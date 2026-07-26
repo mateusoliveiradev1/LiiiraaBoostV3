@@ -158,14 +158,97 @@ A v1 requirement is complete only when:
 
 ## Traceability
 
-Roadmap phase mapping will be populated during roadmap creation.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Pending |
+| UX-01 | Phase 2 | Pending |
+| UX-02 | Phase 2 | Pending |
+| UX-03 | Phase 2 | Pending |
+| UX-04 | Phase 2 | Pending |
+| UX-05 | Phase 2 | Pending |
+| UX-06 | Phase 2 | Pending |
+| UX-07 | Phase 2 | Pending |
+| UX-08 | Phase 2 | Pending |
+| UX-09 | Phase 2 | Pending |
+| UX-10 | Phase 2 | Pending |
+| UX-11 | Phase 2 | Pending |
+| UX-12 | Phase 2 | Pending |
+| WEB-01 | Phase 3 | Pending |
+| WEB-02 | Phase 3 | Pending |
+| WEB-03 | Phase 3 | Pending |
+| WEB-04 | Phase 4 | Pending |
+| WEB-05 | Phase 4 | Pending |
+| WEB-06 | Phase 4 | Pending |
+| WEB-07 | Phase 4 | Pending |
+| WEB-08 | Phase 3 | Pending |
+| IDEN-01 | Phase 4 | Pending |
+| IDEN-02 | Phase 4 | Pending |
+| IDEN-03 | Phase 4 | Pending |
+| IDEN-04 | Phase 4 | Pending |
+| IDEN-05 | Phase 4 | Pending |
+| IDEN-06 | Phase 4 | Pending |
+| IDEN-07 | Phase 4 | Pending |
+| IDEN-08 | Phase 4 | Pending |
+| IDEN-09 | Phase 4 | Pending |
+| DIAG-01 | Phase 5 | Pending |
+| DIAG-02 | Phase 5 | Pending |
+| DIAG-03 | Phase 5 | Pending |
+| DIAG-04 | Phase 5 | Pending |
+| DIAG-05 | Phase 5 | Pending |
+| DIAG-06 | Phase 5 | Pending |
+| DIAG-07 | Phase 5 | Pending |
+| PLAN-01 | Phase 6 | Pending |
+| PLAN-02 | Phase 6 | Pending |
+| PLAN-03 | Phase 6 | Pending |
+| PLAN-04 | Phase 6 | Pending |
+| PLAN-05 | Phase 6 | Pending |
+| PLAN-06 | Phase 6 | Pending |
+| PLAN-07 | Phase 6 | Pending |
+| PLAN-08 | Phase 6 | Pending |
+| GAME-01 | Phase 8 | Pending |
+| GAME-02 | Phase 8 | Pending |
+| GAME-03 | Phase 8 | Pending |
+| GAME-04 | Phase 8 | Pending |
+| GAME-05 | Phase 8 | Pending |
+| GAME-06 | Phase 8 | Pending |
+| GAME-07 | Phase 8 | Pending |
+| MEAS-01 | Phase 5 | Pending |
+| MEAS-02 | Phase 5 | Pending |
+| MEAS-03 | Phase 5 | Pending |
+| MEAS-04 | Phase 5 | Pending |
+| MEAS-05 | Phase 5 | Pending |
+| MEAS-06 | Phase 5 | Pending |
+| OPTM-01 | Phase 7 | Pending |
+| OPTM-02 | Phase 7 | Pending |
+| OPTM-03 | Phase 7 | Pending |
+| OPTM-04 | Phase 7 | Pending |
+| OPTM-05 | Phase 7 | Pending |
+| OPTM-06 | Phase 7 | Pending |
+| AIST-01 | Phase 9 | Pending |
+| AIST-02 | Phase 9 | Pending |
+| AIST-03 | Phase 9 | Pending |
+| AIST-04 | Phase 9 | Pending |
+| AIST-05 | Phase 9 | Pending |
+| AIST-06 | Phase 9 | Pending |
+| RELS-01 | Phase 10 | Pending |
+| RELS-02 | Phase 10 | Pending |
+| RELS-03 | Phase 10 | Pending |
+| RELS-04 | Phase 10 | Pending |
+| RELS-05 | Phase 10 | Pending |
+| RELS-06 | Phase 10 | Pending |
+| RELS-07 | Phase 10 | Pending |
 
 **Coverage:**
 
 - v1 requirements: 82 total
-- Mapped to phases: 0
-- Unmapped: 82
+- Mapped to phases: 82
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-26*  
-*Last updated: 2026-07-26 after initial definition*
+*Last updated: 2026-07-26 after roadmap traceability mapping*
