@@ -498,22 +498,17 @@ describe('real graph adapters', () => {
     const generatedDirectionRule = rules.find(
       ({ name }) => name === 'canonical-layer-contracts-rust',
     );
-    const contractsPrivateRule = rules.find(
-      ({ name }) => name === 'canonical-public-contracts-ts',
-    );
+    const contractsPrivateRule = rules.find(({ name }) => name === 'canonical-public-contracts-ts');
 
-    expect(generatedDirectionRule).toMatchObject({
-      from: { path: '^crates/contracts-rust(?:/|$)' },
-      to: {
-        path: expect.stringContaining('crates/desktop-application'),
-      },
-    });
+    expect(generatedDirectionRule?.from.path).toBe('^crates/contracts-rust(?:/|$)');
+    expect(generatedDirectionRule?.to.path).toContain('crates/desktop-application');
+    expect(contractsPrivateRule?.from.path).toBeTypeOf('string');
     expect(contractsPrivateRule).toEqual({
       name: 'canonical-public-contracts-ts',
       severity: 'error',
       comment: 'Cross-module imports must target a canonical public root.',
       from: {
-        path: expect.any(String),
+        path: contractsPrivateRule?.from.path,
         pathNot: '^packages/contracts-ts(?:/|$)',
       },
       to: {
@@ -547,16 +542,18 @@ describe('real graph adapters', () => {
   it('executes each live adapter exactly once and reports both execution counts', async () => {
     const okPolicy = { ok: true, diagnostics: [] };
     const result = await runArchitectureAdapters(
-      async () => ({
-        adapter: 'workspace',
-        graph: { schemaVersion: 1, nodes: [], edges: [] },
-        policy: okPolicy,
-      }),
-      async () => ({
-        adapter: 'cargo',
-        graph: { schemaVersion: 1, nodes: [], edges: [] },
-        policy: okPolicy,
-      }),
+      () =>
+        Promise.resolve({
+          adapter: 'workspace',
+          graph: { schemaVersion: 1, nodes: [], edges: [] },
+          policy: okPolicy,
+        }),
+      () =>
+        Promise.resolve({
+          adapter: 'cargo',
+          graph: { schemaVersion: 1, nodes: [], edges: [] },
+          policy: okPolicy,
+        }),
     );
 
     expect(result).toEqual({
