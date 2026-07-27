@@ -9,7 +9,7 @@ import { compile as compileTypeScript } from 'json-schema-to-typescript';
 
 type JsonObject = Record<string, unknown>;
 
-interface GeneratedArtifact {
+export interface GeneratedArtifact {
   readonly path: string;
   readonly value: JsonObject | string;
 }
@@ -27,17 +27,21 @@ export interface GenerationStage {
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const SOURCE_ENTRY = join(REPOSITORY_ROOT, 'packages', 'contracts-source', 'src', 'main.tsp');
-const OUTPUT_ROOT = join(REPOSITORY_ROOT, 'contracts', 'generated');
+const STAGING_ROOT = process.env['LIIIRAA_GENERATION_STAGING_ROOT'];
+const OUTPUT_ROOT =
+  STAGING_ROOT === undefined
+    ? join(REPOSITORY_ROOT, 'contracts', 'generated')
+    : join(STAGING_ROOT, 'contracts', 'generated');
 const DESKTOP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'desktop', 'v1');
 const HTTP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'http');
 const TYPESCRIPT_OUTPUT_ROOT = join(
-  REPOSITORY_ROOT,
+  STAGING_ROOT ?? REPOSITORY_ROOT,
   'packages',
   'contracts-ts',
   'src',
   'generated',
 );
-const RUST_OUTPUT_ROOT = join(REPOSITORY_ROOT, 'crates', 'contracts-rust', 'src');
+const RUST_OUTPUT_ROOT = join(STAGING_ROOT ?? REPOSITORY_ROOT, 'crates', 'contracts-rust', 'src');
 
 export const OUTPUT_PATHS = Object.freeze({
   messageEnvelope: join(DESKTOP_OUTPUT_ROOT, 'message-envelope.schema.json'),
@@ -149,10 +153,7 @@ function createRuntimeSchema(
 
 function inspectMessageRoot(): JsonObject {
   return {
-    oneOf: [
-      { $ref: 'InspectSystemRequest.json' },
-      { $ref: 'InspectSystemResult.json' },
-    ],
+    oneOf: [{ $ref: 'InspectSystemRequest.json' }, { $ref: 'InspectSystemResult.json' }],
   };
 }
 
@@ -339,19 +340,15 @@ const typescriptStage: GenerationStage = {
       throw new Error('Could not build TypeScript transport generator schema.');
     }
 
-    const models = await compileTypeScript(
-      generatorSchema,
-      'MessageEnvelope',
-      {
-        additionalProperties: false,
-        bannerComment: GENERATED_TYPESCRIPT_HEADER,
-        style: {
-          singleQuote: true,
-        },
-        unknownAny: false,
-        unreachableDefinitions: true,
+    const models = await compileTypeScript(generatorSchema, 'MessageEnvelope', {
+      additionalProperties: false,
+      bannerComment: GENERATED_TYPESCRIPT_HEADER,
+      style: {
+        singleQuote: true,
       },
-    );
+      unknownAny: false,
+      unreachableDefinitions: true,
+    });
 
     return [
       {
@@ -421,15 +418,7 @@ const rustStage: GenerationStage = {
 
       const generated = await executeFile(
         'cargo',
-        [
-          'run',
-          '--quiet',
-          '--package',
-          'contract-generation-rust',
-          '--',
-          '--schema',
-          schemaPath,
-        ],
+        ['run', '--quiet', '--package', 'contract-generation-rust', '--', '--schema', schemaPath],
         context.repositoryRoot,
       );
 
@@ -445,11 +434,7 @@ const rustStage: GenerationStage = {
   },
 };
 
-const GENERATION_STAGES: readonly GenerationStage[] = [
-  schemaStage,
-  typescriptStage,
-  rustStage,
-];
+const GENERATION_STAGES: readonly GenerationStage[] = [schemaStage, typescriptStage, rustStage];
 
 async function atomicWrite(path: string, contents: string): Promise<void> {
   assertKnownOutputPath(path);

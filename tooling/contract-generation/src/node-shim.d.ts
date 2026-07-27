@@ -1,7 +1,17 @@
 declare module 'node:fs/promises' {
+  interface DirectoryEntry {
+    readonly name: string;
+    isDirectory(): boolean;
+    isFile(): boolean;
+  }
+
   export function mkdir(path: string, options: { recursive: true }): Promise<string | undefined>;
   export function mkdtemp(prefix: string): Promise<string>;
   export function readFile(path: string, encoding: 'utf8'): Promise<string>;
+  export function readdir(
+    path: string,
+    options: { withFileTypes: true },
+  ): Promise<DirectoryEntry[]>;
   export function rename(oldPath: string, newPath: string): Promise<void>;
   export function rm(
     path: string,
@@ -17,6 +27,7 @@ declare module 'node:child_process' {
     options: {
       cwd: string;
       encoding: 'utf8';
+      env?: Record<string, string | undefined>;
       maxBuffer: number;
       windowsHide: boolean;
     },
@@ -42,6 +53,9 @@ declare module 'node:url' {
 
 declare const process: {
   argv: string[];
+  env: Record<string, string | undefined>;
+  execPath: string;
+  exitCode?: number;
   pid: number;
 };
 
