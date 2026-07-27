@@ -1,0 +1,324 @@
+import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { NodeHost, compile, formatDiagnostic, type CompilerOptions } from '@typespec/compiler';
+
+type JsonObject = Record<string, unknown>;
+
+interface GeneratedArtifact {
+  readonly path: string;
+  readonly value: JsonObject;
+}
+
+export interface GenerationContext {
+  readonly repositoryRoot: string;
+  readonly sourceEntry: string;
+  readonly outputRoot: string;
+}
+
+export interface GenerationStage {
+  readonly name: string;
+  generate(context: GenerationContext): Promise<readonly GeneratedArtifact[]>;
+}
+
+const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+const SOURCE_ENTRY = join(REPOSITORY_ROOT, 'packages', 'contracts-source', 'src', 'main.tsp');
+const OUTPUT_ROOT = join(REPOSITORY_ROOT, 'contracts', 'generated');
+const DESKTOP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'desktop', 'v1');
+const HTTP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'http');
+
+export const OUTPUT_PATHS = Object.freeze({
+  messageEnvelope: join(DESKTOP_OUTPUT_ROOT, 'message-envelope.schema.json'),
+  diagnosticValue: join(DESKTOP_OUTPUT_ROOT, 'diagnostic-value.schema.json'),
+  inspectSystem: join(DESKTOP_OUTPUT_ROOT, 'inspect-system.schema.json'),
+  openApi: join(HTTP_OUTPUT_ROOT, 'openapi.json'),
+});
+
+const KNOWN_OUTPUT_PATHS = new Set(Object.values(OUTPUT_PATHS).map((path) => resolve(path)));
+const SCHEMA_DIALECT = 'https://json-schema.org/draft/2020-12/schema';
+const GENERATED_HEADER = Object.freeze({
+  generator: '@liiiraa/contract-generation',
+  notice: 'GENERATED FILE - DO NOT EDIT',
+  source: 'packages/contracts-source/src/main.tsp',
+});
+const REQUIRED_DEFINITIONS = Object.freeze([
+  'DiagnosticValue',
+  'InspectSystemRequest',
+  'InspectSystemResult',
+]);
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => canonicalize(entry));
+  }
+
+  if (isJsonObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, canonicalize(entry)]),
+    );
+  }
+
+  return value;
+}
+
+function stableJson(value: unknown): string {
+  return `${JSON.stringify(canonicalize(value), null, 2)}\n`;
+}
+
+function isWithin(root: string, candidate: string): boolean {
+  const relation = relative(resolve(root), resolve(candidate));
+  return relation === '' || (!relation.startsWith('..') && !isAbsolute(relation));
+}
+
+export function assertKnownOutputPath(path: string): void {
+  const resolvedPath = resolve(path);
+  if (!isWithin(OUTPUT_ROOT, resolvedPath) || !KNOWN_OUTPUT_PATHS.has(resolvedPath)) {
+    throw new Error(`Refusing to write unowned generation path: ${resolvedPath}`);
+  }
+}
+
+function expectRejectedPath(path: string): void {
+  try {
+    assertKnownOutputPath(path);
+  } catch {
+    return;
+  }
+
+  throw new Error(`Bounded path policy accepted forbidden path: ${path}`);
+}
+
+export function verifyBoundedPathPolicy(): void {
+  for (const path of KNOWN_OUTPUT_PATHS) {
+    assertKnownOutputPath(path);
+  }
+
+  expectRejectedPath(join(REPOSITORY_ROOT, 'package.json'));
+  expectRejectedPath(join(OUTPUT_ROOT, 'unexpected.schema.json'));
+  expectRejectedPath(join(OUTPUT_ROOT, '..', 'outside-generated.json'));
+}
+
+function requireDefinitions(bundle: JsonObject): JsonObject {
+  const definitions = bundle['$defs'];
+  if (!isJsonObject(definitions)) {
+    throw new Error('TypeSpec JSON Schema bundle is missing $defs.');
+  }
+
+  for (const definitionName of REQUIRED_DEFINITIONS) {
+    if (!isJsonObject(definitions[definitionName])) {
+      throw new Error(`TypeSpec JSON Schema bundle is missing ${definitionName}.`);
+    }
+  }
+
+  return definitions;
+}
+
+function createRuntimeSchema(
+  schemaId: string,
+  definitions: JsonObject,
+  root: JsonObject,
+): JsonObject {
+  return {
+    $schema: SCHEMA_DIALECT,
+    $id: schemaId,
+    'x-liiiraa-generated': GENERATED_HEADER,
+    $defs: definitions,
+    ...root,
+  };
+}
+
+function toOpenApiSchema(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => toOpenApiSchema(entry));
+  }
+
+  if (!isJsonObject(value)) {
+    return value;
+  }
+
+  const converted: JsonObject = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (key === '$id' || key === '$schema') {
+      continue;
+    }
+
+    if (key === '$ref' && typeof entry === 'string' && entry.endsWith('.json')) {
+      converted[key] = `#/components/schemas/${entry.slice(0, -'.json'.length)}`;
+      continue;
+    }
+
+    converted[key] = toOpenApiSchema(entry);
+  }
+
+  return converted;
+}
+
+function createOpenApiDocument(definitions: JsonObject): JsonObject {
+  const schemas = Object.fromEntries(
+    Object.entries(definitions).map(([name, schema]) => [name, toOpenApiSchema(schema)]),
+  );
+
+  return {
+    openapi: '3.1.0',
+    info: {
+      title: 'Liiiraa Boost Contracts',
+      version: '1.0.0',
+    },
+    paths: {},
+    components: {
+      schemas,
+    },
+    'x-liiiraa-generated': GENERATED_HEADER,
+  };
+}
+
+async function compileCanonicalSchema(): Promise<JsonObject> {
+  const stagingRoot = await mkdtemp(join(tmpdir(), 'liiiraa-contract-generation-'));
+  const schemaStagingRoot = join(stagingRoot, 'schema');
+  const bundlePath = join(schemaStagingRoot, 'desktop-v1.bundle.json');
+  const compilerOptions: CompilerOptions = {
+    emit: ['@typespec/json-schema'],
+    options: {
+      '@typespec/json-schema': {
+        'emitter-output-dir': schemaStagingRoot,
+        'file-type': 'json',
+        'seal-object-schemas': true,
+        bundleId: 'desktop-v1.bundle.json',
+        emitAllRefs: true,
+      },
+    },
+    outputDir: stagingRoot,
+    warningAsError: true,
+  };
+
+  try {
+    const program = await compile(NodeHost, SOURCE_ENTRY, compilerOptions);
+    if (program.hasError()) {
+      const diagnostics = program.diagnostics.map((diagnostic) => formatDiagnostic(diagnostic));
+      throw new Error(`Canonical TypeSpec compilation failed:\n${diagnostics.join('\n')}`);
+    }
+
+    const emitted = JSON.parse(await readFile(bundlePath, 'utf8')) as unknown;
+    if (!isJsonObject(emitted)) {
+      throw new Error('TypeSpec emitted a non-object JSON Schema bundle.');
+    }
+    if (emitted['$schema'] !== SCHEMA_DIALECT) {
+      throw new Error('TypeSpec emitted an unsupported JSON Schema dialect.');
+    }
+
+    requireDefinitions(emitted);
+    return emitted;
+  } finally {
+    await rm(stagingRoot, { force: true, recursive: true });
+  }
+}
+
+const schemaStage: GenerationStage = {
+  name: 'runtime-schemas-and-openapi',
+  async generate(): Promise<readonly GeneratedArtifact[]> {
+    const bundle = await compileCanonicalSchema();
+    const definitions = requireDefinitions(bundle);
+    const inspectMessageRefs = [
+      { $ref: 'InspectSystemRequest.json' },
+      { $ref: 'InspectSystemResult.json' },
+    ];
+
+    return [
+      {
+        path: OUTPUT_PATHS.messageEnvelope,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
+          definitions,
+          { oneOf: inspectMessageRefs },
+        ),
+      },
+      {
+        path: OUTPUT_PATHS.diagnosticValue,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/diagnostic-value.schema.json',
+          definitions,
+          { $ref: 'DiagnosticValue.json' },
+        ),
+      },
+      {
+        path: OUTPUT_PATHS.inspectSystem,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/inspect-system.schema.json',
+          definitions,
+          { oneOf: inspectMessageRefs },
+        ),
+      },
+      {
+        path: OUTPUT_PATHS.openApi,
+        value: createOpenApiDocument(definitions),
+      },
+    ];
+  },
+};
+
+const GENERATION_STAGES: readonly GenerationStage[] = [schemaStage];
+
+async function atomicWrite(path: string, contents: string): Promise<void> {
+  assertKnownOutputPath(path);
+  await mkdir(dirname(path), { recursive: true });
+  const temporaryPath = `${path}.${String(process.pid)}.tmp`;
+
+  try {
+    await writeFile(temporaryPath, contents, 'utf8');
+    await rename(temporaryPath, path);
+  } finally {
+    await rm(temporaryPath, { force: true });
+  }
+}
+
+export async function generateContracts(): Promise<void> {
+  verifyBoundedPathPolicy();
+
+  const context: GenerationContext = {
+    repositoryRoot: REPOSITORY_ROOT,
+    sourceEntry: SOURCE_ENTRY,
+    outputRoot: OUTPUT_ROOT,
+  };
+
+  const artifacts: GeneratedArtifact[] = [];
+  for (const stage of GENERATION_STAGES) {
+    const stageArtifacts = await stage.generate(context);
+    for (const artifact of stageArtifacts) {
+      assertKnownOutputPath(artifact.path);
+      artifacts.push(artifact);
+    }
+  }
+
+  const emittedPaths = new Set(artifacts.map((artifact) => resolve(artifact.path)));
+  if (
+    emittedPaths.size !== KNOWN_OUTPUT_PATHS.size ||
+    [...KNOWN_OUTPUT_PATHS].some((path) => !emittedPaths.has(path))
+  ) {
+    throw new Error('Generation stages did not emit the exact owned output set.');
+  }
+
+  for (const artifact of artifacts) {
+    await atomicWrite(artifact.path, stableJson(artifact.value));
+  }
+}
+
+const isDirectExecution =
+  process.argv[1] !== undefined &&
+  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+
+if (isDirectExecution) {
+  if (process.argv.includes('--check-paths')) {
+    verifyBoundedPathPolicy();
+    console.log('Bounded contract-generation path policy passed.');
+  } else {
+    await generateContracts();
+    console.log(`Generated ${String(KNOWN_OUTPUT_PATHS.size)} normalized contract artifacts.`);
+  }
+}
