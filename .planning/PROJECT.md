@@ -21,7 +21,7 @@ Produce measurable performance gains adapted to the exact hardware without sacri
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Phase 1 established one versioned TypeSpec truth source, generated TypeScript/Rust transports, equivalent runtime validation, truthful adapter provenance, executable acceptance coverage, and live modular architecture enforcement. — Validated in Phase 1: Product Truth and Modular Contracts
 
 ### Active
 
@@ -54,6 +54,10 @@ The desktop app is the first deliverable. Its real Tauri shell, shared design sy
 The optimizer covers Windows services and tasks, CPU and power, GPU vendors, memory, storage, networking, games and launchers, input devices, security and privacy, displays, audio, USB, VBS/virtualization, scheduler behavior, shader caches, thermal behavior, notebooks, desktops, drivers, firmware guidance, monitoring, history, and recovery. Hardware support is capability-driven across Intel/AMD CPUs, NVIDIA/AMD/Intel GPUs, notebooks/desktops, SATA/NVMe/HDD storage, Ethernet/Wi-Fi, and different Windows generations.
 
 The user is a solo developer working with AI assistance. The project will advance by verified milestones without a fixed release date. Early infrastructure cost must remain minimal; production-scale AWS resources are provisioned only when beta demand justifies them.
+
+## Current State
+
+Phase 1 is complete: the repository now has a verified, generated cross-language contract foundation, truthful simulator/production adapter boundary, executable five-dimension acceptance policy, and live pnpm/Cargo architecture enforcement. Phase 2 can build the complete desktop experience on these contracts without inventing parallel DTOs or bypassing provenance and module gates.
 
 ## Constraints
 
@@ -114,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current evidence, users, and feedback.
 
 ---
-*Last updated: 2026-07-26 after project initialization*
+*Last updated: 2026-07-27 after Phase 1 completion*
