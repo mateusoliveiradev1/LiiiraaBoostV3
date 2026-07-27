@@ -1,8 +1,6 @@
 use std::{fs, path::PathBuf};
 
-use liiiraa_contracts_rust::{
-    DIAGNOSTIC_VALUE_SCHEMA_ID, validate_diagnostic_value,
-};
+use liiiraa_contracts_rust::{DIAGNOSTIC_VALUE_SCHEMA_ID, validate_diagnostic_value};
 use serde::Deserialize;
 use serde_json::{Value, json};
 
@@ -43,8 +41,8 @@ fn public_validator_matches_every_shared_corpus_verdict() {
             assert_eq!(
                 result.is_ok(),
                 vector.expected_verdict == "valid",
-                "corpus verdict drifted for {}",
-                vector.id
+                "corpus verdict drifted for {}: {result:?}",
+                vector.id,
             );
 
             if let Ok(transport) = result {

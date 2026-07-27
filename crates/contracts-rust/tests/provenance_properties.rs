@@ -1,6 +1,4 @@
-use liiiraa_contracts_rust::{
-    DIAGNOSTIC_VALUE_SCHEMA_ID, validate_diagnostic_value,
-};
+use liiiraa_contracts_rust::{DIAGNOSTIC_VALUE_SCHEMA_ID, validate_diagnostic_value};
 use proptest::prelude::*;
 use serde_json::{Value, json};
 

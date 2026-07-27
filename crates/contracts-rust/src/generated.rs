@@ -985,25 +985,11 @@ impl<'de> ::serde::Deserialize<'de> for InspectionId {
 #[doc = "      \"$ref\": \"#/definitions/ProvenanceDescription\""]
 #[doc = "    },"]
 #[doc = "    \"quality\": {"]
-#[doc = "      \"anyOf\": ["]
-#[doc = "        {"]
-#[doc = "          \"type\": \"string\","]
-#[doc = "          \"enum\": ["]
-#[doc = "            \"valid\""]
-#[doc = "          ]"]
-#[doc = "        },"]
-#[doc = "        {"]
-#[doc = "          \"type\": \"string\","]
-#[doc = "          \"enum\": ["]
-#[doc = "            \"degraded\""]
-#[doc = "          ]"]
-#[doc = "        },"]
-#[doc = "        {"]
-#[doc = "          \"type\": \"string\","]
-#[doc = "          \"enum\": ["]
-#[doc = "            \"insufficient\""]
-#[doc = "          ]"]
-#[doc = "        }"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"valid\","]
+#[doc = "        \"degraded\","]
+#[doc = "        \"insufficient\""]
 #[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"value\": {"]
@@ -1098,201 +1084,10 @@ impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueK
 #[doc = r""]
 #[doc = r" ```json"]
 #[doc = "{"]
-#[doc = "  \"anyOf\": ["]
-#[doc = "    {"]
-#[doc = "      \"type\": \"string\","]
-#[doc = "      \"enum\": ["]
-#[doc = "        \"valid\""]
-#[doc = "      ]"]
-#[doc = "    },"]
-#[doc = "    {"]
-#[doc = "      \"type\": \"string\","]
-#[doc = "      \"enum\": ["]
-#[doc = "        \"degraded\""]
-#[doc = "      ]"]
-#[doc = "    },"]
-#[doc = "    {"]
-#[doc = "      \"type\": \"string\","]
-#[doc = "      \"enum\": ["]
-#[doc = "        \"insufficient\""]
-#[doc = "      ]"]
-#[doc = "    }"]
-#[doc = "  ]"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-pub struct MeasuredDiagnosticValueQuality {
-    #[serde(
-        flatten,
-        default,
-        skip_serializing_if = "::std::option::Option::is_none"
-    )]
-    pub subtype_0: ::std::option::Option<MeasuredDiagnosticValueQualitySubtype0>,
-    #[serde(
-        flatten,
-        default,
-        skip_serializing_if = "::std::option::Option::is_none"
-    )]
-    pub subtype_1: ::std::option::Option<MeasuredDiagnosticValueQualitySubtype1>,
-    #[serde(
-        flatten,
-        default,
-        skip_serializing_if = "::std::option::Option::is_none"
-    )]
-    pub subtype_2: ::std::option::Option<MeasuredDiagnosticValueQualitySubtype2>,
-}
-impl ::std::default::Default for MeasuredDiagnosticValueQuality {
-    fn default() -> Self {
-        Self {
-            subtype_0: Default::default(),
-            subtype_1: Default::default(),
-            subtype_2: Default::default(),
-        }
-    }
-}
-#[doc = "`MeasuredDiagnosticValueQualitySubtype0`"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"valid\""]
-#[doc = "  ]"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(
-    :: serde :: Deserialize,
-    :: serde :: Serialize,
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-)]
-pub enum MeasuredDiagnosticValueQualitySubtype0 {
-    #[serde(rename = "valid")]
-    Valid,
-}
-impl ::std::fmt::Display for MeasuredDiagnosticValueQualitySubtype0 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match *self {
-            Self::Valid => f.write_str("valid"),
-        }
-    }
-}
-impl ::std::str::FromStr for MeasuredDiagnosticValueQualitySubtype0 {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        match value {
-            "valid" => Ok(Self::Valid),
-            _ => Err("invalid value".into()),
-        }
-    }
-}
-impl ::std::convert::TryFrom<&str> for MeasuredDiagnosticValueQualitySubtype0 {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<&::std::string::String> for MeasuredDiagnosticValueQualitySubtype0 {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: &::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQualitySubtype0 {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: ::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-#[doc = "`MeasuredDiagnosticValueQualitySubtype1`"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
-#[doc = "    \"degraded\""]
-#[doc = "  ]"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(
-    :: serde :: Deserialize,
-    :: serde :: Serialize,
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-)]
-pub enum MeasuredDiagnosticValueQualitySubtype1 {
-    #[serde(rename = "degraded")]
-    Degraded,
-}
-impl ::std::fmt::Display for MeasuredDiagnosticValueQualitySubtype1 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match *self {
-            Self::Degraded => f.write_str("degraded"),
-        }
-    }
-}
-impl ::std::str::FromStr for MeasuredDiagnosticValueQualitySubtype1 {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        match value {
-            "degraded" => Ok(Self::Degraded),
-            _ => Err("invalid value".into()),
-        }
-    }
-}
-impl ::std::convert::TryFrom<&str> for MeasuredDiagnosticValueQualitySubtype1 {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<&::std::string::String> for MeasuredDiagnosticValueQualitySubtype1 {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: &::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQualitySubtype1 {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: ::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-#[doc = "`MeasuredDiagnosticValueQualitySubtype2`"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
+#[doc = "    \"valid\","]
+#[doc = "    \"degraded\","]
 #[doc = "    \"insufficient\""]
 #[doc = "  ]"]
 #[doc = "}"]
@@ -1310,33 +1105,41 @@ impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQ
     PartialEq,
     PartialOrd,
 )]
-pub enum MeasuredDiagnosticValueQualitySubtype2 {
+pub enum MeasuredDiagnosticValueQuality {
+    #[serde(rename = "valid")]
+    Valid,
+    #[serde(rename = "degraded")]
+    Degraded,
     #[serde(rename = "insufficient")]
     Insufficient,
 }
-impl ::std::fmt::Display for MeasuredDiagnosticValueQualitySubtype2 {
+impl ::std::fmt::Display for MeasuredDiagnosticValueQuality {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
+            Self::Valid => f.write_str("valid"),
+            Self::Degraded => f.write_str("degraded"),
             Self::Insufficient => f.write_str("insufficient"),
         }
     }
 }
-impl ::std::str::FromStr for MeasuredDiagnosticValueQualitySubtype2 {
+impl ::std::str::FromStr for MeasuredDiagnosticValueQuality {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
+            "valid" => Ok(Self::Valid),
+            "degraded" => Ok(Self::Degraded),
             "insufficient" => Ok(Self::Insufficient),
             _ => Err("invalid value".into()),
         }
     }
 }
-impl ::std::convert::TryFrom<&str> for MeasuredDiagnosticValueQualitySubtype2 {
+impl ::std::convert::TryFrom<&str> for MeasuredDiagnosticValueQuality {
     type Error = self::error::ConversionError;
     fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
     }
 }
-impl ::std::convert::TryFrom<&::std::string::String> for MeasuredDiagnosticValueQualitySubtype2 {
+impl ::std::convert::TryFrom<&::std::string::String> for MeasuredDiagnosticValueQuality {
     type Error = self::error::ConversionError;
     fn try_from(
         value: &::std::string::String,
@@ -1344,7 +1147,7 @@ impl ::std::convert::TryFrom<&::std::string::String> for MeasuredDiagnosticValue
         value.parse()
     }
 }
-impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQualitySubtype2 {
+impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQuality {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

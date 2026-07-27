@@ -31,6 +31,7 @@
     "contracts:generate": "pnpm --filter @liiiraa/contract-generation generate",
     "contracts:check": "pnpm --filter @liiiraa/contract-generation contracts:check",
     "contracts:compat": "pnpm --filter @liiiraa/contract-compat contracts:compat",
+    "test:contracts": "pnpm contracts:check && pnpm contracts:compat && pnpm --filter @liiiraa/contracts-ts exec vitest --run && cargo test -p liiiraa-contracts-rust",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
     "verify": "pnpm verify:workspace && pnpm test:architecture && pnpm contracts:check && pnpm contracts:compat && pnpm generate && pnpm check && pnpm test && pnpm build"

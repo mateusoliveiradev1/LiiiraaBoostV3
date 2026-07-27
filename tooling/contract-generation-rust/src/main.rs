@@ -201,6 +201,7 @@ fn normalize_schema(
     let Some(object) = schema.as_object_mut() else {
         return Ok(());
     };
+    normalize_string_constant_union(object, location)?;
     let keys = object.keys().cloned().collect::<Vec<_>>();
 
     for key in keys {
@@ -258,6 +259,52 @@ fn normalize_schema(
         }
     }
 
+    Ok(())
+}
+
+fn normalize_string_constant_union(
+    object: &mut Map<String, Value>,
+    location: &str,
+) -> Result<(), String> {
+    let Some(branches) = object.get("anyOf").and_then(Value::as_array) else {
+        return Ok(());
+    };
+
+    let constants = branches
+        .iter()
+        .map(|branch| {
+            let branch = branch.as_object()?;
+            if branch.len() != 2 || branch.get("type").and_then(Value::as_str) != Some("string") {
+                return None;
+            }
+            branch
+                .get("const")
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        })
+        .collect::<Option<Vec<_>>>();
+    let Some(constants) = constants else {
+        return Ok(());
+    };
+    if constants.is_empty() {
+        return Err(format!("'anyOf' at '{location}' must not be empty"));
+    }
+
+    let mut unique = constants.clone();
+    unique.sort();
+    unique.dedup();
+    if unique.len() != constants.len() {
+        return Err(format!(
+            "string constant union at '{location}' contains duplicate values"
+        ));
+    }
+
+    object.remove("anyOf");
+    object.insert("type".to_owned(), Value::String("string".to_owned()));
+    object.insert(
+        "enum".to_owned(),
+        Value::Array(constants.into_iter().map(Value::String).collect()),
+    );
     Ok(())
 }
 
