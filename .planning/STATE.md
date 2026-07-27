@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-18-PLAN.md
-last_updated: "2026-07-27T05:31:44.012Z"
+stopped_at: Completed 01-08-PLAN.md
+last_updated: "2026-07-27T05:50:11.015Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 15
+  completed_plans: 16
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 16 of 21
+Plan: 17 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
@@ -70,6 +70,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P15 | 12 min | 3 tasks | 15 files |
 | Phase 01 P16 | 32 min | 3 tasks | 15 files |
 | Phase 01 P18 | 12 min | 2 tasks | 15 files |
+| Phase 01 P08 | 14 min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Expose only bounded structural validation metadata; never echo payload values or unsupported schema identifiers. — Cross-process validation errors remain useful for diagnosis without becoming an information-disclosure channel.
 - [Phase 01]: Return generated transports only after canonical runtime schema validation succeeds. — One schema remains the boundary authority while both public runtimes avoid handwritten DTO duplication.
 - [Phase 01]: Normalize TypeSpec anyOf string constants to one Rust enum before Typify generation. — The equivalent enum preserves accepted JSON while ensuring schema-valid measurement quality values deserialize.
+- [Phase 01]: Map generated transports into nested frozen native provenance values — Keeps transport DTOs out of application truth and makes validation-before-mapping explicit.
+- [Phase 01]: Keep adapter conformance framework-neutral — Structured cases and reports let simulator and production adapters share the same contract without a runtime test-framework dependency.
+- [Phase 01]: Separate standard and unavailable conformance scenarios — Unavailable-state evidence remains mandatory without forcing fully available future adapters to fabricate missing data.
 
 ### Pending Todos
 
@@ -143,6 +147,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T05:31:26.536Z
-Stopped at: Completed 01-18-PLAN.md
+Last session: 2026-07-27T05:49:57.133Z
+Stopped at: Completed 01-08-PLAN.md
 Resume file: None
