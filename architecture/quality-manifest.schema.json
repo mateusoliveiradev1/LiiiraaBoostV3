@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liiiraa.dev/architecture/quality-manifest.schema.json",
+  "title": "Liiiraa Boost Quality Manifest",
+  "description": "Executable acceptance evidence for one feature or requirement set.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "featureId", "requirements", "owner", "acceptance"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "featureId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9]*-[0-9]{2,}$"
+      }
+    },
+    "owner": {
+      "$ref": "#/$defs/owner"
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["security", "privacy", "accessibility", "performance", "recovery"],
+      "properties": {
+        "security": {
+          "$ref": "#/$defs/dimension"
+        },
+        "privacy": {
+          "$ref": "#/$defs/dimension"
+        },
+        "accessibility": {
+          "$ref": "#/$defs/dimension"
+        },
+        "performance": {
+          "$ref": "#/$defs/dimension"
+        },
+        "recovery": {
+          "$ref": "#/$defs/dimension"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "owner": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "file", "owner", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "command": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 260
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "enum": ["planned", "passed"]
+        }
+      }
+    },
+    "testedDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence"],
+      "properties": {
+        "status": {
+          "const": "tested"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "reopeningTrigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["condition", "reviewBy"],
+      "properties": {
+        "condition": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 300
+        },
+        "reviewBy": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      }
+    },
+    "exemption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rationale", "residualRisk", "reviewer", "reopeningTrigger"],
+      "properties": {
+        "rationale": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 500
+        },
+        "residualRisk": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 300
+        },
+        "reviewer": {
+          "$ref": "#/$defs/owner"
+        },
+        "reopeningTrigger": {
+          "$ref": "#/$defs/reopeningTrigger"
+        }
+      }
+    },
+    "notApplicableDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "exemption"],
+      "properties": {
+        "status": {
+          "const": "not_applicable"
+        },
+        "exemption": {
+          "$ref": "#/$defs/exemption"
+        }
+      }
+    },
+    "dimension": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/testedDimension"
+        },
+        {
+          "$ref": "#/$defs/notApplicableDimension"
+        }
+      ]
+    }
+  }
+}

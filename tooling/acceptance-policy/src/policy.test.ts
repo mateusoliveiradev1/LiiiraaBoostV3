@@ -8,13 +8,49 @@ import {
   type QualityPolicyContext,
 } from './policy.ts';
 
+interface EvidenceFixture {
+  id: string;
+  command: string;
+  file: string;
+  owner: string;
+  status: 'planned' | 'passed';
+}
+
+interface TestedDimensionFixture {
+  status: 'tested';
+  evidence: EvidenceFixture[];
+}
+
+interface ExemptDimensionFixture {
+  status: 'not_applicable';
+  exemption: {
+    rationale: string;
+    residualRisk: string;
+    reviewer: string;
+    reopeningTrigger: {
+      condition: string;
+      reviewBy: string;
+    };
+  };
+}
+
+interface ManifestFixture {
+  schemaVersion: number;
+  featureId: string;
+  requirements: string[];
+  owner: string;
+  acceptance: Partial<
+    Record<QualityDimension, TestedDimensionFixture | ExemptDimensionFixture>
+  >;
+}
+
 const commandFor = (dimension: QualityDimension): string =>
   `pnpm --filter @liiiraa/example test -- --run ${dimension}`;
 
 const fileFor = (dimension: QualityDimension): string =>
   `packages/example/src/${dimension}.test.ts`;
 
-const testedDimension = (dimension: QualityDimension) => ({
+const testedDimension = (dimension: QualityDimension): TestedDimensionFixture => ({
   status: 'tested',
   evidence: [
     {
@@ -27,7 +63,7 @@ const testedDimension = (dimension: QualityDimension) => ({
   ],
 });
 
-const validManifest = () => ({
+const validManifest = (): ManifestFixture => ({
   schemaVersion: 1,
   featureId: 'quality-policy',
   requirements: ['FOUND-06'],
@@ -36,6 +72,28 @@ const validManifest = () => ({
     QUALITY_DIMENSIONS.map((dimension) => [dimension, testedDimension(dimension)]),
   ),
 });
+
+const tested = (
+  manifest: ManifestFixture,
+  dimension: QualityDimension,
+): TestedDimensionFixture => {
+  const value = manifest.acceptance[dimension];
+  if (value?.status !== 'tested') {
+    throw new Error(`Expected tested fixture for ${dimension}.`);
+  }
+  return value;
+};
+
+const exempted = (
+  manifest: ManifestFixture,
+  dimension: QualityDimension,
+): ExemptDimensionFixture => {
+  const value = manifest.acceptance[dimension];
+  if (value?.status !== 'not_applicable') {
+    throw new Error(`Expected exemption fixture for ${dimension}.`);
+  }
+  return value;
+};
 
 const context = (overrides: Partial<QualityPolicyContext> = {}): QualityPolicyContext => ({
   mode: 'planned',
@@ -72,7 +130,9 @@ describe('quality manifest schema and dimension policy', () => {
     'requires exact tested evidence field %s',
     (field) => {
       const manifest = validManifest();
-      delete manifest.acceptance.security.evidence[0]?.[field];
+      delete (tested(manifest, 'security').evidence[0] as
+        | Partial<EvidenceFixture>
+        | undefined)?.[field];
 
       expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
     },
@@ -80,14 +140,14 @@ describe('quality manifest schema and dimension policy', () => {
 
   it('rejects wildcard evidence paths with a stable dimension reason', () => {
     const manifest = validManifest();
-    manifest.acceptance.security.evidence[0]!.file = 'packages/**/security.test.ts';
+    tested(manifest, 'security').evidence[0]!.file = 'packages/**/security.test.ts';
 
     expectOnlyCode(manifest, 'EVIDENCE_PATH_NOT_EXACT');
   });
 
   it('rejects watch-mode commands with a stable dimension reason', () => {
     const manifest = validManifest();
-    manifest.acceptance.security.evidence[0]!.command =
+    tested(manifest, 'security').evidence[0]!.command =
       'pnpm --filter @liiiraa/example test --watch';
 
     expectOnlyCode(manifest, 'EVIDENCE_COMMAND_NOT_TERMINATING');
@@ -95,15 +155,17 @@ describe('quality manifest schema and dimension policy', () => {
 
   it('rejects duplicate evidence identifiers across dimensions', () => {
     const manifest = validManifest();
-    manifest.acceptance.privacy.evidence[0]!.id =
-      manifest.acceptance.security.evidence[0]!.id;
+    tested(manifest, 'privacy').evidence[0]!.id = tested(
+      manifest,
+      'security',
+    ).evidence[0]!.id;
 
     expectOnlyCode(manifest, 'DUPLICATE_EVIDENCE_ID');
   });
 
   it('rejects evidence owned by anyone other than the manifest owner', () => {
     const manifest = validManifest();
-    manifest.acceptance.security.evidence[0]!.owner = 'other-team';
+    tested(manifest, 'security').evidence[0]!.owner = 'other-team';
 
     expectOnlyCode(manifest, 'EVIDENCE_OWNER_MISMATCH');
   });
@@ -119,7 +181,7 @@ describe('quality manifest schema and dimension policy', () => {
 describe('accountable exemption policy', () => {
   const exemptPrivacy = () => {
     const manifest = validManifest();
-    manifest.acceptance.privacy = {
+    manifest.acceptance['privacy'] = {
       status: 'not_applicable',
       exemption: {
         rationale: 'No personal information crosses this feature boundary.',
@@ -130,7 +192,7 @@ describe('accountable exemption policy', () => {
           reviewBy: '2027-07-27',
         },
       },
-    } as never;
+    };
     return manifest;
   };
 
@@ -145,7 +207,9 @@ describe('accountable exemption policy', () => {
     'rejects schema exemption missing %s',
     (field) => {
       const manifest = exemptPrivacy();
-      delete manifest.acceptance.privacy.exemption[field];
+      delete (exempted(manifest, 'privacy').exemption as Partial<
+        ExemptDimensionFixture['exemption']
+      >)[field];
 
       expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
     },
@@ -153,14 +217,14 @@ describe('accountable exemption policy', () => {
 
   it('rejects exemption reviewed only by its owner', () => {
     const manifest = exemptPrivacy();
-    manifest.acceptance.privacy.exemption.reviewer = manifest.owner;
+    exempted(manifest, 'privacy').exemption.reviewer = manifest.owner;
 
     expectOnlyCode(manifest, 'UNACCOUNTABLE_EXEMPTION');
   });
 
   it('rejects stale exemption reopening triggers', () => {
     const manifest = exemptPrivacy();
-    manifest.acceptance.privacy.exemption.reopeningTrigger.reviewBy = '2026-07-26';
+    exempted(manifest, 'privacy').exemption.reopeningTrigger.reviewBy = '2026-07-26';
 
     expectOnlyCode(manifest, 'STALE_REOPENING_TRIGGER');
   });
