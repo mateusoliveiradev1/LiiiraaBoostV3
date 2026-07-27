@@ -235,6 +235,15 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(yaml@2.9.0)
 
+  packages/contracts-source:
+    devDependencies:
+      '@typespec/compiler':
+        specifier: 1.14.0
+        version: 1.14.0
+      '@typespec/json-schema':
+        specifier: 1.14.0
+        version: 1.14.0(@typespec/compiler@1.14.0)
+
   tooling/acceptance-policy:
     dependencies:
       ajv:

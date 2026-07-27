@@ -1,0 +1,17 @@
+{
+  "name": "@liiiraa/contracts-source",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "tspMain": "src/main.tsp",
+  "scripts": {
+    "generate": "tsp compile .",
+    "check": "tsp compile .",
+    "test": "tsp compile .",
+    "build": "tsp compile ."
+  },
+  "devDependencies": {
+    "@typespec/compiler": "1.14.0",
+    "@typespec/json-schema": "1.14.0"
+  }
+}
