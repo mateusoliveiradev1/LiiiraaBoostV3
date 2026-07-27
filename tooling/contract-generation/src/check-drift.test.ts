@@ -1,7 +1,4 @@
-import {
-  compareGeneratedArtifacts,
-  findHandwrittenTransportDeclarations,
-} from './check-drift.ts';
+import { compareGeneratedArtifacts, findHandwrittenTransportDeclarations } from './check-drift.ts';
 
 function assertDeepEqual(actual: unknown, expected: unknown, message: string): void {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
