@@ -77,7 +77,7 @@ const runSubject = async (createClient: () => DesktopInspectionClient) =>
   }).run();
 
 describe('desktop client conformance factory', () => {
-  it('publishes fixed lifecycle group counts and accepts a conforming fake', async () => {
+  it('publishes fixed adapter parity counts and accepts a conforming fake', async () => {
     const suite = createDesktopClientConformance({
       createClient: () => createSubject(),
       clock: () => '2000-01-01T00:00:00.000Z',
@@ -91,7 +91,12 @@ describe('desktop client conformance factory', () => {
       determinism: 1,
     });
     expect(suite.groupCounts).toEqual(CONFORMANCE_GROUP_COUNTS);
-    expect(suite.cases).toHaveLength(11);
+    expect(suite.cases).toHaveLength(
+      Object.values(CONFORMANCE_GROUP_COUNTS).reduce(
+        (total, count) => total + count,
+        0,
+      ),
+    );
     await expect(suite.run()).resolves.toMatchObject({
       ok: true,
       passed: 11,
