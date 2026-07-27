@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-17-PLAN.md
-last_updated: "2026-07-27T04:14:49.961Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-07-27T04:22:29.080Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 9
-  percent: 43
+  completed_plans: 10
+  percent: 0
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 10 of 21
+Plan: 11 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 01 execution started
 
@@ -64,6 +64,7 @@ Progress: [████░░░░░░] 43%
 | Phase 01 P12 | 10 min | 1 tasks | 5 files |
 | Phase 01 P13 | 12 min | 2 tasks | 8 files |
 | Phase 01 P17 | 5 min | 2 tasks | 8 files |
+| Phase 01 P05 | 12min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Use one manifest per Phase 1 requirement so coverage ownership remains unambiguous and mutation-testable.
 - [Phase 01]: Keep every future evidence reference at planned status until its owning plan produces executable final proof.
 - [Phase 01]: Derive the Phase 1 requirement set from REQUIREMENTS.md traceability before enforcing one-to-one coverage.
+- [Phase 01]: Represent every diagnostic value as a closed oneOf over five literal provenance variants. — This makes provenance structurally exhaustive and prevents unavailable values from carrying fabricated data.
+- [Phase 01]: Keep the contract proof boundary inspection-only with exact request and result message literals. — A narrow non-mutating boundary proves adapter substitution without introducing future optimizer authority.
 
 ### Pending Todos
 
@@ -122,6 +125,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T04:14:49.870Z
-Stopped at: Completed 01-17-PLAN.md
+Last session: 2026-07-27T04:22:29.076Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
