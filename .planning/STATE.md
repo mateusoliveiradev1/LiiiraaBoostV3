@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-07-27T02:10:27.984Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-07-27T02:27:38.748Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 2 of 21
+Plan: 3 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 01 execution started
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after plan completion*
 | Phase 01 P01 | 15 min | 2 tasks | 4 files |
+| Phase 01 P02 | 15 min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Safety]: Fail closed, keep recovery available, prohibit arbitrary scripts, anti-cheat interference, and Tamper Protection bypass.
 - [Execution]: Allow controlled subagent parallelism only within fixed contracts and file ownership; integration remains centrally reviewed.
 - [Phase 01]: Proceed with the 26 exact Phase 1 dependency pins only after explicit approval of all 12 recency-flagged identities and evidence. — The registry verifier passed after review, and the user replied aprovado to the blocking legitimacy checkpoint.
+- [Phase 01]: Use pnpm devEngines to execute exact Node 24.18.0 and packageManager to pin pnpm 11.17.0. — Keeps repository execution deterministic even when the host shell starts on an older compatible Node release.
+- [Phase 01]: Keep TypeScript at compatibility pin 6.0.3 with typescript-eslint 8.65.0. — The approved lint stack supports TypeScript below 6.1; TypeScript 7 remains excluded.
+- [Phase 01]: Deny package lifecycle scripts without build-script exceptions. — Fail-closed installation prevents unreviewed consumer install hooks from executing.
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T02:10:27.980Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-07-27T02:27:38.743Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
