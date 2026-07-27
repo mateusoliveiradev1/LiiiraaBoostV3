@@ -117,7 +117,41 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Every planned module has deliberate loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement behavior with no dead controls or unlabeled fixture values.
 5. User can complete every desktop flow in PT-BR or English with keyboard and assistive technology, scaled UI, reduced motion, WCAG 2.2 AA contrast, and status meaning that never relies on color alone.
 
-**Plans**: TBD
+**Plans**: 13 plans
+
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Review Phase 2 dependency identities and select the Authenticode custody contract
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 02-02-PLAN.md — Activate the strict Phase 2 workspace, dependency graph, and lifecycle commands
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 02-03-PLAN.md — Build closed operational-state and deterministic S01–S24 scenario contracts
+- [ ] 02-04-PLAN.md — Build Wave 0 component, browser, packaged, and quality-evidence harnesses
+- [ ] 02-12-PLAN.md — Build the least-privilege Tauri shell and native Windows bridges
+
+**Wave 4** *(blocked on Wave 3 foundations)*
+
+- [ ] 02-05-PLAN.md — Implement the bespoke accessible design-token and component system
+- [ ] 02-06-PLAN.md — Implement calibration, consent, deferral, limited-mode, and revalidation machines
+- [ ] 02-07-PLAN.md — Implement command, favorites, Activity, feedback, receipt, and preference policies
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 02-08-PLAN.md — Compose calibration, contextual Home, command center, favorites, and Activity
+- [ ] 02-09-PLAN.md — Compose complete Prepare, Improve, and Measure technical modules
+- [ ] 02-10-PLAN.md — Compose recovery, no-effect previews, Assistant, account, support, and settings
+
+**Wave 6** *(blocked on Waves 3 and 5)*
+
+- [ ] 02-11-PLAN.md — Assemble typed routes, safe adapter composition, localization, preferences, and app shell
+
+**Wave 7** *(blocked on Wave 6)*
+
+- [ ] 02-13-PLAN.md — Close browser, accessibility, visual, packaged Windows, signing, and final evidence gates
 
 **UI hint**: yes
 
