@@ -427,24 +427,24 @@ type OperationalState =
 | A3 | React Intl/FormatJS is the preferred framework-neutral desktop catalog implementation. | Standard Stack | Medium; project stack requires a framework-neutral catalog but does not lock this package. |
 | A4 | One consolidated human checkpoint may review all exact SUS pins in an atomic install. | Package Audit | Medium; the package-gate wording may require individual checkpoint records. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Which Authenticode provider and certificate identity will satisfy UX-01?**
    - Known: a signed Tauri package is required and Tauri documents Windows signing flows. [CITED: https://v2.tauri.app/distribute/sign/windows/]
    - Unknown: provider, certificate type, secret custody, timestamp server, and CI access are not defined in repository evidence.
-   - Recommendation: make signing-provider selection an early human checkpoint; implementation may proceed with unsigned local builds, but UX-01 cannot pass final acceptance without a verifiable signature.
+   - **RESOLVED BY:** Plan 02-01 Task 2 is the blocking decision mechanism and `.planning/phases/02-complete-desktop-experience/02-SIGNING-DECISION.md` is its non-secret custody contract; Plan 02-26 Task 1 then attaches observed access/provenance in `quality/evidence/phase-02/environment/signing-access.json`. No provider or certificate is preselected here: execution remains blocked until the human approves a real choice, and UX-01 cannot pass final acceptance without a verifiable signature.
 
 2. **Keep direct `tauri-driver` or adopt the current recommended WebdriverIO service?**
    - Known: the project stack pins `tauri-driver` 2.0.6; current official Tauri docs recommend `@wdio/tauri-service` and still support direct driving. [VERIFIED: AGENTS.md] [CITED: https://v2.tauri.app/develop/tests/webdriver/]
-   - Recommendation: keep the locked pin for planning and isolate the driver adapter; change only through a reviewed stack decision.
+   - **RESOLVED BY:** The locked stack choice remains `tauri-driver` 2.0.6, isolated by Plan 02-16 in `apps/desktop/tests/packaged/driver.ts`; any later replacement requires a reviewed stack decision.
 
 3. **How should the `msw` audit conflict be resolved?**
    - Known: the project stack mentions MSW, while the mandatory legitimacy seam returned SLOP because of a postinstall signal. The desktop simulator already provides a deterministic port. [VERIFIED: package-legitimacy seam]
-   - Recommendation: omit MSW from Phase 2; reopen only if a concrete HTTP boundary cannot be exercised through the client port.
+   - **RESOLVED BY:** Plan 02-01's blocking dependency approval and `architecture/dependency-review.md` keep MSW excluded; Plan 02-14's `approved manifest identities` test enforces that exclusion. Reopening it requires a new reviewed dependency decision tied to a concrete HTTP boundary.
 
 4. **Which clean Windows 10 images are supported for packaged acceptance?**
    - Known: Windows 10/11 is required; this host is Windows 11 only. [VERIFIED: AGENTS.md] [VERIFIED: environment probe]
-   - Recommendation: define CI runner/image provenance before packaged acceptance wave.
+   - **RESOLVED BY:** Plan 02-26 Task 1 is the blocking human decision mechanism and `quality/evidence/phase-02/environment/windows-10-image.json` plus `windows-11-image.json` are the reviewed-image evidence contracts. No Windows 10 image is claimed selected here; packaged acceptance remains blocked until those records name real reviewed image/build/runner provenance and pass the Plan 02-16 verifier.
 
 ## Environment Availability
 
