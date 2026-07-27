@@ -29,6 +29,7 @@
     "test:architecture": "node tooling/architecture-tests/src/check-workspace.ts && pnpm --filter @liiiraa/architecture-tests test -- --run",
     "test:acceptance-policy": "pnpm --filter @liiiraa/acceptance-policy exec vitest --run",
     "contracts:generate": "pnpm --filter @liiiraa/contract-generation generate",
+    "contracts:check": "pnpm --filter @liiiraa/contract-generation contracts:check",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
     "verify": "pnpm verify:workspace && pnpm test:architecture && pnpm generate && pnpm check && pnpm test && pnpm build"

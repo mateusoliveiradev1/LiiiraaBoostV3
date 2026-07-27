@@ -6,7 +6,8 @@
   "scripts": {
     "generate": "node src/generate.ts",
     "check": "tsc --noEmit",
-    "test": "node src/generate.ts --check-paths && node src/check-corpus.mjs",
+    "test": "node src/generate.ts --check-paths && node src/check-corpus.mjs && node src/check-drift.test.ts",
+    "contracts:check": "node src/check-drift.ts",
     "build": "tsc --noEmit"
   },
   "devDependencies": {
