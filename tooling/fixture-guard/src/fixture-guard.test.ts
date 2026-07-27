@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { createProductionDesktopComposition } from '@liiiraa/desktop-production-reference';
 
 import leakMatrix from '../fixtures/static-runtime-leaks.json' with { type: 'json' };
+import { inspectBuiltArtifact } from './artifact-guard.ts';
 import { inspectProductionRuntimeBoundary } from './runtime-guard.ts';
 import { inspectStaticProductionGraph, runLiveStaticProductionGuard } from './static-guard.ts';
 
@@ -113,6 +114,60 @@ describe('runtime production fixture refusal', () => {
     ).toEqual({
       ok: true,
       findings: [],
+    });
+  });
+});
+
+describe('artifact production fixture refusal', () => {
+  it('artifact rejects the exact leaking distribution corpus', () => {
+    const result = inspectBuiltArtifact({
+      distributionRoot: new URL('../fixtures/leaking-artifact/', import.meta.url),
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.scannedFiles).toBe(1);
+    expect(result.findings).toEqual([
+      {
+        code: 'FIXTURE_SENTINEL',
+        path: 'fixture-sentinel.txt',
+        message: 'Built artifact contains a fixture sentinel.',
+      },
+    ]);
+  });
+
+  it('artifact accepts the exact clean distribution corpus', () => {
+    const result = inspectBuiltArtifact({
+      distributionRoot: new URL('../fixtures/clean-artifact/', import.meta.url),
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      findings: [],
+      scannedFiles: 1,
+    });
+    expect(result.scannedBytes).toBeGreaterThan(0);
+  });
+
+  it('artifact requires an explicit absolute distribution root', () => {
+    expect(() =>
+      inspectBuiltArtifact({ distributionRoot: 'fixtures/clean-artifact' }),
+    ).toThrow('distributionRoot must be an explicit absolute path or file URL');
+  });
+
+  it('artifact refuses source trees as distribution roots', () => {
+    const result = inspectBuiltArtifact({
+      distributionRoot: new URL('./', import.meta.url),
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      scannedFiles: 0,
+      findings: [
+        {
+          code: 'INVALID_DISTRIBUTION_ROOT',
+          path: '.',
+        },
+      ],
     });
   });
 });
