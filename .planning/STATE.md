@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-16-PLAN.md
-last_updated: "2026-07-27T05:16:13.585Z"
+stopped_at: Completed 01-18-PLAN.md
+last_updated: "2026-07-27T05:31:44.012Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 14
+  completed_plans: 15
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 15 of 21
+Plan: 16 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
@@ -69,6 +69,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P07 | 10min | 2 tasks | 5 files |
 | Phase 01 P15 | 12 min | 3 tasks | 15 files |
 | Phase 01 P16 | 32 min | 3 tasks | 15 files |
+| Phase 01 P18 | 12 min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Represent JSON Schema date-time fields as Rust strings in generated transports. — Canonical runtime schema validation remains the enforcement boundary and avoids an unapproved chrono dependency.
 - [Phase 01]: Anchor approved contracts to immutable Git revision plus SHA-256 artifact hashes. — Prevents mutable working-tree artifacts from approving themselves while keeping baseline compact.
 - [Phase 01]: Require explicit ADR-0002 major-transition approval for breaking contract changes. — A version bump alone cannot bypass executable compatibility policy.
+- [Phase 01]: Expose only bounded structural validation metadata; never echo payload values or unsupported schema identifiers. — Cross-process validation errors remain useful for diagnosis without becoming an information-disclosure channel.
+- [Phase 01]: Return generated transports only after canonical runtime schema validation succeeds. — One schema remains the boundary authority while both public runtimes avoid handwritten DTO duplication.
+- [Phase 01]: Normalize TypeSpec anyOf string constants to one Rust enum before Typify generation. — The equivalent enum preserves accepted JSON while ensuring schema-valid measurement quality values deserialize.
 
 ### Pending Todos
 
@@ -139,6 +143,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T05:16:13.582Z
-Stopped at: Completed 01-16-PLAN.md
+Last session: 2026-07-27T05:31:26.536Z
+Stopped at: Completed 01-18-PLAN.md
 Resume file: None
