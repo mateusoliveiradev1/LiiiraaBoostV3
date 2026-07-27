@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node check-toolchain.mjs",
-    "check": "tsc --project tsconfig.json",
+    "check": "node check-toolchain.mjs",
     "test": "vitest run"
   },
   "devDependencies": {

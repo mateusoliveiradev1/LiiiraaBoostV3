@@ -26,8 +26,9 @@
     "format": "prettier --write package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
     "format:check": "prettier --check package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
     "test": "turbo run test",
+    "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
-    "verify": "pnpm generate && pnpm check && pnpm test && pnpm build"
+    "verify": "pnpm verify:workspace && pnpm generate && pnpm check && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.65.0",

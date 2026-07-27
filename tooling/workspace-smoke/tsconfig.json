@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node", "vitest/globals"]
+    "types": ["vitest/globals"]
   },
-  "include": ["toolchain.test.ts"]
+  "include": ["check-toolchain.d.mts", "toolchain.test.ts"]
 }

@@ -1,186 +1,126 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-import { afterEach, describe, expect, it } from 'vitest';
-
-import { verifyWorkspace } from './check-toolchain.mjs';
+import { verifyWorkspaceSnapshot, type WorkspaceSnapshot } from './check-toolchain.mjs';
 
 const exactVersions = {
   node: '24.18.0',
   pnpm: '11.17.0',
 };
 
-const temporaryRoots: string[] = [];
-
-async function createWorkspaceFixture(): Promise<string> {
-  const root = await mkdtemp(path.join(tmpdir(), 'liiiraa-workspace-smoke-'));
-  temporaryRoots.push(root);
-
-  await mkdir(path.join(root, 'tooling', 'architecture-tests'), {
-    recursive: true,
-  });
-  await writeFile(
-    path.join(root, 'package.json'),
-    `${JSON.stringify(
-      {
-        name: '@liiiraa/workspace',
-        version: '0.0.0',
-        private: true,
-        packageManager: 'pnpm@11.17.0',
-        devEngines: {
-          runtime: {
-            name: 'node',
-            version: '24.18.0',
-            onFail: 'download',
-          },
-          packageManager: {
-            name: 'pnpm',
-            version: '11.17.0',
-            onFail: 'download',
-          },
+function exactSnapshot(): WorkspaceSnapshot {
+  return {
+    packageManifest: {
+      packageManager: 'pnpm@11.17.0',
+      devEngines: {
+        runtime: {
+          name: 'node',
+          version: '24.18.0',
         },
-        devDependencies: {
-          typescript: '6.0.3',
+        packageManager: {
+          name: 'pnpm',
+          version: '11.17.0',
         },
       },
-      null,
-      2,
-    )}\n`,
-  );
-  await writeFile(
-    path.join(root, 'tooling', 'architecture-tests', 'package.json'),
-    `${JSON.stringify(
-      {
-        name: '@liiiraa/architecture-tests',
-        version: '0.0.0',
-        private: true,
+      devDependencies: {
+        typescript: '6.0.3',
       },
-      null,
-      2,
-    )}\n`,
-  );
-  await writeFile(
-    path.join(root, 'pnpm-workspace.yaml'),
-    'packages:\n  - apps/*\n  - packages/*\n  - tooling/*\n',
-  );
-  await writeFile(
-    path.join(root, 'rust-toolchain.toml'),
-    '[toolchain]\nchannel = "1.97.1"\nprofile = "minimal"\ncomponents = ["clippy", "rustfmt"]\n',
-  );
-  await writeFile(
-    path.join(root, 'Cargo.toml'),
-    '[workspace]\nresolver = "3"\nmembers = ["crates/*", "tooling/*/rust"]\n',
-  );
-
-  return root;
+    },
+    pnpmRoots: ['apps/*', 'packages/*', 'tooling/*'],
+    rust: {
+      channel: '1.97.1',
+      profile: 'minimal',
+      components: ['clippy', 'rustfmt'],
+    },
+    cargo: {
+      resolver: '3',
+      memberRoots: ['crates/*', 'tooling/*/rust'],
+    },
+    packageNames: ['@liiiraa/architecture-tests', '@liiiraa/workspace-smoke'],
+  };
 }
 
-afterEach(async () => {
-  await Promise.all(
-    temporaryRoots.splice(0).map(async (root) => {
-      await rm(root, { force: true, recursive: true });
-    }),
-  );
-});
-
 describe('workspace toolchain contract', () => {
-  it('accepts the exact Node, pnpm, TypeScript, Rust, and workspace pins', async () => {
-    const root = await createWorkspaceFixture();
-
+  it('accepts the exact Node, pnpm, TypeScript, Rust, and workspace pins', () => {
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(exactSnapshot(), exactVersions);
     }).not.toThrow();
   });
 
   it.each([
-    ['Node', '"24.18.0"', '"24.18.1"', /Node pin.*24\.18\.0/u],
-    ['pnpm', '"pnpm@11.17.0"', '"pnpm@11.16.0"', /pnpm pin.*11\.17\.0/u],
-    ['TypeScript', '"6.0.3"', '"6.0.4"', /TypeScript pin.*6\.0\.3/u],
-  ])('rejects a changed %s pin', async (_name, expected, replacement, message) => {
-    const root = await createWorkspaceFixture();
-    const packagePath = path.join(root, 'package.json');
-    const contents = await import('node:fs/promises').then(({ readFile }) =>
-      readFile(packagePath, 'utf8'),
-    );
-    await writeFile(packagePath, contents.replace(expected, replacement));
+    ['Node', '24.18.1', /Node pin.*24\.18\.0/u],
+    ['pnpm', '11.16.0', /pnpm pin.*11\.17\.0/u],
+    ['TypeScript', '6.0.4', /TypeScript pin.*6\.0\.3/u],
+  ])('rejects a changed %s pin', (name, replacement, message) => {
+    const snapshot = exactSnapshot();
+    if (name === 'Node') {
+      snapshot.packageManifest.devEngines.runtime.version = replacement;
+    } else if (name === 'pnpm') {
+      snapshot.packageManifest.packageManager = `pnpm@${replacement}`;
+    } else {
+      snapshot.packageManifest.devDependencies.typescript = replacement;
+    }
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(message);
   });
 
-  it('rejects a changed Rust pin', async () => {
-    const root = await createWorkspaceFixture();
-    await writeFile(
-      path.join(root, 'rust-toolchain.toml'),
-      '[toolchain]\nchannel = "stable"\nprofile = "minimal"\ncomponents = ["clippy", "rustfmt"]\n',
-    );
+  it('rejects a changed Rust pin', () => {
+    const snapshot = exactSnapshot();
+    snapshot.rust.channel = 'stable';
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(/Rust pin.*1\.97\.1/u);
   });
 
-  it('rejects missing JavaScript or Rust workspace roots', async () => {
-    const root = await createWorkspaceFixture();
-    await writeFile(
-      path.join(root, 'pnpm-workspace.yaml'),
-      'packages:\n  - packages/*\n  - tooling/*\n',
-    );
+  it('rejects missing JavaScript or Rust workspace roots', () => {
+    const snapshot = exactSnapshot();
+    snapshot.pnpmRoots = ['packages/*', 'tooling/*'];
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(/missing required workspace root.*apps\/\*/u);
 
-    await writeFile(
-      path.join(root, 'pnpm-workspace.yaml'),
-      'packages:\n  - apps/*\n  - packages/*\n  - tooling/*\n',
-    );
-    await writeFile(
-      path.join(root, 'Cargo.toml'),
-      '[workspace]\nresolver = "3"\nmembers = ["crates/*"]\n',
-    );
+    snapshot.pnpmRoots = ['apps/*', 'packages/*', 'tooling/*'];
+    snapshot.cargo.memberRoots = ['crates/*'];
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(/missing required Cargo member.*tooling\/\*\/rust/u);
   });
 
-  it('rejects a non-resolver-3 Cargo workspace', async () => {
-    const root = await createWorkspaceFixture();
-    await writeFile(
-      path.join(root, 'Cargo.toml'),
-      '[workspace]\nresolver = "2"\nmembers = ["crates/*", "tooling/*/rust"]\n',
-    );
+  it('rejects a non-resolver-3 Cargo workspace', () => {
+    const snapshot = exactSnapshot();
+    snapshot.cargo.resolver = '2';
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(/Cargo resolver.*3/u);
   });
 
-  it('reports actionable local Node and pnpm mismatches', async () => {
-    const root = await createWorkspaceFixture();
-
+  it('reports actionable local Node and pnpm mismatches', () => {
     expect(() => {
-      verifyWorkspace(root, { node: '24.16.0', pnpm: '10.0.0' });
+      verifyWorkspaceSnapshot(exactSnapshot(), {
+        node: '24.16.0',
+        pnpm: '10.0.0',
+      });
     }).toThrow(/Node 24\.18\.0.*pnpm install/u);
 
     expect(() => {
-      verifyWorkspace(root, { node: '24.18.0', pnpm: '10.0.0' });
+      verifyWorkspaceSnapshot(exactSnapshot(), {
+        node: '24.18.0',
+        pnpm: '10.0.0',
+      });
     }).toThrow(/pnpm 11\.17\.0.*Corepack/u);
   });
 
-  it('rejects catch-all JavaScript package names', async () => {
-    const root = await createWorkspaceFixture();
-    await mkdir(path.join(root, 'packages', 'shared'), { recursive: true });
-    await writeFile(
-      path.join(root, 'packages', 'shared', 'package.json'),
-      '{"name":"@liiiraa/shared","version":"0.0.0","private":true}\n',
-    );
+  it('rejects catch-all package names', () => {
+    const snapshot = exactSnapshot();
+    snapshot.packageNames.push('@liiiraa/shared');
 
     expect(() => {
-      verifyWorkspace(root, exactVersions);
+      verifyWorkspaceSnapshot(snapshot, exactVersions);
     }).toThrow(/catch-all package name.*@liiiraa\/shared/u);
   });
 });
