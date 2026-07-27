@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-15-PLAN.md
-last_updated: "2026-07-27T04:59:09.022Z"
+stopped_at: Completed 01-16-PLAN.md
+last_updated: "2026-07-27T05:16:13.585Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 13
+  completed_plans: 14
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 14 of 21
+Plan: 15 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
@@ -68,6 +68,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P14 | 10min | 2 tasks | 10 files |
 | Phase 01 P07 | 10min | 2 tasks | 5 files |
 | Phase 01 P15 | 12 min | 3 tasks | 15 files |
+| Phase 01 P16 | 32 min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Require synthetic sentinels and one frozen clock across corpus payloads. — Shared validation evidence must never contain or resemble real-machine performance data.
 - [Phase 01]: Expose TypeScript transports only through the explicit ./generated package entry. — Validator exports remain reserved for Plan 01-18.
 - [Phase 01]: Represent JSON Schema date-time fields as Rust strings in generated transports. — Canonical runtime schema validation remains the enforcement boundary and avoids an unapproved chrono dependency.
+- [Phase 01]: Anchor approved contracts to immutable Git revision plus SHA-256 artifact hashes. — Prevents mutable working-tree artifacts from approving themselves while keeping baseline compact.
+- [Phase 01]: Require explicit ADR-0002 major-transition approval for breaking contract changes. — A version bump alone cannot bypass executable compatibility policy.
 
 ### Pending Todos
 
@@ -136,6 +139,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T04:59:09.018Z
-Stopped at: Completed 01-15-PLAN.md
+Last session: 2026-07-27T05:16:13.582Z
+Stopped at: Completed 01-16-PLAN.md
 Resume file: None
