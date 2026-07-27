@@ -86,15 +86,15 @@ describe('desktop client conformance factory', () => {
 
     expect(CONFORMANCE_GROUP_COUNTS).toEqual({
       metadata: 3,
-      lifecycle: 4,
+      lifecycle: 5,
       truth: 2,
       determinism: 1,
     });
     expect(suite.groupCounts).toEqual(CONFORMANCE_GROUP_COUNTS);
-    expect(suite.cases).toHaveLength(10);
+    expect(suite.cases).toHaveLength(11);
     await expect(suite.run()).resolves.toMatchObject({
       ok: true,
-      passed: 10,
+      passed: 11,
       failed: 0,
     });
   });

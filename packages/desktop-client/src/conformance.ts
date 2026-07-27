@@ -8,6 +8,8 @@ import type { NativeDiagnosticValue, NativeSystemInspection } from './truth.js';
 
 export type ConformanceGroup = 'metadata' | 'lifecycle' | 'truth' | 'determinism';
 
+export type DesktopConformanceScenario = 'standard' | 'unavailable';
+
 export type ConformanceFailure =
   | 'CAPABILITY_MISMATCH'
   | 'CANCELLATION_NOT_HONORED'
@@ -41,7 +43,7 @@ export interface DesktopClientConformanceCase {
 }
 
 export interface DesktopClientConformanceDependencies {
-  readonly createClient: () => DesktopInspectionClient;
+  readonly createClient: (scenario: DesktopConformanceScenario) => DesktopInspectionClient;
   readonly clock: () => string;
   readonly requestIds: () => string;
 }
@@ -54,7 +56,7 @@ export interface DesktopClientConformanceSuite {
 
 export const CONFORMANCE_GROUP_COUNTS = Object.freeze({
   metadata: 3,
-  lifecycle: 4,
+  lifecycle: 5,
   truth: 2,
   determinism: 1,
 }) satisfies Readonly<Record<ConformanceGroup, number>>;
@@ -196,7 +198,7 @@ export const createDesktopClientConformance = (
 ): DesktopClientConformanceSuite => {
   const cases: readonly DesktopClientConformanceCase[] = Object.freeze([
     createCase('metadata', 'immutable identity', () => {
-      const identity = dependencies.createClient().identity;
+      const identity = dependencies.createClient('standard').identity;
       return Object.isFrozen(identity) &&
         isNonEmptyString(identity.adapterId) &&
         isNonEmptyString(identity.adapterVersion)
@@ -204,11 +206,11 @@ export const createDesktopClientConformance = (
         : ['IDENTITY_INVALID'];
     }),
     createCase('metadata', 'canonical schema version', () => {
-      const schemaVersion: string = dependencies.createClient().schemaVersion;
+      const schemaVersion: string = dependencies.createClient('standard').schemaVersion;
       return schemaVersion === DESKTOP_SCHEMA_VERSION ? [] : ['SCHEMA_MISMATCH'];
     }),
     createCase('metadata', 'declared inspection capability', () => {
-      const capabilities = dependencies.createClient().capabilities;
+      const capabilities = dependencies.createClient('standard').capabilities;
       return Object.isFrozen(capabilities) &&
         capabilities.length === 1 &&
         capabilities[0] === DESKTOP_INSPECTION_CAPABILITY
@@ -216,7 +218,7 @@ export const createDesktopClientConformance = (
         : ['CAPABILITY_MISMATCH'];
     }),
     createCase('lifecycle', 'invalid input', async () => {
-      const result = await dependencies.createClient().inspectSystem({
+      const result = await dependencies.createClient('standard').inspectSystem({
         requestId: '',
         issuedAt: '',
       });
@@ -227,7 +229,7 @@ export const createDesktopClientConformance = (
     createCase('lifecycle', 'pre-cancelled request', async () => {
       const controller = new AbortController();
       controller.abort();
-      const result = await dependencies.createClient().inspectSystem({
+      const result = await dependencies.createClient('standard').inspectSystem({
         ...validInput(dependencies),
         signal: controller.signal,
       });
@@ -235,29 +237,41 @@ export const createDesktopClientConformance = (
     }),
     createCase('lifecycle', 'structured result without raw throw', async () => {
       const result: unknown = await dependencies
-        .createClient()
+        .createClient('standard')
         .inspectSystem(validInput(dependencies));
       return isRecord(result) && typeof result['ok'] === 'boolean' ? [] : ['RAW_THROW'];
     }),
-    createCase('lifecycle', 'success with explicit unavailable truth', async () => {
-      const result = await dependencies.createClient().inspectSystem(validInput(dependencies));
+    createCase('lifecycle', 'successful inspection', async () => {
+      const result = await dependencies
+        .createClient('standard')
+        .inspectSystem(validInput(dependencies));
+      return result.ok ? [] : ['SUCCESS_UNAVAILABLE_MISSING'];
+    }),
+    createCase('lifecycle', 'explicit unavailable truth scenario', async () => {
+      const result = await dependencies
+        .createClient('unavailable')
+        .inspectSystem(validInput(dependencies));
       return result.ok &&
         inspectionValues(result.value).some((value) => value.kind === 'unavailable')
         ? []
         : ['SUCCESS_UNAVAILABLE_MISSING'];
     }),
     createCase('truth', 'deeply immutable inspection', async () => {
-      const result = await dependencies.createClient().inspectSystem(validInput(dependencies));
+      const result = await dependencies
+        .createClient('standard')
+        .inspectSystem(validInput(dependencies));
       return result.ok && isDeepFrozen(result.value) ? [] : ['MUTABLE_RESULT'];
     }),
     createCase('truth', 'exhaustive provenance', async () => {
-      const result = await dependencies.createClient().inspectSystem(validInput(dependencies));
+      const result = await dependencies
+        .createClient('standard')
+        .inspectSystem(validInput(dependencies));
       return result.ok && inspectionValues(result.value).every(hasValidProvenance)
         ? []
         : ['PROVENANCE_INVALID'];
     }),
     createCase('determinism', 'repeated call equality', async () => {
-      const client = dependencies.createClient();
+      const client = dependencies.createClient('standard');
       const input = validInput(dependencies);
       const first = await client.inspectSystem(input);
       const second = await client.inspectSystem(input);

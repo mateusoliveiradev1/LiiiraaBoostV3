@@ -14,6 +14,7 @@ export type {
   ConformanceCaseResult,
   ConformanceFailure,
   ConformanceGroup,
+  DesktopConformanceScenario,
   DesktopClientConformanceCase,
   DesktopClientConformanceDependencies,
   DesktopClientConformanceReport,
