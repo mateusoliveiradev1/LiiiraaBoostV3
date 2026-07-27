@@ -4,6 +4,7 @@ import {
   GENERATED_SCHEMA_PATH,
   emitSpikeSchema,
   readPersistedSchema,
+  validateSpikeVectors,
 } from './run-spike.ts';
 
 describe('schema semantics', () => {
@@ -43,5 +44,37 @@ describe('schema determinism', () => {
 
     expect(second).toBe(first);
     expect(first.endsWith('\n')).toBe(true);
+  });
+});
+
+describe('persisted schema vectors', () => {
+  test('accepts every valid vector and rejects every invalid vector', async () => {
+    const evidence = await validateSpikeVectors();
+
+    expect(evidence.representation).toBe('reusable-envelope');
+    expect(evidence.validCases).toEqual([
+      'system provenance',
+      'benchmark provenance',
+      'user provenance',
+      'profile provenance',
+      'ai provenance',
+    ]);
+    expect(evidence.invalidCases).toEqual([
+      'unknown version',
+      'unknown envelope kind',
+      'unknown provenance kind',
+      'extra envelope field',
+      'extra provenance field',
+      'missing metadata',
+      'confidence below minimum',
+      'confidence above maximum',
+      'empty samples',
+      'too many samples',
+    ]);
+    expect(evidence.generatedTypeScript).toContain(
+      "kind: 'system' | 'benchmark' | 'user' | 'profile' | 'ai'",
+    );
+    expect(evidence.generatedTypeScript).toContain("version: '1'");
+    expect(evidence.generatedTypeScript).toContain("kind: 'spike'");
   });
 });

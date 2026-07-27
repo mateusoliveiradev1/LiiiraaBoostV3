@@ -1,0 +1,188 @@
+{
+  "cases": [
+    {
+      "name": "unknown version",
+      "value": {
+        "version": "2",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-invalid-version",
+          "createdAt": "2026-07-27T02:01:00Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "unknown envelope kind",
+      "value": {
+        "version": "1",
+        "kind": "other",
+        "metadata": {
+          "correlationId": "corr-invalid-envelope",
+          "createdAt": "2026-07-27T02:01:01Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "unknown provenance kind",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-invalid-provenance",
+          "createdAt": "2026-07-27T02:01:02Z",
+          "provenance": {
+            "kind": "remote",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "extra envelope field",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "unexpected": true,
+        "metadata": {
+          "correlationId": "corr-extra",
+          "createdAt": "2026-07-27T02:01:03Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "extra provenance field",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-extra-provenance",
+          "createdAt": "2026-07-27T02:01:04Z",
+          "provenance": {
+            "kind": "user",
+            "userId": "user-01",
+            "admin": true
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "missing metadata",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "payload": {
+          "confidence": 50,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "confidence below minimum",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-low",
+          "createdAt": "2026-07-27T02:01:05Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": -1,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "confidence above maximum",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-high",
+          "createdAt": "2026-07-27T02:01:06Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 101,
+          "samples": [1]
+        }
+      }
+    },
+    {
+      "name": "empty samples",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-empty",
+          "createdAt": "2026-07-27T02:01:07Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": []
+        }
+      }
+    },
+    {
+      "name": "too many samples",
+      "value": {
+        "version": "1",
+        "kind": "spike",
+        "metadata": {
+          "correlationId": "corr-many",
+          "createdAt": "2026-07-27T02:01:08Z",
+          "provenance": {
+            "kind": "system",
+            "component": "cpu"
+          }
+        },
+        "payload": {
+          "confidence": 50,
+          "samples": [1, 2, 3, 4]
+        }
+      }
+    }
+  ]
+}
