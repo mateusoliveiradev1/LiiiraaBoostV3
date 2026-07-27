@@ -28,15 +28,20 @@
     "test": "turbo run test",
     "test:adapters": "node tooling/adapter-conformance/run.mjs",
     "test:architecture": "node tooling/architecture-tests/src/check-workspace.ts && pnpm --filter @liiiraa/architecture-tests test -- --run",
+    "test:runtime-truth": "pnpm --filter @liiiraa/fixture-guard test -- --run -t \"type-boundary|static|runtime\"",
     "test:production-truth": "pnpm --filter @liiiraa/fixture-guard test -- --run -t \"artifact|production smoke\"",
     "test:acceptance-policy": "pnpm --filter @liiiraa/acceptance-policy exec vitest --run",
+    "acceptance:check": "node --experimental-strip-types tooling/acceptance-policy/src/policy.ts",
+    "supply-chain:check": "node tooling/supply-chain/verify-pins.mjs --check",
+    "verify:artifacts": "node tooling/ci/verify-required-artifacts.mjs",
     "contracts:generate": "pnpm --filter @liiiraa/contract-generation generate",
     "contracts:check": "pnpm --filter @liiiraa/contract-generation contracts:check",
     "contracts:compat": "pnpm --filter @liiiraa/contract-compat contracts:compat",
     "test:contracts": "pnpm contracts:check && pnpm contracts:compat && pnpm --filter @liiiraa/contracts-ts exec vitest --run && cargo test -p liiiraa-contracts-rust",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
-    "verify": "pnpm verify:workspace && pnpm test:architecture && pnpm contracts:check && pnpm contracts:compat && pnpm generate && pnpm check && pnpm test && pnpm build"
+    "verify:quick": "pnpm verify:workspace && pnpm format:check && pnpm check && pnpm contracts:check && pnpm contracts:compat && pnpm test:architecture && pnpm test:contracts && pnpm test:adapters && pnpm test:runtime-truth && pnpm test:acceptance-policy -- --mode planned && pnpm verify:artifacts",
+    "verify": "pnpm verify:quick && pnpm test && pnpm build && pnpm test:production-truth && pnpm supply-chain:check && pnpm test:acceptance-policy -- --mode final && pnpm acceptance:check -- --mode final"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.65.0",

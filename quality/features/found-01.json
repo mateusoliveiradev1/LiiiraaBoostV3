@@ -13,7 +13,7 @@
           "command": "pnpm test:contracts",
           "file": "packages/contracts-ts/src/validation.test.ts",
           "owner": "plan-01-18",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -25,7 +25,7 @@
           "command": "pnpm test:contracts",
           "file": "packages/contracts-ts/src/validation.test.ts",
           "owner": "plan-01-18",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -37,7 +37,7 @@
           "command": "pnpm test:contracts",
           "file": "packages/contracts-ts/src/validation.test.ts",
           "owner": "plan-01-18",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -49,7 +49,7 @@
           "command": "pnpm test:contracts",
           "file": "packages/contracts-ts/src/validation.test.ts",
           "owner": "plan-01-18",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -61,7 +61,7 @@
           "command": "pnpm test:contracts",
           "file": "crates/contracts-rust/tests/golden_corpus.rs",
           "owner": "plan-01-18",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     }

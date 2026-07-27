@@ -7,11 +7,11 @@
       "outputs": []
     },
     "check": {
-      "dependsOn": ["^check"],
+      "dependsOn": ["generate", "^check"],
       "outputs": []
     },
     "test": {
-      "dependsOn": ["generate", "^test"],
+      "dependsOn": ["check", "^test"],
       "outputs": ["coverage/**"]
     },
     "build": {

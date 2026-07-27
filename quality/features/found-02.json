@@ -13,7 +13,7 @@
           "command": "pnpm test:adapters",
           "file": "packages/desktop-client/src/conformance.test.ts",
           "owner": "plan-01-19",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -25,7 +25,7 @@
           "command": "pnpm test:adapters",
           "file": "packages/desktop-client/src/conformance.test.ts",
           "owner": "plan-01-19",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -37,7 +37,7 @@
           "command": "pnpm test:adapters",
           "file": "packages/desktop-client/src/conformance.test.ts",
           "owner": "plan-01-19",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -49,7 +49,7 @@
           "command": "pnpm test:adapters",
           "file": "packages/desktop-client/src/conformance.test.ts",
           "owner": "plan-01-19",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -61,7 +61,7 @@
           "command": "pnpm test:adapters",
           "file": "packages/desktop-client/src/conformance.test.ts",
           "owner": "plan-01-19",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     }

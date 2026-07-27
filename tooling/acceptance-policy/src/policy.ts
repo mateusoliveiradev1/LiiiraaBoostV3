@@ -410,3 +410,105 @@ export const parsePolicyMode = (arguments_: readonly string[]): PolicyMode => {
 
   return value;
 };
+
+interface NodeFileSystem {
+  readonly existsSync: (path: string) => boolean;
+  readonly readFileSync: (path: string, encoding: 'utf8') => string;
+}
+
+interface NodePath {
+  readonly join: (...paths: readonly string[]) => string;
+}
+
+declare const process: {
+  readonly argv: string[];
+  readonly cwd: () => string;
+  exitCode?: number;
+  readonly getBuiltinModule: (specifier: 'node:fs' | 'node:path') => unknown;
+};
+
+const rootScriptGraph = (scripts: Readonly<Record<string, unknown>>, entry: string): string => {
+  const visited = new Set<string>();
+  const bodies: string[] = [];
+  const visit = (name: string): void => {
+    if (visited.has(name)) return;
+    visited.add(name);
+    const body = scripts[name];
+    if (typeof body !== 'string') return;
+    bodies.push(body);
+    for (const match of body.matchAll(/(?:^|&&)\s*pnpm\s+([a-z][\w:-]*)/gu)) {
+      const child = match[1];
+      if (child !== undefined) visit(child);
+    }
+  };
+  visit(entry);
+  return bodies.join('\n');
+};
+
+export const runAcceptancePolicy = (
+  mode: PolicyMode,
+  repositoryRoot = process.cwd(),
+): PolicyResult => {
+  const fs = process.getBuiltinModule('node:fs') as NodeFileSystem;
+  const path = process.getBuiltinModule('node:path') as NodePath;
+  const requirementIds = ['FOUND-01', 'FOUND-02', 'FOUND-03', 'FOUND-04', 'FOUND-05', 'FOUND-06'];
+  const packageManifest = JSON.parse(
+    fs.readFileSync(path.join(repositoryRoot, 'package.json'), 'utf8'),
+  ) as { readonly scripts?: Readonly<Record<string, unknown>> };
+  const verificationGraph = rootScriptGraph(
+    packageManifest.scripts ?? {},
+    mode === 'final' ? 'verify' : 'verify:quick',
+  );
+  const diagnostics: PolicyDiagnostic[] = [];
+
+  for (const requirement of requirementIds) {
+    const manifestPath = path.join(
+      repositoryRoot,
+      'quality',
+      'features',
+      `${requirement.toLowerCase()}.json`,
+    );
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as QualityManifest;
+    const evidence = Object.values(manifest.acceptance).flatMap((entry) =>
+      entry.status === 'tested' ? entry.evidence : [],
+    );
+    const result = evaluateQualityManifest(manifest, {
+      mode,
+      knownRequirements: requirementIds,
+      requiredRequirements: [requirement],
+      asOf: new Date().toISOString().slice(0, 10),
+      availableFiles: evidence
+        .map(({ file }) => file)
+        .filter((file) => fs.existsSync(path.join(repositoryRoot, file))),
+      availableCommands: evidence
+        .map(({ command }) => command)
+        .filter((command) => verificationGraph.includes(command)),
+    });
+    diagnostics.push(...result.diagnostics);
+  }
+
+  const sortedDiagnostics = sortDiagnostics(diagnostics);
+  return { ok: sortedDiagnostics.length === 0, diagnostics: sortedDiagnostics };
+};
+
+const isDirectExecution = process.argv[1]
+  ?.replaceAll('\\', '/')
+  .endsWith('/tooling/acceptance-policy/src/policy.ts');
+
+if (isDirectExecution) {
+  try {
+    const mode = parsePolicyMode(process.argv.slice(2));
+    const result = runAcceptancePolicy(mode);
+    if (!result.ok) {
+      for (const diagnostic of result.diagnostics) {
+        console.error(`${diagnostic.code} ${diagnostic.path}: ${diagnostic.message}`);
+      }
+      process.exitCode = 1;
+    } else {
+      console.log(`Acceptance policy passed in ${mode} mode.`);
+    }
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+}

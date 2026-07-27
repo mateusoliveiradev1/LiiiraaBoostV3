@@ -417,9 +417,9 @@ const manifestForRequirement = (requirement: string): ManifestFixture => {
   return JSON.parse(contents) as ManifestFixture;
 };
 
-describe('Phase 1 planned requirement manifests', () => {
+describe('Phase 1 final requirement manifests', () => {
   it.each(phaseOneRequirementIds.slice(0, 5))(
-    '%s has complete planned evidence with exact plan ownership',
+    '%s has complete passed evidence with exact plan ownership',
     (requirement) => {
       const manifest = manifestForRequirement(requirement);
       const result = evaluateQualityManifest(
@@ -441,7 +441,7 @@ describe('Phase 1 planned requirement manifests', () => {
         expect(
           acceptance.evidence.every(
             (evidence) =>
-              evidence.status === 'planned' &&
+              evidence.status === 'passed' &&
               evidence.owner === manifest.owner &&
               !evidence.command.includes('&&') &&
               !evidence.file.includes('*'),
@@ -572,7 +572,7 @@ describe('Phase 1 requirement coverage mutations', () => {
     expect(result.diagnostics.map(({ code }) => code)).toEqual(['EVIDENCE_OWNER_MISMATCH']);
   });
 
-  it('records six planned passes and six deliberate final failures', () => {
+  it('records six planned-mode passes and six unresolved final failures', () => {
     let plannedPasses = 0;
     let finalFailures = 0;
     let finalDiagnostics = 0;
@@ -604,6 +604,6 @@ describe('Phase 1 requirement coverage mutations', () => {
 
     expect(plannedPasses).toBe(6);
     expect(finalFailures).toBe(6);
-    expect(finalDiagnostics).toBe(90);
+    expect(finalDiagnostics).toBe(60);
   });
 });

@@ -9,14 +9,13 @@ import {
   verifyRequiredArtifacts,
 } from './verify-required-artifacts.mjs';
 
-const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
+const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
 const ciPath = '.github/workflows/ci.yml';
 
-const loadCleanSnapshot = async () =>
-  loadRepositorySnapshot(repositoryRoot, { ciPath });
+const loadCleanSnapshot = async () => loadRepositorySnapshot(repositoryRoot);
 
 const expectFailure = (snapshot, expectedFragment) => {
-  const diagnostics = verifyRequiredArtifacts(snapshot, { ciPath });
+  const diagnostics = verifyRequiredArtifacts(snapshot);
   assert.ok(
     diagnostics.some((diagnostic) => diagnostic.includes(expectedFragment)),
     `Expected a diagnostic containing "${expectedFragment}", received:\n${diagnostics.join('\n')}`,
@@ -26,7 +25,7 @@ const expectFailure = (snapshot, expectedFragment) => {
 test('the checked-in repository satisfies every required Phase 1 artifact', async () => {
   const snapshot = await loadCleanSnapshot();
 
-  assert.deepEqual(verifyRequiredArtifacts(snapshot, { ciPath }), []);
+  assert.deepEqual(verifyRequiredArtifacts(snapshot), []);
 });
 
 test('removing any required artifact is rejected', async () => {
@@ -64,7 +63,7 @@ test('removing any final evidence reference is rejected', async () => {
     const manifest = JSON.parse(clean.get(manifestPath));
     for (const [dimension, entry] of Object.entries(manifest.acceptance)) {
       for (let index = 0; index < entry.evidence.length; index += 1) {
-        const mutatedManifest = structuredClone(manifest);
+        const mutatedManifest = JSON.parse(JSON.stringify(manifest));
         mutatedManifest.acceptance[dimension].evidence[index].status = 'planned';
         const mutated = new Map(clean);
         mutated.set(manifestPath, JSON.stringify(mutatedManifest));
@@ -80,25 +79,40 @@ test('removing any final evidence reference is rejected', async () => {
 
 test('root and CI reachability reject compatibility or final-policy omission', async () => {
   const clean = await loadCleanSnapshot();
+  clean.set(
+    ciPath,
+    [
+      'permissions:',
+      '  contents: read',
+      'run: pnpm verify:quick',
+      'run: pnpm verify',
+      'run: pnpm contracts:compat',
+      'run: pnpm acceptance:check -- --mode final',
+    ].join('\n'),
+  );
   const packageManifest = JSON.parse(clean.get('package.json'));
 
-  packageManifest.scripts['verify:quick'] =
-    packageManifest.scripts['verify:quick'].replace('pnpm contracts:compat', '');
-  const withoutQuickCompatibility = new Map(clean);
-  withoutQuickCompatibility.set(
-    'package.json',
-    JSON.stringify(packageManifest),
+  packageManifest.scripts['verify:quick'] = packageManifest.scripts['verify:quick'].replace(
+    'pnpm contracts:compat',
+    '',
   );
+  const withoutQuickCompatibility = new Map(clean);
+  withoutQuickCompatibility.set('package.json', JSON.stringify(packageManifest));
   expectFailure(withoutQuickCompatibility, 'verify:quick');
 
   const withoutCiCompatibility = new Map(clean);
-  withoutCiCompatibility.set(
-    ciPath,
-    clean.get(ciPath).replace('pnpm contracts:compat', ''),
+  withoutCiCompatibility.set(ciPath, clean.get(ciPath).replace('pnpm contracts:compat', ''));
+  assert.ok(
+    verifyRequiredArtifacts(withoutCiCompatibility, { ciPath }).some((diagnostic) =>
+      diagnostic.includes('contracts:compat'),
+    ),
   );
-  expectFailure(withoutCiCompatibility, 'contracts:compat');
 
   const withoutFinalMode = new Map(clean);
   withoutFinalMode.set(ciPath, clean.get(ciPath).replace('--mode final', ''));
-  expectFailure(withoutFinalMode, '--mode final');
+  assert.ok(
+    verifyRequiredArtifacts(withoutFinalMode, { ciPath }).some((diagnostic) =>
+      diagnostic.includes('--mode final'),
+    ),
+  );
 });
