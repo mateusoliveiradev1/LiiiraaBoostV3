@@ -25,6 +25,7 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs dependency-cruiser.config.mjs",
     "format:check": "prettier --check package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs dependency-cruiser.config.mjs",
+    "docs:check": "prettier --check README.md architecture/README.md architecture/OWNERSHIP.md architecture/decisions/0003-module-ownership-and-direction.md architecture/decisions/0004-truth-provenance-and-fixture-boundary.md architecture/decisions/0005-cross-cutting-acceptance-policy.md",
     "test": "turbo run test",
     "test:adapters": "node tooling/adapter-conformance/run.mjs",
     "test:architecture": "node tooling/architecture-tests/src/check-workspace.ts && pnpm --filter @liiiraa/architecture-tests test -- --run",

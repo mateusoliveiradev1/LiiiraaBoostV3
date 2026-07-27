@@ -5,6 +5,7 @@ import test from 'node:test';
 import {
   NEGATIVE_PROOFS,
   REQUIRED_ARTIFACTS,
+  REQUIRED_DOCS,
   loadRepositorySnapshot,
   verifyRequiredArtifacts,
 } from './verify-required-artifacts.mjs';
@@ -14,8 +15,8 @@ const ciPath = '.github/workflows/ci.yml';
 
 const loadCleanSnapshot = async () => loadRepositorySnapshot(repositoryRoot);
 
-const expectFailure = (snapshot, expectedFragment) => {
-  const diagnostics = verifyRequiredArtifacts(snapshot);
+const expectFailure = (snapshot, expectedFragment, options = {}) => {
+  const diagnostics = verifyRequiredArtifacts(snapshot, options);
   assert.ok(
     diagnostics.some((diagnostic) => diagnostic.includes(expectedFragment)),
     `Expected a diagnostic containing "${expectedFragment}", received:\n${diagnostics.join('\n')}`,
@@ -35,6 +36,17 @@ test('removing any required artifact is rejected', async () => {
     const mutated = new Map(clean);
     mutated.delete(path);
     expectFailure(mutated, path);
+  }
+});
+
+test('docs-only verification rejects every required contributor document omission', async () => {
+  const clean = await loadCleanSnapshot();
+  assert.deepEqual(verifyRequiredArtifacts(clean, { docsOnly: true }), []);
+
+  for (const path of REQUIRED_DOCS) {
+    const mutated = new Map(clean);
+    mutated.delete(path);
+    expectFailure(mutated, path, { docsOnly: true });
   }
 });
 

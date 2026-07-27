@@ -9,6 +9,15 @@ const QUALITY_MANIFESTS = Object.freeze(
   Array.from({ length: 6 }, (_, index) => `quality/features/found-0${String(index + 1)}.json`),
 );
 
+export const REQUIRED_DOCS = Object.freeze([
+  'README.md',
+  'architecture/README.md',
+  'architecture/OWNERSHIP.md',
+  'architecture/decisions/0003-module-ownership-and-direction.md',
+  'architecture/decisions/0004-truth-provenance-and-fixture-boundary.md',
+  'architecture/decisions/0005-cross-cutting-acceptance-policy.md',
+]);
+
 export const REQUIRED_ARTIFACTS = Object.freeze([
   'package.json',
   'turbo.json',
@@ -38,6 +47,7 @@ export const REQUIRED_ARTIFACTS = Object.freeze([
   'tooling/acceptance-policy/src/policy.test.ts',
   'tooling/ci/verify-required-artifacts.mjs',
   'tooling/ci/verify-required-artifacts.test.mjs',
+  ...REQUIRED_DOCS,
   ...QUALITY_MANIFESTS,
 ]);
 
@@ -310,8 +320,18 @@ const checkCi = (snapshot, ciPath, diagnostics) => {
   }
 };
 
-export const verifyRequiredArtifacts = (snapshot, { ciPath = undefined } = {}) => {
+export const verifyRequiredArtifacts = (
+  snapshot,
+  { ciPath = undefined, docsOnly = false } = {},
+) => {
   const diagnostics = [];
+  if (docsOnly) {
+    for (const path of REQUIRED_DOCS) {
+      if (!snapshot.has(path)) diagnostics.push(`required documentation missing: ${path}`);
+    }
+    return diagnostics.toSorted();
+  }
+
   for (const path of REQUIRED_ARTIFACTS) {
     if (!snapshot.has(path)) diagnostics.push(`required artifact missing: ${path}`);
   }
@@ -330,10 +350,15 @@ export const verifyRequiredArtifacts = (snapshot, { ciPath = undefined } = {}) =
 
 const parseArguments = (arguments_) => {
   if (arguments_.length === 0) return {};
+  if (arguments_.length === 1 && arguments_[0] === '--docs') {
+    return { docsOnly: true };
+  }
   if (arguments_.length === 2 && arguments_[0] === '--ci') {
     return { ciPath: normalizePath(arguments_[1]) };
   }
-  throw new Error('Usage: node tooling/ci/verify-required-artifacts.mjs [--ci <workflow>]');
+  throw new Error(
+    'Usage: node tooling/ci/verify-required-artifacts.mjs [--docs | --ci <workflow>]',
+  );
 };
 
 const isDirectExecution =
@@ -349,7 +374,9 @@ if (isDirectExecution) {
       throw new Error(`Required Phase 1 artifact verification failed:\n${diagnostics.join('\n')}`);
     }
     console.log(
-      `Required Phase 1 artifacts verified (${String(REQUIRED_ARTIFACTS.length)} artifacts, ${String(NEGATIVE_PROOFS.length)} negative proofs).`,
+      options.docsOnly
+        ? `Required Phase 1 documentation verified (${String(REQUIRED_DOCS.length)} documents).`
+        : `Required Phase 1 artifacts verified (${String(REQUIRED_ARTIFACTS.length)} artifacts, ${String(NEGATIVE_PROOFS.length)} negative proofs).`,
     );
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
