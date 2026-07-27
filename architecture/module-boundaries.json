@@ -157,6 +157,15 @@
       "publicRoots": ["tooling/architecture-tests/src/policy.ts"],
       "runtimeClass": "tooling",
       "status": "active"
+    },
+    {
+      "id": "contract-generation-spike-rust",
+      "owner": "contracts",
+      "layer": "tooling",
+      "roots": ["tooling/contract-generation-spike-rust"],
+      "publicRoots": ["tooling/contract-generation-spike-rust/src/main.rs"],
+      "runtimeClass": "tooling",
+      "status": "active"
     }
   ],
   "exceptions": []
