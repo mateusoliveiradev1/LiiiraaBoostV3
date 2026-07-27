@@ -244,6 +244,8 @@ importers:
         specifier: 1.14.0
         version: 1.14.0(@typespec/compiler@1.14.0)
 
+  packages/contracts-ts: {}
+
   tooling/acceptance-policy:
     dependencies:
       ajv:
@@ -280,6 +282,9 @@ importers:
       '@typespec/openapi3':
         specifier: 1.14.0
         version: 1.14.0(@typespec/compiler@1.14.0)(@typespec/http@1.14.0(@typespec/compiler@1.14.0))(@typespec/json-schema@1.14.0(@typespec/compiler@1.14.0))
+      json-schema-to-typescript:
+        specifier: 15.0.4
+        version: 15.0.4
 
   tooling/contract-generation-spike:
     devDependencies:
