@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "found-06-quality-acceptance",
+  "requirements": ["FOUND-06"],
+  "owner": "plan-01-10",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-06-security-omission-gate",
+          "command": "pnpm test:acceptance-policy -- --mode final",
+          "file": "tooling/acceptance-policy/src/policy.test.ts",
+          "owner": "plan-01-10",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-06-privacy-omission-gate",
+          "command": "pnpm test:acceptance-policy -- --mode final",
+          "file": "tooling/acceptance-policy/src/policy.test.ts",
+          "owner": "plan-01-10",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-06-accessibility-omission-gate",
+          "command": "pnpm test:acceptance-policy -- --mode final",
+          "file": "tooling/acceptance-policy/src/policy.test.ts",
+          "owner": "plan-01-10",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-06-performance-omission-gate",
+          "command": "pnpm test:acceptance-policy -- --mode final",
+          "file": "tooling/acceptance-policy/src/policy.test.ts",
+          "owner": "plan-01-10",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-06-recovery-omission-gate",
+          "command": "pnpm test:acceptance-policy -- --mode final",
+          "file": "tooling/acceptance-policy/src/policy.test.ts",
+          "owner": "plan-01-10",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
