@@ -1,0 +1,15 @@
+{
+  "name": "@liiiraa/workspace-smoke",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node check-toolchain.mjs",
+    "check": "tsc --project tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}
