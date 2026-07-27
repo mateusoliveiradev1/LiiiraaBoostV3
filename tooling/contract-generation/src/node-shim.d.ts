@@ -10,6 +10,20 @@ declare module 'node:fs/promises' {
   export function writeFile(path: string, data: string, encoding: 'utf8'): Promise<void>;
 }
 
+declare module 'node:child_process' {
+  export function execFile(
+    file: string,
+    args: readonly string[],
+    options: {
+      cwd: string;
+      encoding: 'utf8';
+      maxBuffer: number;
+      windowsHide: boolean;
+    },
+    callback: (error: Error | null, stdout: string, stderr: string) => void,
+  ): void;
+}
+
 declare module 'node:os' {
   export function tmpdir(): string;
 }

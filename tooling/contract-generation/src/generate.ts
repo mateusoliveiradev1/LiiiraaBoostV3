@@ -1,4 +1,5 @@
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +37,7 @@ const TYPESCRIPT_OUTPUT_ROOT = join(
   'src',
   'generated',
 );
+const RUST_OUTPUT_ROOT = join(REPOSITORY_ROOT, 'crates', 'contracts-rust', 'src');
 
 export const OUTPUT_PATHS = Object.freeze({
   messageEnvelope: join(DESKTOP_OUTPUT_ROOT, 'message-envelope.schema.json'),
@@ -44,6 +46,7 @@ export const OUTPUT_PATHS = Object.freeze({
   openApi: join(HTTP_OUTPUT_ROOT, 'openapi.json'),
   typescriptModels: join(TYPESCRIPT_OUTPUT_ROOT, 'models.ts'),
   typescriptIndex: join(TYPESCRIPT_OUTPUT_ROOT, 'index.ts'),
+  rustModels: join(RUST_OUTPUT_ROOT, 'generated.rs'),
 });
 
 const KNOWN_OUTPUT_PATHS = new Set(Object.values(OUTPUT_PATHS).map((path) => resolve(path)));
@@ -141,6 +144,15 @@ function createRuntimeSchema(
     'x-liiiraa-generated': GENERATED_HEADER,
     $defs: definitions,
     ...root,
+  };
+}
+
+function inspectMessageRoot(): JsonObject {
+  return {
+    oneOf: [
+      { $ref: 'InspectSystemRequest.json' },
+      { $ref: 'InspectSystemResult.json' },
+    ],
   };
 }
 
@@ -242,10 +254,6 @@ const schemaStage: GenerationStage = {
   async generate(): Promise<readonly GeneratedArtifact[]> {
     const bundle = await canonicalSchema();
     const definitions = requireDefinitions(bundle);
-    const inspectMessageRefs = [
-      { $ref: 'InspectSystemRequest.json' },
-      { $ref: 'InspectSystemResult.json' },
-    ];
 
     return [
       {
@@ -253,7 +261,7 @@ const schemaStage: GenerationStage = {
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
           definitions,
-          { oneOf: inspectMessageRefs },
+          inspectMessageRoot(),
         ),
       },
       {
@@ -269,7 +277,7 @@ const schemaStage: GenerationStage = {
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/inspect-system.schema.json',
           definitions,
-          { oneOf: inspectMessageRefs },
+          inspectMessageRoot(),
         ),
       },
       {
@@ -323,10 +331,7 @@ const typescriptStage: GenerationStage = {
     const definitions = requireDefinitions(await canonicalSchema());
     const generatorSchema = rebaseForTypeScript({
       title: 'MessageEnvelope',
-      oneOf: [
-        { $ref: 'InspectSystemRequest.json' },
-        { $ref: 'InspectSystemResult.json' },
-      ],
+      ...inspectMessageRoot(),
       $defs: definitions,
     });
 
@@ -363,7 +368,88 @@ const typescriptStage: GenerationStage = {
   },
 };
 
-const GENERATION_STAGES: readonly GenerationStage[] = [schemaStage, typescriptStage];
+function executeFile(
+  command: string,
+  arguments_: readonly string[],
+  workingDirectory: string,
+): Promise<string> {
+  return new Promise((resolvePromise, rejectPromise) => {
+    execFile(
+      command,
+      arguments_,
+      {
+        cwd: workingDirectory,
+        encoding: 'utf8',
+        maxBuffer: 16 * 1024 * 1024,
+        windowsHide: true,
+      },
+      (error, stdout, stderr) => {
+        if (error !== null) {
+          rejectPromise(
+            new Error(
+              `${command} ${arguments_.join(' ')} failed:\n${stderr.trim() || error.message}`,
+            ),
+          );
+          return;
+        }
+
+        resolvePromise(stdout);
+      },
+    );
+  });
+}
+
+const rustStage: GenerationStage = {
+  name: 'rust-transports',
+  async generate(context): Promise<readonly GeneratedArtifact[]> {
+    const definitions = requireDefinitions(await canonicalSchema());
+    const stagingRoot = await mkdtemp(join(tmpdir(), 'liiiraa-contract-generation-rust-'));
+    const schemaPath = join(stagingRoot, 'message-envelope.schema.json');
+
+    try {
+      await writeFile(
+        schemaPath,
+        stableJson(
+          createRuntimeSchema(
+            'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
+            definitions,
+            inspectMessageRoot(),
+          ),
+        ),
+        'utf8',
+      );
+
+      const generated = await executeFile(
+        'cargo',
+        [
+          'run',
+          '--quiet',
+          '--package',
+          'contract-generation-rust',
+          '--',
+          '--schema',
+          schemaPath,
+        ],
+        context.repositoryRoot,
+      );
+
+      return [
+        {
+          path: OUTPUT_PATHS.rustModels,
+          value: normalizeGeneratedText(generated),
+        },
+      ];
+    } finally {
+      await rm(stagingRoot, { force: true, recursive: true });
+    }
+  },
+};
+
+const GENERATION_STAGES: readonly GenerationStage[] = [
+  schemaStage,
+  typescriptStage,
+  rustStage,
+];
 
 async function atomicWrite(path: string, contents: string): Promise<void> {
   assertKnownOutputPath(path);
