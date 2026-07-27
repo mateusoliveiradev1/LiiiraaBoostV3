@@ -71,9 +71,10 @@ describe('persisted schema vectors', () => {
       'empty samples',
       'too many samples',
     ]);
-    expect(evidence.generatedTypeScript).toContain(
-      "kind: 'system' | 'benchmark' | 'user' | 'profile' | 'ai'",
-    );
+    expect(evidence.generatedTypeScript).toContain('export type ProvenanceJson =');
+    for (const kind of ['system', 'benchmark', 'user', 'profile', 'ai']) {
+      expect(evidence.generatedTypeScript).toContain(`kind: '${kind}'`);
+    }
     expect(evidence.generatedTypeScript).toContain("version: '1'");
     expect(evidence.generatedTypeScript).toContain("kind: 'spike'");
   });

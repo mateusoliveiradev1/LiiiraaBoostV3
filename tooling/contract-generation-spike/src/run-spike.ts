@@ -9,9 +9,13 @@ import {
   formatDiagnostic,
   type CompilerOptions,
 } from '@typespec/compiler';
+import { Ajv2020, type ValidateFunction } from 'ajv/dist/2020.js';
+import { compile as compileTypeScript } from 'json-schema-to-typescript';
 
 const PACKAGE_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FIXTURE_PATH = join(PACKAGE_ROOT, 'fixtures', 'spike.tsp');
+const VALID_FIXTURE_PATH = join(PACKAGE_ROOT, 'fixtures', 'valid.json');
+const INVALID_FIXTURE_PATH = join(PACKAGE_ROOT, 'fixtures', 'invalid.json');
 
 export const GENERATED_SCHEMA_PATH = join(
   PACKAGE_ROOT,
@@ -29,8 +33,135 @@ export interface SpikeSchemaEvidence {
   readonly maxItems: number;
 }
 
+export interface SpikeVectorEvidence {
+  readonly representation: 'reusable-envelope';
+  readonly validCases: readonly string[];
+  readonly invalidCases: readonly string[];
+  readonly generatedTypeScript: string;
+}
+
+interface VectorCase {
+  readonly name: string;
+  readonly value: unknown;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readVectorCases(value: unknown, fixtureName: string): readonly VectorCase[] {
+  if (!isRecord(value) || !Array.isArray(value['cases'])) {
+    throw new Error(`${fixtureName} must contain a cases array.`);
+  }
+
+  return value['cases'].map((entry, index) => {
+    if (
+      !isRecord(entry) ||
+      typeof entry['name'] !== 'string' ||
+      !('value' in entry)
+    ) {
+      throw new Error(`${fixtureName} case ${String(index)} is malformed.`);
+    }
+
+    return {
+      name: entry['name'],
+      value: entry['value'],
+    };
+  });
+}
+
+function schemaDefinitions(
+  schema: Record<string, unknown>,
+): Record<string, Record<string, unknown>> {
+  const definitions = schema['$defs'];
+  if (!isRecord(definitions)) {
+    throw new Error('Persisted schema does not contain a $defs object.');
+  }
+
+  const result: Record<string, Record<string, unknown>> = {};
+  for (const [name, definition] of Object.entries(definitions)) {
+    if (!isRecord(definition)) {
+      throw new Error(`Persisted schema definition ${name} is not an object.`);
+    }
+    result[name] = definition;
+  }
+  return result;
+}
+
+function createEnvelopeValidator(
+  definitions: Record<string, Record<string, unknown>>,
+): ValidateFunction {
+  const ajv = new Ajv2020({
+    allErrors: true,
+    strict: true,
+    validateSchema: true,
+  });
+
+  for (const definition of Object.values(definitions)) {
+    ajv.addSchema(definition);
+  }
+
+  const validator = ajv.getSchema('SpikeEnvelope.json');
+  if (validator === undefined) {
+    throw new Error('Ajv could not resolve the persisted SpikeEnvelope definition.');
+  }
+  return validator;
+}
+
+function rebaseForTypeScript(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => rebaseForTypeScript(entry));
+  }
+
+  if (!isRecord(value)) {
+    return value;
+  }
+
+  const rebased: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (key === '$ref' && typeof entry === 'string' && entry.endsWith('.json')) {
+      rebased[key] = `#/$defs/${entry.slice(0, -'.json'.length)}`;
+      continue;
+    }
+
+    if (key === 'unevaluatedProperties' && isClosedObjectSchema(value)) {
+      rebased['additionalProperties'] = false;
+      continue;
+    }
+
+    rebased[key] = rebaseForTypeScript(entry);
+  }
+  return rebased;
+}
+
+async function generateTypeScript(
+  definitions: Record<string, Record<string, unknown>>,
+): Promise<string> {
+  const envelope = definitions['SpikeEnvelope'];
+  if (envelope === undefined) {
+    throw new Error('Persisted schema does not contain SpikeEnvelope.');
+  }
+
+  const generatorSchema = rebaseForTypeScript({
+    ...envelope,
+    $defs: definitions,
+  });
+  if (!isRecord(generatorSchema)) {
+    throw new Error('Could not build the TypeScript generator schema.');
+  }
+
+  return compileTypeScript(
+    generatorSchema,
+    'SpikeEnvelope',
+    {
+      additionalProperties: false,
+      bannerComment: '',
+      style: {
+        singleQuote: true,
+      },
+      unknownAny: false,
+    },
+  );
 }
 
 function canonicalize(value: unknown): unknown {
@@ -221,7 +352,47 @@ export async function readPersistedSchema(): Promise<string> {
   return readFile(GENERATED_SCHEMA_PATH, 'utf8');
 }
 
+export async function validateSpikeVectors(): Promise<SpikeVectorEvidence> {
+  await emitSpikeSchema();
+  const schemaValue = JSON.parse(await readPersistedSchema()) as unknown;
+  if (!isRecord(schemaValue)) {
+    throw new Error('Persisted schema is not a JSON object.');
+  }
+
+  const definitions = schemaDefinitions(schemaValue);
+  const validateEnvelope = createEnvelopeValidator(definitions);
+  const validCases = readVectorCases(
+    JSON.parse(await readFile(VALID_FIXTURE_PATH, 'utf8')) as unknown,
+    'valid.json',
+  );
+  const invalidCases = readVectorCases(
+    JSON.parse(await readFile(INVALID_FIXTURE_PATH, 'utf8')) as unknown,
+    'invalid.json',
+  );
+
+  for (const vector of validCases) {
+    if (!validateEnvelope(vector.value)) {
+      throw new Error(
+        `Expected valid vector "${vector.name}" to pass: ${JSON.stringify(validateEnvelope.errors)}`,
+      );
+    }
+  }
+
+  for (const vector of invalidCases) {
+    if (validateEnvelope(vector.value)) {
+      throw new Error(`Expected invalid vector "${vector.name}" to fail.`);
+    }
+  }
+
+  return {
+    representation: 'reusable-envelope',
+    validCases: validCases.map((vector) => vector.name),
+    invalidCases: invalidCases.map((vector) => vector.name),
+    generatedTypeScript: await generateTypeScript(definitions),
+  };
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const evidence = await emitSpikeSchema();
+  const evidence = await validateSpikeVectors();
   console.log(JSON.stringify(evidence));
 }
