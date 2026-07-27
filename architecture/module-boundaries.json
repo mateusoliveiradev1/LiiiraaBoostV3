@@ -1,0 +1,163 @@
+{
+  "$schema": "./module-boundaries.schema.json",
+  "schemaVersion": 1,
+  "layers": [
+    {
+      "name": "contracts",
+      "allowedDependencies": []
+    },
+    {
+      "name": "generated",
+      "allowedDependencies": ["contracts"]
+    },
+    {
+      "name": "domain",
+      "allowedDependencies": ["generated"]
+    },
+    {
+      "name": "application",
+      "allowedDependencies": ["domain", "generated"]
+    },
+    {
+      "name": "adapter",
+      "allowedDependencies": ["application", "domain", "generated"]
+    },
+    {
+      "name": "design",
+      "allowedDependencies": ["design", "generated"]
+    },
+    {
+      "name": "feature",
+      "allowedDependencies": ["application", "design", "generated"]
+    },
+    {
+      "name": "composition",
+      "allowedDependencies": ["feature", "adapter", "application", "design", "generated"]
+    },
+    {
+      "name": "tooling",
+      "allowedDependencies": [
+        "contracts",
+        "generated",
+        "domain",
+        "application",
+        "adapter",
+        "design",
+        "feature",
+        "composition",
+        "tooling"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "contracts-source",
+      "owner": "contracts",
+      "layer": "contracts",
+      "roots": ["packages/contracts-source"],
+      "publicRoots": ["packages/contracts-source/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "contracts-ts",
+      "owner": "contracts",
+      "layer": "generated",
+      "roots": ["packages/contracts-ts"],
+      "publicRoots": ["packages/contracts-ts/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "contracts-rust",
+      "owner": "contracts",
+      "layer": "generated",
+      "roots": ["crates/contracts-rust"],
+      "publicRoots": ["crates/contracts-rust/src/lib.rs"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "optimizer-domain",
+      "owner": "optimizer",
+      "layer": "domain",
+      "roots": ["crates/optimizer-domain"],
+      "publicRoots": ["crates/optimizer-domain/src/lib.rs"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "desktop-application",
+      "owner": "desktop",
+      "layer": "application",
+      "roots": ["crates/desktop-application"],
+      "publicRoots": ["crates/desktop-application/src/lib.rs"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "desktop-client",
+      "owner": "desktop",
+      "layer": "application",
+      "roots": ["packages/desktop-client"],
+      "publicRoots": ["packages/desktop-client/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "desktop-simulator",
+      "owner": "desktop",
+      "layer": "adapter",
+      "roots": ["packages/desktop-simulator"],
+      "publicRoots": ["packages/desktop-simulator/src/index.ts"],
+      "runtimeClass": "fixture",
+      "status": "reserved"
+    },
+    {
+      "id": "design-tokens",
+      "owner": "design-system",
+      "layer": "design",
+      "roots": ["packages/design-tokens"],
+      "publicRoots": ["packages/design-tokens/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "design-system",
+      "owner": "design-system",
+      "layer": "design",
+      "roots": ["packages/design-system"],
+      "publicRoots": ["packages/design-system/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "feature-shell",
+      "owner": "desktop-ui",
+      "layer": "feature",
+      "roots": ["packages/feature-shell"],
+      "publicRoots": ["packages/feature-shell/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "desktop-app",
+      "owner": "desktop",
+      "layer": "composition",
+      "roots": ["apps/desktop"],
+      "publicRoots": ["apps/desktop/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "architecture-tests",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/architecture-tests"],
+      "publicRoots": ["tooling/architecture-tests/src/policy.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    }
+  ],
+  "exceptions": []
+}

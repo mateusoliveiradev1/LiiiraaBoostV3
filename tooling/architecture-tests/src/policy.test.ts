@@ -193,8 +193,7 @@ describe('policy evaluator', () => {
       diagnostics: [
         {
           code: 'CYCLE',
-          path:
-            'packages/desktop-client/src/a.ts -> packages/desktop-client/src/b.ts -> packages/desktop-client/src/a.ts',
+          path: 'packages/desktop-client/src/a.ts -> packages/desktop-client/src/b.ts -> packages/desktop-client/src/a.ts',
           message:
             'Dependency cycle detected: packages/desktop-client/src/a.ts -> packages/desktop-client/src/b.ts -> packages/desktop-client/src/a.ts.',
         },
