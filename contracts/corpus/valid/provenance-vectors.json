@@ -1,0 +1,71 @@
+{
+  "corpusVersion": "1.0.0",
+  "syntheticSentinel": "LIIIRAA_SYNTHETIC_CONTRACT_VECTOR_ONLY",
+  "vectors": [
+    {
+      "id": "synthetic-valid-fixture",
+      "class": "fixture",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "fixture",
+        "value": "SYNTHETIC_FIXTURE_VALUE_DO_NOT_DISPLAY",
+        "scenarioId": "synthetic-scenario-fixture",
+        "fixtureVersion": "synthetic-fixture-v1"
+      },
+      "expectedVerdict": "valid",
+      "reason": "Canonical fixture provenance retains an unmistakably synthetic scenario and fixture version."
+    },
+    {
+      "id": "synthetic-valid-observed",
+      "class": "observed",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "observed",
+        "value": "SYNTHETIC_OBSERVED_VALUE_DO_NOT_DISPLAY",
+        "source": "SYNTHETIC source: deterministic contract vector, not a machine probe",
+        "observedAt": "2000-01-01T00:00:00.000Z"
+      },
+      "expectedVerdict": "valid",
+      "reason": "Canonical observed provenance retains its synthetic source and frozen observation clock."
+    },
+    {
+      "id": "synthetic-valid-measured",
+      "class": "measured",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "measured",
+        "value": "SYNTHETIC_MEASURED_VALUE_DO_NOT_DISPLAY",
+        "method": "SYNTHETIC no-op methodology: no hardware or performance data sampled",
+        "measuredAt": "2000-01-01T00:00:00.000Z",
+        "quality": "valid"
+      },
+      "expectedVerdict": "valid",
+      "reason": "Canonical measured provenance retains methodology, a frozen clock, and quality without a performance claim."
+    },
+    {
+      "id": "synthetic-valid-modeled",
+      "class": "modeled",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "modeled",
+        "value": "SYNTHETIC_MODELED_VALUE_DO_NOT_DISPLAY",
+        "modelId": "synthetic-model-noop-v1",
+        "confidence": 0.5,
+        "assumptions": ["SYNTHETIC assumption: no hardware or user data supplied"]
+      },
+      "expectedVerdict": "valid",
+      "reason": "Canonical modeled provenance retains the model identity, bounded confidence, and explicit synthetic assumption."
+    },
+    {
+      "id": "synthetic-valid-unavailable",
+      "class": "unavailable",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "unavailable",
+        "reason": "SYNTHETIC reason: diagnostic intentionally unavailable in this vector"
+      },
+      "expectedVerdict": "valid",
+      "reason": "Canonical unavailable provenance carries only an explicit synthetic reason and no invented value."
+    }
+  ]
+}

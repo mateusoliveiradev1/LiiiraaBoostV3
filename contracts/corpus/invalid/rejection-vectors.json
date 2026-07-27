@@ -1,0 +1,83 @@
+{
+  "corpusVersion": "1.0.0",
+  "syntheticSentinel": "LIIIRAA_SYNTHETIC_CONTRACT_VECTOR_ONLY",
+  "vectors": [
+    {
+      "id": "synthetic-invalid-unknown-schema-version",
+      "class": "unknown-schema-version",
+      "schema": "desktop.diagnostic-value.v999",
+      "payload": {
+        "kind": "unavailable",
+        "reason": "SYNTHETIC reason: unsupported schema version sentinel"
+      },
+      "expectedVerdict": "invalid",
+      "reason": "An unknown schema version must fail closed before payload validation."
+    },
+    {
+      "id": "synthetic-invalid-unknown-kind",
+      "class": "unknown-kind",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "synthetic-unknown",
+        "reason": "SYNTHETIC reason: unknown provenance discriminator"
+      },
+      "expectedVerdict": "invalid",
+      "reason": "The provenance discriminator is a closed five-kind vocabulary."
+    },
+    {
+      "id": "synthetic-invalid-missing-kind-metadata",
+      "class": "missing-kind-metadata",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "measured",
+        "value": "SYNTHETIC_MEASURED_VALUE_DO_NOT_DISPLAY",
+        "measuredAt": "2000-01-01T00:00:00.000Z",
+        "quality": "valid"
+      },
+      "expectedVerdict": "invalid",
+      "reason": "Measured provenance without its required methodology is incomplete."
+    },
+    {
+      "id": "synthetic-invalid-combined-kind-metadata",
+      "class": "combined-kind-metadata",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "observed",
+        "value": "SYNTHETIC_OBSERVED_VALUE_DO_NOT_DISPLAY",
+        "source": "SYNTHETIC source: deterministic contract vector",
+        "observedAt": "2000-01-01T00:00:00.000Z",
+        "method": "SYNTHETIC forbidden measured methodology on an observed value",
+        "measuredAt": "2000-01-01T00:00:00.000Z",
+        "quality": "valid"
+      },
+      "expectedVerdict": "invalid",
+      "reason": "Metadata from observed and measured provenance kinds cannot be combined."
+    },
+    {
+      "id": "synthetic-invalid-extra-field",
+      "class": "extra-field",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "unavailable",
+        "reason": "SYNTHETIC reason: unavailable value with a forbidden extra property",
+        "unexpected": "SYNTHETIC_EXTRA_FIELD"
+      },
+      "expectedVerdict": "invalid",
+      "reason": "Closed provenance objects reject fields outside the selected kind."
+    },
+    {
+      "id": "synthetic-invalid-bounds-violation",
+      "class": "bounds-violation",
+      "schema": "desktop.diagnostic-value.v1",
+      "payload": {
+        "kind": "modeled",
+        "value": "SYNTHETIC_MODELED_VALUE_DO_NOT_DISPLAY",
+        "modelId": "synthetic-model-noop-v1",
+        "confidence": 1.01,
+        "assumptions": ["SYNTHETIC assumption: confidence exceeds its closed bound"]
+      },
+      "expectedVerdict": "invalid",
+      "reason": "Modeled confidence above one violates the explicit contract bound."
+    }
+  ]
+}

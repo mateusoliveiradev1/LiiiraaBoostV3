@@ -1,0 +1,39 @@
+{
+  "corpusVersion": "1.0.0",
+  "syntheticSentinel": "LIIIRAA_SYNTHETIC_CONTRACT_VECTOR_ONLY",
+  "schemas": [
+    {
+      "id": "desktop.diagnostic-value.v1",
+      "path": "contracts/generated/desktop/v1/diagnostic-value.schema.json",
+      "sha256": "e37266c9211b6ead4c80df419e5068e03ac73b8880ae5b9b47698abcfb6fb7ee"
+    }
+  ],
+  "matrices": [
+    {
+      "path": "valid/provenance-vectors.json",
+      "expectedVerdict": "valid",
+      "expectedCount": 5
+    },
+    {
+      "path": "invalid/rejection-vectors.json",
+      "expectedVerdict": "invalid",
+      "expectedCount": 6
+    }
+  ],
+  "requiredClasses": {
+    "valid": ["fixture", "observed", "measured", "modeled", "unavailable"],
+    "invalid": [
+      "unknown-schema-version",
+      "unknown-kind",
+      "missing-kind-metadata",
+      "combined-kind-metadata",
+      "extra-field",
+      "bounds-violation"
+    ]
+  },
+  "expectedCounts": {
+    "valid": 5,
+    "invalid": 6,
+    "total": 11
+  }
+}
