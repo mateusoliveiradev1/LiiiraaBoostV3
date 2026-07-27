@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import canonicalPolicy from '../../../architecture/module-boundaries.json' with { type: 'json' };
+import allowedGraph from '../fixtures/allowed-graph.json' with { type: 'json' };
+import cargoForbiddenEdge from '../fixtures/cargo-forbidden-edge.json' with { type: 'json' };
+import cycleGraph from '../fixtures/cycle.json' with { type: 'json' };
+import forbiddenEdge from '../fixtures/forbidden-edge.json' with { type: 'json' };
 import { evaluateGraph, validatePolicy } from './policy.ts';
 
 const productionNode = (path: string) => ({
@@ -235,4 +239,101 @@ describe('policy evaluator', () => {
       diagnostics: [],
     });
   });
+});
+
+const negativeFixtures = [
+  {
+    name: 'production fixture edge',
+    graph: forbiddenEdge,
+    expectedDiagnostic: {
+      code: 'PRODUCTION_TO_FIXTURE',
+      path: 'apps/desktop/src/index.ts -> packages/desktop-simulator/src/index.ts',
+      message:
+        'Production module "desktop-app" cannot depend on fixture module "desktop-simulator".',
+    },
+  },
+  {
+    name: 'dependency cycle',
+    graph: cycleGraph,
+    expectedDiagnostic: {
+      code: 'CYCLE',
+      path: 'packages/desktop-client/src/a.ts -> packages/desktop-client/src/b.ts -> packages/desktop-client/src/a.ts',
+      message:
+        'Dependency cycle detected: packages/desktop-client/src/a.ts -> packages/desktop-client/src/b.ts -> packages/desktop-client/src/a.ts.',
+    },
+  },
+  {
+    name: 'acyclic Cargo layer edge',
+    graph: cargoForbiddenEdge,
+    expectedDiagnostic: {
+      code: 'LAYER_DIRECTION',
+      path: 'crates/contracts-rust/src/lib.rs -> crates/desktop-application/src/lib.rs',
+      message:
+        'Layer "generated" in module "contracts-rust" cannot depend on layer "application" in module "desktop-application".',
+    },
+  },
+] as const;
+
+describe('policy graph fixtures', () => {
+  it('accepts the complete allowed graph fixture', () => {
+    expect(evaluateGraph(canonicalPolicy, allowedGraph)).toEqual({
+      ok: true,
+      diagnostics: [],
+    });
+  });
+
+  it.each(negativeFixtures)(
+    'rejects only the seeded invariant in $name',
+    ({ graph, expectedDiagnostic }) => {
+      expect(evaluateGraph(canonicalPolicy, graph)).toEqual({
+        ok: false,
+        diagnostics: [expectedDiagnostic],
+      });
+    },
+  );
+
+  it('executes the complete negative fixture corpus', () => {
+    expect(negativeFixtures).toHaveLength(3);
+    expect(
+      negativeFixtures.map(({ expectedDiagnostic }) => expectedDiagnostic.code).toSorted(),
+    ).toEqual(['CYCLE', 'LAYER_DIRECTION', 'PRODUCTION_TO_FIXTURE']);
+  });
+
+  it('detects a deep-import mutation of the allowed fixture', () => {
+    const mutatedGraph = {
+      ...allowedGraph,
+      nodes: [...allowedGraph.nodes, productionNode('packages/contracts-ts/src/private.ts')],
+      edges: [
+        ...allowedGraph.edges,
+        {
+          from: 'packages/desktop-client/src/index.ts',
+          to: 'packages/contracts-ts/src/private.ts',
+          importPath: '@liiiraa/contracts-ts/src/private',
+          kind: 'typescript',
+        },
+      ],
+    };
+
+    expect(evaluateGraph(canonicalPolicy, mutatedGraph)).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'DEEP_IMPORT',
+          path: 'packages/contracts-ts/src/private.ts',
+          message:
+            'Import "@liiiraa/contracts-ts/src/private" targets a private path in module "contracts-ts".',
+        },
+      ],
+    });
+  });
+
+  it.each(negativeFixtures)(
+    'passes $name after removing its seeded violating edges',
+    ({ graph }) => {
+      expect(evaluateGraph(canonicalPolicy, { ...graph, edges: [] })).toEqual({
+        ok: true,
+        diagnostics: [],
+      });
+    },
+  );
 });
