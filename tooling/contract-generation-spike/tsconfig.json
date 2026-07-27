@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "."
+    "lib": ["ES2024", "DOM"],
+    "rootDir": ".",
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"]
 }

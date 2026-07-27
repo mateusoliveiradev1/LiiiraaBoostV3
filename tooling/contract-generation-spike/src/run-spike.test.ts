@@ -26,9 +26,11 @@ describe('schema semantics', () => {
     expect(evidence.minItems).toBe(1);
     expect(evidence.maxItems).toBe(3);
     expect(schema).toHaveProperty('$defs.SpikeEnvelope');
-    expect(GENERATED_SCHEMA_PATH.replaceAll('\\', '/')).toEndWith(
-      'tooling/contract-generation-spike/generated/spike.schema.json',
-    );
+    expect(
+      GENERATED_SCHEMA_PATH.replaceAll('\\', '/').endsWith(
+        'tooling/contract-generation-spike/generated/spike.schema.json',
+      ),
+    ).toBe(true);
   });
 });
 

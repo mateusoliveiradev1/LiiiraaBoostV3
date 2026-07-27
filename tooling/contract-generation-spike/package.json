@@ -6,7 +6,7 @@
   "scripts": {
     "generate": "node src/run-spike.ts",
     "check": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest",
     "build": "tsc --noEmit"
   },
   "devDependencies": {

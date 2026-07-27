@@ -32,7 +32,7 @@ model AiProvenance {
   modelId: string;
 }
 
-@discriminator("kind")
+@oneOf
 union Provenance {
   system: SystemProvenance,
   benchmark: BenchmarkProvenance,

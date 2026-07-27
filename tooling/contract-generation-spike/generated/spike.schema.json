@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "AiProvenance": {
+      "$id": "AiProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "ai",
+          "type": "string"
+        },
+        "modelId": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "modelId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "BenchmarkProvenance": {
+      "$id": "BenchmarkProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "benchmarkId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "kind": {
+          "const": "benchmark",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "benchmarkId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "EnvelopeMetadata": {
+      "$id": "EnvelopeMetadata.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "createdAt": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "Provenance.json"
+        }
+      },
+      "required": [
+        "correlationId",
+        "createdAt",
+        "provenance"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProfileProvenance": {
+      "$id": "ProfileProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "profile",
+          "type": "string"
+        },
+        "profileId": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "profileId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "Provenance": {
+      "$id": "Provenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "SystemProvenance.json"
+        },
+        {
+          "$ref": "BenchmarkProvenance.json"
+        },
+        {
+          "$ref": "UserProvenance.json"
+        },
+        {
+          "$ref": "ProfileProvenance.json"
+        },
+        {
+          "$ref": "AiProvenance.json"
+        }
+      ]
+    },
+    "SpikeEnvelope": {
+      "$id": "SpikeEnvelope.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "spike",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "EnvelopeMetadata.json"
+        },
+        "payload": {
+          "$ref": "SpikePayload.json"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "kind",
+        "metadata",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SpikePayload": {
+      "$id": "SpikePayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "confidence": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "samples": {
+          "items": {
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "confidence",
+        "samples"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SystemProvenance": {
+      "$id": "SystemProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "component": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "kind": {
+          "const": "system",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "component"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "UserProvenance": {
+      "$id": "UserProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "user",
+          "type": "string"
+        },
+        "userId": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "userId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    }
+  },
+  "$id": "spike.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
