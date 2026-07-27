@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "nodes": [
     {
-      "path": "packages/contracts-source/src/index.ts",
+      "path": "packages/contracts-source/src/main.tsp",
       "runtimeClass": "production"
     },
     {
@@ -29,7 +29,7 @@
   "edges": [
     {
       "from": "packages/contracts-ts/src/index.ts",
-      "to": "packages/contracts-source/src/index.ts",
+      "to": "packages/contracts-source/src/main.tsp",
       "importPath": "@liiiraa/contracts-source",
       "kind": "typescript"
     },

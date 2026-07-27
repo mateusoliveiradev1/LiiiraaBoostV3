@@ -1,5 +1,3 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { basename, dirname, join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import canonicalPolicy from '../../../architecture/module-boundaries.json' with { type: 'json' };
@@ -15,6 +13,32 @@ import {
   runLiveWorkspaceCheck,
 } from './check-workspace.ts';
 import { evaluateGraph, validatePolicy } from './policy.ts';
+
+interface PromiseFileSystem {
+  mkdir: (path: string) => Promise<void>;
+  mkdtemp: (prefix: string) => Promise<string>;
+  rm: (path: string, options: { recursive: true; force: true }) => Promise<void>;
+  writeFile: (path: string, contents: string, encoding: 'utf8') => Promise<void>;
+}
+
+interface PathApi {
+  basename: (path: string) => string;
+  dirname: (path: string) => string;
+  join: (...parts: string[]) => string;
+  relative: (from: string, to: string) => string;
+  resolve: (...parts: string[]) => string;
+}
+
+declare const process: {
+  chdir: (directory: string) => void;
+  cwd: () => string;
+  getBuiltinModule: (specifier: string) => unknown;
+};
+
+const fileSystem = process.getBuiltinModule('node:fs/promises') as PromiseFileSystem;
+const pathApi = process.getBuiltinModule('node:path') as PathApi;
+const { mkdir, mkdtemp, rm, writeFile } = fileSystem;
+const { basename, dirname, join, relative, resolve } = pathApi;
 
 const productionNode = (path: string) => ({
   path,
@@ -230,12 +254,12 @@ describe('policy evaluator', () => {
     const graph = {
       schemaVersion: 1,
       nodes: [
-        productionNode('packages/contracts-source/src/index.ts'),
+        productionNode('packages/contracts-source/src/main.tsp'),
         productionNode('packages/desktop-client/src/index.ts'),
       ],
       edges: [
         {
-          from: 'packages/contracts-source/src/index.ts',
+          from: 'packages/contracts-source/src/main.tsp',
           to: 'packages/desktop-client/src/index.ts',
           importPath: '@liiiraa/desktop-client',
           kind: 'typescript',

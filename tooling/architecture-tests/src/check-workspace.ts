@@ -65,15 +65,68 @@ interface CanonicalPolicy {
   exceptions: CanonicalException[];
 }
 
+interface DirectoryEntry {
+  name: string;
+  isDirectory: () => boolean;
+  isSymbolicLink: () => boolean;
+}
+
+interface FileSystem {
+  existsSync: (path: string) => boolean;
+  lstatSync: (path: string) => {
+    isDirectory: () => boolean;
+    isFile: () => boolean;
+    isSymbolicLink: () => boolean;
+  };
+  readFileSync: (path: string, encoding: 'utf8') => string;
+  readdirSync: (path: string, options: { withFileTypes: true }) => DirectoryEntry[];
+}
+
+interface PathApi {
+  join: (...parts: string[]) => string;
+  relative: (from: string, to: string) => string;
+  resolve: (...parts: string[]) => string;
+}
+
 declare const process: {
   argv: string[];
   cwd: () => string;
   execPath: string;
   exitCode?: number;
+  getBuiltinModule: (specifier: string) => unknown;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasFileSystem = (value: unknown): value is FileSystem =>
+  isRecord(value) &&
+  typeof value['existsSync'] === 'function' &&
+  typeof value['lstatSync'] === 'function' &&
+  typeof value['readFileSync'] === 'function' &&
+  typeof value['readdirSync'] === 'function';
+
+const hasPathApi = (value: unknown): value is PathApi =>
+  isRecord(value) &&
+  typeof value['join'] === 'function' &&
+  typeof value['relative'] === 'function' &&
+  typeof value['resolve'] === 'function';
+
+const nodeFileSystem = (): FileSystem => {
+  const fileSystem = process.getBuiltinModule('node:fs');
+  if (!hasFileSystem(fileSystem)) {
+    throw new Error('Node fs built-in is unavailable.');
+  }
+  return fileSystem;
+};
+
+const nodePath = (): PathApi => {
+  const pathApi = process.getBuiltinModule('node:path');
+  if (!hasPathApi(pathApi)) {
+    throw new Error('Node path built-in is unavailable.');
+  }
+  return pathApi;
+};
 
 const readStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
@@ -152,6 +205,133 @@ const exactPathPattern = (paths: string[]): string => {
   return escapedPaths.length === 1
     ? `^${escapedPaths[0] ?? ''}$`
     : `^(?:${escapedPaths.join('|')})$`;
+};
+
+const readWorkspacePatterns = (workspaceContents: string): string[] => {
+  const patterns: string[] = [];
+  let foundPackages = false;
+  let readingPackages = false;
+
+  for (const [index, rawLine] of workspaceContents.split(/\r?\n/u).entries()) {
+    const trimmedLine = rawLine.trim();
+    if (trimmedLine.length === 0 || trimmedLine.startsWith('#')) {
+      continue;
+    }
+    if (/^packages:\s*$/u.test(rawLine)) {
+      if (foundPackages) {
+        throw new Error('pnpm-workspace.yaml declares packages more than once.');
+      }
+      foundPackages = true;
+      readingPackages = true;
+      continue;
+    }
+    if (!readingPackages) {
+      continue;
+    }
+    if (/^\S/u.test(rawLine)) {
+      readingPackages = false;
+      continue;
+    }
+    const entry = /^\s*-\s*(.+?)\s*$/u.exec(rawLine)?.[1];
+    if (entry === undefined) {
+      throw new Error(
+        `pnpm-workspace.yaml packages entry at line ${String(index + 1)} is malformed.`,
+      );
+    }
+    const unquoted =
+      (entry.startsWith("'") && entry.endsWith("'")) ||
+      (entry.startsWith('"') && entry.endsWith('"'))
+        ? entry.slice(1, -1)
+        : entry;
+    if (!/^(?:apps|packages|tooling)\/\*$/u.test(unquoted)) {
+      throw new Error(`Unsupported pnpm workspace pattern "${unquoted}".`);
+    }
+    patterns.push(unquoted);
+  }
+
+  if (!foundPackages || patterns.length === 0) {
+    throw new Error('pnpm-workspace.yaml must declare supported package roots.');
+  }
+  return [...new Set(patterns)].toSorted();
+};
+
+export const discoverPnpmWorkspaceRoots = (repositoryRoot: string): string[] => {
+  const fileSystem = nodeFileSystem();
+  const pathApi = nodePath();
+  const normalizedRepositoryRoot = pathApi.resolve(repositoryRoot);
+  const workspacePath = pathApi.join(normalizedRepositoryRoot, 'pnpm-workspace.yaml');
+  if (!fileSystem.existsSync(workspacePath) || !fileSystem.lstatSync(workspacePath).isFile()) {
+    throw new Error('pnpm-workspace.yaml is missing or is not a regular file.');
+  }
+
+  const patterns = readWorkspacePatterns(fileSystem.readFileSync(workspacePath, 'utf8'));
+  const roots = new Set<string>();
+  for (const pattern of patterns) {
+    const parent = pattern.slice(0, -2);
+    const parentPath = pathApi.resolve(normalizedRepositoryRoot, parent);
+    if (!fileSystem.existsSync(parentPath)) {
+      continue;
+    }
+    const parentStats = fileSystem.lstatSync(parentPath);
+    if (parentStats.isSymbolicLink() || !parentStats.isDirectory()) {
+      throw new Error(`Workspace parent "${parent}" must be a regular directory.`);
+    }
+
+    for (const entry of fileSystem
+      .readdirSync(parentPath, { withFileTypes: true })
+      .toSorted((left, right) => left.name.localeCompare(right.name))) {
+      if (
+        entry.name.startsWith('.') ||
+        entry.name === 'node_modules' ||
+        entry.name === 'dist' ||
+        entry.isSymbolicLink() ||
+        !entry.isDirectory()
+      ) {
+        continue;
+      }
+      const packageRoot = pathApi.join(parentPath, entry.name);
+      const manifestPath = pathApi.join(packageRoot, 'package.json');
+      if (!fileSystem.existsSync(manifestPath)) {
+        continue;
+      }
+      const manifestStats = fileSystem.lstatSync(manifestPath);
+      if (manifestStats.isSymbolicLink() || !manifestStats.isFile()) {
+        continue;
+      }
+      try {
+        const manifest = JSON.parse(fileSystem.readFileSync(manifestPath, 'utf8')) as unknown;
+        if (!isRecord(manifest)) {
+          throw new Error('manifest root is not an object');
+        }
+      } catch (error) {
+        throw new Error(
+          `Workspace manifest "${normalizeRepositoryPath(
+            pathApi.relative(normalizedRepositoryRoot, manifestPath),
+          )}" is invalid JSON: ${error instanceof Error ? error.message : String(error)}.`,
+        );
+      }
+      const relativeRoot = normalizeRepositoryPath(
+        pathApi.relative(normalizedRepositoryRoot, packageRoot),
+      );
+      if (
+        relativeRoot.length === 0 ||
+        relativeRoot === '..' ||
+        relativeRoot.startsWith('../')
+      ) {
+        throw new Error(`Workspace package "${relativeRoot}" escapes the repository root.`);
+      }
+      roots.add(relativeRoot);
+    }
+  }
+  return [...roots].toSorted();
+};
+
+export const createWorkspaceRootPattern = (repositoryRoot: string): string => {
+  const roots = discoverPnpmWorkspaceRoots(repositoryRoot);
+  if (roots.length === 0) {
+    throw new Error('pnpm-workspace.yaml did not resolve any package roots.');
+  }
+  return rootPattern(roots);
 };
 
 export const createCanonicalRootPattern = (policyInput: unknown): string =>
@@ -242,11 +422,14 @@ const isRepositoryDependency = (dependency: Record<string, unknown>): boolean =>
 export const normalizeDependencyCruiserResult = (
   policyInput: unknown,
   cruiseResultInput: unknown,
+  workspaceRoots: readonly string[] = [],
 ): NormalizedDependencyGraph => {
   if (!isRecord(cruiseResultInput) || !Array.isArray(cruiseResultInput['modules'])) {
     throw new Error('Dependency-cruiser output must contain a modules array.');
   }
-  const nodePaths = new Set<string>();
+  const nodePaths = new Set(
+    workspaceRoots.map((root) => `${normalizeRepositoryPath(root)}/package.json`),
+  );
   const edges: NormalizedDependencyEdge[] = [];
 
   for (const moduleInput of cruiseResultInput['modules']) {
@@ -310,9 +493,11 @@ const runDependencyCruiser = (): unknown => {
 };
 
 export const runLiveWorkspaceCheck = (policyInput: unknown): Promise<WorkspaceCheckResult> => {
+  const workspaceRoots = discoverPnpmWorkspaceRoots(process.cwd());
   const graph = normalizeDependencyCruiserResult(
     policyInput,
     readCruiseOutput(runDependencyCruiser()),
+    workspaceRoots,
   );
   return Promise.resolve({
     adapter: 'workspace' as const,

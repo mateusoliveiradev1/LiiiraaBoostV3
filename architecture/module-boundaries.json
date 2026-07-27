@@ -55,9 +55,9 @@
       "owner": "contracts",
       "layer": "contracts",
       "roots": ["packages/contracts-source"],
-      "publicRoots": ["packages/contracts-source/src/index.ts"],
+      "publicRoots": ["packages/contracts-source/src/main.tsp"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "contracts-ts",
@@ -102,7 +102,7 @@
       "roots": ["packages/desktop-client"],
       "publicRoots": ["packages/desktop-client/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "desktop-production-reference",
@@ -120,7 +120,7 @@
       "roots": ["packages/desktop-simulator"],
       "publicRoots": ["packages/desktop-simulator/src/index.ts"],
       "runtimeClass": "fixture",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "design-tokens",
@@ -159,11 +159,47 @@
       "status": "reserved"
     },
     {
+      "id": "acceptance-policy",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/acceptance-policy"],
+      "publicRoots": ["tooling/acceptance-policy/src/policy.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
       "id": "architecture-tests",
       "owner": "architecture",
       "layer": "tooling",
       "roots": ["tooling/architecture-tests"],
       "publicRoots": ["tooling/architecture-tests/src/policy.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
+      "id": "contract-compat",
+      "owner": "contracts",
+      "layer": "tooling",
+      "roots": ["tooling/contract-compat"],
+      "publicRoots": ["tooling/contract-compat/src/check-compat.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
+      "id": "contract-generation",
+      "owner": "contracts",
+      "layer": "tooling",
+      "roots": ["tooling/contract-generation"],
+      "publicRoots": ["tooling/contract-generation/src/generate.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
+      "id": "contract-generation-spike",
+      "owner": "contracts",
+      "layer": "tooling",
+      "roots": ["tooling/contract-generation-spike"],
+      "publicRoots": ["tooling/contract-generation-spike/src/run-spike.ts"],
       "runtimeClass": "tooling",
       "status": "active"
     },
@@ -194,6 +230,15 @@
       "layer": "tooling",
       "roots": ["tooling/contract-generation-spike-rust"],
       "publicRoots": ["tooling/contract-generation-spike-rust/src/main.rs"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
+      "id": "workspace-smoke",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/workspace-smoke"],
+      "publicRoots": ["tooling/workspace-smoke/check-toolchain.mjs"],
       "runtimeClass": "tooling",
       "status": "active"
     }

@@ -1,14 +1,14 @@
 import canonicalPolicy from './architecture/module-boundaries.json' with { type: 'json' };
 import {
-  createCanonicalRootPattern,
   createDependencyCruiserRestrictions,
+  createWorkspaceRootPattern,
 } from './tooling/architecture-tests/src/check-workspace.ts';
 
 export default {
   forbidden: createDependencyCruiserRestrictions(canonicalPolicy),
   options: {
     exclude: '(^|/)(?:node_modules|dist)(?:/|$)',
-    includeOnly: createCanonicalRootPattern(canonicalPolicy),
+    includeOnly: createWorkspaceRootPattern(process.cwd()),
     tsConfig: {
       fileName: 'tsconfig.base.json',
     },
