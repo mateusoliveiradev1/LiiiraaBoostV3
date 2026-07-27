@@ -41,6 +41,12 @@ export interface ArchitectureCheckResult {
   cargo: CargoCheckResult;
 }
 
+export interface ActivatedWorkspaceDependency {
+  from: string;
+  to: string;
+  importPath?: string;
+}
+
 interface CanonicalLayer {
   name: string;
   allowedDependencies: string[];
@@ -188,6 +194,70 @@ const readCanonicalPolicy = (policyInput: unknown): CanonicalPolicy => {
   });
 
   return { layers, modules, exceptions };
+};
+
+export const createActivatedWorkspaceGraph = (
+  policyInput: unknown,
+  moduleIds: readonly string[],
+  dependencies: readonly ActivatedWorkspaceDependency[] = [],
+): NormalizedDependencyGraph => {
+  const policy = readCanonicalPolicy(policyInput);
+  const canonicalModules = new Map(policy.modules.map((module) => [module.id, module]));
+  const activatedModules = [...new Set(moduleIds)].toSorted().map((moduleId) => {
+    const module = canonicalModules.get(moduleId);
+    if (module === undefined) {
+      throw new Error(`Cannot activate unknown canonical module "${moduleId}".`);
+    }
+
+    const publicRoot = module.publicRoots[0];
+    if (module.publicRoots.length !== 1 || publicRoot === undefined) {
+      throw new Error(
+        `Activated canonical module "${moduleId}" must declare exactly one public root.`,
+      );
+    }
+
+    return {
+      id: module.id,
+      publicRoot,
+      runtimeClass: module.runtimeClass,
+    };
+  });
+  const activatedById = new Map(activatedModules.map((module) => [module.id, module]));
+
+  const edges: NormalizedDependencyEdge[] = dependencies.map((dependency) => {
+    const source = activatedById.get(dependency.from);
+    const target = activatedById.get(dependency.to);
+
+    if (source === undefined || target === undefined) {
+      throw new Error(
+        `Activated dependency "${dependency.from}" -> "${dependency.to}" ` +
+          'must reference selected canonical modules.',
+      );
+    }
+
+    return {
+      from: source.publicRoot,
+      to: target.publicRoot,
+      importPath: dependency.importPath ?? target.publicRoot,
+      kind: 'typescript',
+    };
+  });
+
+  return {
+    schemaVersion: 1,
+    nodes: activatedModules
+      .map(({ publicRoot, runtimeClass }) => ({
+        path: publicRoot,
+        runtimeClass,
+      }))
+      .toSorted((left, right) => left.path.localeCompare(right.path)),
+    edges: edges.toSorted(
+      (left, right) =>
+        left.from.localeCompare(right.from) ||
+        left.to.localeCompare(right.to) ||
+        left.importPath.localeCompare(right.importPath),
+    ),
+  };
 };
 
 const escapeRegularExpression = (value: string): string =>
