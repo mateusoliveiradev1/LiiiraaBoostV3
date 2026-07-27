@@ -19,12 +19,24 @@
   },
   "scripts": {
     "generate": "turbo run generate",
-    "check": "turbo run check",
+    "check": "pnpm check:root && turbo run check",
+    "check:root": "pnpm check:types && pnpm lint && pnpm format:check",
+    "check:types": "tsc --version",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
+    "format:check": "prettier --check package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
     "test": "turbo run test",
     "build": "turbo run build",
     "verify": "pnpm generate && pnpm check && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "turbo": "2.10.7"
+    "@typescript-eslint/eslint-plugin": "8.65.0",
+    "@typescript-eslint/parser": "8.65.0",
+    "dependency-cruiser": "18.1.0",
+    "eslint": "10.8.0",
+    "prettier": "3.9.6",
+    "turbo": "2.10.7",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   }
 }
