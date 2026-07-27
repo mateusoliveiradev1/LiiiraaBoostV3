@@ -149,9 +149,9 @@ describe('artifact production fixture refusal', () => {
   });
 
   it('artifact requires an explicit absolute distribution root', () => {
-    expect(() =>
-      inspectBuiltArtifact({ distributionRoot: 'fixtures/clean-artifact' }),
-    ).toThrow('distributionRoot must be an explicit absolute path or file URL');
+    expect(() => inspectBuiltArtifact({ distributionRoot: 'fixtures/clean-artifact' })).toThrow(
+      'distributionRoot must be an explicit absolute path or file URL',
+    );
   });
 
   it('artifact refuses source trees as distribution roots', () => {
