@@ -1,0 +1,19 @@
+{
+  "name": "@liiiraa/fixture-guard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "tsc --project tsconfig.json",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@liiiraa/desktop-client": "workspace:*",
+    "@liiiraa/desktop-production-reference": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}
