@@ -7,24 +7,33 @@ discoverable; if this document and the JSON disagree, the JSON wins and
 
 ## Owners and public entrypoints
 
+ADR 0003 uses each status precisely: `active` identifies an implementation root
+participating in the current executable foundation; `reserved` allocates a
+future boundary without asserting an implementation exists.
+
 | Module                           | Owner         | Layer       | Runtime    | Status   | Public entrypoint                                               |
 | -------------------------------- | ------------- | ----------- | ---------- | -------- | --------------------------------------------------------------- |
-| `contracts-source`               | contracts     | contracts   | production | reserved | `packages/contracts-source/src/index.ts`                        |
+| `contracts-source`               | contracts     | contracts   | production | active   | `packages/contracts-source/src/main.tsp`                        |
 | `contracts-ts`                   | contracts     | generated   | production | active   | `packages/contracts-ts/src/index.ts`                            |
 | `contracts-rust`                 | contracts     | generated   | production | active   | `crates/contracts-rust/src/lib.rs`                              |
 | `optimizer-domain`               | optimizer     | domain      | production | reserved | `crates/optimizer-domain/src/lib.rs`                            |
 | `desktop-application`            | desktop       | application | production | reserved | `crates/desktop-application/src/lib.rs`                         |
-| `desktop-client`                 | desktop       | application | production | reserved | `packages/desktop-client/src/index.ts`                          |
+| `desktop-client`                 | desktop       | application | production | active   | `packages/desktop-client/src/index.ts`                          |
 | `desktop-production-reference`   | desktop       | adapter     | production | active   | `packages/desktop-production-reference/src/index.ts`            |
-| `desktop-simulator`              | desktop       | adapter     | fixture    | reserved | `packages/desktop-simulator/src/index.ts`                       |
+| `desktop-simulator`              | desktop       | adapter     | fixture    | active   | `packages/desktop-simulator/src/index.ts`                       |
 | `design-tokens`                  | design-system | design      | production | reserved | `packages/design-tokens/src/index.ts`                           |
 | `design-system`                  | design-system | design      | production | reserved | `packages/design-system/src/index.ts`                           |
 | `feature-shell`                  | desktop-ui    | feature     | production | reserved | `packages/feature-shell/src/index.ts`                           |
 | `desktop-app`                    | desktop       | composition | production | reserved | `apps/desktop/src/index.ts`                                     |
+| `acceptance-policy`              | architecture  | tooling     | tooling    | active   | `tooling/acceptance-policy/src/policy.ts`                       |
 | `architecture-tests`             | architecture  | tooling     | tooling    | active   | `tooling/architecture-tests/src/policy.ts`                      |
+| `contract-compat`                | contracts     | tooling     | tooling    | active   | `tooling/contract-compat/src/check-compat.ts`                   |
+| `contract-generation`            | contracts     | tooling     | tooling    | active   | `tooling/contract-generation/src/generate.ts`                   |
+| `contract-generation-spike`      | contracts     | tooling     | tooling    | active   | `tooling/contract-generation-spike/src/run-spike.ts`            |
 | `fixture-guard`                  | architecture  | tooling     | tooling    | active   | `tooling/fixture-guard/src/static-guard.ts`, `runtime-guard.ts` |
 | `contract-generation-rust`       | contracts     | tooling     | tooling    | active   | `tooling/contract-generation-rust/src/main.rs`                  |
 | `contract-generation-spike-rust` | contracts     | tooling     | tooling    | active   | `tooling/contract-generation-spike-rust/src/main.rs`            |
+| `workspace-smoke`                | architecture  | tooling     | tooling    | active   | `tooling/workspace-smoke/check-toolchain.mjs`                   |
 
 `reserved` means the policy allocates ownership and dependency direction for a
 future module. It does not mean the package, crate, application, API, or product

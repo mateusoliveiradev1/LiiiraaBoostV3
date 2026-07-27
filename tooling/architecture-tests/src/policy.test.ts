@@ -8,6 +8,7 @@ import forbiddenEdge from '../fixtures/forbidden-edge.json' with { type: 'json' 
 import { normalizeCargoMetadata } from './check-cargo.ts';
 import {
   createDependencyCruiserRestrictions,
+  discoverPnpmWorkspaceRoots,
   normalizeDependencyCruiserResult,
   runArchitectureAdapters,
   runLiveWorkspaceCheck,
@@ -388,22 +389,17 @@ const expectedPnpmWorkspaceRoots = [
 
 const repositoryRoot = resolve(process.cwd(), '..', '..');
 
-const discoverWorkspaceRoots = async (): Promise<string[]> => {
-  const workspaceModule: unknown = await import('./check-workspace.ts');
-  const discover = Reflect.get(workspaceModule as object, 'discoverPnpmWorkspaceRoots');
-  expect(discover).toBeTypeOf('function');
-  return (discover as (root: string) => string[])(repositoryRoot);
-};
+const discoverWorkspaceRoots = (): string[] => discoverPnpmWorkspaceRoots(repositoryRoot);
 
 describe.sequential('live workspace discovery boundary', () => {
   it('discovers every pnpm package independently of canonical ownership', async () => {
-    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+    expect(discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
 
     const policyWithoutContractsSource = {
       ...canonicalPolicy,
       modules: canonicalPolicy.modules.filter(({ id }) => id !== 'contracts-source'),
     };
-    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+    expect(discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
 
     const originalWorkingDirectory = process.cwd();
     process.chdir(repositoryRoot);
@@ -522,7 +518,7 @@ describe.sequential('live workspace discovery boundary', () => {
       await rm(mutationRoot, { recursive: true, force: true });
     }
 
-    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+    expect(discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
     process.chdir(repositoryRoot);
     try {
       expect((await runLiveWorkspaceCheck(canonicalPolicy)).policy).toEqual({

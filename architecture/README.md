@@ -20,14 +20,18 @@ policy objects that could silently drift.
 
 ### Ownership and dependency direction
 
-1. Find the owning module and its public roots in
-   [`module-boundaries.json`](module-boundaries.json).
-2. Import through a declared public root. Do not deep-import another module.
-3. Keep dependencies in the declared layer direction. Both TypeScript and Cargo
-   graphs are evaluated by the same policy through `pnpm test:architecture`.
-4. Treat `status: "reserved"` records as future constraints, not implemented
-   packages. Do not create empty package shells to satisfy the map.
-5. Update the executable policy and [ownership guide](OWNERSHIP.md) together
+1. Treat pnpm and Cargo workspace metadata as the authority for which package
+   and crate roots exist.
+2. Use [`module-boundaries.json`](module-boundaries.json) as the authority for
+   who owns each root and which dependency directions are legal.
+3. Give every existing workspace package an `active` module record. A
+   `reserved` record allocates a future boundary and must never hide an
+   implemented root. Do not create empty package shells to satisfy the map.
+4. Import through a declared public root. Do not deep-import another module.
+5. Keep dependencies in the declared layer direction. Both TypeScript and Cargo
+   graphs are evaluated by the shared canonical evaluator through
+   `pnpm test:architecture`.
+6. Update the executable policy and [ownership guide](OWNERSHIP.md) together
    when an architecture decision changes ownership or direction.
 
 ### Contract generation and compatibility
