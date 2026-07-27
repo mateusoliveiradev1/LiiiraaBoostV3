@@ -5,8 +5,8 @@ import {
   validateDiagnosticValue,
   type DiagnosticValueJson,
 } from '@liiiraa/contracts-ts';
-import invalidCorpus from '../../../contracts/corpus/invalid/rejection-vectors.json';
-import validCorpus from '../../../contracts/corpus/valid/provenance-vectors.json';
+import invalidCorpus from '../../../contracts/corpus/invalid/rejection-vectors.json' with { type: 'json' };
+import validCorpus from '../../../contracts/corpus/valid/provenance-vectors.json' with { type: 'json' };
 
 describe('public diagnostic value validator', () => {
   it.each(validCorpus.vectors)('accepts $id through the package root', (vector) => {
