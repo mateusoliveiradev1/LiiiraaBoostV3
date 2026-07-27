@@ -1,20 +1,23 @@
 import {
   DESKTOP_INSPECTION_CAPABILITY,
   DESKTOP_SCHEMA_VERSION,
-  type DesktopInspectionClient,
   type DesktopInspectionError,
   type InspectSystemInput,
-  type NativeDiagnosticValue,
-  type NativeSystemInspection,
   type Result,
 } from '@liiiraa/desktop-client';
+
+import type {
+  ProductionDesktopInspectionClient,
+  ProductionDiagnosticValue,
+  ProductionSystemInspection,
+} from './composition.js';
 
 export interface ProductionUnavailableOptions {
   readonly clock: () => string;
   readonly inspectionIds: () => string;
 }
 
-const unavailable = (reason: string): NativeDiagnosticValue =>
+const unavailable = (reason: string): ProductionDiagnosticValue =>
   Object.freeze({
     kind: 'unavailable',
     provenance: Object.freeze({ reason }),
@@ -58,7 +61,7 @@ const validateInput = (
 
 export const createProductionUnavailableClient = (
   options: ProductionUnavailableOptions,
-): DesktopInspectionClient =>
+): ProductionDesktopInspectionClient =>
   Object.freeze({
     identity: Object.freeze({
       adapterId: 'liiiraa-desktop-production-unavailable',
@@ -68,14 +71,14 @@ export const createProductionUnavailableClient = (
     capabilities: Object.freeze([DESKTOP_INSPECTION_CAPABILITY]),
     inspectSystem(
       input: InspectSystemInput,
-    ): Promise<Result<NativeSystemInspection, DesktopInspectionError>> {
+    ): Promise<Result<ProductionSystemInspection, DesktopInspectionError>> {
       const validation = validateInput(input);
 
       if (!validation.ok) {
         return Promise.resolve(validation);
       }
 
-      const value: NativeSystemInspection = Object.freeze({
+      const value: ProductionSystemInspection = Object.freeze({
         inspectionId: options.inspectionIds(),
         inspectedAt: options.clock(),
         deviceLabel: unavailable(
