@@ -11,6 +11,7 @@
   },
   "scripts": {
     "check": "tsc --noEmit --strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess --module NodeNext --moduleResolution NodeNext --target ES2024 src/generated/index.ts",
+    "test": "vitest",
     "build": "pnpm check"
   }
 }
