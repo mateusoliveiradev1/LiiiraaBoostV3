@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-07-PLAN.md
-last_updated: "2026-07-27T04:44:12.624Z"
+stopped_at: Completed 01-15-PLAN.md
+last_updated: "2026-07-27T04:59:09.022Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 12
-  percent: 57
+  completed_plans: 13
+  percent: 0
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 13 of 21
+Plan: 14 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
@@ -67,6 +67,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P05 | 12min | 2 tasks | 7 files |
 | Phase 01 P14 | 10min | 2 tasks | 10 files |
 | Phase 01 P07 | 10min | 2 tasks | 5 files |
+| Phase 01 P15 | 12 min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Pin generated diagnostic schema identity path and SHA-256 in the corpus manifest. — Integrity is enforced now while runtime payload verdict parity remains owned by Plan 01-18.
 - [Phase 01]: Keep one compact valid matrix and one compact invalid matrix. — Every required provenance and rejection class stays versioned and represented exactly once.
 - [Phase 01]: Require synthetic sentinels and one frozen clock across corpus payloads. — Shared validation evidence must never contain or resemble real-machine performance data.
+- [Phase 01]: Expose TypeScript transports only through the explicit ./generated package entry. — Validator exports remain reserved for Plan 01-18.
+- [Phase 01]: Represent JSON Schema date-time fields as Rust strings in generated transports. — Canonical runtime schema validation remains the enforcement boundary and avoids an unapproved chrono dependency.
 
 ### Pending Todos
 
@@ -133,6 +136,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T04:43:41.617Z
-Stopped at: Completed 01-07-PLAN.md
+Last session: 2026-07-27T04:59:09.018Z
+Stopped at: Completed 01-15-PLAN.md
 Resume file: None
