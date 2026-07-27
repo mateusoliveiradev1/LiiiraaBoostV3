@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "path": "apps/desktop/src/index.ts",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "packages/desktop-simulator/src/index.ts",
+      "runtimeClass": "fixture"
+    }
+  ],
+  "edges": [
+    {
+      "from": "apps/desktop/src/index.ts",
+      "to": "packages/desktop-simulator/src/index.ts",
+      "importPath": "@liiiraa/desktop-simulator",
+      "kind": "typescript"
+    }
+  ]
+}

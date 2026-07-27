@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "path": "packages/contracts-source/src/index.ts",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "packages/contracts-ts/src/index.ts",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "crates/contracts-rust/src/lib.rs",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "crates/optimizer-domain/src/lib.rs",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "packages/desktop-client/src/index.ts",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "apps/desktop/src/index.ts",
+      "runtimeClass": "production"
+    }
+  ],
+  "edges": [
+    {
+      "from": "packages/contracts-ts/src/index.ts",
+      "to": "packages/contracts-source/src/index.ts",
+      "importPath": "@liiiraa/contracts-source",
+      "kind": "typescript"
+    },
+    {
+      "from": "crates/optimizer-domain/src/lib.rs",
+      "to": "crates/contracts-rust/src/lib.rs",
+      "importPath": "contracts-rust",
+      "kind": "cargo"
+    },
+    {
+      "from": "packages/desktop-client/src/index.ts",
+      "to": "packages/contracts-ts/src/index.ts",
+      "importPath": "@liiiraa/contracts-ts",
+      "kind": "typescript"
+    },
+    {
+      "from": "apps/desktop/src/index.ts",
+      "to": "packages/desktop-client/src/index.ts",
+      "importPath": "@liiiraa/desktop-client",
+      "kind": "typescript"
+    }
+  ]
+}

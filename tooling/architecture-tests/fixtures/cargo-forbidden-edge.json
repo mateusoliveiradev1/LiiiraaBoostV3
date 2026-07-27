@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "path": "crates/contracts-rust/src/lib.rs",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "crates/desktop-application/src/lib.rs",
+      "runtimeClass": "production"
+    }
+  ],
+  "edges": [
+    {
+      "from": "crates/contracts-rust/src/lib.rs",
+      "to": "crates/desktop-application/src/lib.rs",
+      "importPath": "desktop-application",
+      "kind": "cargo"
+    }
+  ]
+}

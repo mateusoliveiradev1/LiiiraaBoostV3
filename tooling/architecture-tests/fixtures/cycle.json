@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "path": "packages/desktop-client/src/a.ts",
+      "runtimeClass": "production"
+    },
+    {
+      "path": "packages/desktop-client/src/b.ts",
+      "runtimeClass": "production"
+    }
+  ],
+  "edges": [
+    {
+      "from": "packages/desktop-client/src/a.ts",
+      "to": "packages/desktop-client/src/b.ts",
+      "importPath": "./b.ts",
+      "kind": "typescript"
+    },
+    {
+      "from": "packages/desktop-client/src/b.ts",
+      "to": "packages/desktop-client/src/a.ts",
+      "importPath": "./a.ts",
+      "kind": "typescript"
+    }
+  ]
+}
