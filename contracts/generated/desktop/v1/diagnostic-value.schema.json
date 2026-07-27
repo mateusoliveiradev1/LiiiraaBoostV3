@@ -1,0 +1,381 @@
+{
+  "$defs": {
+    "CorrelationId": {
+      "$id": "CorrelationId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "DiagnosticPrimitive": {
+      "$id": "DiagnosticPrimitive.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "DiagnosticValue": {
+      "$id": "DiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "FixtureDiagnosticValue.json"
+        },
+        {
+          "$ref": "ObservedDiagnosticValue.json"
+        },
+        {
+          "$ref": "MeasuredDiagnosticValue.json"
+        },
+        {
+          "$ref": "ModeledDiagnosticValue.json"
+        },
+        {
+          "$ref": "UnavailableDiagnosticValue.json"
+        }
+      ]
+    },
+    "FixtureDiagnosticValue": {
+      "$id": "FixtureDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "fixtureVersion": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "kind": {
+          "const": "fixture",
+          "type": "string"
+        },
+        "scenarioId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "scenarioId",
+        "fixtureVersion"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectionId": {
+      "$id": "InspectionId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "InspectSystemRequest": {
+      "$id": "InspectSystemRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.inspect-system.request",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "InspectSystemRequestPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemRequestPayload": {
+      "$id": "InspectSystemRequestPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "scope": {
+          "const": "summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemResult": {
+      "$id": "InspectSystemResult.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.inspect-system.result",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "InspectSystemResultPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemResultPayload": {
+      "$id": "InspectSystemResultPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "deviceLabel": {
+          "$ref": "DiagnosticValue.json"
+        },
+        "inspectedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "inspectionId": {
+          "$ref": "InspectionId.json"
+        },
+        "logicalProcessorCount": {
+          "$ref": "DiagnosticValue.json"
+        },
+        "totalMemoryBytes": {
+          "$ref": "DiagnosticValue.json"
+        }
+      },
+      "required": [
+        "inspectionId",
+        "inspectedAt",
+        "deviceLabel",
+        "logicalProcessorCount",
+        "totalMemoryBytes"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "MeasuredDiagnosticValue": {
+      "$id": "MeasuredDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "measured",
+          "type": "string"
+        },
+        "measuredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "method": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "quality": {
+          "anyOf": [
+            {
+              "const": "valid",
+              "type": "string"
+            },
+            {
+              "const": "degraded",
+              "type": "string"
+            },
+            {
+              "const": "insufficient",
+              "type": "string"
+            }
+          ]
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "method",
+        "measuredAt",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ModeledDiagnosticValue": {
+      "$id": "ModeledDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "$ref": "ProvenanceDescription.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "kind": {
+          "const": "modeled",
+          "type": "string"
+        },
+        "modelId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "modelId",
+        "confidence",
+        "assumptions"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ObservedDiagnosticValue": {
+      "$id": "ObservedDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "observed",
+          "type": "string"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProvenanceDescription": {
+      "$id": "ProvenanceDescription.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ProvenanceIdentifier": {
+      "$id": "ProvenanceIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "RequestId": {
+      "$id": "RequestId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "UnavailableDiagnosticValue": {
+      "$id": "UnavailableDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "unavailable",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "ProvenanceDescription.json"
+        }
+      },
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/desktop/v1/diagnostic-value.schema.json",
+  "$ref": "DiagnosticValue.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}

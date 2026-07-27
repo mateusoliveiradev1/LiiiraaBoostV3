@@ -1,0 +1,354 @@
+{
+  "components": {
+    "schemas": {
+      "CorrelationId": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "DiagnosticPrimitive": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "DiagnosticValue": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FixtureDiagnosticValue"
+          },
+          {
+            "$ref": "#/components/schemas/ObservedDiagnosticValue"
+          },
+          {
+            "$ref": "#/components/schemas/MeasuredDiagnosticValue"
+          },
+          {
+            "$ref": "#/components/schemas/ModeledDiagnosticValue"
+          },
+          {
+            "$ref": "#/components/schemas/UnavailableDiagnosticValue"
+          }
+        ]
+      },
+      "FixtureDiagnosticValue": {
+        "properties": {
+          "fixtureVersion": {
+            "$ref": "#/components/schemas/ProvenanceIdentifier"
+          },
+          "kind": {
+            "const": "fixture",
+            "type": "string"
+          },
+          "scenarioId": {
+            "$ref": "#/components/schemas/ProvenanceIdentifier"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DiagnosticPrimitive"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "scenarioId",
+          "fixtureVersion"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InspectionId": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "InspectSystemRequest": {
+        "properties": {
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "messageType": {
+            "const": "desktop.inspect-system.request",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/InspectSystemRequestPayload"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/RequestId"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "messageType",
+          "requestId",
+          "issuedAt",
+          "payload"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InspectSystemRequestPayload": {
+        "properties": {
+          "scope": {
+            "const": "summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InspectSystemResult": {
+        "properties": {
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "messageType": {
+            "const": "desktop.inspect-system.result",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/InspectSystemResultPayload"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/RequestId"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "messageType",
+          "requestId",
+          "issuedAt",
+          "payload"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InspectSystemResultPayload": {
+        "properties": {
+          "deviceLabel": {
+            "$ref": "#/components/schemas/DiagnosticValue"
+          },
+          "inspectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "inspectionId": {
+            "$ref": "#/components/schemas/InspectionId"
+          },
+          "logicalProcessorCount": {
+            "$ref": "#/components/schemas/DiagnosticValue"
+          },
+          "totalMemoryBytes": {
+            "$ref": "#/components/schemas/DiagnosticValue"
+          }
+        },
+        "required": [
+          "inspectionId",
+          "inspectedAt",
+          "deviceLabel",
+          "logicalProcessorCount",
+          "totalMemoryBytes"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "MeasuredDiagnosticValue": {
+        "properties": {
+          "kind": {
+            "const": "measured",
+            "type": "string"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "method": {
+            "$ref": "#/components/schemas/ProvenanceDescription"
+          },
+          "quality": {
+            "anyOf": [
+              {
+                "const": "valid",
+                "type": "string"
+              },
+              {
+                "const": "degraded",
+                "type": "string"
+              },
+              {
+                "const": "insufficient",
+                "type": "string"
+              }
+            ]
+          },
+          "value": {
+            "$ref": "#/components/schemas/DiagnosticPrimitive"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "method",
+          "measuredAt",
+          "quality"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ModeledDiagnosticValue": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "$ref": "#/components/schemas/ProvenanceDescription"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "confidence": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "kind": {
+            "const": "modeled",
+            "type": "string"
+          },
+          "modelId": {
+            "$ref": "#/components/schemas/ProvenanceIdentifier"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DiagnosticPrimitive"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "modelId",
+          "confidence",
+          "assumptions"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ObservedDiagnosticValue": {
+        "properties": {
+          "kind": {
+            "const": "observed",
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProvenanceDescription"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DiagnosticPrimitive"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "source",
+          "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ProvenanceDescription": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ProvenanceIdentifier": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "RequestId": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "UnavailableDiagnosticValue": {
+        "properties": {
+          "kind": {
+            "const": "unavailable",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ProvenanceDescription"
+          }
+        },
+        "required": [
+          "kind",
+          "reason"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "Liiiraa Boost Contracts",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {},
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}
