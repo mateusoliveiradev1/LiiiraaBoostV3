@@ -117,7 +117,9 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Every planned module has deliberate loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement behavior with no dead controls or unlabeled fixture values.
 5. User can complete every desktop flow in PT-BR or English with keyboard and assistive technology, scaled UI, reduced motion, WCAG 2.2 AA contrast, and status meaning that never relies on color alone.
 
-**Plans**: 13 plans
+**Plans**: 32 plans
+
+**Legacy outline below is superseded by the authoritative revision graph that follows.**
 
 **Wave 1**
 
@@ -152,6 +154,88 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 **Wave 7** *(blocked on Wave 6)*
 
 - [ ] 02-13-PLAN.md — Close browser, accessibility, visual, packaged Windows, signing, and final evidence gates
+
+**Authoritative revision graph**
+
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Review dependency identities and select Authenticode custody
+
+**Wave 2**
+
+- [ ] 02-02-PLAN.md — Activate TypeScript workspace ownership and fixture boundaries
+
+**Wave 3**
+
+- [ ] 02-14-PLAN.md — Scaffold approved package-owned manifests
+- [ ] 02-24-PLAN.md — Define canonical TypeSpec shell messages and generate transports
+
+**Wave 4**
+
+- [ ] 02-31-PLAN.md — Resolve and verify the frozen approved pnpm lockfile
+- [ ] 02-32-PLAN.md — Runtime-validate generated shell messages in TypeScript and Rust
+
+**Wave 5**
+
+- [ ] 02-03-PLAN.md — Build deterministic S01-S24 scenario contracts
+- [ ] 02-12-PLAN.md — Create and register the least-privilege Tauri crate atomically
+- [ ] 02-15-PLAN.md — Add terminating desktop lifecycle commands
+
+**Wave 6**
+
+- [ ] 02-04-PLAN.md — Build canonical-parity Storybook and browser harnesses
+- [ ] 02-16-PLAN.md — Build fail-closed packaged Windows harnesses
+- [ ] 02-17-PLAN.md — Author planned evidence for UX-01 through UX-06
+- [ ] 02-18-PLAN.md — Author planned evidence for UX-07 through UX-12
+- [ ] 02-22-PLAN.md — Implement validated native window and navigation lifecycle
+
+**Wave 7**
+
+- [ ] 02-19-PLAN.md — Unify Wave 0 parity, reachability, and omission gates
+- [ ] 02-23-PLAN.md — Implement validated tray, notification, and startup bridges
+
+**Wave 8**
+
+- [ ] 02-05-PLAN.md — Implement design tokens and the accessible design system
+- [ ] 02-06-PLAN.md — Implement calibration and limited-mode machines
+- [ ] 02-07-PLAN.md — Implement command, Activity, feedback, and preference policies
+
+**Wave 9**
+
+- [ ] 02-08-PLAN.md — Compose calibration, Home, command center, favorites, and Activity
+- [ ] 02-09-PLAN.md — Compose Prepare, Improve, and Measure modules
+- [ ] 02-10-PLAN.md — Compose recovery, preview, Assistant, account, support, and settings
+
+**Wave 10**
+
+- [ ] 02-11-PLAN.md — Assemble typed routes and truth-safe composition
+- [ ] 02-20-PLAN.md — Implement localization and benign appearance preferences
+
+**Wave 11**
+
+- [ ] 02-21-PLAN.md — Compose the responsive accessible application shell
+
+**Wave 12**
+
+- [ ] 02-25-PLAN.md — Wire validated native events and preferences into visible UI
+
+**Wave 13**
+
+- [ ] 02-13-PLAN.md — Prove browser route, scenario, accessibility, and visual acceptance
+- [ ] 02-26-PLAN.md — Gate reviewed Windows/signing and human accessibility evidence
+
+**Wave 14**
+
+- [ ] 02-27-PLAN.md — Prove signed packaged Windows journeys and performance
+
+**Wave 15**
+
+- [ ] 02-28-PLAN.md — Promote observed UX-01 through UX-06 evidence
+- [ ] 02-29-PLAN.md — Promote observed UX-07 through UX-12 evidence
+
+**Wave 16**
+
+- [ ] 02-30-PLAN.md — Enforce final evidence, omissions, and recursive gates
 
 **UI hint**: yes
 
