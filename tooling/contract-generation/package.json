@@ -6,7 +6,7 @@
   "scripts": {
     "generate": "node src/generate.ts",
     "check": "tsc --noEmit",
-    "test": "node src/generate.ts --check-paths",
+    "test": "node src/generate.ts --check-paths && node src/check-corpus.mjs",
     "build": "tsc --noEmit"
   },
   "devDependencies": {
