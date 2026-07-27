@@ -4,6 +4,16 @@ import { describe, expect, it } from 'vitest';
 import productionPackage from '../../../packages/desktop-production-reference/package.json' with {
   type: 'json',
 };
+import { createProductionDesktopComposition } from '@liiiraa/desktop-production-reference';
+
+import leakMatrix from '../fixtures/static-runtime-leaks.json' with {
+  type: 'json',
+};
+import { inspectProductionRuntimeBoundary } from './runtime-guard.ts';
+import {
+  inspectStaticProductionGraph,
+  runLiveStaticProductionGuard,
+} from './static-guard.ts';
 
 const formatDiagnostic = (diagnostic: ts.Diagnostic): string => {
   const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -41,6 +51,74 @@ describe('type-boundary fixture refusal', () => {
           default: './src/index.ts',
         },
       },
+    });
+  });
+});
+
+describe('static production fixture refusal', () => {
+  it('static group rejects its exact non-zero seeded graph case count', () => {
+    expect(leakMatrix.static).toHaveLength(
+      leakMatrix.expectedCaseCounts.static,
+    );
+    expect(leakMatrix.static.length).toBeGreaterThan(0);
+
+    const results = leakMatrix.static.map(({ graph, expectedCode }) => {
+      const result = inspectStaticProductionGraph(graph);
+      expect(result.ok).toBe(false);
+      expect(result.findings.map(({ code }) => code)).toContain(expectedCode);
+      return result;
+    });
+
+    expect(results).toHaveLength(leakMatrix.expectedCaseCounts.static);
+  });
+
+  it('static guard accepts the actual clean workspace graph', async () => {
+    await expect(runLiveStaticProductionGuard()).resolves.toEqual({
+      ok: true,
+      findings: [],
+    });
+  });
+});
+
+describe('runtime production fixture refusal', () => {
+  it('runtime group rejects its exact non-zero seeded response case count', () => {
+    expect(leakMatrix.runtime).toHaveLength(
+      leakMatrix.expectedCaseCounts.runtime,
+    );
+    expect(leakMatrix.runtime.length).toBeGreaterThan(0);
+
+    const results = leakMatrix.runtime.map(
+      ({ boundary, expectedCode }) => {
+        const result = inspectProductionRuntimeBoundary(boundary);
+        expect(result.ok).toBe(false);
+        expect(result.findings.map(({ code }) => code)).toContain(expectedCode);
+        return result;
+      },
+    );
+
+    expect(results).toHaveLength(leakMatrix.expectedCaseCounts.runtime);
+  });
+
+  it('runtime guard accepts unavailable truth from production composition', async () => {
+    const composition = createProductionDesktopComposition({
+      clock: () => '2000-01-01T00:00:00.000Z',
+      inspectionIds: () => 'inspection-runtime-proof',
+    });
+    const result = await composition.client.inspectSystem({
+      requestId: 'request-runtime-proof',
+      issuedAt: '2000-01-01T00:00:00.000Z',
+    });
+
+    expect(
+      inspectProductionRuntimeBoundary({
+        mode: composition.mode,
+        identity: composition.client.identity,
+        schemaVersion: composition.client.schemaVersion,
+        result,
+      }),
+    ).toEqual({
+      ok: true,
+      findings: [],
     });
   });
 });

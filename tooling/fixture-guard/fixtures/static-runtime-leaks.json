@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "expectedCaseCounts": {
+    "static": 2,
+    "runtime": 4
+  },
+  "static": [
+    {
+      "name": "production composition imports simulator",
+      "graph": {
+        "schemaVersion": 1,
+        "nodes": [
+          {
+            "path": "apps/desktop/src/index.ts",
+            "runtimeClass": "production"
+          },
+          {
+            "path": "packages/desktop-simulator/src/index.ts",
+            "runtimeClass": "fixture"
+          }
+        ],
+        "edges": [
+          {
+            "from": "apps/desktop/src/index.ts",
+            "to": "packages/desktop-simulator/src/index.ts",
+            "importPath": "@liiiraa/desktop-simulator",
+            "kind": "typescript"
+          }
+        ]
+      },
+      "expectedCode": "PRODUCTION_TO_FIXTURE"
+    },
+    {
+      "name": "production package re-exports simulator",
+      "graph": {
+        "schemaVersion": 1,
+        "nodes": [
+          {
+            "path": "packages/desktop-production-reference/src/index.ts",
+            "runtimeClass": "production"
+          },
+          {
+            "path": "packages/desktop-simulator/src/index.ts",
+            "runtimeClass": "fixture"
+          }
+        ],
+        "edges": [
+          {
+            "from": "packages/desktop-production-reference/src/index.ts",
+            "to": "packages/desktop-simulator/src/index.ts",
+            "importPath": "@liiiraa/desktop-simulator",
+            "kind": "typescript"
+          }
+        ]
+      },
+      "expectedCode": "PRODUCTION_TO_FIXTURE"
+    }
+  ],
+  "runtime": [
+    {
+      "name": "simulator identity",
+      "boundary": {
+        "mode": "production",
+        "identity": {
+          "adapterId": "liiiraa-desktop-simulator",
+          "adapterVersion": "1.0.0"
+        },
+        "schemaVersion": "1.0",
+        "result": {
+          "ok": true,
+          "value": {}
+        }
+      },
+      "expectedCode": "IDENTITY_MISMATCH"
+    },
+    {
+      "name": "simulator mode",
+      "boundary": {
+        "mode": "simulator",
+        "identity": {
+          "adapterId": "liiiraa-desktop-production-unavailable",
+          "adapterVersion": "1.0.0"
+        },
+        "schemaVersion": "1.0",
+        "result": {
+          "ok": true,
+          "value": {}
+        }
+      },
+      "expectedCode": "MODE_MISMATCH"
+    },
+    {
+      "name": "unsupported schema",
+      "boundary": {
+        "mode": "production",
+        "identity": {
+          "adapterId": "liiiraa-desktop-production-unavailable",
+          "adapterVersion": "1.0.0"
+        },
+        "schemaVersion": "2.0",
+        "result": {
+          "ok": true,
+          "value": {}
+        }
+      },
+      "expectedCode": "SCHEMA_MISMATCH"
+    },
+    {
+      "name": "nested fixture provenance",
+      "boundary": {
+        "mode": "production",
+        "identity": {
+          "adapterId": "liiiraa-desktop-production-unavailable",
+          "adapterVersion": "1.0.0"
+        },
+        "schemaVersion": "1.0",
+        "result": {
+          "ok": true,
+          "value": {
+            "hardware": {
+              "deviceLabel": {
+                "kind": "fixture",
+                "value": "SYNTHETIC RUNTIME LEAK",
+                "provenance": {
+                  "scenarioId": "synthetic-runtime-leak",
+                  "fixtureVersion": "1.0.0"
+                }
+              }
+            }
+          }
+        }
+      },
+      "expectedCode": "FIXTURE_PROVENANCE"
+    }
+  ]
+}
