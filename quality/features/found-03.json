@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "found-03-provenance-contract",
+  "requirements": ["FOUND-03"],
+  "owner": "plan-01-18",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-03-illegal-kind-rejection",
+          "command": "pnpm test:contracts",
+          "file": "crates/contracts-rust/tests/provenance_properties.rs",
+          "owner": "plan-01-18",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-03-provenance-redaction",
+          "command": "pnpm test:contracts",
+          "file": "packages/contracts-ts/src/validation.test.ts",
+          "owner": "plan-01-18",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-03-machine-readable-status",
+          "command": "pnpm test:contracts",
+          "file": "packages/contracts-ts/src/validation.test.ts",
+          "owner": "plan-01-18",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-03-cross-language-properties",
+          "command": "pnpm test:contracts",
+          "file": "crates/contracts-rust/tests/provenance_properties.rs",
+          "owner": "plan-01-18",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-03-round-trip-stability",
+          "command": "pnpm test:contracts",
+          "file": "crates/contracts-rust/tests/provenance_properties.rs",
+          "owner": "plan-01-18",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

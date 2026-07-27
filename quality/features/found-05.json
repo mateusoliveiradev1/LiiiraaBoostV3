@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "found-05-module-boundaries",
+  "requirements": ["FOUND-05"],
+  "owner": "plan-01-12",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-05-forbidden-edge-policy",
+          "command": "pnpm test:architecture",
+          "file": "tooling/architecture-tests/src/policy.test.ts",
+          "owner": "plan-01-12",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-05-fixture-boundary-policy",
+          "command": "pnpm test:architecture",
+          "file": "tooling/architecture-tests/src/policy.test.ts",
+          "owner": "plan-01-12",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-05-stable-diagnostics",
+          "command": "pnpm test:architecture",
+          "file": "tooling/architecture-tests/src/policy.test.ts",
+          "owner": "plan-01-12",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-05-live-graph-execution",
+          "command": "pnpm test:architecture",
+          "file": "tooling/architecture-tests/src/policy.test.ts",
+          "owner": "plan-01-12",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-05-cycle-rejection",
+          "command": "pnpm test:architecture",
+          "file": "tooling/architecture-tests/src/policy.test.ts",
+          "owner": "plan-01-12",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

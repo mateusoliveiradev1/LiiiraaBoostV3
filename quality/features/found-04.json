@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "found-04-production-truth",
+  "requirements": ["FOUND-04"],
+  "owner": "plan-01-20",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-04-fixture-artifact-rejection",
+          "command": "pnpm test:production-truth",
+          "file": "tooling/fixture-guard/src/fixture-guard.test.ts",
+          "owner": "plan-01-20",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-04-unavailable-only-production",
+          "command": "pnpm test:production-truth",
+          "file": "tooling/fixture-guard/src/fixture-guard.test.ts",
+          "owner": "plan-01-20",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-04-explicit-unavailable-state",
+          "command": "pnpm test:production-truth",
+          "file": "tooling/fixture-guard/src/fixture-guard.test.ts",
+          "owner": "plan-01-20",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-04-bounded-artifact-scan",
+          "command": "pnpm test:production-truth",
+          "file": "tooling/fixture-guard/src/fixture-guard.test.ts",
+          "owner": "plan-01-20",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-04-fail-closed-process",
+          "command": "pnpm test:production-truth",
+          "file": "tooling/fixture-guard/src/fixture-guard.test.ts",
+          "owner": "plan-01-20",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

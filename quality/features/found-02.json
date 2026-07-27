@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "found-02-adapter-conformance",
+  "requirements": ["FOUND-02"],
+  "owner": "plan-01-19",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-02-boundary-validation",
+          "command": "pnpm test:adapters",
+          "file": "packages/desktop-client/src/conformance.test.ts",
+          "owner": "plan-01-19",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-02-unavailable-production-data",
+          "command": "pnpm test:adapters",
+          "file": "packages/desktop-client/src/conformance.test.ts",
+          "owner": "plan-01-19",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-02-typed-unavailable-state",
+          "command": "pnpm test:adapters",
+          "file": "packages/desktop-client/src/conformance.test.ts",
+          "owner": "plan-01-19",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-02-deterministic-case-parity",
+          "command": "pnpm test:adapters",
+          "file": "packages/desktop-client/src/conformance.test.ts",
+          "owner": "plan-01-19",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "found-02-lifecycle-cancellation",
+          "command": "pnpm test:adapters",
+          "file": "packages/desktop-client/src/conformance.test.ts",
+          "owner": "plan-01-19",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
