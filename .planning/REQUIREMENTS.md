@@ -16,7 +16,7 @@
 
 ### Desktop Experience
 
-- [ ] **UX-01**: User can install and open the non-elevated Windows desktop app through a signed Tauri package
+- [x] **UX-01**: User can install and open the non-elevated Windows desktop app through a signed Tauri package
 - [ ] **UX-02**: User completes a guided first-run calibration covering inventory, diagnosis, restore readiness, goals, and priority games
 - [ ] **UX-03**: User sees a contextual home prioritizing the next recommended action, selected game profile, and current system state
 - [ ] **UX-04**: User can navigate primary areas by goal and drill into technical details by hardware or Windows component
@@ -25,9 +25,9 @@
 - [ ] **UX-07**: User sees complete loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement states
 - [ ] **UX-08**: User can review current activity and prior notifications through a priority-based activity center
 - [ ] **UX-09**: User receives discreet normal feedback and Windows-level notifications only for actionable or critical events
-- [ ] **UX-10**: User can operate the complete desktop experience with keyboard and assistive technology at WCAG 2.2 AA
-- [ ] **UX-11**: User can use the desktop experience in PT-BR or English without clipped or untranslated product-critical content
-- [ ] **UX-12**: User can enable reduced motion, scale the interface, and understand every status without relying on color alone
+- [x] **UX-10**: User can operate the complete desktop experience with keyboard and assistive technology at WCAG 2.2 AA
+- [x] **UX-11**: User can use the desktop experience in PT-BR or English without clipped or untranslated product-critical content
+- [x] **UX-12**: User can enable reduced motion, scale the interface, and understand every status without relying on color alone
 
 ### Web Platform
 
@@ -166,7 +166,7 @@ A v1 requirement is complete only when:
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
-| UX-01 | Phase 2 | Pending |
+| UX-01 | Phase 2 | Complete |
 | UX-02 | Phase 2 | Pending |
 | UX-03 | Phase 2 | Pending |
 | UX-04 | Phase 2 | Pending |
@@ -175,9 +175,9 @@ A v1 requirement is complete only when:
 | UX-07 | Phase 2 | Pending |
 | UX-08 | Phase 2 | Pending |
 | UX-09 | Phase 2 | Pending |
-| UX-10 | Phase 2 | Pending |
-| UX-11 | Phase 2 | Pending |
-| UX-12 | Phase 2 | Pending |
+| UX-10 | Phase 2 | Complete |
+| UX-11 | Phase 2 | Complete |
+| UX-12 | Phase 2 | Complete |
 | WEB-01 | Phase 3 | Pending |
 | WEB-02 | Phase 3 | Pending |
 | WEB-03 | Phase 3 | Pending |
