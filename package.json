@@ -1,0 +1,30 @@
+{
+  "name": "@liiiraa/workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Deterministic modular workspace for Liiiraa Boost",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.17.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.18.0",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.17.0",
+      "onFail": "download"
+    }
+  },
+  "scripts": {
+    "generate": "turbo run generate",
+    "check": "turbo run check",
+    "test": "turbo run test",
+    "build": "turbo run build",
+    "verify": "pnpm generate && pnpm check && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "turbo": "2.10.7"
+  }
+}
