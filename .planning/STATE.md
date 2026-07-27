@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-12-PLAN.md
-last_updated: "2026-07-27T03:46:15.620Z"
+stopped_at: Completed 01-13-PLAN.md
+last_updated: "2026-07-27T04:03:04.743Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 7
-  percent: 33
+  completed_plans: 8
+  percent: 38
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 8 of 21
+Plan: 9 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 01 execution started
 
-Progress: [███░░░░░░░] 33%
+Progress: [████░░░░░░] 38%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 01 P06 | 8 min | 2 tasks | 7 files |
 | Phase 01 P11 | 7 min | 1 tasks | 9 files |
 | Phase 01 P12 | 10 min | 1 tasks | 5 files |
+| Phase 01 P13 | 12 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Derive dependency-cruiser restrictions directly from the canonical module constitution. — Live TypeScript enforcement must not drift from architecture/module-boundaries.json.
 - [Phase 01]: Normalize dependency-cruiser and Cargo metadata into the existing shared evaluator. — One evaluator preserves identical ownership, public-root, fixture, layer, and cycle semantics across languages.
 - [Phase 01]: Require test:architecture to execute and report both live adapters. — The root gate cannot silently pass when either language adapter is skipped.
+- [Phase 01]: Approve TypeSpec JSON Schema 2020-12 to Typify 0.7.0 with verified in-memory normalization. — The spike produced deterministic compiling Rust and rejected unsupported representations without generated-code patches.
+- [Phase 01]: Translate bundled references, object closure, and string constants only in memory before Typify. — Each mapping preserves the accepted JSON instance set while keeping the persisted TypeSpec artifact unchanged.
+- [Phase 01]: Require Rust JSON Schema validation before generated transport deserialization. — Typify transport types do not enforce every numeric and collection bound.
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T03:46:01.033Z
-Stopped at: Completed 01-12-PLAN.md
+Last session: 2026-07-27T04:02:50.305Z
+Stopped at: Completed 01-13-PLAN.md
 Resume file: None
