@@ -387,3 +387,67 @@ describe('planned and final omission matrix', () => {
     expect(result.diagnostics.map(({ code }) => code)).toEqual(['MANIFEST_SCHEMA_INVALID']);
   });
 });
+
+interface NodeFileSystem {
+  readFileSync(path: string, encoding: 'utf8'): string;
+}
+
+declare const process: {
+  cwd(): string;
+  getBuiltinModule(id: 'fs'): NodeFileSystem;
+};
+
+const phaseOneRequirementIds = [
+  'FOUND-01',
+  'FOUND-02',
+  'FOUND-03',
+  'FOUND-04',
+  'FOUND-05',
+  'FOUND-06',
+] as const;
+
+const manifestForRequirement = (requirement: string): ManifestFixture => {
+  const fileSystem = process.getBuiltinModule('fs');
+  const manifestId = requirement.toLowerCase();
+  const contents = fileSystem.readFileSync(
+    `${process.cwd()}/../../quality/features/${manifestId}.json`,
+    'utf8',
+  );
+
+  return JSON.parse(contents) as ManifestFixture;
+};
+
+describe('Phase 1 planned requirement manifests', () => {
+  it.each(phaseOneRequirementIds.slice(0, 5))(
+    '%s has complete planned evidence with exact plan ownership',
+    (requirement) => {
+      const manifest = manifestForRequirement(requirement);
+      const result = evaluateQualityManifest(
+        manifest,
+        context({
+          mode: 'planned',
+          knownRequirements: phaseOneRequirementIds,
+          requiredRequirements: [requirement],
+        }),
+      );
+
+      expect(result).toEqual({ ok: true, diagnostics: [] });
+      expect(manifest.requirements).toEqual([requirement]);
+      expect(manifest.owner).toMatch(/^plan-01-[0-9]{2}$/);
+
+      for (const dimension of QUALITY_DIMENSIONS) {
+        const acceptance = tested(manifest, dimension);
+        expect(acceptance.evidence).not.toHaveLength(0);
+        expect(
+          acceptance.evidence.every(
+            (evidence) =>
+              evidence.status === 'planned' &&
+              evidence.owner === manifest.owner &&
+              !evidence.command.includes('&&') &&
+              !evidence.file.includes('*'),
+          ),
+        ).toBe(true);
+      }
+    },
+  );
+});
