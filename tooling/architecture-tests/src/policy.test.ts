@@ -1,3 +1,5 @@
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import canonicalPolicy from '../../../architecture/module-boundaries.json' with { type: 'json' };
@@ -10,6 +12,7 @@ import {
   createDependencyCruiserRestrictions,
   normalizeDependencyCruiserResult,
   runArchitectureAdapters,
+  runLiveWorkspaceCheck,
 } from './check-workspace.ts';
 import { evaluateGraph, validatePolicy } from './policy.ts';
 
@@ -342,6 +345,170 @@ describe('policy graph fixtures', () => {
       });
     },
   );
+});
+
+const expectedPnpmWorkspaceRoots = [
+  'packages/contracts-source',
+  'packages/contracts-ts',
+  'packages/desktop-client',
+  'packages/desktop-production-reference',
+  'packages/desktop-simulator',
+  'tooling/acceptance-policy',
+  'tooling/architecture-tests',
+  'tooling/contract-compat',
+  'tooling/contract-generation',
+  'tooling/contract-generation-spike',
+  'tooling/fixture-guard',
+  'tooling/workspace-smoke',
+] as const;
+
+const repositoryRoot = resolve(process.cwd(), '..', '..');
+
+const discoverWorkspaceRoots = async (): Promise<string[]> => {
+  const workspaceModule: unknown = await import('./check-workspace.ts');
+  const discover = Reflect.get(workspaceModule as object, 'discoverPnpmWorkspaceRoots');
+  expect(discover).toBeTypeOf('function');
+  return (discover as (root: string) => string[])(repositoryRoot);
+};
+
+describe.sequential('live workspace discovery boundary', () => {
+  it('discovers every pnpm package independently of canonical ownership', async () => {
+    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+
+    const policyWithoutContractsSource = {
+      ...canonicalPolicy,
+      modules: canonicalPolicy.modules.filter(({ id }) => id !== 'contracts-source'),
+    };
+    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+
+    const originalWorkingDirectory = process.cwd();
+    process.chdir(repositoryRoot);
+    try {
+      const result = await runLiveWorkspaceCheck(policyWithoutContractsSource);
+      expect(result.policy).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'UNKNOWN_OWNER',
+            path: 'packages/contracts-source/package.json',
+            message: 'No module owns "packages/contracts-source/package.json".',
+          },
+        ],
+      });
+    } finally {
+      process.chdir(originalWorkingDirectory);
+    }
+  }, 30_000);
+
+  it('routes undeclared, forbidden-direction, and cyclic mutations through the live adapter', async () => {
+    const toolingRoot = resolve(repositoryRoot, 'tooling');
+    const mutationPrefix = join(toolingRoot, 'liiiraa-architecture-mutation-');
+    const mutationRoot = resolve(await mkdtemp(mutationPrefix));
+
+    expect(dirname(mutationRoot)).toBe(toolingRoot);
+    expect(basename(mutationRoot)).toMatch(/^liiiraa-architecture-mutation-/u);
+
+    const relativeMutationRoot = relative(repositoryRoot, mutationRoot).replaceAll('\\', '/');
+    const sourceRoot = join(mutationRoot, 'src');
+    await mkdir(sourceRoot);
+    await writeFile(
+      join(mutationRoot, 'package.json'),
+      `${JSON.stringify(
+        {
+          name: '@liiiraa/architecture-mutation',
+          version: '0.0.0',
+          private: true,
+          type: 'module',
+        },
+        null,
+        2,
+      )}\n`,
+      'utf8',
+    );
+
+    const originalWorkingDirectory = process.cwd();
+    process.chdir(repositoryRoot);
+    try {
+      await writeFile(join(sourceRoot, 'index.ts'), 'export const sentinel = true;\n', 'utf8');
+      const unknownOwnerResult = await runLiveWorkspaceCheck(canonicalPolicy);
+      expect(unknownOwnerResult.policy).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'UNKNOWN_OWNER',
+            path: `${relativeMutationRoot}/package.json`,
+            message: `No module owns "${relativeMutationRoot}/package.json".`,
+          },
+          {
+            code: 'UNKNOWN_OWNER',
+            path: `${relativeMutationRoot}/src/index.ts`,
+            message: `No module owns "${relativeMutationRoot}/src/index.ts".`,
+          },
+        ],
+      });
+
+      const mutationModule = {
+        id: 'architecture-mutation',
+        owner: 'architecture',
+        layer: 'contracts',
+        roots: [relativeMutationRoot],
+        publicRoots: [`${relativeMutationRoot}/src/index.ts`],
+        runtimeClass: 'tooling',
+        status: 'active',
+      } as const;
+      const mutationPolicy = {
+        ...canonicalPolicy,
+        modules: [...canonicalPolicy.modules, mutationModule],
+      };
+
+      await writeFile(
+        join(sourceRoot, 'index.ts'),
+        "import '../../../packages/desktop-client/src/index.ts';\nexport const sentinel = true;\n",
+        'utf8',
+      );
+      const forbiddenDirectionResult = await runLiveWorkspaceCheck(mutationPolicy);
+      expect(forbiddenDirectionResult.policy).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'LAYER_DIRECTION',
+            path: `${relativeMutationRoot}/src/index.ts -> packages/desktop-client/src/index.ts`,
+            message:
+              'Layer "contracts" in module "architecture-mutation" cannot depend on layer "application" in module "desktop-client".',
+          },
+        ],
+      });
+
+      await writeFile(join(sourceRoot, 'index.ts'), "export { value } from './value.ts';\n", 'utf8');
+      await writeFile(join(sourceRoot, 'value.ts'), "export { sentinel as value } from './index.ts';\n", 'utf8');
+      const cycleResult = await runLiveWorkspaceCheck(mutationPolicy);
+      expect(cycleResult.policy).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'CYCLE',
+            path: `${relativeMutationRoot}/src/index.ts -> ${relativeMutationRoot}/src/value.ts -> ${relativeMutationRoot}/src/index.ts`,
+            message: `Dependency cycle detected: ${relativeMutationRoot}/src/index.ts -> ${relativeMutationRoot}/src/value.ts -> ${relativeMutationRoot}/src/index.ts.`,
+          },
+        ],
+      });
+    } finally {
+      process.chdir(originalWorkingDirectory);
+      expect(dirname(mutationRoot)).toBe(toolingRoot);
+      await rm(mutationRoot, { recursive: true, force: true });
+    }
+
+    expect(await discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
+    process.chdir(repositoryRoot);
+    try {
+      expect((await runLiveWorkspaceCheck(canonicalPolicy)).policy).toEqual({
+        ok: true,
+        diagnostics: [],
+      });
+    } finally {
+      process.chdir(originalWorkingDirectory);
+    }
+  }, 30_000);
 });
 
 describe('real graph adapters', () => {
