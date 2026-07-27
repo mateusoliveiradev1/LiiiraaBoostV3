@@ -254,6 +254,16 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(yaml@2.9.0)
 
+  packages/desktop-client:
+    dependencies:
+      '@liiiraa/contracts-ts':
+        specifier: workspace:*
+        version: link:../contracts-ts
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(yaml@2.9.0)
+
   tooling/acceptance-policy:
     dependencies:
       ajv:
