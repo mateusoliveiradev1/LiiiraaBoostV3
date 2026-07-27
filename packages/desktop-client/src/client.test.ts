@@ -91,7 +91,7 @@ describe('desktop inspection client boundary', () => {
           assumptions: ['synthetic input only'],
         },
       });
-      expect(result.value.payload).toBeUndefined();
+      expect('payload' in result.value).toBe(false);
       expect(Object.isFrozen(result.value)).toBe(true);
       expect(Object.isFrozen(result.value.deviceLabel)).toBe(true);
       expect(Object.isFrozen(result.value.deviceLabel.provenance)).toBe(true);
@@ -114,9 +114,7 @@ describe('desktop inspection client boundary', () => {
       createTransport(vi.fn().mockResolvedValue(invalidResult)),
     );
 
-    await expect(
-      client.inspectSystem({ requestId: 'request-01' }),
-    ).resolves.toMatchObject({
+    await expect(client.inspectSystem({ requestId: 'request-01' })).resolves.toMatchObject({
       ok: false,
       error: {
         code: 'INVALID_TRANSPORT',
@@ -154,9 +152,7 @@ describe('desktop inspection client boundary', () => {
   it('converts raw adapter failures into value-free typed errors', async () => {
     const secret = 'SENSITIVE_RAW_ADAPTER_ERROR';
     const client = createDesktopInspectionClient(
-      createTransport(
-        vi.fn().mockRejectedValue(new Error(secret)),
-      ),
+      createTransport(vi.fn().mockRejectedValue(new Error(secret))),
     );
 
     const result = await client.inspectSystem({ requestId: 'request-01' });
