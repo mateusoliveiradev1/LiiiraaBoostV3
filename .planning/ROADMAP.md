@@ -35,27 +35,67 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Automated checks reject circular or forbidden module dependencies and reject affected features whose acceptance coverage omits required security, privacy, accessibility, performance, or recovery criteria.
 
 **Plans**: 21/21 plans complete
+**Wave 1**
 
 - [x] 01-01-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [x] 01-02-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [x] 01-03-PLAN.md
 - [x] 01-04-PLAN.md
-- [x] 01-05-PLAN.md
 - [x] 01-06-PLAN.md
-- [x] 01-07-PLAN.md
-- [x] 01-08-PLAN.md
-- [x] 01-09-PLAN.md
-- [x] 01-10-PLAN.md
 - [x] 01-11-PLAN.md
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [x] 01-12-PLAN.md
 - [x] 01-13-PLAN.md
-- [x] 01-14-PLAN.md
-- [x] 01-15-PLAN.md
-- [x] 01-16-PLAN.md
 - [x] 01-17-PLAN.md
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [x] 01-05-PLAN.md
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [x] 01-14-PLAN.md
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [x] 01-07-PLAN.md
+- [x] 01-15-PLAN.md
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [x] 01-16-PLAN.md
 - [x] 01-18-PLAN.md
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [x] 01-08-PLAN.md
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
 - [x] 01-19-PLAN.md
+
+**Wave 11** *(blocked on Wave 10 completion)*
+
+- [x] 01-09-PLAN.md
+
+**Wave 12** *(blocked on Wave 11 completion)*
+
 - [x] 01-20-PLAN.md
+
+**Wave 13** *(blocked on Wave 12 completion)*
+
+- [x] 01-10-PLAN.md
+
+**Wave 14** *(blocked on Wave 13 completion)*
+
 - [x] 01-21-PLAN.md
 
 ### Phase 2: Complete Desktop Experience
