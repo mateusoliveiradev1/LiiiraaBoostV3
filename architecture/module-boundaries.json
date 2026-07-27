@@ -105,6 +105,15 @@
       "status": "reserved"
     },
     {
+      "id": "desktop-production-reference",
+      "owner": "desktop",
+      "layer": "adapter",
+      "roots": ["packages/desktop-production-reference"],
+      "publicRoots": ["packages/desktop-production-reference/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
       "id": "desktop-simulator",
       "owner": "desktop",
       "layer": "adapter",
