@@ -60,6 +60,7 @@ describe('desktop inspection client boundary', () => {
 
     const result = await client.inspectSystem({
       requestId: 'request-01',
+      issuedAt: '2000-01-01T00:00:00.000Z',
       correlationId: 'correlation-01',
     });
 
@@ -114,7 +115,12 @@ describe('desktop inspection client boundary', () => {
       createTransport(vi.fn().mockResolvedValue(invalidResult)),
     );
 
-    await expect(client.inspectSystem({ requestId: 'request-01' })).resolves.toMatchObject({
+    await expect(
+      client.inspectSystem({
+        requestId: 'request-01',
+        issuedAt: '2000-01-01T00:00:00.000Z',
+      }),
+    ).resolves.toMatchObject({
       ok: false,
       error: {
         code: 'INVALID_TRANSPORT',
@@ -140,6 +146,7 @@ describe('desktop inspection client boundary', () => {
     await expect(
       client.inspectSystem({
         requestId: 'request-01',
+        issuedAt: '2000-01-01T00:00:00.000Z',
         signal: controller.signal,
       }),
     ).resolves.toEqual({
@@ -155,7 +162,10 @@ describe('desktop inspection client boundary', () => {
       createTransport(vi.fn().mockRejectedValue(new Error(secret))),
     );
 
-    const result = await client.inspectSystem({ requestId: 'request-01' });
+    const result = await client.inspectSystem({
+      requestId: 'request-01',
+      issuedAt: '2000-01-01T00:00:00.000Z',
+    });
 
     expect(result).toEqual({
       ok: false,

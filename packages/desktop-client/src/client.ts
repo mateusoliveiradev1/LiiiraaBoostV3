@@ -24,6 +24,7 @@ export interface DesktopClientIdentity {
 
 export interface InspectSystemInput {
   readonly requestId: string;
+  readonly issuedAt: string;
   readonly correlationId?: string;
   readonly signal?: AbortSignal;
 }
@@ -157,6 +158,24 @@ export const createDesktopInspectionClient = (
     async inspectSystem(
       input: InspectSystemInput,
     ): Promise<Result<NativeSystemInspection, DesktopInspectionError>> {
+      if (input.requestId.length === 0) {
+        return {
+          ok: false,
+          error: { code: 'INVALID_INPUT', field: 'requestId' },
+        };
+      }
+      if (input.issuedAt.length === 0) {
+        return {
+          ok: false,
+          error: { code: 'INVALID_INPUT', field: 'issuedAt' },
+        };
+      }
+      if (input.correlationId === '') {
+        return {
+          ok: false,
+          error: { code: 'INVALID_INPUT', field: 'correlationId' },
+        };
+      }
       if (isCancelled(input.signal)) {
         return { ok: false, error: { code: 'CANCELLED' } };
       }

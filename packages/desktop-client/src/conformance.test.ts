@@ -39,22 +39,22 @@ const frozenInspection: NativeSystemInspection = Object.freeze({
   }),
 });
 
-const successfulInspect = async (
+const successfulInspect = (
   input: InspectSystemInput,
 ): Promise<Result<NativeSystemInspection, DesktopInspectionError>> => {
   if (input.requestId.length === 0 || input.issuedAt.length === 0 || input.correlationId === '') {
-    return {
+    return Promise.resolve({
       ok: false,
       error: {
         code: 'INVALID_INPUT',
         field: input.requestId.length === 0 ? 'requestId' : 'issuedAt',
       },
-    };
+    });
   }
   if (input.signal?.aborted === true) {
-    return { ok: false, error: { code: 'CANCELLED' } };
+    return Promise.resolve({ ok: false, error: { code: 'CANCELLED' } });
   }
-  return { ok: true, value: frozenInspection };
+  return Promise.resolve({ ok: true, value: frozenInspection });
 };
 
 const createSubject = (overrides: Partial<DesktopInspectionClient> = {}): DesktopInspectionClient =>
@@ -123,10 +123,11 @@ describe('desktop client conformance factory', () => {
       expectedFailure: 'MUTABLE_RESULT',
       createClient: () =>
         createSubject({
-          inspectSystem: async () => ({
-            ok: true,
-            value: structuredClone(frozenInspection),
-          }),
+          inspectSystem: () =>
+            Promise.resolve({
+              ok: true,
+              value: structuredClone(frozenInspection),
+            }),
         }),
     },
     {
@@ -134,16 +135,17 @@ describe('desktop client conformance factory', () => {
       expectedFailure: 'PROVENANCE_INVALID',
       createClient: () =>
         createSubject({
-          inspectSystem: async () => ({
-            ok: true,
-            value: {
-              ...frozenInspection,
-              deviceLabel: {
-                kind: 'observed',
-                value: 'SYNTHETIC DEVICE',
-              },
-            } as NativeSystemInspection,
-          }),
+          inspectSystem: () =>
+            Promise.resolve({
+              ok: true,
+              value: {
+                ...frozenInspection,
+                deviceLabel: {
+                  kind: 'observed',
+                  value: 'SYNTHETIC DEVICE',
+                },
+              } as NativeSystemInspection,
+            }),
         }),
     },
     {
@@ -160,13 +162,14 @@ describe('desktop client conformance factory', () => {
       createClient: () => {
         let call = 0;
         return createSubject({
-          inspectSystem: async () => ({
-            ok: true,
-            value: Object.freeze({
-              ...frozenInspection,
-              inspectionId: `inspection-${String(++call)}`,
+          inspectSystem: () =>
+            Promise.resolve({
+              ok: true,
+              value: Object.freeze({
+                ...frozenInspection,
+                inspectionId: `inspection-${String(++call)}`,
+              }),
             }),
-          }),
         });
       },
     },

@@ -6,9 +6,12 @@ export type Result<Value, ErrorValue> =
 export type InspectionField =
   'envelope' | 'deviceLabel' | 'logicalProcessorCount' | 'totalMemoryBytes';
 
+export type InspectInputField = 'correlationId' | 'issuedAt' | 'requestId';
+
 export type DesktopInspectionError =
   | Readonly<{ code: 'CAPABILITY_UNAVAILABLE'; capability: DesktopCapability }>
   | Readonly<{ code: 'CANCELLED' }>
+  | Readonly<{ code: 'INVALID_INPUT'; field: InspectInputField }>
   | Readonly<{
       code: 'INVALID_TRANSPORT';
       field: InspectionField;
