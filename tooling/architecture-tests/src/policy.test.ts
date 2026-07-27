@@ -391,7 +391,7 @@ const repositoryRoot = resolve(process.cwd(), '..', '..');
 
 const discoverWorkspaceRoots = (): string[] => discoverPnpmWorkspaceRoots(repositoryRoot);
 
-describe.sequential('live workspace discovery boundary', () => {
+describe('live workspace discovery boundary', { concurrent: false }, () => {
   it('discovers every pnpm package independently of canonical ownership', async () => {
     expect(discoverWorkspaceRoots()).toEqual(expectedPnpmWorkspaceRoots);
 
