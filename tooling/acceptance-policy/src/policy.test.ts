@@ -451,3 +451,159 @@ describe('Phase 1 planned requirement manifests', () => {
     },
   );
 });
+
+const phaseOneRequirementsFromDocument = (): string[] => {
+  const fileSystem = process.getBuiltinModule('fs');
+  const requirementsDocument = fileSystem.readFileSync(
+    `${process.cwd()}/../../.planning/REQUIREMENTS.md`,
+    'utf8',
+  );
+  const traceability = requirementsDocument.slice(
+    requirementsDocument.indexOf('## Traceability'),
+    requirementsDocument.indexOf('**Coverage:**'),
+  );
+
+  return [...traceability.matchAll(/^\|\s*(FOUND-[0-9]{2})\s*\|\s*Phase 1\s*\|/gm)].map(
+    ([, requirement]) => {
+      if (requirement === undefined) {
+        throw new Error('Phase 1 traceability row did not contain a requirement ID.');
+      }
+
+      return requirement;
+    },
+  );
+};
+
+const coverageDiagnostics = (
+  requirements: readonly string[],
+  manifests: readonly ManifestFixture[],
+): string[] => {
+  const counts = new Map(requirements.map((requirement) => [requirement, 0]));
+  const diagnostics: string[] = [];
+
+  for (const manifest of manifests) {
+    for (const requirement of manifest.requirements) {
+      const current = counts.get(requirement);
+      if (current === undefined) {
+        diagnostics.push(`unexpected:${requirement}`);
+      } else {
+        counts.set(requirement, current + 1);
+      }
+    }
+  }
+
+  for (const [requirement, count] of counts) {
+    if (count === 0) {
+      diagnostics.push(`missing:${requirement}`);
+    } else if (count > 1) {
+      diagnostics.push(`duplicate:${requirement}`);
+    }
+  }
+
+  return diagnostics.toSorted();
+};
+
+const phaseOneManifests = (): ManifestFixture[] =>
+  phaseOneRequirementIds.map((requirement) => manifestForRequirement(requirement));
+
+describe('Phase 1 requirement coverage mutations', () => {
+  it('derives exactly FOUND-01 through FOUND-06 from REQUIREMENTS.md', () => {
+    expect(phaseOneRequirementsFromDocument()).toEqual(phaseOneRequirementIds);
+  });
+
+  it('requires exactly one current manifest for every Phase 1 requirement', () => {
+    expect(coverageDiagnostics(phaseOneRequirementsFromDocument(), phaseOneManifests())).toEqual(
+      [],
+    );
+  });
+
+  it('rejects a removed manifest', () => {
+    expect(coverageDiagnostics(phaseOneRequirementIds, phaseOneManifests().slice(0, -1))).toEqual([
+      'missing:FOUND-06',
+    ]);
+  });
+
+  it('rejects a renamed requirement and its resulting omission', () => {
+    const manifests = phaseOneManifests();
+    manifests[0] = {
+      ...manifests[0],
+      requirements: ['FOUND-99'],
+    } as ManifestFixture;
+
+    expect(coverageDiagnostics(phaseOneRequirementIds, manifests)).toEqual([
+      'missing:FOUND-01',
+      'unexpected:FOUND-99',
+    ]);
+  });
+
+  it('rejects duplicate requirement ownership', () => {
+    const manifests = phaseOneManifests();
+    manifests[5] = {
+      ...manifests[5],
+      requirements: ['FOUND-05'],
+    } as ManifestFixture;
+
+    expect(coverageDiagnostics(phaseOneRequirementIds, manifests)).toEqual([
+      'duplicate:FOUND-05',
+      'missing:FOUND-06',
+    ]);
+  });
+
+  it('rejects a removed quality dimension', () => {
+    const manifest = structuredClone(manifestForRequirement('FOUND-06'));
+    omitDimension(manifest, 'recovery');
+
+    expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
+  });
+
+  it('rejects an evidence owner that does not name the manifest plan', () => {
+    const manifest = structuredClone(manifestForRequirement('FOUND-06'));
+    evidenceAt(manifest, 'security').owner = 'plan-01-99';
+
+    const result = evaluateQualityManifest(
+      manifest,
+      context({
+        mode: 'planned',
+        knownRequirements: phaseOneRequirementIds,
+        requiredRequirements: ['FOUND-06'],
+      }),
+    );
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['EVIDENCE_OWNER_MISMATCH']);
+  });
+
+  it('records six planned passes and six deliberate final failures', () => {
+    let plannedPasses = 0;
+    let finalFailures = 0;
+    let finalDiagnostics = 0;
+
+    for (const [index, manifest] of phaseOneManifests().entries()) {
+      const requirement = phaseOneRequirementIds[index];
+      if (requirement === undefined) {
+        throw new Error('Manifest has no matching Phase 1 requirement.');
+      }
+      const policyContext = context({
+        knownRequirements: phaseOneRequirementIds,
+        requiredRequirements: [requirement],
+      });
+      const planned = evaluateQualityManifest(manifest, {
+        ...policyContext,
+        mode: 'planned',
+      });
+      const final = evaluateQualityManifest(manifest, {
+        ...policyContext,
+        mode: 'final',
+        availableFiles: [],
+        availableCommands: [],
+      });
+
+      plannedPasses += Number(planned.ok);
+      finalFailures += Number(!final.ok);
+      finalDiagnostics += final.diagnostics.length;
+    }
+
+    expect(plannedPasses).toBe(6);
+    expect(finalFailures).toBe(6);
+    expect(finalDiagnostics).toBe(90);
+  });
+});
