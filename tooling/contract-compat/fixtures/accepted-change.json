@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "expectedCaseCount": 2,
+  "cases": [
+    {
+      "id": "additive-optional-field",
+      "baseline": {
+        "contractVersion": "1.0.0",
+        "http": {
+          "openapi": "3.1.0",
+          "paths": {}
+        },
+        "desktop": {
+          "Envelope": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "inspection"
+              }
+            },
+            "required": ["kind"],
+            "unevaluatedProperties": false
+          }
+        }
+      },
+      "candidate": {
+        "contractVersion": "1.1.0",
+        "http": {
+          "openapi": "3.1.0",
+          "paths": {}
+        },
+        "desktop": {
+          "Envelope": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "inspection"
+              },
+              "correlationId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            },
+            "required": ["kind"],
+            "unevaluatedProperties": false
+          }
+        }
+      }
+    },
+    {
+      "id": "approved-major-transition",
+      "baseline": {
+        "contractVersion": "1.4.0",
+        "http": {
+          "openapi": "3.1.0",
+          "paths": {}
+        },
+        "desktop": {
+          "Envelope": {
+            "type": "object",
+            "properties": {
+              "messageType": {
+                "const": "desktop.inspect.v1"
+              }
+            },
+            "required": ["messageType"],
+            "unevaluatedProperties": false
+          }
+        }
+      },
+      "candidate": {
+        "contractVersion": "2.0.0",
+        "majorTransitionApproval": {
+          "fromMajor": 1,
+          "toMajor": 2,
+          "approvedBy": "architecture/contracts",
+          "decision": "ADR-0002"
+        },
+        "http": {
+          "openapi": "3.1.0",
+          "paths": {}
+        },
+        "desktop": {
+          "Envelope": {
+            "type": "object",
+            "properties": {
+              "messageType": {
+                "const": "desktop.inspect.v2"
+              }
+            },
+            "required": ["messageType"],
+            "unevaluatedProperties": false
+          }
+        }
+      }
+    }
+  ]
+}
