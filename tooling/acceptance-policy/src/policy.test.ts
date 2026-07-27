@@ -40,9 +40,13 @@ interface ManifestFixture {
   featureId: string;
   requirements: string[];
   owner: string;
-  acceptance: Partial<
-    Record<QualityDimension, TestedDimensionFixture | ExemptDimensionFixture>
-  >;
+  acceptance: {
+    security?: TestedDimensionFixture | ExemptDimensionFixture;
+    privacy?: TestedDimensionFixture | ExemptDimensionFixture;
+    accessibility?: TestedDimensionFixture | ExemptDimensionFixture;
+    performance?: TestedDimensionFixture | ExemptDimensionFixture;
+    recovery?: TestedDimensionFixture | ExemptDimensionFixture;
+  };
 }
 
 const commandFor = (dimension: QualityDimension): string =>
@@ -69,9 +73,13 @@ const validManifest = (): ManifestFixture => ({
   featureId: 'quality-policy',
   requirements: ['FOUND-06'],
   owner: 'quality-team',
-  acceptance: Object.fromEntries(
-    QUALITY_DIMENSIONS.map((dimension) => [dimension, testedDimension(dimension)]),
-  ),
+  acceptance: {
+    security: testedDimension('security'),
+    privacy: testedDimension('privacy'),
+    accessibility: testedDimension('accessibility'),
+    performance: testedDimension('performance'),
+    recovery: testedDimension('recovery'),
+  },
 });
 
 const exemptionDimension = (reviewer = 'independent-reviewer'): ExemptDimensionFixture => ({
@@ -89,22 +97,91 @@ const exemptionDimension = (reviewer = 'independent-reviewer'): ExemptDimensionF
 
 const stagedManifest = (status: 'planned' | 'passed'): ManifestFixture => {
   const manifest = validManifest();
-  tested(manifest, 'security').evidence[0]!.status = status;
+  evidenceAt(manifest, 'security').status = status;
   for (const dimension of QUALITY_DIMENSIONS.filter((value) => value !== 'security')) {
     manifest.acceptance[dimension] = exemptionDimension();
   }
   return manifest;
 };
 
-const tested = (
-  manifest: ManifestFixture,
-  dimension: QualityDimension,
-): TestedDimensionFixture => {
+const tested = (manifest: ManifestFixture, dimension: QualityDimension): TestedDimensionFixture => {
   const value = manifest.acceptance[dimension];
   if (value?.status !== 'tested') {
     throw new Error(`Expected tested fixture for ${dimension}.`);
   }
   return value;
+};
+
+const evidenceAt = (
+  manifest: ManifestFixture,
+  dimension: QualityDimension,
+  index = 0,
+): EvidenceFixture => {
+  const evidence = tested(manifest, dimension).evidence[index];
+  if (evidence === undefined) {
+    throw new Error(`Expected evidence ${String(index)} for ${dimension}.`);
+  }
+  return evidence;
+};
+
+const omitDimension = (manifest: ManifestFixture, dimension: QualityDimension): void => {
+  switch (dimension) {
+    case 'security':
+      delete manifest.acceptance.security;
+      return;
+    case 'privacy':
+      delete manifest.acceptance.privacy;
+      return;
+    case 'accessibility':
+      delete manifest.acceptance.accessibility;
+      return;
+    case 'performance':
+      delete manifest.acceptance.performance;
+      return;
+    case 'recovery':
+      delete manifest.acceptance.recovery;
+  }
+};
+
+const omitEvidenceField = (
+  evidence: Partial<EvidenceFixture>,
+  field: keyof EvidenceFixture,
+): void => {
+  switch (field) {
+    case 'id':
+      delete evidence.id;
+      return;
+    case 'command':
+      delete evidence.command;
+      return;
+    case 'file':
+      delete evidence.file;
+      return;
+    case 'owner':
+      delete evidence.owner;
+      return;
+    case 'status':
+      delete evidence.status;
+  }
+};
+
+const omitExemptionField = (
+  exemption: Partial<ExemptDimensionFixture['exemption']>,
+  field: keyof ExemptDimensionFixture['exemption'],
+): void => {
+  switch (field) {
+    case 'rationale':
+      delete exemption.rationale;
+      return;
+    case 'residualRisk':
+      delete exemption.residualRisk;
+      return;
+    case 'reviewer':
+      delete exemption.reviewer;
+      return;
+    case 'reopeningTrigger':
+      delete exemption.reopeningTrigger;
+  }
 };
 
 const exempted = (
@@ -144,7 +221,7 @@ describe('quality manifest schema and dimension policy', () => {
 
   it.each(QUALITY_DIMENSIONS)('rejects schema omission of the %s dimension', (dimension) => {
     const manifest = validManifest();
-    delete manifest.acceptance[dimension];
+    omitDimension(manifest, dimension);
 
     expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
   });
@@ -153,9 +230,7 @@ describe('quality manifest schema and dimension policy', () => {
     'requires exact tested evidence field %s',
     (field) => {
       const manifest = validManifest();
-      delete (tested(manifest, 'security').evidence[0] as
-        | Partial<EvidenceFixture>
-        | undefined)?.[field];
+      omitEvidenceField(evidenceAt(manifest, 'security'), field);
 
       expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
     },
@@ -163,32 +238,28 @@ describe('quality manifest schema and dimension policy', () => {
 
   it('rejects wildcard evidence paths with a stable dimension reason', () => {
     const manifest = validManifest();
-    tested(manifest, 'security').evidence[0]!.file = 'packages/**/security.test.ts';
+    evidenceAt(manifest, 'security').file = 'packages/**/security.test.ts';
 
     expectOnlyCode(manifest, 'EVIDENCE_PATH_NOT_EXACT');
   });
 
   it('rejects watch-mode commands with a stable dimension reason', () => {
     const manifest = validManifest();
-    tested(manifest, 'security').evidence[0]!.command =
-      'pnpm --filter @liiiraa/example test --watch';
+    evidenceAt(manifest, 'security').command = 'pnpm --filter @liiiraa/example test --watch';
 
     expectOnlyCode(manifest, 'EVIDENCE_COMMAND_NOT_TERMINATING');
   });
 
   it('rejects duplicate evidence identifiers across dimensions', () => {
     const manifest = validManifest();
-    tested(manifest, 'privacy').evidence[0]!.id = tested(
-      manifest,
-      'security',
-    ).evidence[0]!.id;
+    evidenceAt(manifest, 'privacy').id = evidenceAt(manifest, 'security').id;
 
     expectOnlyCode(manifest, 'DUPLICATE_EVIDENCE_ID');
   });
 
   it('rejects evidence owned by anyone other than the manifest owner', () => {
     const manifest = validManifest();
-    tested(manifest, 'security').evidence[0]!.owner = 'other-team';
+    evidenceAt(manifest, 'security').owner = 'other-team';
 
     expectOnlyCode(manifest, 'EVIDENCE_OWNER_MISMATCH');
   });
@@ -204,7 +275,7 @@ describe('quality manifest schema and dimension policy', () => {
 describe('accountable exemption policy', () => {
   const exemptPrivacy = () => {
     const manifest = validManifest();
-    manifest.acceptance['privacy'] = {
+    manifest.acceptance.privacy = {
       status: 'not_applicable',
       exemption: {
         rationale: 'No personal information crosses this feature boundary.',
@@ -230,9 +301,7 @@ describe('accountable exemption policy', () => {
     'rejects schema exemption missing %s',
     (field) => {
       const manifest = exemptPrivacy();
-      delete (exempted(manifest, 'privacy').exemption as Partial<
-        ExemptDimensionFixture['exemption']
-      >)[field];
+      omitExemptionField(exempted(manifest, 'privacy').exemption, field);
 
       expectOnlyCode(manifest, 'MANIFEST_SCHEMA_INVALID');
     },
@@ -255,7 +324,7 @@ describe('accountable exemption policy', () => {
 
 describe('explicit policy mode parsing', () => {
   it('requires --mode planned or --mode final rather than inferring a mode', () => {
-    expect(() => parsePolicyMode([])).toThrowError('Missing required --mode planned|final.');
+    expect(() => parsePolicyMode([])).toThrow('Missing required --mode planned|final.');
     expect(parsePolicyMode(['--mode', 'planned'])).toBe('planned');
     expect(parsePolicyMode(['--mode', 'final'])).toBe('final');
   });
@@ -269,7 +338,7 @@ describe('planned and final omission matrix', () => {
       const dimension = fixture.dimension as QualityDimension;
 
       if (fixture.kind === 'omit-dimension') {
-        delete manifest.acceptance[dimension];
+        omitDimension(manifest, dimension);
       } else {
         manifest.acceptance[dimension] = exemptionDimension(manifest.owner);
       }
@@ -284,7 +353,7 @@ describe('planned and final omission matrix', () => {
     '$id proves the planned/final transition policy',
     (fixture) => {
       const manifest = stagedManifest(fixture.evidenceStatus as 'planned' | 'passed');
-      const evidence = tested(manifest, 'security').evidence[0]!;
+      const evidence = evidenceAt(manifest, 'security');
       const policyContext = {
         ...context(),
         mode: fixture.mode,
@@ -299,15 +368,13 @@ describe('planned and final omission matrix', () => {
   );
 
   it('planned and final fixture groups execute exact non-vacuous case counts', () => {
-    expect(omissionMatrix.omissionCases).toHaveLength(
-      omissionMatrix.expectedCounts.omissionCases,
-    );
+    expect(omissionMatrix.omissionCases).toHaveLength(omissionMatrix.expectedCounts.omissionCases);
     expect(omissionMatrix.transitionStages).toHaveLength(
       omissionMatrix.expectedCounts.transitionStages,
     );
-    expect(
-      omissionMatrix.omissionCases.length + omissionMatrix.transitionStages.length,
-    ).toBe(omissionMatrix.expectedCounts.totalCases);
+    expect(omissionMatrix.omissionCases.length + omissionMatrix.transitionStages.length).toBe(
+      omissionMatrix.expectedCounts.totalCases,
+    );
     expect(omissionMatrix.expectedCounts.omissionCases).toBe(6);
     expect(omissionMatrix.expectedCounts.transitionStages).toBeGreaterThan(0);
   });
@@ -317,8 +384,6 @@ describe('planned and final omission matrix', () => {
     manifest.requirements = [];
 
     const result = evaluateQualityManifest(manifest, context({ mode: 'planned' }));
-    expect(result.diagnostics.map(({ code }) => code)).toEqual([
-      'MANIFEST_SCHEMA_INVALID',
-    ]);
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['MANIFEST_SCHEMA_INVALID']);
   });
 });

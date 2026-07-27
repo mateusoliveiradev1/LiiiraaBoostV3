@@ -1,8 +1,6 @@
 import { Ajv2020, type ErrorObject } from 'ajv/dist/2020.js';
 
-import qualityManifestSchema from '../../../architecture/quality-manifest.schema.json' with {
-  type: 'json',
-};
+import qualityManifestSchema from '../../../architecture/quality-manifest.schema.json' with { type: 'json' };
 
 export const QUALITY_DIMENSIONS = [
   'security',
@@ -100,15 +98,14 @@ const pointerToPath = (pointer: string): string => {
     .map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
 
   return segments.reduce(
-    (path, segment) =>
-      /^[0-9]+$/.test(segment) ? `${path}[${segment}]` : `${path}.${segment}`,
+    (path, segment) => (/^[0-9]+$/.test(segment) ? `${path}[${segment}]` : `${path}.${segment}`),
     '$',
   );
 };
 
 const schemaErrorPath = (error: ErrorObject): string => {
   const basePath = pointerToPath(error.instancePath);
-  const missingProperty = error.params['missingProperty'];
+  const missingProperty = (error.params as Record<string, unknown>)['missingProperty'];
 
   return error.keyword === 'required' && typeof missingProperty === 'string'
     ? `${basePath}.${missingProperty}`
@@ -116,7 +113,7 @@ const schemaErrorPath = (error: ErrorObject): string => {
 };
 
 const schemaErrorMessage = (error: ErrorObject): string => {
-  const missingProperty = error.params['missingProperty'];
+  const missingProperty = (error.params as Record<string, unknown>)['missingProperty'];
   if (error.keyword === 'required' && typeof missingProperty === 'string') {
     return `Required property "${missingProperty}" is missing.`;
   }
@@ -160,7 +157,8 @@ const isExactCommand = (command: string): boolean =>
 const dateValue = (value: string): number => Date.parse(`${value}T00:00:00.000Z`);
 
 const validateContext = (context: QualityPolicyContext): PolicyDiagnostic[] => {
-  if (context.mode !== 'planned' && context.mode !== 'final') {
+  const mode: unknown = context.mode;
+  if (mode !== 'planned' && mode !== 'final') {
     return [
       diagnostic(
         'POLICY_CONTEXT_INVALID',
@@ -397,14 +395,15 @@ export const parsePolicyMode = (arguments_: readonly string[]): PolicyMode => {
     .map((argument, index) => (argument === '--mode' ? index : -1))
     .filter((index) => index >= 0);
 
-  if (modeIndexes.length === 0) {
+  const modeIndex = modeIndexes[0];
+  if (modeIndex === undefined) {
     throw new Error('Missing required --mode planned|final.');
   }
   if (modeIndexes.length > 1) {
     throw new Error('--mode must be provided exactly once.');
   }
 
-  const value = arguments_[modeIndexes[0]! + 1];
+  const value = arguments_[modeIndex + 1];
   if (value !== 'planned' && value !== 'final') {
     throw new Error('--mode must be followed by planned or final.');
   }
