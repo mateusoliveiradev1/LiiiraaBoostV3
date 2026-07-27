@@ -99,6 +99,104 @@
       "allowedLifecycleScripts": {}
     },
     {
+      "name": "tauri-plugin-deep-link",
+      "version": "2.4.9",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Validated desktop deep-link routing",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri-plugin-notification",
+      "version": "2.3.3",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Desktop notification integration",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri-plugin-process",
+      "version": "2.3.1",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Scoped desktop process lifecycle integration",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri-plugin-single-instance",
+      "version": "2.4.3",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Single-instance startup and deep-link handoff",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri-plugin-updater",
+      "version": "2.10.1",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Signed desktop update client",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri-plugin-window-state",
+      "version": "2.4.1",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/plugins-workspace",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Benign desktop window-state persistence",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "tauri",
+      "version": "2.11.5",
+      "ecosystem": "cargo",
+      "registry": "https://crates.io",
+      "repository": "https://github.com/tauri-apps/tauri",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Windows desktop shell and native composition",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
       "name": "typify",
       "version": "0.7.0",
       "ecosystem": "cargo",
@@ -109,6 +207,151 @@
       "disposition": "OK",
       "reviewReason": "",
       "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@axe-core/playwright",
+      "version": "4.12.1",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/dequelabs/axe-core-npm",
+      "license": "MPL-2.0",
+      "purpose": "Automated browser accessibility assertions",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {
+        "prepare": "npx playwright install && npm run build"
+      },
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "@formatjs/cli",
+      "version": "6.16.14",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/formatjs/formatjs",
+      "license": "MIT",
+      "purpose": "Desktop message extraction and compilation",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.62.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/microsoft/playwright",
+      "license": "Apache-2.0",
+      "purpose": "Browser E2E and deterministic screenshot testing",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@storybook/react-vite",
+      "version": "10.5.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/storybookjs/storybook",
+      "license": "MIT",
+      "purpose": "React Vite component and state catalog",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@tailwindcss/vite",
+      "version": "4.3.3",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/tailwindlabs/tailwindcss",
+      "license": "MIT",
+      "purpose": "Token-backed Tailwind integration for Vite",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@tanstack/react-query",
+      "version": "5.101.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/TanStack/query",
+      "license": "MIT",
+      "purpose": "Validated desktop async cache and cancellation",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@tanstack/react-router",
+      "version": "1.170.18",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/TanStack/router",
+      "license": "MIT",
+      "purpose": "Typed desktop navigation",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@tanstack/router-plugin",
+      "version": "1.168.23",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/TanStack/router",
+      "license": "MIT",
+      "purpose": "Typed desktop route generation integration",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@tauri-apps/api",
+      "version": "2.11.1",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/tauri-apps/tauri",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Typed desktop renderer bridge",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "@tauri-apps/cli",
+      "version": "2.11.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/tauri-apps/tauri",
+      "license": "Apache-2.0 OR MIT",
+      "purpose": "Tauri desktop build and bundle CLI",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {
+        "prepack": "cp ../../crates/tauri-schema-generator/schemas/config.schema.json .",
+        "prepublishOnly": "napi prepublish -t npm --gh-release-id $RELEASE_ID"
+      },
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
@@ -183,6 +426,36 @@
       "allowedLifecycleScripts": {}
     },
     {
+      "name": "@vitejs/plugin-react",
+      "version": "6.0.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/vitejs/vite-plugin-react",
+      "license": "MIT",
+      "purpose": "React integration for the desktop Vite renderer",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {
+        "prepublishOnly": "npm run build"
+      },
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "@xstate/react",
+      "version": "6.1.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/statelyai/xstate",
+      "license": "MIT",
+      "purpose": "React bindings for safety-critical workflows",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
       "name": "ajv",
       "version": "8.20.0",
       "ecosystem": "npm",
@@ -239,6 +512,37 @@
       }
     },
     {
+      "name": "lucide-react",
+      "version": "1.27.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/lucide-icons/lucide",
+      "license": "ISC",
+      "purpose": "Curated outline icon set",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "motion",
+      "version": "12.42.2",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/motiondivision/motion",
+      "license": "MIT",
+      "purpose": "Reduced-motion-aware purposeful transitions",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {
+        "postpublish": "git push --tags",
+        "prepack": "yarn build"
+      },
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
       "name": "pnpm",
       "version": "11.17.0",
       "ecosystem": "npm",
@@ -261,6 +565,107 @@
       "disposition": "REVIEW_REQUIRED",
       "reviewReason": "Research legitimacy audit flagged the recent official release as too new.",
       "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "react-aria-components",
+      "version": "1.19.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/adobe/react-spectrum",
+      "license": "Apache-2.0",
+      "purpose": "Accessible headless interaction primitives",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.8",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/react/react",
+      "license": "MIT",
+      "purpose": "Desktop renderer DOM integration",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "react-hook-form",
+      "version": "7.83.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/react-hook-form/react-hook-form",
+      "license": "MIT",
+      "purpose": "Complex desktop settings and support forms",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {
+        "prepare": "husky",
+        "prepublishOnly": "pnpm install && pnpm lint:fix && pnpm type && pnpm test && pnpm build"
+      },
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "react-intl",
+      "version": "10.1.18",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/formatjs/formatjs",
+      "license": "BSD-3-Clause",
+      "purpose": "Desktop ICU message formatting and localization",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "react",
+      "version": "19.2.8",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/react/react",
+      "license": "MIT",
+      "purpose": "Desktop renderer component composition",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "storybook",
+      "version": "10.5.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/storybookjs/storybook",
+      "license": "MIT",
+      "purpose": "Component and operational state catalog",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
+      "name": "tailwindcss",
+      "version": "4.3.3",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/tailwindlabs/tailwindcss",
+      "license": "MIT",
+      "purpose": "Token-backed utility infrastructure",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
     },
     {
       "name": "turbo",
@@ -287,6 +692,34 @@
       "allowedLifecycleScripts": {}
     },
     {
+      "name": "uplot",
+      "version": "1.6.32",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/leeoniya/uPlot",
+      "license": "MIT",
+      "purpose": "Dense desktop time-series rendering",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "OK"
+    },
+    {
+      "name": "vite",
+      "version": "8.1.5",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/vitejs/vite",
+      "license": "MIT",
+      "purpose": "Desktop renderer build",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
       "name": "vitest",
       "version": "4.1.10",
       "ecosystem": "npm",
@@ -297,6 +730,20 @@
       "disposition": "REVIEW_REQUIRED",
       "reviewReason": "Research legitimacy audit flagged the recent official release as too new.",
       "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "xstate",
+      "version": "5.32.5",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/statelyai/xstate",
+      "license": "MIT",
+      "purpose": "Safety-critical desktop workflow state machines",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 2 legitimacy audit flagged this recent official release as SUS: too-new.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
     },
     {
       "name": "node",
@@ -321,6 +768,20 @@
       "disposition": "OK",
       "reviewReason": "",
       "allowedLifecycleScripts": {}
+    }
+  ],
+  "excluded": [
+    {
+      "name": "@tauri-apps/plugin-single-instance",
+      "ecosystem": "npm",
+      "verdict": "SLOP",
+      "reason": "The npm identity does not exist; use the verified tauri-plugin-single-instance Rust crate."
+    },
+    {
+      "name": "msw",
+      "ecosystem": "npm",
+      "verdict": "SLOP by required seam",
+      "reason": "Excluded by the Phase 2 legitimacy seam; use the existing deterministic desktop adapter port."
     }
   ]
 }
