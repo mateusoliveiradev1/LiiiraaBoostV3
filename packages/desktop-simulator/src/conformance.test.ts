@@ -50,15 +50,17 @@ describe('desktop simulator adapter', () => {
 
     if (first.ok) {
       expect(Object.isFrozen(first.value)).toBe(true);
-      expect([
-        first.value.deviceLabel,
-        first.value.logicalProcessorCount,
-        first.value.totalMemoryBytes,
-      ]).toSatisfyAll(
-        (value) =>
-          value.kind === 'fixture' &&
-          value.provenance.scenarioId === 'synthetic-standard',
-      );
+      expect(
+        [
+          first.value.deviceLabel,
+          first.value.logicalProcessorCount,
+          first.value.totalMemoryBytes,
+        ].every(
+          (value) =>
+            value.kind === 'fixture' &&
+            value.provenance.scenarioId === 'synthetic-standard',
+        ),
+      ).toBe(true);
     }
   });
 });
