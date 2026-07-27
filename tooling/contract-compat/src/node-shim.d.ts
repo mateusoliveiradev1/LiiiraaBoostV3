@@ -16,6 +16,15 @@ declare module 'node:child_process' {
   ): void;
 }
 
+declare module 'node:crypto' {
+  interface Hash {
+    update(value: string): Hash;
+    digest(encoding: 'hex'): string;
+  }
+
+  export function createHash(algorithm: 'sha256'): Hash;
+}
+
 declare module 'node:fs/promises' {
   export function mkdtemp(prefix: string): Promise<string>;
   export function readFile(path: string, encoding: 'utf8'): Promise<string>;

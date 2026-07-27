@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.0",
+  "baselineRevision": "75e63518992821e77b42d572af7571d817e456b9",
+  "owner": "architecture/contracts",
+  "approvalDecision": "ADR-0002",
+  "approvedAt": "2026-07-27",
+  "expectedArtifactCount": 4,
+  "artifacts": [
+    {
+      "path": "contracts/generated/http/openapi.json",
+      "role": "http",
+      "sha256": "0c1eaaf67b53f95f4e1d7603ba19b0f21765403e0aec418c5c231615b16fb17d"
+    },
+    {
+      "path": "contracts/generated/desktop/v1/diagnostic-value.schema.json",
+      "role": "desktop",
+      "sha256": "e37266c9211b6ead4c80df419e5068e03ac73b8880ae5b9b47698abcfb6fb7ee"
+    },
+    {
+      "path": "contracts/generated/desktop/v1/inspect-system.schema.json",
+      "role": "desktop",
+      "sha256": "ba4f0cb5578643d48da6691f751bc4789e9af2a0978763f6e91ddb3062b44382"
+    },
+    {
+      "path": "contracts/generated/desktop/v1/message-envelope.schema.json",
+      "role": "desktop",
+      "sha256": "2df22aac658890cd4f5820e43ff9b675c7b142ebc097b35b887df5f3cf5f8956"
+    }
+  ]
+}

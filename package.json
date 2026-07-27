@@ -30,9 +30,10 @@
     "test:acceptance-policy": "pnpm --filter @liiiraa/acceptance-policy exec vitest --run",
     "contracts:generate": "pnpm --filter @liiiraa/contract-generation generate",
     "contracts:check": "pnpm --filter @liiiraa/contract-generation contracts:check",
+    "contracts:compat": "pnpm --filter @liiiraa/contract-compat contracts:compat",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
-    "verify": "pnpm verify:workspace && pnpm test:architecture && pnpm generate && pnpm check && pnpm test && pnpm build"
+    "verify": "pnpm verify:workspace && pnpm test:architecture && pnpm contracts:check && pnpm contracts:compat && pnpm generate && pnpm check && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.65.0",

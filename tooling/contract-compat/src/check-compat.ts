@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
@@ -18,6 +19,12 @@ interface ContractSnapshot {
   readonly majorTransitionApproval?: MajorTransitionApproval;
   readonly http: JsonObject;
   readonly desktop: Readonly<Record<string, JsonObject>>;
+}
+
+interface BaselineArtifact {
+  readonly path: string;
+  readonly role: 'http' | 'desktop';
+  readonly sha256: string;
 }
 
 export interface CompatibilityResult {
@@ -320,6 +327,31 @@ function executeOasdiff(arguments_: string[]): Promise<string> {
   });
 }
 
+function executeGit(arguments_: string[]): Promise<string> {
+  return new Promise((resolvePromise, rejectPromise) => {
+    execFile(
+      'git',
+      arguments_,
+      {
+        cwd: REPOSITORY_ROOT,
+        encoding: 'utf8',
+        maxBuffer: 16 * 1024 * 1024,
+        windowsHide: true,
+      },
+      (error, stdout, stderr) => {
+        if (error !== null) {
+          rejectPromise(
+            new Error(`git ${arguments_.join(' ')} failed:\n${stderr.trim() || error.message}`),
+          );
+          return;
+        }
+
+        resolvePromise(stdout);
+      },
+    );
+  });
+}
+
 async function compareHttpWithOasdiff(
   baseline: JsonObject,
   candidate: JsonObject,
@@ -357,6 +389,75 @@ async function readJsonObject(path: string): Promise<JsonObject> {
   return value;
 }
 
+function requireBaselineArtifact(value: unknown, index: number): BaselineArtifact {
+  if (
+    !isJsonObject(value) ||
+    typeof value['path'] !== 'string' ||
+    (value['role'] !== 'http' && value['role'] !== 'desktop') ||
+    typeof value['sha256'] !== 'string' ||
+    !/^[a-f0-9]{64}$/u.test(value['sha256'])
+  ) {
+    throw new Error(`Approved baseline artifact ${String(index)} is invalid.`);
+  }
+
+  return value as unknown as BaselineArtifact;
+}
+
+async function readApprovedBaseline(path: string): Promise<ContractSnapshot> {
+  const manifest = await readJsonObject(path);
+  const revision = manifest['baselineRevision'];
+  const contractVersion = manifest['contractVersion'];
+  const expectedArtifactCount = manifest['expectedArtifactCount'];
+  const artifactValues = manifest['artifacts'];
+
+  if (
+    typeof revision !== 'string' ||
+    !/^[a-f0-9]{40}$/u.test(revision) ||
+    typeof contractVersion !== 'string' ||
+    !Number.isInteger(expectedArtifactCount) ||
+    !Array.isArray(artifactValues) ||
+    artifactValues.length !== expectedArtifactCount
+  ) {
+    throw new Error('Approved versioned baseline manifest is invalid.');
+  }
+
+  const artifacts = artifactValues.map(requireBaselineArtifact);
+  if (artifacts.filter((artifact) => artifact.role === 'http').length !== 1) {
+    throw new Error('Approved baseline must contain exactly one HTTP artifact.');
+  }
+
+  const loaded = await Promise.all(
+    artifacts.map(async (artifact) => {
+      const contents = await executeGit(['show', `${revision}:${artifact.path}`]);
+      const actualHash = createHash('sha256').update(contents).digest('hex');
+      if (actualHash !== artifact.sha256) {
+        throw new Error(`Approved baseline hash mismatch for ${artifact.path}: ${actualHash}.`);
+      }
+
+      const document: unknown = JSON.parse(contents);
+      if (!isJsonObject(document)) {
+        throw new Error(`Approved baseline ${artifact.path} is not a JSON object.`);
+      }
+
+      return { artifact, document };
+    }),
+  );
+  const httpEntry = loaded.find(({ artifact }) => artifact.role === 'http');
+  if (httpEntry === undefined) {
+    throw new Error('Approved baseline HTTP artifact was not loaded.');
+  }
+
+  return {
+    contractVersion,
+    http: httpEntry.document,
+    desktop: Object.fromEntries(
+      loaded
+        .filter(({ artifact }) => artifact.role === 'desktop')
+        .map(({ artifact, document }) => [basename(artifact.path), document]),
+    ),
+  };
+}
+
 async function readCurrentSnapshot(): Promise<ContractSnapshot> {
   const http = await readJsonObject(CURRENT_OPENAPI_PATH);
   const info = http['info'];
@@ -380,8 +481,7 @@ async function readCurrentSnapshot(): Promise<ContractSnapshot> {
 export async function checkApprovedBaseline(
   baselinePath = DEFAULT_BASELINE_PATH,
 ): Promise<CompatibilityResult> {
-  const baselineDocument = await readJsonObject(baselinePath);
-  const baseline = requireSnapshot(baselineDocument, 'approved baseline');
+  const baseline = await readApprovedBaseline(baselinePath);
   const candidate = await readCurrentSnapshot();
   const httpDiagnostics = await compareHttpWithOasdiff(baseline.http, candidate.http);
 

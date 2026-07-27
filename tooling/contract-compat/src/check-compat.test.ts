@@ -1,6 +1,6 @@
 import acceptedFixture from '../fixtures/accepted-change.json' with { type: 'json' };
 import breakingFixture from '../fixtures/breaking-change.json' with { type: 'json' };
-import { evaluateCompatibilityFixture } from './check-compat.ts';
+import { checkApprovedBaseline, evaluateCompatibilityFixture } from './check-compat.ts';
 
 function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -39,6 +39,12 @@ assert(
 assert(
   breakingResults.every((result) => result.diagnostics.length > 0),
   'Every rejected case must explain the incompatibility.',
+);
+
+const approvedBaselineResult = await checkApprovedBaseline();
+assert(
+  approvedBaselineResult.compatible,
+  `Approved baseline must pass: ${JSON.stringify(approvedBaselineResult)}`,
 );
 
 console.log(
