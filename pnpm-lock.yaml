@@ -264,6 +264,16 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(yaml@2.9.0)
 
+  packages/desktop-simulator:
+    dependencies:
+      '@liiiraa/desktop-client':
+        specifier: workspace:*
+        version: link:../desktop-client
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(yaml@2.9.0)
+
   tooling/acceptance-policy:
     dependencies:
       ajv:
