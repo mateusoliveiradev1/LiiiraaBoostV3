@@ -1,24 +1,24 @@
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
-import productionPackage from '../../../packages/desktop-production-reference/package.json' with {
-  type: 'json',
-};
 import { createProductionDesktopComposition } from '@liiiraa/desktop-production-reference';
 
-import leakMatrix from '../fixtures/static-runtime-leaks.json' with {
-  type: 'json',
-};
+import leakMatrix from '../fixtures/static-runtime-leaks.json' with { type: 'json' };
 import { inspectProductionRuntimeBoundary } from './runtime-guard.ts';
-import {
-  inspectStaticProductionGraph,
-  runLiveStaticProductionGuard,
-} from './static-guard.ts';
+import { inspectStaticProductionGraph, runLiveStaticProductionGuard } from './static-guard.ts';
 
 const formatDiagnostic = (diagnostic: ts.Diagnostic): string => {
   const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
   return `TS${String(diagnostic.code)} ${message}`;
 };
+
+const productionPackageContents = ts.sys.readFile(
+  '../../packages/desktop-production-reference/package.json',
+);
+if (productionPackageContents === undefined) {
+  throw new Error('Production package manifest is unavailable.');
+}
+const productionPackage = JSON.parse(productionPackageContents) as unknown;
 
 describe('type-boundary fixture refusal', () => {
   it('type-boundary compiles the negative fixture through the public package entry', () => {
@@ -57,9 +57,7 @@ describe('type-boundary fixture refusal', () => {
 
 describe('static production fixture refusal', () => {
   it('static group rejects its exact non-zero seeded graph case count', () => {
-    expect(leakMatrix.static).toHaveLength(
-      leakMatrix.expectedCaseCounts.static,
-    );
+    expect(leakMatrix.static).toHaveLength(leakMatrix.expectedCaseCounts.static);
     expect(leakMatrix.static.length).toBeGreaterThan(0);
 
     const results = leakMatrix.static.map(({ graph, expectedCode }) => {
@@ -82,19 +80,15 @@ describe('static production fixture refusal', () => {
 
 describe('runtime production fixture refusal', () => {
   it('runtime group rejects its exact non-zero seeded response case count', () => {
-    expect(leakMatrix.runtime).toHaveLength(
-      leakMatrix.expectedCaseCounts.runtime,
-    );
+    expect(leakMatrix.runtime).toHaveLength(leakMatrix.expectedCaseCounts.runtime);
     expect(leakMatrix.runtime.length).toBeGreaterThan(0);
 
-    const results = leakMatrix.runtime.map(
-      ({ boundary, expectedCode }) => {
-        const result = inspectProductionRuntimeBoundary(boundary);
-        expect(result.ok).toBe(false);
-        expect(result.findings.map(({ code }) => code)).toContain(expectedCode);
-        return result;
-      },
-    );
+    const results = leakMatrix.runtime.map(({ boundary, expectedCode }) => {
+      const result = inspectProductionRuntimeBoundary(boundary);
+      expect(result.ok).toBe(false);
+      expect(result.findings.map(({ code }) => code)).toContain(expectedCode);
+      return result;
+    });
 
     expect(results).toHaveLength(leakMatrix.expectedCaseCounts.runtime);
   });

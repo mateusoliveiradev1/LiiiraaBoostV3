@@ -19,11 +19,10 @@ export type ProductionDiagnosticValue =
   | Extract<NativeDiagnosticValue, Readonly<{ kind: 'modeled' }>>
   | Extract<NativeDiagnosticValue, Readonly<{ kind: 'unavailable' }>>;
 
-export interface ProductionSystemInspection
-  extends Omit<
-    NativeSystemInspection,
-    'deviceLabel' | 'logicalProcessorCount' | 'totalMemoryBytes'
-  > {
+export interface ProductionSystemInspection extends Omit<
+  NativeSystemInspection,
+  'deviceLabel' | 'logicalProcessorCount' | 'totalMemoryBytes'
+> {
   readonly deviceLabel: ProductionDiagnosticValue;
   readonly logicalProcessorCount: ProductionDiagnosticValue;
   readonly totalMemoryBytes: ProductionDiagnosticValue;
@@ -33,8 +32,10 @@ export interface ProductionDesktopClientIdentity extends DesktopClientIdentity {
   readonly adapterId: 'liiiraa-desktop-production-unavailable';
 }
 
-export interface ProductionDesktopInspectionClient
-  extends Omit<DesktopInspectionClient, 'identity' | 'inspectSystem'> {
+export interface ProductionDesktopInspectionClient extends Omit<
+  DesktopInspectionClient,
+  'identity' | 'inspectSystem'
+> {
   readonly identity: ProductionDesktopClientIdentity;
   inspectSystem(
     input: InspectSystemInput,

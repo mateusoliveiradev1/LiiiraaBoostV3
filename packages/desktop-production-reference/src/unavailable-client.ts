@@ -37,9 +37,7 @@ const cancelled = (): Result<never, DesktopInspectionError> =>
     error: Object.freeze({ code: 'CANCELLED' }),
   });
 
-const validateInput = (
-  input: InspectSystemInput,
-): Result<undefined, DesktopInspectionError> => {
+const validateInput = (input: InspectSystemInput): Result<undefined, DesktopInspectionError> => {
   if (input.requestId.length === 0) {
     return invalidInput('requestId');
   }
@@ -87,9 +85,7 @@ export const createProductionUnavailableClient = (
         logicalProcessorCount: unavailable(
           'Native processor inspection is not connected in this build',
         ),
-        totalMemoryBytes: unavailable(
-          'Native memory inspection is not connected in this build',
-        ),
+        totalMemoryBytes: unavailable('Native memory inspection is not connected in this build'),
       });
 
       return Promise.resolve(Object.freeze({ ok: true, value }));
