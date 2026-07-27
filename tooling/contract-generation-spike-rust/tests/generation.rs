@@ -11,6 +11,14 @@ const SHARED_SCHEMA: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../contract-generation-spike/generated/spike.schema.json"
 );
+const VALID_VECTORS: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../contract-generation-spike/fixtures/valid.json"
+);
+const INVALID_VECTORS: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../contract-generation-spike/fixtures/invalid.json"
+);
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 fn run_generator(schema: &Path) -> Output {
@@ -58,6 +66,46 @@ fn typify_emits_deterministic_rust_from_the_shared_schema() {
         source.ends_with('\n'),
         "rustfmt output must end with newline"
     );
+}
+
+#[test]
+fn rust_runtime_validation_matches_the_shared_vector_matrix() {
+    let mut schema: Value =
+        serde_json::from_str(&fs::read_to_string(SHARED_SCHEMA).expect("shared schema read"))
+            .expect("shared schema parses");
+    schema
+        .as_object_mut()
+        .expect("shared schema is an object")
+        .insert(
+            "$ref".to_owned(),
+            Value::String("SpikeEnvelope.json".to_owned()),
+        );
+    let validator = jsonschema::validator_for(&schema).expect("shared schema compiles");
+
+    let valid: Value =
+        serde_json::from_str(&fs::read_to_string(VALID_VECTORS).expect("valid vectors read"))
+            .expect("valid vectors parse");
+    for case in valid["cases"].as_array().expect("valid cases are an array") {
+        assert!(
+            validator.is_valid(&case["value"]),
+            "valid case was rejected: {}",
+            case["name"]
+        );
+    }
+
+    let invalid: Value =
+        serde_json::from_str(&fs::read_to_string(INVALID_VECTORS).expect("invalid vectors read"))
+            .expect("invalid vectors parse");
+    for case in invalid["cases"]
+        .as_array()
+        .expect("invalid cases are an array")
+    {
+        assert!(
+            !validator.is_valid(&case["value"]),
+            "invalid case was accepted: {}",
+            case["name"]
+        );
+    }
 }
 
 #[test]
