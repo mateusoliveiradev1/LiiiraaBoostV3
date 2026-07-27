@@ -26,6 +26,7 @@
     "format": "prettier --write package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
     "format:check": "prettier --check package.json pnpm-workspace.yaml turbo.json tsconfig.base.json eslint.config.mjs prettier.config.mjs",
     "test": "turbo run test",
+    "test:architecture": "node tooling/architecture-tests/src/check-workspace.ts && pnpm --filter @liiiraa/architecture-tests test -- --run",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
     "verify": "pnpm verify:workspace && pnpm generate && pnpm check && pnpm test && pnpm build"
