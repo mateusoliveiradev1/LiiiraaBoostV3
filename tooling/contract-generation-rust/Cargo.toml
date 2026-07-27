@@ -1,0 +1,11 @@
+[package]
+name = "contract-generation-rust"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde_json = "=1.0.151"
+typify = { version = "=0.7.0", default-features = false }

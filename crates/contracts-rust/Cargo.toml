@@ -1,0 +1,10 @@
+[package]
+name = "liiiraa-contracts-rust"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
