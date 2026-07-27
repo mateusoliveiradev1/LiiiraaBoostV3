@@ -28,6 +28,7 @@
     "test": "turbo run test",
     "test:adapters": "node tooling/adapter-conformance/run.mjs",
     "test:architecture": "node tooling/architecture-tests/src/check-workspace.ts && pnpm --filter @liiiraa/architecture-tests test -- --run",
+    "test:production-truth": "pnpm --filter @liiiraa/fixture-guard test -- --run -t \"artifact|production smoke\"",
     "test:acceptance-policy": "pnpm --filter @liiiraa/acceptance-policy exec vitest --run",
     "contracts:generate": "pnpm --filter @liiiraa/contract-generation generate",
     "contracts:check": "pnpm --filter @liiiraa/contract-generation contracts:check",

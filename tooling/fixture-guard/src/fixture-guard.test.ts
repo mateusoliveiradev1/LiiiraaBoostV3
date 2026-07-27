@@ -5,6 +5,10 @@ import { createProductionDesktopComposition } from '@liiiraa/desktop-production-
 
 import leakMatrix from '../fixtures/static-runtime-leaks.json' with { type: 'json' };
 import { inspectBuiltArtifact } from './artifact-guard.ts';
+import {
+  inspectProductionSmokeEvidence,
+  runProductionSmoke,
+} from './production-smoke.ts';
 import { inspectProductionRuntimeBoundary } from './runtime-guard.ts';
 import { inspectStaticProductionGraph, runLiveStaticProductionGuard } from './static-guard.ts';
 
@@ -169,5 +173,87 @@ describe('artifact production fixture refusal', () => {
         },
       ],
     });
+  });
+});
+
+describe('production smoke subprocess truth', () => {
+  it('production smoke builds and launches only the exported distributable', () => {
+    const result = runProductionSmoke();
+
+    expect(result).toMatchObject({
+      ok: true,
+      executedEntry:
+        'packages/desktop-production-reference/dist/index.js',
+      mode: 'production',
+      identity: 'liiiraa-desktop-production-unavailable',
+      schemaVersion: '1.0',
+      result: {
+        ok: true,
+        value: {
+          cpu: { kind: 'unavailable' },
+          gpu: { kind: 'unavailable' },
+          memory: { kind: 'unavailable' },
+        },
+      },
+    });
+    expect(result.artifactScannedFiles).toBeGreaterThan(0);
+  });
+
+  it('production smoke refuses a fixture module load', () => {
+    const result = inspectProductionSmokeEvidence({
+      expectedEntry: new URL(
+        '../../../packages/desktop-production-reference/dist/index.js',
+        import.meta.url,
+      ),
+      loadedModule: new URL('../fixtures/production-fixture-type.ts', import.meta.url)
+        .href,
+      boundary: {
+        mode: 'production',
+        identity: 'liiiraa-desktop-production-unavailable',
+        schemaVersion: '1.0',
+        result: { ok: true },
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.findings).toEqual([
+      {
+        code: 'ENTRY_MISMATCH',
+        path: '$.loadedModule',
+      },
+    ]);
+  });
+
+  it('production smoke refuses a fixture response', () => {
+    const entry = new URL(
+      '../../../packages/desktop-production-reference/dist/index.js',
+      import.meta.url,
+    );
+    const result = inspectProductionSmokeEvidence({
+      expectedEntry: entry,
+      loadedModule: entry.href,
+      boundary: {
+        mode: 'production',
+        identity: 'liiiraa-desktop-production-unavailable',
+        schemaVersion: '1.0',
+        result: {
+          ok: true,
+          value: {
+            cpu: {
+              kind: 'fixture',
+              scenarioId: 'forbidden-smoke-fixture',
+            },
+          },
+        },
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.findings).toEqual([
+      {
+        code: 'FIXTURE_PROVENANCE',
+        path: '$.result.value.cpu',
+      },
+    ]);
   });
 });
