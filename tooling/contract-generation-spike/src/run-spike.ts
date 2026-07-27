@@ -394,5 +394,12 @@ export async function validateSpikeVectors(): Promise<SpikeVectorEvidence> {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const evidence = await validateSpikeVectors();
-  console.log(JSON.stringify(evidence));
+  console.log(
+    JSON.stringify({
+      representation: evidence.representation,
+      validCases: evidence.validCases,
+      invalidCases: evidence.invalidCases,
+      generatedTypeScriptBytes: evidence.generatedTypeScript.length,
+    }),
+  );
 }
