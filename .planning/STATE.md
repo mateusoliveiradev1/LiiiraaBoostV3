@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-07-27T03:30:56.592Z"
+stopped_at: Completed 01-11-PLAN.md
+last_updated: "2026-07-27T03:31:18.210Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 01 execution started
 progress:
@@ -60,6 +60,7 @@ Progress: [██░░░░░░░░] 19%
 | Phase 01 P03 | 11 min | 2 tasks | 11 files |
 | Phase 01 P04 | 10 min | 2 tasks | 10 files |
 | Phase 01 P06 | 8 min | 2 tasks | 7 files |
+| Phase 01 P11 | 7 min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Compile the canonical Draft 2020-12 quality manifest schema with Ajv before semantic checks. — One executable schema remains the structural authority while stable semantic diagnostics enforce repository policy.
 - [Phase 01]: Require explicit planned or final mode selection in both CLI arguments and evaluator context. — Acceptance strength must never be inferred from file presence or environment state.
 - [Phase 01]: Resolve final evidence against exact caller-supplied command and repository-file sets. — Pure deterministic resolution keeps policy tests reproducible and prevents ambient environment inference.
+- [Phase 01]: Keep Cargo members empty until real crates exist, while machine-checking approved crates and Rust-tooling roots in workspace metadata. — Cargo rejects unmatched workspace globs before the first Rust consumer exists.
+- [Phase 01]: Test toolchain mutations through a pure snapshot policy core without adding an unreviewed Node type dependency. — The policy remains deterministic and participates in strict lint using the approved dependency set.
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T03:30:56.589Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-07-27T03:31:18.206Z
+Stopped at: Completed 01-11-PLAN.md
 Resume file: None
