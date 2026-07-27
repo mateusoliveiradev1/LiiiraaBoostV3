@@ -117,7 +117,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Every planned module has deliberate loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement behavior with no dead controls or unlabeled fixture values.
 5. User can complete every desktop flow in PT-BR or English with keyboard and assistive technology, scaled UI, reduced motion, WCAG 2.2 AA contrast, and status meaning that never relies on color alone.
 
-**Plans**: 32 plans
+**Plans**: 33 plans
 
 **Legacy outline below is superseded by the authoritative revision graph that follows.**
 
@@ -222,18 +222,22 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 **Wave 13**
 
 - [ ] 02-13-PLAN.md — Prove browser route, scenario, accessibility, and visual acceptance
-- [ ] 02-26-PLAN.md — Gate reviewed Windows/signing and human accessibility evidence
+- [ ] 02-33-PLAN.md — Build, Authenticode-sign, timestamp, verify, hash, and stage the exact Tauri artifact
 
 **Wave 14**
 
-- [ ] 02-27-PLAN.md — Prove signed packaged Windows journeys and performance
+- [ ] 02-26-PLAN.md — Record human accessibility evidence against the exact signed artifact
 
 **Wave 15**
+
+- [ ] 02-27-PLAN.md — Prove exact signed packaged Windows journeys and performance
+
+**Wave 16**
 
 - [ ] 02-28-PLAN.md — Promote observed UX-01 through UX-06 evidence
 - [ ] 02-29-PLAN.md — Promote observed UX-07 through UX-12 evidence
 
-**Wave 16**
+**Wave 17**
 
 - [ ] 02-30-PLAN.md — Enforce final evidence, omissions, and recursive gates
 
