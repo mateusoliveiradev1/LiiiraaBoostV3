@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-14-PLAN.md
-last_updated: "2026-07-27T04:33:42.105Z"
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-07-27T04:44:12.624Z"
 last_activity: 2026-07-27
-last_activity_desc: Phase 01 execution started
+last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 11
-  percent: 52
+  completed_plans: 12
+  percent: 57
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 12 of 21
+Plan: 13 of 21
 Status: Ready to execute
-Last activity: 2026-07-27 — Phase 01 execution started
+Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
-Progress: [█████░░░░░] 52%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [█████░░░░░] 52%
 | Phase 01 P17 | 5 min | 2 tasks | 8 files |
 | Phase 01 P05 | 12min | 2 tasks | 7 files |
 | Phase 01 P14 | 10min | 2 tasks | 10 files |
+| Phase 01 P07 | 10min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Bundle TypeSpec definitions into each standalone runtime schema. — Each persisted validator artifact resolves independently while TypeSpec remains the only editable semantic source.
 - [Phase 01]: Keep generated OpenAPI 3.1 paths empty until canonical HTTP operations exist. — Desktop message contracts provide reusable components but do not authorize inventing network routes.
 - [Phase 01]: Use one ordered generation stage registry. — Plan 01-15 can add language emitters to the existing deterministic root command without a second orchestration path.
+- [Phase 01]: Pin generated diagnostic schema identity path and SHA-256 in the corpus manifest. — Integrity is enforced now while runtime payload verdict parity remains owned by Plan 01-18.
+- [Phase 01]: Keep one compact valid matrix and one compact invalid matrix. — Every required provenance and rejection class stays versioned and represented exactly once.
+- [Phase 01]: Require synthetic sentinels and one frozen clock across corpus payloads. — Shared validation evidence must never contain or resemble real-machine performance data.
 
 ### Pending Todos
 
@@ -129,6 +133,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T04:33:26.181Z
-Stopped at: Completed 01-14-PLAN.md
+Last session: 2026-07-27T04:43:41.617Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
