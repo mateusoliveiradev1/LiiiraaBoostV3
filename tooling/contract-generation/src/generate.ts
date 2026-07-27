@@ -340,7 +340,7 @@ const typescriptStage: GenerationStage = {
     }
 
     const models = await compileTypeScript(
-      generatorSchema as Parameters<typeof compileTypeScript>[0],
+      generatorSchema,
       'MessageEnvelope',
       {
         additionalProperties: false,
