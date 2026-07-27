@@ -4,5 +4,6 @@ node_modules/
 coverage/
 dist/
 build/
+/target/
 *.tsbuildinfo
 .planning/research/.cache/

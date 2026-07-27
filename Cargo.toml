@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = []
+members = ["tooling/contract-generation-spike-rust"]
 
 [workspace.package]
 edition = "2024"
