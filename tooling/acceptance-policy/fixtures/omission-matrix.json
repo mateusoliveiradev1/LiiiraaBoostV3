@@ -1,0 +1,99 @@
+{
+  "expectedCounts": {
+    "omissionCases": 6,
+    "transitionStages": 6,
+    "totalCases": 12
+  },
+  "omissionCases": [
+    {
+      "id": "missing-security",
+      "kind": "omit-dimension",
+      "dimension": "security",
+      "expectedCodes": ["MANIFEST_SCHEMA_INVALID"]
+    },
+    {
+      "id": "missing-privacy",
+      "kind": "omit-dimension",
+      "dimension": "privacy",
+      "expectedCodes": ["MANIFEST_SCHEMA_INVALID"]
+    },
+    {
+      "id": "missing-accessibility",
+      "kind": "omit-dimension",
+      "dimension": "accessibility",
+      "expectedCodes": ["MANIFEST_SCHEMA_INVALID"]
+    },
+    {
+      "id": "missing-performance",
+      "kind": "omit-dimension",
+      "dimension": "performance",
+      "expectedCodes": ["MANIFEST_SCHEMA_INVALID"]
+    },
+    {
+      "id": "missing-recovery",
+      "kind": "omit-dimension",
+      "dimension": "recovery",
+      "expectedCodes": ["MANIFEST_SCHEMA_INVALID"]
+    },
+    {
+      "id": "unaccountable-privacy-exemption",
+      "kind": "owner-reviewed-exemption",
+      "dimension": "privacy",
+      "expectedCodes": ["UNACCOUNTABLE_EXEMPTION"]
+    }
+  ],
+  "transitionStages": [
+    {
+      "id": "explicit-mode-required",
+      "mode": null,
+      "evidenceStatus": "planned",
+      "resolveFile": false,
+      "resolveCommand": false,
+      "expectedCodes": ["POLICY_CONTEXT_INVALID"]
+    },
+    {
+      "id": "planned-unresolved-reference",
+      "mode": "planned",
+      "evidenceStatus": "planned",
+      "resolveFile": false,
+      "resolveCommand": false,
+      "expectedCodes": []
+    },
+    {
+      "id": "final-planned-unresolved-reference",
+      "mode": "final",
+      "evidenceStatus": "planned",
+      "resolveFile": false,
+      "resolveCommand": false,
+      "expectedCodes": [
+        "EVIDENCE_COMMAND_UNRESOLVED",
+        "EVIDENCE_FILE_MISSING",
+        "EVIDENCE_NOT_FINAL"
+      ]
+    },
+    {
+      "id": "final-passed-file-missing",
+      "mode": "final",
+      "evidenceStatus": "passed",
+      "resolveFile": false,
+      "resolveCommand": true,
+      "expectedCodes": ["EVIDENCE_FILE_MISSING"]
+    },
+    {
+      "id": "final-passed-command-unresolved",
+      "mode": "final",
+      "evidenceStatus": "passed",
+      "resolveFile": true,
+      "resolveCommand": false,
+      "expectedCodes": ["EVIDENCE_COMMAND_UNRESOLVED"]
+    },
+    {
+      "id": "final-passed-and-resolved",
+      "mode": "final",
+      "evidenceStatus": "passed",
+      "resolveFile": true,
+      "resolveCommand": true,
+      "expectedCodes": []
+    }
+  ]
+}

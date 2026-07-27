@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import omissionMatrix from '../fixtures/omission-matrix.json' with { type: 'json' };
 import {
   evaluateQualityManifest,
   parsePolicyMode,
@@ -72,6 +73,28 @@ const validManifest = (): ManifestFixture => ({
     QUALITY_DIMENSIONS.map((dimension) => [dimension, testedDimension(dimension)]),
   ),
 });
+
+const exemptionDimension = (reviewer = 'independent-reviewer'): ExemptDimensionFixture => ({
+  status: 'not_applicable',
+  exemption: {
+    rationale: 'This quality dimension does not apply to the bounded feature.',
+    residualRisk: 'A future boundary change could make this dimension applicable.',
+    reviewer,
+    reopeningTrigger: {
+      condition: 'Reopen when this feature crosses a new data or runtime boundary.',
+      reviewBy: '2027-07-27',
+    },
+  },
+});
+
+const stagedManifest = (status: 'planned' | 'passed'): ManifestFixture => {
+  const manifest = validManifest();
+  tested(manifest, 'security').evidence[0]!.status = status;
+  for (const dimension of QUALITY_DIMENSIONS.filter((value) => value !== 'security')) {
+    manifest.acceptance[dimension] = exemptionDimension();
+  }
+  return manifest;
+};
 
 const tested = (
   manifest: ManifestFixture,
@@ -235,5 +258,67 @@ describe('explicit policy mode parsing', () => {
     expect(() => parsePolicyMode([])).toThrowError('Missing required --mode planned|final.');
     expect(parsePolicyMode(['--mode', 'planned'])).toBe('planned');
     expect(parsePolicyMode(['--mode', 'final'])).toBe('final');
+  });
+});
+
+describe('planned and final omission matrix', () => {
+  it.each(omissionMatrix.omissionCases)(
+    'planned mode rejects omission case $id with one stable reason',
+    (fixture) => {
+      const manifest = validManifest();
+      const dimension = fixture.dimension as QualityDimension;
+
+      if (fixture.kind === 'omit-dimension') {
+        delete manifest.acceptance[dimension];
+      } else {
+        manifest.acceptance[dimension] = exemptionDimension(manifest.owner);
+      }
+
+      const result = evaluateQualityManifest(manifest, context({ mode: 'planned' }));
+      expect(result.diagnostics.map(({ code }) => code)).toEqual(fixture.expectedCodes);
+      expect(result.ok).toBe(false);
+    },
+  );
+
+  it.each(omissionMatrix.transitionStages)(
+    '$id proves the planned/final transition policy',
+    (fixture) => {
+      const manifest = stagedManifest(fixture.evidenceStatus as 'planned' | 'passed');
+      const evidence = tested(manifest, 'security').evidence[0]!;
+      const policyContext = {
+        ...context(),
+        mode: fixture.mode,
+        availableFiles: fixture.resolveFile ? [evidence.file] : [],
+        availableCommands: fixture.resolveCommand ? [evidence.command] : [],
+      } as unknown as QualityPolicyContext;
+
+      const result = evaluateQualityManifest(manifest, policyContext);
+      expect(result.diagnostics.map(({ code }) => code)).toEqual(fixture.expectedCodes);
+      expect(result.ok).toBe(fixture.expectedCodes.length === 0);
+    },
+  );
+
+  it('planned and final fixture groups execute exact non-vacuous case counts', () => {
+    expect(omissionMatrix.omissionCases).toHaveLength(
+      omissionMatrix.expectedCounts.omissionCases,
+    );
+    expect(omissionMatrix.transitionStages).toHaveLength(
+      omissionMatrix.expectedCounts.transitionStages,
+    );
+    expect(
+      omissionMatrix.omissionCases.length + omissionMatrix.transitionStages.length,
+    ).toBe(omissionMatrix.expectedCounts.totalCases);
+    expect(omissionMatrix.expectedCounts.omissionCases).toBe(6);
+    expect(omissionMatrix.expectedCounts.transitionStages).toBeGreaterThan(0);
+  });
+
+  it('planned mode still requires complete requirement coverage', () => {
+    const manifest = validManifest();
+    manifest.requirements = [];
+
+    const result = evaluateQualityManifest(manifest, context({ mode: 'planned' }));
+    expect(result.diagnostics.map(({ code }) => code)).toEqual([
+      'MANIFEST_SCHEMA_INVALID',
+    ]);
   });
 });
