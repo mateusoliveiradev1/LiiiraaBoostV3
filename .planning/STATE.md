@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: product-truth-and-modular-contracts
 status: executing
-stopped_at: Completed 01-20-PLAN.md
-last_updated: "2026-07-27T06:35:57.742Z"
+stopped_at: Completed 01-10-PLAN.md
+last_updated: "2026-07-27T06:56:19.655Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed 01-07-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 21
-  completed_plans: 19
+  completed_plans: 20
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 01 (product-truth-and-modular-contracts) — EXECUTING
-Plan: 20 of 21
+Plan: 21 of 21
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed 01-07-PLAN.md
 
@@ -74,6 +74,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P19 | 8 min | 2 tasks | 15 files |
 | Phase 01 P09 | 10 min | 2 tasks | 13 files |
 | Phase 01 P20 | 10 min | 2 tasks | 12 files |
+| Phase 01 P10 | 18 min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 01]: Expose one fail-closed production composition until a native transport exists. — Production must never substitute simulator truth for unavailable hardware evidence.
 - [Phase 01]: Use canonical graph evaluation and recursive runtime refusal as independent fixture guards. — Independent type, graph, identity, mode, schema, and provenance checks prevent one bypass from fabricating production truth.
 - [Phase 01]: Execute only the emitted default package export in the production smoke. — Prevents source composition or fixture wiring from satisfying process truth.
+- [Phase 01]: Final acceptance resolves exact evidence files and commands through the recursive root verify graph. — Prevents ambient state or isolated test success from satisfying release acceptance.
+- [Phase 01]: Keep quick verification under 30 seconds while preserving every deterministic foundation invariant. — Property, artifact-depth, build, audit, and final acceptance work belongs in full verification.
+- [Phase 01]: CI uploads only static bounded failure metadata with one-day retention. — Failure artifacts remain useful for job identification without bundling sensitive command output.
 
 ### Pending Todos
 
@@ -156,6 +160,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T06:35:57.737Z
-Stopped at: Completed 01-20-PLAN.md
+Last session: 2026-07-27T06:56:00.891Z
+Stopped at: Completed 01-10-PLAN.md
 Resume file: None
