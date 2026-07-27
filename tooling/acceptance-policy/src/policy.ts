@@ -160,6 +160,16 @@ const isExactCommand = (command: string): boolean =>
 const dateValue = (value: string): number => Date.parse(`${value}T00:00:00.000Z`);
 
 const validateContext = (context: QualityPolicyContext): PolicyDiagnostic[] => {
+  if (context.mode !== 'planned' && context.mode !== 'final') {
+    return [
+      diagnostic(
+        'POLICY_CONTEXT_INVALID',
+        '$context.mode',
+        'Policy mode must be explicitly set to "planned" or "final".',
+      ),
+    ];
+  }
+
   if (!Number.isFinite(dateValue(context.asOf))) {
     return [
       diagnostic(
