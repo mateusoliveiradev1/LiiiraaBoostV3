@@ -5,10 +5,7 @@ import { createProductionDesktopComposition } from '@liiiraa/desktop-production-
 
 import leakMatrix from '../fixtures/static-runtime-leaks.json' with { type: 'json' };
 import { inspectBuiltArtifact } from './artifact-guard.ts';
-import {
-  inspectProductionSmokeEvidence,
-  runProductionSmoke,
-} from './production-smoke.ts';
+import { inspectProductionSmokeEvidence, runProductionSmoke } from './production-smoke.ts';
 import { inspectProductionRuntimeBoundary } from './runtime-guard.ts';
 import { inspectStaticProductionGraph, runLiveStaticProductionGuard } from './static-guard.ts';
 
@@ -48,12 +45,12 @@ describe('type-boundary fixture refusal', () => {
 
   it('type-boundary exposes only the public index as package and build entry', () => {
     expect(productionPackage).toMatchObject({
-      main: './src/index.ts',
+      main: './dist/index.js',
       types: './src/index.ts',
       exports: {
         '.': {
           types: './src/index.ts',
-          default: './src/index.ts',
+          default: './dist/index.js',
         },
       },
     });
@@ -182,17 +179,19 @@ describe('production smoke subprocess truth', () => {
 
     expect(result).toMatchObject({
       ok: true,
-      executedEntry:
-        'packages/desktop-production-reference/dist/index.js',
+      executedEntry: 'packages/desktop-production-reference/dist/index.js',
       mode: 'production',
-      identity: 'liiiraa-desktop-production-unavailable',
+      identity: {
+        adapterId: 'liiiraa-desktop-production-unavailable',
+        adapterVersion: '1.0.0',
+      },
       schemaVersion: '1.0',
       result: {
         ok: true,
         value: {
-          cpu: { kind: 'unavailable' },
-          gpu: { kind: 'unavailable' },
-          memory: { kind: 'unavailable' },
+          deviceLabel: { kind: 'unavailable' },
+          logicalProcessorCount: { kind: 'unavailable' },
+          totalMemoryBytes: { kind: 'unavailable' },
         },
       },
     });
@@ -205,11 +204,13 @@ describe('production smoke subprocess truth', () => {
         '../../../packages/desktop-production-reference/dist/index.js',
         import.meta.url,
       ),
-      loadedModule: new URL('../fixtures/production-fixture-type.ts', import.meta.url)
-        .href,
+      loadedModule: new URL('../fixtures/production-fixture-type.ts', import.meta.url).href,
       boundary: {
         mode: 'production',
-        identity: 'liiiraa-desktop-production-unavailable',
+        identity: {
+          adapterId: 'liiiraa-desktop-production-unavailable',
+          adapterVersion: '1.0.0',
+        },
         schemaVersion: '1.0',
         result: { ok: true },
       },
@@ -234,7 +235,10 @@ describe('production smoke subprocess truth', () => {
       loadedModule: entry.href,
       boundary: {
         mode: 'production',
-        identity: 'liiiraa-desktop-production-unavailable',
+        identity: {
+          adapterId: 'liiiraa-desktop-production-unavailable',
+          adapterVersion: '1.0.0',
+        },
         schemaVersion: '1.0',
         result: {
           ok: true,

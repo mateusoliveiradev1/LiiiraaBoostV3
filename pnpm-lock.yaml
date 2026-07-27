@@ -343,6 +343,9 @@ importers:
 
   tooling/fixture-guard:
     dependencies:
+      '@liiiraa/contracts-ts':
+        specifier: workspace:*
+        version: link:../../packages/contracts-ts
       '@liiiraa/desktop-client':
         specifier: workspace:*
         version: link:../../packages/desktop-client

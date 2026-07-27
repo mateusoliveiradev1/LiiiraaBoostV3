@@ -7,7 +7,7 @@ import {
 export default {
   forbidden: createDependencyCruiserRestrictions(canonicalPolicy),
   options: {
-    exclude: '(^|/)node_modules/',
+    exclude: '(^|/)(?:node_modules|dist)(?:/|$)',
     includeOnly: createCanonicalRootPattern(canonicalPolicy),
     tsConfig: {
       fileName: 'tsconfig.base.json',

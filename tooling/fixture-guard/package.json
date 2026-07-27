@@ -6,9 +6,10 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check": "tsc --project tsconfig.json",
-    "test": "vitest"
+    "test": "pnpm --filter @liiiraa/desktop-production-reference build && vitest"
   },
   "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/desktop-client": "workspace:*",
     "@liiiraa/desktop-production-reference": "workspace:*"
   },

@@ -1,9 +1,9 @@
-import {
-  DESKTOP_INSPECTION_CAPABILITY,
-  DESKTOP_SCHEMA_VERSION,
-  type DesktopInspectionError,
-  type InspectSystemInput,
-  type Result,
+import type {
+  DesktopCapability,
+  DesktopInspectionError,
+  DesktopSchemaVersion,
+  InspectSystemInput,
+  Result,
 } from '@liiiraa/desktop-client';
 
 import type {
@@ -11,6 +11,9 @@ import type {
   ProductionDiagnosticValue,
   ProductionSystemInspection,
 } from './composition.js';
+
+const DESKTOP_INSPECTION_CAPABILITY = 'system.inspect.summary' satisfies DesktopCapability;
+const DESKTOP_SCHEMA_VERSION = '1.0' satisfies DesktopSchemaVersion;
 
 export interface ProductionUnavailableOptions {
   readonly clock: () => string;
@@ -66,7 +69,7 @@ export const createProductionUnavailableClient = (
       adapterVersion: '1.0.0',
     }),
     schemaVersion: DESKTOP_SCHEMA_VERSION,
-    capabilities: Object.freeze([DESKTOP_INSPECTION_CAPABILITY]),
+    capabilities: Object.freeze([DESKTOP_INSPECTION_CAPABILITY] as const),
     inspectSystem(
       input: InspectSystemInput,
     ): Promise<Result<ProductionSystemInspection, DesktopInspectionError>> {
