@@ -8,9 +8,9 @@
 ### Product Foundation
 
 - [x] **FOUND-01**: The product uses one versioned contract source to generate TypeScript and Rust transport models and runtime validators
-- [ ] **FOUND-02**: The desktop simulator and future real adapters pass the same contract conformance suite
+- [x] **FOUND-02**: The desktop simulator and future real adapters pass the same contract conformance suite
 - [x] **FOUND-03**: Every displayed diagnostic or performance value identifies whether it is fixture, observed, measured, modeled, or unavailable
-- [ ] **FOUND-04**: Production mode cannot expose deterministic fixture data as if it came from the user's PC
+- [x] **FOUND-04**: Production mode cannot expose deterministic fixture data as if it came from the user's PC
 - [x] **FOUND-05**: Automated architecture checks reject forbidden cross-module imports and circular dependencies
 - [x] **FOUND-06**: Security, privacy, accessibility, performance, and recovery criteria are part of each affected feature's acceptance tests
 
@@ -161,9 +161,9 @@ A v1 requirement is complete only when:
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Complete |
-| FOUND-02 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | UX-01 | Phase 2 | Pending |
