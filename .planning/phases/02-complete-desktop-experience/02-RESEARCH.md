@@ -308,7 +308,7 @@ Create reusable PCs, games, entitlement states, evidence sources, and workflow o
 | Fixture truth | UI-local JSON mocks | `desktop-simulator` → `desktop-client` | The repository already enforces adapter identity and runtime validation. [VERIFIED: packages/desktop-simulator/src/index.ts] |
 | Visual controls | shadcn, dashboard kits, copied registry blocks | Authored design-system components | The locked visual identity rejects inherited template language. [VERIFIED: 02-UI-SPEC.md] |
 | Charts | Canvas decoration without semantics | Owned wrappers and uPlot only for dense series | Every plot needs keyboard cursor, table and summary. [VERIFIED: 02-UI-SPEC.md section 14] |
-| Signing or cryptography | Custom signatures or embedded secrets | Authenticode/Tauri updater signing through CI secret provider | Signing identity and private-key custody are security boundaries. [CITED: https://v2.tauri.app/distribute/sign/windows/] |
+| Signing or cryptography | Custom signatures or embedded secrets | Local self-signed Authenticode using a non-exportable key in the maintainer's `CurrentUser` Windows CNG store; CI has no key access and builds only unsigned non-promotable development artifacts; publicly trusted signing is deferred to Phase 10 before distribution | Signing identity and private-key custody are security boundaries. [CITED: https://v2.tauri.app/distribute/sign/windows/] |
 
 ## Common Pitfalls
 
@@ -429,10 +429,11 @@ type OperationalState =
 
 ## Open Questions (RESOLVED)
 
-1. **Which Authenticode provider and certificate identity will satisfy UX-01?**
-   - Known: a signed Tauri package is required and Tauri documents Windows signing flows. [CITED: https://v2.tauri.app/distribute/sign/windows/]
-   - Unknown: provider, certificate type, secret custody, timestamp server, and CI access are not defined in repository evidence.
-   - **RESOLVED BY:** Plan 02-01 Task 2 is the blocking decision mechanism and `.planning/phases/02-complete-desktop-experience/02-SIGNING-DECISION.md` is its non-secret custody contract; Plan 02-26 Task 1 then attaches observed access/provenance in `quality/evidence/phase-02/environment/signing-access.json`. No provider or certificate is preselected here: execution remains blocked until the human approves a real choice, and UX-01 cannot pass final acceptance without a verifiable signature.
+1. **Which zero-cost Authenticode identity satisfies Phase 2 development acceptance?**
+   - Known: the user selected a local self-signed Windows CNG development certificate at zero cost. Its non-exportable private key remains in the maintainer's `CurrentUser` certificate store and CI receives no private-key access.
+   - Known: this identity proves local artifact integrity only. It has an untrusted self-signed root, no public trust or SmartScreen reputation, and it is not production-ready or distributable; publicly trusted signing remains a Phase 10 gate.
+   - Timestamp applicability is `not-applicable` unless execution verifies an official free compatible timestamp authority. A timestamp service or timestamp claim must not be invented.
+   - **RESOLVED BY:** Plan 02-01 Task 2 records the approved policy in `.planning/phases/02-complete-desktop-experience/02-SIGNING-DECISION.md`; Plan 02-33 owns creation of the local certificate and the non-secret observed access/provenance record in `quality/evidence/phase-02/environment/signing-access.json`.
 
 2. **Keep direct `tauri-driver` or adopt the current recommended WebdriverIO service?**
    - Known: the project stack pins `tauri-driver` 2.0.6; current official Tauri docs recommend `@wdio/tauri-service` and still support direct driving. [VERIFIED: AGENTS.md] [CITED: https://v2.tauri.app/develop/tests/webdriver/]
@@ -458,10 +459,10 @@ type OperationalState =
 | EdgeDriver | direct Windows WebDriver | No | command not found | Install matching driver or use reviewed service change. [VERIFIED: environment probe] |
 | WebView2 Runtime | runtime/startup tests | Not detected by probes | registry and standard application path yielded no result | Installer bootstrapper and clean-VM verification. [VERIFIED: environment probe] |
 | Visual Studio C++ build tools | Windows Tauri link/bundle | Not detected on PATH/standard probes | `cl`/`link` not found | Install Tauri Windows prerequisites. [CITED: https://v2.tauri.app/start/prerequisites/] |
-| Authenticode certificate/provider | signed installer | Unknown | no repository evidence | No final-acceptance fallback. [ASSUMED] |
+| Authenticode development certificate/provider | locally signed development installer | Approved zero-cost local path | Self-signed Windows CNG certificate; non-exportable key in maintainer `CurrentUser` store; `signing-access.json` owned by Plan 02-33 | Timestamp is `not-applicable` unless an official free compatible TSA is verified; untrusted root, no SmartScreen/public trust, and no distribution. Trusted production signing is deferred to Phase 10. [VERIFIED: user decision] |
 | NVDA / Windows 10 runner | manual accessibility/support matrix | Not probed/available | no evidence | Provision before final acceptance. [ASSUMED] |
 
-**Missing dependencies with no final fallback:** correct Node version, Authenticode signing identity, supported Windows 10 packaged runner.
+**Missing dependencies with no final fallback:** correct Node version and supported Windows 10 packaged runner. The Phase 2 development-signing identity is resolved through the zero-cost local CNG path; publicly trusted distributable signing is intentionally deferred to Phase 10.
 
 **Missing dependencies with implementation fallback:** direct driver, EdgeDriver, WebView2, and build tools can be installed in Wave 0; browser tests can advance UI work but cannot replace packaged acceptance.
 

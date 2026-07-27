@@ -70,6 +70,17 @@ Downstream agents MUST read `02-UI-SPEC.md` before planning or implementing. Req
 - **D-19:** Closing the window exits the interface by default. Remaining in the tray requires explicit opt-in during calibration or later in Settings.
 - **D-20:** A clean development/test installation starts in S01 at first calibration. The scenario selector may switch scenarios and remember the most recent selection afterward.
 
+### Post-planning decision: zero-paid-services development signing
+
+This decision was made after the original D-01–D-20 discussion and does not rewrite that history:
+
+- Everything remains free during Phase 2. No paid signing provider, certificate, HSM, cloud runner, timestamp service, or other paid resource may be required.
+- Phase 2 uses only a local self-signed SHA-256 development Authenticode certificate with code-signing EKU `1.3.6.1.5.5.7.3.3`. Its private key is non-exportable and remains in the maintainer's `Cert:\CurrentUser\My` Windows CNG store.
+- CI receives no private-key access. CI artifacts are unsigned development builds and may not be staged, published, promoted, distributed, or labeled release-ready.
+- The self-signed certificate provides local integrity only. It provides no public trust, no SmartScreen reputation, no production readiness, and no distribution authorization.
+- Timestamping is `not-applicable` unless execution verifies an official, free, compatible timestamp authority. A timestamp or service must never be assumed or fabricated.
+- Commercial publicly trusted signing is deferred to Phase 10 and is required before any public release or distribution claim.
+
 ### The agent's Discretion
 
 - Choose exact fictional game, profile, operation, hardware model, evidence source, and localized names within the scenario narrative constraints.

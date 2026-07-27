@@ -222,7 +222,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 **Wave 13**
 
 - [ ] 02-13-PLAN.md — Prove browser route, scenario, accessibility, and visual acceptance
-- [ ] 02-33-PLAN.md — Build, Authenticode-sign, timestamp, verify, hash, and stage the exact Tauri artifact
+- [ ] 02-33-PLAN.md — Build, Authenticode-sign, record and verify timestamp applicability (including not-applicable), hash, and stage the exact Tauri artifact
 
 **Wave 14**
 
