@@ -1,0 +1,154 @@
+name: Phase 1 verification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quick-linux:
+    name: Quick verification (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist before installation
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact Rust and Cargo toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
+      - name: Select exact Rust and Cargo toolchain
+        run: rustup default 1.97.1
+      - name: Verify CI gate reachability
+        run: node tooling/ci/verify-required-artifacts.mjs --ci .github/workflows/ci.yml
+      - name: Run contract compatibility preflight
+        run: pnpm contracts:compat
+      - name: Run authoritative quick verification
+        run: pnpm verify:quick
+      - name: Record bounded redacted failure metadata
+        if: failure()
+        env:
+          CI_FAILURE_JOB: quick-linux
+        run: >-
+          node -e "require('node:fs').writeFileSync('ci-failure.json',
+          JSON.stringify({ job: process.env.CI_FAILURE_JOB, status: 'failed' }))"
+      - name: Upload bounded redacted failure metadata
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quick-linux-failure
+          path: ci-failure.json
+          if-no-files-found: error
+          retention-days: 1
+
+  full-linux:
+    name: Full verification (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist before installation
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact Rust and Cargo toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
+      - name: Select exact Rust and Cargo toolchain
+        run: rustup default 1.97.1
+      - name: Verify CI gate reachability
+        run: node tooling/ci/verify-required-artifacts.mjs --ci .github/workflows/ci.yml
+      - name: Run contract compatibility preflight
+        run: pnpm contracts:compat
+      - name: Run final acceptance preflight
+        run: pnpm acceptance:check -- --mode final
+      - name: Run authoritative full verification
+        run: pnpm verify
+      - name: Record bounded redacted failure metadata
+        if: failure()
+        env:
+          CI_FAILURE_JOB: full-linux
+        run: >-
+          node -e "require('node:fs').writeFileSync('ci-failure.json',
+          JSON.stringify({ job: process.env.CI_FAILURE_JOB, status: 'failed' }))"
+      - name: Upload bounded redacted failure metadata
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: full-linux-failure
+          path: ci-failure.json
+          if-no-files-found: error
+          retention-days: 1
+
+  full-windows:
+    name: Full verification (Windows)
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm
+        run: corepack enable; corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist before installation
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact Rust and Cargo toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
+      - name: Select exact Rust and Cargo toolchain
+        run: rustup default 1.97.1
+      - name: Verify CI gate reachability
+        run: node tooling/ci/verify-required-artifacts.mjs --ci .github/workflows/ci.yml
+      - name: Run contract compatibility preflight
+        run: pnpm contracts:compat
+      - name: Run final acceptance preflight
+        run: pnpm acceptance:check -- --mode final
+      - name: Run authoritative full verification
+        run: pnpm verify
+      - name: Record bounded redacted failure metadata
+        if: failure()
+        env:
+          CI_FAILURE_JOB: full-windows
+        run: >-
+          node -e "require('node:fs').writeFileSync('ci-failure.json',
+          JSON.stringify({ job: process.env.CI_FAILURE_JOB, status: 'failed' }))"
+      - name: Upload bounded redacted failure metadata
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: full-windows-failure
+          path: ci-failure.json
+          if-no-files-found: error
+          retention-days: 1

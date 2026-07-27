@@ -264,17 +264,49 @@ const checkCi = (snapshot, ciPath, diagnostics) => {
   for (const marker of [
     'permissions:',
     'contents: read',
+    'quick-linux:',
+    'full-linux:',
+    'full-windows:',
+    'ubuntu-24.04',
+    'windows-2025',
+    'actions/checkout@11d5960a326750d5838078e36cf38b85af677262',
+    'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020',
+    'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02',
+    'node-version: 24.18.0',
+    'pnpm@11.17.0',
+    'rustup toolchain install 1.97.1',
+    'verify-pins.mjs --check',
+    'pnpm install --frozen-lockfile --ignore-scripts',
+    'persist-credentials: false',
+    'verify-required-artifacts.mjs --ci .github/workflows/ci.yml',
     'pnpm verify:quick',
     'pnpm verify',
     'pnpm contracts:compat',
     '--mode final',
+    'if: failure()',
+    'retention-days: 1',
   ]) {
     if (!ci.includes(marker)) {
       diagnostics.push(`${ciPath}: missing "${marker}"`);
     }
   }
-  if (/continue-on-error:\s*true|permissions:\s*write-all/u.test(ci)) {
+  if (
+    /continue-on-error:\s*true|permissions:\s*write-all|\$\{\{\s*secrets\.|(?:actions|checks|deployments|id-token|packages|pull-requests|security-events|statuses):\s*write/u.test(
+      ci,
+    )
+  ) {
     diagnostics.push(`${ciPath}: verification must fail closed with read-only permissions`);
+  }
+  for (const match of ci.matchAll(/uses:\s*[^@\s]+@([^\s]+)/gu)) {
+    if (!/^[0-9a-f]{40}$/u.test(match[1])) {
+      diagnostics.push(`${ciPath}: every action must be pinned to a full commit SHA`);
+    }
+  }
+  if (
+    ci.indexOf('verify-pins.mjs --check') >
+    ci.indexOf('pnpm install --frozen-lockfile --ignore-scripts')
+  ) {
+    diagnostics.push(`${ciPath}: dependency allowlist verification must precede installation`);
   }
 };
 
