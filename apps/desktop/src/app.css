@@ -143,6 +143,95 @@ textarea {
   font-family: var(--lb-font-data);
 }
 
+.desktop-startup-surface,
+.desktop-installer-handoff {
+  box-sizing: border-box;
+  display: grid;
+  align-content: center;
+  gap: var(--lb-space-4);
+  inline-size: min(100%, 760px);
+  min-block-size: calc(100vh - (var(--lb-space-6) * 2));
+  margin-inline: auto;
+}
+
+.desktop-startup-header {
+  display: grid;
+  gap: var(--lb-space-2);
+  max-inline-size: 72ch;
+}
+
+.desktop-startup-header h1,
+.desktop-startup-header p {
+  margin: 0;
+}
+
+.desktop-startup-context {
+  color: var(--lb-cobalt-signal);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.desktop-startup-version,
+.desktop-installer-details dd {
+  font-family: var(--lb-font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+.desktop-installer-details {
+  display: grid;
+  margin: 0;
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.desktop-installer-details > div {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(0, 1.4fr);
+  gap: var(--lb-space-3);
+  min-block-size: var(--lb-row-standard-size);
+  padding: var(--lb-space-2) 0;
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.desktop-installer-details > div:last-child {
+  border-block-end: 0;
+}
+
+.desktop-installer-details dt {
+  color: var(--lb-text-secondary);
+}
+
+.desktop-installer-details dd {
+  min-inline-size: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.desktop-installer-details [data-status='invalid'],
+.desktop-installer-details [data-status='unsupported'] {
+  color: var(--lb-critical);
+}
+
+.desktop-startup-decision,
+.desktop-startup-safety {
+  max-inline-size: 72ch;
+  color: var(--lb-text-secondary);
+}
+
+.desktop-startup-surface[data-startup-kind='failure'] {
+  align-content: start;
+}
+
+.desktop-startup-surface[data-startup-kind='failure'] h2 {
+  color: var(--lb-critical);
+}
+
+.desktop-startup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
 @media (width < 1440px) {
   .desktop-shell-body {
     grid-template-columns: 200px minmax(0, 1fr);
@@ -194,6 +283,22 @@ textarea {
   }
 
   .desktop-operational-state {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .desktop-startup-surface,
+  .desktop-installer-handoff {
+    align-content: start;
+    min-block-size: auto;
+  }
+
+  .desktop-installer-details > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--lb-space-1);
+  }
+
+  .desktop-startup-actions {
     align-items: stretch;
     flex-direction: column;
   }

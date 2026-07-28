@@ -1,0 +1,159 @@
+// @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+import type {
+  ShellInstallerIdentityJson,
+  ShellStartupFailureStateJson,
+  ShellStartupStateJson,
+} from '@liiiraa/contracts-ts';
+
+import { InstallerHandoff } from './installer-handoff.js';
+import { StartupSurface } from './startup.js';
+
+const installer: ShellInstallerIdentityJson = {
+  publisher: 'Liiiraa Boost Development',
+  version: '0.2.0',
+  channel: 'development',
+  windowsCompatibility: {
+    kind: 'supported',
+    detectedBuild: 26100,
+    minimumBuild: 19045,
+  },
+};
+
+const startupStates: readonly ShellStartupStateJson[] = [
+  { kind: 'splash', step: 'initializing-webview' },
+  { kind: 'splash', step: 'loading-local-state' },
+  { kind: 'splash', step: 'validating-installation' },
+  { kind: 'splash', step: 'opening-shell' },
+  { kind: 'updating', step: 'verifying-signature' },
+  { kind: 'updating', step: 'installing-update' },
+  { kind: 'updating', step: 'preparing-rollback' },
+  { kind: 'ready' },
+  {
+    kind: 'failure',
+    reason: 'missing-webview2',
+    recoveryAction: 'install-webview2',
+  },
+  {
+    kind: 'failure',
+    reason: 'damaged-installation',
+    recoveryAction: 'view-offline-instructions',
+  },
+  {
+    kind: 'failure',
+    reason: 'incompatible-windows-build',
+    recoveryAction: 'view-offline-instructions',
+  },
+  {
+    kind: 'failure',
+    reason: 'local-state-migration-failed',
+    recoveryAction: 'retry',
+  },
+  {
+    kind: 'failure',
+    reason: 'update-signature-failed',
+    recoveryAction: 'rollback',
+  },
+  {
+    kind: 'failure',
+    reason: 'internal-startup-error',
+    recoveryAction: 'open-safe-mode',
+  },
+];
+
+describe('installer handoff', () => {
+  it('shows exact signed-development identity and compatibility before continuation', () => {
+    const markup = renderToStaticMarkup(
+      <InstallerHandoff identity={installer} locale="en-US" />,
+    );
+
+    expect(markup).toContain('Liiiraa Boost Development');
+    expect(markup).toContain('0.2.0');
+    expect(markup).toContain('development');
+    expect(markup).toContain('26100');
+    expect(markup).toContain('19045');
+    expect(markup).toContain('self-signed development certificate');
+    expect(markup).toContain('Updater disabled');
+    expect(markup).toContain('No optimization has run');
+  });
+
+  it('blocks unsupported or unverified identities without fabricating trust', () => {
+    const markup = renderToStaticMarkup(
+      <InstallerHandoff
+        identity={{
+          ...installer,
+          channel: 'stable',
+          windowsCompatibility: {
+            kind: 'unsupported',
+            reason: 'unsupported-build',
+            detectedBuild: 18363,
+            minimumBuild: 19045,
+          },
+        }}
+        locale="pt-BR"
+        signatureState="unknown"
+        updateIdentity="unknown"
+      />,
+    );
+
+    expect(markup).toContain('incompatível');
+    expect(markup).toContain('ainda não foi verificada');
+    expect(markup).toContain('disabled');
+    expect(markup).not.toContain('confiável');
+  });
+});
+
+describe('startup', () => {
+  it.each(startupStates)(
+    'renders complete accessible copy for $kind state',
+    (state) => {
+      const markup = renderToStaticMarkup(
+        <StartupSurface
+          firstLaunch
+          locale="pt-BR"
+          state={state}
+          version="0.2.0"
+        />,
+      );
+
+      expect(markup).toContain('Primeira abertura local');
+      expect(markup).toContain('Versão');
+      expect(markup).not.toContain('placeholder');
+      expect(markup).not.toContain('undefined');
+      if (state.kind === 'failure') {
+        expect(markup).toContain('role="alert"');
+        expect(markup).toContain('Abrir suporte');
+        expect(markup).toContain('documentação');
+      }
+    },
+  );
+
+  it('exposes all generated recovery actions with localized safe controls', () => {
+    const recoveryActions: readonly ShellStartupFailureStateJson['recoveryAction'][] =
+      [
+        'install-webview2',
+        'view-offline-instructions',
+        'retry',
+        'rollback',
+        'open-safe-mode',
+        'exit',
+      ];
+
+    for (const recoveryAction of recoveryActions) {
+      const markup = renderToStaticMarkup(
+        <StartupSurface
+          locale="en-US"
+          state={{
+            kind: 'failure',
+            reason: 'internal-startup-error',
+            recoveryAction,
+          }}
+          version="0.2.0"
+        />,
+      );
+      expect(markup).not.toContain('undefined');
+      expect(markup).toContain('No optimization or privileged change');
+    }
+  });
+});
