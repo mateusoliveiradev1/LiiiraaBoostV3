@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-07-28T03:06:15.919Z"
+stopped_at: Completed 02-17-PLAN.md
+last_updated: "2026-07-28T03:17:00.260Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 33
+  completed_plans: 34
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 4 of 33
+Plan: 5 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -88,6 +88,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P15 | 23min | 2 tasks | 16 files |
 | Phase 02 P04 | 24min | 2 tasks | 11 files |
 | Phase 02 P16 | 9min | 2 tasks | 5 files |
+| Phase 02 P17 | 7min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -184,6 +185,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep Wave 0 dry-run strictly planned and report every unavailable packaged prerequisite without invoking tauri-driver.
 - [Phase 02]: Accept Phase 2 signing only as local CurrentUser CNG development custody with false public-trust, SmartScreen, production, and distribution claims.
 - [Phase 02]: Allow timestamping only when not applicable or backed by explicit official-free evidence.
+- [Phase 02]: Keep Plan 02-28 accountable for UX-01 through UX-06 evidence promotion. — The quality schema requires evidence owner to match manifest owner, and Plan 02-28 performs final observed promotion.
+- [Phase 02]: Reference canonical story and browser scenario parity for UX-04 through UX-06. — Avoids duplicating the S01-S24 catalog while preserving omission-resistant evidence paths.
 
 ### Pending Todos
 
@@ -207,6 +210,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T03:05:51.501Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-07-28T03:17:00.256Z
+Stopped at: Completed 02-17-PLAN.md
 Resume file: None
