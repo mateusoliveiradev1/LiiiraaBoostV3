@@ -12,6 +12,7 @@ import {
   PreviewWorkflowSurface,
   advancePreviewWorkflow,
   createPreviewWorkflowReceipt,
+  type PreviewWorkflowState,
 } from './preview-workflows.js';
 import { RECOVER_VIEWS, RecoverSurface } from './recover.js';
 
@@ -29,7 +30,7 @@ describe('preview recovery restart future surfaces', () => {
       'preview-complete',
     ] as const;
 
-    let state = expectedPath[0];
+    let state: PreviewWorkflowState = expectedPath[0];
     for (const event of [
       'VALIDATE',
       'VALID',
@@ -45,9 +46,32 @@ describe('preview recovery restart future surfaces', () => {
     expect(advancePreviewWorkflow('previewing', 'PAUSE')).toBe('paused');
     expect(advancePreviewWorkflow('paused', 'RECOVER')).toBe('guided-recovery');
     expect(advancePreviewWorkflow('guided-recovery', 'VERIFIED')).toBe('verified');
+    expect(advancePreviewWorkflow('validating', 'FAIL')).toBe('partial-failure');
+    expect(advancePreviewWorkflow('partial-failure', 'DIAGNOSE')).toBe(
+      'dependency-diagnostic',
+    );
+    expect(advancePreviewWorkflow('dependency-diagnostic', 'RECOVER')).toBe(
+      'guided-recovery',
+    );
+    expect(advancePreviewWorkflow('ready', 'RESTART')).toBe('restart-pending');
+    expect(advancePreviewWorkflow('restart-pending', 'CONTINUE')).toBe(
+      'restart-continuation',
+    );
     expect(PREVIEW_WORKFLOW_STATES).toEqual(
       expect.arrayContaining([...expectedPath, 'paused', 'guided-recovery', 'verified']),
     );
+
+    for (const workflowState of PREVIEW_WORKFLOW_STATES) {
+      const markup = renderToStaticMarkup(
+        <PreviewWorkflowSurface
+          locale="en"
+          scenarioId="S15"
+          state={workflowState}
+        />,
+      );
+      expect(markup).toContain(`data-preview-state="${workflowState}"`);
+      expect(markup).toContain('no privileged authority connected');
+    }
   });
 
   it('renders every risk gate and always terminates in an exact no-change receipt', () => {
@@ -56,11 +80,11 @@ describe('preview recovery restart future surfaces', () => {
         riskLevel === 'extreme' ? 'EU ENTENDO QUE ESTA É APENAS UMA PRÉVIA' : undefined;
       const markup = renderToStaticMarkup(
         <PreviewWorkflowSurface
-          confirmationValue={confirmationValue}
           locale="pt-BR"
           riskLevel={riskLevel}
           scenarioId="S15"
           state="preview-complete"
+          {...(confirmationValue === undefined ? {} : { confirmationValue })}
         />,
       );
 
