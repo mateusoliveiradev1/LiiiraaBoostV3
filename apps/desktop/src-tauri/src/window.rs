@@ -102,6 +102,22 @@ impl HostEventMetadata {
             issued_at: format_unix_timestamp(elapsed.as_secs()),
         }
     }
+
+    pub(crate) fn into_envelope(self, message_type: &str, payload: Value) -> Value {
+        let mut message = json!({
+            "schemaVersion": "1.0",
+            "messageType": message_type,
+            "requestId": self.request_id,
+            "issuedAt": self.issued_at,
+            "payload": payload
+        });
+
+        if let Some(correlation_id) = self.correlation_id {
+            message["correlationId"] = Value::String(correlation_id);
+        }
+
+        message
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -311,17 +327,7 @@ fn build_host_event(
     payload: Value,
     metadata: HostEventMetadata,
 ) -> Result<HostToRendererShellEvent, WindowLifecycleError> {
-    let mut message = json!({
-        "schemaVersion": "1.0",
-        "messageType": message_type,
-        "requestId": metadata.request_id,
-        "issuedAt": metadata.issued_at,
-        "payload": payload
-    });
-
-    if let Some(correlation_id) = metadata.correlation_id {
-        message["correlationId"] = Value::String(correlation_id);
-    }
+    let message = metadata.into_envelope(message_type, payload);
 
     validate_host_to_renderer_shell_event(HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, &message)
         .map_err(|_| WindowLifecycleError::HostEventRejected)

@@ -1,3 +1,4 @@
+mod navigation;
 mod window;
 
 use std::sync::Mutex;
@@ -7,11 +8,15 @@ use liiiraa_contracts_rust::{
     RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellWindowState,
     validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
 };
+use navigation::{
+    ExternalNavigationSource, navigation_event_from_external, navigation_event_from_second_instance,
+};
 use serde::Serialize;
 use serde_json::Value;
 use tauri::{
     AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
 };
+use tauri_plugin_deep_link::DeepLinkExt;
 use window::{
     CloseAction, HOST_EVENT_CHANNEL, HostEventMetadata, WindowEffect, WindowLifecycle,
     WindowLifecycleError, WorkArea,
@@ -195,6 +200,26 @@ fn apply_window_state(
     Ok(())
 }
 
+fn focus_main_window(app: &AppHandle) -> Result<(), ShellDispatchError> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or(ShellDispatchError::WindowUnavailable)?;
+    window
+        .unminimize()
+        .and_then(|()| window.show())
+        .and_then(|()| window.set_focus())
+        .map_err(|_| ShellDispatchError::HostOperationFailed)
+}
+
+fn emit_navigation_event(
+    app: &AppHandle,
+    event: HostToRendererShellEvent,
+) -> Result<(), ShellDispatchError> {
+    focus_main_window(app)?;
+    app.emit(HOST_EVENT_CHANNEL, event)
+        .map_err(|_| ShellDispatchError::HostOperationFailed)
+}
+
 fn build_profile() -> BuildProfile {
     if cfg!(debug_assertions) {
         BuildProfile::Development
@@ -211,9 +236,13 @@ fn run() -> Result<(), String> {
     tauri::Builder::default()
         .manage(Mutex::new(WindowLifecycle::default()))
         .plugin(tauri_plugin_single_instance::init(
-            |app, _arguments, _cwd| {
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.set_focus();
+            |app, arguments, _cwd| {
+                let _ = focus_main_window(app);
+                if let Ok(Some(event)) = navigation_event_from_second_instance(
+                    &arguments,
+                    HostEventMetadata::now("second-instance-navigation"),
+                ) {
+                    let _ = emit_navigation_event(app, event);
                 }
             },
         ))
@@ -222,6 +251,36 @@ fn run() -> Result<(), String> {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .setup(|app| {
+            let app_handle = app.handle().clone();
+            app.deep_link().on_open_url(move |open_url| {
+                for url in open_url.urls() {
+                    if let Ok(event) = navigation_event_from_external(
+                        url.as_str(),
+                        ExternalNavigationSource::DeepLink,
+                        HostEventMetadata::now("deep-link-navigation"),
+                    ) {
+                        let _ = emit_navigation_event(&app_handle, event);
+                        break;
+                    }
+                }
+            });
+
+            if let Ok(Some(urls)) = app.deep_link().get_current() {
+                for url in urls {
+                    if let Ok(event) = navigation_event_from_external(
+                        url.as_str(),
+                        ExternalNavigationSource::DeepLink,
+                        HostEventMetadata::now("startup-deep-link-navigation"),
+                    ) {
+                        let _ = emit_navigation_event(app.handle(), event);
+                        break;
+                    }
+                }
+            }
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![dispatch_shell_command])
         .on_window_event(|window, event| {
             if window.label() != "main" {

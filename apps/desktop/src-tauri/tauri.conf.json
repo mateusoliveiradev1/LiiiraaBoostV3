@@ -48,9 +48,14 @@
         }
       ]
     }
+ },
+ "plugins": {
+  "deep-link": {
+   "desktop": {
+    "schemes": ["liiiraa-boost"]
+   }
   },
-  "plugins": {
-    "liiiraa-shell": {
+  "liiiraa-shell": {
       "identity": {
         "publisher": "Liiiraa Boost",
         "version": "0.0.0",

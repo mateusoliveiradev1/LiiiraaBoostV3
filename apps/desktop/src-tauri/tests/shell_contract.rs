@@ -2,10 +2,10 @@ use std::{fs, path::PathBuf};
 
 use serde_json::{Value, json};
 
-#[path = "../src/window.rs"]
-mod window;
 #[path = "../src/navigation.rs"]
 mod navigation;
+#[path = "../src/window.rs"]
+mod window;
 
 use navigation::{
     ExternalNavigationSource, NavigationBridgeError, navigation_event_from_external,
@@ -293,10 +293,7 @@ fn navigation_maps_only_allowlisted_deep_links_to_generated_events() {
     let event = navigation_event_from_external(
         "liiiraa-boost://goal/measure",
         ExternalNavigationSource::DeepLink,
-        HostEventMetadata::fixed(
-            "request-navigation-0001",
-            "2026-07-28T12:00:00.000Z",
-        ),
+        HostEventMetadata::fixed("request-navigation-0001", "2026-07-28T12:00:00.000Z"),
     )
     .expect("allowlisted goal deep link");
     let value = serde_json::to_value(event).expect("serializable generated event");
@@ -319,10 +316,7 @@ fn navigation_maps_only_allowlisted_deep_links_to_generated_events() {
         let error = navigation_event_from_external(
             rejected,
             ExternalNavigationSource::DeepLink,
-            HostEventMetadata::fixed(
-                "request-navigation-rejected",
-                "2026-07-28T12:00:00.000Z",
-            ),
+            HostEventMetadata::fixed("request-navigation-rejected", "2026-07-28T12:00:00.000Z"),
         )
         .expect_err("unknown, risky, or privileged intent must reject");
         assert_eq!(error, NavigationBridgeError::Rejected);
@@ -340,10 +334,7 @@ fn navigation_second_instance_ignores_raw_process_arguments_and_emits_one_intent
     ];
     let event = navigation_event_from_second_instance(
         &arguments,
-        HostEventMetadata::fixed(
-            "request-second-instance-0001",
-            "2026-07-28T12:00:00.000Z",
-        ),
+        HostEventMetadata::fixed("request-second-instance-0001", "2026-07-28T12:00:00.000Z"),
     )
     .expect("bounded second-instance arguments")
     .expect("one allowlisted intent");
@@ -351,10 +342,7 @@ fn navigation_second_instance_ignores_raw_process_arguments_and_emits_one_intent
 
     assert_eq!(value["payload"]["source"], "second-launch");
     assert_eq!(value["payload"]["intent"]["kind"], "settings");
-    assert_eq!(
-        value["payload"]["intent"]["destination"],
-        "accessibility"
-    );
+    assert_eq!(value["payload"]["intent"]["destination"], "accessibility");
     assert!(!value.to_string().contains("Program Files"));
     assert!(!value.to_string().contains("opaque-launcher"));
     assert!(!value.to_string().contains("improve"));
