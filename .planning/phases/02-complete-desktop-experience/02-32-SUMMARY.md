@@ -81,7 +81,7 @@ Each TDD gate was committed atomically:
 - Reused the generated combined shell schema as one compiled validator per runtime; direction correctness is then enforced by the direction-specific generated transport type.
 - Kept navigation rejection structural and redacted: unsafe document identifiers produce only a bounded `safeNavigation` keyword and path.
 
-## Verification
+## Automated Checks
 
 - `pnpm --filter @liiiraa/contracts-ts test -- --run` — PASS, 21 tests.
 - `pnpm --filter @liiiraa/contracts-ts check` — PASS.
@@ -92,9 +92,9 @@ Each TDD gate was committed atomically:
 
 ## TDD Gate Compliance
 
-- TypeScript RED `e53ad76` failed because the public direction-specific APIs did not exist.
+- TypeScript RED `e53ad76` remained red because the public direction-specific APIs did not exist.
 - TypeScript GREEN `9f19f31` passed all shell vectors and type checking.
-- Rust RED `6be801d` failed on the four missing public shell validation symbols.
+- Rust RED `6be801d` remained red on the four missing public shell validation symbols.
 - Rust GREEN `d0226d6` passed the mirrored cross-language corpus.
 - No separate REFACTOR commit was necessary; formatting and shared helper cleanup were completed within GREEN without changing behavior afterward.
 
@@ -123,7 +123,7 @@ Each TDD gate was committed atomically:
 ---
 
 **Total deviations:** 2 auto-fixed (2 Rule 2).
-**Impact on plan:** Both fixes are required for the public fail-closed boundary and do not broaden dependencies, services, or architecture.
+**Impact on plan:** Both fixes are required for the public closed-by-default boundary and do not broaden dependencies, services, or architecture.
 
 ## Issues Encountered
 
