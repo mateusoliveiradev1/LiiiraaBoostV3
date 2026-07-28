@@ -110,7 +110,16 @@ export default defineConfig([
       parser: tseslintParser,
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['apps/desktop/vite.config.ts'],
+          allowDefaultProject: [
+            'apps/desktop/.storybook/main.ts',
+            'apps/desktop/.storybook/preview.tsx',
+            'apps/desktop/playwright.config.ts',
+            'apps/desktop/tests/browser/axe.ts',
+            'apps/desktop/tests/browser/fixtures.ts',
+            'apps/desktop/tests/browser/harness.config.spec.ts',
+            'apps/desktop/tests/browser/keyboard.ts',
+            'apps/desktop/vite.config.ts',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },

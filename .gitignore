@@ -4,6 +4,9 @@ node_modules/
 coverage/
 dist/
 build/
+playwright-report/
+storybook-static/
+test-results/
 /target/
 *.tsbuildinfo
 .planning/research/.cache/
