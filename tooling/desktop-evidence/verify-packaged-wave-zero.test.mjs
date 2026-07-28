@@ -207,6 +207,41 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
       'windows-10 edition must be a non-empty reviewed value',
     ],
     [
+      'missing build metadata',
+      (fixture) => {
+        fixture.records[0].windows.build = 'unresolved';
+      },
+      'windows-10 build must be a non-empty reviewed value',
+    ],
+    [
+      'missing image identity',
+      (fixture) => {
+        fixture.records[0].imageIdentity = '';
+      },
+      'windows-10 imageIdentity must be a non-empty reviewed value',
+    ],
+    [
+      'missing runner identity',
+      (fixture) => {
+        fixture.records[0].runnerIdentity = '';
+      },
+      'windows-10 runnerIdentity must be a non-empty reviewed value',
+    ],
+    [
+      'unavailable WebView2',
+      (fixture) => {
+        fixture.records[0].webView2.status = 'unresolved';
+      },
+      'windows-10 WebView2 metadata must identify an available reviewed version',
+    ],
+    [
+      'wrong signing access boundary',
+      (fixture) => {
+        fixture.records[0].developmentSigningAccess = 'ci';
+      },
+      'windows-10 developmentSigningAccess must be current-user-local-only',
+    ],
+    [
       'browser substitution',
       (fixture) => {
         fixture.records[0].provenance.kind = 'browser-observation';
@@ -228,6 +263,34 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
       'windows-11 reviewedAt must be an ISO timestamp',
     ],
     [
+      'missing provenance',
+      (fixture) => {
+        delete fixture.records[1].provenance;
+      },
+      'windows-11 provenance must be present',
+    ],
+    [
+      'missing observer',
+      (fixture) => {
+        fixture.records[1].observer = '';
+      },
+      'windows-11 observer must be present',
+    ],
+    [
+      'missing evidence path',
+      (fixture) => {
+        fixture.records[1].evidencePath = '';
+      },
+      'windows-11 evidencePath must be a non-empty reviewed value',
+    ],
+    [
+      'wrong trust class',
+      (fixture) => {
+        fixture.records[2].trustClass = 'publicly-trusted';
+      },
+      'development signing trustClass must be self-signed-development',
+    ],
+    [
       'wrong certificate store',
       (fixture) => {
         fixture.records[2].certificateStore = 'Cert:\\LocalMachine\\My';
@@ -235,11 +298,39 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
       'development signing certificateStore must be Cert:\\CurrentUser\\My',
     ],
     [
+      'malformed thumbprint',
+      (fixture) => {
+        fixture.records[2].certificateThumbprint = 'secret-certificate';
+      },
+      'development signing certificateThumbprint must be a non-secret hexadecimal thumbprint',
+    ],
+    [
+      'wrong signing EKU',
+      (fixture) => {
+        fixture.records[2].extendedKeyUsage = '1.3.6.1.5.5.7.3.1';
+      },
+      'development signing extendedKeyUsage must be the code-signing EKU',
+    ],
+    [
+      'wrong digest',
+      (fixture) => {
+        fixture.records[2].digestAlgorithm = 'SHA-1';
+      },
+      'development signing digestAlgorithm must be SHA-256',
+    ],
+    [
       'wrong CNG provider',
       (fixture) => {
         fixture.records[2].keyProvider = 'legacy CSP';
       },
       'development signing keyProvider must be Microsoft Software Key Storage Provider',
+    ],
+    [
+      'wrong CNG custody',
+      (fixture) => {
+        fixture.records[2].keyCustody.scope = 'local-machine';
+      },
+      'development signing key custody must be current-user CNG',
     ],
     [
       'exportable key',
@@ -263,6 +354,13 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
       'development signing publicTrust must be false',
     ],
     [
+      'SmartScreen reputation claim',
+      (fixture) => {
+        fixture.records[2].smartScreenReputation = true;
+      },
+      'development signing smartScreenReputation must be false',
+    ],
+    [
       'release-ready claim',
       (fixture) => {
         fixture.records[2].productionReady = true;
@@ -275,6 +373,13 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
         fixture.records[2].distributionAllowed = true;
       },
       'development signing distributionAllowed must be false',
+    ],
+    [
+      'missing Phase 10 deferral',
+      (fixture) => {
+        fixture.records[2].productionSigningDeferredTo = 'Phase 2';
+      },
+      'development signing production trust must remain deferred to Phase 10',
     ],
     [
       'invalid timestamp applicability',
@@ -315,6 +420,23 @@ test('reviewed environment mutations fail with stable diagnostics', async (t) =>
   }
 });
 
+test('reviewed environment accepts timestamping only with official-free evidence', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'liiiraa-packaged-timestamp-'));
+  t.after(() => rmSync(directory, { force: true, recursive: true }));
+  const fixture = reviewedEnvironment();
+  fixture.records[2].timestamp = {
+    state: 'verified-official-free',
+    authority: 'official compatible free TSA',
+    evidencePath: 'quality/evidence/phase-02/environment/free-tsa-review.json',
+  };
+  const environmentPath = writeJson(directory, 'environment.json', fixture);
+
+  const result = runCli('--environment', environmentPath, '--require-reviewed');
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).acceptance, 'reviewed');
+});
+
 test('manual mode validates observed records and reachable attachments without creating evidence', (t) => {
   const directory = mkdtempSync(join(tmpdir(), 'liiiraa-packaged-manual-'));
   t.after(() => rmSync(directory, { force: true, recursive: true }));
@@ -345,6 +467,20 @@ test('manual mode fails closed for unresolved, browser, and unreachable attachme
         fixture.records[1].provenance.kind = 'browser-observation';
       },
       'browser evidence cannot substitute for packaged evidence',
+    ],
+    [
+      'missing manual observer',
+      (fixture) => {
+        fixture.records[1].observer = '';
+      },
+      'non-elevation observer must be present',
+    ],
+    [
+      'malformed observation timestamp',
+      (fixture) => {
+        fixture.records[1].observedAt = 'today';
+      },
+      'non-elevation observedAt must be an ISO timestamp',
     ],
     [
       'missing attachment',
