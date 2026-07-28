@@ -44,7 +44,10 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     let capability = read_json("capabilities/default.json");
     assert_eq!(capability["identifier"], "main-shell");
     assert_eq!(capability["windows"], json!(["main"]));
-    assert_eq!(capability["permissions"], json!([]));
+    assert_eq!(
+        capability["permissions"],
+        json!(["core:event:allow-listen"])
+    );
     assert!(capability.get("remote").is_none());
 
     let config = read_json("tauri.conf.json");
@@ -118,8 +121,9 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
     let source = fs::read_to_string(&source_path)
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
 
-    assert_eq!(source.matches("#[tauri::command]").count(), 1);
-    assert!(source.contains("tauri::generate_handler![dispatch_shell_command]"));
+    assert_eq!(source.matches("#[tauri::command]").count(), 2);
+    assert!(source.contains("dispatch_shell_command,"));
+    assert!(source.contains("get_shell_bootstrap"));
     assert!(source.contains("validate_renderer_to_host_shell_command"));
     assert!(source.contains("validate_host_to_renderer_shell_event"));
     assert!(source.contains("ShellContract::authorize_startup"));

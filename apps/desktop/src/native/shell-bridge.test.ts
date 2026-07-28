@@ -139,6 +139,18 @@ const createHarness = () => {
 };
 
 describe('shell bridge', () => {
+  it('requests a replayable startup snapshot after registering the listener', async () => {
+    const harness = createHarness();
+    const bridge = createShellBridge(harness);
+
+    await bridge.start();
+
+    expect(harness.transport.listen).toHaveBeenCalledTimes(1);
+    expect(harness.transport.invoke).toHaveBeenCalledWith(
+      'get_shell_bootstrap',
+    );
+  });
+
   it('validates and dispatches every generated host event exactly once', async () => {
     const harness = createHarness();
     const bridge = createShellBridge(harness);

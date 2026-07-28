@@ -3,6 +3,10 @@
   "productName": "Liiiraa Boost",
   "version": "0.0.0",
   "identifier": "com.liiiraa.boost",
+  "build": {
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
@@ -44,7 +48,7 @@
           "identifier": "main-shell",
           "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
           "windows": ["main"],
-          "permissions": []
+          "permissions": ["core:event:allow-listen"]
         }
       ]
     }

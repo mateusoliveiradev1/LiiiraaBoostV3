@@ -11,6 +11,7 @@ import {
 
 export const HOST_EVENT_CHANNEL = 'desktop-shell-event' as const;
 export const RENDERER_COMMAND_NAME = 'dispatch_shell_command' as const;
+export const BOOTSTRAP_COMMAND_NAME = 'get_shell_bootstrap' as const;
 
 type HostEventOf<
   TMessageType extends HostToRendererShellEventJson['messageType'],
@@ -195,8 +196,14 @@ export const createShellBridge = ({
 
     startPromise = transport
       .listen(HOST_EVENT_CHANNEL, handleHostEvent)
-      .then((disposeListener) => {
+      .then(async (disposeListener) => {
         unlisten = disposeListener;
+        const snapshot = await transport.invoke(BOOTSTRAP_COMMAND_NAME);
+        if (Array.isArray(snapshot)) {
+          for (const payload of snapshot) {
+            handleHostEvent({ payload });
+          }
+        }
       })
       .catch((error: unknown) => {
         startPromise = undefined;

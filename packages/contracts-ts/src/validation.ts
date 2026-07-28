@@ -1,11 +1,9 @@
-import { Ajv2020, type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
-
-import diagnosticValueSchema from '../../../contracts/generated/desktop/v1/diagnostic-value.schema.json' with {
-  type: 'json',
-};
-import shellMessageSchema from '../../../contracts/generated/desktop/v1/shell-message.schema.json' with {
-  type: 'json',
-};
+import type { ErrorObject, ValidateFunction } from 'ajv';
+import {
+  diagnosticValueValidator,
+  hostToRendererValidator,
+  rendererToHostValidator,
+} from './generated/standalone-validators.js';
 import type {
   DiagnosticValueJson,
   HostToRendererShellEventJson,
@@ -57,78 +55,14 @@ export type HostToRendererShellEventValidationResult =
 export type RendererToHostShellCommandValidationResult =
   ContractValidationResult<RendererToHostShellCommandJson>;
 
-type JsonSchema = Record<string, unknown>;
-
-const isJsonSchema = (value: unknown): value is JsonSchema =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const addGeneratedDefinitions = (
-  ajv: Ajv2020,
-  definitions: Record<string, unknown>,
-  schemaName: string,
-): void => {
-  for (const definition of Object.values(definitions)) {
-    if (!isJsonSchema(definition)) {
-      throw new Error(
-        `Generated ${schemaName} schema contains a non-object definition.`,
-      );
-    }
-    ajv.addSchema(definition);
-  }
+const diagnosticValidator =
+  diagnosticValueValidator as ValidateFunction<DiagnosticValueJson>;
+const shellMessageValidators = {
+  hostToRenderer:
+    hostToRendererValidator as ValidateFunction<HostToRendererShellEventJson>,
+  rendererToHost:
+    rendererToHostValidator as ValidateFunction<RendererToHostShellCommandJson>,
 };
-
-const createAjv = (): Ajv2020 =>
-  new Ajv2020({
-    allErrors: true,
-    strict: true,
-    validateFormats: false,
-  });
-
-const compileDiagnosticValueValidator =
-  (): ValidateFunction<DiagnosticValueJson> => {
-    const ajv = createAjv();
-    addGeneratedDefinitions(ajv, diagnosticValueSchema.$defs, 'diagnostic');
-
-    const validator =
-      ajv.getSchema<DiagnosticValueJson>('DiagnosticValue.json');
-    if (validator === undefined) {
-      throw new Error(
-        'Generated diagnostic schema does not expose DiagnosticValue.json.',
-      );
-    }
-    return validator;
-  };
-
-const compileShellMessageValidators = (): {
-  readonly hostToRenderer: ValidateFunction<HostToRendererShellEventJson>;
-  readonly rendererToHost: ValidateFunction<RendererToHostShellCommandJson>;
-} => {
-  const ajv = createAjv();
-  addGeneratedDefinitions(ajv, shellMessageSchema.$defs, 'shell');
-
-  const hostToRenderer =
-    ajv.getSchema<HostToRendererShellEventJson>(
-      'HostToRendererShellEvent.json',
-    );
-  const rendererToHost =
-    ajv.getSchema<RendererToHostShellCommandJson>(
-      'RendererToHostShellCommand.json',
-    );
-
-  if (hostToRenderer === undefined || rendererToHost === undefined) {
-    throw new Error(
-      'Generated shell schema does not expose both transport directions.',
-    );
-  }
-
-  return {
-    hostToRenderer,
-    rendererToHost,
-  };
-};
-
-const diagnosticValueValidator = compileDiagnosticValueValidator();
-const shellMessageValidators = compileShellMessageValidators();
 
 const bounded = (value: string, maximum: number): string =>
   value.length <= maximum ? value : value.slice(0, maximum);
@@ -258,7 +192,7 @@ export const validateDiagnosticValue = (
     DIAGNOSTIC_VALUE_SCHEMA_ID,
     schemaId,
     input,
-    diagnosticValueValidator,
+    diagnosticValidator,
   );
 
 export const validateHostToRendererShellEvent = (

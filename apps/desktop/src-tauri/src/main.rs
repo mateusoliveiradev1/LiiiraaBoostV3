@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod navigation;
 mod notifications;
 mod tray;
@@ -401,6 +403,22 @@ fn build_profile() -> BuildProfile {
     }
 }
 
+#[tauri::command]
+fn get_shell_bootstrap() -> Result<Vec<HostToRendererShellEvent>, ShellDispatchError> {
+    let config: Value = serde_json::from_str(include_str!("../tauri.conf.json"))
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+    [
+        installer_identity_event(&config, HostEventMetadata::now("installer-identity-replay")),
+        startup_state_event(
+            StartupCondition::Ready,
+            HostEventMetadata::now("startup-ready-replay"),
+        ),
+    ]
+    .into_iter()
+    .map(|event| event.map_err(|_| ShellDispatchError::ContractRejected))
+    .collect()
+}
+
 fn run() -> Result<(), String> {
     let configured_adapter = std::env::var(ADAPTER_ENVIRONMENT_VARIABLE).ok();
     ShellContract::authorize_startup(build_profile(), configured_adapter.as_deref())
@@ -475,7 +493,10 @@ fn run() -> Result<(), String> {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![dispatch_shell_command])
+        .invoke_handler(tauri::generate_handler![
+            dispatch_shell_command,
+            get_shell_bootstrap
+        ])
         .on_window_event(|window, event| {
             if window.label() != "main" {
                 return;
