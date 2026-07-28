@@ -53,7 +53,11 @@ const phase2Packages = [
     root: 'packages/feature-shell',
     publicRoot: 'packages/feature-shell/src/index.ts',
     packageName: '@liiiraa/feature-shell',
-    workspaceDependencies: ['@liiiraa/design-system', '@liiiraa/desktop-client'],
+    workspaceDependencies: [
+      '@liiiraa/contracts-ts',
+      '@liiiraa/design-system',
+      '@liiiraa/desktop-client',
+    ],
   },
   {
     id: 'desktop-app',

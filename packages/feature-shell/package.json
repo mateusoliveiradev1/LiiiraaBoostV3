@@ -15,6 +15,7 @@
     "test": "vitest --run"
   },
   "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/design-system": "workspace:*",
     "@liiiraa/desktop-client": "workspace:*",
     "@tanstack/react-query": "5.101.4",

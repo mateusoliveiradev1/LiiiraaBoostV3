@@ -39,3 +39,17 @@ export type {
   CalibrationActorSnapshot,
   CalibrationMachine,
 } from './machines/calibration.machine.js';
+
+export * from './features/account-settings.js';
+export * from './features/activity.js';
+export * from './features/assistant.js';
+export * from './features/calibration.js';
+export * from './features/command-center.js';
+export * from './features/favorites.js';
+export * from './features/home.js';
+export * from './features/improve.js';
+export * from './features/measure.js';
+export * from './features/prepare.js';
+export * from './features/preview-workflows.js';
+export * from './features/recover.js';
+export type { ShellNavigationIntentJson } from '@liiiraa/contracts-ts';
