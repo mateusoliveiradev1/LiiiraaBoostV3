@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+  "apps/desktop/src-tauri",
   "crates/contracts-rust",
   "tooling/contract-generation-rust",
   "tooling/contract-generation-spike-rust",
