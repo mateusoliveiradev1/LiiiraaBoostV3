@@ -190,11 +190,7 @@ const matchDefinition = (
 ): Readonly<Record<string, string>> | undefined => {
   const patternSegments = decodedSegments(definition.pattern);
   const pathSegments = decodedSegments(pathname);
-  if (
-    patternSegments === undefined ||
-    pathSegments === undefined ||
-    patternSegments.length !== pathSegments.length
-  ) {
+  if (patternSegments === undefined || pathSegments?.length !== patternSegments.length) {
     return undefined;
   }
 
@@ -380,8 +376,6 @@ export const routeFromValidatedShellNavigationIntent = (
         ? `/documentation/${intent.documentId}`
         : undefined;
       break;
-    default:
-      path = undefined;
   }
   return path === undefined
     ? failure('INVALID_NAVIGATION_INTENT', '$.intent')
