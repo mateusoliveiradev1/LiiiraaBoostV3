@@ -88,10 +88,7 @@ export const GlobalCommandCenter = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const isPtBr = locale === 'pt-BR';
   const policyLocale = isPtBr ? 'pt-BR' : 'en-US';
-  const results = useMemo(
-    () => searchCommands(entries, query, context),
-    [context, entries, query],
-  );
+  const results = useMemo(() => searchCommands(entries, query, context), [context, entries, query]);
 
   const close = () => {
     setIsOpen(false);
@@ -120,9 +117,7 @@ export const GlobalCommandCenter = ({
 
   useEffect(() => {
     setActiveIndex((current) => clampActiveIndex(current, results.length));
-    setPreviewIndex((current) =>
-      current === null || current >= results.length ? null : current,
-    );
+    setPreviewIndex((current) => (current === null || current >= results.length ? null : current));
   }, [results.length]);
 
   const activate = (result: CommandSearchResult) => {
@@ -215,7 +210,9 @@ export const GlobalCommandCenter = ({
           </label>
           <input
             aria-activedescendant={
-              activeIndex >= 0 ? `command-result-${results[activeIndex]?.entry.id ?? ''}` : undefined
+              activeIndex >= 0
+                ? `command-result-${results[activeIndex]?.entry.id ?? ''}`
+                : undefined
             }
             aria-autocomplete="list"
             aria-controls={results.length > 0 ? 'global-command-results' : undefined}
@@ -227,7 +224,11 @@ export const GlobalCommandCenter = ({
               setActiveIndex(0);
             }}
             onKeyDown={onSearchKeyDown}
-            placeholder={isPtBr ? 'Jogo, componente, configuração ou documento' : 'Game, component, setting, or document'}
+            placeholder={
+              isPtBr
+                ? 'Jogo, componente, configuração ou documento'
+                : 'Game, component, setting, or document'
+            }
             ref={inputRef}
             role="combobox"
             type="search"
@@ -241,18 +242,19 @@ export const GlobalCommandCenter = ({
                   ? 'Digite para pesquisar rotas locais e ações seguras.'
                   : 'Type to search local routes and safe actions.'
               }
+              locale={locale}
               state="empty"
             />
           ) : results.length === 0 ? (
             <p role="status">{getCommandNoResultMessage(policyLocale, query)}</p>
           ) : (
-            <ul aria-label={isPtBr ? 'Resultados de comandos' : 'Command results'} id="global-command-results" role="listbox">
+            <ul
+              aria-label={isPtBr ? 'Resultados de comandos' : 'Command results'}
+              id="global-command-results"
+              role="listbox"
+            >
               {groupedResults.map((group) => (
-                <li
-                  aria-label={GROUP_LABELS[locale][group.kind]}
-                  key={group.kind}
-                  role="group"
-                >
+                <li aria-label={GROUP_LABELS[locale][group.kind]} key={group.kind} role="group">
                   <span>{GROUP_LABELS[locale][group.kind]}</span>
                   <ul role="presentation">
                     {group.results.map((result) => {
@@ -263,8 +265,12 @@ export const GlobalCommandCenter = ({
                           data-risk={result.entry.risk}
                           id={`command-result-${result.entry.id}`}
                           key={result.entry.id}
-                          onClick={() => { activate(result); }}
-                          onMouseMove={() => { setActiveIndex(resultIndex); }}
+                          onClick={() => {
+                            activate(result);
+                          }}
+                          onMouseMove={() => {
+                            setActiveIndex(resultIndex);
+                          }}
                           role="option"
                         >
                           <strong>{result.entry.label}</strong>
@@ -289,7 +295,11 @@ export const GlobalCommandCenter = ({
               <p>{preview.entry.consequence}</p>
               {previewBoundary ? (
                 <>
-                  <StatusSignal detail={previewBoundary.explanation} state="unsupported" />
+                  <StatusSignal
+                    detail={previewBoundary.explanation}
+                    locale={locale}
+                    state="unsupported"
+                  />
                   <LbButton
                     onPress={() => {
                       onOpenScenario(previewBoundary.action.scenarioId);
@@ -300,7 +310,12 @@ export const GlobalCommandCenter = ({
                   </LbButton>
                 </>
               ) : null}
-              <LbButton onPress={() => { setPreviewIndex(null); }} variant="quiet">
+              <LbButton
+                onPress={() => {
+                  setPreviewIndex(null);
+                }}
+                variant="quiet"
+              >
                 {isPtBr ? 'Fechar prévia' : 'Close preview'}
               </LbButton>
             </aside>

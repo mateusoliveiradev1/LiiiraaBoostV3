@@ -15,10 +15,7 @@ import {
   VerificationReceipt,
   type OperationalState,
 } from '@liiiraa/design-system';
-import type {
-  DesktopScenarioId,
-  PhaseBoundaryExplanation,
-} from '@liiiraa/desktop-client';
+import type { DesktopScenarioId, PhaseBoundaryExplanation } from '@liiiraa/desktop-client';
 
 import type { ShellLocale } from './calibration.js';
 
@@ -93,13 +90,20 @@ const GAME = Object.freeze({
 });
 
 const LIBRARY_PROJECTION: Readonly<
-  Record<GameLibraryState, Readonly<{ detail: LocalizedCopy; state: OperationalState; title: LocalizedCopy }>>
+  Record<
+    GameLibraryState,
+    Readonly<{ detail: LocalizedCopy; state: OperationalState; title: LocalizedCopy }>
+  >
 > = {
   detected: {
-    title: { en: 'One scenario game is ready for review', 'pt-BR': 'Um jogo de cenário está pronto para revisão' },
+    title: {
+      en: 'One scenario game is ready for review',
+      'pt-BR': 'Um jogo de cenário está pronto para revisão',
+    },
     detail: {
       en: 'Northstar Arena is fictional and exists only as deterministic fixture evidence.',
-      'pt-BR': 'Northstar Arena é fictício e existe apenas como evidência determinística de cenário.',
+      'pt-BR':
+        'Northstar Arena é fictício e existe apenas como evidência determinística de cenário.',
     },
     state: 'fixture',
   },
@@ -107,15 +111,20 @@ const LIBRARY_PROJECTION: Readonly<
     title: { en: 'No games were detected', 'pt-BR': 'Nenhum jogo foi detectado' },
     detail: {
       en: 'This can be normal on a new installation. Add a local identity for scenario review.',
-      'pt-BR': 'Isso pode ser normal em uma instalação nova. Adicione uma identidade local para revisar o cenário.',
+      'pt-BR':
+        'Isso pode ser normal em uma instalação nova. Adicione uma identidade local para revisar o cenário.',
     },
     state: 'empty',
   },
   scanning: {
-    title: { en: 'Reviewing launcher identities', 'pt-BR': 'Revisando identidades de inicializadores' },
+    title: {
+      en: 'Reviewing launcher identities',
+      'pt-BR': 'Revisando identidades de inicializadores',
+    },
     detail: {
       en: 'The deterministic scan is active. No game files are opened or modified.',
-      'pt-BR': 'A varredura determinística está ativa. Nenhum arquivo de jogo é aberto ou modificado.',
+      'pt-BR':
+        'A varredura determinística está ativa. Nenhum arquivo de jogo é aberto ou modificado.',
     },
     state: 'loading',
   },
@@ -128,7 +137,10 @@ const LIBRARY_PROJECTION: Readonly<
     state: 'partial-failure',
   },
   'duplicate-identity': {
-    title: { en: 'Two launchers report the same game', 'pt-BR': 'Dois inicializadores relatam o mesmo jogo' },
+    title: {
+      en: 'Two launchers report the same game',
+      'pt-BR': 'Dois inicializadores relatam o mesmo jogo',
+    },
     detail: {
       en: 'The identities remain separate until a user reviews the deterministic match.',
       'pt-BR': 'As identidades ficam separadas até a revisão da correspondência determinística.',
@@ -200,6 +212,7 @@ const LibraryView = ({
       </h2>
       <StatusSignal
         detail={localized(projection.detail, locale)}
+        locale={locale}
         state={projection.state}
       />
       <p>{localized(projection.title, locale)}</p>
@@ -208,12 +221,17 @@ const LibraryView = ({
         <>
           <article>
             <h3>{GAME.fictional}</h3>
-            <ProvenanceMark detail="FICTIONAL · DETERMINISTIC FIXTURE" kind="fixture" />
+            <ProvenanceMark
+              detail="FICTIONAL · DETERMINISTIC FIXTURE"
+              kind="fixture"
+              locale={locale}
+            />
             <p>
               {localized(
                 {
                   en: 'Golden competitive-shooter narrative for a mid-range Intel/NVIDIA Windows 11 fixture.',
-                  'pt-BR': 'Narrativa competitiva fictícia para um cenário Windows 11 intermediário Intel/NVIDIA.',
+                  'pt-BR':
+                    'Narrativa competitiva fictícia para um cenário Windows 11 intermediário Intel/NVIDIA.',
                 },
                 locale,
               )}
@@ -225,7 +243,10 @@ const LibraryView = ({
           <section aria-label="Real discovery identities">
             <h3>
               {localized(
-                { en: 'Recognizable discovery evidence', 'pt-BR': 'Evidência de descoberta reconhecível' },
+                {
+                  en: 'Recognizable discovery evidence',
+                  'pt-BR': 'Evidência de descoberta reconhecível',
+                },
                 locale,
               )}
             </h3>
@@ -255,11 +276,16 @@ const LibraryView = ({
 
       {state === 'duplicate-identity' ? (
         <LbButton onPress={() => onNavigate?.('overview')} variant="primary">
-          {localized({ en: 'Review both identities', 'pt-BR': 'Revisar as duas identidades' }, locale)}
+          {localized(
+            { en: 'Review both identities', 'pt-BR': 'Revisar as duas identidades' },
+            locale,
+          )}
         </LbButton>
       ) : null}
 
-      {state === 'launcher-unavailable' ? <PhaseBoundary boundary={boundary} locale={locale} /> : null}
+      {state === 'launcher-unavailable' ? (
+        <PhaseBoundary boundary={boundary} locale={locale} />
+      ) : null}
     </section>
   );
 };
@@ -271,26 +297,36 @@ const GameOverview = ({ locale }: { readonly locale: ShellLocale }) => (
       {localized(
         {
           en: 'Fictional anchor for navigation and recovery validation. No real-game integration is claimed.',
-          'pt-BR': 'Referência fictícia para validar navegação e recuperação. Nenhuma integração real é alegada.',
+          'pt-BR':
+            'Referência fictícia para validar navegação e recuperação. Nenhuma integração real é alegada.',
         },
         locale,
       )}
     </p>
     <dl>
-      <dt>{localized({ en: 'Executable identity', 'pt-BR': 'Identidade do executável' }, locale)}</dt>
+      <dt>
+        {localized({ en: 'Executable identity', 'pt-BR': 'Identidade do executável' }, locale)}
+      </dt>
       <dd>{GAME.executableIdentity}</dd>
-      <dt>{localized({ en: 'Launcher identity', 'pt-BR': 'Identidade do inicializador' }, locale)}</dt>
+      <dt>
+        {localized({ en: 'Launcher identity', 'pt-BR': 'Identidade do inicializador' }, locale)}
+      </dt>
       <dd>{GAME.launcherIdentity}</dd>
       <dt>{localized({ en: 'Compatibility', 'pt-BR': 'Compatibilidade' }, locale)}</dt>
-      <dd>{localized({ en: 'Scenario-qualified only', 'pt-BR': 'Qualificada apenas no cenário' }, locale)}</dd>
+      <dd>
+        {localized(
+          { en: 'Scenario-qualified only', 'pt-BR': 'Qualificada apenas no cenário' },
+          locale,
+        )}
+      </dd>
     </dl>
     <CapabilityReason
       capability="Anti-cheat boundary"
       reason="No injection, game-file modification, launcher flags, or anti-cheat interference."
       state="restricted"
     />
-    <FreshnessStamp capturedAt="2030-01-15T18:00:00.000Z" freshness="current" />
-    <QualityMark detail="Deterministic fixture review" quality="verified" />
+    <FreshnessStamp capturedAt="2030-01-15T18:00:00.000Z" freshness="current" locale={locale} />
+    <QualityMark detail="Deterministic fixture review" locale={locale} quality="verified" />
   </section>
 );
 
@@ -302,28 +338,69 @@ const ProfileView = ({ locale }: { readonly locale: ShellLocale }) => (
     <p>{GAME.profile}</p>
     <ol>
       <li>
-        <strong>{localized({ en: 'Signed official base', 'pt-BR': 'Base oficial assinada' }, locale)}</strong>
-        <p>{localized({ en: 'Scenario signature verified.', 'pt-BR': 'Assinatura do cenário verificada.' }, locale)}</p>
+        <strong>
+          {localized({ en: 'Signed official base', 'pt-BR': 'Base oficial assinada' }, locale)}
+        </strong>
+        <p>
+          {localized(
+            { en: 'Scenario signature verified.', 'pt-BR': 'Assinatura do cenário verificada.' },
+            locale,
+          )}
+        </p>
       </li>
       <li>
         <strong>{localized({ en: 'Local adaptation', 'pt-BR': 'Adaptação local' }, locale)}</strong>
-        <p>{localized({ en: 'Derived from fixture capabilities.', 'pt-BR': 'Derivada das capacidades do cenário.' }, locale)}</p>
+        <p>
+          {localized(
+            {
+              en: 'Derived from fixture capabilities.',
+              'pt-BR': 'Derivada das capacidades do cenário.',
+            },
+            locale,
+          )}
+        </p>
       </li>
       <li>
-        <strong>{localized({ en: 'User overrides', 'pt-BR': 'Preferências do usuário' }, locale)}</strong>
-        <p>{localized({ en: 'One reversible presentation choice.', 'pt-BR': 'Uma escolha reversível de apresentação.' }, locale)}</p>
+        <strong>
+          {localized({ en: 'User overrides', 'pt-BR': 'Preferências do usuário' }, locale)}
+        </strong>
+        <p>
+          {localized(
+            {
+              en: 'One reversible presentation choice.',
+              'pt-BR': 'Uma escolha reversível de apresentação.',
+            },
+            locale,
+          )}
+        </p>
       </li>
     </ol>
     <BeforeAfterDiff
       entries={[
         {
-          label: localized({ en: 'Frame limiter policy', 'pt-BR': 'Política de limite de quadros' }, locale),
-          before: localized({ en: 'Official base: automatic', 'pt-BR': 'Base oficial: automática' }, locale),
-          after: localized({ en: 'User override: review each session', 'pt-BR': 'Preferência: revisar a cada sessão' }, locale),
+          label: localized(
+            { en: 'Frame limiter policy', 'pt-BR': 'Política de limite de quadros' },
+            locale,
+          ),
+          before: localized(
+            { en: 'Official base: automatic', 'pt-BR': 'Base oficial: automática' },
+            locale,
+          ),
+          after: localized(
+            {
+              en: 'User override: review each session',
+              'pt-BR': 'Preferência: revisar a cada sessão',
+            },
+            locale,
+          ),
         },
       ]}
     />
-    <ProvenanceMark detail="SIGNED BASE + FIXTURE ADAPTATION + USER OVERRIDE" kind="fixture" />
+    <ProvenanceMark
+      detail="SIGNED BASE + FIXTURE ADAPTATION + USER OVERRIDE"
+      kind="fixture"
+      locale={locale}
+    />
   </section>
 );
 
@@ -352,7 +429,8 @@ const GameEvidence = ({ locale }: { readonly locale: ShellLocale }) => (
       {localized(
         {
           en: 'These sources validate the interface contract, not a real launcher or game.',
-          'pt-BR': 'Estas fontes validam o contrato da interface, não um jogo ou inicializador real.',
+          'pt-BR':
+            'Estas fontes validam o contrato da interface, não um jogo ou inicializador real.',
         },
         locale,
       )}
@@ -371,13 +449,25 @@ const GameHistory = ({ locale }: { readonly locale: ShellLocale }) => (
           id: 'preflight',
           timestamp: '2030-01-15T18:00:00.000Z',
           title: localized({ en: 'Preflight reviewed', 'pt-BR': 'Pré-voo revisado' }, locale),
-          detail: localized({ en: 'No changes requested.', 'pt-BR': 'Nenhuma alteração solicitada.' }, locale),
+          detail: localized(
+            { en: 'No changes requested.', 'pt-BR': 'Nenhuma alteração solicitada.' },
+            locale,
+          ),
         },
         {
           id: 'restoration',
           timestamp: '2030-01-15T18:40:00.000Z',
-          title: localized({ en: 'Restoration verified', 'pt-BR': 'Restauração verificada' }, locale),
-          detail: localized({ en: 'Scenario receipt confirms no change.', 'pt-BR': 'O recibo de cenário confirma nenhuma alteração.' }, locale),
+          title: localized(
+            { en: 'Restoration verified', 'pt-BR': 'Restauração verificada' },
+            locale,
+          ),
+          detail: localized(
+            {
+              en: 'Scenario receipt confirms no change.',
+              'pt-BR': 'O recibo de cenário confirma nenhuma alteração.',
+            },
+            locale,
+          ),
         },
       ]}
     />
@@ -398,11 +488,38 @@ const PreflightView = ({
     <GameRunway
       game={GAME.fictional}
       steps={[
-        localized({ en: 'Validate fixture profile envelope', 'pt-BR': 'Validar envelope do perfil de cenário' }, locale),
-        localized({ en: 'Review temporary operation requests', 'pt-BR': 'Revisar solicitações temporárias' }, locale),
-        localized({ en: 'Resolve conflicts and restart constraints', 'pt-BR': 'Resolver conflitos e restrições de reinicialização' }, locale),
-        localized({ en: 'Verify recovery readiness', 'pt-BR': 'Verificar prontidão para recuperação' }, locale),
-        localized({ en: 'Confirm preview only — no launch', 'pt-BR': 'Confirmar somente prévia — sem iniciar' }, locale),
+        localized(
+          {
+            en: 'Validate fixture profile envelope',
+            'pt-BR': 'Validar envelope do perfil de cenário',
+          },
+          locale,
+        ),
+        localized(
+          {
+            en: 'Review temporary operation requests',
+            'pt-BR': 'Revisar solicitações temporárias',
+          },
+          locale,
+        ),
+        localized(
+          {
+            en: 'Resolve conflicts and restart constraints',
+            'pt-BR': 'Resolver conflitos e restrições de reinicialização',
+          },
+          locale,
+        ),
+        localized(
+          { en: 'Verify recovery readiness', 'pt-BR': 'Verificar prontidão para recuperação' },
+          locale,
+        ),
+        localized(
+          {
+            en: 'Confirm preview only — no launch',
+            'pt-BR': 'Confirmar somente prévia — sem iniciar',
+          },
+          locale,
+        ),
       ]}
     />
     <StatusSignal
@@ -413,6 +530,7 @@ const PreflightView = ({
         },
         locale,
       )}
+      locale={locale}
       state="fixture"
     />
     <LbButton onPress={() => onNavigate?.('active-session')} variant="primary">
@@ -432,10 +550,20 @@ const ActiveSessionView = ({
   readonly onNavigate?: PrepareSurfaceProps['onNavigate'];
   readonly scenarioId: string;
 }) => (
-  <section aria-labelledby="prepare-session-title" data-external-launch={externalLaunch} data-lb-region>
+  <section
+    aria-labelledby="prepare-session-title"
+    data-external-launch={externalLaunch}
+    data-lb-region
+  >
     <h2 id="prepare-session-title">
       {externalLaunch
-        ? localized({ en: 'External launch detected in scenario', 'pt-BR': 'Abertura externa detectada no cenário' }, locale)
+        ? localized(
+            {
+              en: 'External launch detected in scenario',
+              'pt-BR': 'Abertura externa detectada no cenário',
+            },
+            locale,
+          )
         : localized({ en: 'Session preview active', 'pt-BR': 'Prévia de sessão ativa' }, locale)}
     </h2>
     <ScenarioMarker scenarioId={externalLaunch ? 'S09' : scenarioId} />
@@ -443,7 +571,8 @@ const ActiveSessionView = ({
       {localized(
         {
           en: 'The same fixture profile and preflight semantics are displayed. Detection is scenario-marked and performs no process monitoring.',
-          'pt-BR': 'O mesmo perfil de cenário e pré-voo são exibidos. A detecção é marcada como cenário e não monitora processos.',
+          'pt-BR':
+            'O mesmo perfil de cenário e pré-voo são exibidos. A detecção é marcada como cenário e não monitora processos.',
         },
         locale,
       )}
@@ -452,12 +581,28 @@ const ActiveSessionView = ({
       <dt>{localized({ en: 'Active profile', 'pt-BR': 'Perfil ativo' }, locale)}</dt>
       <dd>{GAME.profile}</dd>
       <dt>{localized({ en: 'Telemetry', 'pt-BR': 'Telemetria' }, locale)}</dt>
-      <dd>{localized({ en: 'Minimized fixture preview', 'pt-BR': 'Prévia mínima de cenário' }, locale)}</dd>
+      <dd>
+        {localized(
+          { en: 'Minimized fixture preview', 'pt-BR': 'Prévia mínima de cenário' },
+          locale,
+        )}
+      </dd>
       <dt>{localized({ en: 'Temporary operations', 'pt-BR': 'Operações temporárias' }, locale)}</dt>
-      <dd>{localized({ en: 'Requested: none; applied: none', 'pt-BR': 'Solicitadas: nenhuma; aplicadas: nenhuma' }, locale)}</dd>
+      <dd>
+        {localized(
+          {
+            en: 'Requested: none; applied: none',
+            'pt-BR': 'Solicitadas: nenhuma; aplicadas: nenhuma',
+          },
+          locale,
+        )}
+      </dd>
     </dl>
     <LbButton onPress={() => onNavigate?.('recovery')} variant="secondary">
-      {localized({ en: 'Open emergency recovery route', 'pt-BR': 'Abrir rota de recuperação de emergência' }, locale)}
+      {localized(
+        { en: 'Open emergency recovery route', 'pt-BR': 'Abrir rota de recuperação de emergência' },
+        locale,
+      )}
     </LbButton>
   </section>
 );
@@ -466,23 +611,38 @@ const RESTORATION_PROJECTION: Readonly<
   Record<RestorationState, Readonly<{ detail: LocalizedCopy; state: OperationalState }>>
 > = {
   restoring: {
-    detail: { en: 'Verifying the scenario prior state.', 'pt-BR': 'Verificando o estado anterior do cenário.' },
+    detail: {
+      en: 'Verifying the scenario prior state.',
+      'pt-BR': 'Verificando o estado anterior do cenário.',
+    },
     state: 'loading',
   },
   'game-still-running': {
-    detail: { en: 'The scenario game is still marked active; restoration waits safely.', 'pt-BR': 'O jogo do cenário ainda está ativo; a restauração aguarda com segurança.' },
+    detail: {
+      en: 'The scenario game is still marked active; restoration waits safely.',
+      'pt-BR': 'O jogo do cenário ainda está ativo; a restauração aguarda com segurança.',
+    },
     state: 'restart-pending',
   },
   'process-ambiguity': {
-    detail: { en: 'Process identity is ambiguous, so restoration fails closed.', 'pt-BR': 'A identidade do processo é ambígua; a restauração falha de forma segura.' },
+    detail: {
+      en: 'Process identity is ambiguous, so restoration fails closed.',
+      'pt-BR': 'A identidade do processo é ambígua; a restauração falha de forma segura.',
+    },
     state: 'contradictory-evidence',
   },
   'partial-failure': {
-    detail: { en: 'One verification dependency did not respond; no change occurred.', 'pt-BR': 'Uma dependência de verificação não respondeu; nenhuma alteração ocorreu.' },
+    detail: {
+      en: 'One verification dependency did not respond; no change occurred.',
+      'pt-BR': 'Uma dependência de verificação não respondeu; nenhuma alteração ocorreu.',
+    },
     state: 'partial-failure',
   },
   verified: {
-    detail: { en: 'Prior state verified. The receipt confirms that no change occurred.', 'pt-BR': 'Estado anterior verificado. O recibo confirma que nenhuma alteração ocorreu.' },
+    detail: {
+      en: 'Prior state verified. The receipt confirms that no change occurred.',
+      'pt-BR': 'Estado anterior verificado. O recibo confirma que nenhuma alteração ocorreu.',
+    },
     state: 'fixture',
   },
 };
@@ -497,17 +657,31 @@ const RestorationView = ({
   const projection = RESTORATION_PROJECTION[state];
 
   return (
-    <section aria-labelledby="prepare-restoration-title" data-lb-region data-restoration-state={state}>
+    <section
+      aria-labelledby="prepare-restoration-title"
+      data-lb-region
+      data-restoration-state={state}
+    >
       <h2 id="prepare-restoration-title">
         {localized({ en: 'Session restoration', 'pt-BR': 'Restauração da sessão' }, locale)}
       </h2>
       {state === 'partial-failure' ? (
         <OperationalFailure
           detail={localized(projection.detail, locale)}
-          title={localized({ en: 'Restoration verification paused', 'pt-BR': 'Verificação da restauração pausada' }, locale)}
+          title={localized(
+            {
+              en: 'Restoration verification paused',
+              'pt-BR': 'Verificação da restauração pausada',
+            },
+            locale,
+          )}
         />
       ) : (
-        <StatusSignal detail={localized(projection.detail, locale)} state={projection.state} />
+        <StatusSignal
+          detail={localized(projection.detail, locale)}
+          locale={locale}
+          state={projection.state}
+        />
       )}
       {state === 'verified' ? (
         <VerificationReceipt
@@ -544,17 +718,36 @@ const ResultView = ({
       <QualityMark
         detail={
           approved
-            ? localized({ en: 'Fixture methodology approved', 'pt-BR': 'Metodologia de cenário aprovada' }, locale)
-            : localized({ en: 'No performance claim permitted', 'pt-BR': 'Nenhuma alegação de desempenho permitida' }, locale)
+            ? localized(
+                { en: 'Fixture methodology approved', 'pt-BR': 'Metodologia de cenário aprovada' },
+                locale,
+              )
+            : localized(
+                {
+                  en: 'No performance claim permitted',
+                  'pt-BR': 'Nenhuma alegação de desempenho permitida',
+                },
+                locale,
+              )
         }
-        quality={approved ? 'verified' : degraded ? 'degraded' : incomparable ? 'contradictory' : 'unavailable'}
+        locale={locale}
+        quality={
+          approved
+            ? 'verified'
+            : degraded
+              ? 'degraded'
+              : incomparable
+                ? 'contradictory'
+                : 'unavailable'
+        }
       />
       <p>
         {approved
           ? localized(
               {
                 en: 'The deterministic session completed with approved fixture quality; it is not a real measurement.',
-                'pt-BR': 'A sessão determinística terminou com qualidade de cenário aprovada; não é uma medição real.',
+                'pt-BR':
+                  'A sessão determinística terminou com qualidade de cenário aprovada; não é uma medição real.',
               },
               locale,
             )
@@ -562,7 +755,8 @@ const ResultView = ({
             ? localized(
                 {
                   en: 'Capture coverage is degraded. 1% low remains unavailable.',
-                  'pt-BR': 'A cobertura da captura está degradada. O 1% low permanece indisponível.',
+                  'pt-BR':
+                    'A cobertura da captura está degradada. O 1% low permanece indisponível.',
                 },
                 locale,
               )
@@ -570,19 +764,21 @@ const ResultView = ({
               ? localized(
                   {
                     en: 'The session cannot be compared because workload and thermal state differ. No percentage is shown.',
-                    'pt-BR': 'A sessão não pode ser comparada porque carga e estado térmico diferem. Nenhuma porcentagem é exibida.',
+                    'pt-BR':
+                      'A sessão não pode ser comparada porque carga e estado térmico diferem. Nenhuma porcentagem é exibida.',
                   },
                   locale,
                 )
               : localized(
                   {
                     en: 'This game has no approved capture method. No estimate is substituted.',
-                    'pt-BR': 'Este jogo não tem método de captura aprovado. Nenhuma estimativa é substituída.',
+                    'pt-BR':
+                      'Este jogo não tem método de captura aprovado. Nenhuma estimativa é substituída.',
                   },
                   locale,
                 )}
       </p>
-      <ProvenanceMark detail="SESSION FIXTURE · NOT OBSERVED" kind="fixture" />
+      <ProvenanceMark detail="SESSION FIXTURE · NOT OBSERVED" kind="fixture" locale={locale} />
     </section>
   );
 };
@@ -612,7 +808,8 @@ export const PrepareSurface = ({
       purpose={localized(
         {
           en: 'Review game identity, profile, preflight, session, and restoration without running privileged work.',
-          'pt-BR': 'Revise identidade, perfil, pré-voo, sessão e restauração sem executar trabalho privilegiado.',
+          'pt-BR':
+            'Revise identidade, perfil, pré-voo, sessão e restauração sem executar trabalho privilegiado.',
         },
         locale,
       )}
@@ -640,9 +837,7 @@ export const PrepareSurface = ({
         scenarioId={scenarioId}
       />
     ) : null}
-    {view === 'restoration' ? (
-      <RestorationView locale={locale} state={restorationState} />
-    ) : null}
+    {view === 'restoration' ? <RestorationView locale={locale} state={restorationState} /> : null}
     {view === 'result' ? <ResultView locale={locale} state={resultState} /> : null}
   </main>
 );

@@ -379,9 +379,10 @@ const FreshFinding = ({
         },
         locale,
       )}
+      locale={locale}
       state="fixture"
     />
-    <ProvenanceMark detail="S01 · FIXTURE · 2030-01-15T18:00:00Z" kind="fixture" />
+    <ProvenanceMark detail="S01 · FIXTURE · 2030-01-15T18:00:00Z" kind="fixture" locale={locale} />
   </aside>
 );
 
@@ -402,7 +403,11 @@ const ComponentView = ({
       <section
         aria-label={localized({ en: 'Observed state', 'pt-BR': 'Estado observado' }, locale)}
       >
-        <ProvenanceMark detail="FIXTURE — NOT OBSERVED FROM THIS PC" kind="fixture" />
+        <ProvenanceMark
+          detail="FIXTURE — NOT OBSERVED FROM THIS PC"
+          kind="fixture"
+          locale={locale}
+        />
         <p>
           {localized(
             {
@@ -455,6 +460,7 @@ const ComponentView = ({
               },
               locale,
             )}
+            locale={locale}
             state="empty"
           />
         ) : null}
@@ -523,13 +529,14 @@ const OperationView = ({
         <dd>{operation.recoveryMethod}</dd>
         <dt>{localized({ en: 'Provenance', 'pt-BR': 'Proveniência' }, locale)}</dt>
         <dd>
-          <ProvenanceMark detail="SIMULATED SCENARIO" kind={operation.provenance} />
+          <ProvenanceMark detail="SIMULATED SCENARIO" kind={operation.provenance} locale={locale} />
         </dd>
       </dl>
-      <QualityMark quality={operation.evidenceQuality} />
+      <QualityMark locale={locale} quality={operation.evidenceQuality} />
       {operation.eligibility === 'excluded' ? (
         <StatusSignal
           detail={operation.exclusionReason ?? operation.compatibility}
+          locale={locale}
           state="unsupported"
         />
       ) : (
@@ -596,7 +603,7 @@ const PlanReviewView = ({
           onInspect={() => onNavigate?.('operation', operation.id)}
           risk={riskForDesignSystem(operation.riskClass)}
         />
-        <QualityMark quality={operation.evidenceQuality} />
+        <QualityMark locale={locale} quality={operation.evidenceQuality} />
       </article>
     ))}
     <PlanDependencyList

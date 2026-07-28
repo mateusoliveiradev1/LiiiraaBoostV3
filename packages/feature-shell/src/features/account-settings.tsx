@@ -203,6 +203,7 @@ export const EntitlementSurface = ({ locale, scenarioId, state }: EntitlementSur
     <ScenarioMarker scenarioId={scenarioId} />
     <StatusSignal
       detail={ENTITLEMENT_COPY[state][locale]}
+      locale={locale}
       state={
         state === 'expired'
           ? 'expired-entitlement'
@@ -460,6 +461,7 @@ export const UpdateSurface = ({ locale, scenarioId, state }: UpdateSurfaceProps)
                 ? 'Assinatura inválida. A atualização foi bloqueada; a versão atual continua segura.'
                 : 'Invalid signature. Update blocked; the current version continues safely.'
             }
+            locale={locale}
             state="contradictory-evidence"
           />
           <code>S21-UPDATE-SIGNATURE-INVALID</code>
@@ -475,6 +477,7 @@ export const UpdateSurface = ({ locale, scenarioId, state }: UpdateSurfaceProps)
                 ? 'A versão atual continua em uso.'
                 : 'The current version remains in use.'
           }
+          locale={locale}
           state="fixture"
         />
       )}

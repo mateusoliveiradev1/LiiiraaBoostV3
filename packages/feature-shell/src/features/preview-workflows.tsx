@@ -289,7 +289,7 @@ export const PreviewWorkflowSurface = ({
       ) : null}
 
       {activeState === 'restart-pending' || activeState === 'restart-continuation' ? (
-        <RestartPlanner>
+        <RestartPlanner locale={locale}>
           <p>
             {locale === 'pt-BR'
               ? 'O agendamento real pertence à Fase 6.'
@@ -309,6 +309,7 @@ export const PreviewWorkflowSurface = ({
       {activeState === 'guided-recovery' || activeState === 'verified' ? (
         <RecoveryCheckpoint
           detail={STATE_COPY[activeState][locale]}
+          locale={locale}
           title={locale === 'pt-BR' ? 'Recuperação guiada' : 'Guided recovery'}
         />
       ) : null}
@@ -317,6 +318,7 @@ export const PreviewWorkflowSurface = ({
         <>
           <VerificationReceipt
             detail={receipt.receipt.summary}
+            locale={locale}
             receiptId={receipt.activity.correlationId}
           />
           <ChangeLedger
@@ -328,6 +330,7 @@ export const PreviewWorkflowSurface = ({
                 timestamp: '2030-01-15T18:00:00.000Z',
               },
             ]}
+            locale={locale}
           />
         </>
       ) : null}

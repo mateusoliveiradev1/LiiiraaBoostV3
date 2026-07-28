@@ -97,6 +97,7 @@ export const FavoritesManager = ({
                 detail={
                   isPtBr ? 'Nenhum favorito nesta categoria.' : 'No favorite in this category.'
                 }
+                locale={locale}
                 state="empty"
               />
             ) : (
@@ -173,6 +174,7 @@ export const FavoritesManager = ({
                         ? 'Ações privilegiadas ou destrutivas não podem ser favoritas.'
                         : 'Privileged or destructive actions cannot be favorites.')
                     }
+                    locale={locale}
                     state="permission"
                   />
                 ) : null}

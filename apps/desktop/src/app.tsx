@@ -1272,6 +1272,7 @@ const DesktopAppContent = ({
       >
         <WindowTitleBar
           globalStatus={presentation.reason}
+          locale={locale}
           onOpenActivity={() => {
             rememberOverlayInvoker();
             setActivityOpen(true);
@@ -1315,7 +1316,12 @@ const DesktopAppContent = ({
           ref={goalRegionRef}
           tabIndex={-1}
         >
-          <GoalRail activeId={activeGoalFor(route)} goals={goals} utilities={utilities} />
+          <GoalRail
+            activeId={activeGoalFor(route)}
+            goals={goals}
+            locale={locale}
+            utilities={utilities}
+          />
         </div>
 
         <div
@@ -1442,7 +1448,10 @@ const DesktopAppContent = ({
           </button>
         }
       >
-        <LbSearchField label={locale === 'pt-BR' ? 'Pesquisar comandos' : 'Search commands'} />
+        <LbSearchField
+          autoFocus
+          label={locale === 'pt-BR' ? 'Pesquisar comandos' : 'Search commands'}
+        />
         <ul className="desktop-command-list">
           {commandItems.map((item) => (
             <li key={item.id}>

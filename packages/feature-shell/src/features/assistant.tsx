@@ -166,6 +166,7 @@ export const AssistantSurface = ({ locale, scenarioId, view }: AssistantSurfaceP
           <h2>{locale === 'pt-BR' ? 'Proposta rejeitada' : 'Proposal rejected'}</h2>
           <StatusSignal
             detail={ASSISTANT_COPY['policy-rejected'][locale]}
+            locale={locale}
             state="contradictory-evidence"
           />
           <code>S19-POLICY-RECOVERY-EVIDENCE-REQUIRED</code>

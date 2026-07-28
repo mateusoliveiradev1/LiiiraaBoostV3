@@ -8,6 +8,7 @@ import {
   type OperationalState,
 } from '@liiiraa/design-system';
 import { useActor } from '@xstate/react';
+import { useState } from 'react';
 
 import { calibrationMachine } from '../machines/calibration.machine.js';
 import {
@@ -372,12 +373,18 @@ const actionForState = (
 };
 
 export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [snapshot, send] = useActor(calibrationMachine, {
     input: { snapshot: props.initialSnapshot },
   });
   const machineState =
     snapshot.value === 'restoring' ? ('new' as const) : MACHINE_TO_SURFACE[snapshot.value];
-  const state = props.surfaceState ?? machineState;
+  const state =
+    hasInteracted || props.surfaceState === undefined ? machineState : props.surfaceState;
+  const sendInteraction = (event: CalibrationEvent): void => {
+    setHasInteracted(true);
+    send(event);
+  };
   const copy = STATE_COPY[props.locale][state];
   const stepLabels = STEP_LABELS[props.locale];
   const activeStep = CALIBRATION_STEPS.indexOf(snapshot.context.currentStep);
@@ -482,7 +489,9 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
             </aside>
           ) : null}
 
-          <div className="lb-calibration-actions">{actionForState(state, send, props)}</div>
+          <div className="lb-calibration-actions">
+            {actionForState(state, sendInteraction, props)}
+          </div>
         </section>
       </div>
 
@@ -504,7 +513,7 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
             isSelected={snapshot.context.consents[consent]}
             key={consent}
             onChange={(granted) => {
-              send({ type: 'SET_CONSENT', consent, granted });
+              sendInteraction({ type: 'SET_CONSENT', consent, granted });
             }}
           >
             {CONSENT_LABELS[props.locale][consent]}

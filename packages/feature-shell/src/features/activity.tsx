@@ -107,7 +107,9 @@ export const ActivitySurface = ({
             <input
               checked={filter === candidate}
               name="activity-filter"
-              onChange={() => { setFilter(candidate); }}
+              onChange={() => {
+                setFilter(candidate);
+              }}
               type="radio"
               value={candidate}
             />
@@ -117,7 +119,9 @@ export const ActivitySurface = ({
         <label>
           <input
             checked={includeHistory}
-            onChange={(event) => { setIncludeHistory(event.currentTarget.checked); }}
+            onChange={(event) => {
+              setIncludeHistory(event.currentTarget.checked);
+            }}
             type="checkbox"
           />
           {isPtBr ? 'Incluir histórico dispensado' : 'Include dismissed history'}
@@ -127,10 +131,9 @@ export const ActivitySurface = ({
       {groups.length === 0 ? (
         <StatusSignal
           detail={
-            isPtBr
-              ? 'Nenhum evento corresponde a este filtro.'
-              : 'No event matches this filter.'
+            isPtBr ? 'Nenhum evento corresponde a este filtro.' : 'No event matches this filter.'
           }
+          locale={locale}
           state="empty"
         />
       ) : (
@@ -148,6 +151,7 @@ export const ActivitySurface = ({
                         <h3>{event.title}</h3>
                         <StatusSignal
                           detail={event.affectedObject}
+                          locale={locale}
                           state={
                             event.severity === 'critical'
                               ? 'recovery'
@@ -172,7 +176,11 @@ export const ActivitySurface = ({
                         </dd>
                       </dl>
                       {event.scenarioMarked ? (
-                        <p>{isPtBr ? 'Evento de cenário — nenhuma alteração real.' : 'Scenario event — no real change.'}</p>
+                        <p>
+                          {isPtBr
+                            ? 'Evento de cenário — nenhuma alteração real.'
+                            : 'Scenario event — no real change.'}
+                        </p>
                       ) : null}
                       {event.nextAction ? (
                         <LbButton
@@ -184,9 +192,9 @@ export const ActivitySurface = ({
                       ) : null}
                       {event.severity === 'critical' && !event.acknowledged ? (
                         <LbButton
-                          onPress={() =>
-                            { dispatch({ type: 'acknowledge', correlationId: event.correlationId }); }
-                          }
+                          onPress={() => {
+                            dispatch({ type: 'acknowledge', correlationId: event.correlationId });
+                          }}
                           variant="secondary"
                         >
                           {isPtBr ? 'Reconhecer evento' : 'Acknowledge event'}
@@ -194,9 +202,9 @@ export const ActivitySurface = ({
                       ) : null}
                       {event.severity === 'critical' && !event.resolved ? (
                         <LbButton
-                          onPress={() =>
-                            { dispatch({ type: 'resolve', correlationId: event.correlationId }); }
-                          }
+                          onPress={() => {
+                            dispatch({ type: 'resolve', correlationId: event.correlationId });
+                          }}
                           variant="secondary"
                         >
                           {isPtBr ? 'Marcar como resolvido' : 'Mark resolved'}
@@ -204,9 +212,9 @@ export const ActivitySurface = ({
                       ) : null}
                       <LbButton
                         isDisabled={dismissalBlocked}
-                        onPress={() =>
-                          { dispatch({ type: 'dismiss', correlationId: event.correlationId }); }
-                        }
+                        onPress={() => {
+                          dispatch({ type: 'dismiss', correlationId: event.correlationId });
+                        }}
                         variant="quiet"
                       >
                         {isPtBr ? 'Dispensar da lista ativa' : 'Dismiss from active list'}
@@ -234,7 +242,10 @@ export const ActivitySurface = ({
           </h2>
           <ol>
             {receipts.map((receipt) => (
-              <li data-changed={String(receipt.changed)} key={`${receipt.scenarioId}-${receipt.summary}`}>
+              <li
+                data-changed={String(receipt.changed)}
+                key={`${receipt.scenarioId}-${receipt.summary}`}
+              >
                 <ScenarioMarker scenarioId={receipt.scenarioId} />
                 <strong>{receipt.summary}</strong>
                 <p>
@@ -287,7 +298,9 @@ export const FeedbackSurface = ({ locale, onNavigate, signal }: FeedbackSurfaceP
           : 'This event remains available in Activity.'}
       </p>
       {policy.windowsNotification ? (
-        <aside aria-label={isPtBr ? 'Prévia da notificação do Windows' : 'Windows notification preview'}>
+        <aside
+          aria-label={isPtBr ? 'Prévia da notificação do Windows' : 'Windows notification preview'}
+        >
           <strong>{policy.windowsNotification.productName}</strong>
           <p>{policy.windowsNotification.issue}</p>
           <LbButton

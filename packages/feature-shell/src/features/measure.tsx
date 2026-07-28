@@ -126,8 +126,12 @@ const Metadata = ({
     aria-label={localized({ en: 'Measurement metadata', 'pt-BR': 'Metadados da medição' }, locale)}
     data-lb-region
   >
-    <ProvenanceMark detail="DETERMINISTIC FIXTURE · NOT MEASURED FROM THIS PC" kind="fixture" />
-    <QualityMark quality={quality} />
+    <ProvenanceMark
+      detail="DETERMINISTIC FIXTURE · NOT MEASURED FROM THIS PC"
+      kind="fixture"
+      locale={locale}
+    />
+    <QualityMark locale={locale} quality={quality} />
     <dl>
       <dt>{localized({ en: 'Source and collector', 'pt-BR': 'Fonte e coletor' }, locale)}</dt>
       <dd>{COLLECTOR}</dd>
@@ -171,7 +175,7 @@ const ViewStatus = ({
   readonly target: MeasureView;
 }) => (
   <div>
-    <StatusSignal detail={localized(detail, locale)} state={state} />
+    <StatusSignal detail={localized(detail, locale)} locale={locale} state={state} />
     <LbButton onPress={() => onNavigate?.(target)} variant="secondary">
       {localized({ en: 'Review safe next step', 'pt-BR': 'Revisar próxima etapa segura' }, locale)}
     </LbButton>
@@ -230,6 +234,7 @@ const BaselineView = ({ locale }: { readonly locale: ShellLocale }) => (
         { en: 'Median fixture frame time', 'pt-BR': 'Tempo mediano de quadro do cenário' },
         locale,
       )}
+      locale={locale}
       sampleWindow={SAMPLE_WINDOW}
     />
     <MetricReadout
@@ -238,6 +243,7 @@ const BaselineView = ({ locale }: { readonly locale: ShellLocale }) => (
         { en: 'Fixture GPU temperature', 'pt-BR': 'Temperatura de GPU do cenário' },
         locale,
       )}
+      locale={locale}
       sampleWindow={SAMPLE_WINDOW}
     />
     <TelemetryPlot
@@ -636,6 +642,7 @@ const CollectorOverheadView = ({ locale }: { readonly locale: ShellLocale }) => 
         { en: 'Fixture collector budget', 'pt-BR': 'Orçamento do coletor de cenário' },
         locale,
       )}
+      locale={locale}
       sampleWindow={SAMPLE_WINDOW}
     />
     <p>
@@ -677,6 +684,7 @@ const DegradedCoverageView = ({
         ),
       )}
       label="1% low"
+      locale={locale}
       sampleWindow={SAMPLE_WINDOW}
     />
     <MetricReadout
@@ -685,6 +693,7 @@ const DegradedCoverageView = ({
         { en: 'Available frame-time median', 'pt-BR': 'Mediana disponível de tempo de quadro' },
         locale,
       )}
+      locale={locale}
       sampleWindow={SAMPLE_WINDOW}
     />
     <ViewStatus
@@ -700,7 +709,10 @@ const DegradedCoverageView = ({
     <Metadata
       comparison={{ en: 'Rejected — degraded collector', 'pt-BR': 'Rejeitada — coletor degradado' }}
       locale={locale}
-      missingCoverage="Approved 1% low samples"
+      missingCoverage={localized(
+        { en: 'Approved 1% low samples', 'pt-BR': 'Amostras de 1% low aprovadas' },
+        locale,
+      )}
       quality="degraded"
     />
   </section>

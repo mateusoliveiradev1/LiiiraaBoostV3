@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import type { EvidenceLocale } from './evidence.js';
 import { LbIconButton } from './primitives.js';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -241,24 +242,43 @@ export interface ChangeLedgerEntry {
   readonly timestamp: string;
 }
 
-export const ChangeLedger = ({ entries }: { readonly entries: readonly ChangeLedgerEntry[] }) => (
-  <EvidenceTable
-    caption="Change ledger"
-    columns={[
-      { id: 'timestamp', label: 'Timestamp' },
-      { id: 'change', label: 'Change' },
-      { id: 'result', label: 'Result' },
-    ]}
-    rows={entries.map((entry) => ({
-      cells: {
-        change: entry.change,
-        result: entry.result,
-        timestamp: <time dateTime={entry.timestamp}>{entry.timestamp}</time>,
-      },
-      id: entry.id,
-    }))}
-  />
-);
+const CHANGE_RESULT_LABELS = Object.freeze({
+  applied: { en: 'Applied', 'pt-BR': 'Aplicada' },
+  failed: { en: 'Failed', 'pt-BR': 'Falhou' },
+  reverted: { en: 'Reverted', 'pt-BR': 'Revertida' },
+  'no-change': { en: 'No change', 'pt-BR': 'Sem alteração' },
+} satisfies Readonly<
+  Record<ChangeLedgerEntry['result'], Readonly<Record<'en' | 'pt-BR', string>>>
+>);
+
+export const ChangeLedger = ({
+  entries,
+  locale = 'en',
+}: {
+  readonly entries: readonly ChangeLedgerEntry[];
+  readonly locale?: EvidenceLocale;
+}) => {
+  const language = locale === 'pt-BR' ? 'pt-BR' : 'en';
+
+  return (
+    <EvidenceTable
+      caption={language === 'pt-BR' ? 'Registro de alterações' : 'Change ledger'}
+      columns={[
+        { id: 'timestamp', label: language === 'pt-BR' ? 'Data e hora' : 'Timestamp' },
+        { id: 'change', label: language === 'pt-BR' ? 'Alteração' : 'Change' },
+        { id: 'result', label: language === 'pt-BR' ? 'Resultado' : 'Result' },
+      ]}
+      rows={entries.map((entry) => ({
+        cells: {
+          change: entry.change,
+          result: CHANGE_RESULT_LABELS[entry.result][language],
+          timestamp: <time dateTime={entry.timestamp}>{entry.timestamp}</time>,
+        },
+        id: entry.id,
+      }))}
+    />
+  );
+};
 
 export interface TimelineEntry {
   readonly detail: string;

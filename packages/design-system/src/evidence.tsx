@@ -328,10 +328,16 @@ export type MetricEvidence =
 export interface MetricReadoutProps {
   readonly evidence: MetricEvidence;
   readonly label: string;
+  readonly locale?: EvidenceLocale;
   readonly sampleWindow?: string;
 }
 
-export const MetricReadout = ({ evidence, label, sampleWindow }: MetricReadoutProps) => (
+export const MetricReadout = ({
+  evidence,
+  label,
+  locale = 'en',
+  sampleWindow,
+}: MetricReadoutProps) => (
   <section aria-label={label} className="lb-metric" data-lb-region>
     <span className="lb-metric-label">{label}</span>
     {evidence.status === 'available' ? (
@@ -340,15 +346,28 @@ export const MetricReadout = ({ evidence, label, sampleWindow }: MetricReadoutPr
       </strong>
     ) : (
       <strong className="lb-metric-unavailable">
-        {evidence.status === 'incomplete' ? 'Incomplete' : 'Unavailable'} — {evidence.reason}
+        {locale === 'pt-BR'
+          ? evidence.status === 'incomplete'
+            ? 'Incompleto'
+            : 'Indisponível'
+          : evidence.status === 'incomplete'
+            ? 'Incomplete'
+            : 'Unavailable'}{' '}
+        — {evidence.reason}
       </strong>
     )}
     <div className="lb-evidence-line">
-      <ProvenanceMark kind={evidence.provenance} />
-      <QualityMark quality={evidence.quality} />
-      <FreshnessStamp capturedAt={evidence.capturedAt} freshness="current" />
-      <span>Source: {evidence.source}</span>
-      {sampleWindow ? <span>Sample: {sampleWindow}</span> : null}
+      <ProvenanceMark kind={evidence.provenance} locale={locale} />
+      <QualityMark locale={locale} quality={evidence.quality} />
+      <FreshnessStamp capturedAt={evidence.capturedAt} freshness="current" locale={locale} />
+      <span>
+        {locale === 'pt-BR' ? 'Fonte' : 'Source'}: {evidence.source}
+      </span>
+      {sampleWindow ? (
+        <span>
+          {locale === 'pt-BR' ? 'Amostra' : 'Sample'}: {sampleWindow}
+        </span>
+      ) : null}
     </div>
   </section>
 );

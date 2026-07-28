@@ -21,7 +21,7 @@ import { Button, Toolbar } from 'react-aria-components';
 
 import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.js';
 import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.js';
-import type { OperationalState, RiskLevel } from './evidence.js';
+import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.js';
 
 export interface WindowControlHandlers {
   readonly close?: () => void;
@@ -32,6 +32,7 @@ export interface WindowControlHandlers {
 export interface WindowTitleBarProps {
   readonly controls?: WindowControlHandlers;
   readonly globalStatus: string;
+  readonly locale?: EvidenceLocale;
   readonly onOpenActivity?: () => void;
   readonly onOpenCommand?: () => void;
   readonly productName?: string;
@@ -41,12 +42,17 @@ export interface WindowTitleBarProps {
 export const WindowTitleBar = ({
   controls,
   globalStatus,
+  locale = 'en',
   onOpenActivity,
   onOpenCommand,
   productName = 'Liiiraa Boost',
   scenarioId,
 }: WindowTitleBarProps) => (
-  <header aria-label="Application title bar" className="lb-title-bar" data-lb-region>
+  <header
+    aria-label={locale === 'pt-BR' ? 'Barra de título do aplicativo' : 'Application title bar'}
+    className="lb-title-bar"
+    data-lb-region
+  >
     <strong className="lb-product-brand">
       <span aria-hidden="true" className="lb-product-mark">
         LB
@@ -57,26 +63,48 @@ export const WindowTitleBar = ({
     <span className="lb-global-status">{globalStatus}</span>
     <div className="lb-title-actions">
       {onOpenCommand ? (
-        <LbIconButton icon={<Search />} label="Open command center" onPress={onOpenCommand} />
+        <LbIconButton
+          icon={<Search />}
+          label={locale === 'pt-BR' ? 'Abrir central de comandos' : 'Open command center'}
+          onPress={onOpenCommand}
+        />
       ) : null}
       {onOpenActivity ? (
-        <LbIconButton icon={<Bell />} label="Open activity" onPress={onOpenActivity} />
+        <LbIconButton
+          icon={<Bell />}
+          label={locale === 'pt-BR' ? 'Abrir atividade' : 'Open activity'}
+          onPress={onOpenActivity}
+        />
       ) : null}
     </div>
     {controls ? (
-      <div aria-label="Window controls" className="lb-window-controls" role="group">
+      <div
+        aria-label={locale === 'pt-BR' ? 'Controles da janela' : 'Window controls'}
+        className="lb-window-controls"
+        role="group"
+      >
         {controls.minimize ? (
-          <LbIconButton icon={<Minimize2 />} label="Minimize window" onPress={controls.minimize} />
+          <LbIconButton
+            icon={<Minimize2 />}
+            label={locale === 'pt-BR' ? 'Minimizar janela' : 'Minimize window'}
+            onPress={controls.minimize}
+          />
         ) : null}
         {controls.maximizeRestore ? (
           <LbIconButton
             icon={<Maximize2 />}
-            label="Maximize or restore window"
+            label={
+              locale === 'pt-BR' ? 'Maximizar ou restaurar janela' : 'Maximize or restore window'
+            }
             onPress={controls.maximizeRestore}
           />
         ) : null}
         {controls.close ? (
-          <LbIconButton icon={<X />} label="Close window" onPress={controls.close} />
+          <LbIconButton
+            icon={<X />}
+            label={locale === 'pt-BR' ? 'Fechar janela' : 'Close window'}
+            onPress={controls.close}
+          />
         ) : null}
       </div>
     ) : null}
@@ -92,6 +120,7 @@ export interface GoalRailItem {
 export interface GoalRailProps {
   readonly activeId: string;
   readonly goals: readonly GoalRailItem[];
+  readonly locale?: EvidenceLocale;
   readonly utilities?: readonly GoalRailItem[];
 }
 
@@ -135,14 +164,21 @@ const GoalButtons = ({
   </>
 );
 
-export const GoalRail = ({ activeId, goals, utilities = [] }: GoalRailProps) => (
-  <nav aria-label="Primary goals" className="lb-goal-rail" data-lb-region>
-    <Toolbar aria-label="Product goals" orientation="vertical">
+export const GoalRail = ({ activeId, goals, locale = 'en', utilities = [] }: GoalRailProps) => (
+  <nav
+    aria-label={locale === 'pt-BR' ? 'Objetivos principais' : 'Primary goals'}
+    className="lb-goal-rail"
+    data-lb-region
+  >
+    <Toolbar
+      aria-label={locale === 'pt-BR' ? 'Objetivos do produto' : 'Product goals'}
+      orientation="vertical"
+    >
       <GoalButtons activeId={activeId} items={goals} />
     </Toolbar>
     {utilities.length > 0 ? (
       <Toolbar
-        aria-label="Account and settings"
+        aria-label={locale === 'pt-BR' ? 'Conta e configurações' : 'Account and settings'}
         className="lb-goal-utilities"
         orientation="vertical"
       >
@@ -355,12 +391,22 @@ export interface LedgerEntry {
   readonly state: OperationalState;
 }
 
-export const SystemStateLedger = ({ entries }: { readonly entries: readonly LedgerEntry[] }) => (
-  <section aria-label="System state ledger" className="lb-workflow" data-lb-region>
+export const SystemStateLedger = ({
+  entries,
+  locale = 'en',
+}: {
+  readonly entries: readonly LedgerEntry[];
+  readonly locale?: EvidenceLocale;
+}) => (
+  <section
+    aria-label={locale === 'pt-BR' ? 'Registro do estado do sistema' : 'System state ledger'}
+    className="lb-workflow"
+    data-lb-region
+  >
     {entries.map((entry) => (
       <div className="lb-ledger-row" key={entry.id}>
         <strong>{entry.label}</strong>
-        <StatusSignal detail={entry.detail} state={entry.state} />
+        <StatusSignal detail={entry.detail} locale={locale} state={entry.state} />
       </div>
     ))}
   </section>
@@ -499,15 +545,30 @@ export const TypedConfirmation = ({
 
 export const RestartPlanner = ({
   children,
+  locale = 'en',
   scheduledFor,
 }: {
   readonly children?: ReactNode;
+  readonly locale?: EvidenceLocale;
   readonly scheduledFor?: string;
 }) => (
-  <section aria-label="Restart planner" className="lb-workflow" data-lb-region>
-    <h2>Restart planner</h2>
+  <section
+    aria-label={locale === 'pt-BR' ? 'Planejamento de reinicialização' : 'Restart planner'}
+    className="lb-workflow"
+    data-lb-region
+  >
+    <h2>{locale === 'pt-BR' ? 'Planejamento de reinicialização' : 'Restart planner'}</h2>
     <StatusSignal
-      detail={scheduledFor ? `Scheduled for ${scheduledFor}` : 'No restart time selected.'}
+      detail={
+        scheduledFor
+          ? locale === 'pt-BR'
+            ? `Agendado para ${scheduledFor}`
+            : `Scheduled for ${scheduledFor}`
+          : locale === 'pt-BR'
+            ? 'Nenhum horário de reinicialização foi escolhido.'
+            : 'No restart time selected.'
+      }
+      locale={locale}
       state="restart-pending"
     />
     {children}
@@ -516,26 +577,34 @@ export const RestartPlanner = ({
 
 export const RecoveryCheckpoint = ({
   detail,
+  locale = 'en',
   title,
 }: {
   readonly detail: string;
+  readonly locale?: EvidenceLocale;
   readonly title: string;
 }) => (
   <section aria-label={title} className="lb-workflow" data-lb-region>
     <h2>{title}</h2>
-    <StatusSignal detail={detail} state="recovery" />
+    <StatusSignal detail={detail} locale={locale} state="recovery" />
   </section>
 );
 
 export const VerificationReceipt = ({
   detail,
+  locale = 'en',
   receiptId,
 }: {
   readonly detail: string;
+  readonly locale?: EvidenceLocale;
   readonly receiptId: string;
 }) => (
-  <section aria-label="Verification receipt" className="lb-receipt" data-lb-region>
-    <h2>Verification complete</h2>
+  <section
+    aria-label={locale === 'pt-BR' ? 'Recibo de verificação' : 'Verification receipt'}
+    className="lb-receipt"
+    data-lb-region
+  >
+    <h2>{locale === 'pt-BR' ? 'Verificação concluída' : 'Verification complete'}</h2>
     <p>{detail}</p>
     <code>{receiptId}</code>
   </section>

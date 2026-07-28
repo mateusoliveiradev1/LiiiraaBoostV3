@@ -151,24 +151,34 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
         <SystemStateLedger
           entries={[
             {
-              detail: 'Scenario ledger is available.',
+              detail:
+                locale === 'pt-BR'
+                  ? 'O registro do cenário está disponível.'
+                  : 'Scenario ledger is available.',
               id: 'ledger',
-              label: 'Change ledger',
+              label: locale === 'pt-BR' ? 'Registro de alterações' : 'Change ledger',
               state: 'fixture',
             },
             {
-              detail: 'Synthetic snapshot metadata is ready for review.',
+              detail:
+                locale === 'pt-BR'
+                  ? 'Os metadados simulados do snapshot estão prontos para revisão.'
+                  : 'Synthetic snapshot metadata is ready for review.',
               id: 'snapshot',
-              label: 'Recovery snapshot',
+              label: locale === 'pt-BR' ? 'Snapshot de recuperação' : 'Recovery snapshot',
               state: 'fixture',
             },
             {
-              detail: 'Privileged recovery authority is unavailable in Phase 2.',
+              detail:
+                locale === 'pt-BR'
+                  ? 'A autorização privilegiada de recuperação não está disponível na Fase 2.'
+                  : 'Privileged recovery authority is unavailable in Phase 2.',
               id: 'authority',
-              label: 'Recovery authority',
+              label: locale === 'pt-BR' ? 'Autorização de recuperação' : 'Recovery authority',
               state: 'unsupported',
             },
           ]}
+          locale={locale}
         />
       ) : null}
 
@@ -176,18 +186,25 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
         <ChangeLedger
           entries={[
             {
-              change: 'Review opened. No system operation requested.',
+              change:
+                locale === 'pt-BR'
+                  ? 'Revisão aberta. Nenhuma operação do sistema foi solicitada.'
+                  : 'Review opened. No system operation requested.',
               id: `${scenarioId}-RECOVER-REVIEW`,
               result: 'no-change',
               timestamp: '2030-01-15T18:00:00.000Z',
             },
             {
-              change: 'Preview receipt appended. PC remains unchanged.',
+              change:
+                locale === 'pt-BR'
+                  ? 'Recibo da prévia adicionado. O PC permanece sem alterações.'
+                  : 'Preview receipt appended. PC remains unchanged.',
               id: `${scenarioId}-PREVIEW-NO-CHANGE`,
               result: 'no-change',
               timestamp: '2030-01-15T18:00:01.000Z',
             },
           ]}
+          locale={locale}
         />
       ) : null}
 
@@ -222,12 +239,13 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
       ) : null}
 
       {activeView === 'interrupted-plan' || activeView === 'guided-recovery' ? (
-        <RecoveryCheckpoint detail={copy.detail} title={copy.title} />
+        <RecoveryCheckpoint detail={copy.detail} locale={locale} title={copy.title} />
       ) : null}
 
       {activeView === 'verified-receipt' ? (
         <VerificationReceipt
           detail={copy.detail}
+          locale={locale}
           receiptId={`${scenarioId}-RECOVERY-VERIFIED-NO-CHANGE`}
         />
       ) : null}

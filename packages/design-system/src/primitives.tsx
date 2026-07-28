@@ -138,6 +138,7 @@ interface LbFieldCopy {
 }
 
 export interface LbTextFieldProps extends LbFieldCopy {
+  readonly autoFocus?: boolean;
   readonly defaultValue?: string;
   readonly isDisabled?: boolean;
   readonly isInvalid?: boolean;
