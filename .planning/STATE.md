@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-22-PLAN.md
-last_updated: "2026-07-28T03:46:28.053Z"
+stopped_at: Completed 02-19-PLAN.md
+last_updated: "2026-07-28T04:05:59.139Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 36
+  completed_plans: 37
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 7 of 33
+Plan: 8 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -91,6 +91,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P17 | 7min | 2 tasks | 6 files |
 | Phase 02 P18 | 4min | 2 tasks | 6 files |
 | Phase 02 P22 | 8min | 2 tasks | 5 files |
+| Phase 02 P19 | 12min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -195,6 +196,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep native Windows decorations for shell controls — Preserves snap layouts, Alt+Space, minimize, maximize, and operating-system accessibility behavior.
 - [Phase 02]: Exit ordinary close by default and gate tray behavior behind validated opt-in — Implements D-19 while recovery close structurally excludes interface termination.
 - [Phase 02]: Reduce external navigation to the registered liiiraa-boost allowlist — Raw executable arguments, launcher flags, unknown routes, and privileged intent never reach the renderer.
+- [Phase 02]: Derive Wave 0 scenario and route/state coverage only from the canonical desktop scenario catalog. — Prevents a duplicated S01-S24 source from drifting.
+- [Phase 02]: Preserve unavailable native and human evidence as planned-unresolved with exact owners until observed promotion. — Prevents planned Windows, signing, NVDA, forced-colors, and scale entries from masquerading as proof.
+- [Phase 02]: Execute Wave 0 omission mutations entirely in memory and hash all 20 source artifacts before and after. — Keeps mutation tests deterministic and source artifacts byte-stable.
 
 ### Pending Todos
 
@@ -218,6 +222,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T03:46:05.743Z
-Stopped at: Completed 02-22-PLAN.md
+Last session: 2026-07-28T04:05:24.757Z
+Stopped at: Completed 02-19-PLAN.md
 Resume file: None

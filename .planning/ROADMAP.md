@@ -117,7 +117,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Every planned module has deliberate loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement behavior with no dead controls or unlabeled fixture values.
 5. User can complete every desktop flow in PT-BR or English with keyboard and assistive technology, scaled UI, reduced motion, WCAG 2.2 AA contrast, and status meaning that never relies on color alone.
 
-**Plans**: 14/33 plans executed
+**Plans**: 15/33 plans executed
 
 **Legacy outline below is superseded by the authoritative revision graph that follows.**
 
@@ -191,7 +191,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 **Wave 7**
 
-- [ ] 02-19-PLAN.md — Unify Wave 0 parity, reachability, and omission gates
+- [x] 02-19-PLAN.md — Unify Wave 0 parity, reachability, and omission gates
 - [ ] 02-23-PLAN.md — Implement validated tray, notification, and startup bridges
 
 **Wave 8**
@@ -405,7 +405,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Product Truth and Modular Contracts | 22/22 | Complete    | 2026-07-27 |
-| 2. Complete Desktop Experience | 14/33 | In Progress|  |
+| 2. Complete Desktop Experience | 15/33 | In Progress|  |
 | 3. Complete Web Experience | 0/TBD | Not started | - |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD | Not started | - |
 | 5. Hardware Intelligence and Measured Evidence | 0/TBD | Not started | - |
