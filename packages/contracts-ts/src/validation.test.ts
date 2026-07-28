@@ -75,7 +75,7 @@ const validRendererCommand = {
     category: 'recovery-required',
     title: 'Recovery required',
     body: 'Review the recovery state.',
-    intent: {
+    action: {
       kind: 'goal',
       destination: 'recover',
     },
