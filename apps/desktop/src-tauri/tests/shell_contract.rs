@@ -2,6 +2,13 @@ use std::{fs, path::PathBuf};
 
 use serde_json::{Value, json};
 
+#[path = "../src/window.rs"]
+mod window;
+
+use window::{
+    CloseAction, HostEventMetadata, WindowEffect, WindowLifecycle, WindowLifecycleError, WorkArea,
+};
+
 fn crate_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
@@ -120,4 +127,154 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
             "forbidden native authority registered: {forbidden}"
         );
     }
+}
+
+fn shell_envelope(message_type: &str, payload: Value) -> Value {
+    json!({
+        "schemaVersion": "1.0",
+        "messageType": message_type,
+        "requestId": "request-shell-contract-0001",
+        "correlationId": "correlation-shell-contract-0001",
+        "issuedAt": "2026-07-28T12:00:00.000Z",
+        "payload": payload
+    })
+}
+
+fn primary_work_area() -> WorkArea {
+    WorkArea::new("monitor-primary", 0, 0, 1280, 720).expect("valid test work area")
+}
+
+#[test]
+fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
+    let mut lifecycle = WindowLifecycle::default();
+    assert_eq!(lifecycle.close_action(), CloseAction::Exit);
+
+    let malformed = shell_envelope(
+        "desktop.shell.set-tray-preference.command",
+        json!({
+            "preference": "keep-game-detection-in-tray",
+            "unexpected": "must-not-mutate"
+        }),
+    );
+    assert_eq!(
+        lifecycle.dispatch_renderer_message(&malformed, &primary_work_area()),
+        Err(WindowLifecycleError::ContractRejected)
+    );
+    assert_eq!(lifecycle.close_action(), CloseAction::Exit);
+
+    let opt_in = shell_envelope(
+        "desktop.shell.set-tray-preference.command",
+        json!({ "preference": "keep-game-detection-in-tray" }),
+    );
+    let dispatch = lifecycle
+        .dispatch_renderer_message(&opt_in, &primary_work_area())
+        .expect("generated tray opt-in command");
+
+    assert_eq!(lifecycle.close_action(), CloseAction::HideToTray);
+    assert!(dispatch.effects.iter().any(|effect| {
+        matches!(
+            effect,
+            WindowEffect::Emit(event)
+                if serde_json::to_value(event)
+                    .is_ok_and(|value| value["messageType"]
+                        == "desktop.shell.tray-preference-changed.event")
+        )
+    }));
+}
+
+#[test]
+fn window_close_during_recovery_never_exits_the_interface() {
+    let mut lifecycle = WindowLifecycle::default();
+    lifecycle.set_recovery_in_progress(true);
+
+    let close = lifecycle
+        .begin_close(HostEventMetadata::fixed(
+            "request-window-close-0001",
+            "2026-07-28T12:00:00.000Z",
+        ))
+        .expect("generated close request event");
+
+    assert_eq!(close.action, CloseAction::AwaitRendererDecision);
+    assert_eq!(
+        serde_json::to_value(close.event).expect("serializable generated event")["payload"]
+            ["context"]["kind"],
+        "recovery-in-progress"
+    );
+
+    let forbidden_exit = shell_envelope(
+        "desktop.shell.resolve-close.command",
+        json!({
+            "resolution": {
+                "context": "recovery-in-progress",
+                "decision": "close-interface"
+            }
+        }),
+    );
+    assert_eq!(
+        lifecycle.dispatch_renderer_message(&forbidden_exit, &primary_work_area()),
+        Err(WindowLifecycleError::ContractRejected)
+    );
+    assert_eq!(
+        lifecycle.close_action(),
+        CloseAction::AwaitRendererDecision
+    );
+
+    let stay_here = shell_envelope(
+        "desktop.shell.resolve-close.command",
+        json!({
+            "resolution": {
+                "context": "recovery-in-progress",
+                "decision": "stay-here"
+            }
+        }),
+    );
+    let dispatch = lifecycle
+        .dispatch_renderer_message(&stay_here, &primary_work_area())
+        .expect("generated recovery close resolution");
+    assert!(matches!(
+        dispatch.effects.as_slice(),
+        [WindowEffect::Close(CloseAction::StayVisible)]
+    ));
+}
+
+#[test]
+fn window_restore_clamps_to_the_selected_monitor_work_area() {
+    let mut lifecycle = WindowLifecycle::default();
+    let save = shell_envelope(
+        "desktop.shell.save-window-state.command",
+        json!({
+            "state": {
+                "kind": "normal",
+                "monitorId": "monitor-primary",
+                "x": -900,
+                "y": 1800,
+                "width": 2000,
+                "height": 1200
+            }
+        }),
+    );
+
+    let dispatch = lifecycle
+        .dispatch_renderer_message(&save, &primary_work_area())
+        .expect("generated save-window-state command");
+    let applied = dispatch
+        .effects
+        .iter()
+        .find_map(|effect| match effect {
+            WindowEffect::ApplyWindowState(state) => serde_json::to_value(state).ok(),
+            _ => None,
+        })
+        .expect("clamped state effect");
+
+    assert_eq!(
+        applied,
+        json!({
+            "kind": "normal",
+            "monitorId": "monitor-primary",
+            "x": 0,
+            "y": 0,
+            "width": 1280,
+            "height": 720
+        })
+    );
 }
