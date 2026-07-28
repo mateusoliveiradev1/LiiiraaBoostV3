@@ -37,6 +37,8 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(window["minWidth"], 760);
     assert_eq!(window["minHeight"], 600);
     assert_eq!(window["center"], true);
+    assert_eq!(window["decorations"], true);
+    assert_eq!(window["resizable"], true);
 
     let security = &config["app"]["security"];
     let mut runtime_capability = capability.clone();
@@ -103,6 +105,10 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
     assert!(source.contains("validate_renderer_to_host_shell_command"));
     assert!(source.contains("validate_host_to_renderer_shell_event"));
     assert!(source.contains("ShellContract::authorize_startup"));
+    assert!(source.contains("WindowEvent::CloseRequested"));
+    assert!(source.contains("HostEventMetadata::now(\"close-request\")"));
+    assert!(source.contains("current_work_area"));
+    assert!(source.contains("HOST_EVENT_CHANNEL"));
     assert!(
         source
             .find("ShellContract::authorize_startup")
@@ -156,10 +162,10 @@ fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
             "unexpected": "must-not-mutate"
         }),
     );
-    assert_eq!(
+    assert!(matches!(
         lifecycle.dispatch_renderer_message(&malformed, &primary_work_area()),
         Err(WindowLifecycleError::ContractRejected)
-    );
+    ));
     assert_eq!(lifecycle.close_action(), CloseAction::Exit);
 
     let opt_in = shell_envelope(
@@ -196,8 +202,8 @@ fn window_close_during_recovery_never_exits_the_interface() {
 
     assert_eq!(close.action, CloseAction::AwaitRendererDecision);
     assert_eq!(
-        serde_json::to_value(close.event).expect("serializable generated event")["payload"]
-            ["context"]["kind"],
+        serde_json::to_value(close.event).expect("serializable generated event")["payload"]["context"]
+            ["kind"],
         "recovery-in-progress"
     );
 
@@ -210,14 +216,11 @@ fn window_close_during_recovery_never_exits_the_interface() {
             }
         }),
     );
-    assert_eq!(
+    assert!(matches!(
         lifecycle.dispatch_renderer_message(&forbidden_exit, &primary_work_area()),
         Err(WindowLifecycleError::ContractRejected)
-    );
-    assert_eq!(
-        lifecycle.close_action(),
-        CloseAction::AwaitRendererDecision
-    );
+    ));
+    assert_eq!(lifecycle.close_action(), CloseAction::AwaitRendererDecision);
 
     let stay_here = shell_envelope(
         "desktop.shell.resolve-close.command",

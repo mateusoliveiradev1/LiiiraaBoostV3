@@ -1,11 +1,21 @@
+mod window;
+
+use std::sync::Mutex;
+
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
-    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand,
+    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellWindowState,
     validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
 };
 use serde::Serialize;
 use serde_json::Value;
-use tauri::Manager;
+use tauri::{
+    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
+};
+use window::{
+    CloseAction, HOST_EVENT_CHANNEL, HostEventMetadata, WindowEffect, WindowLifecycle,
+    WindowLifecycleError, WorkArea,
+};
 
 const FIXTURE_ADAPTER: &str = "fixture";
 const ADAPTER_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_DESKTOP_ADAPTER";
@@ -21,6 +31,8 @@ pub enum BuildProfile {
 pub enum ShellDispatchError {
     ContractRejected,
     FixtureAdapterForbidden,
+    HostOperationFailed,
+    WindowUnavailable,
 }
 
 pub struct ShellContract;
@@ -56,9 +68,131 @@ impl ShellContract {
 
 #[tauri::command]
 fn dispatch_shell_command(
+    app: AppHandle,
+    lifecycle: State<'_, Mutex<WindowLifecycle>>,
     message: Value,
 ) -> Result<RendererToHostShellCommand, ShellDispatchError> {
-    ShellContract::dispatch_renderer_command(&message)
+    let work_area = current_work_area(&app)?;
+    let dispatch = lifecycle
+        .lock()
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?
+        .dispatch_renderer_message(&message, &work_area)
+        .map_err(map_window_error)?;
+
+    apply_window_effects(&app, dispatch.effects)?;
+    Ok(dispatch.command)
+}
+
+fn current_work_area(app: &AppHandle) -> Result<WorkArea, ShellDispatchError> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or(ShellDispatchError::WindowUnavailable)?;
+    let monitor = window
+        .current_monitor()
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?
+        .ok_or(ShellDispatchError::WindowUnavailable)?;
+    let monitor_id = monitor
+        .name()
+        .cloned()
+        .unwrap_or_else(|| "monitor-unnamed".to_owned());
+    let work_area = monitor.work_area();
+
+    WorkArea::new(
+        monitor_id,
+        work_area.position.x,
+        work_area.position.y,
+        work_area.size.width,
+        work_area.size.height,
+    )
+    .map_err(map_window_error)
+}
+
+fn map_window_error(error: WindowLifecycleError) -> ShellDispatchError {
+    match error {
+        WindowLifecycleError::ContractRejected => ShellDispatchError::ContractRejected,
+        WindowLifecycleError::HostEventRejected | WindowLifecycleError::InvalidWorkArea => {
+            ShellDispatchError::HostOperationFailed
+        }
+    }
+}
+
+fn apply_window_effects(
+    app: &AppHandle,
+    effects: Vec<WindowEffect>,
+) -> Result<(), ShellDispatchError> {
+    for effect in effects {
+        match effect {
+            WindowEffect::Emit(event) => app
+                .emit(HOST_EVENT_CHANNEL, event)
+                .map_err(|_| ShellDispatchError::HostOperationFailed)?,
+            WindowEffect::ApplyWindowState(state) => {
+                let window = app
+                    .get_webview_window("main")
+                    .ok_or(ShellDispatchError::WindowUnavailable)?;
+                apply_window_state(&window, &state)?;
+            }
+            WindowEffect::Close(CloseAction::Exit) => app.exit(0),
+            WindowEffect::Close(CloseAction::HideToTray) => {
+                let window = app
+                    .get_webview_window("main")
+                    .ok_or(ShellDispatchError::WindowUnavailable)?;
+                window
+                    .hide()
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+            }
+            WindowEffect::Close(CloseAction::StayVisible | CloseAction::AwaitRendererDecision) => {
+                let window = app
+                    .get_webview_window("main")
+                    .ok_or(ShellDispatchError::WindowUnavailable)?;
+                window
+                    .show()
+                    .and_then(|()| window.set_focus())
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn apply_window_state(
+    window: &WebviewWindow,
+    state: &ShellWindowState,
+) -> Result<(), ShellDispatchError> {
+    match state {
+        ShellWindowState::NormalWindowState(state) => {
+            window
+                .unminimize()
+                .and_then(|()| window.unmaximize())
+                .and_then(|()| window.set_position(PhysicalPosition::new(state.x, state.y)))
+                .and_then(|()| {
+                    window.set_size(PhysicalSize::new(state.width as u32, state.height as u32))
+                })
+                .and_then(|()| window.show())
+                .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+        }
+        ShellWindowState::MaximizedWindowState(state) => {
+            window
+                .unminimize()
+                .and_then(|()| window.unmaximize())
+                .and_then(|()| window.set_position(PhysicalPosition::new(state.x, state.y)))
+                .and_then(|()| {
+                    window.set_size(PhysicalSize::new(
+                        state.restore_width as u32,
+                        state.restore_height as u32,
+                    ))
+                })
+                .and_then(|()| window.maximize())
+                .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+        }
+        ShellWindowState::MinimizedWindowState(_) => {
+            window
+                .minimize()
+                .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+        }
+    }
+
+    Ok(())
 }
 
 fn build_profile() -> BuildProfile {
@@ -75,6 +209,7 @@ fn run() -> Result<(), String> {
         .map_err(|_| "desktop startup policy rejected the configured adapter".to_owned())?;
 
     tauri::Builder::default()
+        .manage(Mutex::new(WindowLifecycle::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, _arguments, _cwd| {
                 if let Some(window) = app.get_webview_window("main") {
@@ -88,6 +223,40 @@ fn run() -> Result<(), String> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![dispatch_shell_command])
+        .on_window_event(|window, event| {
+            if window.label() != "main" {
+                return;
+            }
+
+            let WindowEvent::CloseRequested { api, .. } = event else {
+                return;
+            };
+            let lifecycle = window.state::<Mutex<WindowLifecycle>>();
+            let close = lifecycle.lock().ok().and_then(|lifecycle| {
+                lifecycle
+                    .begin_close(HostEventMetadata::now("close-request"))
+                    .ok()
+            });
+
+            let Some(close) = close else {
+                api.prevent_close();
+                return;
+            };
+
+            let _ = window.emit(HOST_EVENT_CHANNEL, close.event);
+            match close.action {
+                CloseAction::Exit => {}
+                CloseAction::HideToTray => {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+                CloseAction::StayVisible | CloseAction::AwaitRendererDecision => {
+                    api.prevent_close();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .map_err(|error| format!("desktop host failed: {error}"))
 }
