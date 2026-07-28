@@ -1,0 +1,83 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-07-complete-operational-states",
+  "requirements": ["UX-07"],
+  "owner": "plan-02-29",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-07-truth-safe-authored-states",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"shell states|accessibility\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-07-bounded-state-diagnostics",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"future surfaces|boundary|receipt\"",
+          "file": "packages/feature-shell/src/features/future-surfaces.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-07-state-semantics",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"shell states|accessibility\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-07-browser-state-matrix",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/accessibility.spec.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-07-packaged-state-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-07-recovery-state-journeys",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"preview|recovery|restart\"",
+          "file": "packages/feature-shell/src/features/future-surfaces.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-07-packaged-state-recovery",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/journeys.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
