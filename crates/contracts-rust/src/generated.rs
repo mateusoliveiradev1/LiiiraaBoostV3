@@ -5554,6 +5554,7 @@ impl ::std::convert::TryFrom<::std::string::String> for ShellRecoveryCloseResolu
 #[doc = "  \"$id\": \"ShellReleaseChannel.json\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
+#[doc = "    \"development\","]
 #[doc = "    \"stable\","]
 #[doc = "    \"beta\","]
 #[doc = "    \"experimental\""]
@@ -5575,6 +5576,8 @@ impl ::std::convert::TryFrom<::std::string::String> for ShellRecoveryCloseResolu
     PartialOrd,
 )]
 pub enum ShellReleaseChannel {
+    #[serde(rename = "development")]
+    Development,
     #[serde(rename = "stable")]
     Stable,
     #[serde(rename = "beta")]
@@ -5585,6 +5588,7 @@ pub enum ShellReleaseChannel {
 impl ::std::fmt::Display for ShellReleaseChannel {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
+            Self::Development => f.write_str("development"),
             Self::Stable => f.write_str("stable"),
             Self::Beta => f.write_str("beta"),
             Self::Experimental => f.write_str("experimental"),
@@ -5595,6 +5599,7 @@ impl ::std::str::FromStr for ShellReleaseChannel {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
+            "development" => Ok(Self::Development),
             "stable" => Ok(Self::Stable),
             "beta" => Ok(Self::Beta),
             "experimental" => Ok(Self::Experimental),

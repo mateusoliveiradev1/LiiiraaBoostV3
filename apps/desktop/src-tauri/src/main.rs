@@ -1,4 +1,5 @@
 mod navigation;
+mod notifications;
 mod tray;
 mod window;
 
@@ -12,6 +13,10 @@ use liiiraa_contracts_rust::{
 use navigation::{
     ExternalNavigationSource, navigation_event_from_external, navigation_event_from_second_instance,
 };
+use notifications::{
+    NotificationBridge, NotificationEffect, StartupCondition, installer_identity_event,
+    startup_state_event,
+};
 use serde::Serialize;
 use serde_json::Value;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
@@ -20,6 +25,7 @@ use tauri::{
     AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
+use tauri_plugin_notification::NotificationExt;
 use tray::{
     TRAY_ID, TrayEffect, TrayLifecycle, TrayMenuContext, TrayMenuEntryKind, tray_menu_model,
 };
@@ -82,9 +88,25 @@ fn dispatch_shell_command(
     app: AppHandle,
     lifecycle: State<'_, Mutex<WindowLifecycle>>,
     tray_lifecycle: State<'_, Mutex<TrayLifecycle>>,
+    notification_bridge: State<'_, Mutex<NotificationBridge>>,
     message: Value,
 ) -> Result<RendererToHostShellCommand, ShellDispatchError> {
     let command = ShellContract::dispatch_renderer_command(&message)?;
+    if matches!(
+        &command,
+        RendererToHostShellCommand::SetLocaleCommand(_)
+            | RendererToHostShellCommand::SetNotificationPreferenceCommand(_)
+            | RendererToHostShellCommand::ShowNotificationCommand(_)
+    ) {
+        let effects = notification_bridge
+            .lock()
+            .map_err(|_| ShellDispatchError::HostOperationFailed)?
+            .dispatch_renderer_message(&message, HostEventMetadata::now("notification-command"))
+            .map_err(|_| ShellDispatchError::ContractRejected)?;
+        apply_notification_effects(&app, effects)?;
+        return Ok(command);
+    }
+
     let work_area = current_work_area(&app)?;
     let dispatch = lifecycle
         .lock()
@@ -267,6 +289,32 @@ fn apply_tray_effects(app: &AppHandle, effects: Vec<TrayEffect>) -> Result<(), S
     Ok(())
 }
 
+fn apply_notification_effects(
+    app: &AppHandle,
+    effects: Vec<NotificationEffect>,
+) -> Result<(), ShellDispatchError> {
+    for effect in effects {
+        match effect {
+            NotificationEffect::Emit(event) => app
+                .emit(HOST_EVENT_CHANNEL, event)
+                .map_err(|_| ShellDispatchError::HostOperationFailed)?,
+            NotificationEffect::Show(notification) => {
+                let action = serde_json::to_value(&notification.action)
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+                let notification_builder = app.notification().builder();
+                notification_builder
+                    .title(notification.title)
+                    .body(notification.body)
+                    .extra("shellAction", action)
+                    .show()
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
     let tray_id = TrayIconId::new(TRAY_ID);
     if let Some(tray) = app.tray_by_id(&tray_id) {
@@ -357,6 +405,7 @@ fn run() -> Result<(), String> {
     tauri::Builder::default()
         .manage(Mutex::new(WindowLifecycle::default()))
         .manage(Mutex::new(TrayLifecycle::default()))
+        .manage(Mutex::new(NotificationBridge::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, arguments, _cwd| {
                 let _ = focus_main_window(app);
@@ -374,6 +423,25 @@ fn run() -> Result<(), String> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(|app| {
+            let config: Value = serde_json::from_str(include_str!("../tauri.conf.json"))?;
+            let startup_events = [
+                installer_identity_event(&config, HostEventMetadata::now("installer-identity")),
+                startup_state_event(
+                    StartupCondition::OpeningShell,
+                    HostEventMetadata::now("startup-opening-shell"),
+                ),
+                startup_state_event(
+                    StartupCondition::Ready,
+                    HostEventMetadata::now("startup-ready"),
+                ),
+            ];
+            for event in startup_events {
+                let event = event.map_err(|_| {
+                    std::io::Error::other("generated startup event failed validation")
+                })?;
+                app.emit(HOST_EVENT_CHANNEL, event)?;
+            }
+
             let app_handle = app.handle().clone();
             app.deep_link().on_open_url(move |open_url| {
                 for url in open_url.urls() {

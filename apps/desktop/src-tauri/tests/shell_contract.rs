@@ -584,10 +584,7 @@ fn notification_startup_preferences_allowlist_categories_and_redact_renderer_cop
     assert!(matches!(
         bridge.dispatch_renderer_message(
             &malformed,
-            HostEventMetadata::fixed(
-                "request-notification-malformed",
-                "2026-07-28T12:00:00.000Z"
-            )
+            HostEventMetadata::fixed("request-notification-malformed", "2026-07-28T12:00:00.000Z")
         ),
         Err(NotificationBridgeError::ContractRejected)
     ));
@@ -600,10 +597,7 @@ fn notification_startup_preferences_allowlist_categories_and_redact_renderer_cop
     let locale_effects = bridge
         .dispatch_renderer_message(
             &locale,
-            HostEventMetadata::fixed(
-                "request-notification-locale",
-                "2026-07-28T12:00:00.000Z",
-            ),
+            HostEventMetadata::fixed("request-notification-locale", "2026-07-28T12:00:00.000Z"),
         )
         .expect("generated locale command");
     assert!(locale_effects.iter().any(|effect| {
@@ -653,10 +647,7 @@ fn notification_startup_preferences_allowlist_categories_and_redact_renderer_cop
     let effects = bridge
         .dispatch_renderer_message(
             &show,
-            HostEventMetadata::fixed(
-                "request-notification-show",
-                "2026-07-28T12:00:00.000Z",
-            ),
+            HostEventMetadata::fixed("request-notification-show", "2026-07-28T12:00:00.000Z"),
         )
         .expect("approved recovery notification");
     let approved = effects
@@ -672,8 +663,7 @@ fn notification_startup_preferences_allowlist_categories_and_redact_renderer_cop
     assert!(!approved.body.contains("SENSITIVE"));
     assert!(approved.respects_focus_assist);
     assert_eq!(
-        serde_json::to_value(&approved.action)
-            .expect("generated notification action")["payload"]["source"],
+        serde_json::to_value(&approved.action).expect("generated notification action")["payload"]["source"],
         "notification"
     );
 
@@ -788,10 +778,7 @@ fn notification_startup_failures_emit_only_generated_safe_states_and_actions() {
             assert_eq!(value["payload"]["state"]["reason"], reason);
         }
         if let Some(recovery_action) = recovery_action {
-            assert_eq!(
-                value["payload"]["state"]["recoveryAction"],
-                recovery_action
-            );
+            assert_eq!(value["payload"]["state"]["recoveryAction"], recovery_action);
         }
     }
 }
@@ -819,7 +806,11 @@ fn notification_startup_installer_identity_uses_the_validated_development_channe
             "publisher": "Liiiraa Boost",
             "version": "0.0.0",
             "channel": "development",
-            "windowsCompatibility": ["10", "11"]
+            "windowsCompatibility": {
+                "kind": "supported",
+                "detectedBuild": 0,
+                "minimumBuild": 0
+            }
         })
     );
 }

@@ -27,6 +27,7 @@ scalar ShellNotificationTitle extends string;
 scalar ShellNotificationBody extends string;
 
 union ShellReleaseChannel {
+  development: "development",
   stable: "stable",
   beta: "beta",
   experimental: "experimental",

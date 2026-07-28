@@ -29,7 +29,7 @@ export type HostToRendererShellEventJson =
   | ShellWindowStateChangedEventJson;
 export type ShellPublisherJson = string;
 export type ShellVersionJson = string;
-export type ShellReleaseChannelJson = 'stable' | 'beta' | 'experimental';
+export type ShellReleaseChannelJson = 'development' | 'stable' | 'beta' | 'experimental';
 export type ShellWindowsCompatibilityJson =
   ShellSupportedWindowsCompatibilityJson | ShellUnsupportedWindowsCompatibilityJson;
 export type ShellStartupStateJson =
