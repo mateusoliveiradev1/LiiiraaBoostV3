@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-19-PLAN.md
-last_updated: "2026-07-28T04:05:59.139Z"
+stopped_at: Completed 02-23-PLAN.md
+last_updated: "2026-07-28T04:31:11.809Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 37
+  completed_plans: 38
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 8 of 33
+Plan: 9 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -92,6 +92,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P18 | 4min | 2 tasks | 6 files |
 | Phase 02 P22 | 8min | 2 tasks | 5 files |
 | Phase 02 P19 | 12min | 2 tasks | 1 files |
+| Phase 02 P23 | 18min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -199,6 +200,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Derive Wave 0 scenario and route/state coverage only from the canonical desktop scenario catalog. — Prevents a duplicated S01-S24 source from drifting.
 - [Phase 02]: Preserve unavailable native and human evidence as planned-unresolved with exact owners until observed promotion. — Prevents planned Windows, signing, NVDA, forced-colors, and scale entries from masquerading as proof.
 - [Phase 02]: Execute Wave 0 omission mutations entirely in memory and hash all 20 source artifacts before and after. — Keeps mutation tests deterministic and source artifacts byte-stable.
+- [Phase 02]: Create or reveal the native tray only after validated opt-in or an active safety workflow. — Preserves D-19 exit-on-close and prevents implicit background persistence.
+- [Phase 02]: Map each generated notification category and locale to fixed redacted OS copy and a category-specific generated action. — Renderer hardware text must never leave the application through Windows notifications.
+- [Phase 02]: Use the generated 0/0 compatibility sentinel for declared installer support before diagnostics supply an observed Windows build. — Installer identity remains deterministic without presenting the sentinel as observed evidence.
+- [Phase 02]: Add development to the generated release-channel union. — The self-signed local build must report the configured development identity truthfully.
 
 ### Pending Todos
 
@@ -222,6 +227,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T04:05:24.757Z
-Stopped at: Completed 02-19-PLAN.md
+Last session: 2026-07-28T04:31:11.804Z
+Stopped at: Completed 02-23-PLAN.md
 Resume file: None
