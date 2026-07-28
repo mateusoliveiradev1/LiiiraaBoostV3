@@ -6,6 +6,7 @@ import {
   ContextualHome,
   DocumentationSurface,
   EntitlementSurface,
+  FavoritesManager,
   ImproveSurface,
   MeasureSurface,
   PrepareSurface,
@@ -15,6 +16,7 @@ import {
   UpdateSurface,
 } from '@liiiraa/feature-shell';
 import type {
+  FavoriteCandidate,
   HomeCalibrationState,
   HomeClaim,
   PreferenceEvent,
@@ -48,7 +50,7 @@ import {
 import type { ActivityItem, OperationalState } from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { detectLocale, formatMessage } from './locales/i18n.js';
+import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { InstallerHandoff } from './features/installer-handoff.js';
 import { StartupSurface } from './features/startup.js';
 import {
@@ -59,6 +61,7 @@ import {
 } from './native/shell-bridge.js';
 import {
   DesktopPreferencesProvider,
+  PreConsentLocaleControl,
   useDesktopPreferences,
   type HostCommandMetadata,
 } from './preferences.js';
@@ -225,6 +228,35 @@ const HOME_CLAIMS: readonly HomeClaim[] = Object.freeze([
     state: 'fixture',
   }),
 ]);
+
+const SETTINGS_FAVORITE_CANDIDATES: readonly FavoriteCandidate[] = Object.freeze([
+  Object.freeze({
+    eligibility: 'safe',
+    id: 'game-northstar',
+    kind: 'game',
+    label: 'Northstar Arena',
+  }),
+  Object.freeze({
+    eligibility: 'safe',
+    id: 'game-vector-strike',
+    kind: 'game',
+    label: 'Vector Strike Arena',
+  }),
+  Object.freeze({
+    eligibility: 'safe',
+    id: 'metric-frame-time',
+    kind: 'metric',
+    label: 'Frame time',
+  }),
+  Object.freeze({
+    eligibility: 'safe',
+    id: 'safe-open-activity',
+    kind: 'safe-action',
+    label: 'Open Activity',
+  }),
+]);
+
+const SETTINGS_INITIAL_FAVORITES = Object.freeze(SETTINGS_FAVORITE_CANDIDATES.slice(0, 3));
 
 const ACTIVITY_EVENTS: Parameters<typeof ActivitySurface>[0]['events'] = Object.freeze([
   Object.freeze({
@@ -731,7 +763,22 @@ export const DesktopRouteOutlet = ({
             </StandaloneSection>
           );
         }
-        return <SettingsSurface locale={locale} scenarioId={scenarioId} />;
+        return (
+          <SettingsSurface locale={locale} scenarioId={scenarioId}>
+            <section aria-labelledby="desktop-language-title" data-lb-region>
+              <h2 id="desktop-language-title">
+                {locale === 'pt-BR' ? 'Preferências regionais' : 'Regional preferences'}
+              </h2>
+              <PreConsentLocaleControl />
+            </section>
+            <FavoritesManager
+              candidates={SETTINGS_FAVORITE_CANDIDATES}
+              headingLevel="h2"
+              initialFavorites={SETTINGS_INITIAL_FAVORITES}
+              locale={locale}
+            />
+          </SettingsSurface>
+        );
       }
       return (
         <AccountSurface
@@ -786,8 +833,43 @@ const deferFocus = (focus: () => void): void => {
   focus();
 };
 
+const hasSimulatedScenarioMarker = (): boolean => {
+  const testState = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__') as unknown;
+  if (typeof testState !== 'object' || testState === null) {
+    return false;
+  }
+  const scenario = Reflect.get(testState, 'scenario') as unknown;
+  return (
+    typeof scenario === 'object' &&
+    scenario !== null &&
+    (Reflect.get(scenario, 'marker') as unknown) === 'SIMULATED SCENARIO'
+  );
+};
+
+const pseudoLocalizeText = (root: HTMLElement): void => {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node !== null) {
+    const source = node.nodeValue ?? '';
+    const content = source.trim();
+    const parent = node.parentElement;
+    if (
+      content !== '' &&
+      !content.startsWith('⟦') &&
+      !content.includes('DEMO') &&
+      !content.includes('SIMULATED SCENARIO') &&
+      !/^S(?:0[1-9]|1[0-9]|2[0-4])$/u.test(content) &&
+      parent?.closest('script, style, [aria-hidden="true"]') === null
+    ) {
+      node.nodeValue = source.replace(content, pseudoExpand(content));
+    }
+    node = walker.nextNode();
+  }
+};
+
 export interface DesktopAppProps {
   readonly appScale?: 100 | 125 | 150;
+  readonly catalogLocale?: 'pseudo';
   readonly forcedColors?: boolean;
   readonly initialPath?: string;
   readonly nativeBridgeTransport?: ShellBridgeTransport;
@@ -813,6 +895,7 @@ type DesktopAppContentProps = Omit<
 
 const DesktopAppContent = ({
   appScale,
+  catalogLocale,
   forcedColors = false,
   initialPath = '/calibration/welcome',
   nativeState,
@@ -842,6 +925,24 @@ const DesktopAppContent = ({
   const lastOverlayInvoker = useRef<HTMLElement | null>(null);
   const navigatorRef = useRef<DesktopNavigator | null>(null);
 
+  useEffect(() => {
+    if (catalogLocale !== 'pseudo' || !hasSimulatedScenarioMarker()) {
+      return;
+    }
+
+    const applyPseudoLocale = (): void => {
+      document.documentElement.lang = 'x-pseudo';
+      const shell = document.querySelector<HTMLElement>('.desktop-app-shell');
+      if (shell !== null) {
+        pseudoLocalizeText(shell);
+      }
+    };
+    const frame = globalThis.requestAnimationFrame(applyPseudoLocale);
+    return () => {
+      globalThis.cancelAnimationFrame(frame);
+    };
+  }, [catalogLocale, locale, operationalState, route.pathname]);
+
   const focusHeading = useCallback(() => {
     deferFocus(() => {
       workCanvasRef.current?.querySelector<HTMLElement>('h1')?.focus();
@@ -856,9 +957,7 @@ const DesktopAppContent = ({
       const regions: Readonly<Record<DesktopF6Region, HTMLElement | null>> = {
         'title-bar': titleRegionRef.current,
         'goal-rail': goalRegionRef.current,
-        main:
-          workCanvasRef.current?.querySelector<HTMLElement>('main,[role="main"]') ??
-          workCanvasRef.current,
+        main: workCanvasRef.current,
         inspector: inspectorRegionRef.current,
       };
       regions[region]?.focus();

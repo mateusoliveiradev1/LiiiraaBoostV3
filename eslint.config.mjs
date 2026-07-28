@@ -124,6 +124,7 @@ export default defineConfig([
             'apps/desktop/tests/browser/visual.spec.ts',
             'apps/desktop/vite.config.ts',
           ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 16,
         },
         tsconfigRootDir: import.meta.dirname,
       },

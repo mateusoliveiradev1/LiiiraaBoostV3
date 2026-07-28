@@ -1,15 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-import scenarioCatalogJson from '../../../../contracts/scenarios/desktop-scenarios.json' with {
-  type: 'json',
-};
+import scenarioCatalogJson from '../../../../contracts/scenarios/desktop-scenarios.json' with { type: 'json' };
 import type { ShellOperationalState } from '../../src/app.tsx';
 import { expectNoAxeViolations } from './axe.ts';
-import {
-  DESKTOP_APP_URL,
-  DESKTOP_SCENARIO_MARKER,
-  openDesktopTestCase,
-} from './fixtures.ts';
+import { DESKTOP_APP_URL, DESKTOP_SCENARIO_MARKER, openDesktopTestCase } from './fixtures.ts';
 import { expectKeyboardFocus, runKeyboardJourney } from './keyboard.ts';
 
 interface AccessibilityScenario {
@@ -110,9 +104,9 @@ test('@a11y-visual-smoke rejects serious and critical axe findings on all 59 can
           );
 
           await expectNoAxeViolations(page, ['.desktop-app-shell']);
-          await expect(page.locator('[tabindex]:not([tabindex="0"]):not([tabindex="-1"])')).toHaveCount(
-            0,
-          );
+          await expect(
+            page.locator('[tabindex]:not([tabindex="0"]):not([tabindex="-1"])'),
+          ).toHaveCount(0);
           await expect(page.locator('main')).toHaveCount(1);
           await expect(page.locator('h1')).toHaveCount(1);
           auditedPairCount += 1;
@@ -170,7 +164,8 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and favorite jour
     '/settings/general',
   );
 
-  const locale = page.getByLabel('Language');
+  await expect(page.getByLabel('Language')).toBeVisible();
+  const locale = page.locator('#desktop-locale');
   await locale.focus();
   await page.keyboard.press('Home');
   await expect(locale).toHaveValue('pt-BR');
@@ -179,12 +174,12 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and favorite jour
   const moveRight = page.getByRole('button', { name: 'Mover para a direita' }).first();
   await moveRight.focus();
   await page.keyboard.press('Enter');
-  await expect(page.locator('[aria-live="polite"]')).toContainText(/movido para a direita/iu);
+  await expect(page.getByRole('status')).toContainText(/movido para a direita/iu);
 
   const remove = page.getByRole('button', { name: 'Remover' }).first();
   await remove.focus();
   await page.keyboard.press('Enter');
-  await expect(page.locator('[aria-live="polite"]')).toContainText(/removido/iu);
+  await expect(page.getByRole('status')).toContainText(/removido/iu);
 });
 
 test('@a11y-visual-smoke keeps preview, restart, recovery, and expired access keyboard reachable', async ({

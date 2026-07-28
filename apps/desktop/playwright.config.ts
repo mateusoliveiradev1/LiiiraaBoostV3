@@ -139,7 +139,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'pnpm build && pnpm exec vite preview',
-    reuseExistingServer: process.env['CI'] !== 'true',
+    reuseExistingServer: false,
     stderr: 'pipe',
     stdout: 'pipe',
     timeout: 120_000,

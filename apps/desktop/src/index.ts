@@ -28,6 +28,7 @@ const readDesktopTestComposition = (): DesktopAppProps => {
   }
 
   const appScale = composition['appScale'];
+  const catalogLocale = composition['catalogLocale'];
   const initialPath = composition['initialPath'];
   const operationalState = composition['operationalState'];
   const scenarioId = composition['scenarioId'];
@@ -51,6 +52,7 @@ const readDesktopTestComposition = (): DesktopAppProps => {
     operationalState: operationalState as ShellOperationalState,
     scenarioId,
     windowsLocale,
+    ...(catalogLocale === 'pseudo' ? { catalogLocale } : {}),
     ...(TEST_SCALE_VALUES.has(appScale as number) ? { appScale: appScale as 100 | 125 | 150 } : {}),
     ...(typeof composition['forcedColors'] === 'boolean'
       ? { forcedColors: composition['forcedColors'] }

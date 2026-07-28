@@ -273,7 +273,7 @@ textarea {
 
   .desktop-goal-region .lb-goal {
     inline-size: 100%;
-    overflow: hidden;
+    overflow: visible;
   }
 }
 

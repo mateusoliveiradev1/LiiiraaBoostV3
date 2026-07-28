@@ -17,6 +17,7 @@ export interface FavoriteCandidate extends Favorite {
 
 export interface FavoritesManagerProps {
   readonly candidates: readonly FavoriteCandidate[];
+  readonly headingLevel?: 'h1' | 'h2';
   readonly initialFavorites: readonly Favorite[];
   readonly locale: ShellLocale;
   readonly onChange?: (favorites: readonly Favorite[]) => void;
@@ -29,6 +30,7 @@ const KIND_LABELS: Readonly<Record<ShellLocale, Readonly<Record<FavoriteKind, st
 
 export const FavoritesManager = ({
   candidates,
+  headingLevel = 'h1',
   initialFavorites,
   locale,
   onChange,
@@ -41,6 +43,8 @@ export const FavoritesManager = ({
   );
   const [announcement, setAnnouncement] = useState('');
   const isPtBr = locale === 'pt-BR';
+  const Heading = headingLevel;
+  const SectionHeading = headingLevel === 'h1' ? 'h2' : 'h3';
 
   const update = (
     action:
@@ -58,9 +62,9 @@ export const FavoritesManager = ({
   return (
     <section aria-labelledby="favorites-manager-title" data-lb-region>
       <header>
-        <h1 id="favorites-manager-title">
+        <Heading id="favorites-manager-title">
           {isPtBr ? 'Gerenciar favoritos' : 'Manage favorites'}
-        </h1>
+        </Heading>
         <p>
           {isPtBr
             ? 'Favoritos aparecem somente na linha designada e não alteram as três prioridades do Início.'
@@ -84,13 +88,15 @@ export const FavoritesManager = ({
         const items = favorites.filter((favorite) => favorite.kind === kind);
         return (
           <section aria-labelledby={`favorites-${kind}`} key={kind}>
-            <h2 id={`favorites-${kind}`}>{KIND_LABELS[locale][kind]}</h2>
+            <SectionHeading id={`favorites-${kind}`}>{KIND_LABELS[locale][kind]}</SectionHeading>
             <p>
               {String(items.length)}/{String(FAVORITE_LIMITS[kind])}
             </p>
             {items.length === 0 ? (
               <StatusSignal
-                detail={isPtBr ? 'Nenhum favorito nesta categoria.' : 'No favorite in this category.'}
+                detail={
+                  isPtBr ? 'Nenhum favorito nesta categoria.' : 'No favorite in this category.'
+                }
                 state="empty"
               />
             ) : (
@@ -100,35 +106,39 @@ export const FavoritesManager = ({
                     <span>{favorite.label}</span>
                     <LbButton
                       isDisabled={index === 0}
-                      onPress={() =>
-                        { update(
+                      onPress={() => {
+                        update(
                           { type: 'move', id: favorite.id, direction: 'left' },
-                          isPtBr ? `${favorite.label} movido para a esquerda.` : `${favorite.label} moved left.`,
-                        ); }
-                      }
+                          isPtBr
+                            ? `${favorite.label} movido para a esquerda.`
+                            : `${favorite.label} moved left.`,
+                        );
+                      }}
                       variant="quiet"
                     >
                       {isPtBr ? 'Mover para a esquerda' : 'Move left'}
                     </LbButton>
                     <LbButton
                       isDisabled={index === items.length - 1}
-                      onPress={() =>
-                        { update(
+                      onPress={() => {
+                        update(
                           { type: 'move', id: favorite.id, direction: 'right' },
-                          isPtBr ? `${favorite.label} movido para a direita.` : `${favorite.label} moved right.`,
-                        ); }
-                      }
+                          isPtBr
+                            ? `${favorite.label} movido para a direita.`
+                            : `${favorite.label} moved right.`,
+                        );
+                      }}
                       variant="quiet"
                     >
                       {isPtBr ? 'Mover para a direita' : 'Move right'}
                     </LbButton>
                     <LbButton
-                      onPress={() =>
-                        { update(
+                      onPress={() => {
+                        update(
                           { type: 'remove', id: favorite.id },
                           isPtBr ? `${favorite.label} removido.` : `${favorite.label} removed.`,
-                        ); }
-                      }
+                        );
+                      }}
                       variant="quiet"
                     >
                       {isPtBr ? 'Remover' : 'Remove'}
@@ -142,9 +152,9 @@ export const FavoritesManager = ({
       })}
 
       <section aria-labelledby="favorite-candidates-title">
-        <h2 id="favorite-candidates-title">
+        <SectionHeading id="favorite-candidates-title">
           {isPtBr ? 'Itens disponíveis' : 'Available items'}
-        </h2>
+        </SectionHeading>
         <ul>
           {candidates.map((candidate) => {
             const atLimit =
@@ -168,12 +178,12 @@ export const FavoritesManager = ({
                 ) : null}
                 <LbButton
                   isDisabled={unavailable}
-                  onPress={() =>
-                    { update(
+                  onPress={() => {
+                    update(
                       { type: 'pin', favorite: candidate },
                       isPtBr ? `${candidate.label} fixado.` : `${candidate.label} pinned.`,
-                    ); }
-                  }
+                    );
+                  }}
                   variant="secondary"
                 >
                   {isPtBr ? 'Fixar favorito' : 'Pin favorite'}

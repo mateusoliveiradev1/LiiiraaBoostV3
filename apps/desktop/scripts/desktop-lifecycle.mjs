@@ -174,7 +174,14 @@ const verifyLifecycleContract = () => {
 };
 
 const runVitest = (arguments_) => {
-  runPnpm(['exec', 'vitest', '--run', ...arguments_.filter((argument) => argument !== '--run')]);
+  runPnpm([
+    'exec',
+    'vitest',
+    '--run',
+    '--exclude',
+    'tests/browser/**/*.spec.ts',
+    ...arguments_.filter((argument) => argument !== '--run'),
+  ]);
 };
 
 const runPlaywright = (arguments_, defaultProject) => {

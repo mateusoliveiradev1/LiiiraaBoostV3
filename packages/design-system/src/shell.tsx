@@ -1,4 +1,21 @@
-import { Activity, Bell, Maximize2, Minimize2, PanelRight, Search, X } from 'lucide-react';
+import {
+  Activity,
+  Bell,
+  Bot,
+  Gamepad2,
+  Gauge,
+  History,
+  Home,
+  Maximize2,
+  Minimize2,
+  PanelRight,
+  Search,
+  Settings,
+  Sparkles,
+  UserRound,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button, Toolbar } from 'react-aria-components';
 
@@ -73,6 +90,17 @@ export interface GoalRailProps {
   readonly utilities?: readonly GoalRailItem[];
 }
 
+const GOAL_ICONS: Readonly<Record<string, LucideIcon>> = Object.freeze({
+  account: UserRound,
+  assistant: Bot,
+  home: Home,
+  improve: Sparkles,
+  measure: Gauge,
+  prepare: Gamepad2,
+  recover: History,
+  settings: Settings,
+});
+
 const GoalButtons = ({
   activeId,
   items,
@@ -81,17 +109,24 @@ const GoalButtons = ({
   readonly items: readonly GoalRailItem[];
 }) => (
   <>
-    {items.map((item) => (
-      <Button
-        className="lb-goal"
-        data-lb-control
-        key={item.id}
-        onPress={item.onPress}
-        {...(item.id === activeId ? { 'aria-current': 'page' as const } : {})}
-      >
-        {item.label}
-      </Button>
-    ))}
+    {items.map((item) => {
+      const Icon = GOAL_ICONS[item.id];
+      return (
+        <Button
+          aria-label={item.label}
+          className="lb-goal"
+          data-lb-control
+          key={item.id}
+          onPress={item.onPress}
+          {...(item.id === activeId ? { 'aria-current': 'page' as const } : {})}
+        >
+          {Icon === undefined ? null : (
+            <Icon aria-hidden="true" className="lb-goal-icon" size={20} strokeWidth={1.75} />
+          )}
+          <span className="lb-goal-label">{item.label}</span>
+        </Button>
+      );
+    })}
   </>
 );
 

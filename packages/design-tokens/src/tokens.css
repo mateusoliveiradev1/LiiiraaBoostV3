@@ -515,8 +515,14 @@
 }
 
 .lb-goal {
+  gap: var(--lb-space-2);
   justify-content: flex-start;
   padding-inline: var(--lb-space-3);
+  position: relative;
+}
+
+.lb-goal-icon {
+  flex: 0 0 auto;
 }
 
 .lb-breadcrumbs,
@@ -737,6 +743,44 @@
 @media (width < 1180px) {
   .lb-goal-rail {
     inline-size: var(--lb-row-primary-size);
+  }
+
+  .lb-goal {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .lb-goal::after {
+    position: absolute;
+    z-index: 30;
+    inset-inline-start: calc(100% + var(--lb-space-2));
+    padding: var(--lb-space-1) var(--lb-space-2);
+    border: 1px solid var(--lb-line-strong);
+    border-radius: var(--lb-radius-default);
+    opacity: 0;
+    color: var(--lb-text-primary);
+    background: var(--lb-surface-raised);
+    content: none;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .lb-goal:hover::after,
+  .lb-goal[data-focus-visible]::after {
+    opacity: 1;
+    content: attr(aria-label);
+  }
+
+  .lb-goal-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .lb-context-inspector {

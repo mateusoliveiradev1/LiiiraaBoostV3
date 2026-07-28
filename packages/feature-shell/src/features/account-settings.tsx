@@ -249,11 +249,12 @@ const consentLabel = (key: ConnectedConsentKey, locale: ShellLocale): string => 
 };
 
 export interface SettingsSurfaceProps {
+  readonly children?: ReactNode;
   readonly locale: ShellLocale;
   readonly scenarioId: string;
 }
 
-export const SettingsSurface = ({ locale, scenarioId }: SettingsSurfaceProps) => {
+export const SettingsSurface = ({ children, locale, scenarioId }: SettingsSurfaceProps) => {
   const [consents, setConsents] = useState<ConnectedConsent>(DEFAULT_CONNECTED_CONSENT);
   const [scale, setScale] = useState('100');
   const [density, setDensity] = useState('comfortable');
@@ -345,6 +346,7 @@ export const SettingsSurface = ({ locale, scenarioId }: SettingsSurfaceProps) =>
           selectedKey={motion}
         />
       </section>
+      {children}
     </main>
   );
 };

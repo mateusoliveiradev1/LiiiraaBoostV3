@@ -1,13 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-import storyManifestJson from '../../../../tooling/desktop-evidence/story-manifest.json' with {
-  type: 'json',
-};
-import {
-  DESKTOP_APP_URL,
-  openDesktopTestCase,
-  type DesktopTestComposition,
-} from './fixtures.ts';
+import storyManifestJson from '../../../../tooling/desktop-evidence/story-manifest.json' with { type: 'json' };
+import { DESKTOP_APP_URL, openDesktopTestCase, type DesktopTestComposition } from './fixtures.ts';
 
 interface VisualAxis {
   readonly appScale: 100 | 125 | 150;
@@ -31,7 +25,7 @@ interface StoryManifest {
 }
 
 const manifest = storyManifestJson as unknown as StoryManifest;
-const visualAxes = Object.freeze([
+const visualAxes: readonly VisualAxis[] = Object.freeze([
   {
     appScale: 100,
     forcedColors: 'none',
@@ -78,11 +72,17 @@ const visualAxes = Object.freeze([
     scenarioId: 'S24',
     viewport: { height: 600, width: 760 },
   },
-] as const satisfies readonly VisualAxis[]);
+]);
 
 test('@a11y-visual-smoke locks every visual axis value to deterministic browser cases', () => {
-  expect(new Set(visualAxes.map(({ viewport }) => `${viewport.width}x${viewport.height}`))).toEqual(
-    new Set(manifest.axes.viewports.map(({ width, height }) => `${width}x${height}`)),
+  expect(
+    new Set(
+      visualAxes.map(({ viewport }) => `${String(viewport.width)}x${String(viewport.height)}`),
+    ),
+  ).toEqual(
+    new Set(
+      manifest.axes.viewports.map(({ width, height }) => `${String(width)}x${String(height)}`),
+    ),
   );
   expect(new Set(visualAxes.map(({ locale, catalogLocale }) => catalogLocale ?? locale))).toEqual(
     new Set(['pt-BR', 'en-US', 'pseudo']),
@@ -98,7 +98,9 @@ test('@a11y-visual-smoke locks every visual axis value to deterministic browser 
     ),
   ).toEqual(new Set(manifest.axes.motion));
   expect(
-    new Set(visualAxes.map(({ forcedColors }) => (forcedColors === 'active' ? 'forced' : 'normal'))),
+    new Set(
+      visualAxes.map(({ forcedColors }) => (forcedColors === 'active' ? 'forced' : 'normal')),
+    ),
   ).toEqual(new Set(manifest.axes.forcedColors));
 });
 
@@ -151,6 +153,26 @@ for (const axis of visualAxes) {
         scrollWidth: document.documentElement.scrollWidth,
       }));
       expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
+      const clippedControls = await page
+        .locator('a, button, input, select, textarea, [role="button"]')
+        .evaluateAll((controls) =>
+          controls
+            .filter((control) => {
+              const element = control as HTMLElement;
+              const style = globalThis.getComputedStyle(element);
+              return (
+                style.display !== 'none' &&
+                style.visibility !== 'hidden' &&
+                element.clientWidth > 1 &&
+                element.scrollWidth > element.clientWidth + 1
+              );
+            })
+            .map((control) => {
+              const element = control as HTMLElement;
+              return element.getAttribute('aria-label') ?? element.textContent.trim();
+            }),
+        );
+      expect(clippedControls).toEqual([]);
 
       const currentStatus = page.getByRole('region', {
         name: /Current operational state|Estado operacional atual/iu,

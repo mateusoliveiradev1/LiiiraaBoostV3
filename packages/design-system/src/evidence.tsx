@@ -177,10 +177,11 @@ const OPERATIONAL_PROJECTION: Readonly<Record<OperationalState, VisualProjection
 interface MarkProps {
   readonly detail?: string | undefined;
   readonly projection: VisualProjection;
+  readonly state?: OperationalState;
   readonly testId?: string;
 }
 
-const Mark = ({ detail, projection, testId }: MarkProps) => {
+const Mark = ({ detail, projection, state, testId }: MarkProps) => {
   const Icon = projection.icon;
 
   return (
@@ -188,6 +189,7 @@ const Mark = ({ detail, projection, testId }: MarkProps) => {
       className="lb-status-mark"
       data-lb-status
       data-pattern={projection.pattern}
+      data-state={state}
       data-testid={testId}
       data-tone={projection.tone}
     >
@@ -235,7 +237,12 @@ export interface StatusSignalProps {
 }
 
 export const StatusSignal = ({ detail, state }: StatusSignalProps) => (
-  <Mark detail={detail} projection={OPERATIONAL_PROJECTION[state]} testId="status-signal" />
+  <Mark
+    detail={detail}
+    projection={OPERATIONAL_PROJECTION[state]}
+    state={state}
+    testId="status-signal"
+  />
 );
 
 interface EvidenceIdentity {
