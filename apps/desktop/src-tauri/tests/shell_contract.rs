@@ -4,7 +4,13 @@ use serde_json::{Value, json};
 
 #[path = "../src/window.rs"]
 mod window;
+#[path = "../src/navigation.rs"]
+mod navigation;
 
+use navigation::{
+    ExternalNavigationSource, NavigationBridgeError, navigation_event_from_external,
+    navigation_event_from_second_instance,
+};
 use window::{
     CloseAction, HostEventMetadata, WindowEffect, WindowLifecycle, WindowLifecycleError, WorkArea,
 };
@@ -279,5 +285,102 @@ fn window_restore_clamps_to_the_selected_monitor_work_area() {
             "width": 1280,
             "height": 720
         })
+    );
+}
+
+#[test]
+fn navigation_maps_only_allowlisted_deep_links_to_generated_events() {
+    let event = navigation_event_from_external(
+        "liiiraa-boost://goal/measure",
+        ExternalNavigationSource::DeepLink,
+        HostEventMetadata::fixed(
+            "request-navigation-0001",
+            "2026-07-28T12:00:00.000Z",
+        ),
+    )
+    .expect("allowlisted goal deep link");
+    let value = serde_json::to_value(event).expect("serializable generated event");
+
+    assert_eq!(
+        value["messageType"],
+        "desktop.shell.navigation-requested.event"
+    );
+    assert_eq!(value["payload"]["source"], "deep-link");
+    assert_eq!(value["payload"]["intent"]["kind"], "goal");
+    assert_eq!(value["payload"]["intent"]["destination"], "measure");
+
+    for rejected in [
+        "https://example.invalid/goal/measure",
+        "liiiraa-boost://optimizer/apply",
+        "liiiraa-boost://documentation/../../SENSITIVE_DOCUMENT",
+        "liiiraa-boost://settings/advanced?execute=SENSITIVE_COMMAND",
+        "liiiraa-boost://goal/unknown",
+    ] {
+        let error = navigation_event_from_external(
+            rejected,
+            ExternalNavigationSource::DeepLink,
+            HostEventMetadata::fixed(
+                "request-navigation-rejected",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect_err("unknown, risky, or privileged intent must reject");
+        assert_eq!(error, NavigationBridgeError::Rejected);
+        assert!(!format!("{error:?}").contains("SENSITIVE"));
+    }
+}
+
+#[test]
+fn navigation_second_instance_ignores_raw_process_arguments_and_emits_one_intent() {
+    let arguments = vec![
+        "C:\\Program Files\\Liiiraa Boost\\liiiraa-desktop.exe".to_owned(),
+        "--opaque-launcher-argument".to_owned(),
+        "liiiraa-boost://settings/accessibility".to_owned(),
+        "liiiraa-boost://goal/improve".to_owned(),
+    ];
+    let event = navigation_event_from_second_instance(
+        &arguments,
+        HostEventMetadata::fixed(
+            "request-second-instance-0001",
+            "2026-07-28T12:00:00.000Z",
+        ),
+    )
+    .expect("bounded second-instance arguments")
+    .expect("one allowlisted intent");
+    let value = serde_json::to_value(event).expect("serializable generated event");
+
+    assert_eq!(value["payload"]["source"], "second-launch");
+    assert_eq!(value["payload"]["intent"]["kind"], "settings");
+    assert_eq!(
+        value["payload"]["intent"]["destination"],
+        "accessibility"
+    );
+    assert!(!value.to_string().contains("Program Files"));
+    assert!(!value.to_string().contains("opaque-launcher"));
+    assert!(!value.to_string().contains("improve"));
+}
+
+#[test]
+fn navigation_runtime_registers_single_instance_before_deep_link_handlers() {
+    let source_path = crate_root().join("src/main.rs");
+    let source = fs::read_to_string(&source_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
+
+    let single_instance = source
+        .find("tauri_plugin_single_instance::init")
+        .expect("single-instance plugin registration");
+    let deep_link = source
+        .find("tauri_plugin_deep_link::init")
+        .expect("deep-link plugin registration");
+    assert!(single_instance < deep_link);
+    assert!(source.contains("navigation_event_from_second_instance"));
+    assert!(source.contains("on_open_url"));
+    assert!(source.contains("get_current"));
+    assert!(source.contains("focus_main_window"));
+
+    let config = read_json("tauri.conf.json");
+    assert_eq!(
+        config["plugins"]["deep-link"]["desktop"]["schemes"],
+        json!(["liiiraa-boost"])
     );
 }
