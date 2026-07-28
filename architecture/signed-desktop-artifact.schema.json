@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liiiraa.dev/architecture/signed-desktop-artifact.schema.json",
+  "title": "Liiiraa Boost development desktop artifact evidence",
+  "description": "Fail-closed evidence for local self-signed development artifacts and separate unsigned CI builds. This contract does not represent public trust or release readiness.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/localDevelopmentRecord"
+    },
+    {
+      "$ref": "#/$defs/unsignedCiRecord"
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "thumbprint": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{40,64}$"
+    },
+    "timestampNotApplicable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "const": "not-applicable"
+        }
+      }
+    },
+    "signedArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sourcePath",
+        "stagedPath",
+        "sizeBytes",
+        "sha256",
+        "stagedSha256",
+        "signature"
+      ],
+      "properties": {
+        "kind": {
+          "enum": ["installer", "executable"]
+        },
+        "sourcePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stagedPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "stagedSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "signerThumbprint", "digestAlgorithm", "chainClass", "timestamp"],
+          "properties": {
+            "status": {
+              "enum": ["Valid", "SelfSignedUntrustedRoot"]
+            },
+            "signerThumbprint": {
+              "$ref": "#/$defs/thumbprint"
+            },
+            "digestAlgorithm": {
+              "const": "SHA-256"
+            },
+            "chainClass": {
+              "const": "self-signed-untrusted-root"
+            },
+            "timestamp": {
+              "$ref": "#/$defs/timestampNotApplicable"
+            }
+          }
+        }
+      }
+    },
+    "localDevelopmentRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "evidenceKind",
+        "artifactClass",
+        "generatedAt",
+        "build",
+        "signing",
+        "artifacts",
+        "staging"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "evidenceKind": {
+          "const": "desktop-signed-artifact"
+        },
+        "artifactClass": {
+          "const": "self-signed-development"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "build": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["productName", "version", "identifier", "target", "elevatedUi"],
+          "properties": {
+            "productName": {
+              "const": "Liiiraa Boost"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "identifier": {
+              "const": "com.liiiraa.boost"
+            },
+            "target": {
+              "const": "x86_64-pc-windows-msvc"
+            },
+            "elevatedUi": {
+              "const": false
+            }
+          }
+        },
+        "signing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trustClass",
+            "certificateStore",
+            "certificateThumbprint",
+            "extendedKeyUsage",
+            "digestAlgorithm",
+            "keyProvider",
+            "keyCustody",
+            "timestamp",
+            "publicTrust",
+            "smartScreenReputation",
+            "productionReady",
+            "distributionAllowed",
+            "productionSigningDeferredTo"
+          ],
+          "properties": {
+            "trustClass": {
+              "const": "self-signed-development"
+            },
+            "certificateStore": {
+              "const": "Cert:\\CurrentUser\\My"
+            },
+            "certificateThumbprint": {
+              "$ref": "#/$defs/thumbprint"
+            },
+            "extendedKeyUsage": {
+              "const": "1.3.6.1.5.5.7.3.3"
+            },
+            "digestAlgorithm": {
+              "const": "SHA-256"
+            },
+            "keyProvider": {
+              "const": "Microsoft Software Key Storage Provider"
+            },
+            "keyCustody": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["scope", "technology", "exportable", "ciPrivateKeyAccess"],
+              "properties": {
+                "scope": {
+                  "const": "current-user"
+                },
+                "technology": {
+                  "const": "CNG"
+                },
+                "exportable": {
+                  "const": false
+                },
+                "ciPrivateKeyAccess": {
+                  "const": false
+                }
+              }
+            },
+            "timestamp": {
+              "$ref": "#/$defs/timestampNotApplicable"
+            },
+            "publicTrust": {
+              "const": false
+            },
+            "smartScreenReputation": {
+              "const": false
+            },
+            "productionReady": {
+              "const": false
+            },
+            "distributionAllowed": {
+              "const": false
+            },
+            "productionSigningDeferredTo": {
+              "const": "Phase 10"
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/signedArtifact"
+          }
+        },
+        "staging": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "published", "promoted", "releaseReady"],
+          "properties": {
+            "allowed": {
+              "const": true
+            },
+            "published": {
+              "const": false
+            },
+            "promoted": {
+              "const": false
+            },
+            "releaseReady": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "unsignedCiArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "signatureStatus", "sha256", "sizeBytes"],
+      "properties": {
+        "kind": {
+          "enum": ["installer", "executable"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signatureStatus": {
+          "const": "NotSigned"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "unsignedCiRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "evidenceKind",
+        "artifactClass",
+        "generatedAt",
+        "ci",
+        "artifacts",
+        "labels"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "evidenceKind": {
+          "const": "desktop-unsigned-ci-build"
+        },
+        "artifactClass": {
+          "const": "unsigned-ci"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ci": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "privateKeyAccess",
+            "signed",
+            "stagingAllowed",
+            "publishingAllowed",
+            "promotionAllowed",
+            "releaseReady",
+            "productionReady",
+            "distributionAllowed"
+          ],
+          "properties": {
+            "privateKeyAccess": {
+              "const": false
+            },
+            "signed": {
+              "const": false
+            },
+            "stagingAllowed": {
+              "const": false
+            },
+            "publishingAllowed": {
+              "const": false
+            },
+            "promotionAllowed": {
+              "const": false
+            },
+            "releaseReady": {
+              "const": false
+            },
+            "productionReady": {
+              "const": false
+            },
+            "distributionAllowed": {
+              "const": false
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/unsignedCiArtifact"
+          }
+        },
+        "labels": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "development-only"
+            },
+            {
+              "const": "unsigned"
+            },
+            {
+              "const": "non-promotable"
+            }
+          ],
+          "items": false
+        }
+      }
+    }
+  }
+}

@@ -11,10 +11,7 @@ import {
 } from './package-signed-desktop.mjs';
 
 const workspaceRoot = resolve(import.meta.dirname, '../..');
-const workflowPath = resolve(
-  workspaceRoot,
-  'tooling/desktop-evidence/package-signed-desktop.mjs',
-);
+const workflowPath = resolve(workspaceRoot, 'tooling/desktop-evidence/package-signed-desktop.mjs');
 const hashA = 'A'.repeat(64);
 const hashB = 'B'.repeat(64);
 const thumbprint = 'C'.repeat(40);
@@ -29,13 +26,7 @@ const runCli = (...arguments_) =>
     windowsHide: true,
   });
 
-const signedArtifact = ({
-  kind,
-  sourcePath,
-  stagedPath,
-  sha256,
-  sizeBytes,
-}) => ({
+const signedArtifact = ({ kind, sourcePath, stagedPath, sha256, sizeBytes }) => ({
   kind,
   sourcePath,
   stagedPath,
@@ -91,8 +82,7 @@ const localDevelopmentEvidence = () => ({
     signedArtifact({
       kind: 'installer',
       sourcePath: 'target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe',
-      stagedPath:
-        'quality/evidence/phase-02/staged/Liiiraa Boost_0.0.0_x64-setup.exe',
+      stagedPath: 'quality/evidence/phase-02/staged/Liiiraa Boost_0.0.0_x64-setup.exe',
       sha256: hashA,
       sizeBytes: 10_000,
     }),
@@ -215,12 +205,7 @@ test('development signing policy rejects paid, exported, elevated, CI-key, and n
       /smartScreenReputation must be false/u,
     ],
     ['production readiness', 'productionReady', true, /productionReady must be false/u],
-    [
-      'distribution permission',
-      'distributionAllowed',
-      true,
-      /distributionAllowed must be false/u,
-    ],
+    ['distribution permission', 'distributionAllowed', true, /distributionAllowed must be false/u],
     ['fabricated timestamp', 'timestampState', 'present', /timestamp state/u],
     ['non-Windows signing', 'platform', 'linux', /Windows-only/u],
   ];
@@ -334,12 +319,7 @@ test('unsigned CI evidence is a separate non-promotable class', async (t) => {
     ['promotion', 'promotionAllowed', true, /promotionAllowed must be false/u],
     ['release-ready label', 'releaseReady', true, /releaseReady must be false/u],
     ['production label', 'productionReady', true, /productionReady must be false/u],
-    [
-      'distribution label',
-      'distributionAllowed',
-      true,
-      /distributionAllowed must be false/u,
-    ],
+    ['distribution label', 'distributionAllowed', true, /distributionAllowed must be false/u],
   ];
 
   for (const [name, field, value, diagnostic] of mutations) {
