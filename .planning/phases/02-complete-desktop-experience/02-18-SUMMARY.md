@@ -109,7 +109,7 @@ None - all work uses local, free tooling and introduces no paid service, externa
 - Combined UX-07 through UX-12 planned-policy gate - passed; 50 tests.
 - Direct `evaluateQualityManifest` validation for all six manifests - passed with no diagnostics.
 - Focused Prettier check for all six manifests - passed.
-- Stub-pattern scan found no placeholder or incomplete evidence values in the six manifests.
+- Stub-pattern scan found no placeholder or provisional evidence values in the six manifests.
 
 ## Self-Check: PASSED
 
