@@ -59,6 +59,8 @@ const reviewedEnvironment = () => ({
         status: 'available',
         version: '138.0.3351.95',
       },
+      resetMethod: 'clean snapshot restore',
+      supportStatus: 'supported for packaged acceptance',
       developmentSigningAccess: 'current-user-local-only',
       evidencePath: 'quality/evidence/phase-02/environment/windows-10-image.json',
     },
@@ -79,6 +81,8 @@ const reviewedEnvironment = () => ({
         status: 'available',
         version: '138.0.3351.95',
       },
+      resetMethod: 'clean snapshot restore',
+      supportStatus: 'supported for packaged acceptance',
       developmentSigningAccess: 'current-user-local-only',
       evidencePath: 'quality/evidence/phase-02/environment/windows-11-image.json',
     },
@@ -110,6 +114,36 @@ const reviewedEnvironment = () => ({
     },
   ],
 });
+
+const unresolvedImageRecord = (release) => ({
+  schemaVersion: '1.0',
+  evidenceKind: 'desktop-packaged-environment-record',
+  recordType: 'windows-image',
+  id: `windows-${release}`,
+  status: 'unresolved',
+  availability: 'unavailable',
+  windows: {
+    family: 'Windows',
+    release,
+    edition: 'unresolved',
+    build: 'unresolved',
+    architecture: 'x64',
+  },
+  imageIdentity: 'unresolved',
+  runnerIdentity: 'unresolved',
+  webView2: {
+    status: 'unresolved',
+    version: 'unresolved',
+  },
+  resetMethod: 'unresolved',
+  supportStatus: 'unresolved',
+  developmentSigningAccess: 'unresolved',
+});
+
+const writeImageDirectory = (directory, windows10, windows11) => {
+  writeJson(directory, 'windows-10-image.json', windows10);
+  writeJson(directory, 'windows-11-image.json', windows11);
+};
 
 const requiredManualIds = Object.freeze([
   'authenticode',
@@ -169,6 +203,131 @@ test('dry-run remains planned and names every unavailable packaged prerequisite'
     'scale',
   ]) {
     assert.match(report.prerequisites.join('\n'), new RegExp(prerequisite, 'iu'));
+  }
+});
+
+test('image-only mode accepts honest unresolved records without loading signing access', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'liiiraa-packaged-images-unresolved-'));
+  t.after(() => rmSync(directory, { force: true, recursive: true }));
+  writeImageDirectory(directory, unresolvedImageRecord('10'), unresolvedImageRecord('11'));
+  writeJson(directory, 'signing-access.json', {
+    privateKey: 'this file must not be loaded by image-only review',
+  });
+
+  const result = runCli('--environment', directory, '--require-images-reviewed');
+
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.mode, 'reviewed-images');
+  assert.equal(report.acceptance, 'unresolved');
+  assert.equal(report.packagedAcceptance, false);
+  assert.equal(report.signingAccessLoaded, false);
+  assert.equal(report.reviewedImageCount, 0);
+  assert.equal(report.unresolvedImageCount, 2);
+  assert.deepEqual(report.recordIds, ['windows-10', 'windows-11']);
+});
+
+test('image-only mode accepts two distinct reviewed real image records', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'liiiraa-packaged-images-reviewed-'));
+  t.after(() => rmSync(directory, { force: true, recursive: true }));
+  const fixture = reviewedEnvironment();
+  const [windows10, windows11] = fixture.records;
+  writeImageDirectory(
+    directory,
+    {
+      schemaVersion: '1.0',
+      evidenceKind: 'desktop-packaged-environment-record',
+      ...windows10,
+    },
+    {
+      schemaVersion: '1.0',
+      evidenceKind: 'desktop-packaged-environment-record',
+      ...windows11,
+    },
+  );
+
+  const result = runCli('--environment', directory, '--require-images-reviewed');
+
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.acceptance, 'reviewed');
+  assert.equal(report.reviewedImageCount, 2);
+  assert.equal(report.unresolvedImageCount, 0);
+});
+
+test('image-only mode rejects missing, unexpected, fabricated, and duplicate image evidence', async (t) => {
+  const cases = [
+    [
+      'missing required image file',
+      (directory) => {
+        writeJson(directory, 'windows-10-image.json', unresolvedImageRecord('10'));
+      },
+      'Windows 11 image evidence is not readable JSON',
+    ],
+    [
+      'unexpected image identity',
+      (directory) => {
+        const windows10 = unresolvedImageRecord('10');
+        windows10.id = 'windows-server';
+        writeImageDirectory(directory, windows10, unresolvedImageRecord('11'));
+      },
+      'windows-10 must use its exact Windows-image identity',
+    ],
+    [
+      'fabricated unresolved provenance',
+      (directory) => {
+        const windows10 = unresolvedImageRecord('10');
+        windows10.provenance = {
+          kind: 'controlled-machine-review',
+          source: 'invented',
+        };
+        writeImageDirectory(directory, windows10, unresolvedImageRecord('11'));
+      },
+      'windows-10 unresolved record must not fabricate provenance',
+    ],
+    [
+      'resolved-looking fact in unavailable record',
+      (directory) => {
+        const windows10 = unresolvedImageRecord('10');
+        windows10.windows.build = '19045';
+        writeImageDirectory(directory, windows10, unresolvedImageRecord('11'));
+      },
+      'windows-10 unavailable facts must remain unresolved',
+    ],
+    [
+      'duplicate reviewed image identity',
+      (directory) => {
+        const fixture = reviewedEnvironment();
+        fixture.records[1].imageIdentity = fixture.records[0].imageIdentity;
+        writeImageDirectory(
+          directory,
+          {
+            schemaVersion: '1.0',
+            evidenceKind: 'desktop-packaged-environment-record',
+            ...fixture.records[0],
+          },
+          {
+            schemaVersion: '1.0',
+            evidenceKind: 'desktop-packaged-environment-record',
+            ...fixture.records[1],
+          },
+        );
+      },
+      'reviewed Windows image identities must be distinct',
+    ],
+  ];
+
+  for (const [name, arrange, expectedDiagnostic] of cases) {
+    await t.test(name, () => {
+      const directory = mkdtempSync(join(tmpdir(), 'liiiraa-packaged-image-mutation-'));
+      t.after(() => rmSync(directory, { force: true, recursive: true }));
+      arrange(directory);
+
+      const result = runCli('--environment', directory, '--require-images-reviewed');
+
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, new RegExp(expectedDiagnostic, 'u'));
+    });
   }
 });
 
@@ -518,5 +677,5 @@ test('unsupported CLI combinations fail deterministically', () => {
   const result = runCli('--environment', 'missing.json');
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /--environment requires --require-reviewed/u);
+  assert.match(result.stderr, /--environment requires exactly one reviewed environment gate/u);
 });

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-environment-record",
+  "recordType": "windows-image",
+  "id": "windows-11",
+  "status": "unresolved",
+  "availability": "unavailable",
+  "windows": {
+    "family": "Windows",
+    "release": "11",
+    "edition": "unresolved",
+    "build": "unresolved",
+    "architecture": "x64"
+  },
+  "imageIdentity": "unresolved",
+  "runnerIdentity": "unresolved",
+  "webView2": {
+    "status": "unresolved",
+    "version": "unresolved"
+  },
+  "resetMethod": "unresolved",
+  "supportStatus": "unresolved",
+  "developmentSigningAccess": "unresolved"
+}

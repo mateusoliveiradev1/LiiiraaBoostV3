@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 const prefix = '[packaged-wave-zero]';
 
@@ -86,33 +86,40 @@ const assertOnlyArguments = (arguments_, allowed) => {
 const detectMode = (arguments_) => {
   const environmentPath = optionValue(arguments_, '--environment');
   const manualPath = optionValue(arguments_, '--manual');
+  const requireImagesReviewed = arguments_.includes('--require-images-reviewed');
   const requireReviewed = arguments_.includes('--require-reviewed');
   const requireObserved = arguments_.includes('--require-observed');
   const dryRun = arguments_.includes('--dry-run');
 
   if (environmentPath !== undefined) {
-    if (!requireReviewed) {
-      fail('--environment requires --require-reviewed.');
+    if (requireImagesReviewed === requireReviewed) {
+      fail('--environment requires exactly one reviewed environment gate.');
     }
     if (manualPath !== undefined || requireObserved || dryRun) {
       fail('reviewed environment mode cannot be combined with another mode.');
     }
-    assertOnlyArguments(arguments_, new Set(['--environment', '--require-reviewed']));
-    return { kind: 'environment', path: resolve(environmentPath) };
+    assertOnlyArguments(
+      arguments_,
+      new Set(['--environment', '--require-images-reviewed', '--require-reviewed']),
+    );
+    return {
+      kind: requireImagesReviewed ? 'images' : 'environment',
+      path: resolve(environmentPath),
+    };
   }
 
   if (manualPath !== undefined) {
     if (!requireObserved) {
       fail('--manual requires --require-observed.');
     }
-    if (requireReviewed || dryRun) {
+    if (requireImagesReviewed || requireReviewed || dryRun) {
       fail('observed manual mode cannot be combined with another mode.');
     }
     assertOnlyArguments(arguments_, new Set(['--manual', '--require-observed']));
     return { kind: 'manual', path: resolve(manualPath) };
   }
 
-  if (requireReviewed || requireObserved) {
+  if (requireImagesReviewed || requireReviewed || requireObserved) {
     fail('a reviewed or observed gate requires its evidence path.');
   }
   assertOnlyArguments(arguments_, new Set(['--dry-run']));
@@ -201,6 +208,70 @@ const assertWindowsImage = (record, release) => {
   if (record.developmentSigningAccess !== 'current-user-local-only') {
     fail(`${label} developmentSigningAccess must be current-user-local-only.`);
   }
+  if (!nonEmptyReviewedValue(record.resetMethod)) {
+    fail(`${label} resetMethod must be a non-empty reviewed value.`);
+  }
+  if (!nonEmptyReviewedValue(record.supportStatus)) {
+    fail(`${label} supportStatus must be a non-empty reviewed value.`);
+  }
+};
+
+const assertUnresolvedWindowsImage = (record, release) => {
+  const label = `windows-${release}`;
+  if (record.recordType !== 'windows-image' || record.id !== label) {
+    fail(`${label} must use its exact Windows-image identity.`);
+  }
+  if (record.status !== 'unresolved' || record.availability !== 'unavailable') {
+    fail(`${label} unavailable environment must remain explicitly unresolved.`);
+  }
+  if (!isRecord(record.windows)) {
+    fail(`${label} windows metadata must be present.`);
+  }
+  if (
+    record.windows.family !== 'Windows' ||
+    record.windows.release !== release ||
+    record.windows.architecture !== 'x64'
+  ) {
+    fail(`${label} must identify Windows ${release} x64.`);
+  }
+  for (const value of [
+    record.windows.edition,
+    record.windows.build,
+    record.imageIdentity,
+    record.runnerIdentity,
+    record.resetMethod,
+    record.supportStatus,
+    record.developmentSigningAccess,
+  ]) {
+    if (value !== 'unresolved') {
+      fail(`${label} unavailable facts must remain unresolved.`);
+    }
+  }
+  if (
+    !isRecord(record.webView2) ||
+    record.webView2.status !== 'unresolved' ||
+    record.webView2.version !== 'unresolved'
+  ) {
+    fail(`${label} unavailable WebView2 facts must remain unresolved.`);
+  }
+  for (const field of ['provenance', 'observer', 'reviewedAt']) {
+    if (field in record) {
+      fail(`${label} unresolved record must not fabricate ${field}.`);
+    }
+  }
+};
+
+const assertReviewedOrUnresolvedWindowsImage = (record, release) => {
+  const label = `windows-${release}`;
+  if (record.recordType !== 'windows-image' || record.id !== label) {
+    fail(`${label} must use its exact Windows-image identity.`);
+  }
+  if (record.status === 'reviewed') {
+    assertWindowsImage(record, release);
+    return 'reviewed';
+  }
+  assertUnresolvedWindowsImage(record, release);
+  return 'unresolved';
 };
 
 const assertFalse = (record, field, diagnostic) => {
@@ -290,7 +361,86 @@ const requireRecord = (records, recordType, id, label) => {
   return matches[0];
 };
 
-const validateEnvironment = (path) => {
+const readEnvironmentRecord = (environmentDirectory, fileName, label) => {
+  if (!existsSync(environmentDirectory) || !statSync(environmentDirectory).isDirectory()) {
+    fail('environment evidence path must be a directory.');
+  }
+  const record = readJsonObject(join(environmentDirectory, fileName), label);
+  const secretField = findForbiddenSecretField(record);
+  if (secretField !== undefined) {
+    fail(`secret-shaped field is forbidden: ${secretField}.`);
+  }
+  if (
+    record.schemaVersion !== '1.0' ||
+    record.evidenceKind !== 'desktop-packaged-environment-record'
+  ) {
+    fail(`${label} must use desktop-packaged-environment-record schemaVersion 1.0.`);
+  }
+  return record;
+};
+
+const assertDistinctReviewedImageIdentities = (windows10, windows11) => {
+  if (
+    windows10.status === 'reviewed' &&
+    windows11.status === 'reviewed' &&
+    windows10.imageIdentity === windows11.imageIdentity
+  ) {
+    fail('reviewed Windows image identities must be distinct.');
+  }
+};
+
+const validateImageDirectory = (environmentDirectory) => {
+  const windows10 = readEnvironmentRecord(
+    environmentDirectory,
+    'windows-10-image.json',
+    'Windows 10 image evidence',
+  );
+  const windows11 = readEnvironmentRecord(
+    environmentDirectory,
+    'windows-11-image.json',
+    'Windows 11 image evidence',
+  );
+  const statuses = [
+    assertReviewedOrUnresolvedWindowsImage(windows10, '10'),
+    assertReviewedOrUnresolvedWindowsImage(windows11, '11'),
+  ];
+  assertDistinctReviewedImageIdentities(windows10, windows11);
+  const reviewedImageCount = statuses.filter((status) => status === 'reviewed').length;
+
+  return {
+    mode: 'reviewed-images',
+    acceptance: reviewedImageCount === 2 ? 'reviewed' : 'unresolved',
+    packagedAcceptance: false,
+    observationsCreated: false,
+    signingAccessLoaded: false,
+    reviewedImageCount,
+    unresolvedImageCount: 2 - reviewedImageCount,
+    recordIds: ['windows-10', 'windows-11'],
+  };
+};
+
+const validateEnvironmentDirectory = (environmentDirectory) => {
+  const imageReport = validateImageDirectory(environmentDirectory);
+  const signing = readEnvironmentRecord(
+    environmentDirectory,
+    'signing-access.json',
+    'development signing evidence',
+  );
+  assertDevelopmentSigning(signing);
+
+  return {
+    mode: 'reviewed-environment',
+    acceptance: imageReport.acceptance,
+    packagedAcceptance: false,
+    observationsCreated: false,
+    signingAccessLoaded: true,
+    reviewedImageCount: imageReport.reviewedImageCount,
+    unresolvedImageCount: imageReport.unresolvedImageCount,
+    recordIds: ['windows-10', 'windows-11', 'local-development-signing'],
+  };
+};
+
+const validateEnvironmentDocument = (path) => {
   const document = readJsonObject(path, 'environment evidence');
   const secretField = findForbiddenSecretField(document);
   if (secretField !== undefined) {
@@ -332,6 +482,11 @@ const validateEnvironment = (path) => {
     recordIds: ['windows-10', 'windows-11', 'local-development-signing'],
   };
 };
+
+const validateEnvironment = (path) =>
+  existsSync(path) && statSync(path).isDirectory()
+    ? validateEnvironmentDirectory(path)
+    : validateEnvironmentDocument(path);
 
 const assertContainedAttachment = (manualPath, recordId, attachment) => {
   if (!nonEmptyReviewedValue(attachment)) {
@@ -409,9 +564,11 @@ try {
   const report =
     mode.kind === 'dry-run'
       ? dryRunReport()
-      : mode.kind === 'environment'
-        ? validateEnvironment(mode.path)
-        : validateManual(mode.path);
+      : mode.kind === 'images'
+        ? validateImageDirectory(mode.path)
+        : mode.kind === 'environment'
+          ? validateEnvironment(mode.path)
+          : validateManual(mode.path);
   process.stdout.write(`${JSON.stringify(report, undefined, 2)}\n`);
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
