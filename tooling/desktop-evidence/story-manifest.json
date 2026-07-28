@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "canonicalCatalog": {
+    "path": "../../contracts/scenarios/desktop-scenarios.json",
+    "collectionField": "scenarios",
+    "scenarioIdField": "id",
+    "requiredRoutesField": "requiredRoutes",
+    "requiredStatesField": "requiredStates"
+  },
+  "coverage": {
+    "strategy": "derive-required-states",
+    "scenarioRange": {
+      "prefix": "S",
+      "first": 1,
+      "last": 24,
+      "pad": 2
+    },
+    "routeField": "route",
+    "stateField": "state"
+  },
+  "axes": {
+    "viewports": [
+      { "width": 1440, "height": 900 },
+      { "width": 1280, "height": 800 },
+      { "width": 960, "height": 700 },
+      { "width": 760, "height": 600 }
+    ],
+    "locales": ["pt-BR", "en", "pseudo"],
+    "scales": [100, 125, 150],
+    "motion": ["responsive", "reduced"],
+    "forcedColors": ["normal", "forced"]
+  }
+}

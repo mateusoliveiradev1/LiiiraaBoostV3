@@ -119,6 +119,18 @@ describe('story parity canonical derivation', () => {
     expect(manifest).not.toHaveProperty('scenarios');
     expect(manifest).not.toHaveProperty('requiredRoutes');
     expect(manifest).not.toHaveProperty('requiredStates');
+    expect(manifest.axes).toEqual({
+      forcedColors: ['normal', 'forced'],
+      locales: ['pt-BR', 'en', 'pseudo'],
+      motion: ['responsive', 'reduced'],
+      scales: [100, 125, 150],
+      viewports: [
+        { height: 900, width: 1440 },
+        { height: 800, width: 1280 },
+        { height: 700, width: 960 },
+        { height: 600, width: 760 },
+      ],
+    });
     expect(coverage.diagnostics).toEqual([]);
     expect(coverage.scenarioIds).toHaveLength(24);
     expect(coverage.pairs.length).toBeGreaterThan(24);
