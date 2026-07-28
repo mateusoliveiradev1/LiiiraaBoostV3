@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-18-PLAN.md
-last_updated: "2026-07-28T03:25:47.462Z"
+stopped_at: Completed 02-22-PLAN.md
+last_updated: "2026-07-28T03:46:28.053Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 35
+  completed_plans: 36
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 6 of 33
+Plan: 7 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -90,6 +90,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P16 | 9min | 2 tasks | 5 files |
 | Phase 02 P17 | 7min | 2 tasks | 6 files |
 | Phase 02 P18 | 4min | 2 tasks | 6 files |
+| Phase 02 P22 | 8min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -191,6 +192,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep Plan 02-29 accountable for every UX-07 through UX-12 evidence entry so manifest ownership remains schema-consistent through final promotion. — The quality schema requires each evidence owner to match the manifest owner.
 - [Phase 02]: Treat NVDA, forced-colors, 200 percent text, and 150 percent app-scale files as authoritative human observations that browser automation cannot replace. — Automated browser semantics cannot establish assistive-technology or native Windows rendering observation.
 - [Phase 02]: Keep reviewed Windows images, free local self-signed development signing, native notifications, and packaged performance planned until their exact evidence gates execute. — Planned status prevents unavailable native or human evidence from being promoted prematurely.
+- [Phase 02]: Keep native Windows decorations for shell controls — Preserves snap layouts, Alt+Space, minimize, maximize, and operating-system accessibility behavior.
+- [Phase 02]: Exit ordinary close by default and gate tray behavior behind validated opt-in — Implements D-19 while recovery close structurally excludes interface termination.
+- [Phase 02]: Reduce external navigation to the registered liiiraa-boost allowlist — Raw executable arguments, launcher flags, unknown routes, and privileged intent never reach the renderer.
 
 ### Pending Todos
 
@@ -214,6 +218,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T03:25:47.455Z
-Stopped at: Completed 02-18-PLAN.md
+Last session: 2026-07-28T03:46:05.743Z
+Stopped at: Completed 02-22-PLAN.md
 Resume file: None
