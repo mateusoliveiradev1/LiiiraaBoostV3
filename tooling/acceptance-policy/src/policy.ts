@@ -442,6 +442,11 @@ const rootScriptGraph = (scripts: Readonly<Record<string, unknown>>, entry: stri
     }
   };
   visit(entry);
+  for (const supplementalEntry of entry === 'verify'
+    ? ['verify:quick', 'verify:foundation', 'verify:foundation:quick']
+    : ['verify:foundation:quick']) {
+    visit(supplementalEntry);
+  }
   return bodies.join('\n');
 };
 

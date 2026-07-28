@@ -104,10 +104,9 @@ test('root and CI reachability reject compatibility or final-policy omission', a
   );
   const packageManifest = JSON.parse(clean.get('package.json'));
 
-  packageManifest.scripts['verify:quick'] = packageManifest.scripts['verify:quick'].replace(
-    'pnpm contracts:compat',
-    '',
-  );
+  packageManifest.scripts['verify:foundation:quick'] = packageManifest.scripts[
+    'verify:foundation:quick'
+  ].replace('pnpm contracts:compat', '');
   const withoutQuickCompatibility = new Map(clean);
   withoutQuickCompatibility.set('package.json', JSON.stringify(packageManifest));
   expectFailure(withoutQuickCompatibility, 'verify:quick');

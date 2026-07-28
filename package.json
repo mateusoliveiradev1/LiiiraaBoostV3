@@ -41,8 +41,10 @@
     "test:contracts": "pnpm contracts:check && pnpm contracts:compat && pnpm --filter @liiiraa/contracts-ts exec vitest --run && cargo test -p liiiraa-contracts-rust",
     "verify:workspace": "node tooling/workspace-smoke/check-toolchain.mjs",
     "build": "turbo run build",
-    "verify:quick": "pnpm verify:workspace && pnpm format:check && pnpm check && pnpm contracts:check && pnpm contracts:compat && pnpm test:architecture && pnpm test:contracts && pnpm test:adapters && pnpm test:runtime-truth && pnpm test:acceptance-policy -- --mode planned && pnpm verify:artifacts",
-    "verify": "pnpm verify:quick && pnpm test && pnpm build && pnpm test:production-truth && pnpm supply-chain:check && pnpm test:acceptance-policy -- --mode final && pnpm acceptance:check -- --mode final"
+    "verify:foundation:quick": "pnpm verify:workspace && pnpm format:check && pnpm check && pnpm contracts:check && pnpm contracts:compat && pnpm test:architecture && pnpm test:contracts && pnpm test:adapters && pnpm test:runtime-truth && pnpm test:acceptance-policy -- --mode planned && pnpm verify:artifacts",
+    "verify:foundation": "pnpm verify:quick && pnpm test && pnpm build && pnpm test:production-truth && pnpm supply-chain:check && pnpm test:acceptance-policy -- --mode final && pnpm acceptance:check -- --mode final",
+    "verify:quick": "pnpm --filter @liiiraa/desktop verify:quick",
+    "verify": "pnpm --filter @liiiraa/desktop verify"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.65.0",

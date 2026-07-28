@@ -122,6 +122,16 @@ const ROOT_FULL_GATES = Object.freeze([
   'acceptance:check -- --mode final',
 ]);
 
+const ROOT_DESKTOP_LIFECYCLE = Object.freeze({
+  'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick',
+  verify: 'pnpm --filter @liiiraa/desktop verify',
+});
+
+const ROOT_FOUNDATION_DELEGATES = Object.freeze({
+  'verify:quick': ['verify:foundation:quick'],
+  verify: ['verify:quick', 'verify:foundation', 'verify:foundation:quick'],
+});
+
 const readPaths = async (root, paths) => {
   const snapshot = new Map();
 
@@ -172,7 +182,7 @@ const parseJson = (snapshot, path, diagnostics) => {
   }
 };
 
-const scriptGraph = (scripts, entry) => {
+const scriptGraph = (scripts, entry, supplementalEntries = []) => {
   const visited = new Set();
   const bodies = [];
 
@@ -188,6 +198,9 @@ const scriptGraph = (scripts, entry) => {
   };
 
   visit(entry);
+  for (const supplementalEntry of supplementalEntries) {
+    visit(supplementalEntry);
+  }
   return bodies.join('\n');
 };
 
@@ -202,7 +215,13 @@ const checkRootScripts = (snapshot, diagnostics) => {
     ['verify:quick', ROOT_QUICK_GATES],
     ['verify', ROOT_FULL_GATES],
   ]) {
-    const body = scripts[entry];
+    if (scripts[entry] !== ROOT_DESKTOP_LIFECYCLE[entry]) {
+      diagnostics.push(
+        `package.json:${entry}: must delegate exactly to the bounded desktop lifecycle`,
+      );
+    }
+    const body =
+      scripts[entry === 'verify:quick' ? 'verify:foundation:quick' : 'verify:foundation'];
     if (typeof body !== 'string') {
       diagnostics.push(`package.json:${entry}: required terminating script missing`);
       continue;
@@ -216,7 +235,7 @@ const checkRootScripts = (snapshot, diagnostics) => {
       diagnostics.push(`package.json:${entry}: optional or non-terminating gate forbidden`);
     }
   }
-  return scriptGraph(scripts, 'verify');
+  return scriptGraph(scripts, 'verify', ROOT_FOUNDATION_DELEGATES.verify);
 };
 
 const checkTurbo = (snapshot, diagnostics) => {

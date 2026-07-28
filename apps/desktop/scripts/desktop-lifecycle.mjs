@@ -1,12 +1,19 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { delimiter, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const COMMAND_TIMEOUT_MS = 120_000;
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = resolve(desktopRoot, '..', '..');
-const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+const pnpmCliPath = [
+  process.env.npm_execpath,
+  ...(process.env.PATH?.split(delimiter).map((pathEntry) =>
+    resolve(pathEntry, 'node_modules', 'pnpm', 'bin', 'pnpm.cjs'),
+  ) ?? []),
+].find(
+  (candidate) => candidate !== undefined && candidate.endsWith('pnpm.cjs') && existsSync(candidate),
+);
 
 const requiredScripts = Object.freeze([
   'build',
@@ -65,6 +72,15 @@ const run = (executable, arguments_, cwd = desktopRoot) => {
   }
 };
 
+const runPnpm = (arguments_, cwd = desktopRoot) => {
+  if (pnpmCliPath === undefined || !pnpmCliPath.endsWith('pnpm.cjs') || !existsSync(pnpmCliPath)) {
+    throw new Error(
+      'Unable to resolve the active pnpm.cjs from npm_execpath. Run this lifecycle through pnpm.',
+    );
+  }
+  run(process.execPath, [pnpmCliPath, ...arguments_], cwd);
+};
+
 const hasFlag = (arguments_, flag) => arguments_.includes(flag);
 
 const optionValue = (arguments_, option) => {
@@ -88,7 +104,9 @@ const verifyLifecycleContract = () => {
   }
 
   const desktopPackage = JSON.parse(readFileSync(resolve(desktopRoot, 'package.json'), 'utf8'));
+  const workspacePackage = JSON.parse(readFileSync(resolve(workspaceRoot, 'package.json'), 'utf8'));
   const scripts = desktopPackage.scripts ?? {};
+  const workspaceScripts = workspacePackage.scripts ?? {};
 
   for (const scriptName of requiredScripts) {
     const command = scripts[scriptName];
@@ -99,6 +117,28 @@ const verifyLifecycleContract = () => {
       throw new Error(
         `Desktop lifecycle script must terminate and cannot use watch mode: ${scriptName}`,
       );
+    }
+  }
+
+  const expectedRootLinks = Object.freeze({
+    'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick',
+    verify: 'pnpm --filter @liiiraa/desktop verify',
+  });
+
+  for (const [scriptName, expectedCommand] of Object.entries(expectedRootLinks)) {
+    if (workspaceScripts[scriptName] !== expectedCommand) {
+      throw new Error(
+        `Root lifecycle script ${scriptName} must resolve exactly to the desktop package.`,
+      );
+    }
+  }
+
+  for (const foundationScript of ['verify:foundation:quick', 'verify:foundation']) {
+    if (
+      typeof workspaceScripts[foundationScript] !== 'string' ||
+      workspaceScripts[foundationScript].trim() === ''
+    ) {
+      throw new Error(`Root foundation lifecycle is missing: ${foundationScript}`);
     }
   }
 
@@ -126,13 +166,15 @@ const verifyLifecycleContract = () => {
     );
   }
 
+  runPnpm(['exec', 'turbo', 'ls'], workspaceRoot);
+
   process.stdout.write(
     '[desktop-lifecycle] lifecycle smoke passed: strict configs, bounded scripts, and empty composition public root are wired.\n',
   );
 };
 
 const runVitest = (arguments_) => {
-  run(pnpmCommand, ['exec', 'vitest', '--run', ...arguments_]);
+  runPnpm(['exec', 'vitest', '--run', ...arguments_]);
 };
 
 const runPlaywright = (arguments_, defaultProject) => {
@@ -142,7 +184,7 @@ const runPlaywright = (arguments_, defaultProject) => {
     defaultProject !== undefined && !hasFlag(arguments_, '--project')
       ? ['--project', defaultProject]
       : [];
-  run(pnpmCommand, [
+  runPnpm([
     'exec',
     'playwright',
     'test',
@@ -200,7 +242,7 @@ const executeCommand = (command, arguments_) => {
     case 'wave-zero': {
       if (hasFlag(arguments_, '--browser-smoke')) {
         requirePath('apps/desktop/.storybook/main.ts', 'Browser Wave 0');
-        run(pnpmCommand, [
+        runPnpm([
           'exec',
           'storybook',
           'dev',
@@ -231,6 +273,7 @@ const executeCommand = (command, arguments_) => {
         verifyLifecycleContract();
         return;
       }
+      runPnpm(['verify:foundation:quick'], workspaceRoot);
       executeCommand('unit', ['-t', '@unit-smoke']);
       executeCommand('stories', ['--grep', '@story-smoke']);
       executeCommand('browser', ['--grep', '@browser-smoke']);
@@ -240,6 +283,7 @@ const executeCommand = (command, arguments_) => {
       executeCommand('evidence', ['--mode', 'planned', '--smoke']);
       return;
     case 'final':
+      runPnpm(['verify:foundation'], workspaceRoot);
       executeCommand('unit', arguments_);
       executeCommand('stories', arguments_);
       executeCommand('browser', arguments_);
@@ -253,8 +297,11 @@ const executeCommand = (command, arguments_) => {
   }
 };
 
-const [command, separator, ...rawArguments] = process.argv.slice(2);
-const arguments_ = separator === '--' ? rawArguments : [separator, ...rawArguments].filter(Boolean);
+const [command, ...rawArguments] = process.argv.slice(2);
+while (rawArguments[0] === '--') {
+  rawArguments.shift();
+}
+const arguments_ = rawArguments;
 
 try {
   if (command === undefined) {

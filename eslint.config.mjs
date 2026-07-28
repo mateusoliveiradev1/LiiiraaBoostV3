@@ -109,7 +109,9 @@ export default defineConfig([
     languageOptions: {
       parser: tseslintParser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['apps/desktop/vite.config.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

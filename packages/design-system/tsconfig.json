@@ -8,8 +8,7 @@
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "noEmit": false,
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["react"]
+    "rootDir": "src"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
