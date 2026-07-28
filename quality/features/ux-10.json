@@ -1,0 +1,125 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-10-accessible-bespoke-interface",
+  "requirements": ["UX-10"],
+  "owner": "plan-02-29",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-10-truthful-non-color-status",
+          "command": "pnpm --filter @liiiraa/design-system test -- --run",
+          "file": "packages/design-system/src/design-system.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-reviewed-windows-10-image",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --environment quality/evidence/phase-02/environment --require-reviewed",
+          "file": "quality/evidence/phase-02/environment/windows-10-image.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-reviewed-windows-11-image",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --environment quality/evidence/phase-02/environment --require-reviewed",
+          "file": "quality/evidence/phase-02/environment/windows-11-image.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-free-development-signing",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --environment quality/evidence/phase-02/environment --require-reviewed",
+          "file": "quality/evidence/phase-02/environment/signing-access.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-10-assistive-copy-redaction",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"future surfaces|boundary|receipt\"",
+          "file": "packages/feature-shell/src/features/future-surfaces.test.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-10-automated-keyboard-axe",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/accessibility.spec.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-human-nvda-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/nvda.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-human-forced-colors-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/forced-colors.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-human-text-scale-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/text-scale-200.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-human-app-scale-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/app-scale-150.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-10-packaged-accessibility-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-10-focus-and-keyboard-recovery",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/accessibility.spec.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-10-packaged-accessibility-journey",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/journeys.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

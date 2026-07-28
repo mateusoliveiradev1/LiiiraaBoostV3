@@ -1,0 +1,97 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-11-complete-localization",
+  "requirements": ["UX-11"],
+  "owner": "plan-02-29",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-11-critical-copy-parity",
+          "command": "pnpm --filter @liiiraa/desktop test -- --run -t \"locale|catalog parity\"",
+          "file": "apps/desktop/src/locales/i18n.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-11-pre-consent-locale-switch",
+          "command": "pnpm --filter @liiiraa/desktop test:localization -- --run",
+          "file": "apps/desktop/src/preferences.tsx",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-11-browser-locale-visual-matrix",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/visual.spec.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-11-human-nvda-localized-copy",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/nvda.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-11-human-text-expansion-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/text-scale-200.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-11-human-app-scale-localization",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/app-scale-150.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-11-packaged-localization-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-11-locale-fallback-recovery",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-11-packaged-locale-persistence",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/journeys.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

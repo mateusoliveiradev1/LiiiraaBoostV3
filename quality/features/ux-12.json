@@ -1,0 +1,104 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-12-accessible-appearance-preferences",
+  "requirements": ["UX-12"],
+  "owner": "plan-02-29",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-12-validated-preference-boundary",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-12-benign-preferences-only",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-12-automated-appearance-matrix",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/visual.spec.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-12-human-nvda-preferences",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/nvda.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-12-human-forced-colors-preferences",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/forced-colors.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-12-human-text-scale-preferences",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/text-scale-200.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-12-human-app-scale-preferences",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/app-scale-150.json",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-12-packaged-scale-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-12-corrupt-preference-recovery",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        },
+        {
+          "id": "ux-12-packaged-preference-persistence",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/journeys.ts",
+          "owner": "plan-02-29",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
