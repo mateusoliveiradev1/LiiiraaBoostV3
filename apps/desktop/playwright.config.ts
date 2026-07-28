@@ -93,6 +93,24 @@ export default defineConfig({
       testMatch: '**/*.config.pw.ts',
     },
     {
+      metadata: {
+        appScale: '100',
+        contrast: 'normal',
+        locale: 'pt-BR',
+        motion: 'responsive',
+        scenarioMarker: 'SIMULATED SCENARIO',
+        viewport: '1440x900',
+      },
+      name: 'chromium',
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4173',
+        locale: 'pt-BR',
+        viewport: { height: 900, width: 1440 },
+      },
+    },
+    {
       name: 'storybook',
       testMatch: '**/*.stories.spec.ts',
       use: {
@@ -118,6 +136,14 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'off',
+  },
+  webServer: {
+    command: 'pnpm build && pnpm exec vite preview',
+    reuseExistingServer: process.env['CI'] !== 'true',
+    stderr: 'pipe',
+    stdout: 'pipe',
+    timeout: 120_000,
+    url: 'http://127.0.0.1:4173',
   },
   workers: 1,
 });
