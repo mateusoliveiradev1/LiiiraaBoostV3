@@ -2180,6 +2180,7 @@ name = "liiiraa-desktop"
 version = "0.0.0"
 dependencies = [
  "liiiraa-contracts-rust",
+ "serde",
  "serde_json",
  "tauri",
  "tauri-plugin-deep-link",
