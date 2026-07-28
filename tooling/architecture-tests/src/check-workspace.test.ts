@@ -72,18 +72,18 @@ const readManifest = (root: string): WorkspaceManifest =>
     fileSystem.readFileSync(pathApi.join(repositoryRoot, root, 'package.json'), 'utf8'),
   ) as WorkspaceManifest;
 
-const manifestEntries = (manifest: WorkspaceManifest): ReadonlyArray<readonly [string, string]> =>
+const manifestEntries = (manifest: WorkspaceManifest): readonly (readonly [string, string])[] =>
   [
     ...Object.entries(manifest.dependencies ?? {}),
     ...Object.entries(manifest.devDependencies ?? {}),
     ...Object.entries(manifest.peerDependencies ?? {}),
   ].toSorted(([leftName], [rightName]) => leftName.localeCompare(rightName));
 
-const readApprovedIdentities = (): ReadonlyArray<{
+const readApprovedIdentities = (): readonly {
   ecosystem: 'cargo' | 'npm';
   name: string;
   version: string;
-}> => {
+}[] => {
   const approval = fileSystem.readFileSync(
     pathApi.join(
       repositoryRoot,
@@ -167,7 +167,7 @@ describe('Phase 2 manifest gates', { concurrent: false }, () => {
 
   it('package ownership has one active owner and canonical public root', () => {
     expect(
-      phase2Packages.map(({ id, owner, root, publicRoot, packageName, workspaceDependencies }) => {
+      phase2Packages.map(({ id, root }) => {
         const matches = canonicalPolicy.modules.filter((module) => module.id === id);
         expect(matches).toHaveLength(1);
 
