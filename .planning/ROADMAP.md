@@ -117,7 +117,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 4. Every planned module has deliberate loading, empty, offline, permission, unsupported, partial-failure, restart-pending, recovery, and expired-entitlement behavior with no dead controls or unlabeled fixture values.
 5. User can complete every desktop flow in PT-BR or English with keyboard and assistive technology, scaled UI, reduced motion, WCAG 2.2 AA contrast, and status meaning that never relies on color alone.
 
-**Plans**: 7/33 plans executed
+**Plans**: 8/33 plans executed
 
 **Legacy outline below is superseded by the authoritative revision graph that follows.**
 
@@ -133,7 +133,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 - [x] 02-03-PLAN.md — Build closed operational-state and deterministic S01–S24 scenario contracts
 - [ ] 02-04-PLAN.md — Build Wave 0 component, browser, packaged, and quality-evidence harnesses
-- [ ] 02-12-PLAN.md — Build the least-privilege Tauri shell and native Windows bridges
+- [x] 02-12-PLAN.md — Build the least-privilege Tauri shell and native Windows bridges
 
 **Wave 4** *(blocked on Wave 3 foundations)*
 
@@ -177,7 +177,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 **Wave 5**
 
-- [ ] 02-03-PLAN.md — Build deterministic S01-S24 scenario contracts
+- [x] 02-03-PLAN.md — Build deterministic S01-S24 scenario contracts
 - [ ] 02-12-PLAN.md — Create and register the least-privilege Tauri crate atomically
 - [ ] 02-15-PLAN.md — Add terminating desktop lifecycle commands
 
@@ -405,7 +405,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Product Truth and Modular Contracts | 22/22 | Complete    | 2026-07-27 |
-| 2. Complete Desktop Experience | 7/33 | In Progress|  |
+| 2. Complete Desktop Experience | 8/33 | In Progress|  |
 | 3. Complete Web Experience | 0/TBD | Not started | - |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD | Not started | - |
 | 5. Hardware Intelligence and Measured Evidence | 0/TBD | Not started | - |
