@@ -229,14 +229,19 @@ describe('Phase 2 manifest gates', { concurrent: false }, () => {
         }),
     );
 
-    expect(approvedIdentities).toHaveLength(31);
+    expect(approvedIdentities).toHaveLength(33);
     expect(new Set(directExternalIdentities)).toEqual(
       new Set(
         approvedIdentities
-          .filter(({ ecosystem }) => ecosystem === 'npm')
+          .filter(({ ecosystem, name }) => ecosystem === 'npm' && name !== '@typespec/openapi')
           .map(({ ecosystem, name, version }) => `${ecosystem}:${name}@${version}`),
       ),
     );
+
+    expect(manifestEntries(readManifest('tooling/contract-generation'))).toContainEqual([
+      '@typespec/openapi',
+      '1.14.0',
+    ]);
 
     for (const { name, version } of approvedIdentities) {
       expect(review).toContain(`\`${name}@${version}\``);

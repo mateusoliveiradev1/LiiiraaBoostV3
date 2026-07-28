@@ -1,0 +1,28 @@
+{
+  "name": "@liiiraa/feature-shell",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@liiiraa/design-system": "workspace:*",
+    "@liiiraa/desktop-client": "workspace:*",
+    "@tanstack/react-query": "5.101.4",
+    "@tanstack/react-router": "1.170.18",
+    "@xstate/react": "6.1.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "7.83.0",
+    "react-intl": "10.1.18",
+    "uplot": "1.6.32",
+    "xstate": "5.32.5"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17"
+  }
+}

@@ -373,11 +373,15 @@ describe('policy graph fixtures', () => {
 });
 
 const expectedPnpmWorkspaceRoots = [
+  'apps/desktop',
   'packages/contracts-source',
   'packages/contracts-ts',
+  'packages/design-system',
+  'packages/design-tokens',
   'packages/desktop-client',
   'packages/desktop-production-reference',
   'packages/desktop-simulator',
+  'packages/feature-shell',
   'tooling/acceptance-policy',
   'tooling/architecture-tests',
   'tooling/contract-compat',
@@ -499,8 +503,16 @@ describe('live workspace discovery boundary', { concurrent: false }, () => {
         ],
       });
 
-      await writeFile(join(sourceRoot, 'index.ts'), "export { value } from './value.ts';\n", 'utf8');
-      await writeFile(join(sourceRoot, 'value.ts'), "export { sentinel as value } from './index.ts';\n", 'utf8');
+      await writeFile(
+        join(sourceRoot, 'index.ts'),
+        "export { value } from './value.ts';\n",
+        'utf8',
+      );
+      await writeFile(
+        join(sourceRoot, 'value.ts'),
+        "export { sentinel as value } from './index.ts';\n",
+        'utf8',
+      );
       const cycleResult = await runLiveWorkspaceCheck(mutationPolicy);
       expect(cycleResult.policy).toEqual({
         ok: false,

@@ -129,7 +129,7 @@
       "roots": ["packages/design-tokens"],
       "publicRoots": ["packages/design-tokens/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "design-system",
@@ -138,7 +138,7 @@
       "roots": ["packages/design-system"],
       "publicRoots": ["packages/design-system/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "feature-shell",
@@ -147,7 +147,7 @@
       "roots": ["packages/feature-shell"],
       "publicRoots": ["packages/feature-shell/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "desktop-app",
@@ -156,7 +156,7 @@
       "roots": ["apps/desktop"],
       "publicRoots": ["apps/desktop/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "acceptance-policy",

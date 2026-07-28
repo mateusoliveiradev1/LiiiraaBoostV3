@@ -354,6 +354,20 @@
       "verdict": "SUS: too-new"
     },
     {
+      "name": "@types/react",
+      "version": "19.2.17",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+      "license": "MIT",
+      "purpose": "React type peer required by the approved internationalization dependency",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "User explicitly approved this exact free MIT peer identity on 2026-07-27.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "version": "8.65.0",
       "ecosystem": "npm",
@@ -424,6 +438,20 @@
       "disposition": "REVIEW_REQUIRED",
       "reviewReason": "Research legitimacy audit flagged the recent official release as too new.",
       "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@typespec/openapi",
+      "version": "1.14.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/microsoft/typespec",
+      "license": "MIT",
+      "purpose": "Peer vocabulary required by the approved TypeSpec OpenAPI 3 emitter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "User explicitly approved this exact free MIT peer identity on 2026-07-27.",
+      "allowedLifecycleScripts": {},
+      "scope": "phase-02",
+      "verdict": "SUS: too-new"
     },
     {
       "name": "@vitejs/plugin-react",

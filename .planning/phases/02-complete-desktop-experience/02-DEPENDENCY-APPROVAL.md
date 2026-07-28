@@ -49,10 +49,24 @@ This approves the complete exact set below: 19 identities classified `SUS: too-n
 30. `npm:vite@8.1.5`
 31. `npm:xstate@5.32.5`
 
+## Supplemental free peer approval
+
+During Plan 02-14 verification, strict peer enforcement identified two exact peer identities required by already approved packages. Both identities are registry-verified, MIT-licensed, free to use, and have no consumer-install lifecycle hooks.
+
+On 2026-07-27, after these exact identities were presented, the user replied:
+
+> aprovo
+
+This supplements the original 31-item approval without changing or substituting any previously approved identity:
+
+32. `npm:@types/react@19.2.17`
+33. `npm:@typespec/openapi@1.14.0`
+
+The resulting Phase 2 approval contains 33 exact identities. `@types/react` belongs to the React feature consumer, while `@typespec/openapi` belongs to the existing TypeSpec contract-generation tool that requires it as a peer.
+
 ## Explicit exclusions and limits
 
 - `npm:@tauri-apps/plugin-single-instance` remains excluded because the identity does not exist; use the approved Rust crate.
 - `npm:msw` remains excluded for Phase 2; use the existing deterministic desktop adapter port.
 - Installation must preserve exact version parity with the generated evidence and deny unapproved consumer-install lifecycle hooks.
 - This record contains no credentials, keys, tokens, certificate material, or other secrets.
-
