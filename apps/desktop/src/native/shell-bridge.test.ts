@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { RendererToHostShellCommandJson } from '@liiiraa/contracts-ts';
 
 import {
   HOST_EVENT_CHANNEL,
@@ -102,7 +103,7 @@ const rendererCommands = [
       restoreHeight: 800,
     },
   }),
-] as const;
+] as unknown as readonly RendererToHostShellCommandJson[];
 
 const createHarness = () => {
   let listener:
@@ -215,7 +216,7 @@ describe('shell bridge', () => {
       bridge.send({
         messageType: 'desktop.shell.execute-arbitrary.command',
         payload: { command: 'SENSITIVE_COMMAND' },
-      }),
+      } as unknown as RendererToHostShellCommandJson),
     ).resolves.toBe(false);
     expect(harness.transport.invoke).toHaveBeenCalledTimes(
       rendererCommands.length,

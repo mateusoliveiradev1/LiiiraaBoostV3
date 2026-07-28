@@ -24,6 +24,7 @@
     "verify": "node scripts/desktop-lifecycle.mjs final --"
   },
   "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/design-system": "workspace:*",
     "@liiiraa/design-tokens": "workspace:*",
     "@liiiraa/desktop-production-reference": "workspace:*",
