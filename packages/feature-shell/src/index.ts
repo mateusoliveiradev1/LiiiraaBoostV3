@@ -39,6 +39,32 @@ export type {
   CalibrationActorSnapshot,
   CalibrationMachine,
 } from './machines/calibration.machine.js';
+export {
+  DATA_TEXT_PREFERENCES,
+  DENSITY_PREFERENCES,
+  DESKTOP_LOCALES,
+  INTERFACE_SCALES,
+  MOTION_PREFERENCES,
+  PREFERENCE_VERSION,
+  createDefaultPreferences,
+  detectDesktopLocale,
+  reducePreferences,
+  restorePreferences,
+  selectCloseBehavior,
+  selectDensityMetrics,
+  serializePreferences,
+} from './model/preferences.js';
+export type {
+  DataTextPreference,
+  DensityMetrics,
+  DensityPreference,
+  DesktopLocale,
+  DesktopPreferences,
+  InterfaceScale,
+  MotionPreference,
+  PreferenceEvent,
+  PreferenceRestoreResult,
+} from './model/preferences.js';
 
 export * from './features/account-settings.js';
 export * from './features/activity.js';
@@ -52,4 +78,9 @@ export * from './features/measure.js';
 export * from './features/prepare.js';
 export * from './features/preview-workflows.js';
 export * from './features/recover.js';
-export type { ShellNavigationIntentJson } from '@liiiraa/contracts-ts';
+export type {
+  RendererToHostShellCommandJson,
+  ShellNavigationIntentJson,
+  ShellSetLocaleCommandJson,
+  ShellSetTrayPreferenceCommandJson,
+} from '@liiiraa/contracts-ts';
