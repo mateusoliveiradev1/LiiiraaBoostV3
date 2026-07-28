@@ -19,6 +19,7 @@ export interface GlobalCommandCenterProps {
   readonly boundaries?: Readonly<Partial<Record<string, ActionablePhaseBoundary>>>;
   readonly context: CommandSearchContext;
   readonly entries: readonly CommandSearchEntry[];
+  readonly initialQuery?: string;
   readonly initiallyOpen?: boolean;
   readonly locale: ShellLocale;
   readonly onNavigate: (selection: CommandSelection) => void;
@@ -72,6 +73,7 @@ export const GlobalCommandCenter = ({
   boundaries = {},
   context,
   entries,
+  initialQuery = '',
   initiallyOpen = false,
   locale,
   onNavigate,
@@ -79,7 +81,7 @@ export const GlobalCommandCenter = ({
   scenarioId,
 }: GlobalCommandCenterProps) => {
   const [isOpen, setIsOpen] = useState(initiallyOpen);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -216,7 +218,7 @@ export const GlobalCommandCenter = ({
               activeIndex >= 0 ? `command-result-${results[activeIndex]?.entry.id ?? ''}` : undefined
             }
             aria-autocomplete="list"
-            aria-controls="global-command-results"
+            aria-controls={results.length > 0 ? 'global-command-results' : undefined}
             aria-expanded="true"
             autoComplete="off"
             id="global-command-search"

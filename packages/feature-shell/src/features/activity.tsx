@@ -109,6 +109,7 @@ export const ActivitySurface = ({
               name="activity-filter"
               onChange={() => { setFilter(candidate); }}
               type="radio"
+              value={candidate}
             />
             {FILTER_LABELS[locale][candidate]}
           </label>
