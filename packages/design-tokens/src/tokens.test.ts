@@ -16,7 +16,7 @@ import {
 describe('Pre-Dawn Flight Deck token contract', () => {
   it('locks layout spacing and rejects off-scale values', () => {
     expect(Object.values(SPACING)).toEqual([4, 8, 16, 24, 32, 48, 64]);
-    expect(() => assertSpacingValue(12)).toThrowError('12px is outside the locked spacing scale');
+    expect(() => assertSpacingValue(12)).toThrow('12px is outside the locked spacing scale');
     expect(assertSpacingValue(24)).toBe(24);
   });
 
@@ -31,7 +31,7 @@ describe('Pre-Dawn Flight Deck token contract', () => {
         (left, right) => left - right,
       ),
     ).toEqual([400, 600]);
-    expect(typography.every(({ family }) => family === 'manrope' || family === 'mono')).toBe(true);
+    expect(new Set(typography.map(({ family }) => family))).toEqual(new Set(['manrope', 'mono']));
   });
 
   it('locks the authored surface, cobalt, semantic, focus, and disabled colors', () => {

@@ -97,7 +97,9 @@ export const AccessiblePlot = ({
             icon={<ChevronLeft />}
             isDisabled={safeCursor === 0}
             label="Previous chart sample"
-            onPress={() => moveCursor(-1)}
+            onPress={() => {
+              moveCursor(-1);
+            }}
           />
           <output aria-live="polite">
             {cursorPoint?.label}: {cursorPoint?.value} {unit}
@@ -106,7 +108,9 @@ export const AccessiblePlot = ({
             icon={<ChevronRight />}
             isDisabled={safeCursor === cursorLimit}
             label="Next chart sample"
-            onPress={() => moveCursor(1)}
+            onPress={() => {
+              moveCursor(1);
+            }}
           />
         </div>
       ) : null}
@@ -124,7 +128,7 @@ export const AccessiblePlot = ({
         </thead>
         <tbody>
           {(bounded[0]?.points ?? []).map((point, pointIndex) => (
-            <tr key={`${pointIndex}:${point.label}`}>
+            <tr key={`${String(pointIndex)}:${point.label}`}>
               <th scope="row">{point.label}</th>
               {bounded.map((entry) => (
                 <td key={entry.id}>{entry.points[pointIndex]?.value ?? 'Unavailable'}</td>
@@ -200,7 +204,13 @@ export const EvidenceTable = ({ caption, columns, onSort, rows, sort }: Evidence
               scope="col"
             >
               {onSort ? (
-                <button data-lb-control onClick={() => onSort(column.id)} type="button">
+                <button
+                  data-lb-control
+                  onClick={() => {
+                    onSort(column.id);
+                  }}
+                  type="button"
+                >
                   {column.label}
                 </button>
               ) : (

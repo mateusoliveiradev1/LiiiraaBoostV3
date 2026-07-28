@@ -14,7 +14,7 @@ const SPACING_VALUES = Object.freeze(Object.values(SPACING));
 
 export const assertSpacingValue = (value: number): SpacingValue => {
   if (!(SPACING_VALUES as readonly number[]).includes(value)) {
-    throw new RangeError(`${value}px is outside the locked spacing scale`);
+    throw new RangeError(`${String(value)}px is outside the locked spacing scale`);
   }
 
   return value as SpacingValue;
@@ -139,7 +139,7 @@ export type AppearanceTokenName =
 
 export type AppearanceTokens = Readonly<Record<AppearanceTokenName, string>>;
 
-const milliseconds = (value: number): string => `${value}ms`;
+const milliseconds = (value: number): string => `${String(value)}ms`;
 
 export const createAppearanceTokens = (modes: AppearanceModes): AppearanceTokens => {
   const reducedDuration = MOTION_TOKENS.hoverFocus.durationMs;
@@ -147,7 +147,9 @@ export const createAppearanceTokens = (modes: AppearanceModes): AppearanceTokens
 
   return Object.freeze({
     '--lb-app-scale': String(modes.scale / 100),
-    '--lb-control-gap': `${modes.density === 'compact' ? SPACING.space2 : SPACING.space3}px`,
+    '--lb-control-gap': `${String(
+      modes.density === 'compact' ? SPACING.space2 : SPACING.space3,
+    )}px`,
     '--lb-control-min-size': '44px',
     '--lb-disabled-opacity': '1',
     '--lb-disabled-text': COLOR_TOKENS.textSecondary,
@@ -168,7 +170,9 @@ export const createAppearanceTokens = (modes: AppearanceModes): AppearanceTokens
       isReduced ? reducedDuration : MOTION_TOKENS.route.durationMs,
     ),
     '--lb-motion-translate': isReduced ? '0px' : '8px',
-    '--lb-section-gap': `${modes.density === 'compact' ? SPACING.space3 : SPACING.space4}px`,
+    '--lb-section-gap': `${String(
+      modes.density === 'compact' ? SPACING.space3 : SPACING.space4,
+    )}px`,
     '--lb-text-scale': String(modes.textScale / 100),
   });
 };

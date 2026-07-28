@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import {
   Button,
-  Checkbox,
+  CheckboxButton,
+  CheckboxField,
   ComboBox,
   Dialog,
   DialogTrigger,
@@ -19,7 +20,8 @@ import {
   ModalOverlay,
   Popover,
   ProgressBar,
-  Radio,
+  RadioButton,
+  RadioField,
   RadioGroup,
   SearchField,
   Select,
@@ -28,7 +30,8 @@ import {
   SliderOutput,
   SliderThumb,
   SliderTrack,
-  Switch,
+  SwitchButton,
+  SwitchField,
   Tab,
   TabList,
   TabPanel,
@@ -43,6 +46,15 @@ import {
 import type { Key } from 'react-aria-components';
 
 export type LbButtonVariant = 'primary' | 'secondary' | 'quiet' | 'destructive';
+
+export const LB_INTERACTION_STATES = Object.freeze([
+  'default',
+  'hover',
+  'focus-visible',
+  'pressed',
+  'disabled',
+  'loading',
+] as const);
 
 export interface LbButtonProps {
   readonly children: ReactNode;
@@ -191,16 +203,18 @@ export interface LbChoiceProps {
 }
 
 export const LbCheckbox = ({ children, ...props }: LbChoiceProps) => (
-  <Checkbox className="lb-choice" data-lb-control {...props}>
-    {({ isSelected }) => (
-      <>
-        <span aria-hidden="true" className="lb-choice-mark">
-          {isSelected ? '✓' : ''}
-        </span>
-        {children}
-      </>
-    )}
-  </Checkbox>
+  <CheckboxField {...props}>
+    <CheckboxButton className="lb-choice" data-lb-control>
+      {({ isSelected }) => (
+        <>
+          <span aria-hidden="true" className="lb-choice-mark">
+            {isSelected ? '✓' : ''}
+          </span>
+          {children}
+        </>
+      )}
+    </CheckboxButton>
+  </CheckboxField>
 );
 
 export interface LbRadioOption {
@@ -219,16 +233,18 @@ export const LbRadioGroup = ({ label, options, ...props }: LbRadioGroupProps) =>
   <RadioGroup className="lb-choice-group" {...props}>
     <Label>{label}</Label>
     {options.map((option) => (
-      <Radio className="lb-choice" data-lb-control key={option.value} value={option.value}>
-        {({ isSelected }) => (
-          <>
-            <span aria-hidden="true" className="lb-radio-mark">
-              {isSelected ? '●' : ''}
-            </span>
-            {option.label}
-          </>
-        )}
-      </Radio>
+      <RadioField key={option.value} value={option.value}>
+        <RadioButton className="lb-choice" data-lb-control>
+          {({ isSelected }) => (
+            <>
+              <span aria-hidden="true" className="lb-radio-mark">
+                {isSelected ? '●' : ''}
+              </span>
+              {option.label}
+            </>
+          )}
+        </RadioButton>
+      </RadioField>
     ))}
   </RadioGroup>
 );
@@ -241,16 +257,18 @@ export interface LbSwitchProps {
 }
 
 export const LbSwitch = ({ children, ...props }: LbSwitchProps) => (
-  <Switch className="lb-switch" data-lb-control {...props}>
-    {({ isSelected }) => (
-      <>
-        <span aria-hidden="true" className="lb-switch-track" data-selected={isSelected}>
-          <span className="lb-switch-thumb" />
-        </span>
-        {children}
-      </>
-    )}
-  </Switch>
+  <SwitchField {...props}>
+    <SwitchButton className="lb-switch" data-lb-control>
+      {({ isSelected }) => (
+        <>
+          <span aria-hidden="true" className="lb-switch-track" data-selected={isSelected}>
+            <span className="lb-switch-thumb" />
+          </span>
+          {children}
+        </>
+      )}
+    </SwitchButton>
+  </SwitchField>
 );
 
 export interface LbSliderProps {
@@ -273,7 +291,7 @@ export const LbSlider = ({ label, ...props }: LbSliderProps) => (
           className="lb-slider-thumb"
           data-lb-control
           index={0}
-          style={{ insetInlineStart: `${state.getThumbPercent(0) * 100}%` }}
+          style={{ insetInlineStart: `${String(state.getThumbPercent(0) * 100)}%` }}
         />
       )}
     </SliderTrack>
@@ -302,12 +320,13 @@ export const LbSelect = ({
 }: LbCollectionFieldProps) => (
   <Select
     className="lb-field"
+    placeholder={placeholder}
     {...(onSelectionChange ? { onSelectionChange } : {})}
     {...(selectedKey === undefined ? {} : { selectedKey })}
   >
     <Label>{label}</Label>
     <Button className="lb-input lb-select-trigger" data-lb-control>
-      <SelectValue>{({ selectedText }) => selectedText ?? placeholder}</SelectValue>
+      <SelectValue />
     </Button>
     <Popover className="lb-popover">
       <ListBox items={options}>
@@ -421,14 +440,19 @@ export const LbTabs = ({ label, tabs, ...props }: LbTabsProps) => (
   </Tabs>
 );
 
-interface LbOverlayProps {
+export interface LbDialogContentProps {
   readonly children: ReactNode;
   readonly description?: string;
   readonly title: string;
+}
+
+interface LbOverlayProps extends LbDialogContentProps {
+  readonly isOpen?: boolean;
+  readonly onOpenChange?: (isOpen: boolean) => void;
   readonly trigger: ReactNode;
 }
 
-const DialogBody = ({ children, description, title }: Omit<LbOverlayProps, 'trigger'>) => (
+export const LbDialogContent = ({ children, description, title }: LbDialogContentProps) => (
   <>
     <Heading slot="title">{title}</Heading>
     {description ? <Text slot="description">{description}</Text> : null}
@@ -436,33 +460,47 @@ const DialogBody = ({ children, description, title }: Omit<LbOverlayProps, 'trig
   </>
 );
 
-export const LbDialog = ({ trigger, ...dialogProps }: LbOverlayProps) => (
-  <DialogTrigger>
+export const LbDialog = ({ isOpen, onOpenChange, trigger, ...dialogProps }: LbOverlayProps) => (
+  <DialogTrigger
+    {...(isOpen === undefined ? {} : { isOpen })}
+    {...(onOpenChange ? { onOpenChange } : {})}
+  >
     {trigger}
     <ModalOverlay className="lb-modal-overlay">
       <Modal className="lb-dialog">
-        <Dialog>{() => <DialogBody {...dialogProps} />}</Dialog>
+        <Dialog>{() => <LbDialogContent {...dialogProps} />}</Dialog>
       </Modal>
     </ModalOverlay>
   </DialogTrigger>
 );
 
-export const LbAlertDialog = ({ trigger, ...dialogProps }: LbOverlayProps) => (
-  <DialogTrigger>
+export const LbAlertDialog = ({
+  isOpen,
+  onOpenChange,
+  trigger,
+  ...dialogProps
+}: LbOverlayProps) => (
+  <DialogTrigger
+    {...(isOpen === undefined ? {} : { isOpen })}
+    {...(onOpenChange ? { onOpenChange } : {})}
+  >
     {trigger}
     <ModalOverlay className="lb-modal-overlay">
       <Modal className="lb-dialog" isDismissable={false}>
-        <Dialog role="alertdialog">{() => <DialogBody {...dialogProps} />}</Dialog>
+        <Dialog role="alertdialog">{() => <LbDialogContent {...dialogProps} />}</Dialog>
       </Modal>
     </ModalOverlay>
   </DialogTrigger>
 );
 
-export const LbSheet = ({ trigger, ...dialogProps }: LbOverlayProps) => (
-  <DialogTrigger>
+export const LbSheet = ({ isOpen, onOpenChange, trigger, ...dialogProps }: LbOverlayProps) => (
+  <DialogTrigger
+    {...(isOpen === undefined ? {} : { isOpen })}
+    {...(onOpenChange ? { onOpenChange } : {})}
+  >
     {trigger}
     <Popover className="lb-sheet" placement="end">
-      <Dialog>{() => <DialogBody {...dialogProps} />}</Dialog>
+      <Dialog>{() => <LbDialogContent {...dialogProps} />}</Dialog>
     </Popover>
   </DialogTrigger>
 );
@@ -498,7 +536,10 @@ export const LbProgress = ({ label, maxValue, value }: LbProgressProps) => (
         <span>{label}</span>
         <span>{valueText}</span>
         <span aria-hidden="true" className="lb-progress-track">
-          <span className="lb-progress-fill" style={{ inlineSize: `${percentage ?? 0}%` }} />
+          <span
+            className="lb-progress-fill"
+            style={{ inlineSize: `${String(percentage ?? 0)}%` }}
+          />
         </span>
       </>
     )}

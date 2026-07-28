@@ -127,7 +127,7 @@ export const Breadcrumbs = ({ items }: BreadcrumbsProps) => (
       {items.map((item, index) => {
         const isCurrent = index === items.length - 1;
         return (
-          <li key={`${index}:${item.label}`}>
+          <li key={`${String(index)}:${item.label}`}>
             {isCurrent || !item.onPress ? (
               <span aria-current={isCurrent ? 'page' : undefined}>{item.label}</span>
             ) : (
@@ -271,7 +271,7 @@ export const createTrayStateModel = (input: TrayStateInput): TrayStateModel =>
     ...input,
     tooltip: `Liiiraa Boost — ${input.status}${
       input.activityRequiringAttention > 0
-        ? ` — ${input.activityRequiringAttention} item(s) require attention`
+        ? ` — ${String(input.activityRequiringAttention)} item(s) require attention`
         : ''
     }`,
   });

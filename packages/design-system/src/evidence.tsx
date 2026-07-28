@@ -20,23 +20,41 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export type ProvenanceKind = 'fixture' | 'observed' | 'measured' | 'modeled' | 'unavailable';
-export type EvidenceFreshness = 'current' | 'stale' | 'unknown';
-export type EvidenceQuality =
-  'verified' | 'degraded' | 'insufficient' | 'contradictory' | 'unavailable';
-export type OperationalState =
-  | 'loading'
-  | 'empty'
-  | 'offline'
-  | 'permission'
-  | 'unsupported'
-  | 'partial-failure'
-  | 'restart-pending'
-  | 'recovery'
-  | 'expired-entitlement'
-  | 'stale-evidence'
-  | 'contradictory-evidence'
-  | 'fixture';
+export const PROVENANCE_KINDS = Object.freeze([
+  'fixture',
+  'observed',
+  'measured',
+  'modeled',
+  'unavailable',
+] as const);
+export type ProvenanceKind = (typeof PROVENANCE_KINDS)[number];
+
+export const EVIDENCE_FRESHNESS_STATES = Object.freeze(['current', 'stale', 'unknown'] as const);
+export type EvidenceFreshness = (typeof EVIDENCE_FRESHNESS_STATES)[number];
+export const EVIDENCE_QUALITY_STATES = Object.freeze([
+  'verified',
+  'degraded',
+  'insufficient',
+  'contradictory',
+  'unavailable',
+] as const);
+export type EvidenceQuality = (typeof EVIDENCE_QUALITY_STATES)[number];
+
+export const OPERATIONAL_STATES = Object.freeze([
+  'loading',
+  'empty',
+  'offline',
+  'permission',
+  'unsupported',
+  'partial-failure',
+  'restart-pending',
+  'recovery',
+  'expired-entitlement',
+  'stale-evidence',
+  'contradictory-evidence',
+  'fixture',
+] as const);
+export type OperationalState = (typeof OPERATIONAL_STATES)[number];
 
 type SignalTone = 'neutral' | 'success' | 'warning' | 'critical' | 'experimental' | 'restricted';
 type SignalPattern =
