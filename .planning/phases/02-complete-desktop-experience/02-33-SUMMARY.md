@@ -109,7 +109,7 @@ Each completed task was committed atomically:
 
 - **Found during:** Task 3 desktop build
 - **Issue:** Node returned `spawnSync pnpm.cmd EINVAL` because Windows command scripts cannot be executed directly with this spawn configuration.
-- **Fix:** Used the static `cmd.exe /d /c pnpm.cmd` invocation on Windows while retaining argument-array execution.
+- **Fix:** Used the Windows command launcher `cmd.exe` with flags `/d /c` to invoke `pnpm.cmd` while retaining argument-array execution.
 - **Files modified:** `tooling/desktop-evidence/package-signed-desktop.mjs`
 - **Verification:** Pinned Tauri builds completed in both local and CI modes.
 - **Committed in:** `0277cc2`
