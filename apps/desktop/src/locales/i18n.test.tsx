@@ -11,6 +11,7 @@ import {
   formatMessage,
   formatNumber,
   formatStorage,
+  type MessageId,
 } from './i18n.js';
 
 describe('locale catalog parity', () => {
@@ -49,7 +50,9 @@ describe('locale catalog parity', () => {
   });
 
   it('expands every pseudo message by at least 35 percent', () => {
-    for (const messageId of Object.keys(MESSAGE_CATALOGS['pt-BR'])) {
+    for (const messageId of Object.keys(
+      MESSAGE_CATALOGS['pt-BR'],
+    ) as MessageId[]) {
       const source = MESSAGE_CATALOGS['pt-BR'][messageId]!;
       const pseudo = MESSAGE_CATALOGS.pseudo[messageId]!;
 
