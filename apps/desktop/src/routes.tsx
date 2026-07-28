@@ -44,20 +44,25 @@ export interface DesktopRouteDefinition {
   readonly capability: 'navigate';
 }
 
-const route = (
-  pattern: string,
-  feature: DesktopFeature,
-  surface: DesktopRouteDefinition['surface'],
-  state: string,
-): DesktopRouteDefinition =>
+const route = <
+  const Pattern extends string,
+  const Feature extends DesktopFeature,
+  const Surface extends DesktopRouteDefinition['surface'],
+  const State extends string,
+>(
+  pattern: Pattern,
+  feature: Feature,
+  surface: Surface,
+  state: State,
+) =>
   Object.freeze({
     pattern,
     feature,
     surface,
     state,
     headingMessageId: `route.${feature}.${state}.heading`,
-    capability: 'navigate',
-  });
+    capability: 'navigate' as const,
+  }) satisfies DesktopRouteDefinition;
 
 export const desktopRouteTree = Object.freeze([
   route('/', 'calibration', 'CalibrationWorkspace', 'welcome'),
@@ -120,6 +125,9 @@ export const desktopRouteTree = Object.freeze([
   route('/documentation/:documentId', 'documentation', 'DocumentationSurface', 'document'),
 ] satisfies readonly DesktopRouteDefinition[]);
 
+export type DesktopRoutePattern = (typeof desktopRouteTree)[number]['pattern'];
+export type DesktopRouteState = (typeof desktopRouteTree)[number]['state'];
+
 export interface DesktopSearch {
   readonly filter?: string;
   readonly inspector?: string;
@@ -133,7 +141,7 @@ export interface DesktopRouteMatch {
   readonly definition: DesktopRouteDefinition;
   readonly pathname: string;
   readonly feature: DesktopFeature;
-  readonly state: string;
+  readonly state: DesktopRouteState;
   readonly params: Readonly<Record<string, string>>;
   readonly search: DesktopSearch;
   readonly returnIntent?: ReturnIntent;
