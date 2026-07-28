@@ -11,7 +11,7 @@ const verifierPath = resolve(
   'tooling/desktop-evidence/verify-packaged-wave-zero.mjs',
 );
 
-const clone = (value) => structuredClone(value);
+const clone = (value) => JSON.parse(JSON.stringify(value));
 
 const writeJson = (directory, name, value) => {
   const path = join(directory, name);
