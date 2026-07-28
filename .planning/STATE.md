@@ -6,14 +6,14 @@ current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
 stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-07-28T02:50:59.179Z"
+last_updated: "2026-07-28T03:06:15.919Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 32
+  completed_plans: 33
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 3 of 33
+Plan: 4 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -87,6 +87,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P12 | 14min | 2 tasks | 9 files |
 | Phase 02 P15 | 23min | 2 tasks | 16 files |
 | Phase 02 P04 | 24min | 2 tasks | 11 files |
+| Phase 02 P16 | 9min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Gerar 144 projetos Playwright a partir dos cinco eixos visuais bloqueados, além de harness e Storybook. — A matriz programática evita duplicação e prova todas as combinações determinísticas.
 - [Phase 02]: Persistir no manifesto somente a referência canônica, a regra S01-S24 e os eixos visuais. — Rotas e estados são derivados em execução para impedir uma segunda lista sujeita a drift.
 - [Phase 02]: Validar mutações de histórias contra a projeção do catálogo canônico sem deep imports. — A verificação preserva fronteiras públicas de módulos e mantém o JSON como única autoridade.
+- [Phase 02]: Keep Wave 0 dry-run strictly planned and report every unavailable packaged prerequisite without invoking tauri-driver.
+- [Phase 02]: Accept Phase 2 signing only as local CurrentUser CNG development custody with false public-trust, SmartScreen, production, and distribution claims.
+- [Phase 02]: Allow timestamping only when not applicable or backed by explicit official-free evidence.
 
 ### Pending Todos
 
@@ -203,6 +207,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T02:50:59.175Z
+Last session: 2026-07-28T03:05:51.501Z
 Stopped at: Completed 02-04-PLAN.md
 Resume file: None
