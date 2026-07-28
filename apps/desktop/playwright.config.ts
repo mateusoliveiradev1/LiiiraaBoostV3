@@ -88,7 +88,7 @@ export default defineConfig({
         viewportAxes: viewports.length,
       },
       name: 'harness',
-      testMatch: '**/*.config.spec.ts',
+      testMatch: '**/*.config.pw.ts',
     },
     {
       name: 'storybook',

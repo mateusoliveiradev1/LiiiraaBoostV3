@@ -116,7 +116,7 @@ export default defineConfig([
             'apps/desktop/playwright.config.ts',
             'apps/desktop/tests/browser/axe.ts',
             'apps/desktop/tests/browser/fixtures.ts',
-            'apps/desktop/tests/browser/harness.config.spec.ts',
+            'apps/desktop/tests/browser/harness.config.pw.ts',
             'apps/desktop/tests/browser/keyboard.ts',
             'apps/desktop/vite.config.ts',
           ],
