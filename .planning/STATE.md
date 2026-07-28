@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-13-PLAN.md
-last_updated: "2026-07-28T09:49:22.612Z"
+stopped_at: Completed 02-33-PLAN.md
+last_updated: "2026-07-28T15:36:15.223Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 49
+  completed_plans: 50
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 20 of 33
+Plan: 21 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -104,6 +104,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P21 | 10 min | 2 tasks | 12 files |
 | Phase 02 P25 | 26 min | 3 tasks | 11 files |
 | Phase 02 P13 | 35 min | 2 tasks | 21 files |
+| Phase 02 P33 | 5h37 | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -245,6 +246,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Project host locale and tray events directly through the preference reducer without republishing commands. — Prevents bidirectional renderer/native preference feedback loops while preserving one reducer as UI truth.
 - [Phase 02]: Keep browser composition marker-gated and pseudo-localization test-only. — Prevents ambient test globals or pseudo catalogs from changing shipping desktop truth.
 - [Phase 02]: Use compact goal icons with full accessible names below 1180 px. — Satisfies the locked 72/64 px rail without clipping labels or removing them from assistive technology.
+- [Phase 02]: Keep Windows 10 and Windows 11 packaged environments explicitly unresolved — No clean resettable environments are available; image, build, runner, WebView2, reset, support, and provenance facts must not be invented.
+- [Phase 02]: Use only the free self-signed CurrentUser CNG development certificate — Public trust, SmartScreen, production, distribution, and timestamp claims remain blocked or not-applicable until Phase 10.
+- [Phase 02]: Keep CI signing-key-free and unsigned — CI output is separately classified, unstaged, unpublished, non-promotable, and never release-ready.
 
 ### Pending Todos
 
@@ -268,6 +272,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T09:49:22.607Z
-Stopped at: Completed 02-13-PLAN.md
+Last session: 2026-07-28T15:36:15.219Z
+Stopped at: Completed 02-33-PLAN.md
 Resume file: None
