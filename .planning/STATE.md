@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-12-PLAN.md
-last_updated: "2026-07-28T01:46:15.254Z"
-last_activity: 2026-07-27
-last_activity_desc: Completed Phase 02 Plan 02 workspace reservation and ownership gates
+stopped_at: Completed 02-15-PLAN.md
+last_updated: "2026-07-28T02:16:49.850Z"
+last_activity: 2026-07-28
+last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 30
+  completed_plans: 31
   percent: 10
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 9 of 33
+Plan: 2 of 33
 Status: Ready to execute
-Last activity: 2026-07-27 — Completed Phase 02 Plan 02 workspace reservation and ownership gates
+Last activity: 2026-07-28 — Phase 02 execution started
 
 Progress: [████░░░░░░] 44%
 
@@ -85,6 +85,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P32 | 7min | 2 tasks | 5 files |
 | Phase 02 P03 | 18min | 3 tasks | 9 files |
 | Phase 02 P12 | 14min | 2 tasks | 9 files |
+| Phase 02 P15 | 23min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep the renderer capability empty and route the only custom command through generated validation — Future permissions require explicit review and capability-file/runtime parity.
 - [Phase 02]: Keep updater artifacts disabled until a legitimate key exists — Never fabricate updater signatures or production trust.
 - [Phase 02]: Use current-user NSIS installation and null signing inputs until Plan 02-33 — Plan 02-33 will bind observed free local CNG evidence without elevating the UI.
+- [Phase 02]: Delegate root verification to one bounded desktop lifecycle while retaining named foundation graphs for static evidence reachability. — Focused lifecycle smoke can validate wiring without claiming future evidence, while ordinary quick and final modes remain fail-closed.
+- [Phase 02]: Treat absent future desktop suite or evidence artifacts as explicit failures with owning-plan diagnostics. — Prevents incomplete unit, browser, packaged, localization, scenario, or evidence commands from spoofing product acceptance.
 
 ### Pending Todos
 
@@ -196,6 +199,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T01:46:15.249Z
-Stopped at: Completed 02-12-PLAN.md
+Last session: 2026-07-28T02:16:49.846Z
+Stopped at: Completed 02-15-PLAN.md
 Resume file: None
