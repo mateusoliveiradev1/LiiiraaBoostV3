@@ -3,6 +3,7 @@ import {
   ChangeLedger,
   EvidenceList,
   LbButton,
+  LbRadioGroup,
   OperationInspector,
   OperationRow,
   PlanDependencyList,
@@ -49,6 +50,13 @@ export const IMPROVE_GOALS = Object.freeze([
 
 export type ImproveGoal = (typeof IMPROVE_GOALS)[number];
 
+export const IMPROVE_RISK_POLICIES = Object.freeze([
+  'verified',
+  'advanced',
+  'experimental',
+  'extreme',
+] as const);
+
 export const IMPROVE_COMPONENTS = Object.freeze([
   'windows',
   'cpu-power',
@@ -90,6 +98,7 @@ export interface TechnicalOperation {
 export interface ImproveSurfaceProps {
   readonly locale: ShellLocale;
   readonly onNavigate?: (view: ImproveView, targetId?: string) => void;
+  readonly onRiskPolicyChange?: (risk: OperationRisk) => void;
   readonly scenarioId: string;
   readonly selectedComponent?: ImproveComponent;
   readonly selectedGoal?: ImproveGoal;
@@ -383,7 +392,6 @@ const ComponentView = ({
   readonly onNavigate?: ImproveSurfaceProps['onNavigate'];
 }) => {
   const operations = GOLDEN_OPERATIONS.filter((operation) => operation.component === component);
-  const visibleOperations = operations.length > 0 ? operations : [GOLDEN_OPERATIONS[0]!];
 
   return (
     <section aria-labelledby="improve-component-title" data-component-id={component} data-lb-region>
@@ -419,7 +427,7 @@ const ComponentView = ({
           locale,
         )}
       >
-        {visibleOperations.map((operation) => (
+        {operations.map((operation) => (
           <div data-eligibility={operation.eligibility} key={operation.id}>
             <OperationRow
               detail={operation.expectedDirection}
@@ -434,6 +442,19 @@ const ComponentView = ({
             />
           </div>
         ))}
+        {operations.length === 0 ? (
+          <StatusSignal
+            detail={localized(
+              {
+                en: 'No operation is authored for this component in the golden scenario. Phase 7 owns the verified catalog; inspect the component evidence now.',
+                'pt-BR':
+                  'Nenhuma operação foi criada para este componente no cenário principal. A Fase 7 é responsável pelo catálogo verificado; inspecione agora a evidência do componente.',
+              },
+              locale,
+            )}
+            state="empty"
+          />
+        ) : null}
       </section>
 
       <EvidenceList
@@ -528,9 +549,11 @@ const OperationView = ({
 const PlanReviewView = ({
   locale,
   onNavigate,
+  onRiskPolicyChange,
 }: {
   readonly locale: ShellLocale;
   readonly onNavigate?: ImproveSurfaceProps['onNavigate'];
+  readonly onRiskPolicyChange?: ImproveSurfaceProps['onRiskPolicyChange'];
 }) => (
   <section aria-labelledby="improve-plan-title" data-critical-path="complete" data-lb-region>
     <h2 id="improve-plan-title">
@@ -549,6 +572,19 @@ const PlanReviewView = ({
         locale,
       )}
     </p>
+    <LbRadioGroup
+      label={localized({ en: 'Global risk policy', 'pt-BR': 'Política global de risco' }, locale)}
+      onChange={(risk) => {
+        if ((IMPROVE_RISK_POLICIES as readonly string[]).includes(risk)) {
+          onRiskPolicyChange?.(risk as OperationRisk);
+        }
+      }}
+      options={IMPROVE_RISK_POLICIES.map((risk) => ({
+        label: risk.charAt(0).toUpperCase() + risk.slice(1),
+        value: risk,
+      }))}
+      value="verified"
+    />
     {GOLDEN_OPERATIONS.map((operation) => (
       <article data-eligibility={operation.eligibility} key={operation.id}>
         <OperationRow
@@ -712,6 +748,7 @@ const NoChangeReceiptView = ({
 export const ImproveSurface = ({
   locale,
   onNavigate,
+  onRiskPolicyChange,
   scenarioId,
   selectedComponent = 'cpu-power',
   selectedGoal = 'performance',
@@ -753,7 +790,13 @@ export const ImproveSurface = ({
       {view === 'operation' ? (
         <OperationView locale={locale} onNavigate={onNavigate} operation={operation} />
       ) : null}
-      {view === 'plan-review' ? <PlanReviewView locale={locale} onNavigate={onNavigate} /> : null}
+      {view === 'plan-review' ? (
+        <PlanReviewView
+          locale={locale}
+          onNavigate={onNavigate}
+          onRiskPolicyChange={onRiskPolicyChange}
+        />
+      ) : null}
       {view === 'confirmation' ? (
         <ConfirmationView locale={locale} onNavigate={onNavigate} scenarioId={scenarioId} />
       ) : null}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { LbIconButton } from './primitives.js';
@@ -60,6 +60,7 @@ export const AccessiblePlot = ({
   unit,
 }: AccessiblePlotProps) => {
   const bounded = boundSeries(series);
+  const titleId = useId();
   const cursorSeries = bounded[0];
   const [cursor, setCursor] = useState(0);
   const cursorLimit = Math.max((cursorSeries?.points.length ?? 1) - 1, 0);
@@ -71,9 +72,9 @@ export const AccessiblePlot = ({
   };
 
   return (
-    <figure aria-labelledby={`${label}-title`} className="lb-plot" data-lb-region>
+    <figure aria-labelledby={titleId} className="lb-plot" data-lb-region>
       <figcaption>
-        <h2 id={`${label}-title`}>{label}</h2>
+        <h2 id={titleId}>{label}</h2>
         <p>{summary}</p>
       </figcaption>
       {isVisible ? (
