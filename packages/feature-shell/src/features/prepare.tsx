@@ -206,7 +206,12 @@ const LibraryView = ({
   const boundary = createBoundary(scenarioId, locale, 'Real launcher discovery', 'Phase 8');
 
   return (
-    <section aria-labelledby="prepare-library-title" data-library-state={state} data-lb-region>
+    <section
+      aria-labelledby="prepare-library-title"
+      className="lb-game-library"
+      data-library-state={state}
+      data-lb-region
+    >
       <h2 id="prepare-library-title">
         {localized({ en: 'Game library', 'pt-BR': 'Biblioteca de jogos' }, locale)}
       </h2>
@@ -264,6 +269,38 @@ const LibraryView = ({
                 </li>
               ))}
             </ul>
+          </section>
+          <section
+            aria-label={localized({ en: 'Game readiness', 'pt-BR': 'Prontidão do jogo' }, locale)}
+            className="lb-game-readiness"
+          >
+            <article>
+              <span>{localized({ en: 'Active profile', 'pt-BR': 'Perfil ativo' }, locale)}</span>
+              <strong>{localized({ en: 'Competitive', 'pt-BR': 'Competitivo' }, locale)}</strong>
+              <p>
+                {localized(
+                  { en: 'balanced and reversible', 'pt-BR': 'equilibrado e reversível' },
+                  locale,
+                )}
+              </p>
+            </article>
+            <article>
+              <span>{localized({ en: 'Preflight', 'pt-BR': 'Pré-verificação' }, locale)}</span>
+              <strong>{localized({ en: 'Ready', 'pt-BR': 'Pronta' }, locale)}</strong>
+              <p>
+                {localized({ en: 'simulated evidence', 'pt-BR': 'evidência simulada' }, locale)}
+              </p>
+            </article>
+            <article>
+              <span>{localized({ en: 'Recovery', 'pt-BR': 'Recuperação' }, locale)}</span>
+              <strong>{localized({ en: 'Protected', 'pt-BR': 'Protegida' }, locale)}</strong>
+              <p>
+                {localized(
+                  { en: 'no changes applied', 'pt-BR': 'nenhuma alteração aplicada' },
+                  locale,
+                )}
+              </p>
+            </article>
           </section>
         </>
       ) : null}
@@ -807,13 +844,12 @@ export const PrepareSurface = ({
       ]}
       purpose={localized(
         {
-          en: 'Review game identity, profile, preflight, session, and restoration without running privileged work.',
-          'pt-BR':
-            'Revise identidade, perfil, pré-voo, sessão e restauração sem executar trabalho privilegiado.',
+          en: 'Review your games, profiles, readiness, and session safety in one place.',
+          'pt-BR': 'Revise seus jogos, perfis, prontidão e segurança de sessão em um só lugar.',
         },
         locale,
       )}
-      title={localized({ en: 'Prepare', 'pt-BR': 'Preparar' }, locale)}
+      title={localized({ en: 'Games', 'pt-BR': 'Jogos' }, locale)}
     />
 
     {view === 'library' ? (

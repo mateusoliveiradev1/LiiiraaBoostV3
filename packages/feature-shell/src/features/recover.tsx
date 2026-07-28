@@ -40,8 +40,8 @@ const RECOVER_COPY: Readonly<
       title: 'Recovery readiness',
     },
     'pt-BR': {
-      detail: 'Inspecione a prontidão sem criar ou restaurar estado do sistema.',
-      title: 'Prontidão de recuperação',
+      detail: 'Revise pontos de segurança, histórico e opções de restauração do sistema.',
+      title: 'Recuperação',
     },
   },
   ledger: {
@@ -148,38 +148,73 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
       <p>{`DEMO · ${scenarioId}`}</p>
 
       {activeView === 'overview' ? (
-        <SystemStateLedger
-          entries={[
-            {
-              detail:
-                locale === 'pt-BR'
-                  ? 'O registro do cenário está disponível.'
-                  : 'Scenario ledger is available.',
-              id: 'ledger',
-              label: locale === 'pt-BR' ? 'Registro de alterações' : 'Change ledger',
-              state: 'fixture',
-            },
-            {
-              detail:
-                locale === 'pt-BR'
-                  ? 'Os metadados simulados do snapshot estão prontos para revisão.'
-                  : 'Synthetic snapshot metadata is ready for review.',
-              id: 'snapshot',
-              label: locale === 'pt-BR' ? 'Snapshot de recuperação' : 'Recovery snapshot',
-              state: 'fixture',
-            },
-            {
-              detail:
-                locale === 'pt-BR'
-                  ? 'A autorização privilegiada de recuperação não está disponível na Fase 2.'
-                  : 'Privileged recovery authority is unavailable in Phase 2.',
-              id: 'authority',
-              label: locale === 'pt-BR' ? 'Autorização de recuperação' : 'Recovery authority',
-              state: 'unsupported',
-            },
-          ]}
-          locale={locale}
-        />
+        <>
+          <section
+            aria-label={locale === 'pt-BR' ? 'Resumo de proteção' : 'Protection summary'}
+            className="lb-recovery-summary"
+          >
+            <div aria-hidden="true" className="lb-recovery-emblem">
+              ✓
+            </div>
+            <div>
+              <p className="lb-section-kicker">
+                {locale === 'pt-BR' ? 'Estado do sistema' : 'System state'}
+              </p>
+              <h2>{locale === 'pt-BR' ? 'Proteção preparada' : 'Protection ready'}</h2>
+              <p>
+                {locale === 'pt-BR'
+                  ? 'O histórico simulado e o snapshot de recuperação estão íntegros para revisão.'
+                  : 'The simulated history and recovery snapshot are intact for review.'}
+              </p>
+            </div>
+            <dl>
+              <div>
+                <dt>{locale === 'pt-BR' ? 'Alterações' : 'Changes'}</dt>
+                <dd>0</dd>
+              </div>
+              <div>
+                <dt>Snapshots</dt>
+                <dd>2</dd>
+              </div>
+              <div>
+                <dt>{locale === 'pt-BR' ? 'Última verificação' : 'Last check'}</dt>
+                <dd>{locale === 'pt-BR' ? 'Agora' : 'Now'}</dd>
+              </div>
+            </dl>
+          </section>
+          <SystemStateLedger
+            entries={[
+              {
+                detail:
+                  locale === 'pt-BR'
+                    ? 'O registro do cenário está disponível.'
+                    : 'Scenario ledger is available.',
+                id: 'ledger',
+                label: locale === 'pt-BR' ? 'Registro de alterações' : 'Change ledger',
+                state: 'fixture',
+              },
+              {
+                detail:
+                  locale === 'pt-BR'
+                    ? 'Os metadados simulados do snapshot estão prontos para revisão.'
+                    : 'Synthetic snapshot metadata is ready for review.',
+                id: 'snapshot',
+                label: locale === 'pt-BR' ? 'Snapshot de recuperação' : 'Recovery snapshot',
+                state: 'fixture',
+              },
+              {
+                detail:
+                  locale === 'pt-BR'
+                    ? 'A autorização privilegiada de recuperação não está disponível na Fase 2.'
+                    : 'Privileged recovery authority is unavailable in Phase 2.',
+                id: 'authority',
+                label: locale === 'pt-BR' ? 'Autorização de recuperação' : 'Recovery authority',
+                state: 'unsupported',
+              },
+            ]}
+            locale={locale}
+          />
+        </>
       ) : null}
 
       {activeView === 'ledger' ? (

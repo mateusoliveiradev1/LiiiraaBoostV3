@@ -403,10 +403,10 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
       <RouteHeader
         purpose={
           isPtBr
-            ? 'Crie uma linha de base local explicável antes de receber recomendações.'
-            : 'Build an explainable local baseline before receiving recommendations.'
+            ? 'Antes de otimizar, vamos conhecer seu hardware e preparar uma recuperação segura.'
+            : 'Before optimizing, we will learn your hardware and prepare safe recovery.'
         }
-        title={isPtBr ? 'Calibração guiada' : 'Guided calibration'}
+        title={isPtBr ? 'Vamos preparar seu PC' : 'Let us prepare your PC'}
       />
 
       <div className="lb-calibration-layout">
@@ -501,12 +501,12 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
         data-lb-region
       >
         <h2 id="connected-processing-title">
-          {isPtBr ? 'Processamento opcional conectado' : 'Optional connected processing'}
+          {isPtBr ? 'Privacidade sob seu controle' : 'Privacy under your control'}
         </h2>
         <p>
           {isPtBr
-            ? 'O inventário básico é local. Cada opção conectada exige consentimento independente e começa desligada.'
-            : 'Basic inventory is local. Each connected option needs separate consent and starts off.'}
+            ? 'A análise básica acontece no PC. Recursos em nuvem são opcionais e começam desligados.'
+            : 'Basic analysis runs on the PC. Cloud features are optional and start disabled.'}
         </p>
         {(Object.keys(snapshot.context.consents) as ConnectedConsentKey[]).map((consent) => (
           <LbSwitch

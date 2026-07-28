@@ -50,6 +50,20 @@ interface LocalizedCopy {
 
 const localized = (copy: LocalizedCopy, locale: ShellLocale) => copy[locale];
 
+const MEASURE_VIEW_COPY: Readonly<Record<MeasureView, LocalizedCopy>> = Object.freeze({
+  overview: { en: 'Overview', 'pt-BR': 'Visão geral' },
+  baseline: { en: 'Baseline', 'pt-BR': 'Linha de base' },
+  capture: { en: 'Capture', 'pt-BR': 'Captura' },
+  'session-history': { en: 'Session history', 'pt-BR': 'Histórico' },
+  'matched-comparison': { en: 'Valid comparison', 'pt-BR': 'Comparação válida' },
+  'rejected-comparison': { en: 'Rejected comparison', 'pt-BR': 'Comparação rejeitada' },
+  diff: { en: 'Differences', 'pt-BR': 'Diferenças' },
+  timeline: { en: 'Timeline', 'pt-BR': 'Linha do tempo' },
+  'report-preview': { en: 'Report', 'pt-BR': 'Relatório' },
+  'collector-overhead': { en: 'Collector impact', 'pt-BR': 'Impacto do coletor' },
+  'degraded-coverage': { en: 'Coverage', 'pt-BR': 'Cobertura' },
+});
+
 const CAPTURED_AT = '2030-01-15T18:30:00.000Z';
 const ENVIRONMENT = 'Northstar Arena · S01 · Windows 11 · Verified fixture profile';
 const SAMPLE_WINDOW = '120 s · 500 ms interval';
@@ -114,7 +128,7 @@ const unavailableMetric = (reason: string): MetricEvidence => ({
 const Metadata = ({
   comparison,
   locale,
-  missingCoverage = 'None in this fixture view',
+  missingCoverage,
   quality = 'verified',
 }: {
   readonly comparison: LocalizedCopy;
@@ -127,7 +141,13 @@ const Metadata = ({
     data-lb-region
   >
     <ProvenanceMark
-      detail="DETERMINISTIC FIXTURE · NOT MEASURED FROM THIS PC"
+      detail={localized(
+        {
+          en: 'DETERMINISTIC FIXTURE · NOT MEASURED FROM THIS PC',
+          'pt-BR': 'CENÁRIO DETERMINÍSTICO · NÃO MEDIDO NESTE PC',
+        },
+        locale,
+      )}
       kind="fixture"
       locale={locale}
     />
@@ -142,7 +162,11 @@ const Metadata = ({
       <dt>{localized({ en: 'Sample', 'pt-BR': 'Amostra' }, locale)}</dt>
       <dd>{SAMPLE_WINDOW}</dd>
       <dt>{localized({ en: 'Environment', 'pt-BR': 'Ambiente' }, locale)}</dt>
-      <dd>{ENVIRONMENT}</dd>
+      <dd>
+        {locale === 'pt-BR'
+          ? 'Northstar Arena · S01 · Windows 11 · perfil simulado verificado'
+          : ENVIRONMENT}
+      </dd>
       <dt>{localized({ en: 'Collector overhead', 'pt-BR': 'Sobrecarga do coletor' }, locale)}</dt>
       <dd>
         {localized(
@@ -154,7 +178,13 @@ const Metadata = ({
         )}
       </dd>
       <dt>{localized({ en: 'Missing coverage', 'pt-BR': 'Cobertura ausente' }, locale)}</dt>
-      <dd>{missingCoverage}</dd>
+      <dd>
+        {missingCoverage ??
+          localized(
+            { en: 'None in this fixture view', 'pt-BR': 'Nenhuma nesta visualização simulada' },
+            locale,
+          )}
+      </dd>
       <dt>{localized({ en: 'Comparison verdict', 'pt-BR': 'Veredito da comparação' }, locale)}</dt>
       <dd>{localized(comparison, locale)}</dd>
     </dl>
@@ -189,7 +219,7 @@ const OverviewView = ({
   readonly locale: ShellLocale;
   readonly onNavigate?: MeasureSurfaceProps['onNavigate'];
 }) => (
-  <section aria-labelledby="measure-overview-title" data-lb-region>
+  <section aria-labelledby="measure-overview-title" className="lb-measure-overview" data-lb-region>
     <h2 id="measure-overview-title">
       {localized({ en: 'Evidence overview', 'pt-BR': 'Visão geral da evidência' }, locale)}
     </h2>
@@ -203,6 +233,38 @@ const OverviewView = ({
         locale,
       )}
     </p>
+    <div
+      aria-label={localized(
+        { en: 'Simulated performance summary', 'pt-BR': 'Resumo de desempenho simulado' },
+        locale,
+      )}
+      className="lb-measure-snapshot"
+    >
+      <article>
+        <span>Frametime</span>
+        <strong>
+          16,7 <small>ms</small>
+        </strong>
+        <p>{localized({ en: 'simulated average', 'pt-BR': 'média simulada' }, locale)}</p>
+      </article>
+      <article>
+        <span>1% low</span>
+        <strong>
+          11,2 <small>ms</small>
+        </strong>
+        <p>{localized({ en: 'simulated sample', 'pt-BR': 'amostra simulada' }, locale)}</p>
+      </article>
+      <article>
+        <span>FPS</span>
+        <strong>121</strong>
+        <p>{localized({ en: 'simulated average', 'pt-BR': 'média simulada' }, locale)}</p>
+      </article>
+      <article>
+        <span>{localized({ en: 'Quality', 'pt-BR': 'Qualidade' }, locale)}</span>
+        <strong>{localized({ en: 'Valid', 'pt-BR': 'Válida' }, locale)}</strong>
+        <p>{localized({ en: 'fixture evidence', 'pt-BR': 'evidência de cenário' }, locale)}</p>
+      </article>
+    </div>
     <nav
       aria-label={localized(
         { en: 'Measurement destinations', 'pt-BR': 'Destinos de medição' },
@@ -211,7 +273,7 @@ const OverviewView = ({
     >
       {MEASURE_VIEWS.filter((view) => view !== 'overview').map((view) => (
         <LbButton key={view} onPress={() => onNavigate?.(view)} variant="quiet">
-          {view}
+          {localized(MEASURE_VIEW_COPY[view], locale)}
         </LbButton>
       ))}
     </nav>
@@ -733,13 +795,12 @@ export const MeasureSurface = ({ locale, onNavigate, scenarioId, view }: Measure
       ]}
       purpose={localized(
         {
-          en: 'Inspect methodology, provenance, quality, comparability, and missing coverage before reading any result.',
-          'pt-BR':
-            'Inspecione metodologia, proveniência, qualidade, comparabilidade e cobertura ausente antes de ler resultados.',
+          en: 'Follow performance, capture sessions, and compare reliable results.',
+          'pt-BR': 'Acompanhe o desempenho, capture sessões e compare resultados confiáveis.',
         },
         locale,
       )}
-      title={localized({ en: 'Measure', 'pt-BR': 'Medir' }, locale)}
+      title={localized({ en: 'Performance', 'pt-BR': 'Desempenho' }, locale)}
     />
 
     {view === 'overview' ? <OverviewView locale={locale} onNavigate={onNavigate} /> : null}

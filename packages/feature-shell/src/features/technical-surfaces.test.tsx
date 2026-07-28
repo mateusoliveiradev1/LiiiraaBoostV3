@@ -156,7 +156,7 @@ describe('Improve operation and plan review technical surface', () => {
       const markup = renderToStaticMarkup(
         <ImproveSurface locale="en" scenarioId="S01" selectedGoal={goal} view="goals" />,
       );
-      expect(markup).toContain('Choose the outcome first');
+      expect(markup).toContain('What should improve first?');
       for (const component of IMPROVE_COMPONENTS) {
         expect(markup).toContain(`data-component-id="${component}"`);
       }

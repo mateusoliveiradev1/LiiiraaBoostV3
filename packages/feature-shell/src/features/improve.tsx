@@ -195,6 +195,20 @@ const COMPONENT_COPY: Readonly<
   },
 };
 
+const COMPONENT_GLYPHS: Readonly<Record<ImproveComponent, string>> = Object.freeze({
+  windows: 'WIN',
+  'cpu-power': 'CPU',
+  gpu: 'GPU',
+  memory: 'RAM',
+  storage: 'SSD',
+  thermals: '°C',
+  network: 'NET',
+  audio: 'AUD',
+  'input-usb': 'USB',
+  display: 'HZ',
+  'security-privacy': 'SEC',
+});
+
 export const GOLDEN_OPERATIONS = Object.freeze([
   {
     id: 'power-balanced-review',
@@ -298,10 +312,15 @@ const GoalsView = ({
   readonly onNavigate?: ImproveSurfaceProps['onNavigate'];
   readonly selectedGoal: ImproveGoal;
 }) => (
-  <section aria-labelledby="improve-goals-title" data-lb-region>
+  <section
+    aria-labelledby="improve-goals-title"
+    className="lb-optimization-overview"
+    data-lb-region
+    data-selected-goal={selectedGoal}
+  >
     <h2 id="improve-goals-title">
       {localized(
-        { en: 'Choose the outcome first', 'pt-BR': 'Escolha primeiro o objetivo' },
+        { en: 'What should improve first?', 'pt-BR': 'O que deve melhorar primeiro?' },
         locale,
       )}
     </h2>
@@ -325,12 +344,16 @@ const GoalsView = ({
         { en: 'Applicable components', 'pt-BR': 'Componentes aplicáveis' },
         locale,
       )}
+      className="lb-component-grid"
     >
       {IMPROVE_COMPONENTS.map((component) => {
         const copy = COMPONENT_COPY[component];
         const applicable = copy.relevance.includes(selectedGoal);
         return (
-          <article data-component-id={component} key={component}>
+          <article className="lb-component-card" data-component-id={component} key={component}>
+            <span aria-hidden="true" className="lb-component-glyph">
+              {COMPONENT_GLYPHS[component]}
+            </span>
             <h3>{localized(copy.label, locale)}</h3>
             <CapabilityReason
               capability={localized(copy.label, locale)}
@@ -354,7 +377,7 @@ const GoalsView = ({
               state={applicable ? 'compatible' : 'hidden'}
             />
             <LbButton onPress={() => onNavigate?.('component', component)} variant="secondary">
-              {localized({ en: 'Inspect component', 'pt-BR': 'Inspecionar componente' }, locale)}
+              {localized({ en: 'Open', 'pt-BR': 'Abrir' }, locale)}
             </LbButton>
           </article>
         );
@@ -782,13 +805,13 @@ export const ImproveSurface = ({
         ]}
         purpose={localized(
           {
-            en: 'Navigate by goal, inspect component evidence, and review every operation before a no-effect preview.',
+            en: 'Choose a performance goal and review every recommended adjustment before applying it.',
             'pt-BR':
-              'Navegue por objetivo, inspecione evidências e revise cada operação antes de uma prévia sem efeito.',
+              'Escolha um objetivo de desempenho e revise cada ajuste recomendado antes de aplicar.',
           },
           locale,
         )}
-        title={localized({ en: 'Improve', 'pt-BR': 'Melhorar' }, locale)}
+        title={localized({ en: 'Optimization', 'pt-BR': 'Otimização' }, locale)}
       />
 
       {view === 'goals' ? (
