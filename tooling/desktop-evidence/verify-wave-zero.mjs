@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -774,8 +775,218 @@ export const verifyWaveZero = (snapshot, { referenceCatalog = snapshot.catalog }
   };
 };
 
-export const runMutationSuite = (_snapshot) => {
-  fail('MUTATION_SUITE_IMPLEMENTATION_REQUIRED', 'Wave 0 omission mutations are not implemented.');
+const sourcePaths = Object.freeze([
+  canonicalCatalogPath,
+  storyManifestPath,
+  'tooling/desktop-evidence/verify-wave-zero.mjs',
+  'apps/desktop/package.json',
+  'apps/desktop/playwright.config.ts',
+  'apps/desktop/scripts/desktop-lifecycle.mjs',
+  'apps/desktop/tests/packaged/windows-matrix.json',
+  'package.json',
+  ...Array.from({ length: 12 }, (_value, index) => {
+    const id = String(index + 1).padStart(2, '0');
+    return `quality/features/ux-${id}.json`;
+  }),
+]);
+
+const sourceHashes = () =>
+  Object.fromEntries(
+    sourcePaths.map((path) => [
+      path,
+      createHash('sha256')
+        .update(readFileSync(resolve(workspaceRoot, path)))
+        .digest('hex'),
+    ]),
+  );
+
+const firstEvidence = (snapshot, manifestIndex, dimension) => {
+  const evidence =
+    snapshot.uxManifests?.[manifestIndex]?.document?.acceptance?.[dimension]?.evidence;
+  if (!Array.isArray(evidence) || evidence.length === 0) {
+    fail('MUTATION_FIXTURE_INVALID', `missing ${dimension} evidence in UX manifest fixture.`);
+  }
+  return evidence[0];
+};
+
+const mutationCases = Object.freeze([
+  {
+    expectedCode: 'SCENARIO_COUNT_MISMATCH',
+    id: 'scenario-removed',
+    mutate: (snapshot) => {
+      snapshot.catalog.scenarios.shift();
+    },
+  },
+  {
+    expectedCode: 'SCENARIO_SEQUENCE_MISMATCH',
+    id: 'scenario-renamed',
+    mutate: (snapshot) => {
+      snapshot.catalog.scenarios[0].id = 'S99';
+    },
+  },
+  {
+    expectedCode: 'REQUIRED_STATE_ROUTE_UNDECLARED',
+    id: 'required-route-removed',
+    mutate: (snapshot) => {
+      snapshot.catalog.scenarios[0].requiredRoutes.shift();
+    },
+  },
+  {
+    expectedCode: 'REQUIRED_STATE_DRIFT',
+    id: 'required-state-renamed',
+    mutate: (snapshot) => {
+      snapshot.catalog.scenarios[0].requiredStates[0].state = 'renamed-state';
+    },
+  },
+  {
+    expectedCode: 'STORY_AXIS_PARITY',
+    id: 'story-axis-removed',
+    mutate: (snapshot) => {
+      snapshot.storyManifest.axes.scales.pop();
+    },
+  },
+  {
+    expectedCode: 'PACKAGED_ROW_PARITY',
+    id: 'packaged-row-removed',
+    mutate: (snapshot) => {
+      snapshot.packagedMatrix.records.pop();
+    },
+  },
+  {
+    expectedCode: 'UX_MANIFEST_PARITY',
+    id: 'ux-manifest-removed',
+    mutate: (snapshot) => {
+      snapshot.uxManifests.pop();
+    },
+  },
+  {
+    expectedCode: 'UX_QUALITY_DIMENSION_PARITY',
+    id: 'quality-dimension-removed',
+    mutate: (snapshot) => {
+      delete snapshot.uxManifests[0].document.acceptance.recovery;
+    },
+  },
+  {
+    expectedCode: 'UX_EVIDENCE_PLANNED_CONTRACT',
+    id: 'evidence-owner-renamed',
+    mutate: (snapshot) => {
+      firstEvidence(snapshot, 0, 'security').owner = 'plan-02-99';
+    },
+  },
+  {
+    expectedCode: 'UX_CANONICAL_STORY_LINK',
+    id: 'artifact-path-renamed',
+    mutate: (snapshot) => {
+      const evidence = Object.values(snapshot.uxManifests[3].document.acceptance)
+        .flatMap((entry) => entry.evidence ?? [])
+        .find((entry) => entry.id === 'ux-04-canonical-story-parity');
+      if (evidence === undefined) {
+        fail('MUTATION_FIXTURE_INVALID', 'UX-04 canonical story evidence is missing.');
+      }
+      evidence.file = 'tooling/desktop-evidence/renamed-story-manifest.json';
+    },
+  },
+  {
+    expectedCode: 'ROOT_COMMAND_UNREACHABLE',
+    id: 'root-command-removed',
+    mutate: (snapshot) => {
+      delete snapshot.rootPackage.scripts['verify:quick'];
+    },
+  },
+  {
+    expectedCode: 'STORY_CATALOG_PARITY',
+    id: 'story-catalog-drift',
+    mutate: (snapshot) => {
+      snapshot.storyManifest.canonicalCatalog.path = '../../contracts/scenarios/renamed.json';
+    },
+  },
+  {
+    expectedCode: 'DUPLICATED_SCENARIO_TRUTH',
+    id: 'duplicated-story-scenario-source',
+    mutate: (snapshot) => {
+      snapshot.storyManifest.scenarios = snapshot.catalog.scenarios.map((scenario) => scenario.id);
+    },
+  },
+]);
+
+export const runMutationSuite = (snapshot) => {
+  const diagnostics = [];
+  const hashesBefore = sourceHashes();
+  const referenceCatalog = clone(snapshot.catalog);
+  const firstBaseline = verifyWaveZero(clone(snapshot));
+  const secondBaseline = verifyWaveZero(clone(snapshot));
+  if (!firstBaseline.ok) {
+    diagnostics.push({
+      code: 'MUTATION_BASELINE_INVALID',
+      message: JSON.stringify(firstBaseline.diagnostics),
+      subject: 'complete-wave-zero-graph',
+    });
+  }
+  if (!same(firstBaseline, secondBaseline)) {
+    diagnostics.push({
+      code: 'MUTATION_BASELINE_UNSTABLE',
+      message: 'complete Wave 0 verification changed across identical reruns.',
+      subject: 'complete-wave-zero-graph',
+    });
+  }
+
+  const results = [];
+  for (const mutation of mutationCases) {
+    const mutated = clone(snapshot);
+    mutation.mutate(mutated);
+    const first = verifyWaveZero(mutated, { referenceCatalog });
+    const second = verifyWaveZero(clone(mutated), { referenceCatalog });
+    const codes = first.diagnostics.map((diagnostic) => diagnostic.code);
+    if (first.ok || !codes.includes(mutation.expectedCode)) {
+      diagnostics.push({
+        code: 'MUTATION_EXPECTATION_FAILED',
+        message: `expected ${mutation.expectedCode}, received ${codes.join(', ') || 'no diagnostic'}.`,
+        subject: mutation.id,
+      });
+    }
+    if (!same(first.diagnostics, second.diagnostics)) {
+      diagnostics.push({
+        code: 'MUTATION_DIAGNOSTIC_UNSTABLE',
+        message: 'mutation diagnostics changed across identical reruns.',
+        subject: mutation.id,
+      });
+    }
+    results.push({
+      diagnostic: mutation.expectedCode,
+      id: mutation.id,
+      passed: !first.ok && codes.includes(mutation.expectedCode),
+    });
+  }
+
+  if (!same(hashesBefore, sourceHashes())) {
+    diagnostics.push({
+      code: 'MUTATION_SOURCE_CHANGED',
+      message: 'mutation execution changed a checked-in Wave 0 source artifact.',
+      subject: 'source-hashes',
+    });
+  }
+  diagnostics.sort(
+    (left, right) =>
+      left.code.localeCompare(right.code) ||
+      left.subject.localeCompare(right.subject) ||
+      left.message.localeCompare(right.message),
+  );
+  return {
+    diagnostics,
+    ok: diagnostics.length === 0,
+    report: {
+      acceptance: 'planned',
+      byteStable: diagnostics.every(
+        (diagnostic) =>
+          diagnostic.code !== 'MUTATION_BASELINE_UNSTABLE' &&
+          diagnostic.code !== 'MUTATION_DIAGNOSTIC_UNSTABLE' &&
+          diagnostic.code !== 'MUTATION_SOURCE_CHANGED',
+      ),
+      mutationCount: results.length,
+      mutations: results,
+      sourceCount: sourcePaths.length,
+    },
+  };
 };
 
 const parseArguments = (arguments_) => {
