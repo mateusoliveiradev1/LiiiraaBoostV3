@@ -1,0 +1,1428 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "2.0.0",
+  "scenarios": [
+    {
+      "id": "S01",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Golden calibration and ready home",
+      "seed": 2001,
+      "clock": "2030-01-15T18:00:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 120,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "partial",
+        "unavailableSources": ["firmware-telemetry"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "completed",
+      "recommendations": [
+        {
+          "id": "op-power-plan-balanced",
+          "risk": "verified",
+          "eligibility": "ready",
+          "evidenceQuality": "verified"
+        },
+        {
+          "id": "op-gpu-scheduling-review",
+          "risk": "advanced",
+          "eligibility": "review-required",
+          "evidenceQuality": "verified"
+        },
+        {
+          "id": "op-firmware-memory-timing",
+          "risk": "advanced",
+          "eligibility": "excluded",
+          "evidenceQuality": "insufficient"
+        }
+      ],
+      "requiredRoutes": ["/calibration", "/home", "/games/detail", "/improve/component"],
+      "requiredStates": [
+        { "route": "/calibration", "state": "fixture" },
+        { "route": "/home", "state": "fixture" },
+        { "route": "/games/detail", "state": "fixture" },
+        { "route": "/improve/component", "state": "fixture" }
+      ],
+      "deltaPaths": ["calibration", "evidence.completeness", "recommendations"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Preview only. No system setting, game file, or service was changed."
+      }
+    },
+    {
+      "id": "S02",
+      "familyId": "hybrid-amd-laptop",
+      "name": "Hybrid GPU recommendations",
+      "seed": 2002,
+      "clock": "2030-01-15T18:01:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 180,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "laptop-amd-hybrid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "AMD",
+        "cpuModel": "Ryzen 7 7840HS",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 4060 Laptop",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "hybrid-gpu-competitive",
+        "displayName": "Hybrid GPU Competitive",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "running",
+      "activity": "in-progress",
+      "recommendations": [],
+      "requiredRoutes": ["/calibration", "/improve/component", "/plans/review"],
+      "requiredStates": [
+        { "route": "/calibration", "state": "loading" },
+        { "route": "/improve/component", "state": "fixture" },
+        { "route": "/plans/review", "state": "fixture" }
+      ],
+      "deltaPaths": ["hardware", "profile", "calibration"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Preview only. Hybrid GPU recommendations were not applied."
+      }
+    },
+    {
+      "id": "S03",
+      "familyId": "high-end-amd",
+      "name": "No urgent recommendation",
+      "seed": 2003,
+      "clock": "2030-01-15T18:02:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 90,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-amd-radeon-high",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "AMD",
+        "cpuModel": "Ryzen 9 7900X",
+        "gpuVendor": "AMD",
+        "gpuModel": "Radeon RX 7900 XTX",
+        "tier": "high-end"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "quality-stable",
+        "displayName": "Quality Stable",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/settings/appearance"],
+      "requiredStates": [
+        { "route": "/home", "state": "empty" },
+        { "route": "/settings/appearance", "state": "fixture" }
+      ],
+      "deltaPaths": ["hardware", "profile", "recommendations"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "No eligible change was proposed or applied."
+      }
+    },
+    {
+      "id": "S04",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Windows 10 serviced lifecycle",
+      "seed": 2004,
+      "clock": "2030-01-15T18:03:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 130,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-10",
+        "build": "LTSC-ESU",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/improve/component"],
+      "requiredStates": [
+        { "route": "/home", "state": "fixture" },
+        { "route": "/improve/component", "state": "fixture" }
+      ],
+      "deltaPaths": ["hardware.platform", "hardware.build"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Lifecycle eligibility was evaluated without changing Windows."
+      }
+    },
+    {
+      "id": "S05",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Windows 10 out of support",
+      "seed": 2005,
+      "clock": "2030-01-15T18:04:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 130,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-10",
+        "build": "22H2-out-of-support",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "unavailable",
+        "completeness": "partial",
+        "unavailableSources": ["supported-windows-lifecycle"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/improve/component"],
+      "requiredStates": [
+        { "route": "/home", "state": "unsupported" },
+        { "route": "/improve/component", "state": "unsupported" }
+      ],
+      "deltaPaths": ["hardware.platform", "hardware.build", "evidence"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Unsupported lifecycle blocked recommendations; no change occurred."
+      }
+    },
+    {
+      "id": "S06",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Partial GPU inventory",
+      "seed": 2006,
+      "clock": "2030-01-15T18:05:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 160,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "unknown",
+        "quality": "insufficient",
+        "completeness": "partial",
+        "unavailableSources": ["gpu-driver-source"]
+      },
+      "entitlement": "active",
+      "calibration": "paused",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/calibration", "/home", "/plans/review"],
+      "requiredStates": [
+        { "route": "/calibration", "state": "partial-failure" },
+        { "route": "/home", "state": "stale-evidence" },
+        { "route": "/plans/review", "state": "contradictory-evidence" }
+      ],
+      "deltaPaths": ["evidence", "calibration"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Insufficient GPU evidence blocked the preview."
+      }
+    },
+    {
+      "id": "S07",
+      "familyId": "competitive-intel-nvidia",
+      "name": "No games detected",
+      "seed": 2007,
+      "clock": "2030-01-15T18:06:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 110,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "no-game-detected",
+        "displayName": "No game detected",
+        "kind": "none-detected",
+        "integrationQualification": "not-applicable",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "no-profile",
+        "displayName": "No profile",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "partial",
+        "unavailableSources": ["game-identity"]
+      },
+      "entitlement": "active",
+      "calibration": "deferred",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/games", "/calibration"],
+      "requiredStates": [
+        { "route": "/games", "state": "empty" },
+        { "route": "/calibration", "state": "empty" }
+      ],
+      "deltaPaths": ["game", "profile", "calibration"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Manual game addition remains available; no game integration was claimed."
+      }
+    },
+    {
+      "id": "S08",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Duplicate launcher identity",
+      "seed": 2008,
+      "clock": "2030-01-15T18:07:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 140,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "counter-strike-2-discovery",
+        "displayName": "Counter-Strike 2",
+        "kind": "real-discovery",
+        "integrationQualification": "discovery-only-unqualified",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "identity-review",
+        "displayName": "Identity Review",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "contradictory",
+        "completeness": "partial",
+        "unavailableSources": ["canonical-launcher-identity"]
+      },
+      "entitlement": "active",
+      "calibration": "paused",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/games", "/games/detail"],
+      "requiredStates": [
+        { "route": "/games", "state": "contradictory-evidence" },
+        { "route": "/games/detail", "state": "contradictory-evidence" }
+      ],
+      "deltaPaths": ["game", "profile", "evidence"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Discovery identity remained unresolved and no integration was claimed."
+      }
+    },
+    {
+      "id": "S09",
+      "familyId": "hybrid-amd-laptop",
+      "name": "External launch detected",
+      "seed": 2009,
+      "clock": "2030-01-15T18:08:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 80,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "laptop-amd-hybrid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "AMD",
+        "cpuModel": "Ryzen 7 7840HS",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 4060 Laptop",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "hybrid-gpu-competitive",
+        "displayName": "Hybrid GPU Competitive",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "in-progress",
+      "recommendations": [],
+      "requiredRoutes": ["/session/active", "/activity"],
+      "requiredStates": [
+        { "route": "/session/active", "state": "fixture" },
+        { "route": "/activity", "state": "fixture" }
+      ],
+      "deltaPaths": ["activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "External launch detection is simulated; no game process was modified."
+      }
+    },
+    {
+      "id": "S10",
+      "familyId": "hybrid-amd-laptop",
+      "name": "Degraded capture",
+      "seed": 2010,
+      "clock": "2030-01-15T18:09:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 200,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "laptop-amd-hybrid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "AMD",
+        "cpuModel": "Ryzen 7 7840HS",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 4060 Laptop",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "hybrid-gpu-competitive",
+        "displayName": "Hybrid GPU Competitive",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "degraded",
+        "completeness": "partial",
+        "unavailableSources": ["one-percent-low"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "completed",
+      "recommendations": [],
+      "requiredRoutes": ["/measure", "/activity"],
+      "requiredStates": [
+        { "route": "/measure", "state": "partial-failure" },
+        { "route": "/activity", "state": "fixture" }
+      ],
+      "deltaPaths": ["evidence", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Capture evidence is degraded and no missing metric was fabricated."
+      }
+    },
+    {
+      "id": "S11",
+      "familyId": "hybrid-amd-laptop",
+      "name": "Incomparable sessions",
+      "seed": 2011,
+      "clock": "2030-01-15T18:10:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 100,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "laptop-amd-hybrid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "AMD",
+        "cpuModel": "Ryzen 7 7840HS",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 4060 Laptop",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "hybrid-gpu-competitive",
+        "displayName": "Hybrid GPU Competitive",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "contradictory",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/measure/comparison"],
+      "requiredStates": [
+        { "route": "/measure/comparison", "state": "contradictory-evidence" }
+      ],
+      "deltaPaths": ["evidence.quality", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "The sessions were rejected as incomparable; no result was inferred."
+      }
+    },
+    {
+      "id": "S12",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Offline within grace",
+      "seed": 2012,
+      "clock": "2030-01-15T18:11:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 0,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "stale",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "offline-grace",
+      "calibration": "complete",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/games", "/recover"],
+      "requiredStates": [
+        { "route": "/home", "state": "offline" },
+        { "route": "/games", "state": "offline" },
+        { "route": "/recover", "state": "fixture" }
+      ],
+      "deltaPaths": ["entitlement", "evidence.freshness"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Local functions remain available; no remote state was simulated."
+      }
+    },
+    {
+      "id": "S13",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Offline entitlement expired",
+      "seed": 2013,
+      "clock": "2030-01-15T18:12:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 0,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "stale",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "expired",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/activity", "/recover"],
+      "requiredStates": [
+        { "route": "/home", "state": "expired-entitlement" },
+        { "route": "/activity", "state": "expired-entitlement" },
+        { "route": "/recover", "state": "fixture" }
+      ],
+      "deltaPaths": ["entitlement", "activity"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "New premium actions are blocked while recovery and history remain available."
+      }
+    },
+    {
+      "id": "S14",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Permission denied",
+      "seed": 2014,
+      "clock": "2030-01-15T18:13:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 100,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "unknown",
+        "quality": "unavailable",
+        "completeness": "partial",
+        "unavailableSources": ["permission-protected-source"]
+      },
+      "entitlement": "active",
+      "calibration": "paused",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/calibration", "/home"],
+      "requiredStates": [
+        { "route": "/calibration", "state": "permission" },
+        { "route": "/home", "state": "partial-failure" }
+      ],
+      "deltaPaths": ["evidence", "calibration"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Permission denial was respected and no protected source was accessed."
+      }
+    },
+    {
+      "id": "S15",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Preview dependency failure",
+      "seed": 2015,
+      "clock": "2030-01-15T18:14:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 220,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "degraded",
+        "completeness": "partial",
+        "unavailableSources": ["dependency-verification"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/plans/review", "/activity", "/recover"],
+      "requiredStates": [
+        { "route": "/plans/review", "state": "partial-failure" },
+        { "route": "/activity", "state": "partial-failure" },
+        { "route": "/recover", "state": "recovery" }
+      ],
+      "deltaPaths": ["evidence", "activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Dependency verification failed before any preview effect."
+      }
+    },
+    {
+      "id": "S16",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Restart pending",
+      "seed": 2016,
+      "clock": "2030-01-15T18:15:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 70,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/activity", "/restart"],
+      "requiredStates": [
+        { "route": "/home", "state": "restart-pending" },
+        { "route": "/activity", "state": "restart-pending" },
+        { "route": "/restart", "state": "restart-pending" }
+      ],
+      "deltaPaths": ["activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Restart scheduling is a deterministic preview; no restart was requested."
+      }
+    },
+    {
+      "id": "S17",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Interrupted preview recovery",
+      "seed": 2017,
+      "clock": "2030-01-15T18:16:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 150,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "degraded",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/recover", "/activity"],
+      "requiredStates": [
+        { "route": "/home", "state": "recovery" },
+        { "route": "/recover", "state": "recovery" },
+        { "route": "/activity", "state": "recovery" }
+      ],
+      "deltaPaths": ["evidence.quality", "activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Recovery completed inside the scenario and changed no machine state."
+      }
+    },
+    {
+      "id": "S18",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Extreme protection preview",
+      "seed": 2018,
+      "clock": "2030-01-15T18:17:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 100,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "extreme-protection-preview",
+        "displayName": "Extreme Protection Preview",
+        "riskPolicy": "extreme"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "completed",
+      "recommendations": [],
+      "requiredRoutes": ["/plans/review", "/activity"],
+      "requiredStates": [
+        { "route": "/plans/review", "state": "fixture" },
+        { "route": "/activity", "state": "fixture" }
+      ],
+      "deltaPaths": ["profile", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Level 4 confirmation ended in a no-change scenario receipt."
+      }
+    },
+    {
+      "id": "S19",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Local AI with cloud consent denied",
+      "seed": 2019,
+      "clock": "2030-01-15T18:18:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 40,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "partial",
+        "unavailableSources": ["cloud-ai"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/ai", "/plans/review"],
+      "requiredStates": [
+        { "route": "/ai", "state": "permission" },
+        { "route": "/plans/review", "state": "fixture" }
+      ],
+      "deltaPaths": ["evidence.unavailableSources", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Cloud consent stayed disabled and the local proposal changed nothing."
+      }
+    },
+    {
+      "id": "S20",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Support bundle redaction",
+      "seed": 2020,
+      "clock": "2030-01-15T18:19:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 60,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "in-progress",
+      "recommendations": [],
+      "requiredRoutes": ["/support", "/activity"],
+      "requiredStates": [
+        { "route": "/support", "state": "permission" },
+        { "route": "/activity", "state": "fixture" }
+      ],
+      "deltaPaths": ["activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Sensitive fields were redacted in preview and no bundle was uploaded."
+      }
+    },
+    {
+      "id": "S21",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Invalid update signature",
+      "seed": 2021,
+      "clock": "2030-01-15T18:20:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 90,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "unavailable",
+        "completeness": "complete",
+        "unavailableSources": ["signed-update"]
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "requires-action",
+      "recommendations": [],
+      "requiredRoutes": ["/startup", "/updates", "/activity"],
+      "requiredStates": [
+        { "route": "/startup", "state": "unsupported" },
+        { "route": "/updates", "state": "unsupported" },
+        { "route": "/activity", "state": "partial-failure" }
+      ],
+      "deltaPaths": ["evidence", "activity", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Invalid update evidence was rejected; the current version remains active."
+      }
+    },
+    {
+      "id": "S22",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Slow cancelled calibration",
+      "seed": 2022,
+      "clock": "2030-01-15T18:21:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 2400,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Competitive Balanced",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "unknown",
+        "quality": "unavailable",
+        "completeness": "partial",
+        "unavailableSources": ["cancelled-inventory-step"]
+      },
+      "entitlement": "active",
+      "calibration": "cancelled",
+      "activity": "history",
+      "recommendations": [],
+      "requiredRoutes": ["/calibration", "/home"],
+      "requiredStates": [
+        { "route": "/calibration", "state": "loading" },
+        { "route": "/home", "state": "empty" }
+      ],
+      "deltaPaths": ["latencyMs", "calibration", "evidence"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Cancellation saved deterministic progress and made no system change."
+      }
+    },
+    {
+      "id": "S23",
+      "familyId": "competitive-intel-nvidia",
+      "name": "PT-BR at 150 percent scale",
+      "seed": 2023,
+      "clock": "2030-01-15T18:22:00.000Z",
+      "locale": "pt-BR",
+      "latencyMs": 100,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena-long-name",
+        "displayName": "Vector Strike Arena: Campeonato Internacional de Inverno",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "competitive-balanced",
+        "displayName": "Equilíbrio competitivo",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "completed",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/games/detail", "/settings/appearance"],
+      "requiredStates": [
+        { "route": "/home", "state": "fixture" },
+        { "route": "/games/detail", "state": "fixture" },
+        { "route": "/settings/appearance", "state": "fixture" }
+      ],
+      "deltaPaths": ["locale", "game.displayName", "profile.displayName"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Cenário visual em 150%; nenhuma alteração foi aplicada ao sistema."
+      }
+    },
+    {
+      "id": "S24",
+      "familyId": "competitive-intel-nvidia",
+      "name": "Forced colors and reduced motion",
+      "seed": 2024,
+      "clock": "2030-01-15T18:23:00.000Z",
+      "locale": "en-US",
+      "latencyMs": 100,
+      "adapterIdentity": {
+        "kind": "fixture",
+        "adapterId": "liiiraa-desktop-simulator",
+        "adapterVersion": "2.0.0",
+        "scenarioMarker": "SIMULATED SCENARIO"
+      },
+      "hardware": {
+        "id": "pc-intel-nvidia-mid",
+        "platform": "windows-11",
+        "build": "23H2",
+        "cpuVendor": "Intel",
+        "cpuModel": "Core i5-12400F",
+        "gpuVendor": "NVIDIA",
+        "gpuModel": "GeForce RTX 3060",
+        "tier": "mid-range"
+      },
+      "game": {
+        "id": "vector-strike-arena",
+        "displayName": "Vector Strike Arena",
+        "kind": "fictional-anchor",
+        "integrationQualification": "deterministic-fixture",
+        "integrationValidated": false
+      },
+      "profile": {
+        "id": "accessible-rendering",
+        "displayName": "Accessible Rendering",
+        "riskPolicy": "verified"
+      },
+      "evidence": {
+        "freshness": "current",
+        "quality": "verified",
+        "completeness": "complete",
+        "unavailableSources": []
+      },
+      "entitlement": "active",
+      "calibration": "complete",
+      "activity": "completed",
+      "recommendations": [],
+      "requiredRoutes": ["/home", "/activity", "/settings/appearance"],
+      "requiredStates": [
+        { "route": "/home", "state": "fixture" },
+        { "route": "/activity", "state": "fixture" },
+        { "route": "/settings/appearance", "state": "fixture" }
+      ],
+      "deltaPaths": ["profile", "requiredRoutes"],
+      "noEffect": {
+        "receiptKind": "scenario-preview",
+        "changed": false,
+        "summary": "Forced colors and reduced motion render without changing system state."
+      }
+    }
+  ]
+}
