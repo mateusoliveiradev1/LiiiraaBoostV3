@@ -488,7 +488,7 @@ function renderCombinedReport(verified, excluded) {
 
 ## Phase 2 review gate
 
-No Phase 2 dependency package has been installed. The verifier fetched public npm and crates.io metadata without registry credentials, confirmed all ${phaseTwo.length} exact identities and versions, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
+Evidence generation does not install Phase 2 dependency packages. The verifier fetched public npm and crates.io metadata without registry credentials, confirmed all ${phaseTwo.length} exact identities and versions, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
 
 The ${phaseTwoReviewRequired.length} rows under **Phase 2 review required before installation** carry the research verdict \`SUS: too-new\`. This is a blocking human-review classification for recent official releases, not evidence that the packages are malicious.
 
