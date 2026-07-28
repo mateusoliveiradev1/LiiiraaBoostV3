@@ -19,13 +19,7 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     let capability = read_json("capabilities/default.json");
     assert_eq!(capability["identifier"], "main-shell");
     assert_eq!(capability["windows"], json!(["main"]));
-    assert_eq!(
-        capability["permissions"],
-        json!([
-            "core:event:allow-listen",
-            "core:event:allow-unlisten"
-        ])
-    );
+    assert_eq!(capability["permissions"], json!([]));
     assert!(capability.get("remote").is_none());
 
     let config = read_json("tauri.conf.json");
@@ -38,12 +32,19 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(window["center"], true);
 
     let security = &config["app"]["security"];
-    assert_eq!(security["capabilities"], json!(["main-shell"]));
+    let mut runtime_capability = capability.clone();
+    runtime_capability
+        .as_object_mut()
+        .expect("capability is an object")
+        .remove("$schema");
+    assert_eq!(security["capabilities"], json!([runtime_capability]));
     assert_eq!(security["freezePrototype"], true);
     assert_eq!(security["dangerousDisableAssetCspModification"], false);
-    assert!(security["csp"]
-        .as_str()
-        .is_some_and(|csp| csp.contains("default-src 'self'") && csp.contains("object-src 'none'")));
+    assert!(
+        security["csp"].as_str().is_some_and(
+            |csp| csp.contains("default-src 'self'") && csp.contains("object-src 'none'")
+        )
+    );
 
     let bundle = &config["bundle"];
     assert_eq!(bundle["active"], true);
@@ -51,17 +52,20 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(bundle["publisher"], "Liiiraa Boost");
     assert_eq!(bundle["createUpdaterArtifacts"], false);
     assert_eq!(bundle["windows"]["digestAlgorithm"], "sha256");
-    assert!(bundle["windows"]
-        .as_object()
-        .is_some_and(|windows| windows.contains_key("certificateThumbprint")));
+    assert!(
+        bundle["windows"]
+            .as_object()
+            .is_some_and(|windows| windows.contains_key("certificateThumbprint"))
+    );
     assert!(bundle["windows"]["certificateThumbprint"].is_null());
-    assert!(bundle["windows"]
-        .as_object()
-        .is_some_and(|windows| windows.contains_key("timestampUrl")));
+    assert!(
+        bundle["windows"]
+            .as_object()
+            .is_some_and(|windows| windows.contains_key("timestampUrl"))
+    );
     assert!(bundle["windows"]["timestampUrl"].is_null());
     assert_eq!(
-        bundle["windows"]["nsis"]["installMode"],
-        "currentUser",
+        bundle["windows"]["nsis"]["installMode"], "currentUser",
         "the installer must not request per-machine elevation"
     );
 

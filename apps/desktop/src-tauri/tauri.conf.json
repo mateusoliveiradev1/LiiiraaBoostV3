@@ -4,17 +4,76 @@
   "version": "0.0.0",
   "identifier": "com.liiiraa.boost",
   "bundle": {
-    "icon": ["icons/icon-rgba.png"]
+    "active": true,
+    "targets": ["nsis"],
+    "createUpdaterArtifacts": false,
+    "publisher": "Liiiraa Boost",
+    "icon": ["icons/icon-rgba.png"],
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "certificateThumbprint": null,
+      "timestampUrl": null,
+      "allowDowngrades": false,
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   },
   "app": {
+    "withGlobalTauri": false,
     "windows": [
       {
         "label": "main",
-        "title": "Liiiraa Boost"
+        "title": "Liiiraa Boost",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 760,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true
       }
     ],
     "security": {
-      "capabilities": []
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+      "freezePrototype": true,
+      "dangerousDisableAssetCspModification": false,
+      "capabilities": [
+        {
+          "identifier": "main-shell",
+          "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
+          "windows": ["main"],
+          "permissions": []
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "liiiraa-shell": {
+      "identity": {
+        "publisher": "Liiiraa Boost",
+        "version": "0.0.0",
+        "channel": "development",
+        "compatibility": {
+          "windows": ["10", "11"]
+        },
+        "updater": {
+          "signatureRequired": true,
+          "publicKeyConfigured": false,
+          "artifactsEnabled": false,
+          "productionGate": "Phase 10"
+        },
+        "signing": {
+          "class": "self-signed-development",
+          "certificateOwnerPlan": "02-33",
+          "timestamp": "not-applicable",
+          "publicTrust": false,
+          "smartScreenReputation": false,
+          "productionReady": false,
+          "distributionAllowed": false
+        }
+      }
     }
   }
 }
