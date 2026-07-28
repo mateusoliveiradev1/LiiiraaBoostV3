@@ -150,7 +150,12 @@ export const AssistantSurface = ({ locale, scenarioId, view }: AssistantSurfaceP
               </dd>
             </div>
           </dl>
-          <LbButton variant="primary">
+          <LbButton
+            onPress={() => {
+              setInternalView('policy-rejected');
+            }}
+            variant="primary"
+          >
             {locale === 'pt-BR' ? 'Revisar proposta' : 'Review proposal'}
           </LbButton>
         </section>

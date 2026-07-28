@@ -439,44 +439,54 @@ export const SupportPackagePreview = ({
 export interface UpdateSurfaceProps {
   readonly locale: ShellLocale;
   readonly scenarioId: string;
-  readonly state: UpdateState;
+  readonly state?: UpdateState;
 }
 
-export const UpdateSurface = ({ locale, scenarioId, state }: UpdateSurfaceProps) => (
-  <section aria-labelledby="update-title" data-lb-region data-update-state={state}>
-    <h2 id="update-title">{locale === 'pt-BR' ? 'Atualizações' : 'Updates'}</h2>
-    <ScenarioMarker scenarioId={scenarioId} />
-    {state === 'signature-failure' ? (
-      <div aria-live="assertive" role="alert">
+export const UpdateSurface = ({ locale, scenarioId, state }: UpdateSurfaceProps) => {
+  const [internalState, setInternalState] = useState<UpdateState>('current');
+  const activeState = state ?? internalState;
+
+  return (
+    <section aria-labelledby="update-title" data-lb-region data-update-state={activeState}>
+      <h2 id="update-title">{locale === 'pt-BR' ? 'Atualizações' : 'Updates'}</h2>
+      <ScenarioMarker scenarioId={scenarioId} />
+      {activeState === 'signature-failure' ? (
+        <div aria-live="assertive" role="alert">
+          <StatusSignal
+            detail={
+              locale === 'pt-BR'
+                ? 'Assinatura inválida. A atualização foi bloqueada; a versão atual continua segura.'
+                : 'Invalid signature. Update blocked; the current version continues safely.'
+            }
+            state="contradictory-evidence"
+          />
+          <code>S21-UPDATE-SIGNATURE-INVALID</code>
+        </div>
+      ) : (
         <StatusSignal
           detail={
-            locale === 'pt-BR'
-              ? 'Assinatura inválida. A atualização foi bloqueada; a versão atual continua segura.'
-              : 'Invalid signature. Update blocked; the current version continues safely.'
+            activeState === 'available'
+              ? locale === 'pt-BR'
+                ? 'Manifesto de atualização sintético disponível para revisão.'
+                : 'Synthetic update manifest available for review.'
+              : locale === 'pt-BR'
+                ? 'A versão atual continua em uso.'
+                : 'The current version remains in use.'
           }
-          state="contradictory-evidence"
+          state="fixture"
         />
-        <code>S21-UPDATE-SIGNATURE-INVALID</code>
-      </div>
-    ) : (
-      <StatusSignal
-        detail={
-          state === 'available'
-            ? locale === 'pt-BR'
-              ? 'Manifesto de atualização sintético disponível para revisão.'
-              : 'Synthetic update manifest available for review.'
-            : locale === 'pt-BR'
-              ? 'A versão atual continua em uso.'
-              : 'The current version remains in use.'
-        }
-        state="fixture"
-      />
-    )}
-    <LbButton variant="primary">
-      {locale === 'pt-BR' ? 'Continuar com a versão atual' : 'Continue current version'}
-    </LbButton>
-  </section>
-);
+      )}
+      <LbButton
+        onPress={() => {
+          setInternalState('safe-continuation');
+        }}
+        variant="primary"
+      >
+        {locale === 'pt-BR' ? 'Continuar com a versão atual' : 'Continue current version'}
+      </LbButton>
+    </section>
+  );
+};
 
 export interface DocumentationSurfaceProps {
   readonly documentId: string;
