@@ -32,6 +32,10 @@ export type DesktopTestScenarioId =
   | 'S23'
   | 'S24';
 
+const CLEAN_TEST_SCENARIO = 'S01' satisfies DesktopTestScenarioId;
+const PRODUCTION_ADAPTER_ID = 'liiiraa-desktop-production-unavailable';
+const PRODUCTION_SCHEMA_VERSION = '1.0';
+
 export interface DesktopScenarioStorage {
   readonly getItem: (key: string) => string | null;
   readonly setItem: (key: string, value: string) => void;
@@ -105,7 +109,9 @@ const createScenarioSelection = (
   storage: DesktopScenarioStorage | undefined,
 ): DesktopScenarioSelection => {
   const stored = storage?.getItem(DESKTOP_TEST_SCENARIO_STORAGE_KEY);
-  let currentScenario: DesktopTestScenarioId = isTestScenarioId(stored) ? stored : 'S01';
+  let currentScenario: DesktopTestScenarioId = isTestScenarioId(stored)
+    ? stored
+    : CLEAN_TEST_SCENARIO;
 
   return Object.freeze({
     current: () => currentScenario,
@@ -173,13 +179,13 @@ function assertProductionComposition(
     throw new DesktopCompositionRefusedError('PRODUCTION_REFERENCE_INVALID', '$.client');
   }
   const identity = client['identity'];
-  if (!isRecord(identity) || identity['adapterId'] !== 'liiiraa-desktop-production-unavailable') {
+  if (!isRecord(identity) || identity['adapterId'] !== PRODUCTION_ADAPTER_ID) {
     throw new DesktopCompositionRefusedError('FIXTURE_IDENTITY_REFUSED', '$.client.identity');
   }
   if (
     typeof identity['adapterVersion'] !== 'string' ||
     identity['adapterVersion'].length === 0 ||
-    client['schemaVersion'] !== '1.0' ||
+    client['schemaVersion'] !== PRODUCTION_SCHEMA_VERSION ||
     !Array.isArray(client['capabilities']) ||
     typeof client['inspectSystem'] !== 'function'
   ) {
