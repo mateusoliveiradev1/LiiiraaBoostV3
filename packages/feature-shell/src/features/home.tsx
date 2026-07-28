@@ -76,21 +76,6 @@ export interface ContextualHomeProps {
 const isLimitedVariant = (variant: HomeVariant) =>
   variant === 'unsupported-windows' || variant === 'critical-security';
 
-const VARIANT_STATE: Readonly<Record<HomeVariant, OperationalState>> = {
-  ready: 'fixture',
-  recommendations: 'fixture',
-  'game-ready': 'fixture',
-  'game-running': 'loading',
-  'restart-pending': 'restart-pending',
-  'recovery-required': 'recovery',
-  'offline-entitled': 'offline',
-  'expired-entitlement': 'expired-entitlement',
-  'unsupported-windows': 'unsupported',
-  'critical-security': 'contradictory-evidence',
-  'calibration-incomplete': 'empty',
-  'evidence-stale': 'stale-evidence',
-};
-
 const DEFAULT_VARIANT_COPY: Readonly<Record<ShellLocale, Readonly<Record<HomeVariant, string>>>> = {
   en: {
     ready: 'No urgent finding requires action.',
@@ -176,9 +161,7 @@ export const ContextualHome = ({
           ? 'Conclua a calibração para receber uma próxima ação baseada neste PC.'
           : 'Complete calibration to receive a next action based on this PC.'
       }
-      title={
-        isPtBr ? 'Ainda não há evidência suficiente' : 'There is not enough evidence yet'
-      }
+      title={isPtBr ? 'Ainda não há evidência suficiente' : 'There is not enough evidence yet'}
     />
   ) : recommendationVisible ? (
     <NextActionBrief
@@ -207,6 +190,7 @@ export const ContextualHome = ({
   return (
     <main
       aria-labelledby="contextual-home-title"
+      className="lb-contextual-home"
       data-home-variant={variant}
       data-locale={locale}
       data-scenario-id={scenarioId}
@@ -224,13 +208,17 @@ export const ContextualHome = ({
         {isPtBr ? 'Início contextual' : 'Contextual Home'}
       </span>
 
-      <section aria-label={isPtBr ? 'Próxima ação' : 'Next action'} data-home-region-order="1">
+      <section
+        aria-label={isPtBr ? 'Próxima ação' : 'Next action'}
+        className="lb-home-next"
+        data-home-region-order="1"
+      >
         {nextActionRegion}
-        <StatusSignal detail={DEFAULT_VARIANT_COPY[locale][variant]} state={VARIANT_STATE[variant]} />
       </section>
 
       <section
         aria-label={isPtBr ? 'Jogo selecionado' : 'Selected game'}
+        className="lb-home-game"
         data-evidence={selectedGame ? 'trusted-or-stale' : 'unavailable'}
         data-home-region-order="2"
       >
@@ -246,30 +234,33 @@ export const ContextualHome = ({
               ]}
             />
             <p>
-              {isPtBr ? 'Fonte' : 'Source'}: {selectedGame.source}
+              {isPtBr ? 'Fonte' : 'Source'}:{' '}
+              {isPtBr && selectedGame.source === 'fixture-policy'
+                ? 'cenário simulado local'
+                : selectedGame.source}
             </p>
             <FreshnessStamp
               capturedAt={selectedGame.capturedAt}
               freshness={selectedGame.freshness}
+              locale={locale}
             />
           </>
         ) : (
           <>
             <h2>{isPtBr ? 'Nenhum jogo selecionado' : 'No selected game'}</h2>
-            <StatusSignal
-              detail={
-                isPtBr
-                  ? 'A calibração ainda não forneceu um jogo confiável.'
-                  : 'Calibration has not provided a trusted game yet.'
-              }
-              state="empty"
-            />
+            <StatusSignal locale={locale} state="empty" />
+            <p>
+              {isPtBr
+                ? 'A calibração ainda não forneceu um jogo confiável.'
+                : 'Calibration has not provided a trusted game yet.'}
+            </p>
           </>
         )}
       </section>
 
       <section
         aria-labelledby="system-state-ledger-title"
+        className="lb-home-ledger"
         data-home-region-order="3"
         data-lb-region
       >
@@ -292,13 +283,18 @@ export const ContextualHome = ({
                 {groups[group].map((claim) => (
                   <li data-claim-source={claim.source} key={claim.id}>
                     <strong>{claim.label}</strong>
-                    <StatusSignal detail={claim.detail} state={claim.state} />
+                    <StatusSignal locale={locale} state={claim.state} />
+                    <p className="lb-home-claim-detail">{claim.detail}</p>
                     <span>
-                      {isPtBr ? 'Fonte' : 'Source'}: {claim.source}
+                      {isPtBr ? 'Fonte' : 'Source'}:{' '}
+                      {isPtBr && claim.source === 'fixture-policy'
+                        ? 'cenário simulado local'
+                        : claim.source}
                     </span>
                     <FreshnessStamp
                       capturedAt={claim.capturedAt}
                       freshness={claim.freshness}
+                      locale={locale}
                     />
                   </li>
                 ))}

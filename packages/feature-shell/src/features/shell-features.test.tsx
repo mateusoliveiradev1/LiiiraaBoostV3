@@ -29,12 +29,7 @@ import {
 } from './calibration.js';
 import { GlobalCommandCenter } from './command-center.js';
 import { FavoritesManager, type FavoriteCandidate } from './favorites.js';
-import {
-  HOME_VARIANTS,
-  ContextualHome,
-  type HomeClaim,
-  type SelectedGame,
-} from './home.js';
+import { HOME_VARIANTS, ContextualHome, type HomeClaim, type SelectedGame } from './home.js';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
@@ -292,6 +287,8 @@ describe('UX-02 UX-03 shell states and accessibility', () => {
         expect(markup).toContain('data-testid="status-signal"');
         expect(markup).toContain('data-pattern=');
         expect(markup).toContain('aria-live="polite"');
+        expect(markup).toContain('class="lb-calibration-stage"');
+        expect(markup).toContain('class="lb-calibration-consent"');
         expect(markup).not.toContain('undefined');
         expect(semanticAudit(markup)).toEqual([]);
       }

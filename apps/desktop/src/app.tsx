@@ -217,17 +217,21 @@ const READY_CALIBRATION = Object.freeze({
   }),
 }) satisfies HomeCalibrationState;
 
-const HOME_CLAIMS: readonly HomeClaim[] = Object.freeze([
-  Object.freeze({
-    capturedAt: '2030-01-15T18:00:00.000Z',
-    detail: 'Synthetic compatibility evidence is current for scenario S01.',
-    freshness: 'current',
-    id: 'S01-compatibility',
-    label: 'Scenario compatibility',
-    source: 'fixture-policy',
-    state: 'fixture',
-  }),
-]);
+const createHomeClaims = (locale: ShellLocale): readonly HomeClaim[] =>
+  Object.freeze([
+    Object.freeze({
+      capturedAt: '2030-01-15T18:00:00.000Z',
+      detail:
+        locale === 'pt-BR'
+          ? 'A evidência simulada de compatibilidade está atualizada para o cenário S01.'
+          : 'Synthetic compatibility evidence is current for scenario S01.',
+      freshness: 'current',
+      id: 'S01-compatibility',
+      label: locale === 'pt-BR' ? 'Compatibilidade do cenário' : 'Scenario compatibility',
+      source: 'fixture-policy',
+      state: 'fixture',
+    }),
+  ]);
 
 const SETTINGS_FAVORITE_CANDIDATES: readonly FavoriteCandidate[] = Object.freeze([
   Object.freeze({
@@ -671,7 +675,7 @@ export const DesktopRouteOutlet = ({
       return (
         <ContextualHome
           calibration={READY_CALIBRATION}
-          claims={HOME_CLAIMS}
+          claims={createHomeClaims(locale)}
           locale={locale}
           scenarioId={scenarioId}
           variant="ready"
@@ -1289,7 +1293,7 @@ const DesktopAppContent = ({
         className="desktop-operational-state"
         data-lb-region
       >
-        <StatusSignal detail={presentation.reason} state={operationalState} />
+        <StatusSignal detail={presentation.reason} locale={locale} state={operationalState} />
         <LbButton
           onPress={() => {
             navigate(

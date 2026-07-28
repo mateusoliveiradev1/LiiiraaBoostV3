@@ -325,3 +325,210 @@ textarea {
     transition: none;
   }
 }
+
+/* Phase 02 visual remediation — desktop composition */
+
+html {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+.desktop-app-shell {
+  grid-template-rows: 52px auto auto minmax(0, 1fr);
+}
+
+.desktop-shell-body {
+  grid-template-columns: 216px minmax(0, 1fr) 320px;
+}
+
+.desktop-work-canvas {
+  padding: clamp(var(--lb-space-4), 2.5vw, var(--lb-space-5));
+}
+
+.desktop-work-canvas > main,
+.desktop-work-canvas > section {
+  inline-size: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.desktop-work-canvas .lb-scenario-marker {
+  display: none;
+}
+
+.desktop-inspector-region {
+  border-inline-start-color: #202734;
+  background: #0b0e13;
+}
+
+.desktop-inspector-region > .lb-context-inspector {
+  padding: var(--lb-space-4);
+  background: transparent;
+}
+
+.desktop-operational-state {
+  min-block-size: 44px;
+  padding-inline: clamp(var(--lb-space-3), 2.5vw, var(--lb-space-5));
+  border-block-end-color: #202734;
+  background: #0d1016;
+}
+
+.desktop-operational-state .lb-status-detail {
+  max-inline-size: 68ch;
+}
+
+.desktop-startup-surface,
+.desktop-installer-handoff {
+  align-content: start;
+  inline-size: min(calc(100% - (var(--lb-space-5) * 2)), 880px);
+  min-block-size: auto;
+  padding: clamp(var(--lb-space-4), 5vw, var(--lb-space-6));
+  margin-block: clamp(var(--lb-space-4), 7vh, var(--lb-space-7));
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: var(--lb-radius-overlay);
+  background: var(--lb-surface-inset);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.desktop-startup-header {
+  gap: var(--lb-space-3);
+}
+
+.desktop-startup-header h1 {
+  max-inline-size: 18ch;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.desktop-startup-header p {
+  max-inline-size: 62ch;
+  color: var(--lb-text-secondary);
+}
+
+.desktop-startup-context {
+  inline-size: fit-content;
+  padding: var(--lb-space-1) var(--lb-space-2);
+  border: 1px solid #30405e;
+  border-radius: 999px;
+  color: var(--lb-cobalt-signal);
+  background: #111827;
+}
+
+.desktop-installer-handoff .desktop-startup-header {
+  order: 1;
+}
+
+.desktop-startup-decision {
+  order: 2;
+  max-inline-size: 64ch;
+  padding-inline-start: var(--lb-space-3);
+  border-inline-start: 2px solid var(--lb-success);
+  color: var(--lb-text-secondary);
+}
+
+.desktop-startup-actions {
+  order: 3;
+  gap: var(--lb-space-2);
+}
+
+.desktop-installer-technical {
+  order: 4;
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.desktop-installer-technical > summary {
+  padding-block: var(--lb-space-3);
+  color: var(--lb-text-secondary);
+  font-weight: var(--lb-weight-semibold);
+  cursor: pointer;
+}
+
+.desktop-installer-technical > summary:hover {
+  color: var(--lb-text-primary);
+}
+
+.desktop-installer-details {
+  margin-block: 0 var(--lb-space-2);
+  border-block: 0;
+}
+
+.desktop-installer-details div {
+  grid-template-columns: minmax(148px, 0.7fr) minmax(0, 1.3fr);
+  gap: var(--lb-space-4);
+  padding-block: var(--lb-space-2);
+}
+
+.desktop-installer-details dt {
+  color: var(--lb-text-tertiary);
+}
+
+.desktop-installer-details dd {
+  color: var(--lb-text-secondary);
+}
+
+@media (width < 1280px) {
+  .desktop-shell-body {
+    grid-template-columns: 216px minmax(0, 1fr);
+  }
+
+  .desktop-inspector-region {
+    position: fixed;
+    z-index: 15;
+    inset-block: 52px 0;
+    inset-inline-end: 0;
+    inline-size: min(360px, 100%);
+    box-shadow: var(--lb-shadow-overlay);
+    transform: translateX(100%);
+  }
+
+  .desktop-inspector-region[data-open='true'] {
+    transform: translateX(0);
+  }
+}
+
+@media (width < 960px) {
+  .desktop-shell-body {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+}
+
+@media (width <= 960px) {
+  .desktop-shell-body {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .desktop-goal-region > .lb-goal-rail {
+    inline-size: 72px;
+  }
+
+  .desktop-goal-region .lb-goal-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (width < 760px) {
+  .desktop-work-canvas {
+    padding: var(--lb-space-3);
+  }
+
+  .desktop-startup-surface,
+  .desktop-installer-handoff {
+    inline-size: calc(100% - (var(--lb-space-3) * 2));
+    padding: var(--lb-space-4);
+    margin-block: var(--lb-space-3);
+  }
+
+  .desktop-installer-details div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--lb-space-1);
+  }
+}

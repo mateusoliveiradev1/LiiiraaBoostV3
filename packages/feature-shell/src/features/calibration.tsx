@@ -171,11 +171,13 @@ const STATE_COPY: Readonly<
     },
     offline: {
       title: 'O processamento conectado está indisponível',
-      detail: 'As etapas locais continuam disponíveis; etapas conectadas opcionais ficam desligadas.',
+      detail:
+        'As etapas locais continuam disponíveis; etapas conectadas opcionais ficam desligadas.',
     },
     'permission-requested': {
       title: 'Esta fonte precisa de permissão',
-      detail: 'Somente esta etapa dependente está bloqueada. Outras ações locais seguras continuam.',
+      detail:
+        'Somente esta etapa dependente está bloqueada. Outras ações locais seguras continuam.',
     },
     'permission-denied': {
       title: 'A permissão do inventário foi negada',
@@ -199,7 +201,8 @@ const STATE_COPY: Readonly<
     },
     failure: {
       title: 'A calibração não pôde continuar',
-      detail: 'Nenhuma alteração ocorreu. Revise a referência de diagnóstico antes de tentar novamente.',
+      detail:
+        'Nenhuma alteração ocorreu. Revise a referência de diagnóstico antes de tentar novamente.',
     },
     completed: {
       title: 'Calibração concluída',
@@ -211,7 +214,8 @@ const STATE_COPY: Readonly<
     },
     limited: {
       title: 'Modo limitado seguro',
-      detail: 'Recomendações estão ocultas; funções locais seguras e recuperação continuam disponíveis.',
+      detail:
+        'Recomendações estão ocultas; funções locais seguras e recuperação continuam disponíveis.',
     },
     revalidation: {
       title: 'Revalidação parcial necessária',
@@ -220,18 +224,19 @@ const STATE_COPY: Readonly<
   },
 };
 
-const CONSENT_LABELS: Readonly<Record<ShellLocale, Readonly<Record<ConnectedConsentKey, string>>>> = {
-  en: {
-    telemetry: 'Optional product telemetry',
-    cloudAi: 'Optional cloud AI',
-    diagnosticSharing: 'Optional diagnostic sharing',
-  },
-  'pt-BR': {
-    telemetry: 'Telemetria opcional do produto',
-    cloudAi: 'IA em nuvem opcional',
-    diagnosticSharing: 'Compartilhamento opcional de diagnóstico',
-  },
-};
+const CONSENT_LABELS: Readonly<Record<ShellLocale, Readonly<Record<ConnectedConsentKey, string>>>> =
+  {
+    en: {
+      telemetry: 'Optional product telemetry',
+      cloudAi: 'Optional cloud AI',
+      diagnosticSharing: 'Optional diagnostic sharing',
+    },
+    'pt-BR': {
+      telemetry: 'Telemetria opcional do produto',
+      cloudAi: 'IA em nuvem opcional',
+      diagnosticSharing: 'Compartilhamento opcional de diagnóstico',
+    },
+  };
 
 const MACHINE_TO_SURFACE: Readonly<Record<CalibrationState, CalibrationSurfaceState>> = {
   new: 'new',
@@ -313,10 +318,7 @@ const actionForState = (
       );
     case 'permission-requested':
       return (
-        <LbButton
-          onPress={() => props.onBoundaryAction?.('request-permission')}
-          variant="primary"
-        >
+        <LbButton onPress={() => props.onBoundaryAction?.('request-permission')} variant="primary">
           {isPtBr ? 'Revisar permissão' : 'Review permission'}
         </LbButton>
       );
@@ -385,6 +387,7 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
   return (
     <main
       aria-labelledby="calibration-workspace-title"
+      className="lb-calibration-workspace"
       data-calibration-state={state}
       data-locale={props.locale}
       data-scenario-id={props.scenarioId}
@@ -405,19 +408,22 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
           steps={CALIBRATION_STEPS.map((step) => stepLabels[step])}
         />
 
-        <section aria-labelledby="calibration-workspace-title" data-lb-region>
-          <header>
+        <section
+          aria-labelledby="calibration-workspace-title"
+          className="lb-calibration-stage"
+          data-lb-region
+        >
+          <header className="lb-calibration-stage-header">
             <p>
               {isPtBr
                 ? `Etapa ${String(activeStep + 1)} de ${String(CALIBRATION_STEPS.length)}`
                 : `Step ${String(activeStep + 1)} of ${String(CALIBRATION_STEPS.length)}`}
             </p>
-              <h2 id="calibration-workspace-title">{stepLabels[snapshot.context.currentStep]}</h2>
-            <StatusSignal detail={copy.detail} state={SURFACE_TO_OPERATIONAL[state]} />
+            <h2 id="calibration-workspace-title">{stepLabels[snapshot.context.currentStep]}</h2>
+            <StatusSignal label={copy.title} state={SURFACE_TO_OPERATIONAL[state]} />
           </header>
 
-          <div aria-live="polite" role="status">
-            <strong>{copy.title}</strong>
+          <div aria-live="polite" className="lb-calibration-message" role="status">
             <p>{copy.detail}</p>
           </div>
 
@@ -427,7 +433,7 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
             </p>
           ) : null}
 
-          <details>
+          <details className="lb-calibration-technical">
             <summary>{isPtBr ? 'Detalhes técnicos' : 'Technical details'}</summary>
             {currentEvidence ? (
               <dl>
@@ -476,11 +482,15 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
             </aside>
           ) : null}
 
-          <div>{actionForState(state, send, props)}</div>
+          <div className="lb-calibration-actions">{actionForState(state, send, props)}</div>
         </section>
       </div>
 
-      <section aria-labelledby="connected-processing-title" data-lb-region>
+      <section
+        aria-labelledby="connected-processing-title"
+        className="lb-calibration-consent"
+        data-lb-region
+      >
         <h2 id="connected-processing-title">
           {isPtBr ? 'Processamento opcional conectado' : 'Optional connected processing'}
         </h2>

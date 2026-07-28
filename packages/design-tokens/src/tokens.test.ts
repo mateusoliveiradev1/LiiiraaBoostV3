@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 
 import { describe, expect, it } from 'vitest';
+import { readFile, stat } from 'node:fs/promises';
 
 import {
   COLOR_TOKENS,
@@ -93,5 +94,26 @@ describe('Pre-Dawn Flight Deck token contract', () => {
       unavailable: 'dotted',
       warning: 'dashed',
     });
+  });
+
+  it('ships the free variable fonts and their OFL licenses with the desktop app', async () => {
+    const fontDirectory = new URL('../../../apps/desktop/public/fonts/', import.meta.url);
+    const assets = [
+      'manrope-variable.woff2',
+      'jetbrains-mono-variable.woff2',
+      'OFL-Manrope.txt',
+      'OFL-JetBrains-Mono.txt',
+    ];
+
+    for (const asset of assets) {
+      expect((await stat(new URL(asset, fontDirectory))).size).toBeGreaterThan(1_000);
+    }
+
+    expect(await readFile(new URL('OFL-Manrope.txt', fontDirectory), 'utf8')).toContain(
+      'SIL OPEN FONT LICENSE',
+    );
+    expect(await readFile(new URL('OFL-JetBrains-Mono.txt', fontDirectory), 'utf8')).toContain(
+      'SIL OPEN FONT LICENSE',
+    );
   });
 });

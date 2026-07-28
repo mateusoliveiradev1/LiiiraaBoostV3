@@ -55,6 +55,7 @@ export const OPERATIONAL_STATES = Object.freeze([
   'fixture',
 ] as const);
 export type OperationalState = (typeof OPERATIONAL_STATES)[number];
+export type EvidenceLocale = 'pt-BR' | 'en' | 'en-US';
 
 type SignalTone = 'neutral' | 'success' | 'warning' | 'critical' | 'experimental' | 'restricted';
 type SignalPattern =
@@ -174,14 +175,58 @@ const OPERATIONAL_PROJECTION: Readonly<Record<OperationalState, VisualProjection
   },
 });
 
+const PT_BR_LABELS = Object.freeze({
+  provenance: {
+    fixture: 'Cenário simulado',
+    observed: 'Observado',
+    measured: 'Medido',
+    modeled: 'Estimado',
+    unavailable: 'Indisponível',
+  },
+  freshness: {
+    current: 'Atual',
+    stale: 'Desatualizado',
+    unknown: 'Validade desconhecida',
+  },
+  quality: {
+    verified: 'Aprovado',
+    degraded: 'Qualidade reduzida',
+    insufficient: 'Rejeitado — evidência insuficiente',
+    contradictory: 'Rejeitado — evidência contraditória',
+    unavailable: 'Não avaliado',
+  },
+  operational: {
+    loading: 'Carregando',
+    empty: 'Nenhum registro',
+    offline: 'Sem conexão',
+    permission: 'Permissão necessária',
+    unsupported: 'Sem suporte',
+    'partial-failure': 'Concluído parcialmente',
+    'restart-pending': 'Reinicialização pendente',
+    recovery: 'Recuperação necessária',
+    'expired-entitlement': 'Assinatura expirada',
+    'stale-evidence': 'Evidência desatualizada',
+    'contradictory-evidence': 'Evidência contraditória',
+    fixture: 'Cenário simulado',
+  },
+} satisfies {
+  readonly provenance: Readonly<Record<ProvenanceKind, string>>;
+  readonly freshness: Readonly<Record<EvidenceFreshness, string>>;
+  readonly quality: Readonly<Record<EvidenceQuality, string>>;
+  readonly operational: Readonly<Record<OperationalState, string>>;
+});
+
+const isPtBr = (locale: EvidenceLocale | undefined): boolean => locale === 'pt-BR';
+
 interface MarkProps {
   readonly detail?: string | undefined;
+  readonly label?: string | undefined;
   readonly projection: VisualProjection;
   readonly state?: OperationalState;
   readonly testId?: string;
 }
 
-const Mark = ({ detail, projection, state, testId }: MarkProps) => {
+const Mark = ({ detail, label, projection, state, testId }: MarkProps) => {
   const Icon = projection.icon;
 
   return (
@@ -194,7 +239,7 @@ const Mark = ({ detail, projection, state, testId }: MarkProps) => {
       data-tone={projection.tone}
     >
       <Icon aria-hidden="true" size={18} strokeWidth={1.75} />
-      <span>{projection.label}</span>
+      <span>{label ?? projection.label}</span>
       {detail ? <span className="lb-status-detail">{detail}</span> : null}
     </span>
   );
@@ -203,11 +248,13 @@ const Mark = ({ detail, projection, state, testId }: MarkProps) => {
 export interface ProvenanceMarkProps {
   readonly detail?: string;
   readonly kind: ProvenanceKind;
+  readonly locale?: EvidenceLocale;
 }
 
-export const ProvenanceMark = ({ detail, kind }: ProvenanceMarkProps) => (
+export const ProvenanceMark = ({ detail, kind, locale }: ProvenanceMarkProps) => (
   <Mark
     detail={kind === 'fixture' ? (detail ?? 'SIMULATED SCENARIO') : detail}
+    label={isPtBr(locale) ? PT_BR_LABELS.provenance[kind] : undefined}
     projection={PROVENANCE_PROJECTION[kind]}
     testId="provenance-mark"
   />
@@ -216,29 +263,44 @@ export const ProvenanceMark = ({ detail, kind }: ProvenanceMarkProps) => (
 export interface FreshnessStampProps {
   readonly capturedAt?: string;
   readonly freshness: EvidenceFreshness;
+  readonly locale?: EvidenceLocale;
 }
 
-export const FreshnessStamp = ({ capturedAt, freshness }: FreshnessStampProps) => (
-  <Mark detail={capturedAt} projection={FRESHNESS_PROJECTION[freshness]} testId="freshness-stamp" />
+export const FreshnessStamp = ({ capturedAt, freshness, locale }: FreshnessStampProps) => (
+  <Mark
+    detail={capturedAt}
+    label={isPtBr(locale) ? PT_BR_LABELS.freshness[freshness] : undefined}
+    projection={FRESHNESS_PROJECTION[freshness]}
+    testId="freshness-stamp"
+  />
 );
 
 export interface QualityMarkProps {
   readonly detail?: string;
+  readonly locale?: EvidenceLocale;
   readonly quality: EvidenceQuality;
 }
 
-export const QualityMark = ({ detail, quality }: QualityMarkProps) => (
-  <Mark detail={detail} projection={QUALITY_PROJECTION[quality]} testId="quality-mark" />
+export const QualityMark = ({ detail, locale, quality }: QualityMarkProps) => (
+  <Mark
+    detail={detail}
+    label={isPtBr(locale) ? PT_BR_LABELS.quality[quality] : undefined}
+    projection={QUALITY_PROJECTION[quality]}
+    testId="quality-mark"
+  />
 );
 
 export interface StatusSignalProps {
   readonly detail?: string;
+  readonly label?: string;
+  readonly locale?: EvidenceLocale;
   readonly state: OperationalState;
 }
 
-export const StatusSignal = ({ detail, state }: StatusSignalProps) => (
+export const StatusSignal = ({ detail, label, locale, state }: StatusSignalProps) => (
   <Mark
     detail={detail}
+    label={label ?? (isPtBr(locale) ? PT_BR_LABELS.operational[state] : undefined)}
     projection={OPERATIONAL_PROJECTION[state]}
     state={state}
     testId="status-signal"

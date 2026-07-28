@@ -1,8 +1,5 @@
 import { LbButton } from '@liiiraa/design-system';
-import type {
-  ShellInstallerIdentityJson,
-  ShellReleaseChannelJson,
-} from '@liiiraa/contracts-ts';
+import type { ShellInstallerIdentityJson, ShellReleaseChannelJson } from '@liiiraa/contracts-ts';
 import type { ReactNode } from 'react';
 
 import type { ShippingLocale } from '../locales/i18n.js';
@@ -10,16 +7,9 @@ import type { ShippingLocale } from '../locales/i18n.js';
 type LocalizedCopy = Readonly<Record<ShippingLocale, string>>;
 
 export type InstallerSignatureState =
-  | 'trusted-publisher'
-  | 'development-self-signed'
-  | 'invalid'
-  | 'unknown';
+  'trusted-publisher' | 'development-self-signed' | 'invalid' | 'unknown';
 
-export type InstallerUpdateIdentity =
-  | 'signed-manifest'
-  | 'disabled'
-  | 'invalid'
-  | 'unknown';
+export type InstallerUpdateIdentity = 'signed-manifest' | 'disabled' | 'invalid' | 'unknown';
 
 export interface InstallerHandoffProps {
   readonly identity: ShellInstallerIdentityJson;
@@ -31,12 +21,9 @@ export interface InstallerHandoffProps {
   readonly updateIdentity?: InstallerUpdateIdentity;
 }
 
-const copy = (locale: ShippingLocale, value: LocalizedCopy): string =>
-  value[locale];
+const copy = (locale: ShippingLocale, value: LocalizedCopy): string => value[locale];
 
-const CHANNEL_COPY: Readonly<
-  Record<ShellReleaseChannelJson, LocalizedCopy>
-> = Object.freeze({
+const CHANNEL_COPY: Readonly<Record<ShellReleaseChannelJson, LocalizedCopy>> = Object.freeze({
   development: {
     'en-US': 'Development channel',
     'pt-BR': 'Canal de desenvolvimento',
@@ -49,17 +36,14 @@ const CHANNEL_COPY: Readonly<
   },
 });
 
-const SIGNATURE_COPY: Readonly<
-  Record<InstallerSignatureState, LocalizedCopy>
-> = Object.freeze({
+const SIGNATURE_COPY: Readonly<Record<InstallerSignatureState, LocalizedCopy>> = Object.freeze({
   'trusted-publisher': {
     'en-US': 'Trusted publisher signature',
     'pt-BR': 'Assinatura de publicador confiável',
   },
   'development-self-signed': {
     'en-US': 'Local self-signed development certificate — no public trust',
-    'pt-BR':
-      'Certificado local autoassinado de desenvolvimento — sem confiança pública',
+    'pt-BR': 'Certificado local autoassinado de desenvolvimento — sem confiança pública',
   },
   invalid: {
     'en-US': 'Signature is invalid. Continuing is blocked.',
@@ -71,9 +55,7 @@ const SIGNATURE_COPY: Readonly<
   },
 });
 
-const UPDATE_COPY: Readonly<
-  Record<InstallerUpdateIdentity, LocalizedCopy>
-> = Object.freeze({
+const UPDATE_COPY: Readonly<Record<InstallerUpdateIdentity, LocalizedCopy>> = Object.freeze({
   'signed-manifest': {
     'en-US': 'Signed update manifest matches this publisher',
     'pt-BR': 'A atualização assinada corresponde a este publicador',
@@ -84,8 +66,7 @@ const UPDATE_COPY: Readonly<
   },
   invalid: {
     'en-US': 'Update identity is invalid. Updates remain disabled.',
-    'pt-BR':
-      'A assinatura da atualização é inválida. As atualizações continuam desativadas.',
+    'pt-BR': 'A assinatura da atualização é inválida. As atualizações continuam desativadas.',
   },
   unknown: {
     'en-US': 'No signed update identity is available.',
@@ -104,14 +85,10 @@ const COMPATIBILITY_REASON_COPY = Object.freeze({
   },
 } satisfies Readonly<Record<string, LocalizedCopy>>);
 
-const defaultSignatureState = (
-  channel: ShellReleaseChannelJson,
-): InstallerSignatureState =>
+const defaultSignatureState = (channel: ShellReleaseChannelJson): InstallerSignatureState =>
   channel === 'development' ? 'development-self-signed' : 'unknown';
 
-const defaultUpdateIdentity = (
-  channel: ShellReleaseChannelJson,
-): InstallerUpdateIdentity =>
+const defaultUpdateIdentity = (channel: ShellReleaseChannelJson): InstallerUpdateIdentity =>
   channel === 'development' ? 'disabled' : 'unknown';
 
 export const InstallerHandoff = ({
@@ -127,8 +104,7 @@ export const InstallerHandoff = ({
   const canContinue =
     compatibility.kind === 'supported' &&
     (signatureState === 'trusted-publisher' ||
-      (identity.channel === 'development' &&
-        signatureState === 'development-self-signed')) &&
+      (identity.channel === 'development' && signatureState === 'development-self-signed')) &&
     updateIdentity !== 'invalid';
   const compatibilityText =
     compatibility.kind === 'supported'
@@ -168,51 +144,55 @@ export const InstallerHandoff = ({
         </p>
       </header>
 
-      <dl className="desktop-installer-details">
-        <div>
-          <dt>{copy(locale, { 'en-US': 'Publisher', 'pt-BR': 'Publicador' })}</dt>
-          <dd>{identity.publisher}</dd>
-        </div>
-        <div>
-          <dt>{copy(locale, { 'en-US': 'Version', 'pt-BR': 'Versão' })}</dt>
-          <dd>{identity.version}</dd>
-        </div>
-        <div>
-          <dt>{copy(locale, { 'en-US': 'Channel', 'pt-BR': 'Canal' })}</dt>
-          <dd>{copy(locale, CHANNEL_COPY[identity.channel])}</dd>
-        </div>
-        <div>
-          <dt>
-            {copy(locale, {
-              'en-US': 'Windows compatibility',
-              'pt-BR': 'Compatibilidade do Windows',
-            })}
-          </dt>
-          <dd data-status={compatibility.kind}>{compatibilityText}</dd>
-        </div>
-        <div>
-          <dt>
-            {copy(locale, {
-              'en-US': 'Publisher signature',
-              'pt-BR': 'Assinatura do publicador',
-            })}
-          </dt>
-          <dd data-status={signatureState}>
-            {copy(locale, SIGNATURE_COPY[signatureState])}
-          </dd>
-        </div>
-        <div>
-          <dt>
-            {copy(locale, {
-              'en-US': 'Update identity',
-              'pt-BR': 'Identidade de atualização',
-            })}
-          </dt>
-          <dd data-status={updateIdentity}>
-            {copy(locale, UPDATE_COPY[updateIdentity])}
-          </dd>
-        </div>
-      </dl>
+      <details className="desktop-installer-technical">
+        <summary>
+          {copy(locale, {
+            'en-US': 'View technical details',
+            'pt-BR': 'Ver detalhes técnicos',
+          })}
+        </summary>
+        <dl className="desktop-installer-details">
+          <div>
+            <dt>{copy(locale, { 'en-US': 'Publisher', 'pt-BR': 'Publicador' })}</dt>
+            <dd>{identity.publisher}</dd>
+          </div>
+          <div>
+            <dt>{copy(locale, { 'en-US': 'Version', 'pt-BR': 'Versão' })}</dt>
+            <dd>{identity.version}</dd>
+          </div>
+          <div>
+            <dt>{copy(locale, { 'en-US': 'Channel', 'pt-BR': 'Canal' })}</dt>
+            <dd>{copy(locale, CHANNEL_COPY[identity.channel])}</dd>
+          </div>
+          <div>
+            <dt>
+              {copy(locale, {
+                'en-US': 'Windows compatibility',
+                'pt-BR': 'Compatibilidade do Windows',
+              })}
+            </dt>
+            <dd data-status={compatibility.kind}>{compatibilityText}</dd>
+          </div>
+          <div>
+            <dt>
+              {copy(locale, {
+                'en-US': 'Publisher signature',
+                'pt-BR': 'Assinatura do publicador',
+              })}
+            </dt>
+            <dd data-status={signatureState}>{copy(locale, SIGNATURE_COPY[signatureState])}</dd>
+          </div>
+          <div>
+            <dt>
+              {copy(locale, {
+                'en-US': 'Update identity',
+                'pt-BR': 'Identidade de atualização',
+              })}
+            </dt>
+            <dd data-status={updateIdentity}>{copy(locale, UPDATE_COPY[updateIdentity])}</dd>
+          </div>
+        </dl>
+      </details>
 
       <p aria-live="polite" className="desktop-startup-decision">
         {canContinue
@@ -223,8 +203,7 @@ export const InstallerHandoff = ({
                 'Esta identidade é aceitável para o canal atual. Continue para a inicialização local.',
             })
           : copy(locale, {
-              'en-US':
-                'Safe continuation is blocked until identity and compatibility checks pass.',
+              'en-US': 'Safe continuation is blocked until identity and compatibility checks pass.',
               'pt-BR':
                 'A continuação segura está bloqueada até que as verificações de identidade e compatibilidade sejam aprovadas.',
             })}
@@ -243,9 +222,7 @@ export const InstallerHandoff = ({
         </LbButton>
         <LbButton
           variant="secondary"
-          {...(onOpenVerification === undefined
-            ? {}
-            : { onPress: onOpenVerification })}
+          {...(onOpenVerification === undefined ? {} : { onPress: onOpenVerification })}
         >
           {copy(locale, {
             'en-US': 'Review verification path',
@@ -254,9 +231,7 @@ export const InstallerHandoff = ({
         </LbButton>
         <LbButton
           variant="quiet"
-          {...(onOpenDocumentation === undefined
-            ? {}
-            : { onPress: onOpenDocumentation })}
+          {...(onOpenDocumentation === undefined ? {} : { onPress: onOpenDocumentation })}
         >
           {copy(locale, {
             'en-US': 'Open compatibility documentation',

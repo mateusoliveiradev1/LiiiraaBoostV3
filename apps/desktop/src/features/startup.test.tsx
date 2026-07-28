@@ -64,9 +64,7 @@ const startupStates: readonly ShellStartupStateJson[] = [
 
 describe('installer handoff', () => {
   it('shows exact signed-development identity and compatibility before continuation', () => {
-    const markup = renderToStaticMarkup(
-      <InstallerHandoff identity={installer} locale="en-US" />,
-    );
+    const markup = renderToStaticMarkup(<InstallerHandoff identity={installer} locale="en-US" />);
 
     expect(markup).toContain('Liiiraa Boost Development');
     expect(markup).toContain('0.2.0');
@@ -79,15 +77,16 @@ describe('installer handoff', () => {
   });
 
   it('renders the complete handoff in PT-BR without leaking internal English copy', () => {
-    const markup = renderToStaticMarkup(
-      <InstallerHandoff identity={installer} locale="pt-BR" />,
-    );
+    const markup = renderToStaticMarkup(<InstallerHandoff identity={installer} locale="pt-BR" />);
 
     expect(markup).toContain('Confira a instalação antes de começar');
     expect(markup).toContain('Canal de desenvolvimento');
     expect(markup).toContain(
       'Atualizações automáticas desativadas nesta versão de desenvolvimento',
     );
+    expect(markup).toContain('<details class="desktop-installer-technical">');
+    expect(markup).toContain('Ver detalhes técnicos');
+    expect(markup).not.toContain('<details class="desktop-installer-technical" open="">');
     for (const englishCopy of [
       'Development channel',
       'Verify this installation',
@@ -126,49 +125,40 @@ describe('installer handoff', () => {
 });
 
 describe('startup', () => {
-  it.each(startupStates)(
-    'renders complete accessible copy for $kind state',
-    (state) => {
-      const markup = renderToStaticMarkup(
-        <StartupSurface
-          firstLaunch
-          locale="pt-BR"
-          state={state}
-          version="0.2.0"
-        />,
-      );
+  it.each(startupStates)('renders complete accessible copy for $kind state', (state) => {
+    const markup = renderToStaticMarkup(
+      <StartupSurface firstLaunch locale="pt-BR" state={state} version="0.2.0" />,
+    );
 
-      expect(markup).toContain('Primeira abertura local');
-      expect(markup).toContain('Versão');
-      expect(markup).not.toContain('placeholder');
-      expect(markup).not.toContain('undefined');
-      for (const englishCopy of [
-        'Initializing the local Windows interface',
-        'Loading protected local preferences',
-        'Open Liiiraa Boost',
-        'Try again',
-        'Open safe mode',
-      ]) {
-        expect(markup).not.toContain(englishCopy);
-      }
-      if (state.kind === 'failure') {
-        expect(markup).toContain('role="alert"');
-        expect(markup).toContain('Abrir suporte');
-        expect(markup).toContain('documentação');
-      }
-    },
-  );
+    expect(markup).toContain('Primeira abertura local');
+    expect(markup).toContain('Versão');
+    expect(markup).not.toContain('placeholder');
+    expect(markup).not.toContain('undefined');
+    for (const englishCopy of [
+      'Initializing the local Windows interface',
+      'Loading protected local preferences',
+      'Open Liiiraa Boost',
+      'Try again',
+      'Open safe mode',
+    ]) {
+      expect(markup).not.toContain(englishCopy);
+    }
+    if (state.kind === 'failure') {
+      expect(markup).toContain('role="alert"');
+      expect(markup).toContain('Abrir suporte');
+      expect(markup).toContain('documentação');
+    }
+  });
 
   it('exposes all generated recovery actions with localized safe controls', () => {
-    const recoveryActions: readonly ShellStartupFailureStateJson['recoveryAction'][] =
-      [
-        'install-webview2',
-        'view-offline-instructions',
-        'retry',
-        'rollback',
-        'open-safe-mode',
-        'exit',
-      ];
+    const recoveryActions: readonly ShellStartupFailureStateJson['recoveryAction'][] = [
+      'install-webview2',
+      'view-offline-instructions',
+      'retry',
+      'rollback',
+      'open-safe-mode',
+      'exit',
+    ];
 
     for (const recoveryAction of recoveryActions) {
       const markup = renderToStaticMarkup(

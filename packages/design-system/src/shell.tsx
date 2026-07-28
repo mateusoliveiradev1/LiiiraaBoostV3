@@ -47,7 +47,12 @@ export const WindowTitleBar = ({
   scenarioId,
 }: WindowTitleBarProps) => (
   <header aria-label="Application title bar" className="lb-title-bar" data-lb-region>
-    <strong>{productName}</strong>
+    <strong className="lb-product-brand">
+      <span aria-hidden="true" className="lb-product-mark">
+        LB
+      </span>
+      <span>{productName}</span>
+    </strong>
     {scenarioId ? <ScenarioMarker scenarioId={scenarioId} /> : null}
     <span className="lb-global-status">{globalStatus}</span>
     <div className="lb-title-actions">
