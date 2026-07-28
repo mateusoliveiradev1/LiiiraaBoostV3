@@ -74,6 +74,7 @@ Each implementation stage was committed atomically:
 1. **Task 1 RED: add failing workspace activation gates** — `2e47f43` (test)
 2. **Task 1 GREEN and Task 2 verification: activate roots and approved identities** — `c3a49ce` (feat)
 3. **Audit correctness fix: keep generated dependency evidence wording truthful** — `6b35c7f` (fix)
+4. **Post-wave gate fix: satisfy architecture test lint policy** — `c76c752` (fix)
 
 ## Files Created/Modified
 
@@ -125,6 +126,13 @@ Each implementation stage was committed atomically:
 - **Verification:** `verify-pins.mjs --check` passes with regenerated evidence.
 - **Commit:** `6b35c7f`
 
+## Post-Wave Gate Correction
+
+- Replaced two `ReadonlyArray<T>` spellings with the repository-required `readonly T[]` syntax.
+- Removed four unused properties from a test-only destructuring without changing assertions or behavior.
+- Focused architecture tests pass 34/34, package typecheck passes, and repository lint passes with zero warnings.
+- The requested `rtk pnpm check` now advances beyond all 02-14 lint errors and stops only at a later-plan `TS18003` in `packages/design-tokens/tsconfig.json`; that unrelated package scaffold was intentionally left untouched.
+
 ## Issues Encountered
 
 - The plan's `pnpm` verification command refreshes workspace installation metadata and therefore temporarily updates `pnpm-lock.yaml`; every such mutation was restored, and the final commit leaves the lockfile unchanged.
@@ -141,12 +149,12 @@ None. No paid service, credentials, or external infrastructure is required.
 
 - Plan 02-24 can consume the active desktop workspace and contract tooling.
 - Plan 02-31 can perform the intentionally deferred deterministic lockfile resolution.
-- No blockers remain for the next Phase 2 wave.
+- No blockers attributable to Plan 02-14 remain.
 
 ## Self-Check: PASSED
 
 - All four created manifests and this summary exist on disk.
-- RED `2e47f43`, GREEN `c3a49ce`, and audit fix `6b35c7f` exist in git history.
+- RED `2e47f43`, GREEN `c3a49ce`, audit fix `6b35c7f`, and post-wave gate fix `c76c752` exist in git history.
 - Architecture tests pass 34/34, supply-chain evidence is current, and `pnpm-lock.yaml` is unchanged.
 
 ---
