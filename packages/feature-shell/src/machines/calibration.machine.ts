@@ -644,6 +644,37 @@ export const requiredStepForAction = (
   event: Extract<CalibrationEvent, { type: 'REQUIRE_ACTION' }>,
 ): CalibrationStep => ACTION_REQUIRED_STEPS[event.action];
 
+const selectHomeAccess = (
+  snapshot: CalibrationActorSnapshot,
+  requiredComplete: boolean,
+  nextOptionalStep: CalibrationStep | null,
+): HomeCalibrationState['access'] => {
+  if (snapshot.value === 'limited') {
+    return 'limited';
+  }
+  if (!requiredComplete) {
+    return 'blocked';
+  }
+  if (snapshot.value === 'completed' || nextOptionalStep === null) {
+    return 'ready';
+  }
+  return 'progressive';
+};
+
+const selectContinueProminence = (
+  snapshot: CalibrationActorSnapshot,
+  dependencyStep: CalibrationStep | null,
+  continueStep: CalibrationStep | null,
+): HomeCalibrationState['continueAction']['prominence'] => {
+  if (continueStep === null) {
+    return 'hidden';
+  }
+  if (dependencyStep !== null || snapshot.value === 'resumed') {
+    return 'dominant';
+  }
+  return 'quiet';
+};
+
 export const selectHomeCalibrationState = (
   snapshot: CalibrationActorSnapshot,
 ): HomeCalibrationState => {
@@ -665,17 +696,9 @@ export const selectHomeCalibrationState = (
     OPTIONAL_CALIBRATION_STEPS,
   );
   const continueStep = dependencyStep ?? nextOptionalStep;
-  const access =
-    snapshot.value === 'limited'
-      ? 'limited'
-      : !requiredComplete
-        ? 'blocked'
-        : snapshot.value === 'completed' || nextOptionalStep === null
-          ? 'ready'
-          : 'progressive';
 
   return Object.freeze({
-    access,
+    access: selectHomeAccess(snapshot, requiredComplete, nextOptionalStep),
     requiredComplete,
     optionalProgress: Object.freeze({
       completed: optionalCompleted,
@@ -685,12 +708,7 @@ export const selectHomeCalibrationState = (
     incompleteSteps: Object.freeze(incompleteSteps),
     recommendationsAllowed: requiredComplete && snapshot.value !== 'limited',
     continueAction: Object.freeze({
-      prominence:
-        continueStep === null
-          ? 'hidden'
-          : dependencyStep !== null || snapshot.value === 'resumed'
-            ? 'dominant'
-            : 'quiet',
+      prominence: selectContinueProminence(snapshot, dependencyStep, continueStep),
       messageId: 'calibration.action.continue',
       step: continueStep,
     }),

@@ -43,6 +43,72 @@ const requiredEvidenceEvents = Object.freeze([
   { type: 'RECORD_EVIDENCE', evidence: evidence('systemInventory') },
 ] as const satisfies readonly CalibrationEvent[]);
 
+const reachableStateCases = Object.freeze([
+  {
+    state: 'offlineLocal',
+    events: [{ type: 'START' }, { type: 'GO_OFFLINE' }],
+  },
+  {
+    state: 'deferred',
+    events: [
+      { type: 'START' },
+      { type: 'DEFER_STEP', step: 'goals', messageId: 'calibration.defer.saved' },
+    ],
+  },
+  {
+    state: 'partial',
+    events: [
+      { type: 'START' },
+      {
+        type: 'RECORD_EVIDENCE',
+        evidence: evidence('performanceDiagnosis', 'unavailable'),
+      },
+    ],
+  },
+  {
+    state: 'cancelled',
+    events: [{ type: 'START' }, { type: 'CANCEL' }],
+  },
+  {
+    state: 'resumed',
+    events: [{ type: 'START' }, { type: 'CANCEL' }, { type: 'RESUME' }],
+  },
+  {
+    state: 'completed',
+    events: [...requiredEvidenceEvents, { type: 'COMPLETE' }],
+  },
+  {
+    state: 'revalidation',
+    events: [
+      ...requiredEvidenceEvents,
+      { type: 'COMPLETE' },
+      {
+        type: 'REVALIDATE',
+        affectedSteps: ['systemInventory'],
+        reasonMessageId: 'calibration.revalidation.stale',
+      },
+    ],
+  },
+] as const satisfies readonly {
+  readonly state: string;
+  readonly events: readonly CalibrationEvent[];
+}[]);
+
+const enumerateEventSequences = (
+  alphabet: readonly CalibrationEvent[],
+  maximumLength: number,
+): readonly (readonly CalibrationEvent[])[] => {
+  const sequences: CalibrationEvent[][] = [[]];
+  let frontier: CalibrationEvent[][] = [[]];
+
+  for (let length = 1; length <= maximumLength; length += 1) {
+    frontier = frontier.flatMap((sequence) => alphabet.map((event) => [...sequence, event]));
+    sequences.push(...frontier);
+  }
+
+  return sequences;
+};
+
 describe('UX-02 calibration contract', () => {
   it('defines the seven ordered steps with stable message IDs', () => {
     expect(CALIBRATION_STEPS).toEqual([
@@ -216,39 +282,9 @@ describe('UX-02 calibration contract', () => {
   });
 
   it('reaches offline, deferred, partial, cancelled, resumed, completed, and revalidation safely', () => {
-    const cases = [
-      [{ type: 'START' }, { type: 'GO_OFFLINE' }],
-      [
-        { type: 'START' },
-        { type: 'DEFER_STEP', step: 'goals', messageId: 'calibration.defer.saved' },
-      ],
-      [
-        { type: 'START' },
-        { type: 'RECORD_EVIDENCE', evidence: evidence('performanceDiagnosis', 'unavailable') },
-      ],
-      [{ type: 'START' }, { type: 'CANCEL' }],
-      [{ type: 'START' }, { type: 'CANCEL' }, { type: 'RESUME' }],
-      [...requiredEvidenceEvents, { type: 'COMPLETE' }],
-      [
-        ...requiredEvidenceEvents,
-        { type: 'COMPLETE' },
-        {
-          type: 'REVALIDATE',
-          affectedSteps: ['systemInventory'],
-          reasonMessageId: 'calibration.revalidation.stale',
-        },
-      ],
-    ] as const satisfies readonly (readonly CalibrationEvent[])[];
-
-    expect(cases.map((events) => sendAll(events).getSnapshot().value)).toEqual([
-      'offlineLocal',
-      'deferred',
-      'partial',
-      'cancelled',
-      'resumed',
-      'completed',
-      'revalidation',
-    ]);
+    expect(reachableStateCases.map(({ events }) => sendAll(events).getSnapshot().value)).toEqual(
+      reachableStateCases.map(({ state }) => state),
+    );
   });
 
   it('round-trips a versioned snapshot without actor internals or diagnostic values', () => {
@@ -270,6 +306,21 @@ describe('UX-02 calibration contract', () => {
     const restoredActor = createCalibrationActor({ snapshot: persisted }).start();
     expect(serializeCalibrationSnapshot(restoredActor.getSnapshot())).toEqual(persisted);
   });
+
+  it.each(reachableStateCases)(
+    'round-trips the reachable $state snapshot deterministically',
+    ({ events }) => {
+      const persisted = serializeCalibrationSnapshot(sendAll(events).getSnapshot());
+      const restored = restoreCalibrationSnapshot(JSON.parse(JSON.stringify(persisted)));
+
+      expect(restored).toEqual({ ok: true, snapshot: persisted });
+      expect(
+        serializeCalibrationSnapshot(
+          createCalibrationActor({ snapshot: persisted }).start().getSnapshot(),
+        ),
+      ).toEqual(persisted);
+    },
+  );
 
   it.each([
     null,
@@ -309,21 +360,26 @@ describe('UX-02 calibration contract', () => {
   });
 
   it('preserves the recommendation invariant across deterministic event sequences', () => {
-    const sequences = [
-      [],
-      [{ type: 'START' }],
-      [{ type: 'START' }, { type: 'FAIL_REQUIRED', reason: 'inventoryFailed' }],
-      [...requiredEvidenceEvents, { type: 'GO_HOME' }],
-      [
-        ...requiredEvidenceEvents,
-        { type: 'COMPLETE' },
-        {
-          type: 'REVALIDATE',
-          affectedSteps: ['systemInventory'],
-          reasonMessageId: 'calibration.revalidation.hardwareChanged',
-        },
-      ],
-    ] as const satisfies readonly (readonly CalibrationEvent[])[];
+    const alphabet = Object.freeze([
+      { type: 'START' },
+      { type: 'RECORD_EVIDENCE', evidence: evidence('trustPrivacy') },
+      { type: 'RECORD_EVIDENCE', evidence: evidence('systemInventory') },
+      { type: 'GO_HOME' },
+      { type: 'COMPLETE' },
+      { type: 'SET_CONSENT', consent: 'cloudAi', granted: true },
+      {
+        type: 'REQUIRE_ACTION',
+        action: 'reviewPerformancePlan',
+        route: '/plans/review',
+      },
+      { type: 'FAIL_REQUIRED', reason: 'inventoryFailed' },
+      {
+        type: 'REVALIDATE',
+        affectedSteps: ['systemInventory'],
+        reasonMessageId: 'calibration.revalidation.hardwareChanged',
+      },
+    ] as const satisfies readonly CalibrationEvent[]);
+    const sequences = enumerateEventSequences(alphabet, 4);
 
     for (const sequence of sequences) {
       const snapshot = sendAll(sequence).getSnapshot();
