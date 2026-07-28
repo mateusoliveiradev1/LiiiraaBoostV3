@@ -53,7 +53,7 @@ requirements-completed: [UX-02, UX-03, UX-04, UX-05, UX-06, UX-07, UX-08, UX-09,
 
 # Phase 02 Plan 21: Responsive Desktop Application Shell Summary
 
-**A complete localized shell now mounts every desktop route with responsive composition, keyboard/focus behavior, visible provenance, and fail-closed operational-state guidance.**
+**A complete localized shell now mounts every desktop route with responsive composition, keyboard/focus behavior, visible provenance, and deny-by-default operational-state guidance.**
 
 ## Performance
 
@@ -75,7 +75,7 @@ requirements-completed: [UX-02, UX-03, UX-04, UX-05, UX-06, UX-07, UX-08, UX-09,
 ## Task Commits
 
 1. **Task 1: Compose shell regions and route outlet** — `a47137b`
-2. **Task 2 RED: Add failing semantic and scale contracts** — `7aa1167`
+2. **Task 2 RED: Add expected RED semantic and scale contracts** — `7aa1167`
 3. **Task 2 GREEN: Prove shell semantics, scaling, and operational states** — `7385328`
 4. **Architecture gate alignment** — `a643fb6`
 
@@ -138,7 +138,7 @@ requirements-completed: [UX-02, UX-03, UX-04, UX-05, UX-06, UX-07, UX-08, UX-09,
 ## Threat Model
 
 - Persistent scenario and provenance markers prevent simulated state from appearing as measured machine truth.
-- Closed operational-state definitions prevent unknown failure modes from silently degrading into optimistic success UI.
+- Closed operational-state definitions prevent unknown error modes from silently degrading into optimistic success UI.
 - Overlay focus restoration and live-region priority keep safety and recovery actions operable through keyboard and assistive technology.
 - No network endpoint, privileged system mutation, paid service, authentication flow, or remote execution capability was introduced.
 
