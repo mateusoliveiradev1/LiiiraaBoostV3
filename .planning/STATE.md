@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-08-PLAN.md
-last_updated: "2026-07-28T06:10:00.710Z"
+stopped_at: Completed 02-09-PLAN.md
+last_updated: "2026-07-28T06:37:04.855Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 42
+  completed_plans: 43
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 13 of 33
+Plan: 14 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -97,6 +97,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P06 | 13min | 3 tasks | 5 files |
 | Phase 02 P07 | 7min | 3 tasks | 4 files |
 | Phase 02 P08 | 23min | 3 tasks | 6 files |
+| Phase 02 P09 | 23min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -220,6 +221,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Guarded calibration actor remains workflow truth while scenario inputs select authored presentation states. — Prevents deterministic previews from fabricating machine evidence.
 - [Phase 02]: Command selection is navigation-only and review-required results always route to full review. — Command search must never become an execution bypass.
 - [Phase 02]: Windows notification previews render only redacted interaction-policy output. — Sensitive event detail must stay out of native notification candidates.
+- [Phase 02]: Representar cada variante operacional das rotas técnicas como uma projeção de estado fechada, permitindo trocar fixtures por adaptadores reais sem alterar a arquitetura da informação.
+- [Phase 02]: Manter todos os valores de jogos, recomendações, sessões e medições da Fase 2 explicitamente marcados como fixtures; impacto esperado continua direcional e comparações rejeitadas não exibem resultado relativo.
+- [Phase 02]: Gerar IDs acessíveis dos títulos dos gráficos com React useId para impedir relações ARIA inválidas quando os rótulos forem traduzidos.
 
 ### Pending Todos
 
@@ -243,6 +247,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T06:10:00.705Z
-Stopped at: Completed 02-08-PLAN.md
+Last session: 2026-07-28T06:37:04.851Z
+Stopped at: Completed 02-09-PLAN.md
 Resume file: None
