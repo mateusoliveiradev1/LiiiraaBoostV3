@@ -4,6 +4,8 @@ use serde_json::{Value, json};
 
 #[path = "../src/navigation.rs"]
 mod navigation;
+#[path = "../src/notifications.rs"]
+mod notifications;
 #[path = "../src/tray.rs"]
 mod tray;
 #[path = "../src/window.rs"]
@@ -12,6 +14,10 @@ mod window;
 use navigation::{
     ExternalNavigationSource, NavigationBridgeError, navigation_event_from_external,
     navigation_event_from_second_instance,
+};
+use notifications::{
+    NotificationBridge, NotificationBridgeError, NotificationEffect, StartupCondition,
+    installer_identity_event, startup_state_event,
 };
 use tray::{
     TrayEffect, TrayLifecycle, TrayLifecycleError, TrayMenuContext, TrayMenuEntryKind,
@@ -558,4 +564,276 @@ fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
         ),
         Err(TrayLifecycleError::UnknownAction)
     ));
+}
+
+#[test]
+fn notification_startup_preferences_allowlist_categories_and_redact_renderer_copy() {
+    let mut bridge = NotificationBridge::default();
+
+    let malformed = shell_envelope(
+        "desktop.shell.set-notification-preference.command",
+        json!({
+            "preference": {
+                "enabled": true,
+                "focusAssist": "respect",
+                "categories": ["recovery-required"]
+            },
+            "unexpected": "must-not-mutate"
+        }),
+    );
+    assert!(matches!(
+        bridge.dispatch_renderer_message(
+            &malformed,
+            HostEventMetadata::fixed(
+                "request-notification-malformed",
+                "2026-07-28T12:00:00.000Z"
+            )
+        ),
+        Err(NotificationBridgeError::ContractRejected)
+    ));
+    assert!(!bridge.is_enabled());
+
+    let locale = shell_envelope(
+        "desktop.shell.set-locale.command",
+        json!({ "locale": "pt-BR" }),
+    );
+    let locale_effects = bridge
+        .dispatch_renderer_message(
+            &locale,
+            HostEventMetadata::fixed(
+                "request-notification-locale",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("generated locale command");
+    assert!(locale_effects.iter().any(|effect| {
+        matches!(
+            effect,
+            NotificationEffect::Emit(event)
+                if serde_json::to_value(event).is_ok_and(|value| {
+                    value["messageType"] == "desktop.shell.locale-changed.event"
+                        && value["payload"]["locale"] == "pt-BR"
+                })
+        )
+    }));
+
+    let preference = shell_envelope(
+        "desktop.shell.set-notification-preference.command",
+        json!({
+            "preference": {
+                "enabled": true,
+                "focusAssist": "respect",
+                "categories": ["recovery-required"]
+            }
+        }),
+    );
+    bridge
+        .dispatch_renderer_message(
+            &preference,
+            HostEventMetadata::fixed(
+                "request-notification-preference",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("generated notification preference");
+    assert!(bridge.is_enabled());
+
+    let show = shell_envelope(
+        "desktop.shell.show-notification.command",
+        json!({
+            "category": "recovery-required",
+            "title": "SENSITIVE_GPU_SERIAL_001",
+            "body": "GPU serial SENSITIVE_GPU_SERIAL_001 at PCI path SENSITIVE_PATH",
+            "action": {
+                "kind": "goal",
+                "destination": "recover"
+            }
+        }),
+    );
+    let effects = bridge
+        .dispatch_renderer_message(
+            &show,
+            HostEventMetadata::fixed(
+                "request-notification-show",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("approved recovery notification");
+    let approved = effects
+        .iter()
+        .find_map(|effect| match effect {
+            NotificationEffect::Show(notification) => Some(notification),
+            _ => None,
+        })
+        .expect("native notification effect");
+    assert_eq!(approved.category, "recovery-required");
+    assert!(approved.title.starts_with("Liiiraa Boost"));
+    assert!(!approved.title.contains("SENSITIVE"));
+    assert!(!approved.body.contains("SENSITIVE"));
+    assert!(approved.respects_focus_assist);
+    assert_eq!(
+        serde_json::to_value(&approved.action)
+            .expect("generated notification action")["payload"]["source"],
+        "notification"
+    );
+
+    let disabled_category = shell_envelope(
+        "desktop.shell.show-notification.command",
+        json!({
+            "category": "account-security",
+            "title": "Account event",
+            "body": "Review account security.",
+            "action": {
+                "kind": "goal",
+                "destination": "account"
+            }
+        }),
+    );
+    assert!(
+        bridge
+            .dispatch_renderer_message(
+                &disabled_category,
+                HostEventMetadata::fixed(
+                    "request-notification-disabled-category",
+                    "2026-07-28T12:00:00.000Z",
+                ),
+            )
+            .expect("valid but disabled category")
+            .is_empty()
+    );
+
+    let unsafe_action = shell_envelope(
+        "desktop.shell.show-notification.command",
+        json!({
+            "category": "recovery-required",
+            "title": "Recovery",
+            "body": "Recovery requires attention.",
+            "action": {
+                "kind": "settings",
+                "destination": "advanced"
+            }
+        }),
+    );
+    assert!(matches!(
+        bridge.dispatch_renderer_message(
+            &unsafe_action,
+            HostEventMetadata::fixed(
+                "request-notification-unsafe-action",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        ),
+        Err(NotificationBridgeError::UnsafeAction)
+    ));
+}
+
+#[test]
+fn notification_startup_failures_emit_only_generated_safe_states_and_actions() {
+    let cases = [
+        (
+            StartupCondition::MissingWebView2,
+            "failure",
+            Some("missing-webview2"),
+            Some("install-webview2"),
+        ),
+        (
+            StartupCondition::DamagedInstallation,
+            "failure",
+            Some("damaged-installation"),
+            Some("view-offline-instructions"),
+        ),
+        (
+            StartupCondition::UnsupportedBuild,
+            "failure",
+            Some("incompatible-windows-build"),
+            Some("view-offline-instructions"),
+        ),
+        (
+            StartupCondition::MigrationFailure,
+            "failure",
+            Some("local-state-migration-failed"),
+            Some("open-safe-mode"),
+        ),
+        (StartupCondition::UpdateInProgress, "updating", None, None),
+        (
+            StartupCondition::SignatureInvalid,
+            "failure",
+            Some("update-signature-failed"),
+            Some("rollback"),
+        ),
+        (StartupCondition::RollbackAvailable, "updating", None, None),
+        (
+            StartupCondition::SafeMode,
+            "failure",
+            Some("internal-startup-error"),
+            Some("open-safe-mode"),
+        ),
+    ];
+
+    for (index, (condition, kind, reason, recovery_action)) in cases.into_iter().enumerate() {
+        let event = startup_state_event(
+            condition,
+            HostEventMetadata::fixed(
+                format!("request-startup-state-{index:04}"),
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("generated startup state");
+        let value = serde_json::to_value(event).expect("serializable startup event");
+        assert_eq!(
+            value["messageType"],
+            "desktop.shell.startup-state-changed.event"
+        );
+        assert_eq!(value["payload"]["state"]["kind"], kind);
+        if let Some(reason) = reason {
+            assert_eq!(value["payload"]["state"]["reason"], reason);
+        }
+        if let Some(recovery_action) = recovery_action {
+            assert_eq!(
+                value["payload"]["state"]["recoveryAction"],
+                recovery_action
+            );
+        }
+    }
+}
+
+#[test]
+fn notification_startup_installer_identity_uses_the_validated_development_channel() {
+    let config = read_json("tauri.conf.json");
+    let event = installer_identity_event(
+        &config,
+        HostEventMetadata::fixed(
+            "request-installer-identity-0001",
+            "2026-07-28T12:00:00.000Z",
+        ),
+    )
+    .expect("generated installer identity event");
+    let value = serde_json::to_value(event).expect("serializable installer identity");
+
+    assert_eq!(
+        value["messageType"],
+        "desktop.shell.installer-identity.event"
+    );
+    assert_eq!(
+        value["payload"]["installer"],
+        json!({
+            "publisher": "Liiiraa Boost",
+            "version": "0.0.0",
+            "channel": "development",
+            "windowsCompatibility": ["10", "11"]
+        })
+    );
+}
+
+#[test]
+fn notification_startup_runtime_registers_native_effects_and_generated_startup_events() {
+    let source_path = crate_root().join("src/main.rs");
+    let source = fs::read_to_string(&source_path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
+
+    assert!(source.contains("NotificationExt"));
+    assert!(source.contains(".notification().builder()"));
+    assert!(source.contains("installer_identity_event"));
+    assert!(source.contains("startup_state_event"));
+    assert!(source.contains("StartupCondition::Ready"));
+    assert!(source.contains("NotificationBridge::default()"));
 }
