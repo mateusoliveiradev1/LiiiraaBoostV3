@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-15-PLAN.md
-last_updated: "2026-07-28T02:16:49.850Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-07-28T02:50:59.179Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 31
+  completed_plans: 32
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 2 of 33
+Plan: 3 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -86,6 +86,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P03 | 18min | 3 tasks | 9 files |
 | Phase 02 P12 | 14min | 2 tasks | 9 files |
 | Phase 02 P15 | 23min | 2 tasks | 16 files |
+| Phase 02 P04 | 24min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -176,6 +177,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Use current-user NSIS installation and null signing inputs until Plan 02-33 — Plan 02-33 will bind observed free local CNG evidence without elevating the UI.
 - [Phase 02]: Delegate root verification to one bounded desktop lifecycle while retaining named foundation graphs for static evidence reachability. — Focused lifecycle smoke can validate wiring without claiming future evidence, while ordinary quick and final modes remain fail-closed.
 - [Phase 02]: Treat absent future desktop suite or evidence artifacts as explicit failures with owning-plan diagnostics. — Prevents incomplete unit, browser, packaged, localization, scenario, or evidence commands from spoofing product acceptance.
+- [Phase 02]: Gerar 144 projetos Playwright a partir dos cinco eixos visuais bloqueados, além de harness e Storybook. — A matriz programática evita duplicação e prova todas as combinações determinísticas.
+- [Phase 02]: Persistir no manifesto somente a referência canônica, a regra S01-S24 e os eixos visuais. — Rotas e estados são derivados em execução para impedir uma segunda lista sujeita a drift.
+- [Phase 02]: Validar mutações de histórias contra a projeção do catálogo canônico sem deep imports. — A verificação preserva fronteiras públicas de módulos e mantém o JSON como única autoridade.
 
 ### Pending Todos
 
@@ -199,6 +203,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T02:16:49.846Z
-Stopped at: Completed 02-15-PLAN.md
+Last session: 2026-07-28T02:50:59.175Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
