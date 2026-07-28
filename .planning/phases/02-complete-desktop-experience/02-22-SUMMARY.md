@@ -111,8 +111,8 @@ Each TDD task was committed with a failing test before its implementation:
 
 ## TDD Gate Compliance
 
-- Task 1 RED `471eaa3` failed because `window.rs` did not exist; GREEN `5547177` passed all window close and restore behavior.
-- Task 2 RED `b9fd969` failed because `navigation.rs` did not exist; GREEN `40b79b2` passed all navigation, redaction, and runtime registration behavior.
+- Task 1 RED `471eaa3` produced the expected RED because `window.rs` did not exist; GREEN `5547177` passed all window close and restore behavior.
+- Task 2 RED `b9fd969` produced the expected RED because `navigation.rs` did not exist; GREEN `40b79b2` passed all navigation, redaction, and runtime registration behavior.
 - No separate refactor commit was necessary; formatting and shared metadata-envelope extraction were completed within GREEN before the final verification.
 
 ## Known Stubs
