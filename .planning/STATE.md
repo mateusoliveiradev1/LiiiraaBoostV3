@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-07-27T23:23:53.079Z"
+stopped_at: Completed 02-14-PLAN.md
+last_updated: "2026-07-28T00:08:31.493Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed Phase 02 Plan 02 workspace reservation and ownership gates
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 24
-  percent: 44
+  completed_plans: 25
+  percent: 10
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 3 of 33
+Plan: 4 of 33
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed Phase 02 Plan 02 workspace reservation and ownership gates
 
@@ -79,6 +79,7 @@ Progress: [████░░░░░░] 44%
 | Phase 01 P22 | 12 min | 3 tasks | 7 files |
 | Phase 02 P01 | 7min | 1 tasks | 1 files |
 | Phase 02 P02 | 6min | 2 tasks | 2 files |
+| Phase 02 P14 | 23min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -151,6 +152,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Publicly trusted commercial signing and release claims remain blocked until Phase 10.
 - [Phase 02]: Model Phase 2 activation entirely in memory until Plan 02-14 creates all manifests atomically.
 - [Phase 02]: Resolve synthetic graph nodes from canonical module IDs and public roots instead of duplicating repository paths.
+- [Phase 02]: Keep every Phase 2 dependency free for now; add only the two exact MIT peers explicitly approved by the user. — Strict peer enforcement remains enabled without introducing paid services or broader dependency substitutions.
+- [Phase 02]: Place @types/react in feature-shell and @typespec/openapi in contract-generation, their narrowest real consumers. — Dependency ownership follows the design-to-feature-to-composition boundaries and avoids root-level leakage.
+- [Phase 02]: Leave pnpm-lock.yaml unchanged so deterministic lockfile resolution remains owned by Plan 02-31. — Plan 02-14 establishes reviewed manifests and ownership only; lock resolution remains a later atomic gate.
 
 ### Pending Todos
 
@@ -174,6 +178,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T23:23:53.073Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-07-28T00:08:31.489Z
+Stopped at: Completed 02-14-PLAN.md
 Resume file: None
