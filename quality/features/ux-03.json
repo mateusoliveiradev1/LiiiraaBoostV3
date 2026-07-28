@@ -1,0 +1,83 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-03-contextual-home",
+  "requirements": ["UX-03"],
+  "owner": "plan-02-28",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-03-trusted-home-gates",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-02|UX-03\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-03-home-evidence-disclosure",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-02|UX-03\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-03-home-semantics",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"shell states|accessibility\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-03-home-browser-axes",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/visual.spec.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-03-packaged-home-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-03-incomplete-home-resume",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-02|UX-03\"",
+          "file": "packages/feature-shell/src/features/shell-features.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-03-canonical-home-parity",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@route-scenario-smoke\"",
+          "file": "apps/desktop/tests/browser/scenarios.spec.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

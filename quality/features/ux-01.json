@@ -1,0 +1,104 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-01-installable-desktop-shell",
+  "requirements": ["UX-01"],
+  "owner": "plan-02-28",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-01-development-signature",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/signature.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-01-windows-10-image",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --environment quality/evidence/phase-02/environment --require-images-reviewed",
+          "file": "quality/evidence/phase-02/environment/windows-10-image.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-01-windows-11-image",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --environment quality/evidence/phase-02/environment --require-images-reviewed",
+          "file": "quality/evidence/phase-02/environment/windows-11-image.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-01-startup-redaction",
+          "command": "pnpm --filter @liiiraa/desktop test -- --run -t \"startup|installer handoff\"",
+          "file": "apps/desktop/src/features/startup.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-01-nvda-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/nvda.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-01-forced-colors-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/forced-colors.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-01-text-scale-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/text-scale-200.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-01-app-scale-observation",
+          "command": "node tooling/desktop-evidence/verify-packaged-wave-zero.mjs --manual quality/evidence/phase-02/manual --require-observed",
+          "file": "quality/evidence/phase-02/manual/app-scale-150.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-01-packaged-startup-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-01-install-startup-recovery",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke\"",
+          "file": "apps/desktop/tests/packaged/journeys.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
