@@ -78,6 +78,27 @@ describe('installer handoff', () => {
     expect(markup).toContain('No optimization has run');
   });
 
+  it('renders the complete handoff in PT-BR without leaking internal English copy', () => {
+    const markup = renderToStaticMarkup(
+      <InstallerHandoff identity={installer} locale="pt-BR" />,
+    );
+
+    expect(markup).toContain('Confira a instalação antes de começar');
+    expect(markup).toContain('Canal de desenvolvimento');
+    expect(markup).toContain(
+      'Atualizações automáticas desativadas nesta versão de desenvolvimento',
+    );
+    for (const englishCopy of [
+      'Development channel',
+      'Verify this installation',
+      'Updater disabled',
+      'No optimization has run',
+      '>development<',
+    ]) {
+      expect(markup).not.toContain(englishCopy);
+    }
+  });
+
   it('blocks unsupported or unverified identities without fabricating trust', () => {
     const markup = renderToStaticMarkup(
       <InstallerHandoff
@@ -99,7 +120,7 @@ describe('installer handoff', () => {
 
     expect(markup).toContain('incompatível');
     expect(markup).toContain('ainda não foi verificada');
-    expect(markup).toContain('disabled');
+    expect(markup).toContain('Nenhuma identidade de atualização assinada');
     expect(markup).not.toContain('confiável');
   });
 });
@@ -121,6 +142,15 @@ describe('startup', () => {
       expect(markup).toContain('Versão');
       expect(markup).not.toContain('placeholder');
       expect(markup).not.toContain('undefined');
+      for (const englishCopy of [
+        'Initializing the local Windows interface',
+        'Loading protected local preferences',
+        'Open Liiiraa Boost',
+        'Try again',
+        'Open safe mode',
+      ]) {
+        expect(markup).not.toContain(englishCopy);
+      }
       if (state.kind === 'failure') {
         expect(markup).toContain('role="alert"');
         expect(markup).toContain('Abrir suporte');

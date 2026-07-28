@@ -17,7 +17,7 @@ describe('UX-12 preferences', () => {
     expect(detectDesktopLocale('PT-br')).toBe('pt-BR');
     expect(detectDesktopLocale('pt-PT')).toBe('en-US');
     expect(detectDesktopLocale('en-US')).toBe('en-US');
-    expect(detectDesktopLocale(undefined)).toBe('en-US');
+    expect(detectDesktopLocale(undefined)).toBe('pt-BR');
   });
 
   it('implements D-18 and D-19 with Comfortable, System, and exit defaults', () => {
@@ -26,6 +26,7 @@ describe('UX-12 preferences', () => {
     expect(preferences).toEqual({
       version: PREFERENCE_VERSION,
       locale: 'pt-BR',
+      localeSource: 'automatic',
       interfaceScale: 100,
       motion: 'system',
       density: 'comfortable',
@@ -64,7 +65,11 @@ describe('UX-12 preferences', () => {
     const restored = restorePreferences(JSON.parse(JSON.stringify(persisted)), 'pt-BR');
     const serialized = JSON.stringify(persisted);
 
-    expect(restored).toEqual({ ok: true, preferences: changed });
+    expect(restored).toEqual({
+      ok: true,
+      migrated: false,
+      preferences: changed,
+    });
     expect(serialized).not.toContain('consent');
     expect(serialized).not.toContain('entitlement');
     expect(serialized).not.toContain('account');
@@ -107,6 +112,67 @@ describe('UX-12 preferences', () => {
       ok: false,
       reason: 'invalid-preferences',
       preferences: createDefaultPreferences('pt-BR'),
+    });
+  });
+
+  it('migrates legacy automatic English to PT-BR without losing benign preferences', () => {
+    const restored = restorePreferences(
+      {
+        version: 1,
+        locale: 'en-US',
+        interfaceScale: 125,
+        motion: 'reduced',
+        density: 'compact',
+        dataText: 'increased-contrast',
+        trayEnabled: true,
+      },
+      undefined,
+    );
+
+    expect(restored).toEqual({
+      ok: true,
+      migrated: true,
+      preferences: {
+        version: PREFERENCE_VERSION,
+        locale: 'pt-BR',
+        localeSource: 'automatic',
+        interfaceScale: 125,
+        motion: 'reduced',
+        density: 'compact',
+        dataText: 'increased-contrast',
+        trayEnabled: true,
+      },
+    });
+  });
+
+  it('keeps an explicit language choice in the current format', () => {
+    const restored = restorePreferences(
+      {
+        version: 3,
+        locale: 'en-US',
+        localeSource: 'explicit',
+        interfaceScale: 112.5,
+        motion: 'system',
+        density: 'comfortable',
+        dataText: 'standard',
+        trayEnabled: false,
+      },
+      'pt-BR',
+    );
+
+    expect(restored).toEqual({
+      ok: true,
+      migrated: false,
+      preferences: {
+        version: PREFERENCE_VERSION,
+        locale: 'en-US',
+        localeSource: 'explicit',
+        interfaceScale: 112.5,
+        motion: 'system',
+        density: 'comfortable',
+        dataText: 'standard',
+        trayEnabled: false,
+      },
     });
   });
 

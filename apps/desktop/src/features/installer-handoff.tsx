@@ -63,7 +63,7 @@ const SIGNATURE_COPY: Readonly<
   },
   invalid: {
     'en-US': 'Signature is invalid. Continuing is blocked.',
-    'pt-BR': 'A assinatura é inválida. A continuação está bloqueada.',
+    'pt-BR': 'A assinatura é inválida. Não é possível continuar.',
   },
   unknown: {
     'en-US': 'Publisher signature has not been verified.',
@@ -76,22 +76,33 @@ const UPDATE_COPY: Readonly<
 > = Object.freeze({
   'signed-manifest': {
     'en-US': 'Signed update manifest matches this publisher',
-    'pt-BR': 'O manifesto de atualização assinado corresponde a este publicador',
+    'pt-BR': 'A atualização assinada corresponde a este publicador',
   },
   disabled: {
     'en-US': 'Updater disabled for this development build',
-    'pt-BR': 'Atualizador desativado nesta compilação de desenvolvimento',
+    'pt-BR': 'Atualizações automáticas desativadas nesta versão de desenvolvimento',
   },
   invalid: {
     'en-US': 'Update identity is invalid. Updates remain disabled.',
     'pt-BR':
-      'A identidade de atualização é inválida. As atualizações continuam desativadas.',
+      'A assinatura da atualização é inválida. As atualizações continuam desativadas.',
   },
   unknown: {
     'en-US': 'No signed update identity is available.',
     'pt-BR': 'Nenhuma identidade de atualização assinada está disponível.',
   },
 });
+
+const COMPATIBILITY_REASON_COPY = Object.freeze({
+  'unsupported-build': {
+    'en-US': 'unsupported Windows build',
+    'pt-BR': 'versão do Windows sem suporte',
+  },
+  'unsupported-lifecycle': {
+    'en-US': 'unsupported Windows lifecycle',
+    'pt-BR': 'ciclo de suporte do Windows encerrado',
+  },
+} satisfies Readonly<Record<string, LocalizedCopy>>);
 
 const defaultSignatureState = (
   channel: ShellReleaseChannelJson,
@@ -127,7 +138,7 @@ export const InstallerHandoff = ({
         })
       : copy(locale, {
           'en-US': `Unsupported Windows build ${String(compatibility.detectedBuild)} (minimum ${String(compatibility.minimumBuild)}; ${compatibility.reason})`,
-          'pt-BR': `Compilação do Windows incompatível ${String(compatibility.detectedBuild)} (mínima ${String(compatibility.minimumBuild)}; ${compatibility.reason})`,
+          'pt-BR': `Windows incompatível: compilação ${String(compatibility.detectedBuild)}. É necessária a compilação ${String(compatibility.minimumBuild)} ou mais recente (${copy(locale, COMPATIBILITY_REASON_COPY[compatibility.reason])}).`,
         });
 
   return (
@@ -144,7 +155,7 @@ export const InstallerHandoff = ({
         <h1 id="installer-handoff-title">
           {copy(locale, {
             'en-US': 'Verify this installation before first launch',
-            'pt-BR': 'Verifique esta instalação antes da primeira abertura',
+            'pt-BR': 'Confira a instalação antes de começar',
           })}
         </h1>
         <p>
@@ -168,7 +179,7 @@ export const InstallerHandoff = ({
         </div>
         <div>
           <dt>{copy(locale, { 'en-US': 'Channel', 'pt-BR': 'Canal' })}</dt>
-          <dd>{identity.channel}</dd>
+          <dd>{copy(locale, CHANNEL_COPY[identity.channel])}</dd>
         </div>
         <div>
           <dt>

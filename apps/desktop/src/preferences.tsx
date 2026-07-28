@@ -30,6 +30,10 @@ import {
 } from './locales/i18n.js';
 
 export const DESKTOP_PREFERENCES_STORAGE_KEY =
+  'liiiraa.desktop.preferences.v3' as const;
+export const PREVIOUS_DESKTOP_PREFERENCES_STORAGE_KEY =
+  'liiiraa.desktop.preferences.v2' as const;
+export const LEGACY_DESKTOP_PREFERENCES_STORAGE_KEY =
   'liiiraa.desktop.preferences.v1' as const;
 
 export interface DesktopPreferenceStorage {
@@ -77,12 +81,21 @@ export const loadDesktopPreferences = (
   }
 
   try {
-    const serialized = storage.getItem(DESKTOP_PREFERENCES_STORAGE_KEY);
-    if (serialized === null) {
-      return defaults;
+    for (const key of [
+      DESKTOP_PREFERENCES_STORAGE_KEY,
+      PREVIOUS_DESKTOP_PREFERENCES_STORAGE_KEY,
+      LEGACY_DESKTOP_PREFERENCES_STORAGE_KEY,
+    ]) {
+      const serialized = storage.getItem(key);
+      if (serialized !== null) {
+        return restorePreferences(
+          JSON.parse(serialized),
+          windowsLocale,
+        ).preferences;
+      }
     }
 
-    return restorePreferences(JSON.parse(serialized), windowsLocale).preferences;
+    return defaults;
   } catch {
     return defaults;
   }
