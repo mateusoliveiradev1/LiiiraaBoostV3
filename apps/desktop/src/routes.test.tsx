@@ -8,6 +8,11 @@ import {
   routeFromValidatedShellNavigationIntent,
   type ShellNavigationIntent,
 } from './routes.js';
+import {
+  DESKTOP_TEST_SCENARIO_STORAGE_KEY,
+  DesktopCompositionRefusedError,
+  createDesktopComposition,
+} from './composition.js';
 
 const EXPECTED_ROUTE_PATTERNS = Object.freeze([
   '/',
@@ -227,5 +232,138 @@ describe('routes: keyboard, focus, announcements, and browser history', () => {
       });
     }
     expect(focusRegion.mock.calls.map(([region]) => region)).toEqual(DESKTOP_F6_REGIONS);
+  });
+});
+
+describe('composition: D-20 S01 clean start and remembered test selection', () => {
+  const createStorage = (initial?: Readonly<Record<string, string>>) => {
+    const values = new Map(Object.entries(initial ?? {}));
+    return {
+      values,
+      storage: {
+        getItem: vi.fn((key: string) => values.get(key) ?? null),
+        setItem: vi.fn((key: string, value: string) => {
+          values.set(key, value);
+        }),
+      },
+    };
+  };
+
+  it.each(['development', 'test'] as const)(
+    'starts a clean %s composition at S01 first calibration',
+    (mode) => {
+      const { storage } = createStorage();
+      const composition = createDesktopComposition({ mode, storage });
+
+      expect(composition).toMatchObject({
+        mode,
+        initialPath: '/calibration/welcome',
+      });
+      expect(composition.scenarioSelection.current()).toBe('S01');
+      expect(storage.setItem).not.toHaveBeenCalled();
+    },
+  );
+
+  it('remembers only a later validated test scenario selection', () => {
+    const { storage, values } = createStorage();
+    const composition = createDesktopComposition({ mode: 'development', storage });
+
+    expect(composition.scenarioSelection.select('S15')).toEqual({ ok: true, value: 'S15' });
+    expect(values).toEqual(new Map([[DESKTOP_TEST_SCENARIO_STORAGE_KEY, 'S15']]));
+
+    const resumed = createDesktopComposition({ mode: 'development', storage });
+    expect(resumed.scenarioSelection.current()).toBe('S15');
+    expect(resumed.scenarioSelection.select('S99')).toMatchObject({
+      ok: false,
+      error: { code: 'INVALID_TEST_SCENARIO' },
+    });
+    expect(values).toEqual(new Map([[DESKTOP_TEST_SCENARIO_STORAGE_KEY, 'S15']]));
+  });
+
+  it('ignores corrupt persisted selection and restores safe S01 without rewriting storage', () => {
+    const { storage } = createStorage({
+      [DESKTOP_TEST_SCENARIO_STORAGE_KEY]: '../fixture',
+    });
+    const composition = createDesktopComposition({ mode: 'test', storage });
+
+    expect(composition.scenarioSelection.current()).toBe('S01');
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+});
+
+describe('composition: production unavailable reference and fixture refusal', () => {
+  const productionOptions = {
+    clock: () => '2030-01-15T18:00:00.000Z',
+    inspectionIds: () => 'production-unavailable-0001',
+  };
+
+  it('uses the fail-closed public production reference without scenario storage', () => {
+    const storage = {
+      getItem: vi.fn(() => 'S15'),
+      setItem: vi.fn(),
+    };
+    const composition = createDesktopComposition({
+      mode: 'production',
+      productionOptions,
+    });
+
+    expect(composition.mode).toBe('production');
+    expect(composition.client.identity.adapterId).toBe(
+      'liiiraa-desktop-production-unavailable',
+    );
+    expect(composition.client.schemaVersion).toBe('1.0');
+    expect(storage.getItem).not.toHaveBeenCalled();
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+
+  it('refuses fixture identity before production startup even when JavaScript bypasses types', () => {
+    expect(() =>
+      createDesktopComposition({
+        mode: 'production',
+        productionOptions,
+        productionReferenceFactory: () => ({
+          mode: 'production',
+          client: {
+            identity: {
+              adapterId: 'liiiraa-desktop-simulator',
+              adapterVersion: '2.0.0',
+            },
+            schemaVersion: '1.0',
+            capabilities: [],
+            inspectSystem: vi.fn(),
+          },
+        }),
+      }),
+    ).toThrowError(
+      expect.objectContaining<Partial<DesktopCompositionRefusedError>>({
+        code: 'FIXTURE_IDENTITY_REFUSED',
+      }),
+    );
+  });
+
+  it('refuses nested fixture provenance at the runtime composition boundary', () => {
+    expect(() =>
+      createDesktopComposition({
+        mode: 'production',
+        productionOptions,
+        productionReferenceFactory: () => ({
+          mode: 'production',
+          client: {
+            identity: {
+              adapterId: 'liiiraa-desktop-production-unavailable',
+              adapterVersion: '1.0.0',
+            },
+            schemaVersion: '1.0',
+            capabilities: [],
+            fixtureVersion: 'forbidden',
+            inspectSystem: vi.fn(),
+          },
+        }),
+      }),
+    ).toThrowError(
+      expect.objectContaining<Partial<DesktopCompositionRefusedError>>({
+        code: 'FIXTURE_PROVENANCE_REFUSED',
+      }),
+    );
   });
 });
