@@ -40,15 +40,18 @@
   --lb-weight-regular: 400;
   --lb-weight-semibold: 600;
 
-  --lb-surface-canvas: #090b0f;
-  --lb-surface-inset: #0b0e13;
-  --lb-surface-work: #121722;
-  --lb-surface-raised: #181f2c;
-  --lb-cobalt-action: #315acd;
-  --lb-cobalt-signal: #7ea0ff;
-  --lb-text-primary: #f4f7fb;
-  --lb-text-secondary: #aab4c4;
-  --lb-text-tertiary: #7d899b;
+  --lb-surface-canvas: #050608;
+  --lb-surface-inset: #080a0e;
+  --lb-surface-work: #0b0e13;
+  --lb-surface-raised: #10141b;
+  --lb-cobalt-action: #78c9eb;
+  --lb-cobalt-signal: #8fd8f5;
+  --lb-text-primary: #f3f5f7;
+  --lb-text-secondary: #a6abb3;
+  --lb-text-tertiary: #878e98;
+  --lb-line-subtle: #1c222b;
+  --lb-line-strong: #2d3540;
+  --lb-focus-ring: #a4ddf4;
   --lb-line-subtle: #2a3343;
   --lb-line-strong: #3d4a60;
   --lb-focus-ring: #8eabff;

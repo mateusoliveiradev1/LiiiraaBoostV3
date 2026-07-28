@@ -21,8 +21,9 @@ test('@browser-smoke lists the deterministic harness without launching a browser
     scenarioMarker: DESKTOP_SCENARIO_MARKER,
     viewportAxes: 4,
   });
-  expect(new Set(projectNames).size).toBe(146);
+  expect(new Set(projectNames).size).toBe(147);
   expect(projectNames).toContain('harness');
+  expect(projectNames).toContain('chromium');
   expect(projectNames).toContain('storybook');
   expect(projectNames).toContain('browser-1440x900-pt-BR-scale-100-responsive-normal');
   expect(projectNames).toContain('browser-760x600-pseudo-scale-150-reduced-forced');

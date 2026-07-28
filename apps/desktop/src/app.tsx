@@ -677,6 +677,23 @@ export const DesktopRouteOutlet = ({
           calibration={READY_CALIBRATION}
           claims={createHomeClaims(locale)}
           locale={locale}
+          nextAction={{
+            consequence:
+              locale === 'pt-BR'
+                ? 'Nenhuma alteração será aplicada antes da sua confirmação.'
+                : 'No change will be applied before your confirmation.',
+            cta: locale === 'pt-BR' ? 'Executar otimização' : 'Run optimization',
+            evidence:
+              locale === 'pt-BR' ? 'Cenário demonstrativo local.' : 'Local demonstration scenario.',
+            onPress: () => {
+              navigate('/improve');
+            },
+            reason:
+              locale === 'pt-BR'
+                ? 'O plano está disponível para revisão.'
+                : 'The plan is available for review.',
+            title: locale === 'pt-BR' ? 'Plano recomendado' : 'Recommended plan',
+          }}
           scenarioId={scenarioId}
           variant="ready"
         />
@@ -1150,44 +1167,37 @@ const DesktopAppContent = ({
     () => [
       {
         id: 'home',
-        label: formatMessage(preferences.locale, 'navigation.home'),
+        label: preferences.locale === 'pt-BR' ? 'Visão geral' : 'Overview',
         onPress: () => {
           navigate('/home');
         },
       },
       {
-        id: 'prepare',
-        label: formatMessage(preferences.locale, 'navigation.prepare'),
-        onPress: () => {
-          navigate('/prepare');
-        },
-      },
-      {
         id: 'improve',
-        label: formatMessage(preferences.locale, 'navigation.improve'),
+        label: preferences.locale === 'pt-BR' ? 'Otimização' : 'Optimization',
         onPress: () => {
           navigate('/improve');
         },
       },
       {
+        id: 'prepare',
+        label: preferences.locale === 'pt-BR' ? 'Jogos' : 'Games',
+        onPress: () => {
+          navigate('/prepare');
+        },
+      },
+      {
         id: 'measure',
-        label: formatMessage(preferences.locale, 'navigation.measure'),
+        label: preferences.locale === 'pt-BR' ? 'Desempenho' : 'Performance',
         onPress: () => {
           navigate('/measure/overview');
         },
       },
       {
         id: 'recover',
-        label: formatMessage(preferences.locale, 'navigation.recover'),
+        label: preferences.locale === 'pt-BR' ? 'Recuperação' : 'Recovery',
         onPress: () => {
           navigate('/recover/overview');
-        },
-      },
-      {
-        id: 'assistant',
-        label: formatMessage(preferences.locale, 'navigation.assistant'),
-        onPress: () => {
-          navigate('/assistant');
         },
       },
     ],
@@ -1197,15 +1207,8 @@ const DesktopAppContent = ({
   const utilities = useMemo(
     () => [
       {
-        id: 'account',
-        label: formatMessage(preferences.locale, 'navigation.account'),
-        onPress: () => {
-          navigate('/account/overview');
-        },
-      },
-      {
         id: 'settings',
-        label: formatMessage(preferences.locale, 'navigation.settings'),
+        label: preferences.locale === 'pt-BR' ? 'Configurações' : 'Settings',
         onPress: () => {
           navigate('/settings/general');
         },
@@ -1216,7 +1219,24 @@ const DesktopAppContent = ({
 
   const commandItems = useMemo(
     () =>
-      [...goals, ...utilities].map((item) => ({
+      [
+        ...goals,
+        ...utilities,
+        {
+          id: 'assistant',
+          label: preferences.locale === 'pt-BR' ? 'Assistente' : 'Assistant',
+          onPress: () => {
+            navigate('/assistant');
+          },
+        },
+        {
+          id: 'account',
+          label: preferences.locale === 'pt-BR' ? 'Conta' : 'Account',
+          onPress: () => {
+            navigate('/account/overview');
+          },
+        },
+      ].map((item) => ({
         id: item.id,
         label: item.label,
         onAction: () => {
@@ -1225,7 +1245,7 @@ const DesktopAppContent = ({
           restoreOverlayFocus();
         },
       })),
-    [goals, restoreOverlayFocus, utilities],
+    [goals, navigate, preferences.locale, restoreOverlayFocus, utilities],
   );
 
   const layout = getResponsiveShellLayout(measuredWidth);
@@ -1295,18 +1315,22 @@ const DesktopAppContent = ({
         data-lb-region
       >
         <StatusSignal detail={presentation.reason} locale={locale} state={operationalState} />
-        <LbButton
-          onPress={() => {
-            navigate(
-              operationalState === 'recovery'
-                ? '/recover/emergency'
-                : '/documentation/local-operational-state',
-            );
-          }}
-          variant="quiet"
-        >
-          {presentation.action}
-        </LbButton>
+        {route.pathname === '/home' ? (
+          <span>{presentation.action}</span>
+        ) : (
+          <LbButton
+            onPress={() => {
+              navigate(
+                operationalState === 'recovery'
+                  ? '/recover/emergency'
+                  : '/documentation/local-operational-state',
+              );
+            }}
+            variant="quiet"
+          >
+            {presentation.action}
+          </LbButton>
+        )}
       </section>
 
       <div className="desktop-shell-body">

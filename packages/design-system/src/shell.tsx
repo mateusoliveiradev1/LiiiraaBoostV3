@@ -11,6 +11,7 @@ import {
   PanelRight,
   Search,
   Settings,
+  ShieldCheck,
   Sparkles,
   UserRound,
   X,
@@ -183,6 +184,10 @@ export const GoalRail = ({ activeId, goals, locale = 'en', utilities = [] }: Goa
         orientation="vertical"
       >
         <GoalButtons activeId={activeId} items={utilities} />
+        <p className="lb-goal-safety">
+          <ShieldCheck aria-hidden="true" />
+          <span>{locale === 'pt-BR' ? 'Sistema protegido' : 'System protected'}</span>
+        </p>
       </Toolbar>
     ) : null}
   </nav>

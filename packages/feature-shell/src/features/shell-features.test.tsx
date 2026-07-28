@@ -360,6 +360,38 @@ describe('UX-02 UX-03 shell states and accessibility', () => {
     expect(markup).toContain('Retry');
     expect(markup).not.toContain('Forbidden recommendation');
   });
+
+  it('renders the approved dark Home contract with explicitly simulated evidence', () => {
+    const markup = renderToStaticMarkup(
+      <ContextualHome
+        calibration={readyCalibration}
+        claims={claims}
+        locale="pt-BR"
+        nextAction={{
+          consequence: 'Nada será aplicado sem confirmação.',
+          cta: 'Executar otimização',
+          evidence: 'Cenário local.',
+          reason: 'Plano disponível.',
+          title: 'Plano recomendado',
+        }}
+        scenarioId="S01"
+        selectedGame={selectedGame}
+        variant="ready"
+      />,
+    );
+
+    expect(markup).toContain('Sistema pronto para desempenho máximo');
+    expect(markup).toContain('Cenário simulado');
+    expect(markup).toContain('92');
+    expect(markup).toContain('/ 100');
+    expect(markup).toContain('Telemetria');
+    expect(markup).toContain('Métricas demonstrativas');
+    expect(markup).toContain('Plano recomendado');
+    expect(markup).toContain('Prioridade de jogo');
+    expect(markup).toContain('Alterações seguras e reversíveis');
+    expect(markup).not.toContain('health score');
+    expect(semanticAudit(markup)).toEqual([]);
+  });
 });
 
 describe('UX-05 UX-06 UX-08 UX-09 keyboard and policy interactions', () => {
