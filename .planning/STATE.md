@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-07-28T05:28:08.827Z"
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-07-28T05:41:22.447Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 40
+  completed_plans: 41
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 11 of 33
+Plan: 12 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -95,6 +95,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P23 | 18min | 2 tasks | 9 files |
 | Phase 02 P05 | 29min | 3 tasks | 13 files |
 | Phase 02 P06 | 13min | 3 tasks | 5 files |
+| Phase 02 P07 | 7min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -212,6 +213,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Publish the authored stylesheet through ./tokens.css and declare CSS side effects. — Consumers receive the visual contract without bundlers tree-shaking it.
 - [Phase 02]: Persist only versioned product-owned calibration snapshots — XState actor internals and raw diagnostic values never cross the persistence boundary.
 - [Phase 02]: Gate global recommendations only on trust and inventory — Optional evidence remains resumable and blocks only its dependent action.
+- [Phase 02]: Rank command results by contextual relevance, exact label, prefix, then stable label and ID ordering; review-required results navigate only to full review.
+- [Phase 02]: Generate Windows notifications from a closed actionable-category map with fixed safe copy instead of forwarding event or hardware detail.
+- [Phase 02]: Persist only an exact versioned benign preference shape; unknown, corrupt, consent, entitlement, or account fields restore safe defaults.
 
 ### Pending Todos
 
@@ -235,6 +239,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T05:27:48.728Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-07-28T05:41:22.443Z
+Stopped at: Completed 02-07-PLAN.md
 Resume file: None
