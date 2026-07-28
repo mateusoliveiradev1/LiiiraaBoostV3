@@ -423,7 +423,10 @@ fn tray_lifecycle_requires_validated_opt_in_or_an_active_safety_workflow() {
 
     let effects = lifecycle.set_safety_workflow_active(false);
     assert!(!lifecycle.is_visible());
-    assert!(matches!(effects.as_slice(), [TrayEffect::SetVisible(false)]));
+    assert!(matches!(
+        effects.as_slice(),
+        [TrayEffect::SetVisible(false)]
+    ));
 }
 
 #[test]
@@ -509,10 +512,7 @@ fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
     let open = lifecycle
         .handle_menu_action(
             "tray-open",
-            HostEventMetadata::fixed(
-                "request-tray-open-0001",
-                "2026-07-28T12:00:00.000Z",
-            ),
+            HostEventMetadata::fixed("request-tray-open-0001", "2026-07-28T12:00:00.000Z"),
         )
         .expect("allowlisted tray open action");
     let event = open
@@ -533,13 +533,13 @@ fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
     let exit = lifecycle
         .handle_menu_action(
             "tray-exit-interface",
-            HostEventMetadata::fixed(
-                "request-tray-exit-0001",
-                "2026-07-28T12:00:00.000Z",
-            ),
+            HostEventMetadata::fixed("request-tray-exit-0001", "2026-07-28T12:00:00.000Z"),
         )
         .expect("allowlisted tray exit action");
-    assert!(exit.iter().any(|effect| matches!(effect, TrayEffect::ExitInterface)));
+    assert!(
+        exit.iter()
+            .any(|effect| matches!(effect, TrayEffect::ExitInterface))
+    );
     assert!(exit.iter().any(|effect| {
         matches!(
             effect,
@@ -554,10 +554,7 @@ fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
     assert!(matches!(
         lifecycle.handle_menu_action(
             "tray-run-arbitrary-command",
-            HostEventMetadata::fixed(
-                "request-tray-rejected-0001",
-                "2026-07-28T12:00:00.000Z",
-            )
+            HostEventMetadata::fixed("request-tray-rejected-0001", "2026-07-28T12:00:00.000Z",)
         ),
         Err(TrayLifecycleError::UnknownAction)
     ));

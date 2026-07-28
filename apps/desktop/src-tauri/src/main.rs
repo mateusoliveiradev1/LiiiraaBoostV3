@@ -1,4 +1,5 @@
 mod navigation;
+mod tray;
 mod window;
 
 use std::sync::Mutex;
@@ -13,10 +14,15 @@ use navigation::{
 };
 use serde::Serialize;
 use serde_json::Value;
+use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::tray::{TrayIconBuilder, TrayIconId};
 use tauri::{
     AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
+use tray::{
+    TRAY_ID, TrayEffect, TrayLifecycle, TrayMenuContext, TrayMenuEntryKind, tray_menu_model,
+};
 use window::{
     CloseAction, HOST_EVENT_CHANNEL, HostEventMetadata, WindowEffect, WindowLifecycle,
     WindowLifecycleError, WorkArea,
@@ -75,8 +81,10 @@ impl ShellContract {
 fn dispatch_shell_command(
     app: AppHandle,
     lifecycle: State<'_, Mutex<WindowLifecycle>>,
+    tray_lifecycle: State<'_, Mutex<TrayLifecycle>>,
     message: Value,
 ) -> Result<RendererToHostShellCommand, ShellDispatchError> {
+    let command = ShellContract::dispatch_renderer_command(&message)?;
     let work_area = current_work_area(&app)?;
     let dispatch = lifecycle
         .lock()
@@ -84,8 +92,22 @@ fn dispatch_shell_command(
         .dispatch_renderer_message(&message, &work_area)
         .map_err(map_window_error)?;
 
+    let tray_effects = if matches!(
+        &command,
+        RendererToHostShellCommand::SetTrayPreferenceCommand(_)
+    ) {
+        tray_lifecycle
+            .lock()
+            .map_err(|_| ShellDispatchError::HostOperationFailed)?
+            .dispatch_renderer_message(&message)
+            .map_err(|_| ShellDispatchError::ContractRejected)?
+    } else {
+        Vec::new()
+    };
+
     apply_window_effects(&app, dispatch.effects)?;
-    Ok(dispatch.command)
+    apply_tray_effects(&app, tray_effects)?;
+    Ok(command)
 }
 
 fn current_work_area(app: &AppHandle) -> Result<WorkArea, ShellDispatchError> {
@@ -220,6 +242,105 @@ fn emit_navigation_event(
         .map_err(|_| ShellDispatchError::HostOperationFailed)
 }
 
+fn apply_tray_effects(app: &AppHandle, effects: Vec<TrayEffect>) -> Result<(), ShellDispatchError> {
+    for effect in effects {
+        match effect {
+            TrayEffect::SetVisible(true) => ensure_native_tray(app)?,
+            TrayEffect::SetVisible(false) => {
+                let tray_id = TrayIconId::new(TRAY_ID);
+                if let Some(tray) = app.tray_by_id(&tray_id) {
+                    tray.set_visible(false)
+                        .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+                }
+            }
+            TrayEffect::Emit(event) => {
+                if matches!(event, HostToRendererShellEvent::NavigationRequestedEvent(_)) {
+                    focus_main_window(app)?;
+                }
+                app.emit(HOST_EVENT_CHANNEL, event)
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+            }
+            TrayEffect::ExitInterface => app.exit(0),
+        }
+    }
+
+    Ok(())
+}
+
+fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
+    let tray_id = TrayIconId::new(TRAY_ID);
+    if let Some(tray) = app.tray_by_id(&tray_id) {
+        let tooltip = app
+            .state::<Mutex<TrayLifecycle>>()
+            .lock()
+            .map_err(|_| ShellDispatchError::HostOperationFailed)?
+            .tooltip();
+        tray.set_tooltip(Some(tooltip))
+            .and_then(|()| tray.set_visible(true))
+            .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+        return Ok(());
+    }
+
+    let menu_context = TrayMenuContext::default();
+    let mut menu = MenuBuilder::new(app);
+    for entry in tray_menu_model(&menu_context)
+        .into_iter()
+        .filter(|entry| entry.visible)
+    {
+        match entry.kind {
+            TrayMenuEntryKind::Separator => {
+                menu = menu.separator();
+            }
+            TrayMenuEntryKind::Action | TrayMenuEntryKind::Status => {
+                let id = entry
+                    .id
+                    .unwrap_or_else(|| "tray-current-profile-state".to_owned());
+                let item = MenuItemBuilder::with_id(id, entry.label)
+                    .enabled(entry.enabled)
+                    .build(app)
+                    .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+                menu = menu.item(&item);
+            }
+        }
+    }
+    let menu = menu
+        .build()
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+    let tooltip = app
+        .state::<Mutex<TrayLifecycle>>()
+        .lock()
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?
+        .tooltip();
+    let mut builder = TrayIconBuilder::with_id(tray_id)
+        .menu(&menu)
+        .tooltip(tooltip)
+        .on_menu_event(|app, event| {
+            let effects = app
+                .state::<Mutex<TrayLifecycle>>()
+                .lock()
+                .ok()
+                .and_then(|lifecycle| {
+                    lifecycle
+                        .handle_menu_action(
+                            event.id().as_ref(),
+                            HostEventMetadata::now("tray-action"),
+                        )
+                        .ok()
+                });
+            if let Some(effects) = effects {
+                let _ = apply_tray_effects(app, effects);
+            }
+        });
+    if let Some(icon) = app.default_window_icon().cloned() {
+        builder = builder.icon(icon);
+    }
+    builder
+        .build(app)
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+
+    Ok(())
+}
+
 fn build_profile() -> BuildProfile {
     if cfg!(debug_assertions) {
         BuildProfile::Development
@@ -235,6 +356,7 @@ fn run() -> Result<(), String> {
 
     tauri::Builder::default()
         .manage(Mutex::new(WindowLifecycle::default()))
+        .manage(Mutex::new(TrayLifecycle::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, arguments, _cwd| {
                 let _ = focus_main_window(app);
