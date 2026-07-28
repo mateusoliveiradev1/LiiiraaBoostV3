@@ -1,6 +1,6 @@
 import type { ShellNavigationIntentJson } from '@liiiraa/feature-shell';
 
-export type ShellNavigationIntent = ShellNavigationIntentJson;
+export type { ShellNavigationIntentJson as ShellNavigationIntent } from '@liiiraa/feature-shell';
 
 export const DESKTOP_F6_REGIONS = Object.freeze([
   'title-bar',
@@ -331,7 +331,7 @@ const GOAL_PATHS = Object.freeze({
   measure: '/measure/overview',
   prepare: '/prepare',
   recover: '/recover/overview',
-} satisfies Record<Extract<ShellNavigationIntent, { kind: 'goal' }>['destination'], string>);
+} satisfies Record<Extract<ShellNavigationIntentJson, { kind: 'goal' }>['destination'], string>);
 
 const SETTINGS_PATHS = Object.freeze({
   accessibility: '/settings/accessibility',
@@ -342,7 +342,10 @@ const SETTINGS_PATHS = Object.freeze({
   notifications: '/settings/notifications',
   privacy: '/settings/privacy',
   updates: '/settings/updates',
-} satisfies Record<Extract<ShellNavigationIntent, { kind: 'settings' }>['destination'], string>);
+} satisfies Record<
+  Extract<ShellNavigationIntentJson, { kind: 'settings' }>['destination'],
+  string
+>);
 
 const CALIBRATION_PATHS = Object.freeze({
   diagnosis: '/calibration/diagnosis',
@@ -353,10 +356,13 @@ const CALIBRATION_PATHS = Object.freeze({
   summary: '/calibration/summary',
   trust: '/calibration/trust',
   welcome: '/calibration/welcome',
-} satisfies Record<Extract<ShellNavigationIntent, { kind: 'calibration' }>['destination'], string>);
+} satisfies Record<
+  Extract<ShellNavigationIntentJson, { kind: 'calibration' }>['destination'],
+  string
+>);
 
 export const routeFromValidatedShellNavigationIntent = (
-  intent: ShellNavigationIntent,
+  intent: ShellNavigationIntentJson,
 ): DesktopRouteResult => {
   let path: string | undefined;
   switch (intent.kind) {
