@@ -774,16 +774,20 @@ export const verifyWaveZero = (snapshot, { referenceCatalog = snapshot.catalog }
   };
 };
 
+export const runMutationSuite = (_snapshot) => {
+  fail('MUTATION_SUITE_IMPLEMENTATION_REQUIRED', 'Wave 0 omission mutations are not implemented.');
+};
+
 const parseArguments = (arguments_) => {
   if (
     arguments_.length !== 3 ||
     arguments_[0] !== '--mode' ||
     arguments_[1] !== 'planned' ||
-    arguments_[2] !== '--smoke'
+    !['--smoke', '--mutations'].includes(arguments_[2])
   ) {
-    fail('CLI_USAGE', 'expected --mode planned --smoke.');
+    fail('CLI_USAGE', 'expected --mode planned --smoke|--mutations.');
   }
-  return { mode: 'planned', selector: 'smoke' };
+  return { mode: 'planned', selector: arguments_[2].slice(2) };
 };
 
 const isDirectExecution =
@@ -792,8 +796,10 @@ const isDirectExecution =
 
 if (isDirectExecution) {
   try {
-    parseArguments(process.argv.slice(2));
-    const result = verifyWaveZero(await loadWaveZeroSnapshot());
+    const options = parseArguments(process.argv.slice(2));
+    const snapshot = await loadWaveZeroSnapshot();
+    const result =
+      options.selector === 'smoke' ? verifyWaveZero(snapshot) : runMutationSuite(snapshot);
     if (!result.ok) {
       fail('VERIFY_FAILED', JSON.stringify(result.diagnostics));
     }
