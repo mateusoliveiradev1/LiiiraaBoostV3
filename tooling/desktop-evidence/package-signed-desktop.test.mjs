@@ -16,8 +16,6 @@ const hashA = 'A'.repeat(64);
 const hashB = 'B'.repeat(64);
 const thumbprint = 'C'.repeat(40);
 
-const clone = (value) => JSON.parse(JSON.stringify(value));
-
 const runCli = (...arguments_) =>
   spawnSync(process.execPath, [workflowPath, ...arguments_], {
     cwd: workspaceRoot,

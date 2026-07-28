@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-unsigned-ci-build",
+  "artifactClass": "unsigned-ci",
+  "generatedAt": "2026-07-28T15:30:43.979Z",
+  "ci": {
+    "privateKeyAccess": false,
+    "signed": false,
+    "stagingAllowed": false,
+    "publishingAllowed": false,
+    "promotionAllowed": false,
+    "releaseReady": false,
+    "productionReady": false,
+    "distributionAllowed": false
+  },
+  "artifacts": [
+    {
+      "kind": "installer",
+      "path": "target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe",
+      "signatureStatus": "NotSigned",
+      "sha256": "B244E80A41BF3A53BA43D300B9656B6495F6ADAD8B70C3B8473D1C56CAB9038E",
+      "sizeBytes": 4501309
+    },
+    {
+      "kind": "executable",
+      "path": "target/release/liiiraa-desktop.exe",
+      "signatureStatus": "NotSigned",
+      "sha256": "29EA60209F982040B5FFB1DE2525CD64CD62BB2FC3A0A8681894AAF707EA24E7",
+      "sizeBytes": 23304192
+    }
+  ],
+  "labels": ["development-only", "unsigned", "non-promotable"]
+}

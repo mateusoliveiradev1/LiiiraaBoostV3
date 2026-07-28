@@ -1,5 +1,4 @@
 import {
-  appendFileSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -10,8 +9,9 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import { tmpdir } from 'node:os';
-import { basename, dirname, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
@@ -583,7 +583,7 @@ $cert = Get-ChildItem -Path Cert:\\CurrentUser\\My |
     $_.Subject -eq $subject -and
     $_.HasPrivateKey -and
     $_.NotAfter -gt (Get-Date).AddDays(30) -and
-    ($_.EnhancedKeyUsageList.ObjectId.Value -contains $eku)
+    (($_.EnhancedKeyUsageList | ForEach-Object { [string]$_.ObjectId }) -contains $eku)
   } |
   Sort-Object NotAfter -Descending |
   Select-Object -First 1
@@ -597,8 +597,11 @@ if ($null -eq $cert) {
     -CertStoreLocation 'Cert:\\CurrentUser\\My' \
     -Provider ${quotePowerShell(keyProvider)} \
     -KeyExportPolicy NonExportable \
-    -KeySpec Signature \
     -NotAfter (Get-Date).AddYears(2)
+}
+$actualEkus = @($cert.EnhancedKeyUsageList | ForEach-Object { [string]$_.ObjectId })
+if ($actualEkus -notcontains $eku) {
+  throw 'The certificate does not carry the code-signing EKU.'
 }
 $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
 if ($rsa -isnot [System.Security.Cryptography.RSACng]) {
@@ -630,12 +633,16 @@ $exportable = ([string]$rsa.Key.ExportPolicy) -match 'AllowExport'
 };
 
 const buildDesktop = () => {
-  const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-  runCommand(
-    pnpmCommand,
-    ['--filter', '@liiiraa/desktop', 'exec', 'tauri', 'build'],
-    'pinned Tauri desktop build',
-  );
+  const pnpmArguments = ['--filter', '@liiiraa/desktop', 'exec', 'tauri', 'build'];
+  if (process.platform === 'win32') {
+    runCommand(
+      process.env.ComSpec ?? 'cmd.exe',
+      ['/d', '/c', 'pnpm.cmd', ...pnpmArguments],
+      'pinned Tauri desktop build',
+    );
+    return;
+  }
+  runCommand('pnpm', pnpmArguments, 'pinned Tauri desktop build');
 };
 
 const inspectAuthenticode = (path) => {
@@ -707,7 +714,12 @@ const assertTamperRejected = (path) => {
   const tamperedPath = join(directory, basename(path));
   try {
     copyFileSync(path, tamperedPath);
-    appendFileSync(tamperedPath, Buffer.from([0]));
+    const bytes = readFileSync(tamperedPath);
+    if (bytes.length < 3) {
+      fail(`tamper check input is unexpectedly short for ${basename(path)}.`);
+    }
+    bytes[2] ^= 1;
+    writeFileSync(tamperedPath, bytes);
     const inspection = inspectAuthenticode(tamperedPath);
     if (inspection.status !== 'HashMismatch') {
       fail(`tamper check was not rejected for ${basename(path)}.`);
@@ -727,6 +739,20 @@ const requireBuildArtifacts = (identity) => {
     }
   }
   return artifacts;
+};
+
+const removeExpectedBuildArtifacts = (identity) => {
+  for (const artifact of expectedArtifacts(identity)) {
+    rmSync(artifact.path, { force: true });
+  }
+};
+
+const cleanUnsignedCiBuildArtifacts = () => {
+  runCommand(
+    'cargo',
+    ['clean', '--manifest-path', cargoManifestPath],
+    'clean unsigned CI workspace build artifacts',
+  );
 };
 
 const writeJson = (path, value) => {
@@ -887,6 +913,8 @@ const executeUnsignedCi = (options) => {
   }
   assertNoSigningSecretsInEnvironment();
   const identity = readPinnedBuildIdentity();
+  cleanUnsignedCiBuildArtifacts();
+  removeExpectedBuildArtifacts(identity);
   buildDesktop();
   const artifacts = requireBuildArtifacts(identity).map((artifact) => {
     const inspection = inspectAuthenticode(artifact.path);
