@@ -220,9 +220,9 @@ export const ContextualHome = ({
         }
         title={isPtBr ? 'Início contextual' : 'Contextual Home'}
       />
-      <h1 className="lb-visually-hidden" id="contextual-home-title">
+      <span className="lb-visually-hidden" id="contextual-home-title">
         {isPtBr ? 'Início contextual' : 'Contextual Home'}
-      </h1>
+      </span>
 
       <section aria-label={isPtBr ? 'Próxima ação' : 'Next action'} data-home-region-order="1">
         {nextActionRegion}

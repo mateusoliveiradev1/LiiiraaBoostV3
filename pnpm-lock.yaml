@@ -237,6 +237,12 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@liiiraa/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
+      '@liiiraa/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       '@liiiraa/desktop-production-reference':
         specifier: workspace:*
         version: link:../../packages/desktop-production-reference

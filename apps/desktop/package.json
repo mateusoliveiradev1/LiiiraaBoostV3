@@ -24,6 +24,8 @@
     "verify": "node scripts/desktop-lifecycle.mjs final --"
   },
   "dependencies": {
+    "@liiiraa/design-system": "workspace:*",
+    "@liiiraa/design-tokens": "workspace:*",
     "@liiiraa/desktop-production-reference": "workspace:*",
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",

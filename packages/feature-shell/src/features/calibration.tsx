@@ -412,7 +412,7 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
                 ? `Etapa ${String(activeStep + 1)} de ${String(CALIBRATION_STEPS.length)}`
                 : `Step ${String(activeStep + 1)} of ${String(CALIBRATION_STEPS.length)}`}
             </p>
-            <h1 id="calibration-workspace-title">{stepLabels[snapshot.context.currentStep]}</h1>
+              <h2 id="calibration-workspace-title">{stepLabels[snapshot.context.currentStep]}</h2>
             <StatusSignal detail={copy.detail} state={SURFACE_TO_OPERATIONAL[state]} />
           </header>
 

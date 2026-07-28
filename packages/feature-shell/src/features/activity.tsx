@@ -96,9 +96,9 @@ export const ActivitySurface = ({
         }
         title={isPtBr ? 'Atividade' : 'Activity'}
       />
-      <h1 className="lb-visually-hidden" id="activity-surface-title">
+      <span className="lb-visually-hidden" id="activity-surface-title">
         {isPtBr ? 'Atividade' : 'Activity'}
-      </h1>
+      </span>
 
       <fieldset>
         <legend>{isPtBr ? 'Filtrar atividade' : 'Filter activity'}</legend>
