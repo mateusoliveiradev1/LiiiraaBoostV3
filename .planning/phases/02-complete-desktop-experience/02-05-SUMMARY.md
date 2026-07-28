@@ -9,7 +9,7 @@ requires:
 provides:
   - Pre-Dawn Flight Deck token contract for scale, density, motion, contrast, typography, color, focus, and status patterns
   - Liiiraa Boost-owned React Aria primitives, shell, evidence, workflow, and data component APIs
-  - Exhaustive non-color projections for provenance, operational state, incomplete/unavailable evidence, and simulated scenarios
+  - Exhaustive non-color projections for provenance, operational state, partial/unavailable evidence, and simulated scenarios
   - Keyboard-accessible bounded charts with tabular alternatives
 affects: [desktop-routes, feature-shells, storybook, visual-regression, accessibility-verification]
 tech-stack:
@@ -39,7 +39,7 @@ key-decisions:
   - "Publish the token stylesheet through ./tokens.css and mark CSS as a side effect so consumers receive the authored visual contract."
 patterns-established:
   - "Lb boundary: React Aria behavior stays internal; consumers import only authored Liiiraa Boost components."
-  - "Evidence projection: unavailable, incomplete, simulated, quality, freshness, and status remain explicit in every visual mode."
+  - "Evidence projection: unavailable, partial, simulated, quality, freshness, and status remain explicit in every visual mode."
 requirements-completed: [UX-03, UX-07, UX-10, UX-11, UX-12]
 duration: 29min
 completed: 2026-07-28
@@ -62,7 +62,7 @@ status: complete
 
 - Encoded the locked spacing, typography, palette, focus, status-pattern, 100/125/150% scale, Comfortable/Compact density, 200% text, reduced-motion, and forced-colors contracts as deterministic TypeScript and CSS outputs.
 - Exported the complete Section 10 primitive, shell, evidence, workflow, and data API behind Liiiraa Boost-owned `Lb*` components with React Aria handling behavior.
-- Made observed, measured, modeled, unavailable, fixture, incomplete, risk, quality, freshness, and operational states distinguishable without depending on color.
+- Made observed, measured, modeled, unavailable, fixture, partial-evidence, risk, quality, freshness, and operational states distinguishable without depending on color.
 - Added bounded accessible charts with keyboard cursors and equivalent data tables, plus a persistent `SIMULATED SCENARIO` marker.
 - Added five token-contract tests and eleven semantic, interaction, state, locale, and accessibility tests.
 
@@ -159,7 +159,7 @@ None — no account, secret, paid library, external service, or manual configura
 ## Next Phase Readiness
 
 - Later desktop routes can compose one stable accessible visual language rather than introducing route-specific controls or state colors.
-- D-04 unavailable/incomplete projections, simulated markers, accessible chart alternatives, scale, contrast, and motion behavior are ready for scenario and route composition plans.
+- D-04 unavailable/partial-evidence projections, simulated markers, accessible chart alternatives, scale, contrast, and motion behavior are ready for scenario and route composition plans.
 - No blocker remains for subsequent Phase 02 plans.
 
 ## Self-Check: PASSED
