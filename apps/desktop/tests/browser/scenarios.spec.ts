@@ -1,24 +1,18 @@
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { expect, test } from '@playwright/test';
 
+import scenarioCatalogJson from '../../../../contracts/scenarios/desktop-scenarios.json' with { type: 'json' };
+import storyManifestJson from '../../../../tooling/desktop-evidence/story-manifest.json' with { type: 'json' };
 import type { ShellOperationalState } from '../../src/app.tsx';
-import {
-  DESKTOP_APP_URL,
-  DESKTOP_SCENARIO_MARKER,
-  openDesktopTestCase,
-  type DesktopBrowserScenario,
-} from './fixtures.ts';
+import { DESKTOP_APP_URL, DESKTOP_SCENARIO_MARKER, openDesktopTestCase } from './fixtures.ts';
 
-interface CatalogScenario extends DesktopBrowserScenario {
+interface CatalogScenario {
   readonly activity: string;
   readonly adapterIdentity: Readonly<{
-    kind: 'fixture';
-    scenarioMarker: typeof DESKTOP_SCENARIO_MARKER;
+    kind: string;
+    scenarioMarker: string;
   }>;
   readonly calibration: string;
+  readonly clock: string;
   readonly deltaPaths: readonly string[];
   readonly entitlement: string;
   readonly evidence: Readonly<{
@@ -29,7 +23,7 @@ interface CatalogScenario extends DesktopBrowserScenario {
   }>;
   readonly familyId: string;
   readonly game: Readonly<{
-    integrationValidated: false;
+    integrationValidated: boolean;
     kind: string;
   }>;
   readonly hardware: Readonly<{
@@ -38,10 +32,12 @@ interface CatalogScenario extends DesktopBrowserScenario {
     platform: string;
     tier: string;
   }>;
+  readonly id: string;
   readonly locale: 'en-US' | 'pt-BR';
+  readonly latencyMs: number;
   readonly noEffect: Readonly<{
-    changed: false;
-    receiptKind: 'scenario-preview';
+    changed: boolean;
+    receiptKind: string;
     summary: string;
   }>;
   readonly recommendations: readonly Readonly<{
@@ -52,21 +48,22 @@ interface CatalogScenario extends DesktopBrowserScenario {
   readonly requiredRoutes: readonly string[];
   readonly requiredStates: readonly Readonly<{
     route: string;
-    state: ShellOperationalState;
+    state: string;
   }>[];
+  readonly seed: number;
 }
 
 interface ScenarioCatalog {
   readonly fixtureVersion: string;
-  readonly scenarios: readonly CatalogScenario[];
+  readonly scenarios: CatalogScenario[];
 }
 
 interface StoryManifest {
   readonly canonicalCatalog: Readonly<{
     path: string;
-    requiredRoutesField: 'requiredRoutes';
-    requiredStatesField: 'requiredStates';
-    scenarioIdField: 'id';
+    requiredRoutesField: string;
+    requiredStatesField: string;
+    scenarioIdField: string;
   }>;
   readonly coverage: Readonly<{
     scenarioRange: Readonly<{
@@ -75,20 +72,12 @@ interface StoryManifest {
       pad: number;
       prefix: string;
     }>;
-    strategy: 'derive-required-states';
+    strategy: string;
   }>;
 }
 
-const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
-const catalogPath = resolve(workspaceRoot, 'contracts', 'scenarios', 'desktop-scenarios.json');
-const manifestPath = resolve(
-  workspaceRoot,
-  'tooling',
-  'desktop-evidence',
-  'story-manifest.json',
-);
-const catalog = JSON.parse(readFileSync(catalogPath, 'utf8')) as ScenarioCatalog;
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as StoryManifest;
+const catalog = scenarioCatalogJson as unknown as ScenarioCatalog;
+const manifest = storyManifestJson as unknown as StoryManifest;
 
 const OPERATIONAL_STATES = new Set<ShellOperationalState>([
   'loading',
@@ -105,7 +94,7 @@ const OPERATIONAL_STATES = new Set<ShellOperationalState>([
   'fixture',
 ]);
 
-const CANONICAL_ROUTE_PATHS: Readonly<Record<string, string>> = Object.freeze({
+const CANONICAL_ROUTE_PATHS: Readonly<Partial<Record<string, string>>> = Object.freeze({
   '/activity': '/activity',
   '/ai': '/assistant',
   '/calibration': '/calibration/welcome',
@@ -208,8 +197,7 @@ const parityDiagnostics = (candidate: ScenarioCatalog): readonly string[] => {
   return diagnostics.toSorted();
 };
 
-const cloneCatalog = (): ScenarioCatalog =>
-  JSON.parse(JSON.stringify(catalog)) as ScenarioCatalog;
+const cloneCatalog = (): ScenarioCatalog => JSON.parse(JSON.stringify(catalog)) as ScenarioCatalog;
 
 const scenario = (id: string): CatalogScenario => {
   const value = catalog.scenarios.find((candidate) => candidate.id === id);
@@ -221,22 +209,26 @@ const scenario = (id: string): CatalogScenario => {
 
 test('@route-scenario-smoke reports stable missing, extra, and duplicate parity diagnostics', () => {
   expect(manifest.coverage.strategy).toBe('derive-required-states');
-  expect(resolve(dirname(manifestPath), manifest.canonicalCatalog.path)).toBe(catalogPath);
+  expect(manifest.canonicalCatalog.path).toBe('../../contracts/scenarios/desktop-scenarios.json');
   expect(parityDiagnostics(catalog)).toEqual([]);
 
   const missing = cloneCatalog();
-  (missing.scenarios as CatalogScenario[]).shift();
+  missing.scenarios.shift();
   expect(parityDiagnostics(missing)).toContain('scenario parity: missing scenario S01');
 
   const extra = cloneCatalog();
-  (extra.scenarios as CatalogScenario[]).push({
-    ...extra.scenarios.at(-1)!,
+  const lastScenario = extra.scenarios.at(-1);
+  if (lastScenario === undefined) {
+    throw new Error('Canonical scenario catalog cannot be empty.');
+  }
+  extra.scenarios.push({
+    ...lastScenario,
     id: 'S25',
   });
   expect(parityDiagnostics(extra)).toContain('scenario parity: extra scenario S25');
 
   const duplicate = cloneCatalog();
-  (duplicate.scenarios as CatalogScenario[]).push(duplicate.scenarios[0]!);
+  duplicate.scenarios.push(scenario('S01'));
   expect(parityDiagnostics(duplicate)).toContain('scenario parity: duplicate scenario S01');
 });
 
@@ -256,23 +248,36 @@ test('@route-scenario-smoke executes every canonical S01-S24 route/state pair in
     for (const catalogScenario of catalog.scenarios) {
       for (const requirement of catalogScenario.requiredStates) {
         const initialPath = CANONICAL_ROUTE_PATHS[requirement.route];
-        expect(initialPath, `${catalogScenario.id} ${requirement.route}`).toBeDefined();
+        if (
+          initialPath === undefined ||
+          !OPERATIONAL_STATES.has(requirement.state as ShellOperationalState)
+        ) {
+          throw new Error(
+            `Unmapped canonical browser case ${catalogScenario.id}::${requirement.route}::${requirement.state}`,
+          );
+        }
 
         const page = await context.newPage();
         try {
           await openDesktopTestCase(
             page,
             {
-              initialPath: initialPath!,
-              operationalState: requirement.state,
+              initialPath,
+              operationalState: requirement.state as ShellOperationalState,
               scenarioId: catalogScenario.id,
               windowsLocale: catalogScenario.locale,
             },
-            catalogScenario,
+            {
+              clock: catalogScenario.clock,
+              id: catalogScenario.id,
+              latencyMs: catalogScenario.latencyMs,
+              marker: DESKTOP_SCENARIO_MARKER,
+              seed: catalogScenario.seed,
+            },
           );
 
           const shell = page.locator('.desktop-app-shell');
-          await expect(shell).toHaveAttribute('data-route-path', initialPath!);
+          await expect(shell).toHaveAttribute('data-route-path', initialPath);
           await expect(shell).toHaveAttribute('data-operational-state', requirement.state);
           await expect(page.locator('main')).toHaveCount(1);
           await expect(page.locator('h1')).toHaveCount(1);
@@ -306,9 +311,7 @@ test('@route-scenario-smoke executes every canonical S01-S24 route/state pair in
             },
           });
 
-          executedPairs.push(
-            `${catalogScenario.id}::${requirement.route}::${requirement.state}`,
-          );
+          executedPairs.push(`${catalogScenario.id}::${requirement.route}::${requirement.state}`);
         } finally {
           await page.close();
         }
@@ -329,14 +332,11 @@ test('@route-scenario-smoke executes every canonical S01-S24 route/state pair in
 
 test('@route-scenario-smoke executes explicit D-01 through D-20 decision assertions', () => {
   const s01 = scenario('S01');
-  const s02 = scenario('S02');
   const s03 = scenario('S03');
-  const s05 = scenario('S05');
   const s06 = scenario('S06');
   const s07 = scenario('S07');
   const s14 = scenario('S14');
   const s15 = scenario('S15');
-  const s18 = scenario('S18');
   const s19 = scenario('S19');
   const s20 = scenario('S20');
   const s21 = scenario('S21');
@@ -351,8 +351,7 @@ test('@route-scenario-smoke executes explicit D-01 through D-20 decision asserti
         ({ route, state }) => route === '/plans/review' && state === 'contradictory-evidence',
       ) && s06.calibration === 'paused',
     'D-03':
-      s22.calibration === 'cancelled' &&
-      s22.requiredStates.some(({ route }) => route === '/home'),
+      s22.calibration === 'cancelled' && s22.requiredStates.some(({ route }) => route === '/home'),
     'D-04':
       s01.evidence.quality === 'verified' &&
       s06.evidence.unavailableSources.includes('gpu-driver-source'),
@@ -367,8 +366,7 @@ test('@route-scenario-smoke executes explicit D-01 through D-20 decision asserti
       s06.requiredStates.some(({ state }) => state === 'stale-evidence') &&
       s06.deltaPaths.includes('evidence'),
     'D-08':
-      s07.calibration === 'deferred' &&
-      s07.requiredStates.some(({ state }) => state === 'empty'),
+      s07.calibration === 'deferred' && s07.requiredStates.some(({ state }) => state === 'empty'),
     'D-09':
       s01.hardware.platform === 'windows-11' &&
       s01.hardware.cpuVendor === 'Intel' &&
@@ -376,7 +374,7 @@ test('@route-scenario-smoke executes explicit D-01 through D-20 decision asserti
       s01.hardware.tier === 'mid-range',
     'D-10':
       s01.game.kind === 'fictional-anchor' &&
-      s01.game.integrationValidated === false &&
+      !s01.game.integrationValidated &&
       catalog.scenarios.some(({ game }) => game.kind !== 'fictional-anchor'),
     'D-11':
       s01.recommendations.some(
@@ -389,24 +387,21 @@ test('@route-scenario-smoke executes explicit D-01 through D-20 decision asserti
         ({ eligibility, evidenceQuality }) =>
           eligibility === 'excluded' && evidenceQuality === 'insufficient',
       ) &&
-      s01.noEffect.changed === false,
+      !s01.noEffect.changed,
     'D-12':
       new Set(catalog.scenarios.map(({ familyId }) => familyId)).size === 3 &&
       catalog.scenarios.every(({ deltaPaths }) => deltaPaths.length <= 3),
     'D-13':
       s15.requiredStates.some(({ state }) => state === 'partial-failure') &&
       s15.requiredStates.some(({ state }) => state === 'recovery') &&
-      s15.noEffect.changed === false,
+      !s15.noEffect.changed,
     'D-14':
       ['/ai', '/support', '/updates'].every((route) =>
         catalog.scenarios.some(({ requiredRoutes }) => requiredRoutes.includes(route)),
-      ) &&
-      [s19, s20, s21].every(({ noEffect }) => noEffect.changed === false),
-    'D-15':
-      catalog.scenarios.every(
-        ({ noEffect }) =>
-          noEffect.receiptKind === 'scenario-preview' && noEffect.changed === false,
-      ),
+      ) && [s19, s20, s21].every(({ noEffect }) => !noEffect.changed),
+    'D-15': catalog.scenarios.every(
+      ({ noEffect }) => noEffect.receiptKind === 'scenario-preview' && !noEffect.changed,
+    ),
     'D-16':
       s20.noEffect.summary.includes('no bundle was uploaded') &&
       s21.noEffect.summary.includes('current version remains active'),
@@ -415,7 +410,7 @@ test('@route-scenario-smoke executes explicit D-01 through D-20 decision asserti
       s03.requiredRoutes.includes('/settings/appearance') &&
       s23.requiredRoutes.includes('/settings/appearance'),
     'D-19':
-      catalog.scenarios.every(({ noEffect }) => noEffect.changed === false) &&
+      catalog.scenarios.every(({ noEffect }) => !noEffect.changed) &&
       s24.requiredRoutes.includes('/settings/appearance'),
     'D-20':
       catalog.scenarios[0]?.id === 'S01' &&

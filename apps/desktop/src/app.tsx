@@ -255,9 +255,7 @@ const activityOverlayItems: Parameters<typeof ActivityCenter>[0]['items'] = Obje
 
 type NativeActivityEvent = Parameters<typeof ActivitySurface>[0]['events'][number];
 
-export const routeForNativeNavigation = (
-  intent: ShellNavigationIntentJson,
-): string => {
+export const routeForNativeNavigation = (intent: ShellNavigationIntentJson): string => {
   switch (intent.kind) {
     case 'goal': {
       const routes = {
@@ -288,9 +286,7 @@ export interface NativeShellCompositionCallbacks {
   readonly onHostPreference: (event: PreferenceEvent) => void;
   readonly onInstallerIdentity: (identity: ShellInstallerIdentityJson) => void;
   readonly onNavigation: (pathname: string, requestId: string) => void;
-  readonly onNotificationPreference: (
-    preference: ShellNotificationPreferenceJson,
-  ) => void;
+  readonly onNotificationPreference: (preference: ShellNotificationPreferenceJson) => void;
   readonly onStartupState: (state: ShellStartupStateJson) => void;
   readonly onWindowState: (state: ShellWindowStateJson) => void;
 }
@@ -304,10 +300,7 @@ export const createNativeShellComposition = ({
   callbacks,
   transport,
 }: CreateNativeShellCompositionOptions): ShellBridge => {
-  const observe = (
-    event: HostToRendererShellEventJson,
-    project: () => void,
-  ): void => {
+  const observe = (event: HostToRendererShellEventJson, project: () => void): void => {
     callbacks.onEvent(event);
     project();
   };
@@ -326,10 +319,7 @@ export const createNativeShellComposition = ({
       },
       onNavigation: (event) => {
         observe(event, () => {
-          callbacks.onNavigation(
-            routeForNativeNavigation(event.payload.intent),
-            event.requestId,
-          );
+          callbacks.onNavigation(routeForNativeNavigation(event.payload.intent), event.requestId);
         });
       },
       onLocale: (event) => {
@@ -344,9 +334,7 @@ export const createNativeShellComposition = ({
         observe(event, () => {
           callbacks.onHostPreference({
             type: 'set-tray-enabled',
-            enabled:
-              event.payload.preference ===
-              'keep-game-detection-in-tray',
+            enabled: event.payload.preference === 'keep-game-detection-in-tray',
           });
         });
       },
@@ -385,25 +373,20 @@ export const createHostCommandMetadataFactory = (
   };
 };
 
-const nativeActivityFor = (
-  event: HostToRendererShellEventJson,
-): NativeActivityEvent => {
+const nativeActivityFor = (event: HostToRendererShellEventJson): NativeActivityEvent => {
   const isFailure =
     event.messageType === 'desktop.shell.startup-state-changed.event' &&
     event.payload.state.kind === 'failure';
-  const isClose =
-    event.messageType === 'desktop.shell.close-requested.event';
+  const isClose = event.messageType === 'desktop.shell.close-requested.event';
   const category: NativeActivityEvent['category'] =
     event.messageType === 'desktop.shell.installer-identity.event' ||
     event.messageType === 'desktop.shell.startup-state-changed.event'
       ? 'updates'
       : isClose
         ? 'recovery'
-        : event.messageType ===
-              'desktop.shell.notification-preference-changed.event' ||
+        : event.messageType === 'desktop.shell.notification-preference-changed.event' ||
             event.messageType === 'desktop.shell.locale-changed.event' ||
-            event.messageType ===
-              'desktop.shell.tray-preference-changed.event'
+            event.messageType === 'desktop.shell.tray-preference-changed.event'
           ? 'account'
           : 'plans';
 
@@ -423,9 +406,7 @@ const nativeActivityFor = (
   });
 };
 
-const nativeOverlayItemFor = (
-  event: HostToRendererShellEventJson,
-): ActivityItem | undefined => {
+const nativeOverlayItemFor = (event: HostToRendererShellEventJson): ActivityItem | undefined => {
   if (
     event.messageType === 'desktop.shell.startup-state-changed.event' &&
     event.payload.state.kind === 'failure'
@@ -442,10 +423,7 @@ const nativeOverlayItemFor = (
     return Object.freeze({
       detail: event.payload.context.kind,
       id: event.requestId,
-      state:
-        event.payload.context.kind === 'recovery-in-progress'
-          ? 'recovery'
-          : 'restart-pending',
+      state: event.payload.context.kind === 'recovery-in-progress' ? 'recovery' : 'restart-pending',
       title: 'Close decision requires attention',
     });
   }
@@ -468,9 +446,7 @@ interface NativeShellState {
   readonly windowState?: ShellWindowStateJson;
 }
 
-const createInitialNativeShellState = (
-  nativeShell: boolean,
-): NativeShellState => {
+const createInitialNativeShellState = (nativeShell: boolean): NativeShellState => {
   const startupState: ShellStartupStateJson = nativeShell
     ? { kind: 'splash', step: 'initializing-webview' }
     : { kind: 'ready' };
@@ -827,10 +803,7 @@ export interface DesktopAppProps {
 
 type DesktopAppContentProps = Omit<
   DesktopAppProps,
-  | 'nativeBridgeTransport'
-  | 'nativeCommandMetadata'
-  | 'nativeShell'
-  | 'windowsLocale'
+  'nativeBridgeTransport' | 'nativeCommandMetadata' | 'nativeShell' | 'windowsLocale'
 > &
   Readonly<{
     nativeState?: NativeShellState;
@@ -1182,6 +1155,8 @@ const DesktopAppContent = ({
       data-motion={motion ? 'reduced' : 'responsive'}
       data-operational-state={operationalState}
       data-page-horizontal-scroll={layout.pageHorizontalScroll}
+      data-route-path={route.pathname}
+      data-route-state={route.state}
       data-shell-width={layout.width}
       data-text-scale={String(textScale)}
       data-viewport-width={String(measuredWidth)}
@@ -1300,9 +1275,7 @@ const DesktopAppContent = ({
                   <>
                     <p data-native-window-state>{nativeState.windowState.kind}</p>
                     <LbButton onPress={saveNativeWindowState} variant="secondary">
-                      {locale === 'pt-BR'
-                        ? 'Salvar estado desta janela'
-                        : 'Save this window state'}
+                      {locale === 'pt-BR' ? 'Salvar estado desta janela' : 'Save this window state'}
                     </LbButton>
                   </>
                 )}
@@ -1595,21 +1568,16 @@ const NativeDesktopApp = ({
   windowsLocale,
   ...appProps
 }: NativeDesktopAppProps): ReactNode => {
-  const [nativeState, setNativeState] = useState(() =>
-    createInitialNativeShellState(true),
-  );
+  const [nativeState, setNativeState] = useState(() => createInitialNativeShellState(true));
   const bridgeRef = useRef<ShellBridge | null>(null);
   const commandMetadata = useMemo(
     () => nativeCommandMetadata ?? createHostCommandMetadataFactory(),
     [nativeCommandMetadata],
   );
 
-  const sendHostCommand = useCallback(
-    (command: RendererToHostShellCommandJson): void => {
-      void bridgeRef.current?.send(command);
-    },
-    [],
-  );
+  const sendHostCommand = useCallback((command: RendererToHostShellCommandJson): void => {
+    void bridgeRef.current?.send(command);
+  }, []);
 
   useEffect(() => {
     const bridge = createNativeShellComposition({
@@ -1632,16 +1600,12 @@ const NativeDesktopApp = ({
               activityItems:
                 overlayItem === undefined
                   ? current.activityItems
-                  : Object.freeze(
-                      [overlayItem, ...current.activityItems].slice(0, 16),
-                    ),
+                  : Object.freeze([overlayItem, ...current.activityItems].slice(0, 16)),
             });
           });
         },
         onHostPreference: (hostPreferenceEvent) => {
-          setNativeState((current) =>
-            Object.freeze({ ...current, hostPreferenceEvent }),
-          );
+          setNativeState((current) => Object.freeze({ ...current, hostPreferenceEvent }));
         },
         onInstallerIdentity: (installerIdentity) => {
           setNativeState((current) =>
@@ -1661,9 +1625,7 @@ const NativeDesktopApp = ({
           );
         },
         onNotificationPreference: (notificationPreference) => {
-          setNativeState((current) =>
-            Object.freeze({ ...current, notificationPreference }),
-          );
+          setNativeState((current) => Object.freeze({ ...current, notificationPreference }));
         },
         onStartupState: (startupState) => {
           setNativeState((current) =>
@@ -1675,14 +1637,10 @@ const NativeDesktopApp = ({
           );
         },
         onWindowState: (windowState) => {
-          setNativeState((current) =>
-            Object.freeze({ ...current, windowState }),
-          );
+          setNativeState((current) => Object.freeze({ ...current, windowState }));
         },
       },
-      ...(nativeBridgeTransport === undefined
-        ? {}
-        : { transport: nativeBridgeTransport }),
+      ...(nativeBridgeTransport === undefined ? {} : { transport: nativeBridgeTransport }),
     });
 
     bridgeRef.current = bridge;
@@ -1743,9 +1701,7 @@ const NativeDesktopApp = ({
         commandMetadata={commandMetadata}
         nativeState={nativeState}
         onAcceptInstaller={() => {
-          setNativeState((current) =>
-            Object.freeze({ ...current, installerAccepted: true }),
-          );
+          setNativeState((current) => Object.freeze({ ...current, installerAccepted: true }));
         }}
         onAcknowledgeStartup={acknowledgeStartup}
         onResolveClose={resolveClose}
@@ -1762,28 +1718,21 @@ export const DesktopApp = ({
   windowsLocale,
   ...props
 }: DesktopAppProps): ReactNode => {
-  const useNativeShell =
-    nativeShell ?? Reflect.has(globalThis, '__TAURI_INTERNALS__');
+  const useNativeShell = nativeShell ?? Reflect.has(globalThis, '__TAURI_INTERNALS__');
 
   if (useNativeShell) {
     return (
       <NativeDesktopApp
         {...props}
-        {...(nativeBridgeTransport === undefined
-          ? {}
-          : { nativeBridgeTransport })}
-        {...(nativeCommandMetadata === undefined
-          ? {}
-          : { nativeCommandMetadata })}
+        {...(nativeBridgeTransport === undefined ? {} : { nativeBridgeTransport })}
+        {...(nativeCommandMetadata === undefined ? {} : { nativeCommandMetadata })}
         {...(windowsLocale === undefined ? {} : { windowsLocale })}
       />
     );
   }
 
   return (
-    <DesktopPreferencesProvider
-      {...(windowsLocale === undefined ? {} : { windowsLocale })}
-    >
+    <DesktopPreferencesProvider {...(windowsLocale === undefined ? {} : { windowsLocale })}>
       <DesktopAppContent {...props} />
     </DesktopPreferencesProvider>
   );

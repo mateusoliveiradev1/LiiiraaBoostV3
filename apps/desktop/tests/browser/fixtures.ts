@@ -1,5 +1,8 @@
 import { expect, test as base, type Page } from '@playwright/test';
 
+import type { DesktopAppProps, ShellOperationalState } from '../../src/app.tsx';
+
+export const DESKTOP_APP_URL = 'http://127.0.0.1:4173';
 export const FROZEN_DESKTOP_CLOCK = '2030-01-15T18:00:00.000Z';
 export const FROZEN_DESKTOP_ID = '00000000-0000-4000-8000-000000000001';
 export const FROZEN_DESKTOP_SEED = 2_001;
@@ -19,6 +22,18 @@ export interface DesktopBrowserScenario {
   readonly latencyMs: number;
   readonly marker: typeof DESKTOP_SCENARIO_MARKER;
   readonly seed: number;
+}
+
+export interface DesktopTestComposition {
+  readonly appScale?: NonNullable<DesktopAppProps['appScale']>;
+  readonly forcedColors?: boolean;
+  readonly initialPath: string;
+  readonly operationalState: ShellOperationalState;
+  readonly reducedMotion?: boolean;
+  readonly scenarioId: string;
+  readonly textScale?: NonNullable<DesktopAppProps['textScale']>;
+  readonly viewportWidth?: number;
+  readonly windowsLocale: string;
 }
 
 const defaultDesktopScenario = Object.freeze({
@@ -90,6 +105,24 @@ export const freezeDesktopScenario = async (
       scenarioValue: scenario,
     },
   );
+};
+
+export const openDesktopTestCase = async (
+  page: Page,
+  composition: DesktopTestComposition,
+  scenario: DesktopBrowserScenario = defaultDesktopScenario,
+): Promise<void> => {
+  await freezeDesktopScenario(page, scenario);
+  await page.addInitScript((compositionValue) => {
+    Object.defineProperty(globalThis, '__LIIIRAA_DESKTOP_COMPOSITION__', {
+      configurable: false,
+      enumerable: false,
+      value: Object.freeze(compositionValue),
+      writable: false,
+    });
+  }, composition);
+  await page.goto(DESKTOP_APP_URL);
+  await expect(page.locator('.desktop-app-shell')).toBeVisible();
 };
 
 interface DesktopFixtures {

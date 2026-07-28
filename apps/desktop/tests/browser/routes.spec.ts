@@ -1,11 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { desktopRouteTree } from '../../src/routes.tsx';
-import {
-  DESKTOP_APP_URL,
-  DESKTOP_SCENARIO_MARKER,
-  openDesktopTestCase,
-} from './fixtures.ts';
+import { DESKTOP_APP_URL, DESKTOP_SCENARIO_MARKER, openDesktopTestCase } from './fixtures.ts';
 
 const concretePathFor = (pattern: string): string =>
   pattern
