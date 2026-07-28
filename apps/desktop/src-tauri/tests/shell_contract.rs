@@ -4,12 +4,18 @@ use serde_json::{Value, json};
 
 #[path = "../src/navigation.rs"]
 mod navigation;
+#[path = "../src/tray.rs"]
+mod tray;
 #[path = "../src/window.rs"]
 mod window;
 
 use navigation::{
     ExternalNavigationSource, NavigationBridgeError, navigation_event_from_external,
     navigation_event_from_second_instance,
+};
+use tray::{
+    TrayEffect, TrayLifecycle, TrayLifecycleError, TrayMenuContext, TrayMenuEntryKind,
+    tray_menu_model,
 };
 use window::{
     CloseAction, HostEventMetadata, WindowEffect, WindowLifecycle, WindowLifecycleError, WorkArea,
@@ -371,4 +377,188 @@ fn navigation_runtime_registers_single_instance_before_deep_link_handlers() {
         config["plugins"]["deep-link"]["desktop"]["schemes"],
         json!(["liiiraa-boost"])
     );
+}
+
+#[test]
+fn tray_lifecycle_requires_validated_opt_in_or_an_active_safety_workflow() {
+    let mut lifecycle = TrayLifecycle::default();
+    assert!(!lifecycle.is_visible());
+    assert_eq!(lifecycle.tooltip(), "Liiiraa Boost — Interface open");
+
+    let malformed = shell_envelope(
+        "desktop.shell.set-tray-preference.command",
+        json!({
+            "preference": "keep-game-detection-in-tray",
+            "unexpected": "must-not-mutate"
+        }),
+    );
+    assert!(matches!(
+        lifecycle.dispatch_renderer_message(&malformed),
+        Err(TrayLifecycleError::ContractRejected)
+    ));
+    assert!(!lifecycle.is_visible());
+
+    let opt_in = shell_envelope(
+        "desktop.shell.set-tray-preference.command",
+        json!({ "preference": "keep-game-detection-in-tray" }),
+    );
+    let effects = lifecycle
+        .dispatch_renderer_message(&opt_in)
+        .expect("generated tray opt-in command");
+    assert!(lifecycle.is_visible());
+    assert!(matches!(effects.as_slice(), [TrayEffect::SetVisible(true)]));
+
+    let opt_out = shell_envelope(
+        "desktop.shell.set-tray-preference.command",
+        json!({ "preference": "close-window" }),
+    );
+    lifecycle.set_safety_workflow_active(true);
+    assert!(lifecycle.is_visible());
+    assert_eq!(lifecycle.tooltip(), "Liiiraa Boost — Recovery required");
+    let effects = lifecycle
+        .dispatch_renderer_message(&opt_out)
+        .expect("generated tray opt-out command");
+    assert!(lifecycle.is_visible());
+    assert!(effects.is_empty());
+
+    let effects = lifecycle.set_safety_workflow_active(false);
+    assert!(!lifecycle.is_visible());
+    assert!(matches!(effects.as_slice(), [TrayEffect::SetVisible(false)]));
+}
+
+#[test]
+fn tray_menu_order_actions_and_attention_visibility_match_the_contract() {
+    let context = TrayMenuContext {
+        selected_game: "VALORANT".to_owned(),
+        profile_state: "Competitive · Ready".to_owned(),
+        automatic_profiles_paused: false,
+        attention_count: 0,
+    };
+    let menu = tray_menu_model(&context);
+    let visible_entries = menu
+        .iter()
+        .filter(|entry| entry.visible)
+        .map(|entry| {
+            (
+                entry.id.as_deref(),
+                entry.label.as_str(),
+                entry.enabled,
+                entry.kind,
+            )
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        visible_entries,
+        vec![
+            (
+                Some("tray-open"),
+                "Open Liiiraa Boost",
+                true,
+                TrayMenuEntryKind::Action
+            ),
+            (
+                Some("tray-prepare-launch"),
+                "VALORANT · Prepare launch",
+                true,
+                TrayMenuEntryKind::Action
+            ),
+            (
+                None,
+                "Competitive · Ready",
+                false,
+                TrayMenuEntryKind::Status
+            ),
+            (
+                Some("tray-pause-automatic-profiles"),
+                "Pause automatic profiles",
+                true,
+                TrayMenuEntryKind::Action
+            ),
+            (None, "", false, TrayMenuEntryKind::Separator),
+            (
+                Some("tray-settings"),
+                "Settings",
+                true,
+                TrayMenuEntryKind::Action
+            ),
+            (
+                Some("tray-exit-interface"),
+                "Exit interface",
+                true,
+                TrayMenuEntryKind::Action
+            ),
+        ]
+    );
+
+    let attention_menu = tray_menu_model(&TrayMenuContext {
+        attention_count: 2,
+        ..context
+    });
+    let attention = attention_menu
+        .iter()
+        .find(|entry| entry.id.as_deref() == Some("tray-activity"))
+        .expect("conditional activity item");
+    assert!(attention.visible);
+    assert_eq!(attention.label, "Activity requiring attention (2)");
+}
+
+#[test]
+fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
+    let lifecycle = TrayLifecycle::default();
+    let open = lifecycle
+        .handle_menu_action(
+            "tray-open",
+            HostEventMetadata::fixed(
+                "request-tray-open-0001",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("allowlisted tray open action");
+    let event = open
+        .iter()
+        .find_map(|effect| match effect {
+            TrayEffect::Emit(event) => serde_json::to_value(event).ok(),
+            _ => None,
+        })
+        .expect("generated navigation event");
+    assert_eq!(
+        event["messageType"],
+        "desktop.shell.navigation-requested.event"
+    );
+    assert_eq!(event["payload"]["source"], "tray");
+    assert_eq!(event["payload"]["intent"]["kind"], "goal");
+    assert_eq!(event["payload"]["intent"]["destination"], "home");
+
+    let exit = lifecycle
+        .handle_menu_action(
+            "tray-exit-interface",
+            HostEventMetadata::fixed(
+                "request-tray-exit-0001",
+                "2026-07-28T12:00:00.000Z",
+            ),
+        )
+        .expect("allowlisted tray exit action");
+    assert!(exit.iter().any(|effect| matches!(effect, TrayEffect::ExitInterface)));
+    assert!(exit.iter().any(|effect| {
+        matches!(
+            effect,
+            TrayEffect::Emit(event)
+                if serde_json::to_value(event).is_ok_and(|value| {
+                    value["messageType"] == "desktop.shell.close-requested.event"
+                        && value["payload"]["context"]["kind"] == "ordinary"
+                })
+        )
+    }));
+
+    assert!(matches!(
+        lifecycle.handle_menu_action(
+            "tray-run-arbitrary-command",
+            HostEventMetadata::fixed(
+                "request-tray-rejected-0001",
+                "2026-07-28T12:00:00.000Z",
+            )
+        ),
+        Err(TrayLifecycleError::UnknownAction)
+    ));
 }
