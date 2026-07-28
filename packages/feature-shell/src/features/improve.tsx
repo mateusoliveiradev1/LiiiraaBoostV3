@@ -195,7 +195,7 @@ const COMPONENT_COPY: Readonly<
   },
 };
 
-export const GOLDEN_OPERATIONS: readonly TechnicalOperation[] = Object.freeze([
+export const GOLDEN_OPERATIONS = Object.freeze([
   {
     id: 'power-balanced-review',
     name: 'Review balanced game power policy',
@@ -251,10 +251,10 @@ export const GOLDEN_OPERATIONS: readonly TechnicalOperation[] = Object.freeze([
     provenance: 'fixture',
     dependencies: ['Verified GPU driver source'],
   },
-]);
+] as const satisfies readonly TechnicalOperation[]);
 
 const operationById = (id: string | undefined): TechnicalOperation =>
-  GOLDEN_OPERATIONS.find((operation) => operation.id === id) ?? GOLDEN_OPERATIONS[0]!;
+  GOLDEN_OPERATIONS.find((operation) => operation.id === id) ?? GOLDEN_OPERATIONS[0];
 
 const capabilityStateFor = (eligibility: OperationEligibility): CapabilityState => {
   switch (eligibility) {
@@ -268,6 +268,9 @@ const capabilityStateFor = (eligibility: OperationEligibility): CapabilityState 
 };
 
 const riskForDesignSystem = (risk: OperationRisk): RiskLevel => risk;
+
+const exclusionReasonFor = (operation: TechnicalOperation): string | undefined =>
+  operation.exclusionReason;
 
 const createBoundary = (
   scenarioId: string,
@@ -437,7 +440,7 @@ const ComponentView = ({
             />
             <CapabilityReason
               capability={operation.name}
-              reason={operation.exclusionReason ?? operation.compatibility}
+              reason={exclusionReasonFor(operation) ?? operation.compatibility}
               state={capabilityStateFor(operation.eligibility)}
             />
           </div>
@@ -588,7 +591,7 @@ const PlanReviewView = ({
     {GOLDEN_OPERATIONS.map((operation) => (
       <article data-eligibility={operation.eligibility} key={operation.id}>
         <OperationRow
-          detail={operation.exclusionReason ?? operation.expectedDirection}
+          detail={exclusionReasonFor(operation) ?? operation.expectedDirection}
           name={operation.name}
           onInspect={() => onNavigate?.('operation', operation.id)}
           risk={riskForDesignSystem(operation.riskClass)}

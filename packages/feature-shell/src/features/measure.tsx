@@ -55,7 +55,7 @@ const ENVIRONMENT = 'Northstar Arena · S01 · Windows 11 · Verified fixture pr
 const SAMPLE_WINDOW = '120 s · 500 ms interval';
 const COLLECTOR = 'fixture-frame-time-collector@1';
 
-const FRAME_TIME_SERIES: readonly ChartSeries[] = Object.freeze([
+const FRAME_TIME_SERIES = Object.freeze([
   {
     id: 'baseline',
     label: 'Fixture baseline',
@@ -86,7 +86,7 @@ const FRAME_TIME_SERIES: readonly ChartSeries[] = Object.freeze([
       { label: '90 s', value: 12 },
     ],
   },
-]);
+] as const satisfies readonly ChartSeries[]);
 
 const fixtureMetric = (
   value: string,
@@ -245,7 +245,7 @@ const BaselineView = ({ locale }: { readonly locale: ShellLocale }) => (
         { en: 'Baseline telemetry', 'pt-BR': 'Telemetria da linha de base' },
         locale,
       )}
-      series={[FRAME_TIME_SERIES[0]!]}
+      series={[FRAME_TIME_SERIES[0]]}
       summary={localized(
         {
           en: 'A deterministic fixture sequence with keyboard and table alternatives.',
@@ -311,7 +311,7 @@ const CaptureView = ({
     />
     <FrameTimePlot
       label={localized({ en: 'Active frame time', 'pt-BR': 'Tempo de quadro ativo' }, locale)}
-      series={[FRAME_TIME_SERIES[0]!]}
+      series={[FRAME_TIME_SERIES[0]]}
       summary={localized(
         {
           en: 'Fixture frame time; lower values are directionally better.',
