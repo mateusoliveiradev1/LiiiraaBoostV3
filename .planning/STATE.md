@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-31-PLAN.md
-last_updated: "2026-07-28T00:35:16.134Z"
+stopped_at: Completed 02-32-PLAN.md
+last_updated: "2026-07-28T00:49:03.621Z"
 last_activity: 2026-07-27
 last_activity_desc: Completed Phase 02 Plan 02 workspace reservation and ownership gates
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 27
+  completed_plans: 28
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 6 of 33
+Plan: 7 of 33
 Status: Ready to execute
 Last activity: 2026-07-27 — Completed Phase 02 Plan 02 workspace reservation and ownership gates
 
@@ -82,6 +82,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P14 | 23min | 2 tasks | 12 files |
 | Phase 02 P24 | 12min | 2 tasks | 8 files |
 | Phase 02 P31 | 4min | 2 tasks | 1 files |
+| Phase 02 P32 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Encode ordinary and recovery close resolutions as separate closed variants. — Recovery must never validate a terminate-interface decision.
 - [Phase 02]: Generate TypeScript and Rust from one combined transport root while exposing shell validation through a dedicated schema. — All consumers share generated DTOs without broadening legacy schema authority.
 - [Phase 02]: Freeze only the 33 exact free Phase 2 identities approved by the user — Transitive resolution remains locked and consumer lifecycle scripts remain denied.
+- [Phase 02]: Use distinct stable schema identities for each shell transport direction. — Cross-direction and unknown messages must fail closed before routing.
+- [Phase 02]: Compile the generated shell schema once per runtime and deserialize Rust values only after schema validation. — The generated schema remains authoritative while typed values enter trusted code only after validation.
+- [Phase 02]: Apply a redacted semantic safe-navigation guard after schema validation. — Generated document IDs are length-bounded but not path-bounded, so risky navigation requires an equivalent runtime guard.
 
 ### Pending Todos
 
@@ -184,6 +188,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T00:34:57.603Z
-Stopped at: Completed 02-31-PLAN.md
+Last session: 2026-07-28T00:48:29.291Z
+Stopped at: Completed 02-32-PLAN.md
 Resume file: None
