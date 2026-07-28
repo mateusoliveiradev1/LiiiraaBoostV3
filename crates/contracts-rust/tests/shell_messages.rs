@@ -1,8 +1,8 @@
 use liiiraa_contracts_rust::{
-    validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID,
+    validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 fn shell_envelope() -> Value {
     json!({
@@ -55,11 +55,9 @@ fn shell_messages_accept_generated_transport_values() {
     let host_input = valid_host_event();
     let command_input = valid_renderer_command();
 
-    let host = validate_host_to_renderer_shell_event(
-        HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID,
-        &host_input,
-    )
-    .expect("valid host event");
+    let host =
+        validate_host_to_renderer_shell_event(HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, &host_input)
+            .expect("valid host event");
     let command = validate_renderer_to_host_shell_command(
         RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID,
         &command_input,
@@ -101,13 +99,10 @@ fn shell_messages_reject_the_cross_language_invalid_vectors() {
             RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID,
             {
                 let mut value = valid.clone();
-                value
-                    .as_object_mut()
-                    .expect("command is an object")
-                    .insert(
-                        "messageType".to_owned(),
-                        json!("desktop.shell.execute-arbitrary.command"),
-                    );
+                value.as_object_mut().expect("command is an object").insert(
+                    "messageType".to_owned(),
+                    json!("desktop.shell.execute-arbitrary.command"),
+                );
                 value
             },
             "unknown discriminator",
@@ -214,8 +209,7 @@ fn shell_message_errors_are_deterministic_bounded_and_redacted() {
         first
             .issues
             .iter()
-            .all(|issue| issue.path.chars().count() <= 256
-                && issue.keyword.chars().count() <= 64)
+            .all(|issue| issue.path.chars().count() <= 256 && issue.keyword.chars().count() <= 64)
     );
 
     let serialized = format!("{first:?}");
