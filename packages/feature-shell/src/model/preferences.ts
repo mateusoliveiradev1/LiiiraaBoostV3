@@ -2,19 +2,9 @@ export const PREFERENCE_VERSION = 1 as const;
 
 export const DESKTOP_LOCALES = Object.freeze(['pt-BR', 'en-US'] as const);
 export const INTERFACE_SCALES = Object.freeze([100, 112.5, 125, 150] as const);
-export const MOTION_PREFERENCES = Object.freeze([
-  'system',
-  'reduced',
-  'responsive',
-] as const);
-export const DENSITY_PREFERENCES = Object.freeze([
-  'comfortable',
-  'compact',
-] as const);
-export const DATA_TEXT_PREFERENCES = Object.freeze([
-  'standard',
-  'increased-contrast',
-] as const);
+export const MOTION_PREFERENCES = Object.freeze(['system', 'reduced', 'responsive'] as const);
+export const DENSITY_PREFERENCES = Object.freeze(['comfortable', 'compact'] as const);
+export const DATA_TEXT_PREFERENCES = Object.freeze(['standard', 'increased-contrast'] as const);
 
 export type DesktopLocale = (typeof DESKTOP_LOCALES)[number];
 export type InterfaceScale = (typeof INTERFACE_SCALES)[number];
@@ -64,21 +54,14 @@ const PREFERENCE_KEYS = Object.freeze([
   'version',
 ] as const);
 
-const freezePreferences = (
-  preferences: DesktopPreferences,
-): Readonly<DesktopPreferences> => Object.freeze({ ...preferences });
+const freezePreferences = (preferences: DesktopPreferences): Readonly<DesktopPreferences> =>
+  Object.freeze({ ...preferences });
 
-const includes = <Value>(
-  values: readonly Value[],
-  candidate: unknown,
-): candidate is Value => values.some((value) => value === candidate);
+const includes = <Value>(values: readonly Value[], candidate: unknown): candidate is Value =>
+  values.some((value) => value === candidate);
 
-export const detectDesktopLocale = (
-  windowsLocale: string | undefined,
-): DesktopLocale =>
-  windowsLocale?.trim().toLocaleLowerCase('en-US') === 'pt-br'
-    ? 'pt-BR'
-    : 'en-US';
+export const detectDesktopLocale = (windowsLocale: string | undefined): DesktopLocale =>
+  windowsLocale?.trim().toLocaleLowerCase('en-US') === 'pt-br' ? 'pt-BR' : 'en-US';
 
 export const createDefaultPreferences = (
   windowsLocale: string | undefined,
@@ -116,21 +99,11 @@ export const reducePreferences = (
         ...current,
         trayEnabled: event.enabled,
       });
-    default: {
-      const exhaustive: never = event;
-      return exhaustive;
-    }
   }
 };
 
-const isDesktopPreferences = (
-  candidate: unknown,
-): candidate is DesktopPreferences => {
-  if (
-    candidate === null ||
-    typeof candidate !== 'object' ||
-    Array.isArray(candidate)
-  ) {
+const isDesktopPreferences = (candidate: unknown): candidate is DesktopPreferences => {
+  if (candidate === null || typeof candidate !== 'object' || Array.isArray(candidate)) {
     return false;
   }
 
@@ -185,14 +158,10 @@ export const restorePreferences = (
   });
 };
 
-export const selectCloseBehavior = (
-  preferences: DesktopPreferences,
-): 'exit' | 'keep-in-tray' =>
+export const selectCloseBehavior = (preferences: DesktopPreferences): 'exit' | 'keep-in-tray' =>
   preferences.trayEnabled ? 'keep-in-tray' : 'exit';
 
-export const selectDensityMetrics = (
-  density: DensityPreference,
-): Readonly<DensityMetrics> =>
+export const selectDensityMetrics = (density: DensityPreference): Readonly<DensityMetrics> =>
   Object.freeze({
     minimumTargetPx: 44,
     bodyFontPx: 15,

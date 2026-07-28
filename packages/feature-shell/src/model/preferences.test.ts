@@ -56,18 +56,12 @@ describe('UX-12 preferences', () => {
       { type: 'set-tray-enabled', enabled: true },
     ].reduce(
       (preferences, event) =>
-        reducePreferences(
-          preferences,
-          event as Parameters<typeof reducePreferences>[1],
-        ),
+        reducePreferences(preferences, event as Parameters<typeof reducePreferences>[1]),
       createDefaultPreferences('pt-BR'),
     );
 
     const persisted = serializePreferences(changed);
-    const restored = restorePreferences(
-      JSON.parse(JSON.stringify(persisted)),
-      'pt-BR',
-    );
+    const restored = restorePreferences(JSON.parse(JSON.stringify(persisted)), 'pt-BR');
     const serialized = JSON.stringify(persisted);
 
     expect(restored).toEqual({ ok: true, preferences: changed });

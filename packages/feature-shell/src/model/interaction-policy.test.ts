@@ -96,8 +96,11 @@ describe('UX-05 command policy', () => {
       contextTags: ['improve'],
     })[0];
 
-    expect(result?.entry.id).toBe('operation-power');
-    expect(selectCommand(result!.entry)).toEqual({
+    if (result === undefined) {
+      throw new Error('Expected the power-plan result.');
+    }
+    expect(result.entry.id).toBe('operation-power');
+    expect(selectCommand(result.entry)).toEqual({
       kind: 'navigate',
       route: '/plans/review',
       reviewRequired: true,
@@ -130,9 +133,9 @@ describe('UX-06 favorite policy', () => {
     });
 
     const fiveGames = Array.from({ length: 5 }, (_, index) => ({
-      id: `game-${index}`,
+      id: `game-${String(index)}`,
       kind: 'game' as const,
-      label: `Game ${index}`,
+      label: `Game ${String(index)}`,
     }));
     const unchanged = reduceFavorites(fiveGames, {
       type: 'pin',
@@ -150,11 +153,7 @@ describe('UX-06 favorite policy', () => {
       direction: 'left',
     });
 
-    expect(moved.map(({ id }) => id)).toEqual([
-      'metric-1',
-      'game-1',
-      'action-1',
-    ]);
+    expect(moved.map(({ id }) => id)).toEqual(['metric-1', 'game-1', 'action-1']);
     expect(composeHomeRegions(moved)).toMatchObject({
       priorities: ['next-action', 'game-runway', 'system-state'],
       favorites: moved,
@@ -198,9 +197,7 @@ describe('UX-08 Activity policy', () => {
       ['completed', ['completed-b']],
     ]);
     expect(
-      selectActivityGroups(events, 'recovery')[0]?.events.map(
-        ({ correlationId }) => correlationId,
-      ),
+      selectActivityGroups(events, 'recovery')[0]?.events.map(({ correlationId }) => correlationId),
     ).toEqual(['action-b']);
   });
 
@@ -261,15 +258,12 @@ describe('UX-08 Activity policy', () => {
       correlationId: 'recent',
     });
 
-    expect(retained.map(({ correlationId }) => correlationId)).toEqual([
-      'recent',
-    ]);
+    expect(retained.map(({ correlationId }) => correlationId)).toEqual(['recent']);
     expect(selectActivityGroups(history, 'all')).toEqual([]);
-    expect(selectActivityGroups(history, 'all', { includeHistory: true })[0])
-      .toMatchObject({
-        state: 'history',
-        events: [{ correlationId: 'recent' }],
-      });
+    expect(selectActivityGroups(history, 'all', { includeHistory: true })[0]).toMatchObject({
+      state: 'history',
+      events: [{ correlationId: 'recent' }],
+    });
   });
 });
 
@@ -363,8 +357,7 @@ describe('UX-09 feedback, receipt, and boundary policies', () => {
       receiptKind: 'scenario-preview',
       scenarioId: 'S18',
       changed: false,
-      summary:
-        'Prévia concluída — nenhuma alteração foi feita neste PC.',
+      summary: 'Prévia concluída — nenhuma alteração foi feita neste PC.',
       requestedOperations: ['Solicitar alteração da proteção'],
     });
     expect(result.activity).toMatchObject({

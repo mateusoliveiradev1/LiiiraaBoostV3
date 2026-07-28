@@ -113,8 +113,7 @@ export type ActivityState = (typeof ACTIVITY_STATES)[number];
 export type ActivityFilter = (typeof ACTIVITY_FILTERS)[number];
 export type ActivityCategory = Exclude<ActivityFilter, 'all'>;
 export type ActivitySeverity = 'normal' | 'warning' | 'critical';
-export type WindowsNotificationCategory =
-  (typeof WINDOWS_NOTIFICATION_CATEGORIES)[number];
+export type WindowsNotificationCategory = (typeof WINDOWS_NOTIFICATION_CATEGORIES)[number];
 
 export interface ActivityAction {
   readonly label: string;
@@ -135,9 +134,7 @@ export interface ActivityEvent {
   readonly dismissed: boolean;
   readonly scenarioMarked: boolean;
   readonly nextAction?: ActivityAction;
-  readonly notificationCategory?:
-    | WindowsNotificationCategory
-    | 'ordinary-completion';
+  readonly notificationCategory?: WindowsNotificationCategory | 'ordinary-completion';
   readonly sensitiveDetail?: string;
 }
 
@@ -165,10 +162,7 @@ export interface WindowsNotification {
   readonly correlationId: string;
 }
 
-export type FeedbackPlacement =
-  | 'same-control'
-  | 'cross-route'
-  | 'durable';
+export type FeedbackPlacement = 'same-control' | 'cross-route' | 'durable';
 
 export type FeedbackChannel = 'inline' | 'toast' | 'activity' | 'windows';
 
@@ -234,8 +228,7 @@ const deepFreeze = <Value>(value: Value): Readonly<Value> => {
   return value;
 };
 
-const compareText = (left: string, right: string): number =>
-  left.localeCompare(right, 'en-US');
+const compareText = (left: string, right: string): number => left.localeCompare(right, 'en-US');
 
 const searchRank = (
   entry: CommandSearchEntry,
@@ -251,9 +244,7 @@ const searchRank = (
     normalizeSearchText(entry.scope),
     ...entry.keywords.map(normalizeSearchText),
   ];
-  const context = entry.contextTags.some((tag) =>
-    contextTags.has(normalizeSearchText(tag)),
-  );
+  const context = entry.contextTags.some((tag) => contextTags.has(normalizeSearchText(tag)));
   const exact = label === query;
   const prefix = label.startsWith(query);
   const keyword = searchable.some((candidate) => candidate.includes(query));
@@ -297,46 +288,50 @@ export const searchCommands = (
     }
 
     return (
-      compareText(left.entry.label, right.entry.label) ||
-      compareText(left.entry.id, right.entry.id)
+      compareText(left.entry.label, right.entry.label) || compareText(left.entry.id, right.entry.id)
     );
   });
 
   return deepFreeze(
     ranked.map(({ entry, reasons }) => ({
-      entry: deepFreeze({ ...entry, keywords: [...entry.keywords], contextTags: [...entry.contextTags] }),
+      entry: deepFreeze({
+        ...entry,
+        keywords: [...entry.keywords],
+        contextTags: [...entry.contextTags],
+      }),
       reasons: [...reasons],
     })),
   );
 };
 
-export const selectCommand = (
-  entry: CommandSearchEntry,
-): Readonly<CommandSelection> => {
+export const selectCommand = (entry: CommandSearchEntry): Readonly<CommandSelection> => {
   const reviewRequired = entry.risk === 'review-required';
-  if (reviewRequired && entry.reviewRoute === undefined) {
-    throw new Error('Review-required command must define a review route.');
+  if (reviewRequired) {
+    if (entry.reviewRoute === undefined) {
+      throw new Error('Review-required command must define a review route.');
+    }
+    return deepFreeze({
+      kind: 'navigate',
+      route: entry.reviewRoute,
+      reviewRequired: true,
+      execution: 'none',
+    });
   }
 
   return deepFreeze({
     kind: 'navigate',
-    route: reviewRequired ? entry.reviewRoute! : entry.route,
-    reviewRequired,
+    route: entry.route,
+    reviewRequired: false,
     execution: 'none',
   });
 };
 
-export const getCommandNoResultMessage = (
-  locale: 'pt-BR' | 'en-US',
-  query: string,
-): string =>
+export const getCommandNoResultMessage = (locale: 'pt-BR' | 'en-US', query: string): string =>
   locale === 'pt-BR'
     ? `Não encontramos “${query}”. Pesquise por um jogo, componente, configuração ou documento.`
     : `We couldn’t find “${query}”. Search for a game, component, setting, or document.`;
 
-const freezeFavorites = (
-  favorites: readonly Favorite[],
-): readonly Favorite[] =>
+const freezeFavorites = (favorites: readonly Favorite[]): readonly Favorite[] =>
   deepFreeze(favorites.map((favorite) => ({ ...favorite })));
 
 export const reduceFavorites = (
@@ -346,16 +341,9 @@ export const reduceFavorites = (
   const favorites = current.map((favorite) => ({ ...favorite }));
 
   if (action.type === 'pin') {
-    const duplicate = favorites.some(
-      (favorite) => favorite.id === action.favorite.id,
-    );
-    const kindCount = favorites.filter(
-      (favorite) => favorite.kind === action.favorite.kind,
-    ).length;
-    if (
-      duplicate ||
-      kindCount >= FAVORITE_LIMITS[action.favorite.kind]
-    ) {
+    const duplicate = favorites.some((favorite) => favorite.id === action.favorite.id);
+    const kindCount = favorites.filter((favorite) => favorite.kind === action.favorite.kind).length;
+    if (duplicate || kindCount >= FAVORITE_LIMITS[action.favorite.kind]) {
       return freezeFavorites(favorites);
     }
 
@@ -363,9 +351,7 @@ export const reduceFavorites = (
     return freezeFavorites(favorites);
   }
 
-  const currentIndex = favorites.findIndex(
-    (favorite) => favorite.id === action.id,
-  );
+  const currentIndex = favorites.findIndex((favorite) => favorite.id === action.id);
   if (currentIndex === -1) {
     return freezeFavorites(favorites);
   }
@@ -375,34 +361,31 @@ export const reduceFavorites = (
     return freezeFavorites(favorites);
   }
 
-  const nextIndex =
-    action.direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+  const nextIndex = action.direction === 'left' ? currentIndex - 1 : currentIndex + 1;
   if (nextIndex < 0 || nextIndex >= favorites.length) {
     return freezeFavorites(favorites);
   }
 
-  const [favorite] = favorites.splice(currentIndex, 1);
-  favorites.splice(nextIndex, 0, favorite!);
+  const favorite = favorites[currentIndex];
+  if (favorite === undefined) {
+    return freezeFavorites(favorites);
+  }
+  favorites.splice(currentIndex, 1);
+  favorites.splice(nextIndex, 0, favorite);
   return freezeFavorites(favorites);
 };
 
-export const composeHomeRegions = (
-  favorites: readonly Favorite[],
-): Readonly<HomeRegions> =>
+export const composeHomeRegions = (favorites: readonly Favorite[]): Readonly<HomeRegions> =>
   deepFreeze({
     priorities: [...HOME_PRIORITY_REGIONS],
     favorites: favorites.map((favorite) => ({ ...favorite })),
-  }) as Readonly<HomeRegions>;
+  });
 
-const freezeActivity = (
-  events: readonly ActivityEvent[],
-): readonly ActivityEvent[] =>
+const freezeActivity = (events: readonly ActivityEvent[]): readonly ActivityEvent[] =>
   deepFreeze(
     events.map((event) => ({
       ...event,
-      ...(event.nextAction === undefined
-        ? {}
-        : { nextAction: { ...event.nextAction } }),
+      ...(event.nextAction === undefined ? {} : { nextAction: { ...event.nextAction } }),
     })),
   );
 
@@ -443,10 +426,7 @@ export const reduceActivity = (
       if (action.type === 'resolve') {
         return { ...event, resolved: true };
       }
-      if (
-        event.severity === 'critical' &&
-        (!event.acknowledged || !event.resolved)
-      ) {
+      if (event.severity === 'critical' && (!event.acknowledged || !event.resolved)) {
         return event;
       }
 
@@ -455,13 +435,12 @@ export const reduceActivity = (
   );
 };
 
-const ACTIVITY_STATE_ORDER: Readonly<Record<ActivityState, number>> =
-  Object.freeze({
-    'requires-action': 0,
-    'in-progress': 1,
-    completed: 2,
-    history: 3,
-  });
+const ACTIVITY_STATE_ORDER: Readonly<Record<ActivityState, number>> = Object.freeze({
+  'requires-action': 0,
+  'in-progress': 1,
+  completed: 2,
+  history: 3,
+});
 
 export const selectActivityGroups = (
   events: readonly ActivityEvent[],
@@ -471,9 +450,7 @@ export const selectActivityGroups = (
   const selected = events.filter(
     (event) =>
       (filter === 'all' || event.category === filter) &&
-      (options.includeHistory === true
-        ? true
-        : !event.dismissed && event.state !== 'history'),
+      (options.includeHistory === true ? true : !event.dismissed && event.state !== 'history'),
   );
   const groups = new Map<ActivityState, ActivityEvent[]>();
   for (const event of selected) {
@@ -484,10 +461,7 @@ export const selectActivityGroups = (
 
   return deepFreeze(
     [...groups.entries()]
-      .sort(
-        ([left], [right]) =>
-          ACTIVITY_STATE_ORDER[left] - ACTIVITY_STATE_ORDER[right],
-      )
+      .sort(([left], [right]) => ACTIVITY_STATE_ORDER[left] - ACTIVITY_STATE_ORDER[right])
       .map(([state, stateEvents]) => ({
         state,
         events: stateEvents
@@ -559,9 +533,7 @@ export const createWindowsNotification = (
   });
 };
 
-export const mapFeedbackChannels = (
-  signal: FeedbackSignal,
-): Readonly<FeedbackPolicy> => {
+export const mapFeedbackChannels = (signal: FeedbackSignal): Readonly<FeedbackPolicy> => {
   const windowsNotification = createWindowsNotification(signal.event);
   const channels: FeedbackChannel[] =
     signal.placement === 'same-control'
@@ -628,14 +600,8 @@ export const createNoChangeReceipt = (
       category: 'plans',
       state: 'completed',
       severity: 'normal',
-      title:
-        input.locale === 'pt-BR'
-          ? 'Revise a prévia concluída'
-          : 'Review completed preview',
-      affectedObject:
-        input.locale === 'pt-BR'
-          ? 'Operações solicitadas'
-          : 'Requested operations',
+      title: input.locale === 'pt-BR' ? 'Revise a prévia concluída' : 'Review completed preview',
+      affectedObject: input.locale === 'pt-BR' ? 'Operações solicitadas' : 'Requested operations',
       occurredAt: input.createdAt,
       source: `scenario:${scenarioId}`,
       acknowledged: true,
@@ -668,9 +634,7 @@ export const createPhaseBoundaryExplanation = (
     action: {
       kind: 'demonstration',
       label:
-        input.locale === 'pt-BR'
-          ? 'Abrir cenário de demonstração'
-          : 'Open demonstration scenario',
+        input.locale === 'pt-BR' ? 'Abrir cenário de demonstração' : 'Open demonstration scenario',
       scenarioId: availableScenarioId,
     },
   });
