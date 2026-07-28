@@ -55,6 +55,22 @@ export const UPDATE_STATES = Object.freeze([
 ] as const);
 export type UpdateState = (typeof UPDATE_STATES)[number];
 
+const PSEUDO_CHARACTER_MAP: Readonly<Record<string, string>> = Object.freeze({
+  a: 'á',
+  e: 'ë',
+  i: 'ï',
+  o: 'ô',
+  u: 'ü',
+  A: 'Á',
+  E: 'Ë',
+  I: 'Ï',
+  O: 'Ô',
+  U: 'Ü',
+});
+
+export const pseudoLocalizeFutureCopy = (value: string): string =>
+  `［${Array.from(value, (character) => PSEUDO_CHARACTER_MAP[character] ?? character).join('')} ···］`;
+
 const accountCopy = (
   state: AccountState,
   locale: ShellLocale,
@@ -247,6 +263,9 @@ export const SettingsSurface = ({ locale, scenarioId }: SettingsSurfaceProps) =>
     <main
       data-cloud-ai={String(consents.cloudAi)}
       data-diagnostic-sharing={String(consents.diagnosticSharing)}
+      data-forced-colors-ready="true"
+      data-interface-scales="100,112.5,125,150"
+      data-reduced-motion-ready="true"
       data-telemetry={String(consents.telemetry)}
     >
       <RouteHeader

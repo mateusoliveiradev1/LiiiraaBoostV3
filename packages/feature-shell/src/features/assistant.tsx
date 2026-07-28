@@ -123,8 +123,8 @@ export const AssistantSurface = ({ locale, scenarioId, view }: AssistantSurfaceP
           <p>{boundary.explanation}</p>
           <p>
             {locale === 'pt-BR'
-              ? `Responsável: ${boundary.owningPhase} · demonstração: ${boundary.availableScenarioId} · consentimento continua desligado.`
-              : `Owner: ${boundary.owningPhase} · demonstration: ${boundary.availableScenarioId} · consent remains off.`}
+              ? `Responsável: ${boundary.owningPhase} · demonstração: ${boundary.availableScenarioId} · documentação local disponível · consentimento continua desligado.`
+              : `Owner: ${boundary.owningPhase} · demonstration: ${boundary.availableScenarioId} · local documentation available · consent remains off.`}
           </p>
         </aside>
       ) : null}
