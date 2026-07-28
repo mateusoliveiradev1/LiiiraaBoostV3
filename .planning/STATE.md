@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-25-PLAN.md
-last_updated: "2026-07-28T09:02:08.217Z"
+stopped_at: Completed 02-13-PLAN.md
+last_updated: "2026-07-28T09:49:22.612Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 48
+  completed_plans: 49
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 19 of 33
+Plan: 20 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -103,6 +103,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P20 | 17min | 2 tasks | 11 files |
 | Phase 02 P21 | 10 min | 2 tasks | 12 files |
 | Phase 02 P25 | 26 min | 3 tasks | 11 files |
+| Phase 02 P13 | 35 min | 2 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -242,6 +243,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Require injected request metadata before preference commands can cross the future native bridge. — Keeps command construction deterministic and prevents the provider inventing transport identity.
 - [Phase 02]: Route every native shell payload through generated runtime validation before application dispatch or Tauri invoke. — Keeps cross-process state typed, bounded, auditable, and prevents invalid payloads from changing renderer or host state.
 - [Phase 02]: Project host locale and tray events directly through the preference reducer without republishing commands. — Prevents bidirectional renderer/native preference feedback loops while preserving one reducer as UI truth.
+- [Phase 02]: Keep browser composition marker-gated and pseudo-localization test-only. — Prevents ambient test globals or pseudo catalogs from changing shipping desktop truth.
+- [Phase 02]: Use compact goal icons with full accessible names below 1180 px. — Satisfies the locked 72/64 px rail without clipping labels or removing them from assistive technology.
 
 ### Pending Todos
 
@@ -265,6 +268,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T09:01:39.620Z
-Stopped at: Completed 02-25-PLAN.md
+Last session: 2026-07-28T09:49:22.607Z
+Stopped at: Completed 02-13-PLAN.md
 Resume file: None
