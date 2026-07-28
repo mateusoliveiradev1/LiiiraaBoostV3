@@ -14,6 +14,7 @@ import {
   selectActivityGroups,
   selectCommand,
   selectDependencyProminence,
+  mapFeedbackChannels,
   type ActivityEvent,
   type CommandSearchEntry,
   type Favorite,
@@ -58,21 +59,25 @@ const commandIndex = Object.freeze([
 
 const activity = (
   overrides: Partial<ActivityEvent> & Pick<ActivityEvent, 'correlationId'>,
-): ActivityEvent => ({
-  correlationId: overrides.correlationId,
-  category: 'plans',
-  state: 'completed',
-  severity: 'normal',
-  title: 'Reviewed plan',
-  affectedObject: 'Competitive profile',
-  occurredAt: '2026-07-28T12:00:00.000Z',
-  source: 'desktop-preview',
-  acknowledged: true,
-  resolved: true,
-  dismissed: false,
-  scenarioMarked: true,
-  ...overrides,
-});
+): ActivityEvent => {
+  const { correlationId, ...rest } = overrides;
+
+  return {
+    category: 'plans',
+    state: 'completed',
+    severity: 'normal',
+    title: 'Reviewed plan',
+    affectedObject: 'Competitive profile',
+    occurredAt: '2026-07-28T12:00:00.000Z',
+    source: 'desktop-preview',
+    acknowledged: true,
+    resolved: true,
+    dismissed: false,
+    scenarioMarked: true,
+    ...rest,
+    correlationId,
+  };
+};
 
 describe('UX-05 command policy', () => {
   it('ranks contextual results before exact matches and keeps deterministic ties', () => {
@@ -269,6 +274,42 @@ describe('UX-08 Activity policy', () => {
 });
 
 describe('UX-09 feedback, receipt, and boundary policies', () => {
+  it('maps inline, cross-route, durable, and native feedback channels', () => {
+    const inline = mapFeedbackChannels({
+      placement: 'same-control',
+      event: activity({ correlationId: 'inline' }),
+    });
+    const toast = mapFeedbackChannels({
+      placement: 'cross-route',
+      event: activity({ correlationId: 'toast' }),
+    });
+    const native = mapFeedbackChannels({
+      placement: 'durable',
+      event: activity({
+        correlationId: 'native',
+        notificationCategory: 'restart-deadline',
+      }),
+    });
+
+    expect(inline).toMatchObject({
+      channels: ['inline', 'activity'],
+      inlineDurationMs: 4000,
+      maximumVisibleToasts: null,
+    });
+    expect(toast).toMatchObject({
+      channels: ['toast', 'activity'],
+      inlineDurationMs: null,
+      maximumVisibleToasts: 2,
+    });
+    expect(native).toMatchObject({
+      channels: ['activity', 'windows'],
+      windowsNotification: {
+        category: 'restart-deadline',
+        correlationId: 'native',
+      },
+    });
+  });
+
   it('maps only approved actionable categories to redacted Windows notifications', () => {
     const approved = createWindowsNotification(
       activity({
