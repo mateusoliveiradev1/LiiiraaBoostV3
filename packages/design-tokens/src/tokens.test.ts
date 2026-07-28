@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -21,9 +23,9 @@ describe('Pre-Dawn Flight Deck token contract', () => {
   it('allows only the four authored text sizes and two weights', () => {
     const typography = Object.values(TYPOGRAPHY);
 
-    expect([...new Set(typography.map(({ size }) => size))].sort((left, right) => left - right)).toEqual([
-      13, 15, 20, 28,
-    ]);
+    expect(
+      [...new Set(typography.map(({ size }) => size))].sort((left, right) => left - right),
+    ).toEqual([13, 15, 20, 28]);
     expect(
       [...new Set(typography.flatMap(({ weights }) => weights))].sort(
         (left, right) => left - right,

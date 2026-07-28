@@ -1,0 +1,195 @@
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/manrope-variable.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Variable';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-variable.woff2') format('woff2-variations');
+}
+
+:root {
+  color-scheme: dark;
+  font-family: 'Manrope Variable', sans-serif;
+
+  --lb-font-body: 'Manrope Variable', sans-serif;
+  --lb-font-data: 'JetBrains Mono Variable', monospace;
+
+  --lb-space-1: 4px;
+  --lb-space-2: 8px;
+  --lb-space-3: 16px;
+  --lb-space-4: 24px;
+  --lb-space-5: 32px;
+  --lb-space-6: 48px;
+  --lb-space-7: 64px;
+
+  --lb-text-label-size: 13px;
+  --lb-text-label-line: 18px;
+  --lb-text-body-size: 15px;
+  --lb-text-body-line: 24px;
+  --lb-text-heading-size: 20px;
+  --lb-text-heading-line: 26px;
+  --lb-text-display-size: 28px;
+  --lb-text-display-line: 34px;
+  --lb-weight-regular: 400;
+  --lb-weight-semibold: 600;
+
+  --lb-surface-canvas: #090b0f;
+  --lb-surface-inset: #0b0e13;
+  --lb-surface-work: #121722;
+  --lb-surface-raised: #181f2c;
+  --lb-cobalt-action: #315acd;
+  --lb-cobalt-signal: #7ea0ff;
+  --lb-text-primary: #f4f7fb;
+  --lb-text-secondary: #aab4c4;
+  --lb-text-tertiary: #7d899b;
+  --lb-line-subtle: #2a3343;
+  --lb-line-strong: #3d4a60;
+  --lb-focus-ring: #8eabff;
+  --lb-success: #4dca8b;
+  --lb-warning: #f3b64a;
+  --lb-critical: #ff747d;
+  --lb-destructive-fill: #b52d3a;
+  --lb-experimental: #c08cff;
+  --lb-disabled-fill: #3d4452;
+  --lb-disabled-text: #aab4c4;
+  --lb-disabled-opacity: 1;
+  --lb-scrim: rgba(3, 5, 8, 0.76);
+
+  --lb-radius-default: 6px;
+  --lb-radius-overlay: 10px;
+  --lb-shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.46);
+  --lb-focus-width: 2px;
+  --lb-focus-separation: 2px;
+
+  --lb-control-min-size: 44px;
+  --lb-row-dense-size: 44px;
+  --lb-row-standard-size: 52px;
+  --lb-row-primary-size: 64px;
+  --lb-screen-padding: 32px;
+  --lb-grid-gutter: 24px;
+  --lb-control-gap: 16px;
+  --lb-section-gap: 24px;
+  --lb-app-scale: 1;
+  --lb-text-scale: 1;
+
+  --lb-motion-hover-duration: 100ms;
+  --lb-motion-control-duration: 140ms;
+  --lb-motion-inspector-duration: 180ms;
+  --lb-motion-route-duration: 220ms;
+  --lb-motion-progress-duration: 240ms;
+  --lb-motion-easing: cubic-bezier(0.2, 0, 0, 1);
+  --lb-motion-translate: 8px;
+
+  --lb-pattern-success: solid;
+  --lb-pattern-warning: dashed;
+  --lb-pattern-critical: double;
+  --lb-pattern-experimental: dotted;
+  --lb-pattern-restricted: dotted;
+  --lb-pattern-pending-restart: dashed;
+  --lb-pattern-recovery: double;
+  --lb-pattern-unavailable: dotted;
+  --lb-pattern-fixture: dashed;
+
+  --lb-forced-canvas: var(--lb-surface-canvas);
+  --lb-forced-canvas-text: var(--lb-text-primary);
+  --lb-forced-focus: var(--lb-focus-ring);
+}
+
+[data-density='comfortable'] {
+  --lb-control-gap: 16px;
+  --lb-section-gap: 24px;
+}
+
+[data-density='compact'] {
+  --lb-control-gap: 8px;
+  --lb-section-gap: 16px;
+}
+
+[data-app-scale='100'] {
+  --lb-app-scale: 1;
+}
+
+[data-app-scale='125'] {
+  --lb-app-scale: 1.25;
+}
+
+[data-app-scale='150'] {
+  --lb-app-scale: 1.5;
+}
+
+[data-text-scale='100'] {
+  --lb-text-scale: 1;
+}
+
+[data-text-scale='200'] {
+  --lb-text-scale: 2;
+}
+
+[data-motion='reduced'] {
+  --lb-motion-control-duration: 100ms;
+  --lb-motion-inspector-duration: 100ms;
+  --lb-motion-route-duration: 100ms;
+  --lb-motion-progress-duration: 100ms;
+  --lb-motion-translate: 0px;
+}
+
+[data-lb-control] {
+  min-block-size: var(--lb-control-min-size);
+  min-inline-size: var(--lb-control-min-size);
+}
+
+[data-lb-control]:focus-visible {
+  outline: var(--lb-focus-width) solid var(--lb-forced-focus);
+  outline-offset: var(--lb-focus-separation);
+}
+
+[data-lb-control][aria-disabled='true'],
+[data-lb-control]:disabled {
+  color: var(--lb-disabled-text);
+  opacity: var(--lb-disabled-opacity);
+}
+
+@media (width < 1440px) {
+  :root {
+    --lb-screen-padding: 24px;
+    --lb-grid-gutter: 16px;
+  }
+}
+
+@media (width < 960px) {
+  :root {
+    --lb-screen-padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --lb-motion-control-duration: 100ms;
+    --lb-motion-inspector-duration: 100ms;
+    --lb-motion-route-duration: 100ms;
+    --lb-motion-progress-duration: 100ms;
+    --lb-motion-translate: 0px;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --lb-forced-canvas: Canvas;
+    --lb-forced-canvas-text: CanvasText;
+    --lb-forced-focus: Highlight;
+    forced-color-adjust: auto;
+  }
+
+  [data-lb-control],
+  [data-lb-status],
+  [data-lb-region] {
+    border-color: CanvasText;
+  }
+}
