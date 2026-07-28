@@ -4,7 +4,8 @@
  * This file is read-only. DO NOT EDIT.
  */
 
-export type MessageEnvelope = InspectSystemRequestJson | InspectSystemResultJson;
+export type MessageEnvelope =
+  InspectSystemRequestJson | InspectSystemResultJson | HostToRendererShellEventJson | RendererToHostShellCommandJson;
 export type RequestIdJson = string;
 export type CorrelationIdJson = string;
 export type InspectionIdJson = string;
@@ -17,6 +18,54 @@ export type DiagnosticValueJson =
 export type DiagnosticPrimitiveJson = string | number | boolean;
 export type ProvenanceIdentifierJson = string;
 export type ProvenanceDescriptionJson = string;
+export type HostToRendererShellEventJson =
+  | ShellInstallerIdentityEventJson
+  | ShellStartupStateChangedEventJson
+  | ShellNavigationRequestedEventJson
+  | ShellLocaleChangedEventJson
+  | ShellTrayPreferenceChangedEventJson
+  | ShellCloseRequestedEventJson
+  | ShellNotificationPreferenceChangedEventJson
+  | ShellWindowStateChangedEventJson;
+export type ShellPublisherJson = string;
+export type ShellVersionJson = string;
+export type ShellReleaseChannelJson = 'stable' | 'beta' | 'experimental';
+export type ShellWindowsCompatibilityJson =
+  ShellSupportedWindowsCompatibilityJson | ShellUnsupportedWindowsCompatibilityJson;
+export type ShellStartupStateJson =
+  | ShellStartupSplashStateJson
+  | ShellStartupUpdatingStateJson
+  | ShellStartupReadyStateJson
+  | ShellStartupFailureStateJson;
+export type ShellNavigationIntentJson =
+  | ShellGoalNavigationIntentJson
+  | ShellSettingsNavigationIntentJson
+  | ShellCalibrationNavigationIntentJson
+  | ShellDocumentationNavigationIntentJson;
+export type ShellDocumentIdJson = string;
+export type ShellLocaleJson = 'pt-BR' | 'en';
+export type ShellTrayPreferenceJson = 'close-window' | 'keep-game-detection-in-tray';
+export type ShellCloseContextJson = ShellOrdinaryCloseContextJson | ShellRecoveryCloseContextJson;
+export type ShellNotificationCategoryJson =
+  | 'recovery-required'
+  | 'restart-deadline'
+  | 'game-profile-restore-failed'
+  | 'signed-update-action-required'
+  | 'account-security';
+export type ShellWindowStateJson =
+  ShellNormalWindowStateJson | ShellMaximizedWindowStateJson | ShellMinimizedWindowStateJson;
+export type ShellMonitorIdJson = string;
+export type RendererToHostShellCommandJson =
+  | ShellNavigateCommandJson
+  | ShellSetLocaleCommandJson
+  | ShellSetTrayPreferenceCommandJson
+  | ShellResolveCloseCommandJson
+  | ShellSetNotificationPreferenceCommandJson
+  | ShellShowNotificationCommandJson
+  | ShellSaveWindowStateCommandJson;
+export type ShellCloseResolutionJson = ShellOrdinaryCloseResolutionJson | ShellRecoveryCloseResolutionJson;
+export type ShellNotificationTitleJson = string;
+export type ShellNotificationBodyJson = string;
 
 export interface InspectSystemRequestJson {
   schemaVersion: '1.0';
@@ -231,4 +280,289 @@ export interface ModeledDiagnosticValueJson {
 export interface UnavailableDiagnosticValueJson {
   kind: 'unavailable';
   reason: ProvenanceDescriptionJson;
+}
+export interface ShellInstallerIdentityEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.installer-identity.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellInstallerIdentityEventPayloadJson;
+}
+export interface ShellInstallerIdentityEventPayloadJson {
+  installer: ShellInstallerIdentityJson;
+}
+export interface ShellInstallerIdentityJson {
+  publisher: ShellPublisherJson;
+  version: ShellVersionJson;
+  channel: ShellReleaseChannelJson;
+  windowsCompatibility: ShellWindowsCompatibilityJson;
+}
+export interface ShellSupportedWindowsCompatibilityJson {
+  kind: 'supported';
+  detectedBuild: number;
+  minimumBuild: number;
+}
+export interface ShellUnsupportedWindowsCompatibilityJson {
+  kind: 'unsupported';
+  reason: 'unsupported-build' | 'unsupported-lifecycle';
+  detectedBuild: number;
+  minimumBuild: number;
+}
+export interface ShellStartupStateChangedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.startup-state-changed.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellStartupStateChangedEventPayloadJson;
+}
+export interface ShellStartupStateChangedEventPayloadJson {
+  state: ShellStartupStateJson;
+}
+export interface ShellStartupSplashStateJson {
+  kind: 'splash';
+  step: 'initializing-webview' | 'loading-local-state' | 'validating-installation' | 'opening-shell';
+}
+export interface ShellStartupUpdatingStateJson {
+  kind: 'updating';
+  step: 'verifying-signature' | 'installing-update' | 'preparing-rollback';
+}
+export interface ShellStartupReadyStateJson {
+  kind: 'ready';
+}
+export interface ShellStartupFailureStateJson {
+  kind: 'failure';
+  reason:
+    | 'missing-webview2'
+    | 'damaged-installation'
+    | 'incompatible-windows-build'
+    | 'local-state-migration-failed'
+    | 'update-signature-failed'
+    | 'internal-startup-error';
+  recoveryAction: 'install-webview2' | 'view-offline-instructions' | 'retry' | 'rollback' | 'open-safe-mode' | 'exit';
+}
+export interface ShellNavigationRequestedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.navigation-requested.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellNavigationRequestedEventPayloadJson;
+}
+export interface ShellNavigationRequestedEventPayloadJson {
+  source: 'second-launch' | 'deep-link' | 'tray' | 'notification';
+  intent: ShellNavigationIntentJson;
+}
+export interface ShellGoalNavigationIntentJson {
+  kind: 'goal';
+  destination: 'home' | 'prepare' | 'improve' | 'measure' | 'recover' | 'assistant' | 'activity' | 'account';
+}
+export interface ShellSettingsNavigationIntentJson {
+  kind: 'settings';
+  destination:
+    'general' | 'background' | 'appearance' | 'accessibility' | 'privacy' | 'notifications' | 'updates' | 'advanced';
+}
+export interface ShellCalibrationNavigationIntentJson {
+  kind: 'calibration';
+  destination: 'welcome' | 'trust' | 'inventory' | 'diagnosis' | 'recovery' | 'goals' | 'games' | 'summary';
+}
+export interface ShellDocumentationNavigationIntentJson {
+  kind: 'documentation';
+  documentId: ShellDocumentIdJson;
+}
+export interface ShellLocaleChangedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.locale-changed.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellLocaleChangedEventPayloadJson;
+}
+export interface ShellLocaleChangedEventPayloadJson {
+  locale: ShellLocaleJson;
+}
+export interface ShellTrayPreferenceChangedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.tray-preference-changed.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellTrayPreferenceChangedEventPayloadJson;
+}
+export interface ShellTrayPreferenceChangedEventPayloadJson {
+  preference: ShellTrayPreferenceJson;
+}
+export interface ShellCloseRequestedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.close-requested.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellCloseRequestedEventPayloadJson;
+}
+export interface ShellCloseRequestedEventPayloadJson {
+  context: ShellCloseContextJson;
+}
+export interface ShellOrdinaryCloseContextJson {
+  kind: 'ordinary';
+}
+export interface ShellRecoveryCloseContextJson {
+  kind: 'recovery-in-progress';
+}
+export interface ShellNotificationPreferenceChangedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.notification-preference-changed.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellNotificationPreferenceChangedEventPayloadJson;
+}
+export interface ShellNotificationPreferenceChangedEventPayloadJson {
+  preference: ShellNotificationPreferenceJson;
+}
+export interface ShellNotificationPreferenceJson {
+  enabled: boolean;
+  focusAssist: 'respect';
+  /**
+   * @minItems 0
+   * @maxItems 5
+   */
+  categories:
+    | []
+    | [ShellNotificationCategoryJson]
+    | [ShellNotificationCategoryJson, ShellNotificationCategoryJson]
+    | [ShellNotificationCategoryJson, ShellNotificationCategoryJson, ShellNotificationCategoryJson]
+    | [
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson
+      ]
+    | [
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson,
+        ShellNotificationCategoryJson
+      ];
+}
+export interface ShellWindowStateChangedEventJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.window-state-changed.event';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellWindowStateChangedEventPayloadJson;
+}
+export interface ShellWindowStateChangedEventPayloadJson {
+  state: ShellWindowStateJson;
+}
+export interface ShellNormalWindowStateJson {
+  kind: 'normal';
+  monitorId: ShellMonitorIdJson;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+export interface ShellMaximizedWindowStateJson {
+  kind: 'maximized';
+  monitorId: ShellMonitorIdJson;
+  x: number;
+  y: number;
+  restoreWidth: number;
+  restoreHeight: number;
+}
+export interface ShellMinimizedWindowStateJson {
+  kind: 'minimized';
+  restoreState: ShellNormalWindowStateJson | ShellMaximizedWindowStateJson;
+}
+export interface ShellNavigateCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.navigate.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellNavigateCommandPayloadJson;
+}
+export interface ShellNavigateCommandPayloadJson {
+  intent: ShellNavigationIntentJson;
+}
+export interface ShellSetLocaleCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.set-locale.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellSetLocaleCommandPayloadJson;
+}
+export interface ShellSetLocaleCommandPayloadJson {
+  locale: ShellLocaleJson;
+}
+export interface ShellSetTrayPreferenceCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.set-tray-preference.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellSetTrayPreferenceCommandPayloadJson;
+}
+export interface ShellSetTrayPreferenceCommandPayloadJson {
+  preference: ShellTrayPreferenceJson;
+}
+export interface ShellResolveCloseCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.resolve-close.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellResolveCloseCommandPayloadJson;
+}
+export interface ShellResolveCloseCommandPayloadJson {
+  resolution: ShellCloseResolutionJson;
+}
+export interface ShellOrdinaryCloseResolutionJson {
+  context: 'ordinary';
+  decision: 'close-interface' | 'keep-running-in-tray';
+}
+export interface ShellRecoveryCloseResolutionJson {
+  context: 'recovery-in-progress';
+  decision: 'keep-running-in-tray' | 'stay-here';
+}
+export interface ShellSetNotificationPreferenceCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.set-notification-preference.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellSetNotificationPreferenceCommandPayloadJson;
+}
+export interface ShellSetNotificationPreferenceCommandPayloadJson {
+  preference: ShellNotificationPreferenceJson;
+}
+export interface ShellShowNotificationCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.show-notification.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellShowNotificationCommandPayloadJson;
+}
+export interface ShellShowNotificationCommandPayloadJson {
+  category: ShellNotificationCategoryJson;
+  title: ShellNotificationTitleJson;
+  body: ShellNotificationBodyJson;
+  action: ShellNavigationIntentJson;
+}
+export interface ShellSaveWindowStateCommandJson {
+  schemaVersion: '1.0';
+  messageType: 'desktop.shell.save-window-state.command';
+  requestId: RequestIdJson;
+  correlationId?: CorrelationIdJson;
+  issuedAt: string;
+  payload: ShellSaveWindowStateCommandPayloadJson;
+}
+export interface ShellSaveWindowStateCommandPayloadJson {
+  state: ShellWindowStateJson;
 }

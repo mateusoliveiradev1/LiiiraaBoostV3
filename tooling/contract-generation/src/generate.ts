@@ -47,6 +47,7 @@ export const OUTPUT_PATHS = Object.freeze({
   messageEnvelope: join(DESKTOP_OUTPUT_ROOT, 'message-envelope.schema.json'),
   diagnosticValue: join(DESKTOP_OUTPUT_ROOT, 'diagnostic-value.schema.json'),
   inspectSystem: join(DESKTOP_OUTPUT_ROOT, 'inspect-system.schema.json'),
+  shellMessage: join(DESKTOP_OUTPUT_ROOT, 'shell-message.schema.json'),
   openApi: join(HTTP_OUTPUT_ROOT, 'openapi.json'),
   typescriptModels: join(TYPESCRIPT_OUTPUT_ROOT, 'models.ts'),
   typescriptIndex: join(TYPESCRIPT_OUTPUT_ROOT, 'index.ts'),
@@ -67,8 +68,18 @@ const GENERATED_TYPESCRIPT_HEADER = `/**
  */`;
 const REQUIRED_DEFINITIONS = Object.freeze([
   'DiagnosticValue',
+  'HostToRendererShellEvent',
   'InspectSystemRequest',
   'InspectSystemResult',
+  'RendererToHostShellCommand',
+  'ShellCloseContext',
+  'ShellInstallerIdentity',
+  'ShellNavigationIntent',
+  'ShellNotificationCategory',
+  'ShellNotificationPreference',
+  'ShellStartupState',
+  'ShellTrayPreference',
+  'ShellWindowState',
 ]);
 
 function isJsonObject(value: unknown): value is JsonObject {
@@ -137,6 +148,17 @@ function requireDefinitions(bundle: JsonObject): JsonObject {
   return definitions;
 }
 
+function inspectionDefinitions(definitions: JsonObject): JsonObject {
+  return Object.fromEntries(
+    Object.entries(definitions).filter(
+      ([name]) =>
+        !name.startsWith('Shell') &&
+        name !== 'HostToRendererShellEvent' &&
+        name !== 'RendererToHostShellCommand',
+    ),
+  );
+}
+
 function createRuntimeSchema(
   schemaId: string,
   definitions: JsonObject,
@@ -154,6 +176,26 @@ function createRuntimeSchema(
 function inspectMessageRoot(): JsonObject {
   return {
     oneOf: [{ $ref: 'InspectSystemRequest.json' }, { $ref: 'InspectSystemResult.json' }],
+  };
+}
+
+function shellMessageRoot(): JsonObject {
+  return {
+    oneOf: [
+      { $ref: 'HostToRendererShellEvent.json' },
+      { $ref: 'RendererToHostShellCommand.json' },
+    ],
+  };
+}
+
+function transportMessageRoot(): JsonObject {
+  return {
+    oneOf: [
+      { $ref: 'InspectSystemRequest.json' },
+      { $ref: 'InspectSystemResult.json' },
+      { $ref: 'HostToRendererShellEvent.json' },
+      { $ref: 'RendererToHostShellCommand.json' },
+    ],
   };
 }
 
@@ -255,13 +297,14 @@ const schemaStage: GenerationStage = {
   async generate(): Promise<readonly GeneratedArtifact[]> {
     const bundle = await canonicalSchema();
     const definitions = requireDefinitions(bundle);
+    const legacyInspectionDefinitions = inspectionDefinitions(definitions);
 
     return [
       {
         path: OUTPUT_PATHS.messageEnvelope,
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
-          definitions,
+          legacyInspectionDefinitions,
           inspectMessageRoot(),
         ),
       },
@@ -269,7 +312,7 @@ const schemaStage: GenerationStage = {
         path: OUTPUT_PATHS.diagnosticValue,
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/diagnostic-value.schema.json',
-          definitions,
+          legacyInspectionDefinitions,
           { $ref: 'DiagnosticValue.json' },
         ),
       },
@@ -277,13 +320,21 @@ const schemaStage: GenerationStage = {
         path: OUTPUT_PATHS.inspectSystem,
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/inspect-system.schema.json',
-          definitions,
+          legacyInspectionDefinitions,
           inspectMessageRoot(),
         ),
       },
       {
+        path: OUTPUT_PATHS.shellMessage,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/shell-message.schema.json',
+          definitions,
+          shellMessageRoot(),
+        ),
+      },
+      {
         path: OUTPUT_PATHS.openApi,
-        value: createOpenApiDocument(definitions),
+        value: createOpenApiDocument(legacyInspectionDefinitions),
       },
     ];
   },
@@ -332,7 +383,7 @@ const typescriptStage: GenerationStage = {
     const definitions = requireDefinitions(await canonicalSchema());
     const generatorSchema = rebaseForTypeScript({
       title: 'MessageEnvelope',
-      ...inspectMessageRoot(),
+      ...transportMessageRoot(),
       $defs: definitions,
     });
 
@@ -407,11 +458,11 @@ const rustStage: GenerationStage = {
       await writeFile(
         schemaPath,
         stableJson(
-          createRuntimeSchema(
-            'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
-            definitions,
-            inspectMessageRoot(),
-          ),
+        createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
+          definitions,
+          transportMessageRoot(),
+        ),
         ),
         'utf8',
       );

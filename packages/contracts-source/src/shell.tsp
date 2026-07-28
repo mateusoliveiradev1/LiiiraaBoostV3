@@ -39,14 +39,18 @@ union ShellLocale {
 
 model ShellSupportedWindowsCompatibility {
   kind: "supported";
+  @minValue(0)
   detectedBuild: int32;
+  @minValue(0)
   minimumBuild: int32;
 }
 
 model ShellUnsupportedWindowsCompatibility {
   kind: "unsupported";
   reason: "unsupported-build" | "unsupported-lifecycle";
+  @minValue(0)
   detectedBuild: int32;
+  @minValue(0)
   minimumBuild: int32;
 }
 
@@ -184,10 +188,20 @@ union ShellCloseContext {
   recoveryInProgress: ShellRecoveryCloseContext,
 }
 
-union ShellCloseDecision {
-  closeInterface: "close-interface",
-  keepRunningInTray: "keep-running-in-tray",
-  stayHere: "stay-here",
+model ShellOrdinaryCloseResolution {
+  context: "ordinary";
+  decision: "close-interface" | "keep-running-in-tray";
+}
+
+model ShellRecoveryCloseResolution {
+  context: "recovery-in-progress";
+  decision: "keep-running-in-tray" | "stay-here";
+}
+
+@oneOf
+union ShellCloseResolution {
+  ordinary: ShellOrdinaryCloseResolution,
+  recoveryInProgress: ShellRecoveryCloseResolution,
 }
 
 @jsonSchema
@@ -348,8 +362,7 @@ model ShellSetTrayPreferenceCommandPayload {
 }
 
 model ShellResolveCloseCommandPayload {
-  context: ShellCloseContext;
-  decision: ShellCloseDecision;
+  resolution: ShellCloseResolution;
 }
 
 model ShellSetNotificationPreferenceCommandPayload {

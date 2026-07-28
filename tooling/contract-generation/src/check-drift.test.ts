@@ -10,6 +10,7 @@ function assertDeepEqual(actual: unknown, expected: unknown, message: string): v
 
 const expectedArtifacts = new Map([
   ['contracts/generated/desktop/v1/message-envelope.schema.json', 'expected\n'],
+  ['contracts/generated/desktop/v1/shell-message.schema.json', 'shell\n'],
   ['packages/contracts-ts/src/generated/models.ts', 'models\n'],
 ]);
 
@@ -24,6 +25,7 @@ assertDeepEqual(
   [
     'changed: contracts/generated/desktop/v1/message-envelope.schema.json',
     'extra: crates/contracts-rust/src/extra.rs',
+    'missing: contracts/generated/desktop/v1/shell-message.schema.json',
     'missing: packages/contracts-ts/src/generated/models.ts',
   ],
   'Drift diagnostics must be complete and deterministically sorted.',
@@ -46,12 +48,19 @@ assertDeepEqual(
       contents: 'pub struct DiagnosticValue {}',
     },
     {
+      path: 'packages/example/src/shell.ts',
+      contents:
+        'export type HostToRendererShellEvent = unknown; export interface ShellWindowState {}',
+    },
+    {
       path: 'packages/example/src/domain.ts',
       contents: 'export interface InspectionSummary { status: string }',
     },
   ]),
   [
     'crates/example/src/lib.rs: handwritten DiagnosticValue declaration',
+    'packages/example/src/shell.ts: handwritten HostToRendererShellEvent declaration',
+    'packages/example/src/shell.ts: handwritten ShellWindowState declaration',
     'packages/example/src/transport.ts: handwritten InspectSystemRequest declaration',
   ],
   'Handwritten transport declarations must fail without flagging unrelated domain types.',

@@ -1,0 +1,2177 @@
+{
+  "$defs": {
+    "CorrelationId": {
+      "$id": "CorrelationId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "DiagnosticPrimitive": {
+      "$id": "DiagnosticPrimitive.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "DiagnosticValue": {
+      "$id": "DiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "FixtureDiagnosticValue.json"
+        },
+        {
+          "$ref": "ObservedDiagnosticValue.json"
+        },
+        {
+          "$ref": "MeasuredDiagnosticValue.json"
+        },
+        {
+          "$ref": "ModeledDiagnosticValue.json"
+        },
+        {
+          "$ref": "UnavailableDiagnosticValue.json"
+        }
+      ]
+    },
+    "FixtureDiagnosticValue": {
+      "$id": "FixtureDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "fixtureVersion": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "kind": {
+          "const": "fixture",
+          "type": "string"
+        },
+        "scenarioId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "scenarioId",
+        "fixtureVersion"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "HostToRendererShellEvent": {
+      "$id": "HostToRendererShellEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellInstallerIdentityEvent.json"
+        },
+        {
+          "$ref": "ShellStartupStateChangedEvent.json"
+        },
+        {
+          "$ref": "ShellNavigationRequestedEvent.json"
+        },
+        {
+          "$ref": "ShellLocaleChangedEvent.json"
+        },
+        {
+          "$ref": "ShellTrayPreferenceChangedEvent.json"
+        },
+        {
+          "$ref": "ShellCloseRequestedEvent.json"
+        },
+        {
+          "$ref": "ShellNotificationPreferenceChangedEvent.json"
+        },
+        {
+          "$ref": "ShellWindowStateChangedEvent.json"
+        }
+      ]
+    },
+    "InspectionId": {
+      "$id": "InspectionId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "InspectSystemRequest": {
+      "$id": "InspectSystemRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.inspect-system.request",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "InspectSystemRequestPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemRequestPayload": {
+      "$id": "InspectSystemRequestPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "scope": {
+          "const": "summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemResult": {
+      "$id": "InspectSystemResult.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.inspect-system.result",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "InspectSystemResultPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InspectSystemResultPayload": {
+      "$id": "InspectSystemResultPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "deviceLabel": {
+          "$ref": "DiagnosticValue.json"
+        },
+        "inspectedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "inspectionId": {
+          "$ref": "InspectionId.json"
+        },
+        "logicalProcessorCount": {
+          "$ref": "DiagnosticValue.json"
+        },
+        "totalMemoryBytes": {
+          "$ref": "DiagnosticValue.json"
+        }
+      },
+      "required": [
+        "inspectionId",
+        "inspectedAt",
+        "deviceLabel",
+        "logicalProcessorCount",
+        "totalMemoryBytes"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "MeasuredDiagnosticValue": {
+      "$id": "MeasuredDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "measured",
+          "type": "string"
+        },
+        "measuredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "method": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "quality": {
+          "anyOf": [
+            {
+              "const": "valid",
+              "type": "string"
+            },
+            {
+              "const": "degraded",
+              "type": "string"
+            },
+            {
+              "const": "insufficient",
+              "type": "string"
+            }
+          ]
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "method",
+        "measuredAt",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ModeledDiagnosticValue": {
+      "$id": "ModeledDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "$ref": "ProvenanceDescription.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "kind": {
+          "const": "modeled",
+          "type": "string"
+        },
+        "modelId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "modelId",
+        "confidence",
+        "assumptions"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ObservedDiagnosticValue": {
+      "$id": "ObservedDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "observed",
+          "type": "string"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProvenanceDescription": {
+      "$id": "ProvenanceDescription.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ProvenanceIdentifier": {
+      "$id": "ProvenanceIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "RendererToHostShellCommand": {
+      "$id": "RendererToHostShellCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellNavigateCommand.json"
+        },
+        {
+          "$ref": "ShellSetLocaleCommand.json"
+        },
+        {
+          "$ref": "ShellSetTrayPreferenceCommand.json"
+        },
+        {
+          "$ref": "ShellResolveCloseCommand.json"
+        },
+        {
+          "$ref": "ShellSetNotificationPreferenceCommand.json"
+        },
+        {
+          "$ref": "ShellShowNotificationCommand.json"
+        },
+        {
+          "$ref": "ShellSaveWindowStateCommand.json"
+        }
+      ]
+    },
+    "RequestId": {
+      "$id": "RequestId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellCalibrationNavigationIntent": {
+      "$id": "ShellCalibrationNavigationIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "destination": {
+          "anyOf": [
+            {
+              "const": "welcome",
+              "type": "string"
+            },
+            {
+              "const": "trust",
+              "type": "string"
+            },
+            {
+              "const": "inventory",
+              "type": "string"
+            },
+            {
+              "const": "diagnosis",
+              "type": "string"
+            },
+            {
+              "const": "recovery",
+              "type": "string"
+            },
+            {
+              "const": "goals",
+              "type": "string"
+            },
+            {
+              "const": "games",
+              "type": "string"
+            },
+            {
+              "const": "summary",
+              "type": "string"
+            }
+          ]
+        },
+        "kind": {
+          "const": "calibration",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "destination"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellCloseContext": {
+      "$id": "ShellCloseContext.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellOrdinaryCloseContext.json"
+        },
+        {
+          "$ref": "ShellRecoveryCloseContext.json"
+        }
+      ]
+    },
+    "ShellCloseRequestedEvent": {
+      "$id": "ShellCloseRequestedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.close-requested.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellCloseRequestedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellCloseRequestedEventPayload": {
+      "$id": "ShellCloseRequestedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "context": {
+          "$ref": "ShellCloseContext.json"
+        }
+      },
+      "required": [
+        "context"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellCloseResolution": {
+      "$id": "ShellCloseResolution.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellOrdinaryCloseResolution.json"
+        },
+        {
+          "$ref": "ShellRecoveryCloseResolution.json"
+        }
+      ]
+    },
+    "ShellDocumentationNavigationIntent": {
+      "$id": "ShellDocumentationNavigationIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "documentId": {
+          "$ref": "ShellDocumentId.json"
+        },
+        "kind": {
+          "const": "documentation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "documentId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellDocumentId": {
+      "$id": "ShellDocumentId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellGoalNavigationIntent": {
+      "$id": "ShellGoalNavigationIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "destination": {
+          "anyOf": [
+            {
+              "const": "home",
+              "type": "string"
+            },
+            {
+              "const": "prepare",
+              "type": "string"
+            },
+            {
+              "const": "improve",
+              "type": "string"
+            },
+            {
+              "const": "measure",
+              "type": "string"
+            },
+            {
+              "const": "recover",
+              "type": "string"
+            },
+            {
+              "const": "assistant",
+              "type": "string"
+            },
+            {
+              "const": "activity",
+              "type": "string"
+            },
+            {
+              "const": "account",
+              "type": "string"
+            }
+          ]
+        },
+        "kind": {
+          "const": "goal",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "destination"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellInstallerIdentity": {
+      "$id": "ShellInstallerIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "channel": {
+          "$ref": "ShellReleaseChannel.json"
+        },
+        "publisher": {
+          "$ref": "ShellPublisher.json"
+        },
+        "version": {
+          "$ref": "ShellVersion.json"
+        },
+        "windowsCompatibility": {
+          "$ref": "ShellWindowsCompatibility.json"
+        }
+      },
+      "required": [
+        "publisher",
+        "version",
+        "channel",
+        "windowsCompatibility"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellInstallerIdentityEvent": {
+      "$id": "ShellInstallerIdentityEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.installer-identity.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellInstallerIdentityEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellInstallerIdentityEventPayload": {
+      "$id": "ShellInstallerIdentityEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "installer": {
+          "$ref": "ShellInstallerIdentity.json"
+        }
+      },
+      "required": [
+        "installer"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellLocale": {
+      "$id": "ShellLocale.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pt-BR",
+          "type": "string"
+        },
+        {
+          "const": "en",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellLocaleChangedEvent": {
+      "$id": "ShellLocaleChangedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.locale-changed.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellLocaleChangedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellLocaleChangedEventPayload": {
+      "$id": "ShellLocaleChangedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "locale": {
+          "$ref": "ShellLocale.json"
+        }
+      },
+      "required": [
+        "locale"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellMaximizedWindowState": {
+      "$id": "ShellMaximizedWindowState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "maximized",
+          "type": "string"
+        },
+        "monitorId": {
+          "$ref": "ShellMonitorId.json"
+        },
+        "restoreHeight": {
+          "maximum": 8640,
+          "minimum": 600,
+          "type": "integer"
+        },
+        "restoreWidth": {
+          "maximum": 16384,
+          "minimum": 760,
+          "type": "integer"
+        },
+        "x": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "monitorId",
+        "x",
+        "y",
+        "restoreWidth",
+        "restoreHeight"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellMinimizedWindowState": {
+      "$id": "ShellMinimizedWindowState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "minimized",
+          "type": "string"
+        },
+        "restoreState": {
+          "anyOf": [
+            {
+              "$ref": "ShellNormalWindowState.json"
+            },
+            {
+              "$ref": "ShellMaximizedWindowState.json"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "restoreState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellMonitorId": {
+      "$id": "ShellMonitorId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellNavigateCommand": {
+      "$id": "ShellNavigateCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.navigate.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellNavigateCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNavigateCommandPayload": {
+      "$id": "ShellNavigateCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "intent": {
+          "$ref": "ShellNavigationIntent.json"
+        }
+      },
+      "required": [
+        "intent"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNavigationIntent": {
+      "$id": "ShellNavigationIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellGoalNavigationIntent.json"
+        },
+        {
+          "$ref": "ShellSettingsNavigationIntent.json"
+        },
+        {
+          "$ref": "ShellCalibrationNavigationIntent.json"
+        },
+        {
+          "$ref": "ShellDocumentationNavigationIntent.json"
+        }
+      ]
+    },
+    "ShellNavigationRequestedEvent": {
+      "$id": "ShellNavigationRequestedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.navigation-requested.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellNavigationRequestedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNavigationRequestedEventPayload": {
+      "$id": "ShellNavigationRequestedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "intent": {
+          "$ref": "ShellNavigationIntent.json"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "const": "second-launch",
+              "type": "string"
+            },
+            {
+              "const": "deep-link",
+              "type": "string"
+            },
+            {
+              "const": "tray",
+              "type": "string"
+            },
+            {
+              "const": "notification",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "intent"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNormalWindowState": {
+      "$id": "ShellNormalWindowState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "height": {
+          "maximum": 8640,
+          "minimum": 600,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "normal",
+          "type": "string"
+        },
+        "monitorId": {
+          "$ref": "ShellMonitorId.json"
+        },
+        "width": {
+          "maximum": 16384,
+          "minimum": 760,
+          "type": "integer"
+        },
+        "x": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "monitorId",
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNotificationBody": {
+      "$id": "ShellNotificationBody.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellNotificationCategory": {
+      "$id": "ShellNotificationCategory.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "recovery-required",
+          "type": "string"
+        },
+        {
+          "const": "restart-deadline",
+          "type": "string"
+        },
+        {
+          "const": "game-profile-restore-failed",
+          "type": "string"
+        },
+        {
+          "const": "signed-update-action-required",
+          "type": "string"
+        },
+        {
+          "const": "account-security",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellNotificationPreference": {
+      "$id": "ShellNotificationPreference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "ShellNotificationCategory.json"
+          },
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "focusAssist": {
+          "const": "respect",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "focusAssist",
+        "categories"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNotificationPreferenceChangedEvent": {
+      "$id": "ShellNotificationPreferenceChangedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.notification-preference-changed.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellNotificationPreferenceChangedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNotificationPreferenceChangedEventPayload": {
+      "$id": "ShellNotificationPreferenceChangedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "preference": {
+          "$ref": "ShellNotificationPreference.json"
+        }
+      },
+      "required": [
+        "preference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellNotificationTitle": {
+      "$id": "ShellNotificationTitle.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellOrdinaryCloseContext": {
+      "$id": "ShellOrdinaryCloseContext.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "ordinary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellOrdinaryCloseResolution": {
+      "$id": "ShellOrdinaryCloseResolution.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "context": {
+          "const": "ordinary",
+          "type": "string"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "const": "close-interface",
+              "type": "string"
+            },
+            {
+              "const": "keep-running-in-tray",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "context",
+        "decision"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellPublisher": {
+      "$id": "ShellPublisher.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellRecoveryCloseContext": {
+      "$id": "ShellRecoveryCloseContext.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "recovery-in-progress",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellRecoveryCloseResolution": {
+      "$id": "ShellRecoveryCloseResolution.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "context": {
+          "const": "recovery-in-progress",
+          "type": "string"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "const": "keep-running-in-tray",
+              "type": "string"
+            },
+            {
+              "const": "stay-here",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "context",
+        "decision"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellReleaseChannel": {
+      "$id": "ShellReleaseChannel.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "stable",
+          "type": "string"
+        },
+        {
+          "const": "beta",
+          "type": "string"
+        },
+        {
+          "const": "experimental",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellResolveCloseCommand": {
+      "$id": "ShellResolveCloseCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.resolve-close.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellResolveCloseCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellResolveCloseCommandPayload": {
+      "$id": "ShellResolveCloseCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "resolution": {
+          "$ref": "ShellCloseResolution.json"
+        }
+      },
+      "required": [
+        "resolution"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSaveWindowStateCommand": {
+      "$id": "ShellSaveWindowStateCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.save-window-state.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellSaveWindowStateCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSaveWindowStateCommandPayload": {
+      "$id": "ShellSaveWindowStateCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "state": {
+          "$ref": "ShellWindowState.json"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetLocaleCommand": {
+      "$id": "ShellSetLocaleCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.set-locale.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellSetLocaleCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetLocaleCommandPayload": {
+      "$id": "ShellSetLocaleCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "locale": {
+          "$ref": "ShellLocale.json"
+        }
+      },
+      "required": [
+        "locale"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetNotificationPreferenceCommand": {
+      "$id": "ShellSetNotificationPreferenceCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.set-notification-preference.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellSetNotificationPreferenceCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetNotificationPreferenceCommandPayload": {
+      "$id": "ShellSetNotificationPreferenceCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "preference": {
+          "$ref": "ShellNotificationPreference.json"
+        }
+      },
+      "required": [
+        "preference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSettingsNavigationIntent": {
+      "$id": "ShellSettingsNavigationIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "destination": {
+          "anyOf": [
+            {
+              "const": "general",
+              "type": "string"
+            },
+            {
+              "const": "background",
+              "type": "string"
+            },
+            {
+              "const": "appearance",
+              "type": "string"
+            },
+            {
+              "const": "accessibility",
+              "type": "string"
+            },
+            {
+              "const": "privacy",
+              "type": "string"
+            },
+            {
+              "const": "notifications",
+              "type": "string"
+            },
+            {
+              "const": "updates",
+              "type": "string"
+            },
+            {
+              "const": "advanced",
+              "type": "string"
+            }
+          ]
+        },
+        "kind": {
+          "const": "settings",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "destination"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetTrayPreferenceCommand": {
+      "$id": "ShellSetTrayPreferenceCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.set-tray-preference.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellSetTrayPreferenceCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSetTrayPreferenceCommandPayload": {
+      "$id": "ShellSetTrayPreferenceCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "preference": {
+          "$ref": "ShellTrayPreference.json"
+        }
+      },
+      "required": [
+        "preference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellShowNotificationCommand": {
+      "$id": "ShellShowNotificationCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.show-notification.command",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellShowNotificationCommandPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellShowNotificationCommandPayload": {
+      "$id": "ShellShowNotificationCommandPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "ShellNavigationIntent.json"
+        },
+        "body": {
+          "$ref": "ShellNotificationBody.json"
+        },
+        "category": {
+          "$ref": "ShellNotificationCategory.json"
+        },
+        "title": {
+          "$ref": "ShellNotificationTitle.json"
+        }
+      },
+      "required": [
+        "category",
+        "title",
+        "body",
+        "action"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupFailureState": {
+      "$id": "ShellStartupFailureState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "failure",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "const": "missing-webview2",
+              "type": "string"
+            },
+            {
+              "const": "damaged-installation",
+              "type": "string"
+            },
+            {
+              "const": "incompatible-windows-build",
+              "type": "string"
+            },
+            {
+              "const": "local-state-migration-failed",
+              "type": "string"
+            },
+            {
+              "const": "update-signature-failed",
+              "type": "string"
+            },
+            {
+              "const": "internal-startup-error",
+              "type": "string"
+            }
+          ]
+        },
+        "recoveryAction": {
+          "anyOf": [
+            {
+              "const": "install-webview2",
+              "type": "string"
+            },
+            {
+              "const": "view-offline-instructions",
+              "type": "string"
+            },
+            {
+              "const": "retry",
+              "type": "string"
+            },
+            {
+              "const": "rollback",
+              "type": "string"
+            },
+            {
+              "const": "open-safe-mode",
+              "type": "string"
+            },
+            {
+              "const": "exit",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "reason",
+        "recoveryAction"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupReadyState": {
+      "$id": "ShellStartupReadyState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "ready",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupSplashState": {
+      "$id": "ShellStartupSplashState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "splash",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "const": "initializing-webview",
+              "type": "string"
+            },
+            {
+              "const": "loading-local-state",
+              "type": "string"
+            },
+            {
+              "const": "validating-installation",
+              "type": "string"
+            },
+            {
+              "const": "opening-shell",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "step"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupState": {
+      "$id": "ShellStartupState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellStartupSplashState.json"
+        },
+        {
+          "$ref": "ShellStartupUpdatingState.json"
+        },
+        {
+          "$ref": "ShellStartupReadyState.json"
+        },
+        {
+          "$ref": "ShellStartupFailureState.json"
+        }
+      ]
+    },
+    "ShellStartupStateChangedEvent": {
+      "$id": "ShellStartupStateChangedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.startup-state-changed.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellStartupStateChangedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupStateChangedEventPayload": {
+      "$id": "ShellStartupStateChangedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "state": {
+          "$ref": "ShellStartupState.json"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellStartupUpdatingState": {
+      "$id": "ShellStartupUpdatingState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "updating",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "const": "verifying-signature",
+              "type": "string"
+            },
+            {
+              "const": "installing-update",
+              "type": "string"
+            },
+            {
+              "const": "preparing-rollback",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "step"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellSupportedWindowsCompatibility": {
+      "$id": "ShellSupportedWindowsCompatibility.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "detectedBuild": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "supported",
+          "type": "string"
+        },
+        "minimumBuild": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "detectedBuild",
+        "minimumBuild"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellTrayPreference": {
+      "$id": "ShellTrayPreference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "close-window",
+          "type": "string"
+        },
+        {
+          "const": "keep-game-detection-in-tray",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellTrayPreferenceChangedEvent": {
+      "$id": "ShellTrayPreferenceChangedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.tray-preference-changed.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellTrayPreferenceChangedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellTrayPreferenceChangedEventPayload": {
+      "$id": "ShellTrayPreferenceChangedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "preference": {
+          "$ref": "ShellTrayPreference.json"
+        }
+      },
+      "required": [
+        "preference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellUnsupportedWindowsCompatibility": {
+      "$id": "ShellUnsupportedWindowsCompatibility.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "detectedBuild": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "unsupported",
+          "type": "string"
+        },
+        "minimumBuild": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "const": "unsupported-build",
+              "type": "string"
+            },
+            {
+              "const": "unsupported-lifecycle",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "reason",
+        "detectedBuild",
+        "minimumBuild"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellVersion": {
+      "$id": "ShellVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ShellWindowsCompatibility": {
+      "$id": "ShellWindowsCompatibility.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellSupportedWindowsCompatibility.json"
+        },
+        {
+          "$ref": "ShellUnsupportedWindowsCompatibility.json"
+        }
+      ]
+    },
+    "ShellWindowState": {
+      "$id": "ShellWindowState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ShellNormalWindowState.json"
+        },
+        {
+          "$ref": "ShellMaximizedWindowState.json"
+        },
+        {
+          "$ref": "ShellMinimizedWindowState.json"
+        }
+      ]
+    },
+    "ShellWindowStateChangedEvent": {
+      "$id": "ShellWindowStateChangedEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "messageType": {
+          "const": "desktop.shell.window-state-changed.event",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "ShellWindowStateChangedEventPayload.json"
+        },
+        "requestId": {
+          "$ref": "RequestId.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "messageType",
+        "requestId",
+        "issuedAt",
+        "payload"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ShellWindowStateChangedEventPayload": {
+      "$id": "ShellWindowStateChangedEventPayload.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "state": {
+          "$ref": "ShellWindowState.json"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "UnavailableDiagnosticValue": {
+      "$id": "UnavailableDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "unavailable",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "ProvenanceDescription.json"
+        }
+      },
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/desktop/v1/shell-message.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "HostToRendererShellEvent.json"
+    },
+    {
+      "$ref": "RendererToHostShellCommand.json"
+    }
+  ],
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}
