@@ -54,10 +54,12 @@ const browserProjects: Project[] = viewports.flatMap((viewport) =>
           use: {
             ...devices['Desktop Chrome'],
             baseURL: 'http://127.0.0.1:4173',
+            contextOptions: {
+              reducedMotion: motion.reducedMotion,
+            },
             deviceScaleFactor: scale.deviceScaleFactor,
             forcedColors: contrast.forcedColors,
             locale: locale.browserLocale,
-            reducedMotion: motion.reducedMotion,
             viewport: { height: viewport.height, width: viewport.width },
           },
         })),
@@ -96,8 +98,10 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:6006',
+        contextOptions: {
+          reducedMotion: 'reduce',
+        },
         locale: 'pt-BR',
-        reducedMotion: 'reduce',
         viewport: { height: 900, width: 1440 },
       },
     },
