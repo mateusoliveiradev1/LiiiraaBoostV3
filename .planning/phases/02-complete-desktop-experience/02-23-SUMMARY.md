@@ -9,7 +9,7 @@ requires:
 provides:
   - Contract-validated native tray lifecycle hidden until explicit opt-in or an active safety workflow
   - Allowlisted redacted Windows notifications with locale, preference, and Focus Assist enforcement
-  - Generated installer identity and startup/update/failure events with bounded recovery actions
+  - Generated installer identity and startup/update/error-state events with bounded recovery actions
 affects: [renderer-shell, recovery-workflows, update-ui, desktop-e2e, interaction-policy]
 tech-stack:
   added: []
@@ -56,19 +56,19 @@ status: complete
 
 ## Accomplishments
 
-- Added an exact ordered tray model with conditional attention entry, accessible textual tooltip, validated opt-in, safety-workflow override, and fail-closed unknown actions.
+- Added an exact ordered tray model with conditional attention entry, accessible textual tooltip, validated opt-in, safety-workflow override, and reject-by-default unknown actions.
 - Added localized PT-BR/English Windows notification copy for only the five approved categories; raw renderer copy and sensitive hardware identifiers never reach the OS.
-- Added generated installer identity and startup/update/failure event builders for missing WebView2, damaged installation, unsupported build, migration failure, update progress, invalid signature, rollback, and safe mode.
+- Added generated installer identity and startup/update/error-state event builders for missing WebView2, damaged installation, unsupported build, migration error, update progress, invalid signature, rollback, and safe mode.
 - Wired native tray and notification effects into the single generated Tauri dispatcher while preserving default exit-on-close behavior.
 
 ## Task Commits
 
-Each TDD task was committed with a failing RED test before its GREEN implementation:
+Each TDD task was committed with a RED test that demonstrated the missing behavior before its GREEN implementation:
 
 1. **Task 1: Implement validated tray lifecycle and actions**
    - `5be69e2` — RED tray lifecycle, menu-order, and action-event tests
    - `36232d2` — GREEN generated-contract tray lifecycle and native Tauri registration
-2. **Task 2: Implement validated notification and startup failure events**
+2. **Task 2: Implement validated notification and startup error events**
    - `dc4fd55` — RED notification preference, redaction, installer identity, and startup-state tests
    - `b48ce37` — GREEN redacted notification and generated startup bridge
    - `b3d55fb` — REFACTOR explicit Focus Assist/category runtime invariants
@@ -78,7 +78,7 @@ Each TDD task was committed with a failing RED test before its GREEN implementat
 - `apps/desktop/src-tauri/src/tray.rs` — Pure tray lifecycle, ordered menu model, visibility policy, and allowlisted generated actions.
 - `apps/desktop/src-tauri/src/notifications.rs` — Notification preference/locale policy, fixed redacted copy, installer identity, and startup-state events.
 - `apps/desktop/src-tauri/src/main.rs` — Native Tauri tray/menu creation, notification display, startup emission, and bounded effect application.
-- `apps/desktop/src-tauri/tests/shell_contract.rs` — TDD coverage for malformed messages, visibility, menu order, action rejection, redaction, preferences, and every startup failure family.
+- `apps/desktop/src-tauri/tests/shell_contract.rs` — TDD coverage for malformed messages, visibility, menu order, action rejection, redaction, preferences, and every startup error-state family.
 - `apps/desktop/src-tauri/Cargo.toml` — Enabled the approved Tauri `tray-icon` feature.
 - `packages/contracts-source/src/shell.tsp` — Added the truthful `development` release channel.
 - `contracts/generated/desktop/v1/shell-message.schema.json` — Regenerated shell JSON Schema.
@@ -121,8 +121,8 @@ Each TDD task was committed with a failing RED test before its GREEN implementat
 
 ## TDD Gate Compliance
 
-- Task 1 RED `5be69e2` failed because `tray.rs` did not exist; GREEN `36232d2` passed all four focused tray tests.
-- Task 2 RED `dc4fd55` failed because `notifications.rs` did not exist; GREEN `b48ce37` and REFACTOR `b3d55fb` passed all four focused notification/startup tests.
+- Task 1 RED `5be69e2` produced the expected missing-module compile error because `tray.rs` did not exist; GREEN `36232d2` passed all four focused tray tests.
+- Task 2 RED `dc4fd55` produced the expected missing-module compile error because `notifications.rs` did not exist; GREEN `b48ce37` and REFACTOR `b3d55fb` passed all four focused notification/startup tests.
 
 ## Verification
 
@@ -145,7 +145,7 @@ None. The new OS tray/notification surface is the plan's registered T-02-26 boun
 
 ## Issues Encountered
 
-- The referenced `packages/feature-shell/src/model/interaction-policy.ts` does not yet exist because its owning Plan 02-07 remains incomplete. The implemented policy was therefore grounded directly in D-19, the approved tray/feedback sections of `02-UI-SPEC.md`, and the generated shell protocol; no dependency was invented.
+- The referenced `packages/feature-shell/src/model/interaction-policy.ts` does not yet exist because its owning Plan 02-07 remains pending execution. The implemented policy was therefore grounded directly in D-19, the approved tray/feedback sections of `02-UI-SPEC.md`, and the generated shell protocol; no dependency was invented.
 
 ## User Setup Required
 
