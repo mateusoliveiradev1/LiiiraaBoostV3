@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-10-PLAN.md
-last_updated: "2026-07-28T06:54:21.423Z"
+stopped_at: Completed 02-11-PLAN.md
+last_updated: "2026-07-28T07:29:04.356Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 55
-  completed_plans: 44
+  completed_plans: 45
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 02 (complete-desktop-experience) — EXECUTING
-Plan: 15 of 33
+Plan: 16 of 33
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 02 execution started
 
@@ -99,6 +99,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02 P08 | 23min | 3 tasks | 6 files |
 | Phase 02 P09 | 23min | 3 tasks | 5 files |
 | Phase 02 P10 | 13min | 3 tasks | 5 files |
+| Phase 02 P11 | 19min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -228,6 +229,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep every Phase 2 privileged remote effect behind an explicit no-success boundary. — Phase 2 validates complete local interaction without fabricating authority or remote success.
 - [Phase 02]: Model Verified through Extreme confirmation while all preview levels terminate changed:false. — Risk review remains proportional but never authorizes system mutation in the visual milestone.
 - [Phase 02]: Keep telemetry, cloud AI, diagnostic sharing independent disabled by default. — D-06 requires separate explicit consent for every connected processing purpose.
+- [Phase 02]: Keep every Plan 02-11 dependency free and workspace-local. — Typed route and composition wiring needs no new external or paid library.
+- [Phase 02]: Re-export shell navigation intent directly from generated contracts. — Renderer code must not create a second handwritten DTO authority.
+- [Phase 02]: Persist scenario selection only in explicit test composition with S01 clean start. — Production must never acquire fixture identity through remembered development state.
+- [Phase 02]: Reject fixture identity and nested fixture provenance in production composition. — The unavailable production reference is the only honest adapter until native transport exists.
 
 ### Pending Todos
 
@@ -251,6 +256,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T06:54:21.419Z
-Stopped at: Completed 02-10-PLAN.md
+Last session: 2026-07-28T07:29:04.351Z
+Stopped at: Completed 02-11-PLAN.md
 Resume file: None
