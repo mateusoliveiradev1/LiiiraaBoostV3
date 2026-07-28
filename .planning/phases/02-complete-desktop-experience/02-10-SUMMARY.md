@@ -67,6 +67,14 @@ status: complete
 - Added independent default-off telemetry, cloud-AI, and diagnostic-sharing controls plus scale, density, motion, forced-colors, and reduced-motion declarations.
 - Expanded the feature-shell suite from 78 to 86 passing tests with PT-BR, English, pseudo-localization, focus, live-region, keyboard semantic, non-color state, fixture, failure, recovery, and D-16 boundary coverage.
 
+## Files Created/Modified
+
+- `packages/feature-shell/src/features/recover.tsx` — recovery readiness, ledger, snapshots, emergency, guided-recovery, and verified-receipt views.
+- `packages/feature-shell/src/features/preview-workflows.tsx` — closed preview/restart/failure state model and D-15 receipt composition.
+- `packages/feature-shell/src/features/assistant.tsx` — local-first Assistant, proposal policy, history, deletion, and cloud-denied boundaries.
+- `packages/feature-shell/src/features/account-settings.tsx` — account, entitlement, settings, support, update, documentation, and D-16 boundary surfaces.
+- `packages/feature-shell/src/features/future-surfaces.test.tsx` — deterministic state, localization, consent, truth, and accessibility coverage.
+
 ## Task Commits
 
 1. **Task 1: Implement complete no-effect preview, restart, failure, and recovery journeys**
@@ -126,7 +134,7 @@ None.
 ## Issues Encountered
 
 - Direct Storybook and route-browser commands report `No tests found` because route stories and scenario/accessibility/visual Playwright specs are intentionally owned by Plans 02-11 and 02-13. The approved `--pass-with-no-tests` Storybook smoke and deterministic browser harness pass.
-- The desktop localization lifecycle still fails closed because `apps/desktop/src/locales/pt-BR.json` is not yet produced by its downstream owning plan. Plan 02-10 validates PT-BR, English, and pseudo copy at component level without claiming that future catalog evidence.
+- **Future/deferred — Plan 02-20, not created by this plan:** the desktop PT-BR locale catalog is not produced yet, so the localization lifecycle correctly remains fail-closed. Plan 02-10 validates PT-BR, English, and pseudo copy at component level without claiming that future catalog evidence.
 
 ## User Setup Required
 
