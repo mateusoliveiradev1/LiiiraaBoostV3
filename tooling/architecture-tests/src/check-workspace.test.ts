@@ -65,7 +65,7 @@ const phase2Packages = [
     root: 'apps/desktop',
     publicRoot: 'apps/desktop/src/index.ts',
     packageName: '@liiiraa/desktop',
-    workspaceDependencies: ['@liiiraa/feature-shell'],
+    workspaceDependencies: ['@liiiraa/desktop-production-reference', '@liiiraa/feature-shell'],
   },
 ] as const;
 

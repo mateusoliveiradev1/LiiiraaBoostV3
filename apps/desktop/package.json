@@ -24,6 +24,7 @@
     "verify": "node scripts/desktop-lifecycle.mjs final --"
   },
   "dependencies": {
+    "@liiiraa/desktop-production-reference": "workspace:*",
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",
     "react": "19.2.8",

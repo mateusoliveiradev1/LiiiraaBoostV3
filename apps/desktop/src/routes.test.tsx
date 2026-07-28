@@ -6,12 +6,13 @@ import {
   desktopRouteTree,
   resolveDesktopRoute,
   routeFromValidatedShellNavigationIntent,
+  type DesktopF6Region,
   type ShellNavigationIntent,
 } from './routes.js';
 import {
   DESKTOP_TEST_SCENARIO_STORAGE_KEY,
-  DesktopCompositionRefusedError,
   createDesktopComposition,
+  type DesktopCompositionRefusedError,
 } from './composition.js';
 
 const EXPECTED_ROUTE_PATTERNS = Object.freeze([
@@ -81,7 +82,10 @@ describe('routes: complete typed desktop route tree', () => {
     expect(new Set(desktopRouteTree.map(({ pattern }) => pattern)).size).toBe(
       EXPECTED_ROUTE_PATTERNS.length,
     );
-    expect(desktopRouteTree.every(({ capability }) => capability === 'navigate')).toBe(true);
+    const capabilities: readonly string[] = desktopRouteTree.map(({ capability }) => capability);
+    expect(capabilities).toEqual(
+      Array.from({ length: EXPECTED_ROUTE_PATTERNS.length }, () => 'navigate'),
+    );
   });
 
   it('validates dynamic parameters, search, and bounded return intent', () => {
@@ -212,7 +216,7 @@ describe('routes: keyboard, focus, announcements, and browser history', () => {
   });
 
   it('implements goal shortcuts and cycles only the four locked F6 regions', () => {
-    const focusRegion = vi.fn();
+    const focusRegion = vi.fn<(region: DesktopF6Region) => void>();
     const navigator = createDesktopNavigator({
       focusRegion,
       initialPath: '/home',
@@ -308,9 +312,7 @@ describe('composition: production unavailable reference and fixture refusal', ()
     });
 
     expect(composition.mode).toBe('production');
-    expect(composition.client.identity.adapterId).toBe(
-      'liiiraa-desktop-production-unavailable',
-    );
+    expect(composition.client.identity.adapterId).toBe('liiiraa-desktop-production-unavailable');
     expect(composition.client.schemaVersion).toBe('1.0');
     expect(storage.getItem).not.toHaveBeenCalled();
     expect(storage.setItem).not.toHaveBeenCalled();
@@ -334,7 +336,7 @@ describe('composition: production unavailable reference and fixture refusal', ()
           },
         }),
       }),
-    ).toThrowError(
+    ).toThrow(
       expect.objectContaining<Partial<DesktopCompositionRefusedError>>({
         code: 'FIXTURE_IDENTITY_REFUSED',
       }),
@@ -360,7 +362,7 @@ describe('composition: production unavailable reference and fixture refusal', ()
           },
         }),
       }),
-    ).toThrowError(
+    ).toThrow(
       expect.objectContaining<Partial<DesktopCompositionRefusedError>>({
         code: 'FIXTURE_PROVENANCE_REFUSED',
       }),

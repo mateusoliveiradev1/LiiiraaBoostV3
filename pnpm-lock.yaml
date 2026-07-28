@@ -237,6 +237,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@liiiraa/desktop-production-reference':
+        specifier: workspace:*
+        version: link:../../packages/desktop-production-reference
       '@liiiraa/feature-shell':
         specifier: workspace:*
         version: link:../../packages/feature-shell
