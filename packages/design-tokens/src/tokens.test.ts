@@ -1,0 +1,95 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  COLOR_TOKENS,
+  MOTION_TOKENS,
+  RADII,
+  SPACING,
+  STATUS_PATTERNS,
+  TYPOGRAPHY,
+  assertSpacingValue,
+  createAppearanceTokens,
+} from './index.js';
+
+describe('Pre-Dawn Flight Deck token contract', () => {
+  it('locks layout spacing and rejects off-scale values', () => {
+    expect(Object.values(SPACING)).toEqual([4, 8, 16, 24, 32, 48, 64]);
+    expect(() => assertSpacingValue(12)).toThrowError('12px is outside the locked spacing scale');
+    expect(assertSpacingValue(24)).toBe(24);
+  });
+
+  it('allows only the four authored text sizes and two weights', () => {
+    const typography = Object.values(TYPOGRAPHY);
+
+    expect([...new Set(typography.map(({ size }) => size))].sort((left, right) => left - right)).toEqual([
+      13, 15, 20, 28,
+    ]);
+    expect(
+      [...new Set(typography.flatMap(({ weights }) => weights))].sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual([400, 600]);
+    expect(typography.every(({ family }) => family === 'manrope' || family === 'mono')).toBe(true);
+  });
+
+  it('locks the authored surface, cobalt, semantic, focus, and disabled colors', () => {
+    expect(COLOR_TOKENS).toEqual({
+      surfaceCanvas: '#090B0F',
+      surfaceInset: '#0B0E13',
+      surfaceWork: '#121722',
+      surfaceRaised: '#181F2C',
+      cobaltAction: '#315ACD',
+      cobaltSignal: '#7EA0FF',
+      textPrimary: '#F4F7FB',
+      textSecondary: '#AAB4C4',
+      textTertiary: '#7D899B',
+      lineSubtle: '#2A3343',
+      lineStrong: '#3D4A60',
+      focusRing: '#8EABFF',
+      success: '#4DCA8B',
+      warning: '#F3B64A',
+      critical: '#FF747D',
+      destructiveFill: '#B52D3A',
+      experimental: '#C08CFF',
+      disabledFill: '#3D4452',
+      scrim: 'rgba(3, 5, 8, 0.76)',
+    });
+    expect(RADII).toEqual({ default: 6, overlay: 10 });
+  });
+
+  it('resolves compact, 150% scale, 200% text, reduced-motion, and forced-color outputs', () => {
+    const output = createAppearanceTokens({
+      density: 'compact',
+      forcedColors: true,
+      motion: 'reduced',
+      scale: 150,
+      textScale: 200,
+    });
+
+    expect(output).toMatchObject({
+      '--lb-app-scale': '1.5',
+      '--lb-control-gap': '8px',
+      '--lb-control-min-size': '44px',
+      '--lb-disabled-opacity': '1',
+      '--lb-disabled-text': '#AAB4C4',
+      '--lb-forced-canvas': 'Canvas',
+      '--lb-forced-canvas-text': 'CanvasText',
+      '--lb-forced-focus': 'Highlight',
+      '--lb-motion-route-duration': '100ms',
+      '--lb-motion-translate': '0px',
+      '--lb-section-gap': '16px',
+      '--lb-text-scale': '2',
+    });
+  });
+
+  it('keeps motion bounded and gives every state a non-color pattern', () => {
+    expect(Math.max(...Object.values(MOTION_TOKENS).map(({ durationMs }) => durationMs))).toBe(240);
+    expect(new Set(Object.values(STATUS_PATTERNS)).size).toBeGreaterThan(1);
+    expect(STATUS_PATTERNS).toMatchObject({
+      critical: 'double',
+      fixture: 'diagonal-stripe',
+      unavailable: 'dotted',
+      warning: 'dashed',
+    });
+  });
+});
