@@ -48,8 +48,20 @@ if (typeof document !== 'undefined' && document.getElementById('root') !== null)
   mountDesktopApp();
 }
 
-export { DesktopApp, DesktopRouteOutlet } from './app.js';
-export type { DesktopAppProps, DesktopRouteOutletProps } from './app.js';
+export {
+  DesktopApp,
+  DesktopRouteOutlet,
+  SHELL_OPERATIONAL_STATES,
+  getOperationalPresentation,
+  getResponsiveShellLayout,
+} from './app.js';
+export type {
+  DesktopAppProps,
+  DesktopRouteOutletProps,
+  ResponsiveShellLayout,
+  ShellOperationalState,
+  ShellWidth,
+} from './app.js';
 export {
   DESKTOP_F6_REGIONS,
   createDesktopNavigator,

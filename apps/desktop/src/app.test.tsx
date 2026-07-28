@@ -131,9 +131,9 @@ describe('shell semantics', () => {
       initialPath: '/home',
     });
 
-    for (const _region of DESKTOP_F6_REGIONS) {
+    DESKTOP_F6_REGIONS.forEach(() => {
       navigator.handleKeyboard({ key: 'F6' });
-    }
+    });
 
     expect(focused).toEqual(DESKTOP_F6_REGIONS);
 

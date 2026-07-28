@@ -23,6 +23,7 @@ import {
   LbButton,
   LbDialog,
   LbSearchField,
+  OPERATIONAL_STATES,
   RouteHeader,
   StatusSignal,
   WindowTitleBar,
@@ -35,8 +36,9 @@ import { DesktopPreferencesProvider, useDesktopPreferences } from './preferences
 import { createDesktopNavigator, resolveDesktopRoute } from './routes.js';
 import type { DesktopF6Region, DesktopNavigator, DesktopRouteMatch } from './routes.js';
 
-type ShellOperationalState = OperationalState;
-type ShellWidth = 'wide' | 'standard' | 'compact' | 'minimum';
+export const SHELL_OPERATIONAL_STATES = OPERATIONAL_STATES satisfies readonly OperationalState[];
+export type ShellOperationalState = (typeof SHELL_OPERATIONAL_STATES)[number];
+export type ShellWidth = 'wide' | 'standard' | 'compact' | 'minimum';
 
 interface OperationalPresentation {
   readonly action: Readonly<Record<ShellLocale, string>>;
@@ -152,6 +154,15 @@ const OPERATIONAL_PRESENTATIONS: Readonly<Record<ShellOperationalState, Operatio
     },
   });
 
+export const getOperationalPresentation = (
+  state: ShellOperationalState,
+  locale: ShellLocale,
+): Readonly<{ action: string; reason: string }> =>
+  Object.freeze({
+    action: OPERATIONAL_PRESENTATIONS[state].action[locale],
+    reason: OPERATIONAL_PRESENTATIONS[state].reason[locale],
+  });
+
 const READY_CALIBRATION = Object.freeze({
   access: 'ready',
   requiredComplete: true,
@@ -226,17 +237,44 @@ const resolveInitialRoute = (initialPath: string): DesktopRouteMatch => {
   return fallback.value;
 };
 
-const shellWidthFor = (viewportWidth: number): ShellWidth => {
+export interface ResponsiveShellLayout {
+  readonly inspectorMode: 'overlay' | 'persistent';
+  readonly pageHorizontalScroll: 'forbidden';
+  readonly railWidth: 64 | 72 | 200 | 216;
+  readonly width: ShellWidth;
+}
+
+export const getResponsiveShellLayout = (viewportWidth: number): ResponsiveShellLayout => {
   if (viewportWidth >= 1440) {
-    return 'wide';
+    return Object.freeze({
+      inspectorMode: 'persistent',
+      pageHorizontalScroll: 'forbidden',
+      railWidth: 216,
+      width: 'wide',
+    });
   }
   if (viewportWidth >= 1180) {
-    return 'standard';
+    return Object.freeze({
+      inspectorMode: 'overlay',
+      pageHorizontalScroll: 'forbidden',
+      railWidth: 200,
+      width: 'standard',
+    });
   }
   if (viewportWidth >= 960) {
-    return 'compact';
+    return Object.freeze({
+      inspectorMode: 'overlay',
+      pageHorizontalScroll: 'forbidden',
+      railWidth: 72,
+      width: 'compact',
+    });
   }
-  return 'minimum';
+  return Object.freeze({
+    inspectorMode: 'overlay',
+    pageHorizontalScroll: 'forbidden',
+    railWidth: 64,
+    width: 'minimum',
+  });
 };
 
 const calibrationStateFor = (
@@ -518,7 +556,10 @@ export interface DesktopAppProps {
   readonly scenarioId?: string;
   readonly textScale?: 100 | 200;
   readonly viewportWidth?: number;
+  readonly windowsLocale?: string;
 }
+
+type DesktopAppContentProps = Omit<DesktopAppProps, 'windowsLocale'>;
 
 const DesktopAppContent = ({
   appScale,
@@ -529,7 +570,7 @@ const DesktopAppContent = ({
   scenarioId = 'S01',
   textScale = 100,
   viewportWidth,
-}: DesktopAppProps) => {
+}: DesktopAppContentProps) => {
   const { preferences } = useDesktopPreferences();
   const locale: ShellLocale = preferences.locale === 'pt-BR' ? 'pt-BR' : 'en';
   const [route, setRoute] = useState(() => resolveInitialRoute(initialPath));
@@ -776,8 +817,8 @@ const DesktopAppContent = ({
     [goals, restoreOverlayFocus, utilities],
   );
 
-  const shellWidth = shellWidthFor(measuredWidth);
-  const presentation = OPERATIONAL_PRESENTATIONS[operationalState];
+  const layout = getResponsiveShellLayout(measuredWidth);
+  const presentation = getOperationalPresentation(operationalState, locale);
   const criticalState = criticalStateFor(operationalState);
   const effectiveScale = appScale ?? preferences.interfaceScale;
   const motion = reducedMotion ?? preferences.motion === 'reduced';
@@ -787,9 +828,12 @@ const DesktopAppContent = ({
       className="desktop-app-shell"
       data-app-scale={String(effectiveScale)}
       data-forced-colors={forcedColors ? 'active' : 'system'}
+      data-goal-rail-width={String(layout.railWidth)}
+      data-inspector-mode={layout.inspectorMode}
       data-motion={motion ? 'reduced' : 'responsive'}
       data-operational-state={operationalState}
-      data-shell-width={shellWidth}
+      data-page-horizontal-scroll={layout.pageHorizontalScroll}
+      data-shell-width={layout.width}
       data-text-scale={String(textScale)}
       data-viewport-width={String(measuredWidth)}
     >
@@ -800,7 +844,7 @@ const DesktopAppContent = ({
         tabIndex={-1}
       >
         <WindowTitleBar
-          globalStatus={presentation.reason[locale]}
+          globalStatus={presentation.reason}
           onOpenActivity={() => {
             rememberOverlayInvoker();
             setActivityOpen(true);
@@ -814,7 +858,7 @@ const DesktopAppContent = ({
       </div>
 
       {criticalState === undefined ? null : (
-        <CriticalStateRail detail={presentation.reason[locale]} state={criticalState} />
+        <CriticalStateRail detail={presentation.reason} state={criticalState} />
       )}
 
       <section
@@ -822,7 +866,7 @@ const DesktopAppContent = ({
         className="desktop-operational-state"
         data-lb-region
       >
-        <StatusSignal detail={presentation.reason[locale]} state={operationalState} />
+        <StatusSignal detail={presentation.reason} state={operationalState} />
         <LbButton
           onPress={() => {
             navigate(
@@ -833,7 +877,7 @@ const DesktopAppContent = ({
           }}
           variant="quiet"
         >
-          {presentation.action[locale]}
+          {presentation.action}
         </LbButton>
       </section>
 
@@ -871,7 +915,7 @@ const DesktopAppContent = ({
           <ContextInspector
             title={locale === 'pt-BR' ? 'Contexto e evidências' : 'Context and evidence'}
           >
-            <p>{presentation.reason[locale]}</p>
+            <p>{presentation.reason}</p>
             <p>
               <strong>{`DEMO · ${scenarioId}`}</strong>
             </p>
@@ -891,7 +935,7 @@ const DesktopAppContent = ({
         {announcement}
       </div>
       <div aria-atomic="true" aria-live="assertive" className="lb-visually-hidden">
-        {criticalState === undefined ? '' : presentation.reason[locale]}
+        {criticalState === undefined ? '' : presentation.reason}
       </div>
 
       {activityOpen ? (
@@ -984,8 +1028,8 @@ const DesktopAppContent = ({
   );
 };
 
-export const DesktopApp = (props: DesktopAppProps) => (
-  <DesktopPreferencesProvider>
+export const DesktopApp = ({ windowsLocale, ...props }: DesktopAppProps) => (
+  <DesktopPreferencesProvider {...(windowsLocale === undefined ? {} : { windowsLocale })}>
     <DesktopAppContent {...props} />
   </DesktopPreferencesProvider>
 );
