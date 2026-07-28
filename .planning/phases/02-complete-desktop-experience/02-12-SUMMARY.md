@@ -111,8 +111,8 @@ Each TDD gate was committed atomically:
 
 ## TDD Gate Compliance
 
-- Task 1 RED failed on the intended valid-dispatch assertion before implementation; GREEN passed generated validation and production fixture refusal.
-- Task 2 RED failed because the required capability artifact did not exist; GREEN passed exact capability, CSP, bundle identity, and command-registration assertions.
+- Task 1 RED produced the intended valid-dispatch rejection before implementation; GREEN passed generated validation and production fixture refusal.
+- Task 2 RED produced the intended rejection because the required capability artifact did not exist; GREEN passed exact capability, CSP, bundle identity, and command-registration assertions.
 - No separate REFACTOR commit was needed; formatting and warning cleanup occurred before each GREEN commit.
 
 ## Deviations from Plan
@@ -133,7 +133,7 @@ Each TDD gate was committed atomically:
 
 - **Found during:** Task 2 GREEN
 - **Issue:** A file-reference capability requires application build-script ACL manifests; declaring `tauri-build` directly would exceed the approved dependency set.
-- **Fix:** Kept the reviewed capability artifact, supplied the same empty capability inline to the runtime context, and added an equality assertion that fails on drift or permission broadening.
+- **Fix:** Kept the reviewed capability artifact, supplied the same empty capability inline to the runtime context, and added an equality assertion that rejects drift or permission broadening.
 - **Files modified:** `apps/desktop/src-tauri/capabilities/default.json`, `apps/desktop/src-tauri/tauri.conf.json`, `apps/desktop/src-tauri/tests/shell_contract.rs`
 - **Verification:** Focused capability tests and Tauri context compilation pass with no additional direct dependency.
 - **Committed in:** `a1a4830`
@@ -150,7 +150,7 @@ Each TDD gate was committed atomically:
 
 ## Known Stubs
 
-None. Empty renderer permissions and disabled updater artifacts are deliberate fail-closed security gates, not placeholders.
+None. Empty renderer permissions and disabled updater artifacts are deliberate deny-by-default security gates, not placeholders.
 
 ## Authentication Gates
 
@@ -164,7 +164,7 @@ None — no paid service, secret, cloud resource, certificate purchase, or exter
 
 - Renderer composition can now invoke one bounded generated shell command and extend permissions only through reviewed capability changes.
 - Plan 02-33 can bind the local free CNG certificate to the null signing fields without changing publisher, digest, channel, or trust classification.
-- Publicly trusted signing and updater key configuration remain blocked until their explicit later gates.
+- Publicly trusted signing and updater key configuration remain unavailable until their explicit later gates.
 
 ## Self-Check: PASSED
 
