@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import manifest from '../../../../contracts/scenarios/desktop-scenarios.json' with {
-  type: 'json',
-};
+import manifest from '../../../../contracts/scenarios/desktop-scenarios.json' with { type: 'json' };
 import {
   DESKTOP_SCENARIOS,
   getDesktopScenario,
+  parseDesktopScenarioManifest,
   type DesktopScenario,
 } from './catalog.js';
 
@@ -102,5 +101,40 @@ describe('S01-S24 deterministic scenario catalog and operational state coverage'
   it('fails closed for unknown scenario identities and keeps serialized evidence stable', () => {
     expect(() => getDesktopScenario('S25')).toThrowError('Unknown desktop scenario: S25');
     expect(JSON.stringify(DESKTOP_SCENARIOS)).toBe(JSON.stringify(DESKTOP_SCENARIOS));
+  });
+
+  it.each([
+    ['operational state', 'requiredStates', 'invented-loading-flag'],
+    ['route', 'requiredRoutes', '/invented-route'],
+    ['provenance', 'adapterIdentity', 'observed'],
+  ] as const)('rejects unknown %s values before projection', (_, target, unknownValue) => {
+    const candidate = structuredClone(manifest) as unknown as {
+      scenarios: Array<{
+        adapterIdentity: { kind: string };
+        requiredRoutes: string[];
+        requiredStates: Array<{ state: string }>;
+      }>;
+    };
+    const first = candidate.scenarios[0];
+    expect(first).toBeDefined();
+    if (first === undefined) {
+      return;
+    }
+
+    if (target === 'requiredStates') {
+      const firstRequirement = first.requiredStates[0];
+      expect(firstRequirement).toBeDefined();
+      if (firstRequirement !== undefined) {
+        firstRequirement.state = unknownValue;
+      }
+    } else if (target === 'requiredRoutes') {
+      first.requiredRoutes[0] = unknownValue;
+    } else {
+      first.adapterIdentity.kind = unknownValue;
+    }
+
+    expect(() => parseDesktopScenarioManifest(candidate)).toThrowError(
+      'Invalid desktop scenario manifest',
+    );
   });
 });

@@ -45,12 +45,7 @@ describe('closed desktop experience operational state', () => {
       'cancelled',
       'complete',
     ]);
-    expect(ACTIVITY_STATES).toEqual([
-      'requires-action',
-      'in-progress',
-      'completed',
-      'history',
-    ]);
+    expect(ACTIVITY_STATES).toEqual(['requires-action', 'in-progress', 'completed', 'history']);
 
     expect(isOperationalState('recovery')).toBe(true);
     expect(isOperationalState('some-loading-flag')).toBe(false);

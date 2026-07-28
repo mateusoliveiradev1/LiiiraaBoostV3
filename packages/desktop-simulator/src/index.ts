@@ -7,10 +7,7 @@ import {
   type DesktopInspectionTransport,
 } from '@liiiraa/desktop-client';
 
-import {
-  getDesktopSimulatorScenario,
-  type DesktopSimulatorScenario,
-} from './scenarios.js';
+import { getDesktopSimulatorScenario, type DesktopSimulatorScenario } from './scenarios.js';
 
 export interface DesktopSimulatorOptions {
   readonly scenario: DesktopConformanceScenario;
@@ -21,9 +18,7 @@ export interface DesktopSimulatorOptions {
 export const createDesktopSimulatorClient = (
   options: DesktopSimulatorOptions,
 ): DesktopInspectionClient => {
-  const scenario: DesktopSimulatorScenario = getDesktopSimulatorScenario(
-    options.scenario,
-  );
+  const scenario: DesktopSimulatorScenario = getDesktopSimulatorScenario(options.scenario);
   const transport: DesktopInspectionTransport = {
     identity: Object.freeze({
       adapterId: 'liiiraa-desktop-simulator',
@@ -37,9 +32,7 @@ export const createDesktopSimulatorClient = (
           schemaVersion: DESKTOP_SCHEMA_VERSION,
           messageType: 'desktop.inspect-system.result',
           requestId: input.requestId,
-          ...(input.correlationId === undefined
-            ? {}
-            : { correlationId: input.correlationId }),
+          ...(input.correlationId === undefined ? {} : { correlationId: input.correlationId }),
           issuedAt: input.issuedAt,
           payload: Object.freeze({
             inspectionId: options.inspectionIds(),
@@ -62,3 +55,10 @@ export {
   type DesktopSimulatorScenario,
   type DesktopSimulatorUnavailableValue,
 } from './scenarios.js';
+export {
+  DESKTOP_SCENARIOS,
+  getDesktopScenario,
+  parseDesktopScenarioManifest,
+} from './scenarios/catalog.js';
+export { SCENARIO_FAMILIES } from './scenarios/families.js';
+export type { ScenarioFamily } from './scenarios/families.js';
