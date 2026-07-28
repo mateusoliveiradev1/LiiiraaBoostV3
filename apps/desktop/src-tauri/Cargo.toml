@@ -11,6 +11,9 @@ build = "build.rs"
 name = "liiiraa-desktop"
 path = "src/main.rs"
 
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
 [dependencies]
 liiiraa-contracts-rust = { path = "../../../crates/contracts-rust" }
 serde = { version = "=1.0.229", features = ["derive"] }

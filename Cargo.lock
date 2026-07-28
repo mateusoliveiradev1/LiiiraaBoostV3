@@ -2183,6 +2183,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri",
+ "tauri-build",
  "tauri-plugin-deep-link",
  "tauri-plugin-notification",
  "tauri-plugin-process",
