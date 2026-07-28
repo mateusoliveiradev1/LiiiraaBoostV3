@@ -11,6 +11,7 @@ import {
 
 test('@browser-smoke lists the deterministic harness without launching a browser', () => {
   const metadata = test.info().project.metadata;
+  const projectNames = test.info().config.projects.map((project) => project.name);
 
   expect(metadata).toMatchObject({
     contrastAxes: 2,
@@ -20,6 +21,11 @@ test('@browser-smoke lists the deterministic harness without launching a browser
     scenarioMarker: DESKTOP_SCENARIO_MARKER,
     viewportAxes: 4,
   });
+  expect(new Set(projectNames).size).toBe(146);
+  expect(projectNames).toContain('harness');
+  expect(projectNames).toContain('storybook');
+  expect(projectNames).toContain('browser-1440x900-pt-BR-scale-100-responsive-normal');
+  expect(projectNames).toContain('browser-760x600-pseudo-scale-150-reduced-forced');
   expect(FROZEN_DESKTOP_CLOCK).toBe('2030-01-15T18:00:00.000Z');
   expect(FROZEN_DESKTOP_ID).toMatch(/^00000000-0000-4000-8000-[0-9]{12}$/u);
   expect(FROZEN_DESKTOP_LATENCY_MS).toBe(120);
