@@ -6,24 +6,19 @@ import {
   EVIDENCE_QUALITY_STATES,
   isDesktopRoute,
   isOperationalState,
-  type ActivityState,
-  type CalibrationProgress,
   type DesktopRoute,
   type DesktopScenario,
   type DesktopScenarioId,
-  type EntitlementState,
-  type EvidenceFreshness,
-  type EvidenceQuality,
   type GameFixture,
   type HardwareFixture,
   type ProfileFixture,
   type RecommendationState,
   type RouteRequirement,
   type ScenarioAdapterIdentity,
-  type ScenarioFamilyId,
 } from '@liiiraa/desktop-client';
 
 import manifest from '../../../../contracts/scenarios/desktop-scenarios.json' with { type: 'json' };
+import { assertScenarioFamilyDelta } from './deltas.js';
 import { isScenarioFamilyId } from './families.js';
 
 export type { DesktopScenario } from '@liiiraa/desktop-client';
@@ -81,7 +76,7 @@ const requireLiteral = <const Values extends readonly string[]>(
   if (typeof value !== 'string' || !(values as readonly string[]).includes(value)) {
     return fail(path, values.join(' | '));
   }
-  return value as Values[number];
+  return value;
 };
 
 const requireFalse = (value: unknown, path: string): false => {
@@ -207,16 +202,8 @@ const parseProfile = (value: unknown, path: string): ProfileFixture => {
 const parseEvidence = (value: unknown, path: string): DesktopScenario['evidence'] => {
   const record = requireRecord(value, path);
   return {
-    freshness: requireLiteral(
-      record['freshness'],
-      EVIDENCE_FRESHNESS_STATES,
-      `${path}.freshness`,
-    ) as EvidenceFreshness,
-    quality: requireLiteral(
-      record['quality'],
-      EVIDENCE_QUALITY_STATES,
-      `${path}.quality`,
-    ) as EvidenceQuality,
+    freshness: requireLiteral(record['freshness'], EVIDENCE_FRESHNESS_STATES, `${path}.freshness`),
+    quality: requireLiteral(record['quality'], EVIDENCE_QUALITY_STATES, `${path}.quality`),
     completeness: requireLiteral(
       record['completeness'],
       ['partial', 'complete'] as const,
@@ -247,7 +234,7 @@ const parseRecommendation = (value: unknown, path: string): RecommendationState 
       record['evidenceQuality'],
       EVIDENCE_QUALITY_STATES,
       `${path}.evidenceQuality`,
-    ) as EvidenceQuality,
+    ),
   };
 };
 
@@ -301,7 +288,7 @@ const parseScenario = (value: unknown, index: number): DesktopScenario => {
 
   return deepFreeze({
     id,
-    familyId: familyIdValue as ScenarioFamilyId,
+    familyId: familyIdValue,
     name: requireString(record['name'], `${path}.name`),
     seed: requireInteger(record['seed'], `${path}.seed`),
     clock: requireString(record['clock'], `${path}.clock`),
@@ -312,21 +299,13 @@ const parseScenario = (value: unknown, index: number): DesktopScenario => {
     game: parseGame(record['game'], `${path}.game`),
     profile: parseProfile(record['profile'], `${path}.profile`),
     evidence: parseEvidence(record['evidence'], `${path}.evidence`),
-    entitlement: requireLiteral(
-      record['entitlement'],
-      ENTITLEMENT_STATES,
-      `${path}.entitlement`,
-    ) as EntitlementState,
+    entitlement: requireLiteral(record['entitlement'], ENTITLEMENT_STATES, `${path}.entitlement`),
     calibration: requireLiteral(
       record['calibration'],
       CALIBRATION_PROGRESS_STATES,
       `${path}.calibration`,
-    ) as CalibrationProgress,
-    activity: requireLiteral(
-      record['activity'],
-      ACTIVITY_STATES,
-      `${path}.activity`,
-    ) as ActivityState,
+    ),
+    activity: requireLiteral(record['activity'], ACTIVITY_STATES, `${path}.activity`),
     recommendations: requireArray(record['recommendations'], `${path}.recommendations`).map(
       (recommendation, recommendationIndex) =>
         parseRecommendation(
@@ -357,6 +336,7 @@ export const parseDesktopScenarioManifest = (value: unknown): readonly DesktopSc
   requireString(root['fixtureVersion'], '$.fixtureVersion');
 
   const scenarios = requireArray(root['scenarios'], '$.scenarios').map(parseScenario);
+  scenarios.forEach(assertScenarioFamilyDelta);
   const expectedIds = Array.from(
     { length: 24 },
     (_, index) => `S${String(index + 1).padStart(2, '0')}`,

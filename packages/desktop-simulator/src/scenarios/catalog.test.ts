@@ -7,6 +7,8 @@ import {
   parseDesktopScenarioManifest,
   type DesktopScenario,
 } from './catalog.js';
+import { SCENARIO_DELTAS } from './deltas.js';
+import { SCENARIO_FAMILIES } from './families.js';
 
 const EXPECTED_IDS = Object.freeze(
   Array.from({ length: 24 }, (_, index) => `S${String(index + 1).padStart(2, '0')}`),
@@ -89,18 +91,24 @@ describe('S01-S24 deterministic scenario catalog and operational state coverage'
     const realGames = DESKTOP_SCENARIOS.filter(({ game }) => game.kind === 'real-discovery');
 
     expect(realGames.length).toBeGreaterThan(0);
-    expect(
-      realGames.every(
-        ({ game }) =>
-          game.integrationQualification === 'discovery-only-unqualified' &&
-          game.integrationValidated === false,
-      ),
-    ).toBe(true);
+    realGames.forEach(({ game }) => {
+      expect(game).toMatchObject({
+        kind: 'real-discovery',
+        integrationQualification: 'discovery-only-unqualified',
+        integrationValidated: false,
+      });
+    });
   });
 
   it('fails closed for unknown scenario identities and keeps serialized evidence stable', () => {
-    expect(() => getDesktopScenario('S25')).toThrowError('Unknown desktop scenario: S25');
-    expect(JSON.stringify(DESKTOP_SCENARIOS)).toBe(JSON.stringify(DESKTOP_SCENARIOS));
+    expect(() => getDesktopScenario('S25')).toThrow('Unknown desktop scenario: S25');
+    const firstProjection = JSON.stringify(parseDesktopScenarioManifest(structuredClone(manifest)));
+    const secondProjection = JSON.stringify(
+      parseDesktopScenarioManifest(structuredClone(manifest)),
+    );
+
+    expect(firstProjection).toBe(secondProjection);
+    expect(firstProjection).toBe(JSON.stringify(DESKTOP_SCENARIOS));
   });
 
   it.each([
@@ -109,11 +117,11 @@ describe('S01-S24 deterministic scenario catalog and operational state coverage'
     ['provenance', 'adapterIdentity', 'observed'],
   ] as const)('rejects unknown %s values before projection', (_, target, unknownValue) => {
     const candidate = structuredClone(manifest) as unknown as {
-      scenarios: Array<{
+      scenarios: {
         adapterIdentity: { kind: string };
         requiredRoutes: string[];
-        requiredStates: Array<{ state: string }>;
-      }>;
+        requiredStates: { state: string }[];
+      }[];
     };
     const first = candidate.scenarios[0];
     expect(first).toBeDefined();
@@ -133,8 +141,61 @@ describe('S01-S24 deterministic scenario catalog and operational state coverage'
       first.adapterIdentity.kind = unknownValue;
     }
 
-    expect(() => parseDesktopScenarioManifest(candidate)).toThrowError(
+    expect(() => parseDesktopScenarioManifest(candidate)).toThrow(
       'Invalid desktop scenario manifest',
+    );
+  });
+});
+
+describe('scenario family and focused delta invariants', () => {
+  it('keeps the small family set and ordered S01-S24 deltas deeply frozen', () => {
+    expect(SCENARIO_FAMILIES.map(({ id }) => id)).toEqual([
+      'competitive-intel-nvidia',
+      'hybrid-amd-laptop',
+      'high-end-amd',
+    ]);
+    expect(SCENARIO_DELTAS.map(({ scenarioId }) => scenarioId)).toEqual(EXPECTED_IDS);
+    expect(SCENARIO_DELTAS.map(({ paths }) => paths)).toEqual(
+      DESKTOP_SCENARIOS.map(({ deltaPaths }) => deltaPaths),
+    );
+    expect(isDeeplyFrozen(SCENARIO_FAMILIES)).toBe(true);
+    expect(isDeeplyFrozen(SCENARIO_DELTAS)).toBe(true);
+  });
+
+  it('rejects an undeclared mutation outside a scenario family baseline', () => {
+    const candidate = structuredClone(manifest);
+    const scenario = candidate.scenarios[8];
+
+    expect(scenario?.id).toBe('S09');
+    if (scenario === undefined) {
+      return;
+    }
+    scenario.hardware.gpuModel = 'SYNTHETIC UNDECLARED GPU';
+
+    expect(() => parseDesktopScenarioManifest(candidate)).toThrow(
+      'Undeclared family mutation in S09: hardware.gpuModel',
+    );
+  });
+
+  it('rejects duplicate or unknown delta paths before catalog publication', () => {
+    const duplicate = structuredClone(manifest);
+    const unknown = structuredClone(manifest);
+    const duplicateScenario = duplicate.scenarios[0];
+    const unknownScenario = unknown.scenarios[0];
+
+    expect(duplicateScenario).toBeDefined();
+    expect(unknownScenario).toBeDefined();
+    if (duplicateScenario === undefined || unknownScenario === undefined) {
+      return;
+    }
+    duplicateScenario.deltaPaths.push(duplicateScenario.deltaPaths[0] ?? 'calibration');
+    unknownScenario.deltaPaths = ['invented.path'];
+
+    expect(() => parseDesktopScenarioManifest(duplicate)).toThrow(
+      'Invalid scenario delta declaration: S01',
+    );
+    expect(() => parseDesktopScenarioManifest(unknown)).toThrow(
+      'Invalid scenario delta declaration: S01',
     );
   });
 });

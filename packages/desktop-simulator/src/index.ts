@@ -60,5 +60,7 @@ export {
   getDesktopScenario,
   parseDesktopScenarioManifest,
 } from './scenarios/catalog.js';
-export { SCENARIO_FAMILIES } from './scenarios/families.js';
+export { SCENARIO_DELTAS } from './scenarios/deltas.js';
+export { SCENARIO_FAMILIES, getScenarioFamily } from './scenarios/families.js';
+export type { ScenarioDelta } from './scenarios/deltas.js';
 export type { ScenarioFamily } from './scenarios/families.js';

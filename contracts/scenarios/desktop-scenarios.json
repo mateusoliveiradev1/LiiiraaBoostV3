@@ -1329,7 +1329,7 @@
         "tier": "mid-range"
       },
       "game": {
-        "id": "vector-strike-arena-long-name",
+        "id": "vector-strike-arena",
         "displayName": "Vector Strike Arena: Campeonato Internacional de Inverno",
         "kind": "fictional-anchor",
         "integrationQualification": "deterministic-fixture",
