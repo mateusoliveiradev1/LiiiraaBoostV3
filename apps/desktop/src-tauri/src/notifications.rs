@@ -49,6 +49,7 @@ impl Default for NotificationBridge {
 }
 
 impl NotificationBridge {
+    #[cfg(test)]
     pub fn is_enabled(&self) -> bool {
         self.enabled
     }
@@ -189,6 +190,7 @@ fn approved_copy(
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(dead_code)]
 pub enum StartupCondition {
     OpeningShell,
     Ready,

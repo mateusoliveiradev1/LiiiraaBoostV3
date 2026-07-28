@@ -156,6 +156,7 @@ impl TrayLifecycle {
         Ok(visibility_effect(was_visible, self.is_visible()))
     }
 
+    #[allow(dead_code)]
     pub fn set_safety_workflow_active(&mut self, active: bool) -> Vec<TrayEffect> {
         let was_visible = self.is_visible();
         self.safety_workflow_active = active;

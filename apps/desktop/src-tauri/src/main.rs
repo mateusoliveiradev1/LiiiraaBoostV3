@@ -129,7 +129,7 @@ fn dispatch_shell_command(
 
     apply_window_effects(&app, dispatch.effects)?;
     apply_tray_effects(&app, tray_effects)?;
-    Ok(command)
+    Ok(dispatch.command)
 }
 
 fn current_work_area(app: &AppHandle) -> Result<WorkArea, ShellDispatchError> {
@@ -299,12 +299,16 @@ fn apply_notification_effects(
                 .emit(HOST_EVENT_CHANNEL, event)
                 .map_err(|_| ShellDispatchError::HostOperationFailed)?,
             NotificationEffect::Show(notification) => {
+                if !notification.respects_focus_assist {
+                    return Err(ShellDispatchError::ContractRejected);
+                }
                 let action = serde_json::to_value(&notification.action)
                     .map_err(|_| ShellDispatchError::HostOperationFailed)?;
                 let notification_builder = app.notification().builder();
                 notification_builder
                     .title(notification.title)
                     .body(notification.body)
+                    .extra("category", notification.category)
                     .extra("shellAction", action)
                     .show()
                     .map_err(|_| ShellDispatchError::HostOperationFailed)?;
