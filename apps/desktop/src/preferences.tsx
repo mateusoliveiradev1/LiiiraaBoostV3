@@ -164,6 +164,7 @@ export interface DesktopPreferencesProviderProps {
   readonly children: ReactNode;
   readonly commandMetadata?: () => HostCommandMetadata;
   readonly documentElement?: HTMLElement | null;
+  readonly hostPreferenceEvent?: PreferenceEvent;
   readonly sendHostCommand?: (command: RendererToHostShellCommandJson) => void;
   readonly storage?: DesktopPreferenceStorage;
   readonly windowsLocale?: string;
@@ -173,6 +174,7 @@ export const DesktopPreferencesProvider = ({
   children,
   commandMetadata,
   documentElement,
+  hostPreferenceEvent,
   sendHostCommand,
   storage = browserPreferenceStorage(),
   windowsLocale,
@@ -182,6 +184,12 @@ export const DesktopPreferencesProvider = ({
     undefined,
     () => loadDesktopPreferences(storage, windowsLocale),
   );
+
+  useEffect(() => {
+    if (hostPreferenceEvent !== undefined) {
+      reducerDispatch(hostPreferenceEvent);
+    }
+  }, [hostPreferenceEvent]);
 
   useEffect(() => {
     if (storage !== undefined) {
@@ -241,8 +249,9 @@ export const DesktopPreferencesProvider = ({
       {
         children,
         locale: preferences.locale,
-        onLocaleChange: (locale: DesktopLocale) =>
-          dispatch({ type: 'set-locale', locale }),
+        onLocaleChange: (locale: DesktopLocale) => {
+          dispatch({ type: 'set-locale', locale });
+        },
       },
     ),
   );
@@ -277,11 +286,12 @@ export const PreConsentLocaleControl = ({
       {
         'aria-label': label,
         id,
-        onChange: (event: ChangeEvent<HTMLSelectElement>) =>
+        onChange: (event: ChangeEvent<HTMLSelectElement>) => {
           dispatch({
             type: 'set-locale',
             locale: event.currentTarget.value as DesktopLocale,
-          }),
+          });
+        },
         value: preferences.locale,
       },
       PRE_CONSENT_LOCALE_OPTIONS.map(({ locale, messageId }) =>

@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react';
+import type { HostToRendererShellEventJson } from '@liiiraa/contracts-ts';
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  createNativeShellComposition,
   DesktopApp,
   SHELL_OPERATIONAL_STATES,
   getOperationalPresentation,
   getResponsiveShellLayout,
+  routeForNativeNavigation,
 } from './app.js';
+import type { ShellBridgeTransport } from './native/shell-bridge.js';
 import { DESKTOP_F6_REGIONS, createDesktopNavigator, desktopRouteTree } from './routes.js';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
@@ -176,4 +180,215 @@ describe('scale smoke', () => {
       expect(semanticFindings(markup)).toEqual([]);
     },
   );
+});
+
+describe('native composition smoke', () => {
+  it('projects every validated host event and disposes one deduplicated listener', async () => {
+    let listener:
+      | ((event: { readonly payload: unknown }) => void)
+      | undefined;
+    let listenCalls = 0;
+    const unlisten = vi.fn();
+    const transport: ShellBridgeTransport = {
+      listen: (_channel, handler) => {
+        listenCalls += 1;
+        listener = handler;
+        return Promise.resolve(unlisten);
+      },
+      invoke: () => Promise.resolve(undefined),
+    };
+    const observed: HostToRendererShellEventJson[] = [];
+    const installerIdentities: unknown[] = [];
+    const startupStates: unknown[] = [];
+    const navigations: unknown[] = [];
+    const hostPreferences: unknown[] = [];
+    const closeContexts: unknown[] = [];
+    const notificationPreferences: unknown[] = [];
+    const windowStates: unknown[] = [];
+    const diagnostics: unknown[] = [];
+    const events = [
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.installer-identity.event',
+        requestId: 'native-smoke-installer',
+        issuedAt: '2026-07-28T09:00:00.000Z',
+        payload: {
+          installer: {
+            publisher: 'Liiiraa Boost Development',
+            version: '0.2.0',
+            channel: 'development',
+            windowsCompatibility: {
+              kind: 'supported',
+              detectedBuild: 26100,
+              minimumBuild: 19045,
+            },
+          },
+        },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.startup-state-changed.event',
+        requestId: 'native-smoke-startup',
+        issuedAt: '2026-07-28T09:00:01.000Z',
+        payload: {
+          state: { kind: 'splash', step: 'validating-installation' },
+        },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.navigation-requested.event',
+        requestId: 'native-smoke-navigation',
+        issuedAt: '2026-07-28T09:00:02.000Z',
+        payload: {
+          source: 'tray',
+          intent: { kind: 'settings', destination: 'privacy' },
+        },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.locale-changed.event',
+        requestId: 'native-smoke-locale',
+        issuedAt: '2026-07-28T09:00:03.000Z',
+        payload: { locale: 'pt-BR' },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.tray-preference-changed.event',
+        requestId: 'native-smoke-tray',
+        issuedAt: '2026-07-28T09:00:04.000Z',
+        payload: { preference: 'keep-game-detection-in-tray' },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.close-requested.event',
+        requestId: 'native-smoke-close',
+        issuedAt: '2026-07-28T09:00:05.000Z',
+        payload: { context: { kind: 'recovery-in-progress' } },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.notification-preference-changed.event',
+        requestId: 'native-smoke-notification',
+        issuedAt: '2026-07-28T09:00:06.000Z',
+        payload: {
+          preference: {
+            enabled: true,
+            focusAssist: 'respect',
+            categories: ['recovery-required'],
+          },
+        },
+      },
+      {
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.window-state-changed.event',
+        requestId: 'native-smoke-window',
+        issuedAt: '2026-07-28T09:00:07.000Z',
+        payload: {
+          state: {
+            kind: 'normal',
+            monitorId: 'primary-monitor',
+            x: 80,
+            y: 60,
+            width: 1280,
+            height: 800,
+          },
+        },
+      },
+    ] as const satisfies readonly HostToRendererShellEventJson[];
+    const bridge = createNativeShellComposition({
+      callbacks: {
+        onCloseRequest: (context) => {
+          closeContexts.push(context);
+        },
+        onDiagnostic: (diagnostic) => {
+          diagnostics.push(diagnostic);
+        },
+        onEvent: (event) => {
+          observed.push(event);
+        },
+        onHostPreference: (event) => {
+          hostPreferences.push(event);
+        },
+        onInstallerIdentity: (identity) => {
+          installerIdentities.push(identity);
+        },
+        onNavigation: (pathname, requestId) => {
+          navigations.push({ pathname, requestId });
+        },
+        onNotificationPreference: (preference) => {
+          notificationPreferences.push(preference);
+        },
+        onStartupState: (state) => {
+          startupStates.push(state);
+        },
+        onWindowState: (state) => {
+          windowStates.push(state);
+        },
+      },
+      transport,
+    });
+
+    await Promise.all([bridge.start(), bridge.start()]);
+    for (const event of events) {
+      listener?.({ payload: event });
+    }
+
+    expect(listenCalls).toBe(1);
+    expect(observed).toEqual(events);
+    expect(installerIdentities).toHaveLength(1);
+    expect(startupStates).toEqual([
+      { kind: 'splash', step: 'validating-installation' },
+    ]);
+    expect(navigations).toEqual([
+      {
+        pathname: '/settings/privacy',
+        requestId: 'native-smoke-navigation',
+      },
+    ]);
+    expect(hostPreferences).toEqual([
+      { type: 'set-locale', locale: 'pt-BR' },
+      { type: 'set-tray-enabled', enabled: true },
+    ]);
+    expect(closeContexts).toEqual([{ kind: 'recovery-in-progress' }]);
+    expect(notificationPreferences).toHaveLength(1);
+    expect(windowStates).toEqual([
+      {
+        kind: 'normal',
+        monitorId: 'primary-monitor',
+        x: 80,
+        y: 60,
+        width: 1280,
+        height: 800,
+      },
+    ]);
+    expect(diagnostics).toEqual([]);
+
+    await bridge.dispose();
+    expect(unlisten).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps every navigation family and shows native startup before the route shell', () => {
+    expect(
+      routeForNativeNavigation({ kind: 'goal', destination: 'activity' }),
+    ).toBe('/activity');
+    expect(
+      routeForNativeNavigation({ kind: 'settings', destination: 'updates' }),
+    ).toBe('/settings/updates');
+    expect(
+      routeForNativeNavigation({ kind: 'calibration', destination: 'summary' }),
+    ).toBe('/calibration/summary');
+    expect(
+      routeForNativeNavigation({
+        kind: 'documentation',
+        documentId: 'startup recovery',
+      }),
+    ).toBe('/documentation/startup%20recovery');
+
+    const markup = renderToStaticMarkup(
+      <DesktopApp nativeShell viewportWidth={1280} windowsLocale="pt-BR" />,
+    );
+    expect(markup).toContain('data-startup-kind="splash"');
+    expect(markup).toContain('Primeira abertura local');
+    expect(markup).not.toContain('data-viewport-width="1280"');
+  });
 });

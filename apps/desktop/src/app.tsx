@@ -14,12 +14,29 @@ import {
   SettingsSurface,
   UpdateSurface,
 } from '@liiiraa/feature-shell';
-import type { HomeCalibrationState, HomeClaim, ShellLocale } from '@liiiraa/feature-shell';
+import type {
+  HomeCalibrationState,
+  HomeClaim,
+  PreferenceEvent,
+  ShellLocale,
+} from '@liiiraa/feature-shell';
+import type {
+  HostToRendererShellEventJson,
+  RendererToHostShellCommandJson,
+  ShellCloseContextJson,
+  ShellCloseResolutionJson,
+  ShellInstallerIdentityJson,
+  ShellNavigationIntentJson,
+  ShellNotificationPreferenceJson,
+  ShellStartupStateJson,
+  ShellWindowStateJson,
+} from '@liiiraa/contracts-ts';
 import {
   ActivityCenter,
   ContextInspector,
   CriticalStateRail,
   GoalRail,
+  LbAlertDialog,
   LbButton,
   LbDialog,
   LbSearchField,
@@ -28,11 +45,23 @@ import {
   StatusSignal,
   WindowTitleBar,
 } from '@liiiraa/design-system';
-import type { OperationalState } from '@liiiraa/design-system';
+import type { ActivityItem, OperationalState } from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { formatMessage } from './locales/i18n.js';
-import { DesktopPreferencesProvider, useDesktopPreferences } from './preferences.js';
+import { detectLocale, formatMessage } from './locales/i18n.js';
+import { InstallerHandoff } from './features/installer-handoff.js';
+import { StartupSurface } from './features/startup.js';
+import {
+  createShellBridge,
+  type ShellBridge,
+  type ShellBridgeDiagnostic,
+  type ShellBridgeTransport,
+} from './native/shell-bridge.js';
+import {
+  DesktopPreferencesProvider,
+  useDesktopPreferences,
+  type HostCommandMetadata,
+} from './preferences.js';
 import { createDesktopNavigator, resolveDesktopRoute } from './routes.js';
 import type { DesktopF6Region, DesktopNavigator, DesktopRouteMatch } from './routes.js';
 
@@ -224,6 +253,237 @@ const activityOverlayItems: Parameters<typeof ActivityCenter>[0]['items'] = Obje
   }),
 ]);
 
+type NativeActivityEvent = Parameters<typeof ActivitySurface>[0]['events'][number];
+
+export const routeForNativeNavigation = (
+  intent: ShellNavigationIntentJson,
+): string => {
+  switch (intent.kind) {
+    case 'goal': {
+      const routes = {
+        home: '/home',
+        prepare: '/prepare',
+        improve: '/improve',
+        measure: '/measure/overview',
+        recover: '/recover/overview',
+        assistant: '/assistant',
+        activity: '/activity',
+        account: '/account/overview',
+      } satisfies Readonly<Record<typeof intent.destination, string>>;
+      return routes[intent.destination];
+    }
+    case 'settings':
+      return `/settings/${intent.destination}`;
+    case 'calibration':
+      return `/calibration/${intent.destination}`;
+    case 'documentation':
+      return `/documentation/${encodeURIComponent(intent.documentId)}`;
+  }
+};
+
+export interface NativeShellCompositionCallbacks {
+  readonly onCloseRequest: (context: ShellCloseContextJson) => void;
+  readonly onDiagnostic: (diagnostic: ShellBridgeDiagnostic) => void;
+  readonly onEvent: (event: HostToRendererShellEventJson) => void;
+  readonly onHostPreference: (event: PreferenceEvent) => void;
+  readonly onInstallerIdentity: (identity: ShellInstallerIdentityJson) => void;
+  readonly onNavigation: (pathname: string, requestId: string) => void;
+  readonly onNotificationPreference: (
+    preference: ShellNotificationPreferenceJson,
+  ) => void;
+  readonly onStartupState: (state: ShellStartupStateJson) => void;
+  readonly onWindowState: (state: ShellWindowStateJson) => void;
+}
+
+export interface CreateNativeShellCompositionOptions {
+  readonly callbacks: NativeShellCompositionCallbacks;
+  readonly transport?: ShellBridgeTransport;
+}
+
+export const createNativeShellComposition = ({
+  callbacks,
+  transport,
+}: CreateNativeShellCompositionOptions): ShellBridge => {
+  const observe = (
+    event: HostToRendererShellEventJson,
+    project: () => void,
+  ): void => {
+    callbacks.onEvent(event);
+    project();
+  };
+
+  return createShellBridge({
+    handlers: {
+      onInstallerIdentity: (event) => {
+        observe(event, () => {
+          callbacks.onInstallerIdentity(event.payload.installer);
+        });
+      },
+      onStartupState: (event) => {
+        observe(event, () => {
+          callbacks.onStartupState(event.payload.state);
+        });
+      },
+      onNavigation: (event) => {
+        observe(event, () => {
+          callbacks.onNavigation(
+            routeForNativeNavigation(event.payload.intent),
+            event.requestId,
+          );
+        });
+      },
+      onLocale: (event) => {
+        observe(event, () => {
+          callbacks.onHostPreference({
+            type: 'set-locale',
+            locale: event.payload.locale === 'pt-BR' ? 'pt-BR' : 'en-US',
+          });
+        });
+      },
+      onTrayPreference: (event) => {
+        observe(event, () => {
+          callbacks.onHostPreference({
+            type: 'set-tray-enabled',
+            enabled:
+              event.payload.preference ===
+              'keep-game-detection-in-tray',
+          });
+        });
+      },
+      onCloseRequest: (event) => {
+        observe(event, () => {
+          callbacks.onCloseRequest(event.payload.context);
+        });
+      },
+      onNotificationPreference: (event) => {
+        observe(event, () => {
+          callbacks.onNotificationPreference(event.payload.preference);
+        });
+      },
+      onWindowState: (event) => {
+        observe(event, () => {
+          callbacks.onWindowState(event.payload.state);
+        });
+      },
+    },
+    onDiagnostic: callbacks.onDiagnostic,
+    ...(transport === undefined ? {} : { transport }),
+  });
+};
+
+export const createHostCommandMetadataFactory = (
+  now: () => string = () => new Date().toISOString(),
+): (() => HostCommandMetadata) => {
+  let sequence = 0;
+
+  return () => {
+    sequence += 1;
+    return Object.freeze({
+      requestId: `renderer-shell-${String(sequence).padStart(6, '0')}`,
+      issuedAt: now(),
+    });
+  };
+};
+
+const nativeActivityFor = (
+  event: HostToRendererShellEventJson,
+): NativeActivityEvent => {
+  const isFailure =
+    event.messageType === 'desktop.shell.startup-state-changed.event' &&
+    event.payload.state.kind === 'failure';
+  const isClose =
+    event.messageType === 'desktop.shell.close-requested.event';
+  const category: NativeActivityEvent['category'] =
+    event.messageType === 'desktop.shell.installer-identity.event' ||
+    event.messageType === 'desktop.shell.startup-state-changed.event'
+      ? 'updates'
+      : isClose
+        ? 'recovery'
+        : event.messageType ===
+              'desktop.shell.notification-preference-changed.event' ||
+            event.messageType === 'desktop.shell.locale-changed.event' ||
+            event.messageType ===
+              'desktop.shell.tray-preference-changed.event'
+          ? 'account'
+          : 'plans';
+
+  return Object.freeze({
+    correlationId: event.correlationId ?? event.requestId,
+    category,
+    state: isFailure || isClose ? 'requires-action' : 'completed',
+    severity: isFailure ? 'critical' : isClose ? 'warning' : 'normal',
+    title: event.messageType,
+    affectedObject: 'Native desktop shell',
+    occurredAt: event.issuedAt,
+    source: 'validated-native-shell',
+    acknowledged: false,
+    resolved: false,
+    dismissed: false,
+    scenarioMarked: false,
+  });
+};
+
+const nativeOverlayItemFor = (
+  event: HostToRendererShellEventJson,
+): ActivityItem | undefined => {
+  if (
+    event.messageType === 'desktop.shell.startup-state-changed.event' &&
+    event.payload.state.kind === 'failure'
+  ) {
+    return Object.freeze({
+      detail: event.payload.state.reason,
+      id: event.requestId,
+      state: 'partial-failure',
+      title: 'Native startup requires attention',
+    });
+  }
+
+  if (event.messageType === 'desktop.shell.close-requested.event') {
+    return Object.freeze({
+      detail: event.payload.context.kind,
+      id: event.requestId,
+      state:
+        event.payload.context.kind === 'recovery-in-progress'
+          ? 'recovery'
+          : 'restart-pending',
+      title: 'Close decision requires attention',
+    });
+  }
+
+  return undefined;
+};
+
+interface NativeShellState {
+  readonly activityEvents: readonly NativeActivityEvent[];
+  readonly activityItems: readonly ActivityItem[];
+  readonly closeContext?: ShellCloseContextJson;
+  readonly diagnostic?: ShellBridgeDiagnostic;
+  readonly hostPreferenceEvent?: PreferenceEvent;
+  readonly installerAccepted: boolean;
+  readonly installerIdentity?: ShellInstallerIdentityJson;
+  readonly navigation?: Readonly<{ pathname: string; requestId: string }>;
+  readonly notificationPreference?: ShellNotificationPreferenceJson;
+  readonly startupAcknowledged: boolean;
+  readonly startupState: ShellStartupStateJson;
+  readonly windowState?: ShellWindowStateJson;
+}
+
+const createInitialNativeShellState = (
+  nativeShell: boolean,
+): NativeShellState => {
+  const startupState: ShellStartupStateJson = nativeShell
+    ? { kind: 'splash', step: 'initializing-webview' }
+    : { kind: 'ready' };
+
+  return Object.freeze({
+    activityEvents: Object.freeze([]),
+    activityItems: Object.freeze([]),
+    installerAccepted: !nativeShell,
+    startupAcknowledged: !nativeShell,
+    startupState,
+  });
+};
+
 const resolveInitialRoute = (initialPath: string): DesktopRouteMatch => {
   const result = resolveDesktopRoute(initialPath);
   if (result.ok) {
@@ -373,6 +633,7 @@ const StandaloneSection = ({ children, locale, purpose, title }: StandaloneSecti
 );
 
 export interface DesktopRouteOutletProps {
+  readonly activityEvents?: readonly NativeActivityEvent[];
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly route: DesktopRouteMatch;
@@ -380,6 +641,7 @@ export interface DesktopRouteOutletProps {
 }
 
 export const DesktopRouteOutlet = ({
+  activityEvents = ACTIVITY_EVENTS,
   locale,
   navigate,
   route,
@@ -455,7 +717,8 @@ export const DesktopRouteOutlet = ({
     case 'ActivitySurface':
       return (
         <ActivitySurface
-          events={ACTIVITY_EVENTS}
+          events={activityEvents}
+          key={activityEvents.map(({ correlationId }) => correlationId).join(':')}
           locale={locale}
           onNavigate={navigate}
           scenarioId={scenarioId}
@@ -551,6 +814,9 @@ export interface DesktopAppProps {
   readonly appScale?: 100 | 125 | 150;
   readonly forcedColors?: boolean;
   readonly initialPath?: string;
+  readonly nativeBridgeTransport?: ShellBridgeTransport;
+  readonly nativeCommandMetadata?: () => HostCommandMetadata;
+  readonly nativeShell?: boolean;
   readonly operationalState?: ShellOperationalState;
   readonly reducedMotion?: boolean;
   readonly scenarioId?: string;
@@ -559,12 +825,26 @@ export interface DesktopAppProps {
   readonly windowsLocale?: string;
 }
 
-type DesktopAppContentProps = Omit<DesktopAppProps, 'windowsLocale'>;
+type DesktopAppContentProps = Omit<
+  DesktopAppProps,
+  | 'nativeBridgeTransport'
+  | 'nativeCommandMetadata'
+  | 'nativeShell'
+  | 'windowsLocale'
+> &
+  Readonly<{
+    nativeState?: NativeShellState;
+    onSendHostCommand?: (command: RendererToHostShellCommandJson) => void;
+    commandMetadata?: () => HostCommandMetadata;
+  }>;
 
 const DesktopAppContent = ({
   appScale,
   forcedColors = false,
   initialPath = '/calibration/welcome',
+  nativeState,
+  onSendHostCommand,
+  commandMetadata,
   operationalState = 'fixture',
   reducedMotion,
   scenarioId = 'S01',
@@ -640,6 +920,61 @@ const DesktopAppContent = ({
       setRoute(result.value);
     }
   }, []);
+
+  useEffect(() => {
+    if (nativeState?.navigation !== undefined) {
+      navigate(nativeState.navigation.pathname);
+    }
+  }, [nativeState?.navigation, navigate]);
+
+  const sendNotificationPreference = useCallback(() => {
+    if (
+      nativeState === undefined ||
+      onSendHostCommand === undefined ||
+      commandMetadata === undefined
+    ) {
+      return;
+    }
+
+    const enabled = !(nativeState.notificationPreference?.enabled ?? false);
+    onSendHostCommand({
+      schemaVersion: '1.0',
+      messageType: 'desktop.shell.set-notification-preference.command',
+      ...commandMetadata(),
+      payload: {
+        preference: {
+          enabled,
+          focusAssist: 'respect',
+          categories: enabled
+            ? [
+                'recovery-required',
+                'restart-deadline',
+                'game-profile-restore-failed',
+                'signed-update-action-required',
+                'account-security',
+              ]
+            : [],
+        },
+      },
+    });
+  }, [commandMetadata, nativeState, onSendHostCommand]);
+
+  const saveNativeWindowState = useCallback(() => {
+    if (
+      nativeState?.windowState === undefined ||
+      onSendHostCommand === undefined ||
+      commandMetadata === undefined
+    ) {
+      return;
+    }
+
+    onSendHostCommand({
+      schemaVersion: '1.0',
+      messageType: 'desktop.shell.save-window-state.command',
+      ...commandMetadata(),
+      payload: { state: nativeState.windowState },
+    });
+  }, [commandMetadata, nativeState?.windowState, onSendHostCommand]);
 
   const rememberOverlayInvoker = useCallback(() => {
     lastOverlayInvoker.current =
@@ -822,6 +1157,20 @@ const DesktopAppContent = ({
   const criticalState = criticalStateFor(operationalState);
   const effectiveScale = appScale ?? preferences.interfaceScale;
   const motion = reducedMotion ?? preferences.motion === 'reduced';
+  const routeActivityEvents = useMemo(
+    () =>
+      nativeState === undefined
+        ? ACTIVITY_EVENTS
+        : Object.freeze([...nativeState.activityEvents, ...ACTIVITY_EVENTS]),
+    [nativeState],
+  );
+  const overlayActivityItems = useMemo(
+    () =>
+      nativeState === undefined
+        ? activityOverlayItems
+        : Object.freeze([...nativeState.activityItems, ...activityOverlayItems]),
+    [nativeState],
+  );
 
   return (
     <div
@@ -898,6 +1247,7 @@ const DesktopAppContent = ({
           tabIndex={-1}
         >
           <DesktopRouteOutlet
+            activityEvents={routeActivityEvents}
             locale={locale}
             navigate={navigate}
             route={route}
@@ -919,6 +1269,45 @@ const DesktopAppContent = ({
             <p>
               <strong>{`DEMO · ${scenarioId}`}</strong>
             </p>
+            {nativeState === undefined ? null : (
+              <>
+                <p data-native-shell-diagnostic>
+                  {nativeState.diagnostic === undefined
+                    ? locale === 'pt-BR'
+                      ? 'Ponte nativa validada e ativa.'
+                      : 'Validated native bridge is active.'
+                    : `${nativeState.diagnostic.code} · ${
+                        nativeState.diagnostic.messageType ?? 'unknown-message'
+                      }`}
+                </p>
+                <p data-native-notification-state>
+                  {locale === 'pt-BR' ? 'Notificações do Windows' : 'Windows notifications'}
+                  {': '}
+                  {nativeState.notificationPreference?.enabled === true
+                    ? locale === 'pt-BR'
+                      ? 'ativadas'
+                      : 'enabled'
+                    : locale === 'pt-BR'
+                      ? 'desativadas'
+                      : 'disabled'}
+                </p>
+                <LbButton onPress={sendNotificationPreference} variant="secondary">
+                  {locale === 'pt-BR'
+                    ? 'Alterar notificações do Windows'
+                    : 'Change Windows notifications'}
+                </LbButton>
+                {nativeState.windowState === undefined ? null : (
+                  <>
+                    <p data-native-window-state>{nativeState.windowState.kind}</p>
+                    <LbButton onPress={saveNativeWindowState} variant="secondary">
+                      {locale === 'pt-BR'
+                        ? 'Salvar estado desta janela'
+                        : 'Save this window state'}
+                    </LbButton>
+                  </>
+                )}
+              </>
+            )}
             <LbButton
               onPress={() => {
                 setInspectorOpen(false);
@@ -944,7 +1333,7 @@ const DesktopAppContent = ({
           className="desktop-activity-overlay"
           data-lb-region
         >
-          <ActivityCenter items={activityOverlayItems} />
+          <ActivityCenter items={overlayActivityItems} />
           <LbButton
             onPress={() => {
               setActivityOpen(false);
@@ -1028,8 +1417,374 @@ const DesktopAppContent = ({
   );
 };
 
-export const DesktopApp = ({ windowsLocale, ...props }: DesktopAppProps) => (
-  <DesktopPreferencesProvider {...(windowsLocale === undefined ? {} : { windowsLocale })}>
-    <DesktopAppContent {...props} />
-  </DesktopPreferencesProvider>
-);
+interface NativeShellPresentationProps {
+  readonly appProps: DesktopAppContentProps;
+  readonly commandMetadata: () => HostCommandMetadata;
+  readonly nativeState: NativeShellState;
+  readonly onAcceptInstaller: () => void;
+  readonly onAcknowledgeStartup: (pathname?: string) => void;
+  readonly onResolveClose: (resolution: ShellCloseResolutionJson) => void;
+  readonly onSendHostCommand: (command: RendererToHostShellCommandJson) => void;
+}
+
+const NativeShellPresentation = ({
+  appProps,
+  commandMetadata,
+  nativeState,
+  onAcceptInstaller,
+  onAcknowledgeStartup,
+  onResolveClose,
+  onSendHostCommand,
+}: NativeShellPresentationProps): ReactNode => {
+  const { preferences } = useDesktopPreferences();
+  const locale = detectLocale(preferences.locale);
+  const version = nativeState.installerIdentity?.version ?? 'development';
+
+  let content: ReactNode;
+  if (nativeState.installerIdentity === undefined) {
+    content = (
+      <StartupSurface
+        firstLaunch
+        locale={locale}
+        state={nativeState.startupState}
+        version={version}
+      />
+    );
+  } else if (!nativeState.installerAccepted) {
+    content = (
+      <InstallerHandoff
+        identity={nativeState.installerIdentity}
+        locale={locale}
+        onContinue={onAcceptInstaller}
+      />
+    );
+  } else if (!nativeState.startupAcknowledged) {
+    content = (
+      <StartupSurface
+        firstLaunch
+        locale={locale}
+        onContinue={() => {
+          onAcknowledgeStartup();
+        }}
+        onOpenDocumentation={() => {
+          onAcknowledgeStartup('/documentation/local-startup');
+        }}
+        onOpenSupport={() => {
+          onAcknowledgeStartup('/documentation/local-support');
+        }}
+        onRecoveryAction={(action) => {
+          if (action === 'exit') {
+            onResolveClose({
+              context: 'ordinary',
+              decision: 'close-interface',
+            });
+            return;
+          }
+
+          onAcknowledgeStartup(
+            action === 'open-safe-mode' || action === 'rollback'
+              ? '/recover/emergency'
+              : '/documentation/local-startup',
+          );
+        }}
+        state={nativeState.startupState}
+        version={version}
+      />
+    );
+  } else {
+    content = (
+      <DesktopAppContent
+        {...appProps}
+        commandMetadata={commandMetadata}
+        nativeState={nativeState}
+        onSendHostCommand={onSendHostCommand}
+      />
+    );
+  }
+
+  const closeContext = nativeState.closeContext;
+  return (
+    <>
+      {content}
+      <LbAlertDialog
+        description={
+          closeContext?.kind === 'recovery-in-progress'
+            ? locale === 'pt-BR'
+              ? 'Uma recuperação está em andamento. A interface deve permanecer disponível.'
+              : 'Recovery is in progress. The interface must remain available.'
+            : locale === 'pt-BR'
+              ? 'Escolha entre encerrar a interface ou manter a detecção no tray.'
+              : 'Choose whether to close the interface or keep detection in the tray.'
+        }
+        isOpen={closeContext !== undefined}
+        title={locale === 'pt-BR' ? 'Confirmar fechamento' : 'Confirm close'}
+        trigger={
+          <button className="lb-visually-hidden" tabIndex={-1} type="button">
+            {locale === 'pt-BR' ? 'Abrir confirmação de fechamento' : 'Open close confirmation'}
+          </button>
+        }
+      >
+        {closeContext?.kind === 'recovery-in-progress' ? (
+          <>
+            <LbButton
+              onPress={() => {
+                onResolveClose({
+                  context: 'recovery-in-progress',
+                  decision: 'stay-here',
+                });
+              }}
+              variant="primary"
+            >
+              {locale === 'pt-BR' ? 'Permanecer aqui' : 'Stay here'}
+            </LbButton>
+            <LbButton
+              onPress={() => {
+                onResolveClose({
+                  context: 'recovery-in-progress',
+                  decision: 'keep-running-in-tray',
+                });
+              }}
+              variant="secondary"
+            >
+              {locale === 'pt-BR' ? 'Manter no tray' : 'Keep running in tray'}
+            </LbButton>
+          </>
+        ) : (
+          <>
+            <LbButton
+              onPress={() => {
+                onResolveClose({
+                  context: 'ordinary',
+                  decision: 'close-interface',
+                });
+              }}
+              variant="primary"
+            >
+              {locale === 'pt-BR' ? 'Encerrar interface' : 'Close interface'}
+            </LbButton>
+            <LbButton
+              onPress={() => {
+                onResolveClose({
+                  context: 'ordinary',
+                  decision: 'keep-running-in-tray',
+                });
+              }}
+              variant="secondary"
+            >
+              {locale === 'pt-BR' ? 'Manter detecção no tray' : 'Keep detection in tray'}
+            </LbButton>
+          </>
+        )}
+      </LbAlertDialog>
+    </>
+  );
+};
+
+type NativeDesktopAppProps = Omit<
+  DesktopAppProps,
+  'nativeBridgeTransport' | 'nativeCommandMetadata' | 'nativeShell'
+> &
+  Readonly<{
+    nativeBridgeTransport?: ShellBridgeTransport;
+    nativeCommandMetadata?: () => HostCommandMetadata;
+  }>;
+
+const NativeDesktopApp = ({
+  nativeBridgeTransport,
+  nativeCommandMetadata,
+  windowsLocale,
+  ...appProps
+}: NativeDesktopAppProps): ReactNode => {
+  const [nativeState, setNativeState] = useState(() =>
+    createInitialNativeShellState(true),
+  );
+  const bridgeRef = useRef<ShellBridge | null>(null);
+  const commandMetadata = useMemo(
+    () => nativeCommandMetadata ?? createHostCommandMetadataFactory(),
+    [nativeCommandMetadata],
+  );
+
+  const sendHostCommand = useCallback(
+    (command: RendererToHostShellCommandJson): void => {
+      void bridgeRef.current?.send(command);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const bridge = createNativeShellComposition({
+      callbacks: {
+        onCloseRequest: (closeContext) => {
+          setNativeState((current) => Object.freeze({ ...current, closeContext }));
+        },
+        onDiagnostic: (diagnostic) => {
+          setNativeState((current) => Object.freeze({ ...current, diagnostic }));
+        },
+        onEvent: (event) => {
+          setNativeState((current) => {
+            const activityEvent = nativeActivityFor(event);
+            const overlayItem = nativeOverlayItemFor(event);
+            return Object.freeze({
+              ...current,
+              activityEvents: Object.freeze(
+                [activityEvent, ...current.activityEvents].slice(0, 32),
+              ),
+              activityItems:
+                overlayItem === undefined
+                  ? current.activityItems
+                  : Object.freeze(
+                      [overlayItem, ...current.activityItems].slice(0, 16),
+                    ),
+            });
+          });
+        },
+        onHostPreference: (hostPreferenceEvent) => {
+          setNativeState((current) =>
+            Object.freeze({ ...current, hostPreferenceEvent }),
+          );
+        },
+        onInstallerIdentity: (installerIdentity) => {
+          setNativeState((current) =>
+            Object.freeze({
+              ...current,
+              installerAccepted: false,
+              installerIdentity,
+            }),
+          );
+        },
+        onNavigation: (pathname, requestId) => {
+          setNativeState((current) =>
+            Object.freeze({
+              ...current,
+              navigation: Object.freeze({ pathname, requestId }),
+            }),
+          );
+        },
+        onNotificationPreference: (notificationPreference) => {
+          setNativeState((current) =>
+            Object.freeze({ ...current, notificationPreference }),
+          );
+        },
+        onStartupState: (startupState) => {
+          setNativeState((current) =>
+            Object.freeze({
+              ...current,
+              startupAcknowledged: false,
+              startupState,
+            }),
+          );
+        },
+        onWindowState: (windowState) => {
+          setNativeState((current) =>
+            Object.freeze({ ...current, windowState }),
+          );
+        },
+      },
+      ...(nativeBridgeTransport === undefined
+        ? {}
+        : { transport: nativeBridgeTransport }),
+    });
+
+    bridgeRef.current = bridge;
+    void bridge.start();
+    return () => {
+      void bridge.dispose();
+      if (bridgeRef.current === bridge) {
+        bridgeRef.current = null;
+      }
+    };
+  }, [nativeBridgeTransport]);
+
+  const resolveClose = useCallback(
+    (resolution: ShellCloseResolutionJson): void => {
+      sendHostCommand({
+        schemaVersion: '1.0',
+        messageType: 'desktop.shell.resolve-close.command',
+        ...commandMetadata(),
+        payload: { resolution },
+      });
+      setNativeState((current) => {
+        const updated = { ...current };
+        delete updated.closeContext;
+        return Object.freeze(updated);
+      });
+    },
+    [commandMetadata, sendHostCommand],
+  );
+
+  const acknowledgeStartup = useCallback((pathname?: string): void => {
+    setNativeState((current) =>
+      Object.freeze({
+        ...current,
+        startupAcknowledged: true,
+        ...(pathname === undefined
+          ? {}
+          : {
+              navigation: Object.freeze({
+                pathname,
+                requestId: `local-startup-${pathname}`,
+              }),
+            }),
+      }),
+    );
+  }, []);
+
+  return (
+    <DesktopPreferencesProvider
+      commandMetadata={commandMetadata}
+      sendHostCommand={sendHostCommand}
+      {...(nativeState.hostPreferenceEvent === undefined
+        ? {}
+        : { hostPreferenceEvent: nativeState.hostPreferenceEvent })}
+      {...(windowsLocale === undefined ? {} : { windowsLocale })}
+    >
+      <NativeShellPresentation
+        appProps={appProps}
+        commandMetadata={commandMetadata}
+        nativeState={nativeState}
+        onAcceptInstaller={() => {
+          setNativeState((current) =>
+            Object.freeze({ ...current, installerAccepted: true }),
+          );
+        }}
+        onAcknowledgeStartup={acknowledgeStartup}
+        onResolveClose={resolveClose}
+        onSendHostCommand={sendHostCommand}
+      />
+    </DesktopPreferencesProvider>
+  );
+};
+
+export const DesktopApp = ({
+  nativeBridgeTransport,
+  nativeCommandMetadata,
+  nativeShell,
+  windowsLocale,
+  ...props
+}: DesktopAppProps): ReactNode => {
+  const useNativeShell =
+    nativeShell ?? Reflect.has(globalThis, '__TAURI_INTERNALS__');
+
+  if (useNativeShell) {
+    return (
+      <NativeDesktopApp
+        {...props}
+        {...(nativeBridgeTransport === undefined
+          ? {}
+          : { nativeBridgeTransport })}
+        {...(nativeCommandMetadata === undefined
+          ? {}
+          : { nativeCommandMetadata })}
+        {...(windowsLocale === undefined ? {} : { windowsLocale })}
+      />
+    );
+  }
+
+  return (
+    <DesktopPreferencesProvider
+      {...(windowsLocale === undefined ? {} : { windowsLocale })}
+    >
+      <DesktopAppContent {...props} />
+    </DesktopPreferencesProvider>
+  );
+};
