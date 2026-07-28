@@ -153,4 +153,15 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['apps/desktop/tests/packaged/driver.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+    rules: {
+      ...tseslintPlugin.configs['disable-type-checked'].rules,
+    },
+  },
 ]);
