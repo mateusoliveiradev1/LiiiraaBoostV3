@@ -9,6 +9,20 @@
       "default": "./src/index.ts"
     }
   },
+  "scripts": {
+    "build": "vite build",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/desktop-lifecycle.mjs unit --",
+    "test:stories": "node scripts/desktop-lifecycle.mjs stories --",
+    "test:e2e": "node scripts/desktop-lifecycle.mjs browser --",
+    "test:packaged": "node scripts/desktop-lifecycle.mjs packaged --",
+    "test:scenarios": "node scripts/desktop-lifecycle.mjs scenarios --",
+    "test:localization": "node scripts/desktop-lifecycle.mjs localization --",
+    "test:evidence": "node scripts/desktop-lifecycle.mjs evidence --",
+    "test:wave-zero": "node scripts/desktop-lifecycle.mjs wave-zero --",
+    "verify:quick": "node scripts/desktop-lifecycle.mjs quick --",
+    "verify": "node scripts/desktop-lifecycle.mjs final --"
+  },
   "dependencies": {
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",
