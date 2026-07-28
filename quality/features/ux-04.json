@@ -1,0 +1,76 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-04-goal-oriented-navigation",
+  "requirements": ["UX-04"],
+  "owner": "plan-02-28",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-04-validated-navigation-intent",
+          "command": "pnpm --filter @liiiraa/desktop test -- --run -t \"routes|navigation intent\"",
+          "file": "apps/desktop/src/routes.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-04-production-fixture-refusal",
+          "command": "pnpm --filter @liiiraa/desktop test -- --run -t \"composition|S01|fixture refusal\"",
+          "file": "apps/desktop/src/routes.test.tsx",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-04-route-keyboard-axe",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/accessibility.spec.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-04-packaged-route-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-04-canonical-story-parity",
+          "command": "node tooling/desktop-evidence/verify-wave-zero.mjs --mode planned --smoke",
+          "file": "tooling/desktop-evidence/story-manifest.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-04-browser-route-recovery",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@route-scenario-smoke\"",
+          "file": "apps/desktop/tests/browser/scenarios.spec.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "ux-06-controlled-favorites",
+  "requirements": ["UX-06"],
+  "owner": "plan-02-28",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-06-favorite-policy-limits",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-05|UX-06|UX-08|UX-09\"",
+          "file": "packages/feature-shell/src/model/interaction-policy.test.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-06-benign-preference-persistence",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-06-favorites-keyboard-axe",
+          "command": "pnpm --filter @liiiraa/desktop test:e2e -- --project chromium --grep \"@a11y-visual-smoke\"",
+          "file": "apps/desktop/tests/browser/accessibility.spec.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-06-packaged-favorites-performance",
+          "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@performance-smoke\"",
+          "file": "apps/desktop/tests/packaged/performance.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "ux-06-reorder-and-restore",
+          "command": "pnpm --filter @liiiraa/feature-shell test -- --run -t \"UX-12|preferences\"",
+          "file": "packages/feature-shell/src/model/preferences.test.ts",
+          "owner": "plan-02-28",
+          "status": "planned"
+        },
+        {
+          "id": "ux-06-canonical-story-parity",
+          "command": "node tooling/desktop-evidence/verify-wave-zero.mjs --mode planned --smoke",
+          "file": "tooling/desktop-evidence/story-manifest.json",
+          "owner": "plan-02-28",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
