@@ -9,8 +9,9 @@ use std::sync::Mutex;
 
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
-    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellWindowState,
-    validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
+    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellLocale,
+    ShellWindowState, validate_host_to_renderer_shell_event,
+    validate_renderer_to_host_shell_command,
 };
 use navigation::{
     ExternalNavigationSource, navigation_event_from_external, navigation_event_from_second_instance,
@@ -22,7 +23,7 @@ use notifications::{
 use serde::Serialize;
 use serde_json::Value;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
-use tauri::tray::{TrayIconBuilder, TrayIconId};
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent, TrayIconId};
 use tauri::{
     AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
 };
@@ -335,7 +336,7 @@ fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
         return Ok(());
     }
 
-    let menu_context = TrayMenuContext::default();
+    let menu_context = TrayMenuContext::for_locale(system_shell_locale());
     let mut menu = MenuBuilder::new(app);
     for entry in tray_menu_model(&menu_context)
         .into_iter()
@@ -367,6 +368,7 @@ fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
         .tooltip();
     let mut builder = TrayIconBuilder::with_id(tray_id)
         .menu(&menu)
+        .show_menu_on_left_click(false)
         .tooltip(tooltip)
         .on_menu_event(|app, event| {
             let effects = app
@@ -384,6 +386,17 @@ fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
             if let Some(effects) = effects {
                 let _ = apply_tray_effects(app, effects);
             }
+        })
+        .on_tray_icon_event(|tray, event| {
+            if matches!(
+                event,
+                TrayIconEvent::DoubleClick {
+                    button: MouseButton::Left,
+                    ..
+                }
+            ) {
+                let _ = focus_main_window(tray.app_handle());
+            }
         });
     if let Some(icon) = app.default_window_icon().cloned() {
         builder = builder.icon(icon);
@@ -393,6 +406,17 @@ fn ensure_native_tray(app: &AppHandle) -> Result<(), ShellDispatchError> {
         .map_err(|_| ShellDispatchError::HostOperationFailed)?;
 
     Ok(())
+}
+
+fn system_shell_locale() -> ShellLocale {
+    let locale = sys_locale::get_locale()
+        .unwrap_or_else(|| "en".to_owned())
+        .to_ascii_lowercase();
+    if locale.starts_with("pt") {
+        ShellLocale::PtBr
+    } else {
+        ShellLocale::En
+    }
 }
 
 fn build_profile() -> BuildProfile {
@@ -426,7 +450,9 @@ fn run() -> Result<(), String> {
 
     tauri::Builder::default()
         .manage(Mutex::new(WindowLifecycle::default()))
-        .manage(Mutex::new(TrayLifecycle::default()))
+        .manage(Mutex::new(
+            TrayLifecycle::with_locale(system_shell_locale()),
+        ))
         .manage(Mutex::new(NotificationBridge::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, arguments, _cwd| {

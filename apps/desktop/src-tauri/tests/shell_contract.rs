@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf};
 
+use liiiraa_contracts_rust::ShellLocale;
 use serde_json::{Value, json};
 
 #[path = "../src/navigation.rs"]
@@ -401,6 +402,10 @@ fn tray_lifecycle_requires_validated_opt_in_or_an_active_safety_workflow() {
     let mut lifecycle = TrayLifecycle::default();
     assert!(!lifecycle.is_visible());
     assert_eq!(lifecycle.tooltip(), "Liiiraa Boost — Interface open");
+    assert_eq!(
+        TrayLifecycle::with_locale(ShellLocale::PtBr).tooltip(),
+        "Liiiraa Boost — Interface aberta"
+    );
 
     let malformed = shell_envelope(
         "desktop.shell.set-tray-preference.command",
@@ -449,8 +454,9 @@ fn tray_lifecycle_requires_validated_opt_in_or_an_active_safety_workflow() {
 #[test]
 fn tray_menu_order_actions_and_attention_visibility_match_the_contract() {
     let context = TrayMenuContext {
+        locale: ShellLocale::PtBr,
         selected_game: "VALORANT".to_owned(),
-        profile_state: "Competitive · Ready".to_owned(),
+        profile_state: "Competitivo · Pronto".to_owned(),
         automatic_profiles_paused: false,
         attention_count: 0,
     };
@@ -473,38 +479,38 @@ fn tray_menu_order_actions_and_attention_visibility_match_the_contract() {
         vec![
             (
                 Some("tray-open"),
-                "Open Liiiraa Boost",
+                "Abrir Liiiraa Boost",
                 true,
                 TrayMenuEntryKind::Action
             ),
             (
                 Some("tray-prepare-launch"),
-                "VALORANT · Prepare launch",
+                "VALORANT · Preparar sessão",
                 true,
                 TrayMenuEntryKind::Action
             ),
             (
                 None,
-                "Competitive · Ready",
+                "Competitivo · Pronto",
                 false,
                 TrayMenuEntryKind::Status
             ),
             (
                 Some("tray-pause-automatic-profiles"),
-                "Pause automatic profiles",
+                "Pausar perfis automáticos",
                 true,
                 TrayMenuEntryKind::Action
             ),
             (None, "", false, TrayMenuEntryKind::Separator),
             (
                 Some("tray-settings"),
-                "Settings",
+                "Configurações",
                 true,
                 TrayMenuEntryKind::Action
             ),
             (
                 Some("tray-exit-interface"),
-                "Exit interface",
+                "Encerrar interface",
                 true,
                 TrayMenuEntryKind::Action
             ),
@@ -520,7 +526,27 @@ fn tray_menu_order_actions_and_attention_visibility_match_the_contract() {
         .find(|entry| entry.id.as_deref() == Some("tray-activity"))
         .expect("conditional activity item");
     assert!(attention.visible);
-    assert_eq!(attention.label, "Activity requiring attention (2)");
+    assert_eq!(attention.label, "Atividade requer atenção (2)");
+
+    let english_menu = tray_menu_model(&TrayMenuContext {
+        locale: ShellLocale::En,
+        selected_game: "No game selected".to_owned(),
+        profile_state: "Current profile · Not selected".to_owned(),
+        automatic_profiles_paused: false,
+        attention_count: 0,
+    });
+    assert_eq!(english_menu[0].label, "Open Liiiraa Boost");
+}
+
+#[test]
+fn native_tray_wires_left_double_click_to_window_focus() {
+    let source = fs::read_to_string(crate_root().join("src/main.rs"))
+        .expect("native main source should be readable");
+    assert!(source.contains(".on_tray_icon_event("));
+    assert!(source.contains(".show_menu_on_left_click(false)"));
+    assert!(source.contains("TrayIconEvent::DoubleClick"));
+    assert!(source.contains("MouseButton::Left"));
+    assert!(source.contains("focus_main_window(tray.app_handle())"));
 }
 
 #[test]

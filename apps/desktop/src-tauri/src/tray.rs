@@ -1,7 +1,8 @@
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
-    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellTrayPreference,
-    validate_host_to_renderer_shell_event, validate_renderer_to_host_shell_command,
+    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellLocale,
+    ShellTrayPreference, validate_host_to_renderer_shell_event,
+    validate_renderer_to_host_shell_command,
 };
 use serde_json::{Value, json};
 
@@ -34,6 +35,7 @@ pub struct TrayMenuEntry {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TrayMenuContext {
+    pub locale: ShellLocale,
     pub selected_game: String,
     pub profile_state: String,
     pub automatic_profiles_paused: bool,
@@ -42,9 +44,20 @@ pub struct TrayMenuContext {
 
 impl Default for TrayMenuContext {
     fn default() -> Self {
+        Self::for_locale(ShellLocale::En)
+    }
+}
+
+impl TrayMenuContext {
+    pub fn for_locale(locale: ShellLocale) -> Self {
+        let (selected_game, profile_state) = match locale {
+            ShellLocale::PtBr => ("Nenhum jogo selecionado", "Perfil atual · Não selecionado"),
+            ShellLocale::En => ("No game selected", "Current profile · Not selected"),
+        };
         Self {
-            selected_game: "No game selected".to_owned(),
-            profile_state: "Current profile · Not selected".to_owned(),
+            locale,
+            selected_game: selected_game.to_owned(),
+            profile_state: profile_state.to_owned(),
             automatic_profiles_paused: false,
             attention_count: 0,
         }
@@ -52,11 +65,27 @@ impl Default for TrayMenuContext {
 }
 
 pub fn tray_menu_model(context: &TrayMenuContext) -> Vec<TrayMenuEntry> {
+    let is_pt_br = context.locale == ShellLocale::PtBr;
     vec![
-        action(OPEN_ID, "Open Liiiraa Boost"),
+        action(
+            OPEN_ID,
+            if is_pt_br {
+                "Abrir Liiiraa Boost"
+            } else {
+                "Open Liiiraa Boost"
+            },
+        ),
         action(
             PREPARE_LAUNCH_ID,
-            format!("{} · Prepare launch", context.selected_game),
+            format!(
+                "{} · {}",
+                context.selected_game,
+                if is_pt_br {
+                    "Preparar sessão"
+                } else {
+                    "Prepare launch"
+                }
+            ),
         ),
         TrayMenuEntry {
             id: None,
@@ -68,14 +97,28 @@ pub fn tray_menu_model(context: &TrayMenuContext) -> Vec<TrayMenuEntry> {
         action(
             PAUSE_AUTOMATIC_PROFILES_ID,
             if context.automatic_profiles_paused {
-                "Resume automatic profiles"
+                if is_pt_br {
+                    "Retomar perfis automáticos"
+                } else {
+                    "Resume automatic profiles"
+                }
+            } else if is_pt_br {
+                "Pausar perfis automáticos"
             } else {
                 "Pause automatic profiles"
             },
         ),
         TrayMenuEntry {
             id: Some(ACTIVITY_ID.to_owned()),
-            label: format!("Activity requiring attention ({})", context.attention_count),
+            label: format!(
+                "{} ({})",
+                if is_pt_br {
+                    "Atividade requer atenção"
+                } else {
+                    "Activity requiring attention"
+                },
+                context.attention_count
+            ),
             enabled: true,
             visible: context.attention_count > 0,
             kind: TrayMenuEntryKind::Action,
@@ -87,8 +130,22 @@ pub fn tray_menu_model(context: &TrayMenuContext) -> Vec<TrayMenuEntry> {
             visible: true,
             kind: TrayMenuEntryKind::Separator,
         },
-        action(SETTINGS_ID, "Settings"),
-        action(EXIT_INTERFACE_ID, "Exit interface"),
+        action(
+            SETTINGS_ID,
+            if is_pt_br {
+                "Configurações"
+            } else {
+                "Settings"
+            },
+        ),
+        action(
+            EXIT_INTERFACE_ID,
+            if is_pt_br {
+                "Encerrar interface"
+            } else {
+                "Exit interface"
+            },
+        ),
     ]
 }
 
@@ -116,22 +173,38 @@ pub enum TrayLifecycleError {
     UnknownAction,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct TrayLifecycle {
+    locale: ShellLocale,
     opted_in: bool,
     safety_workflow_active: bool,
 }
 
+impl Default for TrayLifecycle {
+    fn default() -> Self {
+        Self::with_locale(ShellLocale::En)
+    }
+}
+
 impl TrayLifecycle {
+    pub fn with_locale(locale: ShellLocale) -> Self {
+        Self {
+            locale,
+            opted_in: false,
+            safety_workflow_active: false,
+        }
+    }
+
     pub fn is_visible(&self) -> bool {
         self.opted_in || self.safety_workflow_active
     }
 
     pub fn tooltip(&self) -> &'static str {
-        if self.safety_workflow_active {
-            "Liiiraa Boost — Recovery required"
-        } else {
-            "Liiiraa Boost — Interface open"
+        match (&self.locale, self.safety_workflow_active) {
+            (ShellLocale::PtBr, true) => "Liiiraa Boost — Recuperação necessária",
+            (ShellLocale::PtBr, false) => "Liiiraa Boost — Interface aberta",
+            (ShellLocale::En, true) => "Liiiraa Boost — Recovery required",
+            (ShellLocale::En, false) => "Liiiraa Boost — Interface open",
         }
     }
 
