@@ -25,6 +25,11 @@ import {
   resolveGameProfile,
 } from './game-profiles.js';
 import { PremiumDownloadsSurface } from './premium-downloads.js';
+import {
+  createPremiumUpdater,
+  type PremiumUpdateCheckStageId,
+  type PremiumUpdateManifest,
+} from './premium-updater.js';
 import { usePremiumLocalization } from './premium-localization.js';
 import { PremiumSettingsSurface } from './premium-settings.js';
 import { PremiumToast, type PremiumToastMessage, type PremiumToastTone } from './premium-toast.js';
@@ -1517,56 +1522,468 @@ const ActivitySurface = ({ notify }: { readonly notify: (message: string) => voi
   </section>
 );
 
-const AboutSurface = ({ notify }: { readonly notify: (message: string) => void }) => (
-  <div className="premium-about-layout">
-    <section className="premium-about-hero">
-      <span className="premium-about-mark" aria-hidden="true">
-        <svg viewBox="0 0 36 28">
-          <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" />
-          <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" />
-        </svg>
-      </span>
-      <div>
-        <span className="premium-section-label">Liiiraa Boost</span>
-        <h2>Controle preciso. Recuperação sempre disponível.</h2>
-        <p>Versão 0.0.0 · canal estável · compilação visual da Fase 2</p>
-      </div>
+type PremiumUpdaterPhase =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'downloading'
+  | 'ready'
+  | 'preparing'
+  | 'scheduled'
+  | 'up-to-date'
+  | 'error';
+
+const updateStageLabel = (locale: ShellLocale, stage: PremiumUpdateCheckStageId | null) => {
+  const labels: Record<PremiumUpdateCheckStageId, readonly [string, string]> = {
+    channel: ['Conectando ao canal estável', 'Connecting to the stable channel'],
+    manifest: ['Validando o manifesto da versão', 'Validating the release manifest'],
+    signature: ['Verificando a assinatura digital', 'Verifying the digital signature'],
+    version: ['Comparando as versões instaladas', 'Comparing installed versions'],
+  };
+
+  return stage
+    ? text(locale, labels[stage][0], labels[stage][1])
+    : text(locale, 'Preparando verificação segura', 'Preparing secure check');
+};
+
+const formatUpdateSize = (bytes: number, locale: ShellLocale) =>
+  new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 1,
+  }).format(bytes / 1_000_000);
+
+const AboutSurface = ({
+  locale,
+  notify,
+}: {
+  readonly locale: ShellLocale;
+  readonly notify: (message: string, tone?: PremiumToastTone) => void;
+}) => {
+  const updater = useMemo(() => createPremiumUpdater(), []);
+  const controllerRef = useRef<AbortController | null>(null);
+  const [phase, setPhase] = useState<PremiumUpdaterPhase>('idle');
+  const [progress, setProgress] = useState(0);
+  const [checkStage, setCheckStage] = useState<PremiumUpdateCheckStageId | null>(null);
+  const [manifest, setManifest] = useState<PremiumUpdateManifest | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(
+    () => () => {
+      controllerRef.current?.abort();
+    },
+    [],
+  );
+
+  const isWorking = phase === 'checking' || phase === 'downloading' || phase === 'preparing';
+
+  const startCheck = async () => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setPhase('checking');
+    setProgress(0);
+    setCheckStage(null);
+    setManifest(null);
+    setErrorMessage('');
+
+    try {
+      const result = await updater.check({
+        onProgress: (update) => {
+          setCheckStage(update.stage);
+          setProgress(update.progress);
+        },
+        signal: controller.signal,
+      });
+
+      if (result.kind === 'available') {
+        setManifest(result.manifest);
+        setPhase('available');
+        notify(
+          text(locale, 'Atualização 0.1.0 encontrada com segurança.', 'Update 0.1.0 found safely.'),
+          'success',
+        );
+      } else {
+        setPhase('up-to-date');
+        notify(
+          text(locale, 'Você já está na versão mais recente.', 'You are already up to date.'),
+          'success',
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      setErrorMessage(
+        text(
+          locale,
+          'Não foi possível concluir a verificação demonstrativa.',
+          'The demonstration check could not be completed.',
+        ),
+      );
+      setPhase('error');
+    }
+  };
+
+  const startDownload = async () => {
+    if (!manifest) {
+      return;
+    }
+
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setPhase('downloading');
+    setProgress(0);
+
+    try {
+      await updater.download(manifest, {
+        onProgress: (update) => {
+          setProgress(update.progress);
+        },
+        signal: controller.signal,
+      });
+      setPhase('ready');
+      notify(
+        text(
+          locale,
+          'Pacote demonstrativo validado e pronto.',
+          'Demo package validated and ready.',
+        ),
+        'success',
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        setPhase('available');
+        setProgress(0);
+        notify(text(locale, 'Download demonstrativo cancelado.', 'Demo download cancelled.'));
+        return;
+      }
+      setErrorMessage(
+        text(
+          locale,
+          'O download demonstrativo foi interrompido. Tente novamente.',
+          'The demo download was interrupted. Try again.',
+        ),
+      );
+      setPhase('error');
+    }
+  };
+
+  const cancelDownload = () => {
+    controllerRef.current?.abort();
+  };
+
+  const prepareInstall = async () => {
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setPhase('preparing');
+
+    try {
+      await updater.prepareInstall(controller.signal);
+      setPhase('scheduled');
+      notify(
+        text(
+          locale,
+          'Instalação demonstrativa preparada para o encerramento.',
+          'Demo installation prepared for app exit.',
+        ),
+        'success',
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      setErrorMessage(
+        text(
+          locale,
+          'Não foi possível preparar a instalação.',
+          'Installation could not be prepared.',
+        ),
+      );
+      setPhase('error');
+    }
+  };
+
+  const updateAction = (() => {
+    if (phase === 'available') {
+      return (
+        <PremiumButton
+          onClick={() => {
+            void startDownload();
+          }}
+          tone="primary"
+        >
+          <ProductIcon name="download" size={17} weight="bold" />
+          {text(locale, 'Baixar atualização', 'Download update')}
+        </PremiumButton>
+      );
+    }
+    if (phase === 'downloading') {
+      return (
+        <PremiumButton onClick={cancelDownload} tone="quiet">
+          {text(locale, 'Cancelar download', 'Cancel download')}
+        </PremiumButton>
+      );
+    }
+    if (phase === 'ready') {
+      return (
+        <PremiumButton
+          onClick={() => {
+            void prepareInstall();
+          }}
+          tone="primary"
+        >
+          <ProductIcon name="package" size={17} weight="bold" />
+          {text(locale, 'Instalar ao fechar', 'Install on exit')}
+        </PremiumButton>
+      );
+    }
+    if (phase === 'scheduled') {
+      return (
+        <PremiumButton
+          onClick={() => {
+            setPhase('available');
+          }}
+          tone="quiet"
+        >
+          {text(locale, 'Cancelar instalação', 'Cancel installation')}
+        </PremiumButton>
+      );
+    }
+    return (
       <PremiumButton
+        disabled={isWorking}
         onClick={() => {
-          notify('Você já está na versão mais recente do cenário.');
+          void startCheck();
         }}
         tone="primary"
       >
-        Verificar atualizações
+        {phase === 'checking' ? (
+          <ProductIcon name="loading" size={17} weight="bold" />
+        ) : (
+          <ProductIcon name="recovery" size={17} weight="bold" />
+        )}
+        {phase === 'checking'
+          ? text(locale, 'Verificando…', 'Checking…')
+          : text(locale, 'Verificar atualizações', 'Check for updates')}
       </PremiumButton>
-    </section>
-    <section className="premium-about-grid">
-      {[
-        ['Integridade', 'Assinatura de desenvolvimento', 'check'],
-        ['Termos de uso', 'Contrato completo do aplicativo', 'list'],
-        ['Privacidade', 'Política LGPD e GDPR', 'shield'],
-        ['Licenças', 'Bibliotecas, fontes e ícones', 'code'],
-        ['Suporte', 'Documentação e diagnóstico', 'info'],
-        ['Versão do WebView2', 'Runtime 138.0 · compatível', 'browser'],
-      ].map(([title, description, icon]) => (
-        <button
-          key={title}
-          onClick={() => {
-            notify(`${String(title)} aberto no cenário demonstrativo.`);
-          }}
-          type="button"
-        >
-          <ProductIcon name={icon as ProductIconName} size={22} weight="duotone" />
-          <span>
-            <strong>{title}</strong>
-            <small>{description}</small>
+    );
+  })();
+
+  const releaseNotes = manifest?.releaseNotes[locale === 'pt-BR' ? 'ptBr' : 'en'] ?? [];
+
+  return (
+    <div className="premium-about-layout">
+      <section className="premium-about-hero">
+        <span className="premium-about-mark" aria-hidden="true">
+          <svg viewBox="0 0 36 28">
+            <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" />
+            <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" />
+          </svg>
+        </span>
+        <div>
+          <span className="premium-section-label">Liiiraa Boost</span>
+          <h2>
+            {text(
+              locale,
+              'Controle preciso. Recuperação sempre disponível.',
+              'Precise control. Recovery always available.',
+            )}
+          </h2>
+          <p>
+            {text(
+              locale,
+              'Versão 0.0.0 · canal estável · compilação visual da Fase 2',
+              'Version 0.0.0 · stable channel · Phase 2 visual build',
+            )}
+          </p>
+        </div>
+        {updateAction}
+      </section>
+
+      <section
+        aria-live="polite"
+        className="premium-updater-card"
+        data-phase={phase}
+        data-testid="premium-updater"
+      >
+        <header className="premium-updater-header">
+          <span className="premium-updater-icon">
+            <ProductIcon
+              name={
+                phase === 'scheduled' || phase === 'ready'
+                  ? 'check'
+                  : phase === 'error'
+                    ? 'warning'
+                    : phase === 'available'
+                      ? 'download'
+                      : 'shield'
+              }
+              size={24}
+              weight="duotone"
+            />
           </span>
-          <ProductIcon name="chevronRight" size={17} />
-        </button>
-      ))}
-    </section>
-  </div>
-);
+          <div>
+            <span className="premium-section-label">
+              {text(locale, 'ATUALIZAÇÃO DO APLICATIVO', 'APP UPDATE')}
+            </span>
+            <h3>
+              {phase === 'idle' && text(locale, 'Pronto para verificar', 'Ready to check')}
+              {phase === 'checking' && updateStageLabel(locale, checkStage)}
+              {phase === 'available' &&
+                text(locale, 'Nova versão disponível', 'New version available')}
+              {phase === 'downloading' &&
+                text(locale, 'Baixando pacote verificado', 'Downloading verified package')}
+              {phase === 'ready' && text(locale, 'Pronto para instalar', 'Ready to install')}
+              {phase === 'preparing' &&
+                text(locale, 'Preparando instalação segura', 'Preparing safe installation')}
+              {phase === 'scheduled' &&
+                text(locale, 'Instalação preparada', 'Installation prepared')}
+              {phase === 'up-to-date' &&
+                text(locale, 'Liiiraa Boost está atualizado', 'Liiiraa Boost is up to date')}
+              {phase === 'error' &&
+                text(locale, 'A verificação precisa de atenção', 'The check needs attention')}
+            </h3>
+          </div>
+          <span className="premium-updater-demo-badge">
+            {text(locale, 'SIMULAÇÃO SEGURA', 'SAFE DEMO')}
+          </span>
+        </header>
+
+        {phase === 'idle' || phase === 'up-to-date' ? (
+          <div className="premium-updater-overview">
+            <div>
+              <span>{text(locale, 'Versão instalada', 'Installed version')}</span>
+              <strong>0.0.0</strong>
+            </div>
+            <div>
+              <span>{text(locale, 'Canal', 'Channel')}</span>
+              <strong>{text(locale, 'Estável', 'Stable')}</strong>
+            </div>
+            <div>
+              <span>{text(locale, 'Integridade', 'Integrity')}</span>
+              <strong>
+                <ProductIcon name="check" size={14} weight="fill" />
+                {text(locale, 'Verificada', 'Verified')}
+              </strong>
+            </div>
+          </div>
+        ) : null}
+
+        {phase === 'checking' || phase === 'downloading' || phase === 'preparing' ? (
+          <div className="premium-updater-progress">
+            <div className="premium-updater-progress-copy">
+              <span>
+                {phase === 'checking'
+                  ? updateStageLabel(locale, checkStage)
+                  : phase === 'downloading'
+                    ? text(
+                        locale,
+                        `${formatUpdateSize(((manifest?.sizeBytes ?? 0) * progress) / 100, locale)} de ${formatUpdateSize(manifest?.sizeBytes ?? 0, locale)} MB`,
+                        `${formatUpdateSize(((manifest?.sizeBytes ?? 0) * progress) / 100, locale)} of ${formatUpdateSize(manifest?.sizeBytes ?? 0, locale)} MB`,
+                      )
+                    : text(
+                        locale,
+                        'Validando o pacote e registrando a próxima ação',
+                        'Validating package and registering the next action',
+                      )}
+              </span>
+              <strong>{phase === 'preparing' ? '100%' : `${String(progress)}%`}</strong>
+            </div>
+            <div
+              aria-label={text(locale, 'Progresso da atualização', 'Update progress')}
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={phase === 'preparing' ? 100 : progress}
+              className="premium-updater-progress-track"
+              role="progressbar"
+            >
+              <span style={{ inlineSize: `${String(phase === 'preparing' ? 100 : progress)}%` }} />
+            </div>
+          </div>
+        ) : null}
+
+        {manifest && ['available', 'ready', 'scheduled'].includes(phase) ? (
+          <div className="premium-updater-release">
+            <div className="premium-updater-version">
+              <span>v{manifest.currentVersion}</span>
+              <ProductIcon name="arrowRight" size={16} weight="bold" />
+              <strong>v{manifest.version}</strong>
+              <small>
+                {formatUpdateSize(manifest.sizeBytes, locale)} MB ·{' '}
+                {text(locale, 'assinatura verificada', 'signature verified')}
+              </small>
+            </div>
+            <ul>
+              {releaseNotes.map((note) => (
+                <li key={note}>
+                  <ProductIcon name="check" size={15} weight="bold" />
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+            {phase === 'scheduled' ? (
+              <div className="premium-updater-ready-note">
+                <ProductIcon name="history" size={18} weight="duotone" />
+                <span>
+                  <strong>
+                    {text(locale, 'Nenhuma reinicialização agora', 'No restart right now')}
+                  </strong>
+                  <small>
+                    {text(
+                      locale,
+                      'A demonstração será concluída quando o aplicativo for encerrado.',
+                      'The demonstration will complete when the app exits.',
+                    )}
+                  </small>
+                </span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {phase === 'error' ? <p className="premium-updater-error">{errorMessage}</p> : null}
+
+        <footer className="premium-updater-footnote">
+          <ProductIcon name="info" size={15} weight="duotone" />
+          <span>
+            {text(
+              locale,
+              'Demonstração da Fase 2: nenhum servidor, arquivo ou instalador real é acionado.',
+              'Phase 2 demo: no real server, file, or installer is used.',
+            )}
+          </span>
+        </footer>
+      </section>
+
+      <section className="premium-about-grid">
+        {[
+          ['Integridade', 'Assinatura de desenvolvimento', 'check'],
+          ['Termos de uso', 'Contrato completo do aplicativo', 'list'],
+          ['Privacidade', 'Política LGPD e GDPR', 'shield'],
+          ['Licenças', 'Bibliotecas, fontes e ícones', 'code'],
+          ['Suporte', 'Documentação e diagnóstico', 'info'],
+          ['Versão do WebView2', 'Runtime 138.0 · compatível', 'browser'],
+        ].map(([title, description, icon]) => (
+          <button
+            key={title}
+            onClick={() => {
+              notify(`${String(title)} aberto no cenário demonstrativo.`);
+            }}
+            type="button"
+          >
+            <ProductIcon name={icon as ProductIconName} size={22} weight="duotone" />
+            <span>
+              <strong>{title}</strong>
+              <small>{description}</small>
+            </span>
+            <ProductIcon name="chevronRight" size={17} />
+          </button>
+        ))}
+      </section>
+    </div>
+  );
+};
 
 const ReviewDialog = ({
   changeCount,
@@ -1751,7 +2168,7 @@ export const PremiumOperationsSurface = ({
   } else if (view === 'activity') {
     content = <ActivitySurface notify={notify} />;
   } else {
-    content = <AboutSurface notify={notify} />;
+    content = <AboutSurface locale={locale} notify={notify} />;
   }
 
   return (
