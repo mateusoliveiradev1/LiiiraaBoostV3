@@ -278,6 +278,8 @@ Items acknowledged and carried forward from previous milestone close:
 | 260728-ndw | Unificar rotas, ícones e instalador ao conceito aprovado          | 2026-07-29 | 1b62551 | Needs Review | [260728-ndw-unificar-todas-as-rotas-desktop-ao-conce](./quick/260728-ndw-unificar-todas-as-rotas-desktop-ao-conce/) |
 | 260729-89h | Finalizar loading, login, perfil, planos e rotas internas premium | 2026-07-29 | c47742e | Verified     | [260729-89h-finalizar-experiencia-desktop-premium-co](./quick/260729-89h-finalizar-experiencia-desktop-premium-co/) |
 
+| 260729-jri | Corrigir primeira abertura, barra superior, conta e otimizações acionáveis | 2026-07-29 | 39bdf24 | Verified | [260729-jri-corrigir-primeira-abertura-barra-superio](./quick/260729-jri-corrigir-primeira-abertura-barra-superio/) |
+
 ## Session Continuity
 
 Last session: 2026-07-28T18:41:44.378Z
