@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "evidenceKind": "desktop-signed-artifact",
   "artifactClass": "self-signed-development",
-  "generatedAt": "2026-07-29T18:12:01.679Z",
+  "generatedAt": "2026-07-29T18:21:24.843Z",
   "build": {
     "productName": "Liiiraa Boost",
     "version": "0.0.0",
@@ -37,9 +37,9 @@
       "kind": "installer",
       "sourcePath": "target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe",
       "stagedPath": "quality/evidence/phase-02/staged/Liiiraa Boost_0.0.0_x64-setup.exe",
-      "sizeBytes": 4557624,
-      "sha256": "766B26FBE4685680FB95FBEEC7BB4174BE042DA6564A11F0596C7C666508B8E5",
-      "stagedSha256": "766B26FBE4685680FB95FBEEC7BB4174BE042DA6564A11F0596C7C666508B8E5",
+      "sizeBytes": 4557312,
+      "sha256": "AE8768631C945FF0FCB94EB069D7ED153457D7EABA2894B507C0BBCF2E882127",
+      "stagedSha256": "AE8768631C945FF0FCB94EB069D7ED153457D7EABA2894B507C0BBCF2E882127",
       "signature": {
         "status": "SelfSignedUntrustedRoot",
         "signerThumbprint": "55D6403DE15473B2A50AE82B7831C457629CC298",
@@ -55,8 +55,8 @@
       "sourcePath": "target/release/liiiraa-desktop.exe",
       "stagedPath": "quality/evidence/phase-02/staged/liiiraa-desktop.exe",
       "sizeBytes": 18139960,
-      "sha256": "EC640287433A1BBB03E6C921E767F4A926D9EE746C502CAAD45E3E454486BD3B",
-      "stagedSha256": "EC640287433A1BBB03E6C921E767F4A926D9EE746C502CAAD45E3E454486BD3B",
+      "sha256": "0332ED688020935F248988B03062747FED749E017A8CCA220B86D3BA462B7494",
+      "stagedSha256": "0332ED688020935F248988B03062747FED749E017A8CCA220B86D3BA462B7494",
       "signature": {
         "status": "SelfSignedUntrustedRoot",
         "signerThumbprint": "55D6403DE15473B2A50AE82B7831C457629CC298",
