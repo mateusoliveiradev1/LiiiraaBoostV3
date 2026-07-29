@@ -2,6 +2,66 @@ import { expect, test } from '@playwright/test';
 
 import { openDesktopTestCase } from './fixtures.ts';
 
+const readShellGeometry = async (page: import('@playwright/test').Page) =>
+  page.evaluate(() => {
+    const boxFor = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (element === null) {
+        throw new Error(`Missing geometry target: ${selector}`);
+      }
+      const box = element.getBoundingClientRect();
+      return {
+        height: Math.round(box.height),
+        width: Math.round(box.width),
+        x: Math.round(box.x),
+        y: Math.round(box.y),
+      };
+    };
+
+    const main = boxFor('.desktop-work-canvas > main');
+    return {
+      body: boxFor('.desktop-shell-body'),
+      canvas: boxFor('.desktop-work-canvas'),
+      main: { width: main.width, x: main.x },
+      rail: boxFor('.desktop-goal-region'),
+      shell: boxFor('.desktop-app-shell'),
+      title: boxFor('.desktop-title-region'),
+    };
+  });
+
+test('@premium-navigation every sidebar route preserves the same shell geometry', async ({ page }) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/home',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  const routes = [
+    { label: 'Otimização', path: '/improve' },
+    { label: 'Jogos', path: '/prepare' },
+    { label: 'Desempenho', path: '/measure/overview' },
+    { label: 'Recuperação', path: '/recover/overview' },
+    { label: 'Configurações', path: '/settings/general' },
+    { label: 'Visão geral', path: '/home' },
+  ] as const;
+
+  for (const width of [1440, 1280, 1024]) {
+    await page.setViewportSize({ height: 800, width });
+    await page.getByRole('button', { name: 'Visão geral', exact: true }).click();
+    const geometry = await readShellGeometry(page);
+
+    for (const route of routes) {
+      await page.getByRole('button', { name: route.label, exact: true }).click();
+      await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
+        'data-route-path',
+        route.path,
+      );
+      expect(await readShellGeometry(page)).toEqual(geometry);
+    }
+  }
+});
+
 test('@premium-notifications drawer is dismissible and never changes shell geometry', async ({
   page,
 }) => {

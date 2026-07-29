@@ -39,7 +39,17 @@
 }
 
 .desktop-app-shell .desktop-work-canvas {
+  padding: 0;
   scrollbar-gutter: stable;
+}
+
+.desktop-app-shell .desktop-work-canvas > main:not(.lb-contextual-home) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: none;
+  min-block-size: 100%;
+  padding: 30px clamp(24px, 3vw, 48px) 48px;
+  margin-inline: 0;
 }
 
 .desktop-app-shell .lb-account-trigger {
