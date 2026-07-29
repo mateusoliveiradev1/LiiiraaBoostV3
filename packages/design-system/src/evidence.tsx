@@ -409,12 +409,18 @@ export interface CapabilityReasonProps {
   readonly capability: string;
   readonly reason: string;
   readonly state: CapabilityState;
+  readonly stateLabel?: string;
 }
 
-export const CapabilityReason = ({ capability, reason, state }: CapabilityReasonProps) => (
+export const CapabilityReason = ({
+  capability,
+  reason,
+  state,
+  stateLabel = state,
+}: CapabilityReasonProps) => (
   <section aria-label={capability} className="lb-capability" data-capability-state={state}>
     <strong>{capability}</strong>
-    <span>{state}</span>
+    <span>{stateLabel}</span>
     <p>{reason}</p>
   </section>
 );
@@ -422,6 +428,7 @@ export const CapabilityReason = ({ capability, reason, state }: CapabilityReason
 export type RiskLevel = 'verified' | 'advanced' | 'experimental' | 'extreme';
 
 export interface RiskClassProps {
+  readonly label?: string;
   readonly level: RiskLevel;
 }
 
@@ -432,9 +439,9 @@ const RISK_LABELS: Readonly<Record<RiskLevel, string>> = Object.freeze({
   extreme: 'Extreme',
 });
 
-export const RiskClass = ({ level }: RiskClassProps) => (
+export const RiskClass = ({ level, label = RISK_LABELS[level] }: RiskClassProps) => (
   <span className="lb-risk" data-risk={level}>
-    {RISK_LABELS[level]}
+    {label}
   </span>
 );
 

@@ -1,7 +1,6 @@
 import {
   CapabilityReason,
   ChangeLedger,
-  EvidenceList,
   LbButton,
   LbRadioGroup,
   OperationInspector,
@@ -79,21 +78,21 @@ type OperationEligibility = RecommendationState['eligibility'];
 type OperationRisk = RecommendationState['risk'];
 
 export interface TechnicalOperation {
-  readonly compatibility: string;
+  readonly compatibility: LocalizedCopy;
   readonly component: ImproveComponent;
-  readonly dependencies: readonly string[];
+  readonly dependencies: readonly LocalizedCopy[];
   readonly eligibility: OperationEligibility;
-  readonly evidence: string;
+  readonly evidence: LocalizedCopy;
   readonly evidenceQuality: EvidenceQuality;
-  readonly exclusionReason?: string;
-  readonly expectedDirection: string;
+  readonly exclusionReason?: LocalizedCopy;
+  readonly expectedDirection: LocalizedCopy;
   readonly id: string;
-  readonly name: string;
-  readonly previousValue: string;
+  readonly name: LocalizedCopy;
+  readonly previousValue: LocalizedCopy;
   readonly provenance: 'fixture';
-  readonly purpose: string;
-  readonly recoveryMethod: string;
-  readonly restartEffect: string;
+  readonly purpose: LocalizedCopy;
+  readonly recoveryMethod: LocalizedCopy;
+  readonly restartEffect: LocalizedCopy;
   readonly riskClass: OperationRisk;
 }
 
@@ -213,59 +212,506 @@ const COMPONENT_ICONS: Readonly<Record<ImproveComponent, ProductIconName>> = Obj
 
 export const GOLDEN_OPERATIONS = Object.freeze([
   {
+    id: 'windows-game-mode-review',
+    name: { en: 'Review Windows Game Mode', 'pt-BR': 'Revisar o Modo de Jogo do Windows' },
+    component: 'windows',
+    eligibility: 'ready',
+    riskClass: 'verified',
+    evidenceQuality: 'verified',
+    purpose: {
+      en: 'Keep foreground game scheduling aligned with the selected session profile.',
+      'pt-BR':
+        'Manter o agendamento do jogo em primeiro plano alinhado ao perfil da sessão selecionada.',
+    },
+    expectedDirection: {
+      en: 'May reduce avoidable background scheduling during a game session.',
+      'pt-BR': 'Pode reduzir agendamentos desnecessários em segundo plano durante o jogo.',
+    },
+    evidence: {
+      en: 'The S01 scenario includes a compatible Windows 11 Game Mode state.',
+      'pt-BR': 'O cenário S01 inclui um estado compatível do Modo de Jogo no Windows 11.',
+    },
+    compatibility: {
+      en: 'Compatible with the Windows 11 S01 fixture.',
+      'pt-BR': 'Compatível com o cenário S01 do Windows 11.',
+    },
+    restartEffect: {
+      en: 'No restart is expected in the simulated review.',
+      'pt-BR': 'Nenhuma reinicialização é esperada na revisão simulada.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: Game Mode enabled.',
+      'pt-BR': 'Base do cenário: Modo de Jogo ativado.',
+    },
+    recoveryMethod: {
+      en: 'Restore the captured Game Mode preference.',
+      'pt-BR': 'Restaurar a preferência capturada do Modo de Jogo.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Windows version', 'pt-BR': 'Versão do Windows' },
+      { en: 'Recovery checkpoint', 'pt-BR': 'Ponto de recuperação' },
+    ],
+  },
+  {
+    id: 'windows-background-apps-review',
+    name: {
+      en: 'Review background app activity',
+      'pt-BR': 'Revisar atividade de aplicativos em segundo plano',
+    },
+    component: 'windows',
+    eligibility: 'ready',
+    riskClass: 'verified',
+    evidenceQuality: 'verified',
+    purpose: {
+      en: 'Identify optional background activity without disabling required Windows services.',
+      'pt-BR':
+        'Identificar atividades opcionais em segundo plano sem desativar serviços necessários do Windows.',
+    },
+    expectedDirection: {
+      en: 'May reduce avoidable CPU and memory pressure before a game starts.',
+      'pt-BR': 'Pode reduzir uso evitável de CPU e memória antes de iniciar um jogo.',
+    },
+    evidence: {
+      en: 'Only allowlisted fixture applications are represented.',
+      'pt-BR': 'Apenas aplicativos permitidos no cenário simulado estão representados.',
+    },
+    compatibility: {
+      en: 'Compatible after per-application review.',
+      'pt-BR': 'Compatível após revisão individual de cada aplicativo.',
+    },
+    restartEffect: {
+      en: 'No system restart; affected apps may need to reopen in a future real flow.',
+      'pt-BR':
+        'Sem reinicialização do sistema; os aplicativos podem precisar ser reabertos em um fluxo real futuro.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: Windows manages background permissions.',
+      'pt-BR': 'Base do cenário: o Windows gerencia as permissões em segundo plano.',
+    },
+    recoveryMethod: {
+      en: 'Restore each captured application permission.',
+      'pt-BR': 'Restaurar a permissão capturada de cada aplicativo.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Application allowlist', 'pt-BR': 'Lista de aplicativos permitidos' },
+      { en: 'User confirmation', 'pt-BR': 'Confirmação do usuário' },
+    ],
+  },
+  {
+    id: 'windows-visual-effects-review',
+    name: {
+      en: 'Review Windows visual effects',
+      'pt-BR': 'Revisar efeitos visuais do Windows',
+    },
+    component: 'windows',
+    eligibility: 'review-required',
+    riskClass: 'advanced',
+    evidenceQuality: 'degraded',
+    purpose: {
+      en: 'Prepare a selective visual-effects profile instead of a blanket disable.',
+      'pt-BR':
+        'Preparar um perfil seletivo de efeitos visuais em vez de desativar tudo indiscriminadamente.',
+    },
+    expectedDirection: {
+      en: 'May reduce desktop composition work on constrained systems; no gain is guaranteed.',
+      'pt-BR':
+        'Pode reduzir o trabalho de composição em sistemas limitados; nenhum ganho é garantido.',
+    },
+    evidence: {
+      en: 'The impact is modeled because no real device measurement exists yet.',
+      'pt-BR': 'O impacto é modelado porque ainda não existe medição do dispositivo real.',
+    },
+    compatibility: {
+      en: 'Requires a complete accessibility and hardware review.',
+      'pt-BR': 'Exige revisão completa de acessibilidade e hardware.',
+    },
+    restartEffect: {
+      en: 'Explorer restart may be required in a future real flow.',
+      'pt-BR': 'O Explorador do Windows pode precisar reiniciar em um fluxo real futuro.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: Windows chooses visual effects automatically.',
+      'pt-BR': 'Base do cenário: o Windows escolhe os efeitos visuais automaticamente.',
+    },
+    recoveryMethod: {
+      en: 'Restore the complete captured visual-effects profile.',
+      'pt-BR': 'Restaurar o perfil completo de efeitos visuais capturado.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Accessibility review', 'pt-BR': 'Revisão de acessibilidade' },
+      { en: 'Hardware classification', 'pt-BR': 'Classificação do hardware' },
+    ],
+  },
+  {
     id: 'power-balanced-review',
-    name: 'Review balanced game power policy',
+    name: {
+      en: 'Review balanced game power policy',
+      'pt-BR': 'Revisar política de energia equilibrada para jogos',
+    },
     component: 'cpu-power',
     eligibility: 'ready',
     riskClass: 'verified',
     evidenceQuality: 'verified',
-    purpose: 'Prefer a validated balanced scenario policy during the selected game.',
-    expectedDirection: 'May reduce avoidable scheduling variance; no numeric gain is guaranteed.',
-    evidence: 'S01 fixture inventory and recovery readiness are current.',
-    compatibility: 'Eligible for the S01 Intel/NVIDIA Windows 11 fixture only.',
-    restartEffect: 'No restart in the preview.',
-    previousValue: 'Scenario baseline: Windows balanced policy.',
-    recoveryMethod: 'Restore the exact prior policy from the scenario checkpoint.',
+    purpose: {
+      en: 'Prefer a validated balanced scenario policy during the selected game.',
+      'pt-BR': 'Priorizar uma política equilibrada validada durante o jogo selecionado.',
+    },
+    expectedDirection: {
+      en: 'May reduce avoidable scheduling variance; no numeric gain is guaranteed.',
+      'pt-BR':
+        'Pode reduzir variações evitáveis de agendamento; nenhum ganho numérico é garantido.',
+    },
+    evidence: {
+      en: 'S01 fixture inventory and recovery readiness are current.',
+      'pt-BR': 'O inventário simulado S01 e a prontidão de recuperação estão atualizados.',
+    },
+    compatibility: {
+      en: 'Eligible for the S01 Windows 11 fixture only.',
+      'pt-BR': 'Elegível somente para o cenário S01 do Windows 11.',
+    },
+    restartEffect: {
+      en: 'No restart in the preview.',
+      'pt-BR': 'Nenhuma reinicialização durante a prévia.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: Windows balanced policy.',
+      'pt-BR': 'Base do cenário: política equilibrada do Windows.',
+    },
+    recoveryMethod: {
+      en: 'Restore the exact prior policy from the scenario checkpoint.',
+      'pt-BR': 'Restaurar a política anterior exata a partir do ponto de recuperação.',
+    },
     provenance: 'fixture',
-    dependencies: ['Trusted inventory', 'Recovery checkpoint'],
+    dependencies: [
+      { en: 'Trusted inventory', 'pt-BR': 'Inventário confiável' },
+      { en: 'Recovery checkpoint', 'pt-BR': 'Ponto de recuperação' },
+    ],
+  },
+  {
+    id: 'cpu-boost-consistency-review',
+    name: {
+      en: 'Review processor boost consistency',
+      'pt-BR': 'Revisar consistência do boost do processador',
+    },
+    component: 'cpu-power',
+    eligibility: 'review-required',
+    riskClass: 'advanced',
+    evidenceQuality: 'degraded',
+    purpose: {
+      en: 'Inspect processor boost behavior without forcing a universal value.',
+      'pt-BR': 'Inspecionar o comportamento de boost sem impor um valor universal.',
+    },
+    expectedDirection: {
+      en: 'May improve frametime consistency when thermal headroom is verified.',
+      'pt-BR': 'Pode melhorar a consistência do frametime quando houver margem térmica verificada.',
+    },
+    evidence: {
+      en: 'Thermal impact remains modeled in the S01 fixture.',
+      'pt-BR': 'O impacto térmico permanece modelado no cenário S01.',
+    },
+    compatibility: {
+      en: 'Requires processor and cooling classification.',
+      'pt-BR': 'Exige classificação do processador e do sistema de refrigeração.',
+    },
+    restartEffect: {
+      en: 'No restart is expected, but a future real plan would revalidate temperatures.',
+      'pt-BR':
+        'Nenhuma reinicialização é esperada, mas um plano real futuro revalidaria as temperaturas.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: manufacturer-managed boost behavior.',
+      'pt-BR': 'Base do cenário: boost gerenciado pelo fabricante.',
+    },
+    recoveryMethod: {
+      en: 'Restore the captured processor policy and verify clocks.',
+      'pt-BR': 'Restaurar a política capturada do processador e verificar os clocks.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Processor identity', 'pt-BR': 'Identidade do processador' },
+      { en: 'Thermal headroom', 'pt-BR': 'Margem térmica' },
+    ],
+  },
+  {
+    id: 'gpu-latency-policy-review',
+    name: {
+      en: 'Review GPU latency policy',
+      'pt-BR': 'Revisar política de latência da GPU',
+    },
+    component: 'gpu',
+    eligibility: 'ready',
+    riskClass: 'verified',
+    evidenceQuality: 'verified',
+    purpose: {
+      en: 'Prepare a vendor-aware latency setting for the selected game profile.',
+      'pt-BR': 'Preparar uma configuração de latência compatível com o fabricante e o jogo.',
+    },
+    expectedDirection: {
+      en: 'May reduce render-queue delay in compatible titles.',
+      'pt-BR': 'Pode reduzir o atraso da fila de renderização em jogos compatíveis.',
+    },
+    evidence: {
+      en: 'The S01 fixture contains a verified GPU family and driver branch.',
+      'pt-BR': 'O cenário S01 contém família de GPU e ramo de driver verificados.',
+    },
+    compatibility: {
+      en: 'Compatible only with the represented driver branch and game profile.',
+      'pt-BR': 'Compatível apenas com o ramo de driver e o perfil de jogo representados.',
+    },
+    restartEffect: {
+      en: 'No Windows restart; a game restart may be required in a future real flow.',
+      'pt-BR':
+        'Sem reinicialização do Windows; o jogo pode precisar reiniciar em um fluxo real futuro.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: application-controlled latency policy.',
+      'pt-BR': 'Base do cenário: política de latência controlada pelo aplicativo.',
+    },
+    recoveryMethod: {
+      en: 'Restore the captured per-game driver setting.',
+      'pt-BR': 'Restaurar a configuração capturada do driver para o jogo.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Verified driver branch', 'pt-BR': 'Ramo de driver verificado' },
+      { en: 'Per-game profile', 'pt-BR': 'Perfil individual do jogo' },
+    ],
   },
   {
     id: 'network-latency-review',
-    name: 'Review adapter latency policy',
+    name: {
+      en: 'Review adapter latency policy',
+      'pt-BR': 'Revisar política de latência do adaptador',
+    },
     component: 'network',
     eligibility: 'review-required',
     riskClass: 'advanced',
     evidenceQuality: 'verified',
-    purpose: 'Inspect an adapter-specific latency policy without applying it.',
-    expectedDirection:
-      'May reduce timing variance for the scenario workload; direction is evidence-bound.',
-    evidence: 'S02 adapter identity is current; workload evidence remains scenario-only.',
-    compatibility: 'Compatible with the S02 fixture after full dependency review.',
-    restartEffect:
-      'Adapter interruption would be possible in a future real flow; preview changes nothing.',
-    previousValue: 'Scenario baseline: system-managed adapter policy.',
-    recoveryMethod: 'Restore the captured adapter policy and verify connectivity.',
+    purpose: {
+      en: 'Inspect an adapter-specific latency policy without applying it.',
+      'pt-BR': 'Inspecionar uma política de latência específica do adaptador sem aplicá-la.',
+    },
+    expectedDirection: {
+      en: 'May reduce timing variance for the scenario workload; direction is evidence-bound.',
+      'pt-BR':
+        'Pode reduzir a variação de tempo na carga simulada; a direção depende da evidência.',
+    },
+    evidence: {
+      en: 'S02 adapter identity is current; workload evidence remains scenario-only.',
+      'pt-BR':
+        'A identidade do adaptador S02 está atualizada; a evidência de carga ainda é simulada.',
+    },
+    compatibility: {
+      en: 'Compatible with the S02 fixture after full dependency review.',
+      'pt-BR': 'Compatível com o cenário S02 após revisão completa das dependências.',
+    },
+    restartEffect: {
+      en: 'Adapter interruption would be possible in a future real flow; preview changes nothing.',
+      'pt-BR':
+        'Uma interrupção do adaptador seria possível em um fluxo real futuro; a prévia não altera nada.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: system-managed adapter policy.',
+      'pt-BR': 'Base do cenário: política do adaptador gerenciada pelo sistema.',
+    },
+    recoveryMethod: {
+      en: 'Restore the captured adapter policy and verify connectivity.',
+      'pt-BR': 'Restaurar a política capturada do adaptador e verificar a conectividade.',
+    },
     provenance: 'fixture',
-    dependencies: ['Adapter identity', 'Offline-safe recovery', 'Explicit confirmation'],
+    dependencies: [
+      { en: 'Adapter identity', 'pt-BR': 'Identidade do adaptador' },
+      { en: 'Offline-safe recovery', 'pt-BR': 'Recuperação segura sem internet' },
+      { en: 'Explicit confirmation', 'pt-BR': 'Confirmação explícita' },
+    ],
   },
   {
     id: 'gpu-driver-hidden',
-    name: 'Tune unverified GPU driver source',
+    name: {
+      en: 'Tune unverified GPU driver source',
+      'pt-BR': 'Ajustar uma origem de driver de GPU não verificada',
+    },
     component: 'gpu',
     eligibility: 'excluded',
     riskClass: 'experimental',
     evidenceQuality: 'insufficient',
-    exclusionReason:
-      'GPU driver source is unavailable in S06, so compatibility cannot be established.',
-    purpose: 'Would inspect a vendor-specific setting only after evidence exists.',
-    expectedDirection: 'Unknown. No directional claim is permitted while evidence is unavailable.',
-    evidence: 'S06 reports an unavailable GPU driver source.',
-    compatibility: 'Excluded fail-closed.',
-    restartEffect: 'Unknown; the operation is excluded before review.',
-    previousValue: 'Unavailable — no defensible value exists.',
-    recoveryMethod: 'Not applicable because no operation can be requested.',
+    exclusionReason: {
+      en: 'GPU driver source is unavailable in S06, so compatibility cannot be established.',
+      'pt-BR':
+        'A origem do driver da GPU não está disponível no S06; a compatibilidade não pode ser confirmada.',
+    },
+    purpose: {
+      en: 'Would inspect a vendor-specific setting only after evidence exists.',
+      'pt-BR': 'Inspecionaria uma configuração do fabricante somente após existir evidência.',
+    },
+    expectedDirection: {
+      en: 'Unknown. No directional claim is permitted while evidence is unavailable.',
+      'pt-BR':
+        'Desconhecida. Nenhuma direção de impacto é permitida enquanto não houver evidência.',
+    },
+    evidence: {
+      en: 'S06 reports an unavailable GPU driver source.',
+      'pt-BR': 'O S06 informa que a origem do driver da GPU não está disponível.',
+    },
+    compatibility: {
+      en: 'Excluded fail-closed.',
+      'pt-BR': 'Excluída com segurança.',
+    },
+    restartEffect: {
+      en: 'Unknown; the operation is excluded before review.',
+      'pt-BR': 'Desconhecido; a operação foi excluída antes da revisão.',
+    },
+    previousValue: {
+      en: 'Unavailable — no defensible value exists.',
+      'pt-BR': 'Indisponível — não existe um valor defensável.',
+    },
+    recoveryMethod: {
+      en: 'Not applicable because no operation can be requested.',
+      'pt-BR': 'Não se aplica, pois nenhuma operação pode ser solicitada.',
+    },
     provenance: 'fixture',
-    dependencies: ['Verified GPU driver source'],
+    dependencies: [
+      { en: 'Verified GPU driver source', 'pt-BR': 'Origem verificada do driver da GPU' },
+    ],
+  },
+  {
+    id: 'memory-background-pressure-review',
+    name: {
+      en: 'Review background memory pressure',
+      'pt-BR': 'Revisar pressão de memória em segundo plano',
+    },
+    component: 'memory',
+    eligibility: 'ready',
+    riskClass: 'verified',
+    evidenceQuality: 'verified',
+    purpose: {
+      en: 'Identify optional processes competing with the selected game for memory.',
+      'pt-BR': 'Identificar processos opcionais que disputam memória com o jogo selecionado.',
+    },
+    expectedDirection: {
+      en: 'May increase available memory before launch without using unsafe memory cleaners.',
+      'pt-BR':
+        'Pode aumentar a memória disponível antes do jogo sem usar limpadores de memória inseguros.',
+    },
+    evidence: {
+      en: 'The fixture includes bounded process and working-set data.',
+      'pt-BR': 'O cenário inclui dados limitados de processos e conjuntos de trabalho.',
+    },
+    compatibility: {
+      en: 'Compatible after protecting system and user-allowlisted processes.',
+      'pt-BR': 'Compatível após proteger processos do sistema e os permitidos pelo usuário.',
+    },
+    restartEffect: {
+      en: 'No system restart.',
+      'pt-BR': 'Sem reinicialização do sistema.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: optional applications remain open.',
+      'pt-BR': 'Base do cenário: aplicativos opcionais permanecem abertos.',
+    },
+    recoveryMethod: {
+      en: 'Reopen only applications explicitly closed by the future plan.',
+      'pt-BR': 'Reabrir somente os aplicativos fechados explicitamente pelo plano futuro.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Process allowlist', 'pt-BR': 'Lista de processos permitidos' },
+      { en: 'User review', 'pt-BR': 'Revisão do usuário' },
+    ],
+  },
+  {
+    id: 'storage-indexing-review',
+    name: {
+      en: 'Review game-library indexing',
+      'pt-BR': 'Revisar indexação da biblioteca de jogos',
+    },
+    component: 'storage',
+    eligibility: 'review-required',
+    riskClass: 'advanced',
+    evidenceQuality: 'degraded',
+    purpose: {
+      en: 'Evaluate indexing activity around game-library paths without disabling search globally.',
+      'pt-BR':
+        'Avaliar a indexação nas pastas de jogos sem desativar a pesquisa do Windows globalmente.',
+    },
+    expectedDirection: {
+      en: 'May reduce background storage activity during a session.',
+      'pt-BR': 'Pode reduzir atividade de armazenamento em segundo plano durante a sessão.',
+    },
+    evidence: {
+      en: 'Storage impact is modeled until the real device is measured.',
+      'pt-BR': 'O impacto no armazenamento é modelado até que o dispositivo real seja medido.',
+    },
+    compatibility: {
+      en: 'Requires verified game paths and storage-health checks.',
+      'pt-BR': 'Exige pastas de jogos verificadas e checagem da saúde do armazenamento.',
+    },
+    restartEffect: {
+      en: 'No Windows restart; indexing state would be revalidated.',
+      'pt-BR': 'Sem reinicialização do Windows; o estado da indexação seria revalidado.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: system-managed indexing.',
+      'pt-BR': 'Base do cenário: indexação gerenciada pelo sistema.',
+    },
+    recoveryMethod: {
+      en: 'Restore the exact captured indexing scope.',
+      'pt-BR': 'Restaurar o escopo exato de indexação capturado.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Verified library paths', 'pt-BR': 'Pastas da biblioteca verificadas' },
+      { en: 'Storage health', 'pt-BR': 'Saúde do armazenamento' },
+    ],
+  },
+  {
+    id: 'thermal-headroom-review',
+    name: {
+      en: 'Review thermal headroom',
+      'pt-BR': 'Revisar margem térmica',
+    },
+    component: 'thermals',
+    eligibility: 'ready',
+    riskClass: 'verified',
+    evidenceQuality: 'verified',
+    purpose: {
+      en: 'Confirm that performance recommendations stay inside the represented thermal margin.',
+      'pt-BR':
+        'Confirmar que as recomendações de desempenho permanecem dentro da margem térmica representada.',
+    },
+    expectedDirection: {
+      en: 'Protects stability by blocking recommendations without sufficient thermal margin.',
+      'pt-BR': 'Protege a estabilidade bloqueando recomendações sem margem térmica suficiente.',
+    },
+    evidence: {
+      en: 'The S01 fixture includes bounded CPU and GPU temperature ranges.',
+      'pt-BR': 'O cenário S01 inclui faixas limitadas de temperatura da CPU e GPU.',
+    },
+    compatibility: {
+      en: 'Compatible as a review gate; it does not control fans or firmware.',
+      'pt-BR': 'Compatível como etapa de revisão; não controla ventoinhas nem o firmware.',
+    },
+    restartEffect: {
+      en: 'No restart.',
+      'pt-BR': 'Sem reinicialização.',
+    },
+    previousValue: {
+      en: 'Scenario baseline: thermal state within the represented range.',
+      'pt-BR': 'Base do cenário: estado térmico dentro da faixa representada.',
+    },
+    recoveryMethod: {
+      en: 'No system change is made; remove dependent recommendations if the gate fails.',
+      'pt-BR':
+        'Nenhuma alteração é feita; remover recomendações dependentes se a verificação falhar.',
+    },
+    provenance: 'fixture',
+    dependencies: [
+      { en: 'Temperature evidence', 'pt-BR': 'Evidência de temperatura' },
+      { en: 'Cooling classification', 'pt-BR': 'Classificação da refrigeração' },
+    ],
   },
 ] as const satisfies readonly TechnicalOperation[]);
 
@@ -285,8 +731,41 @@ const capabilityStateFor = (eligibility: OperationEligibility): CapabilityState 
 
 const riskForDesignSystem = (risk: OperationRisk): RiskLevel => risk;
 
-const exclusionReasonFor = (operation: TechnicalOperation): string | undefined =>
-  operation.exclusionReason;
+const riskLabelFor = (risk: OperationRisk, locale: ShellLocale): string =>
+  localized(
+    {
+      en: risk.charAt(0).toUpperCase() + risk.slice(1),
+      'pt-BR': {
+        verified: 'Verificada',
+        advanced: 'Avançada',
+        experimental: 'Experimental',
+        extreme: 'Extrema',
+      }[risk],
+    },
+    locale,
+  );
+
+const capabilityLabelFor = (state: CapabilityState, locale: ShellLocale): string =>
+  localized(
+    {
+      en: state,
+      'pt-BR': {
+        compatible: 'compatível',
+        unsupported: 'incompatível',
+        hidden: 'disponível em outro objetivo',
+        restricted: 'exige revisão',
+      }[state],
+    },
+    locale,
+  );
+
+const exclusionReasonFor = (
+  operation: TechnicalOperation,
+  locale: ShellLocale,
+): string | undefined =>
+  operation.exclusionReason === undefined
+    ? undefined
+    : localized(operation.exclusionReason, locale);
 
 const createBoundary = (
   scenarioId: string,
@@ -379,6 +858,7 @@ const GoalsView = ({
                     )
               }
               state={applicable ? 'compatible' : 'hidden'}
+              stateLabel={capabilityLabelFor(applicable ? 'compatible' : 'hidden', locale)}
             />
             <LbButton onPress={() => onNavigate?.('component', component)} variant="secondary">
               {localized({ en: 'Open', 'pt-BR': 'Abrir' }, locale)}
@@ -423,59 +903,116 @@ const ComponentView = ({
   readonly onNavigate?: ImproveSurfaceProps['onNavigate'];
 }) => {
   const operations = GOLDEN_OPERATIONS.filter((operation) => operation.component === component);
+  const readyOperations = operations.filter(
+    (operation) => operation.eligibility === 'ready',
+  ).length;
+  const reviewOperations = operations.filter(
+    (operation) => operation.eligibility === 'review-required',
+  ).length;
 
   return (
-    <section aria-labelledby="improve-component-title" data-component-id={component} data-lb-region>
-      <h2 id="improve-component-title">{localized(COMPONENT_COPY[component].label, locale)}</h2>
-      <section
-        aria-label={localized({ en: 'Observed state', 'pt-BR': 'Estado observado' }, locale)}
-      >
-        <ProvenanceMark
-          detail="FIXTURE — NOT OBSERVED FROM THIS PC"
-          kind="fixture"
-          locale={locale}
-        />
-        <p>
-          {localized(
-            {
-              en: 'The scenario projection is internally consistent and current.',
-              'pt-BR': 'A projeção do cenário está atual e internamente consistente.',
-            },
-            locale,
-          )}
-        </p>
-      </section>
-      <p>
-        {localized(
-          {
-            en: 'This component is shown inside the selected goal because its evidence can affect that outcome.',
-            'pt-BR':
-              'Este componente aparece dentro do objetivo porque sua evidência pode afetar esse resultado.',
-          },
-          locale,
-        )}
-      </p>
+    <section
+      aria-labelledby="improve-component-title"
+      className="lb-component-workspace"
+      data-component-id={component}
+      data-lb-region
+    >
+      <header className="lb-component-hero">
+        <div className="lb-component-hero-icon">
+          <ProductIcon name={COMPONENT_ICONS[component]} size={28} />
+        </div>
+        <div>
+          <span className="lb-component-context">
+            {localized({ en: 'Optimization center', 'pt-BR': 'Central de otimização' }, locale)}
+          </span>
+          <h2 id="improve-component-title">{localized(COMPONENT_COPY[component].label, locale)}</h2>
+          <p>
+            {localized(
+              {
+                en: 'Review compatible adjustments, evidence and recovery before building a plan.',
+                'pt-BR':
+                  'Revise ajustes compatíveis, evidências e recuperação antes de montar um plano.',
+              },
+              locale,
+            )}
+          </p>
+        </div>
+        <div className="lb-component-count" aria-label={String(operations.length)}>
+          <strong>{operations.length}</strong>
+          <span>
+            {localized(
+              {
+                en: operations.length === 1 ? 'adjustment available' : 'adjustments available',
+                'pt-BR': operations.length === 1 ? 'ajuste disponível' : 'ajustes disponíveis',
+              },
+              locale,
+            )}
+          </span>
+        </div>
+      </header>
 
       <section
+        className="lb-component-operation-list"
         aria-label={localized(
-          { en: 'Operation candidates', 'pt-BR': 'Operações candidatas' },
+          { en: 'Recommended adjustments', 'pt-BR': 'Ajustes recomendados' },
           locale,
         )}
       >
+        <header>
+          <div>
+            <h3>
+              {localized(
+                { en: 'Recommended adjustments', 'pt-BR': 'Ajustes recomendados' },
+                locale,
+              )}
+            </h3>
+            <p>
+              {localized(
+                {
+                  en: 'Nothing is applied from this screen. Open an adjustment to review every consequence.',
+                  'pt-BR':
+                    'Nada é aplicado nesta tela. Abra um ajuste para revisar todas as consequências.',
+                },
+                locale,
+              )}
+            </p>
+          </div>
+          <span className="lb-component-readiness">
+            {String(readyOperations)} {localized({ en: 'ready', 'pt-BR': 'prontos' }, locale)}
+            {reviewOperations > 0
+              ? ` · ${String(reviewOperations)} ${localized(
+                  { en: 'require review', 'pt-BR': 'exigem revisão' },
+                  locale,
+                )}`
+              : ''}
+          </span>
+        </header>
         {operations.map((operation) => (
-          <div data-eligibility={operation.eligibility} key={operation.id}>
+          <article
+            className="lb-component-operation"
+            data-eligibility={operation.eligibility}
+            key={operation.id}
+          >
             <OperationRow
-              detail={operation.expectedDirection}
-              name={operation.name}
+              actionLabel={localized(
+                { en: 'Review adjustment', 'pt-BR': 'Revisar ajuste' },
+                locale,
+              )}
+              detail={localized(operation.expectedDirection, locale)}
+              name={localized(operation.name, locale)}
               onInspect={() => onNavigate?.('operation', operation.id)}
               risk={riskForDesignSystem(operation.riskClass)}
+              riskLabel={riskLabelFor(operation.riskClass, locale)}
             />
             <CapabilityReason
-              capability={operation.name}
-              reason={exclusionReasonFor(operation) ?? operation.compatibility}
+              capability={localized(operation.name, locale)}
+              reason={
+                exclusionReasonFor(operation, locale) ?? localized(operation.compatibility, locale)
+              }
               state={capabilityStateFor(operation.eligibility)}
+              stateLabel={capabilityLabelFor(capabilityStateFor(operation.eligibility), locale)}
             />
-          </div>
+          </article>
         ))}
         {operations.length === 0 ? (
           <StatusSignal
@@ -493,26 +1030,53 @@ const ComponentView = ({
         ) : null}
       </section>
 
-      <EvidenceList
-        items={[
-          {
-            source: `scenario:S01/${component}`,
-            version: '1',
-            timestamp: '2030-01-15T18:00:00.000Z',
-            confidence: 'fixture',
-          },
-        ]}
-      />
-      <ChangeLedger
-        entries={[
-          {
-            id: `${component}-history`,
-            change: 'Scenario review only',
-            result: 'no-change',
-            timestamp: '2030-01-15T18:00:00.000Z',
-          },
-        ]}
-      />
+      <footer className="lb-component-plan-footer">
+        <div className="lb-component-proof">
+          <div>
+            <ProductIcon name="shield" size={17} />
+            <span>
+              <small>{localized({ en: 'Evidence', 'pt-BR': 'Evidência' }, locale)}</small>
+              <strong>
+                {localized({ en: 'Simulated scenario', 'pt-BR': 'Cenário simulado' }, locale)}
+              </strong>
+            </span>
+          </div>
+          <div>
+            <ProductIcon name="recovery" size={17} />
+            <span>
+              <small>{localized({ en: 'Recovery', 'pt-BR': 'Recuperação' }, locale)}</small>
+              <strong>
+                {localized({ en: 'Planned before changes', 'pt-BR': 'Planejada antes' }, locale)}
+              </strong>
+            </span>
+          </div>
+          <ProvenanceMark
+            detail={`S01 · FIXTURE · ${component.toUpperCase()}`}
+            kind="fixture"
+            locale={locale}
+          />
+        </div>
+        <div>
+          <p>
+            {localized(
+              {
+                en: 'Build one reviewable plan from the compatible adjustments above.',
+                'pt-BR': 'Monte um único plano revisável com os ajustes compatíveis acima.',
+              },
+              locale,
+            )}
+          </p>
+          <LbButton
+            onPress={() => onNavigate?.('plan-review', 'recommended-plan')}
+            variant="primary"
+          >
+            {localized(
+              { en: 'Review recommended plan', 'pt-BR': 'Revisar plano recomendado' },
+              locale,
+            )}
+          </LbButton>
+        </div>
+      </footer>
     </section>
   );
 };
@@ -534,26 +1098,32 @@ const OperationView = ({
     <h2 id="improve-operation-title">
       {localized({ en: 'Operation detail', 'pt-BR': 'Detalhe da operação' }, locale)}
     </h2>
-    <OperationInspector operation={operation.name}>
+    <OperationInspector
+      operation={localized(operation.name, locale)}
+      operationLabel={localized({ en: 'Operation', 'pt-BR': 'Operação' }, locale)}
+    >
       <dl>
         <dt>{localized({ en: 'Purpose', 'pt-BR': 'Objetivo' }, locale)}</dt>
-        <dd>{operation.purpose}</dd>
+        <dd>{localized(operation.purpose, locale)}</dd>
         <dt>{localized({ en: 'Expected direction', 'pt-BR': 'Direção esperada' }, locale)}</dt>
-        <dd>{operation.expectedDirection}</dd>
+        <dd>{localized(operation.expectedDirection, locale)}</dd>
         <dt>{localized({ en: 'Risk', 'pt-BR': 'Risco' }, locale)}</dt>
         <dd>
-          <RiskClass level={riskForDesignSystem(operation.riskClass)} />
+          <RiskClass
+            label={riskLabelFor(operation.riskClass, locale)}
+            level={riskForDesignSystem(operation.riskClass)}
+          />
         </dd>
         <dt>{localized({ en: 'Evidence', 'pt-BR': 'Evidência' }, locale)}</dt>
-        <dd>{operation.evidence}</dd>
+        <dd>{localized(operation.evidence, locale)}</dd>
         <dt>{localized({ en: 'Compatibility', 'pt-BR': 'Compatibilidade' }, locale)}</dt>
-        <dd>{operation.compatibility}</dd>
+        <dd>{localized(operation.compatibility, locale)}</dd>
         <dt>{localized({ en: 'Restart effect', 'pt-BR': 'Efeito de reinicialização' }, locale)}</dt>
-        <dd>{operation.restartEffect}</dd>
+        <dd>{localized(operation.restartEffect, locale)}</dd>
         <dt>{localized({ en: 'Previous value', 'pt-BR': 'Valor anterior' }, locale)}</dt>
-        <dd>{operation.previousValue}</dd>
+        <dd>{localized(operation.previousValue, locale)}</dd>
         <dt>{localized({ en: 'Recovery method', 'pt-BR': 'Método de recuperação' }, locale)}</dt>
-        <dd>{operation.recoveryMethod}</dd>
+        <dd>{localized(operation.recoveryMethod, locale)}</dd>
         <dt>{localized({ en: 'Provenance', 'pt-BR': 'Proveniência' }, locale)}</dt>
         <dd>
           <ProvenanceMark detail="SIMULATED SCENARIO" kind={operation.provenance} locale={locale} />
@@ -562,7 +1132,9 @@ const OperationView = ({
       <QualityMark locale={locale} quality={operation.evidenceQuality} />
       {operation.eligibility === 'excluded' ? (
         <StatusSignal
-          detail={operation.exclusionReason ?? operation.compatibility}
+          detail={
+            exclusionReasonFor(operation, locale) ?? localized(operation.compatibility, locale)
+          }
           locale={locale}
           state="unsupported"
         />
@@ -602,9 +1174,9 @@ const PlanReviewView = ({
     <p>
       {localized(
         {
-          en: 'One Verified operation is ready, one Advanced operation needs full review, and one option is excluded fail-closed.',
+          en: 'Compatible adjustments are grouped here for a complete consequence and recovery review.',
           'pt-BR':
-            'Uma operação Verificada está pronta, uma Avançada exige revisão e uma opção está excluída de forma segura.',
+            'Os ajustes compatíveis estão reunidos aqui para uma revisão completa de consequências e recuperação.',
         },
         locale,
       )}
@@ -617,7 +1189,7 @@ const PlanReviewView = ({
         }
       }}
       options={IMPROVE_RISK_POLICIES.map((risk) => ({
-        label: risk.charAt(0).toUpperCase() + risk.slice(1),
+        label: riskLabelFor(risk, locale),
         value: risk,
       }))}
       value="verified"
@@ -625,19 +1197,44 @@ const PlanReviewView = ({
     {GOLDEN_OPERATIONS.map((operation) => (
       <article data-eligibility={operation.eligibility} key={operation.id}>
         <OperationRow
-          detail={exclusionReasonFor(operation) ?? operation.expectedDirection}
-          name={operation.name}
+          actionLabel={localized({ en: 'Review adjustment', 'pt-BR': 'Revisar ajuste' }, locale)}
+          detail={
+            exclusionReasonFor(operation, locale) ?? localized(operation.expectedDirection, locale)
+          }
+          name={localized(operation.name, locale)}
           onInspect={() => onNavigate?.('operation', operation.id)}
           risk={riskForDesignSystem(operation.riskClass)}
+          riskLabel={riskLabelFor(operation.riskClass, locale)}
         />
         <QualityMark locale={locale} quality={operation.evidenceQuality} />
       </article>
     ))}
     <PlanDependencyList
       dependencies={[
-        { id: 'inventory', label: 'Trusted scenario inventory', state: 'complete' },
-        { id: 'recovery', label: 'No-effect recovery checkpoint', state: 'ready' },
-        { id: 'driver', label: 'GPU driver source', state: 'blocked' },
+        {
+          id: 'inventory',
+          label: localized(
+            { en: 'Trusted scenario inventory', 'pt-BR': 'Inventário confiável do cenário' },
+            locale,
+          ),
+          state: 'complete',
+        },
+        {
+          id: 'recovery',
+          label: localized(
+            {
+              en: 'No-effect recovery checkpoint',
+              'pt-BR': 'Ponto de recuperação sem alterações',
+            },
+            locale,
+          ),
+          state: 'ready',
+        },
+        {
+          id: 'driver',
+          label: localized({ en: 'GPU driver source', 'pt-BR': 'Origem do driver da GPU' }, locale),
+          state: 'blocked',
+        },
       ]}
     />
     <p>

@@ -8,6 +8,7 @@ import type {
 } from '@liiiraa/contracts-ts';
 
 import { InstallerHandoff } from './installer-handoff.js';
+import { PremiumInstallerHandoff } from './premium-installer-handoff.js';
 import { StartupSurface } from './startup.js';
 
 const installer: ShellInstallerIdentityJson = {
@@ -96,6 +97,20 @@ describe('installer handoff', () => {
     ]) {
       expect(markup).not.toContain(englishCopy);
     }
+  });
+
+  it('renders the premium first launch as a clear protected entry point', () => {
+    const markup = renderToStaticMarkup(
+      <PremiumInstallerHandoff identity={installer} locale="pt-BR" />,
+    );
+
+    expect(markup).toContain('desktop-premium-first-run');
+    expect(markup).toContain('Tudo pronto para sua primeira sessão.');
+    expect(markup).toContain('Instalação verificada');
+    expect(markup).toContain('Nenhuma otimização foi executada');
+    expect(markup).toContain('Entrar no Liiiraa Boost');
+    expect(markup).toContain('<details class="desktop-first-run-technical">');
+    expect(markup).not.toContain('Everything is ready for your first session.');
   });
 
   it('blocks unsupported or unverified identities without fabricating trust', () => {

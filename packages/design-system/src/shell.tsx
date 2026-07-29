@@ -467,30 +467,41 @@ export const CalibrationStepRail = ({ activeStep, steps }: CalibrationStepRailPr
 );
 
 export interface OperationRowProps {
+  readonly actionLabel?: string;
   readonly detail: string;
   readonly name: string;
   readonly onInspect?: () => void;
   readonly risk: RiskLevel;
+  readonly riskLabel?: string;
 }
 
-export const OperationRow = ({ detail, name, onInspect, risk }: OperationRowProps) => (
+export const OperationRow = ({
+  actionLabel = 'Inspect operation',
+  detail,
+  name,
+  onInspect,
+  risk,
+  riskLabel,
+}: OperationRowProps) => (
   <div className="lb-operation-row" data-lb-region>
     <div>
       <strong>{name}</strong>
       <p>{detail}</p>
     </div>
-    <RiskClass level={risk} />
-    {onInspect ? <LbButton onPress={onInspect}>Inspect operation</LbButton> : null}
+    <RiskClass {...(riskLabel === undefined ? {} : { label: riskLabel })} level={risk} />
+    {onInspect ? <LbButton onPress={onInspect}>{actionLabel}</LbButton> : null}
   </div>
 );
 
 export const OperationInspector = ({
   children,
   operation,
+  operationLabel = 'Operation',
 }: {
   readonly children: ReactNode;
   readonly operation: string;
-}) => <ContextInspector title={`Operation: ${operation}`}>{children}</ContextInspector>;
+  readonly operationLabel?: string;
+}) => <ContextInspector title={`${operationLabel}: ${operation}`}>{children}</ContextInspector>;
 
 export interface PlanDependency {
   readonly id: string;

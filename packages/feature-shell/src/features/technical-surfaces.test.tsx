@@ -173,7 +173,8 @@ describe('Improve operation and plan review technical surface', () => {
         />,
       );
       expect(markup).toContain(`data-component-id="${component}"`);
-      expect(markup).toContain('FIXTURE — NOT OBSERVED FROM THIS PC');
+      expect(markup).toContain('Cenário simulado');
+      expect(markup).toContain('Revisar plano recomendado');
       expect(axeAdmissionAudit(markup)).toEqual([]);
     }
 
@@ -188,25 +189,29 @@ describe('Improve operation and plan review technical surface', () => {
   });
 
   it('projects the complete operation contract and golden eligibility contrast', () => {
-    expect(GOLDEN_OPERATIONS.map(({ eligibility }) => eligibility)).toEqual([
-      'ready',
-      'review-required',
-      'excluded',
-    ]);
-    expect(GOLDEN_OPERATIONS.map(({ riskClass }) => riskClass)).toEqual([
-      'verified',
-      'advanced',
-      'experimental',
-    ]);
+    expect(new Set(GOLDEN_OPERATIONS.map(({ eligibility }) => eligibility))).toEqual(
+      new Set(['ready', 'review-required', 'excluded']),
+    );
+    expect(new Set(GOLDEN_OPERATIONS.map(({ riskClass }) => riskClass))).toEqual(
+      new Set(['verified', 'advanced', 'experimental']),
+    );
+    expect(GOLDEN_OPERATIONS.filter(({ component }) => component === 'windows')).toHaveLength(3);
 
     for (const operation of GOLDEN_OPERATIONS) {
-      expect(operation.purpose).not.toBe('');
-      expect(operation.expectedDirection).not.toBe('');
-      expect(operation.evidence).not.toBe('');
-      expect(operation.compatibility).not.toBe('');
-      expect(operation.restartEffect).not.toBe('');
-      expect(operation.previousValue).not.toBe('');
-      expect(operation.recoveryMethod).not.toBe('');
+      expect(operation.purpose.en).not.toBe('');
+      expect(operation.purpose['pt-BR']).not.toBe('');
+      expect(operation.expectedDirection.en).not.toBe('');
+      expect(operation.expectedDirection['pt-BR']).not.toBe('');
+      expect(operation.evidence.en).not.toBe('');
+      expect(operation.evidence['pt-BR']).not.toBe('');
+      expect(operation.compatibility.en).not.toBe('');
+      expect(operation.compatibility['pt-BR']).not.toBe('');
+      expect(operation.restartEffect.en).not.toBe('');
+      expect(operation.restartEffect['pt-BR']).not.toBe('');
+      expect(operation.previousValue.en).not.toBe('');
+      expect(operation.previousValue['pt-BR']).not.toBe('');
+      expect(operation.recoveryMethod.en).not.toBe('');
+      expect(operation.recoveryMethod['pt-BR']).not.toBe('');
       expect(operation.provenance).toBe('fixture');
 
       const markup = renderToStaticMarkup(
@@ -217,12 +222,12 @@ describe('Improve operation and plan review technical surface', () => {
           view="operation"
         />,
       );
-      expect(markup).toContain(operation.purpose);
-      expect(markup).toContain(operation.expectedDirection);
-      expect(markup).toContain(operation.compatibility);
-      expect(markup).toContain(operation.restartEffect);
-      expect(markup).toContain(operation.previousValue);
-      expect(markup).toContain(operation.recoveryMethod);
+      expect(markup).toContain(operation.purpose.en);
+      expect(markup).toContain(operation.expectedDirection.en);
+      expect(markup).toContain(operation.compatibility.en);
+      expect(markup).toContain(operation.restartEffect.en);
+      expect(markup).toContain(operation.previousValue.en);
+      expect(markup).toContain(operation.recoveryMethod.en);
     }
   });
 

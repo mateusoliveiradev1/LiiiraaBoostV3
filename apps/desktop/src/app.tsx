@@ -49,7 +49,7 @@ import type { ActivityItem, OperationalState } from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
-import { InstallerHandoff } from './features/installer-handoff.js';
+import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
 import { StartupSurface } from './features/startup.js';
 import {
@@ -1701,7 +1701,7 @@ const NativeShellPresentation = ({
     );
   } else if (!nativeState.installerAccepted) {
     content = (
-      <InstallerHandoff
+      <PremiumInstallerHandoff
         identity={nativeState.installerIdentity}
         locale={locale}
         onContinue={onAcceptInstaller}

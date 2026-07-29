@@ -824,8 +824,10 @@ const SecurityView = ({ locale }: Pick<AccountExperienceProps, 'locale'>) => {
     <div className="desktop-security-view">
       <section className="desktop-security-score">
         <div className="desktop-security-ring">
-          <span>72</span>
-          <small>/100</small>
+          <div className="desktop-security-value">
+            <span>72</span>
+            <small>/100</small>
+          </div>
         </div>
         <div>
           <span className="desktop-profile-eyebrow">
