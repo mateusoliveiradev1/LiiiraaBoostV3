@@ -280,6 +280,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260729-89h | Finalizar loading, login, perfil, planos e rotas internas premium | 2026-07-29 | c47742e | Verified     | [260729-89h-finalizar-experiencia-desktop-premium-co](./quick/260729-89h-finalizar-experiencia-desktop-premium-co/) |
 
 | 260729-s38 | Implementar inicialização real do Liiiraa Boost com o Windows | 2026-07-29 | 6d31364 | Verified | [260729-s38-implementar-inicializa-o-real-do-liiiraa](./quick/260729-s38-implementar-inicializa-o-real-do-liiiraa/) |
+| 260729-sip | Transformar verificação de atualizações em fluxo premium simulado | 2026-07-29 | 62a419f | Verified | [260729-sip-transformar-verifica-o-de-atualiza-es-em](./quick/260729-sip-transformar-verifica-o-de-atualiza-es-em/) |
 | 260729-jri | Corrigir primeira abertura, barra superior, conta e otimizações acionáveis | 2026-07-29 | 39bdf24 | Verified | [260729-jri-corrigir-primeira-abertura-barra-superio](./quick/260729-jri-corrigir-primeira-abertura-barra-superio/) |
 | 260729-km5 | Redesenhar notificações, estabilizar shell e adicionar toggles de otimização | 2026-07-29 | 94031d1 | Verified | [260729-km5-redesenhar-notifica-es-como-painel-flutu](./quick/260729-km5-redesenhar-notifica-es-como-painel-flutu/) |
 | 260729-m1p | Redesenhar integralmente a experiência premium da Fase 2 | 2026-07-29 | 56aa21d | Verified | [260729-m1p-redesenhar-integralmente-a-experi-ncia-p](./quick/260729-m1p-redesenhar-integralmente-a-experi-ncia-p/) |
