@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: complete-desktop-experience
 status: executing
-stopped_at: Completed 02-36-PLAN.md
-last_updated: "2026-07-28T19:35:35.000Z"
-last_activity: 2026-07-28
-last_activity_desc: "Completed quick task 260728-m84: approved dark optimizer Home"
+stopped_at: Completed quick task 260728-ndw
+last_updated: '2026-07-29T05:33:18.3289928-03:00'
+last_activity: 2026-07-29
+last_activity_desc: 'Completed quick task 260728-ndw: final desktop UI and branded installer'
 progress:
   total_phases: 10
   completed_phases: 1
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 02 (complete-desktop-experience) — EXECUTING
 Plan: 21 of 33
 Status: Ready to execute
-Last activity: 2026-07-28 — Completed quick task 260728-m84: approved dark optimizer Home
+Last activity: 2026-07-29 — Completed quick task 260728-ndw: final desktop UI and branded installer
 
 Progress: [████░░░░░░] 44%
 
@@ -46,7 +46,7 @@ Progress: [████░░░░░░] 44%
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
+| ----- | ----- | ----- | -------- |
 | 01    | 22    | -     | -        |
 
 **Recent Trend:**
@@ -54,7 +54,7 @@ Progress: [████░░░░░░] 44%
 - Last 5 plans: -
 - Trend: No execution data yet
 
-*Updated after plan completion*
+_Updated after plan completion_
 | Phase 01 P01 | 15 min | 2 tasks | 4 files |
 | Phase 01 P02 | 15 min | 2 tasks | 9 files |
 | Phase 01 P03 | 11 min | 2 tasks | 11 files |
@@ -267,14 +267,15 @@ None yet.
 Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| *(none)* | | | |
+| -------- | ---- | ------ | ----------- |
+| _(none)_ |      |        |             |
 
 ### Quick Tasks Completed
 
-| #          | Description                                     | Date       | Commit  | Status   | Directory                                                                                                           |
-| ---------- | ----------------------------------------------- | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| 260728-m84 | Implementar exatamente o conceito dark aprovado | 2026-07-28 | 437cbef | Verified | [260728-m84-implementar-exatamente-o-conceito-dark-a](./quick/260728-m84-implementar-exatamente-o-conceito-dark-a/) |
+| #          | Description                                              | Date       | Commit  | Status       | Directory                                                                                                           |
+| ---------- | -------------------------------------------------------- | ---------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| 260728-m84 | Implementar exatamente o conceito dark aprovado          | 2026-07-28 | 437cbef | Verified     | [260728-m84-implementar-exatamente-o-conceito-dark-a](./quick/260728-m84-implementar-exatamente-o-conceito-dark-a/) |
+| 260728-ndw | Unificar rotas, ícones e instalador ao conceito aprovado | 2026-07-29 | 1b62551 | Needs Review | [260728-ndw-unificar-todas-as-rotas-desktop-ao-conce](./quick/260728-ndw-unificar-todas-as-rotas-desktop-ao-conce/) |
 
 ## Session Continuity
 
