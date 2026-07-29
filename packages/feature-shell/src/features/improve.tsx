@@ -7,6 +7,7 @@ import {
   OperationInspector,
   OperationRow,
   PlanDependencyList,
+  ProductIcon,
   ProvenanceMark,
   QualityMark,
   RestartPlanner,
@@ -18,6 +19,7 @@ import {
   VerificationReceipt,
   type CapabilityState,
   type EvidenceQuality,
+  type ProductIconName,
   type RiskLevel,
 } from '@liiiraa/design-system';
 import type {
@@ -195,18 +197,18 @@ const COMPONENT_COPY: Readonly<
   },
 };
 
-const COMPONENT_GLYPHS: Readonly<Record<ImproveComponent, string>> = Object.freeze({
-  windows: 'WIN',
-  'cpu-power': 'CPU',
-  gpu: 'GPU',
-  memory: 'RAM',
-  storage: 'SSD',
-  thermals: '°C',
-  network: 'NET',
-  audio: 'AUD',
-  'input-usb': 'USB',
-  display: 'HZ',
-  'security-privacy': 'SEC',
+const COMPONENT_ICONS: Readonly<Record<ImproveComponent, ProductIconName>> = Object.freeze({
+  windows: 'app',
+  'cpu-power': 'cpu',
+  gpu: 'microchip',
+  memory: 'memory',
+  storage: 'database',
+  thermals: 'temperature',
+  network: 'network',
+  audio: 'audio',
+  'input-usb': 'usb',
+  display: 'monitor',
+  'security-privacy': 'shield',
 });
 
 export const GOLDEN_OPERATIONS = Object.freeze([
@@ -351,9 +353,11 @@ const GoalsView = ({
         const applicable = copy.relevance.includes(selectedGoal);
         return (
           <article className="lb-component-card" data-component-id={component} key={component}>
-            <span aria-hidden="true" className="lb-component-glyph">
-              {COMPONENT_GLYPHS[component]}
-            </span>
+            <ProductIcon
+              className="lb-component-glyph"
+              name={COMPONENT_ICONS[component]}
+              size={20}
+            />
             <h3>{localized(copy.label, locale)}</h3>
             <CapabilityReason
               capability={localized(copy.label, locale)}

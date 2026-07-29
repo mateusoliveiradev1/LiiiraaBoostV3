@@ -4,6 +4,7 @@ import {
   LbSelect,
   LbSwitch,
   LbTextField,
+  ProductIcon,
   RouteHeader,
   ScenarioMarker,
   StatusSignal,
@@ -263,6 +264,7 @@ export const SettingsSurface = ({ children, locale, scenarioId }: SettingsSurfac
 
   return (
     <main
+      className="lb-settings-surface"
       data-cloud-ai={String(consents.cloudAi)}
       data-diagnostic-sharing={String(consents.diagnosticSharing)}
       data-forced-colors-ready="true"
@@ -279,75 +281,87 @@ export const SettingsSurface = ({ children, locale, scenarioId }: SettingsSurfac
         title={locale === 'pt-BR' ? 'Configurações' : 'Settings'}
       />
       <ScenarioMarker scenarioId={scenarioId} />
-      <section aria-labelledby="connected-consent-title" data-lb-region>
-        <h2 id="connected-consent-title">
-          {locale === 'pt-BR' ? 'Processamento conectado' : 'Connected processing'}
-        </h2>
-        <p>
-          {locale === 'pt-BR'
-            ? 'Cada opção começa desligada e precisa ser escolhida separadamente.'
-            : 'Each option starts off and must be selected separately.'}
-        </p>
-        {(
-          [
-            'telemetry',
-            'cloudAi',
-            'diagnosticSharing',
-          ] as const satisfies readonly ConnectedConsentKey[]
-        ).map((key) => (
-          <LbSwitch
-            isSelected={consents[key]}
-            key={key}
-            onChange={(selected) => {
-              setConsents((current) => ({ ...current, [key]: selected }));
+      <div className="lb-settings-grid">
+        <section
+          aria-labelledby="connected-consent-title"
+          className="lb-settings-panel lb-settings-consent"
+          data-lb-region
+        >
+          <h2 id="connected-consent-title">
+            <ProductIcon name="shield" size={20} />
+            <span>{locale === 'pt-BR' ? 'Privacidade e conexão' : 'Privacy and connection'}</span>
+          </h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Cada opção começa desligada e precisa ser escolhida separadamente.'
+              : 'Each option starts off and must be selected separately.'}
+          </p>
+          {(
+            [
+              'telemetry',
+              'cloudAi',
+              'diagnosticSharing',
+            ] as const satisfies readonly ConnectedConsentKey[]
+          ).map((key) => (
+            <LbSwitch
+              isSelected={consents[key]}
+              key={key}
+              onChange={(selected) => {
+                setConsents((current) => ({ ...current, [key]: selected }));
+              }}
+            >
+              {consentLabel(key, locale)}
+            </LbSwitch>
+          ))}
+        </section>
+        <section
+          aria-labelledby="appearance-title"
+          className="lb-settings-panel lb-settings-appearance"
+          data-lb-region
+        >
+          <h2 id="appearance-title">
+            <ProductIcon name="sliders" size={20} />
+            <span>{locale === 'pt-BR' ? 'Aparência e acesso' : 'Appearance and access'}</span>
+          </h2>
+          <LbSelect
+            label={locale === 'pt-BR' ? 'Escala da interface' : 'Interface scale'}
+            onSelectionChange={(key) => {
+              if (key !== null) setScale(String(key));
             }}
-          >
-            {consentLabel(key, locale)}
-          </LbSwitch>
-        ))}
-      </section>
-      <section aria-labelledby="appearance-title" data-lb-region>
-        <h2 id="appearance-title">
-          {locale === 'pt-BR' ? 'Aparência e acesso' : 'Appearance and access'}
-        </h2>
-        <LbSelect
-          label={locale === 'pt-BR' ? 'Escala da interface' : 'Interface scale'}
-          onSelectionChange={(key) => {
-            if (key !== null) setScale(String(key));
-          }}
-          options={[
-            { id: '100', label: '100%' },
-            { id: '112.5', label: '112.5%' },
-            { id: '125', label: '125%' },
-            { id: '150', label: '150%' },
-          ]}
-          selectedKey={scale}
-        />
-        <LbSelect
-          label={locale === 'pt-BR' ? 'Densidade' : 'Density'}
-          onSelectionChange={(key) => {
-            if (key !== null) setDensity(String(key));
-          }}
-          options={[
-            { id: 'comfortable', label: locale === 'pt-BR' ? 'Confortável' : 'Comfortable' },
-            { id: 'compact', label: locale === 'pt-BR' ? 'Compacta' : 'Compact' },
-          ]}
-          selectedKey={density}
-        />
-        <LbSelect
-          label={locale === 'pt-BR' ? 'Movimento' : 'Motion'}
-          onSelectionChange={(key) => {
-            if (key !== null) setMotion(String(key));
-          }}
-          options={[
-            { id: 'system', label: locale === 'pt-BR' ? 'Sistema' : 'System' },
-            { id: 'reduced', label: locale === 'pt-BR' ? 'Reduzido' : 'Reduced' },
-            { id: 'responsive', label: locale === 'pt-BR' ? 'Responsivo' : 'Responsive' },
-          ]}
-          selectedKey={motion}
-        />
-      </section>
-      {children}
+            options={[
+              { id: '100', label: '100%' },
+              { id: '112.5', label: '112.5%' },
+              { id: '125', label: '125%' },
+              { id: '150', label: '150%' },
+            ]}
+            selectedKey={scale}
+          />
+          <LbSelect
+            label={locale === 'pt-BR' ? 'Densidade' : 'Density'}
+            onSelectionChange={(key) => {
+              if (key !== null) setDensity(String(key));
+            }}
+            options={[
+              { id: 'comfortable', label: locale === 'pt-BR' ? 'Confortável' : 'Comfortable' },
+              { id: 'compact', label: locale === 'pt-BR' ? 'Compacta' : 'Compact' },
+            ]}
+            selectedKey={density}
+          />
+          <LbSelect
+            label={locale === 'pt-BR' ? 'Movimento' : 'Motion'}
+            onSelectionChange={(key) => {
+              if (key !== null) setMotion(String(key));
+            }}
+            options={[
+              { id: 'system', label: locale === 'pt-BR' ? 'Sistema' : 'System' },
+              { id: 'reduced', label: locale === 'pt-BR' ? 'Reduzido' : 'Reduced' },
+              { id: 'responsive', label: locale === 'pt-BR' ? 'Responsivo' : 'Responsive' },
+            ]}
+            selectedKey={motion}
+          />
+        </section>
+      </div>
+      {children ? <section className="lb-settings-extensions">{children}</section> : null}
     </main>
   );
 };

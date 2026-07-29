@@ -12,13 +12,22 @@
     "targets": ["nsis"],
     "createUpdaterArtifacts": false,
     "publisher": "Liiiraa Boost",
-    "icon": ["icons/icon-rgba.png"],
+    "copyright": "Copyright © 2026 Liiiraa Boost. Todos os direitos reservados.",
+    "license": "Proprietary",
+    "licenseFile": "legal/TERMOS-DE-LICENCA-PT-BR.txt",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
     "windows": {
       "digestAlgorithm": "sha256",
       "certificateThumbprint": null,
       "timestampUrl": null,
       "allowDowngrades": false,
       "nsis": {
+        "headerImage": "installer/header.bmp",
+        "sidebarImage": "installer/sidebar.bmp",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "languages": ["PortugueseBR", "English"],
+        "displayLanguageSelector": false,
         "installMode": "currentUser"
       }
     }
@@ -52,8 +61,8 @@
         }
       ]
     }
- },
- "plugins": {
+  },
+  "plugins": {
     "deep-link": {
       "desktop": {
         "schemes": ["liiiraa-boost"]

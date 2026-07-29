@@ -6,6 +6,7 @@ import {
   GameRunway,
   LbButton,
   OperationalFailure,
+  ProductIcon,
   ProvenanceMark,
   QualityMark,
   RouteHeader,
@@ -225,7 +226,10 @@ const LibraryView = ({
       {state === 'detected' ? (
         <>
           <article>
-            <h3>{GAME.fictional}</h3>
+            <h3 className="lb-game-title">
+              <ProductIcon name="game" size={21} />
+              <span>{GAME.fictional}</span>
+            </h3>
             <ProvenanceMark
               detail="FICTIONAL · DETERMINISTIC FIXTURE"
               kind="fixture"
@@ -275,6 +279,7 @@ const LibraryView = ({
             className="lb-game-readiness"
           >
             <article>
+              <ProductIcon name="crosshair" size={18} />
               <span>{localized({ en: 'Active profile', 'pt-BR': 'Perfil ativo' }, locale)}</span>
               <strong>{localized({ en: 'Competitive', 'pt-BR': 'Competitivo' }, locale)}</strong>
               <p>
@@ -285,6 +290,7 @@ const LibraryView = ({
               </p>
             </article>
             <article>
+              <ProductIcon name="radar" size={18} />
               <span>{localized({ en: 'Preflight', 'pt-BR': 'Pré-verificação' }, locale)}</span>
               <strong>{localized({ en: 'Ready', 'pt-BR': 'Pronta' }, locale)}</strong>
               <p>
@@ -292,6 +298,7 @@ const LibraryView = ({
               </p>
             </article>
             <article>
+              <ProductIcon name="shield" size={18} />
               <span>{localized({ en: 'Recovery', 'pt-BR': 'Recuperação' }, locale)}</span>
               <strong>{localized({ en: 'Protected', 'pt-BR': 'Protegida' }, locale)}</strong>
               <p>

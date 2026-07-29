@@ -1,0 +1,168 @@
+TERMOS DE LICENÇA E USO DO LIIIRAA BOOST
+Versão dos termos: 28 de julho de 2026
+
+IMPORTANTE: LEIA TODO ESTE DOCUMENTO ANTES DE INSTALAR.
+
+Ao selecionar a opção de aceite no instalador, instalar, abrir ou usar o Liiiraa Boost, você declara que leu e concorda com estes Termos. Se você não concordar, não prossiga com a instalação e remova eventuais cópias do aplicativo.
+
+1. IDENTIFICAÇÃO E OBJETO
+
+1.1. “Liiiraa Boost” é o aplicativo de otimização, diagnóstico e gerenciamento de desempenho para Windows identificado neste instalador.
+
+1.2. Para estes Termos, “Licenciante” significa o responsável pelo projeto e pela distribuição oficial do Liiiraa Boost; “Usuário” significa a pessoa que instala ou utiliza o aplicativo; e “Dispositivo” significa o computador Windows no qual o aplicativo é instalado.
+
+1.3. Estes Termos regulam a licença de uso do aplicativo, do instalador, das atualizações, da documentação e dos componentes distribuídos em conjunto.
+
+2. ESTADO DESTA VERSÃO
+
+2.1. Esta é uma versão de desenvolvimento e avaliação visual. Recursos, diagnósticos, métricas, recomendações e fluxos que aparecem identificados como “simulados”, “cenário simulado”, “fixture”, “demonstração” ou equivalentes não representam medições reais nem alterações reais no sistema.
+
+2.2. Nesta versão, os adaptadores de otimização privilegiada e os serviços remotos de produção podem estar ausentes. A interface não deve ser interpretada como prova de ganho de desempenho, assinatura ativa, cobrança, sincronização em nuvem ou execução de uma ação administrativa.
+
+2.3. Versões futuras poderão executar alterações reais no Windows somente após revisão e confirmação explícita do Usuário, conforme a função disponibilizada.
+
+3. CONCESSÃO DA LICENÇA
+
+3.1. O Licenciante concede ao Usuário uma licença limitada, pessoal, revogável, não exclusiva, intransferível e não sublicenciável para instalar e usar esta versão do Liiiraa Boost em dispositivos sob seu controle, exclusivamente para avaliação e uso legítimo.
+
+3.2. Esta licença não transfere a propriedade do aplicativo, do código, da marca, dos elementos visuais, da documentação ou de qualquer direito de propriedade intelectual.
+
+3.3. O uso comercial, a revenda, a redistribuição pública, a inclusão em pacotes de terceiros ou a disponibilização do instalador em outro domínio dependem de autorização escrita do Licenciante.
+
+4. REQUISITOS E COMPATIBILIDADE
+
+4.1. O aplicativo é destinado ao Windows 10 e ao Windows 11 em hardware compatível. A compatibilidade efetiva pode variar conforme versão do Windows, drivers, políticas corporativas, antivírus, permissões, componentes do sistema e configuração do Dispositivo.
+
+4.2. O Usuário é responsável por manter o Windows, os drivers e os mecanismos de segurança atualizados e por obter as permissões necessárias para instalar o aplicativo.
+
+4.3. O instalador atual opera no perfil do Usuário. Funções futuras que exigirem privilégios elevados deverão apresentar pedido específico do Windows e explicar a finalidade antes da execução.
+
+5. ALTERAÇÕES NO SISTEMA E CONSENTIMENTO
+
+5.1. Quando uma versão permitir otimizações reais, cada plano deverá informar as alterações propostas, os riscos conhecidos, a necessidade de reinicialização e a possibilidade de reversão antes da aplicação.
+
+5.2. O Usuário não deve aplicar uma recomendação que não compreenda. Recomenda-se fechar trabalhos importantes, salvar arquivos e manter backup atualizado antes de qualquer alteração relevante no sistema.
+
+5.3. Nenhuma otimização pode garantir aumento de FPS, redução de latência, estabilidade ou outro resultado específico, pois o resultado depende do hardware, do software, do jogo, dos drivers e das condições de uso.
+
+6. RECUPERAÇÃO E BACKUP
+
+6.1. O Liiiraa Boost busca oferecer alterações explicáveis e reversíveis quando tecnicamente possível. Certas mudanças do Windows, de drivers, de terceiros ou do próprio Usuário podem não permitir reversão integral.
+
+6.2. Histórico, pontos de recuperação internos e prévias de rollback não substituem uma estratégia independente de backup.
+
+6.3. O Usuário é responsável por manter cópias de segurança de arquivos, chaves, configurações e demais dados importantes.
+
+7. PRIVACIDADE E DADOS
+
+7.1. O projeto adota uma abordagem local-first. Preferências e evidências locais podem ser armazenadas no Dispositivo para viabilizar a interface, o histórico, o diagnóstico e a recuperação.
+
+7.2. Telemetria conectada, uso de inteligência artificial em nuvem e compartilhamento de diagnósticos devem permanecer desligados por padrão e depender de consentimentos separados quando forem implementados.
+
+7.3. A ativação de uma finalidade não autoriza automaticamente outra. O Usuário poderá revisar ou retirar consentimentos nas configurações, sem efeito retroativo sobre tratamentos já concluídos de forma legítima.
+
+7.4. Pacotes de suporte deverão exibir uma prévia dos dados selecionados e das redações aplicadas antes de qualquer envio. Esta versão não deve indicar envio concluído quando o adaptador remoto correspondente não existir.
+
+7.5. Dados pessoais serão tratados conforme a legislação aplicável, inclusive a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), quando houver tratamento sujeito a ela.
+
+8. CONTAS, ASSINATURAS E SERVIÇOS CONECTADOS
+
+8.1. Telas de conta, assinatura, dispositivo, cobrança ou suporte podem ser apenas demonstrações nesta versão. Nenhuma cobrança será considerada realizada sem confirmação explícita do provedor de pagamento e do serviço de produção.
+
+8.2. Recursos conectados futuros poderão exigir termos adicionais, política de privacidade, autenticação e conexão com a internet.
+
+8.3. O Licenciante poderá limitar, suspender ou encerrar serviços conectados para segurança, manutenção, prevenção de abuso ou cumprimento legal, preservados os direitos obrigatórios do consumidor.
+
+9. ATUALIZAÇÕES E SEGURANÇA
+
+9.1. Atualizações futuras deverão ser distribuídas por canais oficiais e verificadas por assinatura quando a cadeia de produção estiver ativa.
+
+9.2. Esta compilação de desenvolvimento pode usar certificado local autoassinado e não possui a reputação pública de uma versão comercial assinada. Alertas do Windows não devem ser ocultados ou contornados.
+
+9.3. O Usuário não deve instalar arquivos obtidos de fontes desconhecidas, desativar proteções do sistema para forçar a instalação ou aceitar uma assinatura inválida.
+
+9.4. O Licenciante poderá interromper o suporte a versões inseguras ou incompatíveis e recomendar atualização ou desinstalação.
+
+10. USOS PROIBIDOS
+
+É proibido:
+
+a) usar o aplicativo para violar leis, direitos de terceiros, regras de jogos, plataformas ou sistemas;
+b) utilizar o aplicativo para burlar mecanismos anticheat, segurança, licenciamento ou controle de acesso;
+c) inserir código malicioso, explorar vulnerabilidades, prejudicar serviços ou acessar dados sem autorização;
+d) remover avisos de autoria, marca, segurança, simulação ou licença;
+e) redistribuir versão alterada como se fosse oficial;
+f) realizar engenharia reversa, descompilação ou desmontagem além do limite expressamente permitido pela legislação aplicável;
+g) usar componentes, perfis ou automações para executar comandos remotos arbitrários ou alterações não autorizadas.
+
+11. CONTEÚDO E SOFTWARE DE TERCEIROS
+
+11.1. O aplicativo utiliza bibliotecas e componentes de terceiros sujeitos às respectivas licenças. Os avisos aplicáveis poderão acompanhar a distribuição ou a documentação.
+
+11.2. Windows, nomes de jogos, fabricantes, plataformas e marcas de terceiros pertencem aos respectivos titulares. A compatibilidade mencionada não implica patrocínio ou afiliação.
+
+12. PROPRIEDADE INTELECTUAL
+
+12.1. A marca Liiiraa Boost, o símbolo, a identidade visual, o código, os textos, os fluxos e a documentação são protegidos pela legislação aplicável, ressalvados os componentes de terceiros e suas licenças.
+
+12.2. Sugestões enviadas voluntariamente poderão ser avaliadas para melhoria do produto, sem obrigação de adoção ou remuneração, salvo acordo escrito em contrário.
+
+13. DISPONIBILIDADE E ALTERAÇÕES
+
+13.1. Por se tratar de versão de desenvolvimento, funcionalidades podem mudar, ser removidas, ficar indisponíveis ou apresentar falhas.
+
+13.2. O Licenciante poderá atualizar estes Termos quando houver mudança relevante no produto, na legislação ou no tratamento de dados. Uma nova aceitação será solicitada quando exigida.
+
+14. GARANTIAS E RESPONSABILIDADE
+
+14.1. Esta versão é fornecida para avaliação, no estado em que se encontra, sem promessa de disponibilidade contínua, compatibilidade universal ou resultado específico.
+
+14.2. Dentro dos limites permitidos pela lei, o Licenciante não responde por perdas decorrentes de uso contrário à documentação, instalação de fonte não oficial, alteração não autorizada do aplicativo, falha de terceiros, ausência de backup ou incompatibilidade não informada.
+
+14.3. Nada nestes Termos exclui ou limita direitos, garantias ou responsabilidades que não possam ser afastados pela legislação brasileira, inclusive normas de proteção do consumidor.
+
+14.4. Se houver responsabilidade comprovada, ela será apurada conforme a lei aplicável e as circunstâncias concretas, sem excluir reparação obrigatória.
+
+15. INDENIZAÇÃO POR USO ILÍCITO
+
+Na medida permitida pela lei, o Usuário será responsável por danos diretamente causados por uso ilícito, fraudulento ou deliberadamente abusivo do aplicativo, preservados o contraditório e os direitos legais aplicáveis.
+
+16. VIGÊNCIA, SUSPENSÃO E ENCERRAMENTO
+
+16.1. Estes Termos vigoram a partir do aceite e permanecem válidos enquanto o aplicativo estiver instalado ou for utilizado.
+
+16.2. O Usuário pode encerrar a licença a qualquer momento desinstalando o aplicativo e removendo as cópias sob seu controle.
+
+16.3. A licença poderá ser encerrada em caso de violação material destes Termos. Disposições sobre propriedade intelectual, responsabilidade, privacidade já consumada e solução de conflitos sobrevivem quando necessário.
+
+17. LEI APLICÁVEL E SOLUÇÃO DE CONFLITOS
+
+17.1. Estes Termos são regidos pelas leis da República Federativa do Brasil.
+
+17.2. Antes de iniciar uma disputa, as partes devem buscar solução direta de boa-fé quando isso for possível.
+
+17.3. O foro competente será definido conforme a legislação aplicável, preservado o direito do consumidor de recorrer ao foro legalmente assegurado.
+
+18. DISPOSIÇÕES GERAIS
+
+18.1. Se uma disposição for considerada inválida, as demais continuarão em vigor na maior extensão permitida.
+
+18.2. A tolerância com um descumprimento não representa renúncia de direito.
+
+18.3. Estes Termos, os avisos apresentados no aplicativo e eventuais termos adicionais aceitos para serviços conectados compõem o acordo aplicável ao uso.
+
+18.4. Em caso de divergência, uma condição específica apresentada para determinado recurso prevalece apenas sobre aquele recurso.
+
+19. CONTATO E REGISTRO DA VERSÃO
+
+19.1. Canais oficiais de contato e suporte serão informados no próprio aplicativo ou na página oficial de distribuição quando os serviços conectados entrarem em produção.
+
+19.2. Para fins de rastreabilidade desta avaliação:
+
+Produto: Liiiraa Boost
+Versão do aplicativo: 0.0.0
+Canal: desenvolvimento
+Plataforma: Windows 10/11
+Assinatura desta compilação: certificado local de desenvolvimento, sem confiança pública
+
+FIM DOS TERMOS

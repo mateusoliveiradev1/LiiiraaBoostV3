@@ -43,6 +43,7 @@ import {
   LbDialog,
   LbSearchField,
   OPERATIONAL_STATES,
+  ProductIcon,
   RouteHeader,
   StatusSignal,
   WindowTitleBar,
@@ -786,18 +787,35 @@ export const DesktopRouteOutlet = ({
         }
         return (
           <SettingsSurface locale={locale} scenarioId={scenarioId}>
-            <section aria-labelledby="desktop-language-title" data-lb-region>
-              <h2 id="desktop-language-title">
-                {locale === 'pt-BR' ? 'Preferências regionais' : 'Regional preferences'}
-              </h2>
+            <section
+              aria-labelledby="desktop-language-title"
+              className="lb-settings-regional"
+              data-lb-region
+            >
+              <header>
+                <ProductIcon name="languages" size={20} />
+                <div>
+                  <h2 id="desktop-language-title">
+                    {locale === 'pt-BR' ? 'Preferências regionais' : 'Regional preferences'}
+                  </h2>
+                  <p>
+                    {locale === 'pt-BR'
+                      ? 'Idioma aplicado à interface e às mensagens do aplicativo.'
+                      : 'Language used by the interface and application messages.'}
+                  </p>
+                </div>
+              </header>
               <PreConsentLocaleControl />
             </section>
-            <FavoritesManager
-              candidates={SETTINGS_FAVORITE_CANDIDATES}
-              headingLevel="h2"
-              initialFavorites={SETTINGS_INITIAL_FAVORITES}
-              locale={locale}
-            />
+            <div className="lb-settings-favorites">
+              <ProductIcon name="star" size={20} />
+              <FavoritesManager
+                candidates={SETTINGS_FAVORITE_CANDIDATES}
+                headingLevel="h2"
+                initialFavorites={SETTINGS_INITIAL_FAVORITES}
+                locale={locale}
+              />
+            </div>
           </SettingsSurface>
         );
       }
@@ -966,7 +984,9 @@ const DesktopAppContent = ({
 
   const focusHeading = useCallback(() => {
     deferFocus(() => {
-      workCanvasRef.current?.querySelector<HTMLElement>('h1')?.focus();
+      const workCanvas = workCanvasRef.current;
+      workCanvas?.scrollTo({ left: 0, top: 0 });
+      workCanvas?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
     });
   }, []);
 

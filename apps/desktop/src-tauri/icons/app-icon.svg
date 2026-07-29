@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="icon-bg" x1=".1" y1="0" x2=".9" y2="1">
+      <stop offset="0" stop-color="#07131a"/>
+      <stop offset=".55" stop-color="#061018"/>
+      <stop offset="1" stop-color="#03070a"/>
+    </linearGradient>
+    <radialGradient id="icon-glow" cx=".42" cy=".34" r=".72">
+      <stop offset="0" stop-color="#49c8f2" stop-opacity=".16"/>
+      <stop offset=".58" stop-color="#147ba0" stop-opacity=".04"/>
+      <stop offset="1" stop-color="#07131a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="icon-mark" x1=".1" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#c9f3ff"/>
+      <stop offset=".35" stop-color="#70d9fb"/>
+      <stop offset="1" stop-color="#30b6e7"/>
+    </linearGradient>
+  </defs>
+  <rect x="68" y="68" width="888" height="888" rx="212" fill="url(#icon-bg)"/>
+  <rect x="68.5" y="68.5" width="887" height="887" rx="211.5" fill="none" stroke="#21414e" stroke-width="3"/>
+  <rect x="90" y="90" width="844" height="844" rx="191" fill="url(#icon-glow)"/>
+  <g transform="translate(180 230) scale(20)">
+    <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" fill="url(#icon-mark)"/>
+    <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" fill="#a9eaff"/>
+  </g>
+</svg>

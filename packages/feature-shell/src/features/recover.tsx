@@ -1,6 +1,7 @@
 import {
   ChangeLedger,
   LbButton,
+  ProductIcon,
   RecoveryCheckpoint,
   RouteHeader,
   ScenarioMarker,
@@ -153,9 +154,7 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
             aria-label={locale === 'pt-BR' ? 'Resumo de proteção' : 'Protection summary'}
             className="lb-recovery-summary"
           >
-            <div aria-hidden="true" className="lb-recovery-emblem">
-              ✓
-            </div>
+            <ProductIcon className="lb-recovery-emblem" name="shield" size={28} />
             <div>
               <p className="lb-section-kicker">
                 {locale === 'pt-BR' ? 'Estado do sistema' : 'System state'}

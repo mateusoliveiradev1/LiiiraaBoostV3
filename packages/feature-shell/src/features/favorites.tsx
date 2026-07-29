@@ -1,4 +1,4 @@
-import { LbButton, StatusSignal } from '@liiiraa/design-system';
+import { LbButton, LbIconButton, ProductIcon, StatusSignal } from '@liiiraa/design-system';
 import { useState } from 'react';
 
 import {
@@ -105,8 +105,10 @@ export const FavoritesManager = ({
                 {items.map((favorite, index) => (
                   <li key={favorite.id}>
                     <span>{favorite.label}</span>
-                    <LbButton
+                    <LbIconButton
+                      icon={<ProductIcon name="chevronLeft" size={16} />}
                       isDisabled={index === 0}
+                      label={isPtBr ? 'Mover para a esquerda' : 'Move left'}
                       onPress={() => {
                         update(
                           { type: 'move', id: favorite.id, direction: 'left' },
@@ -116,11 +118,11 @@ export const FavoritesManager = ({
                         );
                       }}
                       variant="quiet"
-                    >
-                      {isPtBr ? 'Mover para a esquerda' : 'Move left'}
-                    </LbButton>
-                    <LbButton
+                    />
+                    <LbIconButton
+                      icon={<ProductIcon name="chevronRight" size={16} />}
                       isDisabled={index === items.length - 1}
+                      label={isPtBr ? 'Mover para a direita' : 'Move right'}
                       onPress={() => {
                         update(
                           { type: 'move', id: favorite.id, direction: 'right' },
@@ -130,10 +132,10 @@ export const FavoritesManager = ({
                         );
                       }}
                       variant="quiet"
-                    >
-                      {isPtBr ? 'Mover para a direita' : 'Move right'}
-                    </LbButton>
-                    <LbButton
+                    />
+                    <LbIconButton
+                      icon={<ProductIcon name="trash" size={16} />}
+                      label={isPtBr ? 'Remover favorito' : 'Remove favorite'}
                       onPress={() => {
                         update(
                           { type: 'remove', id: favorite.id },
@@ -141,9 +143,7 @@ export const FavoritesManager = ({
                         );
                       }}
                       variant="quiet"
-                    >
-                      {isPtBr ? 'Remover' : 'Remove'}
-                    </LbButton>
+                    />
                   </li>
                 ))}
               </ol>
@@ -188,6 +188,7 @@ export const FavoritesManager = ({
                   }}
                   variant="secondary"
                 >
+                  <ProductIcon name="pin" size={16} />
                   {isPtBr ? 'Fixar favorito' : 'Pin favorite'}
                 </LbButton>
               </li>

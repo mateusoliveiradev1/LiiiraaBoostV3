@@ -33,21 +33,17 @@
 }
 
 .desktop-app-shell[data-route-path='/home'] .lb-product-brand {
-  gap: 5px;
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  gap: 8px;
+  font-size: 16px;
+  letter-spacing: -0.035em;
 }
 
 .desktop-app-shell[data-route-path='/home'] .lb-product-brand .lb-product-mark {
-  display: none;
+  display: block;
 }
 
 .desktop-app-shell[data-route-path='/home'] .lb-product-brand::after {
-  color: #82ccea;
-  content: '◢';
-  font-size: 11px;
-  filter: drop-shadow(0 0 8px rgba(127, 212, 244, 0.28));
-  transform: rotate(-12deg);
+  content: none;
 }
 
 .desktop-app-shell[data-route-path='/home'] .lb-title-bar > .lb-scenario-marker,

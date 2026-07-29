@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="57" viewBox="0 0 150 57">
+  <defs>
+    <linearGradient id="header-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#05080b"/>
+      <stop offset="1" stop-color="#0a151c"/>
+    </linearGradient>
+    <linearGradient id="header-mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b9ecff"/>
+      <stop offset="1" stop-color="#46c4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="150" height="57" fill="url(#header-bg)"/>
+  <path d="M0 56.5h150" stroke="#24434f"/>
+  <g transform="translate(12 12) scale(1.1)">
+    <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" fill="url(#header-mark)"/>
+    <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" fill="#9ee6ff"/>
+  </g>
+  <text x="52" y="27" fill="#f2f8fb" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">Liiiraa</text>
+  <text x="87" y="27" fill="#80d8f7" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">Boost</text>
+  <text x="52" y="42" fill="#758894" font-family="Segoe UI, Arial, sans-serif" font-size="7.5" letter-spacing=".7">SETUP SEGURO</text>
+</svg>

@@ -6,6 +6,7 @@ import {
   FrameTimePlot,
   LbButton,
   MetricReadout,
+  ProductIcon,
   ProvenanceMark,
   QualityMark,
   RouteHeader,
@@ -241,6 +242,7 @@ const OverviewView = ({
       className="lb-measure-snapshot"
     >
       <article>
+        <ProductIcon name="timer" size={18} />
         <span>Frametime</span>
         <strong>
           16,7 <small>ms</small>
@@ -248,6 +250,7 @@ const OverviewView = ({
         <p>{localized({ en: 'simulated average', 'pt-BR': 'média simulada' }, locale)}</p>
       </article>
       <article>
+        <ProductIcon name="gauge" size={18} />
         <span>1% low</span>
         <strong>
           11,2 <small>ms</small>
@@ -255,11 +258,13 @@ const OverviewView = ({
         <p>{localized({ en: 'simulated sample', 'pt-BR': 'amostra simulada' }, locale)}</p>
       </article>
       <article>
+        <ProductIcon name="activity" size={18} />
         <span>FPS</span>
         <strong>121</strong>
         <p>{localized({ en: 'simulated average', 'pt-BR': 'média simulada' }, locale)}</p>
       </article>
       <article>
+        <ProductIcon name="check" size={18} />
         <span>{localized({ en: 'Quality', 'pt-BR': 'Qualidade' }, locale)}</span>
         <strong>{localized({ en: 'Valid', 'pt-BR': 'Válida' }, locale)}</strong>
         <p>{localized({ en: 'fixture evidence', 'pt-BR': 'evidência de cenário' }, locale)}</p>

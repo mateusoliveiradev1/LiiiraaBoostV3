@@ -2,10 +2,12 @@ import {
   CalibrationStepRail,
   LbButton,
   LbSwitch,
+  ProductIcon,
   RouteHeader,
   ScenarioMarker,
   StatusSignal,
   type OperationalState,
+  type ProductIconName,
 } from '@liiiraa/design-system';
 import { useActor } from '@xstate/react';
 import { useState } from 'react';
@@ -72,6 +74,16 @@ const STEP_LABELS: Readonly<Record<ShellLocale, Readonly<Record<CalibrationStep,
     review: 'Revisão',
   },
 };
+
+const STEP_ICONS: Readonly<Record<CalibrationStep, ProductIconName>> = Object.freeze({
+  trustPrivacy: 'shield',
+  systemInventory: 'cpu',
+  performanceDiagnosis: 'chart',
+  recoveryReadiness: 'recovery',
+  goals: 'crosshair',
+  priorityGames: 'game',
+  review: 'check',
+});
 
 const STATE_COPY: Readonly<
   Record<
@@ -426,7 +438,10 @@ export const CalibrationWorkspace = (props: CalibrationWorkspaceProps) => {
                 ? `Etapa ${String(activeStep + 1)} de ${String(CALIBRATION_STEPS.length)}`
                 : `Step ${String(activeStep + 1)} of ${String(CALIBRATION_STEPS.length)}`}
             </p>
-            <h2 id="calibration-workspace-title">{stepLabels[snapshot.context.currentStep]}</h2>
+            <h2 id="calibration-workspace-title">
+              <ProductIcon name={STEP_ICONS[snapshot.context.currentStep]} size={24} />
+              <span>{stepLabels[snapshot.context.currentStep]}</span>
+            </h2>
             <StatusSignal label={copy.title} state={SURFACE_TO_OPERATIONAL[state]} />
           </header>
 
