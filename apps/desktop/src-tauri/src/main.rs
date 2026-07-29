@@ -27,6 +27,7 @@ use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent, TrayIconId};
 use tauri::{
     AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
 };
+use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_notification::NotificationExt;
 use tray::{
@@ -467,6 +468,10 @@ fn run() -> Result<(), String> {
                     let _ = emit_navigation_event(app, event);
                 }
             },
+        ))
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            None,
         ))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_notification::init())

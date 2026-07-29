@@ -48,6 +48,9 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(
         capability["permissions"],
         json!([
+            "autostart:allow-disable",
+            "autostart:allow-enable",
+            "autostart:allow-is-enabled",
             "core:event:allow-listen",
             "core:window:allow-close",
             "core:window:allow-minimize",
@@ -132,6 +135,7 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
     assert_eq!(source.matches("#[tauri::command]").count(), 2);
     assert!(source.contains("dispatch_shell_command,"));
     assert!(source.contains("get_shell_bootstrap"));
+    assert!(source.contains("tauri_plugin_autostart::init"));
     assert!(source.contains("validate_renderer_to_host_shell_command"));
     assert!(source.contains("validate_host_to_renderer_shell_event"));
     assert!(source.contains("ShellContract::authorize_startup"));

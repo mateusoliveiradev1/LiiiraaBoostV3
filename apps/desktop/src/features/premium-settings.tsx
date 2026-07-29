@@ -7,14 +7,15 @@ import {
   useDesktopPreferences,
   type DesktopTheme,
 } from '../preferences.js';
+import { launchOnStartup } from '../native/launch-on-startup.js';
 
 type SettingsSection = 'general' | 'appearance' | 'notifications' | 'privacy' | 'data';
-type LocalSetting = 'analytics' | 'autoUpdate' | 'launch' | 'notifications';
+type LocalSetting = 'analytics' | 'autoUpdate' | 'notifications';
+type LaunchOnStartupStatus = 'error' | 'loading' | 'ready' | 'updating';
 
 interface LocalSettings {
   readonly analytics: boolean;
   readonly autoUpdate: boolean;
-  readonly launch: boolean;
   readonly notifications: boolean;
 }
 
@@ -22,7 +23,6 @@ const LOCAL_SETTINGS_KEY = 'liiiraa.desktop.visual-settings.v1';
 const DEFAULT_LOCAL_SETTINGS: LocalSettings = Object.freeze({
   analytics: false,
   autoUpdate: true,
-  launch: false,
   notifications: true,
 });
 
@@ -38,7 +38,6 @@ const loadLocalSettings = (): LocalSettings => {
     return Object.freeze({
       analytics: parsed.analytics === true,
       autoUpdate: parsed.autoUpdate !== false,
-      launch: parsed.launch === true,
       notifications: parsed.notifications !== false,
     });
   } catch {
@@ -72,17 +71,21 @@ interface PremiumSettingsSurfaceProps {
 interface SettingSwitchProps {
   readonly active: boolean;
   readonly description: string;
+  readonly disabled?: boolean;
   readonly label: string;
   readonly locale: ShellLocale;
   readonly onToggle: () => void;
+  readonly pending?: boolean;
 }
 
 const SettingSwitch = ({
   active,
   description,
+  disabled = false,
   label,
   locale,
   onToggle,
+  pending = false,
 }: SettingSwitchProps): ReactNode => (
   <article>
     <span>
@@ -91,8 +94,10 @@ const SettingSwitch = ({
     </span>
     <button
       aria-checked={active}
+      aria-busy={pending}
       aria-label={`${active ? text(locale, 'Desativar', 'Disable') : text(locale, 'Ativar', 'Enable')} ${label}`}
       className="premium-switch"
+      disabled={disabled}
       onClick={onToggle}
       role="switch"
       type="button"
@@ -113,10 +118,32 @@ export const PremiumSettingsSurface = ({
     SECTION_FROM_ROUTE[routeState] ?? 'general',
   );
   const [localSettings, setLocalSettings] = useState<LocalSettings>(loadLocalSettings);
+  const [launchEnabled, setLaunchEnabled] = useState(false);
+  const [launchStatus, setLaunchStatus] = useState<LaunchOnStartupStatus>('loading');
 
   useEffect(() => {
     setSection(SECTION_FROM_ROUTE[routeState] ?? 'general');
   }, [routeState]);
+
+  useEffect(() => {
+    let active = true;
+    void launchOnStartup
+      .get()
+      .then((enabled) => {
+        if (active) {
+          setLaunchEnabled(enabled);
+          setLaunchStatus('ready');
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setLaunchStatus('error');
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -142,6 +169,50 @@ export const PremiumSettingsSurface = ({
 
   const updateLocalSetting = (key: LocalSetting): void => {
     setLocalSettings((current) => ({ ...current, [key]: !current[key] }));
+  };
+
+  const toggleLaunchOnStartup = async (): Promise<void> => {
+    if (launchStatus === 'loading' || launchStatus === 'updating') {
+      return;
+    }
+    const requestedState = !launchEnabled;
+    setLaunchStatus('updating');
+    try {
+      const verifiedState = await launchOnStartup.set(requestedState);
+      setLaunchEnabled(verifiedState);
+      setLaunchStatus('ready');
+      if (verifiedState !== requestedState) {
+        notify(
+          text(
+            locale,
+            'O Windows não confirmou a alteração da inicialização.',
+            'Windows did not confirm the startup change.',
+          ),
+          'warning',
+        );
+        return;
+      }
+      notify(
+        requestedState
+          ? text(
+              locale,
+              'Liiiraa Boost iniciará com o Windows.',
+              'Liiiraa Boost will start with Windows.',
+            )
+          : text(locale, 'Inicialização com o Windows desativada.', 'Start with Windows disabled.'),
+        'success',
+      );
+    } catch {
+      setLaunchStatus('error');
+      notify(
+        text(
+          locale,
+          'Não foi possível alterar a inicialização do Windows. Tente novamente.',
+          'Could not change Windows startup. Please try again.',
+        ),
+        'warning',
+      );
+    }
   };
 
   const openSection = (nextSection: SettingsSection): void => {
@@ -264,17 +335,35 @@ export const PremiumSettingsSurface = ({
                   <PreConsentLocaleControl />
                 </article>
                 <SettingSwitch
-                  active={localSettings.launch}
-                  description={text(
-                    locale,
-                    'Abre o Liiiraa Boost ao entrar na sua conta do Windows.',
-                    'Opens Liiiraa Boost when you sign in to Windows.',
-                  )}
+                  active={launchEnabled}
+                  description={
+                    launchStatus === 'loading'
+                      ? text(
+                          locale,
+                          'Verificando a inicialização do Windows…',
+                          'Checking Windows startup…',
+                        )
+                      : launchStatus === 'updating'
+                        ? text(locale, 'Aplicando alteração…', 'Applying change…')
+                        : launchStatus === 'error'
+                          ? text(
+                              locale,
+                              'Não foi possível verificar. Tente novamente.',
+                              'Could not verify the setting. Please try again.',
+                            )
+                          : text(
+                              locale,
+                              'Abre o Liiiraa Boost ao entrar na sua conta do Windows.',
+                              'Opens Liiiraa Boost when you sign in to Windows.',
+                            )
+                  }
+                  disabled={launchStatus === 'loading' || launchStatus === 'updating'}
                   label={text(locale, 'Iniciar com o Windows', 'Start with Windows')}
                   locale={locale}
                   onToggle={() => {
-                    updateLocalSetting('launch');
+                    void toggleLaunchOnStartup();
                   }}
+                  pending={launchStatus === 'loading' || launchStatus === 'updating'}
                 />
                 <SettingSwitch
                   active={preferences.trayEnabled}

@@ -960,6 +960,11 @@
   background: #536ff0;
 }
 
+.premium-switch:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
 .premium-switch[aria-checked='true'] > span {
   background: #fff;
   transform: translateX(19px);

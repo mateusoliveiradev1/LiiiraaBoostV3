@@ -4,6 +4,9 @@
   "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
   "windows": ["main"],
   "permissions": [
+    "autostart:allow-disable",
+    "autostart:allow-enable",
+    "autostart:allow-is-enabled",
     "core:event:allow-listen",
     "core:window:allow-close",
     "core:window:allow-minimize",

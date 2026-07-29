@@ -30,6 +30,7 @@
     "@liiiraa/desktop-production-reference": "workspace:*",
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-autostart": "2.5.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "simple-icons": "16.27.1"
