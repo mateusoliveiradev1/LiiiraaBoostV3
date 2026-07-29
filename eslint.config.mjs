@@ -124,6 +124,7 @@ export default defineConfig([
             'apps/desktop/tests/browser/keyboard.ts',
             'apps/desktop/tests/browser/account-navigation.spec.ts',
             'apps/desktop/tests/browser/notifications-and-optimization.spec.ts',
+            'apps/desktop/tests/browser/downloads-and-uninstaller.spec.ts',
             'apps/desktop/tests/browser/routes.spec.ts',
             'apps/desktop/tests/browser/scenarios.spec.ts',
             'apps/desktop/tests/browser/visual.spec.ts',

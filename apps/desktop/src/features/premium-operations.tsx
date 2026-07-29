@@ -12,6 +12,7 @@ import {
   SERVICES,
   SHORTCUTS,
   type CatalogRouteId,
+  type InstalledAppItem,
   type OperationItem,
   type PremiumRouteId,
 } from './control-center-data.js';
@@ -129,6 +130,9 @@ const INITIAL_OPERATION_STATE = Object.freeze(
 
 const humanCount = (count: number, singular: string, plural: string): string =>
   `${String(count)} ${count === 1 ? singular : plural}`;
+
+const text = (locale: ShellLocale, ptBr: string, english: string): string =>
+  locale === 'pt-BR' ? ptBr : english;
 
 const getInitialActiveGame = (): GameProfile => {
   try {
@@ -906,12 +910,219 @@ const RestorationSurface = ({ notify }: { readonly notify: (message: string) => 
   </>
 );
 
-const UninstallerSurface = ({ notify }: { readonly notify: (message: string) => void }) => {
+const parseInstalledSizeToMb = (size: string): number => {
+  const numericValue = Number.parseFloat(size.replace(',', '.'));
+  return size.toLocaleUpperCase('en-US').includes('GB') ? numericValue * 1024 : numericValue;
+};
+
+const formatInstalledSize = (sizeInMb: number, locale: ShellLocale): string => {
+  if (sizeInMb >= 1024) {
+    return `${(sizeInMb / 1024).toLocaleString(locale, {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 1,
+    })} GB`;
+  }
+  return `${Math.round(sizeInMb).toLocaleString(locale)} MB`;
+};
+
+interface UninstallReviewDialogProps {
+  readonly apps: readonly InstalledAppItem[];
+  readonly locale: ShellLocale;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly working: boolean;
+}
+
+const UninstallReviewDialog = ({
+  apps,
+  locale,
+  onClose,
+  onConfirm,
+  working,
+}: UninstallReviewDialogProps) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const estimatedSpace = formatInstalledSize(
+    apps.reduce((total, app) => total + parseInstalledSizeToMb(app.size), 0),
+    locale,
+  );
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && !working) {
+        onClose();
+      }
+    };
+    globalThis.addEventListener('keydown', onKeyDown);
+    return () => {
+      globalThis.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onClose, working]);
+
+  return (
+    <div
+      className="premium-dialog-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !working) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        aria-labelledby="premium-uninstall-review-title"
+        aria-modal="true"
+        className="premium-review-dialog premium-uninstall-dialog"
+        ref={dialogRef}
+        role="dialog"
+        tabIndex={-1}
+      >
+        <header>
+          <span>
+            <ProductIcon name="trash" size={24} weight="duotone" />
+          </span>
+          <div>
+            <small>{text(locale, 'Ação destrutiva', 'Destructive action')}</small>
+            <h2 id="premium-uninstall-review-title">
+              {text(locale, 'Confirmar desinstalação', 'Confirm uninstall')}
+            </h2>
+          </div>
+          <button
+            aria-label={text(locale, 'Fechar confirmação', 'Close confirmation')}
+            disabled={working}
+            onClick={onClose}
+            type="button"
+          >
+            <ProductIcon name="close" size={20} />
+          </button>
+        </header>
+
+        <div className="premium-uninstall-summary">
+          <div>
+            <span>{text(locale, 'Selecionados', 'Selected')}</span>
+            <strong>{apps.length}</strong>
+          </div>
+          <div>
+            <span>{text(locale, 'Espaço estimado', 'Estimated space')}</span>
+            <strong>{estimatedSpace}</strong>
+          </div>
+        </div>
+
+        <ul className="premium-uninstall-selection">
+          {apps.map((app) => (
+            <li key={app.id}>
+              <span className="premium-app-icon">
+                <BrandIcon brand={app.id} label={app.title} size={20} />
+              </span>
+              <span>
+                <strong>{app.title}</strong>
+                <small>{app.publisher}</small>
+              </span>
+              <b>{app.size}</b>
+            </li>
+          ))}
+        </ul>
+
+        <div className="premium-uninstall-warning">
+          <ProductIcon name="shield" size={19} weight="duotone" />
+          <p>
+            <strong>
+              {text(
+                locale,
+                'Nenhuma alteração real será feita nesta fase.',
+                'No real changes will be made in this phase.',
+              )}
+            </strong>
+            <span>
+              {text(
+                locale,
+                'O motor privilegiado ainda não está conectado. Itens protegidos do sistema permanecem bloqueados.',
+                'The privileged engine is not connected yet. Protected system items remain locked.',
+              )}
+            </span>
+          </p>
+        </div>
+
+        <footer>
+          <PremiumButton disabled={working} onClick={onClose}>
+            {text(locale, 'Cancelar', 'Cancel')}
+          </PremiumButton>
+          <PremiumButton disabled={working} onClick={onConfirm} tone="danger">
+            {working
+              ? text(locale, 'Desinstalando…', 'Uninstalling…')
+              : text(locale, 'Confirmar desinstalação', 'Confirm uninstall')}
+          </PremiumButton>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+const UninstallerSurface = ({
+  locale,
+  notify,
+}: {
+  readonly locale: ShellLocale;
+  readonly notify: (message: string, tone?: PremiumToastTone) => void;
+}) => {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
-  const filtered = INSTALLED_APPS.filter(({ publisher, title }) =>
-    `${title} ${publisher}`.toLocaleLowerCase('pt-BR').includes(query.toLocaleLowerCase('pt-BR')),
+  const [removed, setRemoved] = useState<ReadonlySet<string>>(new Set());
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [working, setWorking] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+  const selectedApps = INSTALLED_APPS.filter((app) => selected.has(app.id));
+  const removableApps = INSTALLED_APPS.filter((app) => !app.protected && !removed.has(app.id));
+  const allRemovableSelected =
+    removableApps.length > 0 && removableApps.every((app) => selected.has(app.id));
+  const filtered = INSTALLED_APPS.filter(
+    ({ id, publisher, title }) =>
+      !removed.has(id) &&
+      `${title} ${publisher}`
+        .toLocaleLowerCase(locale)
+        .includes(query.trim().toLocaleLowerCase(locale)),
   );
+
+  useEffect(
+    () => () => {
+      if (timer.current !== undefined) {
+        globalThis.clearTimeout(timer.current);
+      }
+    },
+    [],
+  );
+
+  const confirmUninstall = (): void => {
+    const appsToRemove = selectedApps;
+    if (appsToRemove.length === 0 || working) {
+      return;
+    }
+    setWorking(true);
+    timer.current = globalThis.setTimeout(() => {
+      setRemoved((current) => new Set([...current, ...appsToRemove.map(({ id }) => id)]));
+      setSelected(new Set());
+      setWorking(false);
+      setReviewOpen(false);
+      timer.current = undefined;
+
+      const totalSpace = formatInstalledSize(
+        appsToRemove.reduce((total, app) => total + parseInstalledSizeToMb(app.size), 0),
+        locale,
+      );
+      const message =
+        appsToRemove.length === 1
+          ? text(
+              locale,
+              `${appsToRemove[0]?.title ?? ''} foi removido no cenário demonstrativo. ${totalSpace} liberado.`,
+              `${appsToRemove[0]?.title ?? ''} was removed in the demo scenario. ${totalSpace} freed.`,
+            )
+          : text(
+              locale,
+              `${String(appsToRemove.length)} aplicativos foram removidos no cenário demonstrativo. ${totalSpace} liberados.`,
+              `${String(appsToRemove.length)} apps were removed in the demo scenario. ${totalSpace} freed.`,
+            );
+      notify(message, 'success');
+    }, 720);
+  };
 
   const selectedSize = selected.size;
   return (
@@ -919,27 +1130,60 @@ const UninstallerSurface = ({ notify }: { readonly notify: (message: string) => 
       <div className="premium-uninstall-toolbar">
         <label className="premium-search">
           <ProductIcon name="search" size={18} />
-          <span className="lb-visually-hidden">Pesquisar aplicativo instalado</span>
+          <span className="lb-visually-hidden">
+            {text(locale, 'Pesquisar aplicativo instalado', 'Search installed app')}
+          </span>
           <input
             onChange={(event) => {
               setQuery(event.currentTarget.value);
             }}
-            placeholder="Pesquisar aplicativo..."
+            placeholder={text(locale, 'Pesquisar aplicativo...', 'Search app...')}
             type="search"
             value={query}
           />
         </label>
-        <span>{humanCount(selectedSize, 'selecionado', 'selecionados')}</span>
+        <label className="premium-select-all">
+          <input
+            aria-label={text(
+              locale,
+              'Selecionar todos os aplicativos removíveis',
+              'Select all removable apps',
+            )}
+            checked={allRemovableSelected}
+            onChange={() => {
+              setSelected((current) => {
+                const next = new Set(current);
+                if (allRemovableSelected) {
+                  for (const app of removableApps) {
+                    next.delete(app.id);
+                  }
+                } else {
+                  for (const app of removableApps) {
+                    next.add(app.id);
+                  }
+                }
+                return next;
+              });
+            }}
+            type="checkbox"
+          />
+          <span>{text(locale, 'Selecionar todos', 'Select all')}</span>
+        </label>
+        <span>
+          {humanCount(
+            selectedSize,
+            text(locale, 'selecionado', 'selected'),
+            text(locale, 'selecionados', 'selected'),
+          )}
+        </span>
         <PremiumButton
           disabled={selectedSize === 0}
           onClick={() => {
-            notify(
-              `${humanCount(selectedSize, 'item preparado', 'itens preparados')} para revisão.`,
-            );
+            setReviewOpen(true);
           }}
           tone="danger"
         >
-          Revisar desinstalação
+          {text(locale, 'Desinstalar selecionado', 'Uninstall selected')}
         </PremiumButton>
       </div>
       <section className="premium-app-list">
@@ -970,10 +1214,22 @@ const UninstallerSurface = ({ notify }: { readonly notify: (message: string) => 
                 {app.publisher} · {app.category}
               </small>
             </span>
-            {app.protected ? <em>Protegido</em> : <b>{app.size}</b>}
+            {app.protected ? <em>{text(locale, 'Protegido', 'Protected')}</em> : <b>{app.size}</b>}
           </label>
         ))}
       </section>
+
+      {reviewOpen ? (
+        <UninstallReviewDialog
+          apps={selectedApps}
+          locale={locale}
+          onClose={() => {
+            setReviewOpen(false);
+          }}
+          onConfirm={confirmUninstall}
+          working={working}
+        />
+      ) : null}
     </>
   );
 };
@@ -1480,7 +1736,7 @@ export const PremiumOperationsSurface = ({
   } else if (view === 'restoration') {
     content = <RestorationSurface notify={notify} />;
   } else if (view === 'uninstaller') {
-    content = <UninstallerSurface notify={notify} />;
+    content = <UninstallerSurface locale={locale} notify={notify} />;
   } else if (view === 'downloads') {
     content = <PremiumDownloadsSurface locale={locale} notify={notify} />;
   } else if (view === 'settings') {

@@ -1486,10 +1486,27 @@
 
 .premium-uninstall-toolbar {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) auto auto;
+  grid-template-columns: minmax(240px, 1fr) auto auto auto;
   gap: 12px;
   align-items: center;
   margin-block-end: 12px;
+}
+
+.premium-select-all {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  min-block-size: 34px;
+  color: var(--premium-copy);
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.premium-select-all input {
+  inline-size: 15px;
+  block-size: 15px;
+  accent-color: var(--premium-cobalt);
 }
 
 .premium-uninstall-toolbar > span {
@@ -1890,6 +1907,132 @@
   border-block-start: 1px solid var(--premium-line);
 }
 
+.premium-uninstall-dialog {
+  inline-size: min(560px, 100%);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--premium-critical) 32%, var(--premium-line));
+}
+
+.premium-uninstall-dialog header > span {
+  color: #ffaaa3;
+  background: color-mix(in srgb, var(--premium-critical) 16%, var(--premium-surface-raised));
+}
+
+.premium-uninstall-dialog > header button:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
+.premium-uninstall-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 18px 20px 12px;
+}
+
+.premium-uninstall-summary > div {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border: 1px solid var(--premium-line-soft);
+  border-radius: 10px;
+  background: var(--premium-surface);
+}
+
+.premium-uninstall-summary span {
+  color: var(--premium-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.premium-uninstall-summary strong {
+  color: var(--premium-ink);
+  font-family: var(--lb-font-data);
+  font-size: 15px;
+}
+
+.premium-review-dialog .premium-uninstall-selection {
+  max-block-size: 190px;
+  overflow-y: auto;
+  padding: 0 20px 12px;
+}
+
+.premium-uninstall-dialog .premium-uninstall-selection li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  min-block-size: 52px;
+  padding: 8px 10px;
+  border: 1px solid var(--premium-line-soft);
+  border-radius: 9px;
+  background: var(--premium-surface);
+}
+
+.premium-uninstall-selection li > span:nth-child(2) {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-inline-size: 0;
+}
+
+.premium-uninstall-selection li strong {
+  overflow: hidden;
+  color: var(--premium-ink);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premium-uninstall-selection li small,
+.premium-uninstall-selection li b {
+  color: var(--premium-muted);
+  font-size: 9px;
+  font-weight: 560;
+}
+
+.premium-uninstall-selection li b {
+  font-family: var(--lb-font-data);
+}
+
+.premium-uninstall-dialog .premium-uninstall-selection .premium-app-icon {
+  inline-size: 34px;
+  block-size: 34px;
+  color: var(--premium-ink);
+  background: var(--premium-surface-raised);
+}
+
+.premium-uninstall-warning {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  margin: 0 20px 18px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--premium-warning) 32%, var(--premium-line-soft));
+  border-radius: 10px;
+  color: var(--premium-warning);
+  background: color-mix(in srgb, var(--premium-warning) 7%, transparent);
+}
+
+.premium-uninstall-warning p,
+.premium-uninstall-warning strong,
+.premium-uninstall-warning span {
+  display: block;
+  margin: 0;
+}
+
+.premium-uninstall-warning strong {
+  color: var(--premium-ink);
+  font-size: 10px;
+}
+
+.premium-uninstall-warning span {
+  margin-block-start: 4px;
+  color: var(--premium-copy);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
 .premium-toast {
   position: fixed;
   z-index: 100;
@@ -2009,6 +2152,14 @@
     max-inline-size: 100%;
   }
 
+  .premium-uninstall-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .premium-uninstall-toolbar > .premium-search {
+    grid-column: 1 / -1;
+  }
+
   .premium-card-grid,
   .premium-download-grid,
   .premium-app-list,
@@ -2092,6 +2243,27 @@
   border-color: #3c4b71;
 }
 
+.premium-download-grid article[data-download-state='ready-to-install'] {
+  border-color: color-mix(in srgb, var(--premium-cobalt) 55%, var(--premium-line));
+}
+
+.premium-download-grid article[data-download-state='installed'] {
+  border-color: color-mix(in srgb, var(--premium-success) 48%, var(--premium-line));
+}
+
+.premium-download-grid
+  article[data-download-state='ready-to-install']
+  .premium-download-progress
+  > span
+  strong,
+.premium-download-grid
+  article[data-download-state='installed']
+  .premium-download-progress
+  > span
+  strong {
+  color: var(--premium-success);
+}
+
 .premium-download-progress {
   display: grid;
   gap: 8px;
@@ -2145,6 +2317,11 @@
 .premium-download-progress button:hover {
   color: var(--premium-ink);
   background: var(--premium-surface-hover);
+}
+
+.premium-download-progress button:disabled {
+  opacity: 0.68;
+  cursor: wait;
 }
 
 [data-motion='reduced'] .premium-download-progress > i > span {

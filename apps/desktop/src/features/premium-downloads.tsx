@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { DOWNLOADS } from './control-center-data.js';
 import { BrandIcon } from './brand-icons.js';
 
-type DownloadState = 'idle' | 'downloading' | 'paused' | 'complete';
+type DownloadState =
+  'idle' | 'downloading' | 'paused' | 'ready-to-install' | 'installing' | 'installed' | 'error';
 
 interface DownloadProgress {
   readonly progress: number;
@@ -71,8 +72,8 @@ export const PremiumDownloadsSurface = ({
           notify(
             text(
               locale,
-              `${title} foi preparado no cenário. Nenhum instalador real foi executado.`,
-              `${title} was prepared in this scenario. No real installer was executed.`,
+              `${title} está pronto para instalar. Nenhum instalador real foi executado ainda.`,
+              `${title} is ready to install. No real installer has been executed yet.`,
             ),
             'success',
           );
@@ -81,11 +82,34 @@ export const PremiumDownloadsSurface = ({
           ...current,
           [id]: {
             progress: nextProgress,
-            state: nextProgress >= 100 ? 'complete' : 'downloading',
+            state: nextProgress >= 100 ? 'ready-to-install' : 'downloading',
           },
         };
       });
     }, 140);
+  };
+
+  const installDownload = (id: string, title: string): void => {
+    stopTimer(id);
+    setDownloads((current) => ({
+      ...current,
+      [id]: { progress: 100, state: 'installing' },
+    }));
+    timers.current[id] = globalThis.setTimeout(() => {
+      setDownloads((current) => ({
+        ...current,
+        [id]: { progress: 100, state: 'installed' },
+      }));
+      timers.current[id] = undefined;
+      notify(
+        text(
+          locale,
+          `${title} foi instalado no cenário demonstrativo. Nenhuma alteração real foi feita no Windows.`,
+          `${title} was installed in the demo scenario. No real Windows changes were made.`,
+        ),
+        'success',
+      );
+    }, 720);
   };
 
   const pauseDownload = (id: string): void => {
@@ -164,11 +188,17 @@ export const PremiumDownloadsSurface = ({
                 >
                   <span>
                     <strong>
-                      {current.state === 'complete'
-                        ? text(locale, 'Pronto', 'Ready')
-                        : current.state === 'paused'
-                          ? text(locale, 'Pausado', 'Paused')
-                          : text(locale, 'Preparando', 'Preparing')}
+                      {current.state === 'ready-to-install'
+                        ? text(locale, 'Pronto para instalar', 'Ready to install')
+                        : current.state === 'installing'
+                          ? text(locale, 'Instalando', 'Installing')
+                          : current.state === 'installed'
+                            ? text(locale, 'Instalado', 'Installed')
+                            : current.state === 'error'
+                              ? text(locale, 'Falha no download', 'Download failed')
+                              : current.state === 'paused'
+                                ? text(locale, 'Pausado', 'Paused')
+                                : text(locale, 'Preparando', 'Preparing')}
                     </strong>
                     <b>{current.progress}%</b>
                   </span>
@@ -194,17 +224,32 @@ export const PremiumDownloadsSurface = ({
                       >
                         {text(locale, 'Continuar', 'Resume')}
                       </button>
-                    ) : (
+                    ) : current.state === 'ready-to-install' ? (
+                      <button
+                        onClick={() => {
+                          installDownload(item.id, item.title);
+                        }}
+                        type="button"
+                      >
+                        {text(locale, 'Instalar', 'Install')}
+                      </button>
+                    ) : current.state === 'error' ? (
                       <button
                         onClick={() => {
                           startDownload(item.id, item.title);
                         }}
                         type="button"
                       >
-                        {text(locale, 'Preparar novamente', 'Prepare again')}
+                        {text(locale, 'Tentar novamente', 'Try again')}
+                      </button>
+                    ) : (
+                      <button disabled type="button">
+                        {current.state === 'installing'
+                          ? text(locale, 'Instalando…', 'Installing…')
+                          : text(locale, 'Instalado', 'Installed')}
                       </button>
                     )}
-                    {current.state === 'complete' ? null : (
+                    {current.state === 'downloading' || current.state === 'paused' ? (
                       <button
                         onClick={() => {
                           cancelDownload(item.id);
@@ -213,7 +258,16 @@ export const PremiumDownloadsSurface = ({
                       >
                         {text(locale, 'Cancelar', 'Cancel')}
                       </button>
-                    )}
+                    ) : current.state === 'ready-to-install' ? (
+                      <button
+                        onClick={() => {
+                          cancelDownload(item.id);
+                        }}
+                        type="button"
+                      >
+                        {text(locale, 'Descartar', 'Discard')}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               )}
