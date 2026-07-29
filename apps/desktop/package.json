@@ -31,7 +31,8 @@
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "simple-icons": "16.27.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",

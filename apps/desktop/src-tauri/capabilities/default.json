@@ -3,5 +3,5 @@
   "identifier": "main-shell",
   "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
   "windows": ["main"],
-  "permissions": ["core:event:allow-listen"]
+  "permissions": ["core:event:allow-listen", "core:window:allow-set-theme"]
 }

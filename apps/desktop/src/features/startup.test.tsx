@@ -1,5 +1,6 @@
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
+import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import type {
   ShellInstallerIdentityJson,
@@ -9,7 +10,9 @@ import type {
 
 import { InstallerHandoff } from './installer-handoff.js';
 import { PremiumInstallerHandoff } from './premium-installer-handoff.js';
-import { StartupSurface } from './startup.js';
+import { STARTUP_PRESENTATION_STEPS, StartupSurface } from './startup.js';
+
+const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
 const installer: ShellInstallerIdentityJson = {
   publisher: 'Liiiraa Boost Development',
@@ -140,6 +143,23 @@ describe('installer handoff', () => {
 });
 
 describe('startup', () => {
+  it('keeps the visible launch sequence aligned with every typed splash step', () => {
+    expect(STARTUP_PRESENTATION_STEPS).toEqual([
+      'initializing-webview',
+      'loading-local-state',
+      'validating-installation',
+      'opening-shell',
+    ]);
+
+    for (const [index, step] of STARTUP_PRESENTATION_STEPS.entries()) {
+      const markup = renderToStaticMarkup(
+        <StartupSurface locale="pt-BR" state={{ kind: 'splash', step }} version="0.2.0" />,
+      );
+      expect(markup).toContain(`aria-valuenow="${String(index + 1)}"`);
+      expect(markup).toContain(`${String((index + 1) * 25)}%`);
+    }
+  });
+
   it.each(startupStates)('renders complete accessible copy for $kind state', (state) => {
     const markup = renderToStaticMarkup(
       <StartupSurface firstLaunch locale="pt-BR" state={state} version="0.2.0" />,

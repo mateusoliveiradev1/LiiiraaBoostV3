@@ -3,10 +3,7 @@
   "productName": "Liiiraa Boost",
   "version": "0.0.0",
   "identifier": "com.liiiraa.boost",
-  "build": {
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
-  },
+  "build": { "beforeBuildCommand": "pnpm build", "frontendDist": "../dist" },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
@@ -57,30 +54,20 @@
           "identifier": "main-shell",
           "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
           "windows": ["main"],
-          "permissions": ["core:event:allow-listen"]
+          "permissions": ["core:event:allow-listen", "core:window:allow-set-theme"]
         }
       ]
     }
   },
   "plugins": {
-    "deep-link": {
-      "desktop": {
-        "schemes": ["liiiraa-boost"]
-      }
-    },
-    "updater": {
-      "endpoints": [],
-      "pubkey": "",
-      "windows": null
-    },
+    "deep-link": { "desktop": { "schemes": ["liiiraa-boost"] } },
+    "updater": { "endpoints": [], "pubkey": "", "windows": null },
     "liiiraa-shell": {
       "identity": {
         "publisher": "Liiiraa Boost",
         "version": "0.0.0",
         "channel": "development",
-        "compatibility": {
-          "windows": ["10", "11"]
-        },
+        "compatibility": { "windows": ["10", "11"] },
         "updater": {
           "signatureRequired": true,
           "publicKeyConfigured": false,

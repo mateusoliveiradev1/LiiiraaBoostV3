@@ -1,0 +1,234 @@
+html[data-theme='light'] {
+  color-scheme: light;
+  --lb-surface-canvas: #eef2f7;
+  --lb-surface-inset: #e7ecf3;
+  --lb-surface-work: #f7f9fc;
+  --lb-surface-raised: #ffffff;
+  --lb-cobalt-action: #3158c8;
+  --lb-cobalt-signal: #274cb8;
+  --lb-text-primary: #111827;
+  --lb-text-secondary: #465269;
+  --lb-text-tertiary: #5e6b82;
+  --lb-line-subtle: #d7dee9;
+  --lb-line-strong: #bcc7d7;
+  --lb-focus-ring: #244fc4;
+  --lb-success: #08784f;
+  --lb-warning: #8f5a00;
+  --lb-critical: #b52d42;
+  --lb-disabled-fill: #e2e7ef;
+  --lb-disabled-text: #6b7588;
+  --lb-scrim: rgba(25, 35, 52, 0.48);
+}
+
+html[data-theme='light'],
+html[data-theme='light'] body,
+html[data-theme='light'] #root {
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-canvas);
+}
+
+html[data-theme='light'] .premium-operations,
+html[data-theme='light'] .desktop-app-shell {
+  --premium-void: #eef2f7;
+  --premium-sidebar: #f5f7fb;
+  --premium-canvas: #eef2f7;
+  --premium-surface: #f8fafc;
+  --premium-surface-raised: #ffffff;
+  --premium-surface-hover: #edf2fa;
+  --premium-line: #c8d1df;
+  --premium-line-soft: #dbe2ec;
+  --premium-ink: #111827;
+  --premium-copy: #3e4a60;
+  --premium-muted: #5c687d;
+  --premium-cobalt: #3d5fce;
+  --premium-cobalt-strong: #2f52c1;
+  --premium-cobalt-soft: rgba(61, 95, 206, 0.1);
+  --premium-success: #08784f;
+  --premium-warning: #8f5a00;
+  --premium-critical: #b52d42;
+  color: var(--premium-ink);
+  background: var(--premium-void);
+}
+
+html[data-theme='light']
+  :where(
+    .desktop-app-shell .desktop-title-region,
+    .desktop-app-shell .lb-title-bar,
+    .desktop-app-shell .desktop-shell-body,
+    .desktop-app-shell .desktop-goal-region,
+    .desktop-app-shell .desktop-work-canvas
+  ) {
+  border-color: var(--premium-line-soft);
+  color: var(--premium-ink);
+  background: var(--premium-canvas);
+}
+
+html[data-theme='light'] .desktop-app-shell[data-route-path] .desktop-title-region,
+html[data-theme='light'] .desktop-app-shell[data-route-path] .lb-title-bar {
+  border-color: var(--premium-line-soft);
+  background: #f8fafc;
+}
+
+html[data-theme='light'] .lb-product-wordmark span:first-child,
+html[data-theme='light'] .lb-account-trigger-copy strong {
+  color: #111827;
+}
+
+html[data-theme='light'] .lb-product-wordmark span:last-child,
+html[data-theme='light'] .lb-product-mark,
+html[data-theme='light'] .lb-title-actions .lb-icon-button {
+  color: #3158c8;
+}
+
+html[data-theme='light'] .desktop-app-shell .desktop-goal-region,
+html[data-theme='light'] .desktop-app-shell .lb-goal-rail {
+  background: var(--premium-sidebar);
+}
+
+html[data-theme='light'] .desktop-app-shell .lb-goal[aria-current='page'] {
+  border-color: #aebde2;
+  color: #18316f;
+  background: #e3eafe;
+}
+
+html[data-theme='light'] .desktop-app-shell .lb-goal[aria-current='page'] .lb-goal-icon {
+  color: #3158c8;
+}
+
+html[data-theme='light']
+  :where(
+    .premium-route-header,
+    .premium-hardware-strip,
+    .premium-readiness-card,
+    .premium-game-card,
+    .premium-metrics-panel,
+    .premium-next-actions,
+    .premium-session-status,
+    .premium-operation-row,
+    .premium-shortcut-section,
+    .premium-power-grid article,
+    .premium-service-list article,
+    .premium-restore-grid article,
+    .premium-app-list label,
+    .premium-download-grid article,
+    .premium-settings-layout,
+    .premium-settings-list article,
+    .premium-settings-actions button,
+    .premium-about-hero,
+    .premium-about-grid article,
+    .premium-activity-timeline article,
+    .premium-current-plan
+  ) {
+  border-color: var(--premium-line-soft);
+  color: var(--premium-ink);
+  background: var(--premium-surface);
+}
+
+html[data-theme='light']
+  :where(
+    .premium-filter-bar,
+    .premium-plan-bar,
+    .premium-dialog-backdrop,
+    .desktop-notification-drawer,
+    .desktop-first-run-checkpoint,
+    .desktop-startup-surface,
+    .desktop-premium-first-run
+  ) {
+  color: var(--premium-ink, var(--lb-text-primary));
+}
+
+html[data-theme='light']
+  :where(
+    .premium-filter-bar input,
+    .premium-settings-layout select,
+    .premium-uninstall-toolbar input,
+    .premium-button,
+    .premium-filter-chips button,
+    .premium-settings-layout nav button
+  ) {
+  border-color: var(--premium-line);
+  color: var(--premium-ink);
+  background: var(--premium-surface-raised);
+}
+
+html[data-theme='light'] .premium-settings-layout > nav {
+  border-color: var(--premium-line-soft);
+  background: #f1f4f9;
+}
+
+html[data-theme='light'] .premium-settings-layout nav button:hover,
+html[data-theme='light'] .premium-settings-layout nav button[aria-current='page'] {
+  border-color: #afbee0;
+  color: #17316f;
+  background: #e1e9fd;
+}
+
+html[data-theme='light'] .premium-route-header {
+  background: rgba(248, 250, 252, 0.98);
+}
+
+html[data-theme='light'] .premium-route-icon {
+  border-color: #b8c5dd;
+  color: #3158c8;
+  background: #e8edfa;
+}
+
+html[data-theme='light'] .premium-demo-badge {
+  border-color: #b8c5dd;
+  color: #344158;
+  background: #eef2f8;
+}
+
+html[data-theme='light']
+  :where(
+    .premium-route-header p,
+    .premium-operation-copy p,
+    .premium-settings-layout small,
+    .premium-download-grid p,
+    .premium-app-list small,
+    .premium-game-card p
+  ) {
+  color: var(--premium-copy);
+}
+
+html[data-theme='light'] .premium-hardware-strip strong,
+html[data-theme='light'] .premium-metric-grid strong {
+  color: var(--premium-ink);
+}
+
+html[data-theme='light'] .premium-metric-grid > div {
+  background: #ffffff;
+}
+
+html[data-theme='light'] .premium-live {
+  color: #08784f;
+}
+
+html[data-theme='light'] .premium-review-dialog,
+html[data-theme='light'] .premium-toast {
+  border-color: var(--premium-line);
+  color: var(--premium-ink);
+  background: #ffffff;
+}
+
+html[data-theme='light'] .desktop-premium-first-run,
+html[data-theme='light'] .desktop-startup-surface {
+  border-color: #c8d1df;
+  color: #111827;
+  background: #f8fafc;
+}
+
+html[data-theme='light'] .desktop-first-run-checkpoint {
+  background: #ffffff;
+}
+
+html[data-theme='light'] ::selection {
+  color: #ffffff;
+  background: #3158c8;
+}
+
+@media (forced-colors: active) {
+  html[data-theme='light'] * {
+    forced-color-adjust: auto;
+  }
+}

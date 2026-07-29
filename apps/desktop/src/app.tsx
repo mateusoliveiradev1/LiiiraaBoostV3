@@ -50,7 +50,7 @@ import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
-import { StartupSurface } from './features/startup.js';
+import { STARTUP_PRESENTATION_STEPS, StartupSurface } from './features/startup.js';
 import { NotificationCenter } from './features/notification-center.js';
 import { PremiumOperationsSurface } from './features/premium-operations.js';
 import type { PremiumRouteId } from './features/control-center-data.js';
@@ -483,16 +483,48 @@ interface NativeShellState {
   readonly windowState?: ShellWindowStateJson;
 }
 
+const DESKTOP_FIRST_RUN_STORAGE_KEY = 'liiiraa.desktop.first-run.v1';
+
+interface DesktopFirstRunState {
+  readonly installerAccepted: boolean;
+  readonly startupAcknowledged: boolean;
+}
+
+const loadDesktopFirstRunState = (): DesktopFirstRunState => {
+  try {
+    const parsed = JSON.parse(
+      globalThis.localStorage.getItem(DESKTOP_FIRST_RUN_STORAGE_KEY) ?? 'null',
+    ) as Partial<DesktopFirstRunState> | null;
+    return Object.freeze({
+      installerAccepted: parsed?.installerAccepted === true,
+      startupAcknowledged: parsed?.startupAcknowledged === true,
+    });
+  } catch {
+    return Object.freeze({ installerAccepted: false, startupAcknowledged: false });
+  }
+};
+
+const persistDesktopFirstRunState = (state: DesktopFirstRunState): void => {
+  try {
+    globalThis.localStorage.setItem(DESKTOP_FIRST_RUN_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // A blocked storage backend may repeat onboarding but must never block startup.
+  }
+};
+
 const createInitialNativeShellState = (nativeShell: boolean): NativeShellState => {
   const startupState: ShellStartupStateJson = nativeShell
     ? { kind: 'splash', step: 'initializing-webview' }
     : { kind: 'ready' };
+  const firstRun = nativeShell
+    ? loadDesktopFirstRunState()
+    : Object.freeze({ installerAccepted: true, startupAcknowledged: true });
 
   return Object.freeze({
     activityEvents: Object.freeze([]),
     activityItems: Object.freeze([]),
-    installerAccepted: !nativeShell,
-    startupAcknowledged: !nativeShell,
+    installerAccepted: firstRun.installerAccepted,
+    startupAcknowledged: firstRun.startupAcknowledged,
     startupState,
   });
 };
@@ -1776,14 +1808,55 @@ const NativeShellPresentation = ({
   const { preferences } = useDesktopPreferences();
   const locale = detectLocale(preferences.locale);
   const version = nativeState.installerIdentity?.version ?? 'development';
+  const [startupStepIndex, setStartupStepIndex] = useState(0);
+  const [startupPresentationComplete, setStartupPresentationComplete] = useState(false);
+
+  useEffect(() => {
+    const stepDuration = preferences.motion === 'reduced' ? 45 : 190;
+    const timers = STARTUP_PRESENTATION_STEPS.slice(1).map((_step, index) =>
+      globalThis.setTimeout(
+        () => {
+          setStartupStepIndex(index + 1);
+        },
+        stepDuration * (index + 1),
+      ),
+    );
+    timers.push(
+      globalThis.setTimeout(
+        () => {
+          setStartupPresentationComplete(true);
+        },
+        stepDuration * STARTUP_PRESENTATION_STEPS.length +
+          (preferences.motion === 'reduced' ? 20 : 140),
+      ),
+    );
+    return () => {
+      for (const timer of timers) globalThis.clearTimeout(timer);
+    };
+  }, [preferences.motion]);
 
   let content: ReactNode;
-  if (nativeState.installerIdentity === undefined) {
+  const startupRequiresAttention =
+    nativeState.startupState.kind === 'failure' || nativeState.startupState.kind === 'updating';
+  const startupStillRunning =
+    nativeState.startupState.kind !== 'ready' ||
+    nativeState.installerIdentity === undefined ||
+    !startupPresentationComplete;
+  const presentedStartupState: ShellStartupStateJson = startupRequiresAttention
+    ? nativeState.startupState
+    : startupPresentationComplete
+      ? nativeState.startupState
+      : {
+          kind: 'splash',
+          step: STARTUP_PRESENTATION_STEPS[startupStepIndex] ?? 'opening-shell',
+        };
+
+  if (startupStillRunning || startupRequiresAttention) {
     content = (
       <StartupSurface
-        firstLaunch
+        firstLaunch={!nativeState.startupAcknowledged}
         locale={locale}
-        state={nativeState.startupState}
+        state={presentedStartupState}
         version={version}
       />
     );
@@ -1975,7 +2048,6 @@ const NativeDesktopApp = ({
           setNativeState((current) =>
             Object.freeze({
               ...current,
-              installerAccepted: false,
               installerIdentity,
             }),
           );
@@ -1995,7 +2067,6 @@ const NativeDesktopApp = ({
           setNativeState((current) =>
             Object.freeze({
               ...current,
-              startupAcknowledged: false,
               startupState,
             }),
           );
@@ -2035,8 +2106,8 @@ const NativeDesktopApp = ({
   );
 
   const acknowledgeStartup = useCallback((pathname?: string): void => {
-    setNativeState((current) =>
-      Object.freeze({
+    setNativeState((current) => {
+      const next = Object.freeze({
         ...current,
         startupAcknowledged: true,
         ...(pathname === undefined
@@ -2047,8 +2118,13 @@ const NativeDesktopApp = ({
                 requestId: `local-startup-${pathname}`,
               }),
             }),
-      }),
-    );
+      });
+      persistDesktopFirstRunState({
+        installerAccepted: next.installerAccepted,
+        startupAcknowledged: true,
+      });
+      return next;
+    });
   }, []);
 
   return (
@@ -2065,7 +2141,18 @@ const NativeDesktopApp = ({
         commandMetadata={commandMetadata}
         nativeState={nativeState}
         onAcceptInstaller={() => {
-          setNativeState((current) => Object.freeze({ ...current, installerAccepted: true }));
+          setNativeState((current) => {
+            const next = Object.freeze({
+              ...current,
+              installerAccepted: true,
+              startupAcknowledged: true,
+            });
+            persistDesktopFirstRunState({
+              installerAccepted: true,
+              startupAcknowledged: true,
+            });
+            return next;
+          });
         }}
         onAcknowledgeStartup={acknowledgeStartup}
         onResolveClose={resolveClose}

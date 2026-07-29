@@ -11,6 +11,13 @@ import type { ShippingLocale } from '../locales/i18n.js';
 
 type LocalizedCopy = Readonly<Record<ShippingLocale, string>>;
 
+export const STARTUP_PRESENTATION_STEPS = Object.freeze([
+  'initializing-webview',
+  'loading-local-state',
+  'validating-installation',
+  'opening-shell',
+] as const satisfies readonly ShellStartupSplashStateJson['step'][]);
+
 export interface StartupSurfaceProps {
   readonly firstLaunch?: boolean;
   readonly locale: ShippingLocale;
@@ -252,7 +259,22 @@ export const StartupSurface = ({
             'en-US': 'The local interface is ready.',
             'pt-BR': 'A interface local está pronta.',
           } satisfies LocalizedCopy);
-
+  const loadingSteps =
+    state.kind === 'splash'
+      ? (Object.entries(SPLASH_COPY) as readonly [
+          ShellStartupSplashStateJson['step'],
+          LocalizedCopy,
+        ][])
+      : state.kind === 'updating'
+        ? (Object.entries(UPDATE_COPY) as readonly [
+            ShellStartupUpdatingStateJson['step'],
+            LocalizedCopy,
+          ][])
+        : [];
+  const activeLoadingIndex =
+    state.kind === 'splash' || state.kind === 'updating'
+      ? loadingSteps.findIndex(([step]) => step === state.step)
+      : -1;
   return (
     <main
       aria-labelledby="startup-surface-title"
@@ -262,7 +284,10 @@ export const StartupSurface = ({
       data-startup-kind={state.kind}
     >
       <StartupHeader firstLaunch={firstLaunch} locale={locale} version={version} />
-      <section aria-labelledby="startup-status-title">
+      <section
+        aria-labelledby="startup-status-title"
+        className={state.kind === 'ready' ? undefined : 'desktop-loading-stage'}
+      >
         <h2 id="startup-status-title">{copy(locale, statusCopy)}</h2>
         {state.kind === 'ready' ? (
           <p>
@@ -274,7 +299,44 @@ export const StartupSurface = ({
             })}
           </p>
         ) : (
-          <LbProgress label={copy(locale, statusCopy)} />
+          <>
+            <div aria-hidden="true" className="desktop-loading-visual">
+              <span className="desktop-loading-core">
+                <ProductIcon name="lightning" size={30} weight="duotone" />
+              </span>
+              <span className="desktop-loading-orbit" />
+              <span className="desktop-loading-orbit desktop-loading-orbit-secondary" />
+            </div>
+            <div className="desktop-loading-progress">
+              <LbProgress
+                label={copy(locale, statusCopy)}
+                maxValue={loadingSteps.length}
+                value={activeLoadingIndex + 1}
+              />
+            </div>
+            <ol className="desktop-loading-steps">
+              {loadingSteps.map(([step, label], index) => (
+                <li
+                  aria-current={index === activeLoadingIndex ? 'step' : undefined}
+                  data-state={
+                    index < activeLoadingIndex
+                      ? 'complete'
+                      : index === activeLoadingIndex
+                        ? 'active'
+                        : 'pending'
+                  }
+                  key={step}
+                >
+                  <ProductIcon
+                    name={index < activeLoadingIndex ? 'check' : 'loading'}
+                    size={15}
+                    weight={index === activeLoadingIndex ? 'fill' : 'regular'}
+                  />
+                  <span>{copy(locale, label)}</span>
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </section>
       <StartupTrust locale={locale} />

@@ -15,6 +15,11 @@ import {
   type OperationItem,
   type PremiumRouteId,
 } from './control-center-data.js';
+import { BrandIcon } from './brand-icons.js';
+import { PremiumDownloadsSurface } from './premium-downloads.js';
+import { usePremiumLocalization } from './premium-localization.js';
+import { PremiumSettingsSurface } from './premium-settings.js';
+import { PremiumToast, type PremiumToastMessage, type PremiumToastTone } from './premium-toast.js';
 
 interface PremiumOperationsSurfaceProps {
   readonly locale: ShellLocale;
@@ -174,13 +179,17 @@ const RouteHeader = ({
 const HardwareStrip = () => (
   <section aria-label="Hardware detectado no cenário" className="premium-hardware-strip">
     {[
-      ['windows', 'Sistema', 'Windows 11 Pro · 24H2'],
-      ['cpu', 'Processador', 'AMD Ryzen 7 7800X3D'],
-      ['graphics', 'Placa de vídeo', 'NVIDIA GeForce RTX 4070'],
-      ['memory', 'Memória', '32 GB DDR5 · 6000 MT/s'],
-    ].map(([icon, label, value]) => (
+      ['windows', 'Sistema', 'Windows 11 Pro · 24H2', 'windows'],
+      ['amd', 'Processador', 'AMD Ryzen 7 7800X3D', 'cpu'],
+      ['nvidia', 'Placa de vídeo', 'NVIDIA GeForce RTX 4070', 'graphics'],
+      ['', 'Memória', '32 GB DDR5 · 6000 MT/s', 'memory'],
+    ].map(([brand, label, value, icon]) => (
       <div key={label}>
-        <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
+        {brand ? (
+          <BrandIcon brand={brand} label={value ?? brand} size={21} />
+        ) : (
+          <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
+        )}
         <span>
           <small>{label}</small>
           <strong>{value}</strong>
@@ -339,8 +348,16 @@ const HomeSurface = ({
         </div>
       </article>
       <article className="premium-game-card">
-        <div className="premium-game-visual" aria-hidden="true">
-          <ProductIcon name="competitive" size={42} weight="duotone" />
+        <div className="premium-game-visual">
+          <img
+            alt="Counter-Strike 2"
+            decoding="async"
+            loading="eager"
+            src="/games/counter-strike-2.jpg"
+          />
+          <span aria-hidden="true" className="premium-game-brand">
+            <BrandIcon brand="counter-strike-2" size={22} />
+          </span>
         </div>
         <span className="premium-section-label">Jogo selecionado</span>
         <h2>Counter-Strike 2</h2>
@@ -907,7 +924,7 @@ const UninstallerSurface = ({ notify }: { readonly notify: (message: string) => 
               type="checkbox"
             />
             <span className="premium-app-icon">
-              <ProductIcon name={app.category === 'Jogo' ? 'game' : 'app'} size={21} />
+              <BrandIcon brand={app.id} label={app.title} size={21} />
             </span>
             <span>
               <strong>{app.title}</strong>
@@ -923,7 +940,12 @@ const UninstallerSurface = ({ notify }: { readonly notify: (message: string) => 
   );
 };
 
-const DownloadsSurface = ({ notify }: { readonly notify: (message: string) => void }) => {
+/** @deprecated Retained for fixture compatibility; the premium download state machine is used. */
+export const LegacyDownloadsSurface = ({
+  notify,
+}: {
+  readonly notify: (message: string) => void;
+}) => {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<Record<string, 'concluído' | 'ocioso' | 'preparando'>>({});
   const filtered = DOWNLOADS.filter(({ category, description, title }) =>
@@ -955,7 +977,7 @@ const DownloadsSurface = ({ notify }: { readonly notify: (message: string) => vo
           return (
             <article key={item.id}>
               <span className="premium-download-icon">
-                <ProductIcon name={item.icon} size={25} weight="duotone" />
+                <BrandIcon brand={item.id} label={item.title} size={25} />
               </span>
               <div>
                 <small>{item.category}</small>
@@ -1000,7 +1022,8 @@ const SETTINGS_ROUTE_BY_SECTION: Readonly<Record<string, string>> = Object.freez
   Privacidade: '/settings/privacy',
 });
 
-const SettingsSurface = ({
+/** @deprecated Retained only for fixture compatibility while settings migrate to typed preferences. */
+export const LegacySettingsSurface = ({
   navigate,
   notify,
   routeState = 'general',
@@ -1321,18 +1344,20 @@ const ReviewDialog = ({
 };
 
 export const PremiumOperationsSurface = ({
-  locale: _locale,
+  locale,
   navigate,
   settingsSection,
   view,
 }: PremiumOperationsSurfaceProps) => {
+  const rootRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [operationState, setOperationState] = useState<Record<string, boolean>>({
     ...INITIAL_OPERATION_STATE,
   });
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState<PremiumToastMessage | null>(null);
+  usePremiumLocalization(rootRef, locale);
 
   useEffect(() => {
     setQuery('');
@@ -1355,12 +1380,12 @@ export const PremiumOperationsSurface = ({
   }, [reviewOpen]);
 
   useEffect(() => {
-    if (toast.length === 0) {
+    if (toast === null) {
       return undefined;
     }
     const timer = globalThis.setTimeout(() => {
-      setToast('');
-    }, 3200);
+      setToast(null);
+    }, 4200);
     return () => {
       globalThis.clearTimeout(timer);
     };
@@ -1370,8 +1395,8 @@ export const PremiumOperationsSurface = ({
     ([id, active]) => INITIAL_OPERATION_STATE[id] !== active,
   ).length;
 
-  const notify = (message: string): void => {
-    setToast(message);
+  const notify = (message: string, tone: PremiumToastTone = 'success'): void => {
+    setToast({ id: Date.now(), message, tone });
   };
 
   let content: ReactNode;
@@ -1402,9 +1427,16 @@ export const PremiumOperationsSurface = ({
   } else if (view === 'uninstaller') {
     content = <UninstallerSurface notify={notify} />;
   } else if (view === 'downloads') {
-    content = <DownloadsSurface notify={notify} />;
+    content = <PremiumDownloadsSurface locale={locale} notify={notify} />;
   } else if (view === 'settings') {
-    content = <SettingsSurface navigate={navigate} notify={notify} routeState={settingsSection} />;
+    content = (
+      <PremiumSettingsSurface
+        locale={locale}
+        navigate={navigate}
+        notify={notify}
+        routeState={settingsSection}
+      />
+    );
   } else if (view === 'activity') {
     content = <ActivitySurface notify={notify} />;
   } else {
@@ -1412,7 +1444,7 @@ export const PremiumOperationsSurface = ({
   }
 
   return (
-    <main className="premium-operations" data-premium-route={view}>
+    <main className="premium-operations" data-premium-route={view} ref={rootRef}>
       <RouteHeader
         action={
           view === 'downloads' ? (
@@ -1451,21 +1483,15 @@ export const PremiumOperationsSurface = ({
           }}
         />
       ) : null}
-      {toast.length > 0 ? (
-        <div aria-live="polite" className="premium-toast" role="status">
-          <ProductIcon name="check" size={20} weight="duotone" />
-          <span>{toast}</span>
-          <button
-            aria-label="Fechar mensagem"
-            onClick={() => {
-              setToast('');
-            }}
-            type="button"
-          >
-            <ProductIcon name="close" size={18} />
-          </button>
-        </div>
-      ) : null}
+      {toast === null ? null : (
+        <PremiumToast
+          locale={locale}
+          onClose={() => {
+            setToast(null);
+          }}
+          toast={toast}
+        />
+      )}
     </main>
   );
 };

@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ChangeEvent,
   type ReactNode,
 } from 'react';
@@ -23,18 +24,16 @@ import {
   type ShellSetTrayPreferenceCommandJson,
 } from '@liiiraa/feature-shell';
 
-import {
-  LocaleProvider,
-  formatMessage,
-  type MessageId,
-} from './locales/i18n.js';
+import { LocaleProvider, formatMessage, type MessageId } from './locales/i18n.js';
 
-export const DESKTOP_PREFERENCES_STORAGE_KEY =
-  'liiiraa.desktop.preferences.v3' as const;
-export const PREVIOUS_DESKTOP_PREFERENCES_STORAGE_KEY =
-  'liiiraa.desktop.preferences.v2' as const;
-export const LEGACY_DESKTOP_PREFERENCES_STORAGE_KEY =
-  'liiiraa.desktop.preferences.v1' as const;
+export const DESKTOP_PREFERENCES_STORAGE_KEY = 'liiiraa.desktop.preferences.v3' as const;
+export const PREVIOUS_DESKTOP_PREFERENCES_STORAGE_KEY = 'liiiraa.desktop.preferences.v2' as const;
+export const LEGACY_DESKTOP_PREFERENCES_STORAGE_KEY = 'liiiraa.desktop.preferences.v1' as const;
+export const DESKTOP_THEME_STORAGE_KEY = 'liiiraa.desktop.theme.v1' as const;
+
+export const DESKTOP_THEMES = Object.freeze(['dark', 'light', 'system'] as const);
+export type DesktopTheme = (typeof DESKTOP_THEMES)[number];
+export type ResolvedDesktopTheme = Exclude<DesktopTheme, 'system'>;
 
 export interface DesktopPreferenceStorage {
   readonly getItem: (key: string) => string | null;
@@ -88,10 +87,7 @@ export const loadDesktopPreferences = (
     ]) {
       const serialized = storage.getItem(key);
       if (serialized !== null) {
-        return restorePreferences(
-          JSON.parse(serialized),
-          windowsLocale,
-        ).preferences;
+        return restorePreferences(JSON.parse(serialized), windowsLocale).preferences;
       }
     }
 
@@ -111,9 +107,7 @@ export const persistDesktopPreferences = (
   );
 };
 
-export const getAppearanceAttributes = (
-  preferences: DesktopPreferences,
-): AppearanceAttributes => {
+export const getAppearanceAttributes = (preferences: DesktopPreferences): AppearanceAttributes => {
   const density = selectDensityMetrics(preferences.density);
 
   return Object.freeze({
@@ -121,11 +115,11 @@ export const getAppearanceAttributes = (
     density: preferences.density,
     motion: preferences.motion,
     dataText: preferences.dataText,
-    interfaceScale: `${String(preferences.interfaceScale)}%` as AppearanceAttributes['interfaceScale'],
+    interfaceScale:
+      `${String(preferences.interfaceScale)}%` as AppearanceAttributes['interfaceScale'],
     minimumTargetPx:
       `${String(density.minimumTargetPx)}px` as AppearanceAttributes['minimumTargetPx'],
-    bodyFontPx:
-      `${String(density.bodyFontPx)}px` as AppearanceAttributes['bodyFontPx'],
+    bodyFontPx: `${String(density.bodyFontPx)}px` as AppearanceAttributes['bodyFontPx'],
   });
 };
 
@@ -151,19 +145,19 @@ export const createTrayPreferenceCommand = (
     messageType: 'desktop.shell.set-tray-preference.command',
     ...metadata,
     payload: Object.freeze({
-      preference: trayEnabled
-        ? 'keep-game-detection-in-tray'
-        : 'close-window',
+      preference: trayEnabled ? 'keep-game-detection-in-tray' : 'close-window',
     }),
   });
 
 export interface DesktopPreferencesContextValue {
   readonly preferences: DesktopPreferences;
   readonly dispatch: (event: PreferenceEvent) => void;
+  readonly resolvedTheme: ResolvedDesktopTheme;
+  readonly setTheme: (theme: DesktopTheme) => void;
+  readonly theme: DesktopTheme;
 }
 
-const DesktopPreferencesContext =
-  createContext<DesktopPreferencesContextValue | null>(null);
+const DesktopPreferencesContext = createContext<DesktopPreferencesContextValue | null>(null);
 
 const browserPreferenceStorage = (): DesktopPreferenceStorage | undefined => {
   try {
@@ -171,6 +165,22 @@ const browserPreferenceStorage = (): DesktopPreferenceStorage | undefined => {
   } catch {
     return undefined;
   }
+};
+
+const loadDesktopTheme = (storage: DesktopPreferenceStorage | undefined): DesktopTheme => {
+  try {
+    const stored = storage?.getItem(DESKTOP_THEME_STORAGE_KEY);
+    return DESKTOP_THEMES.some((theme) => theme === stored) ? (stored as DesktopTheme) : 'dark';
+  } catch {
+    return 'dark';
+  }
+};
+
+const detectSystemTheme = (): ResolvedDesktopTheme => {
+  if (typeof globalThis.matchMedia !== 'function') {
+    return 'dark';
+  }
+  return globalThis.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 };
 
 export interface DesktopPreferencesProviderProps {
@@ -192,11 +202,12 @@ export const DesktopPreferencesProvider = ({
   storage = browserPreferenceStorage(),
   windowsLocale,
 }: DesktopPreferencesProviderProps): ReactNode => {
-  const [preferences, reducerDispatch] = useReducer(
-    reducePreferences,
-    undefined,
-    () => loadDesktopPreferences(storage, windowsLocale),
+  const [preferences, reducerDispatch] = useReducer(reducePreferences, undefined, () =>
+    loadDesktopPreferences(storage, windowsLocale),
   );
+  const [theme, setThemeState] = useState<DesktopTheme>(() => loadDesktopTheme(storage));
+  const [systemTheme, setSystemTheme] = useState<ResolvedDesktopTheme>(detectSystemTheme);
+  const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
     if (hostPreferenceEvent !== undefined) {
@@ -211,9 +222,23 @@ export const DesktopPreferencesProvider = ({
   }, [preferences, storage]);
 
   useEffect(() => {
+    if (typeof globalThis.matchMedia !== 'function') {
+      return;
+    }
+    const media = globalThis.matchMedia('(prefers-color-scheme: light)');
+    const updateSystemTheme = (): void => {
+      setSystemTheme(media.matches ? 'light' : 'dark');
+    };
+    updateSystemTheme();
+    media.addEventListener('change', updateSystemTheme);
+    return () => {
+      media.removeEventListener('change', updateSystemTheme);
+    };
+  }, []);
+
+  useEffect(() => {
     const root =
-      documentElement ??
-      (typeof document === 'undefined' ? null : document.documentElement);
+      documentElement ?? (typeof document === 'undefined' ? null : document.documentElement);
     if (root === null) {
       return;
     }
@@ -223,10 +248,38 @@ export const DesktopPreferencesProvider = ({
     root.dataset['density'] = attributes.density;
     root.dataset['motion'] = attributes.motion;
     root.dataset['dataText'] = attributes.dataText;
+    root.dataset['theme'] = resolvedTheme;
+    root.dataset['themePreference'] = theme;
+    root.style.colorScheme = resolvedTheme;
     root.style.setProperty('--lb-interface-scale', attributes.interfaceScale);
     root.style.setProperty('--lb-minimum-target', attributes.minimumTargetPx);
     root.style.setProperty('--lb-body-font-size', attributes.bodyFontPx);
-  }, [documentElement, preferences]);
+  }, [documentElement, preferences, resolvedTheme, theme]);
+
+  useEffect(() => {
+    if (!Reflect.has(globalThis, '__TAURI_INTERNALS__')) {
+      return;
+    }
+    void import('@tauri-apps/api/window')
+      .then(async ({ getCurrentWindow }) => {
+        await getCurrentWindow().setTheme(resolvedTheme);
+      })
+      .catch(() => {
+        // The web preview and restricted shells keep the CSS theme without native chrome control.
+      });
+  }, [resolvedTheme]);
+
+  const setTheme = useCallback(
+    (nextTheme: DesktopTheme): void => {
+      setThemeState(nextTheme);
+      try {
+        storage?.setItem(DESKTOP_THEME_STORAGE_KEY, nextTheme);
+      } catch {
+        // A blocked storage backend must not make appearance controls unusable.
+      }
+    },
+    [storage],
+  );
 
   const dispatch = useCallback(
     (event: PreferenceEvent) => {
@@ -237,45 +290,36 @@ export const DesktopPreferencesProvider = ({
       }
 
       if (event.type === 'set-locale') {
-        sendHostCommand(
-          createLocalePreferenceCommand(event.locale, commandMetadata()),
-        );
+        sendHostCommand(createLocalePreferenceCommand(event.locale, commandMetadata()));
       } else if (event.type === 'set-tray-enabled') {
-        sendHostCommand(
-          createTrayPreferenceCommand(event.enabled, commandMetadata()),
-        );
+        sendHostCommand(createTrayPreferenceCommand(event.enabled, commandMetadata()));
       }
     },
     [commandMetadata, sendHostCommand],
   );
 
   const contextValue = useMemo<DesktopPreferencesContextValue>(
-    () => Object.freeze({ dispatch, preferences }),
-    [dispatch, preferences],
+    () => Object.freeze({ dispatch, preferences, resolvedTheme, setTheme, theme }),
+    [dispatch, preferences, resolvedTheme, setTheme, theme],
   );
 
   return createElement(
     DesktopPreferencesContext.Provider,
     { value: contextValue },
-    createElement(
-      LocaleProvider,
-      {
-        children,
-        locale: preferences.locale,
-        onLocaleChange: (locale: DesktopLocale) => {
-          dispatch({ type: 'set-locale', locale });
-        },
+    createElement(LocaleProvider, {
+      children,
+      locale: preferences.locale,
+      onLocaleChange: (locale: DesktopLocale) => {
+        dispatch({ type: 'set-locale', locale });
       },
-    ),
+    }),
   );
 };
 
 export const useDesktopPreferences = (): DesktopPreferencesContextValue => {
   const context = useContext(DesktopPreferencesContext);
   if (context === null) {
-    throw new Error(
-      'useDesktopPreferences must be used inside DesktopPreferencesProvider.',
-    );
+    throw new Error('useDesktopPreferences must be used inside DesktopPreferencesProvider.');
   }
   return context;
 };

@@ -1,6 +1,6 @@
 import { LbButton, ProductIcon } from '@liiiraa/design-system';
 import type { ShellInstallerIdentityJson } from '@liiiraa/contracts-ts';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 
 import type { ShippingLocale } from '../locales/i18n.js';
 import type { InstallerSignatureState, InstallerUpdateIdentity } from './installer-handoff.js';
@@ -40,6 +40,7 @@ export const PremiumInstallerHandoff = ({
   signatureState = identity.channel === 'development' ? 'development-self-signed' : 'unknown',
   updateIdentity = identity.channel === 'development' ? 'disabled' : 'unknown',
 }: PremiumInstallerHandoffProps): ReactNode => {
+  const technicalRef = useRef<HTMLDetailsElement>(null);
   const compatibility = identity.windowsCompatibility;
   const compatible = compatibility.kind === 'supported';
   const identityAccepted =
@@ -197,8 +198,20 @@ export const PremiumInstallerHandoff = ({
             })}
           </LbButton>
           <LbButton
+            onPress={() => {
+              const technical = technicalRef.current;
+              if (technical !== null) {
+                technical.open = true;
+                technical.scrollIntoView({
+                  behavior:
+                    document.documentElement.dataset['motion'] === 'reduced' ? 'auto' : 'smooth',
+                  block: 'nearest',
+                });
+                technical.querySelector('summary')?.focus();
+              }
+              onOpenVerification?.();
+            }}
             variant="secondary"
-            {...(onOpenVerification === undefined ? {} : { onPress: onOpenVerification })}
           >
             {copy(locale, {
               'en-US': 'Review verification',
@@ -207,7 +220,7 @@ export const PremiumInstallerHandoff = ({
           </LbButton>
         </div>
 
-        <details className="desktop-first-run-technical">
+        <details className="desktop-first-run-technical" ref={technicalRef}>
           <summary>
             {copy(locale, {
               'en-US': 'Technical installation details',

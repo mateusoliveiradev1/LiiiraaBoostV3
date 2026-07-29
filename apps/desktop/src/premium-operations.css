@@ -1943,3 +1943,295 @@
     transition: none;
   }
 }
+
+.premium-download-search {
+  display: grid;
+  gap: 7px;
+  margin-block-end: 14px;
+  color: var(--premium-muted);
+  font-size: 11px;
+}
+
+.premium-download-search > span:last-child {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  min-block-size: 42px;
+  padding-inline: 12px;
+  border: 1px solid var(--premium-line);
+  border-radius: 9px;
+  background: var(--premium-surface);
+}
+
+.premium-download-search input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  outline: 0;
+  color: var(--premium-ink);
+  background: transparent;
+}
+
+.premium-download-grid article[data-download-state='downloading'] {
+  border-color: #3c4b71;
+}
+
+.premium-download-progress {
+  display: grid;
+  gap: 8px;
+  align-self: stretch;
+  min-inline-size: 180px;
+}
+
+.premium-download-progress > span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--premium-copy);
+  font-size: 11px;
+}
+
+.premium-download-progress > span b {
+  color: var(--premium-ink);
+  font-family: var(--lb-font-data);
+}
+
+.premium-download-progress > i {
+  display: block;
+  block-size: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--premium-line-soft);
+}
+
+.premium-download-progress > i > span {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--premium-cobalt);
+  transition: inline-size 140ms linear;
+}
+
+.premium-download-progress > div {
+  display: flex;
+  gap: 7px;
+}
+
+.premium-download-progress button {
+  min-block-size: 30px;
+  padding-inline: 10px;
+  border: 1px solid var(--premium-line);
+  border-radius: 7px;
+  color: var(--premium-copy);
+  background: transparent;
+  cursor: pointer;
+}
+
+.premium-download-progress button:hover {
+  color: var(--premium-ink);
+  background: var(--premium-surface-hover);
+}
+
+[data-motion='reduced'] .premium-download-progress > i > span {
+  transition: none;
+}
+
+.premium-brand-icon {
+  --brand-color: #7f91a8;
+  display: inline-grid;
+  flex: 0 0 auto;
+  inline-size: 38px;
+  block-size: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--brand-color) 34%, #2b3444);
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--brand-color) 78%, #ffffff);
+  background: color-mix(in srgb, var(--brand-color) 11%, #0d1119);
+}
+
+.premium-brand-svg {
+  display: block;
+  fill: currentColor;
+}
+
+.premium-brand-svg-microsoft {
+  fill: none;
+}
+
+.premium-brand-svg-windows {
+  color: #1688e8;
+}
+
+.premium-brand-svg-openai {
+  color: #10a37f;
+}
+
+.premium-brand-icon-fallback {
+  color: #c4ccd8;
+  font: 700 11px/1 var(--lb-font-data);
+  letter-spacing: 0.03em;
+}
+
+[data-theme='light'] .premium-brand-icon {
+  border-color: color-mix(in srgb, var(--brand-color) 30%, #c6ceda);
+  color: color-mix(in srgb, var(--brand-color) 74%, #152033);
+  background: color-mix(in srgb, var(--brand-color) 8%, #ffffff);
+}
+
+.premium-hardware-strip .premium-brand-icon {
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 8px;
+}
+
+.premium-game-visual {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 132px;
+  overflow: hidden;
+  border: 1px solid var(--premium-line-soft);
+  border-radius: 10px;
+  background: #0a0d12;
+}
+
+.premium-game-visual > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.premium-game-visual::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 42%, rgba(5, 7, 10, 0.78));
+  content: '';
+  pointer-events: none;
+}
+
+.premium-game-brand {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: 10px;
+  inset-inline-start: 10px;
+}
+
+.premium-game-brand .premium-brand-icon,
+.premium-app-icon .premium-brand-icon,
+.premium-download-icon .premium-brand-icon {
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  border-radius: inherit;
+}
+
+.premium-toast-complete {
+  position: fixed;
+  z-index: 70;
+  inset-block-end: 28px;
+  inset-inline-end: 28px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 32px;
+  gap: 12px;
+  align-items: center;
+  inline-size: min(390px, calc(100vw - 40px));
+  min-block-size: 76px;
+  padding: 13px 14px 15px;
+  overflow: hidden;
+  border: 1px solid var(--premium-line);
+  border-radius: 12px;
+  color: var(--premium-ink);
+  background: #111620;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.28);
+  animation: premium-toast-enter 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.premium-toast-icon {
+  display: grid;
+  inline-size: 36px;
+  block-size: 36px;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--premium-cobalt-strong);
+  background: var(--premium-cobalt-soft);
+}
+
+.premium-toast-complete[data-tone='success'] .premium-toast-icon {
+  color: var(--premium-success);
+  background: rgba(69, 213, 138, 0.11);
+}
+
+.premium-toast-complete[data-tone='warning'] .premium-toast-icon {
+  color: var(--premium-warning);
+  background: rgba(242, 184, 75, 0.12);
+}
+
+.premium-toast-copy {
+  display: grid;
+  gap: 3px;
+  min-inline-size: 0;
+}
+
+.premium-toast-copy strong {
+  font-size: 13px;
+}
+
+.premium-toast-copy small {
+  color: var(--premium-copy);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.premium-toast-complete > button {
+  display: grid;
+  inline-size: 32px;
+  block-size: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--premium-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.premium-toast-complete > button:hover {
+  color: var(--premium-ink);
+  background: var(--premium-surface-hover);
+}
+
+.premium-toast-timeout {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 2px;
+  transform-origin: left;
+  background: var(--premium-cobalt);
+  animation: premium-toast-timeout 4.2s linear forwards;
+}
+
+@keyframes premium-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes premium-toast-timeout {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+[data-motion='reduced'] .premium-toast-complete,
+[data-motion='reduced'] .premium-toast-timeout {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-toast-complete,
+  .premium-toast-timeout {
+    animation: none;
+  }
+}
