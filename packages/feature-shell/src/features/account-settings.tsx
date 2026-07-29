@@ -251,12 +251,31 @@ const consentLabel = (key: ConnectedConsentKey, locale: ShellLocale): string => 
 };
 
 export interface SettingsSurfaceProps {
+  readonly activeSection?: string;
   readonly children?: ReactNode;
   readonly locale: ShellLocale;
+  readonly onNavigate?: (section: string) => void;
   readonly scenarioId: string;
 }
 
-export const SettingsSurface = ({ children, locale, scenarioId }: SettingsSurfaceProps) => {
+const SETTINGS_SECTIONS = Object.freeze([
+  ['general', 'settings', { en: 'General', 'pt-BR': 'Geral' }],
+  ['appearance', 'sliders', { en: 'Appearance', 'pt-BR': 'Aparência' }],
+  ['accessibility', 'profile', { en: 'Accessibility', 'pt-BR': 'Acessibilidade' }],
+  ['privacy', 'shield', { en: 'Privacy', 'pt-BR': 'Privacidade' }],
+  ['notifications', 'activity', { en: 'Notifications', 'pt-BR': 'Notificações' }],
+  ['background', 'app', { en: 'Background', 'pt-BR': 'Segundo plano' }],
+  ['updates', 'recovery', { en: 'Updates', 'pt-BR': 'Atualizações' }],
+  ['advanced', 'cpu', { en: 'Advanced', 'pt-BR': 'Avançado' }],
+] as const);
+
+export const SettingsSurface = ({
+  activeSection = 'general',
+  children,
+  locale,
+  onNavigate,
+  scenarioId,
+}: SettingsSurfaceProps) => {
   const [consents, setConsents] = useState<ConnectedConsent>(DEFAULT_CONNECTED_CONSENT);
   const [scale, setScale] = useState('100');
   const [density, setDensity] = useState('comfortable');
@@ -281,6 +300,23 @@ export const SettingsSurface = ({ children, locale, scenarioId }: SettingsSurfac
         title={locale === 'pt-BR' ? 'Configurações' : 'Settings'}
       />
       <ScenarioMarker scenarioId={scenarioId} />
+      <nav
+        aria-label={locale === 'pt-BR' ? 'Seções de configurações' : 'Settings sections'}
+        className="lb-settings-tabs"
+      >
+        {SETTINGS_SECTIONS.map(([section, icon, label]) => (
+          <LbButton
+            key={section}
+            onPress={() => {
+              onNavigate?.(section);
+            }}
+            variant={activeSection === section ? 'primary' : 'quiet'}
+          >
+            <ProductIcon name={icon} size={16} />
+            {label[locale]}
+          </LbButton>
+        ))}
+      </nav>
       <div className="lb-settings-grid">
         <section
           aria-labelledby="connected-consent-title"

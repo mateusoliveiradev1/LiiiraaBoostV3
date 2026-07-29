@@ -66,6 +66,7 @@ const route = <
 
 export const desktopRouteTree = Object.freeze([
   route('/', 'calibration', 'CalibrationWorkspace', 'welcome'),
+  route('/login', 'account-settings', 'AccountSettingsSurface', 'login'),
   route('/calibration/welcome', 'calibration', 'CalibrationWorkspace', 'welcome'),
   route('/calibration/trust', 'calibration', 'CalibrationWorkspace', 'trust'),
   route('/calibration/inventory', 'calibration', 'CalibrationWorkspace', 'inventory'),
@@ -100,9 +101,15 @@ export const desktopRouteTree = Object.freeze([
   route('/plans/:planId/result', 'preview-workflow', 'PreviewWorkflowSurface', 'result'),
   route('/measure/overview', 'measure', 'MeasureSurface', 'overview'),
   route('/measure/baseline', 'measure', 'MeasureSurface', 'baseline'),
+  route('/measure/capture', 'measure', 'MeasureSurface', 'capture'),
   route('/measure/sessions', 'measure', 'MeasureSurface', 'sessions'),
   route('/measure/compare', 'measure', 'MeasureSurface', 'compare'),
+  route('/measure/rejected', 'measure', 'MeasureSurface', 'rejected-comparison'),
+  route('/measure/diff', 'measure', 'MeasureSurface', 'diff'),
+  route('/measure/timeline', 'measure', 'MeasureSurface', 'timeline'),
   route('/measure/reports', 'measure', 'MeasureSurface', 'reports'),
+  route('/measure/collector-overhead', 'measure', 'MeasureSurface', 'collector-overhead'),
+  route('/measure/degraded-coverage', 'measure', 'MeasureSurface', 'degraded-coverage'),
   route('/recover/overview', 'recover', 'RecoverSurface', 'overview'),
   route('/recover/ledger', 'recover', 'RecoverSurface', 'ledger'),
   route('/recover/snapshots', 'recover', 'RecoverSurface', 'snapshots'),

@@ -1,0 +1,38 @@
+:root {
+  --color-bg: #05070a;
+  --color-sidebar: #070a0e;
+  --color-surface: #090d12;
+  --color-surface-raised: #0c1218;
+  --color-border: #1c2a33;
+  --color-border-strong: #2b4452;
+  --color-text: #f1f7fa;
+  --color-text-muted: #91a3af;
+  --color-text-dim: #60727e;
+  --color-primary: #69d3f8;
+  --color-primary-hover: #9be4ff;
+  --color-success: #71d6ad;
+  --color-warning: #e4b66b;
+  --color-danger: #ee7f86;
+  --font-sans: Inter, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+  --shadow-overlay: 0 8px 20px rgb(0 0 0 / 35%);
+}

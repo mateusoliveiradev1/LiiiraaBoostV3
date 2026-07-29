@@ -30,9 +30,11 @@ export interface WindowControlHandlers {
 }
 
 export interface WindowTitleBarProps {
+  readonly accountLabel?: string;
   readonly controls?: WindowControlHandlers;
   readonly globalStatus: string;
   readonly locale?: EvidenceLocale;
+  readonly onOpenAccount?: () => void;
   readonly onOpenActivity?: () => void;
   readonly onOpenCommand?: () => void;
   readonly productName?: string;
@@ -40,9 +42,11 @@ export interface WindowTitleBarProps {
 }
 
 export const WindowTitleBar = ({
+  accountLabel,
   controls,
   globalStatus,
   locale = 'en',
+  onOpenAccount,
   onOpenActivity,
   onOpenCommand,
   productName = 'Liiiraa Boost',
@@ -86,6 +90,23 @@ export const WindowTitleBar = ({
           label={locale === 'pt-BR' ? 'Abrir atividade' : 'Open activity'}
           onPress={onOpenActivity}
         />
+      ) : null}
+
+      {onOpenAccount ? (
+        <Button
+          aria-label={locale === 'pt-BR' ? 'Abrir perfil e conta' : 'Open profile and account'}
+          className="lb-account-trigger"
+          data-lb-control
+          onPress={onOpenAccount}
+        >
+          <span aria-hidden="true" className="lb-account-avatar">
+            LP
+          </span>
+          <span className="lb-account-trigger-copy">
+            <strong>{accountLabel ?? (locale === 'pt-BR' ? 'Meu perfil' : 'My profile')}</strong>
+            <small>Premium</small>
+          </span>
+        </Button>
       ) : null}
     </div>
     {controls ? (

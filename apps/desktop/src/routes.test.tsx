@@ -17,6 +17,7 @@ import {
 
 const EXPECTED_ROUTE_PATTERNS = Object.freeze([
   '/',
+  '/login',
   '/calibration/welcome',
   '/calibration/trust',
   '/calibration/inventory',
@@ -51,9 +52,15 @@ const EXPECTED_ROUTE_PATTERNS = Object.freeze([
   '/plans/:planId/result',
   '/measure/overview',
   '/measure/baseline',
+  '/measure/capture',
   '/measure/sessions',
   '/measure/compare',
+  '/measure/rejected',
+  '/measure/diff',
+  '/measure/timeline',
   '/measure/reports',
+  '/measure/collector-overhead',
+  '/measure/degraded-coverage',
   '/recover/overview',
   '/recover/ledger',
   '/recover/snapshots',

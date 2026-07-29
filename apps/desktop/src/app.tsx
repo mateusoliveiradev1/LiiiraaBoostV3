@@ -1,11 +1,9 @@
 import {
-  AccountSurface,
   ActivitySurface,
   AssistantSurface,
   CalibrationWorkspace,
   ContextualHome,
   DocumentationSurface,
-  EntitlementSurface,
   FavoritesManager,
   ImproveSurface,
   MeasureSurface,
@@ -44,7 +42,6 @@ import {
   LbSearchField,
   OPERATIONAL_STATES,
   ProductIcon,
-  RouteHeader,
   StatusSignal,
   WindowTitleBar,
 } from '@liiiraa/design-system';
@@ -53,6 +50,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { InstallerHandoff } from './features/installer-handoff.js';
+import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
 import { StartupSurface } from './features/startup.js';
 import {
   createShellBridge,
@@ -598,9 +596,15 @@ const measureViewFor = (
   const views = {
     overview: 'overview',
     baseline: 'baseline',
+    capture: 'capture',
     sessions: 'session-history',
     compare: 'matched-comparison',
+    'rejected-comparison': 'rejected-comparison',
+    diff: 'diff',
+    timeline: 'timeline',
     reports: 'report-preview',
+    'collector-overhead': 'collector-overhead',
+    'degraded-coverage': 'degraded-coverage',
   } as const;
   return Object.hasOwn(views, routeState) ? views[routeState as keyof typeof views] : 'overview';
 };
@@ -631,19 +635,91 @@ const previewStateFor = (
   return Object.hasOwn(states, routeState) ? states[routeState as keyof typeof states] : 'review';
 };
 
-interface StandaloneSectionProps {
-  readonly children: ReactNode;
-  readonly locale: ShellLocale;
-  readonly purpose: Readonly<Record<ShellLocale, string>>;
-  readonly title: Readonly<Record<ShellLocale, string>>;
-}
+const improveGoalFor = (
+  routeState: DesktopRouteMatch['state'],
+): NonNullable<Parameters<typeof ImproveSurface>[0]['selectedGoal']> => {
+  const goals = {
+    'goal-performance': 'performance',
+    'goal-latency': 'latency',
+    'goal-stability': 'stability',
+    'goal-privacy': 'privacy',
+  } as const;
+  return Object.hasOwn(goals, routeState) ? goals[routeState as keyof typeof goals] : 'performance';
+};
 
-const StandaloneSection = ({ children, locale, purpose, title }: StandaloneSectionProps) => (
-  <main>
-    <RouteHeader purpose={purpose[locale]} title={title[locale]} />
-    {children}
-  </main>
-);
+const accountViewFor = (routeState: DesktopRouteMatch['state']): AccountExperienceView => {
+  if (
+    routeState === 'login' ||
+    routeState === 'subscription' ||
+    routeState === 'device' ||
+    routeState === 'security'
+  ) {
+    return routeState;
+  }
+  return 'overview';
+};
+
+const improvePathFor = (
+  target: Parameters<NonNullable<Parameters<typeof ImproveSurface>[0]['onNavigate']>>[0],
+  id?: string,
+): string => {
+  switch (target) {
+    case 'goals':
+      return id === undefined ? '/improve' : `/goals/${id}`;
+    case 'component':
+      return `/components/${id ?? 'windows'}`;
+    case 'operation':
+      return `/operations/${id ?? 'power-balanced-review'}`;
+    case 'plan-review':
+      return `/plans/${id ?? 'recommended-plan'}/review`;
+    case 'confirmation':
+      return '/plans/recommended-plan/confirm';
+    case 'restart':
+      return '/plans/recommended-plan/restart';
+    case 'recovery-history':
+      return '/recover/ledger';
+    case 'no-change-receipt':
+      return '/plans/recommended-plan/result';
+  }
+};
+
+const preparePathFor = (
+  target: Parameters<NonNullable<Parameters<typeof PrepareSurface>[0]['onNavigate']>>[0],
+): string => {
+  const paths = {
+    library: '/games',
+    'manual-add': '/games/add',
+    overview: '/games/northstar-arena/overview',
+    profile: '/games/northstar-arena/profile',
+    evidence: '/games/northstar-arena/evidence',
+    history: '/games/northstar-arena/history',
+    preflight: '/games/northstar-arena/preflight',
+    'active-session': '/session/demo-session/active',
+    restoration: '/session/demo-session/restoring',
+    result: '/session/demo-session/result',
+    recovery: '/recover/overview',
+  } as const;
+  return paths[target];
+};
+
+const measurePathFor = (
+  target: Parameters<NonNullable<Parameters<typeof MeasureSurface>[0]['onNavigate']>>[0],
+): string => {
+  const paths = {
+    overview: '/measure/overview',
+    baseline: '/measure/baseline',
+    capture: '/measure/capture',
+    'session-history': '/measure/sessions',
+    'matched-comparison': '/measure/compare',
+    'rejected-comparison': '/measure/rejected',
+    diff: '/measure/diff',
+    timeline: '/measure/timeline',
+    'report-preview': '/measure/reports',
+    'collector-overhead': '/measure/collector-overhead',
+    'degraded-coverage': '/measure/degraded-coverage',
+  } as const;
+  return paths[target];
+};
 
 export interface DesktopRouteOutletProps {
   readonly activityEvents?: readonly NativeActivityEvent[];
@@ -703,6 +779,9 @@ export const DesktopRouteOutlet = ({
       return (
         <PrepareSurface
           locale={locale}
+          onNavigate={(target) => {
+            navigate(preparePathFor(target));
+          }}
           scenarioId={scenarioId}
           view={prepareViewFor(route.state)}
         />
@@ -711,7 +790,16 @@ export const DesktopRouteOutlet = ({
       return (
         <ImproveSurface
           locale={locale}
+          onNavigate={(target, id) => {
+            navigate(improvePathFor(target, id));
+          }}
           scenarioId={scenarioId}
+          selectedComponent={
+            (route.params['componentId'] as
+              NonNullable<Parameters<typeof ImproveSurface>[0]['selectedComponent']> | undefined) ??
+            'windows'
+          }
+          selectedGoal={improveGoalFor(route.state)}
           {...(route.params['operationId'] === undefined
             ? {}
             : { selectedOperationId: route.params['operationId'] })}
@@ -730,6 +818,9 @@ export const DesktopRouteOutlet = ({
       return (
         <MeasureSurface
           locale={locale}
+          onNavigate={(target) => {
+            navigate(measurePathFor(target));
+          }}
           scenarioId={scenarioId}
           view={measureViewFor(route.state)}
         />
@@ -755,38 +846,30 @@ export const DesktopRouteOutlet = ({
         />
       );
     case 'AccountSettingsSurface':
-      if (route.state === 'subscription') {
-        return (
-          <StandaloneSection
-            locale={locale}
-            purpose={{
-              en: 'Review retained access, offline windows, and subscription state.',
-              'pt-BR': 'Revise o acesso mantido, janelas offline e o estado da assinatura.',
-            }}
-            title={{ en: 'Subscription', 'pt-BR': 'Assinatura' }}
-          >
-            <EntitlementSurface locale={locale} scenarioId={scenarioId} state="offline-window" />
-          </StandaloneSection>
-        );
-      }
       if (route.state === 'general' || route.pathname.startsWith('/settings/')) {
         if (route.state === 'updates') {
           return (
-            <StandaloneSection
+            <SettingsSurface
+              activeSection={route.state}
               locale={locale}
-              purpose={{
-                en: 'Verify signed update status without weakening the current version.',
-                'pt-BR':
-                  'Verifique o estado de atualizações assinadas sem enfraquecer a versão atual.',
+              onNavigate={(section) => {
+                navigate(`/settings/${section}`);
               }}
-              title={{ en: 'Updates', 'pt-BR': 'Atualizações' }}
+              scenarioId={scenarioId}
             >
               <UpdateSurface locale={locale} scenarioId={scenarioId} state="current" />
-            </StandaloneSection>
+            </SettingsSurface>
           );
         }
         return (
-          <SettingsSurface locale={locale} scenarioId={scenarioId}>
+          <SettingsSurface
+            activeSection={route.state}
+            locale={locale}
+            onNavigate={(section) => {
+              navigate(`/settings/${section}`);
+            }}
+            scenarioId={scenarioId}
+          >
             <section
               aria-labelledby="desktop-language-title"
               className="lb-settings-regional"
@@ -820,10 +903,11 @@ export const DesktopRouteOutlet = ({
         );
       }
       return (
-        <AccountSurface
+        <AccountExperience
           locale={locale}
+          navigate={navigate}
           scenarioId={scenarioId}
-          state={route.state === 'security' ? 'session-expired' : 'signed-out'}
+          view={accountViewFor(route.state)}
         />
       );
     case 'DocumentationSurface':
@@ -936,7 +1020,7 @@ const DesktopAppContent = ({
   appScale,
   catalogLocale,
   forcedColors = false,
-  initialPath = '/calibration/welcome',
+  initialPath = '/login',
   nativeState,
   onSendHostCommand,
   commandMetadata,
@@ -1288,6 +1372,38 @@ const DesktopAppContent = ({
     [nativeState],
   );
 
+  if (route.pathname === '/login') {
+    return (
+      <div
+        className="desktop-app-shell desktop-auth-root"
+        data-app-scale={String(effectiveScale)}
+        data-forced-colors={forcedColors ? 'active' : 'system'}
+        data-motion={motion ? 'reduced' : 'responsive'}
+        data-route-path={route.pathname}
+        data-route-state={route.state}
+        data-shell-width={layout.width}
+        data-text-scale={String(textScale)}
+        data-viewport-width={String(measuredWidth)}
+      >
+        <div className="desktop-title-region" data-focus-region="title-bar">
+          <WindowTitleBar
+            globalStatus={
+              locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'
+            }
+            locale={locale}
+          />
+        </div>
+        <span className="lb-visually-hidden">{`DEMO · ${scenarioId}`}</span>
+        <AccountExperience
+          locale={locale}
+          navigate={navigate}
+          scenarioId={scenarioId}
+          view="login"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className="desktop-app-shell"
@@ -1311,8 +1427,12 @@ const DesktopAppContent = ({
         tabIndex={-1}
       >
         <WindowTitleBar
+          accountLabel={locale === 'pt-BR' ? 'Liiiraa Player' : 'Liiiraa Player'}
           globalStatus={presentation.reason}
           locale={locale}
+          onOpenAccount={() => {
+            navigate('/account/overview');
+          }}
           onOpenActivity={() => {
             rememberOverlayInvoker();
             setActivityOpen(true);

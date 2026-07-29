@@ -1,4 +1,4 @@
-import { LbButton, LbProgress } from '@liiiraa/design-system';
+import { LbButton, LbProgress, ProductIcon } from '@liiiraa/design-system';
 import type {
   ShellStartupFailureStateJson,
   ShellStartupSplashStateJson,
@@ -17,94 +17,83 @@ export interface StartupSurfaceProps {
   readonly onContinue?: () => void;
   readonly onOpenDocumentation?: () => void;
   readonly onOpenSupport?: () => void;
-  readonly onRecoveryAction?: (
-    action: ShellStartupFailureStateJson['recoveryAction'],
-  ) => void;
+  readonly onRecoveryAction?: (action: ShellStartupFailureStateJson['recoveryAction']) => void;
   readonly state: ShellStartupStateJson;
   readonly version: string;
 }
 
-const copy = (locale: ShippingLocale, value: LocalizedCopy): string =>
-  value[locale];
+const copy = (locale: ShippingLocale, value: LocalizedCopy): string => value[locale];
 
-const SPLASH_COPY: Readonly<
-  Record<ShellStartupSplashStateJson['step'], LocalizedCopy>
-> = Object.freeze({
-  'initializing-webview': {
-    'en-US': 'Initializing the local Windows interface',
-    'pt-BR': 'Inicializando a interface local do Windows',
-  },
-  'loading-local-state': {
-    'en-US': 'Loading protected local preferences',
-    'pt-BR': 'Carregando preferências locais protegidas',
-  },
-  'validating-installation': {
-    'en-US': 'Validating installation identity and compatibility',
-    'pt-BR': 'Validando a identidade e a compatibilidade da instalação',
-  },
-  'opening-shell': {
-    'en-US': 'Opening the non-elevated application shell',
-    'pt-BR': 'Abrindo a interface do aplicativo sem elevação',
-  },
-});
+const SPLASH_COPY: Readonly<Record<ShellStartupSplashStateJson['step'], LocalizedCopy>> =
+  Object.freeze({
+    'initializing-webview': {
+      'en-US': 'Initializing the local Windows interface',
+      'pt-BR': 'Inicializando a interface local do Windows',
+    },
+    'loading-local-state': {
+      'en-US': 'Loading protected local preferences',
+      'pt-BR': 'Carregando preferências locais protegidas',
+    },
+    'validating-installation': {
+      'en-US': 'Validating installation identity and compatibility',
+      'pt-BR': 'Validando a identidade e a compatibilidade da instalação',
+    },
+    'opening-shell': {
+      'en-US': 'Opening the non-elevated application shell',
+      'pt-BR': 'Abrindo a interface do aplicativo sem elevação',
+    },
+  });
 
-const UPDATE_COPY: Readonly<
-  Record<ShellStartupUpdatingStateJson['step'], LocalizedCopy>
-> = Object.freeze({
-  'verifying-signature': {
-    'en-US': 'Verifying the signed update identity',
-    'pt-BR': 'Verificando a identidade da atualização assinada',
-  },
-  'installing-update': {
-    'en-US': 'Installing the verified update',
-    'pt-BR': 'Instalando a atualização verificada',
-  },
-  'preparing-rollback': {
-    'en-US': 'Preparing a safe rollback to the previous version',
-    'pt-BR': 'Preparando uma reversão segura para a versão anterior',
-  },
-});
+const UPDATE_COPY: Readonly<Record<ShellStartupUpdatingStateJson['step'], LocalizedCopy>> =
+  Object.freeze({
+    'verifying-signature': {
+      'en-US': 'Verifying the signed update identity',
+      'pt-BR': 'Verificando a identidade da atualização assinada',
+    },
+    'installing-update': {
+      'en-US': 'Installing the verified update',
+      'pt-BR': 'Instalando a atualização verificada',
+    },
+    'preparing-rollback': {
+      'en-US': 'Preparing a safe rollback to the previous version',
+      'pt-BR': 'Preparando uma reversão segura para a versão anterior',
+    },
+  });
 
-const FAILURE_COPY: Readonly<
-  Record<ShellStartupFailureStateJson['reason'], LocalizedCopy>
-> = Object.freeze({
-  'missing-webview2': {
-    'en-US':
-      'Microsoft Edge WebView2 is missing. The desktop interface cannot start safely.',
-    'pt-BR':
-      'O Microsoft Edge WebView2 está ausente. A interface não pode iniciar com segurança.',
-  },
-  'damaged-installation': {
-    'en-US':
-      'Installation files failed integrity checks. No system action was attempted.',
-    'pt-BR':
-      'Os arquivos da instalação falharam na verificação de integridade. Nenhuma ação no sistema foi tentada.',
-  },
-  'incompatible-windows-build': {
-    'en-US':
-      'This Windows build is outside the supported compatibility range.',
-    'pt-BR':
-      'Esta compilação do Windows está fora da faixa de compatibilidade aceita.',
-  },
-  'local-state-migration-failed': {
-    'en-US':
-      'Local preferences could not be migrated. Existing recovery data remains untouched.',
-    'pt-BR':
-      'Não foi possível migrar as preferências locais. Os dados de recuperação existentes permanecem intactos.',
-  },
-  'update-signature-failed': {
-    'en-US':
-      'The update signature does not match the expected publisher. The update was not opened.',
-    'pt-BR':
-      'A assinatura da atualização não corresponde ao publicador esperado. A atualização não foi aberta.',
-  },
-  'internal-startup-error': {
-    'en-US':
-      'The interface stopped during startup. Safe mode remains available without optimization authority.',
-    'pt-BR':
-      'A interface parou durante a inicialização. O modo seguro continua disponível sem autoridade de otimização.',
-  },
-});
+const FAILURE_COPY: Readonly<Record<ShellStartupFailureStateJson['reason'], LocalizedCopy>> =
+  Object.freeze({
+    'missing-webview2': {
+      'en-US': 'Microsoft Edge WebView2 is missing. The desktop interface cannot start safely.',
+      'pt-BR':
+        'O Microsoft Edge WebView2 está ausente. A interface não pode iniciar com segurança.',
+    },
+    'damaged-installation': {
+      'en-US': 'Installation files failed integrity checks. No system action was attempted.',
+      'pt-BR':
+        'Os arquivos da instalação falharam na verificação de integridade. Nenhuma ação no sistema foi tentada.',
+    },
+    'incompatible-windows-build': {
+      'en-US': 'This Windows build is outside the supported compatibility range.',
+      'pt-BR': 'Esta compilação do Windows está fora da faixa de compatibilidade aceita.',
+    },
+    'local-state-migration-failed': {
+      'en-US': 'Local preferences could not be migrated. Existing recovery data remains untouched.',
+      'pt-BR':
+        'Não foi possível migrar as preferências locais. Os dados de recuperação existentes permanecem intactos.',
+    },
+    'update-signature-failed': {
+      'en-US':
+        'The update signature does not match the expected publisher. The update was not opened.',
+      'pt-BR':
+        'A assinatura da atualização não corresponde ao publicador esperado. A atualização não foi aberta.',
+    },
+    'internal-startup-error': {
+      'en-US':
+        'The interface stopped during startup. Safe mode remains available without optimization authority.',
+      'pt-BR':
+        'A interface parou durante a inicialização. O modo seguro continua disponível sem autoridade de otimização.',
+    },
+  });
 
 const RECOVERY_ACTION_COPY: Readonly<
   Record<ShellStartupFailureStateJson['recoveryAction'], LocalizedCopy>
@@ -146,11 +135,42 @@ const StartupHeader = ({
             'pt-BR': 'Inicialização local',
           })}
     </span>
-    <h1 id="startup-surface-title">Liiiraa Boost</h1>
+    <div className="desktop-startup-brand">
+      <svg aria-hidden="true" viewBox="0 0 36 28">
+        <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" />
+        <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" />
+      </svg>
+      <h1 id="startup-surface-title">
+        Liiiraa <strong>Boost</strong>
+      </h1>
+    </div>
     <p className="desktop-startup-version">
       {copy(locale, { 'en-US': 'Version', 'pt-BR': 'Versão' })} {version}
     </p>
   </header>
+);
+
+const StartupTrust = ({ locale }: Pick<StartupSurfaceProps, 'locale'>) => (
+  <div
+    aria-label={copy(locale, {
+      'en-US': 'Startup safety guarantees',
+      'pt-BR': 'Garantias de segurança da inicialização',
+    })}
+    className="desktop-startup-trust"
+  >
+    <span>
+      <ProductIcon name="shield" size={15} />
+      {copy(locale, { 'en-US': 'Protected local state', 'pt-BR': 'Estado local protegido' })}
+    </span>
+    <span>
+      <ProductIcon name="lock" size={15} />
+      {copy(locale, { 'en-US': 'Non-elevated interface', 'pt-BR': 'Interface sem elevação' })}
+    </span>
+    <span>
+      <ProductIcon name="recovery" size={15} />
+      {copy(locale, { 'en-US': 'Recovery preserved', 'pt-BR': 'Recuperação preservada' })}
+    </span>
+  </div>
 );
 
 export const StartupSurface = ({
@@ -172,11 +192,7 @@ export const StartupSurface = ({
         data-lb-region
         data-startup-kind={state.kind}
       >
-        <StartupHeader
-          firstLaunch={firstLaunch}
-          locale={locale}
-          version={version}
-        />
+        <StartupHeader firstLaunch={firstLaunch} locale={locale} version={version} />
         <section aria-labelledby="startup-failure-title" role="alert">
           <h2 id="startup-failure-title">
             {copy(locale, {
@@ -194,6 +210,7 @@ export const StartupSurface = ({
             })}
           </p>
         </section>
+        <StartupTrust locale={locale} />
         <div className="desktop-startup-actions">
           <LbButton
             onPress={() => {
@@ -205,9 +222,7 @@ export const StartupSurface = ({
           </LbButton>
           <LbButton
             variant="secondary"
-            {...(onOpenDocumentation === undefined
-              ? {}
-              : { onPress: onOpenDocumentation })}
+            {...(onOpenDocumentation === undefined ? {} : { onPress: onOpenDocumentation })}
           >
             {copy(locale, {
               'en-US': 'Open startup documentation',
@@ -216,9 +231,7 @@ export const StartupSurface = ({
           </LbButton>
           <LbButton
             variant="quiet"
-            {...(onOpenSupport === undefined
-              ? {}
-              : { onPress: onOpenSupport })}
+            {...(onOpenSupport === undefined ? {} : { onPress: onOpenSupport })}
           >
             {copy(locale, {
               'en-US': 'Open support',
@@ -248,11 +261,7 @@ export const StartupSurface = ({
       data-lb-region
       data-startup-kind={state.kind}
     >
-      <StartupHeader
-        firstLaunch={firstLaunch}
-        locale={locale}
-        version={version}
-      />
+      <StartupHeader firstLaunch={firstLaunch} locale={locale} version={version} />
       <section aria-labelledby="startup-status-title">
         <h2 id="startup-status-title">{copy(locale, statusCopy)}</h2>
         {state.kind === 'ready' ? (
@@ -268,6 +277,7 @@ export const StartupSurface = ({
           <LbProgress label={copy(locale, statusCopy)} />
         )}
       </section>
+      <StartupTrust locale={locale} />
       {state.kind === 'ready' ? (
         <div className="desktop-startup-actions">
           <LbButton

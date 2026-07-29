@@ -119,6 +119,7 @@ export default defineConfig([
             'apps/desktop/tests/browser/fixtures.ts',
             'apps/desktop/tests/browser/harness.config.pw.ts',
             'apps/desktop/tests/browser/keyboard.ts',
+            'apps/desktop/tests/browser/account-navigation.spec.ts',
             'apps/desktop/tests/browser/routes.spec.ts',
             'apps/desktop/tests/browser/scenarios.spec.ts',
             'apps/desktop/tests/browser/visual.spec.ts',
