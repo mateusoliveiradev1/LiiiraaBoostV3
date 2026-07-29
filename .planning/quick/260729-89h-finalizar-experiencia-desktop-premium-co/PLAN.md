@@ -1,7 +1,7 @@
 ---
 quick_id: 260729-89h
 slug: finalizar-experiencia-desktop-premium-co
-status: in_progress
+status: complete
 validation: true
 description: 'Finalizar a experiência desktop premium com loading, login, perfil e rotas internas funcionais.'
 ---

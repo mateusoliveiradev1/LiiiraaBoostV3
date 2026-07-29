@@ -272,10 +272,11 @@ Items acknowledged and carried forward from previous milestone close:
 
 ### Quick Tasks Completed
 
-| #          | Description                                              | Date       | Commit  | Status       | Directory                                                                                                           |
-| ---------- | -------------------------------------------------------- | ---------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
-| 260728-m84 | Implementar exatamente o conceito dark aprovado          | 2026-07-28 | 437cbef | Verified     | [260728-m84-implementar-exatamente-o-conceito-dark-a](./quick/260728-m84-implementar-exatamente-o-conceito-dark-a/) |
-| 260728-ndw | Unificar rotas, ícones e instalador ao conceito aprovado | 2026-07-29 | 1b62551 | Needs Review | [260728-ndw-unificar-todas-as-rotas-desktop-ao-conce](./quick/260728-ndw-unificar-todas-as-rotas-desktop-ao-conce/) |
+| #          | Description                                                       | Date       | Commit  | Status       | Directory                                                                                                           |
+| ---------- | ----------------------------------------------------------------- | ---------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| 260728-m84 | Implementar exatamente o conceito dark aprovado                   | 2026-07-28 | 437cbef | Verified     | [260728-m84-implementar-exatamente-o-conceito-dark-a](./quick/260728-m84-implementar-exatamente-o-conceito-dark-a/) |
+| 260728-ndw | Unificar rotas, ícones e instalador ao conceito aprovado          | 2026-07-29 | 1b62551 | Needs Review | [260728-ndw-unificar-todas-as-rotas-desktop-ao-conce](./quick/260728-ndw-unificar-todas-as-rotas-desktop-ao-conce/) |
+| 260729-89h | Finalizar loading, login, perfil, planos e rotas internas premium | 2026-07-29 | c47742e | Verified     | [260729-89h-finalizar-experiencia-desktop-premium-co](./quick/260729-89h-finalizar-experiencia-desktop-premium-co/) |
 
 ## Session Continuity
 
