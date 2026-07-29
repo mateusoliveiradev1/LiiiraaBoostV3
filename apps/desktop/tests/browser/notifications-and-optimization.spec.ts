@@ -29,7 +29,9 @@ const readShellGeometry = async (page: import('@playwright/test').Page) =>
     };
   });
 
-test('@premium-navigation every sidebar route preserves the same shell geometry', async ({ page }) => {
+test('@premium-navigation every sidebar route preserves the same shell geometry', async ({
+  page,
+}) => {
   await openDesktopTestCase(page, {
     initialPath: '/home',
     operationalState: 'fixture',
@@ -38,11 +40,19 @@ test('@premium-navigation every sidebar route preserves the same shell geometry'
   });
 
   const routes = [
-    { label: 'Otimização', path: '/improve' },
-    { label: 'Jogos', path: '/prepare' },
-    { label: 'Desempenho', path: '/measure/overview' },
-    { label: 'Recuperação', path: '/recover/overview' },
+    { label: 'Modo Competitivo', path: '/competitive' },
+    { label: 'Controles rápidos', path: '/toggles' },
+    { label: 'Atalhos', path: '/shortcuts' },
+    { label: 'Planos de energia', path: '/power' },
+    { label: 'Rede', path: '/network' },
+    { label: 'Tweaks', path: '/tweaks' },
+    { label: 'Segurança', path: '/security' },
+    { label: 'Serviços', path: '/services' },
+    { label: 'Restauração', path: '/restoration' },
+    { label: 'Desinstalador', path: '/uninstaller' },
+    { label: 'Downloads', path: '/downloads' },
     { label: 'Configurações', path: '/settings/general' },
+    { label: 'Sobre', path: '/about' },
     { label: 'Visão geral', path: '/home' },
   ] as const;
 
@@ -114,54 +124,41 @@ test('@premium-notifications drawer is dismissible and never changes shell geome
   await expect(activityButton).toBeFocused();
 });
 
-test('@premium-optimization adjustments use scalable switches and keep detail navigation', async ({
+test('@premium-optimization catalog search, switches, and review are connected', async ({
   page,
 }) => {
   await openDesktopTestCase(page, {
-    initialPath: '/components/windows',
+    initialPath: '/toggles',
     operationalState: 'fixture',
     scenarioId: 'S01',
     windowsLocale: 'pt-BR',
   });
 
   const switches = page.getByRole('switch');
-  await expect(switches).toHaveCount(3);
+  await expect(switches).toHaveCount(8);
   await expect(switches.first()).toBeChecked();
-  await expect(page.getByText('2 ajustes selecionados')).toBeVisible();
-  await expect(page.locator('.lb-component-workspace')).toHaveScreenshot(
-    'optimization-switches-windows-pt-br.png',
-  );
 
-  const firstInfoButton = page
-    .locator('.lb-component-operation')
-    .first()
-    .getByRole('button', { name: /^O que .+ faz$/u });
-  await firstInfoButton.hover();
-  await page.waitForTimeout(600);
-  await expect(page.getByRole('tooltip')).toBeVisible();
-  await expect(page.getByRole('tooltip')).toContainText('O que faz');
+  const search = page.getByRole('searchbox', { name: 'Pesquisar nesta rota' });
+  await search.fill('Bluetooth');
+  await expect(page.locator('.premium-operation-row')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Bluetooth' })).toBeVisible();
+  await search.clear();
+  await expect(page.locator('.premium-operation-row')).toHaveCount(8);
 
-  await page.locator('.lb-switch').first().click();
+  await switches.first().click();
   await expect(switches.first()).not.toBeChecked();
-  await expect(page.getByText('1 ajuste selecionado')).toBeVisible();
+  await expect(page.getByText('1 alteração preparada')).toBeVisible();
 
-  await page
-    .locator('.lb-component-operation')
-    .first()
-    .getByRole('button', { name: 'Detalhes' })
-    .click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/operations/windows-game-mode-review',
-  );
+  await page.getByRole('button', { name: 'Revisar plano' }).click();
+  const review = page.getByRole('dialog', { name: 'Revise antes de continuar' });
+  await expect(review).toBeVisible();
+  await expect(review).toContainText('O motor real ainda não está conectado');
+  await page.keyboard.press('Escape');
+  await expect(review).toBeHidden();
 
-  await page.getByRole('button', { name: 'Otimização', exact: true }).click();
-  await page.getByRole('button', { name: 'Abrir', exact: true }).first().click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/components/windows',
-  );
-  await expect(page.getByRole('button', { name: 'Revisar plano selecionado' })).toBeVisible();
+  await page.getByRole('button', { name: 'Rede', exact: true }).click();
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/network');
+  await expect(page.getByRole('heading', { name: 'Rede' })).toBeVisible();
 });
 
 test('@premium-optimization excludes unsafe adjustments from selection', async ({ page }) => {

@@ -122,7 +122,7 @@ test('@a11y-visual-smoke rejects serious and critical axe findings on all 59 can
   expect(auditedPairCount).toBe(59);
 });
 
-test('@a11y-visual-smoke completes command, F6, route, locale, and favorite journeys by keyboard', async ({
+test('@a11y-visual-smoke completes command, F6, route, locale, and settings journeys by keyboard', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -171,15 +171,24 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and favorite jour
   await expect(locale).toHaveValue('pt-BR');
   await expect(page.getByLabel('Idioma')).toBeVisible();
 
-  const moveRight = page.getByRole('button', { name: 'Mover para a direita' }).first();
-  await moveRight.focus();
+  const appearanceSection = page.getByRole('button', {
+    exact: true,
+    name: 'Aparência',
+  });
+  await appearanceSection.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('status')).toContainText(/movido para a direita/iu);
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
+    'data-route-path',
+    '/settings/appearance',
+  );
+  await expect(page.getByLabel('Tema do aplicativo')).toBeVisible();
 
-  const remove = page.getByRole('button', { name: 'Remover' }).first();
-  await remove.focus();
-  await page.keyboard.press('Enter');
-  await expect(page.getByRole('status')).toContainText(/removido/iu);
+  const reduceMotion = page.getByRole('switch', {
+    name: 'Ativar Reduzir movimento',
+  });
+  await reduceMotion.focus();
+  await page.keyboard.press('Space');
+  await expect(reduceMotion).toBeChecked();
 });
 
 test('@a11y-visual-smoke keeps preview, restart, recovery, and expired access keyboard reachable', async ({

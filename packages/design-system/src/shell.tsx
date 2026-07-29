@@ -1,20 +1,12 @@
 import {
   Activity,
   Bell,
-  Bot,
-  ChartSpline,
-  Gamepad2,
   Maximize2,
   Minimize2,
   PanelRight,
-  RotateCcw,
   Search,
-  Settings2,
   ShieldCheck,
-  UserRound,
   X,
-  Zap,
-  type LucideIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button, Toolbar } from 'react-aria-components';
@@ -22,6 +14,8 @@ import { Button, Toolbar } from 'react-aria-components';
 import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.js';
 import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.js';
 import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.js';
+import { ProductIcon } from './product-icons.js';
+import type { ProductIconName } from './product-icons.js';
 
 export interface WindowControlHandlers {
   readonly close?: () => void;
@@ -156,15 +150,27 @@ export interface GoalRailProps {
   readonly utilities?: readonly GoalRailItem[];
 }
 
-const GOAL_ICONS: Readonly<Record<string, LucideIcon>> = Object.freeze({
-  account: UserRound,
-  assistant: Bot,
-  home: ChartSpline,
-  improve: Zap,
-  measure: Activity,
-  prepare: Gamepad2,
-  recover: RotateCcw,
-  settings: Settings2,
+const GOAL_ICONS: Readonly<Record<string, ProductIconName>> = Object.freeze({
+  about: 'info',
+  account: 'profile',
+  assistant: 'sparkle',
+  competitive: 'competitive',
+  downloads: 'download',
+  home: 'gauge',
+  improve: 'zap',
+  measure: 'activity',
+  network: 'wifi',
+  power: 'power',
+  prepare: 'game',
+  recover: 'recovery',
+  restoration: 'recovery',
+  security: 'shield',
+  services: 'services',
+  settings: 'settings',
+  shortcuts: 'toolbox',
+  toggles: 'toggles',
+  tweaks: 'sliders',
+  uninstaller: 'trash',
 });
 
 const GoalButtons = ({
@@ -176,7 +182,7 @@ const GoalButtons = ({
 }) => (
   <>
     {items.map((item) => {
-      const Icon = GOAL_ICONS[item.id];
+      const icon = GOAL_ICONS[item.id];
       return (
         <Button
           aria-label={item.label}
@@ -186,8 +192,8 @@ const GoalButtons = ({
           onPress={item.onPress}
           {...(item.id === activeId ? { 'aria-current': 'page' as const } : {})}
         >
-          {Icon === undefined ? null : (
-            <Icon aria-hidden="true" className="lb-goal-icon" size={20} strokeWidth={1.75} />
+          {icon === undefined ? null : (
+            <ProductIcon className="lb-goal-icon" name={icon} size={20} weight="duotone" />
           )}
           <span className="lb-goal-label">{item.label}</span>
         </Button>

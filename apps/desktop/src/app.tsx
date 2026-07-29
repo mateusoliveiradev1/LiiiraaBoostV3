@@ -32,7 +32,6 @@ import type {
   ShellWindowStateJson,
 } from '@liiiraa/contracts-ts';
 import {
-  ActivityCenter,
   ContextInspector,
   CriticalStateRail,
   GoalRail,
@@ -45,7 +44,7 @@ import {
   StatusSignal,
   WindowTitleBar,
 } from '@liiiraa/design-system';
-import type { ActivityItem, OperationalState } from '@liiiraa/design-system';
+import type { ActivityCenter, ActivityItem, OperationalState } from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
@@ -53,6 +52,8 @@ import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
 import { StartupSurface } from './features/startup.js';
 import { NotificationCenter } from './features/notification-center.js';
+import { PremiumOperationsSurface } from './features/premium-operations.js';
+import type { PremiumRouteId } from './features/control-center-data.js';
 import {
   createShellBridge,
   type ShellBridge,
@@ -737,7 +738,29 @@ export const DesktopRouteOutlet = ({
   route,
   scenarioId,
 }: DesktopRouteOutletProps): ReactNode => {
-  switch (route.definition.surface) {
+  const surfaceName: string = route.definition.surface;
+
+  if (surfaceName === 'ContextualHome') {
+    return <PremiumOperationsSurface locale={locale} navigate={navigate} view="home" />;
+  }
+  if (surfaceName === 'ActivitySurface') {
+    return <PremiumOperationsSurface locale={locale} navigate={navigate} view="activity" />;
+  }
+  if (
+    route.definition.surface === 'AccountSettingsSurface' &&
+    route.pathname.startsWith('/settings/')
+  ) {
+    return (
+      <PremiumOperationsSurface
+        locale={locale}
+        navigate={navigate}
+        settingsSection={route.state}
+        view="settings"
+      />
+    );
+  }
+
+  switch (surfaceName) {
     case 'CalibrationWorkspace':
       return (
         <CalibrationWorkspace
@@ -774,6 +797,14 @@ export const DesktopRouteOutlet = ({
           }}
           scenarioId={scenarioId}
           variant="ready"
+        />
+      );
+    case 'PremiumOperationsSurface':
+      return (
+        <PremiumOperationsSurface
+          locale={locale}
+          navigate={navigate}
+          view={route.state as PremiumRouteId}
         />
       );
     case 'PrepareSurface':
@@ -921,6 +952,8 @@ export const DesktopRouteOutlet = ({
           />
         </main>
       );
+    default:
+      throw new Error(`Unsupported desktop surface: ${surfaceName}`);
   }
 };
 
@@ -942,6 +975,9 @@ const criticalStateFor = (
 const activeGoalFor = (route: DesktopRouteMatch): string => {
   if (route.pathname.startsWith('/settings/')) {
     return 'settings';
+  }
+  if (route.definition.surface === 'PremiumOperationsSurface') {
+    return route.state;
   }
   if (route.pathname.startsWith('/account/')) {
     return 'account';
@@ -1278,31 +1314,80 @@ const DesktopAppContent = ({
         },
       },
       {
-        id: 'improve',
-        label: preferences.locale === 'pt-BR' ? 'Otimização' : 'Optimization',
+        id: 'competitive',
+        label: preferences.locale === 'pt-BR' ? 'Modo Competitivo' : 'Competitive Mode',
         onPress: () => {
-          navigate('/improve');
+          navigate('/competitive');
         },
       },
       {
-        id: 'prepare',
-        label: preferences.locale === 'pt-BR' ? 'Jogos' : 'Games',
+        id: 'toggles',
+        label: preferences.locale === 'pt-BR' ? 'Controles rápidos' : 'Quick Controls',
         onPress: () => {
-          navigate('/prepare');
+          navigate('/toggles');
         },
       },
       {
-        id: 'measure',
-        label: preferences.locale === 'pt-BR' ? 'Desempenho' : 'Performance',
+        id: 'shortcuts',
+        label: preferences.locale === 'pt-BR' ? 'Atalhos' : 'Shortcuts',
         onPress: () => {
-          navigate('/measure/overview');
+          navigate('/shortcuts');
         },
       },
       {
-        id: 'recover',
-        label: preferences.locale === 'pt-BR' ? 'Recuperação' : 'Recovery',
+        id: 'power',
+        label: preferences.locale === 'pt-BR' ? 'Planos de energia' : 'Power Plans',
         onPress: () => {
-          navigate('/recover/overview');
+          navigate('/power');
+        },
+      },
+      {
+        id: 'network',
+        label: preferences.locale === 'pt-BR' ? 'Rede' : 'Network',
+        onPress: () => {
+          navigate('/network');
+        },
+      },
+      {
+        id: 'tweaks',
+        label: 'Tweaks',
+        onPress: () => {
+          navigate('/tweaks');
+        },
+      },
+      {
+        id: 'security',
+        label: preferences.locale === 'pt-BR' ? 'Segurança' : 'Security',
+        onPress: () => {
+          navigate('/security');
+        },
+      },
+      {
+        id: 'services',
+        label: preferences.locale === 'pt-BR' ? 'Serviços' : 'Services',
+        onPress: () => {
+          navigate('/services');
+        },
+      },
+      {
+        id: 'restoration',
+        label: preferences.locale === 'pt-BR' ? 'Restauração' : 'Restoration',
+        onPress: () => {
+          navigate('/restoration');
+        },
+      },
+      {
+        id: 'uninstaller',
+        label: preferences.locale === 'pt-BR' ? 'Desinstalador' : 'Uninstaller',
+        onPress: () => {
+          navigate('/uninstaller');
+        },
+      },
+      {
+        id: 'downloads',
+        label: 'Downloads',
+        onPress: () => {
+          navigate('/downloads');
         },
       },
     ],
@@ -1316,6 +1401,13 @@ const DesktopAppContent = ({
         label: preferences.locale === 'pt-BR' ? 'Configurações' : 'Settings',
         onPress: () => {
           navigate('/settings/general');
+        },
+      },
+      {
+        id: 'about',
+        label: preferences.locale === 'pt-BR' ? 'Sobre' : 'About',
+        onPress: () => {
+          navigate('/about');
         },
       },
     ],

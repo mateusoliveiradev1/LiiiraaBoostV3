@@ -16,6 +16,7 @@ export type DesktopFeature =
   | 'activity'
   | 'assistant'
   | 'calibration'
+  | 'control-center'
   | 'documentation'
   | 'home'
   | 'improve'
@@ -36,6 +37,7 @@ export interface DesktopRouteDefinition {
     | 'DocumentationSurface'
     | 'ImproveSurface'
     | 'MeasureSurface'
+    | 'PremiumOperationsSurface'
     | 'PrepareSurface'
     | 'PreviewWorkflowSurface'
     | 'RecoverSurface';
@@ -76,6 +78,18 @@ export const desktopRouteTree = Object.freeze([
   route('/calibration/games', 'calibration', 'CalibrationWorkspace', 'games'),
   route('/calibration/summary', 'calibration', 'CalibrationWorkspace', 'summary'),
   route('/home', 'home', 'ContextualHome', 'contextual'),
+  route('/competitive', 'control-center', 'PremiumOperationsSurface', 'competitive'),
+  route('/toggles', 'control-center', 'PremiumOperationsSurface', 'toggles'),
+  route('/shortcuts', 'control-center', 'PremiumOperationsSurface', 'shortcuts'),
+  route('/power', 'control-center', 'PremiumOperationsSurface', 'power'),
+  route('/network', 'control-center', 'PremiumOperationsSurface', 'network'),
+  route('/tweaks', 'control-center', 'PremiumOperationsSurface', 'tweaks'),
+  route('/security', 'control-center', 'PremiumOperationsSurface', 'security'),
+  route('/services', 'control-center', 'PremiumOperationsSurface', 'services'),
+  route('/restoration', 'control-center', 'PremiumOperationsSurface', 'restoration'),
+  route('/uninstaller', 'control-center', 'PremiumOperationsSurface', 'uninstaller'),
+  route('/downloads', 'control-center', 'PremiumOperationsSurface', 'downloads'),
+  route('/about', 'control-center', 'PremiumOperationsSurface', 'about'),
   route('/prepare', 'prepare', 'PrepareSurface', 'library'),
   route('/games', 'prepare', 'PrepareSurface', 'library'),
   route('/games/add', 'prepare', 'PrepareSurface', 'game-add'),

@@ -37,34 +37,20 @@ test('@premium-navigation login, profile, plan and optimization details are conn
   );
   await expect(page.getByRole('heading', { name: 'Escolha seu nível de controle' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Otimização', exact: true }).click();
-  await page.getByRole('button', { name: 'Abrir', exact: true }).first().click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/components/windows',
-  );
-  await expect(page.getByRole('heading', { name: 'Windows' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Detalhes' })).toHaveCount(3);
-  await expect(
-    page.locator('.lb-operation-row strong').filter({
-      hasText: 'Revisar o Modo de Jogo do Windows',
-    }),
-  ).toBeVisible();
+  await page.getByRole('button', { name: 'Controles rápidos', exact: true }).click();
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/toggles');
+  await expect(page.getByRole('heading', { name: 'Controles rápidos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Modo Jogo do Windows' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Detalhes' }).first().click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/operations/windows-game-mode-review',
-  );
-  await expect(page.getByText('Operação: Revisar o Modo de Jogo do Windows')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Otimização', exact: true }).click();
-  await page.getByRole('button', { name: 'Abrir', exact: true }).first().click();
-  await page.getByRole('button', { name: 'Revisar plano selecionado' }).click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/plans/recommended-plan/review',
-  );
+  const gameModeRow = page.locator('.premium-operation-row').filter({
+    has: page.getByRole('heading', { name: 'Modo Jogo do Windows' }),
+  });
+  const gameModeSwitch = gameModeRow.getByRole('switch');
+  await gameModeSwitch.click();
+  await expect(gameModeSwitch).not.toBeChecked();
+  await page.getByRole('button', { name: 'Revisar plano' }).click();
+  await expect(page.getByRole('dialog', { name: 'Revise antes de continuar' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fechar revisão' }).click();
 
   await page.getByRole('button', { name: 'Configurações', exact: true }).click();
   await page.getByRole('button', { name: 'Aparência', exact: true }).click();
@@ -108,7 +94,10 @@ test('@premium-navigation security score stays centered and account tabs remain 
 
   await page.getByRole('button', { name: 'Perfil', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Liiiraa Player' })).toBeVisible();
-  await page.getByRole('button', { name: 'Segurança', exact: true }).click();
+  await page
+    .locator('.desktop-account-tabs')
+    .getByRole('button', { name: 'Segurança', exact: true })
+    .click();
   await expect(
     page.getByRole('heading', { name: 'Base forte, duas etapas pendentes' }),
   ).toBeVisible();

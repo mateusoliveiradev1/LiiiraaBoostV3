@@ -104,11 +104,19 @@ test('@interaction-smoke keeps primary navigation and shell controls observably 
   const shell = page.locator('.desktop-app-shell');
   const destinations = [
     ['Visão geral', '/home'],
-    ['Otimização', '/improve'],
-    ['Jogos', '/prepare'],
-    ['Desempenho', '/measure/overview'],
-    ['Recuperação', '/recover/overview'],
+    ['Modo Competitivo', '/competitive'],
+    ['Controles rápidos', '/toggles'],
+    ['Atalhos', '/shortcuts'],
+    ['Planos de energia', '/power'],
+    ['Rede', '/network'],
+    ['Tweaks', '/tweaks'],
+    ['Segurança', '/security'],
+    ['Serviços', '/services'],
+    ['Restauração', '/restoration'],
+    ['Desinstalador', '/uninstaller'],
+    ['Downloads', '/downloads'],
     ['Configurações', '/settings/general'],
+    ['Sobre', '/about'],
   ] as const;
 
   for (const [name, path] of destinations) {
