@@ -1,4 +1,9 @@
-import { LbButton, ProductIcon } from '@liiiraa/design-system';
+import {
+  LbButton,
+  ProductIcon,
+  WindowTitleBar,
+  type WindowControlHandlers,
+} from '@liiiraa/design-system';
 import type { ShellInstallerIdentityJson } from '@liiiraa/contracts-ts';
 import { useRef, type ReactNode } from 'react';
 
@@ -15,6 +20,7 @@ export interface PremiumInstallerHandoffProps {
   readonly onOpenVerification?: () => void;
   readonly signatureState?: InstallerSignatureState;
   readonly updateIdentity?: InstallerUpdateIdentity;
+  readonly windowControls?: WindowControlHandlers;
 }
 
 const copy = (locale: ShippingLocale, value: LocalizedCopy): string => value[locale];
@@ -39,6 +45,7 @@ export const PremiumInstallerHandoff = ({
   onOpenVerification,
   signatureState = identity.channel === 'development' ? 'development-self-signed' : 'unknown',
   updateIdentity = identity.channel === 'development' ? 'disabled' : 'unknown',
+  windowControls,
 }: PremiumInstallerHandoffProps): ReactNode => {
   const technicalRef = useRef<HTMLDetailsElement>(null);
   const compatibility = identity.windowsCompatibility;
@@ -49,208 +56,223 @@ export const PremiumInstallerHandoff = ({
   const canContinue = compatible && identityAccepted && updateIdentity !== 'invalid';
 
   return (
-    <main
-      aria-labelledby="premium-installer-title"
-      className="desktop-premium-first-run"
-      data-compatible={String(compatible)}
-      data-lb-region
-    >
-      <section className="desktop-first-run-intro">
-        <BrandLockup />
-        <div className="desktop-first-run-copy">
-          <span className="desktop-preview-badge">
-            <ProductIcon name="check" size={14} />
-            {copy(locale, {
-              'en-US': 'Installation complete',
-              'pt-BR': 'Instalação concluída',
-            })}
-          </span>
-          <h1 id="premium-installer-title">
-            {copy(locale, {
-              'en-US': 'Everything is ready for your first session.',
-              'pt-BR': 'Tudo pronto para sua primeira sessão.',
-            })}
-          </h1>
-          <p>
-            {copy(locale, {
-              'en-US':
-                'Liiiraa Boost will start in protected local mode. You stay in control before any future system change.',
-              'pt-BR':
-                'O Liiiraa Boost iniciará em modo local protegido. Você mantém o controle antes de qualquer futura alteração no sistema.',
-            })}
-          </p>
-        </div>
-
-        <div className="desktop-first-run-promise">
-          <ProductIcon name="shield" size={21} />
-          <div>
-            <strong>
+    <div className="desktop-app-shell desktop-first-run-shell">
+      <div className="desktop-title-region" data-focus-region="title-bar">
+        <WindowTitleBar
+          {...(windowControls === undefined ? {} : { controls: windowControls })}
+          globalStatus={copy(locale, {
+            'en-US': 'Protected local environment',
+            'pt-BR': 'Ambiente local protegido',
+          })}
+          locale={locale === 'pt-BR' ? 'pt-BR' : 'en'}
+        />
+      </div>
+      <main
+        aria-labelledby="premium-installer-title"
+        className="desktop-premium-first-run"
+        data-compatible={String(compatible)}
+        data-lb-region
+      >
+        <section className="desktop-first-run-intro">
+          <BrandLockup />
+          <div className="desktop-first-run-copy">
+            <span className="desktop-preview-badge">
+              <ProductIcon name="check" size={14} />
               {copy(locale, {
-                'en-US': 'No optimization has run',
-                'pt-BR': 'Nenhuma otimização foi executada',
+                'en-US': 'Installation complete',
+                'pt-BR': 'Instalação concluída',
               })}
-            </strong>
+            </span>
+            <h1 id="premium-installer-title">
+              {copy(locale, {
+                'en-US': 'Everything is ready for your first session.',
+                'pt-BR': 'Tudo pronto para sua primeira sessão.',
+              })}
+            </h1>
             <p>
               {copy(locale, {
                 'en-US':
-                  'The interface opens without elevated privileges. Every action remains reviewable and reversible.',
+                  'Liiiraa Boost will start in protected local mode. You stay in control before any future system change.',
                 'pt-BR':
-                  'A interface abre sem privilégios elevados. Cada ação permanece revisável e reversível.',
+                  'O Liiiraa Boost iniciará em modo local protegido. Você mantém o controle antes de qualquer futura alteração no sistema.',
               })}
             </p>
           </div>
-        </div>
 
-        <span className="desktop-first-run-version">
-          {`WINDOWS 10/11 · ${identity.version} · ${identity.channel.toUpperCase()}`}
-        </span>
-      </section>
-
-      <section aria-labelledby="premium-checkpoint-title" className="desktop-first-run-checkpoint">
-        <header>
-          <div className="desktop-first-run-check-icon">
-            <ProductIcon name={canContinue ? 'check' : 'shield'} size={24} />
-          </div>
-          <div>
-            <span>
-              {copy(locale, {
-                'en-US': 'Protected startup',
-                'pt-BR': 'Inicialização protegida',
-              })}
-            </span>
-            <h2 id="premium-checkpoint-title">
-              {canContinue
-                ? copy(locale, {
-                    'en-US': 'Installation verified',
-                    'pt-BR': 'Instalação verificada',
-                  })
-                : copy(locale, {
-                    'en-US': 'Verification needs attention',
-                    'pt-BR': 'A verificação precisa de atenção',
-                  })}
-            </h2>
-          </div>
-        </header>
-
-        <div className="desktop-first-run-status">
-          <article data-status={compatible ? 'ready' : 'blocked'}>
-            <ProductIcon name="monitor" size={18} />
+          <div className="desktop-first-run-promise">
+            <ProductIcon name="shield" size={21} />
             <div>
-              <span>{copy(locale, { 'en-US': 'Windows', 'pt-BR': 'Windows' })}</span>
               <strong>
-                {compatible
-                  ? copy(locale, { 'en-US': 'Compatible', 'pt-BR': 'Compatível' })
-                  : copy(locale, { 'en-US': 'Unsupported', 'pt-BR': 'Incompatível' })}
+                {copy(locale, {
+                  'en-US': 'No optimization has run',
+                  'pt-BR': 'Nenhuma otimização foi executada',
+                })}
               </strong>
+              <p>
+                {copy(locale, {
+                  'en-US':
+                    'The interface opens without elevated privileges. Every action remains reviewable and reversible.',
+                  'pt-BR':
+                    'A interface abre sem privilégios elevados. Cada ação permanece revisável e reversível.',
+                })}
+              </p>
             </div>
-            <small>{String(compatibility.detectedBuild)}</small>
-          </article>
-          <article data-status={identityAccepted ? 'ready' : 'blocked'}>
-            <ProductIcon name="shield" size={18} />
+          </div>
+
+          <span className="desktop-first-run-version">
+            {`WINDOWS 10/11 · ${identity.version} · ${identity.channel.toUpperCase()}`}
+          </span>
+        </section>
+
+        <section
+          aria-labelledby="premium-checkpoint-title"
+          className="desktop-first-run-checkpoint"
+        >
+          <header>
+            <div className="desktop-first-run-check-icon">
+              <ProductIcon name={canContinue ? 'check' : 'shield'} size={24} />
+            </div>
             <div>
               <span>
-                {copy(locale, { 'en-US': 'Application identity', 'pt-BR': 'Identidade do app' })}
+                {copy(locale, {
+                  'en-US': 'Protected startup',
+                  'pt-BR': 'Inicialização protegida',
+                })}
               </span>
-              <strong>
-                {identityAccepted
-                  ? copy(locale, { 'en-US': 'Validated', 'pt-BR': 'Validada' })
-                  : copy(locale, { 'en-US': 'Review required', 'pt-BR': 'Exige revisão' })}
-              </strong>
+              <h2 id="premium-checkpoint-title">
+                {canContinue
+                  ? copy(locale, {
+                      'en-US': 'Installation verified',
+                      'pt-BR': 'Instalação verificada',
+                    })
+                  : copy(locale, {
+                      'en-US': 'Verification needs attention',
+                      'pt-BR': 'A verificação precisa de atenção',
+                    })}
+              </h2>
             </div>
-            <small>{identity.publisher}</small>
-          </article>
-          <article data-status="ready">
-            <ProductIcon name="lock" size={18} />
-            <div>
-              <span>
-                {copy(locale, { 'en-US': 'Privilege model', 'pt-BR': 'Modelo de privilégio' })}
-              </span>
-              <strong>{copy(locale, { 'en-US': 'Protected', 'pt-BR': 'Protegido' })}</strong>
-            </div>
-            <small>
-              {copy(locale, { 'en-US': 'Non-elevated UI', 'pt-BR': 'Interface sem elevação' })}
-            </small>
-          </article>
-        </div>
+          </header>
 
-        <p aria-live="polite" className="desktop-first-run-decision">
-          {canContinue
-            ? copy(locale, {
-                'en-US': 'Your protected local workspace is ready.',
-                'pt-BR': 'Seu ambiente local protegido está pronto.',
-              })
-            : copy(locale, {
-                'en-US': 'Continue is blocked until the verification passes.',
-                'pt-BR': 'A continuação está bloqueada até a verificação ser aprovada.',
-              })}
-        </p>
+          <div className="desktop-first-run-status">
+            <article data-status={compatible ? 'ready' : 'blocked'}>
+              <ProductIcon name="monitor" size={18} />
+              <div>
+                <span>{copy(locale, { 'en-US': 'Windows', 'pt-BR': 'Windows' })}</span>
+                <strong>
+                  {compatible
+                    ? copy(locale, { 'en-US': 'Compatible', 'pt-BR': 'Compatível' })
+                    : copy(locale, { 'en-US': 'Unsupported', 'pt-BR': 'Incompatível' })}
+                </strong>
+              </div>
+              <small>{String(compatibility.detectedBuild)}</small>
+            </article>
+            <article data-status={identityAccepted ? 'ready' : 'blocked'}>
+              <ProductIcon name="shield" size={18} />
+              <div>
+                <span>
+                  {copy(locale, { 'en-US': 'Application identity', 'pt-BR': 'Identidade do app' })}
+                </span>
+                <strong>
+                  {identityAccepted
+                    ? copy(locale, { 'en-US': 'Validated', 'pt-BR': 'Validada' })
+                    : copy(locale, { 'en-US': 'Review required', 'pt-BR': 'Exige revisão' })}
+                </strong>
+              </div>
+              <small>{identity.publisher}</small>
+            </article>
+            <article data-status="ready">
+              <ProductIcon name="lock" size={18} />
+              <div>
+                <span>
+                  {copy(locale, { 'en-US': 'Privilege model', 'pt-BR': 'Modelo de privilégio' })}
+                </span>
+                <strong>{copy(locale, { 'en-US': 'Protected', 'pt-BR': 'Protegido' })}</strong>
+              </div>
+              <small>
+                {copy(locale, { 'en-US': 'Non-elevated UI', 'pt-BR': 'Interface sem elevação' })}
+              </small>
+            </article>
+          </div>
 
-        <div className="desktop-first-run-actions">
-          <LbButton
-            isDisabled={!canContinue}
-            variant="primary"
-            {...(onContinue === undefined ? {} : { onPress: onContinue })}
-          >
-            <ProductIcon name="arrowRight" size={17} />
-            {copy(locale, {
-              'en-US': 'Enter Liiiraa Boost',
-              'pt-BR': 'Entrar no Liiiraa Boost',
-            })}
-          </LbButton>
-          <LbButton
-            onPress={() => {
-              const technical = technicalRef.current;
-              if (technical !== null) {
-                technical.open = true;
-                technical.scrollIntoView({
-                  behavior:
-                    document.documentElement.dataset['motion'] === 'reduced' ? 'auto' : 'smooth',
-                  block: 'nearest',
-                });
-                technical.querySelector('summary')?.focus();
-              }
-              onOpenVerification?.();
-            }}
-            variant="secondary"
-          >
-            {copy(locale, {
-              'en-US': 'Review verification',
-              'pt-BR': 'Revisar verificação',
-            })}
-          </LbButton>
-        </div>
+          <p aria-live="polite" className="desktop-first-run-decision">
+            {canContinue
+              ? copy(locale, {
+                  'en-US': 'Your protected local workspace is ready.',
+                  'pt-BR': 'Seu ambiente local protegido está pronto.',
+                })
+              : copy(locale, {
+                  'en-US': 'Continue is blocked until the verification passes.',
+                  'pt-BR': 'A continuação está bloqueada até a verificação ser aprovada.',
+                })}
+          </p>
 
-        <details className="desktop-first-run-technical" ref={technicalRef}>
-          <summary>
-            {copy(locale, {
-              'en-US': 'Technical installation details',
-              'pt-BR': 'Detalhes técnicos da instalação',
-            })}
-          </summary>
-          <dl>
-            <div>
-              <dt>{copy(locale, { 'en-US': 'Publisher', 'pt-BR': 'Publicador' })}</dt>
-              <dd>{identity.publisher}</dd>
-            </div>
-            <div>
-              <dt>{copy(locale, { 'en-US': 'Version', 'pt-BR': 'Versão' })}</dt>
-              <dd>{identity.version}</dd>
-            </div>
-            <div>
-              <dt>{copy(locale, { 'en-US': 'Minimum build', 'pt-BR': 'Build mínima' })}</dt>
-              <dd>{String(compatibility.minimumBuild)}</dd>
-            </div>
-          </dl>
-          {onOpenDocumentation ? (
-            <LbButton onPress={onOpenDocumentation} variant="quiet">
+          <div className="desktop-first-run-actions">
+            <LbButton
+              isDisabled={!canContinue}
+              variant="primary"
+              {...(onContinue === undefined ? {} : { onPress: onContinue })}
+            >
+              <ProductIcon name="arrowRight" size={17} />
               {copy(locale, {
-                'en-US': 'Open compatibility documentation',
-                'pt-BR': 'Abrir documentação de compatibilidade',
+                'en-US': 'Enter Liiiraa Boost',
+                'pt-BR': 'Entrar no Liiiraa Boost',
               })}
             </LbButton>
-          ) : null}
-        </details>
-      </section>
-    </main>
+            <LbButton
+              onPress={() => {
+                const technical = technicalRef.current;
+                if (technical !== null) {
+                  technical.open = true;
+                  technical.scrollIntoView({
+                    behavior:
+                      document.documentElement.dataset['motion'] === 'reduced' ? 'auto' : 'smooth',
+                    block: 'nearest',
+                  });
+                  technical.querySelector('summary')?.focus();
+                }
+                onOpenVerification?.();
+              }}
+              variant="secondary"
+            >
+              {copy(locale, {
+                'en-US': 'Review verification',
+                'pt-BR': 'Revisar verificação',
+              })}
+            </LbButton>
+          </div>
+
+          <details className="desktop-first-run-technical" ref={technicalRef}>
+            <summary>
+              {copy(locale, {
+                'en-US': 'Technical installation details',
+                'pt-BR': 'Detalhes técnicos da instalação',
+              })}
+            </summary>
+            <dl>
+              <div>
+                <dt>{copy(locale, { 'en-US': 'Publisher', 'pt-BR': 'Publicador' })}</dt>
+                <dd>{identity.publisher}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { 'en-US': 'Version', 'pt-BR': 'Versão' })}</dt>
+                <dd>{identity.version}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { 'en-US': 'Minimum build', 'pt-BR': 'Build mínima' })}</dt>
+                <dd>{String(compatibility.minimumBuild)}</dd>
+              </div>
+            </dl>
+            {onOpenDocumentation ? (
+              <LbButton onPress={onOpenDocumentation} variant="quiet">
+                {copy(locale, {
+                  'en-US': 'Open compatibility documentation',
+                  'pt-BR': 'Abrir documentação de compatibilidade',
+                })}
+              </LbButton>
+            ) : null}
+          </details>
+        </section>
+      </main>
+    </div>
   );
 };

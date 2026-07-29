@@ -1903,6 +1903,7 @@ const NativeShellPresentation = ({
         identity={nativeState.installerIdentity}
         locale={locale}
         onContinue={onAcceptInstaller}
+        windowControls={DESKTOP_WINDOW_CONTROLS}
       />
     );
   } else if (!nativeState.startupAcknowledged) {

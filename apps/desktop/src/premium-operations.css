@@ -832,7 +832,13 @@
   border: 0;
   border-radius: 0;
   outline: 0;
+  color-scheme: dark;
   background: transparent;
+}
+
+.premium-game-select-control select option {
+  color: var(--premium-ink);
+  background: var(--premium-surface);
 }
 
 .premium-session-status {
@@ -2224,8 +2230,7 @@
   place-items: center;
   color: var(--premium-copy);
   background:
-    radial-gradient(circle at 50% 20%, rgba(91, 124, 255, 0.18), transparent 55%),
-    #0a0d12;
+    radial-gradient(circle at 50% 20%, rgba(91, 124, 255, 0.18), transparent 55%), #0a0d12;
 }
 
 .premium-game-cover-fallback span {

@@ -92,6 +92,15 @@ html[data-theme='light']
   background: #c42b3a;
 }
 
+html[data-theme='light'] .premium-game-select-control select {
+  color-scheme: light;
+}
+
+html[data-theme='light'] .premium-game-select-control select option {
+  color: var(--premium-ink);
+  background: var(--premium-surface);
+}
+
 html[data-theme='light'] .lb-product-wordmark span:first-child,
 html[data-theme='light'] .lb-account-trigger-copy strong {
   color: #111827;

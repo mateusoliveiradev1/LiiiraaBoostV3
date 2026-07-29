@@ -213,3 +213,17 @@ test('@premium-titlebar exposes branded native window controls', async ({ page }
   await expect(page.getByRole('button', { name: 'Maximizar ou restaurar janela' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Fechar janela' })).toBeVisible();
 });
+
+test('@premium-game-selector keeps native options legible in the dark theme', async ({ page }) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/competitive',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  const selector = page.getByRole('combobox', { name: 'Jogo' });
+  await expect(selector).toHaveCSS('color-scheme', 'dark');
+  await expect(selector.locator('option').first()).toHaveCSS('background-color', 'rgb(17, 22, 32)');
+  await expect(selector.locator('option').first()).toHaveCSS('color', 'rgb(244, 247, 251)');
+});

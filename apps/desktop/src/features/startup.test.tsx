@@ -1,7 +1,7 @@
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type {
   ShellInstallerIdentityJson,
   ShellStartupFailureStateJson,
@@ -104,10 +104,22 @@ describe('installer handoff', () => {
 
   it('renders the premium first launch as a clear protected entry point', () => {
     const markup = renderToStaticMarkup(
-      <PremiumInstallerHandoff identity={installer} locale="pt-BR" />,
+      <PremiumInstallerHandoff
+        identity={installer}
+        locale="pt-BR"
+        windowControls={{
+          close: vi.fn(),
+          maximizeRestore: vi.fn(),
+          minimize: vi.fn(),
+        }}
+      />,
     );
 
     expect(markup).toContain('desktop-premium-first-run');
+    expect(markup).toContain('desktop-first-run-shell');
+    expect(markup).toContain('Minimizar janela');
+    expect(markup).toContain('Maximizar ou restaurar janela');
+    expect(markup).toContain('Fechar janela');
     expect(markup).toContain('Tudo pronto para sua primeira sessão.');
     expect(markup).toContain('Instalação verificada');
     expect(markup).toContain('Nenhuma otimização foi executada');
