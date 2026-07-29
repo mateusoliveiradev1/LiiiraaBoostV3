@@ -174,3 +174,42 @@ test('@premium-optimization excludes unsafe adjustments from selection', async (
   await expect(excludedAdjustment.getByRole('switch')).toBeDisabled();
   await expect(excludedAdjustment).toContainText('Indisponível');
 });
+
+test('@premium-game-profile selection updates Home and survives reload', async ({ page }) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/competitive',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  const gameSelector = page.getByRole('combobox', { name: 'Jogo' });
+  await gameSelector.selectOption('pubg');
+  await expect(gameSelector).toHaveValue('pubg');
+  await expect(page.locator('.premium-session-status')).toContainText('PUBG: BATTLEGROUNDS');
+
+  await page.getByRole('button', { name: 'Visão geral', exact: true }).click();
+  const gameCard = page.locator('.premium-game-card');
+  await expect(gameCard.getByRole('heading', { name: 'PUBG: BATTLEGROUNDS' })).toBeVisible();
+  await expect(gameCard.locator('img')).toHaveAttribute('src', '/games/pubg.jpg');
+
+  await page.reload();
+  await expect(page.locator('.desktop-app-shell')).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Jogo' })).toHaveValue('pubg');
+  await page.getByRole('button', { name: 'Visão geral', exact: true }).click();
+  await expect(page.locator('.premium-game-card')).toContainText('PUBG: BATTLEGROUNDS');
+});
+
+test('@premium-titlebar exposes branded native window controls', async ({ page }) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/home',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  await expect(page.locator('.lb-title-bar')).toHaveAttribute('data-tauri-drag-region', 'true');
+  await expect(page.getByRole('button', { name: 'Minimizar janela' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Maximizar ou restaurar janela' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Fechar janela' })).toBeVisible();
+});

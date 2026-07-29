@@ -42,7 +42,7 @@
         "center": true,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true
+        "decorations": false
       }
     ],
     "security": {
@@ -54,7 +54,14 @@
           "identifier": "main-shell",
           "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
           "windows": ["main"],
-          "permissions": ["core:event:allow-listen", "core:window:allow-set-theme"]
+          "permissions": [
+            "core:event:allow-listen",
+            "core:window:allow-close",
+            "core:window:allow-minimize",
+            "core:window:allow-set-theme",
+            "core:window:allow-start-dragging",
+            "core:window:allow-toggle-maximize"
+          ]
         }
       ]
     }

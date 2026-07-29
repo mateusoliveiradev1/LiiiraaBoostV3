@@ -12,6 +12,7 @@ import {
   siIntel,
   siNvidia,
   siObsstudio,
+  siPubg,
   siSteam,
   siValorant,
   type SimpleIcon,
@@ -37,6 +38,7 @@ const BRAND_ICONS: Readonly<Record<string, SimpleIcon>> = Object.freeze({
   nvidia: siNvidia,
   'nvidia-app': siNvidia,
   obs: siObsstudio,
+  pubg: siPubg,
   steam: siSteam,
   valorant: siValorant,
 });
@@ -55,6 +57,7 @@ const normalizeBrand = (brand: string): string => {
   if (normalized.includes('intel')) return 'intel';
   if (normalized.includes('counter-strike')) return 'counter-strike-2';
   if (normalized.includes('fortnite')) return 'fortnite';
+  if (normalized.includes('pubg') || normalized.includes('battlegrounds')) return 'pubg';
   if (normalized.includes('valorant')) return 'valorant';
   return normalized;
 };

@@ -1,11 +1,11 @@
 import {
   Activity,
   Bell,
-  Maximize2,
-  Minimize2,
+  Minus,
   PanelRight,
   Search,
   ShieldCheck,
+  Square,
   X,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -50,6 +50,7 @@ export const WindowTitleBar = ({
     aria-label={locale === 'pt-BR' ? 'Barra de título do aplicativo' : 'Application title bar'}
     className="lb-title-bar"
     data-lb-region
+    data-tauri-drag-region
   >
     <strong className="lb-product-brand">
       <svg aria-hidden="true" className="lb-product-mark" viewBox="0 0 36 28">
@@ -111,14 +112,14 @@ export const WindowTitleBar = ({
       >
         {controls.minimize ? (
           <LbIconButton
-            icon={<Minimize2 />}
+            icon={<Minus />}
             label={locale === 'pt-BR' ? 'Minimizar janela' : 'Minimize window'}
             onPress={controls.minimize}
           />
         ) : null}
         {controls.maximizeRestore ? (
           <LbIconButton
-            icon={<Maximize2 />}
+            icon={<Square />}
             label={
               locale === 'pt-BR' ? 'Maximizar ou restaurar janela' : 'Maximize or restore window'
             }

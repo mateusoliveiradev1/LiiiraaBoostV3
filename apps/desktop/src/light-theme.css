@@ -69,6 +69,29 @@ html[data-theme='light'] .desktop-app-shell[data-route-path] .lb-title-bar {
   background: #f8fafc;
 }
 
+html[data-theme='light'] .desktop-app-shell .lb-window-controls {
+  border-color: #d8dee8;
+}
+
+html[data-theme='light'] .desktop-app-shell .lb-window-controls .lb-icon-button {
+  color: #4a5568;
+}
+
+html[data-theme='light'] .desktop-app-shell .lb-window-controls .lb-icon-button:hover,
+html[data-theme='light'] .desktop-app-shell .lb-window-controls .lb-icon-button[data-hovered] {
+  color: #111827;
+  background: #e8edf4;
+}
+
+html[data-theme='light'] .desktop-app-shell .lb-window-controls .lb-icon-button:last-child:hover,
+html[data-theme='light']
+  .desktop-app-shell
+  .lb-window-controls
+  .lb-icon-button:last-child[data-hovered] {
+  color: #ffffff;
+  background: #c42b3a;
+}
+
 html[data-theme='light'] .lb-product-wordmark span:first-child,
 html[data-theme='light'] .lb-account-trigger-copy strong {
   color: #111827;

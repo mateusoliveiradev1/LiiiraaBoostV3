@@ -46,7 +46,14 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(capability["windows"], json!(["main"]));
     assert_eq!(
         capability["permissions"],
-        json!(["core:event:allow-listen"])
+        json!([
+            "core:event:allow-listen",
+            "core:window:allow-close",
+            "core:window:allow-minimize",
+            "core:window:allow-set-theme",
+            "core:window:allow-start-dragging",
+            "core:window:allow-toggle-maximize"
+        ])
     );
     assert!(capability.get("remote").is_none());
 
@@ -58,7 +65,7 @@ fn capabilities_lock_host_identity_and_non_elevation() {
     assert_eq!(window["minWidth"], 760);
     assert_eq!(window["minHeight"], 600);
     assert_eq!(window["center"], true);
-    assert_eq!(window["decorations"], true);
+    assert_eq!(window["decorations"], false);
     assert_eq!(window["resizable"], true);
 
     let security = &config["app"]["security"];

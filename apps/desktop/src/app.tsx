@@ -44,7 +44,12 @@ import {
   StatusSignal,
   WindowTitleBar,
 } from '@liiiraa/design-system';
-import type { ActivityCenter, ActivityItem, OperationalState } from '@liiiraa/design-system';
+import type {
+  ActivityCenter,
+  ActivityItem,
+  OperationalState,
+  WindowControlHandlers,
+} from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
@@ -72,6 +77,36 @@ import type { DesktopF6Region, DesktopNavigator, DesktopRouteMatch } from './rou
 export const SHELL_OPERATIONAL_STATES = OPERATIONAL_STATES satisfies readonly OperationalState[];
 export type ShellOperationalState = (typeof SHELL_OPERATIONAL_STATES)[number];
 export type ShellWidth = 'wide' | 'standard' | 'compact' | 'minimum';
+
+type DesktopWindowAction = 'close' | 'minimize' | 'toggleMaximize';
+
+const runDesktopWindowAction = async (action: DesktopWindowAction): Promise<void> => {
+  try {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    const window = getCurrentWindow();
+    if (action === 'close') {
+      await window.close();
+    } else if (action === 'minimize') {
+      await window.minimize();
+    } else {
+      await window.toggleMaximize();
+    }
+  } catch {
+    // Browser, Storybook and unit-test renderers intentionally have no native window host.
+  }
+};
+
+const DESKTOP_WINDOW_CONTROLS: WindowControlHandlers = Object.freeze({
+  close: () => {
+    void runDesktopWindowAction('close');
+  },
+  maximizeRestore: () => {
+    void runDesktopWindowAction('toggleMaximize');
+  },
+  minimize: () => {
+    void runDesktopWindowAction('minimize');
+  },
+});
 
 interface OperationalPresentation {
   readonly action: Readonly<Record<ShellLocale, string>>;
@@ -1512,6 +1547,7 @@ const DesktopAppContent = ({
       >
         <div className="desktop-title-region" data-focus-region="title-bar">
           <WindowTitleBar
+            controls={DESKTOP_WINDOW_CONTROLS}
             globalStatus={
               locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'
             }
@@ -1553,6 +1589,7 @@ const DesktopAppContent = ({
       >
         <WindowTitleBar
           accountLabel={locale === 'pt-BR' ? 'Liiiraa Player' : 'Liiiraa Player'}
+          controls={DESKTOP_WINDOW_CONTROLS}
           globalStatus={presentation.reason}
           locale={locale}
           onOpenAccount={() => {

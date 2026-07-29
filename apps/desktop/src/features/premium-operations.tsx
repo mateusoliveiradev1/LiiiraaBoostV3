@@ -16,6 +16,13 @@ import {
   type PremiumRouteId,
 } from './control-center-data.js';
 import { BrandIcon } from './brand-icons.js';
+import {
+  GAME_PROFILES,
+  type GameProfile,
+  persistActiveGameProfile,
+  readActiveGameProfile,
+  resolveGameProfile,
+} from './game-profiles.js';
 import { PremiumDownloadsSurface } from './premium-downloads.js';
 import { usePremiumLocalization } from './premium-localization.js';
 import { PremiumSettingsSurface } from './premium-settings.js';
@@ -122,6 +129,14 @@ const INITIAL_OPERATION_STATE = Object.freeze(
 
 const humanCount = (count: number, singular: string, plural: string): string =>
   `${String(count)} ${count === 1 ? singular : plural}`;
+
+const getInitialActiveGame = (): GameProfile => {
+  try {
+    return readActiveGameProfile(globalThis.localStorage);
+  } catch {
+    return resolveGameProfile(null);
+  }
+};
 
 const PremiumButton = ({
   children,
@@ -308,9 +323,11 @@ const PlanBar = ({
   ) : null;
 
 const HomeSurface = ({
+  activeGame,
   navigate,
   notify,
 }: {
+  readonly activeGame: GameProfile;
   readonly navigate: (pathname: string) => void;
   readonly notify: (message: string) => void;
 }) => (
@@ -348,28 +365,36 @@ const HomeSurface = ({
         </div>
       </article>
       <article className="premium-game-card">
-        <div className="premium-game-visual">
+        <div className="premium-game-visual" data-game-id={activeGame.id}>
+          <div aria-hidden="true" className="premium-game-cover-fallback">
+            <BrandIcon brand={activeGame.brand} size={42} />
+            <span>{activeGame.title}</span>
+          </div>
           <img
-            alt="Counter-Strike 2"
+            alt={`Arte oficial de ${activeGame.title}`}
             decoding="async"
+            key={activeGame.id}
             loading="eager"
-            src="/games/counter-strike-2.jpg"
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+            }}
+            src={activeGame.cover}
           />
           <span aria-hidden="true" className="premium-game-brand">
-            <BrandIcon brand="counter-strike-2" size={22} />
+            <BrandIcon brand={activeGame.brand} size={22} />
           </span>
         </div>
         <span className="premium-section-label">Jogo selecionado</span>
-        <h2>Counter-Strike 2</h2>
+        <h2>{activeGame.title}</h2>
         <p>Perfil competitivo · prioridade alta · restauração automática</p>
         <dl>
           <div>
             <dt>Última sessão</dt>
-            <dd>144 Hz estáveis</dd>
+            <dd>{activeGame.sessionSummary}</dd>
           </div>
           <div>
             <dt>Perfil</dt>
-            <dd>Competitivo</dd>
+            <dd>{activeGame.profileLabel}</dd>
           </div>
         </dl>
       </article>
@@ -431,8 +456,15 @@ const HomeSurface = ({
   </>
 );
 
-const CompetitiveSurface = ({ notify }: { readonly notify: (message: string) => void }) => {
-  const [game, setGame] = useState('Counter-Strike 2');
+const CompetitiveSurface = ({
+  activeGame,
+  notify,
+  onActiveGameChange,
+}: {
+  readonly activeGame: GameProfile;
+  readonly notify: (message: string) => void;
+  readonly onActiveGameChange: (profile: GameProfile) => void;
+}) => {
   const [sessionActive, setSessionActive] = useState(false);
   const [settings, setSettings] = useState({
     cpuSets: true,
@@ -455,18 +487,24 @@ const CompetitiveSurface = ({ notify }: { readonly notify: (message: string) => 
         </div>
         <div className="premium-game-selector">
           <label htmlFor="competitive-game">Jogo</label>
-          <select
-            id="competitive-game"
-            onChange={(event) => {
-              setGame(event.currentTarget.value);
-            }}
-            value={game}
-          >
-            <option>Counter-Strike 2</option>
-            <option>VALORANT</option>
-            <option>Fortnite</option>
-            <option>Adicionar executável...</option>
-          </select>
+          <div className="premium-game-select-control" data-game-id={activeGame.id}>
+            <span aria-hidden="true" className="premium-game-select-brand">
+              <BrandIcon brand={activeGame.brand} size={20} />
+            </span>
+            <select
+              id="competitive-game"
+              onChange={(event) => {
+                onActiveGameChange(resolveGameProfile(event.currentTarget.value));
+              }}
+              value={activeGame.id}
+            >
+              {GAME_PROFILES.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.title}
+                </option>
+              ))}
+            </select>
+          </div>
           <PremiumButton
             onClick={() => {
               notify('Biblioteca reexaminada no cenário demonstrativo.');
@@ -481,7 +519,7 @@ const CompetitiveSurface = ({ notify }: { readonly notify: (message: string) => 
           <ProductIcon name={sessionActive ? 'rocket' : 'competitive'} size={34} weight="duotone" />
         </span>
         <div>
-          <small>{game}</small>
+          <small>{activeGame.title}</small>
           <strong>{sessionActive ? 'Ambiente priorizado' : 'Pronto para iniciar'}</strong>
           <p>
             {sessionActive
@@ -1355,6 +1393,7 @@ export const PremiumOperationsSurface = ({
   const [operationState, setOperationState] = useState<Record<string, boolean>>({
     ...INITIAL_OPERATION_STATE,
   });
+  const [activeGame, setActiveGame] = useState<GameProfile>(getInitialActiveGame);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [toast, setToast] = useState<PremiumToastMessage | null>(null);
   usePremiumLocalization(rootRef, locale);
@@ -1399,11 +1438,27 @@ export const PremiumOperationsSurface = ({
     setToast({ id: Date.now(), message, tone });
   };
 
+  const selectActiveGame = (profile: GameProfile): void => {
+    setActiveGame(profile);
+    try {
+      persistActiveGameProfile(globalThis.localStorage, profile);
+    } catch {
+      // The selected profile still remains active for this session.
+    }
+    notify(`${profile.title} agora é o jogo ativo do Modo Competitivo.`);
+  };
+
   let content: ReactNode;
   if (view === 'home') {
-    content = <HomeSurface navigate={navigate} notify={notify} />;
+    content = <HomeSurface activeGame={activeGame} navigate={navigate} notify={notify} />;
   } else if (view === 'competitive') {
-    content = <CompetitiveSurface notify={notify} />;
+    content = (
+      <CompetitiveSurface
+        activeGame={activeGame}
+        notify={notify}
+        onActiveGameChange={selectActiveGame}
+      />
+    );
   } else if (view === 'toggles' || view === 'network' || view === 'tweaks' || view === 'security') {
     content = (
       <CatalogSurface
