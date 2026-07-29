@@ -13,6 +13,7 @@ import {
   SettingsSurface,
   UpdateSurface,
 } from '@liiiraa/feature-shell';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import type {
   FavoriteCandidate,
   HomeCalibrationState,
@@ -78,21 +79,30 @@ export const SHELL_OPERATIONAL_STATES = OPERATIONAL_STATES satisfies readonly Op
 export type ShellOperationalState = (typeof SHELL_OPERATIONAL_STATES)[number];
 export type ShellWidth = 'wide' | 'standard' | 'compact' | 'minimum';
 
-type DesktopWindowAction = 'close' | 'minimize' | 'toggleMaximize';
+export type DesktopWindowAction = 'close' | 'minimize' | 'toggleMaximize';
 
-const runDesktopWindowAction = async (action: DesktopWindowAction): Promise<void> => {
+export interface DesktopWindowAdapter {
+  readonly close: () => Promise<void>;
+  readonly minimize: () => Promise<void>;
+  readonly toggleMaximize: () => Promise<void>;
+}
+
+export const runDesktopWindowAction = async (
+  action: DesktopWindowAction,
+  windowAdapter: DesktopWindowAdapter = getCurrentWindow(),
+): Promise<boolean> => {
   try {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const window = getCurrentWindow();
     if (action === 'close') {
-      await window.close();
+      await windowAdapter.close();
     } else if (action === 'minimize') {
-      await window.minimize();
+      await windowAdapter.minimize();
     } else {
-      await window.toggleMaximize();
+      await windowAdapter.toggleMaximize();
     }
+    return true;
   } catch {
     // Browser, Storybook and unit-test renderers intentionally have no native window host.
+    return false;
   }
 };
 

@@ -10,6 +10,7 @@ import {
   getOperationalPresentation,
   getResponsiveShellLayout,
   routeForNativeNavigation,
+  runDesktopWindowAction,
 } from './app.js';
 import type { ShellBridgeTransport } from './native/shell-bridge.js';
 import { DESKTOP_F6_REGIONS, createDesktopNavigator, desktopRouteTree } from './routes.js';
@@ -46,6 +47,21 @@ const semanticFindings = (markup: string): readonly string[] => {
   }
   return findings;
 };
+
+describe('native window controls', () => {
+  it('dispatches minimize exactly once to the current window adapter', async () => {
+    const windowAdapter = {
+      close: vi.fn(() => Promise.resolve()),
+      minimize: vi.fn(() => Promise.resolve()),
+      toggleMaximize: vi.fn(() => Promise.resolve()),
+    };
+
+    await expect(runDesktopWindowAction('minimize', windowAdapter)).resolves.toBe(true);
+    expect(windowAdapter.minimize).toHaveBeenCalledTimes(1);
+    expect(windowAdapter.close).not.toHaveBeenCalled();
+    expect(windowAdapter.toggleMaximize).not.toHaveBeenCalled();
+  });
+});
 
 describe('app shell smoke', () => {
   it('mounts every typed route at every locked responsive width with one main and one H1', () => {
@@ -184,9 +200,7 @@ describe('scale smoke', () => {
 
 describe('native composition smoke', () => {
   it('projects every validated host event and disposes one deduplicated listener', async () => {
-    let listener:
-      | ((event: { readonly payload: unknown }) => void)
-      | undefined;
+    let listener: ((event: { readonly payload: unknown }) => void) | undefined;
     let listenCalls = 0;
     const unlisten = vi.fn();
     const transport: ShellBridgeTransport = {
@@ -336,9 +350,7 @@ describe('native composition smoke', () => {
     expect(listenCalls).toBe(1);
     expect(observed).toEqual(events);
     expect(installerIdentities).toHaveLength(1);
-    expect(startupStates).toEqual([
-      { kind: 'splash', step: 'validating-installation' },
-    ]);
+    expect(startupStates).toEqual([{ kind: 'splash', step: 'validating-installation' }]);
     expect(navigations).toEqual([
       {
         pathname: '/settings/privacy',
@@ -368,15 +380,13 @@ describe('native composition smoke', () => {
   });
 
   it('maps every navigation family and shows native startup before the route shell', () => {
-    expect(
-      routeForNativeNavigation({ kind: 'goal', destination: 'activity' }),
-    ).toBe('/activity');
-    expect(
-      routeForNativeNavigation({ kind: 'settings', destination: 'updates' }),
-    ).toBe('/settings/updates');
-    expect(
-      routeForNativeNavigation({ kind: 'calibration', destination: 'summary' }),
-    ).toBe('/calibration/summary');
+    expect(routeForNativeNavigation({ kind: 'goal', destination: 'activity' })).toBe('/activity');
+    expect(routeForNativeNavigation({ kind: 'settings', destination: 'updates' })).toBe(
+      '/settings/updates',
+    );
+    expect(routeForNativeNavigation({ kind: 'calibration', destination: 'summary' })).toBe(
+      '/calibration/summary',
+    );
     expect(
       routeForNativeNavigation({
         kind: 'documentation',
