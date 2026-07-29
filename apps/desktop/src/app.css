@@ -4,6 +4,7 @@
 html,
 body,
 #root {
+  block-size: 100%;
   min-block-size: 100%;
   min-inline-size: 0;
   margin: 0;
@@ -34,9 +35,9 @@ textarea {
 .desktop-app-shell {
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);
-  min-block-size: 100vh;
+  block-size: 100vh;
   min-inline-size: 0;
-  overflow-x: hidden;
+  overflow: hidden;
   background: var(--lb-surface-canvas);
 }
 
@@ -60,6 +61,7 @@ textarea {
   grid-template-columns: 216px minmax(0, 1fr) 320px;
   min-block-size: 0;
   min-inline-size: 0;
+  overflow: hidden;
 }
 
 .desktop-goal-region {
@@ -76,6 +78,7 @@ textarea {
   min-block-size: 0;
   padding: var(--lb-screen-padding);
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .desktop-work-canvas > main,
@@ -119,6 +122,214 @@ textarea {
   border-inline-start: 1px solid var(--lb-line-strong);
   background: var(--lb-surface-raised);
   box-shadow: var(--lb-shadow-overlay);
+}
+
+.desktop-notification-layer {
+  position: fixed;
+  z-index: 40;
+  inset: 52px 0 0;
+  background: color-mix(in srgb, var(--lb-surface-canvas) 58%, transparent);
+  animation: desktop-notification-backdrop-in 160ms ease-out both;
+}
+
+.desktop-notification-drawer {
+  position: absolute;
+  inset-block: 12px;
+  inset-inline-end: 12px;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  box-sizing: border-box;
+  inline-size: min(424px, calc(100vw - 24px));
+  min-block-size: 0;
+  overflow: hidden;
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-raised);
+  box-shadow: var(--lb-shadow-overlay);
+  outline: 1px solid color-mix(in srgb, var(--lb-line-strong) 78%, transparent);
+  animation: desktop-notification-drawer-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.desktop-notification-drawer:focus-visible {
+  outline: var(--lb-focus-width) solid var(--lb-forced-focus);
+  outline-offset: calc(var(--lb-focus-width) * -1);
+}
+
+.desktop-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-3);
+  padding: 22px 22px 16px;
+}
+
+.desktop-notification-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-inline-size: 0;
+}
+
+.desktop-notification-heading > div {
+  display: grid;
+  gap: 2px;
+}
+
+.desktop-notification-heading > div > span,
+.desktop-notification-item-meta {
+  color: var(--lb-text-secondary);
+  font-family: var(--lb-font-data);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.desktop-notification-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+
+.desktop-notification-mark,
+.desktop-notification-item-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--lb-cobalt-signal);
+  background: var(--lb-surface-inset);
+}
+
+.desktop-notification-mark {
+  inline-size: 38px;
+  block-size: 38px;
+}
+
+.desktop-notification-description {
+  max-inline-size: 48ch;
+  margin: 0;
+  padding: 0 22px 18px;
+  color: var(--lb-text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.desktop-notification-summary {
+  display: grid;
+  grid-template-columns: auto auto minmax(24px, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  padding: 14px 22px;
+  border-block: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.desktop-notification-summary strong {
+  color: var(--lb-cobalt-signal);
+  font-family: var(--lb-font-display);
+  font-size: 22px;
+}
+
+.desktop-notification-summary span {
+  color: var(--lb-text-secondary);
+  font-size: 12px;
+}
+
+.desktop-notification-summary-line {
+  align-self: center;
+  block-size: 1px;
+  background: var(--lb-line-subtle);
+}
+
+.desktop-notification-feed {
+  min-block-size: 0;
+  padding: 16px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.desktop-notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 8px;
+  align-items: start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--lb-surface-canvas);
+}
+
+.desktop-notification-item-icon {
+  inline-size: 38px;
+  block-size: 38px;
+  color: var(--lb-warning);
+}
+
+.desktop-notification-item-copy {
+  display: grid;
+  justify-items: start;
+  gap: 7px;
+  min-inline-size: 0;
+}
+
+.desktop-notification-item-copy h3,
+.desktop-notification-item-copy p {
+  margin: 0;
+}
+
+.desktop-notification-item-copy h3 {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.desktop-notification-item-copy p {
+  color: var(--lb-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.desktop-notification-item-copy .lb-button {
+  margin-block-start: 5px;
+}
+
+.desktop-notification-unread {
+  inline-size: 7px;
+  block-size: 7px;
+  margin-block-start: 5px;
+  border-radius: 50%;
+  background: var(--lb-cobalt-signal);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--lb-cobalt-signal) 70%, transparent);
+}
+
+.desktop-notification-empty {
+  margin: 0;
+  padding: var(--lb-space-4);
+  color: var(--lb-text-secondary);
+  text-align: center;
+}
+
+.desktop-notification-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-block-start: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+@keyframes desktop-notification-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes desktop-notification-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-notification-layer,
+  .desktop-notification-drawer {
+    animation-duration: 1ms;
+  }
 }
 
 .desktop-command-list,

@@ -3,6 +3,7 @@ import {
   ChangeLedger,
   LbButton,
   LbRadioGroup,
+  LbSwitch,
   OperationInspector,
   OperationRow,
   PlanDependencyList,
@@ -26,6 +27,7 @@ import type {
   PhaseBoundaryExplanation,
   RecommendationState,
 } from '@liiiraa/desktop-client';
+import { useState } from 'react';
 
 import type { ShellLocale } from './calibration.js';
 
@@ -893,6 +895,22 @@ const FreshFinding = ({
   </aside>
 );
 
+const operationIconFor = (operation: TechnicalOperation): ProductIconName => {
+  if (operation.id.includes('game')) return 'game';
+  if (operation.id.includes('background')) return 'cpu';
+  if (operation.id.includes('visual')) return 'monitor';
+  if (operation.id.includes('power')) return 'zap';
+  if (operation.id.includes('boost')) return 'gauge';
+  if (operation.id.includes('gpu')) return 'microchip';
+  if (operation.id.includes('network')) return 'network';
+  if (operation.id.includes('memory')) return 'memory';
+  if (operation.id.includes('storage')) return 'database';
+  if (operation.id.includes('thermal')) return 'temperature';
+  if (operation.id.includes('usb')) return 'usb';
+  if (operation.id.includes('security')) return 'shield';
+  return COMPONENT_ICONS[operation.component];
+};
+
 const ComponentView = ({
   component,
   locale,
@@ -903,12 +921,35 @@ const ComponentView = ({
   readonly onNavigate?: ImproveSurfaceProps['onNavigate'];
 }) => {
   const operations = GOLDEN_OPERATIONS.filter((operation) => operation.component === component);
+  const [selectedOperationIds, setSelectedOperationIds] = useState<ReadonlySet<string>>(
+    () =>
+      new Set(
+        GOLDEN_OPERATIONS.filter((operation) => operation.eligibility === 'ready').map(
+          (operation) => operation.id,
+        ),
+      ),
+  );
   const readyOperations = operations.filter(
     (operation) => operation.eligibility === 'ready',
   ).length;
   const reviewOperations = operations.filter(
     (operation) => operation.eligibility === 'review-required',
   ).length;
+  const selectedOperations = operations.filter((operation) =>
+    selectedOperationIds.has(operation.id),
+  );
+
+  const updateSelection = (operationId: string, selected: boolean): void => {
+    setSelectedOperationIds((current) => {
+      const next = new Set(current);
+      if (selected) {
+        next.add(operationId);
+      } else {
+        next.delete(operationId);
+      }
+      return next;
+    });
+  };
 
   return (
     <section
@@ -969,9 +1010,9 @@ const ComponentView = ({
             <p>
               {localized(
                 {
-                  en: 'Nothing is applied from this screen. Open an adjustment to review every consequence.',
+                  en: 'Choose which adjustments enter the simulated plan. Nothing changes in Windows yet.',
                   'pt-BR':
-                    'Nada é aplicado nesta tela. Abra um ajuste para revisar todas as consequências.',
+                    'Escolha quais ajustes entram no plano simulado. Nada muda no Windows ainda.',
                 },
                 locale,
               )}
@@ -991,19 +1032,76 @@ const ComponentView = ({
           <article
             className="lb-component-operation"
             data-eligibility={operation.eligibility}
+            data-preview-selected={selectedOperationIds.has(operation.id)}
             key={operation.id}
           >
+            <span className="lb-component-operation-icon">
+              <ProductIcon name={operationIconFor(operation)} size={21} />
+            </span>
             <OperationRow
-              actionLabel={localized(
-                { en: 'Review adjustment', 'pt-BR': 'Revisar ajuste' },
-                locale,
-              )}
+              actionLabel={localized({ en: 'Details', 'pt-BR': 'Detalhes' }, locale)}
               detail={localized(operation.expectedDirection, locale)}
               name={localized(operation.name, locale)}
               onInspect={() => onNavigate?.('operation', operation.id)}
               risk={riskForDesignSystem(operation.riskClass)}
               riskLabel={riskLabelFor(operation.riskClass, locale)}
             />
+            <div className="lb-component-operation-controls">
+              <span className="lb-component-operation-info">
+                <button
+                  aria-describedby={`operation-tooltip-${operation.id}`}
+                  aria-label={localized(
+                    {
+                      en: `What ${operation.name.en} does`,
+                      'pt-BR': `O que ${operation.name['pt-BR']} faz`,
+                    },
+                    locale,
+                  )}
+                  onClick={() => onNavigate?.('operation', operation.id)}
+                  type="button"
+                >
+                  <ProductIcon name="info" size={17} />
+                </button>
+                <span
+                  className="lb-component-operation-tooltip"
+                  id={`operation-tooltip-${operation.id}`}
+                  role="tooltip"
+                >
+                  <strong>{localized({ en: 'What it does', 'pt-BR': 'O que faz' }, locale)}</strong>
+                  <span>{localized(operation.purpose, locale)}</span>
+                  <small>
+                    {exclusionReasonFor(operation, locale) ??
+                      localized(operation.compatibility, locale)}
+                  </small>
+                </span>
+              </span>
+              <LbSwitch
+                isDisabled={operation.eligibility === 'excluded'}
+                isSelected={selectedOperationIds.has(operation.id)}
+                onChange={(selected) => {
+                  updateSelection(operation.id, selected);
+                }}
+              >
+                <span className="lb-component-switch-copy">
+                  <strong>
+                    {operation.eligibility === 'excluded'
+                      ? localized({ en: 'Unavailable', 'pt-BR': 'Indisponível' }, locale)
+                      : selectedOperationIds.has(operation.id)
+                        ? localized({ en: 'Enabled', 'pt-BR': 'Ativado' }, locale)
+                        : localized({ en: 'Disabled', 'pt-BR': 'Desativado' }, locale)}
+                  </strong>
+                  <small>
+                    {localized(
+                      {
+                        en: 'In this preview',
+                        'pt-BR': 'Nesta prévia',
+                      },
+                      locale,
+                    )}
+                  </small>
+                </span>
+              </LbSwitch>
+            </div>
             <CapabilityReason
               capability={localized(operation.name, locale)}
               reason={
@@ -1057,6 +1155,18 @@ const ComponentView = ({
           />
         </div>
         <div>
+          <strong className="lb-component-selected-count">
+            {selectedOperations.length}{' '}
+            {localized(
+              {
+                en:
+                  selectedOperations.length === 1 ? 'adjustment selected' : 'adjustments selected',
+                'pt-BR':
+                  selectedOperations.length === 1 ? 'ajuste selecionado' : 'ajustes selecionados',
+              },
+              locale,
+            )}
+          </strong>
           <p>
             {localized(
               {
@@ -1067,11 +1177,12 @@ const ComponentView = ({
             )}
           </p>
           <LbButton
+            isDisabled={selectedOperations.length === 0}
             onPress={() => onNavigate?.('plan-review', 'recommended-plan')}
             variant="primary"
           >
             {localized(
-              { en: 'Review recommended plan', 'pt-BR': 'Revisar plano recomendado' },
+              { en: 'Review selected plan', 'pt-BR': 'Revisar plano selecionado' },
               locale,
             )}
           </LbButton>

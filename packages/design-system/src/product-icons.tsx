@@ -4,9 +4,11 @@ import {
   AppWindow,
   AudioLines,
   BadgeCheck,
+  Bell,
   ChartSpline,
   ChevronLeft,
   ChevronRight,
+  CircleHelp,
   CircleMinus,
   Crown,
   Cpu,
@@ -36,6 +38,7 @@ import {
   Timer,
   Trash2,
   Usb,
+  X,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -45,6 +48,7 @@ const PRODUCT_ICONS = Object.freeze({
   arrowRight: ArrowRight,
   app: AppWindow,
   audio: AudioLines,
+  bell: Bell,
   check: BadgeCheck,
   chart: ChartSpline,
   chevronLeft: ChevronLeft,
@@ -57,6 +61,7 @@ const PRODUCT_ICONS = Object.freeze({
   game: Gamepad2,
   gauge: Gauge,
   history: History,
+  info: CircleHelp,
   key: KeyRound,
   languages: Languages,
   lock: LockKeyhole,
@@ -78,6 +83,7 @@ const PRODUCT_ICONS = Object.freeze({
   timer: Timer,
   trash: Trash2,
   usb: Usb,
+  close: X,
   zap: Zap,
 }) satisfies Readonly<Record<string, LucideIcon>>;
 

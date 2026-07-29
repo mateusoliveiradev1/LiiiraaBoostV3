@@ -44,14 +44,14 @@ test('@premium-navigation login, profile, plan and optimization details are conn
     '/components/windows',
   );
   await expect(page.getByRole('heading', { name: 'Windows' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Revisar ajuste' })).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Detalhes' })).toHaveCount(3);
   await expect(
     page.locator('.lb-operation-row strong').filter({
       hasText: 'Revisar o Modo de Jogo do Windows',
     }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Revisar ajuste' }).first().click();
+  await page.getByRole('button', { name: 'Detalhes' }).first().click();
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
     'data-route-path',
     '/operations/windows-game-mode-review',
@@ -60,7 +60,7 @@ test('@premium-navigation login, profile, plan and optimization details are conn
 
   await page.getByRole('button', { name: 'Otimização', exact: true }).click();
   await page.getByRole('button', { name: 'Abrir', exact: true }).first().click();
-  await page.getByRole('button', { name: 'Revisar plano recomendado' }).click();
+  await page.getByRole('button', { name: 'Revisar plano selecionado' }).click();
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
     'data-route-path',
     '/plans/recommended-plan/review',

@@ -174,7 +174,11 @@ describe('Improve operation and plan review technical surface', () => {
       );
       expect(markup).toContain(`data-component-id="${component}"`);
       expect(markup).toContain('Cenário simulado');
-      expect(markup).toContain('Revisar plano recomendado');
+      expect(markup).toContain('Revisar plano selecionado');
+      if (GOLDEN_OPERATIONS.some((operation) => operation.component === component)) {
+        expect(markup).toContain('role="switch"');
+        expect(markup).toContain('data-preview-selected=');
+      }
       expect(axeAdmissionAudit(markup)).toEqual([]);
     }
 

@@ -52,6 +52,7 @@ import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
 import { StartupSurface } from './features/startup.js';
+import { NotificationCenter } from './features/notification-center.js';
 import {
   createShellBridge,
   type ShellBridge,
@@ -1574,22 +1575,17 @@ const DesktopAppContent = ({
       </div>
 
       {activityOpen ? (
-        <aside
-          aria-label={formatMessage(preferences.locale, 'navigation.activity')}
-          className="desktop-activity-overlay"
-          data-lb-region
-        >
-          <ActivityCenter items={overlayActivityItems} />
-          <LbButton
-            onPress={() => {
-              setActivityOpen(false);
-              restoreOverlayFocus();
-            }}
-            variant="quiet"
-          >
-            {formatMessage(preferences.locale, 'action.close')}
-          </LbButton>
-        </aside>
+        <NotificationCenter
+          items={overlayActivityItems}
+          locale={locale}
+          onClose={() => {
+            setActivityOpen(false);
+            restoreOverlayFocus();
+          }}
+          onOpenActivity={() => {
+            navigate('/activity');
+          }}
+        />
       ) : null}
 
       <LbDialog
