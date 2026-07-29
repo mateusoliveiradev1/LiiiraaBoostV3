@@ -121,7 +121,7 @@
 
 /* Premium first launch */
 
-.desktop-first-run-shell {
+.desktop-app-shell.desktop-first-run-shell[data-route-path='/first-run'] {
   grid-template-rows: 52px minmax(0, 1fr);
 }
 

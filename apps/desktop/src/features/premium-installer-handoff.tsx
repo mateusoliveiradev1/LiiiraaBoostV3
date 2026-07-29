@@ -56,7 +56,7 @@ export const PremiumInstallerHandoff = ({
   const canContinue = compatible && identityAccepted && updateIdentity !== 'invalid';
 
   return (
-    <div className="desktop-app-shell desktop-first-run-shell">
+    <div className="desktop-app-shell desktop-first-run-shell" data-route-path="/first-run">
       <div className="desktop-title-region" data-focus-region="title-bar">
         <WindowTitleBar
           {...(windowControls === undefined ? {} : { controls: windowControls })}
