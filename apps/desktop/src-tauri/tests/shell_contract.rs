@@ -184,6 +184,17 @@ fn primary_work_area() -> WorkArea {
 fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
     let mut lifecycle = WindowLifecycle::default();
     assert_eq!(lifecycle.close_action(), CloseAction::Exit);
+    assert!(
+        lifecycle
+            .begin_close(HostEventMetadata::fixed(
+                "request-window-close-default-0001",
+                "2026-07-28T12:00:00.000Z",
+            ))
+            .expect("default close request")
+            .event
+            .is_none(),
+        "ordinary exit must not leave a renderer dialog pending"
+    );
 
     let malformed = shell_envelope(
         "desktop.shell.set-tray-preference.command",
@@ -207,6 +218,17 @@ fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
         .expect("generated tray opt-in command");
 
     assert_eq!(lifecycle.close_action(), CloseAction::HideToTray);
+    assert!(
+        lifecycle
+            .begin_close(HostEventMetadata::fixed(
+                "request-window-close-tray-0001",
+                "2026-07-28T12:00:00.000Z",
+            ))
+            .expect("tray close request")
+            .event
+            .is_none(),
+        "hide-to-tray must not leave a renderer dialog pending"
+    );
     assert!(dispatch.effects.iter().any(|effect| {
         matches!(
             effect,
@@ -232,8 +254,8 @@ fn window_close_during_recovery_never_exits_the_interface() {
 
     assert_eq!(close.action, CloseAction::AwaitRendererDecision);
     assert_eq!(
-        serde_json::to_value(close.event).expect("serializable generated event")["payload"]["context"]
-            ["kind"],
+        serde_json::to_value(close.event.expect("recovery close event"))
+            .expect("serializable generated event")["payload"]["context"]["kind"],
         "recovery-in-progress"
     );
 
@@ -579,9 +601,10 @@ fn tray_actions_emit_generated_events_and_unknown_actions_reject() {
             HostEventMetadata::fixed("request-tray-exit-0001", "2026-07-28T12:00:00.000Z"),
         )
         .expect("allowlisted tray exit action");
-    assert!(
-        exit.iter()
-            .any(|effect| matches!(effect, TrayEffect::ExitInterface))
+    assert_eq!(
+        exit.len(),
+        1,
+        "tray exit must only request renderer confirmation"
     );
     assert!(exit.iter().any(|effect| {
         matches!(

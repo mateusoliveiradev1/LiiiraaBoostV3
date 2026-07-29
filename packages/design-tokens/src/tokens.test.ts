@@ -96,6 +96,21 @@ describe('Pre-Dawn Flight Deck token contract', () => {
     });
   });
 
+  it('keeps modal stacking and responsive action layout in the token contract', async () => {
+    const css = await readFile(new URL('./tokens.css', import.meta.url), 'utf8');
+
+    expect(css).toContain('--lb-layer-modal: 80;');
+    expect(css).toMatch(
+      /\.lb-modal-overlay\s*\{[^}]*z-index:\s*var\(--lb-layer-modal\);[^}]*isolation:\s*isolate;/u,
+    );
+    expect(css).toMatch(
+      /\.lb-dialog-actions\s*\{[^}]*display:\s*flex;[^}]*justify-content:\s*flex-end;/u,
+    );
+    expect(css).toMatch(
+      /@media \(max-width: 640px\)[\s\S]*\.lb-dialog-actions\s*\{[^}]*flex-direction:\s*column;/u,
+    );
+  });
+
   it('ships the free variable fonts and their OFL licenses with the desktop app', async () => {
     const fontDirectory = new URL('../../../apps/desktop/public/fonts/', import.meta.url);
     const assets = [

@@ -24,6 +24,7 @@ import {
   LB_INTERACTION_STATES,
   LbButton,
   LbDialog,
+  LbDialogActions,
   LbDialogContent,
   LbIconButton,
 } from './primitives.js';
@@ -187,6 +188,20 @@ describe('keyboard, dialogs, charts, and accessibility axes', () => {
     );
     expect(content).toContain('slot="title"');
     expect(content).toContain('Plan review');
+  });
+
+  it('keeps dialog actions in a dedicated semantic footer', () => {
+    const actions = renderToStaticMarkup(
+      <LbDialogActions>
+        <LbButton variant="secondary">Keep running</LbButton>
+        <LbButton variant="destructive">Close interface</LbButton>
+      </LbDialogActions>,
+    );
+
+    expect(actions).toContain('class="lb-dialog-actions"');
+    expect(actions).toContain('Keep running');
+    expect(actions).toContain('Close interface');
+    expect(semanticAudit(actions)).toEqual([]);
   });
 
   it('delegates roving tab stops to a vertical React Aria toolbar', () => {

@@ -39,6 +39,7 @@ import {
   LbAlertDialog,
   LbButton,
   LbDialog,
+  LbDialogActions,
   LbSearchField,
   OPERATIONAL_STATES,
   ProductIcon,
@@ -1982,57 +1983,59 @@ const NativeShellPresentation = ({
           </button>
         }
       >
-        {closeContext?.kind === 'recovery-in-progress' ? (
-          <>
-            <LbButton
-              onPress={() => {
-                onResolveClose({
-                  context: 'recovery-in-progress',
-                  decision: 'stay-here',
-                });
-              }}
-              variant="primary"
-            >
-              {locale === 'pt-BR' ? 'Permanecer aqui' : 'Stay here'}
-            </LbButton>
-            <LbButton
-              onPress={() => {
-                onResolveClose({
-                  context: 'recovery-in-progress',
-                  decision: 'keep-running-in-tray',
-                });
-              }}
-              variant="secondary"
-            >
-              {locale === 'pt-BR' ? 'Manter no tray' : 'Keep running in tray'}
-            </LbButton>
-          </>
-        ) : (
-          <>
-            <LbButton
-              onPress={() => {
-                onResolveClose({
-                  context: 'ordinary',
-                  decision: 'close-interface',
-                });
-              }}
-              variant="primary"
-            >
-              {locale === 'pt-BR' ? 'Encerrar interface' : 'Close interface'}
-            </LbButton>
-            <LbButton
-              onPress={() => {
-                onResolveClose({
-                  context: 'ordinary',
-                  decision: 'keep-running-in-tray',
-                });
-              }}
-              variant="secondary"
-            >
-              {locale === 'pt-BR' ? 'Manter detecção no tray' : 'Keep detection in tray'}
-            </LbButton>
-          </>
-        )}
+        <LbDialogActions>
+          {closeContext?.kind === 'recovery-in-progress' ? (
+            <>
+              <LbButton
+                onPress={() => {
+                  onResolveClose({
+                    context: 'recovery-in-progress',
+                    decision: 'keep-running-in-tray',
+                  });
+                }}
+                variant="secondary"
+              >
+                {locale === 'pt-BR' ? 'Manter no tray' : 'Keep running in tray'}
+              </LbButton>
+              <LbButton
+                onPress={() => {
+                  onResolveClose({
+                    context: 'recovery-in-progress',
+                    decision: 'stay-here',
+                  });
+                }}
+                variant="primary"
+              >
+                {locale === 'pt-BR' ? 'Permanecer aqui' : 'Stay here'}
+              </LbButton>
+            </>
+          ) : (
+            <>
+              <LbButton
+                onPress={() => {
+                  onResolveClose({
+                    context: 'ordinary',
+                    decision: 'keep-running-in-tray',
+                  });
+                }}
+                variant="secondary"
+              >
+                {locale === 'pt-BR' ? 'Manter detecção no tray' : 'Keep detection in tray'}
+              </LbButton>
+              <LbButton
+                onPress={() => {
+                  onResolveClose({
+                    context: 'ordinary',
+                    decision: 'close-interface',
+                  });
+                }}
+                variant="destructive"
+              >
+                {locale === 'pt-BR' ? 'Encerrar interface' : 'Close interface'}
+              </LbButton>
+            </>
+          )}
+        </LbDialogActions>
       </LbAlertDialog>
     </>
   );

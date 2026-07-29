@@ -461,6 +461,14 @@ export const LbDialogContent = ({ children, description, title }: LbDialogConten
   </>
 );
 
+export interface LbDialogActionsProps {
+  readonly children: ReactNode;
+}
+
+export const LbDialogActions = ({ children }: LbDialogActionsProps) => (
+  <footer className="lb-dialog-actions">{children}</footer>
+);
+
 export const LbDialog = ({ isOpen, onOpenChange, trigger, ...dialogProps }: LbOverlayProps) => (
   <DialogTrigger
     {...(isOpen === undefined ? {} : { isOpen })}

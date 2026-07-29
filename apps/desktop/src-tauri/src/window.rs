@@ -123,7 +123,7 @@ impl HostEventMetadata {
 #[derive(Clone, Debug)]
 pub struct CloseRequest {
     pub action: CloseAction,
-    pub event: HostToRendererShellEvent,
+    pub event: Option<HostToRendererShellEvent>,
 }
 
 #[derive(Clone, Debug)]
@@ -170,21 +170,18 @@ impl WindowLifecycle {
         &self,
         metadata: HostEventMetadata,
     ) -> Result<CloseRequest, WindowLifecycleError> {
-        let context = if self.recovery_in_progress {
-            json!({ "kind": "recovery-in-progress" })
+        let action = self.close_action();
+        let event = if action == CloseAction::AwaitRendererDecision {
+            Some(build_host_event(
+                "desktop.shell.close-requested.event",
+                json!({ "context": { "kind": "recovery-in-progress" } }),
+                metadata,
+            )?)
         } else {
-            json!({ "kind": "ordinary" })
+            None
         };
-        let event = build_host_event(
-            "desktop.shell.close-requested.event",
-            json!({ "context": context }),
-            metadata,
-        )?;
 
-        Ok(CloseRequest {
-            action: self.close_action(),
-            event,
-        })
+        Ok(CloseRequest { action, event })
     }
 
     pub fn dispatch_renderer_message(

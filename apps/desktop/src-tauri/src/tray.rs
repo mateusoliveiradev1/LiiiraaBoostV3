@@ -163,7 +163,6 @@ fn action(id: &str, label: impl Into<String>) -> TrayMenuEntry {
 pub enum TrayEffect {
     SetVisible(bool),
     Emit(HostToRendererShellEvent),
-    ExitInterface,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -263,14 +262,11 @@ impl TrayLifecycle {
                 json!({ "kind": "settings", "destination": "general" }),
                 metadata,
             )?)],
-            TrayAction::ExitInterface => vec![
-                TrayEffect::Emit(build_host_event(
-                    "desktop.shell.close-requested.event",
-                    json!({ "context": { "kind": "ordinary" } }),
-                    metadata,
-                )?),
-                TrayEffect::ExitInterface,
-            ],
+            TrayAction::ExitInterface => vec![TrayEffect::Emit(build_host_event(
+                "desktop.shell.close-requested.event",
+                json!({ "context": { "kind": "ordinary" } }),
+                metadata,
+            )?)],
         };
 
         Ok(effects)

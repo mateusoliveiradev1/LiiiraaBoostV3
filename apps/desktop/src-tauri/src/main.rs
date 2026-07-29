@@ -279,13 +279,16 @@ fn apply_tray_effects(app: &AppHandle, effects: Vec<TrayEffect>) -> Result<(), S
                 }
             }
             TrayEffect::Emit(event) => {
-                if matches!(event, HostToRendererShellEvent::NavigationRequestedEvent(_)) {
+                if matches!(
+                    event,
+                    HostToRendererShellEvent::NavigationRequestedEvent(_)
+                        | HostToRendererShellEvent::CloseRequestedEvent(_)
+                ) {
                     focus_main_window(app)?;
                 }
                 app.emit(HOST_EVENT_CHANNEL, event)
                     .map_err(|_| ShellDispatchError::HostOperationFailed)?;
             }
-            TrayEffect::ExitInterface => app.exit(0),
         }
     }
 
@@ -543,7 +546,6 @@ fn run() -> Result<(), String> {
                 return;
             };
 
-            let _ = window.emit(HOST_EVENT_CHANNEL, close.event);
             match close.action {
                 CloseAction::Exit => {}
                 CloseAction::HideToTray => {
@@ -552,6 +554,9 @@ fn run() -> Result<(), String> {
                 }
                 CloseAction::StayVisible | CloseAction::AwaitRendererDecision => {
                     api.prevent_close();
+                    if let Some(event) = close.event {
+                        let _ = window.emit(HOST_EVENT_CHANNEL, event);
+                    }
                     let _ = window.show();
                     let _ = window.set_focus();
                 }

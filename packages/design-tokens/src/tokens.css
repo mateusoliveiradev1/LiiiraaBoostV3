@@ -64,6 +64,12 @@
   --lb-disabled-text: #aab4c4;
   --lb-disabled-opacity: 1;
   --lb-scrim: rgba(3, 5, 8, 0.76);
+  --lb-layer-dropdown: 30;
+  --lb-layer-sticky: 40;
+  --lb-layer-popover: 60;
+  --lb-layer-modal: 80;
+  --lb-layer-toast: 100;
+  --lb-layer-tooltip: 110;
 
   --lb-radius-default: 6px;
   --lb-radius-overlay: 10px;
@@ -438,22 +444,79 @@
 
 .lb-modal-overlay {
   position: fixed;
+  z-index: var(--lb-layer-modal);
   inset: 0;
+  isolation: isolate;
   display: grid;
   place-items: center;
   padding: var(--lb-screen-padding);
+  overflow: auto;
   background: var(--lb-scrim);
+  backdrop-filter: blur(6px);
+  overscroll-behavior: contain;
 }
 
 .lb-dialog,
 .lb-sheet {
   display: grid;
   gap: var(--lb-space-3);
+  inline-size: min(100%, calc(var(--lb-space-7) * 10));
   max-inline-size: calc(var(--lb-space-7) * 10);
   max-block-size: calc(100vh - var(--lb-space-7));
   padding: var(--lb-space-4);
   overflow: auto;
   border-radius: var(--lb-radius-overlay);
+}
+
+.lb-dialog [role='dialog'],
+.lb-dialog [role='alertdialog'] {
+  display: grid;
+  gap: var(--lb-space-3);
+  min-inline-size: 0;
+}
+
+.lb-dialog [slot='title'],
+.lb-dialog [slot='description'] {
+  margin: 0;
+}
+
+.lb-dialog [slot='description'] {
+  display: block;
+  max-inline-size: 60ch;
+  color: var(--lb-text-secondary);
+  line-height: var(--lb-text-body-line);
+  text-wrap: pretty;
+}
+
+.lb-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  justify-content: flex-end;
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.lb-dialog-actions .lb-button {
+  min-inline-size: calc(var(--lb-space-7) * 2);
+}
+
+@media (max-width: 640px) {
+  .lb-modal-overlay {
+    padding: var(--lb-space-3);
+  }
+
+  .lb-dialog {
+    padding: var(--lb-space-3);
+  }
+
+  .lb-dialog-actions {
+    flex-direction: column;
+  }
+
+  .lb-dialog-actions .lb-button {
+    inline-size: 100%;
+  }
 }
 
 .lb-progress {
