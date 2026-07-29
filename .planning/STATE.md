@@ -32,6 +32,7 @@ Phase: 02 (complete-desktop-experience) — EXECUTING
 Plan: 21 of 33
 Status: Ready to execute
 Last activity: 2026-07-29 — Completed quick task 260728-ndw: final desktop UI and branded installer
+Last activity: 2026-07-29 - Completed quick task 260729-km5: notifications, stable route geometry and optimization toggles
 
 Progress: [████░░░░░░] 44%
 
@@ -279,6 +280,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260729-89h | Finalizar loading, login, perfil, planos e rotas internas premium | 2026-07-29 | c47742e | Verified     | [260729-89h-finalizar-experiencia-desktop-premium-co](./quick/260729-89h-finalizar-experiencia-desktop-premium-co/) |
 
 | 260729-jri | Corrigir primeira abertura, barra superior, conta e otimizações acionáveis | 2026-07-29 | 39bdf24 | Verified | [260729-jri-corrigir-primeira-abertura-barra-superio](./quick/260729-jri-corrigir-primeira-abertura-barra-superio/) |
+| 260729-km5 | Redesenhar notificações, estabilizar shell e adicionar toggles de otimização | 2026-07-29 | 94031d1 | Verified | [260729-km5-redesenhar-notifica-es-como-painel-flutu](./quick/260729-km5-redesenhar-notifica-es-como-painel-flutu/) |
 
 ## Session Continuity
 
