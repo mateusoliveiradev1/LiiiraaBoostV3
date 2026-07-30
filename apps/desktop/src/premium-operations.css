@@ -214,8 +214,14 @@
 .desktop-app-shell .desktop-work-canvas {
   min-block-size: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--premium-canvas);
+  scrollbar-gutter: stable;
+}
+
+.desktop-app-shell .desktop-work-canvas:has(> .premium-operations) {
+  overflow: hidden;
   scrollbar-gutter: auto;
 }
 

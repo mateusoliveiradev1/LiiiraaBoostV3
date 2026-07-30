@@ -122,6 +122,24 @@ test('@premium-profile edits, validates and persists the complete local identity
   });
 });
 
+test('@premium-profile keeps native wheel scrolling available in the installed shell layout', async ({
+  page,
+}) => {
+  await openProfile(page);
+
+  const workCanvas = page.locator('.desktop-work-canvas');
+  await expect(workCanvas).toHaveCSS('overflow-y', 'auto');
+
+  const before = await workCanvas.evaluate((element) => element.scrollTop);
+  await workCanvas.hover({ position: { x: 500, y: 500 } });
+  await page.mouse.wheel(0, 900);
+
+  await expect
+    .poll(() => workCanvas.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(before);
+  await expect(page.getByRole('heading', { name: 'Conta e dados locais' })).toBeVisible();
+});
+
 test('@premium-profile clear confirmation and preview sign-out preserve honest local behavior', async ({
   page,
 }) => {
