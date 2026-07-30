@@ -1,7 +1,7 @@
 import { ProductIcon } from '@liiiraa/design-system';
 import type { ProductIconName } from '@liiiraa/design-system';
 import type { ShellLocale } from '@liiiraa/feature-shell';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   PreConsentLocaleControl,
   useDesktopPreferences,
@@ -10,24 +10,66 @@ import {
 import { launchOnStartup } from '../native/launch-on-startup.js';
 
 type SettingsSection = 'general' | 'appearance' | 'notifications' | 'privacy' | 'data';
-type LocalSetting = 'analytics' | 'autoUpdate' | 'notifications';
+type LocalSetting =
+  | 'analytics'
+  | 'autoUpdate'
+  | 'crashReports'
+  | 'downloadNotifications'
+  | 'localHistory'
+  | 'notifications'
+  | 'planNotifications'
+  | 'securityNotifications';
 type LaunchOnStartupStatus = 'error' | 'loading' | 'ready' | 'updating';
 
 interface LocalSettings {
   readonly analytics: boolean;
   readonly autoUpdate: boolean;
+  readonly crashReports: boolean;
+  readonly downloadNotifications: boolean;
+  readonly localHistory: boolean;
   readonly notifications: boolean;
+  readonly planNotifications: boolean;
+  readonly securityNotifications: boolean;
 }
 
 const LOCAL_SETTINGS_KEY = 'liiiraa.desktop.visual-settings.v1';
 const DEFAULT_LOCAL_SETTINGS: LocalSettings = Object.freeze({
   analytics: false,
   autoUpdate: true,
+  crashReports: false,
+  downloadNotifications: true,
+  localHistory: true,
   notifications: true,
+  planNotifications: true,
+  securityNotifications: true,
 });
+
+interface ImportedSettingsProfile {
+  readonly localSettings?: Partial<LocalSettings>;
+  readonly preferences?: {
+    readonly dataText?: 'increased-contrast' | 'standard';
+    readonly density?: 'comfortable' | 'compact';
+    readonly interfaceScale?: 100 | 125 | 150;
+    readonly locale?: 'pt-BR' | 'en-US';
+    readonly motion?: 'responsive' | 'reduced';
+    readonly trayEnabled?: boolean;
+  };
+  readonly schemaVersion?: number;
+  readonly theme?: DesktopTheme;
+}
 
 const text = (locale: ShellLocale, ptBr: string, english: string): string =>
   locale === 'pt-BR' ? ptBr : english;
+
+const downloadJson = (filename: string, payload: unknown): void => {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.download = filename;
+  anchor.href = url;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
 
 const loadLocalSettings = (): LocalSettings => {
   try {
@@ -38,12 +80,19 @@ const loadLocalSettings = (): LocalSettings => {
     return Object.freeze({
       analytics: parsed.analytics === true,
       autoUpdate: parsed.autoUpdate !== false,
+      crashReports: parsed.crashReports === true,
+      downloadNotifications: parsed.downloadNotifications !== false,
+      localHistory: parsed.localHistory !== false,
       notifications: parsed.notifications !== false,
+      planNotifications: parsed.planNotifications !== false,
+      securityNotifications: parsed.securityNotifications !== false,
     });
   } catch {
     return DEFAULT_LOCAL_SETTINGS;
   }
 };
+
+export const areApplicationNotificationsEnabled = (): boolean => loadLocalSettings().notifications;
 
 const SECTION_FROM_ROUTE: Readonly<Record<string, SettingsSection>> = Object.freeze({
   advanced: 'data',
@@ -95,9 +144,10 @@ const SettingSwitch = ({
     <button
       aria-checked={active}
       aria-busy={pending}
+      aria-disabled={disabled || pending}
       aria-label={`${active ? text(locale, 'Desativar', 'Disable') : text(locale, 'Ativar', 'Enable')} ${label}`}
       className="premium-switch"
-      disabled={disabled}
+      disabled={disabled || pending}
       onClick={onToggle}
       role="switch"
       type="button"
@@ -120,6 +170,10 @@ export const PremiumSettingsSurface = ({
   const [localSettings, setLocalSettings] = useState<LocalSettings>(loadLocalSettings);
   const [launchEnabled, setLaunchEnabled] = useState(false);
   const [launchStatus, setLaunchStatus] = useState<LaunchOnStartupStatus>('loading');
+  const [dataAction, setDataAction] = useState<'hardware' | null>(null);
+  const [hardwareScannedAt, setHardwareScannedAt] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const dataActionTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setSection(SECTION_FROM_ROUTE[routeState] ?? 'general');
@@ -153,22 +207,196 @@ export const PremiumSettingsSurface = ({
     }
   }, [localSettings]);
 
+  useEffect(
+    () => () => {
+      if (dataActionTimer.current !== undefined) {
+        window.clearTimeout(dataActionTimer.current);
+      }
+    },
+    [],
+  );
+
   const sections = useMemo(
     () =>
       [
-        ['general', text(locale, 'Geral', 'General')],
-        ['appearance', text(locale, 'Aparência', 'Appearance')],
-        ['notifications', text(locale, 'Notificações', 'Notifications')],
-        ['privacy', text(locale, 'Privacidade', 'Privacy')],
-        ['data', text(locale, 'Dados e recuperação', 'Data and recovery')],
+        ['general', text(locale, 'Geral', 'General'), 'settings'],
+        ['appearance', text(locale, 'Aparência', 'Appearance'), 'palette'],
+        ['notifications', text(locale, 'Notificações', 'Notifications'), 'bell'],
+        ['privacy', text(locale, 'Privacidade', 'Privacy'), 'shield'],
+        ['data', text(locale, 'Dados e recuperação', 'Data and recovery'), 'recovery'],
       ] as const,
     [locale],
   );
 
   const sectionLabel = sections.find(([id]) => id === section)?.[1] ?? sections[0][1];
+  const sectionDescription: Record<SettingsSection, string> = {
+    appearance: text(
+      locale,
+      'Tema, escala, densidade e movimento aplicados imediatamente.',
+      'Theme, scale, density, and motion applied immediately.',
+    ),
+    data: text(
+      locale,
+      'Portabilidade das preferências, diagnóstico local e recuperação.',
+      'Preference portability, local diagnostics, and recovery.',
+    ),
+    general: text(
+      locale,
+      'Comportamento do aplicativo neste computador.',
+      'Application behavior on this computer.',
+    ),
+    notifications: text(
+      locale,
+      'Escolha quais eventos merecem interromper sua atenção.',
+      'Choose which events deserve your attention.',
+    ),
+    privacy: text(
+      locale,
+      'Dados locais por padrão e compartilhamento sempre opcional.',
+      'Local data by default and sharing always optional.',
+    ),
+  };
 
   const updateLocalSetting = (key: LocalSetting): void => {
     setLocalSettings((current) => ({ ...current, [key]: !current[key] }));
+  };
+
+  const exportSettingsProfile = (): void => {
+    downloadJson(`liiiraa-boost-perfil-${new Date().toISOString().slice(0, 10)}.json`, {
+      exportedAt: new Date().toISOString(),
+      localSettings,
+      preferences,
+      resolvedTheme,
+      schemaVersion: 1,
+      theme,
+    });
+    notify(
+      text(locale, 'Perfil exportado para Downloads.', 'Profile exported to Downloads.'),
+      'success',
+    );
+  };
+
+  const importSettingsProfile = async (file: File): Promise<void> => {
+    try {
+      const imported = JSON.parse(await file.text()) as ImportedSettingsProfile;
+      if (imported.schemaVersion !== 1) {
+        throw new Error('unsupported profile schema');
+      }
+
+      if (imported.theme === 'dark' || imported.theme === 'light' || imported.theme === 'system') {
+        setTheme(imported.theme);
+      }
+
+      const importedPreferences = imported.preferences;
+      if (importedPreferences?.locale === 'pt-BR' || importedPreferences?.locale === 'en-US') {
+        dispatch({ locale: importedPreferences.locale, type: 'set-locale' });
+      }
+      if (
+        importedPreferences?.interfaceScale === 100 ||
+        importedPreferences?.interfaceScale === 125 ||
+        importedPreferences?.interfaceScale === 150
+      ) {
+        dispatch({
+          scale: importedPreferences.interfaceScale,
+          type: 'set-interface-scale',
+        });
+      }
+      if (
+        importedPreferences?.motion === 'responsive' ||
+        importedPreferences?.motion === 'reduced'
+      ) {
+        dispatch({ motion: importedPreferences.motion, type: 'set-motion' });
+      }
+      if (
+        importedPreferences?.density === 'comfortable' ||
+        importedPreferences?.density === 'compact'
+      ) {
+        dispatch({ density: importedPreferences.density, type: 'set-density' });
+      }
+      if (
+        importedPreferences?.dataText === 'standard' ||
+        importedPreferences?.dataText === 'increased-contrast'
+      ) {
+        dispatch({ dataText: importedPreferences.dataText, type: 'set-data-text' });
+      }
+      if (typeof importedPreferences?.trayEnabled === 'boolean') {
+        dispatch({ enabled: importedPreferences.trayEnabled, type: 'set-tray-enabled' });
+      }
+
+      if (imported.localSettings) {
+        setLocalSettings((current) => {
+          const next = { ...current };
+          for (const key of Object.keys(current) as LocalSetting[]) {
+            const value = imported.localSettings?.[key];
+            if (typeof value === 'boolean') {
+              next[key] = value;
+            }
+          }
+          return next;
+        });
+      }
+
+      notify(
+        text(locale, 'Perfil validado e aplicado.', 'Profile validated and applied.'),
+        'success',
+      );
+    } catch {
+      notify(
+        text(
+          locale,
+          'O arquivo não é um perfil válido do Liiiraa Boost.',
+          'The file is not a valid Liiiraa Boost profile.',
+        ),
+        'warning',
+      );
+    } finally {
+      if (importInputRef.current) {
+        importInputRef.current.value = '';
+      }
+    }
+  };
+
+  const exportSupportReport = (): void => {
+    downloadJson(`liiiraa-boost-diagnostico-${new Date().toISOString().slice(0, 10)}.json`, {
+      generatedAt: new Date().toISOString(),
+      privacy: {
+        accountDataIncluded: false,
+        personalFilesIncluded: false,
+        sensitiveValuesRedacted: true,
+      },
+      scenario: {
+        applicationVersion: '0.0.0',
+        locale: preferences.locale,
+        resolvedTheme,
+        themePreference: theme,
+      },
+      schemaVersion: 1,
+    });
+    notify(
+      text(
+        locale,
+        'Diagnóstico sanitizado exportado para Downloads.',
+        'Sanitized diagnostics exported to Downloads.',
+      ),
+      'success',
+    );
+  };
+
+  const rescanHardware = (): void => {
+    if (dataAction === 'hardware') {
+      return;
+    }
+    setDataAction('hardware');
+    dataActionTimer.current = window.setTimeout(() => {
+      setDataAction(null);
+      setHardwareScannedAt(
+        new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date()),
+      );
+      notify(
+        text(locale, 'Inventário demonstrativo reexaminado.', 'Demonstration inventory rescanned.'),
+        'success',
+      );
+    }, 850);
   };
 
   const toggleLaunchOnStartup = async (): Promise<void> => {
@@ -223,7 +451,7 @@ export const PremiumSettingsSurface = ({
   return (
     <div className="premium-settings-layout" data-premium-localized>
       <nav aria-label={text(locale, 'Seções de configurações', 'Settings sections')}>
-        {sections.map(([id, label]) => (
+        {sections.map(([id, label, icon]) => (
           <button
             aria-current={section === id ? 'page' : undefined}
             key={id}
@@ -232,7 +460,8 @@ export const PremiumSettingsSurface = ({
             }}
             type="button"
           >
-            {label}
+            <ProductIcon name={icon} size={17} weight="duotone" />
+            <span>{label}</span>
           </button>
         ))}
       </nav>
@@ -243,80 +472,128 @@ export const PremiumSettingsSurface = ({
             {text(locale, 'Preferências do aplicativo', 'Application preferences')}
           </span>
           <h2>{sectionLabel}</h2>
+          <p>{sectionDescription[section]}</p>
         </header>
 
         {section === 'data' ? (
-          <div className="premium-settings-actions">
-            {[
-              [
-                text(locale, 'Exportar perfil', 'Export profile'),
-                text(
-                  locale,
-                  'Gera um arquivo com preferências e o plano atual.',
-                  'Creates a file with preferences and the current plan.',
-                ),
-                'download',
-              ],
-              [
-                text(locale, 'Importar perfil', 'Import profile'),
-                text(
-                  locale,
-                  'Valida o perfil antes de mostrar as diferenças.',
-                  'Validates the profile before showing differences.',
-                ),
-                'package',
-              ],
-              [
-                text(locale, 'Abrir pasta de logs', 'Open logs folder'),
-                text(
-                  locale,
-                  'Logs locais com dados sensíveis removidos.',
-                  'Local logs with sensitive data redacted.',
-                ),
-                'activity',
-              ],
-              [
-                text(locale, 'Reexaminar hardware', 'Rescan hardware'),
-                text(
-                  locale,
-                  'Atualiza o inventário do cenário demonstrativo.',
-                  'Refreshes the demonstration hardware inventory.',
-                ),
-                'radar',
-              ],
-              [
-                text(locale, 'Rever primeira abertura', 'Review first launch'),
-                text(
-                  locale,
-                  'Reabre a explicação de segurança e verificação.',
-                  'Reopens the safety and verification explanation.',
-                ),
-                'shield',
-              ],
-            ].map(([title, description, icon]) => (
-              <button
-                key={title}
-                onClick={() => {
-                  notify(
-                    text(
-                      locale,
-                      `${String(title)}: fluxo visual concluído.`,
-                      `${String(title)}: visual flow completed.`,
-                    ),
-                    'success',
-                  );
-                }}
-                type="button"
-              >
-                <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
+          <>
+            <input
+              accept="application/json,.json"
+              aria-label={text(
+                locale,
+                'Selecionar perfil para importar',
+                'Select profile to import',
+              )}
+              hidden
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) {
+                  void importSettingsProfile(file);
+                }
+              }}
+              ref={importInputRef}
+              type="file"
+            />
+            <div className="premium-settings-actions">
+              <button onClick={exportSettingsProfile} type="button">
+                <ProductIcon name="download" size={21} weight="duotone" />
                 <span>
-                  <strong>{title}</strong>
-                  <small>{description}</small>
+                  <strong>{text(locale, 'Exportar perfil', 'Export profile')}</strong>
+                  <small>
+                    {text(
+                      locale,
+                      'Baixa um JSON com preferências visuais e alertas.',
+                      'Downloads a JSON file with appearance and alert preferences.',
+                    )}
+                  </small>
                 </span>
                 <ProductIcon name="chevronRight" size={17} />
               </button>
-            ))}
-          </div>
+              <button
+                onClick={() => {
+                  importInputRef.current?.click();
+                }}
+                type="button"
+              >
+                <ProductIcon name="package" size={21} weight="duotone" />
+                <span>
+                  <strong>{text(locale, 'Importar perfil', 'Import profile')}</strong>
+                  <small>
+                    {text(
+                      locale,
+                      'Valida o arquivo antes de aplicar cada preferência.',
+                      'Validates the file before applying each preference.',
+                    )}
+                  </small>
+                </span>
+                <ProductIcon name="chevronRight" size={17} />
+              </button>
+              <button onClick={exportSupportReport} type="button">
+                <ProductIcon name="activity" size={21} weight="duotone" />
+                <span>
+                  <strong>{text(locale, 'Exportar diagnóstico', 'Export diagnostics')}</strong>
+                  <small>
+                    {text(
+                      locale,
+                      'Relatório local sem conta, arquivos pessoais ou valores sensíveis.',
+                      'Local report without account data, personal files, or sensitive values.',
+                    )}
+                  </small>
+                </span>
+                <ProductIcon name="chevronRight" size={17} />
+              </button>
+              <button
+                aria-busy={dataAction === 'hardware'}
+                disabled={dataAction === 'hardware'}
+                onClick={rescanHardware}
+                type="button"
+              >
+                <ProductIcon
+                  name={dataAction === 'hardware' ? 'loading' : 'radar'}
+                  size={21}
+                  weight="duotone"
+                />
+                <span>
+                  <strong>{text(locale, 'Reexaminar hardware', 'Rescan hardware')}</strong>
+                  <small>
+                    {dataAction === 'hardware'
+                      ? text(locale, 'Atualizando inventário…', 'Refreshing inventory…')
+                      : hardwareScannedAt
+                        ? text(
+                            locale,
+                            `Inventário demonstrativo atualizado às ${hardwareScannedAt}.`,
+                            `Demo inventory refreshed at ${hardwareScannedAt}.`,
+                          )
+                        : text(
+                            locale,
+                            'Atualiza o inventário do cenário demonstrativo.',
+                            'Refreshes the demonstration hardware inventory.',
+                          )}
+                  </small>
+                </span>
+                <ProductIcon name="chevronRight" size={17} />
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/calibration/welcome');
+                }}
+                type="button"
+              >
+                <ProductIcon name="shield" size={21} weight="duotone" />
+                <span>
+                  <strong>{text(locale, 'Rever primeira abertura', 'Review first launch')}</strong>
+                  <small>
+                    {text(
+                      locale,
+                      'Reabre a explicação de segurança e verificação.',
+                      'Reopens the safety and verification explanation.',
+                    )}
+                  </small>
+                </span>
+                <ProductIcon name="chevronRight" size={17} />
+              </button>
+            </div>
+          </>
         ) : (
           <div className="premium-settings-list">
             {section === 'general' ? (
@@ -429,53 +706,225 @@ export const PremiumSettingsSurface = ({
                           )}
                     </small>
                   </span>
-                  <select
+                  <div
                     aria-label={text(locale, 'Tema do aplicativo', 'Application theme')}
-                    onChange={(event) => {
-                      setTheme(event.currentTarget.value as DesktopTheme);
-                    }}
-                    value={theme}
+                    className="premium-theme-choice"
+                    role="radiogroup"
                   >
-                    <option value="dark">{text(locale, 'Escuro', 'Dark')}</option>
-                    <option value="light">{text(locale, 'Claro', 'Light')}</option>
-                    <option value="system">
-                      {text(locale, 'Sistema (Windows)', 'System (Windows)')}
-                    </option>
+                    {[
+                      ['dark', 'moon', text(locale, 'Escuro', 'Dark')],
+                      ['light', 'sun', text(locale, 'Claro', 'Light')],
+                      ['system', 'device', text(locale, 'Sistema', 'System')],
+                    ].map(([value, icon, label]) => (
+                      <button
+                        aria-checked={theme === value}
+                        key={value}
+                        onClick={() => {
+                          setTheme(value as DesktopTheme);
+                        }}
+                        role="radio"
+                        type="button"
+                      >
+                        <ProductIcon
+                          name={icon as ProductIconName}
+                          size={16}
+                          weight={theme === value ? 'fill' : 'duotone'}
+                        />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </article>
+                <article>
+                  <span>
+                    <strong>{text(locale, 'Escala da interface', 'Interface scale')}</strong>
+                    <small>
+                      {text(
+                        locale,
+                        'Aumenta controles e textos sem alterar a resolução.',
+                        'Enlarges controls and text without changing resolution.',
+                      )}
+                    </small>
+                  </span>
+                  <select
+                    aria-label={text(locale, 'Escala da interface', 'Interface scale')}
+                    onChange={(event) => {
+                      dispatch({
+                        scale: Number(event.currentTarget.value) as 100 | 125 | 150,
+                        type: 'set-interface-scale',
+                      });
+                    }}
+                    value={preferences.interfaceScale}
+                  >
+                    <option value={100}>100%</option>
+                    <option value={125}>125%</option>
+                    <option value={150}>150%</option>
                   </select>
                 </article>
+                <article>
+                  <span>
+                    <strong>{text(locale, 'Densidade', 'Density')}</strong>
+                    <small>
+                      {text(
+                        locale,
+                        'Controla a quantidade de informação visível.',
+                        'Controls how much information is visible.',
+                      )}
+                    </small>
+                  </span>
+                  <select
+                    aria-label={text(locale, 'Densidade da interface', 'Interface density')}
+                    onChange={(event) => {
+                      dispatch({
+                        density: event.currentTarget.value as 'comfortable' | 'compact',
+                        type: 'set-density',
+                      });
+                    }}
+                    value={preferences.density}
+                  >
+                    <option value="comfortable">
+                      {text(locale, 'Confortável', 'Comfortable')}
+                    </option>
+                    <option value="compact">{text(locale, 'Compacta', 'Compact')}</option>
+                  </select>
+                </article>
+                <SettingSwitch
+                  active={preferences.dataText === 'increased-contrast'}
+                  description={text(
+                    locale,
+                    'Eleva contraste de métricas, unidades e metadados técnicos.',
+                    'Increases contrast for metrics, units, and technical metadata.',
+                  )}
+                  label={text(locale, 'Contraste de dados', 'Data contrast')}
+                  locale={locale}
+                  onToggle={() => {
+                    dispatch({
+                      dataText:
+                        preferences.dataText === 'increased-contrast'
+                          ? 'standard'
+                          : 'increased-contrast',
+                      type: 'set-data-text',
+                    });
+                  }}
+                />
               </>
             ) : null}
 
             {section === 'notifications' ? (
-              <SettingSwitch
-                active={localSettings.notifications}
-                description={text(
-                  locale,
-                  'Mostra alertas de plano, sessão, download e atualização.',
-                  'Shows plan, session, download, and update alerts.',
-                )}
-                label={text(locale, 'Notificações do aplicativo', 'Application notifications')}
-                locale={locale}
-                onToggle={() => {
-                  updateLocalSetting('notifications');
-                }}
-              />
+              <>
+                <SettingSwitch
+                  active={localSettings.notifications}
+                  description={text(
+                    locale,
+                    'Controle principal para avisos dentro do aplicativo.',
+                    'Master control for in-app notifications.',
+                  )}
+                  label={text(locale, 'Notificações do aplicativo', 'Application notifications')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('notifications');
+                  }}
+                />
+                <SettingSwitch
+                  active={localSettings.planNotifications}
+                  description={text(
+                    locale,
+                    'Revisão de planos, aplicação concluída e restauração disponível.',
+                    'Plan review, completed application, and available recovery.',
+                  )}
+                  disabled={!localSettings.notifications}
+                  label={text(locale, 'Planos e recuperação', 'Plans and recovery')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('planNotifications');
+                  }}
+                />
+                <SettingSwitch
+                  active={localSettings.downloadNotifications}
+                  description={text(
+                    locale,
+                    'Progresso concluído, pausa, falha e pacote pronto.',
+                    'Completed progress, pause, failure, and package readiness.',
+                  )}
+                  disabled={!localSettings.notifications}
+                  label={text(locale, 'Downloads e atualizações', 'Downloads and updates')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('downloadNotifications');
+                  }}
+                />
+                <SettingSwitch
+                  active={localSettings.securityNotifications}
+                  description={text(
+                    locale,
+                    'Falhas de integridade e ações que exigem sua confirmação.',
+                    'Integrity failures and actions requiring confirmation.',
+                  )}
+                  disabled={!localSettings.notifications}
+                  label={text(locale, 'Segurança e integridade', 'Security and integrity')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('securityNotifications');
+                  }}
+                />
+              </>
             ) : null}
 
             {section === 'privacy' ? (
-              <SettingSwitch
-                active={localSettings.analytics}
-                description={text(
-                  locale,
-                  'Compartilha apenas diagnóstico autorizado e sem dados pessoais.',
-                  'Shares only authorized diagnostics without personal data.',
-                )}
-                label={text(locale, 'Diagnóstico opcional', 'Optional diagnostics')}
-                locale={locale}
-                onToggle={() => {
-                  updateLocalSetting('analytics');
-                }}
-              />
+              <>
+                <SettingSwitch
+                  active={localSettings.analytics}
+                  description={text(
+                    locale,
+                    'Compartilha apenas diagnóstico autorizado e sem dados pessoais.',
+                    'Shares only authorized diagnostics without personal data.',
+                  )}
+                  label={text(locale, 'Diagnóstico opcional', 'Optional diagnostics')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('analytics');
+                  }}
+                />
+                <SettingSwitch
+                  active={localSettings.crashReports}
+                  description={text(
+                    locale,
+                    'Envia falhas técnicas sanitizadas somente após sua autorização.',
+                    'Sends sanitized technical failures only with your permission.',
+                  )}
+                  label={text(locale, 'Relatórios de falha', 'Crash reports')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('crashReports');
+                  }}
+                />
+                <SettingSwitch
+                  active={localSettings.localHistory}
+                  description={text(
+                    locale,
+                    'Mantém neste computador o histórico necessário para desfazer mudanças.',
+                    'Keeps the history needed to undo changes on this computer.',
+                  )}
+                  label={text(locale, 'Histórico local de recuperação', 'Local recovery history')}
+                  locale={locale}
+                  onToggle={() => {
+                    updateLocalSetting('localHistory');
+                  }}
+                />
+                <article className="premium-settings-privacy-note">
+                  <ProductIcon name="lock" size={19} weight="duotone" />
+                  <span>
+                    <strong>{text(locale, 'Local por padrão', 'Local by default')}</strong>
+                    <small>
+                      {text(
+                        locale,
+                        'Nenhuma preferência acima inclui documentos, jogos salvos ou credenciais.',
+                        'None of these preferences include documents, game saves, or credentials.',
+                      )}
+                    </small>
+                  </span>
+                </article>
+              </>
             ) : null}
           </div>
         )}

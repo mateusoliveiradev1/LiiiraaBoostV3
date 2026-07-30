@@ -14,14 +14,13 @@ import {
   getAppearanceAttributes,
   loadDesktopPreferences,
   persistDesktopPreferences,
+  resolveNativeWindowTheme,
 } from './preferences.js';
 
 const createMemoryStorage = (initialValue: string | null = null) => {
   let value = initialValue;
   return {
-    getItem: vi.fn((key: string) =>
-      key === DESKTOP_PREFERENCES_STORAGE_KEY ? value : null,
-    ),
+    getItem: vi.fn((key: string) => (key === DESKTOP_PREFERENCES_STORAGE_KEY ? value : null)),
     setItem: vi.fn((key: string, nextValue: string) => {
       if (key === DESKTOP_PREFERENCES_STORAGE_KEY) {
         value = nextValue;
@@ -31,10 +30,15 @@ const createMemoryStorage = (initialValue: string | null = null) => {
 };
 
 describe('preferences D-18 and D-19 defaults', () => {
+  it('releases the native window theme when following Windows', () => {
+    expect(resolveNativeWindowTheme('system', 'dark')).toBeNull();
+    expect(resolveNativeWindowTheme('system', 'light')).toBeNull();
+    expect(resolveNativeWindowTheme('dark', 'dark')).toBe('dark');
+    expect(resolveNativeWindowTheme('light', 'light')).toBe('light');
+  });
+
   it('starts in PT-BR while the native host locale is still unavailable', () => {
-    expect(loadDesktopPreferences(createMemoryStorage(), undefined).locale).toBe(
-      'pt-BR',
-    );
+    expect(loadDesktopPreferences(createMemoryStorage(), undefined).locale).toBe('pt-BR');
   });
 
   it('migrates the legacy automatic English locale without losing benign preferences', () => {
@@ -69,9 +73,7 @@ describe('preferences D-18 and D-19 defaults', () => {
       dataText: 'increased-contrast',
       trayEnabled: true,
     });
-    expect(DESKTOP_PREFERENCES_STORAGE_KEY).toBe(
-      'liiiraa.desktop.preferences.v3',
-    );
+    expect(DESKTOP_PREFERENCES_STORAGE_KEY).toBe('liiiraa.desktop.preferences.v3');
   });
 
   it('restores Comfortable, System motion, 100 percent, and exit-on-close', () => {
@@ -97,9 +99,7 @@ describe('preferences D-18 and D-19 defaults', () => {
       }),
     );
 
-    expect(loadDesktopPreferences(storage, 'pt-BR')).toEqual(
-      createDefaultPreferences('pt-BR'),
-    );
+    expect(loadDesktopPreferences(storage, 'pt-BR')).toEqual(createDefaultPreferences('pt-BR'));
   });
 
   it('persists only validated benign preference fields', () => {
@@ -134,10 +134,7 @@ describe('preferences appearance and generated host commands', () => {
       { type: 'set-data-text', dataText: 'increased-contrast' },
     ].reduce(
       (current, event) =>
-        reducePreferences(
-          current,
-          event as Parameters<typeof reducePreferences>[1],
-        ),
+        reducePreferences(current, event as Parameters<typeof reducePreferences>[1]),
       createDefaultPreferences('en-US'),
     );
 
@@ -171,8 +168,6 @@ describe('preferences appearance and generated host commands', () => {
       ...metadata,
       payload: { preference: 'keep-game-detection-in-tray' },
     });
-    expect(createTrayPreferenceCommand(false, metadata).payload.preference).toBe(
-      'close-window',
-    );
+    expect(createTrayPreferenceCommand(false, metadata).payload.preference).toBe('close-window');
   });
 });

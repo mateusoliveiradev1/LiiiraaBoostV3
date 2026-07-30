@@ -41,10 +41,14 @@ export interface ShortcutItem {
 }
 
 export interface PowerPlanItem {
+  readonly consumption: string;
   readonly description: string;
+  readonly icon: ProductIconName;
   readonly id: string;
   readonly impact: string;
   readonly recommended?: boolean;
+  readonly response: string;
+  readonly thermal: string;
   readonly title: string;
 }
 
@@ -166,7 +170,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         active: true,
         category: 'Latência',
         description: 'Reduz o agrupamento de pequenos pacotes TCP em conexões compatíveis.',
-        icon: 'network',
+        icon: 'arrowsMerge',
         id: 'nagle',
         recommended: true,
         risk: 'moderado',
@@ -177,7 +181,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         category: 'Latência',
         description:
           'Ajusta a moderação de interrupções da placa de rede conforme o hardware detectado.',
-        icon: 'lightning',
+        icon: 'activity',
         id: 'interrupt-moderation',
         recommended: true,
         risk: 'moderado',
@@ -187,7 +191,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         active: false,
         category: 'Energia',
         description: 'Impede que o adaptador Ethernet entre em estados agressivos de economia.',
-        icon: 'power',
+        icon: 'leaf',
         id: 'energy-efficient-ethernet',
         restart: true,
         risk: 'baixo',
@@ -197,7 +201,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         active: false,
         category: 'Largura de banda',
         description: 'Controla o envio de atualizações do Windows para outros computadores.',
-        icon: 'download',
+        icon: 'shareNetwork',
         id: 'delivery-optimization',
         risk: 'baixo',
         title: 'Distribuição P2P de atualizações',
@@ -218,7 +222,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         category: 'Compatibilidade',
         description:
           'Mantém NetBIOS disponível apenas quando redes legadas realmente precisam dele.',
-        icon: 'link',
+        icon: 'broadcast',
         id: 'netbios',
         risk: 'moderado',
         title: 'NetBIOS sobre TCP/IP',
@@ -228,7 +232,7 @@ export const OPERATION_CATALOGS: Readonly<Record<CatalogRouteId, readonly Operat
         category: 'Estabilidade',
         description:
           'Preserva a descarga de segmentação quando ela melhora vazão sem elevar frametime.',
-        icon: 'chart',
+        icon: 'flow',
         id: 'large-send-offload',
         risk: 'moderado',
         title: 'Large Send Offload',
@@ -530,34 +534,54 @@ export const SHORTCUTS: readonly ShortcutItem[] = Object.freeze([
 
 export const POWER_PLANS: readonly PowerPlanItem[] = Object.freeze([
   {
+    consumption: 'Elevado',
     description: 'Recomendado para jogos competitivos em desktops com refrigeração adequada.',
+    icon: 'crosshair',
     id: 'liiiraa-competitive',
     impact: 'Desempenho máximo · consumo alto',
     recommended: true,
+    response: 'Imediata',
+    thermal: 'Exigente',
     title: 'Liiiraa Competitivo',
   },
   {
+    consumption: 'Adaptativo',
     description: 'Mantém resposta alta com menor calor fora de partidas.',
+    icon: 'gauge',
     id: 'liiiraa-adaptive',
     impact: 'Desempenho alto · consumo equilibrado',
+    response: 'Alta',
+    thermal: 'Controlado',
     title: 'Liiiraa Adaptativo',
   },
   {
+    consumption: 'Moderado',
     description: 'Plano padrão do Windows para uso geral.',
+    icon: 'scales',
     id: 'balanced',
     impact: 'Equilibrado',
+    response: 'Padrão',
+    thermal: 'Confortável',
     title: 'Equilibrado',
   },
   {
+    consumption: 'Elevado',
     description: 'Plano nativo voltado a cargas contínuas.',
+    icon: 'speedometer',
     id: 'high-performance',
     impact: 'Desempenho alto · consumo alto',
+    response: 'Sustentada',
+    thermal: 'Quente',
     title: 'Alto desempenho',
   },
   {
+    consumption: 'Máximo',
     description: 'Plano de estação de trabalho disponível em versões compatíveis do Windows.',
+    icon: 'fire',
     id: 'ultimate-performance',
     impact: 'Desempenho máximo · calor elevado',
+    response: 'Máxima',
+    thermal: 'Elevado',
     title: 'Desempenho máximo',
   },
 ]);

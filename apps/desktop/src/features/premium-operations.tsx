@@ -31,7 +31,7 @@ import {
   type PremiumUpdateManifest,
 } from './premium-updater.js';
 import { usePremiumLocalization } from './premium-localization.js';
-import { PremiumSettingsSurface } from './premium-settings.js';
+import { areApplicationNotificationsEnabled, PremiumSettingsSurface } from './premium-settings.js';
 import { PremiumToast, type PremiumToastMessage, type PremiumToastTone } from './premium-toast.js';
 
 interface PremiumOperationsSurfaceProps {
@@ -275,8 +275,8 @@ const OperationRow = ({
   readonly item: OperationItem;
   readonly onToggle: () => void;
 }) => (
-  <article className="premium-operation-row" data-risk={item.risk}>
-    <span className="premium-operation-icon">
+  <article className="premium-operation-row" data-category={item.category} data-risk={item.risk}>
+    <span className="premium-operation-icon" title={item.description}>
       <ProductIcon name={item.icon} size={22} weight="duotone" />
     </span>
     <div className="premium-operation-copy">
@@ -372,6 +372,38 @@ const HomeSurface = ({
             </PremiumButton>
           </div>
         </div>
+        <aside className="premium-readiness-evidence" aria-label="Resumo da prontidão">
+          <header>
+            <span>
+              <ProductIcon name="shield" size={17} weight="duotone" />
+              Verificação local
+            </span>
+            <strong>Agora</strong>
+          </header>
+          <ul>
+            <li>
+              <ProductIcon name="check" size={15} weight="fill" />
+              <span>
+                <strong>Recuperação pronta</strong>
+                <small>Ponto de restauração disponível</small>
+              </span>
+            </li>
+            <li>
+              <ProductIcon name="check" size={15} weight="fill" />
+              <span>
+                <strong>Hardware compatível</strong>
+                <small>Perfil validado para este cenário</small>
+              </span>
+            </li>
+            <li data-tone="attention">
+              <ProductIcon name="info" size={15} weight="fill" />
+              <span>
+                <strong>5 ajustes para revisar</strong>
+                <small>Nenhuma mudança aplicada ainda</small>
+              </span>
+            </li>
+          </ul>
+        </aside>
       </article>
       <article className="premium-game-card">
         <div className="premium-game-visual" data-game-id={activeGame.id}>
@@ -750,40 +782,98 @@ const ShortcutsSurface = ({ notify }: { readonly notify: (message: string) => vo
   );
 };
 
-const PowerSurface = ({ notify }: { readonly notify: (message: string) => void }) => {
+const PowerSurface = ({
+  locale,
+  notify,
+}: {
+  readonly locale: ShellLocale;
+  readonly notify: (message: string) => void;
+}) => {
   const [currentPlan, setCurrentPlan] = useState('liiiraa-adaptive');
+  const currentPlanItem =
+    POWER_PLANS.find(({ id }) => id === currentPlan) ?? POWER_PLANS[1] ?? POWER_PLANS[0];
+
+  if (!currentPlanItem) {
+    return null;
+  }
   return (
     <>
       <section className="premium-current-plan">
-        <span>
-          <ProductIcon name="lightning" size={29} weight="duotone" />
+        <span className="premium-current-plan-icon">
+          <ProductIcon name={currentPlanItem.icon} size={28} weight="duotone" />
         </span>
         <div>
-          <small>Plano aplicado no cenário</small>
-          <h2>{POWER_PLANS.find(({ id }) => id === currentPlan)?.title}</h2>
-          <p>Estado conhecido · restauração disponível · nenhuma alteração real nesta fase</p>
+          <small>{text(locale, 'Plano selecionado', 'Selected plan')}</small>
+          <h2>{currentPlanItem.title}</h2>
+          <p>{currentPlanItem.description}</p>
         </div>
-        <span className="premium-status-pill">Ativo</span>
+        <div className="premium-current-plan-state">
+          <span className="premium-status-pill">
+            <ProductIcon name="check" size={13} weight="fill" />
+            {text(locale, 'Ativo', 'Active')}
+          </span>
+          <small>{text(locale, 'Restauração disponível', 'Restore point available')}</small>
+        </div>
       </section>
       <section className="premium-power-grid">
         {POWER_PLANS.map((plan) => (
-          <article data-current={String(plan.id === currentPlan)} key={plan.id}>
+          <article
+            data-current={String(plan.id === currentPlan)}
+            data-recommended={String(plan.recommended === true)}
+            key={plan.id}
+          >
             <header>
-              <ProductIcon name={plan.recommended ? 'crown' : 'power'} size={22} weight="duotone" />
-              {plan.recommended ? <span>Recomendado</span> : null}
+              <span className="premium-power-plan-icon">
+                <ProductIcon name={plan.icon} size={24} weight="duotone" />
+              </span>
+              <div>
+                {plan.recommended ? (
+                  <span className="premium-power-plan-badge">
+                    <ProductIcon name="crown" size={12} weight="fill" />
+                    {text(locale, 'Recomendado', 'Recommended')}
+                  </span>
+                ) : null}
+                {plan.id === currentPlan ? (
+                  <span className="premium-power-plan-badge" data-tone="active">
+                    <ProductIcon name="check" size={12} weight="fill" />
+                    {text(locale, 'Em uso', 'In use')}
+                  </span>
+                ) : null}
+              </div>
             </header>
             <h2>{plan.title}</h2>
             <p>{plan.description}</p>
-            <small>{plan.impact}</small>
+            <div className="premium-power-plan-stats">
+              <span>
+                <small>{text(locale, 'Resposta', 'Response')}</small>
+                <strong>{plan.response}</strong>
+              </span>
+              <span>
+                <small>{text(locale, 'Consumo', 'Power use')}</small>
+                <strong>{plan.consumption}</strong>
+              </span>
+              <span>
+                <small>{text(locale, 'Térmico', 'Thermal')}</small>
+                <strong>{plan.thermal}</strong>
+              </span>
+            </div>
             <PremiumButton
               disabled={plan.id === currentPlan}
               onClick={() => {
                 setCurrentPlan(plan.id);
-                notify(`${plan.title} selecionado no cenário demonstrativo.`);
+                notify(
+                  text(
+                    locale,
+                    `${plan.title} preparado para revisão.`,
+                    `${plan.title} prepared for review.`,
+                  ),
+                );
               }}
               tone={plan.recommended ? 'primary' : 'secondary'}
             >
-              {plan.id === currentPlan ? 'Plano atual' : 'Preparar aplicação'}
+              {plan.id === currentPlan
+                ? text(locale, 'Plano atual', 'Current plan')
+                : text(locale, 'Selecionar plano', 'Select plan')}
             </PremiumButton>
           </article>
         ))}
@@ -2108,6 +2198,9 @@ export const PremiumOperationsSurface = ({
   ).length;
 
   const notify = (message: string, tone: PremiumToastTone = 'success'): void => {
+    if (tone !== 'warning' && !areApplicationNotificationsEnabled()) {
+      return;
+    }
     setToast({ id: Date.now(), message, tone });
   };
 
@@ -2147,7 +2240,7 @@ export const PremiumOperationsSurface = ({
   } else if (view === 'shortcuts') {
     content = <ShortcutsSurface notify={notify} />;
   } else if (view === 'power') {
-    content = <PowerSurface notify={notify} />;
+    content = <PowerSurface locale={locale} notify={notify} />;
   } else if (view === 'services') {
     content = <ServicesSurface />;
   } else if (view === 'restoration') {

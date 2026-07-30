@@ -12,10 +12,12 @@ declare module '@phosphor-icons/react' {
   type IconComponent = ComponentType<IconProps>;
 
   export const AppWindow: IconComponent;
+  export const ArrowsMerge: IconComponent;
   export const ArrowCounterClockwise: IconComponent;
   export const ArrowRight: IconComponent;
   export const BatteryCharging: IconComponent;
   export const Bell: IconComponent;
+  export const Broadcast: IconComponent;
   export const Browsers: IconComponent;
   export const CaretLeft: IconComponent;
   export const CaretRight: IconComponent;
@@ -31,6 +33,8 @@ declare module '@phosphor-icons/react' {
   export const Database: IconComponent;
   export const DesktopTower: IconComponent;
   export const DownloadSimple: IconComponent;
+  export const FireSimple: IconComponent;
+  export const FlowArrow: IconComponent;
   export const GameController: IconComponent;
   export const Gauge: IconComponent;
   export const GearFine: IconComponent;
@@ -39,6 +43,7 @@ declare module '@phosphor-icons/react' {
   export const HardDrives: IconComponent;
   export const Info: IconComponent;
   export const Key: IconComponent;
+  export const Leaf: IconComponent;
   export const Lightning: IconComponent;
   export const Link: IconComponent;
   export const ListChecks: IconComponent;
@@ -47,6 +52,7 @@ declare module '@phosphor-icons/react' {
   export const Memory: IconComponent;
   export const MinusCircle: IconComponent;
   export const Monitor: IconComponent;
+  export const MoonStars: IconComponent;
   export const Network: IconComponent;
   export const Package: IconComponent;
   export const Palette: IconComponent;
@@ -55,13 +61,17 @@ declare module '@phosphor-icons/react' {
   export const Pulse: IconComponent;
   export const PushPin: IconComponent;
   export const RocketLaunch: IconComponent;
+  export const Scales: IconComponent;
   export const Scan: IconComponent;
+  export const ShareNetwork: IconComponent;
   export const ShieldCheck: IconComponent;
   export const SignOut: IconComponent;
   export const SlidersHorizontal: IconComponent;
   export const Sparkle: IconComponent;
+  export const Speedometer: IconComponent;
   export const Star: IconComponent;
   export const Storefront: IconComponent;
+  export const Sun: IconComponent;
   export const Thermometer: IconComponent;
   export const Timer: IconComponent;
   export const Toolbox: IconComponent;

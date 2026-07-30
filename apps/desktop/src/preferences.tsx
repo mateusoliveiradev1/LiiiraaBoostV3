@@ -183,6 +183,11 @@ const detectSystemTheme = (): ResolvedDesktopTheme => {
   return globalThis.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 };
 
+export const resolveNativeWindowTheme = (
+  theme: DesktopTheme,
+  resolvedTheme: ResolvedDesktopTheme,
+): ResolvedDesktopTheme | null => (theme === 'system' ? null : resolvedTheme);
+
 export interface DesktopPreferencesProviderProps {
   readonly children: ReactNode;
   readonly commandMetadata?: () => HostCommandMetadata;
@@ -262,12 +267,12 @@ export const DesktopPreferencesProvider = ({
     }
     void import('@tauri-apps/api/window')
       .then(async ({ getCurrentWindow }) => {
-        await getCurrentWindow().setTheme(resolvedTheme);
+        await getCurrentWindow().setTheme(resolveNativeWindowTheme(theme, resolvedTheme));
       })
       .catch(() => {
         // The web preview and restricted shells keep the CSS theme without native chrome control.
       });
-  }, [resolvedTheme]);
+  }, [resolvedTheme, theme]);
 
   const setTheme = useCallback(
     (nextTheme: DesktopTheme): void => {
