@@ -38,6 +38,7 @@ declare module '@phosphor-icons/react' {
   export const GameController: IconComponent;
   export const Gauge: IconComponent;
   export const GearFine: IconComponent;
+  export const GearSix: IconComponent;
   export const Globe: IconComponent;
   export const GraphicsCard: IconComponent;
   export const HardDrives: IconComponent;
