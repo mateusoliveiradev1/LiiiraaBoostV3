@@ -270,7 +270,41 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can download a signed installer and verify its release channel, version, integrity, and compatibility information.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: TBD
+**Plans**: 32 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Approve recency-flagged Next.js package identities
+- [ ] 03-02-PLAN.md — Reserve and mutation-test web architecture boundaries
+- [ ] 03-03-PLAN.md — Define canonical TypeSpec web contracts
+- [ ] 03-04-PLAN.md — Scaffold web-core and web-preview packages
+- [ ] 03-05-PLAN.md — Scaffold web-features and web-evidence packages
+- [ ] 03-06-PLAN.md — Scaffold the independent public application
+- [ ] 03-07-PLAN.md — Scaffold the independent account preview application
+- [ ] 03-08-PLAN.md — Scaffold the isolated admin preview application
+- [ ] 03-09-PLAN.md — Generate web schema and cross-language transports
+- [ ] 03-10-PLAN.md — Runtime-validate web documents in TypeScript and Rust
+- [ ] 03-11-PLAN.md — Resolve lockfile and activate the live web workspace
+- [ ] 03-12-PLAN.md — Build the canonical route and safe-link authority
+- [ ] 03-13-PLAN.md — Build W01-W18 scenarios and no-change adapter
+- [ ] 03-14-PLAN.md — Establish Wave 0 verification and evidence harnesses
+- [ ] 03-15-PLAN.md — Build the static public security shell
+- [ ] 03-16-PLAN.md — Build the account security and preview shell
+- [ ] 03-17-PLAN.md — Build the isolated admin security shell
+- [ ] 03-18-PLAN.md — Build shared accessible web components and visual language
+- [ ] 03-19-PLAN.md — Build content admission and public-only search
+- [ ] 03-20-PLAN.md — Compose the Command Runway and Evidence Stage Home
+- [ ] 03-21-PLAN.md — Complete public catalog, plans, policies, status, and errors
+- [ ] 03-22-PLAN.md — Build versioned documentation resolution and deep links
+- [ ] 03-23-PLAN.md — Render the complete versioned documentation experience
+- [ ] 03-24-PLAN.md — Implement fail-closed release and download decisions
+- [ ] 03-25-PLAN.md — Render release integrity and gated download journeys
+- [ ] 03-26-PLAN.md — Build guarded account/admin preview workflows
+- [ ] 03-27-PLAN.md — Complete every account and support preview
+- [ ] 03-28-PLAN.md — Complete role, consent, audit, and admin previews
+- [ ] 03-29-PLAN.md — Capture provenance-bound real desktop screenshots
+- [ ] 03-30-PLAN.md — Prove W01-W18 E2E, visual, accessibility, security, performance
+- [ ] 03-31-PLAN.md — Enforce atomic publication and safe rollback
+- [ ] 03-32-PLAN.md — Promote final evidence and recursive Phase 3 acceptance
 
 **UI hint**: yes
 
