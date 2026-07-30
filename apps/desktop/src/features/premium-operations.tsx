@@ -386,7 +386,7 @@ const HomeSurface = ({
             <p>Revise os ajustes compatíveis antes de iniciar sua próxima sessão.</p>
             <PremiumButton
               onClick={() => {
-                navigate('/improve');
+                navigate('/toggles');
               }}
             >
               Revisar ajustes
@@ -473,7 +473,7 @@ const HomeSurface = ({
         <header>
           <div>
             <span className="premium-section-label">Telemetria local</span>
-            <h2>Agora</h2>
+            <h2>Leitura atual</h2>
           </div>
           <span className="premium-live">
             <span aria-hidden="true" />
@@ -488,7 +488,9 @@ const HomeSurface = ({
             ['network', 'Latência local', '1,2 ms', 'Estável'],
           ].map(([icon, label, value, detail]) => (
             <div key={label}>
-              <ProductIcon name={icon as ProductIconName} size={20} weight="duotone" />
+              <span className="premium-metric-icon">
+                <ProductIcon name={icon as ProductIconName} size={18} weight="duotone" />
+              </span>
               <span>
                 <small>{label}</small>
                 <strong>{value}</strong>
@@ -497,6 +499,19 @@ const HomeSurface = ({
             </div>
           ))}
         </div>
+        <footer className="premium-telemetry-context">
+          <div>
+            <ProductIcon name="shield" size={18} weight="duotone" />
+            <span>
+              <strong>Monitoramento somente leitura</strong>
+              <small>Dados locais do cenário demonstrativo</small>
+            </span>
+          </div>
+          <span>
+            <ProductIcon name="check" size={14} weight="fill" />
+            Nenhuma alteração aplicada
+          </span>
+        </footer>
       </article>
       <article className="premium-next-actions">
         <header>

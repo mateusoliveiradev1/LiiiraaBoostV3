@@ -227,3 +227,20 @@ test('@premium-game-selector keeps native options legible in the dark theme', as
   await expect(selector.locator('option').first()).toHaveCSS('background-color', 'rgb(17, 22, 32)');
   await expect(selector.locator('option').first()).toHaveCSS('color', 'rgb(244, 247, 251)');
 });
+
+test('@premium-navigation home review action opens the current premium controls route', async ({
+  page,
+}) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/home',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  await page.getByRole('button', { name: 'Revisar ajustes' }).click();
+
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/toggles');
+  await expect(page.getByRole('heading', { name: 'Controles rápidos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Otimização' })).toHaveCount(0);
+});
