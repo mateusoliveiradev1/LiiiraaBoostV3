@@ -31,8 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 02 (complete-desktop-experience) — EXECUTING
 Plan: 21 of 33
 Status: Ready to execute
-Last activity: 2026-07-29 — Completed quick task 260728-ndw: final desktop UI and branded installer
-Last activity: 2026-07-29 - Completed quick task 260729-m1p: premium Phase 2 desktop experience
+Last activity: 2026-07-30 - Completed quick task 260729-u3n: redesign premium Home readiness panel
 
 Progress: [████░░░░░░] 44%
 
@@ -284,6 +283,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260729-jri | Corrigir primeira abertura, barra superior, conta e otimizações acionáveis | 2026-07-29 | 39bdf24 | Verified | [260729-jri-corrigir-primeira-abertura-barra-superio](./quick/260729-jri-corrigir-primeira-abertura-barra-superio/) |
 | 260729-km5 | Redesenhar notificações, estabilizar shell e adicionar toggles de otimização | 2026-07-29 | 94031d1 | Verified | [260729-km5-redesenhar-notifica-es-como-painel-flutu](./quick/260729-km5-redesenhar-notifica-es-como-painel-flutu/) |
 | 260729-m1p | Redesenhar integralmente a experiência premium da Fase 2 | 2026-07-29 | 56aa21d | Verified | [260729-m1p-redesenhar-integralmente-a-experi-ncia-p](./quick/260729-m1p-redesenhar-integralmente-a-experi-ncia-p/) |
+| 260729-u3n | Redesenhar painel de prontidão da Home com hierarquia premium e uso melhor do espaço | 2026-07-30 | 9e09a53 | Verified | [260729-u3n-redesenhar-painel-de-prontidao-da-home-c](./quick/260729-u3n-redesenhar-painel-de-prontidao-da-home-c/) |
 
 ## Session Continuity
 
