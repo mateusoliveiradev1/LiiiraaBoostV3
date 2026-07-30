@@ -353,6 +353,7 @@ const HomeSurface = ({
   readonly notify: (message: string) => void;
 }) => {
   const [analysisPhase, setAnalysisPhase] = useState<HomeAnalysisPhase>('idle');
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const analysisTimersRef = useRef<number[]>([]);
   const isAnalyzing =
     analysisPhase === 'hardware' || analysisPhase === 'recovery' || analysisPhase === 'catalog';
@@ -395,6 +396,7 @@ const HomeSurface = ({
       }, 1040),
       globalThis.setTimeout(() => {
         setAnalysisPhase('complete');
+        setHasAnalyzed(true);
         notify(
           text(
             locale,
@@ -403,6 +405,9 @@ const HomeSurface = ({
           ),
         );
       }, 1620),
+      globalThis.setTimeout(() => {
+        setAnalysisPhase('idle');
+      }, 3820),
     );
   };
 
@@ -417,7 +422,7 @@ const HomeSurface = ({
               data-phase={isAnalyzing ? 'analyzing' : 'ready'}
             >
               <span className="premium-readiness-status-icon" aria-hidden="true">
-                <ProductIcon name={isAnalyzing ? 'loading' : 'shield'} size={34} weight="duotone" />
+                <ProductIcon name={isAnalyzing ? 'loading' : 'shield'} size={25} weight="duotone" />
               </span>
               <span>
                 <strong>
@@ -433,9 +438,6 @@ const HomeSurface = ({
               </span>
             </div>
             <div className="premium-readiness-copy">
-              <span className="premium-section-label">
-                {text(locale, 'Prontidão do sistema', 'System readiness')}
-              </span>
               <h2>
                 {text(locale, 'Pronto para sua próxima sessão', 'Ready for your next session')}
               </h2>
@@ -466,7 +468,15 @@ const HomeSurface = ({
                     : text(locale, 'Analisar novamente', 'Analyze again')}
                 </PremiumButton>
               </div>
-              {analysisPhase === 'idle' ? null : (
+              {analysisPhase === 'idle' ? null : analysisPhase === 'complete' ? (
+                <div aria-live="polite" className="premium-analysis-complete" role="status">
+                  <ProductIcon name="check" size={16} weight="bold" />
+                  <span>
+                    <strong>{text(locale, 'Análise concluída', 'Analysis completed')}</strong>
+                    <small>{text(locale, 'Evidências atualizadas', 'Evidence updated')}</small>
+                  </span>
+                </div>
+              ) : (
                 <div
                   aria-live="polite"
                   className="premium-analysis-progress"
@@ -475,11 +485,7 @@ const HomeSurface = ({
                 >
                   <div className="premium-analysis-progress-copy">
                     <span>
-                      <ProductIcon
-                        name={analysisPhase === 'complete' ? 'check' : 'loading'}
-                        size={15}
-                        weight="bold"
-                      />
+                      <ProductIcon name="loading" size={15} weight="bold" />
                       {analysisLabel}
                     </span>
                     <strong>{String(analysisProgress)}%</strong>
@@ -534,7 +540,7 @@ const HomeSurface = ({
                 <span aria-hidden="true" />
                 {isAnalyzing
                   ? text(locale, 'Análise em andamento', 'Analysis in progress')
-                  : analysisPhase === 'complete'
+                  : analysisPhase === 'complete' || hasAnalyzed
                     ? text(locale, 'Verificado agora', 'Verified just now')
                     : text(locale, 'Atualizado agora', 'Updated just now')}
               </strong>

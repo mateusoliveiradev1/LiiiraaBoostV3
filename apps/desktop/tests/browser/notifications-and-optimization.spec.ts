@@ -272,12 +272,11 @@ test('@premium-readiness home analysis exposes progress and refreshes evidence',
     '24',
   );
 
-  await expect(page.getByRole('progressbar', { name: 'Progresso da análise' })).toHaveAttribute(
-    'aria-valuenow',
-    '100',
-    { timeout: 3_000 },
-  );
-  await expect(page.getByText('Análise concluída com segurança', { exact: true })).toBeVisible();
+  await expect(page.getByText('Análise concluída', { exact: true })).toBeVisible({
+    timeout: 3_000,
+  });
+  await expect(page.getByText('Evidências atualizadas', { exact: true })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Progresso da análise' })).toHaveCount(0);
   await expect(page.getByText('Verificado agora', { exact: true })).toBeVisible();
   await expect(analyzeButton).toBeEnabled();
   await expect(
@@ -286,6 +285,10 @@ test('@premium-readiness home analysis exposes progress and refreshes evidence',
       { exact: true },
     ),
   ).toBeVisible();
+  await expect(page.getByText('Análise concluída', { exact: true })).toBeHidden({
+    timeout: 5_000,
+  });
+  await expect(page.getByText('Verificado agora', { exact: true })).toBeVisible();
 });
 
 test('@premium-readiness home readiness and analysis controls are fully localized in English', async ({
