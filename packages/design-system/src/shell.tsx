@@ -1,13 +1,4 @@
-import {
-  Activity,
-  Bell,
-  Minus,
-  PanelRight,
-  Search,
-  ShieldCheck,
-  Square,
-  X,
-} from 'lucide-react';
+import { Activity, Bell, Minus, PanelRight, Search, ShieldCheck, Square, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button, Toolbar } from 'react-aria-components';
 
@@ -24,6 +15,7 @@ export interface WindowControlHandlers {
 }
 
 export interface WindowTitleBarProps {
+  readonly accountInitials?: string;
   readonly accountLabel?: string;
   readonly controls?: WindowControlHandlers;
   readonly globalStatus: string;
@@ -36,6 +28,7 @@ export interface WindowTitleBarProps {
 }
 
 export const WindowTitleBar = ({
+  accountInitials,
   accountLabel,
   controls,
   globalStatus,
@@ -95,7 +88,7 @@ export const WindowTitleBar = ({
           onPress={onOpenAccount}
         >
           <span aria-hidden="true" className="lb-account-avatar">
-            LP
+            {accountInitials ?? 'LP'}
           </span>
           <span className="lb-account-trigger-copy">
             <strong>{accountLabel ?? (locale === 'pt-BR' ? 'Meu perfil' : 'My profile')}</strong>

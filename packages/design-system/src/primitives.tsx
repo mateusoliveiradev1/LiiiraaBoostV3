@@ -143,6 +143,7 @@ export interface LbTextFieldProps extends LbFieldCopy {
   readonly isDisabled?: boolean;
   readonly isInvalid?: boolean;
   readonly isRequired?: boolean;
+  readonly maxLength?: number;
   readonly name?: string;
   readonly onChange?: (value: string) => void;
   readonly placeholder?: string;
@@ -160,11 +161,12 @@ export const LbTextField = ({
   description,
   errorMessage,
   label,
+  maxLength,
   ...fieldProps
 }: LbTextFieldProps) => (
   <TextField className="lb-field" {...fieldProps}>
     <Label>{label}</Label>
-    <Input className="lb-input" data-lb-control />
+    <Input className="lb-input" data-lb-control maxLength={maxLength} />
     <FieldCopy description={description} errorMessage={errorMessage} />
   </TextField>
 );
@@ -173,11 +175,12 @@ export const LbSearchField = ({
   description,
   errorMessage,
   label,
+  maxLength,
   ...fieldProps
 }: LbTextFieldProps) => (
   <SearchField className="lb-field" {...fieldProps}>
     <Label>{label}</Label>
-    <Input className="lb-input" data-lb-control />
+    <Input className="lb-input" data-lb-control maxLength={maxLength} />
     <FieldCopy description={description} errorMessage={errorMessage} />
   </SearchField>
 );
@@ -186,11 +189,12 @@ export const LbTextArea = ({
   description,
   errorMessage,
   label,
+  maxLength,
   ...fieldProps
 }: LbTextFieldProps) => (
   <TextField className="lb-field" {...fieldProps}>
     <Label>{label}</Label>
-    <TextArea className="lb-input lb-text-area" data-lb-control />
+    <TextArea className="lb-input lb-text-area" data-lb-control maxLength={maxLength} />
     <FieldCopy description={description} errorMessage={errorMessage} />
   </TextField>
 );

@@ -1,6 +1,20 @@
-import { LbButton, LbTextField, ProductIcon, RouteHeader } from '@liiiraa/design-system';
-import { useState, type ReactNode } from 'react';
+import { LbButton, LbSwitch, LbTextField, ProductIcon, RouteHeader } from '@liiiraa/design-system';
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import type { ShellLocale } from '@liiiraa/feature-shell';
+import {
+  ACCOUNT_PROFILE_UPDATED_EVENT,
+  DEFAULT_ACCOUNT_PROFILE,
+  LOCAL_ACCOUNT_ID,
+  PROFILE_AVATAR_ACCENTS,
+  accountProfileInitials,
+  clearAccountProfile,
+  createAccountProfileExport,
+  persistAccountProfile,
+  readAccountProfile,
+  validateAccountProfile,
+  type LocalAccountProfile,
+  type ProfileAvatarAccent,
+} from './account-profile.js';
 
 export type AccountExperienceView = 'login' | 'overview' | 'subscription' | 'device' | 'security';
 
@@ -13,6 +27,20 @@ export interface AccountExperienceProps {
 
 const copy = (locale: ShellLocale, value: Readonly<{ en: string; 'pt-BR': string }>): string =>
   value[locale];
+
+const DEFAULT_PROFILE_BIO_EN =
+  'Competitive player focused on consistency, low latency and reversible decisions.';
+
+const profileBioForLocale = (locale: ShellLocale, bio: string): string => {
+  const isDefaultBio = bio === DEFAULT_ACCOUNT_PROFILE.bio || bio === DEFAULT_PROFILE_BIO_EN;
+
+  return isDefaultBio
+    ? copy(locale, {
+        en: DEFAULT_PROFILE_BIO_EN,
+        'pt-BR': DEFAULT_ACCOUNT_PROFILE.bio,
+      })
+    : bio;
+};
 
 const LocalPreviewBadge = ({ locale }: { readonly locale: ShellLocale }) => (
   <span className="desktop-preview-badge">
@@ -286,169 +314,958 @@ const AccountShell = ({
   </main>
 );
 
+type ProfileNotice = Readonly<{
+  message: string;
+  tone: 'error' | 'success';
+}>;
+
+const PROFILE_EMAIL = 'player@liiiraaboost.local';
+
+const ProfileAvatar = ({
+  editable = false,
+  profile,
+}: {
+  readonly editable?: boolean;
+  readonly profile: LocalAccountProfile;
+}) => (
+  <div
+    className="desktop-profile-avatar"
+    data-accent={profile.avatarAccent}
+    data-custom-image={String(profile.avatarImage !== null)}
+  >
+    {profile.avatarImage ? (
+      <img alt={editable ? '' : `Avatar de ${profile.displayName}`} src={profile.avatarImage} />
+    ) : (
+      <span aria-hidden={editable}>{accountProfileInitials(profile.displayName)}</span>
+    )}
+  </div>
+);
+
+const ProfileNoticeBanner = ({
+  locale,
+  notice,
+  onClose,
+}: {
+  readonly locale: ShellLocale;
+  readonly notice: ProfileNotice;
+  readonly onClose: () => void;
+}) => (
+  <aside
+    aria-live={notice.tone === 'error' ? 'assertive' : 'polite'}
+    className="desktop-profile-notice"
+    data-tone={notice.tone}
+  >
+    <ProductIcon name={notice.tone === 'error' ? 'warning' : 'check'} size={18} />
+    <span>{notice.message}</span>
+    <button
+      aria-label={copy(locale, { en: 'Close message', 'pt-BR': 'Fechar mensagem' })}
+      onClick={onClose}
+      type="button"
+    >
+      <ProductIcon name="close" size={16} />
+    </button>
+  </aside>
+);
+
+const ProfileDestination = ({
+  action,
+  description,
+  icon,
+  label,
+  onPress,
+}: {
+  readonly action: string;
+  readonly description: string;
+  readonly icon: 'crown' | 'device' | 'lock';
+  readonly label: string;
+  readonly onPress: () => void;
+}) => (
+  <article className="desktop-profile-destination">
+    <span className="desktop-profile-destination-icon">
+      <ProductIcon name={icon} size={20} />
+    </span>
+    <div>
+      <small>{label}</small>
+      <strong>{description}</strong>
+    </div>
+    <LbButton onPress={onPress} variant="quiet">
+      {action}
+      <ProductIcon name="chevronRight" size={15} />
+    </LbButton>
+  </article>
+);
+
 const ProfileOverview = ({
   locale,
   navigate,
 }: Pick<AccountExperienceProps, 'locale' | 'navigate'>) => {
+  const initialProfile = (): LocalAccountProfile => {
+    try {
+      return readAccountProfile(globalThis.localStorage);
+    } catch {
+      return DEFAULT_ACCOUNT_PROFILE;
+    }
+  };
+
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState('Liiiraa Player');
-  const [draftName, setDraftName] = useState(name);
+  const [profile, setProfile] = useState<LocalAccountProfile>(initialProfile);
+  const [draft, setDraft] = useState<LocalAccountProfile>(profile);
+  const [attempted, setAttempted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<ProfileNotice | null>(null);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const saveTimerRef = useRef<number | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const validation = validateAccountProfile(draft);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(profile);
+
+  useEffect(
+    () => () => {
+      if (saveTimerRef.current !== null) {
+        globalThis.clearTimeout(saveTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (notice === null) {
+      return undefined;
+    }
+
+    const timer = globalThis.setTimeout(() => {
+      setNotice(null);
+    }, 4200);
+    return () => {
+      globalThis.clearTimeout(timer);
+    };
+  }, [notice]);
+
+  const announceProfileUpdate = (): void => {
+    globalThis.dispatchEvent(new CustomEvent(ACCOUNT_PROFILE_UPDATED_EVENT));
+  };
+
+  const beginEditing = (): void => {
+    setDraft({
+      ...profile,
+      bio: profileBioForLocale(locale, profile.bio),
+    });
+    setAttempted(false);
+    setEditing(true);
+    setResetConfirmOpen(false);
+  };
+
+  const cancelEditing = (): void => {
+    setDraft(profile);
+    setAttempted(false);
+    setEditing(false);
+  };
+
+  const saveProfile = (): void => {
+    setAttempted(true);
+    if (Object.keys(validation).length > 0 || !dirty) {
+      if (Object.keys(validation).length > 0) {
+        setNotice({
+          message: copy(locale, {
+            en: 'Review the highlighted fields before saving.',
+            'pt-BR': 'Revise os campos destacados antes de salvar.',
+          }),
+          tone: 'error',
+        });
+      }
+      return;
+    }
+
+    setSaving(true);
+    saveTimerRef.current = globalThis.setTimeout(() => {
+      const nextProfile: LocalAccountProfile = {
+        ...draft,
+        bio: draft.bio.trim(),
+        displayName: draft.displayName.trim(),
+        playerTag: draft.playerTag.trim().toLocaleLowerCase('pt-BR'),
+        updatedAt: new Date().toISOString(),
+      };
+      const persisted = persistAccountProfile(globalThis.localStorage, nextProfile);
+      setSaving(false);
+
+      if (!persisted) {
+        setNotice({
+          message: copy(locale, {
+            en: 'The local profile could not be saved. Check app storage access.',
+            'pt-BR':
+              'Não foi possível salvar o perfil local. Verifique o acesso ao armazenamento do app.',
+          }),
+          tone: 'error',
+        });
+        return;
+      }
+
+      setProfile(nextProfile);
+      setDraft(nextProfile);
+      setEditing(false);
+      setAttempted(false);
+      announceProfileUpdate();
+      setNotice({
+        message: copy(locale, {
+          en: 'Profile saved on this device.',
+          'pt-BR': 'Perfil salvo neste dispositivo.',
+        }),
+        tone: 'success',
+      });
+    }, 520);
+  };
+
+  const updatePreference = (
+    preference: keyof LocalAccountProfile['preferences'],
+    selected: boolean,
+  ): void => {
+    const nextProfile: LocalAccountProfile = {
+      ...profile,
+      preferences: {
+        ...profile.preferences,
+        [preference]: selected,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (!persistAccountProfile(globalThis.localStorage, nextProfile)) {
+      setNotice({
+        message: copy(locale, {
+          en: 'This preference could not be saved locally.',
+          'pt-BR': 'Não foi possível salvar esta preferência localmente.',
+        }),
+        tone: 'error',
+      });
+      return;
+    }
+
+    setProfile(nextProfile);
+    setDraft(nextProfile);
+    announceProfileUpdate();
+  };
+
+  const selectAvatarAccent = (accent: ProfileAvatarAccent): void => {
+    setDraft((current) => ({
+      ...current,
+      avatarAccent: accent,
+      avatarImage: null,
+    }));
+  };
+
+  const loadAvatarImage = (event: ChangeEvent<HTMLInputElement>): void => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) {
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 1_000_000) {
+      setNotice({
+        message: copy(locale, {
+          en: 'Choose a PNG, JPG or WebP image up to 1 MB.',
+          'pt-BR': 'Escolha uma imagem PNG, JPG ou WebP de até 1 MB.',
+        }),
+        tone: 'error',
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      if (typeof reader.result !== 'string') {
+        return;
+      }
+      setDraft((current) => ({
+        ...current,
+        avatarImage: reader.result as string,
+      }));
+    });
+    reader.addEventListener('error', () => {
+      setNotice({
+        message: copy(locale, {
+          en: 'The selected image could not be read.',
+          'pt-BR': 'Não foi possível ler a imagem selecionada.',
+        }),
+        tone: 'error',
+      });
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const copyAccountId = async (): Promise<void> => {
+    try {
+      await globalThis.navigator.clipboard.writeText(LOCAL_ACCOUNT_ID);
+      setNotice({
+        message: copy(locale, {
+          en: 'Account identifier copied.',
+          'pt-BR': 'Identificador da conta copiado.',
+        }),
+        tone: 'success',
+      });
+    } catch {
+      setNotice({
+        message: copy(locale, {
+          en: `Account identifier: ${LOCAL_ACCOUNT_ID}`,
+          'pt-BR': `Identificador da conta: ${LOCAL_ACCOUNT_ID}`,
+        }),
+        tone: 'error',
+      });
+    }
+  };
+
+  const exportProfile = (): void => {
+    const payload = createAccountProfileExport(profile, new Date().toISOString());
+    const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], {
+      type: 'application/json;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.download = `liiiraa-boost-perfil-${profile.playerTag}.json`;
+    anchor.href = url;
+    anchor.click();
+    globalThis.setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 0);
+    setNotice({
+      message: copy(locale, {
+        en: 'Local profile package exported.',
+        'pt-BR': 'Pacote do perfil local exportado.',
+      }),
+      tone: 'success',
+    });
+  };
+
+  const clearLocalPreview = (): void => {
+    if (!clearAccountProfile(globalThis.localStorage)) {
+      setNotice({
+        message: copy(locale, {
+          en: 'The local preview could not be cleared.',
+          'pt-BR': 'Não foi possível limpar a prévia local.',
+        }),
+        tone: 'error',
+      });
+      return;
+    }
+
+    setProfile(DEFAULT_ACCOUNT_PROFILE);
+    setDraft(DEFAULT_ACCOUNT_PROFILE);
+    setEditing(false);
+    setAttempted(false);
+    setResetConfirmOpen(false);
+    announceProfileUpdate();
+    setNotice({
+      message: copy(locale, {
+        en: 'Local profile restored to its default state.',
+        'pt-BR': 'Perfil local restaurado ao estado padrão.',
+      }),
+      tone: 'success',
+    });
+  };
+  const updatedLabel = new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(profile.updatedAt));
 
   return (
     <div className="desktop-account-layout">
+      {notice ? (
+        <ProfileNoticeBanner
+          locale={locale}
+          notice={notice}
+          onClose={() => {
+            setNotice(null);
+          }}
+        />
+      ) : null}
+
       <section className="desktop-profile-hero">
-        <div className="desktop-profile-avatar" aria-hidden="true">
-          LP
+        <div className="desktop-profile-avatar-wrap">
+          <ProfileAvatar profile={profile} />
+          <span
+            aria-label={copy(locale, {
+              en: profile.preferences.showPlayerTag ? 'Profile visible' : 'Profile private',
+              'pt-BR': profile.preferences.showPlayerTag ? 'Perfil visível' : 'Perfil privado',
+            })}
+            className="desktop-profile-presence"
+            data-visible={String(profile.preferences.showPlayerTag)}
+          />
         </div>
         <div className="desktop-profile-identity">
-          <span className="desktop-profile-eyebrow">
-            <ProductIcon name="crown" size={15} />
-            PREMIUM · PRÉVIA LOCAL
+          <span className="desktop-profile-status">
+            <ProductIcon name="check" size={14} />
+            {copy(locale, { en: 'Local profile active', 'pt-BR': 'Perfil local ativo' })}
           </span>
-          <h2>{name}</h2>
-          <p>player@liiiraaboost.local</p>
+          <h2>{profile.displayName}</h2>
+          <p>
+            {profile.preferences.showPlayerTag ? `@${profile.playerTag} · ` : ''}
+            {PROFILE_EMAIL}
+          </p>
+          <div
+            className="desktop-profile-chips"
+            aria-label={copy(locale, {
+              en: 'Profile status',
+              'pt-BR': 'Status do perfil',
+            })}
+          >
+            <span>
+              <ProductIcon name="crown" size={13} />
+              Premium
+            </span>
+            <span>
+              <ProductIcon name="device" size={13} />
+              DESKTOP-LR07
+            </span>
+            <span>
+              <ProductIcon name="shield" size={13} />
+              {copy(locale, { en: 'Protected locally', 'pt-BR': 'Protegido localmente' })}
+            </span>
+          </div>
         </div>
-        <LbButton
-          onPress={() => {
-            setEditing((current) => !current);
-          }}
-          variant="secondary"
-        >
-          <ProductIcon name="profile" size={17} />
-          {copy(locale, { en: 'Edit profile', 'pt-BR': 'Editar perfil' })}
-        </LbButton>
+        <div className="desktop-profile-hero-actions">
+          <LbButton onPress={editing ? cancelEditing : beginEditing} variant="secondary">
+            <ProductIcon name={editing ? 'close' : 'profile'} size={17} />
+            {editing
+              ? copy(locale, { en: 'Close editor', 'pt-BR': 'Fechar editor' })
+              : copy(locale, { en: 'Edit profile', 'pt-BR': 'Editar perfil' })}
+          </LbButton>
+          <LbButton onPress={exportProfile} variant="quiet">
+            <ProductIcon name="download" size={17} />
+            {copy(locale, { en: 'Export', 'pt-BR': 'Exportar' })}
+          </LbButton>
+        </div>
       </section>
 
       {editing ? (
-        <section className="desktop-account-editor" aria-labelledby="desktop-profile-edit-title">
-          <div>
-            <h3 id="desktop-profile-edit-title">
-              {copy(locale, { en: 'Profile details', 'pt-BR': 'Dados do perfil' })}
-            </h3>
-            <p>
-              {copy(locale, {
-                en: 'This edit stays only in the current local preview.',
-                'pt-BR': 'Esta edição permanece apenas na prévia local atual.',
-              })}
-            </p>
-          </div>
-          <LbTextField
-            label={copy(locale, { en: 'Display name', 'pt-BR': 'Nome de exibição' })}
-            onChange={setDraftName}
-            value={draftName}
-          />
-          <div className="desktop-inline-actions">
-            <LbButton
-              onPress={() => {
-                if (draftName.trim().length > 1) {
-                  setName(draftName.trim());
-                  setEditing(false);
+        <section className="desktop-profile-editor" aria-labelledby="desktop-profile-edit-title">
+          <header>
+            <div>
+              <span className="desktop-profile-section-icon">
+                <ProductIcon name="profile" size={19} />
+              </span>
+              <div>
+                <h3 id="desktop-profile-edit-title">
+                  {copy(locale, { en: 'Profile details', 'pt-BR': 'Dados do perfil' })}
+                </h3>
+                <p>
+                  {copy(locale, {
+                    en: 'Changes are stored only on this Windows device.',
+                    'pt-BR': 'As alterações ficam armazenadas somente neste dispositivo Windows.',
+                  })}
+                </p>
+              </div>
+            </div>
+            {dirty ? (
+              <span className="desktop-profile-unsaved">
+                <ProductIcon name="history" size={14} />
+                {copy(locale, { en: 'Unsaved changes', 'pt-BR': 'Alterações não salvas' })}
+              </span>
+            ) : null}
+          </header>
+
+          <div className="desktop-profile-editor-body">
+            <aside className="desktop-profile-avatar-editor">
+              <ProfileAvatar editable profile={draft} />
+              <div>
+                <strong>
+                  {copy(locale, { en: 'Profile image', 'pt-BR': 'Imagem do perfil' })}
+                </strong>
+                <small>
+                  {copy(locale, {
+                    en: 'PNG, JPG or WebP up to 1 MB.',
+                    'pt-BR': 'PNG, JPG ou WebP de até 1 MB.',
+                  })}
+                </small>
+              </div>
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                aria-label={copy(locale, {
+                  en: 'Choose profile image',
+                  'pt-BR': 'Escolher imagem do perfil',
+                })}
+                className="lb-visually-hidden"
+                onChange={loadAvatarImage}
+                ref={photoInputRef}
+                type="file"
+              />
+              <div className="desktop-profile-avatar-actions">
+                <LbButton
+                  onPress={() => {
+                    photoInputRef.current?.click();
+                  }}
+                  variant="secondary"
+                >
+                  {copy(locale, { en: 'Choose image', 'pt-BR': 'Escolher imagem' })}
+                </LbButton>
+                {draft.avatarImage ? (
+                  <LbButton
+                    onPress={() => {
+                      setDraft((current) => ({ ...current, avatarImage: null }));
+                    }}
+                    variant="quiet"
+                  >
+                    {copy(locale, { en: 'Remove', 'pt-BR': 'Remover' })}
+                  </LbButton>
+                ) : null}
+              </div>
+              <div
+                aria-label={copy(locale, { en: 'Avatar color', 'pt-BR': 'Cor do avatar' })}
+                className="desktop-profile-avatar-presets"
+                role="group"
+              >
+                {PROFILE_AVATAR_ACCENTS.map((accent) => (
+                  <button
+                    aria-label={copy(locale, {
+                      en: `Use ${accent} avatar`,
+                      'pt-BR': `Usar avatar ${accent}`,
+                    })}
+                    aria-pressed={draft.avatarAccent === accent && draft.avatarImage === null}
+                    data-accent={accent}
+                    key={accent}
+                    onClick={() => {
+                      selectAvatarAccent(accent);
+                    }}
+                    type="button"
+                  >
+                    <span />
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            <div className="desktop-profile-fields">
+              <LbTextField
+                errorMessage={
+                  attempted && validation.displayName
+                    ? copy(locale, {
+                        en: 'Use between 2 and 40 characters.',
+                        'pt-BR': 'Use entre 2 e 40 caracteres.',
+                      })
+                    : undefined
                 }
+                isInvalid={attempted && Boolean(validation.displayName)}
+                label={copy(locale, { en: 'Display name', 'pt-BR': 'Nome de exibição' })}
+                maxLength={40}
+                onChange={(value) => {
+                  setDraft((current) => ({ ...current, displayName: value }));
+                }}
+                value={draft.displayName}
+              />
+              <LbTextField
+                description={copy(locale, {
+                  en: 'Letters, numbers, dot, dash or underscore.',
+                  'pt-BR': 'Letras, números, ponto, hífen ou sublinhado.',
+                })}
+                errorMessage={
+                  attempted && validation.playerTag
+                    ? copy(locale, {
+                        en: 'Use a valid identifier between 3 and 20 characters.',
+                        'pt-BR': 'Use um identificador válido de 3 a 20 caracteres.',
+                      })
+                    : undefined
+                }
+                isInvalid={attempted && Boolean(validation.playerTag)}
+                label={copy(locale, {
+                  en: 'Player identifier',
+                  'pt-BR': 'Identificador do jogador',
+                })}
+                maxLength={20}
+                onChange={(value) => {
+                  setDraft((current) => ({ ...current, playerTag: value }));
+                }}
+                value={draft.playerTag}
+              />
+              <label className="desktop-profile-bio-field">
+                <span>{copy(locale, { en: 'Short bio', 'pt-BR': 'Apresentação curta' })}</span>
+                <textarea
+                  aria-invalid={attempted && validation.bio ? 'true' : 'false'}
+                  maxLength={120}
+                  onChange={(event) => {
+                    setDraft((current) => ({ ...current, bio: event.currentTarget.value }));
+                  }}
+                  rows={3}
+                  value={draft.bio}
+                />
+                <small>
+                  {attempted && validation.bio
+                    ? copy(locale, {
+                        en: 'Use up to 120 characters.',
+                        'pt-BR': 'Use no máximo 120 caracteres.',
+                      })
+                    : copy(locale, {
+                        en: `${String(draft.bio.length)} of 120 characters`,
+                        'pt-BR': `${String(draft.bio.length)} de 120 caracteres`,
+                      })}
+                </small>
+              </label>
+            </div>
+          </div>
+
+          <footer>
+            <span>
+              <ProductIcon name="shield" size={15} />
+              {copy(locale, {
+                en: 'No cloud synchronization in this preview',
+                'pt-BR': 'Sem sincronização em nuvem nesta prévia',
+              })}
+            </span>
+            <div className="desktop-inline-actions">
+              <LbButton onPress={cancelEditing} variant="quiet">
+                {copy(locale, { en: 'Cancel', 'pt-BR': 'Cancelar' })}
+              </LbButton>
+              <LbButton
+                isDisabled={!dirty || saving}
+                isLoading={saving}
+                loadingLabel={copy(locale, { en: 'Saving profile', 'pt-BR': 'Salvando perfil' })}
+                onPress={saveProfile}
+                variant="primary"
+              >
+                <ProductIcon name="check" size={16} />
+                {copy(locale, { en: 'Save changes', 'pt-BR': 'Salvar alterações' })}
+              </LbButton>
+            </div>
+          </footer>
+        </section>
+      ) : null}
+
+      <section className="desktop-profile-overview-grid">
+        <article className="desktop-profile-about">
+          <header>
+            <span className="desktop-profile-section-icon">
+              <ProductIcon name="profile" size={19} />
+            </span>
+            <div>
+              <h3>{copy(locale, { en: 'About your profile', 'pt-BR': 'Sobre seu perfil' })}</h3>
+              <p>
+                {copy(locale, {
+                  en: 'Identity shown across this local app.',
+                  'pt-BR': 'Identidade exibida neste aplicativo local.',
+                })}
+              </p>
+            </div>
+          </header>
+          <p className="desktop-profile-bio">
+            {profileBioForLocale(locale, profile.bio) ||
+              copy(locale, {
+                en: 'Add a short bio to complete your profile.',
+                'pt-BR': 'Adicione uma apresentação curta para completar seu perfil.',
+              })}
+          </p>
+          <dl className="desktop-profile-facts">
+            <div>
+              <dt>{copy(locale, { en: 'Account email', 'pt-BR': 'E-mail da conta' })}</dt>
+              <dd>{PROFILE_EMAIL}</dd>
+            </div>
+            <div>
+              <dt>{copy(locale, { en: 'Local account ID', 'pt-BR': 'ID local da conta' })}</dt>
+              <dd>
+                <code>{LOCAL_ACCOUNT_ID}</code>
+                <LbButton
+                  onPress={() => {
+                    void copyAccountId();
+                  }}
+                  variant="quiet"
+                >
+                  {copy(locale, { en: 'Copy', 'pt-BR': 'Copiar' })}
+                </LbButton>
+              </dd>
+            </div>
+            <div>
+              <dt>{copy(locale, { en: 'Last saved', 'pt-BR': 'Último salvamento' })}</dt>
+              <dd>{updatedLabel}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <aside className="desktop-profile-preferences">
+          <header>
+            <span className="desktop-profile-section-icon">
+              <ProductIcon name="sliders" size={19} />
+            </span>
+            <div>
+              <h3>
+                {copy(locale, { en: 'Profile preferences', 'pt-BR': 'Preferências do perfil' })}
+              </h3>
+              <p>
+                {copy(locale, {
+                  en: 'Changes are saved immediately.',
+                  'pt-BR': 'As mudanças são salvas imediatamente.',
+                })}
+              </p>
+            </div>
+          </header>
+          <div className="desktop-profile-preference-list">
+            <LbSwitch
+              isSelected={profile.preferences.showPlayerTag}
+              onChange={(selected) => {
+                updatePreference('showPlayerTag', selected);
               }}
-              variant="primary"
             >
-              {copy(locale, { en: 'Save locally', 'pt-BR': 'Salvar localmente' })}
-            </LbButton>
+              <span>
+                <strong>
+                  {copy(locale, {
+                    en: 'Show player identifier',
+                    'pt-BR': 'Mostrar identificador do jogador',
+                  })}
+                </strong>
+                <small>
+                  {copy(locale, {
+                    en: 'Displays your tag beside the account email.',
+                    'pt-BR': 'Exibe sua tag ao lado do e-mail da conta.',
+                  })}
+                </small>
+              </span>
+            </LbSwitch>
+            <LbSwitch
+              isSelected={profile.preferences.showRecentActivity}
+              onChange={(selected) => {
+                updatePreference('showRecentActivity', selected);
+              }}
+            >
+              <span>
+                <strong>
+                  {copy(locale, {
+                    en: 'Show recent local activity',
+                    'pt-BR': 'Mostrar atividade local recente',
+                  })}
+                </strong>
+                <small>
+                  {copy(locale, {
+                    en: 'Keeps the activity summary visible on this page.',
+                    'pt-BR': 'Mantém o resumo de atividades visível nesta página.',
+                  })}
+                </small>
+              </span>
+            </LbSwitch>
+          </div>
+        </aside>
+      </section>
+
+      {profile.preferences.showRecentActivity ? (
+        <section
+          className="desktop-profile-activity"
+          aria-labelledby="desktop-profile-activity-title"
+        >
+          <header>
+            <div>
+              <span className="desktop-profile-section-icon">
+                <ProductIcon name="history" size={19} />
+              </span>
+              <div>
+                <h3 id="desktop-profile-activity-title">
+                  {copy(locale, {
+                    en: 'Recent local activity',
+                    'pt-BR': 'Atividade local recente',
+                  })}
+                </h3>
+                <p>
+                  {copy(locale, {
+                    en: 'Events generated only by this demonstration device.',
+                    'pt-BR': 'Eventos gerados somente por este dispositivo demonstrativo.',
+                  })}
+                </p>
+              </div>
+            </div>
             <LbButton
               onPress={() => {
-                setDraftName(name);
-                setEditing(false);
+                navigate('/activity');
               }}
               variant="quiet"
             >
-              {copy(locale, { en: 'Cancel', 'pt-BR': 'Cancelar' })}
+              {copy(locale, { en: 'View activity', 'pt-BR': 'Ver atividade' })}
+              <ProductIcon name="chevronRight" size={15} />
             </LbButton>
-          </div>
+          </header>
+          <ul>
+            <li>
+              <ProductIcon name="check" size={16} />
+              <span>
+                <strong>
+                  {copy(locale, {
+                    en: 'Readiness analysis completed',
+                    'pt-BR': 'Análise de prontidão concluída',
+                  })}
+                </strong>
+                <small>{copy(locale, { en: 'Today, 08:42', 'pt-BR': 'Hoje, 08:42' })}</small>
+              </span>
+            </li>
+            <li>
+              <ProductIcon name="recovery" size={16} />
+              <span>
+                <strong>
+                  {copy(locale, {
+                    en: 'Recovery path verified',
+                    'pt-BR': 'Caminho de recuperação verificado',
+                  })}
+                </strong>
+                <small>{copy(locale, { en: 'Yesterday, 21:16', 'pt-BR': 'Ontem, 21:16' })}</small>
+              </span>
+            </li>
+            <li>
+              <ProductIcon name="device" size={16} />
+              <span>
+                <strong>
+                  {copy(locale, {
+                    en: 'Device identity validated',
+                    'pt-BR': 'Identidade do dispositivo validada',
+                  })}
+                </strong>
+                <small>DESKTOP-LR07</small>
+              </span>
+            </li>
+          </ul>
         </section>
       ) : null}
 
       <section
-        className="desktop-account-grid"
-        aria-label={copy(locale, { en: 'Account summary', 'pt-BR': 'Resumo da conta' })}
+        aria-label={copy(locale, {
+          en: 'Connected account areas',
+          'pt-BR': 'Áreas conectadas da conta',
+        })}
+        className="desktop-profile-destinations"
       >
-        <article className="desktop-account-summary-card">
-          <header>
-            <ProductIcon name="crown" size={19} />
-            <span>{copy(locale, { en: 'Current plan', 'pt-BR': 'Plano atual' })}</span>
-          </header>
-          <strong>Premium</strong>
-          <p>
-            {copy(locale, {
-              en: 'All visual capabilities unlocked in this local scenario.',
-              'pt-BR': 'Todos os recursos visuais liberados neste cenário local.',
-            })}
-          </p>
-          <LbButton
-            onPress={() => {
-              navigate('/account/subscription');
-            }}
-            variant="secondary"
-          >
-            {copy(locale, { en: 'Manage plan', 'pt-BR': 'Gerenciar plano' })}
-          </LbButton>
-        </article>
-        <article className="desktop-account-summary-card">
-          <header>
-            <ProductIcon name="device" size={19} />
-            <span>{copy(locale, { en: 'Active device', 'pt-BR': 'Dispositivo ativo' })}</span>
-          </header>
-          <strong>DESKTOP-LR07</strong>
-          <p>Windows 11 · 1 de 1 dispositivo</p>
-          <LbButton
-            onPress={() => {
-              navigate('/account/device');
-            }}
-            variant="secondary"
-          >
-            {copy(locale, { en: 'View device', 'pt-BR': 'Ver dispositivo' })}
-          </LbButton>
-        </article>
-        <article className="desktop-account-summary-card">
-          <header>
-            <ProductIcon name="lock" size={19} />
-            <span>{copy(locale, { en: 'Account security', 'pt-BR': 'Segurança da conta' })}</span>
-          </header>
-          <strong>
-            {copy(locale, { en: 'Ready to configure', 'pt-BR': 'Pronta para configurar' })}
-          </strong>
-          <p>
-            {copy(locale, {
-              en: 'Passkeys and MFA are represented before the identity backend arrives.',
-              'pt-BR': 'Passkeys e MFA já estão representados antes da chegada do backend.',
-            })}
-          </p>
-          <LbButton
-            onPress={() => {
-              navigate('/account/security');
-            }}
-            variant="secondary"
-          >
-            {copy(locale, { en: 'Review security', 'pt-BR': 'Revisar segurança' })}
-          </LbButton>
-        </article>
+        <ProfileDestination
+          action={copy(locale, { en: 'Manage', 'pt-BR': 'Gerenciar' })}
+          description="Premium"
+          icon="crown"
+          label={copy(locale, { en: 'Current plan', 'pt-BR': 'Plano atual' })}
+          onPress={() => {
+            navigate('/account/subscription');
+          }}
+        />
+        <ProfileDestination
+          action={copy(locale, { en: 'Open', 'pt-BR': 'Abrir' })}
+          description="DESKTOP-LR07"
+          icon="device"
+          label={copy(locale, { en: 'Active device', 'pt-BR': 'Dispositivo ativo' })}
+          onPress={() => {
+            navigate('/account/device');
+          }}
+        />
+        <ProfileDestination
+          action={copy(locale, { en: 'Review', 'pt-BR': 'Revisar' })}
+          description={copy(locale, {
+            en: '2 protections pending',
+            'pt-BR': '2 proteções pendentes',
+          })}
+          icon="lock"
+          label={copy(locale, { en: 'Account security', 'pt-BR': 'Segurança da conta' })}
+          onPress={() => {
+            navigate('/account/security');
+          }}
+        />
       </section>
 
-      <section className="desktop-account-footer">
-        <div>
-          <strong>
-            {copy(locale, { en: 'Local account preview', 'pt-BR': 'Prévia local da conta' })}
-          </strong>
-          <p>
-            {copy(locale, {
-              en: 'No cloud identity or billing record was created.',
-              'pt-BR': 'Nenhuma identidade em nuvem ou cobrança foi criada.',
-            })}
-          </p>
+      <section className="desktop-profile-account-actions">
+        <header>
+          <div>
+            <span className="desktop-profile-section-icon">
+              <ProductIcon name="shield" size={19} />
+            </span>
+            <div>
+              <h3>
+                {copy(locale, { en: 'Account and local data', 'pt-BR': 'Conta e dados locais' })}
+              </h3>
+              <p>
+                {copy(locale, {
+                  en: 'Export, leave the session or restore this preview.',
+                  'pt-BR': 'Exporte, encerre a sessão ou restaure esta prévia.',
+                })}
+              </p>
+            </div>
+          </div>
+        </header>
+        <div className="desktop-profile-account-action-list">
+          <button onClick={exportProfile} type="button">
+            <ProductIcon name="download" size={19} />
+            <span>
+              <strong>
+                {copy(locale, { en: 'Export local profile', 'pt-BR': 'Exportar perfil local' })}
+              </strong>
+              <small>
+                {copy(locale, {
+                  en: 'Downloads a readable JSON package.',
+                  'pt-BR': 'Baixa um pacote JSON legível.',
+                })}
+              </small>
+            </span>
+            <ProductIcon name="chevronRight" size={16} />
+          </button>
+          <button
+            onClick={() => {
+              navigate('/login');
+            }}
+            type="button"
+          >
+            <ProductIcon name="logout" size={19} />
+            <span>
+              <strong>
+                {copy(locale, { en: 'Sign out of preview', 'pt-BR': 'Sair da prévia' })}
+              </strong>
+              <small>
+                {copy(locale, {
+                  en: 'Returns to sign-in without deleting local data.',
+                  'pt-BR': 'Volta ao login sem apagar os dados locais.',
+                })}
+              </small>
+            </span>
+            <ProductIcon name="chevronRight" size={16} />
+          </button>
+          <button
+            data-tone="danger"
+            onClick={() => {
+              setResetConfirmOpen(true);
+            }}
+            type="button"
+          >
+            <ProductIcon name="trash" size={19} />
+            <span>
+              <strong>
+                {copy(locale, { en: 'Clear local preview', 'pt-BR': 'Limpar prévia local' })}
+              </strong>
+              <small>
+                {copy(locale, {
+                  en: 'Removes profile edits and restores defaults.',
+                  'pt-BR': 'Remove edições do perfil e restaura os padrões.',
+                })}
+              </small>
+            </span>
+            <ProductIcon name="chevronRight" size={16} />
+          </button>
         </div>
-        <LbButton
-          onPress={() => {
-            navigate('/login');
-          }}
-          variant="quiet"
-        >
-          <ProductIcon name="logout" size={17} />
-          {copy(locale, { en: 'Return to sign in', 'pt-BR': 'Voltar para o login' })}
-        </LbButton>
+
+        {resetConfirmOpen ? (
+          <aside className="desktop-profile-reset-confirm" aria-live="polite">
+            <ProductIcon name="warning" size={21} />
+            <div>
+              <strong>
+                {copy(locale, {
+                  en: 'Clear this local profile?',
+                  'pt-BR': 'Limpar este perfil local?',
+                })}
+              </strong>
+              <p>
+                {copy(locale, {
+                  en: 'Name, avatar and profile preferences will return to their default values.',
+                  'pt-BR': 'Nome, avatar e preferências do perfil voltarão aos valores padrão.',
+                })}
+              </p>
+            </div>
+            <div className="desktop-inline-actions">
+              <LbButton
+                onPress={() => {
+                  setResetConfirmOpen(false);
+                }}
+                variant="quiet"
+              >
+                {copy(locale, { en: 'Cancel', 'pt-BR': 'Cancelar' })}
+              </LbButton>
+              <LbButton onPress={clearLocalPreview} variant="destructive">
+                {copy(locale, { en: 'Clear local data', 'pt-BR': 'Limpar dados locais' })}
+              </LbButton>
+            </div>
+          </aside>
+        ) : null}
       </section>
     </div>
   );

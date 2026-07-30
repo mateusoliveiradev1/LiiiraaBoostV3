@@ -29,6 +29,6 @@
     "source": "Cert:\\CurrentUser\\My"
   },
   "observer": "package-signed-desktop.mjs",
-  "reviewedAt": "2026-07-29T19:52:30.323Z",
+  "reviewedAt": "2026-07-30T02:12:00.654Z",
   "evidencePath": "quality/evidence/phase-02/artifacts/signed-desktop-package.json"
 }

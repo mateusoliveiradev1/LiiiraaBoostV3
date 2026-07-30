@@ -57,6 +57,11 @@ import type { ReactNode } from 'react';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
+import {
+  ACCOUNT_PROFILE_UPDATED_EVENT,
+  accountProfileInitials,
+  readAccountProfile,
+} from './features/account-profile.js';
 import { STARTUP_PRESENTATION_STEPS, StartupSurface } from './features/startup.js';
 import { NotificationCenter } from './features/notification-center.js';
 import { PremiumOperationsSurface } from './features/premium-operations.js';
@@ -1147,12 +1152,29 @@ const DesktopAppContent = ({
 }: DesktopAppContentProps) => {
   const { preferences } = useDesktopPreferences();
   const locale: ShellLocale = preferences.locale === 'pt-BR' ? 'pt-BR' : 'en';
+  const [accountProfile, setAccountProfile] = useState(() =>
+    readAccountProfile(globalThis.localStorage),
+  );
   const [route, setRoute] = useState(() => resolveInitialRoute(initialPath));
   const [announcement, setAnnouncement] = useState(route.definition.headingMessageId);
   const [activityOpen, setActivityOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  useEffect(() => {
+    const refreshAccountIdentity = () => {
+      setAccountProfile(readAccountProfile(globalThis.localStorage));
+    };
+
+    globalThis.addEventListener(ACCOUNT_PROFILE_UPDATED_EVENT, refreshAccountIdentity);
+    globalThis.addEventListener('storage', refreshAccountIdentity);
+
+    return () => {
+      globalThis.removeEventListener(ACCOUNT_PROFILE_UPDATED_EVENT, refreshAccountIdentity);
+      globalThis.removeEventListener('storage', refreshAccountIdentity);
+    };
+  }, []);
   const [measuredWidth, setMeasuredWidth] = useState(
     viewportWidth ?? (typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : 1280),
   );
@@ -1558,6 +1580,8 @@ const DesktopAppContent = ({
       >
         <div className="desktop-title-region" data-focus-region="title-bar">
           <WindowTitleBar
+            accountInitials={accountProfileInitials(accountProfile.displayName)}
+            accountLabel={accountProfile.displayName}
             controls={DESKTOP_WINDOW_CONTROLS}
             globalStatus={
               locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'
@@ -1599,7 +1623,8 @@ const DesktopAppContent = ({
         tabIndex={-1}
       >
         <WindowTitleBar
-          accountLabel={locale === 'pt-BR' ? 'Liiiraa Player' : 'Liiiraa Player'}
+          accountInitials={accountProfileInitials(accountProfile.displayName)}
+          accountLabel={accountProfile.displayName}
           controls={DESKTOP_WINDOW_CONTROLS}
           globalStatus={presentation.reason}
           locale={locale}
