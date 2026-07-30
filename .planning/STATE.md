@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 02 (complete-desktop-experience) — EXECUTING
 Plan: 21 of 33
 Status: Ready to execute
-Last activity: 2026-07-30 - Completed quick task 260729-uek: redesign Home telemetry and fix legacy navigation
+Last activity: 2026-07-30 - Completed quick task 260729-v7n: correct Home readiness layout and transient completion feedback
 
 Progress: [████░░░░░░] 44%
 
@@ -285,6 +285,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260729-m1p | Redesenhar integralmente a experiência premium da Fase 2 | 2026-07-29 | 56aa21d | Verified | [260729-m1p-redesenhar-integralmente-a-experi-ncia-p](./quick/260729-m1p-redesenhar-integralmente-a-experi-ncia-p/) |
 | 260729-u3n | Redesenhar painel de prontidão da Home com hierarquia premium e uso melhor do espaço | 2026-07-30 | 9e09a53 | Verified | [260729-u3n-redesenhar-painel-de-prontidao-da-home-c](./quick/260729-u3n-redesenhar-painel-de-prontidao-da-home-c/) |
 | 260729-uek | Redesenhar painel de telemetria local da Home e eliminar espaço vazio | 2026-07-30 | 73209a7 | Verified | [260729-uek-redesenhar-painel-de-telemetria-local-da](./quick/260729-uek-redesenhar-painel-de-telemetria-local-da/) |
+| 260729-v7n | Corrigir layout da prontidão e ocultar confirmação concluída | 2026-07-30 | 80f0b20 | Verified | [260729-v7n-corrigir-layout-da-prontidao-e-ocultar-c](./quick/260729-v7n-corrigir-layout-da-prontidao-e-ocultar-c/) |
 
 ## Session Continuity
 
