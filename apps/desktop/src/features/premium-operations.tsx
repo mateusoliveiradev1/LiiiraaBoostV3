@@ -331,216 +331,362 @@ const PlanBar = ({
     </aside>
   ) : null;
 
+type HomeAnalysisPhase = 'catalog' | 'complete' | 'hardware' | 'idle' | 'recovery';
+
+const HOME_ANALYSIS_PROGRESS: Readonly<Record<HomeAnalysisPhase, number>> = Object.freeze({
+  catalog: 82,
+  complete: 100,
+  hardware: 24,
+  idle: 0,
+  recovery: 56,
+});
+
 const HomeSurface = ({
   activeGame,
+  locale,
   navigate,
   notify,
 }: {
   readonly activeGame: GameProfile;
+  readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly notify: (message: string) => void;
-}) => (
-  <>
-    <HardwareStrip />
-    <section className="premium-home-grid">
-      <article className="premium-readiness-card">
-        <div className="premium-readiness-primary">
-          <div
-            className="premium-score"
-            style={{ '--premium-score': '92%' } as React.CSSProperties}
-          >
-            <span>
-              <strong>92</strong>
-              <small>/ 100</small>
-            </span>
-          </div>
-          <div className="premium-readiness-copy">
-            <span className="premium-section-label">Prontidão do sistema</span>
-            <h2>Seu PC está pronto para competir</h2>
-            <p>
-              O cenário está estável. Há cinco recomendações compatíveis aguardando sua revisão.
-            </p>
-            <div className="premium-inline-actions">
+}) => {
+  const [analysisPhase, setAnalysisPhase] = useState<HomeAnalysisPhase>('idle');
+  const analysisTimersRef = useRef<number[]>([]);
+  const isAnalyzing =
+    analysisPhase === 'hardware' || analysisPhase === 'recovery' || analysisPhase === 'catalog';
+  const analysisProgress = HOME_ANALYSIS_PROGRESS[analysisPhase];
+  const analysisLabel =
+    analysisPhase === 'hardware'
+      ? text(locale, 'Identificando hardware e sistema', 'Identifying hardware and system')
+      : analysisPhase === 'recovery'
+        ? text(locale, 'Validando caminho de recuperação', 'Validating recovery path')
+        : analysisPhase === 'catalog'
+          ? text(locale, 'Revisando ajustes compatíveis', 'Reviewing compatible controls')
+          : text(locale, 'Análise concluída com segurança', 'Analysis completed safely');
+
+  useEffect(
+    () => () => {
+      analysisTimersRef.current.forEach((timer) => {
+        globalThis.clearTimeout(timer);
+      });
+    },
+    [],
+  );
+
+  const startAnalysis = (): void => {
+    if (isAnalyzing) {
+      return;
+    }
+
+    analysisTimersRef.current.forEach((timer) => {
+      globalThis.clearTimeout(timer);
+    });
+    analysisTimersRef.current = [];
+    setAnalysisPhase('hardware');
+
+    analysisTimersRef.current.push(
+      globalThis.setTimeout(() => {
+        setAnalysisPhase('recovery');
+      }, 520),
+      globalThis.setTimeout(() => {
+        setAnalysisPhase('catalog');
+      }, 1040),
+      globalThis.setTimeout(() => {
+        setAnalysisPhase('complete');
+        notify(
+          text(
+            locale,
+            'Análise demonstrativa concluída. As evidências foram atualizadas e nenhuma alteração foi aplicada.',
+            'Demonstration analysis completed. Evidence was updated and no changes were applied.',
+          ),
+        );
+      }, 1620),
+    );
+  };
+
+  return (
+    <>
+      <HardwareStrip />
+      <section className="premium-home-grid">
+        <article className="premium-readiness-card">
+          <div className="premium-readiness-primary">
+            <div
+              className="premium-readiness-status"
+              data-phase={isAnalyzing ? 'analyzing' : 'ready'}
+            >
+              <span className="premium-readiness-status-icon" aria-hidden="true">
+                <ProductIcon name={isAnalyzing ? 'loading' : 'shield'} size={34} weight="duotone" />
+              </span>
+              <span>
+                <strong>
+                  {isAnalyzing
+                    ? text(locale, 'Verificando', 'Checking')
+                    : text(locale, 'Sistema pronto', 'System ready')}
+                </strong>
+                <small>
+                  {isAnalyzing
+                    ? text(locale, 'Somente leitura', 'Read-only')
+                    : text(locale, 'Cenário compatível', 'Compatible scenario')}
+                </small>
+              </span>
+            </div>
+            <div className="premium-readiness-copy">
+              <span className="premium-section-label">
+                {text(locale, 'Prontidão do sistema', 'System readiness')}
+              </span>
+              <h2>
+                {text(locale, 'Pronto para sua próxima sessão', 'Ready for your next session')}
+              </h2>
+              <p>
+                {text(
+                  locale,
+                  'Hardware, recuperação e compatibilidade foram verificados neste cenário demonstrativo.',
+                  'Hardware, recovery, and compatibility were verified in this demonstration scenario.',
+                )}
+              </p>
+              <div className="premium-inline-actions">
+                <PremiumButton
+                  onClick={() => {
+                    navigate('/competitive');
+                  }}
+                  tone="primary"
+                >
+                  {text(locale, 'Abrir Modo Competitivo', 'Open Competitive Mode')}
+                </PremiumButton>
+                <PremiumButton disabled={isAnalyzing} onClick={startAnalysis}>
+                  <ProductIcon
+                    name={isAnalyzing ? 'loading' : 'recovery'}
+                    size={16}
+                    weight="bold"
+                  />
+                  {isAnalyzing
+                    ? text(locale, 'Analisando…', 'Analyzing…')
+                    : text(locale, 'Analisar novamente', 'Analyze again')}
+                </PremiumButton>
+              </div>
+              {analysisPhase === 'idle' ? null : (
+                <div
+                  aria-live="polite"
+                  className="premium-analysis-progress"
+                  data-phase={analysisPhase}
+                  role="status"
+                >
+                  <div className="premium-analysis-progress-copy">
+                    <span>
+                      <ProductIcon
+                        name={analysisPhase === 'complete' ? 'check' : 'loading'}
+                        size={15}
+                        weight="bold"
+                      />
+                      {analysisLabel}
+                    </span>
+                    <strong>{String(analysisProgress)}%</strong>
+                  </div>
+                  <div
+                    aria-label={text(locale, 'Progresso da análise', 'Analysis progress')}
+                    aria-valuemax={100}
+                    aria-valuemin={0}
+                    aria-valuenow={analysisProgress}
+                    className="premium-analysis-progress-track"
+                    role="progressbar"
+                  >
+                    <span style={{ inlineSize: `${String(analysisProgress)}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="premium-readiness-next">
+              <span className="premium-section-label">
+                {text(locale, 'Revisão pendente', 'Pending review')}
+              </span>
+              <strong>
+                <ProductIcon name="sliders" size={20} weight="duotone" />
+                {text(locale, '5 ajustes compatíveis', '5 compatible controls')}
+              </strong>
+              <p>
+                {text(
+                  locale,
+                  'Escolha o que deseja preparar. Nada será aplicado sem sua confirmação.',
+                  'Choose what you want to prepare. Nothing will be applied without your confirmation.',
+                )}
+              </p>
               <PremiumButton
                 onClick={() => {
-                  navigate('/competitive');
-                }}
-                tone="primary"
-              >
-                Abrir Modo Competitivo
-              </PremiumButton>
-              <PremiumButton
-                onClick={() => {
-                  notify('Nova análise simulada concluída. Nenhuma alteração foi aplicada.');
+                  navigate('/toggles');
                 }}
               >
-                Analisar novamente
+                {text(locale, 'Revisar ajustes', 'Review controls')}
               </PremiumButton>
             </div>
           </div>
-          <div className="premium-readiness-next">
-            <span className="premium-section-label">Próxima ação</span>
-            <strong>
-              <span>5</span> recomendações
-            </strong>
-            <p>Revise os ajustes compatíveis antes de iniciar sua próxima sessão.</p>
-            <PremiumButton
-              onClick={() => {
-                navigate('/toggles');
+          <aside
+            className="premium-readiness-evidence"
+            aria-label={text(locale, 'Resumo da prontidão', 'Readiness summary')}
+          >
+            <header>
+              <span>
+                <ProductIcon name="shield" size={17} weight="duotone" />
+                {text(locale, 'Evidências de prontidão', 'Readiness evidence')}
+              </span>
+              <strong>
+                <span aria-hidden="true" />
+                {isAnalyzing
+                  ? text(locale, 'Análise em andamento', 'Analysis in progress')
+                  : analysisPhase === 'complete'
+                    ? text(locale, 'Verificado agora', 'Verified just now')
+                    : text(locale, 'Atualizado agora', 'Updated just now')}
+              </strong>
+            </header>
+            <ul>
+              <li>
+                <span className="premium-readiness-evidence-icon">
+                  <ProductIcon name="recovery" size={16} weight="duotone" />
+                </span>
+                <span>
+                  <strong>{text(locale, 'Recuperação pronta', 'Recovery ready')}</strong>
+                  <small>
+                    {text(locale, 'Ponto de restauração disponível', 'Restore point available')}
+                  </small>
+                </span>
+              </li>
+              <li>
+                <span className="premium-readiness-evidence-icon">
+                  <ProductIcon name="microchip" size={16} weight="duotone" />
+                </span>
+                <span>
+                  <strong>{text(locale, 'Hardware compatível', 'Compatible hardware')}</strong>
+                  <small>
+                    {text(
+                      locale,
+                      'Perfil validado para este cenário',
+                      'Profile validated for this scenario',
+                    )}
+                  </small>
+                </span>
+              </li>
+              <li data-tone="attention">
+                <span className="premium-readiness-evidence-icon">
+                  <ProductIcon name="sliders" size={16} weight="duotone" />
+                </span>
+                <span>
+                  <strong>{text(locale, '5 ajustes para revisar', '5 controls to review')}</strong>
+                  <small>
+                    {text(locale, 'Nenhuma mudança aplicada ainda', 'No changes applied yet')}
+                  </small>
+                </span>
+              </li>
+            </ul>
+          </aside>
+        </article>
+        <article className="premium-game-card">
+          <div className="premium-game-visual" data-game-id={activeGame.id}>
+            <div aria-hidden="true" className="premium-game-cover-fallback">
+              <BrandIcon brand={activeGame.brand} size={42} />
+              <span>{activeGame.title}</span>
+            </div>
+            <img
+              alt={`Arte oficial de ${activeGame.title}`}
+              decoding="async"
+              key={activeGame.id}
+              loading="eager"
+              onError={(event) => {
+                event.currentTarget.hidden = true;
               }}
-            >
-              Revisar ajustes
-            </PremiumButton>
-          </div>
-        </div>
-        <aside className="premium-readiness-evidence" aria-label="Resumo da prontidão">
-          <header>
-            <span>
-              <ProductIcon name="shield" size={17} weight="duotone" />
-              Evidências de prontidão
+              src={activeGame.cover}
+            />
+            <span aria-hidden="true" className="premium-game-brand">
+              <BrandIcon brand={activeGame.brand} size={22} />
             </span>
-            <strong>
+          </div>
+          <span className="premium-section-label">Jogo selecionado</span>
+          <h2>{activeGame.title}</h2>
+          <p>Perfil competitivo · prioridade alta · restauração automática</p>
+          <dl>
+            <div>
+              <dt>Última sessão</dt>
+              <dd>{activeGame.sessionSummary}</dd>
+            </div>
+            <div>
+              <dt>Perfil</dt>
+              <dd>{activeGame.profileLabel}</dd>
+            </div>
+          </dl>
+        </article>
+        <article className="premium-metrics-panel">
+          <header>
+            <div>
+              <span className="premium-section-label">Telemetria local</span>
+              <h2>Leitura atual</h2>
+            </div>
+            <span className="premium-live">
               <span aria-hidden="true" />
-              Atualizado agora
-            </strong>
+              Atualizando
+            </span>
           </header>
-          <ul>
-            <li>
-              <span className="premium-readiness-evidence-icon">
-                <ProductIcon name="recovery" size={16} weight="duotone" />
-              </span>
+          <div className="premium-metric-grid">
+            {[
+              ['cpu', 'CPU', '4%', '47 °C'],
+              ['graphics', 'GPU', '2%', '42 °C'],
+              ['memory', 'Memória', '9,8 GB', '31%'],
+              ['network', 'Latência local', '1,2 ms', 'Estável'],
+            ].map(([icon, label, value, detail]) => (
+              <div key={label}>
+                <span className="premium-metric-icon">
+                  <ProductIcon name={icon as ProductIconName} size={18} weight="duotone" />
+                </span>
+                <span>
+                  <small>{label}</small>
+                  <strong>{value}</strong>
+                  <em>{detail}</em>
+                </span>
+              </div>
+            ))}
+          </div>
+          <footer className="premium-telemetry-context">
+            <div>
+              <ProductIcon name="shield" size={18} weight="duotone" />
               <span>
-                <strong>Recuperação pronta</strong>
-                <small>Ponto de restauração disponível</small>
+                <strong>Monitoramento somente leitura</strong>
+                <small>Dados locais do cenário demonstrativo</small>
               </span>
-            </li>
-            <li>
-              <span className="premium-readiness-evidence-icon">
-                <ProductIcon name="microchip" size={16} weight="duotone" />
-              </span>
-              <span>
-                <strong>Hardware compatível</strong>
-                <small>Perfil validado para este cenário</small>
-              </span>
-            </li>
-            <li data-tone="attention">
-              <span className="premium-readiness-evidence-icon">
-                <ProductIcon name="sliders" size={16} weight="duotone" />
-              </span>
-              <span>
-                <strong>5 ajustes para revisar</strong>
-                <small>Nenhuma mudança aplicada ainda</small>
-              </span>
-            </li>
-          </ul>
-        </aside>
-      </article>
-      <article className="premium-game-card">
-        <div className="premium-game-visual" data-game-id={activeGame.id}>
-          <div aria-hidden="true" className="premium-game-cover-fallback">
-            <BrandIcon brand={activeGame.brand} size={42} />
-            <span>{activeGame.title}</span>
-          </div>
-          <img
-            alt={`Arte oficial de ${activeGame.title}`}
-            decoding="async"
-            key={activeGame.id}
-            loading="eager"
-            onError={(event) => {
-              event.currentTarget.hidden = true;
-            }}
-            src={activeGame.cover}
-          />
-          <span aria-hidden="true" className="premium-game-brand">
-            <BrandIcon brand={activeGame.brand} size={22} />
-          </span>
-        </div>
-        <span className="premium-section-label">Jogo selecionado</span>
-        <h2>{activeGame.title}</h2>
-        <p>Perfil competitivo · prioridade alta · restauração automática</p>
-        <dl>
-          <div>
-            <dt>Última sessão</dt>
-            <dd>{activeGame.sessionSummary}</dd>
-          </div>
-          <div>
-            <dt>Perfil</dt>
-            <dd>{activeGame.profileLabel}</dd>
-          </div>
-        </dl>
-      </article>
-      <article className="premium-metrics-panel">
-        <header>
-          <div>
-            <span className="premium-section-label">Telemetria local</span>
-            <h2>Leitura atual</h2>
-          </div>
-          <span className="premium-live">
-            <span aria-hidden="true" />
-            Atualizando
-          </span>
-        </header>
-        <div className="premium-metric-grid">
+            </div>
+            <span>
+              <ProductIcon name="check" size={14} weight="fill" />
+              Nenhuma alteração aplicada
+            </span>
+          </footer>
+        </article>
+        <article className="premium-next-actions">
+          <header>
+            <span className="premium-section-label">Próximas ações</span>
+            <strong>3 recomendações</strong>
+          </header>
           {[
-            ['cpu', 'CPU', '4%', '47 °C'],
-            ['graphics', 'GPU', '2%', '42 °C'],
-            ['memory', 'Memória', '9,8 GB', '31%'],
-            ['network', 'Latência local', '1,2 ms', 'Estável'],
-          ].map(([icon, label, value, detail]) => (
-            <div key={label}>
-              <span className="premium-metric-icon">
-                <ProductIcon name={icon as ProductIconName} size={18} weight="duotone" />
-              </span>
+            ['Rede', 'Revisar DNS medido e moderação de interrupções', '/network'],
+            ['Energia', 'Ativar plano Liiiraa Adaptativo', '/power'],
+            ['Segurança', 'Verificar compatibilidade do isolamento de núcleo', '/security'],
+          ].map(([label, description, path]) => (
+            <button
+              key={label}
+              onClick={() => {
+                navigate(path ?? '/home');
+              }}
+              type="button"
+            >
               <span>
                 <small>{label}</small>
-                <strong>{value}</strong>
-                <em>{detail}</em>
+                <strong>{description}</strong>
               </span>
-            </div>
+              <ProductIcon name="arrowRight" size={18} />
+            </button>
           ))}
-        </div>
-        <footer className="premium-telemetry-context">
-          <div>
-            <ProductIcon name="shield" size={18} weight="duotone" />
-            <span>
-              <strong>Monitoramento somente leitura</strong>
-              <small>Dados locais do cenário demonstrativo</small>
-            </span>
-          </div>
-          <span>
-            <ProductIcon name="check" size={14} weight="fill" />
-            Nenhuma alteração aplicada
-          </span>
-        </footer>
-      </article>
-      <article className="premium-next-actions">
-        <header>
-          <span className="premium-section-label">Próximas ações</span>
-          <strong>3 recomendações</strong>
-        </header>
-        {[
-          ['Rede', 'Revisar DNS medido e moderação de interrupções', '/network'],
-          ['Energia', 'Ativar plano Liiiraa Adaptativo', '/power'],
-          ['Segurança', 'Verificar compatibilidade do isolamento de núcleo', '/security'],
-        ].map(([label, description, path]) => (
-          <button
-            key={label}
-            onClick={() => {
-              navigate(path ?? '/home');
-            }}
-            type="button"
-          >
-            <span>
-              <small>{label}</small>
-              <strong>{description}</strong>
-            </span>
-            <ProductIcon name="arrowRight" size={18} />
-          </button>
-        ))}
-      </article>
-    </section>
-  </>
-);
+        </article>
+      </section>
+    </>
+  );
+};
 
 const CompetitiveSurface = ({
   activeGame,
@@ -2261,7 +2407,9 @@ export const PremiumOperationsSurface = ({
 
   let content: ReactNode;
   if (view === 'home') {
-    content = <HomeSurface activeGame={activeGame} navigate={navigate} notify={notify} />;
+    content = (
+      <HomeSurface activeGame={activeGame} locale={locale} navigate={navigate} notify={notify} />
+    );
   } else if (view === 'competitive') {
     content = (
       <CompetitiveSurface

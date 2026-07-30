@@ -244,3 +244,64 @@ test('@premium-navigation home review action opens the current premium controls 
   await expect(page.getByRole('heading', { name: 'Controles rápidos' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Otimização' })).toHaveCount(0);
 });
+
+test('@premium-readiness home analysis exposes progress and refreshes evidence', async ({
+  page,
+}) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/home',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  await expect(page.getByText('Sistema pronto', { exact: true })).toBeVisible();
+  await expect(page.locator('.premium-score')).toHaveCount(0);
+  await expect(page.getByText('5 ajustes compatíveis', { exact: true })).toBeVisible();
+
+  const analyzeButton = page
+    .locator('.premium-readiness-copy .premium-inline-actions')
+    .getByRole('button')
+    .nth(1);
+  await analyzeButton.click();
+
+  await expect(analyzeButton).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Analisando…' })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Progresso da análise' })).toHaveAttribute(
+    'aria-valuenow',
+    '24',
+  );
+
+  await expect(page.getByRole('progressbar', { name: 'Progresso da análise' })).toHaveAttribute(
+    'aria-valuenow',
+    '100',
+    { timeout: 3_000 },
+  );
+  await expect(page.getByText('Análise concluída com segurança', { exact: true })).toBeVisible();
+  await expect(page.getByText('Verificado agora', { exact: true })).toBeVisible();
+  await expect(analyzeButton).toBeEnabled();
+  await expect(
+    page.getByText(
+      'Análise demonstrativa concluída. As evidências foram atualizadas e nenhuma alteração foi aplicada.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+});
+
+test('@premium-readiness home readiness and analysis controls are fully localized in English', async ({
+  page,
+}) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/home',
+    operationalState: 'fixture',
+    scenarioId: 'S01',
+    windowsLocale: 'en-US',
+  });
+
+  await expect(page.getByText('System ready', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ready for your next session' })).toBeVisible();
+  await expect(page.getByText('5 compatible controls', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Analyze again' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Review controls' })).toBeVisible();
+  await expect(page.getByText('Prontidão do sistema', { exact: true })).toHaveCount(0);
+});
