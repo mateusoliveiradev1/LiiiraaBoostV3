@@ -13,9 +13,10 @@ export const HOST_EVENT_CHANNEL = 'desktop-shell-event' as const;
 export const RENDERER_COMMAND_NAME = 'dispatch_shell_command' as const;
 export const BOOTSTRAP_COMMAND_NAME = 'get_shell_bootstrap' as const;
 
-type HostEventOf<
-  TMessageType extends HostToRendererShellEventJson['messageType'],
-> = Extract<HostToRendererShellEventJson, { readonly messageType: TMessageType }>;
+type HostEventOf<TMessageType extends HostToRendererShellEventJson['messageType']> = Extract<
+  HostToRendererShellEventJson,
+  { readonly messageType: TMessageType }
+>;
 
 export interface ShellBridgeHandlers {
   readonly onInstallerIdentity: (
@@ -24,24 +25,16 @@ export interface ShellBridgeHandlers {
   readonly onStartupState: (
     event: HostEventOf<'desktop.shell.startup-state-changed.event'>,
   ) => void;
-  readonly onNavigation: (
-    event: HostEventOf<'desktop.shell.navigation-requested.event'>,
-  ) => void;
-  readonly onLocale: (
-    event: HostEventOf<'desktop.shell.locale-changed.event'>,
-  ) => void;
+  readonly onNavigation: (event: HostEventOf<'desktop.shell.navigation-requested.event'>) => void;
+  readonly onLocale: (event: HostEventOf<'desktop.shell.locale-changed.event'>) => void;
   readonly onTrayPreference: (
     event: HostEventOf<'desktop.shell.tray-preference-changed.event'>,
   ) => void;
-  readonly onCloseRequest: (
-    event: HostEventOf<'desktop.shell.close-requested.event'>,
-  ) => void;
+  readonly onCloseRequest: (event: HostEventOf<'desktop.shell.close-requested.event'>) => void;
   readonly onNotificationPreference: (
     event: HostEventOf<'desktop.shell.notification-preference-changed.event'>,
   ) => void;
-  readonly onWindowState: (
-    event: HostEventOf<'desktop.shell.window-state-changed.event'>,
-  ) => void;
+  readonly onWindowState: (event: HostEventOf<'desktop.shell.window-state-changed.event'>) => void;
 }
 
 export interface ShellBridgeTransportEvent {
@@ -53,10 +46,7 @@ export interface ShellBridgeTransport {
     event: string,
     handler: (event: ShellBridgeTransportEvent) => void,
   ) => Promise<() => void>;
-  readonly invoke: (
-    command: string,
-    args?: Record<string, unknown>,
-  ) => Promise<unknown>;
+  readonly invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
 }
 
 export interface ShellBridgeDiagnostic {
@@ -72,9 +62,7 @@ export interface ShellBridgeDiagnostic {
 
 export interface ShellBridge {
   readonly start: () => Promise<void>;
-  readonly send: (
-    command: RendererToHostShellCommandJson,
-  ) => Promise<boolean>;
+  readonly send: (command: RendererToHostShellCommandJson) => Promise<boolean>;
   readonly dispose: () => Promise<void>;
 }
 
@@ -118,10 +106,6 @@ const diagnosticFor = (
   });
 };
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unhandled validated shell message: ${String(value)}`);
-};
-
 const dispatchHostEvent = (
   event: HostToRendererShellEventJson,
   handlers: ShellBridgeHandlers,
@@ -151,8 +135,6 @@ const dispatchHostEvent = (
     case 'desktop.shell.window-state-changed.event':
       handlers.onWindowState(event);
       return;
-    default:
-      return assertNever(event);
   }
 };
 
@@ -214,9 +196,7 @@ export const createShellBridge = ({
     return startPromise;
   };
 
-  const send = async (
-    command: RendererToHostShellCommandJson,
-  ): Promise<boolean> => {
+  const send = async (command: RendererToHostShellCommandJson): Promise<boolean> => {
     const result = validateRendererToHostShellCommand(
       RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID,
       command,
@@ -252,7 +232,4 @@ export const createShellBridge = ({
   return Object.freeze({ dispose, send, start });
 };
 
-export type {
-  HostToRendererShellEventJson,
-  RendererToHostShellCommandJson,
-};
+export type { HostToRendererShellEventJson, RendererToHostShellCommandJson };

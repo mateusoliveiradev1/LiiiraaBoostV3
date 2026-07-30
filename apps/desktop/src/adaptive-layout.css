@@ -1,0 +1,360 @@
+/*
+ * Scale-aware responsive composition.
+ * Loaded last so every route adapts to the space it actually receives after
+ * interface scaling and navigation, rather than to the physical viewport.
+ */
+
+:root {
+  --lb-scroll-thumb: #354252;
+  --lb-scroll-thumb-hover: #526276;
+}
+
+html[data-theme='light'] {
+  --lb-scroll-thumb: #9aa8b8;
+  --lb-scroll-thumb-hover: #748397;
+}
+
+.desktop-app-shell,
+.desktop-app-shell * {
+  scrollbar-color: var(--lb-scroll-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+.desktop-app-shell .lb-goal-rail [role='toolbar']:first-child,
+.desktop-app-shell[data-route-path] .desktop-work-canvas,
+.desktop-app-shell .premium-route-content,
+.desktop-app-shell .desktop-auth-surface {
+  scrollbar-color: var(--lb-scroll-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+.desktop-app-shell ::-webkit-scrollbar {
+  inline-size: 10px;
+  block-size: 10px;
+}
+
+.desktop-app-shell ::-webkit-scrollbar-track,
+.desktop-app-shell ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.desktop-app-shell ::-webkit-scrollbar-thumb {
+  min-block-size: 40px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: var(--lb-scroll-thumb);
+  background-clip: content-box;
+}
+
+.desktop-app-shell ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lb-scroll-thumb-hover);
+}
+
+.desktop-app-shell ::-webkit-scrollbar-button {
+  display: none;
+  inline-size: 0;
+  block-size: 0;
+}
+
+.desktop-app-shell[data-shell-width='compact'] {
+  --lb-adaptive-rail: 72px;
+}
+
+.desktop-app-shell[data-shell-width='minimum'] {
+  --lb-adaptive-rail: 64px;
+}
+
+.desktop-app-shell:is([data-shell-width='compact'], [data-shell-width='minimum'])
+  .desktop-shell-body,
+.desktop-app-shell[data-route-path='/home']:is(
+    [data-shell-width='compact'],
+    [data-shell-width='minimum']
+  )
+  .desktop-shell-body {
+  grid-template-columns: var(--lb-adaptive-rail) minmax(0, 1fr) 0;
+}
+
+.desktop-app-shell:is([data-shell-width='compact'], [data-shell-width='minimum'])
+  .desktop-goal-region
+  > .lb-goal-rail,
+.desktop-app-shell[data-route-path='/home']:is(
+    [data-shell-width='compact'],
+    [data-shell-width='minimum']
+  )
+  .desktop-goal-region
+  > .lb-goal-rail {
+  inline-size: var(--lb-adaptive-rail);
+  padding-inline: 6px;
+}
+
+.desktop-app-shell:is([data-shell-width='compact'], [data-shell-width='minimum']) .lb-goal {
+  justify-content: center;
+  min-block-size: 44px;
+  padding-inline: 0;
+}
+
+.desktop-app-shell[data-route-path='/home']:is(
+    [data-shell-width='compact'],
+    [data-shell-width='minimum']
+  )
+  .lb-goal {
+  min-block-size: 44px;
+  padding-inline: 0;
+}
+
+.desktop-app-shell:is([data-shell-width='compact'], [data-shell-width='minimum']) .lb-goal-label,
+.desktop-app-shell[data-route-path='/home']:is(
+    [data-shell-width='compact'],
+    [data-shell-width='minimum']
+  )
+  .lb-goal-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.premium-operations {
+  container-name: premium-route;
+  container-type: inline-size;
+}
+
+@container premium-route (max-width: 900px) {
+  .premium-route-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .premium-route-actions {
+    align-self: stretch;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .premium-hardware-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .premium-hardware-strip > div:nth-child(3) {
+    border-block-start: 1px solid var(--premium-line-soft);
+    border-inline-start: 0;
+  }
+
+  .premium-hardware-strip > div:nth-child(4) {
+    border-block-start: 1px solid var(--premium-line-soft);
+  }
+
+  .premium-home-grid,
+  .premium-competitive-hero,
+  .premium-restore-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .premium-card-grid,
+  .premium-download-grid,
+  .premium-app-list,
+  .premium-about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .premium-app-list label:nth-child(odd) {
+    border-inline-end: 0;
+  }
+
+  .premium-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .premium-settings-layout > nav {
+    display: flex;
+    flex-wrap: wrap;
+    max-inline-size: 100%;
+    overflow: visible;
+    border-block-end: 1px solid var(--premium-line-soft);
+    border-inline-end: 0;
+  }
+
+  .premium-settings-layout nav button {
+    flex: 1 1 140px;
+  }
+}
+
+@container premium-route (max-width: 720px) {
+  .premium-route-header {
+    min-block-size: 0;
+    padding: 16px 20px;
+  }
+
+  .premium-route-content {
+    padding: 20px 20px 72px;
+  }
+
+  .premium-route-heading {
+    align-items: flex-start;
+  }
+
+  .premium-route-heading p {
+    max-inline-size: 52ch;
+  }
+
+  .premium-uninstall-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+  }
+
+  .premium-uninstall-toolbar > .premium-search,
+  .premium-uninstall-toolbar > .premium-button {
+    grid-column: 1 / -1;
+    inline-size: 100%;
+  }
+
+  .premium-uninstall-toolbar > span {
+    justify-self: end;
+    text-align: end;
+  }
+
+  .premium-app-list label {
+    grid-template-columns: 22px 38px minmax(0, 1fr) auto;
+    min-inline-size: 0;
+  }
+
+  .premium-service-list article {
+    grid-template:
+      'icon copy' auto
+      'icon control' auto /
+      38px minmax(0, 1fr);
+    gap: 10px 14px;
+    align-items: start;
+    padding-block: 14px;
+  }
+
+  .premium-service-list article > .lb-product-icon {
+    grid-area: icon;
+    margin-block-start: 2px;
+  }
+
+  .premium-service-list article > div {
+    grid-area: copy;
+  }
+
+  .premium-service-list article > div > span {
+    flex-wrap: wrap;
+    gap: 5px 9px;
+  }
+
+  .premium-service-list article > label {
+    grid-area: control;
+  }
+
+  .premium-service-list select {
+    min-block-size: 38px;
+  }
+
+  .premium-settings-list article {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding-block: 16px;
+  }
+
+  .premium-settings-list article > label {
+    inline-size: 100%;
+    text-align: start;
+  }
+
+  .premium-settings-list article > label select {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .premium-appearance-preview {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .premium-settings-actions button {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .premium-settings-actions button > :last-child {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@container premium-route (max-width: 500px) {
+  .premium-route-heading {
+    gap: 12px;
+  }
+
+  .premium-route-icon {
+    inline-size: 40px;
+    block-size: 40px;
+  }
+
+  .premium-route-heading h1 {
+    font-size: 20px;
+  }
+
+  .premium-route-heading p {
+    font-size: 11px;
+  }
+
+  .premium-hardware-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .premium-hardware-strip > div + div {
+    border-block-start: 1px solid var(--premium-line-soft);
+    border-inline-start: 0;
+  }
+
+  .premium-uninstall-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .premium-uninstall-toolbar > :where(.premium-search, .premium-select-all, span, .premium-button) {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+
+  .premium-uninstall-toolbar > span {
+    text-align: start;
+  }
+
+  .premium-app-list label {
+    grid-template:
+      'check icon copy' auto
+      'check icon meta' auto /
+      22px 38px minmax(0, 1fr);
+    gap: 5px 10px;
+    padding-block: 12px;
+  }
+
+  .premium-app-list label > input {
+    grid-area: check;
+  }
+
+  .premium-app-list .premium-app-icon {
+    grid-area: icon;
+  }
+
+  .premium-app-list label > span:nth-of-type(2) {
+    grid-area: copy;
+  }
+
+  .premium-app-list label > :where(b, em) {
+    grid-area: meta;
+    justify-self: start;
+  }
+}
+
+@media (forced-colors: active) {
+  .desktop-app-shell,
+  .desktop-app-shell * {
+    scrollbar-color: ButtonText Canvas;
+  }
+}

@@ -7,6 +7,7 @@ import {
   createShellBridge,
   type ShellBridgeHandlers,
   type ShellBridgeTransport,
+  type ShellBridgeTransportEvent,
 } from './shell-bridge.js';
 
 const ISSUED_AT = '2026-07-28T09:00:00.000Z';
@@ -106,16 +107,14 @@ const rendererCommands = [
 ] as unknown as readonly RendererToHostShellCommandJson[];
 
 const createHarness = () => {
-  let listener:
-    | ((event: { readonly payload: unknown }) => void)
-    | undefined;
+  let listener: ((event: { readonly payload: unknown }) => void) | undefined;
   const unlisten = vi.fn();
   const transport: ShellBridgeTransport = {
-    listen: vi.fn(async (_event, handler) => {
+    listen: vi.fn((_event: string, handler: (event: ShellBridgeTransportEvent) => void) => {
       listener = handler;
-      return unlisten;
+      return Promise.resolve(unlisten);
     }),
-    invoke: vi.fn(async () => undefined),
+    invoke: vi.fn(() => Promise.resolve(undefined)),
   };
   const handlers: ShellBridgeHandlers = {
     onInstallerIdentity: vi.fn(),
@@ -146,9 +145,7 @@ describe('shell bridge', () => {
     await bridge.start();
 
     expect(harness.transport.listen).toHaveBeenCalledTimes(1);
-    expect(harness.transport.invoke).toHaveBeenCalledWith(
-      'get_shell_bootstrap',
-    );
+    expect(harness.transport.invoke).toHaveBeenCalledWith('get_shell_bootstrap');
   });
 
   it('validates and dispatches every generated host event exactly once', async () => {
@@ -158,10 +155,7 @@ describe('shell bridge', () => {
     await Promise.all([bridge.start(), bridge.start()]);
 
     expect(harness.transport.listen).toHaveBeenCalledTimes(1);
-    expect(harness.transport.listen).toHaveBeenCalledWith(
-      HOST_EVENT_CHANNEL,
-      expect.any(Function),
-    );
+    expect(harness.transport.listen).toHaveBeenCalledWith(HOST_EVENT_CHANNEL, expect.any(Function));
 
     for (const event of hostEvents) {
       harness.listener()?.({ payload: event });
@@ -201,9 +195,7 @@ describe('shell bridge', () => {
       direction: 'host-to-renderer',
       messageType: 'desktop.shell.navigation-requested.event',
     });
-    expect(JSON.stringify(harness.onDiagnostic.mock.calls)).not.toContain(
-      'must-not-be-reported',
-    );
+    expect(JSON.stringify(harness.onDiagnostic.mock.calls)).not.toContain('must-not-be-reported');
   });
 
   it('validates every renderer command before invoking the native host', async () => {
@@ -214,14 +206,11 @@ describe('shell bridge', () => {
       await expect(bridge.send(command)).resolves.toBe(true);
     }
 
-    expect(harness.transport.invoke).toHaveBeenCalledTimes(
-      rendererCommands.length,
-    );
+    expect(harness.transport.invoke).toHaveBeenCalledTimes(rendererCommands.length);
     for (const command of rendererCommands) {
-      expect(harness.transport.invoke).toHaveBeenCalledWith(
-        RENDERER_COMMAND_NAME,
-        { message: command },
-      );
+      expect(harness.transport.invoke).toHaveBeenCalledWith(RENDERER_COMMAND_NAME, {
+        message: command,
+      });
     }
 
     await expect(
@@ -230,16 +219,12 @@ describe('shell bridge', () => {
         payload: { command: 'SENSITIVE_COMMAND' },
       } as unknown as RendererToHostShellCommandJson),
     ).resolves.toBe(false);
-    expect(harness.transport.invoke).toHaveBeenCalledTimes(
-      rendererCommands.length,
-    );
+    expect(harness.transport.invoke).toHaveBeenCalledTimes(rendererCommands.length);
     expect(harness.onDiagnostic).toHaveBeenCalledWith({
       code: 'invalid-renderer-command',
       direction: 'renderer-to-host',
       messageType: 'desktop.shell.execute-arbitrary.command',
     });
-    expect(JSON.stringify(harness.onDiagnostic.mock.calls)).not.toContain(
-      'SENSITIVE_COMMAND',
-    );
+    expect(JSON.stringify(harness.onDiagnostic.mock.calls)).not.toContain('SENSITIVE_COMMAND');
   });
 });

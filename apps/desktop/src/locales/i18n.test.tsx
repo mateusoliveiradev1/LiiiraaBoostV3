@@ -18,7 +18,7 @@ describe('locale catalog parity', () => {
   it('keeps PT-BR, English, and pseudo locale keys in exact parity', () => {
     expect(assertCatalogParity()).toEqual({
       localeCount: 3,
-      messageCount: expect.any(Number),
+      messageCount: Object.keys(MESSAGE_CATALOGS['pt-BR']).length,
     });
 
     const ptBrKeys = Object.keys(MESSAGE_CATALOGS['pt-BR']).toSorted();
@@ -30,9 +30,7 @@ describe('locale catalog parity', () => {
   it('contains every feature message ID and fails closed for critical copy', () => {
     const expectedCalibrationIds = Object.values(CALIBRATION_STEP_MESSAGE_IDS);
 
-    expect(FEATURE_MESSAGE_IDS).toEqual(
-      expect.arrayContaining(expectedCalibrationIds),
-    );
+    expect(FEATURE_MESSAGE_IDS).toEqual(expect.arrayContaining(expectedCalibrationIds));
 
     for (const messageId of FEATURE_MESSAGE_IDS) {
       expect(MESSAGE_CATALOGS['pt-BR'][messageId]).toBeTruthy();
@@ -44,17 +42,15 @@ describe('locale catalog parity', () => {
       expect(formatMessage('en-US', messageId)).not.toBe(messageId);
     }
 
-    expect(() =>
-      formatMessage('pt-BR', 'dialog.critical.missing' as never),
-    ).toThrow(/Missing product-critical message/u);
+    expect(() => formatMessage('pt-BR', 'dialog.critical.missing' as never)).toThrow(
+      /Missing product-critical message/u,
+    );
   });
 
   it('expands every pseudo message by at least 35 percent', () => {
-    for (const messageId of Object.keys(
-      MESSAGE_CATALOGS['pt-BR'],
-    ) as MessageId[]) {
-      const source = MESSAGE_CATALOGS['pt-BR'][messageId]!;
-      const pseudo = MESSAGE_CATALOGS.pseudo[messageId]!;
+    for (const messageId of Object.keys(MESSAGE_CATALOGS['pt-BR']) as MessageId[]) {
+      const source = MESSAGE_CATALOGS['pt-BR'][messageId];
+      const pseudo = MESSAGE_CATALOGS.pseudo[messageId];
 
       expect(pseudo.length).toBeGreaterThanOrEqual(Math.ceil(source.length * 1.35));
     }

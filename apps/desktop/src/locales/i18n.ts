@@ -95,9 +95,7 @@ export const assertCatalogParity = (): Readonly<{
   for (const messageId of CRITICAL_MESSAGE_IDS) {
     for (const locale of SHIPPING_LOCALES) {
       if (MESSAGE_CATALOGS[locale][messageId].trim() === '') {
-        throw new Error(
-          `Missing product-critical message "${messageId}" for ${locale}.`,
-        );
+        throw new Error(`Missing product-critical message "${messageId}" for ${locale}.`);
       }
     }
   }
@@ -110,45 +108,32 @@ export const assertCatalogParity = (): Readonly<{
 
 export const CATALOG_PARITY = assertCatalogParity();
 
-export const detectLocale = (
-  windowsLocale: string | undefined,
-): ShippingLocale =>
-  windowsLocale?.trim().toLocaleLowerCase('en-US') === 'pt-br'
-    ? 'pt-BR'
-    : 'en-US';
+export const detectLocale = (windowsLocale: string | undefined): ShippingLocale =>
+  windowsLocale?.trim().toLocaleLowerCase('en-US') === 'pt-br' ? 'pt-BR' : 'en-US';
 
 export const formatMessage = (
   locale: CatalogLocale,
   messageId: MessageId,
   values: MessageValues = {},
 ): string => {
-  const template = (MESSAGE_CATALOGS[locale] as Partial<MessageCatalog>)[
-    messageId
-  ];
+  const template = (MESSAGE_CATALOGS[locale] as Partial<MessageCatalog>)[messageId];
 
   if (typeof template !== 'string' || template.trim() === '') {
-    throw new Error(
-      `Missing product-critical message "${String(messageId)}" for ${locale}.`,
-    );
+    throw new Error(`Missing product-critical message "${messageId}" for ${locale}.`);
   }
 
-  return template.replaceAll(/\{([A-Za-z][A-Za-z0-9]*)\}/gu, (token, key) =>
-    Object.hasOwn(values, key) ? String(values[key]) : token,
-  );
+  return template.replaceAll(/\{([A-Za-z][A-Za-z0-9]*)\}/gu, (token: string, key: string) => {
+    const value = values[key];
+    return value === undefined ? token : String(value);
+  });
 };
 
-export const formatNumber = (
-  value: number,
-  locale: ShippingLocale,
-): string =>
+export const formatNumber = (value: number, locale: ShippingLocale): string =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: 3,
   }).format(value);
 
-export const formatDate = (
-  value: Date | number,
-  locale: ShippingLocale,
-): string =>
+export const formatDate = (value: Date | number, locale: ShippingLocale): string =>
   new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     hour: '2-digit',
@@ -159,10 +144,7 @@ export const formatDate = (
     year: 'numeric',
   }).format(value);
 
-export const formatStorage = (
-  gigabytes: number,
-  locale: ShippingLocale,
-): string =>
+export const formatStorage = (gigabytes: number, locale: ShippingLocale): string =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: 2,
     style: 'unit',
@@ -170,10 +152,7 @@ export const formatStorage = (
     unitDisplay: 'short',
   }).format(gigabytes);
 
-export const formatTemperature = (
-  celsius: number,
-  locale: ShippingLocale,
-): string =>
+export const formatTemperature = (celsius: number, locale: ShippingLocale): string =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: 1,
     style: 'unit',
@@ -181,10 +160,7 @@ export const formatTemperature = (
     unitDisplay: 'short',
   }).format(celsius);
 
-export const formatDuration = (
-  milliseconds: number,
-  locale: ShippingLocale,
-): string =>
+export const formatDuration = (milliseconds: number, locale: ShippingLocale): string =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: 2,
     style: 'unit',
@@ -236,8 +212,8 @@ export const LocaleProvider = ({
   locale: controlledLocale,
   onLocaleChange,
 }: LocaleProviderProps): ReactNode => {
-  const [uncontrolledLocale, setUncontrolledLocale] = useState<ShippingLocale>(
-    () => detectLocale(initialWindowsLocale),
+  const [uncontrolledLocale, setUncontrolledLocale] = useState<ShippingLocale>(() =>
+    detectLocale(initialWindowsLocale),
   );
   const locale = controlledLocale ?? uncontrolledLocale;
   const setLocale = useCallback(
@@ -250,8 +226,7 @@ export const LocaleProvider = ({
     [controlledLocale, onLocaleChange],
   );
   const message = useCallback(
-    (messageId: MessageId, values?: MessageValues) =>
-      formatMessage(locale, messageId, values),
+    (messageId: MessageId, values?: MessageValues) => formatMessage(locale, messageId, values),
     [locale],
   );
   const value = useMemo<LocaleContextValue>(

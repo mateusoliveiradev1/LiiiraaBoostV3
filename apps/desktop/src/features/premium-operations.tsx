@@ -504,20 +504,22 @@ const HomeSurface = ({
               )}
             </div>
             <div className="premium-readiness-next">
-              <span className="premium-section-label">
-                {text(locale, 'Revisão pendente', 'Pending review')}
-              </span>
-              <strong>
-                <ProductIcon name="sliders" size={20} weight="duotone" />
-                {text(locale, '5 ajustes compatíveis', '5 compatible controls')}
-              </strong>
-              <p>
-                {text(
-                  locale,
-                  'Escolha o que deseja preparar. Nada será aplicado sem sua confirmação.',
-                  'Choose what you want to prepare. Nothing will be applied without your confirmation.',
-                )}
-              </p>
+              <div className="premium-readiness-next-copy">
+                <span className="premium-section-label">
+                  {text(locale, 'Revisão pendente', 'Pending review')}
+                </span>
+                <strong>
+                  <ProductIcon name="sliders" size={20} weight="duotone" />
+                  {text(locale, '5 ajustes compatíveis', '5 compatible controls')}
+                </strong>
+                <p>
+                  {text(
+                    locale,
+                    'Escolha o que deseja preparar. Nada será aplicado sem sua confirmação.',
+                    'Choose what you want to prepare. Nothing will be applied without your confirmation.',
+                  )}
+                </p>
+              </div>
               <PremiumButton
                 onClick={() => {
                   navigate('/toggles');

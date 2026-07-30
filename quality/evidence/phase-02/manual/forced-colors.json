@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-manual-observation",
+  "recordType": "manual-observation",
+  "id": "forced-colors",
+  "status": "observed",
+  "artifactId": "liiiraa-boost-0.0.0-development-signed",
+  "artifactHash": "0FE99A1F570767DFE084A17E19D4A40BEC37000553687092D058EC6F704284DE",
+  "artifactPath": "quality/evidence/phase-02/staged/liiiraa-desktop.exe",
+  "imageId": "windows-11-development-workstation",
+  "trustClass": "self-signed-development",
+  "publicTrust": false,
+  "productionReady": false,
+  "distributionAllowed": false,
+  "setting": {
+    "kind": "windows-contrast-themes",
+    "coverage": "all themes available on the reviewed workstation"
+  },
+  "steps": [
+    "Apply each contrast theme available in Windows 11.",
+    "Inspect text, buttons, icons, focus indicators and status meaning in the packaged app.",
+    "Restore the normal dark theme after observation."
+  ],
+  "result": "passed",
+  "failures": [],
+  "provenance": {
+    "kind": "controlled-packaged-observation",
+    "source": "project-owner interactive Windows 11 observation"
+  },
+  "observer": "project-owner",
+  "observedAt": "2026-07-30T07:53:33.2126290-03:00",
+  "attachments": ["attachments/forced-colors-observation.txt"]
+}

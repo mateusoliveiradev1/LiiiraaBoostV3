@@ -182,6 +182,7 @@ const GoalButtons = ({
           aria-label={item.label}
           className="lb-goal"
           data-lb-control
+          data-tooltip={item.label}
           key={item.id}
           onPress={item.onPress}
           {...(item.id === activeId ? { 'aria-current': 'page' as const } : {})}

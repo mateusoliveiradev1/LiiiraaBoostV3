@@ -1545,10 +1545,11 @@ const DesktopAppContent = ({
     [goals, navigate, preferences.locale, restoreOverlayFocus, utilities],
   );
 
-  const layout = getResponsiveShellLayout(measuredWidth);
+  const effectiveScale = appScale ?? preferences.interfaceScale;
+  const responsiveWidth = measuredWidth / (effectiveScale / 100);
+  const layout = getResponsiveShellLayout(responsiveWidth);
   const presentation = getOperationalPresentation(operationalState, locale);
   const criticalState = criticalStateFor(operationalState);
-  const effectiveScale = appScale ?? preferences.interfaceScale;
   const motion = reducedMotion ?? preferences.motion === 'reduced';
   const routeActivityEvents = useMemo(
     () =>
@@ -1572,6 +1573,7 @@ const DesktopAppContent = ({
         data-app-scale={String(effectiveScale)}
         data-forced-colors={forcedColors ? 'active' : 'system'}
         data-motion={motion ? 'reduced' : 'responsive'}
+        data-responsive-width={String(Math.round(responsiveWidth))}
         data-route-path={route.pathname}
         data-route-state={route.state}
         data-shell-width={layout.width}
@@ -1610,6 +1612,7 @@ const DesktopAppContent = ({
       data-motion={motion ? 'reduced' : 'responsive'}
       data-operational-state={operationalState}
       data-page-horizontal-scroll={layout.pageHorizontalScroll}
+      data-responsive-width={String(Math.round(responsiveWidth))}
       data-route-path={route.pathname}
       data-route-state={route.state}
       data-shell-width={layout.width}

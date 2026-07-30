@@ -749,10 +749,19 @@ export const PremiumSettingsSurface = ({
                   <select
                     aria-label={text(locale, 'Escala da interface', 'Interface scale')}
                     onChange={(event) => {
+                      const scale = Number(event.currentTarget.value) as 100 | 125 | 150;
                       dispatch({
-                        scale: Number(event.currentTarget.value) as 100 | 125 | 150,
+                        scale,
                         type: 'set-interface-scale',
                       });
+                      notify(
+                        text(
+                          locale,
+                          `Escala da interface ajustada para ${String(scale)}%.`,
+                          `Interface scale adjusted to ${String(scale)}%.`,
+                        ),
+                        'success',
+                      );
                     }}
                     value={preferences.interfaceScale}
                   >
@@ -775,10 +784,21 @@ export const PremiumSettingsSurface = ({
                   <select
                     aria-label={text(locale, 'Densidade da interface', 'Interface density')}
                     onChange={(event) => {
+                      const density = event.currentTarget.value as 'comfortable' | 'compact';
                       dispatch({
-                        density: event.currentTarget.value as 'comfortable' | 'compact',
+                        density,
                         type: 'set-density',
                       });
+                      notify(
+                        density === 'compact'
+                          ? text(locale, 'Densidade compacta aplicada.', 'Compact density applied.')
+                          : text(
+                              locale,
+                              'Densidade confortável aplicada.',
+                              'Comfortable density applied.',
+                            ),
+                        'success',
+                      );
                     }}
                     value={preferences.density}
                   >
@@ -798,15 +818,42 @@ export const PremiumSettingsSurface = ({
                   label={text(locale, 'Contraste de dados', 'Data contrast')}
                   locale={locale}
                   onToggle={() => {
+                    const increased = preferences.dataText !== 'increased-contrast';
                     dispatch({
-                      dataText:
-                        preferences.dataText === 'increased-contrast'
-                          ? 'standard'
-                          : 'increased-contrast',
+                      dataText: increased ? 'increased-contrast' : 'standard',
                       type: 'set-data-text',
                     });
+                    notify(
+                      increased
+                        ? text(locale, 'Contraste de dados reforçado.', 'Data contrast increased.')
+                        : text(
+                            locale,
+                            'Contraste de dados padrão restaurado.',
+                            'Standard data contrast restored.',
+                          ),
+                      'success',
+                    );
                   }}
                 />
+                <article
+                  aria-label={text(locale, 'Prévia das preferências', 'Preference preview')}
+                  className="premium-appearance-preview"
+                >
+                  <span>
+                    <small>{text(locale, 'Prévia ao vivo', 'Live preview')}</small>
+                    <strong>12,4 ms</strong>
+                  </span>
+                  <span className="premium-appearance-preview-meta">
+                    <ProductIcon name="activity" size={18} weight="duotone" />
+                    <small>
+                      {text(
+                        locale,
+                        'Latência estimada · leitura técnica',
+                        'Estimated latency · technical reading',
+                      )}
+                    </small>
+                  </span>
+                </article>
               </>
             ) : null}
 

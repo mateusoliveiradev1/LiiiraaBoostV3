@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-manual-observation",
+  "recordType": "manual-observation",
+  "id": "app-scale-150",
+  "status": "observed",
+  "artifactId": "liiiraa-boost-0.0.0-development-signed",
+  "artifactHash": "FEA8FBD9483A26918E41E66CB539B625EE0D48A0A5B6B76CA207DE08E69C021B",
+  "artifactPath": "quality/evidence/phase-02/staged/liiiraa-desktop.exe",
+  "imageId": "windows-11-development-workstation",
+  "trustClass": "self-signed-development",
+  "publicTrust": false,
+  "productionReady": false,
+  "distributionAllowed": false,
+  "setting": {
+    "kind": "liiiraa-app-scale",
+    "valuePercent": 150
+  },
+  "steps": [
+    "Apply 150 percent application scaling.",
+    "Resize the packaged window through supported widths.",
+    "Inspect Home, Services, Uninstaller, Settings, Power Plans and the compact sidebar.",
+    "Confirm that actions reflow, remain operable and do not overlap."
+  ],
+  "result": "passed",
+  "failures": [],
+  "provenance": {
+    "kind": "controlled-packaged-observation",
+    "source": "project-owner interactive Windows 11 observation and explicit final confirmation"
+  },
+  "observer": "project-owner",
+  "observedAt": "2026-07-30T14:04:46.8217156-03:00",
+  "attachments": ["attachments/app-scale-150-observation.txt"]
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-manual-observation",
+  "recordType": "manual-observation",
+  "id": "nvda",
+  "status": "observed",
+  "artifactId": "liiiraa-boost-0.0.0-development-signed",
+  "artifactHash": "0FE99A1F570767DFE084A17E19D4A40BEC37000553687092D058EC6F704284DE",
+  "artifactPath": "quality/evidence/phase-02/staged/liiiraa-desktop.exe",
+  "imageId": "windows-11-development-workstation",
+  "trustClass": "self-signed-development",
+  "publicTrust": false,
+  "productionReady": false,
+  "distributionAllowed": false,
+  "assistiveTechnology": {
+    "name": "NVDA",
+    "version": "2026.1.1"
+  },
+  "steps": [
+    "Focus the packaged Liiiraa Boost application.",
+    "Navigate the title bar, primary navigation, activity and profile controls with Tab.",
+    "Open the command center with Ctrl+K.",
+    "Close the command center with Escape."
+  ],
+  "result": "passed",
+  "failures": [],
+  "provenance": {
+    "kind": "controlled-packaged-observation",
+    "source": "project-owner interactive Windows 11 observation"
+  },
+  "observer": "project-owner",
+  "observedAt": "2026-07-30T07:49:23.7987358-03:00",
+  "attachments": ["attachments/nvda-observation.txt"]
+}
