@@ -7,7 +7,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 ## Phases
 
 - [x] **Phase 1: Product Truth and Modular Contracts** - Establish the versioned, truthful, enforceable foundation shared by every surface and future adapter. (completed 2026-07-27)
-- [ ] **Phase 2: Complete Desktop Experience** - Deliver the installable, bespoke, fully navigable desktop UX contract with every planned state represented honestly.
+- [x] **Phase 2: Complete Desktop Experience** - Deliver the installable, bespoke, fully navigable desktop UX contract with every planned state represented honestly. (completed 2026-07-30)
 - [ ] **Phase 3: Complete Web Experience** - Deliver the public site, documentation, download path, account shell, and isolated admin shell as one coherent web experience.
 - [ ] **Phase 4: Identity, Commerce, Devices, and Administration** - Connect secure accounts, subscriptions, device licensing, support, and governed administration end to end.
 - [ ] **Phase 5: Hardware Intelligence and Measured Evidence** - Replace diagnostic scenarios with capability-driven Windows inventory and defensible before/after evidence.
@@ -42,62 +42,62 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 - [x] 01-01-PLAN.md
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** _(blocked on Wave 1 completion)_
 
 - [x] 01-02-PLAN.md
 
-**Wave 3** *(blocked on Wave 2 completion)*
+**Wave 3** _(blocked on Wave 2 completion)_
 
 - [x] 01-03-PLAN.md
 - [x] 01-04-PLAN.md
 - [x] 01-06-PLAN.md
 - [x] 01-11-PLAN.md
 
-**Wave 4** *(blocked on Wave 3 completion)*
+**Wave 4** _(blocked on Wave 3 completion)_
 
 - [x] 01-12-PLAN.md
 - [x] 01-13-PLAN.md
 - [x] 01-17-PLAN.md
 
-**Wave 5** *(blocked on Wave 4 completion)*
+**Wave 5** _(blocked on Wave 4 completion)_
 
 - [x] 01-05-PLAN.md
 
-**Wave 6** *(blocked on Wave 5 completion)*
+**Wave 6** _(blocked on Wave 5 completion)_
 
 - [x] 01-14-PLAN.md
 
-**Wave 7** *(blocked on Wave 6 completion)*
+**Wave 7** _(blocked on Wave 6 completion)_
 
 - [x] 01-07-PLAN.md
 - [x] 01-15-PLAN.md
 
-**Wave 8** *(blocked on Wave 7 completion)*
+**Wave 8** _(blocked on Wave 7 completion)_
 
 - [x] 01-16-PLAN.md
 - [x] 01-18-PLAN.md
 
-**Wave 9** *(blocked on Wave 8 completion)*
+**Wave 9** _(blocked on Wave 8 completion)_
 
 - [x] 01-08-PLAN.md
 
-**Wave 10** *(blocked on Wave 9 completion)*
+**Wave 10** _(blocked on Wave 9 completion)_
 
 - [x] 01-19-PLAN.md
 
-**Wave 11** *(blocked on Wave 10 completion)*
+**Wave 11** _(blocked on Wave 10 completion)_
 
 - [x] 01-09-PLAN.md
 
-**Wave 12** *(blocked on Wave 11 completion)*
+**Wave 12** _(blocked on Wave 11 completion)_
 
 - [x] 01-20-PLAN.md
 
-**Wave 13** *(blocked on Wave 12 completion)*
+**Wave 13** _(blocked on Wave 12 completion)_
 
 - [x] 01-10-PLAN.md
 
-**Wave 14** *(blocked on Wave 13 completion)*
+**Wave 14** _(blocked on Wave 13 completion)_
 
 - [x] 01-21-PLAN.md
 
@@ -125,33 +125,33 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 - [x] 02-01-PLAN.md — Review Phase 2 dependency identities and select the Authenticode custody contract
 
-**Wave 2** *(blocked on Wave 1)*
+**Wave 2** _(blocked on Wave 1)_
 
 - [x] 02-02-PLAN.md — Activate the strict Phase 2 workspace, dependency graph, and lifecycle commands
 
-**Wave 3** *(blocked on Wave 2)*
+**Wave 3** _(blocked on Wave 2)_
 
 - [x] 02-03-PLAN.md — Build closed operational-state and deterministic S01–S24 scenario contracts
 - [x] 02-04-PLAN.md — Build Wave 0 component, browser, packaged, and quality-evidence harnesses
 - [x] 02-12-PLAN.md — Build the least-privilege Tauri shell and native Windows bridges
 
-**Wave 4** *(blocked on Wave 3 foundations)*
+**Wave 4** _(blocked on Wave 3 foundations)_
 
 - [x] 02-05-PLAN.md — Implement the bespoke accessible design-token and component system
 - [x] 02-06-PLAN.md — Implement calibration, consent, deferral, limited-mode, and revalidation machines
 - [x] 02-07-PLAN.md — Implement command, favorites, Activity, feedback, receipt, and preference policies
 
-**Wave 5** *(blocked on Wave 4)*
+**Wave 5** _(blocked on Wave 4)_
 
 - [x] 02-08-PLAN.md — Compose calibration, contextual Home, command center, favorites, and Activity
 - [x] 02-09-PLAN.md — Compose complete Prepare, Improve, and Measure technical modules
 - [x] 02-10-PLAN.md — Compose recovery, no-effect previews, Assistant, account, support, and settings
 
-**Wave 6** *(blocked on Waves 3 and 5)*
+**Wave 6** _(blocked on Waves 3 and 5)_
 
 - [x] 02-11-PLAN.md — Assemble typed routes, safe adapter composition, localization, preferences, and app shell
 
-**Wave 7** *(blocked on Wave 6)*
+**Wave 7** _(blocked on Wave 6)_
 
 - [x] 02-13-PLAN.md — Close browser, accessibility, visual, packaged Windows, signing, and final evidence gates
 
@@ -238,20 +238,20 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 **Wave 17**
 
-- [ ] 02-26-PLAN.md — Record human accessibility evidence against the exact remediated signed artifact
+- [x] 02-26-PLAN.md — Record human accessibility evidence against the exact remediated signed artifact
 
 **Wave 18**
 
-- [ ] 02-27-PLAN.md — Prove exact signed packaged Windows journeys and performance
+- [x] 02-27-PLAN.md — Prove exact signed packaged Windows journeys and performance
 
 **Wave 19**
 
-- [ ] 02-28-PLAN.md — Promote observed UX-01 through UX-06 evidence
-- [ ] 02-29-PLAN.md — Promote observed UX-07 through UX-12 evidence
+- [x] 02-28-PLAN.md — Promote observed UX-01 through UX-06 evidence
+- [x] 02-29-PLAN.md — Promote observed UX-07 through UX-12 evidence
 
 **Wave 20**
 
-- [ ] 02-30-PLAN.md — Enforce final evidence, omissions, and recursive gates
+- [x] 02-30-PLAN.md — Enforce final evidence, omissions, and recursive gates
 
 **UI hint**: yes
 
@@ -414,15 +414,15 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 **Execution Order:** Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Product Truth and Modular Contracts | 22/22 | Complete    | 2026-07-27 |
-| 2. Complete Desktop Experience | 31/36 | In Progress|  |
-| 3. Complete Web Experience | 0/TBD | Not started | - |
-| 4. Identity, Commerce, Devices, and Administration | 0/TBD | Not started | - |
-| 5. Hardware Intelligence and Measured Evidence | 0/TBD | Not started | - |
-| 6. Transactional Plans and Recovery | 0/TBD | Not started | - |
-| 7. Verified Optimization Catalog | 0/TBD | Not started | - |
-| 8. Game Profiles and Session Automation | 0/TBD | Not started | - |
-| 9. Advisory AI and Secure Support | 0/TBD | Not started | - |
-| 10. Trusted Distribution and Production Operations | 0/TBD | Not started | - |
+| Phase                                              | Plans Complete | Status      | Completed  |
+| -------------------------------------------------- | -------------- | ----------- | ---------- |
+| 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
+| 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
+| 3. Complete Web Experience                         | 0/TBD          | Not started | -          |
+| 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
+| 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
+| 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
+| 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
+| 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
+| 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |
+| 10. Trusted Distribution and Production Operations | 0/TBD          | Not started | -          |

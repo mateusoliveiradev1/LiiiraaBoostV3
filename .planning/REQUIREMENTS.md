@@ -131,18 +131,18 @@
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| Arbitrary remote or community scripts | Would turn the profile system into a remote-code-execution channel |
-| DLL injection or anti-cheat hooks | Creates ban, security, and compatibility risks |
-| Automatic BIOS, firmware, voltage, or overclock mutation | Cannot provide reliable universal recovery through a Windows application |
-| Kernel driver in the initial product | Expands signing, attack surface, crash, and maintenance risk before user-mode limits are proven |
-| Universal “safe tweak” bundle | Hardware, Windows build, drivers, thermals, and workload change the effect of each operation |
-| Guaranteed FPS percentages or “zero latency” | Such claims cannot be universal or honestly proven |
-| Synthetic health score based on arbitrary issue counts | Encourages fake urgency rather than actionable evidence |
-| Public release of the visual milestone as a working optimizer | Scenario adapters must never be represented as real machine measurements or mutations |
-| Automatic rollback when a subscription expires | Billing state must not destabilize or interrupt the user's PC |
-| Unsupported Defender removal or Tamper Protection bypass | Conflicts with the product's security, integrity, recovery, and truthful-state requirements |
+| Feature                                                       | Reason                                                                                          |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Arbitrary remote or community scripts                         | Would turn the profile system into a remote-code-execution channel                              |
+| DLL injection or anti-cheat hooks                             | Creates ban, security, and compatibility risks                                                  |
+| Automatic BIOS, firmware, voltage, or overclock mutation      | Cannot provide reliable universal recovery through a Windows application                        |
+| Kernel driver in the initial product                          | Expands signing, attack surface, crash, and maintenance risk before user-mode limits are proven |
+| Universal “safe tweak” bundle                                 | Hardware, Windows build, drivers, thermals, and workload change the effect of each operation    |
+| Guaranteed FPS percentages or “zero latency”                  | Such claims cannot be universal or honestly proven                                              |
+| Synthetic health score based on arbitrary issue counts        | Encourages fake urgency rather than actionable evidence                                         |
+| Public release of the visual milestone as a working optimizer | Scenario adapters must never be represented as real machine measurements or mutations           |
+| Automatic rollback when a subscription expires                | Billing state must not destabilize or interrupt the user's PC                                   |
+| Unsupported Defender removal or Tamper Protection bypass      | Conflicts with the product's security, integrity, recovery, and truthful-state requirements     |
 
 ## Definition of Done
 
@@ -158,90 +158,90 @@ A v1 requirement is complete only when:
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| FOUND-01 | Phase 1 | Complete |
-| FOUND-02 | Phase 1 | Complete |
-| FOUND-03 | Phase 1 | Complete |
-| FOUND-04 | Phase 1 | Complete |
-| FOUND-05 | Phase 1 | Complete |
-| FOUND-06 | Phase 1 | Complete |
-| UX-01 | Phase 2 | Complete |
-| UX-02 | Phase 2 | Complete |
-| UX-03 | Phase 2 | Complete |
-| UX-04 | Phase 2 | Complete |
-| UX-05 | Phase 2 | Complete |
-| UX-06 | Phase 2 | Complete |
-| UX-07 | Phase 2 | Complete |
-| UX-08 | Phase 2 | Complete |
-| UX-09 | Phase 2 | Complete |
-| UX-10 | Phase 2 | Complete |
-| UX-11 | Phase 2 | Complete |
-| UX-12 | Phase 2 | Complete |
-| WEB-01 | Phase 3 | Pending |
-| WEB-02 | Phase 3 | Pending |
-| WEB-03 | Phase 3 | Pending |
-| WEB-04 | Phase 4 | Pending |
-| WEB-05 | Phase 4 | Pending |
-| WEB-06 | Phase 4 | Pending |
-| WEB-07 | Phase 4 | Pending |
-| WEB-08 | Phase 3 | Pending |
-| IDEN-01 | Phase 4 | Pending |
-| IDEN-02 | Phase 4 | Pending |
-| IDEN-03 | Phase 4 | Pending |
-| IDEN-04 | Phase 4 | Pending |
-| IDEN-05 | Phase 4 | Pending |
-| IDEN-06 | Phase 4 | Pending |
-| IDEN-07 | Phase 4 | Pending |
-| IDEN-08 | Phase 4 | Pending |
-| IDEN-09 | Phase 4 | Pending |
-| DIAG-01 | Phase 5 | Pending |
-| DIAG-02 | Phase 5 | Pending |
-| DIAG-03 | Phase 5 | Pending |
-| DIAG-04 | Phase 5 | Pending |
-| DIAG-05 | Phase 5 | Pending |
-| DIAG-06 | Phase 5 | Pending |
-| DIAG-07 | Phase 5 | Pending |
-| PLAN-01 | Phase 6 | Pending |
-| PLAN-02 | Phase 6 | Pending |
-| PLAN-03 | Phase 6 | Pending |
-| PLAN-04 | Phase 6 | Pending |
-| PLAN-05 | Phase 6 | Pending |
-| PLAN-06 | Phase 6 | Pending |
-| PLAN-07 | Phase 6 | Pending |
-| PLAN-08 | Phase 6 | Pending |
-| GAME-01 | Phase 8 | Pending |
-| GAME-02 | Phase 8 | Pending |
-| GAME-03 | Phase 8 | Pending |
-| GAME-04 | Phase 8 | Pending |
-| GAME-05 | Phase 8 | Pending |
-| GAME-06 | Phase 8 | Pending |
-| GAME-07 | Phase 8 | Pending |
-| MEAS-01 | Phase 5 | Pending |
-| MEAS-02 | Phase 5 | Pending |
-| MEAS-03 | Phase 5 | Pending |
-| MEAS-04 | Phase 5 | Pending |
-| MEAS-05 | Phase 5 | Pending |
-| MEAS-06 | Phase 5 | Pending |
-| OPTM-01 | Phase 7 | Pending |
-| OPTM-02 | Phase 7 | Pending |
-| OPTM-03 | Phase 7 | Pending |
-| OPTM-04 | Phase 7 | Pending |
-| OPTM-05 | Phase 7 | Pending |
-| OPTM-06 | Phase 7 | Pending |
-| AIST-01 | Phase 9 | Pending |
-| AIST-02 | Phase 9 | Pending |
-| AIST-03 | Phase 9 | Pending |
-| AIST-04 | Phase 9 | Pending |
-| AIST-05 | Phase 9 | Pending |
-| AIST-06 | Phase 9 | Pending |
-| RELS-01 | Phase 10 | Pending |
-| RELS-02 | Phase 10 | Pending |
-| RELS-03 | Phase 10 | Pending |
-| RELS-04 | Phase 10 | Pending |
-| RELS-05 | Phase 10 | Pending |
-| RELS-06 | Phase 10 | Pending |
-| RELS-07 | Phase 10 | Pending |
+| Requirement | Phase    | Status   |
+| ----------- | -------- | -------- |
+| FOUND-01    | Phase 1  | Complete |
+| FOUND-02    | Phase 1  | Complete |
+| FOUND-03    | Phase 1  | Complete |
+| FOUND-04    | Phase 1  | Complete |
+| FOUND-05    | Phase 1  | Complete |
+| FOUND-06    | Phase 1  | Complete |
+| UX-01       | Phase 2  | Complete |
+| UX-02       | Phase 2  | Complete |
+| UX-03       | Phase 2  | Complete |
+| UX-04       | Phase 2  | Complete |
+| UX-05       | Phase 2  | Complete |
+| UX-06       | Phase 2  | Complete |
+| UX-07       | Phase 2  | Complete |
+| UX-08       | Phase 2  | Complete |
+| UX-09       | Phase 2  | Complete |
+| UX-10       | Phase 2  | Complete |
+| UX-11       | Phase 2  | Complete |
+| UX-12       | Phase 2  | Complete |
+| WEB-01      | Phase 3  | Pending  |
+| WEB-02      | Phase 3  | Pending  |
+| WEB-03      | Phase 3  | Pending  |
+| WEB-04      | Phase 4  | Pending  |
+| WEB-05      | Phase 4  | Pending  |
+| WEB-06      | Phase 4  | Pending  |
+| WEB-07      | Phase 4  | Pending  |
+| WEB-08      | Phase 3  | Pending  |
+| IDEN-01     | Phase 4  | Pending  |
+| IDEN-02     | Phase 4  | Pending  |
+| IDEN-03     | Phase 4  | Pending  |
+| IDEN-04     | Phase 4  | Pending  |
+| IDEN-05     | Phase 4  | Pending  |
+| IDEN-06     | Phase 4  | Pending  |
+| IDEN-07     | Phase 4  | Pending  |
+| IDEN-08     | Phase 4  | Pending  |
+| IDEN-09     | Phase 4  | Pending  |
+| DIAG-01     | Phase 5  | Pending  |
+| DIAG-02     | Phase 5  | Pending  |
+| DIAG-03     | Phase 5  | Pending  |
+| DIAG-04     | Phase 5  | Pending  |
+| DIAG-05     | Phase 5  | Pending  |
+| DIAG-06     | Phase 5  | Pending  |
+| DIAG-07     | Phase 5  | Pending  |
+| PLAN-01     | Phase 6  | Pending  |
+| PLAN-02     | Phase 6  | Pending  |
+| PLAN-03     | Phase 6  | Pending  |
+| PLAN-04     | Phase 6  | Pending  |
+| PLAN-05     | Phase 6  | Pending  |
+| PLAN-06     | Phase 6  | Pending  |
+| PLAN-07     | Phase 6  | Pending  |
+| PLAN-08     | Phase 6  | Pending  |
+| GAME-01     | Phase 8  | Pending  |
+| GAME-02     | Phase 8  | Pending  |
+| GAME-03     | Phase 8  | Pending  |
+| GAME-04     | Phase 8  | Pending  |
+| GAME-05     | Phase 8  | Pending  |
+| GAME-06     | Phase 8  | Pending  |
+| GAME-07     | Phase 8  | Pending  |
+| MEAS-01     | Phase 5  | Pending  |
+| MEAS-02     | Phase 5  | Pending  |
+| MEAS-03     | Phase 5  | Pending  |
+| MEAS-04     | Phase 5  | Pending  |
+| MEAS-05     | Phase 5  | Pending  |
+| MEAS-06     | Phase 5  | Pending  |
+| OPTM-01     | Phase 7  | Pending  |
+| OPTM-02     | Phase 7  | Pending  |
+| OPTM-03     | Phase 7  | Pending  |
+| OPTM-04     | Phase 7  | Pending  |
+| OPTM-05     | Phase 7  | Pending  |
+| OPTM-06     | Phase 7  | Pending  |
+| AIST-01     | Phase 9  | Pending  |
+| AIST-02     | Phase 9  | Pending  |
+| AIST-03     | Phase 9  | Pending  |
+| AIST-04     | Phase 9  | Pending  |
+| AIST-05     | Phase 9  | Pending  |
+| AIST-06     | Phase 9  | Pending  |
+| RELS-01     | Phase 10 | Pending  |
+| RELS-02     | Phase 10 | Pending  |
+| RELS-03     | Phase 10 | Pending  |
+| RELS-04     | Phase 10 | Pending  |
+| RELS-05     | Phase 10 | Pending  |
+| RELS-06     | Phase 10 | Pending  |
+| RELS-07     | Phase 10 | Pending  |
 
 **Coverage:**
 
@@ -250,5 +250,6 @@ A v1 requirement is complete only when:
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-07-26*  
-*Last updated: 2026-07-26 after roadmap traceability mapping*
+
+_Requirements defined: 2026-07-26_  
+_Last updated: 2026-07-26 after roadmap traceability mapping_

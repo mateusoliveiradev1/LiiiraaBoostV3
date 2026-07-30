@@ -1,8 +1,8 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Após instalar o build corrigido, abre uma janela de terminal intitulada Liiiraa Boost exibindo 'asset not found: index.html' em vez da interface."
 created: 2026-07-28T16:27:08.165Z
-updated: 2026-07-28T19:02:00-03:00
+updated: 2026-07-30T14:04:46.8217156-03:00
 ---
 
 # Debug: console visível e index.html ausente
@@ -23,19 +23,16 @@ updated: 2026-07-28T19:02:00-03:00
 - expecting: Sem terminal/index.html, sem tela vazia, sem splash initializing-webview permanente; handoff e ready em PT-BR, depois Calibração guiada.
 - next_action: Aguardar confirmação humana do instalador target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe.
 - reasoning_checkpoint:
-    hypothesis: "Os eventos de startup emitidos em setup são perdidos antes do useEffect registrar listen; sem snapshot replayável o renderer conserva o splash. Separadamente, windowsLocale indefinido usa o default en-US."
-    confirming_evidence:
-      - "main.rs emite installer identity e StartupCondition::Ready durante setup, enquanto ShellEventBridge.start registra listen apenas no efeito React posterior."
-      - "O teste RED provou que nenhum get_shell_bootstrap era invocado após listen."
-      - "O teste RED provou que windowsLocale indefinido resultava em en-US."
-    falsification_test: "A hipótese será falsa se o build instalado continuar no splash após o snapshot validado ou se documentElement.lang não for pt-BR com o fallback aplicado."
-    fix_rationale: "Registrar listen antes de pedir um snapshot fecha a janela de perda sem alterar contratos de evento; usar pt-BR somente enquanto o host locale está indisponível atende o primeiro lançamento."
-    blind_spots: "A automação CDP validou o release direto e a sequência completa; resta somente confirmar o comportamento do instalador no ambiente humano."
+  hypothesis: "Os eventos de startup emitidos em setup são perdidos antes do useEffect registrar listen; sem snapshot replayável o renderer conserva o splash. Separadamente, windowsLocale indefinido usa o default en-US."
+  confirming_evidence: - "main.rs emite installer identity e StartupCondition::Ready durante setup, enquanto ShellEventBridge.start registra listen apenas no efeito React posterior." - "O teste RED provou que nenhum get_shell_bootstrap era invocado após listen." - "O teste RED provou que windowsLocale indefinido resultava em en-US."
+  falsification_test: "A hipótese será falsa se o build instalado continuar no splash após o snapshot validado ou se documentElement.lang não for pt-BR com o fallback aplicado."
+  fix_rationale: "Registrar listen antes de pedir um snapshot fecha a janela de perda sem alterar contratos de evento; usar pt-BR somente enquanto o host locale está indisponível atende o primeiro lançamento."
+  blind_spots: "A automação CDP validou o release direto e a sequência completa; resta somente confirmar o comportamento do instalador no ambiente humano."
 - tdd_checkpoint:
-    test_file: "apps/desktop/src/native/shell-bridge.test.ts + apps/desktop/src/preferences.test.tsx"
-    test_name: "requests a replayable startup snapshot after registering the listener + starts in PT-BR while native locale is unavailable"
-    status: "green"
-    failure_output: "RED inicial: 2 failed, 9 passed; após get_shell_bootstrap/replay e fallback pt-BR, 2 arquivos e 11 testes passaram."
+  test_file: "apps/desktop/src/native/shell-bridge.test.ts + apps/desktop/src/preferences.test.tsx"
+  test_name: "requests a replayable startup snapshot after registering the listener + starts in PT-BR while native locale is unavailable"
+  status: "green"
+  failure_output: "RED inicial: 2 failed, 9 passed; após get_shell_bootstrap/replay e fallback pt-BR, 2 arquivos e 11 testes passaram."
 
 ## Evidence
 

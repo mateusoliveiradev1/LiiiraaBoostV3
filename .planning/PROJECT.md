@@ -23,10 +23,11 @@ Produce measurable performance gains adapted to the exact hardware without sacri
 
 - [x] Phase 1 established one versioned TypeSpec truth source, generated TypeScript/Rust transports, equivalent runtime validation, truthful adapter provenance, executable acceptance coverage, and live modular architecture enforcement. — Validated in Phase 1: Product Truth and Modular Contracts
 
+- [x] Deliver a production-quality, installable Windows desktop UI covering the complete planned product surface before implementing privileged optimizations. — Validated in Phase 2: Complete Desktop Experience
+- [x] Provide a contextual home experience centered on the next recommended action, selected game profile, and current system state. — Validated in Phase 2: Complete Desktop Experience
+
 ### Active
 
-- [ ] Deliver a production-quality, installable Windows desktop UI covering the complete planned product surface before implementing privileged optimizations
-- [ ] Provide a contextual home experience centered on the next recommended action, selected game profile, and current system state
 - [ ] Support complete, editable optimization plans with verified, advanced, experimental, and extreme risk levels
 - [ ] Detect hardware capabilities and expose only compatible operations, with unsupported work isolated from stable flows
 - [ ] Support game-specific profiles activated whether a game launches from Liiiraa Boost or an external launcher
@@ -59,6 +60,8 @@ The user is a solo developer working with AI assistance. The project will advanc
 
 Phase 1 is complete: the repository now has a verified, generated cross-language contract foundation, truthful simulator/production adapter boundary, executable five-dimension acceptance policy, and live pnpm/Cargo architecture enforcement. Phase 2 can build the complete desktop experience on these contracts without inventing parallel DTOs or bypassing provenance and module gates.
 
+Phase 2 is complete: the installable desktop visual/UX foundation now includes typed navigation, complete simulated states, PT-BR/English localization, responsive scaling, accessibility coverage, development signing, and explicit truth boundaries. Phase 3 is ready to build the independent public, account, and administrative web experience.
+
 ## Constraints
 
 - **Platform**: Windows 10 and Windows 11 desktop — the optimizer depends on Windows-specific behavior
@@ -81,21 +84,21 @@ Phase 1 is complete: the repository now has a verified, generated cross-language
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Build the complete desktop visual and UX surface before the optimization engine | The visual experience is the primary early risk and future engine integration must not force UI rewrites | — Pending |
-| Use a contextual home rather than a static generic dashboard | The most relevant action changes with system, game, plan, and recovery state | — Pending |
-| Organize primary navigation by user goals and deep views by hardware component | Preserves clarity without flattening a technically deep product into a crowded sidebar | — Pending |
-| Keep the free tier transparent and keep restoration available after subscription expiry | Safety and trust must never be paywalled | — Pending |
-| Limit Premium to one active PC with a 30-day self-service device reset cooldown | Preserves a clear personal license while allowing legitimate hardware changes | — Pending |
-| Allow seven days of offline Premium access | Balances reliability for users with subscription abuse controls | — Pending |
-| Keep applied optimizations after subscription expiry | Automatic rollback on billing state changes could interrupt or destabilize a PC | — Pending |
-| Use official signed profiles, local adaptation, and user customization | Combines validation, hardware specificity, and expert control without arbitrary remote code | — Pending |
-| Use conservative anti-cheat integration | Avoids injection, game modification, and ban risk | — Pending |
-| Make AI advisory only | Natural-language help is useful, but execution remains deterministic and allowlisted | — Pending |
-| Start as a modular monolith | A solo developer needs strong boundaries without premature distributed-system overhead | — Pending |
-| Use OpenTelemetry as the observability standard | Keeps instrumentation portable while allowing the operational backend to evolve | — Pending |
-| Use AWS Organizations with separate environment, security, and log accounts | Reduces blast radius and protects production and audit data | — Pending |
+| Decision                                                                                | Rationale                                                                                                | Outcome   |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------- |
+| Build the complete desktop visual and UX surface before the optimization engine         | The visual experience is the primary early risk and future engine integration must not force UI rewrites | — Pending |
+| Use a contextual home rather than a static generic dashboard                            | The most relevant action changes with system, game, plan, and recovery state                             | — Pending |
+| Organize primary navigation by user goals and deep views by hardware component          | Preserves clarity without flattening a technically deep product into a crowded sidebar                   | — Pending |
+| Keep the free tier transparent and keep restoration available after subscription expiry | Safety and trust must never be paywalled                                                                 | — Pending |
+| Limit Premium to one active PC with a 30-day self-service device reset cooldown         | Preserves a clear personal license while allowing legitimate hardware changes                            | — Pending |
+| Allow seven days of offline Premium access                                              | Balances reliability for users with subscription abuse controls                                          | — Pending |
+| Keep applied optimizations after subscription expiry                                    | Automatic rollback on billing state changes could interrupt or destabilize a PC                          | — Pending |
+| Use official signed profiles, local adaptation, and user customization                  | Combines validation, hardware specificity, and expert control without arbitrary remote code              | — Pending |
+| Use conservative anti-cheat integration                                                 | Avoids injection, game modification, and ban risk                                                        | — Pending |
+| Make AI advisory only                                                                   | Natural-language help is useful, but execution remains deterministic and allowlisted                     | — Pending |
+| Start as a modular monolith                                                             | A solo developer needs strong boundaries without premature distributed-system overhead                   | — Pending |
+| Use OpenTelemetry as the observability standard                                         | Keeps instrumentation portable while allowing the operational backend to evolve                          | — Pending |
+| Use AWS Organizations with separate environment, security, and log accounts             | Reduces blast radius and protects production and audit data                                              | — Pending |
 
 ## Evolution
 
@@ -118,4 +121,5 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current evidence, users, and feedback.
 
 ---
-*Last updated: 2026-07-27 after Phase 1 completion*
+
+_Last updated: 2026-07-30 after Phase 2 completion_
