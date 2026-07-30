@@ -92,6 +92,7 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   'Ponto de restauração disponível': 'Restore point available',
   Preparando: 'Preparing',
   'Preparar aplicação': 'Prepare application',
+  'Próxima ação': 'Next action',
   Processador: 'Processor',
   Protegido: 'Protected',
   'Recuperação pronta': 'Recovery ready',
@@ -104,6 +105,7 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   'Requer reinicialização': 'Restart required',
   Restaurar: 'Restore',
   Restauração: 'Recovery',
+  'Revisar ajustes': 'Review controls',
   'Revisar desinstalação': 'Review uninstall',
   'Revisar plano': 'Review plan',
   'Revise antes de continuar': 'Review before continuing',
@@ -140,6 +142,7 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
     'You already have the latest scenario version.',
   'Última sessão': 'Last session',
   Elevado: 'High',
+  'Evidências de prontidão': 'Readiness evidence',
   Exigente: 'Demanding',
   'Hardware compatível': 'Compatible hardware',
   Imediata: 'Immediate',
@@ -150,6 +153,10 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   Quente: 'Hot',
   Sustentada: 'Sustained',
   Térmico: 'Thermal',
+  'Atualizado agora': 'Updated now',
+  'Revise os ajustes compatíveis antes de iniciar sua próxima sessão.':
+    'Review compatible controls before starting your next session.',
+  '5 recomendações': '5 recommendations',
   'Verificação local': 'Local verification',
   '5 ajustes para revisar': '5 controls to review',
   ativos: 'active',
@@ -159,6 +166,7 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   'itens preparados': 'items prepared',
   ocioso: 'idle',
   preparando: 'preparing',
+  recomendações: 'recommendations',
 });
 
 const ORIGINAL_TEXT = new WeakMap<Text, string>();

@@ -344,31 +344,52 @@ const HomeSurface = ({
     <HardwareStrip />
     <section className="premium-home-grid">
       <article className="premium-readiness-card">
-        <div className="premium-score" style={{ '--premium-score': '92%' } as React.CSSProperties}>
-          <span>
-            <strong>92</strong>
-            <small>/ 100</small>
-          </span>
-        </div>
-        <div>
-          <span className="premium-section-label">Prontidão do sistema</span>
-          <h2>Seu PC está pronto para competir</h2>
-          <p>O cenário está estável. Há cinco recomendações compatíveis aguardando sua revisão.</p>
-          <div className="premium-inline-actions">
+        <div className="premium-readiness-primary">
+          <div
+            className="premium-score"
+            style={{ '--premium-score': '92%' } as React.CSSProperties}
+          >
+            <span>
+              <strong>92</strong>
+              <small>/ 100</small>
+            </span>
+          </div>
+          <div className="premium-readiness-copy">
+            <span className="premium-section-label">Prontidão do sistema</span>
+            <h2>Seu PC está pronto para competir</h2>
+            <p>
+              O cenário está estável. Há cinco recomendações compatíveis aguardando sua revisão.
+            </p>
+            <div className="premium-inline-actions">
+              <PremiumButton
+                onClick={() => {
+                  navigate('/competitive');
+                }}
+                tone="primary"
+              >
+                Abrir Modo Competitivo
+              </PremiumButton>
+              <PremiumButton
+                onClick={() => {
+                  notify('Nova análise simulada concluída. Nenhuma alteração foi aplicada.');
+                }}
+              >
+                Analisar novamente
+              </PremiumButton>
+            </div>
+          </div>
+          <div className="premium-readiness-next">
+            <span className="premium-section-label">Próxima ação</span>
+            <strong>
+              <span>5</span> recomendações
+            </strong>
+            <p>Revise os ajustes compatíveis antes de iniciar sua próxima sessão.</p>
             <PremiumButton
               onClick={() => {
-                navigate('/competitive');
-              }}
-              tone="primary"
-            >
-              Abrir Modo Competitivo
-            </PremiumButton>
-            <PremiumButton
-              onClick={() => {
-                notify('Nova análise simulada concluída. Nenhuma alteração foi aplicada.');
+                navigate('/improve');
               }}
             >
-              Analisar novamente
+              Revisar ajustes
             </PremiumButton>
           </div>
         </div>
@@ -376,27 +397,36 @@ const HomeSurface = ({
           <header>
             <span>
               <ProductIcon name="shield" size={17} weight="duotone" />
-              Verificação local
+              Evidências de prontidão
             </span>
-            <strong>Agora</strong>
+            <strong>
+              <span aria-hidden="true" />
+              Atualizado agora
+            </strong>
           </header>
           <ul>
             <li>
-              <ProductIcon name="check" size={15} weight="fill" />
+              <span className="premium-readiness-evidence-icon">
+                <ProductIcon name="recovery" size={16} weight="duotone" />
+              </span>
               <span>
                 <strong>Recuperação pronta</strong>
                 <small>Ponto de restauração disponível</small>
               </span>
             </li>
             <li>
-              <ProductIcon name="check" size={15} weight="fill" />
+              <span className="premium-readiness-evidence-icon">
+                <ProductIcon name="microchip" size={16} weight="duotone" />
+              </span>
               <span>
                 <strong>Hardware compatível</strong>
                 <small>Perfil validado para este cenário</small>
               </span>
             </li>
             <li data-tone="attention">
-              <ProductIcon name="info" size={15} weight="fill" />
+              <span className="premium-readiness-evidence-icon">
+                <ProductIcon name="sliders" size={16} weight="duotone" />
+              </span>
               <span>
                 <strong>5 ajustes para revisar</strong>
                 <small>Nenhuma mudança aplicada ainda</small>
