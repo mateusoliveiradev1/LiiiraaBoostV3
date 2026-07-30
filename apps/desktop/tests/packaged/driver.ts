@@ -1,15 +1,25 @@
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  runPackagedJourneys,
+  startPackagedSession,
+  stopPackagedSession,
+} from './journeys.ts';
+import { measurePackagedPerformance } from './performance.ts';
+import { verifyDevelopmentArtifact } from './signature.ts';
+
 type JsonRecord = Record<string, unknown>;
 
 type DriverArguments = Readonly<{
+  artifactRecordPath: string;
+  developerWorkstation: boolean;
   driverPath?: string;
   dryRun: boolean;
   grep?: string;
   matrixPath: string;
+  nativeDriverPath?: string;
   runnerId?: string;
   schemaSmoke: boolean;
 }>;
@@ -17,6 +27,10 @@ type DriverArguments = Readonly<{
 const desktopRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const workspaceRoot = resolve(desktopRoot, '../..');
 const defaultMatrixPath = resolve(workspaceRoot, 'apps/desktop/tests/packaged/windows-matrix.json');
+const defaultArtifactRecordPath = resolve(
+  workspaceRoot,
+  'quality/evidence/phase-02/artifacts/signed-desktop-package.json',
+);
 const shellSchemaPath = resolve(
   workspaceRoot,
   'contracts/generated/desktop/v1/shell-message.schema.json',
@@ -52,8 +66,15 @@ const optionValue = (arguments_: readonly string[], option: string): string | un
 };
 
 const parseArguments = (arguments_: readonly string[]): DriverArguments => {
-  const optionsWithValues = new Set(['--driver-path', '--grep', '--matrix', '--runner']);
-  const flags = new Set(['--dry-run', '--schema-smoke']);
+  const optionsWithValues = new Set([
+    '--artifact-record',
+    '--driver-path',
+    '--grep',
+    '--matrix',
+    '--native-driver',
+    '--runner',
+  ]);
+  const flags = new Set(['--developer-workstation', '--dry-run', '--schema-smoke']);
   for (let index = 0; index < arguments_.length; index += 1) {
     const argument = arguments_[index];
     if (argument === undefined) {
@@ -73,10 +94,16 @@ const parseArguments = (arguments_: readonly string[]): DriverArguments => {
   }
 
   return {
+    artifactRecordPath: resolve(
+      optionValue(arguments_, '--artifact-record') ?? defaultArtifactRecordPath,
+    ),
+    developerWorkstation: arguments_.includes('--developer-workstation'),
     driverPath: optionValue(arguments_, '--driver-path') ?? process.env.TAURI_DRIVER_PATH,
     dryRun: arguments_.includes('--dry-run'),
     grep: optionValue(arguments_, '--grep'),
     matrixPath: resolve(optionValue(arguments_, '--matrix') ?? defaultMatrixPath),
+    nativeDriverPath:
+      optionValue(arguments_, '--native-driver') ?? process.env.MSEDGEDRIVER_PATH,
     runnerId: optionValue(arguments_, '--runner'),
     schemaSmoke: arguments_.includes('--schema-smoke'),
   };
@@ -188,7 +215,23 @@ const validateDriverPath = (path: string | undefined): string => {
   return resolvedPath;
 };
 
-const run = (): void => {
+const validateNativeDriverPath = (path: string | undefined): string => {
+  if (path === undefined) {
+    return fail(
+      'matching Microsoft Edge Driver is unavailable; set MSEDGEDRIVER_PATH to the reviewed signed binary.',
+    );
+  }
+  const resolvedPath = resolve(path);
+  if (!existsSync(resolvedPath)) {
+    return fail(`Microsoft Edge Driver path does not exist: ${resolvedPath}`);
+  }
+  if (!/^msedgedriver(?:\.exe)?$/iu.test(basename(resolvedPath))) {
+    return fail('native driver path must name msedgedriver or msedgedriver.exe.');
+  }
+  return resolvedPath;
+};
+
+const run = async (): Promise<void> => {
   const parsedArguments = parseArguments(process.argv.slice(2));
   const matrix = readJsonObject(parsedArguments.matrixPath, 'Windows matrix');
   const records = matrixRecords(matrix);
@@ -224,41 +267,71 @@ const run = (): void => {
   if (process.platform !== 'win32') {
     fail('packaged execution requires a reviewed Windows 10 or Windows 11 runner.');
   }
-  if (prerequisites.length > 0) {
+  if (prerequisites.length > 0 && !parsedArguments.developerWorkstation) {
     fail(`packaged execution prerequisites unavailable: ${prerequisites.join(', ')}.`);
   }
-  if (parsedArguments.runnerId === undefined) {
+  if (!parsedArguments.developerWorkstation && parsedArguments.runnerId === undefined) {
     fail('--runner is required for packaged execution.');
   }
-  const runner = records.find(
-    (record) =>
-      record.recordType === 'windows-image' &&
-      record.id === parsedArguments.runnerId &&
-      record.status === 'reviewed',
-  );
-  if (runner === undefined) {
-    fail(`runner ${parsedArguments.runnerId} is unsupported or unreviewed.`);
+  if (!parsedArguments.developerWorkstation) {
+    const runner = records.find(
+      (record) =>
+        record.recordType === 'windows-image' &&
+        record.id === parsedArguments.runnerId &&
+        record.status === 'reviewed',
+    );
+    if (runner === undefined) {
+      fail(`runner ${parsedArguments.runnerId} is unsupported or unreviewed.`);
+    }
   }
 
   const driverPath = validateDriverPath(parsedArguments.driverPath);
-  const result = spawnSync(driverPath, [], {
-    cwd: workspaceRoot,
-    encoding: 'utf8',
-    shell: false,
-    stdio: 'inherit',
-    timeout: 120_000,
-    windowsHide: true,
-  });
-  if (result.error !== undefined) {
-    fail(`tauri-driver 2.0.6 failed to start: ${result.error.message}`);
-  }
-  if (result.status !== 0) {
-    fail(`tauri-driver 2.0.6 exited with status ${String(result.status)}.`);
+  const nativeDriverPath = validateNativeDriverPath(parsedArguments.nativeDriverPath);
+  const artifact = verifyDevelopmentArtifact(workspaceRoot, parsedArguments.artifactRecordPath);
+  const started = performance.now();
+  const session = await startPackagedSession(
+    driverPath,
+    nativeDriverPath,
+    artifact.executablePath,
+  );
+  try {
+    const journeys = await runPackagedJourneys(session);
+    const measured = await measurePackagedPerformance(session, performance.now() - started);
+    process.stdout.write(
+      `${JSON.stringify(
+        {
+          acceptance: parsedArguments.developerWorkstation
+            ? 'development-workstation-observed'
+            : 'reviewed-image-observed',
+          artifact: {
+            executableSha256: artifact.executableSha256,
+            installerSha256: artifact.installerSha256,
+            thumbprint: artifact.thumbprint,
+            trustClass: artifact.trustClass,
+          },
+          driver: {
+            name: 'tauri-driver',
+            native: basename(nativeDriverPath),
+            version: '2.0.6',
+          },
+          grep: parsedArguments.grep,
+          journeys,
+          performance: measured,
+          publicTrust: false,
+          productionReady: false,
+          runner: parsedArguments.runnerId ?? 'current-windows-development-workstation',
+        },
+        undefined,
+        2,
+      )}\n`,
+    );
+  } finally {
+    await stopPackagedSession(session);
   }
 };
 
 try {
-  run();
+  await run();
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;

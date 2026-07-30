@@ -3,7 +3,7 @@
   "evidenceKind": "desktop-packaged-environment-record",
   "recordType": "windows-image",
   "id": "windows-10",
-  "status": "unresolved",
+  "status": "deferred",
   "availability": "unavailable",
   "windows": {
     "family": "Windows",
@@ -20,5 +20,9 @@
   },
   "resetMethod": "unresolved",
   "supportStatus": "unresolved",
-  "developmentSigningAccess": "unresolved"
+  "developmentSigningAccess": "unresolved",
+  "deferredTo": "Phase 10",
+  "deferralReason": "No clean resettable Windows 10 image is available during the visual milestone.",
+  "userApprovedDeferral": true,
+  "approvedAt": "2026-07-30T07:28:23.7752266-03:00"
 }

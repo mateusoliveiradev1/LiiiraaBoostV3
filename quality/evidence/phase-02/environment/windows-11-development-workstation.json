@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-workstation-record",
+  "recordType": "development-workstation",
+  "id": "windows-11-development-workstation",
+  "status": "reviewed",
+  "availability": "available",
+  "windows": {
+    "family": "Windows",
+    "release": "11",
+    "edition": "Pro",
+    "build": "26200",
+    "architecture": "x64"
+  },
+  "imageIdentity": "current-development-workstation",
+  "cleanResettableImage": false,
+  "runnerIdentity": "local-interactive-windows-11",
+  "webView2": {
+    "status": "reviewed",
+    "version": "150.0.4078.105"
+  },
+  "nativeDriver": {
+    "name": "msedgedriver.exe",
+    "version": "150.0.4078.105",
+    "sha256": "9A8F72306128ABB259C54F0190C704C0CFDF61FB344467ABE16A2DCAD6BDB55D",
+    "authenticode": "valid"
+  },
+  "developmentSigningAccess": "reviewed",
+  "acceptanceScope": "phase-02-development-workstation-uat",
+  "publicReleaseCertification": false,
+  "reviewedAt": "2026-07-30T07:28:23.7752266-03:00"
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "evidenceKind": "desktop-packaged-development-run",
+  "status": "observed",
+  "observedAt": "2026-07-30T07:28:23.7752266-03:00",
+  "environment": "quality/evidence/phase-02/environment/windows-11-development-workstation.json",
+  "artifact": {
+    "record": "quality/evidence/phase-02/artifacts/signed-desktop-package.json",
+    "installerSha256": "08F1B5D33A85270DF0450A0C4491253073D9DE8645DD77530DAFB5E0F5A1F567",
+    "executableSha256": "0FE99A1F570767DFE084A17E19D4A40BEC37000553687092D058EC6F704284DE",
+    "certificateThumbprint": "55D6403DE15473B2A50AE82B7831C457629CC298",
+    "trustClass": "self-signed-development",
+    "publicTrust": false,
+    "smartScreenReputation": false,
+    "productionReady": false,
+    "distributionAllowed": false
+  },
+  "driver": {
+    "name": "tauri-driver",
+    "version": "2.0.6",
+    "nativeDriver": "msedgedriver.exe",
+    "nativeDriverVersion": "150.0.4078.105"
+  },
+  "command": "pnpm --filter @liiiraa/desktop test:packaged -- --grep \"@install-smoke|@native-smoke|@performance-smoke\" --developer-workstation",
+  "journeys": {
+    "passed": 12,
+    "failed": 0,
+    "ids": [
+      "install-launch",
+      "desktop-shell",
+      "goal-navigation",
+      "command-center",
+      "favorites-surface",
+      "game-preview",
+      "failure-recovery-feedback",
+      "activity-notifications",
+      "entitlement-profile",
+      "locale-scale-motion",
+      "settings",
+      "truth-boundary"
+    ]
+  },
+  "performance": {
+    "startupMs": 1645.7794,
+    "startupWithinTwoSeconds": true,
+    "domResponseMs": 2.7618,
+    "domResponseWithin250Ms": true,
+    "processWorkingSetBytes": 32669696,
+    "openUiWithin250Mb": true
+  },
+  "scope": {
+    "developmentWorkstationObserved": true,
+    "cleanImageObserved": false,
+    "windows10Observed": false,
+    "windows10CertificationDeferredTo": "Phase 10",
+    "userApprovedDeferral": true
+  }
+}

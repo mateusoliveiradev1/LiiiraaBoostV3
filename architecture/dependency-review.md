@@ -101,9 +101,9 @@ toolchain:rust@1.97.1
 
 ## Phase 2 review gate
 
-Evidence generation does not install Phase 2 dependency packages. The verifier fetched public npm and crates.io metadata without registry credentials, confirmed all 33 exact identities and versions, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
+Evidence generation does not install Phase 2 dependency packages. The verifier fetched public npm and crates.io metadata without registry credentials, confirmed all 34 exact identities and versions, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
 
-The 21 rows under **Phase 2 review required before installation** carry the research verdict `SUS: too-new`. This is a blocking human-review classification for recent official releases, not evidence that the packages are malicious.
+The 22 rows under **Phase 2 review required before installation** carry the research verdict `SUS: too-new`. This is a blocking human-review classification for recent official releases, not evidence that the packages are malicious.
 
 ## Phase 2 review required before installation
 
@@ -117,6 +117,7 @@ The 21 rows under **Phase 2 review required before installation** carry the rese
 | `@tanstack/react-router@1.170.18` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40tanstack%2Freact-router/1.170.18) | [https://github.com/TanStack/router](https://github.com/TanStack/router) | `MIT` | None | Phase 2 legitimacy audit flagged this recent official release as SUS: too-new. |
 | `@tanstack/router-plugin@1.168.23` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40tanstack%2Frouter-plugin/1.168.23) | [https://github.com/TanStack/router](https://github.com/TanStack/router) | `MIT` | None | Phase 2 legitimacy audit flagged this recent official release as SUS: too-new. |
 | `@tauri-apps/cli@2.11.4` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40tauri-apps%2Fcli/2.11.4) | [https://github.com/tauri-apps/tauri](https://github.com/tauri-apps/tauri) | `Apache-2.0 OR MIT` | `prepack`: `cp ../../crates/tauri-schema-generator/schemas/config.schema.json .`<br>`prepublishOnly`: `napi prepublish -t npm --gh-release-id $RELEASE_ID` | Phase 2 legitimacy audit flagged this recent official release as SUS: too-new. |
+| `@types/node@24.13.3` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40types%2Fnode/24.13.3) | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) | `MIT` | None | User approved free dependencies and the exact MIT identity was reviewed for the Phase 2 packaged harness on 2026-07-30. |
 | `@types/react@19.2.17` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40types%2Freact/19.2.17) | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) | `MIT` | None | User explicitly approved this exact free MIT peer identity on 2026-07-27. |
 | `@typespec/openapi@1.14.0` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40typespec%2Fopenapi/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | User explicitly approved this exact free MIT peer identity on 2026-07-27. |
 | `@vitejs/plugin-react@6.0.4` | npm | `SUS: too-new` | [verified exact version](https://registry.npmjs.org/%40vitejs%2Fplugin-react/6.0.4) | [https://github.com/vitejs/vite-plugin-react](https://github.com/vitejs/vite-plugin-react) | `MIT` | `prepublishOnly`: `npm run build` | Phase 2 legitimacy audit flagged this recent official release as SUS: too-new. |
@@ -191,6 +192,7 @@ npm:@tanstack/react-router@1.170.18
 npm:@tanstack/router-plugin@1.168.23
 npm:@tauri-apps/api@2.11.1
 npm:@tauri-apps/cli@2.11.4
+npm:@types/node@24.13.3
 npm:@types/react@19.2.17
 npm:@typespec/openapi@1.14.0
 npm:@vitejs/plugin-react@6.0.4
