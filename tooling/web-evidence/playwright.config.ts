@@ -15,18 +15,21 @@ const surfaces = [
     app: '@liiiraa/web',
     baseURL: 'http://public.localhost:3100',
     port: 3100,
+    readinessPath: '/pt-BR',
     surface: 'public',
   },
   {
     app: '@liiiraa/account',
     baseURL: 'http://account.localhost:3101',
     port: 3101,
+    readinessPath: '/pt-BR/sign-in',
     surface: 'account',
   },
   {
     app: '@liiiraa/admin',
     baseURL: 'http://admin.localhost:3102',
     port: 3102,
+    readinessPath: '/pt-BR/admin',
     surface: 'admin',
   },
 ] as const;
@@ -132,6 +135,18 @@ const scenarioIdsBySurface = Object.freeze({
 
 const chromium = devices['Desktop Chrome'];
 
+const requestedSpecs = process.argv.join(' ');
+const startsEverySurface =
+  requestedSpecs.length === 0 ||
+  /accessibility-responsive|security-artifacts|matrix\.config/u.test(requestedSpecs);
+const selectedSurfaces = surfaces.filter(({ surface }) =>
+  startsEverySurface
+    ? true
+    : surface === 'public'
+      ? /public|documentation|releases/u.test(requestedSpecs)
+      : requestedSpecs.includes(`${surface}.spec`),
+);
+
 const quickProjects: Project[] = surfaces.map(({ baseURL, surface }) => ({
   grep: new RegExp(`@quick @${surface}`, 'u'),
   metadata: {
@@ -205,14 +220,14 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'off',
   },
-  webServer: surfaces.map(({ app, baseURL, port }) => ({
+  webServer: selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
     command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname 0.0.0.0 --port ${String(port)}`,
     cwd: '../..',
     reuseExistingServer: false,
-    stderr: 'pipe',
+    stderr: 'inherit',
     stdout: 'pipe',
-    timeout: 120_000,
-    url: baseURL,
+    timeout: 300_000,
+    url: `${baseURL}${readinessPath}`,
   })),
   workers: 1,
 });

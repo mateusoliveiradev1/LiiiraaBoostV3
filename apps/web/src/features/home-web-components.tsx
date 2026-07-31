@@ -5,4 +5,4 @@ export {
   CommandRunwayHero,
   RealProductStage,
   StatusSignal,
-} from '@liiiraa/web-features';
+} from '@liiiraa/web-features/components';
