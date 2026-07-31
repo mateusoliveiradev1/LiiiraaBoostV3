@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "fixtureLabel": "Synthetic administrative fixture",
+  "roles": {
+    "support": "Support",
+    "operations": "Operations",
+    "security": "Security",
+    "audit": "Audit"
+  },
+  "landing": {
+    "title": "Role workspace",
+    "summary": "Review the exact responsibilities assigned to this deterministic role. No credential, customer record, or administrative authority is connected.",
+    "scopeTitle": "Available responsibilities",
+    "scopeBody": "Navigation is projected from the canonical route manifest and excludes every cross-role responsibility."
+  },
+  "support": {
+    "title": "Support case review",
+    "summary": "Read and prepare a response for a synthetic case without exposing a customer identity or sending a message.",
+    "caseLabel": "Case SUP-2048",
+    "target": "Customer target ••••-042",
+    "status": "Awaiting review",
+    "subject": "Startup guidance after a Windows update",
+    "detail": "The synthetic report contains a startup state and no uploaded diagnostic payload.",
+    "responseLabel": "Support response draft",
+    "responseHint": "The subject is the only safe draft field. Response text is cleared when the review is cancelled.",
+    "reviewAction": "Review support response",
+    "cancelAction": "Cancel response draft",
+    "cancelled": "Response draft cancelled. No message was sent and no remote event changed.",
+    "purpose": "Prepare a scoped response for the synthetic support case.",
+    "impact": "A future submission would send only the reviewed response to the case. This preview sends nothing."
+  },
+  "operations": {
+    "title": "Operations review",
+    "summary": "Triage a synthetic release-control alert and review proportional action safeguards without changing an operational system.",
+    "reviewLabel": "Review OPS-117",
+    "target": "Deployment target ••••-017",
+    "state": "Publication held",
+    "detail": "The fixture reports a manifest mismatch. Publication remains blocked and no artifact is promoted.",
+    "action": "Review publication hold",
+    "purpose": "Keep the synthetic release held while evidence is reviewed.",
+    "impact": "A future authority could retain the hold for one release object. Phase 3 cannot alter publication state.",
+    "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px."
+  },
+  "security": {
+    "title": "Security review",
+    "summary": "Inspect a synthetic risk alert and prepare an object-specific response without accepting a security credential.",
+    "reviewLabel": "Review SEC-083",
+    "target": "Security target ••••-083",
+    "state": "Containment review required",
+    "detail": "A synthetic request exceeded the expected retry window. No account, token, address, or diagnostic value is present.",
+    "action": "Review containment action",
+    "purpose": "Prepare containment review for the synthetic security alert.",
+    "impact": "A future authority could limit one identified session. This preview cannot revoke, block, or mutate it."
+  },
+  "diagnostics": {
+    "title": "Consent-scoped diagnostics",
+    "summary": "Diagnostic detail stays closed unless purpose, permitted fields, expiration, actor, and immutable audit reference all match this object.",
+    "blockedTitle": "Diagnostic access blocked",
+    "blockedBody": "No valid consent covers this diagnostic object. Metadata below explains the required scope without revealing diagnostic or customer data.",
+    "allowedTitle": "Permitted synthetic fields",
+    "purposeLabel": "Purpose",
+    "fieldsLabel": "Permitted fields",
+    "expirationLabel": "Expiration",
+    "actorLabel": "Requesting actor",
+    "auditLabel": "Immutable audit event",
+    "requiredPurpose": "Review startup evidence for case SUP-2048",
+    "requiredFields": ["startup-state", "application-version"],
+    "actor": "security.preview",
+    "auditReference": "audit-consent-015",
+    "expiration": "2026-01-15T12:30:00.000Z",
+    "denial": "Absent, expired, or wrong-scope consent reveals no diagnostic field and creates no authority."
+  },
+  "audit": {
+    "title": "Immutable audit timeline",
+    "summary": "Correlate complete synthetic events. Records are frozen after generated-contract validation and every target remains redacted.",
+    "caption": "Synthetic immutable administrative events",
+    "actor": "Actor",
+    "role": "Role",
+    "action": "Action",
+    "target": "Redacted target",
+    "reason": "Reason",
+    "consent": "Consent reference",
+    "timestamp": "Timestamp",
+    "result": "Result",
+    "correlation": "Correlation",
+    "receipt": "No-change receipt",
+    "detailAction": "Inspect complete correlated event",
+    "noConsent": "Not required for this event"
+  },
+  "receipt": {
+    "title": "Preview complete — no change was made",
+    "body": "The review reached the disconnected Phase 4 boundary. No remote state changed; the receipt and correlated audit record remain synthetic and immutable."
+  },
+  "recovery": {
+    "title": "Administrative capability unavailable",
+    "offline": "The disconnected authority is offline. Safe review remains available and no request is queued.",
+    "stale": "The synthetic record is stale. Refresh it before any future confirmation.",
+    "expired": "The preview session expired. No credential or sensitive draft was retained.",
+    "permission": "This role does not include the requested responsibility. No data was disclosed.",
+    "failure": "The preview boundary did not respond. No remote state changed.",
+    "safeDraft": "Only the synthetic case subject is eligible for local recovery. Response and diagnostic fields are discarded."
+  }
+}

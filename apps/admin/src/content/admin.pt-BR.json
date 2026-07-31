@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "fixtureLabel": "Fixture administrativa sintética",
+  "roles": {
+    "support": "Suporte",
+    "operations": "Operações",
+    "security": "Segurança",
+    "audit": "Auditoria"
+  },
+  "landing": {
+    "title": "Área da função",
+    "summary": "Revise as responsabilidades exatas atribuídas a esta função determinística. Nenhuma credencial, registro de cliente ou autoridade administrativa está conectada.",
+    "scopeTitle": "Responsabilidades disponíveis",
+    "scopeBody": "A navegação é projetada a partir do manifesto canônico de rotas e exclui toda responsabilidade de outra função."
+  },
+  "support": {
+    "title": "Revisão de caso de suporte",
+    "summary": "Leia e prepare uma resposta para um caso sintético sem expor a identidade do cliente nem enviar uma mensagem.",
+    "caseLabel": "Caso SUP-2048",
+    "target": "Alvo de cliente ••••-042",
+    "status": "Aguardando revisão",
+    "subject": "Orientação de inicialização após uma atualização do Windows",
+    "detail": "O relato sintético contém um estado de inicialização e nenhum diagnóstico enviado.",
+    "responseLabel": "Rascunho de resposta do suporte",
+    "responseHint": "O assunto é o único campo seguro do rascunho. O texto da resposta é apagado quando a revisão é cancelada.",
+    "reviewAction": "Revisar resposta do suporte",
+    "cancelAction": "Cancelar rascunho da resposta",
+    "cancelled": "Rascunho da resposta cancelado. Nenhuma mensagem foi enviada e nenhum evento remoto mudou.",
+    "purpose": "Preparar uma resposta delimitada para o caso sintético de suporte.",
+    "impact": "Um envio futuro mandaria somente a resposta revisada para o caso. Esta prévia não envia nada."
+  },
+  "operations": {
+    "title": "Revisão operacional",
+    "summary": "Faça a triagem de um alerta sintético de controle de versão e revise salvaguardas proporcionais sem alterar um sistema operacional.",
+    "reviewLabel": "Revisão OPS-117",
+    "target": "Alvo de implantação ••••-017",
+    "state": "Publicação retida",
+    "detail": "A fixture informa divergência no manifesto. A publicação permanece bloqueada e nenhum artefato é promovido.",
+    "action": "Revisar retenção da publicação",
+    "purpose": "Manter a versão sintética retida enquanto as evidências são revisadas.",
+    "impact": "Uma autoridade futura poderia manter a retenção de um objeto de versão. A Fase 3 não pode alterar a publicação.",
+    "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px."
+  },
+  "security": {
+    "title": "Revisão de segurança",
+    "summary": "Inspecione um alerta sintético de risco e prepare uma resposta específica sem aceitar uma credencial de segurança.",
+    "reviewLabel": "Revisão SEC-083",
+    "target": "Alvo de segurança ••••-083",
+    "state": "Revisão de contenção necessária",
+    "detail": "Uma solicitação sintética excedeu a janela esperada de repetição. Nenhuma conta, token, endereço ou valor de diagnóstico está presente.",
+    "action": "Revisar ação de contenção",
+    "purpose": "Preparar a revisão de contenção para o alerta sintético de segurança.",
+    "impact": "Uma autoridade futura poderia limitar uma sessão identificada. Esta prévia não pode revogar, bloquear nem alterá-la."
+  },
+  "diagnostics": {
+    "title": "Diagnósticos delimitados por consentimento",
+    "summary": "O detalhe de diagnóstico permanece fechado até que finalidade, campos permitidos, expiração, ator e referência de auditoria imutável correspondam ao objeto.",
+    "blockedTitle": "Acesso ao diagnóstico bloqueado",
+    "blockedBody": "Nenhum consentimento válido cobre este objeto de diagnóstico. Os metadados abaixo explicam o escopo exigido sem revelar dados de diagnóstico ou do cliente.",
+    "allowedTitle": "Campos sintéticos permitidos",
+    "purposeLabel": "Finalidade",
+    "fieldsLabel": "Campos permitidos",
+    "expirationLabel": "Expiração",
+    "actorLabel": "Ator solicitante",
+    "auditLabel": "Evento de auditoria imutável",
+    "requiredPurpose": "Revisar evidências de inicialização do caso SUP-2048",
+    "requiredFields": ["startup-state", "application-version"],
+    "actor": "security.preview",
+    "auditReference": "audit-consent-015",
+    "expiration": "2026-01-15T12:30:00.000Z",
+    "denial": "Consentimento ausente, expirado ou fora do escopo não revela nenhum campo de diagnóstico nem cria autoridade."
+  },
+  "audit": {
+    "title": "Linha do tempo de auditoria imutável",
+    "summary": "Correlacione eventos sintéticos completos. Os registros são congelados após a validação do contrato gerado e todo alvo permanece redigido.",
+    "caption": "Eventos administrativos sintéticos e imutáveis",
+    "actor": "Ator",
+    "role": "Função",
+    "action": "Ação",
+    "target": "Alvo redigido",
+    "reason": "Motivo",
+    "consent": "Referência de consentimento",
+    "timestamp": "Data e hora",
+    "result": "Resultado",
+    "correlation": "Correlação",
+    "receipt": "Comprovante sem alteração",
+    "detailAction": "Inspecionar evento correlacionado completo",
+    "noConsent": "Não exigido para este evento"
+  },
+  "receipt": {
+    "title": "Prévia concluída — nenhuma alteração foi feita",
+    "body": "A revisão alcançou o limite desconectado da Fase 4. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis."
+  },
+  "recovery": {
+    "title": "Capacidade administrativa indisponível",
+    "offline": "A autoridade desconectada está offline. A revisão segura permanece disponível e nenhuma solicitação entrou em fila.",
+    "stale": "O registro sintético está desatualizado. Atualize-o antes de qualquer confirmação futura.",
+    "expired": "A sessão de prévia expirou. Nenhuma credencial ou rascunho sensível foi mantido.",
+    "permission": "Esta função não inclui a responsabilidade solicitada. Nenhum dado foi revelado.",
+    "failure": "O limite da prévia não respondeu. Nenhum estado remoto mudou.",
+    "safeDraft": "Somente o assunto sintético do caso pode ser recuperado localmente. Resposta e campos de diagnóstico são descartados."
+  }
+}
