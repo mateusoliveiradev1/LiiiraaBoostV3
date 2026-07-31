@@ -21,6 +21,9 @@ const EXPECTED_IDS = Object.freeze(
   ),
 );
 
+const clone = <Value>(value: Value): Value =>
+  JSON.parse(JSON.stringify(value)) as Value;
+
 const isDeeplyFrozen = (
   value: unknown,
   visited = new Set<object>(),
@@ -97,10 +100,10 @@ describe('W01-W18 catalog', () => {
     expect(() => getWebScenario('W19')).toThrow('Unknown web scenario: W19');
 
     const first = JSON.stringify(
-      parseWebScenarioManifest(structuredClone(manifest)),
+      parseWebScenarioManifest(clone(manifest)),
     );
     const second = JSON.stringify(
-      parseWebScenarioManifest(structuredClone(manifest)),
+      parseWebScenarioManifest(clone(manifest)),
     );
     expect(first).toBe(second);
     expect(first).toBe(JSON.stringify(WEB_SCENARIOS));
@@ -132,7 +135,7 @@ describe('W01-W18 catalog', () => {
       }
     }],
   ])('rejects %s catalog mutations', (_, mutate) => {
-    const candidate = structuredClone(manifest);
+    const candidate = clone(manifest);
     mutate(candidate);
     expect(() => parseWebScenarioManifest(candidate)).toThrow(
       'Invalid web scenario manifest',
@@ -140,13 +143,13 @@ describe('W01-W18 catalog', () => {
   });
 
   it('rejects undeclared family deltas and non-fixture provenance', () => {
-    const unknownDelta = structuredClone(manifest);
+    const unknownDelta = clone(manifest);
     const firstUnknown = unknownDelta.scenarios[0];
     if (firstUnknown !== undefined) {
       firstUnknown.deltaPaths.push('customer.session');
     }
 
-    const changedProvenance = structuredClone(manifest);
+    const changedProvenance = clone(manifest);
     const firstChanged = changedProvenance.scenarios[0];
     if (firstChanged !== undefined) {
       firstChanged.provenance.kind = 'observed';
