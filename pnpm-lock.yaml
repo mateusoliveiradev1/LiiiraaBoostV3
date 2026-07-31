@@ -610,6 +610,9 @@ importers:
       '@liiiraa/contracts-ts':
         specifier: workspace:*
         version: link:../contracts-ts
+      minisearch:
+        specifier: 7.2.0
+        version: 7.2.0
     devDependencies:
       vitest:
         specifier: 4.1.10

@@ -15,7 +15,8 @@
     "test": "vitest --run --passWithNoTests"
   },
   "dependencies": {
-    "@liiiraa/contracts-ts": "workspace:*"
+    "@liiiraa/contracts-ts": "workspace:*",
+    "minisearch": "7.2.0"
   },
   "devDependencies": {
     "vitest": "4.1.10"

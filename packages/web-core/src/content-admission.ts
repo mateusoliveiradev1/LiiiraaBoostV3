@@ -29,11 +29,7 @@ export type ContentType =
 
 export type ContentRisk = 'none' | 'low' | 'medium' | 'high' | 'critical';
 export type ContentAvailability =
-  | 'available'
-  | 'under-validation'
-  | 'planned'
-  | 'unsupported'
-  | 'obsolete';
+  'available' | 'under-validation' | 'planned' | 'unsupported' | 'obsolete';
 
 export type ContentAsset = Readonly<{
   id: string;
@@ -60,6 +56,7 @@ export type RepositoryContentRecord = Readonly<{
   actionableClaims: readonly string[];
   identifiers: readonly string[];
   errorCodes: readonly string[];
+  suggestions: readonly string[];
   domain: string;
   risk: ContentRisk;
   availability: ContentAvailability;
@@ -132,10 +129,7 @@ const freeze = <Value>(value: Value): Value => {
   return value;
 };
 
-const failure = (
-  code: ContentAdmissionErrorCode,
-  path: string,
-): ContentAdmissionResult =>
+const failure = (code: ContentAdmissionErrorCode, path: string): ContentAdmissionResult =>
   freeze({
     ok: false,
     error: { code, path },
@@ -161,16 +155,13 @@ const stableValue = (value: unknown): unknown => {
 const digest = async (value: unknown): Promise<string> => {
   const bytes = new TextEncoder().encode(JSON.stringify(stableValue(value)));
   const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(hash)]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 };
 
 const routeFor = (
   routeManifest: readonly WebRouteRecordJson[],
   routeId: string,
-): WebRouteRecordJson | undefined =>
-  routeManifest.find((route) => route.id === routeId);
+): WebRouteRecordJson | undefined => routeManifest.find((route) => route.id === routeId);
 
 const hasSupportedEvidenceOrigin = (source: string): boolean => {
   try {
@@ -214,10 +205,7 @@ const isFailure = (
   value: ContentAdmissionResult | ScreenshotProvenanceJson,
 ): value is ContentAdmissionResult => 'ok' in value;
 
-const isStaleHistory = (
-  document: ContentRecordJson,
-  route: WebRouteRecordJson,
-): boolean =>
+const isStaleHistory = (document: ContentRecordJson, route: WebRouteRecordJson): boolean =>
   route.indexing === 'noindex' && document.validationState === 'stale';
 
 const validateEvidence = (
@@ -231,10 +219,7 @@ const validateEvidence = (
       return failure('EVIDENCE_ORIGIN_UNSUPPORTED', `${evidencePath}.source`);
     }
     if (item.applicableVersion !== record.document.version) {
-      return failure(
-        'EVIDENCE_VERSION_MISMATCH',
-        `${evidencePath}.applicableVersion`,
-      );
+      return failure('EVIDENCE_VERSION_MISMATCH', `${evidencePath}.applicableVersion`);
     }
     if (
       !history &&
@@ -327,6 +312,7 @@ const validateRecord = (
     record.metadata.description,
     ...record.warnings,
     ...record.actionableClaims,
+    ...record.suggestions,
   ].join('\n');
   if (RAW_EXECUTABLE_CONTENT.test(authoredText)) {
     return failure('EXECUTABLE_CONTENT', `${path}.body`);
@@ -364,9 +350,7 @@ const validateRecord = (
   let canonicalRouteId = record.canonicalRouteId;
   if (history) {
     const canonicalRoute =
-      canonicalRouteId === undefined
-        ? undefined
-        : routeFor(input.routeManifest, canonicalRouteId);
+      canonicalRouteId === undefined ? undefined : routeFor(input.routeManifest, canonicalRouteId);
     if (
       canonicalRoute?.surface !== 'public' ||
       canonicalRoute.securityBoundary !== 'public-origin' ||
@@ -391,10 +375,7 @@ const admittedFailure = (
   value: ContentAdmissionResult | AdmittedContentRecord,
 ): value is ContentAdmissionResult => 'ok' in value;
 
-const compareRecords = (
-  left: AdmittedContentRecord,
-  right: AdmittedContentRecord,
-): number => {
+const compareRecords = (left: AdmittedContentRecord, right: AdmittedContentRecord): number => {
   const leftKey = `${left.translationKey}\u0000${left.document.routeId}\u0000${left.document.version}\u0000${left.document.locale}\u0000${left.document.id}`;
   const rightKey = `${right.translationKey}\u0000${right.document.routeId}\u0000${right.document.version}\u0000${right.document.locale}\u0000${right.document.id}`;
   return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;

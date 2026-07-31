@@ -51,3 +51,28 @@ export type {
   ContentIdentityErrorCode,
   ContentIdentityResult,
 } from './content.js';
+export { CONTENT_BUNDLE_SCHEMA_VERSION, admitContentBundle } from './content-admission.js';
+export type {
+  AdmittedContentBundle,
+  AdmittedContentRecord,
+  ContentAdmissionError,
+  ContentAdmissionErrorCode,
+  ContentAdmissionInput,
+  ContentAdmissionResult,
+  ContentAsset,
+  ContentAvailability,
+  ContentRisk,
+  ContentType,
+  RepositoryContentRecord,
+} from './content-admission.js';
+export { buildPublicSearchIndex, searchPublicContent } from './search.js';
+export type {
+  PublicSearchIndex,
+  PublicSearchIndexError,
+  PublicSearchIndexErrorCode,
+  PublicSearchIndexResult,
+  PublicSearchResponse,
+  SearchDocument,
+  SearchFilters,
+  SearchResult,
+} from './search.js';

@@ -105,15 +105,11 @@ const contentRecord = (
     metadata: {
       title: locale === 'pt-BR' ? 'Liiiraa Boost | Produto' : 'Liiiraa Boost | Product',
       description:
-        locale === 'pt-BR'
-          ? 'Visão verificável do produto.'
-          : 'A verifiable product overview.',
+        locale === 'pt-BR' ? 'Visão verificável do produto.' : 'A verifiable product overview.',
       socialImageId: `product-social-${suffix}`,
     },
     warnings: [
-      locale === 'pt-BR'
-        ? 'Resultados variam conforme o hardware.'
-        : 'Results vary by hardware.',
+      locale === 'pt-BR' ? 'Resultados variam conforme o hardware.' : 'Results vary by hardware.',
     ],
     screenshotAssetIds: [`product-shot-${suffix}`],
     actionableClaims: [
@@ -123,6 +119,7 @@ const contentRecord = (
     ],
     identifiers: ['LB-PRODUCT', '1.0.0'],
     errorCodes: [],
+    suggestions: locale === 'pt-BR' ? ['Medir desempenho'] : ['Measure performance'],
     domain: 'product',
     risk: 'low',
     availability: 'available',
@@ -154,10 +151,7 @@ describe('content admission', () => {
       expect(first.value.schemaVersion).toBe(1);
       expect(first.value.buildId).toMatch(/^build-[a-f0-9]{64}$/u);
       expect(first.value.contentId).toMatch(/^content-[a-f0-9]{64}$/u);
-      expect(first.value.records.map(({ document }) => document.locale)).toEqual([
-        'en',
-        'pt-BR',
-      ]);
+      expect(first.value.records.map(({ document }) => document.locale)).toEqual(['en', 'pt-BR']);
       expect(first.value.searchableRouteIds).toEqual(['public-product']);
       expect(Object.isFrozen(first.value)).toBe(true);
     }
@@ -229,10 +223,7 @@ describe('content admission', () => {
     },
     {
       name: 'missing warning',
-      mutate: () => [
-        contentRecord('pt-BR', { warnings: [] }),
-        contentRecord('en'),
-      ],
+      mutate: () => [contentRecord('pt-BR', { warnings: [] }), contentRecord('en')],
       code: 'WARNING_MISSING',
     },
     {
@@ -260,10 +251,7 @@ describe('content admission', () => {
     },
     {
       name: 'mutable CMS source',
-      mutate: () => [
-        contentRecord('pt-BR', { source: 'cms' }),
-        contentRecord('en'),
-      ],
+      mutate: () => [contentRecord('pt-BR', { source: 'cms' }), contentRecord('en')],
       code: 'SOURCE_NOT_REPOSITORY',
     },
     {

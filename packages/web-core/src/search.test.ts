@@ -6,11 +6,7 @@ import {
   type ContentAsset,
   type RepositoryContentRecord,
 } from './content-admission.js';
-import {
-  buildPublicSearchIndex,
-  searchPublicContent,
-  type SearchFilters,
-} from './search.js';
+import { buildPublicSearchIndex, searchPublicContent, type SearchFilters } from './search.js';
 import { webRoutes } from './routes.js';
 
 const CLOCK = new Date('2026-07-31T12:00:00.000Z');
@@ -173,10 +169,7 @@ const fixtures: readonly SearchFixture[] = [
   },
 ];
 
-const record = (
-  fixture: SearchFixture,
-  locale: 'pt-BR' | 'en',
-): RepositoryContentRecord => {
+const record = (fixture: SearchFixture, locale: 'pt-BR' | 'en'): RepositoryContentRecord => {
   const canonicalRoute = route(fixture.routeId);
   const suffix = locale === 'pt-BR' ? 'pt' : 'en';
   return {
@@ -238,10 +231,7 @@ const record = (
 };
 
 const admittedBundle = async (): Promise<AdmittedContentBundle> => {
-  const records = fixtures.flatMap((fixture) => [
-    record(fixture, 'pt-BR'),
-    record(fixture, 'en'),
-  ]);
+  const records = fixtures.flatMap((fixture) => [record(fixture, 'pt-BR'), record(fixture, 'en')]);
   const result = await admitContentBundle(records, {
     assetIndex: assets,
     clock: CLOCK,
@@ -253,9 +243,7 @@ const admittedBundle = async (): Promise<AdmittedContentBundle> => {
   return result.value;
 };
 
-const filters = (
-  overrides: Partial<SearchFilters> = {},
-): SearchFilters => ({
+const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({
   locale: 'en',
   version: '1.0.0',
   ...overrides,
@@ -361,12 +349,10 @@ describe('public-only search', () => {
     expect(second).toEqual(first);
     expect(first.results.map(({ searchId }) => searchId)).toEqual(
       [...first.results]
-        .sort(
-          (left, right) =>
-            left.score === right.score
-              ? left.title.localeCompare(right.title) ||
-                left.searchId.localeCompare(right.searchId)
-              : right.score - left.score,
+        .sort((left, right) =>
+          left.score === right.score
+            ? left.title.localeCompare(right.title) || left.searchId.localeCompare(right.searchId)
+            : right.score - left.score,
         )
         .map(({ searchId }) => searchId),
     );
