@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-12-PLAN.md
-last_updated: "2026-07-31T04:21:45.962Z"
+stopped_at: Completed 03-13-PLAN.md
+last_updated: "2026-07-31T04:39:10.275Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 70
+  completed_plans: 71
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 13 of 32
+Plan: 14 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -118,6 +118,7 @@ _Updated after plan completion_
 | Phase 03 P10 | 14m | 1 tasks | 4 files |
 | Phase 03 P11 | 27min | 2 tasks | 23 files |
 | Phase 03 P12 | 15min | 1 tasks | 5 files |
+| Phase 03 P13 | 11min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -295,6 +296,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep webRoutes as exact generated WebRouteRecord objects. — The exported canonical authority itself passes generated runtime validation before deep freezing.
 - [Phase 03]: Derive every route consumer from canonical manifest fields. — Navigation, breadcrumbs, sitemap, redirects, desktop links, indexing, and ownership cannot drift through parallel lists.
 - [Phase 03]: Cross origins only through route IDs and enumerated context. — Fixed HTTPS origins and bounded locale/version/channel/section/destination/return-route values reject arbitrary URLs and sensitive state.
+- [Phase 03]: Keep W01-W18 as one strict JSON fixture authority. — Runtime projection rejects unknown identities, undeclared fields, non-canonical routes, and provenance drift.
+- [Phase 03]: Fix the published web preview to W01. — Alternate scenario selection requires explicit test composition and no query, cookie, URL, or environment override exists.
+- [Phase 03]: Route generated future-authority validation through web-core. — Web-preview preserves its locked dependency on web-core while validating generated commands and receipts.
 
 ### Pending Todos
 
@@ -336,6 +340,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T04:21:45.956Z
-Stopped at: Completed 03-12-PLAN.md
+Last session: 2026-07-31T04:38:52.646Z
+Stopped at: Completed 03-13-PLAN.md
 Resume file: None
