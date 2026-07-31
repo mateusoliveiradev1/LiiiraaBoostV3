@@ -31,6 +31,84 @@ import { WEB_STORY_AXES } from './components.stories.tsx';
 
 const readUtf8File = readFileSync as (path: URL, encoding: 'utf8') => string;
 
+type ReviewSurface = 'public' | 'account' | 'admin';
+
+type VisualManifestEntry = Readonly<{
+  captureId: string;
+  comparisonSource: string;
+  locale: 'pt-BR' | 'en';
+  localeReview: 'pt-BR-default' | 'en-parity';
+  rebaselineOwner: 'plan-03-42' | 'plan-03-43' | 'plan-03-44';
+  reviewPurpose: string;
+  route: string;
+  routeId: string;
+  state: string;
+  surface: ReviewSurface;
+  viewport: string;
+}>;
+
+const visualManifest = JSON.parse(
+  readUtf8File(
+    new URL('../../../tooling/web-evidence/visual-manifest.json', import.meta.url),
+    'utf8',
+  ),
+) as Readonly<{
+  entries: readonly VisualManifestEntry[];
+  schemaVersion: number;
+}>;
+
+const styleSources = Object.freeze([
+  {
+    files: [
+      new URL('../../../apps/web/src/app/public-shell.css', import.meta.url),
+      new URL('../../../apps/web/src/styles/public.css', import.meta.url),
+    ],
+    surface: 'public',
+  },
+  {
+    files: [new URL('../../../apps/account/src/app/account-shell.css', import.meta.url)],
+    surface: 'account',
+  },
+  {
+    files: [new URL('../../../apps/admin/src/app/admin-shell.css', import.meta.url)],
+    surface: 'admin',
+  },
+] as const);
+
+const CANONICAL_TYPE_PIXELS = new Set([13, 15, 20, 28]);
+const CANONICAL_SPACE_PIXELS = new Set([0, 4, 8, 16, 24, 32, 48, 64]);
+
+type TokenViolation = Readonly<{
+  property: string;
+  surface: ReviewSurface | 'shared';
+  value: string;
+}>;
+
+const tokenViolations = (
+  css: string,
+  surface: TokenViolation['surface'],
+): readonly TokenViolation[] => {
+  const violations: TokenViolation[] = [];
+  const declarationPattern =
+    /(?<property>font-size|gap|margin(?:-(?:block|inline)(?:-(?:start|end))?)?|padding(?:-(?:block|inline)(?:-(?:start|end))?)?):\s*(?<value>[^;]+);/gu;
+
+  for (const match of css.matchAll(declarationPattern)) {
+    const property = match.groups?.['property'];
+    const value = match.groups?.['value']?.trim();
+    if (property === undefined || value === undefined) continue;
+
+    const allowedPixels = property === 'font-size' ? CANONICAL_TYPE_PIXELS : CANONICAL_SPACE_PIXELS;
+    const pixels = [...value.matchAll(/(?<pixels>\d+(?:\.\d+)?)px/gu)].map(({ groups }) =>
+      Number(groups?.['pixels']),
+    );
+    if (pixels.some((pixels_) => !allowedPixels.has(pixels_))) {
+      violations.push({ property, surface, value });
+    }
+  }
+
+  return violations;
+};
+
 const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>
   element.props as Readonly<Record<string, unknown>>;
 
@@ -244,6 +322,51 @@ describe('visual contract and story axes', () => {
     expect(css).not.toMatch(/border-radius:\s*(?:2[4-9]|[3-9]\d)px/iu);
     expect(css).not.toMatch(/z-index:\s*\d+/iu);
     expect(css).not.toMatch(/box-shadow:/iu);
+  });
+
+  it('enforces the canonical type and spacing scales across shared and app-local CSS', () => {
+    const sources = [
+      { css: readUtf8File(new URL('./web.css', import.meta.url), 'utf8'), surface: 'shared' as const },
+      ...styleSources.flatMap(({ files, surface }) =>
+        files.map((file) => ({ css: readUtf8File(file, 'utf8'), surface })),
+      ),
+    ];
+
+    expect(sources.flatMap(({ css, surface }) => tokenViolations(css, surface))).toEqual([]);
+  });
+
+  it('binds W01-W18 and G01-G07 to complete qualitative-review metadata', () => {
+    const expectedCaptureIds = [
+      ...Array.from({ length: 18 }, (_, index) => `W${String(index + 1).padStart(2, '0')}`),
+      ...Array.from({ length: 7 }, (_, index) => `G${String(index + 1).padStart(2, '0')}`),
+    ];
+
+    expect(visualManifest.schemaVersion).toBe(2);
+    expect(visualManifest.entries.map(({ captureId }) => captureId)).toEqual(expectedCaptureIds);
+
+    for (const entry of visualManifest.entries) {
+      expect(entry).toMatchObject({
+        comparisonSource: 'phase-02-approved-desktop-captures',
+        rebaselineOwner:
+          entry.surface === 'public'
+            ? 'plan-03-42'
+            : entry.surface === 'account'
+              ? 'plan-03-43'
+              : 'plan-03-44',
+      });
+      expect(entry.route).toMatch(new RegExp(`^/${entry.locale}(?:/|$)`, 'u'));
+      expect(entry.reviewPurpose.length).toBeGreaterThan(12);
+      expect(entry.state.length).toBeGreaterThan(0);
+    }
+
+    for (const surface of ['public', 'account', 'admin'] as const) {
+      const entries = visualManifest.entries.filter((entry) => entry.surface === surface);
+      expect(entries.map(({ localeReview }) => localeReview)).toEqual(
+        expect.arrayContaining(['pt-BR-default', 'en-parity']),
+      );
+      expect(entries.some(({ viewport }) => viewport.startsWith('1440'))).toBe(true);
+      expect(entries.some(({ viewport }) => viewport.startsWith('390'))).toBe(true);
+    }
   });
 
   it('meets the locked AA contrast floor for primary and secondary copy', () => {
