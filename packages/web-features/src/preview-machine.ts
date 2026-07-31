@@ -168,6 +168,8 @@ export const PREVIEW_WORKFLOW_TRANSITIONS = Object.freeze({
   ]),
   'validation-error': Object.freeze([
     'EDIT_FIELD',
+    'EDIT_PURPOSE',
+    'EDIT_IMPACT',
     'SUBMIT',
     'GO_OFFLINE',
     'MARK_STALE',
@@ -288,8 +290,8 @@ export type FutureAuthorityResult =
     }>;
 
 /**
- * Structural port implemented by @liiiraa/web-preview. Keeping this browser-safe
- * contract here avoids importing the fixture-only adapter into a production package.
+ * Structural port implemented by the deterministic preview adapter. Keeping this
+ * browser-safe contract here prevents preview runtime code entering production.
  */
 export interface FutureAuthorityPort {
   execute(input: FutureAuthorityExecution): Promise<FutureAuthorityResult>;
@@ -323,6 +325,8 @@ export interface PreviewWorkflowContext {
 
 export type PreviewWorkflowEvent =
   | Readonly<{ readonly field: string; readonly type: 'EDIT_FIELD'; readonly value: string }>
+  | Readonly<{ readonly type: 'EDIT_PURPOSE'; readonly value: string }>
+  | Readonly<{ readonly type: 'EDIT_IMPACT'; readonly value: string }>
   | Readonly<{ readonly type: 'EDIT' }>
   | Readonly<{ readonly type: 'SUBMIT' }>
   | Readonly<{ readonly type: 'VALIDATION_PASSED' }>
@@ -554,6 +558,15 @@ export const createPreviewWorkflowMachine = (
       issuePreview: authorityActor,
     },
     actions: {
+      applyImpactEdit: assign(({ context, event }) =>
+        event.type === 'EDIT_IMPACT'
+          ? {
+              ...context,
+              impact: event.value,
+              validationErrors: Object.freeze([]),
+            }
+          : context,
+      ),
       applyFieldEdit: assign(({ context, event }) => {
         if (event.type !== 'EDIT_FIELD') {
           return context;
@@ -569,6 +582,15 @@ export const createPreviewWorkflowMachine = (
           validationErrors: Object.freeze([]),
         };
       }),
+      applyPurposeEdit: assign(({ context, event }) =>
+        event.type === 'EDIT_PURPOSE'
+          ? {
+              ...context,
+              purpose: event.value,
+              validationErrors: Object.freeze([]),
+            }
+          : context,
+      ),
       assignAuthorityFailure: assign(({ context, event }) =>
         event.type === 'FAIL'
           ? { ...context, failureCode: event.code }
@@ -647,6 +669,12 @@ export const createPreviewWorkflowMachine = (
           EDIT_FIELD: {
             actions: 'applyFieldEdit',
           },
+          EDIT_IMPACT: {
+            actions: 'applyImpactEdit',
+          },
+          EDIT_PURPOSE: {
+            actions: 'applyPurposeEdit',
+          },
           SUBMIT: 'validating',
         },
       },
@@ -674,6 +702,14 @@ export const createPreviewWorkflowMachine = (
           ...commonInterruptions,
           EDIT_FIELD: {
             actions: 'applyFieldEdit',
+            target: 'editing',
+          },
+          EDIT_IMPACT: {
+            actions: 'applyImpactEdit',
+            target: 'editing',
+          },
+          EDIT_PURPOSE: {
+            actions: 'applyPurposeEdit',
             target: 'editing',
           },
           SUBMIT: 'validating',

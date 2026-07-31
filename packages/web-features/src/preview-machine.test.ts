@@ -1,15 +1,27 @@
 /// <reference lib="dom" />
 
 import { createActor, toPromise } from 'xstate';
+import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import { LbButton, LbTextField } from '@liiiraa/design-system';
 import {
   PREVIEW_ACTION_FAMILIES,
   PREVIEW_ACTION_POLICIES,
+  PREVIEW_WORKFLOW_STATES,
+  PREVIEW_WORKFLOW_TRANSITIONS,
   createPreviewWorkflowMachine,
   type FutureAuthorityPort,
   type PreviewWorkflowEvent,
   type PreviewWorkflowInput,
 } from './preview-machine.js';
+import {
+  PreviewConfirmation,
+  PreviewErrorSummary,
+  PreviewFailure,
+  PreviewReceipt,
+  PreviewReview,
+} from './preview-workflows.js';
+import { PreviewBoundary } from './components.js';
 
 const NOW = '2030-01-15T18:00:00.000Z';
 const CORRELATION_ID = 'preview-correlation-03-26';
@@ -81,6 +93,33 @@ const machineWith = (authority: FutureAuthorityPort) =>
     correlationId: () => CORRELATION_ID,
   });
 
+const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>
+  element.props as Readonly<Record<string, unknown>>;
+
+const elements = (node: ReactNode): readonly ReactElement[] => {
+  const found: ReactElement[] = [];
+  const visit = (candidate: ReactNode) => {
+    if (!isValidElement(candidate)) {
+      return;
+    }
+    found.push(candidate);
+    Children.forEach(elementProps(candidate)['children'] as ReactNode, visit);
+  };
+  visit(node);
+  return found;
+};
+
+const intrinsic = (node: ReactNode, tag: string): readonly ReactElement[] =>
+  elements(node).filter((element) => element.type === tag);
+
+const contextForAccessibility = () => {
+  const actor = createActor(
+    machineWith({ execute: vi.fn<FutureAuthorityPort['execute']>() }),
+    { input: adminInput() },
+  ).start();
+  return actor.getSnapshot().context;
+};
+
 const sendToConfirmation = (
   actor: ReturnType<typeof createActor<ReturnType<typeof machineWith>>>,
 ) => {
@@ -120,6 +159,9 @@ describe('preview workflow machine', () => {
           policy.confirmation.kind !== 'ambiguous',
       ),
     ).toBe(true);
+    expect(Object.keys(PREVIEW_WORKFLOW_TRANSITIONS).sort()).toEqual(
+      [...PREVIEW_WORKFLOW_STATES].sort(),
+    );
   });
 
   it('reaches only a schema-valid no-change receipt after proportional confirmation', async () => {
@@ -259,5 +301,195 @@ describe('preview workflow machine', () => {
 
     expect(actor.getSnapshot().value).toBe('editing');
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed or authority-like terminal results into retryable failure', async () => {
+    const execute = vi.fn<FutureAuthorityPort['execute']>().mockResolvedValue({
+      kind: 'no-change',
+      receipt: {
+        ...completeReceipt,
+        remoteStateChanged: true,
+      },
+    } as never);
+    const actor = createActor(machineWith({ execute }), {
+      input: adminInput(),
+    }).start();
+
+    sendToConfirmation(actor);
+    actor.send({ confirmation: 'Review admin action', type: 'CONFIRM' });
+    await vi.waitFor(() => {
+      expect(actor.getSnapshot().value).toBe('partial-failure');
+    });
+
+    expect(actor.getSnapshot().context.receipt).toBeNull();
+    expect(actor.getSnapshot().context.failureCode).toBe('INVALID_COMMAND');
+  });
+});
+
+describe('preview workflow accessibility', () => {
+  it('renders a captioned review diff with purpose, impact, role, and scoped consent', () => {
+    const review = PreviewReview({
+      context: contextForAccessibility(),
+      locale: 'en',
+    });
+
+    expect(intrinsic(review, 'table')).toHaveLength(1);
+    expect(intrinsic(review, 'caption')).toHaveLength(1);
+    expect(
+      intrinsic(review, 'th').every(
+        (heading) => elementProps(heading)['scope'] === 'col' || elementProps(heading)['scope'] === 'row',
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(review)).toContain('Requesting actor');
+    expect(JSON.stringify(review)).toContain('Immutable no-change event preview');
+  });
+
+  it('repeats the preview boundary and exposes an object-specific proportional confirmation', () => {
+    const confirmation = PreviewConfirmation({
+      confirmationValue: '',
+      context: contextForAccessibility(),
+      locale: 'en',
+      onCancel: vi.fn(),
+      onChangeConfirmation: vi.fn(),
+      onConfirm: vi.fn(),
+    });
+    const tree = elements(confirmation);
+    const buttons = tree.filter((element) => element.type === LbButton);
+
+    expect(tree.some((element) => element.type === PreviewBoundary)).toBe(true);
+    expect(buttons).toHaveLength(2);
+    expect(
+      buttons.some(
+        (button) => elementProps(button)['children'] === 'Review admin action',
+      ),
+    ).toBe(true);
+    expect(intrinsic(confirmation, 'h2')[0]?.props).toMatchObject({ tabIndex: -1 });
+  });
+
+  it('links every validation error to its labeled field without color-only status', () => {
+    const summary = PreviewErrorSummary({
+      actionId: 'admin.review',
+      errors: [
+        { field: 'target', messageId: 'preview.validation.required' },
+        { field: 'consent', messageId: 'preview.validation.consent-required' },
+      ],
+      locale: 'en',
+    });
+    const links = intrinsic(summary, 'a');
+
+    expect(elementProps(summary)['role']).toBe('alert');
+    expect(elementProps(summary)['tabIndex']).toBe(-1);
+    expect(links.map((link) => elementProps(link)['href'])).toEqual([
+      '#preview-admin-review-target',
+      '#preview-admin-review-consent',
+    ]);
+  });
+
+  it('announces safety failures assertively and preserves named safe work', () => {
+    const context = contextForAccessibility();
+    const failure = PreviewFailure({
+      context,
+      locale: 'en',
+      onCancel: vi.fn(),
+      onRecover: vi.fn(),
+      projection: {
+        canCancel: true,
+        canConfirm: false,
+        canRetry: true,
+        isBlocking: true,
+        state: 'offline',
+        validationErrors: [],
+      },
+    });
+
+    expect(elementProps(failure)).toMatchObject({
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
+    expect(JSON.stringify(failure)).toContain('target');
+    expect(elements(failure).filter((element) => element.type === LbButton)).toHaveLength(2);
+  });
+
+  it.each([
+    ['en', 'Preview complete — no change was made'],
+    ['pt-BR', 'Prévia concluída — nenhuma alteração foi feita'],
+  ] as const)(
+    'renders a polite immutable no-change receipt in %s with Phase 4 named',
+    (locale, heading) => {
+      const receipt = PreviewReceipt({
+        actionLabel: 'redacted support case',
+        locale,
+        output: {
+          kind: 'no-change',
+          receipt: completeReceipt,
+          remoteStateChanged: false,
+        },
+      });
+      const serialized = JSON.stringify(receipt);
+      const ledger = intrinsic(receipt, 'ol')[0];
+
+      expect(elementProps(receipt)).toMatchObject({
+        'aria-live': 'polite',
+        'data-remote-state-changed': 'false',
+        tabIndex: -1,
+      });
+      expect(elementProps(ledger as ReactElement)['data-immutable']).toBe('true');
+      expect(serialized).toContain(heading);
+      expect(serialized).toContain('Phase 4');
+      expect(serialized).not.toMatch(/\b(?:submitted|success|mutated)\b/iu);
+    },
+  );
+
+  it('renders cancellation as a Phase 4 no-change terminal state', () => {
+    const context = contextForAccessibility();
+    const receipt = PreviewReceipt({
+      actionLabel: context.action.objectLabel,
+      locale: 'en',
+      output: {
+        kind: 'cancelled',
+        receipt: {
+          authority: completeReceipt.authority,
+          correlationId: CORRELATION_ID,
+          nextPhase: 'Phase 4',
+          reason: 'user-cancelled',
+          receiptKind: 'cancelled',
+          remoteStateChanged: false,
+          requestedAction: context.action.id,
+          reviewedAt: NOW,
+          reviewedInputs: ['target-reviewed'],
+        },
+        remoteStateChanged: false,
+      },
+    });
+    const serialized = JSON.stringify(receipt);
+
+    expect(serialized).toContain('Preview cancelled — no change was made');
+    expect(serialized).toContain('Phase 4');
+    expect(elementProps(receipt)['data-remote-state-changed']).toBe('false');
+    expect(serialized).not.toMatch(/\b(?:submitted|success|mutated)\b/iu);
+  });
+
+  it('uses the accessible design-system text field for typed confirmation', () => {
+    const privacyContext = {
+      ...contextForAccessibility(),
+      action: {
+        family: 'privacy',
+        id: 'privacy.delete',
+        objectLabel: 'privacy request',
+        surface: 'account',
+      },
+      confirmation: PREVIEW_ACTION_POLICIES.privacy.confirmation,
+    } as const;
+    const confirmation = PreviewConfirmation({
+      confirmationValue: '',
+      context: privacyContext,
+      locale: 'pt-BR',
+      onCancel: vi.fn(),
+      onChangeConfirmation: vi.fn(),
+      onConfirm: vi.fn(),
+    });
+
+    expect(elements(confirmation).some((element) => element.type === LbTextField)).toBe(true);
+    expect(JSON.stringify(confirmation)).toContain('ENVIAR SOLICITAÇÃO DE PRIVACIDADE');
   });
 });
