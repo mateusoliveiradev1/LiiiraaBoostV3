@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-07-31T01:54:07.694Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-07-31T02:10:36.794Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 60
+  completed_plans: 61
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 3 of 32
+Plan: 4 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -108,6 +108,7 @@ _Updated after plan completion_
 | Phase 02 P33 | 5h37 | 3 tasks | 13 files |
 | Phase 03 P01 | 12min | 2 tasks | 2 files |
 | Phase 03 P02 | 10min | 2 tasks | 2 files |
+| Phase 03 P03 | 11min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -256,6 +257,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Require a new legitimacy audit and explicit approval for every version, repository, lifecycle, integrity, package-name, or scope change. — Evidence drift must never inherit authority from a previously reviewed identity.
 - [Phase 03]: Reserve all seven Phase 3 roots before scaffolding manifests — Makes ownership executable before application code appears
 - [Phase 03]: Keep account and admin compositions fixture-classified while independently buildable — Buildability does not grant production authority before Phase 4
+- [Phase 03]: Reuse existing shell and fixture provenance types for web documents. — Prevents duplicate locale, version, channel, and simulated provenance authorities.
+- [Phase 03]: Keep Phase 3 distribution and mutation fields literal false or unavailable. — The web experience may preview complete journeys without claiming Phase 4 authority or an approved public artifact.
+- [Phase 03]: Represent SHA-256 with exact 64-character bounds. — Preserves digest length while remaining compatible with the pinned Rust schema normalizer.
 
 ### Pending Todos
 
@@ -297,6 +301,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T01:53:29.306Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-07-31T02:10:36.783Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None

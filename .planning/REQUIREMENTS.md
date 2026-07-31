@@ -31,9 +31,9 @@
 
 ### Web Platform
 
-- [ ] **WEB-01**: Visitor can understand the product, its evidence policy, supported capabilities, plans, and limitations on the public site
-- [ ] **WEB-02**: Visitor can read versioned technical documentation linked from relevant desktop features
-- [ ] **WEB-03**: User can inspect release channel, version, integrity, and compatibility and complete a fail-closed download-eligibility journey; Phase 3 exposes no installer until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled
+- [x] **WEB-01**: Visitor can understand the product, its evidence policy, supported capabilities, plans, and limitations on the public site
+- [x] **WEB-02**: Visitor can read versioned technical documentation linked from relevant desktop features
+- [x] **WEB-03**: User can inspect release channel, version, integrity, and compatibility and complete a fail-closed download-eligibility journey; Phase 3 exposes no installer until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled
 - [ ] **WEB-04**: User can manage profile, security methods, subscription, invoices, active device, and support requests
 - [ ] **WEB-05**: User can revoke the active PC and bind a replacement subject to the 30-day reset cooldown
 - [ ] **WEB-06**: Authorized staff can use an isolated administrative application with role-specific access
@@ -178,9 +178,9 @@ A v1 requirement is complete only when:
 | UX-10       | Phase 2  | Complete |
 | UX-11       | Phase 2  | Complete |
 | UX-12       | Phase 2  | Complete |
-| WEB-01      | Phase 3  | Pending  |
-| WEB-02      | Phase 3  | Pending  |
-| WEB-03      | Phase 3  | Pending  |
+| WEB-01      | Phase 3  | Complete |
+| WEB-02      | Phase 3  | Complete |
+| WEB-03      | Phase 3  | Complete |
 | WEB-04      | Phase 4  | Pending  |
 | WEB-05      | Phase 4  | Pending  |
 | WEB-06      | Phase 4  | Pending  |
