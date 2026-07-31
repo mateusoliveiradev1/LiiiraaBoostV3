@@ -74,6 +74,65 @@ const phase2Packages = [
   },
 ] as const;
 
+const phase3WebReservations = [
+  {
+    id: 'web-core',
+    owner: 'web-platform',
+    root: 'packages/web-core',
+    publicRoot: 'packages/web-core/src/index.ts',
+    layer: 'application',
+    runtimeClass: 'production',
+  },
+  {
+    id: 'web-preview',
+    owner: 'web-platform',
+    root: 'packages/web-preview',
+    publicRoot: 'packages/web-preview/src/index.ts',
+    layer: 'adapter',
+    runtimeClass: 'fixture',
+  },
+  {
+    id: 'web-features',
+    owner: 'web-ui',
+    root: 'packages/web-features',
+    publicRoot: 'packages/web-features/src/index.ts',
+    layer: 'feature',
+    runtimeClass: 'production',
+  },
+  {
+    id: 'web-evidence',
+    owner: 'architecture',
+    root: 'tooling/web-evidence',
+    publicRoot: 'tooling/web-evidence/src/index.ts',
+    layer: 'tooling',
+    runtimeClass: 'tooling',
+  },
+  {
+    id: 'web-app',
+    owner: 'web',
+    root: 'apps/web',
+    publicRoot: 'apps/web/src/index.ts',
+    layer: 'composition',
+    runtimeClass: 'production',
+  },
+  {
+    id: 'account-app',
+    owner: 'account',
+    root: 'apps/account',
+    publicRoot: 'apps/account/src/index.ts',
+    layer: 'composition',
+    runtimeClass: 'fixture',
+  },
+  {
+    id: 'admin-app',
+    owner: 'admin',
+    root: 'apps/admin',
+    publicRoot: 'apps/admin/src/index.ts',
+    layer: 'composition',
+    runtimeClass: 'fixture',
+  },
+] as const;
+
 const repositoryRoot = pathApi.resolve(process.cwd(), '..', '..');
 
 const readManifest = (root: string): WorkspaceManifest =>
@@ -151,6 +210,60 @@ describe('Phase 2 live workspace activation', { concurrent: false }, () => {
         expectedOwner: owner,
         expectedPublicRoot: publicRoot,
       })),
+    );
+  });
+});
+
+describe('Phase 3 web reservation', { concurrent: false }, () => {
+  it('reserves every future web root with one owner and keeps it undiscoverable', () => {
+    const discoveredRoots = new Set(discoverPnpmWorkspaceRoots(repositoryRoot));
+
+    expect(
+      phase3WebReservations.map(
+        ({ id, owner, root, publicRoot, layer, runtimeClass }) => {
+          const matches = canonicalPolicy.modules.filter((module) => module.id === id);
+
+          expect(matches).toHaveLength(1);
+
+          const [module] = matches;
+
+          return {
+            id: module?.id,
+            owner: module?.owner,
+            roots: module?.roots,
+            publicRoots: module?.publicRoots,
+            layer: module?.layer,
+            runtimeClass: module?.runtimeClass,
+            status: module?.status,
+            manifestExists: fileSystem.existsSync(
+              pathApi.join(repositoryRoot, root, 'package.json'),
+            ),
+            discoverable: discoveredRoots.has(root),
+            expectedOwner: owner,
+            expectedPublicRoot: publicRoot,
+            expectedLayer: layer,
+            expectedRuntimeClass: runtimeClass,
+          };
+        },
+      ),
+    ).toEqual(
+      phase3WebReservations.map(
+        ({ id, owner, root, publicRoot, layer, runtimeClass }) => ({
+          id,
+          owner,
+          roots: [root],
+          publicRoots: [publicRoot],
+          layer,
+          runtimeClass,
+          status: 'reserved',
+          manifestExists: false,
+          discoverable: false,
+          expectedOwner: owner,
+          expectedPublicRoot: publicRoot,
+          expectedLayer: layer,
+          expectedRuntimeClass: runtimeClass,
+        }),
+      ),
     );
   });
 });
