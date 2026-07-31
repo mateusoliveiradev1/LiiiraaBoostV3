@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 32/32 plans complete
+**Plans**: 32/36 plans complete
 
 Plans:
 **Wave 1**
@@ -349,6 +349,19 @@ Plans:
 **Wave 15** *(blocked on Wave 14 completion)*
 
 - [x] 03-32-PLAN.md — Promote final evidence and recursive Phase 3 acceptance
+
+**Wave 16** *(verification gap closure; blocked on Plan 03-32)*
+
+- [ ] 03-33-PLAN.md — Complete localized account 403/404/410/500 routing and recovery
+- [ ] 03-34-PLAN.md — Complete localized admin 410 routing and recovery
+
+**Wave 17** *(blocked on Wave 16 completion)*
+
+- [ ] 03-35-PLAN.md — Prove every declared error route through browser-observed W17 evidence
+
+**Wave 18** *(blocked on Wave 17 completion)*
+
+- [ ] 03-36-PLAN.md — Bind final Phase 3 acceptance to executable route-reachability evidence
 
 **UI hint**: yes
 
@@ -496,7 +509,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 32/32 | Complete   | 2026-07-31 |
+| 3. Complete Web Experience                         | 32/36 | Gaps planned | -          |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
