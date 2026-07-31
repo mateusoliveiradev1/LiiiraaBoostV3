@@ -14,6 +14,14 @@ const nextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
   generateBuildId: () => `${ACCOUNT_BUILD_ID_PREFIX}-isolated`,
+  webpack(config) {
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      ".js": [".ts", ".tsx", ".js"],
+      ".mjs": [".mts", ".mjs"],
+    };
+    return config;
+  },
 } satisfies NextConfig;
 
 export default nextConfig;
