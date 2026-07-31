@@ -1,6 +1,8 @@
 /// <reference lib="dom" />
 import { Children, isValidElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
+// @ts-expect-error Node built-in types are intentionally not part of the browser package contract.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   BoundaryTransitionNotice,
@@ -24,6 +26,7 @@ import {
   PublicShell,
   RoleScopeRail,
 } from './shells.js';
+import { WEB_STORY_AXES } from './components.stories.js';
 
 const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>
   element.props as Readonly<Record<string, unknown>>;
@@ -41,6 +44,26 @@ const intrinsicTags = (node: ReactNode): readonly string[] => {
   };
   visit(node);
   return tags;
+};
+
+const relativeLuminance = (hex: string): number => {
+  const channels = hex
+    .replace('#', '')
+    .match(/.{2}/gu)
+    ?.map((channel) => Number.parseInt(channel, 16) / 255);
+  if (!channels || channels.length !== 3) {
+    throw new Error(`Invalid color: ${hex}`);
+  }
+  const linear = channels.map((channel) =>
+    channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * (linear[0] ?? 0) + 0.7152 * (linear[1] ?? 0) + 0.0722 * (linear[2] ?? 0);
+};
+
+const contrastRatio = (foreground: string, background: string): number => {
+  const lighter = Math.max(relativeLuminance(foreground), relativeLuminance(background));
+  const darker = Math.min(relativeLuminance(foreground), relativeLuminance(background));
+  return (lighter + 0.05) / (darker + 0.05);
 };
 
 const navigation = Object.freeze([
@@ -149,5 +172,55 @@ describe('semantic web components', () => {
     expect(intrinsicTags(accountShell)).toEqual(expect.arrayContaining(['nav', 'main']));
     expect(elementProps(adminShell)['data-register']).toBe('product');
     expect(intrinsicTags(adminShell)).toEqual(expect.arrayContaining(['nav', 'main']));
+  });
+});
+
+describe('visual contract and story axes', () => {
+  it('enumerates every locked state, locale, viewport, preference, and interaction axis', () => {
+    expect(WEB_STORY_AXES.interaction).toEqual([
+      'default',
+      'hover',
+      'focus-visible',
+      'pressed',
+      'disabled',
+      'loading',
+    ]);
+    expect(WEB_STORY_AXES.state).toEqual(WEB_STATUS_STATES);
+    expect(WEB_STORY_AXES.locale).toEqual(['pt-BR', 'en', 'pseudo']);
+    expect(WEB_STORY_AXES.viewport).toEqual([320, 390, 768, 960, 1440]);
+    expect(WEB_STORY_AXES.preference).toEqual([
+      'default',
+      'reduced-motion',
+      'forced-colors',
+      'keyboard',
+      'screen-reader',
+    ]);
+  });
+
+  it('uses approved tokens, responsive gates, and anti-template constraints', () => {
+    const css = readFileSync(new URL('./web.css', import.meta.url), 'utf8') as string;
+    expect(css).toContain('var(--lb-space-7)');
+    expect(css).toContain('var(--lb-radius-default)');
+    expect(css).toContain('var(--lb-layer-modal)');
+    expect(css).toContain('@media (width < 640px)');
+    expect(css).toContain('@media (width < 960px)');
+    expect(css).toContain('@media (width < 1280px)');
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(css).toContain('@media (forced-colors: active)');
+    expect(css).toContain('min-block-size: var(--lb-control-min-size)');
+    expect(css).toContain('max-inline-size: 75ch');
+    expect(css).toContain('max-inline-size: 68ch');
+    expect(css).toContain('overflow-x: auto');
+    expect(css).toContain("[data-essential='false']");
+    expect(css).not.toMatch(/linear-gradient|radial-gradient|repeating-linear-gradient/iu);
+    expect(css).not.toMatch(/border-radius:\s*(?:2[4-9]|[3-9]\d)px/iu);
+    expect(css).not.toMatch(/z-index:\s*\d+/iu);
+    expect(css).not.toMatch(/box-shadow:/iu);
+  });
+
+  it('meets the locked AA contrast floor for primary and secondary copy', () => {
+    expect(contrastRatio('#F4F7FB', '#090B0F')).toBeGreaterThanOrEqual(7);
+    expect(contrastRatio('#AAB4C4', '#090B0F')).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio('#AAB4C4', '#121722')).toBeGreaterThanOrEqual(4.5);
   });
 });

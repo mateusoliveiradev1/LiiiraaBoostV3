@@ -1,0 +1,671 @@
+.lb-web-shell {
+  min-block-size: 100%;
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-canvas);
+  font: var(--lb-weight-regular) var(--lb-text-body-size) / var(--lb-text-body-line)
+    var(--lb-font-body);
+}
+
+.lb-web-shell *,
+.lb-web-shell *::before,
+.lb-web-shell *::after {
+  box-sizing: border-box;
+}
+
+.lb-web-shell :where(p, li) {
+  max-inline-size: 75ch;
+}
+
+.lb-web-shell :where(h1, h2, h3, p, dl, ol, ul, figure) {
+  margin-block-start: 0;
+}
+
+.lb-web-shell :where(h1, h2, h3) {
+  color: var(--lb-text-primary);
+  font-family: var(--lb-font-body);
+  font-weight: var(--lb-weight-semibold);
+  text-wrap: balance;
+}
+
+.lb-web-shell h1 {
+  font-size: var(--lb-text-display-size);
+  line-height: var(--lb-text-display-line);
+  letter-spacing: -0.04em;
+}
+
+.lb-web-shell :where(h2, h3) {
+  font-size: var(--lb-text-heading-size);
+  line-height: var(--lb-text-heading-line);
+  letter-spacing: -0.02em;
+}
+
+.lb-web-shell :where(code, time, dd[data-value], .lb-web-manifest dd) {
+  font-family: var(--lb-font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-web-shell :where(a, button, input, select, summary):focus-visible {
+  outline: var(--lb-focus-width) solid var(--lb-forced-focus);
+  outline-offset: var(--lb-focus-separation);
+}
+
+.lb-web-skip-link {
+  position: fixed;
+  z-index: var(--lb-layer-tooltip);
+  inset-block-start: var(--lb-space-2);
+  inset-inline-start: var(--lb-space-2);
+  min-block-size: var(--lb-control-min-size);
+  padding: var(--lb-space-2) var(--lb-space-3);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-raised);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  transform: translateY(calc(-100% - var(--lb-space-3)));
+  transition: transform var(--lb-motion-control-duration) var(--lb-motion-easing);
+}
+
+.lb-web-skip-link:focus {
+  transform: translateY(0);
+}
+
+.lb-web-public-header,
+.lb-web-public-footer,
+.lb-web-public-tools,
+.lb-web-mobile-menu-header,
+.lb-web-route-actions,
+.lb-web-filter-bar {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
+.lb-web-public-header {
+  position: sticky;
+  z-index: var(--lb-layer-sticky);
+  inset-block-start: 0;
+  justify-content: space-between;
+  min-block-size: var(--lb-space-7);
+  padding-inline: var(--lb-screen-padding);
+  border-block-end: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.lb-web-public-header nav ul,
+.lb-web-public-footer nav ul,
+.lb-web-product-frame > nav ul {
+  display: flex;
+  gap: var(--lb-space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.lb-web-public-footer {
+  justify-content: space-between;
+  padding: var(--lb-space-5) var(--lb-screen-padding);
+  border-block-start: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.lb-web-mobile-menu {
+  position: fixed;
+  z-index: var(--lb-layer-modal);
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--lb-space-4);
+  padding: var(--lb-space-3);
+  overflow: auto;
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-canvas);
+}
+
+.lb-web-mobile-menu-header {
+  justify-content: space-between;
+}
+
+.lb-web-mobile-menu nav ul {
+  display: grid;
+  gap: var(--lb-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.lb-web-command-runway {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--lb-space-6);
+  align-items: center;
+  min-block-size: calc(100vh - var(--lb-space-7));
+  padding: var(--lb-space-7) var(--lb-screen-padding);
+}
+
+.lb-web-command-copy,
+.lb-web-command-artifact,
+.lb-web-product-stage,
+.lb-web-claim-row,
+.lb-web-search-result,
+.lb-web-disclosure,
+.lb-web-boundary,
+.lb-web-receipt,
+.lb-web-failure,
+.lb-web-empty,
+.lb-web-download-gate,
+.lb-web-support-matrix,
+.lb-web-compatibility-wizard,
+.lb-web-plan-comparison,
+.lb-web-global-search,
+.lb-web-troubleshooting,
+.lb-web-observed-state,
+.lb-web-recovery-escalation,
+.lb-web-release-channel,
+.lb-web-release-integrity,
+.lb-web-signature-guide,
+.lb-web-post-download,
+.lb-web-policy,
+.lb-web-status-summary,
+.lb-web-sign-in,
+.lb-web-security-methods,
+.lb-web-session-list,
+.lb-web-recovery-review,
+.lb-web-subscription,
+.lb-web-device-review,
+.lb-web-privacy-center,
+.lb-web-consent-review,
+.lb-web-data-request,
+.lb-web-support-composer,
+.lb-web-sensitive-fields,
+.lb-web-support-case,
+.lb-web-consent-scope,
+.lb-web-operations-review,
+.lb-web-security-review,
+.lb-web-purpose-impact,
+.lb-web-correlated-event {
+  display: grid;
+  gap: var(--lb-space-3);
+  min-inline-size: 0;
+}
+
+.lb-web-command-copy > p {
+  max-inline-size: 65ch;
+  color: var(--lb-text-secondary);
+}
+
+.lb-web-command-action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+}
+
+.lb-web-command-artifact {
+  align-self: stretch;
+  padding: var(--lb-space-3);
+  border-inline-start: 1px solid var(--lb-line-strong);
+  background: var(--lb-surface-inset);
+}
+
+.lb-web-product-stage {
+  margin: 0;
+}
+
+.lb-web-product-stage img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  object-fit: contain;
+  border-radius: var(--lb-radius-default);
+}
+
+.lb-web-product-stage figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lb-web-route-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--lb-space-3);
+  align-items: end;
+  padding-block-end: var(--lb-space-4);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-route-header p {
+  max-inline-size: 68ch;
+  color: var(--lb-text-secondary);
+}
+
+.lb-web-status,
+.lb-web-provenance {
+  display: inline-flex;
+  gap: var(--lb-space-1);
+  align-items: center;
+  min-block-size: var(--lb-control-min-size);
+  max-inline-size: 100%;
+  color: var(--lb-text-secondary);
+  font-size: var(--lb-text-label-size);
+  line-height: var(--lb-text-label-line);
+}
+
+.lb-web-status {
+  padding-inline: var(--lb-space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--lb-radius-default);
+}
+
+.lb-web-status-symbol {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--lb-space-3);
+  font-family: var(--lb-font-data);
+}
+
+.lb-web-status[data-pattern='dashed'],
+.lb-web-status[data-pattern='long-dash'],
+.lb-web-status[data-pattern='diagonal-stripe'] {
+  border-style: dashed;
+}
+
+.lb-web-status[data-pattern='dotted'],
+.lb-web-status[data-pattern='dot-dash'] {
+  border-style: dotted;
+}
+
+.lb-web-status[data-pattern='double'] {
+  border-style: double;
+}
+
+.lb-web-status[data-tone='success'] {
+  color: var(--lb-success);
+}
+
+.lb-web-status[data-tone='warning'] {
+  color: var(--lb-warning);
+}
+
+.lb-web-status[data-tone='critical'] {
+  color: var(--lb-critical);
+}
+
+.lb-web-status[data-tone='experimental'] {
+  color: var(--lb-experimental);
+}
+
+.lb-web-status[data-tone='restricted'] {
+  color: var(--lb-text-secondary);
+  background: var(--lb-disabled-fill);
+}
+
+.lb-web-provenance {
+  font-family: var(--lb-font-data);
+}
+
+.lb-web-provenance[data-provenance='simulated'] {
+  color: var(--lb-experimental);
+}
+
+.lb-web-provenance[data-provenance='unavailable'] {
+  color: var(--lb-warning);
+}
+
+.lb-web-boundary,
+.lb-web-preview-rail,
+.lb-web-role-rail {
+  padding: var(--lb-space-3) var(--lb-screen-padding);
+  border-block: 1px solid var(--lb-line-strong);
+  background: var(--lb-surface-work);
+}
+
+.lb-web-preview-rail,
+.lb-web-role-rail {
+  position: sticky;
+  z-index: var(--lb-layer-sticky);
+  inset-block-start: var(--lb-space-7);
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
+.lb-web-role-rail ul {
+  display: flex;
+  gap: var(--lb-space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.lb-web-boundary p,
+.lb-web-preview-rail span,
+.lb-web-role-rail span {
+  color: var(--lb-text-secondary);
+}
+
+.lb-web-disclosure {
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-disclosure summary,
+.lb-web-detail-row summary {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--lb-control-min-size);
+  cursor: pointer;
+}
+
+.lb-web-disclosure-content {
+  padding-block: var(--lb-space-3);
+}
+
+.lb-web-table-region {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-table-region table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+
+.lb-web-table-region caption {
+  padding-block: var(--lb-space-3);
+  color: var(--lb-text-primary);
+  font-weight: var(--lb-weight-semibold);
+  text-align: start;
+}
+
+.lb-web-table-region :where(th, td) {
+  min-block-size: var(--lb-row-dense-size);
+  padding: var(--lb-space-2);
+  border-block-end: 1px solid var(--lb-line-subtle);
+  text-align: start;
+  vertical-align: top;
+}
+
+.lb-web-table-region th {
+  color: var(--lb-text-secondary);
+  font-size: var(--lb-text-label-size);
+}
+
+.lb-web-detail-row {
+  display: none;
+}
+
+.lb-web-filter-bar {
+  flex-wrap: wrap;
+  padding-block: var(--lb-space-3);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-claim-row,
+.lb-web-search-result,
+.lb-web-receipt,
+.lb-web-failure,
+.lb-web-empty,
+.lb-web-download-gate {
+  padding-block: var(--lb-space-4);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-claim-row dl,
+.lb-web-article-metadata,
+.lb-web-manifest,
+.lb-web-receipt dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lb-space-3);
+}
+
+.lb-web-claim-row dl div,
+.lb-web-article-metadata div,
+.lb-web-manifest div,
+.lb-web-receipt dl div {
+  min-inline-size: 0;
+}
+
+.lb-web-claim-row :where(dt, dd),
+.lb-web-article-metadata :where(dt, dd),
+.lb-web-manifest :where(dt, dd),
+.lb-web-receipt :where(dt, dd) {
+  margin: 0;
+}
+
+.lb-web-claim-row dt,
+.lb-web-article-metadata dt,
+.lb-web-manifest dt,
+.lb-web-receipt dt {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.lb-web-documentation-index ul {
+  display: grid;
+  gap: var(--lb-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.lb-web-version-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
+.lb-web-policy {
+  max-inline-size: 68ch;
+}
+
+.lb-web-timeline {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lb-web-timeline li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  gap: var(--lb-space-2) var(--lb-space-3);
+  padding-block: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-timeline li p {
+  grid-column: 2;
+}
+
+.lb-web-toast {
+  position: fixed;
+  z-index: var(--lb-layer-toast);
+  inset-block-end: var(--lb-space-3);
+  inset-inline-end: var(--lb-space-3);
+  max-inline-size: 68ch;
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-raised);
+}
+
+.lb-web-product-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+  min-block-size: calc(100vh - var(--lb-space-7));
+}
+
+.lb-web-product-frame > nav {
+  padding: var(--lb-space-3);
+  border-inline-end: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.lb-web-product-frame > nav ul {
+  position: sticky;
+  inset-block-start: calc(var(--lb-space-7) + var(--lb-space-4));
+  flex-direction: column;
+}
+
+.lb-web-product-frame > main {
+  min-inline-size: 0;
+  padding: var(--lb-space-4);
+}
+
+.lb-web-admin-gate {
+  display: grid;
+  gap: var(--lb-space-4);
+}
+
+.lb-web-high-risk {
+  padding-block: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-warning);
+}
+
+.lb-web-high-risk > p {
+  display: none;
+}
+
+@media (width < 1280px) {
+  .lb-web-command-runway {
+    gap: var(--lb-space-5);
+  }
+}
+
+@media (width < 960px) {
+  .lb-web-public-header > nav,
+  .lb-web-public-tools {
+    display: none;
+  }
+
+  .lb-web-command-runway {
+    grid-template-columns: 1fr;
+    min-block-size: auto;
+    padding-block: var(--lb-space-5);
+  }
+
+  .lb-web-command-copy {
+    order: 1;
+  }
+
+  .lb-web-command-artifact {
+    order: 2;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--lb-line-strong);
+  }
+
+  .lb-web-product-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .lb-web-product-frame > nav {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--lb-line-subtle);
+  }
+
+  .lb-web-product-frame > nav ul {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .lb-web-role-rail,
+  .lb-web-preview-rail {
+    position: static;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lb-web-high-risk > :not(p) {
+    display: none;
+  }
+
+  .lb-web-high-risk > p {
+    display: block;
+  }
+}
+
+@media (width < 640px) {
+  .lb-web-public-footer,
+  .lb-web-route-header,
+  .lb-web-claim-row dl,
+  .lb-web-article-metadata,
+  .lb-web-manifest,
+  .lb-web-receipt dl,
+  .lb-web-timeline li {
+    grid-template-columns: 1fr;
+  }
+
+  .lb-web-public-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: var(--lb-space-3);
+  }
+
+  .lb-web-command-runway,
+  .lb-web-product-frame > main {
+    padding-inline: var(--lb-space-3);
+  }
+
+  .lb-web-route-actions,
+  .lb-web-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lb-web-table-region [data-essential='false'] {
+    display: none;
+  }
+
+  .lb-web-detail-row {
+    display: block;
+  }
+
+  .lb-web-timeline li p {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-web-shell *,
+  .lb-web-shell *::before,
+  .lb-web-shell *::after {
+    scroll-behavior: auto;
+    transition-duration: 100ms;
+    animation-duration: 100ms;
+    animation-iteration-count: 1;
+  }
+
+  .lb-web-skip-link {
+    transition-property: opacity;
+  }
+}
+
+@media (forced-colors: active) {
+  .lb-web-shell {
+    color: CanvasText;
+    background: Canvas;
+    forced-color-adjust: auto;
+  }
+
+  .lb-web-shell
+    :where(
+      [data-lb-control],
+      .lb-web-status,
+      .lb-web-boundary,
+      .lb-web-preview-rail,
+      .lb-web-role-rail,
+      .lb-web-table-region,
+      .lb-web-toast
+    ) {
+    border-color: CanvasText;
+  }
+
+  .lb-web-shell :where(a, button, input, select, summary):focus-visible {
+    outline-color: Highlight;
+  }
+}
