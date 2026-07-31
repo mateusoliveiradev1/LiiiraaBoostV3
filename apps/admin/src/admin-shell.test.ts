@@ -7,6 +7,14 @@ import {
   createAdminFailureModel,
   redactedAdminCorrelationId,
 } from './admin-errors';
+import {
+  ADMIN_ENTRY_ROUTE_IDS,
+  ADMIN_ERROR_ROUTE_IDS,
+  adminFailureKindForRoute,
+  adminRoleCanAccess,
+  isAdminErrorRoute,
+  isAdminPreviewRoute,
+} from './admin-preview-model';
 import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
 
@@ -83,6 +91,54 @@ describe('admin 404', () => {
     expect(adminFailureLocale('fr')).toBe('pt-BR');
     expect(route).toContain('notFound()');
     expect(route).not.toMatch(/redirect\(/u);
+  });
+});
+
+describe('admin 410', () => {
+  it('keeps canonical error routes exhaustive and disjoint from role workspaces', () => {
+    expect(ADMIN_ERROR_ROUTE_IDS).toEqual([
+      'admin-error-404',
+      'admin-error-403',
+      'admin-error-410',
+      'admin-error-500',
+    ]);
+    expect(ADMIN_ERROR_ROUTE_IDS.map(adminFailureKindForRoute)).toEqual([
+      '404',
+      '403',
+      '410',
+      '500',
+    ]);
+    expect(ADMIN_ERROR_ROUTE_IDS.every(isAdminErrorRoute)).toBe(true);
+    expect(ADMIN_ERROR_ROUTE_IDS.some(isAdminPreviewRoute)).toBe(false);
+    expect(ADMIN_ENTRY_ROUTE_IDS.some(isAdminErrorRoute)).toBe(false);
+    expect(adminFailureKindForRoute('admin-role')).toBeUndefined();
+  });
+
+  it('authors distinct bilingual history and same-origin recovery without leaking digests', () => {
+    const ptBr = createAdminFailureModel('410', 'pt-BR', 'history_42');
+    const en = createAdminFailureModel('410', 'en', 'history_42');
+    const unsafe = createAdminFailureModel('410', 'en', 'user@example.com C:\\private');
+
+    expect(ptBr.copy.title).toContain('não está mais disponível');
+    expect(ptBr.copy.affected).toContain('histórico');
+    expect(ptBr.copy.detail).toContain('permanece preservado');
+    expect(ptBr.copy.safeState).toContain('Nenhuma autoridade');
+    expect(en.copy.title).toContain('no longer available');
+    expect(en.copy.affected).toContain('historical');
+    expect(en.copy.detail).toContain('remains preserved');
+    expect(en.copy.safeState).toContain('No authority');
+    expect(ptBr.copy).not.toEqual(createAdminFailureModel('404', 'pt-BR').copy);
+    expect(en.copy).not.toEqual(createAdminFailureModel('500', 'en').copy);
+    expect(ptBr.destinations.role).toBe('/pt-BR/admin');
+    expect(en.destinations.role).toBe('/en/admin');
+    expect(ptBr.correlationId).toBe('LB-ADM-410-history_42');
+    expect(unsafe.correlationId).toBe('LB-ADM-410-REDACTED');
+  });
+
+  it('preserves the closed cross-role access matrix', () => {
+    expect(adminRoleCanAccess('support', 'admin-security')).toBe(false);
+    expect(adminRoleCanAccess('security', 'admin-security')).toBe(true);
+    expect(isAdminPreviewRoute('admin-error-410')).toBe(false);
   });
 });
 
