@@ -534,3 +534,273 @@ describe('Phase 2 ownership', () => {
     });
   });
 });
+
+describe('Phase 3 web isolation', () => {
+  const activatedGraph = createActivatedWorkspaceGraph(
+    canonicalPolicy,
+    [
+      'contracts-ts',
+      'design-system',
+      'architecture-tests',
+      'web-core',
+      'web-preview',
+      'web-features',
+      'web-evidence',
+      'web-app',
+      'account-app',
+      'admin-app',
+    ],
+    [
+      { from: 'web-core', to: 'contracts-ts' },
+      { from: 'web-preview', to: 'web-core' },
+      { from: 'web-features', to: 'web-core' },
+      { from: 'web-features', to: 'design-system' },
+      { from: 'web-app', to: 'web-features' },
+      { from: 'account-app', to: 'web-features' },
+      { from: 'account-app', to: 'web-preview' },
+      { from: 'admin-app', to: 'web-features' },
+      { from: 'admin-app', to: 'web-preview' },
+      { from: 'web-evidence', to: 'architecture-tests' },
+    ],
+  );
+
+  const withEdge = (
+    from: string,
+    to: string,
+    importPath: string,
+  ): typeof activatedGraph => ({
+    ...activatedGraph,
+    edges: [
+      ...activatedGraph.edges,
+      {
+        from,
+        to,
+        importPath,
+        kind: 'typescript' as const,
+      },
+    ],
+  });
+
+  it('accepts the legal web-core, design, feature, adapter, and composition graph', () => {
+    expect(evaluateGraph(canonicalPolicy, activatedGraph)).toEqual({
+      ok: true,
+      diagnostics: [],
+    });
+  });
+
+  it('rejects the public composition importing the preview adapter', () => {
+    expect(
+      evaluateGraph(
+        canonicalPolicy,
+        withEdge(
+          'apps/web/src/index.ts',
+          'packages/web-preview/src/index.ts',
+          '@liiiraa/web-preview',
+        ),
+      ),
+    ).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PRODUCTION_TO_FIXTURE',
+          path: 'apps/web/src/index.ts -> packages/web-preview/src/index.ts',
+          message:
+            'Production module "web-app" cannot depend on fixture module "web-preview".',
+        },
+      ],
+    });
+  });
+
+  it.each([
+    {
+      targetId: 'account-app',
+      targetPath: 'apps/account/src/index.ts',
+      importPath: '@liiiraa/account',
+    },
+    {
+      targetId: 'admin-app',
+      targetPath: 'apps/admin/src/index.ts',
+      importPath: '@liiiraa/admin',
+    },
+  ])(
+    'rejects the public composition importing fixture composition $targetId',
+    ({ targetId, targetPath, importPath }) => {
+      const dependencyPath = `apps/web/src/index.ts -> ${targetPath}`;
+
+      expect(
+        evaluateGraph(
+          canonicalPolicy,
+          withEdge('apps/web/src/index.ts', targetPath, importPath),
+        ),
+      ).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'LAYER_DIRECTION',
+            path: dependencyPath,
+            message:
+              `Layer "composition" in module "web-app" cannot depend on layer ` +
+              `"composition" in module "${targetId}".`,
+          },
+          {
+            code: 'PRODUCTION_TO_FIXTURE',
+            path: dependencyPath,
+            message:
+              `Production module "web-app" cannot depend on fixture module ` +
+              `"${targetId}".`,
+          },
+        ],
+      });
+    },
+  );
+
+  it('rejects the account composition importing the admin composition', () => {
+    const dependencyPath = 'apps/account/src/index.ts -> apps/admin/src/index.ts';
+
+    expect(
+      evaluateGraph(
+        canonicalPolicy,
+        withEdge(
+          'apps/account/src/index.ts',
+          'apps/admin/src/index.ts',
+          '@liiiraa/admin',
+        ),
+      ),
+    ).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'LAYER_DIRECTION',
+          path: dependencyPath,
+          message:
+            'Layer "composition" in module "account-app" cannot depend on layer ' +
+            '"composition" in module "admin-app".',
+        },
+      ],
+    });
+  });
+
+  it('rejects a deep import into the shared design module', () => {
+    const graph = {
+      ...activatedGraph,
+      nodes: [
+        ...activatedGraph.nodes,
+        {
+          path: 'packages/design-system/src/private.ts',
+          runtimeClass: 'production' as const,
+        },
+      ],
+      edges: [
+        ...activatedGraph.edges,
+        {
+          from: 'packages/web-features/src/index.ts',
+          to: 'packages/design-system/src/private.ts',
+          importPath: '@liiiraa/design-system/src/private',
+          kind: 'typescript' as const,
+        },
+      ],
+    };
+
+    expect(evaluateGraph(canonicalPolicy, graph)).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'DEEP_IMPORT',
+          path: 'packages/design-system/src/private.ts',
+          message:
+            'Import "@liiiraa/design-system/src/private" targets a private path ' +
+            'in module "design-system".',
+        },
+      ],
+    });
+  });
+
+  it('rejects an admin route group nested inside the public deployment root', () => {
+    const routeGroupPolicy = {
+      ...canonicalPolicy,
+      modules: canonicalPolicy.modules.map((module) =>
+        module.id === 'admin-app'
+          ? {
+              ...module,
+              roots: ['apps/web/src/app/(admin)'],
+              publicRoots: ['apps/web/src/app/(admin)/src/index.ts'],
+            }
+          : module,
+      ),
+    };
+
+    expect(evaluateGraph(routeGroupPolicy, activatedGraph)).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'DUPLICATE_OWNER',
+          path: 'apps/web/src/app/(admin)',
+          message:
+            'Root "apps/web/src/app/(admin)" is owned by both "admin-app" and "web-app".',
+        },
+      ],
+    });
+  });
+
+  it.each([
+    {
+      moduleId: 'account-app',
+      path: 'apps/account/src/index.ts',
+    },
+    {
+      moduleId: 'admin-app',
+      path: 'apps/admin/src/index.ts',
+    },
+  ])(
+    'keeps independently buildable fixture composition $moduleId from claiming production authority',
+    ({ moduleId, path }) => {
+      const graph = {
+        ...activatedGraph,
+        nodes: activatedGraph.nodes.map((node) =>
+          node.path === path
+            ? {
+                ...node,
+                runtimeClass: 'production' as const,
+              }
+            : node,
+        ),
+      };
+
+      expect(evaluateGraph(canonicalPolicy, graph)).toEqual({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'RUNTIME_CLASS_MISMATCH',
+            path,
+            message:
+              `Node "${path}" claims runtime class "production", but module ` +
+              `"${moduleId}" declares "fixture".`,
+          },
+        ],
+      });
+    },
+  );
+
+  it('rejects a cycle between web evidence and architecture tooling', () => {
+    const graph = withEdge(
+      'tooling/architecture-tests/src/policy.ts',
+      'tooling/web-evidence/src/index.ts',
+      '@liiiraa/web-evidence',
+    );
+    const cycle =
+      'tooling/architecture-tests/src/policy.ts -> ' +
+      'tooling/web-evidence/src/index.ts -> ' +
+      'tooling/architecture-tests/src/policy.ts';
+
+    expect(evaluateGraph(canonicalPolicy, graph)).toEqual({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'CYCLE',
+          path: cycle,
+          message: `Dependency cycle detected: ${cycle}.`,
+        },
+      ],
+    });
+  });
+});
