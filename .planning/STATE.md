@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-35-PLAN.md
-last_updated: "2026-07-31T17:27:22.272Z"
+stopped_at: Completed 03-36-PLAN.md
+last_updated: "2026-07-31T18:04:34.831Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-35-PLAN.md
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 94
-  completed_plans: 93
-  percent: 20
+  completed_plans: 94
+  percent: 30
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 35 of 36
+Plan: 36 of 36
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-35-PLAN.md
 
@@ -141,6 +141,7 @@ _Updated after plan completion_
 | Phase 03 P33 | 24min | 2 tasks | 8 files |
 | Phase 03 P34 | 10min | 2 tasks | 4 files |
 | Phase 03 P35 | 15min | 3 tasks | 6 files |
+| Phase 03 P36 | 32min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -392,6 +393,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Canonical webRoutes and WEB_LOCALES are the only authority for the 24 expected W17 observation identities.
 - [Phase 03]: Reachability evidence stores only bounded outcomes and SHA-256 fingerprints; raw browser text never crosses the durable evidence boundary.
 - [Phase 03]: Route reachability becomes passed only when complete current-source-bound public, account, and admin slices close the exact set.
+- [Phase 03]: D-25 requires the exact 24 browser-observed route outcomes independently of the 53-route declaration.
+- [Phase 03]: Each final proof carries its exact owner; route reachability belongs to plan-03-35 while earlier proofs remain plan-03-32.
+- [Phase 03]: Repository proof validation accepts raw or canonical-LF package hashes so Windows CRLF cannot create false mismatches.
+- [Phase 03]: Raw Node TypeScript execution uses the same-package .ts source import while NodeNext consumers retain existing behavior.
 
 ### Pending Todos
 
@@ -433,6 +438,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T17:27:22.266Z
-Stopped at: Completed 03-35-PLAN.md
+Last session: 2026-07-31T18:04:34.826Z
+Stopped at: Completed 03-36-PLAN.md
 Resume file: None
