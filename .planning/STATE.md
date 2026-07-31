@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-07-31T02:46:35.259Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-07-31T02:55:12.416Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 64
+  completed_plans: 65
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 7 of 32
+Plan: 8 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -112,6 +112,7 @@ _Updated after plan completion_
 | Phase 03 P04 | 3min | 2 tasks | 6 files |
 | Phase 03 P05 | 4min | 2 tasks | 6 files |
 | Phase 03 P09 | 18min | 1 tasks | 8 files |
+| Phase 03 P06 | 3min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -272,6 +273,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Filter web-owned definitions from desktop runtime schemas to preserve byte-identical desktop contracts. — Web models share primitives but must not alter established desktop validation artifacts.
 - [Phase 03]: Generate exact MessageEnvelope and WebDocument aliases through one reachable TypeScript contract root. — Pinned json-schema-to-typescript omits unreachable definitions, while the reachable roots preserve separate public semantics.
 - [Phase 03]: Permit local OpenAPI compatibility only for additive components with empty paths; operations still require pinned oasdiff. — The plan adds schemas but no HTTP operations and cannot install new dependencies.
+- [Phase 03]: Keep public application production-classified without @liiiraa/web-preview. — Prevents fixture authority from entering the public production artifact.
+- [Phase 03]: Declare AVIF/WebP with an empty remote image allowlist. — Avoids trusting any speculative third-party image origin.
+- [Phase 03]: Keep scaffold tests dependency-neutral until Plan 03-11 materializes dependencies. — Satisfies terminating lifecycle contracts without broadening the approved package scope.
 
 ### Pending Todos
 
@@ -313,6 +317,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T02:46:34.915Z
-Stopped at: Completed 03-09-PLAN.md
+Last session: 2026-07-31T02:54:49.403Z
+Stopped at: Completed 03-06-PLAN.md
 Resume file: None
