@@ -3,9 +3,9 @@ phase: 03
 slug: complete-web-experience
 status: approved
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 planning_signoff: approved
-wave_0_execution: pending
+wave_0_execution: complete
 created: 2026-07-30
 ---
 
@@ -20,7 +20,7 @@ created: 2026-07-30
 | Property | Value |
 |----------|-------|
 | **Framework** | Vitest 4.1.10 + Playwright 1.62.0 + Storybook 10.5.4 + `@axe-core/playwright` 4.12.1 |
-| **Config file** | None — Wave 0 installs the web verification configuration |
+| **Config file** | `tooling/web-evidence/playwright.config.ts` |
 | **Quick run command** | `pnpm web:verify:quick` |
 | **Full suite command** | `pnpm verify` |
 | **Estimated runtime** | ~120 seconds |
@@ -40,7 +40,7 @@ created: 2026-07-30
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-W0-HARNESS | 03-14 Task 1 self-test/mutation mode | 7 | Infrastructure | T-03-11 / T-03-08 | A complete isolated fixture passes and every seeded omission produces its expected stable failure code | unit + mutation | `pnpm --filter @liiiraa/web-evidence test -- --run -t "web evidence harness self-test"` | ❌ W0 | ⬜ pending |
+| 03-W0-HARNESS | 03-14 Task 1 self-test/mutation mode | 7 | Infrastructure | T-03-11 / T-03-08 | A complete isolated fixture passes and every seeded omission produces its expected stable failure code | unit + mutation | `pnpm --filter @liiiraa/web-evidence test -- --run -t "web evidence harness self-test"` | ✅ | ✅ green |
 | 03-W0-01 | 03-14 Task 1 readiness mode + downstream WEB-01 owners | 7+ | WEB-01 | T-03-02 / T-03-09 | Public content remains truthful, bilingual, navigable, accessible, and isolated from preview data | unit + E2E + visual + accessibility | `pnpm web:verify:quick -- --requirement WEB-01` | ❌ W0/downstream | ⬜ pending |
 | 03-W0-02 | 03-14 Task 1 readiness mode + downstream WEB-02 owners | 7+ | WEB-02 | T-03-02 / T-03-04 | Locale, version, channel, search, and desktop links resolve only through the typed manifest | contract + unit + E2E | `pnpm web:verify:quick -- --requirement WEB-02` | ❌ W0/downstream | ⬜ pending |
 | 03-W0-03 | 03-14 Task 1 readiness mode + downstream WEB-03 owners | 7+ | WEB-03 | T-03-08 | Download eligibility and integrity flows fail closed and never expose a development artifact | state-machine + artifact + E2E | `pnpm web:verify:quick -- --requirement WEB-03` | ❌ W0/downstream | ⬜ pending |
@@ -52,17 +52,17 @@ created: 2026-07-30
 
 ## Wave 0 Requirements
 
-- [ ] Declare `web-core`, `web-preview`, `web-features`, the three app modules, and `web-evidence` in `architecture/module-boundaries.json`; extend architecture fixtures.
-- [ ] Create package and app manifests, strict TypeScript configs, Next.js configs, and independent `build`, `start`, `check`, and `test` scripts.
-- [ ] Create `tooling/web-evidence/src/route-manifest.test.ts` for bidirectional route, navigation, sitemap, redirect, and desktop-link ownership.
-- [ ] Create `tooling/web-evidence/src/content-publication.test.ts` for schema, locale, review-date, evidence, policy, screenshot, search-index, and release coherence.
-- [ ] Create `tooling/web-evidence/src/security-boundaries.test.ts` for headers, CSP, robots, cookies, origin transitions, and preview/artifact leakage.
-- [ ] Create `tooling/web-evidence/src/release-gate.test.ts` for unavailable, mismatch, no-bypass, and no-development-artifact cases.
-- [ ] Keep two explicit evidence modes: a passing `web evidence harness self-test` over isolated positive/mutation fixtures, and fail-closed `workspace readiness` checks invoked by downstream requirement owners.
-- [ ] Create `tooling/web-evidence/playwright.config.ts` for route states, locales, screenshot coverage, and axe checks.
-- [ ] Create `quality/features/WEB-01.json` through `quality/features/WEB-08.json` for the four Phase 3 requirement IDs and their five-dimension evidence.
+- [x] Declare `web-core`, `web-preview`, `web-features`, the three app modules, and `web-evidence` in `architecture/module-boundaries.json`; extend architecture fixtures.
+- [x] Create package and app manifests, strict TypeScript configs, Next.js configs, and independent `build`, `start`, `check`, and `test` scripts.
+- [x] Create `tooling/web-evidence/src/route-manifest.test.ts` for bidirectional route, navigation, sitemap, redirect, and desktop-link ownership.
+- [x] Create `tooling/web-evidence/src/content-publication.test.ts` for schema, locale, review-date, evidence, policy, screenshot, search-index, and release coherence.
+- [x] Create `tooling/web-evidence/src/security-boundaries.test.ts` for headers, CSP, robots, cookies, origin transitions, and preview/artifact leakage.
+- [x] Create `tooling/web-evidence/src/release-gate.test.ts` for unavailable, mismatch, no-bypass, and no-development-artifact cases.
+- [x] Keep two explicit evidence modes: a passing `web evidence harness self-test` over isolated positive/mutation fixtures, and fail-closed `workspace readiness` checks invoked by downstream requirement owners.
+- [x] Create `tooling/web-evidence/playwright.config.ts` for route states, locales, screenshot coverage, and axe checks.
+- [x] Create `quality/features/WEB-01.json` through `quality/features/WEB-08.json` for the four Phase 3 requirement IDs and their five-dimension evidence.
 - [ ] Add `web:verify:quick` and `web:verify`, wire them into root verification, and update required-artifact tests without dropping existing gates.
-- [ ] Complete a human verification checkpoint for `next`, `@next/mdx`, and `next-intl` before accepting the recency-flagged packages.
+- [x] Complete a human verification checkpoint for `next`, `@next/mdx`, and `next-intl` before accepting the recency-flagged packages.
 
 ---
 
@@ -85,4 +85,4 @@ created: 2026-07-30
 
 **Planning approval:** approved — every Phase 3 requirement has an explicit Plan 03-14 task mapping and focused automated command before UI fan-out.
 
-**Wave 0 execution:** pending — `wave_0_complete` remains `false` until Plan 03-14 has executed and its evidence harness passes. Planning completeness is not execution evidence.
+**Wave 0 execution:** complete — Plan 03-14's harness self-test, browser matrix enumeration, and planned requirement manifests pass. Downstream workspace readiness remains intentionally fail-closed until each feature owner produces its real build and evidence artifacts.
