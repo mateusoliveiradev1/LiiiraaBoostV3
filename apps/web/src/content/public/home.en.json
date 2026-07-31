@@ -100,30 +100,20 @@
   "metadata": {
     "title": "Liiiraa Boost | Evidence-led performance and control",
     "description": "Explore the Liiiraa Boost approach to preparation, evidence, compatibility, and restoration.",
-    "socialImageId": "desktop-home-en"
+    "socialImageId": "desktop-home-en-social"
   },
   "warnings": [
     "Compatibility and results depend on hardware, Windows version, the game, and measurement quality.",
     "Public download remains blocked until a publicly trusted installer is approved."
   ],
-  "screenshotAssetIds": [
-    "desktop-home-en"
-  ],
+  "screenshotAssetIds": ["desktop-home-en"],
   "actionableClaims": [
     "Check compatibility before considering any plan.",
     "Review the source and boundary of every material claim."
   ],
-  "identifiers": [
-    "LB-HOME",
-    "WEB-01",
-    "1.0.0"
-  ],
+  "identifiers": ["LB-HOME", "WEB-01", "1.0.0"],
   "errorCodes": [],
-  "suggestions": [
-    "Check compatibility",
-    "Read the methodology",
-    "Review releases"
-  ],
+  "suggestions": ["Check compatibility", "Read the methodology", "Review releases"],
   "domain": "product",
   "risk": "low",
   "availability": "under-validation",

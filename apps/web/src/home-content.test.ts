@@ -1,4 +1,9 @@
-import { validateWebDocument } from '@liiiraa/web-core';
+import {
+  admitContentBundle,
+  validateWebDocument,
+  webRoutes,
+  type RepositoryContentRecord,
+} from '@liiiraa/web-core';
 import { describe, expect, it } from 'vitest';
 
 import homeEn from './content/public/home.en.json';
@@ -71,9 +76,7 @@ describe('Home content contract', () => {
   });
 
   it('uses the approved promise and gated compatibility action exactly', () => {
-    expect(homePtBr.hero.promise).toBe(
-      'Prepare seu PC. Prove o resultado. Restaure com controle.',
-    );
+    expect(homePtBr.hero.promise).toBe('Prepare seu PC. Prove o resultado. Restaure com controle.');
     expect(homeEn.hero.promise).toBe('Prepare your PC. Prove result. Restore control.');
     expect(homePtBr.hero.primaryAction.label).toBe('Verificar compatibilidade');
     expect(homeEn.hero.primaryAction.label).toBe('Check compatibility');
@@ -107,5 +110,24 @@ describe('Home content contract', () => {
 
     expect(authoredText(homePtBr)).not.toMatch(forbidden);
     expect(authoredText(homeEn)).not.toMatch(forbidden);
+  });
+
+  it('fails content admission explicitly until real capture sidecars are present', async () => {
+    const result = await admitContentBundle(
+      [homePtBr, homeEn] as unknown as readonly RepositoryContentRecord[],
+      {
+        assetIndex: [],
+        clock: new Date('2026-07-31T12:00:00.000Z'),
+        routeManifest: webRoutes,
+      },
+    );
+
+    expect(result).toEqual({
+      error: {
+        code: 'ASSET_MISSING',
+        path: '$.records[0].metadata.socialImageId',
+      },
+      ok: false,
+    });
   });
 });

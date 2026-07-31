@@ -495,7 +495,9 @@ export const CommandRunwayHero = ({
 export interface RealProductStageProps {
   readonly alt: string;
   readonly completeScreenshotHref: string;
+  readonly completeScreenshotLabel?: string;
   readonly height: number;
+  readonly loading?: 'eager' | 'lazy';
   readonly provenance: string;
   readonly src: string;
   readonly width: number;
@@ -504,34 +506,52 @@ export interface RealProductStageProps {
 export const RealProductStage = ({
   alt,
   completeScreenshotHref,
+  completeScreenshotLabel = 'View complete screenshot',
   height,
+  loading = 'eager',
   provenance,
   src,
   width,
 }: RealProductStageProps) => (
   <figure className="lb-web-product-stage">
-    <img alt={alt} decoding="async" height={height} src={src} width={width} />
+    <img alt={alt} decoding="async" height={height} loading={loading} src={src} width={width} />
     <figcaption>
       <ProvenanceLabel detail={provenance} kind="measured" />
-      <LbLink href={completeScreenshotHref}>View complete screenshot</LbLink>
+      <LbLink href={completeScreenshotHref}>{completeScreenshotLabel}</LbLink>
     </figcaption>
   </figure>
 );
 
 export interface ClaimEvidenceRowProps {
   readonly claim: string;
+  readonly labels?: Readonly<{
+    readonly scope: string;
+    readonly source: string;
+    readonly unprovenBoundary: string;
+    readonly validationState: string;
+    readonly version: string;
+  }>;
   readonly provenance: WebProvenanceKind;
   readonly scope: string;
   readonly source: string;
+  readonly unprovenBoundary?: string;
   readonly validationState: string;
   readonly version: string;
 }
 
 export const ClaimEvidenceRow = ({
   claim,
+  labels = {
+    scope: 'Scope',
+    source: 'Source',
+    unprovenBoundary: 'What remains unproven',
+    validationState: 'Validation state',
+    version: 'Version',
+  },
   provenance,
   scope,
   source,
+  unprovenBoundary,
   validationState,
   version,
 }: ClaimEvidenceRowProps) => (
@@ -540,23 +560,29 @@ export const ClaimEvidenceRow = ({
     <ProvenanceLabel kind={provenance} />
     <dl>
       <div>
-        <dt>Source</dt>
+        <dt>{labels.source}</dt>
         <dd>{source}</dd>
       </div>
       <div>
-        <dt>Scope</dt>
+        <dt>{labels.scope}</dt>
         <dd>{scope}</dd>
       </div>
       <div>
-        <dt>Version</dt>
+        <dt>{labels.version}</dt>
         <dd>
           <code>{version}</code>
         </dd>
       </div>
       <div>
-        <dt>Validation state</dt>
+        <dt>{labels.validationState}</dt>
         <dd>{validationState}</dd>
       </div>
+      {unprovenBoundary ? (
+        <div>
+          <dt>{labels.unprovenBoundary}</dt>
+          <dd>{unprovenBoundary}</dd>
+        </div>
+      ) : null}
     </dl>
   </article>
 );

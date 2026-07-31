@@ -100,30 +100,20 @@
   "metadata": {
     "title": "Liiiraa Boost | Desempenho com evidência e controle",
     "description": "Conheça a abordagem de preparação, evidência, compatibilidade e restauração do Liiiraa Boost.",
-    "socialImageId": "desktop-home-pt-BR"
+    "socialImageId": "desktop-home-pt-BR-social"
   },
   "warnings": [
     "Compatibilidade e resultado dependem do hardware, da versão do Windows, do jogo e da qualidade da medição.",
     "O download público permanece bloqueado até existir um instalador com confiança pública aprovada."
   ],
-  "screenshotAssetIds": [
-    "desktop-home-pt-BR"
-  ],
+  "screenshotAssetIds": ["desktop-home-pt-BR"],
   "actionableClaims": [
     "Verifique a compatibilidade antes de considerar qualquer plano.",
     "Consulte a origem e o limite de cada afirmação material."
   ],
-  "identifiers": [
-    "LB-HOME",
-    "WEB-01",
-    "1.0.0"
-  ],
+  "identifiers": ["LB-HOME", "WEB-01", "1.0.0"],
   "errorCodes": [],
-  "suggestions": [
-    "Verificar compatibilidade",
-    "Ler a metodologia",
-    "Consultar as versões"
-  ],
+  "suggestions": ["Verificar compatibilidade", "Ler a metodologia", "Consultar as versões"],
   "domain": "product",
   "risk": "low",
   "availability": "under-validation",
