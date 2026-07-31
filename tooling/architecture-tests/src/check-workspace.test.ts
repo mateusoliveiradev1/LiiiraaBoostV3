@@ -774,7 +774,7 @@ describe('Phase 3 web isolation', () => {
             path,
             message:
               `Node "${path}" claims runtime class "production", but module ` +
-              `"${moduleId}" declares "fixture".`,
+              `"${moduleId}" is "fixture".`,
           },
         ],
       });
