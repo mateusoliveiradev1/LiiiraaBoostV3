@@ -702,15 +702,21 @@ export const ManifestFieldList = ({
 
 export const DownloadAvailabilityGate = ({
   children,
+  description = 'No publicly trusted installer has been approved. There is no continue option.',
   reason,
+  statusLabel = 'Blocked',
+  title = 'Public download is not available yet',
 }: {
   readonly children?: ReactNode;
+  readonly description?: string;
   readonly reason: string;
+  readonly statusLabel?: string;
+  readonly title?: string;
 }) => (
   <section className="lb-web-download-gate" role="alert">
-    <QualityMark detail={reason} quality="critical" />
-    <h2>Public download is not available yet</h2>
-    <p>No publicly trusted installer has been approved. There is no continue option.</p>
+    <StatusSignal detail={reason} label={statusLabel} state="error" />
+    <h2>{title}</h2>
+    <p>{description}</p>
     {children}
   </section>
 );

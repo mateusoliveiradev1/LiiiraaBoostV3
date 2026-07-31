@@ -7,7 +7,12 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./components": {
+      "types": "./src/components.tsx",
+      "default": "./src/components.tsx"
+    },
+    "./web.css": "./src/web.css"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

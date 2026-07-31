@@ -3,7 +3,11 @@
 import { useEffect, useRef } from 'react';
 import type { WebLocale } from '@liiiraa/web-core';
 
-import { accountBoundaryHref, publicBoundaryHref, routing } from '../public-boundary';
+import {
+  CLIENT_WEB_LOCALES,
+  clientAccountBoundaryHref,
+  clientPublicBoundaryHref,
+} from '../public-client-boundary';
 
 type RecoveryDestination = Readonly<{
   href: string;
@@ -34,7 +38,7 @@ export const localeFromFailureParams = (
   value: string | readonly string[] | undefined,
 ): WebLocale => {
   const requested = typeof value === 'string' ? value : value?.[0];
-  return routing.locales.find((locale) => locale === requested) ?? 'pt-BR';
+  return CLIENT_WEB_LOCALES.find((locale) => locale === requested) ?? 'pt-BR';
 };
 
 export const opaqueErrorCorrelation = (digest: string | undefined): string =>
@@ -140,16 +144,16 @@ export const ForbiddenState = ({ locale }: Readonly<{ locale: WebLocale }>) => {
       diagnosticLabel={copy.diagnosticLabel}
       destinations={[
         {
-          href: publicBoundaryHref('public-home', locale),
+          href: clientPublicBoundaryHref('public-home', locale),
           label: copy.home,
           primary: true,
         },
         {
-          href: accountBoundaryHref(locale),
+          href: clientAccountBoundaryHref(locale),
           label: copy.signIn,
         },
         {
-          href: publicBoundaryHref('public-support', locale),
+          href: clientPublicBoundaryHref('public-support', locale),
           label: copy.support,
         },
       ]}
@@ -197,12 +201,12 @@ export const GoneState = ({ locale }: Readonly<{ locale: WebLocale }>) => {
       diagnosticLabel={copy.diagnosticLabel}
       destinations={[
         {
-          href: publicBoundaryHref('docs-index', locale),
+          href: clientPublicBoundaryHref('docs-index', locale),
           label: copy.docs,
           primary: true,
         },
         {
-          href: publicBoundaryHref('public-compatibility', locale),
+          href: clientPublicBoundaryHref('public-compatibility', locale),
           label: copy.compatibility,
         },
       ]}
@@ -263,16 +267,16 @@ export const ServerFailureState = ({
       diagnosticLabel={copy.diagnosticLabel}
       destinations={[
         {
-          href: publicBoundaryHref('public-status', locale),
+          href: clientPublicBoundaryHref('public-status', locale),
           label: copy.status,
           primary: true,
         },
         {
-          href: publicBoundaryHref('public-support', locale),
+          href: clientPublicBoundaryHref('public-support', locale),
           label: copy.support,
         },
         {
-          href: publicBoundaryHref('public-home', locale),
+          href: clientPublicBoundaryHref('public-home', locale),
           label: copy.home,
         },
       ]}

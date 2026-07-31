@@ -3,7 +3,7 @@
 import { createElement, useEffect, useRef } from 'react';
 import type { WebLocale } from '@liiiraa/web-core';
 
-import { publicBoundaryHref } from './public-boundary';
+import { clientPublicBoundaryHref } from './public-client-boundary';
 
 type PublicLocale = WebLocale;
 
@@ -45,9 +45,9 @@ export const createPublicNotFoundModel = (locale: PublicLocale) =>
     copy: COPY[locale],
     diagnosticId: 'LB-WEB-404',
     destinations: Object.freeze({
-      documentation: publicBoundaryHref('docs-index', locale),
-      home: publicBoundaryHref('public-home', locale),
-      support: publicBoundaryHref('public-support', locale),
+      documentation: clientPublicBoundaryHref('docs-index', locale),
+      home: clientPublicBoundaryHref('public-home', locale),
+      support: clientPublicBoundaryHref('public-support', locale),
     }),
     routeId: 'public-error-404',
   });

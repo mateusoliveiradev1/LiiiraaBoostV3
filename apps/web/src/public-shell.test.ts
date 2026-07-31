@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { publicCspProbe, publicHeaderContract } from '../next.config';
 import { publicBoundaryHref, publicNavigation, routing } from './public-boundary';
+import {
+  CLIENT_WEB_LOCALES,
+  clientAccountBoundaryHref,
+  clientPublicBoundaryHref,
+  type ClientRecoveryRouteId,
+} from './public-client-boundary';
 
 describe('public shell', () => {
   it('derives every public navigation pillar and both locale roots from route authority', () => {
@@ -16,6 +22,26 @@ describe('public shell', () => {
     ]);
     expect(publicBoundaryHref('docs-index', 'pt-BR')).toBe('/pt-BR/docs');
     expect(publicBoundaryHref('releases-index', 'en')).toBe('/en/releases');
+  });
+
+  it('keeps the client recovery subset byte-equal to canonical server routes', () => {
+    const recoveryRoutes = [
+      'docs-index',
+      'public-compatibility',
+      'public-home',
+      'public-status',
+      'public-support',
+    ] as const satisfies readonly ClientRecoveryRouteId[];
+
+    expect(CLIENT_WEB_LOCALES).toEqual(routing.locales);
+    for (const locale of routing.locales) {
+      for (const routeId of recoveryRoutes) {
+        expect(clientPublicBoundaryHref(routeId, locale)).toBe(publicBoundaryHref(routeId, locale));
+      }
+      expect(clientAccountBoundaryHref(locale)).toBe(
+        `https://account.liiiraa.com/${locale}/sign-in`,
+      );
+    }
   });
 });
 
