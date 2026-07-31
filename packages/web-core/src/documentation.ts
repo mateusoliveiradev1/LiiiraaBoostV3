@@ -10,8 +10,8 @@ import {
   type WebLocale,
   type WebRouteId,
   type WebVersion,
-} from './routes.js';
-import type { ContentRisk } from './content-admission.js';
+} from './routes.ts';
+import type { ContentRisk } from './content-admission.ts';
 
 export const DOCUMENTATION_DOMAINS = Object.freeze([
   'getting-started',

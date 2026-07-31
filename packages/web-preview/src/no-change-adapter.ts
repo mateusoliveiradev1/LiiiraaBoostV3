@@ -5,7 +5,7 @@ import {
   type NoChangeReceiptJson,
 } from '@liiiraa/web-core';
 
-import type { WebScenario } from './scenarios.js';
+import type { WebScenario } from './scenarios.ts';
 
 export const FUTURE_AUTHORITY_ACTION_FAMILIES = Object.freeze([
   'auth',

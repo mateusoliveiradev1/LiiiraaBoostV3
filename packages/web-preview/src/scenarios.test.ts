@@ -12,7 +12,7 @@ import {
   publishedPreviewScenarioId,
   resolveWebPreviewScenario,
   type WebScenario,
-} from './scenarios.js';
+} from './scenarios.ts';
 
 const EXPECTED_IDS = Object.freeze(
   Array.from(

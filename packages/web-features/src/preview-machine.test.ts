@@ -13,15 +13,15 @@ import {
   type FutureAuthorityPort,
   type PreviewWorkflowEvent,
   type PreviewWorkflowInput,
-} from './preview-machine.js';
+} from './preview-machine.ts';
 import {
   PreviewConfirmation,
   PreviewErrorSummary,
   PreviewFailure,
   PreviewReceipt,
   PreviewReview,
-} from './preview-workflows.js';
-import { PreviewBoundary } from './components.js';
+} from './preview-workflows.tsx';
+import { PreviewBoundary } from './components.tsx';
 
 const NOW = '2030-01-15T18:00:00.000Z';
 const CORRELATION_ID = 'preview-correlation-03-26';

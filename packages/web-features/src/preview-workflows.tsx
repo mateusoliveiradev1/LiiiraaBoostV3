@@ -11,8 +11,8 @@ import {
   type PreviewWorkflowInput,
   type PreviewWorkflowOutput,
   type createPreviewWorkflowMachine,
-} from './preview-machine.js';
-import { PreviewBoundary, ProvenanceLabel } from './components.js';
+} from './preview-machine.ts';
+import { PreviewBoundary, ProvenanceLabel } from './components.tsx';
 
 export type PreviewWorkflowLocale = 'en' | 'pt-BR';
 

@@ -6,8 +6,8 @@ import {
   FUTURE_AUTHORITY_ACTION_FAMILIES,
   createWebPreviewAuthority,
   type FutureAuthorityActionFamily,
-} from './no-change-adapter.js';
-import { getWebScenario } from './scenarios.js';
+} from './no-change-adapter.ts';
+import { getWebScenario } from './scenarios.ts';
 
 const accountScenario = getWebScenario('W13');
 const adminScenario = getWebScenario('W14');

@@ -11,8 +11,8 @@ import {
   StatusSignal,
   WEB_PROVENANCE_KINDS,
   WEB_STATUS_STATES,
-} from './components.js';
-import { AccountPreviewRail, AdminViewportGate } from './shells.js';
+} from './components.tsx';
+import { AccountPreviewRail, AdminViewportGate } from './shells.tsx';
 
 export const WEB_STORY_AXES = Object.freeze({
   interaction: Object.freeze([

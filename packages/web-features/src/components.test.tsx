@@ -15,7 +15,7 @@ import {
   VerificationReceipt,
   WEB_PROVENANCE_KINDS,
   WEB_STATUS_STATES,
-} from './components.js';
+} from './components.tsx';
 import {
   AccountPreviewRail,
   AccountShell,
@@ -25,9 +25,9 @@ import {
   PublicHeader,
   PublicShell,
   RoleScopeRail,
-} from './shells.js';
-import * as storyCatalog from './components.stories.js';
-import { WEB_STORY_AXES } from './components.stories.js';
+} from './shells.tsx';
+import * as storyCatalog from './components.stories.tsx';
+import { WEB_STORY_AXES } from './components.stories.tsx';
 
 const readUtf8File = readFileSync as (path: URL, encoding: 'utf8') => string;
 

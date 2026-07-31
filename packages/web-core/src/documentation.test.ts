@@ -5,7 +5,7 @@ import {
   resolveDocument,
   searchDocumentation,
   type DocumentationArticle,
-} from './documentation.js';
+} from './documentation.ts';
 
 const section = (
   id: string,

@@ -1,4 +1,4 @@
-export type * from './generated/index.js';
+export type * from './generated/index.ts';
 export {
   DIAGNOSTIC_VALUE_SCHEMA_ID,
   HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID,
@@ -8,7 +8,7 @@ export {
   validateHostToRendererShellEvent,
   validateRendererToHostShellCommand,
   validateWebDocument,
-} from './validation.js';
+} from './validation.ts';
 export type {
   ContractValidationError,
   ContractValidationIssue,
@@ -18,4 +18,4 @@ export type {
   RendererToHostShellCommandValidationResult,
   WebDocumentValidationError,
   WebDocumentValidationResult,
-} from './validation.js';
+} from './validation.ts';

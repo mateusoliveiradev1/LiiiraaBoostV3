@@ -4,8 +4,8 @@ import {
   admitContentBundle,
   type ContentAsset,
   type RepositoryContentRecord,
-} from './content-admission.js';
-import { webRoutes } from './routes.js';
+} from './content-admission.ts';
+import { webRoutes } from './routes.ts';
 
 const CLOCK = new Date('2026-07-31T12:00:00.000Z');
 

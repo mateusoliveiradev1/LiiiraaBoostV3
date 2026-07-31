@@ -13,7 +13,7 @@ import type {
   RendererToHostShellCommandJson,
   ShellNavigationIntentJson,
   WebDocument,
-} from './generated/index.js';
+} from './generated/index.ts';
 
 export const DIAGNOSTIC_VALUE_SCHEMA_ID = 'desktop.diagnostic-value.v1' as const;
 export const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID =

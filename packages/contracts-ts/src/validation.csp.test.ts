@@ -14,6 +14,6 @@ describe('contract validation under the desktop CSP', () => {
     } as unknown as FunctionConstructor;
     vi.resetModules();
 
-    await expect(import('./validation.js')).resolves.toBeDefined();
+    await expect(import('./validation.ts')).resolves.toBeDefined();
   });
 });

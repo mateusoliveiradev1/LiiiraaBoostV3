@@ -8,8 +8,8 @@ import type {
   ContentAvailability,
   ContentRisk,
   ContentType,
-} from './content-admission.js';
-import { webRoutes, type WebLocale } from './routes.js';
+} from './content-admission.ts';
+import { webRoutes, type WebLocale } from './routes.ts';
 
 const SEARCH_INDEX_SCHEMA_VERSION = 1 as const;
 const INDEXED_CONTENT_TYPES = new Set<ContentType>([

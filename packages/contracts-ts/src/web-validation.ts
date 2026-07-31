@@ -1,7 +1,7 @@
 import type { ErrorObject, ValidateFunction } from 'ajv';
 
 import { webDocumentValidator } from './generated/standalone-validators.js';
-import type { WebDocument } from './generated/index.js';
+import type { WebDocument } from './generated/index.ts';
 
 export const WEB_DOCUMENT_SCHEMA_ID =
   'https://schemas.liiiraa.dev/web/v1/web-document.schema.json' as const;

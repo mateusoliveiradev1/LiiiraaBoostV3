@@ -12,7 +12,7 @@ import {
   TYPOGRAPHY,
   assertSpacingValue,
   createAppearanceTokens,
-} from './index.js';
+} from './index.ts';
 
 describe('Pre-Dawn Flight Deck token contract', () => {
   it('locks layout spacing and rejects off-scale values', () => {

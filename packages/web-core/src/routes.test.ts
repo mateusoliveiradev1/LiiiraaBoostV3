@@ -13,8 +13,8 @@ import {
   routeHref,
   webRoutes,
   type RouteProjection,
-} from './routes.js';
-import { createContentIdentity } from './content.js';
+} from './routes.ts';
+import { createContentIdentity } from './content.ts';
 
 const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-home',

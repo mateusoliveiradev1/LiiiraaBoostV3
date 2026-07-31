@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createAppearanceTokens } from '@liiiraa/design-tokens';
 
-import { AccessiblePlot, EvidenceTable } from './data.js';
+import { AccessiblePlot, EvidenceTable } from './data.tsx';
 import {
   EVIDENCE_QUALITY_STATES,
   OPERATIONAL_STATES,
@@ -19,7 +19,7 @@ import {
   QualityMark,
   ScenarioMarker,
   StatusSignal,
-} from './evidence.js';
+} from './evidence.tsx';
 import {
   LB_INTERACTION_STATES,
   LbButton,
@@ -27,8 +27,8 @@ import {
   LbDialogActions,
   LbDialogContent,
   LbIconButton,
-} from './primitives.js';
-import { GoalRail, RouteHeader } from './shell.js';
+} from './primitives.tsx';
+import { GoalRail, RouteHeader } from './shell.tsx';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 

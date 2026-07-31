@@ -6,7 +6,7 @@ import {
   verifyReleaseIntegrity,
   type InspectedReleaseArtifact,
   type ReleaseManifestEvidence,
-} from './releases.js';
+} from './releases.ts';
 
 const publishedReleaseRecord = {
   channel: 'stable',

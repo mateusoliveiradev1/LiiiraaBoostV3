@@ -1,8 +1,8 @@
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { EvidenceLocale } from './evidence.js';
-import { LbIconButton } from './primitives.js';
+import type { EvidenceLocale } from './evidence.tsx';
+import { LbIconButton } from './primitives.tsx';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface ChartPoint {

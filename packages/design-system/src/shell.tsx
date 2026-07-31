@@ -2,11 +2,11 @@ import { Activity, Bell, Minus, PanelRight, Search, ShieldCheck, Square, X } fro
 import type { ReactNode } from 'react';
 import { Button, Toolbar } from 'react-aria-components';
 
-import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.js';
-import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.js';
-import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.js';
-import { ProductIcon } from './product-icons.js';
-import type { ProductIconName } from './product-icons.js';
+import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.tsx';
+import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.tsx';
+import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.tsx';
+import { ProductIcon } from './product-icons.tsx';
+import type { ProductIconName } from './product-icons.tsx';
 
 export interface WindowControlHandlers {
   readonly close?: () => void;

@@ -18,7 +18,7 @@ export {
   projectSitemap,
   routeHref,
   webRoutes,
-} from './routes.js';
+} from './routes.ts';
 export type {
   BoundaryContext,
   BoundaryLink,
@@ -38,20 +38,20 @@ export type {
   WebRouteMatch,
   WebRouteResult,
   WebVersion,
-} from './routes.js';
+} from './routes.ts';
 export { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 export type {
   FutureAuthorityCommandJson,
   NoChangeReceiptJson,
 } from '@liiiraa/contracts-ts';
 export type { WebDocumentValidationResult } from '@liiiraa/contracts-ts/web-validation';
-export { createContentIdentity } from './content.js';
+export { createContentIdentity } from './content.ts';
 export type {
   ContentIdentity,
   ContentIdentityErrorCode,
   ContentIdentityResult,
-} from './content.js';
-export { CONTENT_BUNDLE_SCHEMA_VERSION, admitContentBundle } from './content-admission.js';
+} from './content.ts';
+export { CONTENT_BUNDLE_SCHEMA_VERSION, admitContentBundle } from './content-admission.ts';
 export type {
   AdmittedContentBundle,
   AdmittedContentRecord,
@@ -64,8 +64,8 @@ export type {
   ContentRisk,
   ContentType,
   RepositoryContentRecord,
-} from './content-admission.js';
-export { buildPublicSearchIndex, searchPublicContent } from './search.js';
+} from './content-admission.ts';
+export { buildPublicSearchIndex, searchPublicContent } from './search.ts';
 export type {
   PublicSearchIndex,
   PublicSearchIndexError,
@@ -75,7 +75,7 @@ export type {
   SearchDocument,
   SearchFilters,
   SearchResult,
-} from './search.js';
+} from './search.ts';
 
 export {
   DOCUMENTATION_DOMAINS,
@@ -84,8 +84,8 @@ export {
   resolveDesktopDocumentationLink,
   resolveDocument,
   searchDocumentation,
-} from './documentation.js';
-export { decideDownload, selectReleaseChannel, verifyReleaseIntegrity } from './releases.js';
+} from './documentation.ts';
+export { decideDownload, selectReleaseChannel, verifyReleaseIntegrity } from './releases.ts';
 export type {
   DownloadBlockedReason,
   DownloadDecision,
@@ -103,7 +103,7 @@ export type {
   ReleaseManifestEvidence,
   ReleaseProvenance,
   VerificationStep,
-} from './releases.js';
+} from './releases.ts';
 export type {
   CurrentDocumentResolution,
   DesktopDocumentationIntent,
@@ -124,4 +124,4 @@ export type {
   DocumentationSectionKind,
   StaleDocumentResolution,
   TroubleshootingPath,
-} from './documentation.js';
+} from './documentation.ts';

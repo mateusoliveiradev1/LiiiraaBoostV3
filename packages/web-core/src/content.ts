@@ -8,7 +8,7 @@ import {
   type WebLocale,
   type WebRouteId,
   type WebVersion,
-} from './routes.js';
+} from './routes.ts';
 
 export type ContentIdentity = Readonly<{
   channel: WebChannel;

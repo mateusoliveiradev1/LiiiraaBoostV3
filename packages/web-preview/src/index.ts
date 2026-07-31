@@ -5,7 +5,7 @@ export const WEB_PREVIEW_RUNTIME_CLASS = 'fixture' as const;
 export {
   FUTURE_AUTHORITY_ACTION_FAMILIES,
   createWebPreviewAuthority,
-} from './no-change-adapter.js';
+} from './no-change-adapter.ts';
 export type {
   CancelledReceipt,
   FutureAuthorityActionFamily,
@@ -15,7 +15,7 @@ export type {
   FutureAuthorityPort,
   FutureAuthorityResult,
   WebPreviewAuthorityOptions,
-} from './no-change-adapter.js';
+} from './no-change-adapter.ts';
 export {
   WEB_SCENARIOS,
   WEB_SCENARIO_IDS,
@@ -23,9 +23,9 @@ export {
   parseWebScenarioManifest,
   publishedPreviewScenarioId,
   resolveWebPreviewScenario,
-} from './scenarios.js';
+} from './scenarios.ts';
 export type {
   WebPreviewComposition,
   WebScenario,
   WebScenarioId,
-} from './scenarios.js';
+} from './scenarios.ts';
