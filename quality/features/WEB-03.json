@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "web-03-fail-closed-release-journey",
+  "requirements": ["WEB-03"],
+  "owner": "plan-03-32",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-03-development-artifact-rejection",
+          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t release-gate",
+          "file": "tooling/web-evidence/src/release-gate.test.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-03-download-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-quick --grep @download-privacy",
+          "file": "tooling/web-evidence/tests/releases.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-03-integrity-accessibility",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-forced-colors --grep @integrity",
+          "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-03-release-performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-final-wide-1440 --grep @performance",
+          "file": "tooling/web-evidence/tests/releases.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-03-integrity-mismatch-recovery",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-quick --grep @integrity-mismatch",
+          "file": "tooling/web-evidence/tests/releases.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

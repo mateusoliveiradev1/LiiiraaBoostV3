@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "web-02-versioned-documentation",
+  "requirements": ["WEB-02"],
+  "owner": "plan-03-32",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-02-route-boundaries",
+          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t route-manifest",
+          "file": "tooling/web-evidence/src/route-manifest.test.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-02-search-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-quick --grep @search-privacy",
+          "file": "tooling/web-evidence/tests/documentation.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-02-documentation-reflow",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-reflow-320 --grep @documentation",
+          "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-02-documentation-performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-final-wide-1280 --grep @performance",
+          "file": "tooling/web-evidence/tests/documentation.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-02-stale-document-recovery",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-quick --grep @stale-recovery",
+          "file": "tooling/web-evidence/tests/documentation.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "web-08-isolated-deployment-boundaries",
+  "requirements": ["WEB-08"],
+  "owner": "plan-03-32",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-08-three-artifact-security",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/security-artifacts.spec.ts",
+          "file": "tooling/web-evidence/tests/security-artifacts.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-08-cookie-origin-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t security-boundaries",
+          "file": "tooling/web-evidence/src/security-boundaries.test.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-08-three-surface-accessibility",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep @three-surface",
+          "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-08-three-build-performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/security-artifacts.spec.ts --grep @artifact-budget",
+          "file": "tooling/web-evidence/tests/security-artifacts.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-08-deployment-rollback",
+          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t approved-web-rollback",
+          "file": "tooling/web-evidence/src/rollback-bundle.test.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}

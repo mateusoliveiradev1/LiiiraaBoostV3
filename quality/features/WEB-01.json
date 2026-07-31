@@ -1,0 +1,69 @@
+{
+  "$schema": "../../architecture/quality-manifest.schema.json",
+  "schemaVersion": 1,
+  "featureId": "web-01-public-product-evidence",
+  "requirements": ["WEB-01"],
+  "owner": "plan-03-32",
+  "acceptance": {
+    "security": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-01-public-artifact-security",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/security-artifacts.spec.ts --project=public-quick",
+          "file": "tooling/web-evidence/tests/security-artifacts.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "privacy": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-01-public-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/public.spec.ts --project=public-quick --grep @privacy",
+          "file": "tooling/web-evidence/tests/public.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "accessibility": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-01-public-accessibility",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-forced-colors",
+          "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "performance": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-01-public-performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/public.spec.ts --project=public-final-wide-1440 --grep @performance",
+          "file": "tooling/web-evidence/tests/public.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    },
+    "recovery": {
+      "status": "tested",
+      "evidence": [
+        {
+          "id": "web-01-public-recovery",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/public.spec.ts --project=public-quick --grep @recovery",
+          "file": "tooling/web-evidence/tests/public.spec.ts",
+          "owner": "plan-03-32",
+          "status": "planned"
+        }
+      ]
+    }
+  }
+}
