@@ -5,6 +5,7 @@ import { Button, Toolbar } from 'react-aria-components';
 import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.tsx';
 import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.tsx';
 import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.tsx';
+import { ProductLockup } from './product-lockup.tsx';
 import { ProductIcon } from './product-icons.tsx';
 import type { ProductIconName } from './product-icons.tsx';
 
@@ -45,23 +46,7 @@ export const WindowTitleBar = ({
     data-lb-region
     data-tauri-drag-region
   >
-    <strong className="lb-product-brand">
-      <svg aria-hidden="true" className="lb-product-mark" viewBox="0 0 36 28">
-        <path
-          className="lb-product-mark-primary"
-          d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z"
-        />
-        <path
-          className="lb-product-mark-accent"
-          d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z"
-        />
-      </svg>
-      <span className="lb-visually-hidden">{productName}</span>
-      <span aria-hidden="true" className="lb-product-wordmark">
-        <span>Liiiraa</span>
-        <span>Boost</span>
-      </span>
-    </strong>
+    <ProductLockup productName={productName} />
     {scenarioId ? <ScenarioMarker scenarioId={scenarioId} /> : null}
     <span className="lb-global-status">{globalStatus}</span>
     <div className="lb-title-actions">
