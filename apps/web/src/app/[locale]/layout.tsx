@@ -6,6 +6,7 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { ProductLockup } from '@liiiraa/web-features/components';
 
 import {
   accountBoundaryHref,
@@ -22,7 +23,6 @@ type PublicLocaleLayoutProps = Readonly<{
 
 type PublicCopy = Readonly<{
   account: string;
-  boundary: string;
   brandDescription: string;
   footerNavigation: string;
   language: string;
@@ -38,8 +38,6 @@ type PublicCopy = Readonly<{
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     account: 'Conta',
-    boundary:
-      'Superfície pública. Nenhuma sessão de conta ou ação administrativa opera nesta origem.',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
     footerNavigation: 'Navegação complementar',
     language: 'Idioma',
@@ -60,8 +58,6 @@ const COPY = Object.freeze({
   }),
   en: Object.freeze({
     account: 'Account',
-    boundary:
-      'Public surface. No account session or administrative action operates on this origin.',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
     footerNavigation: 'Supplementary navigation',
     language: 'Language',
@@ -123,13 +119,7 @@ const Brand = ({ locale }: { readonly locale: (typeof routing.locales)[number] }
     className="public-brand"
     href={publicBoundaryHref('public-home', locale)}
   >
-    <span aria-hidden="true" className="public-brand__mark">
-      LB
-    </span>
-    <span className="public-brand__wordmark">
-      <strong>Liiiraa</strong>
-      <span>Boost</span>
-    </span>
+    <ProductLockup />
   </a>
 );
 
@@ -224,11 +214,6 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
               </div>
             </details>
           </div>
-
-          <p className="public-boundary-notice" role="note">
-            <span aria-hidden="true">PUBLIC</span>
-            {copy.boundary}
-          </p>
         </header>
 
         <main id="main-content" tabIndex={-1}>
