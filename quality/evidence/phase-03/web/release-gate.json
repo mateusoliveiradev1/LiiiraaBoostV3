@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "release-gate",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm web:test",
+  "source": "tooling/web-evidence/src/release-gate.test.ts",
+  "facts": {
+    "releaseJourneyComplete": true,
+    "integrityJourneyComplete": true,
+    "compatibilityJourneyComplete": true,
+    "downloadAvailable": false,
+    "publicDistributionApproved": false,
+    "bypassAllowed": false
+  }
+}

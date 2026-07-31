@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "public-routes",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/public.spec.ts",
+  "facts": {
+    "canonicalRouteCount": 53,
+    "locales": ["pt-BR", "en"],
+    "publicNavigationDerived": true,
+    "unknownRoutesFailClosed": true
+  }
+}

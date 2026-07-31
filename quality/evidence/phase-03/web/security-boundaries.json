@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "security-boundaries",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/security-artifacts.spec.ts",
+  "surfaces": [
+    {
+      "surface": "public",
+      "origin": "http://public.localhost:3100",
+      "buildRoot": "apps/web/.next/standalone",
+      "indexing": "index",
+      "cookieIssued": false,
+      "fixtureAuthorityConnected": false
+    },
+    {
+      "surface": "account",
+      "origin": "http://account.localhost:3101",
+      "buildRoot": "apps/account/.next/standalone",
+      "indexing": "noindex",
+      "cookieIssued": false,
+      "fixtureAuthorityConnected": false
+    },
+    {
+      "surface": "admin",
+      "origin": "http://admin.localhost:3102",
+      "buildRoot": "apps/admin/.next/standalone",
+      "indexing": "noindex",
+      "cookieIssued": false,
+      "fixtureAuthorityConnected": false
+    }
+  ]
+}

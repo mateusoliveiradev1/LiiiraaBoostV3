@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "docs-routes",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm web:test",
+  "source": "tooling/web-evidence/src/route-manifest.test.ts",
+  "facts": {
+    "desktopLinksUseCanonicalIds": true,
+    "historicalRoutesNoindex": true,
+    "localeVersionChannelFallbackExplicit": true,
+    "routeIds": [
+      "docs-index",
+      "docs-task",
+      "docs-article",
+      "docs-reference",
+      "docs-troubleshooting",
+      "docs-history"
+    ]
+  }
+}

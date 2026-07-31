@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "visual-report",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/visual-manifest.json",
+  "facts": {
+    "goldenCount": 18,
+    "scenarioRange": "W01-W18",
+    "sourceHashBound": true,
+    "updateModeUsed": false
+  }
+}

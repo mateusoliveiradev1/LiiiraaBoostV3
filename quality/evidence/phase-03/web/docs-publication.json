@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "docs-publication",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/documentation.spec.ts",
+  "facts": {
+    "recordCount": 16,
+    "locales": ["pt-BR", "en"],
+    "currentHistoricalReferenceTroubleshootingCovered": true,
+    "genericMutationRecipesDetected": false,
+    "staleIdentitySilentlySubstituted": false
+  }
+}

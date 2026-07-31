@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "release-artifact",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/releases.spec.ts",
+  "facts": {
+    "officialArtifact": "unavailable",
+    "publicInstallerExposed": false,
+    "developmentArtifactDetected": false,
+    "developmentFilenameDetected": false,
+    "continueAnywayControlDetected": false,
+    "trustedDistributionDeferredTo": "Phase 10"
+  }
+}

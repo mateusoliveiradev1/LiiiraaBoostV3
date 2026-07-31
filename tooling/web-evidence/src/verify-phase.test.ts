@@ -85,7 +85,12 @@ const completeInput = (): Phase3VerificationInput => ({
       };
     }),
     locales: [...PHASE_3_LOCALES],
-    proofs: PHASE_3_PROOFS.map(({ file, id }) => ({ file, id, status: 'passed' as const })),
+    proofs: PHASE_3_PROOFS.map(({ file, id }) => ({
+      file,
+      id,
+      owner: 'plan-03-32',
+      status: 'passed' as const,
+    })),
     publication: {
       approved: true,
       bundleFile: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
@@ -148,17 +153,49 @@ describe('Phase 3 final source coverage', () => {
 
 describe('Phase 3 omission coverage', () => {
   it.each([
-    ['requirement', (input: Phase3VerificationInput) => input.artifacts.requirements.pop(), 'MISSING_REQUIREMENT'],
-    ['decision', (input: Phase3VerificationInput) => input.artifacts.decisions.pop(), 'MISSING_DECISION'],
-    ['success criterion', (input: Phase3VerificationInput) => input.artifacts.successCriteria.pop(), 'MISSING_SUCCESS_CRITERION'],
-    ['scenario', (input: Phase3VerificationInput) => input.artifacts.scenarios.pop(), 'MISSING_SCENARIO'],
+    [
+      'requirement',
+      (input: Phase3VerificationInput) => input.artifacts.requirements.pop(),
+      'MISSING_REQUIREMENT',
+    ],
+    [
+      'decision',
+      (input: Phase3VerificationInput) => input.artifacts.decisions.pop(),
+      'MISSING_DECISION',
+    ],
+    [
+      'success criterion',
+      (input: Phase3VerificationInput) => input.artifacts.successCriteria.pop(),
+      'MISSING_SUCCESS_CRITERION',
+    ],
+    [
+      'scenario',
+      (input: Phase3VerificationInput) => input.artifacts.scenarios.pop(),
+      'MISSING_SCENARIO',
+    ],
     ['route', (input: Phase3VerificationInput) => input.artifacts.routes.pop(), 'MISSING_ROUTE'],
     ['locale', (input: Phase3VerificationInput) => input.artifacts.locales.pop(), 'MISSING_LOCALE'],
-    ['evidence dimension', (input: Phase3VerificationInput) => input.artifacts.evidence.pop(), 'MISSING_EVIDENCE_DIMENSION'],
-    ['app artifact', (input: Phase3VerificationInput) => input.artifacts.appArtifacts.pop(), 'MISSING_APP_ARTIFACT'],
-    ['capture', (input: Phase3VerificationInput) => input.artifacts.captures.pop(), 'MISSING_CAPTURE'],
+    [
+      'evidence dimension',
+      (input: Phase3VerificationInput) => input.artifacts.evidence.pop(),
+      'MISSING_EVIDENCE_DIMENSION',
+    ],
+    [
+      'app artifact',
+      (input: Phase3VerificationInput) => input.artifacts.appArtifacts.pop(),
+      'MISSING_APP_ARTIFACT',
+    ],
+    [
+      'capture',
+      (input: Phase3VerificationInput) => input.artifacts.captures.pop(),
+      'MISSING_CAPTURE',
+    ],
     ['proof', (input: Phase3VerificationInput) => input.artifacts.proofs.pop(), 'MISSING_PROOF'],
-    ['source hash', (input: Phase3VerificationInput) => input.artifacts.sourceHashes.pop(), 'MISSING_SOURCE_HASH'],
+    [
+      'source hash',
+      (input: Phase3VerificationInput) => input.artifacts.sourceHashes.pop(),
+      'MISSING_SOURCE_HASH',
+    ],
   ] as const)('rejects one omitted %s with a stable diagnostic', (_name, mutate, code) => {
     const input = cloneInput(completeInput());
     mutate(input);

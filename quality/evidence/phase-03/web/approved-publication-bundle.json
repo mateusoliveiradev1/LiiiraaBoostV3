@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "approved-publication-bundle",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "finalApproved": true,
+  "sourceCommit": "b145e913e01a4f0493ab83595539effb9659d5f7",
+  "requirements": ["WEB-01", "WEB-02", "WEB-03", "WEB-08"],
+  "appArtifacts": [
+    {
+      "surface": "public",
+      "buildId": "pqhJWgqD_G6IOq42DJsUw",
+      "path": "apps/web/.next/standalone",
+      "hash": "c6cf3e8db6b1716f542a80bf709d2390d771ca9995b453649f60d077d9dac33c"
+    },
+    {
+      "surface": "account",
+      "buildId": "account-preview-isolated",
+      "path": "apps/account/.next/standalone",
+      "hash": "12c93bde729298f895f81b897bec377008e511e3d03bd6b01135ff12d081767d"
+    },
+    {
+      "surface": "admin",
+      "buildId": "admin-preview-scaffold",
+      "path": "apps/admin/.next/standalone",
+      "hash": "2f32c8e4340d62e60e60e3800f4f3eb712c9b74b68025ec0b3e8db0488cd8edd"
+    }
+  ],
+  "manifestHashes": {
+    "routes": "e584d4e77e659adc6109bd31f1809236f241ca139031a528ad9dc633e44674e0",
+    "contentPtBr": "38daecd6dc34b0e9896b2ddf55922faebe6c6cae5e5b1a784758813e2d0f4887",
+    "contentEn": "54140bb04a20ddf337779987faae2884fd52ec1fb71dc639f077f503a0eb1a05",
+    "release": "eef56fe96f706d6b8a902989a18672cd890b0a6e21006abd928083828fcdd856",
+    "visual": "2d5a8d1b64cd4e697c3f0aca82f1f2d32b8d7aed5ebe75836137d9b26bdb7664",
+    "capture": "508b588b3d0eb892d2765a1f562b02f7fd7c3a19cb96d1421d518f8bd905eeaf",
+    "web01": "8e567dc723c2d70e2bc0864bce1d687c1cb3dce59d85dc86f77b2590eee29feb",
+    "web02": "46ac0ebb827bb6c88f9c9ba56edabd3b94b817f935fab0563cdb08f57edd53ea",
+    "web03": "a08e22d206f63c258440e3fa01b987c39caced2efc7a8cb840a5a62ab246b4dc",
+    "web08": "f84bff4c7bce3b2a1fcab7bdb3f3abc94ca1d1a3702b7c90223681fd069bc682"
+  },
+  "releaseTruth": {
+    "downloadAvailable": false,
+    "publicDistributionApproved": false,
+    "officialArtifact": "unavailable",
+    "developmentArtifactDetected": false
+  },
+  "rollbackPolicy": {
+    "operation": "redeploy-approved-web-bundle",
+    "databases": "excluded",
+    "externalData": "excluded",
+    "migrations": "excluded"
+  }
+}

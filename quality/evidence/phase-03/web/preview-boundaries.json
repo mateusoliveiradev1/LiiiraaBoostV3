@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "preview-boundaries",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/account.spec.ts",
+  "authority": {
+    "identityConnected": false,
+    "billingConnected": false,
+    "supportSubmissionConnected": false,
+    "diagnosticUploadConnected": false,
+    "adminMutationConnected": false,
+    "publicDistributionConnected": false
+  },
+  "facts": {
+    "noChangeReceiptRequired": true,
+    "remoteStateChanged": false,
+    "previewProvenanceVisible": true,
+    "scenarioSelectionFromRequestState": false
+  }
+}

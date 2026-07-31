@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "content-publication",
+  "owner": "plan-03-32",
+  "status": "passed",
+  "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
+  "source": "tooling/web-evidence/tests/public.spec.ts",
+  "facts": {
+    "bilingual": true,
+    "claimsRequireEvidence": true,
+    "deceptiveUrgencyDetected": false,
+    "privateSearchRecordsDetected": false,
+    "publicDistributionApproved": false
+  }
+}
