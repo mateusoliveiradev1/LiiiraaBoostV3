@@ -162,4 +162,38 @@ describe('account errors', () => {
     expect(notFoundRouteSource).toContain('notFound()');
     expect(notFoundRouteSource).not.toMatch(/redirect\(/u);
   });
+
+  it('dispatches canonical failures before the genuine localized 404 fallback', () => {
+    const pageSource = readFileSync(
+      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+    const failureViewSource = readFileSync(
+      new URL('./account-failure-view.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(pageSource).toContain("kind: 'workflow'");
+    expect(pageSource).toContain("kind: 'error'");
+    expect(pageSource).toContain("kind: 'unknown'");
+    expect(pageSource).toContain('isAccountPreviewRoute');
+    expect(pageSource).toContain('isAccountErrorRoute');
+    expect(pageSource).toContain('accountFailureKindForRoute');
+    expect(pageSource).toContain('createAccountFailureModel');
+    expect(pageSource).toContain('<AccountFailureView');
+    expect(pageSource).toContain("resolution.failureKind === '500'");
+    expect(pageSource).toContain('if (resolution.kind === \'unknown\') notFound()');
+    expect(pageSource).not.toMatch(/redirect\(|cookies\(|fetch\(|window\.location/iu);
+
+    expect((failureViewSource.match(/<h1\b/gu) ?? [])).toHaveLength(1);
+    expect(failureViewSource).toContain('data-route-heading');
+    expect(failureViewSource).toContain("role={kind === '500' ? 'alert' : undefined}");
+    expect(failureViewSource).toContain('account-failure__affected');
+    expect(failureViewSource).toContain('account-failure__detail');
+    expect(failureViewSource).toContain('account-failure__recovery');
+    expect(failureViewSource).toContain('account-failure__safe-work');
+    expect(failureViewSource).toContain('account-failure__actions');
+    expect(failureViewSource).toContain('Redacted correlation');
+    expect(failureViewSource).not.toContain("'use client'");
+  });
 });
