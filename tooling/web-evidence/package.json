@@ -1,0 +1,29 @@
+{
+  "name": "@liiiraa/web-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest --run",
+    "verify": "pnpm check && pnpm test && playwright test"
+  },
+  "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
+    "@liiiraa/web-core": "workspace:*",
+    "@liiiraa/web-features": "workspace:*",
+    "@liiiraa/web-preview": "workspace:*"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.62.0",
+    "vitest": "4.1.10"
+  }
+}
