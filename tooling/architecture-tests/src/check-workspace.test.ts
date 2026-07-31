@@ -25,6 +25,7 @@ const pathApi = process.getBuiltinModule('node:path') as PathApi;
 
 interface WorkspaceManifest {
   name?: unknown;
+  scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
@@ -74,7 +75,7 @@ const phase2Packages = [
   },
 ] as const;
 
-const phase3WebReservations = [
+const phase3WebModules = [
   {
     id: 'web-core',
     owner: 'web-platform',
@@ -82,6 +83,8 @@ const phase3WebReservations = [
     publicRoot: 'packages/web-core/src/index.ts',
     layer: 'application',
     runtimeClass: 'production',
+    packageName: '@liiiraa/web-core',
+    workspaceDependencies: ['@liiiraa/contracts-ts'],
   },
   {
     id: 'web-preview',
@@ -90,6 +93,8 @@ const phase3WebReservations = [
     publicRoot: 'packages/web-preview/src/index.ts',
     layer: 'adapter',
     runtimeClass: 'fixture',
+    packageName: '@liiiraa/web-preview',
+    workspaceDependencies: ['@liiiraa/web-core'],
   },
   {
     id: 'web-features',
@@ -98,6 +103,13 @@ const phase3WebReservations = [
     publicRoot: 'packages/web-features/src/index.ts',
     layer: 'feature',
     runtimeClass: 'production',
+    packageName: '@liiiraa/web-features',
+    workspaceDependencies: [
+      '@liiiraa/contracts-ts',
+      '@liiiraa/design-system',
+      '@liiiraa/design-tokens',
+      '@liiiraa/web-core',
+    ],
   },
   {
     id: 'web-evidence',
@@ -106,6 +118,13 @@ const phase3WebReservations = [
     publicRoot: 'tooling/web-evidence/src/index.ts',
     layer: 'tooling',
     runtimeClass: 'tooling',
+    packageName: '@liiiraa/web-evidence',
+    workspaceDependencies: [
+      '@liiiraa/contracts-ts',
+      '@liiiraa/web-core',
+      '@liiiraa/web-features',
+      '@liiiraa/web-preview',
+    ],
   },
   {
     id: 'web-app',
@@ -114,6 +133,8 @@ const phase3WebReservations = [
     publicRoot: 'apps/web/src/index.ts',
     layer: 'composition',
     runtimeClass: 'production',
+    packageName: '@liiiraa/web',
+    workspaceDependencies: ['@liiiraa/web-core', '@liiiraa/web-features'],
   },
   {
     id: 'account-app',
@@ -122,6 +143,14 @@ const phase3WebReservations = [
     publicRoot: 'apps/account/src/index.ts',
     layer: 'composition',
     runtimeClass: 'fixture',
+    packageName: '@liiiraa/account',
+    workspaceDependencies: [
+      '@liiiraa/design-system',
+      '@liiiraa/design-tokens',
+      '@liiiraa/web-core',
+      '@liiiraa/web-features',
+      '@liiiraa/web-preview',
+    ],
   },
   {
     id: 'admin-app',
@@ -130,6 +159,14 @@ const phase3WebReservations = [
     publicRoot: 'apps/admin/src/index.ts',
     layer: 'composition',
     runtimeClass: 'fixture',
+    packageName: '@liiiraa/admin',
+    workspaceDependencies: [
+      '@liiiraa/design-system',
+      '@liiiraa/design-tokens',
+      '@liiiraa/web-core',
+      '@liiiraa/web-features',
+      '@liiiraa/web-preview',
+    ],
   },
 ] as const;
 
@@ -214,18 +251,35 @@ describe('Phase 2 live workspace activation', { concurrent: false }, () => {
   });
 });
 
-describe('Phase 3 web reservation', { concurrent: false }, () => {
-  it('reserves every future web root with one owner and keeps it undiscoverable', () => {
+describe('Phase 3 live web activation', { concurrent: false }, () => {
+  it('activates every web root exactly once with manifest and dependency parity', () => {
     const discoveredRoots = new Set(discoverPnpmWorkspaceRoots(repositoryRoot));
 
     expect(
-      phase3WebReservations.map(
-        ({ id, owner, root, publicRoot, layer, runtimeClass }) => {
+      phase3WebModules.map(
+        ({
+          id,
+          owner,
+          root,
+          publicRoot,
+          layer,
+          runtimeClass,
+          packageName,
+          workspaceDependencies,
+        }) => {
           const matches = canonicalPolicy.modules.filter((module) => module.id === id);
 
           expect(matches).toHaveLength(1);
 
           const [module] = matches;
+          const manifest = readManifest(root);
+          const actualWorkspaceDependencies = manifestEntries(manifest)
+            .filter(([name]) => name.startsWith('@liiiraa/'))
+            .map(([name, version]) => {
+              expect(version).toBe('workspace:*');
+              return name;
+            })
+            .toSorted();
 
           return {
             id: module?.id,
@@ -239,32 +293,71 @@ describe('Phase 3 web reservation', { concurrent: false }, () => {
               pathApi.join(repositoryRoot, root, 'package.json'),
             ),
             discoverable: discoveredRoots.has(root),
+            packageName: manifest.name,
+            workspaceDependencies: actualWorkspaceDependencies,
             expectedOwner: owner,
             expectedPublicRoot: publicRoot,
             expectedLayer: layer,
             expectedRuntimeClass: runtimeClass,
+            expectedPackageName: packageName,
+            expectedWorkspaceDependencies: [...workspaceDependencies].toSorted(),
           };
         },
       ),
     ).toEqual(
-      phase3WebReservations.map(
-        ({ id, owner, root, publicRoot, layer, runtimeClass }) => ({
+      phase3WebModules.map(
+        ({
+          id,
+          owner,
+          root,
+          publicRoot,
+          layer,
+          runtimeClass,
+          packageName,
+          workspaceDependencies,
+        }) => ({
           id,
           owner,
           roots: [root],
           publicRoots: [publicRoot],
           layer,
           runtimeClass,
-          status: 'reserved',
-          manifestExists: false,
-          discoverable: false,
+          status: 'active',
+          manifestExists: true,
+          discoverable: true,
+          packageName,
+          workspaceDependencies: [...workspaceDependencies].toSorted(),
           expectedOwner: owner,
           expectedPublicRoot: publicRoot,
           expectedLayer: layer,
           expectedRuntimeClass: runtimeClass,
+          expectedPackageName: packageName,
+          expectedWorkspaceDependencies: [...workspaceDependencies].toSorted(),
         }),
       ),
     );
+  });
+
+  it('declares every terminating root web lifecycle command', () => {
+    const rootManifest = readManifest('.');
+
+    expect(
+      Object.fromEntries(
+        [
+          'web:check',
+          'web:test',
+          'web:build',
+          'web:verify:quick',
+          'web:verify',
+        ].map((command) => [command, rootManifest.scripts?.[command]]),
+      ),
+    ).toEqual({
+      'web:check': expect.any(String),
+      'web:test': expect.any(String),
+      'web:build': expect.any(String),
+      'web:verify:quick': expect.any(String),
+      'web:verify': expect.any(String),
+    });
   });
 });
 
