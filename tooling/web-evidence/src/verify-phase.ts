@@ -598,6 +598,11 @@ const fileHash = (repositoryRoot: string, file: string): string =>
     .update(readFileSync(join(repositoryRoot, file)))
     .digest('hex');
 
+const canonicalTextFileHash = (repositoryRoot: string, file: string): string =>
+  createHash('sha256')
+    .update(readFileSync(join(repositoryRoot, file), 'utf8').replaceAll('\r\n', '\n'))
+    .digest('hex');
+
 const nonEmptyDirectory = (repositoryRoot: string, file: string): boolean => {
   const path = join(repositoryRoot, file);
   return existsSync(path) && statSync(path).isDirectory() && readdirSync(path).length > 0;
@@ -697,11 +702,18 @@ export const createRepositoryPhase3Input = (
     ] as const
   ).map(([surface, app]) => {
     const expectedPath = `apps/${app}/.next/standalone`;
-    const expectedHash = fileHash(repositoryRoot, `apps/${app}/package.json`);
+    const packageFile = `apps/${app}/package.json`;
+    const expectedHashes = new Set([
+      fileHash(repositoryRoot, packageFile),
+      canonicalTextFileHash(repositoryRoot, packageFile),
+    ]);
     const bundled = approvedBundle.appArtifacts.find((artifact) => artifact.surface === surface);
     return {
       classification: 'production-build' as const,
-      hash: bundled?.hash === expectedHash ? expectedHash : 'bundle-hash-mismatch',
+      hash:
+        bundled !== undefined && expectedHashes.has(bundled.hash)
+          ? bundled.hash
+          : 'bundle-hash-mismatch',
       path: bundled?.path ?? expectedPath,
       state:
         bundled?.path === expectedPath && nonEmptyDirectory(repositoryRoot, expectedPath)

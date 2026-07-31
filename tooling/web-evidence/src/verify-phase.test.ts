@@ -14,6 +14,7 @@ import {
   PHASE_3_SCENARIOS,
   PHASE_3_SOURCE_FILES,
   PHASE_3_SUCCESS_CRITERIA,
+  createRepositoryPhase3Input,
   verifyPhase3,
   type Phase3VerificationInput,
 } from './verify-phase.js';
@@ -166,6 +167,12 @@ describe('Phase 3 final source coverage', () => {
       expect(result.fingerprint).toMatch(/^[a-f0-9]{64}$/u);
     }
     expect(sha(JSON.stringify(input))).toBe(before);
+  });
+
+  it('accepts the checked-in proof graph across canonical repository line endings', () => {
+    const input = createRepositoryPhase3Input('planned', repositoryRoot);
+
+    expect(verifyPhase3(input, repositoryRoot)).toMatchObject({ ok: true });
   });
 });
 
