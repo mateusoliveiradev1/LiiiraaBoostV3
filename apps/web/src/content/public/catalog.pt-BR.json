@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "version": "1.0.0",
+  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "supportStates": {
+    "available": {
+      "label": "Disponível",
+      "consequence": "A experiência pública descrita está pronta para inspeção.",
+      "evidence": "Conteúdo público validado no repositório e testes determinísticos da interface."
+    },
+    "demonstrative-preview": {
+      "label": "Prévia demonstrativa",
+      "consequence": "Você pode revisar a interação completa, mas nenhum estado nativo ou remoto é alterado.",
+      "evidence": "Adaptadores determinísticos da Fase 3 e recibos sem alteração."
+    },
+    "under-validation": {
+      "label": "Em validação",
+      "consequence": "Não presuma compatibilidade ou resultado de desempenho antes da evidência ficar completa.",
+      "evidence": "O limite de validação e a prova ausente acompanham cada afirmação."
+    },
+    "planned": {
+      "label": "Planejado",
+      "consequence": "A capacidade faz parte do roteiro e ainda não está disponível para uso.",
+      "evidence": "A fase responsável é indicada; nenhuma data de entrega é prometida."
+    },
+    "unsupported": {
+      "label": "Não suportado",
+      "consequence": "A configuração está fora do limite suportado pelo produto.",
+      "evidence": "O limite de compatibilidade explica por que nenhuma ação é oferecida."
+    },
+    "unavailable": {
+      "label": "Indisponível",
+      "consequence": "A ação está bloqueada e não há desvio.",
+      "evidence": "A autoridade ou o artefato de confiança ausente é identificado."
+    }
+  },
+  "records": [
+    {
+      "routeId": "public-product",
+      "contentType": "product",
+      "translationKey": "public-product",
+      "title": "Controle de desempenho que você pode inspecionar",
+      "summary": "Preparação, evidência e restauração formam uma sequência revisável.",
+      "body": "O Liiiraa Boost está construindo um otimizador desktop para Windows 10 e 11 que mantém cada recomendação explicável e reversível. Esta fase comprova a interface e os contratos; ela não afirma ganhos medidos de hardware nem autoridade nativa.",
+      "availability": "under-validation",
+      "validationState": "validated",
+      "limitations": [
+        "A observação de hardware real e as alterações privilegiadas do Windows chegam em fases posteriores.",
+        "Nenhum ganho, contagem de problemas, data de lançamento ou compatibilidade universal é afirmado."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/evidence",
+          "provenance": "observed",
+          "scope": "Jornadas determinísticas de revisão, evidência e recuperação no desktop",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "O comportamento da otimização nativa e o desempenho por máquina continuam não comprovados."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Prepare",
+          "body": "Revise dependências, risco e consequências antes de qualquer operação futura."
+        },
+        {
+          "title": "Prove",
+          "body": "Inspecione fonte, escopo, versão, estado de validação e o que permanece não comprovado."
+        },
+        {
+          "title": "Restaure",
+          "body": "Mantenha histórico e recuperação visíveis como parte do plano, nunca como detalhe posterior."
+        }
+      ]
+    },
+    {
+      "routeId": "public-evidence",
+      "contentType": "evidence",
+      "translationKey": "public-evidence",
+      "title": "Evidência antes da conclusão",
+      "summary": "As afirmações permanecem ligadas à origem, ao escopo, à versão e ao limite de validação.",
+      "body": "A evidência atual comprova o comportamento autoral do produto e estados determinísticos de prévia. Ela não comprova ganho em um PC não observado. Valores medidos, observados, derivados, informados pelo usuário, simulados e indisponíveis permanecem visivelmente distintos.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "Evidência de prévia determinística não substitui medição em hardware Windows representativo.",
+        "Um esquema validado não torna um valor simulado autoritativo."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/docs/current/articles/evidence-method",
+          "provenance": "observed",
+          "scope": "Admissão de conteúdo no repositório e evidência de cenários determinísticos",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Medições representativas de dispositivos e jogos ainda não estão disponíveis."
+        }
+      ],
+      "sections": [
+        {
+          "title": "O que está comprovado",
+          "body": "A propriedade das rotas, a admissão de conteúdo, os limites de prévia e a interação de recuperação são executáveis."
+        },
+        {
+          "title": "O que não está comprovado",
+          "body": "Nenhum registro público atual sustenta um resultado numérico de desempenho para uma máquina real."
+        }
+      ]
+    },
+    {
+      "routeId": "public-compatibility",
+      "contentType": "compatibility",
+      "translationKey": "public-compatibility",
+      "title": "Um fluxo de compatibilidade, limites explícitos",
+      "summary": "Windows 10 e Windows 11 compartilham uma revisão até que evidência verificada exija uma diferença.",
+      "body": "Selecione a geração do Windows e a arquitetura que você realmente usa. O resultado descreve apenas o limite atual de suporte; CPU, GPU, armazenamento, perfil do jogo, drivers e evidência de ciclo de vida ainda determinam se uma otimização futura pode ser recomendada.",
+      "availability": "under-validation",
+      "validationState": "validated",
+      "limitations": [
+        "O ciclo de vida e a edição do Windows 10 precisam ser conferidos no suporte vigente da Microsoft.",
+        "ARM64, compilações não suportadas do Windows e hardware desconhecido não recebem afirmação de compatibilidade."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/docs/current/articles/compatibility-method",
+          "provenance": "derived",
+          "scope": "Equivalência do fluxo do aplicativo entre Windows 10 e Windows 11",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "O suporte específico de hardware e jogo exige inventário observado e perfis validados."
+        }
+      ],
+      "supportMatrix": [
+        {
+          "capability": "Revisão para Windows 10 e Windows 11",
+          "state": "available",
+          "consequence": "As mesmas perguntas e regras de evidência se aplicam às duas gerações do Windows."
+        },
+        {
+          "capability": "Recomendação específica para o hardware",
+          "state": "under-validation",
+          "consequence": "Nenhuma recomendação é mostrada antes de existir inventário real e evidência do perfil."
+        },
+        {
+          "capability": "Aplicação nativa e reversão",
+          "state": "planned",
+          "consequence": "A interface pode ser revisada, mas o estado do Windows não muda na Fase 3."
+        },
+        {
+          "capability": "Compilações não suportadas do Windows",
+          "state": "unsupported",
+          "consequence": "Nenhuma otimização ou conclusão de compatibilidade é oferecida."
+        }
+      ]
+    },
+    {
+      "routeId": "public-plans",
+      "contentType": "plan",
+      "translationKey": "public-plans",
+      "title": "Planos sem termos ocultos",
+      "summary": "Capacidades e consequências comerciais ficam visíveis antes de qualquer confirmação simulada.",
+      "body": "A autoridade de checkout não existe na Fase 3. Os registros abaixo são prévias de capacidades, não ofertas de compra. Não usamos desconto, contagem regressiva, urgência, depoimento nem barreira de segurança paga.",
+      "availability": "demonstrative-preview",
+      "validationState": "validated",
+      "limitations": [
+        "Nenhum plano pago, transação, direito, renovação ou reembolso pode ser criado nesta fase.",
+        "Preços e termos comerciais finais exigem autoridade da Fase 4 e uma nova publicação revisada."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/policies/terms",
+          "provenance": "observed",
+          "scope": "Divulgação pré-checkout e limite de ausência de autoridade",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Preços comerciais finais e o comportamento do provedor de pagamentos ainda não foram aprovados."
+        }
+      ],
+      "plans": [
+        {
+          "id": "phase-3-preview",
+          "name": "Prévia determinística do produto",
+          "price": "Não está à venda",
+          "billingPeriod": "Sem período de cobrança",
+          "renewal": "Sem renovação automática",
+          "taxes": "Nenhum tributo é cobrado porque não há transação disponível",
+          "cancellation": "Não existe algo para cancelar na Fase 3",
+          "refunds": "Nenhum pagamento é aceito, portanto não pode existir evento de reembolso",
+          "deviceRules": "Nenhum direito ou vínculo de dispositivo é criado",
+          "expirationEffects": "O acesso à prévia não cria nem expira um direito pago",
+          "checkoutBoundary": "Autoridade da Fase 4 obrigatória; a confirmação permanece simulada e não altera estado remoto",
+          "capabilities": [
+            {
+              "name": "Revisão pública de produto, evidência e compatibilidade",
+              "state": "available"
+            },
+            {
+              "name": "Fluxos de conta, cobrança e dispositivo",
+              "state": "demonstrative-preview"
+            },
+            {
+              "name": "Aplicação e reversão de otimização nativa",
+              "state": "planned"
+            },
+            {
+              "name": "Instalador público confiável",
+              "state": "unavailable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "routeId": "public-search",
+      "contentType": "search",
+      "translationKey": "public-search",
+      "title": "Busque conteúdo público e validado",
+      "summary": "Resultados expõem tipo de conteúdo, idioma, versão, disponibilidade e estado de validação.",
+      "body": "A busca é enviada explicitamente e armazenada na URL. Ela indexa apenas registros públicos admitidos e nunca registros de conta, administração, cenário, autoridade de prévia ou uso interno.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "A busca atual cobre registros autorais do repositório entregues com esta aplicação pública.",
+        "Dados privados e conteúdo acionável obsoleto nunca são incluídos."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/search",
+          "provenance": "observed",
+          "scope": "Filtros públicos de rota, idioma, versão, disponibilidade e validação",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Nenhuma fonte externa ou privada de conteúdo está conectada."
+        }
+      ],
+      "searchCopy": {
+        "label": "Buscar produto, evidência, compatibilidade, planos e suporte",
+        "submit": "Buscar",
+        "emptyTitle": "Nenhum resultado confiável",
+        "emptyBody": "Revise os termos ou remova um filtro. A busca não mostra conteúdo privado nem versões incompatíveis sem aviso.",
+        "filterLabel": "Disponibilidade"
+      }
+    },
+    {
+      "routeId": "public-support",
+      "contentType": "support",
+      "translationKey": "public-support",
+      "title": "O suporte começa por um caminho seguro",
+      "summary": "Comece pela documentação pública e compartilhe somente os dados mínimos necessários.",
+      "body": "O suporte público explica recuperação e escalonamento sem coletar diagnósticos nesta fase. Envios futuros precisam visualizar cada campo, permitir remoção e exigir consentimento explícito.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "Nenhum caso, anexo, pacote de diagnóstico ou registro de conta é enviado na Fase 3.",
+        "Não inclua senhas, segredos de autenticação, dados de pagamento nem informações pessoais sem relação."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/pt-BR/docs/current/troubleshooting/LB-START",
+          "provenance": "observed",
+          "scope": "Solução pública de problemas e escalonamento de recuperação",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "A autoridade de casos autenticados e diagnósticos com consentimento chegam na Fase 4."
+        }
+      ],
+      "collectionPoint": {
+        "purpose": "Diagnosticar um problema de suporte selecionado pelo usuário",
+        "requiredFields": "Nenhum dado é coletado por esta página pública",
+        "retention": "Sem envio, nenhum registro de suporte é retido",
+        "sharing": "Nada é compartilhado",
+        "revocation": "O consentimento futuro pode ser retirado antes do envio e pela central de privacidade",
+        "policyRouteId": "public-privacy-policy"
+      }
+    }
+  ]
+}

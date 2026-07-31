@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "version": "1.0.0",
+  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "supportStates": {
+    "available": {
+      "label": "Available",
+      "consequence": "The described public experience is ready to inspect.",
+      "evidence": "Repository-validated public content and deterministic interface tests."
+    },
+    "demonstrative-preview": {
+      "label": "Demonstrative preview",
+      "consequence": "You can review the complete interaction, but no native or remote state changes.",
+      "evidence": "Deterministic Phase 3 adapters and no-change receipts."
+    },
+    "under-validation": {
+      "label": "Under validation",
+      "consequence": "Do not assume compatibility or a performance result until evidence is complete.",
+      "evidence": "The validation boundary and missing proof are stated with each claim."
+    },
+    "planned": {
+      "label": "Planned",
+      "consequence": "The capability is part of the roadmap and is not available for use.",
+      "evidence": "The owning roadmap phase is named; no delivery date is promised."
+    },
+    "unsupported": {
+      "label": "Unsupported",
+      "consequence": "The configuration is outside the supported product boundary.",
+      "evidence": "The compatibility boundary explains why no action is offered."
+    },
+    "unavailable": {
+      "label": "Unavailable",
+      "consequence": "The action is blocked and no bypass is provided.",
+      "evidence": "The missing authority or trust artifact is identified."
+    }
+  },
+  "records": [
+    {
+      "routeId": "public-product",
+      "contentType": "product",
+      "translationKey": "public-product",
+      "title": "Performance control you can inspect",
+      "summary": "Preparation, evidence, and restoration are one reviewable sequence.",
+      "body": "Liiiraa Boost is building a Windows 10 and 11 desktop optimizer that keeps every recommendation explainable and reversible. This phase proves the interface and contracts; it does not claim measured hardware gains or native authority.",
+      "availability": "under-validation",
+      "validationState": "validated",
+      "limitations": [
+        "Real hardware observation and privileged Windows changes arrive in later phases.",
+        "No gain, issue count, launch date, or universal compatibility is claimed."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/evidence",
+          "provenance": "observed",
+          "scope": "Deterministic desktop review, evidence, and recovery journeys",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Native optimization behavior and per-machine performance remain unproven."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Prepare",
+          "body": "Review dependencies, risk, and consequences before any future operation."
+        },
+        {
+          "title": "Prove",
+          "body": "Inspect source, scope, version, validation state, and what remains unproven."
+        },
+        {
+          "title": "Restore",
+          "body": "Keep history and recovery visible as part of the plan, not as an afterthought."
+        }
+      ]
+    },
+    {
+      "routeId": "public-evidence",
+      "contentType": "evidence",
+      "translationKey": "public-evidence",
+      "title": "Evidence before conclusions",
+      "summary": "Claims stay attached to their origin, scope, version, and validation boundary.",
+      "body": "The current evidence proves authored product behavior and deterministic preview states. It does not prove a gain on an unobserved PC. Measured, observed, derived, user-provided, simulated, and unavailable values remain visibly distinct.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "Deterministic preview evidence cannot substitute for representative Windows hardware measurement.",
+        "A validated schema does not make a simulated value authoritative."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/docs/current/articles/evidence-method",
+          "provenance": "observed",
+          "scope": "Repository content admission and deterministic scenario evidence",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Representative device and game measurements are not yet available."
+        }
+      ],
+      "sections": [
+        {
+          "title": "What is proven",
+          "body": "Route ownership, content admission, preview boundaries, and recovery interaction are executable."
+        },
+        {
+          "title": "What is not proven",
+          "body": "No public record currently supports a numerical performance result for a real machine."
+        }
+      ]
+    },
+    {
+      "routeId": "public-compatibility",
+      "contentType": "compatibility",
+      "translationKey": "public-compatibility",
+      "title": "One compatibility flow, explicit limits",
+      "summary": "Windows 10 and Windows 11 share one review flow until verified evidence requires a difference.",
+      "body": "Select the Windows generation and architecture you actually use. The result describes the current support boundary only; CPU, GPU, storage, game profile, drivers, and lifecycle evidence still determine whether a future optimization can be recommended.",
+      "availability": "under-validation",
+      "validationState": "validated",
+      "limitations": [
+        "Windows 10 lifecycle and edition support must be checked against current Microsoft support.",
+        "ARM64, unsupported Windows builds, and unknown hardware receive no compatibility claim."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/docs/current/articles/compatibility-method",
+          "provenance": "derived",
+          "scope": "Windows 10 and Windows 11 application-flow equivalence",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Specific hardware and game support require observed inventory and validated profiles."
+        }
+      ],
+      "supportMatrix": [
+        {
+          "capability": "Windows 10 and Windows 11 review flow",
+          "state": "available",
+          "consequence": "The same questions and evidence rules apply to both Windows generations."
+        },
+        {
+          "capability": "Hardware-specific recommendation",
+          "state": "under-validation",
+          "consequence": "No recommendation is shown before real inventory and profile evidence exist."
+        },
+        {
+          "capability": "Native apply and rollback",
+          "state": "planned",
+          "consequence": "The interface can be reviewed, but Windows state cannot be changed in Phase 3."
+        },
+        {
+          "capability": "Unsupported Windows builds",
+          "state": "unsupported",
+          "consequence": "No optimization or compatibility conclusion is offered."
+        }
+      ]
+    },
+    {
+      "routeId": "public-plans",
+      "contentType": "plan",
+      "translationKey": "public-plans",
+      "title": "Plans without hidden terms",
+      "summary": "Capabilities and commercial consequences are visible before any simulated confirmation.",
+      "body": "Checkout authority does not exist in Phase 3. The records below are capability previews, not offers to purchase. No discount, countdown, urgency, testimonial, or safety paywall is used.",
+      "availability": "demonstrative-preview",
+      "validationState": "validated",
+      "limitations": [
+        "No paid plan, transaction, entitlement, renewal, or refund can be created in this phase.",
+        "Final prices and commercial terms require Phase 4 authority and a new reviewed publication."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/policies/terms",
+          "provenance": "observed",
+          "scope": "Pre-checkout disclosure and no-authority boundary",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Final commercial prices and payment-provider behavior are not yet approved."
+        }
+      ],
+      "plans": [
+        {
+          "id": "phase-3-preview",
+          "name": "Deterministic product preview",
+          "price": "Not for sale",
+          "billingPeriod": "No billing period",
+          "renewal": "No automatic renewal",
+          "taxes": "No taxes are charged because no transaction is available",
+          "cancellation": "Nothing to cancel in Phase 3",
+          "refunds": "No payment is accepted, so no refund event can exist",
+          "deviceRules": "No device entitlement or binding is created",
+          "expirationEffects": "Preview access does not create or expire a paid entitlement",
+          "checkoutBoundary": "Phase 4 authority required; confirmation remains simulated and changes no remote state",
+          "capabilities": [
+            {
+              "name": "Public product, evidence, and compatibility review",
+              "state": "available"
+            },
+            {
+              "name": "Account, billing, and device workflows",
+              "state": "demonstrative-preview"
+            },
+            {
+              "name": "Native optimization apply and rollback",
+              "state": "planned"
+            },
+            {
+              "name": "Public trusted installer",
+              "state": "unavailable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "routeId": "public-search",
+      "contentType": "search",
+      "translationKey": "public-search",
+      "title": "Search public, validated content",
+      "summary": "Results expose content type, locale, version, availability, and validation state.",
+      "body": "Search is submitted explicitly and stored in the URL. It indexes only admitted public records and never account, admin, scenario, preview-authority, or internal records.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "Current search covers repository-authored records shipped with this public application.",
+        "Private data and obsolete actionable content are never included."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/search",
+          "provenance": "observed",
+          "scope": "Public-only route, locale, version, availability, and validation filters",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "No external or private content source is connected."
+        }
+      ],
+      "searchCopy": {
+        "label": "Search product, evidence, compatibility, plans, and support",
+        "submit": "Search",
+        "emptyTitle": "No trusted results",
+        "emptyBody": "Revise the query or remove a filter. Search does not expose private content or incompatible versions without notice.",
+        "filterLabel": "Availability"
+      }
+    },
+    {
+      "routeId": "public-support",
+      "contentType": "support",
+      "translationKey": "public-support",
+      "title": "Support begins with a safe path",
+      "summary": "Start with public documentation and share only the minimum data needed.",
+      "body": "Public support explains recovery and escalation without collecting diagnostics in this phase. Future submissions must preview every field, allow removal, and require explicit consent.",
+      "availability": "available",
+      "validationState": "validated",
+      "limitations": [
+        "No support case, attachment, diagnostic bundle, or account record is submitted in Phase 3.",
+        "Do not include passwords, authentication secrets, payment data, or unrelated personal information."
+      ],
+      "evidence": [
+        {
+          "source": "https://liiiraa.com/en/docs/current/troubleshooting/LB-START",
+          "provenance": "observed",
+          "scope": "Public troubleshooting and recovery escalation",
+          "applicableVersion": "1.0.0",
+          "validationState": "validated",
+          "unprovenBoundary": "Authenticated case authority and consent-scoped diagnostics arrive in Phase 4."
+        }
+      ],
+      "collectionPoint": {
+        "purpose": "Diagnose a user-selected support issue",
+        "requiredFields": "No data is collected by this public page",
+        "retention": "No submission means no support record is retained",
+        "sharing": "Nothing is shared",
+        "revocation": "Future consent can be withdrawn before submission and through the privacy center",
+        "policyRouteId": "public-privacy-policy"
+      }
+    }
+  ]
+}
