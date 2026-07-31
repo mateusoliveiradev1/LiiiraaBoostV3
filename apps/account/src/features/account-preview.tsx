@@ -1,19 +1,25 @@
 'use client';
 
-import { LbButton, LbTextField } from '@liiiraa/design-system';
+import { LbButton, LbTextArea, LbTextField } from '@liiiraa/design-system';
 import {
   EmptyComposition,
   PreviewBoundary,
+  PreviewReceipt,
   PreviewWorkflow,
   ProvenanceLabel,
   ResponsiveDataTable,
   StatusSignal,
   createPreviewWorkflowMachine,
   type PreviewActionFamily,
+  type PreviewWorkflowOutput,
   type PreviewWorkflowInput,
 } from '@liiiraa/web-features';
-import { routeHref, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
-import { createWebPreviewAuthority, getWebScenario, type WebScenarioId } from '@liiiraa/web-preview';
+import { routeHref, WEB_ORIGINS, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
+import {
+  createWebPreviewAuthority,
+  getWebScenario,
+  type WebScenarioId,
+} from '@liiiraa/web-preview';
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
 import accountEnJson from '../content/account.en.json';
@@ -24,6 +30,12 @@ export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
   'account-overview',
   'account-profile',
   'account-security',
+  'account-subscription',
+  'account-invoices',
+  'account-device',
+  'account-downloads',
+  'account-privacy',
+  'account-support',
 ] as const satisfies readonly WebRouteId[]);
 
 export type AccountPreviewRoute = (typeof ACCOUNT_ENTRY_ROUTE_IDS)[number];
@@ -72,6 +84,55 @@ type AccountContent = Readonly<{
     sessionDetail: string;
     recoveryDetail: string;
   }>;
+  subscription: Readonly<{
+    title: string;
+    summary: string;
+    plan: string;
+    price: string;
+    billingPeriod: string;
+    renewal: string;
+    taxes: string;
+    cancellation: string;
+    refunds: string;
+    deviceRules: string;
+    expirationEffects: string;
+    action: string;
+  }>;
+  invoices: Readonly<{ title: string; summary: string; caption: string; empty: string }>;
+  device: Readonly<{
+    title: string;
+    summary: string;
+    label: string;
+    detail: string;
+    cooldown: string;
+    action: string;
+  }>;
+  downloads: Readonly<{ title: string; summary: string; boundary: string; action: string }>;
+  privacy: Readonly<{
+    title: string;
+    summary: string;
+    purpose: string;
+    retention: string;
+    sharing: string;
+    revocation: string;
+    exportAction: string;
+    correctionAction: string;
+    deletionAction: string;
+    consentAction: string;
+  }>;
+  support: Readonly<{
+    title: string;
+    summary: string;
+    subjectLabel: string;
+    bodyLabel: string;
+    action: string;
+    purpose: string;
+    retention: string;
+    sharing: string;
+    revocation: string;
+    noUpload: string;
+    sensitiveReview: string;
+  }>;
   recovery: Readonly<{
     title: string;
     safeWork: string;
@@ -97,6 +158,12 @@ const admitAccountContent = (candidate: unknown, locale: WebLocale): AccountCont
     !isRecord(candidate['overview']) ||
     !isRecord(candidate['profile']) ||
     !isRecord(candidate['security']) ||
+    !isRecord(candidate['subscription']) ||
+    !isRecord(candidate['invoices']) ||
+    !isRecord(candidate['device']) ||
+    !isRecord(candidate['downloads']) ||
+    !isRecord(candidate['privacy']) ||
+    !isRecord(candidate['support']) ||
     !isRecord(candidate['recovery'])
   ) {
     throw new Error(`ACCOUNT_CONTENT_INVALID:${locale}:root`);
@@ -130,6 +197,18 @@ const titleFor = (content: AccountContent, routeId: AccountPreviewRoute) => {
       return { title: content.profile.title, summary: content.profile.summary };
     case 'account-security':
       return { title: content.security.title, summary: content.security.summary };
+    case 'account-subscription':
+      return { title: content.subscription.title, summary: content.subscription.summary };
+    case 'account-invoices':
+      return { title: content.invoices.title, summary: content.invoices.summary };
+    case 'account-device':
+      return { title: content.device.title, summary: content.device.summary };
+    case 'account-downloads':
+      return { title: content.downloads.title, summary: content.downloads.summary };
+    case 'account-privacy':
+      return { title: content.privacy.title, summary: content.privacy.summary };
+    case 'account-support':
+      return { title: content.support.title, summary: content.support.summary };
   }
 };
 
@@ -142,20 +221,29 @@ export const validatePreviewEmail = (value: string): boolean =>
   value.length <= 254 && EMAIL_PATTERN.test(value);
 
 const actionInput = ({
+  consent,
   family,
   fields,
+  impact,
   label,
+  purpose,
   review,
   safeDraftFields = [],
 }: Readonly<{
   family: PreviewActionFamily;
+  consent?: PreviewWorkflowInput['consent'];
   fields: Readonly<Record<string, string>>;
+  impact?: string;
   label: string;
+  purpose?: string;
   review: readonly Readonly<{ field: string; label: string; before: string; after: string }>[];
   safeDraftFields?: readonly string[];
 }>): PreviewWorkflowInput => ({
   action: { family, id: `${family}.review`, objectLabel: label, surface: 'account' },
+  ...(consent === undefined ? {} : { consent }),
   fields,
+  ...(impact === undefined ? {} : { impact }),
+  ...(purpose === undefined ? {} : { purpose }),
   requiredFields: Object.keys(fields),
   review,
   role: 'account-holder',
@@ -196,7 +284,11 @@ const PreviewWorkflowRunner = ({
   return <PreviewWorkflow input={input} locale={locale} machine={machine} />;
 };
 
-const FixtureHeader = ({ content, summary, title }: Readonly<{
+const FixtureHeader = ({
+  content,
+  summary,
+  title,
+}: Readonly<{
   content: AccountContent;
   summary: string;
   title: string;
@@ -212,7 +304,11 @@ const FixtureHeader = ({ content, summary, title }: Readonly<{
 
 const DegradedAccountPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article data-account-state="offline stale expired-session partial-failure">
-    <FixtureHeader content={content} summary={content.states.failure} title={content.recovery.title} />
+    <FixtureHeader
+      content={content}
+      summary={content.states.failure}
+      title={content.recovery.title}
+    />
     <PreviewBoundary
       description={
         content.locale === 'pt-BR'
@@ -261,13 +357,22 @@ export const SignInPreview = ({
         family: 'auth',
         fields: { email },
         label: content.signIn.emailAction,
-        review: [{ field: 'email', label: content.signIn.emailLabel, before: 'Not reviewed', after: email }],
+        review: [
+          {
+            field: 'email',
+            label: content.signIn.emailLabel,
+            before: 'Not reviewed',
+            after: email,
+          },
+        ],
       }),
     );
   };
 
   if (workflow !== null) {
-    return <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />;
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
   }
 
   const startChoice = (family: 'social' | 'passkey', provider: string, label: string) => {
@@ -283,7 +388,11 @@ export const SignInPreview = ({
 
   return (
     <article className="lb-web-sign-in" data-account-state="sign-in-preview">
-      <FixtureHeader content={content} summary={content.signIn.summary} title={content.signIn.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.signIn.summary}
+        title={content.signIn.title}
+      />
       <PreviewBoundary description={content.signIn.security} />
       <form noValidate onSubmit={startEmail}>
         {error !== null ? (
@@ -308,15 +417,22 @@ export const SignInPreview = ({
         </div>
         <LbButton type="submit">{content.signIn.emailAction}</LbButton>
       </form>
-      <div aria-label={content.locale === 'pt-BR' ? 'Outras opções futuras' : 'Other future choices'} role="group">
+      <div
+        aria-label={content.locale === 'pt-BR' ? 'Outras opções futuras' : 'Other future choices'}
+        role="group"
+      >
         <LbButton
-          onPress={() => startChoice('social', 'social-provider-preview', content.signIn.socialAction)}
+          onPress={() =>
+            startChoice('social', 'social-provider-preview', content.signIn.socialAction)
+          }
           variant="secondary"
         >
           {content.signIn.socialAction}
         </LbButton>
         <LbButton
-          onPress={() => startChoice('passkey', 'windows-hello-preview', content.signIn.passkeyAction)}
+          onPress={() =>
+            startChoice('passkey', 'windows-hello-preview', content.signIn.passkeyAction)
+          }
           variant="secondary"
         >
           {content.signIn.passkeyAction}
@@ -328,11 +444,20 @@ export const SignInPreview = ({
 
 const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article data-account-state="ready">
-    <FixtureHeader content={content} summary={content.overview.summary} title={content.overview.title} />
+    <FixtureHeader
+      content={content}
+      summary={content.overview.summary}
+      title={content.overview.title}
+    />
     <ResponsiveDataTable
-      caption={content.locale === 'pt-BR' ? 'Responsabilidades da conta' : 'Account responsibilities'}
+      caption={
+        content.locale === 'pt-BR' ? 'Responsabilidades da conta' : 'Account responsibilities'
+      }
       columns={[
-        { id: 'responsibility', label: content.locale === 'pt-BR' ? 'Responsabilidade' : 'Responsibility' },
+        {
+          id: 'responsibility',
+          label: content.locale === 'pt-BR' ? 'Responsabilidade' : 'Responsibility',
+        },
         { id: 'state', label: content.locale === 'pt-BR' ? 'Estado' : 'State' },
         { id: 'action', label: content.locale === 'pt-BR' ? 'Ação' : 'Action', essential: false },
       ]}
@@ -349,7 +474,10 @@ const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => 
         };
       })}
     />
-    <EmptyComposition description={content.overview.emptyBody} title={content.overview.emptyTitle} />
+    <EmptyComposition
+      description={content.overview.emptyBody}
+      title={content.overview.emptyTitle}
+    />
   </article>
 );
 
@@ -360,11 +488,17 @@ const ProfilePreview = ({
   const [displayName, setDisplayName] = useState('Astra Preview');
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   if (workflow !== null) {
-    return <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />;
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
   }
   return (
     <article data-account-state="ready">
-      <FixtureHeader content={content} summary={content.profile.summary} title={content.profile.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.profile.summary}
+        title={content.profile.title}
+      />
       <LbTextField
         description={content.fixtureLabel}
         isRequired
@@ -374,7 +508,10 @@ const ProfilePreview = ({
         value={displayName}
       />
       <dl>
-        <div><dt>{content.profile.localeLabel}</dt><dd>{content.locale}</dd></div>
+        <div>
+          <dt>{content.profile.localeLabel}</dt>
+          <dd>{content.locale}</dd>
+        </div>
       </dl>
       <LbButton
         onPress={() => {
@@ -384,8 +521,18 @@ const ProfilePreview = ({
               fields: { displayName, locale: content.locale },
               label: content.profile.action,
               review: [
-                { field: 'displayName', label: content.profile.nameLabel, before: 'Astra Preview', after: displayName },
-                { field: 'locale', label: content.profile.localeLabel, before: content.locale, after: content.locale },
+                {
+                  field: 'displayName',
+                  label: content.profile.nameLabel,
+                  before: 'Astra Preview',
+                  after: displayName,
+                },
+                {
+                  field: 'locale',
+                  label: content.profile.localeLabel,
+                  before: content.locale,
+                  after: content.locale,
+                },
               ],
               safeDraftFields: ['displayName', 'locale'],
             }),
@@ -409,7 +556,9 @@ export const SecurityMethodList = ({
         <li key={family}>
           <strong>{family === 'passkey' ? content.security.passkey : content.security.mfa}</strong>{' '}
           <StatusSignal label="Fixture" state="preview" />{' '}
-          <LbButton onPress={() => onReview(family)} variant="quiet">{content.security.review}</LbButton>
+          <LbButton onPress={() => onReview(family)} variant="quiet">
+            {content.security.review}
+          </LbButton>
         </li>
       ))}
     </ul>
@@ -422,7 +571,14 @@ export const SessionList = ({
 }: Readonly<{ content: AccountContent; onReview: () => void }>) => (
   <section aria-labelledby="session-list-title" className="lb-web-session-list">
     <h2 id="session-list-title">{content.security.sessions}</h2>
-    <ul><li><span>{content.security.sessionDetail}</span>{' '}<LbButton onPress={onReview} variant="quiet">{content.security.review}</LbButton></li></ul>
+    <ul>
+      <li>
+        <span>{content.security.sessionDetail}</span>{' '}
+        <LbButton onPress={onReview} variant="quiet">
+          {content.security.review}
+        </LbButton>
+      </li>
+    </ul>
   </section>
 );
 
@@ -432,7 +588,12 @@ const SecurityPreview = ({
 }: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   const reviewSecurity = (family: 'passkey' | 'mfa' | 'session') => {
-    const label = family === 'passkey' ? content.security.passkey : family === 'mfa' ? content.security.mfa : content.security.sessions;
+    const label =
+      family === 'passkey'
+        ? content.security.passkey
+        : family === 'mfa'
+          ? content.security.mfa
+          : content.security.sessions;
     setWorkflow(
       actionInput({
         family,
@@ -443,18 +604,458 @@ const SecurityPreview = ({
     );
   };
   if (workflow !== null) {
-    return <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />;
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
   }
   return (
     <article data-account-state="ready">
-      <FixtureHeader content={content} summary={content.security.summary} title={content.security.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.security.summary}
+        title={content.security.title}
+      />
       <PreviewBoundary description={content.signIn.security} />
       <SecurityMethodList content={content} onReview={reviewSecurity} />
       <SessionList content={content} onReview={() => reviewSecurity('session')} />
       <section aria-labelledby="recovery-title" className="lb-web-recovery-review">
-        <h2 id="recovery-title">{content.security.recovery}</h2><p>{content.security.recoveryDetail}</p>
+        <h2 id="recovery-title">{content.security.recovery}</h2>
+        <p>{content.security.recoveryDetail}</p>
       </section>
-      <EmptyComposition description={content.security.emptyAlerts} title={content.security.alerts} />
+      <EmptyComposition
+        description={content.security.emptyAlerts}
+        title={content.security.alerts}
+      />
+    </article>
+  );
+};
+
+const CollectionDisclosure = ({
+  content,
+  purpose,
+  retention,
+  revocation,
+  sharing,
+}: Readonly<{
+  content: AccountContent;
+  purpose: string;
+  retention: string;
+  revocation: string;
+  sharing: string;
+}>) => (
+  <section aria-labelledby="collection-disclosure-title" className="lb-web-consent-review">
+    <h2 id="collection-disclosure-title">
+      {content.locale === 'pt-BR'
+        ? 'Limite de coleta e consentimento'
+        : 'Collection and consent boundary'}
+    </h2>
+    <dl>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Finalidade' : 'Purpose'}</dt>
+        <dd>{purpose}</dd>
+      </div>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Campos obrigatórios' : 'Required fields'}</dt>
+        <dd>
+          {content.locale === 'pt-BR'
+            ? 'Somente campos exibidos na revisão'
+            : 'Only fields shown in review'}
+        </dd>
+      </div>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Retenção' : 'Retention'}</dt>
+        <dd>{retention}</dd>
+      </div>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Compartilhamento' : 'Sharing'}</dt>
+        <dd>{sharing}</dd>
+      </div>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Revogação' : 'Revocation'}</dt>
+        <dd>{revocation}</dd>
+      </div>
+    </dl>
+    <a href={`${WEB_ORIGINS['public-origin']}${hrefFor('public-privacy-policy', content.locale)}`}>
+      {content.locale === 'pt-BR'
+        ? 'Ler política de privacidade completa'
+        : 'Read the full privacy policy'}
+    </a>
+  </section>
+);
+
+export const SubscriptionSummary = ({
+  content,
+  scenarioId,
+}: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
+  const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
+  if (workflow !== null) {
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
+  }
+  const terms = [
+    [content.locale === 'pt-BR' ? 'Preço' : 'Price', content.subscription.price],
+    [
+      content.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
+      content.subscription.billingPeriod,
+    ],
+    [content.locale === 'pt-BR' ? 'Renovação' : 'Renewal', content.subscription.renewal],
+    [content.locale === 'pt-BR' ? 'Tributos' : 'Taxes', content.subscription.taxes],
+    [
+      content.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
+      content.subscription.cancellation,
+    ],
+    [content.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds', content.subscription.refunds],
+    [
+      content.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
+      content.subscription.deviceRules,
+    ],
+    [
+      content.locale === 'pt-BR' ? 'Efeitos da expiração' : 'Expiration effects',
+      content.subscription.expirationEffects,
+    ],
+  ] as const;
+  return (
+    <article className="lb-web-subscription" data-account-state="ready">
+      <FixtureHeader
+        content={content}
+        summary={content.subscription.summary}
+        title={content.subscription.title}
+      />
+      <StatusSignal label={content.subscription.plan} state="preview" />
+      <dl>
+        {terms.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <PreviewBoundary description={content.subscription.summary} />
+      <LbButton
+        onPress={() => {
+          setWorkflow(
+            actionInput({
+              family: 'billing',
+              fields: { plan: 'premium-preview' },
+              impact: content.subscription.expirationEffects,
+              label: content.subscription.action,
+              review: [
+                {
+                  field: 'plan',
+                  label: content.subscription.plan,
+                  before: 'No authoritative plan',
+                  after: 'Premium review only',
+                },
+              ],
+            }),
+          );
+        }}
+      >
+        {content.subscription.action}
+      </LbButton>
+    </article>
+  );
+};
+
+export const InvoiceTable = ({ content }: Readonly<{ content: AccountContent }>) => (
+  <article data-account-state="empty">
+    <FixtureHeader
+      content={content}
+      summary={content.invoices.summary}
+      title={content.invoices.title}
+    />
+    <ResponsiveDataTable
+      caption={content.invoices.caption}
+      columns={[
+        { id: 'reference', label: content.locale === 'pt-BR' ? 'Referência' : 'Reference' },
+        { id: 'state', label: content.locale === 'pt-BR' ? 'Estado' : 'State' },
+        { id: 'amount', label: content.locale === 'pt-BR' ? 'Valor' : 'Amount', essential: false },
+        { id: 'date', label: content.locale === 'pt-BR' ? 'Data' : 'Date', essential: false },
+      ]}
+      rows={[
+        {
+          id: 'invoice-schema-preview',
+          cells: {
+            reference: <code>INV-PREVIEW</code>,
+            state: (
+              <StatusSignal
+                label={content.locale === 'pt-BR' ? 'Não emitida' : 'Not issued'}
+                state="preview"
+              />
+            ),
+            amount: 'R$ 0,00',
+            date: '—',
+          },
+          detail: <p>{content.invoices.empty}</p>,
+        },
+      ]}
+    />
+    <EmptyComposition description={content.invoices.empty} />
+  </article>
+);
+
+export const DeviceBindingReview = ({
+  content,
+  scenarioId,
+}: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
+  const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
+  if (workflow !== null) {
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
+  }
+  return (
+    <article className="lb-web-device-review" data-account-state="sensitive-review">
+      <FixtureHeader
+        content={content}
+        summary={content.device.summary}
+        title={content.device.title}
+      />
+      <dl>
+        <div>
+          <dt>{content.device.label}</dt>
+          <dd>{content.device.detail}</dd>
+        </div>
+      </dl>
+      <PreviewBoundary description={content.device.cooldown} />
+      <LbButton
+        onPress={() =>
+          setWorkflow(
+            actionInput({
+              family: 'device',
+              fields: { device: 'desktop-preview-01' },
+              impact: content.device.cooldown,
+              label: content.device.action,
+              review: [
+                {
+                  field: 'device',
+                  label: content.device.label,
+                  before: 'Synthetic binding retained',
+                  after: 'Replacement reviewed only',
+                },
+              ],
+            }),
+          )
+        }
+        variant="destructive"
+      >
+        {content.device.action}
+      </LbButton>
+    </article>
+  );
+};
+
+export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent }>) => {
+  const releaseHref = routeHref('releases-channel', { channel: 'stable', locale: content.locale });
+  if (!releaseHref.ok) throw new Error('ACCOUNT_PUBLIC_RELEASE_ROUTE_UNAVAILABLE');
+  return (
+    <article data-account-state="public-transition">
+      <FixtureHeader
+        content={content}
+        summary={content.downloads.summary}
+        title={content.downloads.title}
+      />
+      <PreviewBoundary
+        description={content.downloads.boundary}
+        title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
+      />
+      <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>{content.downloads.action}</a>
+    </article>
+  );
+};
+
+export const ConsentReview = ({ content }: Readonly<{ content: AccountContent }>) => (
+  <CollectionDisclosure
+    content={content}
+    purpose={content.privacy.purpose}
+    retention={content.privacy.retention}
+    revocation={content.privacy.revocation}
+    sharing={content.privacy.sharing}
+  />
+);
+
+export const DataRequestReview = ({
+  content,
+  onSelect,
+}: Readonly<{
+  content: AccountContent;
+  onSelect: (request: 'consent' | 'correction' | 'deletion' | 'export') => void;
+}>) => (
+  <section aria-labelledby="data-request-title" className="lb-web-data-request">
+    <h2 id="data-request-title">
+      {content.locale === 'pt-BR' ? 'Solicitações disponíveis' : 'Available requests'}
+    </h2>
+    <div
+      role="group"
+      aria-label={content.locale === 'pt-BR' ? 'Solicitações de privacidade' : 'Privacy requests'}
+    >
+      <LbButton onPress={() => onSelect('export')} variant="secondary">
+        {content.privacy.exportAction}
+      </LbButton>
+      <LbButton onPress={() => onSelect('correction')} variant="secondary">
+        {content.privacy.correctionAction}
+      </LbButton>
+      <LbButton onPress={() => onSelect('consent')} variant="secondary">
+        {content.privacy.consentAction}
+      </LbButton>
+      <LbButton onPress={() => onSelect('deletion')} variant="destructive">
+        {content.privacy.deletionAction}
+      </LbButton>
+    </div>
+  </section>
+);
+
+export const PrivacyCenter = ({
+  content,
+  scenarioId,
+}: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
+  const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
+  if (workflow !== null) {
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
+  }
+  const selectRequest = (request: 'consent' | 'correction' | 'deletion' | 'export') => {
+    const family = request === 'consent' ? 'consent' : 'privacy';
+    const labels = {
+      consent: content.privacy.consentAction,
+      correction: content.privacy.correctionAction,
+      deletion: content.privacy.deletionAction,
+      export: content.privacy.exportAction,
+    } as const;
+    setWorkflow(
+      actionInput({
+        consent: {
+          expiresAt: '2026-01-15T13:00:00.000Z',
+          granted: true,
+          permittedFields: ['request-type'],
+          purpose: content.privacy.purpose,
+          requestingActor: 'account-holder',
+        },
+        family,
+        fields: { requestType: request },
+        impact: content.privacy.revocation,
+        label: labels[request],
+        purpose: content.privacy.purpose,
+        review: [
+          {
+            field: 'requestType',
+            label: labels[request],
+            before: 'No request',
+            after: 'Review prepared',
+          },
+        ],
+      }),
+    );
+  };
+  return (
+    <article className="lb-web-privacy-center" data-account-state="sensitive-review">
+      <FixtureHeader
+        content={content}
+        summary={content.privacy.summary}
+        title={content.privacy.title}
+      />
+      <ConsentReview content={content} />
+      <DataRequestReview content={content} onSelect={selectRequest} />
+    </article>
+  );
+};
+
+export const SensitiveFieldReview = ({ content }: Readonly<{ content: AccountContent }>) => (
+  <aside className="lb-web-sensitive-fields" role="note">
+    <h2>{content.locale === 'pt-BR' ? 'Revisão de campos sensíveis' : 'Sensitive-field review'}</h2>
+    <p>{content.support.sensitiveReview}</p>
+    <p>
+      <strong>{content.support.noUpload}</strong>
+    </p>
+  </aside>
+);
+
+export const SubmissionReceipt = ({
+  actionLabel,
+  locale,
+  output,
+}: Readonly<{ actionLabel: string; locale: WebLocale; output: PreviewWorkflowOutput }>) => (
+  <PreviewReceipt actionLabel={actionLabel} locale={locale} output={output} />
+);
+
+export const SupportRequestComposer = ({
+  content,
+  scenarioId,
+}: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
+  const [subject, setSubject] = useState('Synthetic startup question');
+  const [description, setDescription] = useState('The fixture shows a startup state for review.');
+  const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
+  if (workflow !== null) {
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
+  }
+  return (
+    <article className="lb-web-support-composer" data-account-state="sensitive-review">
+      <FixtureHeader
+        content={content}
+        summary={content.support.summary}
+        title={content.support.title}
+      />
+      <CollectionDisclosure
+        content={content}
+        purpose={content.support.purpose}
+        retention={content.support.retention}
+        revocation={content.support.revocation}
+        sharing={content.support.sharing}
+      />
+      <SensitiveFieldReview content={content} />
+      <LbTextField
+        label={content.support.subjectLabel}
+        maxLength={120}
+        onChange={setSubject}
+        value={subject}
+      />
+      <LbTextArea
+        label={content.support.bodyLabel}
+        maxLength={600}
+        onChange={setDescription}
+        value={description}
+      />
+      <LbButton
+        onPress={() =>
+          setWorkflow(
+            actionInput({
+              consent: {
+                expiresAt: '2026-01-15T13:00:00.000Z',
+                granted: true,
+                permittedFields: ['subject', 'description'],
+                purpose: content.support.purpose,
+                requestingActor: 'account-holder',
+              },
+              family: 'support',
+              fields: { description, subject },
+              impact: content.support.sharing,
+              label: content.support.action,
+              purpose: content.support.purpose,
+              review: [
+                {
+                  field: 'subject',
+                  label: content.support.subjectLabel,
+                  before: 'No request',
+                  after: subject,
+                },
+                {
+                  field: 'description',
+                  label: content.support.bodyLabel,
+                  before: 'No request',
+                  after: description,
+                },
+              ],
+              safeDraftFields: ['subject'],
+            }),
+          )
+        }
+      >
+        {content.support.action}
+      </LbButton>
     </article>
   );
 };
@@ -471,7 +1072,15 @@ export const AccountPreviewExperience = ({
   scenarioId,
 }: AccountPreviewExperienceProps) => {
   const content = getAccountContent(locale);
-  const activeScenarioId = scenarioId ?? (routeId === 'account-sign-in' ? 'W10' : 'W11');
+  const activeScenarioId =
+    scenarioId ??
+    (routeId === 'account-sign-in'
+      ? 'W10'
+      : routeId === 'account-device' ||
+          routeId === 'account-privacy' ||
+          routeId === 'account-support'
+        ? 'W13'
+        : 'W11');
   if (activeScenarioId === 'W12') return <DegradedAccountPreview content={content} />;
   let view: ReactNode;
   switch (routeId) {
@@ -486,6 +1095,24 @@ export const AccountPreviewExperience = ({
       break;
     case 'account-security':
       view = <SecurityPreview content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-subscription':
+      view = <SubscriptionSummary content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-invoices':
+      view = <InvoiceTable content={content} />;
+      break;
+    case 'account-device':
+      view = <DeviceBindingReview content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-downloads':
+      view = <DownloadsPreview content={content} />;
+      break;
+    case 'account-privacy':
+      view = <PrivacyCenter content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-support':
+      view = <SupportRequestComposer content={content} scenarioId={activeScenarioId} />;
       break;
   }
   return (

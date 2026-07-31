@@ -1,0 +1,146 @@
+import { readFileSync } from 'node:fs';
+
+import {
+  projectNavigation,
+  routeHref,
+  validateWebDocument,
+  WEB_ORIGINS,
+  type FutureAuthorityCommandJson,
+  type WebLocale,
+} from '@liiiraa/web-core';
+import { createWebPreviewAuthority, getWebScenario } from '@liiiraa/web-preview';
+import { describe, expect, it } from 'vitest';
+
+import accountEn from '../content/account.en.json';
+import accountPtBr from '../content/account.pt-BR.json';
+
+const featureSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
+const pageSource = readFileSync(
+  new URL('../app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+  'utf8',
+);
+const ACCOUNT_ENTRY_ROUTE_IDS = [
+  'account-sign-in',
+  'account-overview',
+  'account-profile',
+  'account-security',
+  'account-subscription',
+  'account-invoices',
+  'account-device',
+  'account-downloads',
+  'account-privacy',
+  'account-support',
+] as const;
+
+const shapeOf = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(shapeOf);
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, child]) => [key, shapeOf(child)]),
+    );
+  }
+  return typeof value;
+};
+
+describe('account responsibility routes and locales', () => {
+  it('covers sign-in plus every canonical account responsibility in both locales', () => {
+    expect(ACCOUNT_ENTRY_ROUTE_IDS.slice(1)).toEqual(
+      projectNavigation('account').map(({ id }) => id),
+    );
+    for (const locale of ['pt-BR', 'en'] as const satisfies readonly WebLocale[]) {
+      for (const routeId of ACCOUNT_ENTRY_ROUTE_IDS) {
+        expect(routeHref(routeId, { locale }).ok).toBe(true);
+      }
+    }
+    expect(shapeOf(accountPtBr)).toEqual(shapeOf(accountEn));
+    for (const routeId of ACCOUNT_ENTRY_ROUTE_IDS) expect(featureSource).toContain(`'${routeId}'`);
+  });
+
+  it('validates complete email input and provides an accessible correction target', () => {
+    expect(featureSource).toContain('value.length <= 254 && EMAIL_PATTERN.test(value)');
+    expect(featureSource).toContain('const EMAIL_PATTERN = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/u');
+    expect(featureSource).toContain('href="#preview-email"');
+    expect(featureSource).toMatch(/role="alert" tabIndex=\{-1\}/u);
+    expect(featureSource).toContain('PreviewWorkflow');
+  });
+});
+
+describe('W11 and W12 complete account states', () => {
+  it('renders ready responsibility data and degraded recovery without hiding preview provenance', () => {
+    expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(1));
+    expect(getWebScenario('W12')).toMatchObject({ terminalState: 'authority-unavailable' });
+    expect(featureSource).toContain('data-authority-connected="false"');
+    expect(featureSource).toContain(
+      'data-account-state="offline stale expired-session partial-failure"',
+    );
+    expect(featureSource).toContain("hrefFor('account-sign-in', content.locale)");
+    expect(featureSource).toContain("hrefFor('account-support', content.locale)");
+  });
+
+  it('uses accessible compact invoice details and a public stable download boundary', () => {
+    const stable = routeHref('releases-channel', { channel: 'stable', locale: 'en' });
+    expect(stable).toEqual({ ok: true, value: '/en/releases/stable' });
+    expect(`${WEB_ORIGINS['public-origin']}${stable.ok ? stable.value : ''}`).toBe(
+      'https://liiiraa.com/en/releases/stable',
+    );
+    expect(featureSource).toContain('ResponsiveDataTable');
+    expect(featureSource).toContain('essential: false');
+    expect(accountEn.downloads.boundary).toContain('No session, account context, or form data');
+  });
+});
+
+describe('W13 sensitive account no-change authority', () => {
+  const command = (family: 'device' | 'privacy' | 'support'): FutureAuthorityCommandJson => ({
+    command: `${family}.review`,
+    description: `Phase 4 account ${family} authority`,
+    phase: 'Phase 4',
+    surface: 'account',
+  });
+
+  it.each(['device', 'privacy', 'support'] as const)(
+    'emits a schema-valid no-change %s receipt only after review',
+    async (family) => {
+      const scenario = getWebScenario('W13');
+      const authority = createWebPreviewAuthority({
+        clock: () => scenario.clock,
+        correlationIds: [`W13-${family}-receipt`],
+        scenario,
+      });
+      const result = await authority.execute({
+        command: command(family),
+        disposition: 'confirm',
+        reviewedInputs: [`${family}-reviewed`],
+      });
+      expect(result.kind).toBe('no-change');
+      if (result.kind !== 'no-change') throw new Error('Expected no-change result');
+      expect(validateWebDocument(result.receipt).ok).toBe(true);
+      expect(result.receipt).toMatchObject({ nextPhase: 'Phase 4', remoteStateChanged: false });
+    },
+  );
+
+  it('supports explicit cancellation and contains no mutation, upload, cookie, or session channel', async () => {
+    const scenario = getWebScenario('W13');
+    const authority = createWebPreviewAuthority({
+      clock: () => scenario.clock,
+      correlationIds: ['W13-cancel-receipt'],
+      scenario,
+    });
+    const result = await authority.execute({
+      command: command('privacy'),
+      disposition: 'cancel',
+      reviewedInputs: ['privacy-reviewed'],
+    });
+    expect(result).toMatchObject({
+      kind: 'cancelled',
+      receipt: { nextPhase: 'Phase 4', remoteStateChanged: false },
+    });
+    expect(featureSource).not.toMatch(
+      /\bfetch\s*\(|XMLHttpRequest|WebSocket|document\.cookie|localStorage|sessionStorage|type="file"/u,
+    );
+    expect(featureSource).toContain("safeDraftFields: ['subject']");
+    expect(featureSource).toContain('ResponsiveDataTable');
+    expect(pageSource).not.toMatch(/redirect\(|searchParams|process\.env/u);
+  });
+});

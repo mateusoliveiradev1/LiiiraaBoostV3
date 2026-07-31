@@ -46,6 +46,65 @@
     "sessionDetail": "Edge on Windows 11 · synthetic · last seen 2026-01-15 12:00 UTC",
     "recoveryDetail": "Recovery codes are not generated or displayed in Phase 3."
   },
+  "subscription": {
+    "title": "Subscription",
+    "summary": "Review transparent Premium terms before a simulated billing boundary.",
+    "plan": "Premium preview",
+    "price": "R$ 29.90 — illustrative price, not an offer",
+    "billingPeriod": "Monthly",
+    "renewal": "Would renew monthly only after Phase 4 consent",
+    "taxes": "Applicable taxes would be disclosed before purchase",
+    "cancellation": "Would remain available before the next renewal",
+    "refunds": "Subject to the published terms and applicable law",
+    "deviceRules": "One active PC; replacement would have a 30-day cooldown",
+    "expirationEffects": "Applied optimizations and recovery remain available; Premium services stop",
+    "action": "Review subscription change"
+  },
+  "invoices": {
+    "title": "Invoices",
+    "summary": "Synthetic invoice rows demonstrate structure without claiming a payment.",
+    "caption": "Synthetic invoice history",
+    "empty": "No authoritative invoices exist before Phase 4."
+  },
+  "device": {
+    "title": "Device",
+    "summary": "Review a synthetic one-device binding and its replacement consequence.",
+    "label": "DESKTOP-PREVIEW-01",
+    "detail": "Windows 11 · synthetic fixture · no hardware identifier collected",
+    "cooldown": "A confirmed replacement would start a 30-day cooldown in Phase 4. This preview does not revoke or bind a device.",
+    "action": "Review device replacement"
+  },
+  "downloads": {
+    "title": "Downloads",
+    "summary": "Stable releases remain public and never require an account.",
+    "boundary": "This link opens the public release surface. No session, account context, or form data crosses origins.",
+    "action": "Review stable public releases"
+  },
+  "privacy": {
+    "title": "Privacy center",
+    "summary": "Review consent, export, correction, and deletion journeys without creating a request.",
+    "purpose": "Prepare the selected privacy request for the account holder's review.",
+    "retention": "No request content is retained by this Phase 3 preview.",
+    "sharing": "Nothing is uploaded or shared.",
+    "revocation": "Cancel before the Phase 4 authority boundary; no remote state changes.",
+    "exportAction": "Review data export",
+    "correctionAction": "Review data correction",
+    "deletionAction": "Review account deletion",
+    "consentAction": "Review optional consent"
+  },
+  "support": {
+    "title": "Support",
+    "summary": "Compose and review a synthetic support request without sending or uploading anything.",
+    "subjectLabel": "Subject",
+    "bodyLabel": "Description",
+    "action": "Review support request",
+    "purpose": "Prepare a support request for explicit review.",
+    "retention": "No support draft is retained outside the current preview.",
+    "sharing": "No diagnostic, attachment, email, or account record is shared.",
+    "revocation": "Cancel the review at any point; nothing has been submitted.",
+    "noUpload": "Attachments and diagnostic uploads are unavailable in Phase 3.",
+    "sensitiveReview": "Remove credentials, payment data, recovery codes, and unrelated personal information before any future submission."
+  },
   "recovery": {
     "title": "Authority unavailable",
     "safeWork": "Safe draft fields preserved",

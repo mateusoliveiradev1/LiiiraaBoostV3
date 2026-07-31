@@ -46,6 +46,65 @@
     "sessionDetail": "Edge no Windows 11 · sintético · visto por último em 2026-01-15 12:00 UTC",
     "recoveryDetail": "Códigos de recuperação não são gerados nem exibidos na Fase 3."
   },
+  "subscription": {
+    "title": "Assinatura",
+    "summary": "Revise termos transparentes do Premium antes de um limite simulado de cobrança.",
+    "plan": "Prévia Premium",
+    "price": "R$ 29,90 — preço ilustrativo, não uma oferta",
+    "billingPeriod": "Mensal",
+    "renewal": "Renovaria mensalmente somente após consentimento na Fase 4",
+    "taxes": "Tributos aplicáveis seriam informados antes da compra",
+    "cancellation": "Permaneceria disponível antes da próxima renovação",
+    "refunds": "Sujeito aos termos publicados e à legislação aplicável",
+    "deviceRules": "Um PC ativo; a troca teria intervalo de 30 dias",
+    "expirationEffects": "Otimizações aplicadas e recuperação permanecem; serviços Premium param",
+    "action": "Revisar mudança de assinatura"
+  },
+  "invoices": {
+    "title": "Faturas",
+    "summary": "Linhas sintéticas demonstram a estrutura sem alegar um pagamento.",
+    "caption": "Histórico sintético de faturas",
+    "empty": "Nenhuma fatura autoritativa existe antes da Fase 4."
+  },
+  "device": {
+    "title": "Dispositivo",
+    "summary": "Revise uma vinculação sintética de um dispositivo e a consequência da troca.",
+    "label": "DESKTOP-PREVIEW-01",
+    "detail": "Windows 11 · fixture sintética · nenhum identificador de hardware coletado",
+    "cooldown": "Uma troca confirmada iniciaria um intervalo de 30 dias na Fase 4. Esta prévia não revoga nem vincula um dispositivo.",
+    "action": "Revisar troca de dispositivo"
+  },
+  "downloads": {
+    "title": "Downloads",
+    "summary": "Versões estáveis permanecem públicas e nunca exigem uma conta.",
+    "boundary": "Este link abre a superfície pública de versões. Nenhuma sessão, contexto da conta ou dado de formulário cruza as origens.",
+    "action": "Revisar versões estáveis públicas"
+  },
+  "privacy": {
+    "title": "Central de privacidade",
+    "summary": "Revise consentimento, exportação, correção e exclusão sem criar uma solicitação.",
+    "purpose": "Preparar a solicitação de privacidade selecionada para revisão do titular.",
+    "retention": "Nenhum conteúdo da solicitação é retido por esta prévia da Fase 3.",
+    "sharing": "Nada é enviado ou compartilhado.",
+    "revocation": "Cancele antes do limite da Fase 4; nenhum estado remoto muda.",
+    "exportAction": "Revisar exportação de dados",
+    "correctionAction": "Revisar correção de dados",
+    "deletionAction": "Revisar exclusão da conta",
+    "consentAction": "Revisar consentimento opcional"
+  },
+  "support": {
+    "title": "Suporte",
+    "summary": "Componha e revise uma solicitação sintética sem enviar ou fazer upload.",
+    "subjectLabel": "Assunto",
+    "bodyLabel": "Descrição",
+    "action": "Revisar solicitação de suporte",
+    "purpose": "Preparar uma solicitação de suporte para revisão explícita.",
+    "retention": "Nenhum rascunho de suporte é retido fora da prévia atual.",
+    "sharing": "Nenhum diagnóstico, anexo, e-mail ou registro da conta é compartilhado.",
+    "revocation": "Cancele a revisão a qualquer momento; nada foi enviado.",
+    "noUpload": "Anexos e uploads de diagnóstico estão indisponíveis na Fase 3.",
+    "sensitiveReview": "Remova credenciais, dados de pagamento, códigos de recuperação e informações pessoais não relacionadas antes de qualquer envio futuro."
+  },
   "recovery": {
     "title": "Autoridade indisponível",
     "safeWork": "Campos seguros preservados",
