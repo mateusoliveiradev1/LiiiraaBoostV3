@@ -5,11 +5,11 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import {
-  AccountPreviewPage,
   getAccountPreviewMetadata,
   isAccountPreviewRoute,
   type AccountPreviewRoute,
-} from '../../../features/account-preview';
+} from '../../../account-preview-model';
+import { AccountPreviewPage } from '../../../features/account-preview';
 
 type AccountResponsibilityPageProps = Readonly<{
   params: Promise<{

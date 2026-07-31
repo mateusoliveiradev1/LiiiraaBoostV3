@@ -11,6 +11,10 @@
     "./generated": {
       "types": "./src/generated/index.ts",
       "default": "./src/generated/index.ts"
+    },
+    "./web-validation": {
+      "types": "./src/web-validation.ts",
+      "default": "./src/web-validation.ts"
     }
   },
   "scripts": {

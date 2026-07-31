@@ -1,6 +1,6 @@
 import MiniSearch, { type SearchResult as MiniSearchResult } from 'minisearch';
 
-import { validateWebDocument } from '@liiiraa/contracts-ts';
+import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 import type {
   AdmittedContentBundle,

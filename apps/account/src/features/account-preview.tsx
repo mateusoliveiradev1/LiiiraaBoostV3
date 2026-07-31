@@ -24,21 +24,11 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
-
-export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
-  'account-sign-in',
-  'account-overview',
-  'account-profile',
-  'account-security',
-  'account-subscription',
-  'account-invoices',
-  'account-device',
-  'account-downloads',
-  'account-privacy',
-  'account-support',
-] as const satisfies readonly WebRouteId[]);
-
-export type AccountPreviewRoute = (typeof ACCOUNT_ENTRY_ROUTE_IDS)[number];
+import {
+  ACCOUNT_ENTRY_ROUTE_IDS,
+  getAccountPreviewMetadata,
+  type AccountPreviewRoute,
+} from '../account-preview-model';
 export type AccountPreviewState = 'ready' | 'offline' | 'stale' | 'expired-session' | 'failure';
 
 type AccountContent = Readonly<{
@@ -178,42 +168,11 @@ const ACCOUNT_CONTENT = Object.freeze({
 
 export const getAccountContent = (locale: WebLocale): AccountContent => ACCOUNT_CONTENT[locale];
 
-export const isAccountPreviewRoute = (routeId: WebRouteId): routeId is AccountPreviewRoute =>
-  ACCOUNT_ENTRY_ROUTE_IDS.includes(routeId as AccountPreviewRoute);
-
 const hrefFor = (routeId: WebRouteId, locale: WebLocale): string => {
   const result = routeHref(routeId, { locale });
   if (!result.ok) throw new Error(`ACCOUNT_ROUTE_UNAVAILABLE:${routeId}`);
   return result.value;
 };
-
-const titleFor = (content: AccountContent, routeId: AccountPreviewRoute) => {
-  switch (routeId) {
-    case 'account-sign-in':
-      return { title: content.signIn.title, summary: content.signIn.summary };
-    case 'account-overview':
-      return { title: content.overview.title, summary: content.overview.summary };
-    case 'account-profile':
-      return { title: content.profile.title, summary: content.profile.summary };
-    case 'account-security':
-      return { title: content.security.title, summary: content.security.summary };
-    case 'account-subscription':
-      return { title: content.subscription.title, summary: content.subscription.summary };
-    case 'account-invoices':
-      return { title: content.invoices.title, summary: content.invoices.summary };
-    case 'account-device':
-      return { title: content.device.title, summary: content.device.summary };
-    case 'account-downloads':
-      return { title: content.downloads.title, summary: content.downloads.summary };
-    case 'account-privacy':
-      return { title: content.privacy.title, summary: content.privacy.summary };
-    case 'account-support':
-      return { title: content.support.title, summary: content.support.summary };
-  }
-};
-
-export const getAccountPreviewMetadata = (locale: WebLocale, routeId: AccountPreviewRoute) =>
-  titleFor(getAccountContent(locale), routeId);
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
@@ -462,7 +421,7 @@ const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => 
         { id: 'action', label: content.locale === 'pt-BR' ? 'Ação' : 'Action', essential: false },
       ]}
       rows={ACCOUNT_ENTRY_ROUTE_IDS.filter((id) => id !== 'account-sign-in').map((routeId) => {
-        const metadata = titleFor(content, routeId);
+        const metadata = getAccountPreviewMetadata(content.locale, routeId);
         return {
           id: routeId,
           cells: {

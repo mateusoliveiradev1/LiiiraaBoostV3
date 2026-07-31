@@ -1,6 +1,14 @@
 export const ADMIN_TEST_ORIGIN = 'https://admin.localhost';
 
-export const resolveAdminOrigin = (value = process.env['LIIIRAA_ADMIN_ORIGIN']): string => {
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      readonly LIIIRAA_ADMIN_ORIGIN?: string;
+    }
+  }
+}
+
+export const resolveAdminOrigin = (value = process.env.LIIIRAA_ADMIN_ORIGIN): string => {
   const candidate = value ?? ADMIN_TEST_ORIGIN;
   const url = new URL(candidate);
   const localHttp = url.protocol === 'http:' && url.hostname.endsWith('.localhost');

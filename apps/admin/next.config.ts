@@ -1,10 +1,17 @@
 import type { NextConfig } from 'next';
 
-import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from './src/admin-runtime';
+import {
+  ADMIN_RUNTIME_BOUNDARY,
+  ADMIN_TEST_ORIGIN,
+  resolveAdminOrigin,
+} from './src/admin-runtime';
 
 const ADMIN_BUILD_ID_PREFIX = 'admin-preview';
 
 const nextConfig = {
+  env: {
+    LIIIRAA_ADMIN_ORIGIN: resolveAdminOrigin(),
+  },
   output: 'standalone',
   poweredByHeader: false,
   typedRoutes: true,

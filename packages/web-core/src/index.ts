@@ -39,12 +39,12 @@ export type {
   WebRouteResult,
   WebVersion,
 } from './routes.js';
-export { validateWebDocument } from '@liiiraa/contracts-ts';
+export { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 export type {
   FutureAuthorityCommandJson,
   NoChangeReceiptJson,
-  WebDocumentValidationResult,
 } from '@liiiraa/contracts-ts';
+export type { WebDocumentValidationResult } from '@liiiraa/contracts-ts/web-validation';
 export { createContentIdentity } from './content.js';
 export type {
   ContentIdentity,

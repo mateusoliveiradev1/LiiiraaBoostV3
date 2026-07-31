@@ -1,5 +1,4 @@
 import {
-  validateWebDocument,
   type CapabilityAvailabilityJson,
   type IndexingPolicyJson,
   type SafeContextKeyJson,
@@ -8,6 +7,7 @@ import {
   type WebShellJson,
   type WebSurfaceJson,
 } from '@liiiraa/contracts-ts';
+import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 export const WEB_LOCALES = Object.freeze(['pt-BR', 'en'] as const);
 export const WEB_VERSIONS = Object.freeze(['current', '1.0.0'] as const);

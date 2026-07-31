@@ -18,7 +18,6 @@ import {
   validateWebDocument,
   type WebDocumentValidationResult,
   type WebLocale,
-  type WebRouteId,
 } from '@liiiraa/web-core';
 import {
   createWebPreviewAuthority,
@@ -30,18 +29,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AdminPreviewRole } from '../../proxy';
 import adminEnJson from '../content/admin.en.json';
 import adminPtBrJson from '../content/admin.pt-BR.json';
-
-export const ADMIN_ENTRY_ROUTE_IDS = Object.freeze([
-  'admin-role',
-  'admin-support',
-  'admin-operations',
-  'admin-security',
-  'admin-diagnostics',
-  'admin-audit',
-  'admin-audit-event',
-] as const satisfies readonly WebRouteId[]);
-
-export type AdminPreviewRoute = (typeof ADMIN_ENTRY_ROUTE_IDS)[number];
+import {
+  ADMIN_ROLE_ROUTE_ACCESS,
+  adminRoleCanAccess,
+  getAdminPreviewMetadata,
+  type AdminPreviewRoute,
+} from '../admin-preview-model';
 export type AdminPreviewState =
   'ready' | 'offline' | 'stale' | 'expired-session' | 'permission-denied' | 'partial-failure';
 
@@ -118,43 +111,7 @@ const ADMIN_CONTENT = deepFreeze({
   'pt-BR': admitAdminContent(adminPtBrJson, 'pt-BR'),
 });
 
-const ROLE_ROUTE_ACCESS = deepFreeze({
-  support: ['admin-role', 'admin-support'],
-  operations: ['admin-role', 'admin-operations', 'admin-audit'],
-  security: ['admin-role', 'admin-security', 'admin-diagnostics', 'admin-audit'],
-  audit: ['admin-role', 'admin-audit', 'admin-audit-event'],
-} as const satisfies Readonly<Record<AdminPreviewRole, readonly AdminPreviewRoute[]>>);
-
 export const getAdminContent = (locale: WebLocale): AdminContent => ADMIN_CONTENT[locale];
-
-export const isAdminPreviewRoute = (routeId: WebRouteId): routeId is AdminPreviewRoute =>
-  ADMIN_ENTRY_ROUTE_IDS.includes(routeId as AdminPreviewRoute);
-
-export const adminRoleCanAccess = (role: AdminPreviewRole, routeId: AdminPreviewRoute): boolean =>
-  ROLE_ROUTE_ACCESS[role].includes(routeId as never);
-
-const routeMetadata = (content: AdminContent, routeId: AdminPreviewRoute) => {
-  switch (routeId) {
-    case 'admin-role':
-      return content.landing;
-    case 'admin-support':
-      return content.support;
-    case 'admin-operations':
-      return content.operations;
-    case 'admin-security':
-      return content.security;
-    case 'admin-diagnostics':
-      return content.diagnostics;
-    case 'admin-audit':
-    case 'admin-audit-event':
-      return content.audit;
-  }
-};
-
-export const getAdminPreviewMetadata = (locale: WebLocale, routeId: AdminPreviewRoute) => {
-  const metadata = routeMetadata(getAdminContent(locale), routeId);
-  return Object.freeze({ summary: metadata.summary, title: metadata.title });
-};
 
 const hrefFor = (routeId: AdminPreviewRoute, locale: WebLocale, role: AdminPreviewRole): string => {
   const parameters: Record<string, string> = { locale };
@@ -912,7 +869,7 @@ const RoleLanding = ({
     <section aria-labelledby="admin-role-scope-title">
       <h2 id="admin-role-scope-title">{content.landing.scopeTitle}</h2>
       <ul>
-        {ROLE_ROUTE_ACCESS[role].map((routeId) => (
+        {ADMIN_ROLE_ROUTE_ACCESS[role].map((routeId) => (
           <li key={routeId}>
             <a href={hrefFor(routeId, content.locale, role)}>
               {getAdminPreviewMetadata(content.locale, routeId).title}

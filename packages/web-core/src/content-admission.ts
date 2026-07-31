@@ -1,9 +1,9 @@
 import {
-  validateWebDocument,
   type ContentRecordJson,
   type ScreenshotProvenanceJson,
   type WebRouteRecordJson,
 } from '@liiiraa/contracts-ts';
+import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 export const CONTENT_BUNDLE_SCHEMA_VERSION = 1 as const;
 

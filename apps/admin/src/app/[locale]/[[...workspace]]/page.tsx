@@ -9,12 +9,12 @@ import { createAdminFailureModel } from '../../../admin-errors';
 import { AdminFailureView } from '../../../admin-failure-view';
 import { adminRoleFromHeader } from '../../../admin-shell';
 import {
-  AdminPreviewPage,
   adminRoleCanAccess,
   getAdminPreviewMetadata,
   isAdminPreviewRoute,
   type AdminPreviewRoute,
-} from '../../../features/admin-preview';
+} from '../../../admin-preview-model';
+import { AdminPreviewPage } from '../../../features/admin-preview';
 
 type AdminWorkspacePageProps = Readonly<{
   params: Promise<{

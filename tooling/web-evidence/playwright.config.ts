@@ -221,8 +221,9 @@ export default defineConfig({
     video: 'off',
   },
   webServer: selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
-    command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname 0.0.0.0 --port ${String(port)}`,
+    command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
     cwd: '../..',
+    env: app === '@liiiraa/admin' ? { LIIIRAA_ADMIN_ORIGIN: baseURL } : {},
     reuseExistingServer: false,
     stderr: 'inherit',
     stdout: 'pipe',
