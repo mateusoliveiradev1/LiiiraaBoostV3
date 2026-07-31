@@ -1,0 +1,221 @@
+import { createHash } from 'node:crypto';
+
+import { describe, expect, it } from 'vitest';
+
+import {
+  PHASE_3_DECISIONS,
+  PHASE_3_EVIDENCE_DIMENSIONS,
+  PHASE_3_LOCALES,
+  PHASE_3_PROOFS,
+  PHASE_3_REQUIREMENTS,
+  PHASE_3_ROUTES,
+  PHASE_3_SCENARIOS,
+  PHASE_3_SOURCE_FILES,
+  PHASE_3_SUCCESS_CRITERIA,
+  verifyPhase3,
+  type Phase3VerificationInput,
+} from './verify-phase.js';
+
+const sha = (value: string): string => createHash('sha256').update(value).digest('hex');
+
+const evidenceFileByRequirement = Object.freeze({
+  'WEB-01': 'tooling/web-evidence/tests/public.spec.ts',
+  'WEB-02': 'tooling/web-evidence/tests/documentation.spec.ts',
+  'WEB-03': 'tooling/web-evidence/tests/releases.spec.ts',
+  'WEB-08': 'tooling/web-evidence/tests/security-artifacts.spec.ts',
+} as const);
+
+const completeInput = (): Phase3VerificationInput => ({
+  artifacts: {
+    appArtifacts: [
+      {
+        classification: 'production-build',
+        hash: sha('public-build'),
+        path: 'apps/web/.next/standalone',
+        state: 'observed',
+        surface: 'public',
+      },
+      {
+        classification: 'production-build',
+        hash: sha('account-build'),
+        path: 'apps/account/.next/standalone',
+        state: 'observed',
+        surface: 'account',
+      },
+      {
+        classification: 'production-build',
+        hash: sha('admin-build'),
+        path: 'apps/admin/.next/standalone',
+        state: 'observed',
+        surface: 'admin',
+      },
+    ],
+    authority: {
+      adminMutationConnected: false,
+      billingConnected: false,
+      diagnosticUploadConnected: false,
+      identityConnected: false,
+      publicDistributionConnected: false,
+      supportSubmissionConnected: false,
+    },
+    captures: PHASE_3_LOCALES.map((locale) => ({
+      approved: true,
+      hash: sha(`capture:${locale}`),
+      locale,
+      path: `apps/web/public/product/desktop-home.${locale}.webp`,
+      scenarioId: 'S01',
+      sidecarPath: `apps/web/public/product/desktop-home.${locale}.json`,
+    })),
+    decisions: [...PHASE_3_DECISIONS],
+    evidence: PHASE_3_EVIDENCE_DIMENSIONS.map((identity) => {
+      const [requirement, dimension] = identity.split(':') as [
+        (typeof PHASE_3_REQUIREMENTS)[number],
+        string,
+      ];
+      return {
+        command:
+          dimension === 'security' && requirement !== 'WEB-01'
+            ? 'pnpm web:test'
+            : 'pnpm --filter @liiiraa/web-evidence exec playwright test',
+        file: evidenceFileByRequirement[requirement],
+        id: `${requirement.toLowerCase()}-${dimension}`,
+        identity,
+        owner: 'plan-03-32',
+        status: 'passed' as const,
+      };
+    }),
+    locales: [...PHASE_3_LOCALES],
+    proofs: PHASE_3_PROOFS.map(({ file, id }) => ({ file, id, status: 'passed' as const })),
+    publication: {
+      approved: true,
+      bundleFile: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
+      developmentArtifactDetected: false,
+      downloadAvailable: false,
+      officialArtifact: 'unavailable',
+      publicDistributionApproved: false,
+    },
+    requirements: [...PHASE_3_REQUIREMENTS],
+    routes: [...PHASE_3_ROUTES],
+    scenarios: [...PHASE_3_SCENARIOS],
+    sourceHashes: PHASE_3_SOURCE_FILES.map((file) => ({ file, sha256: sha(file) })),
+    successCriteria: [...PHASE_3_SUCCESS_CRITERIA],
+  },
+  commands: [
+    'pnpm web:test',
+    'pnpm --filter @liiiraa/web-evidence exec playwright test',
+    'pnpm web:verify:phase -- --mode final',
+    'pnpm verify',
+  ],
+  mode: 'final',
+  repositoryFiles: [
+    ...PHASE_3_SOURCE_FILES,
+    ...PHASE_3_PROOFS.map(({ file }) => file),
+    'apps/web/.next/standalone',
+    'apps/account/.next/standalone',
+    'apps/admin/.next/standalone',
+    'apps/web/public/product/desktop-home.pt-BR.webp',
+    'apps/web/public/product/desktop-home.pt-BR.json',
+    'apps/web/public/product/desktop-home.en.webp',
+    'apps/web/public/product/desktop-home.en.json',
+  ],
+});
+
+const cloneInput = (input: Phase3VerificationInput): Phase3VerificationInput =>
+  structuredClone(input);
+
+describe('Phase 3 final source coverage', () => {
+  it('accepts the exact closed Phase 3 evidence graph without mutating source input', () => {
+    const input = completeInput();
+    const before = sha(JSON.stringify(input));
+    const result = verifyPhase3(input);
+
+    expect(result.ok).toBe(true);
+    expect(result.diagnostics).toEqual([]);
+    if (result.ok) {
+      expect(result.counts).toEqual({
+        decisions: 86,
+        evidenceDimensions: 20,
+        requirements: 4,
+        routes: 53,
+        scenarios: 18,
+        successCriteria: 4,
+      });
+      expect(result.fingerprint).toMatch(/^[a-f0-9]{64}$/u);
+    }
+    expect(sha(JSON.stringify(input))).toBe(before);
+  });
+});
+
+describe('Phase 3 omission coverage', () => {
+  it.each([
+    ['requirement', (input: Phase3VerificationInput) => input.artifacts.requirements.pop(), 'MISSING_REQUIREMENT'],
+    ['decision', (input: Phase3VerificationInput) => input.artifacts.decisions.pop(), 'MISSING_DECISION'],
+    ['success criterion', (input: Phase3VerificationInput) => input.artifacts.successCriteria.pop(), 'MISSING_SUCCESS_CRITERION'],
+    ['scenario', (input: Phase3VerificationInput) => input.artifacts.scenarios.pop(), 'MISSING_SCENARIO'],
+    ['route', (input: Phase3VerificationInput) => input.artifacts.routes.pop(), 'MISSING_ROUTE'],
+    ['locale', (input: Phase3VerificationInput) => input.artifacts.locales.pop(), 'MISSING_LOCALE'],
+    ['evidence dimension', (input: Phase3VerificationInput) => input.artifacts.evidence.pop(), 'MISSING_EVIDENCE_DIMENSION'],
+    ['app artifact', (input: Phase3VerificationInput) => input.artifacts.appArtifacts.pop(), 'MISSING_APP_ARTIFACT'],
+    ['capture', (input: Phase3VerificationInput) => input.artifacts.captures.pop(), 'MISSING_CAPTURE'],
+    ['proof', (input: Phase3VerificationInput) => input.artifacts.proofs.pop(), 'MISSING_PROOF'],
+    ['source hash', (input: Phase3VerificationInput) => input.artifacts.sourceHashes.pop(), 'MISSING_SOURCE_HASH'],
+  ] as const)('rejects one omitted %s with a stable diagnostic', (_name, mutate, code) => {
+    const input = cloneInput(completeInput());
+    mutate(input);
+
+    expect(verifyPhase3(input).diagnostics.map(({ code: actual }) => actual)).toContain(code);
+  });
+
+  it('rejects renamed and duplicated closed identities', () => {
+    const renamed = cloneInput(completeInput());
+    renamed.artifacts.routes[0] = 'renamed-route';
+    const duplicated = cloneInput(completeInput());
+    duplicated.artifacts.decisions[1] = duplicated.artifacts.decisions[0] ?? 'D-01';
+
+    expect(verifyPhase3(renamed).diagnostics.map(({ code }) => code)).toContain('MISSING_ROUTE');
+    expect(verifyPhase3(duplicated).diagnostics.map(({ code }) => code)).toContain(
+      'DUPLICATE_DECISION',
+    );
+  });
+
+  it('rejects deferred authority or public development distribution claims', () => {
+    const authority = cloneInput(completeInput());
+    authority.artifacts.authority.identityConnected = true;
+    const distribution = cloneInput(completeInput());
+    distribution.artifacts.publication.publicDistributionApproved = true;
+    distribution.artifacts.publication.developmentArtifactDetected = true;
+
+    expect(verifyPhase3(authority).diagnostics.map(({ code }) => code)).toContain(
+      'DEFERRED_AUTHORITY_CONNECTED',
+    );
+    expect(verifyPhase3(distribution).diagnostics.map(({ code }) => code)).toContain(
+      'PUBLIC_DISTRIBUTION_TRUTH_VIOLATION',
+    );
+  });
+});
+
+describe('Phase 3 recursive gate', () => {
+  it('requires the final phase command and root verify command to resolve exactly', () => {
+    const input = cloneInput(completeInput());
+    input.commands = input.commands.filter((command) => command !== 'pnpm verify');
+
+    expect(verifyPhase3(input).diagnostics.map(({ code }) => code)).toContain(
+      'ROOT_COMMAND_UNREACHABLE',
+    );
+  });
+
+  it('rejects an unresolved evidence command and an absent exact evidence file', () => {
+    const unresolved = cloneInput(completeInput());
+    unresolved.commands = unresolved.commands.filter((command) => command !== 'pnpm web:test');
+    const missing = cloneInput(completeInput());
+    const evidenceFile = missing.artifacts.evidence[0]?.file ?? '';
+    missing.repositoryFiles = missing.repositoryFiles.filter((file) => file !== evidenceFile);
+
+    expect(verifyPhase3(unresolved).diagnostics.map(({ code }) => code)).toContain(
+      'EVIDENCE_COMMAND_UNRESOLVED',
+    );
+    expect(verifyPhase3(missing).diagnostics.map(({ code }) => code)).toContain(
+      'EVIDENCE_FILE_MISSING',
+    );
+  });
+});
