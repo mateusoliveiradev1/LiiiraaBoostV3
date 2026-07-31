@@ -2,6 +2,7 @@ import type { WebLocale, WebRouteId } from '@liiiraa/web-core';
 
 import accountEn from './content/account.en.json';
 import accountPtBr from './content/account.pt-BR.json';
+import type { AccountFailureKind } from './account-errors';
 
 export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
   'account-sign-in',
@@ -18,8 +19,35 @@ export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
 
 export type AccountPreviewRoute = (typeof ACCOUNT_ENTRY_ROUTE_IDS)[number];
 
+export const ACCOUNT_ERROR_ROUTE_IDS = Object.freeze([
+  'account-error-404',
+  'account-error-403',
+  'account-error-410',
+  'account-error-500',
+] as const satisfies readonly WebRouteId[]);
+
+export type AccountErrorRoute = (typeof ACCOUNT_ERROR_ROUTE_IDS)[number];
+
 export const isAccountPreviewRoute = (routeId: WebRouteId): routeId is AccountPreviewRoute =>
   ACCOUNT_ENTRY_ROUTE_IDS.includes(routeId as AccountPreviewRoute);
+
+export const isAccountErrorRoute = (routeId: WebRouteId): routeId is AccountErrorRoute =>
+  ACCOUNT_ERROR_ROUTE_IDS.includes(routeId as AccountErrorRoute);
+
+export const accountFailureKindForRoute = (
+  routeId: AccountErrorRoute,
+): AccountFailureKind => {
+  switch (routeId) {
+    case 'account-error-403':
+      return '403';
+    case 'account-error-404':
+      return '404';
+    case 'account-error-410':
+      return '410';
+    case 'account-error-500':
+      return '500';
+  }
+};
 
 const contentByLocale = { en: accountEn, 'pt-BR': accountPtBr } as const;
 

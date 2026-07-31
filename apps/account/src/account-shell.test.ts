@@ -2,14 +2,17 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { projectNavigation } from '@liiiraa/web-core';
 import { ACCOUNT_WEB_COMPOSITION } from './index';
-import * as accountErrorContract from './account-errors';
 import {
   accountFailureLocale,
   createAccountFailureModel,
   redactedAccountCorrelationId,
 } from './account-errors';
-import * as accountRouteContract from './account-preview-model';
-import { ACCOUNT_ENTRY_ROUTE_IDS } from './account-preview-model';
+import {
+  ACCOUNT_ENTRY_ROUTE_IDS,
+  ACCOUNT_ERROR_ROUTE_IDS,
+  accountFailureKindForRoute,
+  isAccountErrorRoute,
+} from './account-preview-model';
 
 describe('account shell', () => {
   it('projects every canonical account responsibility and keeps preview authority visible', () => {
@@ -53,23 +56,17 @@ describe('account shell', () => {
 
 describe('account errors', () => {
   it('maps the closed canonical error route set one-to-one without changing responsibilities', () => {
-    const routes = accountRouteContract as typeof accountRouteContract & {
-      readonly ACCOUNT_ERROR_ROUTE_IDS: readonly string[];
-      accountFailureKindForRoute: (routeId: string) => string;
-      isAccountErrorRoute: (routeId: string) => boolean;
-    };
-
-    expect(routes.ACCOUNT_ERROR_ROUTE_IDS).toEqual([
+    expect(ACCOUNT_ERROR_ROUTE_IDS).toEqual([
       'account-error-404',
       'account-error-403',
       'account-error-410',
       'account-error-500',
     ]);
     expect(
-      routes.ACCOUNT_ERROR_ROUTE_IDS.map((routeId) => [
+      ACCOUNT_ERROR_ROUTE_IDS.map((routeId) => [
         routeId,
-        routes.isAccountErrorRoute(routeId),
-        routes.accountFailureKindForRoute(routeId),
+        isAccountErrorRoute(routeId),
+        accountFailureKindForRoute(routeId),
       ]),
     ).toEqual([
       ['account-error-404', true, '404'],
@@ -77,7 +74,7 @@ describe('account errors', () => {
       ['account-error-410', true, '410'],
       ['account-error-500', true, '500'],
     ]);
-    expect(routes.isAccountErrorRoute('account-security')).toBe(false);
+    expect(isAccountErrorRoute('account-security')).toBe(false);
     expect(ACCOUNT_ENTRY_ROUTE_IDS).toEqual([
       'account-sign-in',
       'account-overview',
@@ -93,23 +90,10 @@ describe('account errors', () => {
   });
 
   it('authors distinct bilingual outcomes with safe same-origin recovery for every status', () => {
-    const failureContract = accountErrorContract as typeof accountErrorContract & {
-      createAccountFailureModel: (
-        kind: '403' | '404' | '410' | '500',
-        locale: 'pt-BR' | 'en',
-      ) => ReturnType<typeof createAccountFailureModel> & {
-        copy: ReturnType<typeof createAccountFailureModel>['copy'] & {
-          affectedCapability: string;
-          recovery: string;
-        };
-      };
-    };
     const kinds = ['403', '404', '410', '500'] as const;
 
     for (const locale of ['pt-BR', 'en'] as const) {
-      const outcomes = kinds.map((kind) =>
-        failureContract.createAccountFailureModel(kind, locale),
-      );
+      const outcomes = kinds.map((kind) => createAccountFailureModel(kind, locale));
 
       expect(new Set(outcomes.map(({ code }) => code)).size).toBe(4);
       expect(new Set(outcomes.map(({ copy }) => copy.title)).size).toBe(4);
@@ -123,19 +107,19 @@ describe('account errors', () => {
       }
     }
 
-    expect(failureContract.createAccountFailureModel('403', 'en').copy.detail).toMatch(
+    expect(createAccountFailureModel('403', 'en').copy.detail).toMatch(
       /permission|responsibility/iu,
     );
-    expect(failureContract.createAccountFailureModel('410', 'en').copy.detail).toMatch(
+    expect(createAccountFailureModel('410', 'en').copy.detail).toMatch(
       /historical|no longer/iu,
     );
-    expect(failureContract.createAccountFailureModel('410', 'pt-BR').copy.recovery).toMatch(
+    expect(createAccountFailureModel('410', 'pt-BR').copy.recovery).toMatch(
       /vis[aã]o geral|suporte/iu,
     );
-    expect(failureContract.createAccountFailureModel('500', 'en').copy.recovery).toMatch(
+    expect(createAccountFailureModel('500', 'en').copy.recovery).toMatch(
       /try again|support/iu,
     );
-    expect(failureContract.createAccountFailureModel('404', 'en').copy.detail).toMatch(
+    expect(createAccountFailureModel('404', 'en').copy.detail).toMatch(
       /address|route/iu,
     );
   });
