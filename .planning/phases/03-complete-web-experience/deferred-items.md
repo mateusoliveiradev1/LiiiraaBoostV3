@@ -29,3 +29,8 @@
 ## 03-27
 
 - `pnpm web:verify:quick -- --requirement WEB-08 --grep "account|W11|W12|W13"` passes all 20 workspace check/test tasks, including the complete account suite, then reaches the planned final readiness boundary: public/account/admin standalone build roots plus `quality/evidence/phase-03/web/security-boundaries.json` and `preview-boundaries.json` remain owned by Plan 03-32. Plan 03-27 proves its account production build independently and does not fabricate phase-wide evidence.
+
+## 03-25
+
+- `pnpm test:architecture` still reports the two parity mismatches already deferred in Plan 03-18: the live `apps/web` manifest includes `@liiiraa/design-tokens` while the architecture fixture does not, and the root `web:verify:quick` command now uses `tooling/web-evidence/run-web-verify.mjs` while the fixture expects the former check/test chain.
+- `pnpm test:runtime-truth` reaches the unchanged fixture guard and times out after five seconds while inspecting the live workspace graph. Plan 03-25 does not own the fixture guard or architecture expectations; its scoped release checks, tests, production build, artifact scan, and browser verification pass.
