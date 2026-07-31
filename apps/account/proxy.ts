@@ -1,6 +1,7 @@
 import {
   createBoundaryLink,
   isWebRouteId,
+  matchWebRoute,
   WEB_LOCALES,
   type WebLocale,
   type WebRouteId,
@@ -116,10 +117,20 @@ export default function accountProxy(request: NextRequest): NextResponse {
     requestHeaders.set('Content-Security-Policy', contentSecurityPolicy);
   }
 
+  const routeMatch = matchWebRoute({
+    pathname: request.nextUrl.pathname,
+    securityBoundary: 'account-origin',
+  });
+  const isNotFound =
+    !routeMatch.ok || routeMatch.value.route.id === 'account-error-404';
+  if (isNotFound) {
+    requestHeaders.set('x-liiiraa-account-failure-kind', '404');
+  }
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
+    ...(isNotFound ? { status: 404 } : {}),
   });
 
   for (const { key, value } of headerContract) {

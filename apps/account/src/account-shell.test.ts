@@ -135,8 +135,13 @@ describe('account errors', () => {
       new URL('./app/[locale]/error.tsx', import.meta.url),
       'utf8',
     );
-    const notFoundRouteSource = readFileSync(
-      new URL('./app/[locale]/errors/404/page.tsx', import.meta.url),
+    const pageSource = readFileSync(
+      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+    const proxySource = readFileSync(new URL('../proxy.ts', import.meta.url), 'utf8');
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
     );
 
@@ -159,8 +164,12 @@ describe('account errors', () => {
     expect(errorSource).toContain('onClick={reset}');
     expect(errorSource).not.toMatch(/error\.(message|stack|name)/u);
     expect(errorSource).not.toMatch(/redirect\(|window\.location|http-equiv=.refresh/iu);
-    expect(notFoundRouteSource).toContain('notFound()');
-    expect(notFoundRouteSource).not.toMatch(/redirect\(/u);
+    expect(pageSource).toContain("resolution.kind === 'unknown' ? '404'");
+    expect(pageSource).not.toMatch(/redirect\(/u);
+    expect(proxySource).toContain("requestHeaders.set('x-liiiraa-account-failure-kind', '404')");
+    expect(proxySource).toContain('isNotFound ? { status: 404 }');
+    expect(layoutSource).toContain("x-liiiraa-account-failure-kind");
+    expect(layoutSource).toContain("createAccountFailureModel('404', locale)");
   });
 
   it('dispatches canonical failures before the genuine localized 404 fallback', () => {
@@ -181,8 +190,8 @@ describe('account errors', () => {
     expect(pageSource).toContain('accountFailureKindForRoute');
     expect(pageSource).toContain('createAccountFailureModel');
     expect(pageSource).toContain('<AccountFailureView');
-    expect(pageSource).toContain("resolution.failureKind === '500'");
-    expect(pageSource).toContain('if (resolution.kind === \'unknown\') notFound()');
+    expect(pageSource).toContain("failureKind === '500'");
+    expect(pageSource).toContain("resolution.kind === 'unknown' ? '404'");
     expect(pageSource).not.toMatch(/redirect\(|cookies\(|fetch\(|window\.location/iu);
 
     expect((failureViewSource.match(/<h1\b/gu) ?? [])).toHaveLength(1);

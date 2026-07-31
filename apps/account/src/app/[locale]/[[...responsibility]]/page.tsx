@@ -63,7 +63,14 @@ export async function generateMetadata({
   const { locale, responsibility } = await params;
   if (!hasLocale(WEB_LOCALES, locale)) return {};
   const resolution = resolveAccountRoute(locale, responsibility);
-  if (resolution.kind === 'unknown') return {};
+  if (resolution.kind === 'unknown') {
+    const metadata = createAccountFailureModel('404', locale).copy;
+    return {
+      description: metadata.detail,
+      robots: { follow: false, index: false, nocache: true },
+      title: `${metadata.title} — Liiiraa Boost`,
+    };
+  }
   if (resolution.kind === 'workflow') {
     const metadata = getAccountPreviewMetadata(locale, resolution.routeId);
     return {
@@ -87,13 +94,14 @@ export default async function AccountResponsibilityPage({
   if (!hasLocale(WEB_LOCALES, locale)) notFound();
   setRequestLocale(locale);
   const resolution = resolveAccountRoute(locale, responsibility);
-  if (resolution.kind === 'unknown') notFound();
-  if (resolution.kind === 'error') {
-    const model = createAccountFailureModel(resolution.failureKind, locale);
-    const canonicalRoute = routeHref(resolution.routeId, { locale });
-    if (!canonicalRoute.ok) notFound();
+  if (resolution.kind !== 'workflow') {
+    const failureKind = resolution.kind === 'unknown' ? '404' : resolution.failureKind;
+    const model = createAccountFailureModel(failureKind, locale);
+    const canonicalRoute =
+      resolution.kind === 'error' ? routeHref(resolution.routeId, { locale }) : undefined;
+    if (canonicalRoute !== undefined && !canonicalRoute.ok) notFound();
     const primaryHref =
-      resolution.failureKind === '500'
+      failureKind === '500' && canonicalRoute?.ok
         ? canonicalRoute.value
         : model.destinations.overview;
     return (
@@ -107,7 +115,7 @@ export default async function AccountResponsibilityPage({
         affected={model.copy.affectedCapability}
         correlationId={model.correlationId}
         detail={model.copy.detail}
-        kind={model.code}
+        kind={failureKind}
         locale={model.locale}
         recovery={model.copy.recovery}
         safeWork={model.copy.safeWork}

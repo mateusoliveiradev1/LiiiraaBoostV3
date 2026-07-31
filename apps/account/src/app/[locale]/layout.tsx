@@ -10,10 +10,12 @@ import {
   type WebRouteId,
 } from '@liiiraa/web-core';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { createAccountFailureModel } from '../../account-errors';
 import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
 
@@ -101,6 +103,19 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(WEB_LOCALES, locale)) {
     return {};
+  }
+  const requestHeaders = await headers();
+  if (requestHeaders.get('x-liiiraa-account-failure-kind') === '404') {
+    const model = createAccountFailureModel('404', locale);
+    return {
+      description: model.copy.detail,
+      robots: {
+        follow: false,
+        index: false,
+        nocache: true,
+      },
+      title: `${model.copy.title} — Liiiraa Boost`,
+    };
   }
   return {
     description: COPY[locale].preview,
