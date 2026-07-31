@@ -3,4 +3,5 @@ export const ADMIN_WEB_COMPOSITION = {
   surface: 'admin',
   authorityConnected: false,
   ordinaryNavigationLinked: false,
+  previewRole: 'support',
 } as const;

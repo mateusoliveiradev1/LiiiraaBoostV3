@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ADMIN_TEST_ORIGIN } from './src/admin-runtime';
+import { resolveAdminOrigin } from './src/admin-runtime';
 
 export const ADMIN_PREVIEW_ROLES = Object.freeze([
   'support',
@@ -36,12 +36,7 @@ const EMPTY_POLICIES = Object.freeze([
   'usb=()',
 ]);
 
-const UNSAFE_CONTEXT_KEYS = Object.freeze([
-  'destination',
-  'redirect',
-  'returnPath',
-  'returnUrl',
-]);
+const UNSAFE_CONTEXT_KEYS = Object.freeze(['destination', 'redirect', 'returnPath', 'returnUrl']);
 
 const createContentSecurityPolicy = (nonce: string): string =>
   [
@@ -62,8 +57,7 @@ const createContentSecurityPolicy = (nonce: string): string =>
   ].join('; ');
 
 const isAdminPreviewRole = (value: string | null): value is AdminPreviewRole =>
-  value !== null &&
-  ADMIN_PREVIEW_ROLES.includes(value as AdminPreviewRole);
+  value !== null && ADMIN_PREVIEW_ROLES.includes(value as AdminPreviewRole);
 
 const containsCrossSurfaceCookie = (cookieHeader: string | null): boolean => {
   if (cookieHeader === null || cookieHeader.trim().length === 0) {
@@ -74,9 +68,7 @@ const containsCrossSurfaceCookie = (cookieHeader: string | null): boolean => {
     .split(';')
     .map((cookie) => cookie.split('=', 1)[0]?.trim().toLowerCase() ?? '')
     .some((name) =>
-      /^(?:__host-|__secure-)?(?:liiiraa[._-])?(?:public|account)(?:[._-]|$)/u.test(
-        name,
-      ),
+      /^(?:__host-|__secure-)?(?:liiiraa[._-])?(?:public|account)(?:[._-]|$)/u.test(name),
     );
 };
 
@@ -142,7 +134,7 @@ export const AdminAccessBoundary = ({
   const requestedRole = url.searchParams.get('role');
   const role = isAdminPreviewRole(requestedRole) ? requestedRole : 'support';
 
-  if (url.origin !== ADMIN_TEST_ORIGIN) {
+  if (url.origin !== resolveAdminOrigin()) {
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'origin-rejected',
@@ -166,7 +158,7 @@ export const AdminAccessBoundary = ({
     });
   }
 
-  if (!isAdminPreviewRole(requestedRole)) {
+  if (requestedRole !== null && !isAdminPreviewRole(requestedRole)) {
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'unknown-role-rejected',
@@ -181,10 +173,7 @@ export const AdminAccessBoundary = ({
   });
 };
 
-const applyAdminHeaders = (
-  response: NextResponse,
-  nonce: string,
-): NextResponse => {
+const applyAdminHeaders = (response: NextResponse, nonce: string): NextResponse => {
   for (const { key, value } of adminHeaderContract(nonce)) {
     response.headers.set(key, value);
   }

@@ -1,9 +1,6 @@
 import type { NextConfig } from 'next';
 
-import {
-  ADMIN_RUNTIME_BOUNDARY,
-  ADMIN_TEST_ORIGIN,
-} from './src/admin-runtime';
+import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from './src/admin-runtime';
 
 const ADMIN_BUILD_ID_PREFIX = 'admin-preview';
 

@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest",

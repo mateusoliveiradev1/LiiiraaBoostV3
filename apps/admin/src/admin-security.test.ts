@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 
@@ -6,10 +8,8 @@ import adminProxy, {
   adminHeaderContract,
   createAdminRequestNonce,
 } from '../proxy';
-import {
-  ADMIN_RUNTIME_BOUNDARY,
-  ADMIN_TEST_ORIGIN,
-} from '../next.config';
+import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
+import { resolveAdminOrigin } from './admin-runtime';
 
 describe('admin security boundary', () => {
   it('uses a dedicated preview origin and never claims connected authority', () => {
@@ -20,6 +20,13 @@ describe('admin security boundary', () => {
       indexing: 'noindex',
       origin: ADMIN_TEST_ORIGIN,
     });
+    expect(resolveAdminOrigin('http://admin.localhost:3102')).toBe('http://admin.localhost:3102');
+    expect(() => resolveAdminOrigin('https://user@admin.localhost')).toThrow(
+      'credential-free dedicated origin',
+    );
+    expect(() => resolveAdminOrigin('http://admin.example.com')).toThrow(
+      'credential-free dedicated origin',
+    );
   });
 
   it('creates a fresh cryptographically random nonce for every request', () => {
@@ -35,10 +42,7 @@ describe('admin security boundary', () => {
   it('applies the strictest noindex, frame-closed, external-free header contract', () => {
     const nonce = 'dGVzdC1hZG1pbi1ub25jZQ==';
     const headers = Object.fromEntries(
-      adminHeaderContract(nonce).map(({ key, value }) => [
-        key.toLowerCase(),
-        value,
-      ]),
+      adminHeaderContract(nonce).map(({ key, value }) => [key.toLowerCase(), value]),
     );
     const csp = headers['content-security-policy'];
 
@@ -65,7 +69,35 @@ describe('admin security boundary', () => {
     expect(Object.keys(headers)).not.toContain('location');
   });
 
+  it('stays distinct from public and account origins, cookies, and CSP policy', () => {
+    const publicConfig = readFileSync(new URL('../../web/next.config.ts', import.meta.url), 'utf8');
+    const accountConfig = readFileSync(
+      new URL('../../account/next.config.ts', import.meta.url),
+      'utf8',
+    );
+    const accountProxy = readFileSync(new URL('../../account/proxy.ts', import.meta.url), 'utf8');
+    const adminCsp = Object.fromEntries(
+      adminHeaderContract('comparison-nonce').map(({ key, value }) => [key.toLowerCase(), value]),
+    )['content-security-policy'];
+
+    expect(publicConfig).toContain("'unsafe-inline'");
+    expect(accountConfig).toContain('https://account.liiiraa.com');
+    expect(accountProxy).not.toContain('display-capture=()');
+    expect(adminCsp).not.toContain("'unsafe-inline'");
+    expect(adminCsp).toContain("'strict-dynamic'");
+    expect(
+      adminHeaderContract('comparison-nonce').find(({ key }) => key === 'Permissions-Policy')
+        ?.value,
+    ).toContain('display-capture=()');
+    expect(ADMIN_TEST_ORIGIN).not.toContain('account.');
+    expect(ADMIN_TEST_ORIGIN).not.toBe('https://liiiraa.com');
+  });
+
   it('admits only closed preview roles and rejects cross-surface state', () => {
+    const defaultPreview = AdminAccessBoundary({
+      cookieHeader: null,
+      url: new URL('https://admin.localhost/pt-BR/admin'),
+    });
     const preview = AdminAccessBoundary({
       cookieHeader: null,
       url: new URL('https://admin.localhost/en/admin?role=security'),
@@ -85,6 +117,11 @@ describe('admin security boundary', () => {
       url: new URL('https://account.localhost/en/admin?role=support'),
     });
 
+    expect(defaultPreview).toEqual({
+      authoritativeAccessConnected: false,
+      reason: 'deterministic-role-preview',
+      role: 'support',
+    });
     expect(preview).toEqual({
       authoritativeAccessConnected: false,
       reason: 'deterministic-role-preview',
@@ -105,9 +142,7 @@ describe('admin security boundary', () => {
   });
 
   it('propagates only disconnected preview markers and blocks unsafe requests', () => {
-    const safe = adminProxy(
-      new NextRequest('https://admin.localhost/pt-BR/admin?role=support'),
-    );
+    const safe = adminProxy(new NextRequest('https://admin.localhost/pt-BR/admin?role=support'));
     const unsafe = adminProxy(
       new NextRequest('https://admin.localhost/pt-BR/admin?returnPath=/account', {
         headers: {
@@ -118,9 +153,7 @@ describe('admin security boundary', () => {
 
     expect(safe.status).toBe(200);
     expect(safe.headers.get('x-liiiraa-admin-role')).toBe('support');
-    expect(safe.headers.get('x-liiiraa-preview-authority')).toBe(
-      'disconnected',
-    );
+    expect(safe.headers.get('x-liiiraa-preview-authority')).toBe('disconnected');
     expect(safe.headers.get('set-cookie')).toBeNull();
     expect(safe.headers.get('location')).toBeNull();
     expect(unsafe.status).toBe(403);
