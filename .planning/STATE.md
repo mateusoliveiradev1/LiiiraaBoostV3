@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-30-PLAN.md
-last_updated: "2026-07-31T13:11:34.534Z"
+stopped_at: Completed 03-31-PLAN.md
+last_updated: "2026-07-31T13:28:25.818Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-27-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 88
+  completed_plans: 89
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 31 of 32
+Plan: 32 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-27-PLAN.md
 
@@ -136,6 +136,7 @@ _Updated after plan completion_
 | Phase 03 P25 | 1h12m | 2 tasks | 16 files |
 | Phase 03 P29 | 18min | 2 tasks | 19 files |
 | Phase 03 P30 | 1h 49m | 3 tasks | 55 files |
+| Phase 03 P31 | 14min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -371,6 +372,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Own account and admin route metadata in server-safe models so page metadata and client experiences share one canonical route projection.
 - [Phase 03]: Bind every Playwright server to its real .localhost hostname and inject the dedicated admin origin at build time so origin assertions are exact.
 - [Phase 03]: Derive all eighteen golden records from W01-W18 and isolate Vitest discovery to src/**/*.test.ts so Playwright suites remain runner-owned.
+- [Phase 03]: Require exact observed evidence commands, files, and independent app artifacts before final web publication approval.
+- [Phase 03]: Re-evaluate final publication and match its fingerprint before minting an immutable approved rollback bundle.
+- [Phase 03]: Web rollback redeploys one approved code/content/manifest/asset bundle and excludes databases, external data, and migrations.
 
 ### Pending Todos
 
@@ -412,6 +416,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T13:11:34.529Z
-Stopped at: Completed 03-30-PLAN.md
+Last session: 2026-07-31T13:28:25.812Z
+Stopped at: Completed 03-31-PLAN.md
 Resume file: None
