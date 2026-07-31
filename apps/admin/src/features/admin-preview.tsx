@@ -270,6 +270,18 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
     correlationId: 'W16-admin-authority-1',
     receipt: staticReceipt('W16', 'admin.review', 'W16-admin-authority-1'),
   }),
+  createImmutableAuditEvent({
+    eventId: 'admin-event-004',
+    actor: 'security.preview',
+    role: 'security',
+    action: 'admin.review',
+    redactedTarget: 'Security target ••••-083',
+    reason: 'Review a synthetic containment action',
+    occurredAt: '2026-01-15T12:00:00.000Z',
+    result: 'simulated-no-change',
+    correlationId: 'W15-admin-authority-1',
+    receipt: staticReceipt('W15', 'admin.review', 'W15-admin-authority-1'),
+  }),
 ] as const);
 
 export const evaluateDiagnosticConsent = (
@@ -277,6 +289,8 @@ export const evaluateDiagnosticConsent = (
   requiredPurpose: string,
   requiredFields: readonly string[],
   now: string,
+  requiredActor: string,
+  requiredAuditEventId: string,
 ): DiagnosticConsentDecision => {
   if (consent === null || consent === undefined || consent.granted !== true) return 'missing';
   if (Number.isNaN(Date.parse(consent.expiresAt)) || Date.parse(consent.expiresAt) <= Date.parse(now)) {
@@ -284,8 +298,8 @@ export const evaluateDiagnosticConsent = (
   }
   if (
     consent.purpose !== requiredPurpose ||
-    consent.actor.trim().length === 0 ||
-    consent.auditEventId.trim().length === 0 ||
+    consent.actor !== requiredActor ||
+    consent.auditEventId !== requiredAuditEventId ||
     requiredFields.some((field) => !consent.permittedFields.includes(field)) ||
     consent.permittedFields.some((field) => !requiredFields.includes(field))
   ) {
@@ -440,14 +454,14 @@ export const ImmutableAuditTimeline = ({
 }: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => {
   const visibleEvents = role === 'audit'
     ? ADMIN_AUDIT_EVENTS
-    : ADMIN_AUDIT_EVENTS.filter((event) => event.role === role || event.role === 'support');
+    : ADMIN_AUDIT_EVENTS.filter((event) => event.role === role);
   return (
     <article data-admin-workspace="immutable audit">
       <FixtureHeader content={content} summary={content.audit.summary} title={content.audit.title} />
       <ResponsiveDataTable
         caption={content.audit.caption}
         columns={[
-          { id: 'event', label: 'Event' },
+          { id: 'event', label: content.locale === 'pt-BR' ? 'Evento' : 'Event' },
           { id: 'actor', label: content.audit.actor },
           { id: 'action', label: content.audit.action },
           { id: 'result', label: content.audit.result, essential: false },
@@ -662,6 +676,7 @@ export const SecurityReview = ({
       target={content.security.target}
       viewportWidth={viewportWidth}
     />
+    <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[3]} />
   </article>
 );
 
@@ -707,6 +722,8 @@ export const DiagnosticFieldDisclosure = ({
     content.diagnostics.requiredPurpose,
     content.diagnostics.requiredFields,
     '2026-01-15T12:00:00.000Z',
+    content.diagnostics.actor,
+    content.diagnostics.auditReference,
   );
   const admittedConsent = decision === 'allowed' && consent != null ? consent : null;
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);

@@ -136,3 +136,106 @@ describe('immutable audit', () => {
     expect(result.receipt).toMatchObject({ nextPhase: 'Phase 4', remoteStateChanged: false });
   });
 });
+
+describe('W15 diagnostic consent guard', () => {
+  it('keeps absent, expired, wrong-purpose, wrong-field, actor, and audit scopes blocked', () => {
+    const scenario = getWebScenario('W15');
+    expect(scenario).toMatchObject({
+      consent: 'preview-denied',
+      role: 'security',
+      terminalState: 'diagnostic-consent-blocked',
+    });
+    expect(scenario.requiredProof).toEqual([
+      'access-blocked',
+      'purpose',
+      'permitted-fields',
+      'expiration',
+      'actor',
+      'audit-explanation',
+    ]);
+    expect(featureSource).toContain("return 'missing'");
+    expect(featureSource).toContain("return 'expired'");
+    expect(featureSource).toContain("return 'wrong-scope'");
+    expect(featureSource).toContain('consent.purpose !== requiredPurpose');
+    expect(featureSource).toContain('consent.actor !== requiredActor');
+    expect(featureSource).toContain('consent.auditEventId !== requiredAuditEventId');
+    expect(featureSource).toContain('!consent.permittedFields.includes(field)');
+    expect(featureSource).toContain('!requiredFields.includes(field)');
+    expect(adminEn.diagnostics.blockedBody).toContain('without revealing diagnostic or customer data');
+    expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
+  });
+});
+
+describe('W16 viewport guard and recovery states', () => {
+  it('preserves safe review while blocking high-risk administration below 960px', () => {
+    const scenario = getWebScenario('W16');
+    const styles = readFileSync(new URL('../app/admin-shell.css', import.meta.url), 'utf8');
+    expect(scenario).toMatchObject({
+      role: 'operations',
+      terminalState: 'high-risk-viewport-blocked',
+      viewport: '390x844',
+    });
+    expect(scenario.requiredProof).toEqual(['safe-review', 'high-risk-action-blocked']);
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\[data-high-risk-action='true'\][\s\S]*display: none !important/u,
+    );
+    expect(featureSource).toContain('data-high-risk-action="true"');
+    expect(featureSource).toContain('admin-mobile-high-risk-block');
+    expect(featureSource).toContain('aria-describedby="admin-mobile-high-risk-block"');
+    expect(featureSource).toContain('viewportWidth');
+  });
+
+  it('authors offline, stale, expired, permission, and partial-failure recovery safely', () => {
+    for (const state of [
+      'offline',
+      'stale',
+      'expired-session',
+      'permission-denied',
+      'partial-failure',
+    ]) expect(featureSource).toContain(`'${state}'`);
+    expect(featureSource).toContain('safeDraftFields: [\'case\']');
+    expect(featureSource).not.toContain("safeDraftFields: ['response']");
+    expect(adminEn.recovery.safeDraft).toContain('Response and diagnostic fields are discarded');
+    expect(adminPtBr.recovery.safeDraft).toContain('Resposta e campos de diagnóstico são descartados');
+  });
+});
+
+describe('admin no-change authority', () => {
+  it.each([
+    ['support', 'W14'],
+    ['diagnostic', 'W15'],
+    ['admin', 'W16'],
+  ] as const)('closes %s actions with a schema-valid receipt', async (family, scenarioId) => {
+    const scenario = getWebScenario(scenarioId);
+    const authority = createWebPreviewAuthority({
+      clock: () => scenario.clock,
+      correlationIds: [`${scenarioId}-${family}-receipt-test`],
+      scenario,
+    });
+    const command: FutureAuthorityCommandJson = {
+      command: `${family}.review`,
+      description: `Phase 4 admin ${family} authority`,
+      phase: 'Phase 4',
+      surface: 'admin',
+    };
+    const result = await authority.execute({
+      command,
+      disposition: 'confirm',
+      reviewedInputs: [`${family}-reviewed`],
+    });
+    expect(result.kind).toBe('no-change');
+    if (result.kind !== 'no-change') throw new Error('Expected no-change receipt');
+    expect(validateWebDocument(result.receipt).ok).toBe(true);
+    expect(result.receipt).toMatchObject({ nextPhase: 'Phase 4', remoteStateChanged: false });
+  });
+
+  it('contains no network, upload, cookie, storage, session, or mutation channel', () => {
+    expect(featureSource).not.toMatch(
+      /\bfetch\s*\(|XMLHttpRequest|WebSocket|document\.cookie|localStorage|sessionStorage|type="file"/u,
+    );
+    expect(featureSource).toContain('createPreviewWorkflowMachine');
+    expect(featureSource).toContain('createWebPreviewAuthority');
+    expect(featureSource).toContain('data-remote-state-changed="false"');
+    expect(featureSource).toContain('data-immutable="true"');
+  });
+});
