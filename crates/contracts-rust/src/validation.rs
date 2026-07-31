@@ -146,6 +146,18 @@ fn invalid_semantic_payload(
     }
 }
 
+fn deserialization_error(schema_id: &'static str) -> ContractValidationError {
+    ContractValidationError {
+        code: ContractValidationCode::DeserializationFailed,
+        schema_id: Some(schema_id),
+        issues: vec![ContractValidationIssue {
+            path: "$".to_owned(),
+            keyword: "deserialize".to_owned(),
+        }],
+        truncated: false,
+    }
+}
+
 fn validate_and_deserialize<T: DeserializeOwned>(
     schema_id: &str,
     expected_schema_id: &'static str,
@@ -160,15 +172,7 @@ fn validate_and_deserialize<T: DeserializeOwned>(
         return Err(invalid_payload(validator, expected_schema_id, input));
     }
 
-    serde_json::from_value(input.clone()).map_err(|_| ContractValidationError {
-        code: ContractValidationCode::DeserializationFailed,
-        schema_id: Some(expected_schema_id),
-        issues: vec![ContractValidationIssue {
-            path: "$".to_owned(),
-            keyword: "deserialize".to_owned(),
-        }],
-        truncated: false,
-    })
+    serde_json::from_value(input.clone()).map_err(|_| deserialization_error(expected_schema_id))
 }
 
 fn deserialize_web_document(
@@ -202,15 +206,7 @@ fn deserialize_web_document(
         return Ok(ValidatedWebDocument::AdminAuditEvent(document));
     }
 
-    Err(ContractValidationError {
-        code: ContractValidationCode::DeserializationFailed,
-        schema_id: Some(WEB_DOCUMENT_SCHEMA_ID),
-        issues: vec![ContractValidationIssue {
-            path: "$".to_owned(),
-            keyword: "deserialize".to_owned(),
-        }],
-        truncated: false,
-    })
+    Err(deserialization_error(WEB_DOCUMENT_SCHEMA_ID))
 }
 
 fn is_safe_web_uri(input: &str) -> bool {
