@@ -140,6 +140,23 @@ describe('admin 410', () => {
     expect(adminRoleCanAccess('security', 'admin-security')).toBe(true);
     expect(isAdminPreviewRoute('admin-error-410')).toBe(false);
   });
+
+  it('dispatches canonical errors before workspace role admission without mutation channels', () => {
+    const page = readFileSync(
+      new URL('./app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+    const errorDispatch = page.indexOf("resolution.kind === 'error'");
+    const roleAdmission = page.indexOf('adminRoleCanAccess(role, resolution.routeId)');
+
+    expect(page).toContain("securityBoundary: 'admin-origin'");
+    expect(page).toContain('adminFailureKindForRoute(routeId)');
+    expect(page).toContain('createAdminFailureModel(resolution.failureKind, locale)');
+    expect(page).toContain('robots: { follow: false, index: false, nocache: true }');
+    expect(errorDispatch).toBeGreaterThan(-1);
+    expect(roleAdmission).toBeGreaterThan(errorDispatch);
+    expect(page).not.toMatch(/redirect\(|fetch\(|cookies\(/u);
+  });
 });
 
 describe('admin 500', () => {
