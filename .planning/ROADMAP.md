@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 20/32 plans executed
+**Plans**: 21/32 plans executed
 
 Plans:
 **Wave 1**
@@ -319,7 +319,7 @@ Plans:
 **Wave 9** *(blocked on Wave 8 completion)*
 
 - [x] 03-20-PLAN.md — Compose the Command Runway and Evidence Stage Home
-- [ ] 03-22-PLAN.md — Build versioned documentation resolution and deep links
+- [x] 03-22-PLAN.md — Build versioned documentation resolution and deep links
 - [ ] 03-26-PLAN.md — Build guarded account/admin preview workflows
 
 **Wave 10** *(blocked on Wave 9 completion)*
@@ -496,7 +496,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 20/32 | In Progress|  |
+| 3. Complete Web Experience                         | 21/32 | In Progress|  |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |

@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-19-PLAN.md
-last_updated: "2026-07-31T07:27:41.931Z"
+stopped_at: Completed 03-22-PLAN.md
+last_updated: "2026-07-31T07:40:13.117Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-19-PLAN.md
+last_activity_desc: Completed 03-22-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 78
-  percent: 20
+  completed_plans: 79
+  percent: 88
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 21 of 32
+Plan: 22 of 32
 Status: Ready to execute
-Last activity: 2026-07-31 — Completed 03-19-PLAN.md
+Last activity: 2026-07-31 — Completed 03-22-PLAN.md
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 77
+- Total plans completed: 79
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -126,6 +126,7 @@ _Updated after plan completion_
 | Phase 03 P18 | 19min | 2 tasks | 7 files |
 | Phase 03 P19 | 18min | 2 tasks | 7 files |
 | Phase 03 P20 | 3h23m | 2 tasks | 13 files |
+| Phase 03 P22 | 9min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -328,6 +329,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Fail the Home product stage closed until Plan 03-29 supplies an approved real desktop capture and matching checksum. — Prevents generated, stock, stale, or tampered imagery from becoming product proof.
 - [Phase 03]: Keep Home filesystem and hash validation server-side behind an app-local client UI boundary. — Preserves the media trust boundary without importing client-only React Aria modules into the Server Component.
 - [Phase 03]: Localize evidence metadata and screenshot actions through backward-compatible shared component props. — Prevents English-only evidence labels leaking into the PT-BR Home while preserving existing consumers.
+- [Phase 03]: Keep documentation locale, version, and channel fallbacks explicit; never silently substitute identity. — Historical guidance remains reachable while navigation changes require an explicit caller decision.
+- [Phase 03]: Permit desktop contextual documentation links only for current supported documents and exact authored sections. — Desktop handoff must not present stale or mismatched guidance as compatible.
+- [Phase 03]: Reject generic executable mutation recipes before documentation resolution or search indexing. — Documentation may explain safe verification but cannot become a remote execution channel.
 
 ### Pending Todos
 
@@ -369,6 +373,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T07:27:20.256Z
-Stopped at: Completed 03-19-PLAN.md
+Last session: 2026-07-31T07:39:53.912Z
+Stopped at: Completed 03-22-PLAN.md
 Resume file: None
