@@ -135,17 +135,27 @@ const scenarioIdsBySurface = Object.freeze({
 
 const chromium = devices['Desktop Chrome'];
 
-const requestedSpecs = process.argv.join(' ');
-const startsEverySurface =
-  requestedSpecs.length === 0 ||
-  /accessibility-responsive|security-artifacts|matrix\.config/u.test(requestedSpecs);
-const selectedSurfaces = surfaces.filter(({ surface }) =>
-  startsEverySurface
-    ? true
-    : surface === 'public'
-      ? /public|documentation|releases/u.test(requestedSpecs)
-      : requestedSpecs.includes(`${surface}.spec`),
-);
+export const selectWebTestSurfaces = (
+  arguments_: readonly string[],
+): readonly (typeof surfaces)[number][] => {
+  const selector = arguments_
+    .filter(
+      (argument) => /\.(?:spec|pw)\.ts(?:$|:)/u.test(argument) || argument.startsWith('--project='),
+    )
+    .join(' ');
+  const startsEverySurface =
+    selector.length === 0 ||
+    /accessibility-responsive|security-artifacts|matrix\.config/u.test(selector);
+  return surfaces.filter(({ surface }) =>
+    startsEverySurface
+      ? true
+      : surface === 'public'
+        ? /public|documentation|releases/u.test(selector)
+        : selector.includes(surface),
+  );
+};
+
+const selectedSurfaces = selectWebTestSurfaces(process.argv.slice(2));
 
 const quickProjects: Project[] = surfaces.map(({ baseURL, surface }) => ({
   grep: new RegExp(`@quick @${surface}`, 'u'),
