@@ -6,14 +6,14 @@ current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
 stopped_at: Completed 03-15-PLAN.md
-last_updated: "2026-07-31T05:25:11.423Z"
+last_updated: "2026-07-31T05:48:58.933Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 73
+  completed_plans: 74
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 16 of 32
+Plan: 17 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -121,6 +121,7 @@ _Updated after plan completion_
 | Phase 03 P13 | 11min | 2 tasks | 8 files |
 | Phase 03 P14 | 10m | 2 tasks | 17 files |
 | Phase 03 P15 | 22min | 2 tasks | 16 files |
+| Phase 03 P16 | 20min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -307,6 +308,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep the nonce-free public surface static; strict inline-free CSP remains report-only until the observed production bootstrap violations reach zero.
 - [Phase 03]: Publish only concrete canonical sitemap URLs and account for unresolved dynamic route families without emitting bracket placeholders.
 - [Phase 03]: Use the supported Next webpack build path with NodeNext extension aliases until Turbopack resolves workspace .js-to-TypeScript specifiers.
+- [Phase 03]: Account cross-origin context remains non-authoritative and is admitted only through web-core canonical destination and return-route validation. — Prevents preview context from becoming session or redirect authority.
+- [Phase 03]: The canonical account 404 route activates the shell and proxy before Plan 03-27 adds workflow content. — Provides a truthful executable route without inventing future account data.
+- [Phase 03]: Design-system provenance is isolated behind a client boundary so the account layout stays server-rendered. — The design-system public root includes React Aria client modules.
 
 ### Pending Todos
 
@@ -348,6 +352,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T05:24:54.232Z
+Last session: 2026-07-31T05:48:30.179Z
 Stopped at: Completed 03-15-PLAN.md
 Resume file: None
