@@ -27,11 +27,7 @@ export type PreviewSurface = Extract<FutureAuthorityCommandJson['surface'], 'acc
 export type PreviewRole = 'account-holder' | 'support' | 'security' | 'operations';
 export type PreviewFreshness = 'current' | 'stale';
 export type PreviewFailureCode =
-  | 'ABORTED'
-  | 'AUTHORITY_UNAVAILABLE'
-  | 'CORRELATION_EXHAUSTED'
-  | 'INVALID_COMMAND'
-  | 'OFFLINE';
+  'ABORTED' | 'AUTHORITY_UNAVAILABLE' | 'CORRELATION_EXHAUSTED' | 'INVALID_COMMAND' | 'OFFLINE';
 
 export interface PreviewConfirmationMetadata {
   readonly kind: 'button' | 'phrase' | 'ambiguous';
@@ -66,20 +62,14 @@ const policy = (
     ...requirements,
   });
 
-const buttonConfirmation = (
-  ptBR: string,
-  en: string,
-): PreviewConfirmationMetadata =>
+const buttonConfirmation = (ptBR: string, en: string): PreviewConfirmationMetadata =>
   Object.freeze({
     kind: 'button',
     label: Object.freeze({ en, 'pt-BR': ptBR }),
     value: Object.freeze({ en, 'pt-BR': ptBR }),
   });
 
-const phraseConfirmation = (
-  ptBR: string,
-  en: string,
-): PreviewConfirmationMetadata =>
+const phraseConfirmation = (ptBR: string, en: string): PreviewConfirmationMetadata =>
   Object.freeze({
     kind: 'phrase',
     label: Object.freeze({ en, 'pt-BR': ptBR }),
@@ -104,11 +94,14 @@ export const PREVIEW_ACTION_POLICIES = Object.freeze({
   device: policy(buttonConfirmation('Revogar dispositivo', 'Revoke device'), {
     requiresImpact: true,
   }),
-  privacy: policy(phraseConfirmation('ENVIAR SOLICITAÇÃO DE PRIVACIDADE', 'SUBMIT PRIVACY REQUEST'), {
-    requiresConsent: true,
-    requiresImpact: true,
-    requiresPurpose: true,
-  }),
+  privacy: policy(
+    phraseConfirmation('ENVIAR SOLICITAÇÃO DE PRIVACIDADE', 'SUBMIT PRIVACY REQUEST'),
+    {
+      requiresConsent: true,
+      requiresImpact: true,
+      requiresPurpose: true,
+    },
+  ),
   support: policy(buttonConfirmation('Compartilhar dados de suporte', 'Share support data'), {
     requiresConsent: true,
     requiresImpact: true,
@@ -267,10 +260,7 @@ export interface PreviewCancellationReceipt {
 export interface FutureAuthorityExecution {
   readonly command: unknown;
   readonly disposition: 'cancel' | 'confirm' | 'failure';
-  readonly failureCode?: Extract<
-    PreviewFailureCode,
-    'AUTHORITY_UNAVAILABLE' | 'OFFLINE'
-  >;
+  readonly failureCode?: Extract<PreviewFailureCode, 'AUTHORITY_UNAVAILABLE' | 'OFFLINE'>;
   readonly reviewedInputs: readonly string[];
   readonly signal?: AbortSignal;
 }
@@ -375,8 +365,7 @@ interface AuthorityActorInput {
 const nonEmpty = (value: string | undefined): boolean =>
   value !== undefined && value.trim().length > 0;
 
-const safeIdentifier = (value: string): boolean =>
-  /^[a-z][a-z0-9.-]{0,118}$/u.test(value);
+const safeIdentifier = (value: string): boolean => /^[a-z][a-z0-9.-]{0,118}$/u.test(value);
 
 const commandFor = (context: PreviewWorkflowContext): FutureAuthorityCommandJson => ({
   command: context.action.id,
@@ -406,12 +395,13 @@ const contextFromInput = (input: PreviewWorkflowInput): PreviewWorkflowContext =
   action: Object.freeze({ ...input.action }),
   cancellation: null,
   confirmation: PREVIEW_ACTION_POLICIES[input.action.family].confirmation,
-  consent: input.consent === undefined || input.consent === null
-    ? null
-    : Object.freeze({
-        ...input.consent,
-        permittedFields: Object.freeze([...input.consent.permittedFields]),
-      }),
+  consent:
+    input.consent === undefined || input.consent === null
+      ? null
+      : Object.freeze({
+          ...input.consent,
+          permittedFields: Object.freeze([...input.consent.permittedFields]),
+        }),
   failureCode: null,
   fields: Object.freeze({ ...input.fields }),
   freshness: input.freshness ?? 'current',
@@ -477,10 +467,7 @@ const validateContext = (
 const isNoChangeResult = (
   value: FutureAuthorityResult,
 ): value is Extract<FutureAuthorityResult, { readonly kind: 'no-change' }> =>
-  value.kind === 'no-change' &&
-  value.receipt.remoteStateChanged === false &&
-  value.receipt.nextPhase === 'Phase 4' &&
-  validateWebDocument(value.receipt).ok;
+  value.kind === 'no-change' && validateWebDocument(value.receipt).ok;
 
 const failureCodeFor = (value: FutureAuthorityResult): PreviewFailureCode =>
   value.kind === 'failure' ? value.code : 'INVALID_COMMAND';
@@ -534,9 +521,7 @@ const commonInterruptions = {
   },
 } as const;
 
-export const createPreviewWorkflowMachine = (
-  dependencies: PreviewWorkflowDependencies,
-) => {
+export const createPreviewWorkflowMachine = (dependencies: PreviewWorkflowDependencies) => {
   const authorityActor = fromPromise<FutureAuthorityResult, AuthorityActorInput>(
     ({ input, signal }) =>
       dependencies.authority.execute({
@@ -592,9 +577,7 @@ export const createPreviewWorkflowMachine = (
           : context,
       ),
       assignAuthorityFailure: assign(({ context, event }) =>
-        event.type === 'FAIL'
-          ? { ...context, failureCode: event.code }
-          : context,
+        event.type === 'FAIL' ? { ...context, failureCode: event.code } : context,
       ),
       assignValidationErrors: assign(({ context, event }) => ({
         ...context,

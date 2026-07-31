@@ -10,7 +10,7 @@ import {
   type PreviewWorkflowContext,
   type PreviewWorkflowInput,
   type PreviewWorkflowOutput,
-  createPreviewWorkflowMachine,
+  type createPreviewWorkflowMachine,
 } from './preview-machine.js';
 import { PreviewBoundary, ProvenanceLabel } from './components.js';
 
@@ -79,44 +79,40 @@ const COPY = Object.freeze({
   }),
 });
 
-const ERROR_COPY: Readonly<
-  Record<string, Readonly<Record<PreviewWorkflowLocale, string>>>
-> = Object.freeze({
-  'preview.validation.consent-required': Object.freeze({
-    en: 'Grant explicit, scoped, time-limited consent before review.',
-    'pt-BR': 'Conceda consentimento explícito, delimitado e temporário antes da revisão.',
-  }),
-  'preview.validation.desktop-required': Object.freeze({
-    en: 'Use a desktop-class viewport at least 960 pixels wide for this high-risk review.',
-    'pt-BR':
-      'Use uma janela de classe desktop com pelo menos 960 pixels para esta revisão de alto risco.',
-  }),
-  'preview.validation.impact-required': Object.freeze({
-    en: 'Describe the impact of the reviewed action.',
-    'pt-BR': 'Descreva o impacto da ação revisada.',
-  }),
-  'preview.validation.purpose-required': Object.freeze({
-    en: 'Describe the specific purpose for this review.',
-    'pt-BR': 'Descreva a finalidade específica desta revisão.',
-  }),
-  'preview.validation.required': Object.freeze({
-    en: 'Enter the required value for this field.',
-    'pt-BR': 'Informe o valor obrigatório deste campo.',
-  }),
-  'preview.validation.role-required': Object.freeze({
-    en: 'A permitted role and scope are required.',
-    'pt-BR': 'Uma função e um escopo permitidos são obrigatórios.',
-  }),
-  'preview.validation.stale': Object.freeze({
-    en: 'Refresh stale input before review.',
-    'pt-BR': 'Atualize a entrada desatualizada antes da revisão.',
-  }),
-});
+const ERROR_COPY: Readonly<Record<string, Readonly<Record<PreviewWorkflowLocale, string>>>> =
+  Object.freeze({
+    'preview.validation.consent-required': Object.freeze({
+      en: 'Grant explicit, scoped, time-limited consent before review.',
+      'pt-BR': 'Conceda consentimento explícito, delimitado e temporário antes da revisão.',
+    }),
+    'preview.validation.desktop-required': Object.freeze({
+      en: 'Use a desktop-class viewport at least 960 pixels wide for this high-risk review.',
+      'pt-BR':
+        'Use uma janela de classe desktop com pelo menos 960 pixels para esta revisão de alto risco.',
+    }),
+    'preview.validation.impact-required': Object.freeze({
+      en: 'Describe the impact of the reviewed action.',
+      'pt-BR': 'Descreva o impacto da ação revisada.',
+    }),
+    'preview.validation.purpose-required': Object.freeze({
+      en: 'Describe the specific purpose for this review.',
+      'pt-BR': 'Descreva a finalidade específica desta revisão.',
+    }),
+    'preview.validation.required': Object.freeze({
+      en: 'Enter the required value for this field.',
+      'pt-BR': 'Informe o valor obrigatório deste campo.',
+    }),
+    'preview.validation.role-required': Object.freeze({
+      en: 'A permitted role and scope are required.',
+      'pt-BR': 'Uma função e um escopo permitidos são obrigatórios.',
+    }),
+    'preview.validation.stale': Object.freeze({
+      en: 'Refresh stale input before review.',
+      'pt-BR': 'Atualize a entrada desatualizada antes da revisão.',
+    }),
+  });
 
-const errorCopy = (
-  error: PreviewValidationError,
-  locale: PreviewWorkflowLocale,
-): string =>
+const errorCopy = (error: PreviewValidationError, locale: PreviewWorkflowLocale): string =>
   ERROR_COPY[error.messageId]?.[locale] ??
   (locale === 'pt-BR' ? 'Revise este campo.' : 'Review this field.');
 
@@ -151,9 +147,7 @@ export const PreviewReview = ({ context, locale }: PreviewReviewProps) => (
       </div>
     </dl>
     <table>
-      <caption>
-        {locale === 'pt-BR' ? 'Diferenças revisadas' : 'Reviewed differences'}
-      </caption>
+      <caption>{locale === 'pt-BR' ? 'Diferenças revisadas' : 'Reviewed differences'}</caption>
       <thead>
         <tr>
           <th scope="col">{locale === 'pt-BR' ? 'Campo' : 'Field'}</th>
@@ -242,9 +236,7 @@ export const PreviewConfirmation = ({
       {requiresPhrase ? (
         <LbTextField
           description={
-            locale === 'pt-BR'
-              ? `Digite exatamente: ${expected}`
-              : `Enter exactly: ${expected}`
+            locale === 'pt-BR' ? `Digite exatamente: ${expected}` : `Enter exactly: ${expected}`
           }
           label={locale === 'pt-BR' ? 'Frase de confirmação' : 'Confirmation phrase'}
           onChange={onChangeConfirmation}
@@ -332,15 +324,9 @@ export interface PreviewReceiptProps {
 }
 
 const correlationFor = (output: PreviewWorkflowOutput): string =>
-  output.kind === 'no-change'
-    ? output.receipt.correlationId
-    : output.receipt.correlationId;
+  output.kind === 'no-change' ? output.receipt.correlationId : output.receipt.correlationId;
 
-export const PreviewReceipt = ({
-  actionLabel,
-  locale,
-  output,
-}: PreviewReceiptProps) => {
+export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptProps) => {
   const cancelled = output.kind === 'cancelled';
   const receipt = output.receipt;
   const correlationId = correlationFor(output);
@@ -415,6 +401,8 @@ export const PreviewFields = ({
   onChangePurpose,
 }: PreviewFieldsProps) => {
   const actionPolicy = PREVIEW_ACTION_POLICIES[context.action.family];
+  const impactError = context.validationErrors.find((error) => error.field === 'impact');
+  const purposeError = context.validationErrors.find((error) => error.field === 'purpose');
   const prerequisite = (
     field: 'consent' | 'freshness' | 'role' | 'viewport',
     label: string,
@@ -433,100 +421,86 @@ export const PreviewFields = ({
   };
 
   return (
-  <div data-preview-region="fields">
-    {actionPolicy.requiresPurpose ? (
-      <div id={fieldId(context.action.id, 'purpose')}>
-        <LbTextField
-          errorMessage={
-            context.validationErrors.find((error) => error.field === 'purpose')
-              ? errorCopy(
-                  context.validationErrors.find((error) => error.field === 'purpose') as PreviewValidationError,
-                  locale,
-                )
-              : undefined
-          }
-          isInvalid={context.validationErrors.some((error) => error.field === 'purpose')}
-          label={locale === 'pt-BR' ? 'Finalidade específica' : 'Specific purpose'}
-          onChange={onChangePurpose}
-          value={context.purpose}
-        />
-      </div>
-    ) : null}
-    {actionPolicy.requiresImpact ? (
-      <div id={fieldId(context.action.id, 'impact')}>
-        <LbTextField
-          errorMessage={
-            context.validationErrors.find((error) => error.field === 'impact')
-              ? errorCopy(
-                  context.validationErrors.find((error) => error.field === 'impact') as PreviewValidationError,
-                  locale,
-                )
-              : undefined
-          }
-          isInvalid={context.validationErrors.some((error) => error.field === 'impact')}
-          label={locale === 'pt-BR' ? 'Impacto revisado' : 'Reviewed impact'}
-          onChange={onChangeImpact}
-          value={context.impact}
-        />
-      </div>
-    ) : null}
-    {context.requiredFields.map((field) => {
-      const error = context.validationErrors.find((candidate) => candidate.field === field);
-      return (
-        <div id={fieldId(context.action.id, field)} key={field}>
+    <div data-preview-region="fields">
+      {actionPolicy.requiresPurpose ? (
+        <div id={fieldId(context.action.id, 'purpose')}>
           <LbTextField
-            errorMessage={error ? errorCopy(error, locale) : undefined}
-            isInvalid={error !== undefined}
-            label={fieldLabel(context, field)}
-            onChange={(value) => {
-              onChange(field, value);
-            }}
-            value={context.fields[field] ?? ''}
+            errorMessage={purposeError ? errorCopy(purposeError, locale) : undefined}
+            isInvalid={purposeError !== undefined}
+            label={locale === 'pt-BR' ? 'Finalidade específica' : 'Specific purpose'}
+            onChange={onChangePurpose}
+            value={context.purpose}
           />
         </div>
-      );
-    })}
-    <dl aria-label={locale === 'pt-BR' ? 'Pré-requisitos da revisão' : 'Review prerequisites'}>
-      {actionPolicy.requiresRole
-        ? prerequisite(
-            'role',
-            locale === 'pt-BR' ? 'Função permitida' : 'Permitted role',
-            context.role ?? (locale === 'pt-BR' ? 'Não informada' : 'Not provided'),
-          )
-        : null}
-      {actionPolicy.requiresConsent
-        ? prerequisite(
-            'consent',
-            locale === 'pt-BR' ? 'Consentimento delimitado' : 'Scoped consent',
-            context.consent?.granted === true
-              ? locale === 'pt-BR'
-                ? 'Concedido para esta revisão'
-                : 'Granted for this review'
-              : locale === 'pt-BR'
-                ? 'Não concedido'
-                : 'Not granted',
-          )
-        : null}
-      {actionPolicy.requiresDesktopViewport
-        ? prerequisite(
-            'viewport',
-            locale === 'pt-BR' ? 'Janela de classe desktop' : 'Desktop-class viewport',
-            `${context.viewport.width}px`,
-          )
-        : null}
-      {prerequisite(
-        'freshness',
-        locale === 'pt-BR' ? 'Atualidade da entrada' : 'Input freshness',
-        context.freshness === 'current'
-          ? locale === 'pt-BR'
-            ? 'Atual'
-            : 'Current'
-          : locale === 'pt-BR'
-            ? 'Desatualizada'
-            : 'Stale',
-      )}
-    </dl>
-  </div>
+      ) : null}
+      {actionPolicy.requiresImpact ? (
+        <div id={fieldId(context.action.id, 'impact')}>
+          <LbTextField
+            errorMessage={impactError ? errorCopy(impactError, locale) : undefined}
+            isInvalid={impactError !== undefined}
+            label={locale === 'pt-BR' ? 'Impacto revisado' : 'Reviewed impact'}
+            onChange={onChangeImpact}
+            value={context.impact}
+          />
+        </div>
+      ) : null}
+      {context.requiredFields.map((field) => {
+        const error = context.validationErrors.find((candidate) => candidate.field === field);
+        return (
+          <div id={fieldId(context.action.id, field)} key={field}>
+            <LbTextField
+              errorMessage={error ? errorCopy(error, locale) : undefined}
+              isInvalid={error !== undefined}
+              label={fieldLabel(context, field)}
+              onChange={(value) => {
+                onChange(field, value);
+              }}
+              value={context.fields[field] ?? ''}
+            />
+          </div>
+        );
+      })}
+      <dl aria-label={locale === 'pt-BR' ? 'Pré-requisitos da revisão' : 'Review prerequisites'}>
+        {actionPolicy.requiresRole
+          ? prerequisite(
+              'role',
+              locale === 'pt-BR' ? 'Função permitida' : 'Permitted role',
+              context.role ?? (locale === 'pt-BR' ? 'Não informada' : 'Not provided'),
+            )
+          : null}
+        {actionPolicy.requiresConsent
+          ? prerequisite(
+              'consent',
+              locale === 'pt-BR' ? 'Consentimento delimitado' : 'Scoped consent',
+              context.consent?.granted === true
+                ? locale === 'pt-BR'
+                  ? 'Concedido para esta revisão'
+                  : 'Granted for this review'
+                : locale === 'pt-BR'
+                  ? 'Não concedido'
+                  : 'Not granted',
+            )
+          : null}
+        {actionPolicy.requiresDesktopViewport
+          ? prerequisite(
+              'viewport',
+              locale === 'pt-BR' ? 'Janela de classe desktop' : 'Desktop-class viewport',
+              `${String(context.viewport.width)}px`,
+            )
+          : null}
+        {prerequisite(
+          'freshness',
+          locale === 'pt-BR' ? 'Atualidade da entrada' : 'Input freshness',
+          context.freshness === 'current'
+            ? locale === 'pt-BR'
+              ? 'Atual'
+              : 'Current'
+            : locale === 'pt-BR'
+              ? 'Desatualizada'
+              : 'Stale',
+        )}
+      </dl>
+    </div>
   );
 };
 
@@ -722,7 +696,10 @@ export const PreviewWorkflow = ({
             </h2>
             <p>{COPY[locale].reauthenticate}</p>
             <PreviewBoundary description={COPY[locale].boundary} />
-            <div role="group" aria-label={locale === 'pt-BR' ? 'Reautenticação' : 'Reauthentication'}>
+            <div
+              role="group"
+              aria-label={locale === 'pt-BR' ? 'Reautenticação' : 'Reauthentication'}
+            >
               <LbButton onPress={cancel} variant="quiet">
                 {COPY[locale].cancel}
               </LbButton>

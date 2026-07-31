@@ -48,9 +48,7 @@ const completeReceipt = {
   reviewedInputs: ['target-reviewed'] as [string, ...string[]],
 } as const;
 
-const adminInput = (
-  overrides: Partial<PreviewWorkflowInput> = {},
-): PreviewWorkflowInput => ({
+const adminInput = (overrides: Partial<PreviewWorkflowInput> = {}): PreviewWorkflowInput => ({
   action: {
     family: 'admin',
     id: 'admin.review',
@@ -113,10 +111,9 @@ const intrinsic = (node: ReactNode, tag: string): readonly ReactElement[] =>
   elements(node).filter((element) => element.type === tag);
 
 const contextForAccessibility = () => {
-  const actor = createActor(
-    machineWith({ execute: vi.fn<FutureAuthorityPort['execute']>() }),
-    { input: adminInput() },
-  ).start();
+  const actor = createActor(machineWith({ execute: vi.fn<FutureAuthorityPort['execute']>() }), {
+    input: adminInput(),
+  }).start();
   return actor.getSnapshot().context;
 };
 
@@ -152,11 +149,12 @@ describe('preview workflow machine', () => {
     expect(Object.keys(PREVIEW_ACTION_POLICIES).sort()).toEqual(
       [...PREVIEW_ACTION_FAMILIES].sort(),
     );
+    expect(Object.values(PREVIEW_ACTION_POLICIES).map((policy) => policy.authority)).toEqual(
+      PREVIEW_ACTION_FAMILIES.map(() => 'Phase 4'),
+    );
     expect(
       Object.values(PREVIEW_ACTION_POLICIES).every(
-        (policy) =>
-          policy.authority === 'Phase 4' &&
-          policy.confirmation.kind !== 'ambiguous',
+        (policy) => policy.confirmation.kind !== 'ambiguous',
       ),
     ).toBe(true);
     expect(Object.keys(PREVIEW_WORKFLOW_TRANSITIONS).sort()).toEqual(
@@ -184,13 +182,10 @@ describe('preview workflow machine', () => {
       receipt: completeReceipt,
       remoteStateChanged: false,
     });
-    expect(execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        disposition: 'confirm',
-        reviewedInputs: ['target-reviewed'],
-        signal: expect.any(AbortSignal),
-      }),
-    );
+    const execution = execute.mock.calls[0]?.[0];
+    expect(execution?.disposition).toBe('confirm');
+    expect(execution?.reviewedInputs).toEqual(['target-reviewed']);
+    expect(execution?.signal).toBeInstanceOf(AbortSignal);
     expect(JSON.stringify(output)).not.toContain('authority-success');
   });
 
@@ -235,9 +230,7 @@ describe('preview workflow machine', () => {
       [{ type: 'EXPIRE_SESSION' }, 'expired-session'],
       [{ type: 'RESUME_SESSION' }, 'editing'],
       [{ code: 'AUTHORITY_UNAVAILABLE', type: 'FAIL' }, 'partial-failure'],
-    ] as const satisfies readonly (
-      readonly [PreviewWorkflowEvent, string]
-    )[];
+    ] as const satisfies readonly (readonly [PreviewWorkflowEvent, string])[];
 
     for (const [event, expectedState] of cases) {
       actor.send(event);
@@ -337,7 +330,8 @@ describe('preview workflow accessibility', () => {
     expect(intrinsic(review, 'caption')).toHaveLength(1);
     expect(
       intrinsic(review, 'th').every(
-        (heading) => elementProps(heading)['scope'] === 'col' || elementProps(heading)['scope'] === 'row',
+        (heading) =>
+          elementProps(heading)['scope'] === 'col' || elementProps(heading)['scope'] === 'row',
       ),
     ).toBe(true);
     expect(JSON.stringify(review)).toContain('Requesting actor');
@@ -359,9 +353,7 @@ describe('preview workflow accessibility', () => {
     expect(tree.some((element) => element.type === PreviewBoundary)).toBe(true);
     expect(buttons).toHaveLength(2);
     expect(
-      buttons.some(
-        (button) => elementProps(button)['children'] === 'Review admin action',
-      ),
+      buttons.some((button) => elementProps(button)['children'] === 'Review admin action'),
     ).toBe(true);
     expect(intrinsic(confirmation, 'h2')[0]?.props).toMatchObject({ tabIndex: -1 });
   });
@@ -433,7 +425,11 @@ describe('preview workflow accessibility', () => {
         'data-remote-state-changed': 'false',
         tabIndex: -1,
       });
-      expect(elementProps(ledger as ReactElement)['data-immutable']).toBe('true');
+      expect(ledger).toBeDefined();
+      if (ledger === undefined) {
+        throw new Error('No-change receipt must render an immutable ledger');
+      }
+      expect(elementProps(ledger)['data-immutable']).toBe('true');
       expect(serialized).toContain(heading);
       expect(serialized).toContain('Phase 4');
       expect(serialized).not.toMatch(/\b(?:submitted|success|mutated)\b/iu);
