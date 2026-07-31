@@ -14,7 +14,7 @@
     "build": "next build",
     "start": "next start",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "pnpm run check",
+    "test": "vitest",
     "verify": "pnpm run check && pnpm run test && pnpm run build"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@types/react": "19.2.17"
+    "@types/react": "19.2.17",
+    "vitest": "4.1.10"
   }
 }
