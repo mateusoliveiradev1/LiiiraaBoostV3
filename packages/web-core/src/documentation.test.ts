@@ -86,10 +86,7 @@ const troubleshooting = (locale: 'pt-BR' | 'en'): DocumentationArticle =>
     },
     domain: 'troubleshooting',
     kind: 'troubleshooting',
-    title:
-      locale === 'pt-BR'
-        ? 'Diagnosticar LB-ERR:0x80070005'
-        : 'Diagnose LB-ERR:0x80070005',
+    title: locale === 'pt-BR' ? 'Diagnosticar LB-ERR:0x80070005' : 'Diagnose LB-ERR:0x80070005',
     summary:
       locale === 'pt-BR'
         ? 'Confirme o estado observado antes da recuperação.'
@@ -160,9 +157,7 @@ describe('versioned documentation', () => {
     expect(result.ok).toBe(true);
     if (!result.ok || result.value.status !== 'stale') return;
 
-    expect(result.value.href).toBe(
-      'https://liiiraa.com/en/docs/history/1.0.0/legacy-capture',
-    );
+    expect(result.value.href).toBe('https://liiiraa.com/en/docs/history/1.0.0/legacy-capture');
     expect(result.value.notice).toMatchObject({
       persistent: true,
       reason: 'unsupported',
@@ -175,6 +170,61 @@ describe('versioned documentation', () => {
           section: 'measuring',
         },
         href: 'https://liiiraa.com/en/docs/current/articles/measure-before-optimizing',
+      },
+    });
+  });
+
+  it('offers explicit locale and version fallbacks without silently changing identity', () => {
+    const missingLocale = resolveDocument(catalog, {
+      locale: 'pt-BR',
+      version: 'current',
+      channel: 'stable',
+      slug: 'lb-err-0x80070005',
+      section: 'troubleshooting',
+    });
+    const missingVersion = resolveDocument(catalog, {
+      locale: 'en',
+      version: '1.0.0',
+      channel: 'stable',
+      slug: 'measure-before-optimizing',
+      section: 'measuring',
+    });
+
+    expect(missingLocale.ok).toBe(true);
+    expect(missingVersion).toMatchObject({
+      ok: false,
+      error: {
+        code: 'INCOMPATIBLE_VERSION',
+        fallbackIdentity: {
+          locale: 'en',
+          version: 'current',
+          channel: 'stable',
+          slug: 'measure-before-optimizing',
+          section: 'measuring',
+        },
+      },
+    });
+
+    const englishOnly = catalog.filter(
+      ({ identity }) =>
+        !(identity.locale === 'pt-BR' && identity.slug === 'measure-before-optimizing'),
+    );
+    expect(
+      resolveDocument(englishOnly, {
+        locale: 'pt-BR',
+        version: 'current',
+        channel: 'stable',
+        slug: 'measure-before-optimizing',
+        section: 'measuring',
+      }),
+    ).toMatchObject({
+      ok: false,
+      error: {
+        code: 'INCOMPATIBLE_LOCALE',
+        fallbackIdentity: {
+          locale: 'en',
+          version: 'current',
+        },
       },
     });
   });
@@ -241,8 +291,7 @@ describe('versioned documentation', () => {
           section: 'measuring',
         },
         articleSectionId: 'evidence',
-        href:
-          'https://liiiraa.com/en/docs/current/articles/measure-before-optimizing#evidence',
+        href: 'https://liiiraa.com/en/docs/current/articles/measure-before-optimizing#evidence',
         routeId: 'docs-article',
       },
     });
@@ -286,9 +335,10 @@ describe('versioned documentation', () => {
       code: 'UNSAFE_IDENTITY',
     },
   ])('fails closed for $name', ({ intent, code }) => {
-    expect(
-      resolveDesktopDocumentationLink(catalog, intent as never),
-    ).toMatchObject({ ok: false, error: { code } });
+    expect(resolveDesktopDocumentationLink(catalog, intent as never)).toMatchObject({
+      ok: false,
+      error: { code },
+    });
   });
 
   it('rejects generic mutation recipes instead of exposing them as technical content', () => {
@@ -302,9 +352,10 @@ describe('versioned documentation', () => {
       ],
     });
 
-    expect(
-      resolveDocument([unsafe], unsafe.identity),
-    ).toMatchObject({ ok: false, error: { code: 'UNSAFE_CONTENT' } });
+    expect(resolveDocument([unsafe], unsafe.identity)).toMatchObject({
+      ok: false,
+      error: { code: 'UNSAFE_CONTENT' },
+    });
     expect(
       searchDocumentation([unsafe], {
         query: 'Set-ItemProperty',

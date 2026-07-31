@@ -76,3 +76,33 @@ export type {
   SearchFilters,
   SearchResult,
 } from './search.js';
+
+export {
+  DOCUMENTATION_DOMAINS,
+  DOCUMENTATION_PLATFORMS,
+  DOCUMENTATION_SECTION_ORDER,
+  resolveDesktopDocumentationLink,
+  resolveDocument,
+  searchDocumentation,
+} from './documentation.js';
+export type {
+  CurrentDocumentResolution,
+  DesktopDocumentationIntent,
+  DesktopDocumentationLinkErrorCode,
+  DesktopDocumentationLinkResult,
+  DocumentIdentity,
+  DocumentResolution,
+  DocumentResolutionErrorCode,
+  DocumentationArticle,
+  DocumentationDomain,
+  DocumentationKind,
+  DocumentationMetadata,
+  DocumentationPlatform,
+  DocumentationSearchFilters,
+  DocumentationSearchResponse,
+  DocumentationSearchResult,
+  DocumentationSection,
+  DocumentationSectionKind,
+  StaleDocumentResolution,
+  TroubleshootingPath,
+} from './documentation.js';
