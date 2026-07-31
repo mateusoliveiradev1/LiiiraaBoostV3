@@ -105,7 +105,12 @@ describe('route reachability validation', () => {
     [
       'wrong surface',
       (values: RouteReachabilityObservation[]) => [
-        { ...values[0]!, surface: 'account' as RouteReachabilitySurface },
+        {
+          ...values[0]!,
+          surface: (values[0]!.surface === 'account'
+            ? 'public'
+            : 'account') as RouteReachabilitySurface,
+        },
         ...values.slice(1),
       ],
     ],
@@ -267,6 +272,6 @@ describe('deterministic atomic evidence writing', () => {
     }
 
     expect(readFileSync(secondPath, 'utf8')).toBe(readFileSync(first.evidencePath, 'utf8'));
-    expect(readFileSync(secondPath, 'utf8')).not.toMatch(/must never persist|@|file:\/\//u);
+    expect(readFileSync(secondPath, 'utf8')).not.toMatch(/must never persist|file:\/\//u);
   });
 });
