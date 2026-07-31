@@ -1,0 +1,1172 @@
+{
+  "schemaVersion": 1,
+  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "sourceFiles": {
+    "en": "apps/web/src/content/docs/docs.en.mdx",
+    "pt-BR": "apps/web/src/content/docs/docs.pt-BR.mdx"
+  },
+  "records": [
+    {
+      "key": "getting-started",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "getting-started",
+        "section": "getting-started"
+      },
+      "domain": "getting-started",
+      "kind": "article",
+      "title": "Getting started",
+      "summary": "Understand the preview boundary, verify context, and continue to preparation.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "low",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["WEB-02", "D-27", "D-29"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Understand the preview boundary before using product guidance. The current experience explains safe preparation, measurement, review, and restoration without performing privileged Windows changes."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Confirm the desktop reports documentation version current and channel stable, then continue to Prepare a session."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Check the visible version, channel, review date, accountable owner, and validation state before following guidance."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "Do not treat simulated receipts or interface demonstrations as measured evidence from your PC."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "The guidance covers Windows 10 and Windows 11 compositions; hardware-specific support remains subject to the compatibility record."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "If locale or version differs, keep the page open and choose the explicit compatible alternative. Content is never silently substituted."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "Contextual links resolve locale, version, channel, task slug, domain, and exact section anchor."
+        }
+      ],
+      "identifiers": ["WEB-02", "DOC-CONTEXT"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "getting-started",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "getting-started",
+        "section": "getting-started"
+      },
+      "domain": "getting-started",
+      "kind": "article",
+      "title": "Primeiros passos",
+      "summary": "Entenda o limite da prévia, verifique o contexto e continue para a preparação.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "low",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["WEB-02", "D-27", "D-29"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Entenda o limite da prévia antes de usar a orientação. A experiência atual explica preparação, medição, revisão e restauração seguras sem executar alterações privilegiadas no Windows."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Confirme que o desktop informa a versão de documentação current e o canal stable; depois continue para Preparar uma sessão."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Confira versão, canal, data de revisão, responsável e estado de validação visíveis antes de seguir a orientação."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Não trate recibos simulados ou demonstrações da interface como evidência medida no seu PC."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "A orientação cobre composições de Windows 10 e Windows 11; o suporte específico do hardware depende do registro de compatibilidade."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Se idioma ou versão diferir, mantenha a página aberta e escolha a alternativa compatível explícita. O conteúdo nunca é substituído silenciosamente."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "Links contextuais resolvem idioma, versão, canal, slug da tarefa, domínio e âncora exata da seção."
+        }
+      ],
+      "identifiers": ["WEB-02", "DOC-CONTEXT"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "prepare-session",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "prepare-session",
+        "section": "preparing"
+      },
+      "domain": "preparing",
+      "kind": "article",
+      "title": "Prepare a session",
+      "summary": "Review game context, dependencies, and recovery before any future operation.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "medium",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["DESKTOP-PREPARE", "WEB-02"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Prepare the game, dependencies, and recovery path before any future optimization operation."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Close unrelated workloads, confirm the selected game, and review preflight without changing system configuration."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Record the selected game, detected constraints, declared goals, and available recovery baseline in local activity."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "An incomplete preflight can make later measurements incomparable. Stop when a dependency or recovery prerequisite is unavailable."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "Preparation applies to Windows 10 and Windows 11; games, anti-cheat systems, and devices can impose narrower boundaries."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "Cancel preparation to return to the last verified local state. No remote authority is required."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "Desktop preparation routes keep game and session identifiers bounded and reject unknown navigation parameters."
+        }
+      ],
+      "identifiers": ["PREFLIGHT", "GAME-SESSION"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "prepare-session",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "prepare-session",
+        "section": "preparing"
+      },
+      "domain": "preparing",
+      "kind": "article",
+      "title": "Preparar uma sessão",
+      "summary": "Revise jogo, dependências e recuperação antes de qualquer operação futura.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "medium",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["DESKTOP-PREPARE", "WEB-02"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Prepare jogo, dependências e caminho de recuperação antes de qualquer futura operação de otimização."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Feche cargas não relacionadas, confirme o jogo e revise a pré-verificação sem alterar a configuração do sistema."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Registre jogo, restrições detectadas, objetivos declarados e linha de recuperação disponível na atividade local."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Uma pré-verificação incompleta pode tornar medições posteriores incomparáveis. Pare se uma dependência ou requisito de recuperação estiver indisponível."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "A preparação se aplica ao Windows 10 e Windows 11; jogos, sistemas antitrapaça e dispositivos podem impor limites menores."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Cancele a preparação para retornar ao último estado local verificado. Nenhuma autoridade remota é necessária."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "As rotas de preparação mantêm identificadores de jogo e sessão limitados e rejeitam parâmetros desconhecidos."
+        }
+      ],
+      "identifiers": ["PREFLIGHT", "GAME-SESSION"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "measure-baseline",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "measure-baseline",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "article",
+      "title": "Measure a baseline",
+      "summary": "Capture comparable evidence before drawing a performance conclusion.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "low",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["LB-EVIDENCE-001", "LB-COLLECTOR"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Capture a comparable baseline before drawing a performance conclusion."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Use the same workload, duration, collector coverage, and power context for baseline and comparison runs."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Inspect provenance, capture window, sample coverage, rejected comparisons, and collector overhead before accepting a result."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "Different workloads or degraded coverage can create a false improvement. A schema-valid record is not automatically a valid comparison."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "Measurement applies to Windows 10 and Windows 11 when selected collectors are available for the device."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "Reject the comparison and return to the last accepted baseline when coverage, context, or provenance differs."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "LB-COLLECTOR, WIN11-24H2, and receipt identifiers remain searchable as full technical tokens and component terms."
+        }
+      ],
+      "identifiers": ["LB-COLLECTOR", "WIN11-24H2", "LB-EVIDENCE-001"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "measure-baseline",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "measure-baseline",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "article",
+      "title": "Medir uma linha de base",
+      "summary": "Capture evidência comparável antes de concluir algo sobre desempenho.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "low",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["LB-EVIDENCE-001", "LB-COLLECTOR"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Capture uma linha de base comparável antes de concluir algo sobre desempenho."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Use a mesma carga, duração, cobertura do coletor e contexto de energia nas execuções de base e comparação."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Inspecione proveniência, janela de captura, cobertura, comparações rejeitadas e sobrecarga do coletor antes de aceitar um resultado."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Cargas diferentes ou cobertura degradada podem criar melhoria falsa. Um registro válido no esquema não é automaticamente uma comparação válida."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "A medição se aplica ao Windows 10 e Windows 11 quando os coletores selecionados estão disponíveis no dispositivo."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Rejeite a comparação e retorne à última linha de base aceita quando cobertura, contexto ou proveniência diferirem."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "LB-COLLECTOR, WIN11-24H2 e identificadores de recibo continuam pesquisáveis como tokens completos e termos componentes."
+        }
+      ],
+      "identifiers": ["LB-COLLECTOR", "WIN11-24H2", "LB-EVIDENCE-001"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "review-optimization",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "review-optimization",
+        "section": "optimizing"
+      },
+      "domain": "optimizing",
+      "kind": "article",
+      "title": "Review an optimization",
+      "summary": "Inspect proposed effects, evidence, risk, and rollback before authorization.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "under-validation",
+        "evidenceReferences": ["PLAN-REVIEW", "NO-CHANGE-RECEIPT"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Review proposed effects, evidence, risk, and rollback before a future operation can be authorized."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Compare the proposed plan with the current baseline and confirm every consequence and recovery step."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Each operation identifies source, scope, applicable version, validation state, and what remains unproven."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "Do not infer a guaranteed gain from a recommendation. Benefit depends on exact hardware and workload."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "Only operations explicitly supported for the detected Windows version and device state can be eligible later."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "Keep the snapshot and inverse operation visible before confirmation. Stop if either is missing."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "This phase renders review and no-change receipts only. Native mutation authority belongs to a later phase."
+        }
+      ],
+      "identifiers": ["PLAN-REVIEW", "NO-CHANGE-RECEIPT"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "review-optimization",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "review-optimization",
+        "section": "optimizing"
+      },
+      "domain": "optimizing",
+      "kind": "article",
+      "title": "Revisar uma otimização",
+      "summary": "Inspecione efeitos, evidências, risco e reversão antes da autorização.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "under-validation",
+        "evidenceReferences": ["PLAN-REVIEW", "NO-CHANGE-RECEIPT"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Revise efeitos propostos, evidências, risco e reversão antes que uma operação futura possa ser autorizada."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Compare o plano proposto com a linha de base atual e confirme cada consequência e etapa de recuperação."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Cada operação identifica origem, escopo, versão aplicável, estado de validação e o que ainda não foi provado."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Não deduza ganho garantido de uma recomendação. O benefício depende do hardware e da carga exatos."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "Somente operações compatíveis com a versão do Windows e o estado do dispositivo poderão ser elegíveis depois."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Mantenha snapshot e operação inversa visíveis antes da confirmação. Pare se algum estiver ausente."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "Esta fase renderiza apenas revisão e recibos sem alteração. A autoridade nativa pertence a uma fase posterior."
+        }
+      ],
+      "identifiers": ["PLAN-REVIEW", "NO-CHANGE-RECEIPT"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "restore-plan",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "restore-plan",
+        "section": "restoring"
+      },
+      "domain": "restoring",
+      "kind": "article",
+      "title": "Restore a plan",
+      "summary": "Return a reviewed plan to its last verified state using recorded recovery.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "under-validation",
+        "evidenceReferences": ["RECOVERY-LEDGER", "SNAPSHOT-ID"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Return a reviewed plan to its last verified state using the recorded recovery path."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Select the exact receipt, inspect its snapshot and inverse operations, and verify the target state matches."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Use immutable activity, snapshot identity, plan identifier, and post-restore verification."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "Restoring the wrong plan or an incompatible snapshot can create partial state. Never choose by title alone."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "Recovery is valid only for the device, application version, and operation set recorded by the original plan."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "If verification cannot establish the expected state, stop, preserve local evidence, and escalate."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "Plan and snapshot identifiers are exact bounded values; historical guidance cannot authorize a current action."
+        }
+      ],
+      "identifiers": ["RECOVERY-LEDGER", "SNAPSHOT-ID"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "restore-plan",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "restore-plan",
+        "section": "restoring"
+      },
+      "domain": "restoring",
+      "kind": "article",
+      "title": "Restaurar um plano",
+      "summary": "Retorne um plano revisado ao último estado verificado usando a recuperação registrada.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "under-validation",
+        "evidenceReferences": ["RECOVERY-LEDGER", "SNAPSHOT-ID"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Retorne um plano revisado ao último estado verificado usando o caminho de recuperação registrado."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Selecione o recibo exato, inspecione snapshot e operações inversas e verifique se o estado alvo corresponde."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Use atividade imutável, identidade do snapshot, identificador do plano e verificação após restauração."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Restaurar o plano errado ou snapshot incompatível pode criar estado parcial. Nunca escolha apenas pelo título."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "A recuperação é válida apenas para dispositivo, versão e operações registrados pelo plano original."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Se a verificação não estabelecer o estado esperado, pare, preserve a evidência local e escale."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "Identificadores são valores exatos e limitados; orientação histórica não autoriza ação atual."
+        }
+      ],
+      "identifiers": ["RECOVERY-LEDGER", "SNAPSHOT-ID"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "lb-err-0x80070005",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "lb-err-0x80070005",
+        "section": "troubleshooting"
+      },
+      "domain": "troubleshooting",
+      "kind": "troubleshooting",
+      "title": "Diagnose LB-ERR:0x80070005",
+      "summary": "Confirm the observed access-denied state before safe recovery or escalation.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["ACL-WIN32", "REDACTED-DIAGNOSTIC"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Diagnose an observed access-denied capture state without weakening Windows protections."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Confirm the exact error code and affected source in local activity, then close active capture before retrying safe verification."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "Match LB-ERR:0x80070005, ACL-WIN32, source identity, timestamp, and redacted diagnostic receipt."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "Do not bypass access controls or security software. This guide does not provide a generic system-mutation recipe."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "The state may occur on Windows 10 or Windows 11; source and permission boundaries can differ by build and policy."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "Return to the previous verified capture source. If the state remains, export the redacted receipt and escalate."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "The resolver indexes full error-code punctuation so the exact observed state remains distinguishable."
+        }
+      ],
+      "identifiers": ["ACL-WIN32", "REDACTED-DIAGNOSTIC"],
+      "errorCodes": ["LB-ERR:0x80070005"],
+      "supported": true,
+      "troubleshooting": {
+        "observedState": "Capture cannot read the selected source and local activity reports LB-ERR:0x80070005.",
+        "evidence": ["Confirm the exact code, source identity, timestamp, and redacted receipt."],
+        "safeSteps": [
+          "Close active capture.",
+          "Confirm the selected source still exists.",
+          "Retry read-only verification once."
+        ],
+        "recovery": [
+          "Return to the previous verified source.",
+          "Keep the failed receipt unchanged for comparison."
+        ],
+        "escalation": "Export the redacted diagnostic receipt and contact support when the observed state remains."
+      }
+    },
+    {
+      "key": "lb-err-0x80070005",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "lb-err-0x80070005",
+        "section": "troubleshooting"
+      },
+      "domain": "troubleshooting",
+      "kind": "troubleshooting",
+      "title": "Diagnosticar LB-ERR:0x80070005",
+      "summary": "Confirme o estado observado de acesso negado antes da recuperação segura ou escalonamento.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["ACL-WIN32", "REDACTED-DIAGNOSTIC"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Diagnostique um estado observado de acesso negado na captura sem enfraquecer proteções do Windows."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Confirme o código exato e a origem afetada na atividade local; depois feche a captura antes de repetir a verificação segura."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Corresponda LB-ERR:0x80070005, ACL-WIN32, identidade da origem, horário e recibo diagnóstico redigido."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Não contorne controles de acesso ou software de segurança. Este guia não oferece receita genérica de mutação."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "O estado pode ocorrer no Windows 10 ou Windows 11; origem e permissões variam por versão e política."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Retorne à origem de captura verificada anterior. Se o estado persistir, exporte o recibo redigido e escale."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "O resolvedor indexa a pontuação completa do código para manter o estado observado distinguível."
+        }
+      ],
+      "identifiers": ["ACL-WIN32", "REDACTED-DIAGNOSTIC"],
+      "errorCodes": ["LB-ERR:0x80070005"],
+      "supported": true,
+      "troubleshooting": {
+        "observedState": "A captura não consegue ler a origem selecionada e a atividade local informa LB-ERR:0x80070005.",
+        "evidence": ["Confirme código, identidade da origem, horário e recibo redigido exatos."],
+        "safeSteps": [
+          "Feche a captura ativa.",
+          "Confirme que a origem selecionada ainda existe.",
+          "Repita a verificação somente leitura uma vez."
+        ],
+        "recovery": [
+          "Retorne à origem verificada anterior.",
+          "Mantenha o recibo da falha inalterado para comparação."
+        ],
+        "escalation": "Exporte o recibo diagnóstico redigido e contate o suporte se o estado observado permanecer."
+      }
+    },
+    {
+      "key": "evidence-identifiers",
+      "identity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "evidence-identifiers",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "reference",
+      "title": "Evidence identifiers reference",
+      "summary": "Interpret technical identifiers attached to documentation and measurement evidence.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "none",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["EVIDENCE-SCHEMA", "CONTENT-ADMISSION"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Interpret technical identifiers attached to documentation and measurement evidence."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Match the identifier on the page with the local receipt before comparing scope or status."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "A reference identifies origin, scope, applicable version, validation state, and the unproven boundary."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "An identifier proves identity, not accuracy or applicability. Inspect provenance and compatibility."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "Syntax is shared across current Windows 10 and Windows 11 docs; individual collectors can be platform-specific."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "When an identifier is absent or mismatched, do not merge records; return to the originating receipt."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "Punctuation in hashes, versions, hardware IDs, and errors is preserved for exact search and one-axis overflow."
+        }
+      ],
+      "identifiers": ["EVIDENCE-SCHEMA", "CONTENT-ADMISSION", "SHA-256"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "evidence-identifiers",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "evidence-identifiers",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "reference",
+      "title": "Referência de identificadores de evidência",
+      "summary": "Interprete identificadores técnicos anexados à documentação e às evidências de medição.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "none",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "validated",
+        "evidenceReferences": ["EVIDENCE-SCHEMA", "CONTENT-ADMISSION"],
+        "releaseReferences": ["stable:current"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Interprete identificadores técnicos anexados à documentação e às evidências de medição."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Corresponda o identificador da página ao recibo local antes de comparar escopo ou estado."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "Uma referência identifica origem, escopo, versão aplicável, estado de validação e limite não provado."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Um identificador prova identidade, não precisão ou aplicabilidade. Inspecione proveniência e compatibilidade."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "A sintaxe é compartilhada pelo Windows 10 e Windows 11; coletores individuais podem ser específicos."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Quando um identificador estiver ausente ou divergente, não combine registros; retorne ao recibo de origem."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "Pontuação em hashes, versões, IDs de hardware e erros é preservada para pesquisa exata e rolagem em um eixo."
+        }
+      ],
+      "identifiers": ["EVIDENCE-SCHEMA", "CONTENT-ADMISSION", "SHA-256"],
+      "errorCodes": [],
+      "supported": true
+    },
+    {
+      "key": "legacy-capture",
+      "identity": {
+        "locale": "en",
+        "version": "1.0.0",
+        "channel": "beta",
+        "slug": "legacy-capture",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "article",
+      "title": "Historical beta capture",
+      "summary": "Retained unsupported capture guidance with an explicit current alternative.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "unsupported",
+        "evidenceReferences": ["HISTORY-1.0.0", "D-30"],
+        "releaseReferences": ["beta:1.0.0"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Purpose",
+          "body": "Explain a historical beta capture record without presenting it as current guidance."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Next action",
+          "body": "Read the persistent unsupported notice, then open the explicit current canonical alternative before acting."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidence",
+          "body": "The page retains its historical version, beta channel, review owner, and release reference."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Risks",
+          "body": "This workflow is unsupported and cannot support a present-tense action."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibility",
+          "body": "The record remains available for Windows 10 and Windows 11 audit context only."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recovery",
+          "body": "Use Measure a baseline for current guidance. The historical URL remains unchanged."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Technical detail",
+          "body": "Historical resolution returns a stale result and canonical identity instead of redirecting or replacing content."
+        }
+      ],
+      "identifiers": ["HISTORY-1.0.0", "BETA-CAPTURE"],
+      "errorCodes": [],
+      "supported": false,
+      "canonicalIdentity": {
+        "locale": "en",
+        "version": "current",
+        "channel": "stable",
+        "slug": "measure-baseline",
+        "section": "measuring"
+      }
+    },
+    {
+      "key": "legacy-capture",
+      "identity": {
+        "locale": "pt-BR",
+        "version": "1.0.0",
+        "channel": "beta",
+        "slug": "legacy-capture",
+        "section": "measuring"
+      },
+      "domain": "measuring",
+      "kind": "article",
+      "title": "Captura beta histórica",
+      "summary": "Orientação de captura não compatível preservada com alternativa atual explícita.",
+      "platform": ["windows-10", "windows-11"],
+      "risk": "high",
+      "metadata": {
+        "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+        "owner": "docs-content",
+        "validationState": "unsupported",
+        "evidenceReferences": ["HISTORY-1.0.0", "D-30"],
+        "releaseReferences": ["beta:1.0.0"]
+      },
+      "sections": [
+        {
+          "id": "purpose",
+          "kind": "purpose",
+          "heading": "Propósito",
+          "body": "Explique um registro histórico de captura beta sem apresentá-lo como orientação atual."
+        },
+        {
+          "id": "next-action",
+          "kind": "next-action",
+          "heading": "Próxima ação",
+          "body": "Leia o aviso persistente e abra a alternativa canônica atual explícita antes de agir."
+        },
+        {
+          "id": "evidence",
+          "kind": "evidence",
+          "heading": "Evidências",
+          "body": "A página preserva versão histórica, canal beta, responsável e referência de lançamento."
+        },
+        {
+          "id": "risks",
+          "kind": "risks",
+          "heading": "Riscos",
+          "body": "Este fluxo não é compatível e não pode sustentar uma ação no presente."
+        },
+        {
+          "id": "compatibility",
+          "kind": "compatibility",
+          "heading": "Compatibilidade",
+          "body": "O registro permanece disponível apenas como contexto de auditoria no Windows 10 e Windows 11."
+        },
+        {
+          "id": "recovery",
+          "kind": "recovery",
+          "heading": "Recuperação",
+          "body": "Use Medir uma linha de base para orientação atual. A URL histórica não muda."
+        },
+        {
+          "id": "technical-detail",
+          "kind": "technical-detail",
+          "heading": "Detalhe técnico",
+          "body": "A resolução histórica retorna resultado obsoleto e identidade canônica sem redirecionar ou substituir conteúdo."
+        }
+      ],
+      "identifiers": ["HISTORY-1.0.0", "BETA-CAPTURE"],
+      "errorCodes": [],
+      "supported": false,
+      "canonicalIdentity": {
+        "locale": "pt-BR",
+        "version": "current",
+        "channel": "stable",
+        "slug": "measure-baseline",
+        "section": "measuring"
+      }
+    }
+  ]
+}
