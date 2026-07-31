@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-25-PLAN.md
-last_updated: "2026-07-31T10:56:44.175Z"
+stopped_at: Completed 03-29-PLAN.md
+last_updated: "2026-07-31T11:18:15.103Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-27-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 86
+  completed_plans: 87
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 29 of 32
+Plan: 30 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-27-PLAN.md
 
@@ -134,6 +134,7 @@ _Updated after plan completion_
 | Phase 03 P27 | 15min | 2 tasks | 5 files |
 | Phase 03 P28 | 14min | 2 tasks | 5 files |
 | Phase 03 P25 | 1h12m | 2 tasks | 16 files |
+| Phase 03 P29 | 18min | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -362,6 +363,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep every Phase 3 release decision blocked until a generated record carries explicit public approval and an official artifact.
 - [Phase 03]: Keep release admission and canonical route resolution on the server while exporting only localized presentational components through the client boundary.
 - [Phase 03]: Treat demonstrative manifest values as explanatory evidence outside the official trust path, never as installer provenance.
+- [Phase 03]: Keep generated ScreenshotProvenance sidecars exact and place extended capture evidence in the manifest.
+- [Phase 03]: Capture only the production-built desktop preview at fixed loopback with frozen S01 and full-frame 1440x900 output.
+- [Phase 03]: Hash every relevant desktop source, locale, style, font, scenario, package, and lock input to invalidate stale captures.
 
 ### Pending Todos
 
@@ -403,6 +407,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T10:56:44.169Z
-Stopped at: Completed 03-25-PLAN.md
+Last session: 2026-07-31T11:18:15.096Z
+Stopped at: Completed 03-29-PLAN.md
 Resume file: None
