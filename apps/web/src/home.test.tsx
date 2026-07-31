@@ -15,6 +15,9 @@ import {
 
 const temporaryDirectories: string[] = [];
 
+const readSource = (path: string) =>
+  import('node:fs/promises').then(({ readFile }) => readFile(new URL(path, import.meta.url), 'utf8'));
+
 const createCaptureDirectory = async (
   locale: HomeLocale,
   overrides: Readonly<Record<string, unknown>> = {},
@@ -62,7 +65,7 @@ afterEach(async () => {
 });
 
 describe('Home layout and screenshot evidence gate', () => {
-  it('keeps copy, compatibility action, and trust boundary before admitted real media', async () => {
+  it('makes the admitted desktop artifact dominant without hiding the next action', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
@@ -71,24 +74,38 @@ describe('Home layout and screenshot evidence gate', () => {
     const props = home.props as Readonly<Record<string, ReactNode>>;
     expect(props['data-capture-state']).toBe('CAPTURE_ADMITTED');
 
-    const sharedSource = await import('node:fs/promises').then(({ readFile }) =>
-      readFile(
-        new URL('../../../packages/web-features/src/components.tsx', import.meta.url),
-        'utf8',
-      ),
-    );
-    const copyPosition = sharedSource.indexOf('className="lb-web-command-copy"');
-    const actionPosition = sharedSource.indexOf('{cta}', copyPosition);
-    const boundaryPosition = sharedSource.indexOf('{boundary}', actionPosition);
-    const mediaPosition = sharedSource.indexOf(
-      'className="lb-web-command-artifact"',
-      boundaryPosition,
-    );
+    const [styles, sharedSource] = await Promise.all([
+      readSource('./styles/public.css'),
+      readSource('../../../packages/web-features/src/components.tsx'),
+    ]);
 
-    expect(copyPosition).toBeGreaterThanOrEqual(0);
-    expect(actionPosition).toBeGreaterThan(copyPosition);
-    expect(boundaryPosition).toBeGreaterThan(actionPosition);
-    expect(mediaPosition).toBeGreaterThan(boundaryPosition);
+    expect(styles).toContain('grid-template-columns: minmax(0, 5fr) minmax(0, 7fr)');
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.public-home \.lb-web-command-artifact\s*\{[\s\S]*order: -1/u,
+    );
+    expect(sharedSource).toContain('className="lb-web-command-action"');
+  });
+
+  it('keeps one trust statement and progressively discloses localized capture metadata', async () => {
+    const [homeSource, sharedSource] = await Promise.all([
+      readSource('./features/home.tsx'),
+      readSource('../../../packages/web-features/src/components.tsx'),
+    ]);
+
+    expect(homeSource.match(/className="home-trust-boundary"/gu)).toHaveLength(1);
+    expect(sharedSource).toContain('className="lb-web-product-provenance"');
+    expect(sharedSource.indexOf('className="lb-web-product-provenance"')).toBeLessThan(
+      sharedSource.indexOf('detail={provenance}'),
+    );
+  });
+
+  it('uses the canonical public type and spacing scale instead of oversized hero values', async () => {
+    const styles = await readSource('./styles/public.css');
+    const homeStyles = styles.slice(0, styles.indexOf('.public-catalog'));
+
+    expect(homeStyles).not.toMatch(/font-size:\s*clamp\(/u);
+    expect(homeStyles).not.toMatch(/(?:gap|padding[^:]*):[^;]*(?:80|88|96|112|144)px/u);
+    expect(homeStyles).toContain('font-size: var(--lb-text-display-size)');
   });
 
   it('admits only an approved executable capture with a matching image checksum', async () => {

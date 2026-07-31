@@ -87,6 +87,13 @@ describe('Home content contract', () => {
     expect(homeEn.availability).toBe('under-validation');
   });
 
+  it('localizes capture provenance as an on-demand visitor disclosure', () => {
+    expect(homePtBr.productStage.provenanceSummary).toBe('Detalhes da captura real');
+    expect(homeEn.productStage.provenanceSummary).toBe('Real capture details');
+    expect(homePtBr.productStage.provenanceLabel).toContain('cenário, viewport e commit');
+    expect(homeEn.productStage.provenanceLabel).toContain('scenario, viewport, and commit');
+  });
+
   it('validates every evidence-bearing document and names every unproven boundary', () => {
     for (const record of [homePtBr, homeEn]) {
       const result = validateWebDocument(record.document);
