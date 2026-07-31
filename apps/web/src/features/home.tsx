@@ -50,6 +50,8 @@ type HomeProductStage = Readonly<{
   assetId: string;
   expectedPath: string;
   fullScreenshotLabel: string;
+  provenanceLabel: string;
+  provenanceSummary: string;
   scenarioId: string;
   sidecarPath: string;
   unavailableBody: string;
@@ -304,7 +306,10 @@ const ProductStageGate = ({
         completeScreenshotHref={admission.href}
         completeScreenshotLabel={content.productStage.fullScreenshotLabel}
         height={admission.height}
+        locale={locale}
         provenance={admission.provenance}
+        provenanceLabel={content.productStage.provenanceLabel}
+        provenanceSummary={content.productStage.provenanceSummary}
         src={admission.src}
         width={admission.width}
       />
@@ -382,8 +387,8 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
           <p>{locale === 'pt-BR' ? 'Prepare · Prove · Restaure' : 'Prepare · Prove · Restore'}</p>
           <h2 id="home-method-title">
             {locale === 'pt-BR'
-              ? 'Uma sequência de decisões, não uma parede de promessas'
-              : 'A sequence of decisions, not a wall of promises'}
+              ? 'Preparação, evidência e recuperação em uma única sequência'
+              : 'Preparation, evidence, and recovery in one sequence'}
           </h2>
           <p>{content.body}</p>
         </header>

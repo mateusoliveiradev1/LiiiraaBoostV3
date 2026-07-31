@@ -129,8 +129,8 @@
       "routeId": "public-evidence"
     },
     "trustBoundary": {
-      "title": "The boundary comes before the promise",
-      "body": "No gain is assumed. Final compatibility depends on observed hardware, and no publicly trusted installer is available now."
+      "title": "What this capture proves",
+      "body": "The interface shown is a real, approved product capture. Its data and operations are deterministic scenarios; gains and compatibility depend on observed hardware."
     }
   },
   "chapters": [
@@ -190,6 +190,8 @@
     "scenarioId": "S01",
     "alt": "Real Liiiraa Boost desktop application Home screen in English.",
     "fullScreenshotLabel": "View complete screenshot",
+    "provenanceSummary": "Real capture details",
+    "provenanceLabel": "Review the scenario, viewport, and commit for this approved capture.",
     "unavailableTitle": "Real product capture is not admitted yet",
     "unavailableBody": "This stage accepts only a capture from the executable desktop application with an approved sidecar and matching checksum. No mockup or visual substitute will be shown."
   },

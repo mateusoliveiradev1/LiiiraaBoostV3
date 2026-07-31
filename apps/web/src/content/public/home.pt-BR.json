@@ -129,8 +129,8 @@
       "routeId": "public-evidence"
     },
     "trustBoundary": {
-      "title": "O limite vem antes da promessa",
-      "body": "Nenhum ganho é presumido. A compatibilidade final depende do hardware observado, e nenhum instalador com confiança pública está disponível agora."
+      "title": "O que esta captura comprova",
+      "body": "A interface exibida é uma captura real e aprovada do produto. Dados e operações nela são cenários determinísticos; ganhos e compatibilidade dependem do hardware observado."
     }
   },
   "chapters": [
@@ -190,6 +190,8 @@
     "scenarioId": "S01",
     "alt": "Tela inicial real do aplicativo desktop Liiiraa Boost em português do Brasil.",
     "fullScreenshotLabel": "Ver captura completa",
+    "provenanceSummary": "Detalhes da captura real",
+    "provenanceLabel": "Consulte cenário, viewport e commit de origem desta captura aprovada.",
     "unavailableTitle": "Captura real do produto ainda não admitida",
     "unavailableBody": "Esta área aceita somente uma captura do aplicativo desktop executável com sidecar aprovado e checksum correspondente. Nenhum mockup ou substituto visual será exibido."
   },

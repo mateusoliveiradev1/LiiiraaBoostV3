@@ -127,7 +127,7 @@ const tokenViolations = (
   return violations;
 };
 
-const KNOWN_TOKEN_MIGRATION_DEBT = Object.freeze([
+const TOKEN_MIGRATION_LEDGER = Object.freeze([
   {
     owner: 'plan-03-38',
     property: 'padding-block-start',
@@ -367,6 +367,11 @@ const KNOWN_TOKEN_MIGRATION_DEBT = Object.freeze([
     value: '172px',
   },
 ] as const);
+
+// Resolved entries remain immutable audit history; only unresolved owners are admitted by the gate.
+const KNOWN_TOKEN_MIGRATION_DEBT = Object.freeze(
+  TOKEN_MIGRATION_LEDGER.filter(({ owner }) => owner !== 'plan-03-38'),
+);
 
 const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>
   element.props as Readonly<Record<string, unknown>>;

@@ -6,7 +6,6 @@ import {
   LbIconButton,
   LbLink,
   LbMenu,
-  ProductLockup,
   LbSearchField,
   LbSelect,
   LbSheet,
@@ -21,7 +20,6 @@ export {
   LbIconButton,
   LbLink,
   LbMenu,
-  ProductLockup,
   LbSearchField,
   LbSelect,
   LbTabs,
@@ -499,8 +497,11 @@ export interface RealProductStageProps {
   readonly completeScreenshotHref: string;
   readonly completeScreenshotLabel?: string;
   readonly height: number;
+  readonly locale?: WebLocale;
   readonly loading?: 'eager' | 'lazy';
   readonly provenance: string;
+  readonly provenanceLabel: string;
+  readonly provenanceSummary: string;
   readonly src: string;
   readonly width: number;
 }
@@ -510,15 +511,22 @@ export const RealProductStage = ({
   completeScreenshotHref,
   completeScreenshotLabel = 'View complete screenshot',
   height,
+  locale = 'en',
   loading = 'eager',
   provenance,
+  provenanceLabel,
+  provenanceSummary,
   src,
   width,
 }: RealProductStageProps) => (
   <figure className="lb-web-product-stage">
     <img alt={alt} decoding="async" height={height} loading={loading} src={src} width={width} />
     <figcaption>
-      <ProvenanceLabel detail={provenance} kind="measured" />
+      <details className="lb-web-product-provenance">
+        <summary>{provenanceSummary}</summary>
+        <p>{provenanceLabel}</p>
+        <ProvenanceLabel detail={provenance} kind="measured" locale={locale} />
+      </details>
       <LbLink href={completeScreenshotHref}>{completeScreenshotLabel}</LbLink>
     </figcaption>
   </figure>

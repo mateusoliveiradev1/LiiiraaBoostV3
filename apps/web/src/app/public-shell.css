@@ -5,7 +5,7 @@
 html {
   min-inline-size: 320px;
   background: var(--lb-surface-canvas);
-  scroll-padding-block-start: 80px;
+  scroll-padding-block-start: var(--lb-space-7);
 }
 
 body {
@@ -110,7 +110,7 @@ summary:focus-visible,
 .public-navigation a,
 .public-mobile-menu__actions a {
   min-block-size: 44px;
-  padding: 11px var(--lb-space-2);
+  padding: var(--lb-space-2);
   color: var(--lb-text-secondary);
   font-size: var(--lb-text-label-size);
   font-weight: var(--lb-weight-semibold);
@@ -160,7 +160,7 @@ summary:focus-visible,
 
 main {
   min-block-size: calc(100vh - 260px);
-  scroll-margin-block-start: 80px;
+  scroll-margin-block-start: var(--lb-space-7);
 }
 
 .public-footer {
@@ -188,7 +188,7 @@ main {
 .public-footer nav a,
 .public-account-link {
   min-block-size: 44px;
-  padding-block: 10px;
+  padding-block: var(--lb-space-2);
   color: var(--lb-text-secondary);
 }
 
@@ -223,7 +223,7 @@ main {
 
 .public-not-found__identity > span {
   color: var(--lb-text-primary);
-  font-size: 64px;
+  font-size: var(--lb-text-display-size);
   font-weight: var(--lb-weight-semibold);
   line-height: 1;
 }
@@ -237,8 +237,8 @@ main {
 
 .public-not-found__content h1 {
   margin: 0;
-  font-size: clamp(32px, 5vw, 56px);
-  line-height: 1.08;
+  font-size: var(--lb-text-display-size);
+  line-height: var(--lb-text-display-line);
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
@@ -295,7 +295,7 @@ main {
 
 @media (width < 960px) {
   html {
-    scroll-padding-block-start: 72px;
+    scroll-padding-block-start: var(--lb-space-7);
   }
 
   .public-header__bar {
@@ -394,7 +394,7 @@ main {
   }
 
   .public-not-found__identity > span {
-    font-size: 48px;
+    font-size: var(--lb-text-display-size);
   }
 }
 
@@ -434,5 +434,4 @@ main {
     color: ButtonText;
     background: ButtonFace;
   }
-
 }

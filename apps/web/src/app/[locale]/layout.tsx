@@ -6,7 +6,8 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ProductLockup } from '@liiiraa/web-features/components';
+
+import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
 
 import {
   accountBoundaryHref,

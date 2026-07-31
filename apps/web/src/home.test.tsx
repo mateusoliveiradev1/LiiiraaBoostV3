@@ -16,7 +16,9 @@ import {
 const temporaryDirectories: string[] = [];
 
 const readSource = (path: string) =>
-  import('node:fs/promises').then(({ readFile }) => readFile(new URL(path, import.meta.url), 'utf8'));
+  import('node:fs/promises').then(({ readFile }) =>
+    readFile(new URL(path, import.meta.url), 'utf8'),
+  );
 
 const createCaptureDirectory = async (
   locale: HomeLocale,
