@@ -28,7 +28,8 @@ import {
   LbDialogContent,
   LbIconButton,
 } from './primitives.tsx';
-import { GoalRail, RouteHeader } from './shell.tsx';
+import { ProductLockup } from './product-lockup.tsx';
+import { GoalRail, RouteHeader, WindowTitleBar } from './shell.tsx';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
@@ -165,6 +166,50 @@ describe('state, provenance, and locale projections', () => {
       expect(markup).toContain(title);
       expect(markup).toContain(purpose);
     }
+  });
+});
+
+describe('approved product identity', () => {
+  it('renders the approved mark paths and wordmark with an accessible product name', () => {
+    const markup = renderToStaticMarkup(<ProductLockup />);
+
+    expect(markup).toContain('aria-label="Liiiraa Boost"');
+    expect(markup).toContain('class="lb-product-mark"');
+    expect(markup).toContain('class="lb-product-mark-primary"');
+    expect(markup).toContain('d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z"');
+    expect(markup).toContain('class="lb-product-mark-accent"');
+    expect(markup).toContain('d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z"');
+    expect(markup).toContain('class="lb-product-wordmark"');
+    expect(markup).toContain('<span>Liiiraa</span><span>Boost</span>');
+  });
+
+  it('preserves approved geometry in compact and full variants without letter-box branding', () => {
+    for (const variant of ['compact', 'full'] as const) {
+      const markup = renderToStaticMarkup(<ProductLockup variant={variant} />);
+
+      expect(markup).toContain(`data-variant="${variant}"`);
+      expect(markup).toContain('viewBox="0 0 36 28"');
+      expect(markup).not.toMatch(/class="[^"]*(?:letter|monogram|initial)[^"]*"/iu);
+    }
+
+    expect(renderToStaticMarkup(<ProductLockup variant="compact" />)).not.toContain(
+      'class="lb-product-wordmark"',
+    );
+    expect(renderToStaticMarkup(<ProductLockup variant="full" />)).toContain(
+      'class="lb-product-wordmark"',
+    );
+  });
+
+  it('keeps WindowTitleBar named and wired to the shared ProductLockup', () => {
+    const markup = renderToStaticMarkup(
+      <WindowTitleBar globalStatus="Ready" locale="pt-BR" productName="Liiiraa Boost" />,
+    );
+
+    expect(markup).toContain('aria-label="Barra de título do aplicativo"');
+    expect(markup).toContain('data-tauri-drag-region="true"');
+    expect(markup).toContain('data-variant="full"');
+    expect(markup).toContain('aria-label="Liiiraa Boost"');
+    expect(markup).toContain('Ready');
   });
 });
 
