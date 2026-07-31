@@ -60,6 +60,10 @@ describe('account errors', () => {
       new URL('./app/[locale]/error.tsx', import.meta.url),
       'utf8',
     );
+    const notFoundRouteSource = readFileSync(
+      new URL('./app/[locale]/errors/404/page.tsx', import.meta.url),
+      'utf8',
+    );
 
     expect(portuguese.destinations.overview).toBe('/pt-BR/account');
     expect(portuguese.destinations.support).toBe('/pt-BR/account/support');
@@ -71,5 +75,7 @@ describe('account errors', () => {
     expect(errorSource).toContain('onClick={reset}');
     expect(errorSource).not.toMatch(/error\.(message|stack|name)/u);
     expect(errorSource).not.toMatch(/redirect\(|window\.location|http-equiv=.refresh/iu);
+    expect(notFoundRouteSource).toContain('notFound()');
+    expect(notFoundRouteSource).not.toMatch(/redirect\(/u);
   });
 });

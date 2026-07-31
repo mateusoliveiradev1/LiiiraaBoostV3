@@ -1,7 +1,6 @@
 import '@liiiraa/design-tokens/tokens.css';
 import '../account-shell.css';
 
-import { ProvenanceMark } from '@liiiraa/design-system';
 import {
   projectNavigation,
   routeHref,
@@ -15,6 +14,7 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
 
 type AccountLocaleLayoutProps = Readonly<{
@@ -169,7 +169,7 @@ export default async function AccountLocaleLayout({
           className="account-preview-rail"
           data-authority="disconnected"
         >
-          <ProvenanceMark detail={copy.previewLabel} kind="fixture" locale={locale} />
+          <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
           <strong>{copy.previewLabel}</strong>
           <p>{copy.preview}</p>
         </aside>

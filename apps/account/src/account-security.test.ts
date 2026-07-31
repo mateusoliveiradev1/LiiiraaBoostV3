@@ -5,6 +5,7 @@ import accountProxy, {
   accountHeaderContract,
   createRequestNonce,
 } from '../proxy';
+import accountRuntimeProxy from './proxy';
 
 describe('account security boundary', () => {
   it('creates a fresh cryptographically random nonce for every request', () => {
@@ -80,5 +81,6 @@ describe('account security boundary', () => {
     expect(first.headers.get('set-cookie')).toBeNull();
     expect(first.headers.get('location')).toBeNull();
     expect(first.status).toBe(200);
+    expect(accountRuntimeProxy).toBe(accountProxy);
   });
 });
