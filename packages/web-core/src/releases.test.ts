@@ -34,7 +34,6 @@ const futureManifest = {
   provenance: 'public-trust-production',
   publicDistributionApproved: true,
   artifactAvailable: true,
-  downloadUri: 'https://download.liiiraa.com/artifacts/future-public-artifact',
 } as const satisfies ReleaseManifestEvidence;
 
 const futureArtifact = {
@@ -62,9 +61,7 @@ describe('fail-closed release decision', () => {
       requested: 'beta',
       reason: 'beta-opt-in-required',
     });
-    expect(
-      selectReleaseChannel({ requested: 'beta', betaOptIn: true }),
-    ).toMatchObject({
+    expect(selectReleaseChannel({ requested: 'beta', betaOptIn: true })).toMatchObject({
       status: 'selected',
       channel: 'beta',
       policy: {
@@ -124,36 +121,28 @@ describe('fail-closed release decision', () => {
     ['provenance', { provenance: 'unknown' }],
     ['publicDistributionApproved', { publicDistributionApproved: false }],
     ['artifactAvailable', { artifactAvailable: false }],
-    ['downloadUri', { downloadUri: 'https://mirror.invalid/setup.exe' }],
-  ] as const)(
-    'blocks a %s disagreement without disclosing compared values',
-    (field, mutation) => {
-      const result = verifyReleaseIntegrity(futureManifest, {
-        ...futureArtifact,
-        ...mutation,
-      } as InspectedReleaseArtifact);
+  ] as const)('blocks a %s disagreement without disclosing compared values', (field, mutation) => {
+    const result = verifyReleaseIntegrity(futureManifest, {
+      ...futureArtifact,
+      ...mutation,
+    } as InspectedReleaseArtifact);
 
-      expect(result.ok).toBe(false);
-      if (result.ok) return;
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
 
-      expect(result.disagreements.map((item) => item.field)).toContain(field);
-      expect(JSON.stringify(result)).not.toContain('Unknown Publisher');
-      expect(JSON.stringify(result)).not.toContain('mirror.invalid');
-      expect(
-        result.disagreements.every(
-          (item) =>
-            item.manifestValueClass.length > 0 &&
-            item.artifactValueClass.length > 0,
-        ),
-      ).toBe(true);
-    },
-  );
+    expect(result.disagreements.map((item) => item.field)).toContain(field);
+    expect(JSON.stringify(result)).not.toContain('Unknown Publisher');
+    expect(
+      result.disagreements.every(
+        (item) => item.manifestValueClass.length > 0 && item.artifactValueClass.length > 0,
+      ),
+    ).toBe(true);
+  });
 
   it.each([
     {
       artifactName: 'Liiiraa Boost_0.0.0_x64-setup.exe',
-      sourcePath:
-        'target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe',
+      sourcePath: 'target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe',
       trustClass: 'self-signed-development',
     },
     {
@@ -166,25 +155,43 @@ describe('fail-closed release decision', () => {
       sourcePath: 'ci/output/future-public-artifact',
       trustClass: 'ci',
     },
-  ] as const)(
-    'hard-rejects Phase 2 and development artifact identities',
-    (developmentIdentity) => {
-      const result = verifyReleaseIntegrity(futureManifest, {
-        ...futureArtifact,
-        ...developmentIdentity,
-      });
+  ] as const)('hard-rejects Phase 2 and development artifact identities', (developmentIdentity) => {
+    const result = verifyReleaseIntegrity(futureManifest, {
+      ...futureArtifact,
+      ...developmentIdentity,
+    });
 
-      expect(result).toMatchObject({
-        ok: false,
-        classification: 'development-artifact',
-      });
-    },
-  );
+    expect(result).toMatchObject({
+      ok: false,
+      classification: 'development-artifact',
+    });
+  });
+
+  it.each([
+    ...Object.keys(futureManifest).flatMap((field) => [
+      { side: 'manifest' as const, field },
+      { side: 'artifact' as const, field },
+    ]),
+    ...['artifactName', 'sourcePath', 'trustClass'].map((field) => ({
+      side: 'artifact' as const,
+      field,
+    })),
+  ])('blocks absent $side evidence field $field', ({ side, field }) => {
+    const manifest = { ...futureManifest } as Record<string, unknown>;
+    const artifact = { ...futureArtifact } as Record<string, unknown>;
+    delete (side === 'manifest' ? manifest : artifact)[field];
+
+    expect(
+      verifyReleaseIntegrity(
+        manifest as unknown as ReleaseManifestEvidence,
+        artifact as unknown as InspectedReleaseArtifact,
+      ).ok,
+    ).toBe(false);
+  });
 
   it('keeps the published Phase 3 record blocked for distribution approval', () => {
     const decision = decideDownload({
       record: publishedReleaseRecord,
-      channelSelection: selectReleaseChannel(),
       historyState: 'current',
     });
 
@@ -229,7 +236,6 @@ describe('fail-closed release decision', () => {
       expect(
         decideDownload({
           record,
-          channelSelection: selectReleaseChannel(),
           historyState: 'current',
           manifest: futureManifest,
           artifact: futureArtifact,
@@ -245,7 +251,6 @@ describe('fail-closed release decision', () => {
     for (const historyState of ['unsafe', 'unavailable'] as const) {
       const decision = decideDownload({
         record: publishedReleaseRecord,
-        channelSelection: selectReleaseChannel(),
         historyState,
       });
 
@@ -271,7 +276,6 @@ describe('fail-closed release decision', () => {
         publicDistributionApproved: true,
         officialArtifact: 'available',
       },
-      channelSelection: selectReleaseChannel(),
       historyState: 'current',
       manifest: futureManifest,
       artifact: futureArtifact,
@@ -280,6 +284,28 @@ describe('fail-closed release decision', () => {
     expect(currentContractDecision).toMatchObject({
       status: 'blocked',
       reason: 'record-invalid',
+    });
+  });
+
+  it('does not accept beta or experimental selection without direct consent input', () => {
+    expect(
+      decideDownload({
+        record: { ...publishedReleaseRecord, channel: 'beta' },
+        historyState: 'current',
+      }),
+    ).toMatchObject({
+      status: 'blocked',
+      reason: 'channel-selection-blocked',
+    });
+
+    expect(
+      decideDownload({
+        record: { ...publishedReleaseRecord, channel: 'experimental' },
+        historyState: 'current',
+      }),
+    ).toMatchObject({
+      status: 'blocked',
+      reason: 'channel-selection-blocked',
     });
   });
 });

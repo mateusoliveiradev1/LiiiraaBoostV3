@@ -85,6 +85,25 @@ export {
   resolveDocument,
   searchDocumentation,
 } from './documentation.js';
+export { decideDownload, selectReleaseChannel, verifyReleaseIntegrity } from './releases.js';
+export type {
+  DownloadBlockedReason,
+  DownloadDecision,
+  DownloadDecisionInput,
+  ExperimentalChannelAcknowledgement,
+  HistoricalReleaseState,
+  InspectedReleaseArtifact,
+  IntegrityDisagreement,
+  IntegrityField,
+  IntegrityValueClass,
+  PublicReleaseChannel,
+  ReleaseChannelRequest,
+  ReleaseChannelSelection,
+  ReleaseIntegrityResult,
+  ReleaseManifestEvidence,
+  ReleaseProvenance,
+  VerificationStep,
+} from './releases.js';
 export type {
   CurrentDocumentResolution,
   DesktopDocumentationIntent,
