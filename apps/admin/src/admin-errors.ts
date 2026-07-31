@@ -63,8 +63,7 @@ const COPY = Object.freeze({
     '410': Object.freeze({
       action: 'Return to role workspace',
       affected: 'This reference is historical and no longer accepts operations.',
-      detail:
-        'The historical context remains preserved without restoring an ended responsibility.',
+      detail: 'The historical context remains preserved without restoring an ended responsibility.',
       safeState:
         'No authority was connected, no operational data was exposed, and no remote action ran.',
       title: 'The administrative reference is no longer available',

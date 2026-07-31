@@ -39,9 +39,7 @@ export const isAdminPreviewRoute = (routeId: WebRouteId): routeId is AdminPrevie
 export const isAdminErrorRoute = (routeId: WebRouteId): routeId is AdminErrorRoute =>
   ADMIN_ERROR_ROUTE_IDS.includes(routeId as AdminErrorRoute);
 
-export const adminFailureKindForRoute = (
-  routeId: WebRouteId,
-): AdminFailureKind | undefined =>
+export const adminFailureKindForRoute = (routeId: WebRouteId): AdminFailureKind | undefined =>
   isAdminErrorRoute(routeId) ? ADMIN_FAILURE_KIND_BY_ROUTE[routeId] : undefined;
 
 export const ADMIN_ROLE_ROUTE_ACCESS = Object.freeze({
