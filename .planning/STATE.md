@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-07-31T03:03:02.745Z"
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-07-31T03:11:30.315Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 66
+  completed_plans: 67
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 9 of 32
+Plan: 10 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -114,6 +114,7 @@ _Updated after plan completion_
 | Phase 03 P09 | 18min | 1 tasks | 8 files |
 | Phase 03 P06 | 3min | 1 tasks | 4 files |
 | Phase 03 P07 | 3min | 1 tasks | 4 files |
+| Phase 03 P08 | 4min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -278,6 +279,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Declare AVIF/WebP with an empty remote image allowlist. — Avoids trusting any speculative third-party image origin.
 - [Phase 03]: Keep scaffold tests dependency-neutral until Plan 03-11 materializes dependencies. — Satisfies terminating lifecycle contracts without broadening the approved package scope.
 - [Phase 03]: Use an account-preview build ID prefix for the isolated account fixture application. — Keeps standalone account artifacts distinct from public and admin builds before Phase 4 authority.
+- [Phase 03]: Keep admin preview authority and ordinary navigation disconnected — The admin application remains fixture-classified with authorityConnected and ordinaryNavigationLinked literal false until privileged authority is explicitly implemented.
+- [Phase 03]: Use a distinct admin-preview build identity — The standalone admin artifact cannot be confused with public or account builds.
+- [Phase 03]: Defer installed admin lifecycle checks to Plan 03-11 — Plan 03-11 owns dependency resolution and executable Next.js lifecycle verification.
 
 ### Pending Todos
 
@@ -319,6 +323,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T03:03:02.735Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-07-31T03:11:30.309Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
