@@ -10,6 +10,7 @@ import {
 import { getWebScenario } from './scenarios.js';
 
 const accountScenario = getWebScenario('W13');
+const adminScenario = getWebScenario('W14');
 
 const commandFor = (
   family: FutureAuthorityActionFamily,
@@ -35,10 +36,13 @@ const createAdapter = (
 
 describe('no-change authority', () => {
   it('returns a schema-valid deterministic no-change receipt for every action family', async () => {
-    const authority = createAdapter();
-
     for (const family of FUTURE_AUTHORITY_ACTION_FAMILIES) {
       const surface = family === 'admin' ? 'admin' : 'account';
+      const authority = createWebPreviewAuthority({
+        scenario: family === 'admin' ? adminScenario : accountScenario,
+        clock: () => accountScenario.clock,
+        correlationIds: [`correlation-${family}`],
+      });
       const result = await authority.execute({
         command: commandFor(family, surface),
         disposition: 'confirm',
@@ -62,7 +66,7 @@ describe('no-change authority', () => {
         provenance: {
           kind: 'fixture',
           value: 'SIMULATED SCENARIO',
-          scenarioId: 'W13',
+          scenarioId: family === 'admin' ? 'W14' : 'W13',
         },
       });
       expect(Object.isFrozen(result)).toBe(true);
