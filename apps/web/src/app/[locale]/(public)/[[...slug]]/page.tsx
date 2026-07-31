@@ -9,6 +9,7 @@ import {
   type CatalogSearchParameters,
 } from '../../../../features/public-catalog';
 import { CommandRunwayHome, getHomeContent } from '../../../../features/home';
+import { ForbiddenState, GoneState, ServerFailureState } from '../../../../features/public-failure';
 import { routing } from '../../../../public-boundary';
 import '../../../../styles/public.css';
 
@@ -33,6 +34,9 @@ const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-privacy-policy',
   'public-terms',
   'public-responsible-disclosure',
+  'public-error-403',
+  'public-error-410',
+  'public-error-500',
 ]);
 
 const resolvePublicCatalogRoute = (
@@ -100,6 +104,18 @@ export default async function PublicCatchAllPage({
 
   if (resolution.routeId === 'public-home') {
     return <CommandRunwayHome locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-error-403') {
+    return <ForbiddenState locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-error-410') {
+    return <GoneState locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-error-500') {
+    return <ServerFailureState locale={resolution.locale} />;
   }
 
   return (

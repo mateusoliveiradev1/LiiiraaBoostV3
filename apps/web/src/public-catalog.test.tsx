@@ -1,6 +1,6 @@
 import { isValidElement } from 'react';
 import { describe, expect, it } from 'vitest';
-import type { WebRouteId } from '@liiiraa/web-core';
+import { matchWebRoute, type WebRouteId } from '@liiiraa/web-core';
 
 import {
   getPublicCatalog,
@@ -18,6 +18,19 @@ const CATALOG_ROUTES = [
 ] as const satisfies readonly WebRouteId[];
 
 describe('public catalog content', () => {
+  it('resolves every catalog path through canonical manifest authority', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      for (const routeId of CATALOG_ROUTES) {
+        const segment = routeId.replace('public-', '');
+        const result = matchWebRoute({
+          pathname: `/${locale}/${segment}`,
+          securityBoundary: 'public-origin',
+        });
+        expect(result).toMatchObject({ ok: true, value: { route: { id: routeId } } });
+      }
+    }
+  });
+
   it('admits exact bilingual route and support-state parity with evidence limits', () => {
     const english = getPublicCatalog('en');
     const portuguese = getPublicCatalog('pt-BR');

@@ -908,6 +908,31 @@
 }
 
 @media (forced-colors: active) {
+  .public-header,
+  .public-header *,
+  .public-catalog,
+  .public-catalog *,
+  .public-not-found,
+  .public-not-found *,
+  .public-footer,
+  .public-footer * {
+    color: CanvasText !important;
+  }
+
+  .public-header a,
+  .public-catalog a,
+  .public-not-found a,
+  .public-footer a {
+    color: LinkText !important;
+  }
+
+  .public-action--primary,
+  .public-action--primary *,
+  .public-not-found button {
+    color: ButtonText !important;
+    background: ButtonFace;
+  }
+
   .catalog-state,
   .catalog-evidence,
   .catalog-table-wrap,

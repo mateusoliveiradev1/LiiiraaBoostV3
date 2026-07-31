@@ -149,7 +149,7 @@ summary:focus-visible,
 
 .public-action--primary {
   border: 1px solid var(--lb-cobalt-action);
-  color: var(--lb-surface-canvas);
+  color: var(--lb-text-primary);
   background: var(--lb-cobalt-action);
 }
 

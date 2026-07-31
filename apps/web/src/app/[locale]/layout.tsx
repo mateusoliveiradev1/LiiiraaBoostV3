@@ -118,7 +118,11 @@ export async function generateMetadata({
 }
 
 const Brand = ({ locale }: { readonly locale: (typeof routing.locales)[number] }) => (
-  <a className="public-brand" href={publicBoundaryHref('public-home', locale)}>
+  <a
+    aria-label="Liiiraa Boost"
+    className="public-brand"
+    href={publicBoundaryHref('public-home', locale)}
+  >
     <span aria-hidden="true" className="public-brand__mark">
       LB
     </span>
