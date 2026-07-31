@@ -20,3 +20,8 @@
 ## 03-20 (continued)
 
 - `pnpm web:verify:quick -- --requirement WEB-01` reaches the Phase 3 readiness gate and reports the still-planned public build root plus `public-routes.json`, `content-publication.json`, and `visual-report.json`. Plan 03-32 owns final evidence promotion; Plan 03-20 proves its Home through focused content/render tests, a production Next build, and live 1440/390/320 viewport checks without fabricating those final evidence artifacts.
+
+## 03-23
+
+- Both Plan 03-23 `web:verify:quick` commands pass workspace checks and tests, then stop at the planned Plan 03-32 readiness boundary: `quality/evidence/phase-03/web/docs-routes.json` and `docs-publication.json` do not exist yet.
+- The existing public client bundle exposes generated Ajv standalone-validator `require("ajv/dist/runtime/ucs2length")` through `contracts-ts`/`web-core`; browser hydration falls into the shared error boundary although production SSR, webpack build, script-blocked Axe checks, and 320/390px reflow pass. Correcting generated validator module format or client entry isolation crosses the contracts/package boundary and remains deferred to the owning packaging/evidence plan.

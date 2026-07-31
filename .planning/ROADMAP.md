@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 23/32 plans executed
+**Plans**: 24/32 plans executed
 
 Plans:
 **Wave 1**
@@ -325,7 +325,7 @@ Plans:
 **Wave 10** *(blocked on Wave 9 completion)*
 
 - [x] 03-21-PLAN.md — Complete public catalog, plans, policies, status, and errors
-- [ ] 03-23-PLAN.md — Render the complete versioned documentation experience
+- [x] 03-23-PLAN.md — Render the complete versioned documentation experience
 - [ ] 03-24-PLAN.md — Implement fail-closed release and download decisions
 - [ ] 03-27-PLAN.md — Complete every account and support preview
 - [ ] 03-28-PLAN.md — Complete role, consent, audit, and admin previews
@@ -496,7 +496,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 23/32 | In Progress|  |
+| 3. Complete Web Experience                         | 24/32 | In Progress|  |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-26-PLAN.md
-last_updated: "2026-07-31T08:45:49.604Z"
+stopped_at: Completed 03-23-PLAN.md
+last_updated: "2026-07-31T09:17:36.383Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-22-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 81
+  completed_plans: 82
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 24 of 32
+Plan: 25 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-22-PLAN.md
 
@@ -129,6 +129,7 @@ _Updated after plan completion_
 | Phase 03 P22 | 9min | 1 tasks | 3 files |
 | Phase 03 P26 | 13min | 2 tasks | 4 files |
 | Phase 03 P21 | 40min | 3 tasks | 17 files |
+| Phase 03 P23 | 29min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -342,6 +343,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep public search as explicit GET submission over repository-admitted public records only.
 - [Phase 03]: Preserve truthful empty incident history until a confirmed public incident exists.
 - [Phase 03]: Keep shared failure UI outside Next route modules to comply with supported route exports.
+- [Phase 03]: Keep MDX repository-only and project it through strict metadata admission before resolver, search, or render paths. — Prevents unreviewed content from entering public guidance.
+- [Phase 03]: Render documentation primitives server-side so public guidance remains semantic and readable without client authority or JavaScript. — Preserves safe progressive disclosure and SSR availability.
+- [Phase 03]: Keep historical guidance reachable and noindex with a persistent notice and explicit canonical alternative. — Avoids silent identity substitution or stale present-tense actions.
 
 ### Pending Todos
 
@@ -383,6 +387,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T08:45:23.224Z
-Stopped at: Completed 03-26-PLAN.md
+Last session: 2026-07-31T09:17:36.378Z
+Stopped at: Completed 03-23-PLAN.md
 Resume file: None
