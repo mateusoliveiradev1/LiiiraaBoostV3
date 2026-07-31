@@ -1,18 +1,16 @@
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-
 import {
   projectIndexing,
   projectSitemap,
   WEB_LOCALES,
   type RouteProjection,
 } from '@liiiraa/web-core';
-
-import { PublicNotFound } from './public-not-found';
+import { createPublicNotFoundModel } from './public-not-found';
 import {
   projectPublicRobots,
   projectPublicSitemap,
+  projectPublicSitemapCoverage,
   routePatternForRobots,
 } from './public-indexing';
 
@@ -30,10 +28,17 @@ describe('sitemap', () => {
   it('projects every canonical indexable public route in both locales', () => {
     const canonical = projectSitemap();
     const sitemap = projectPublicSitemap();
+    const coverage = projectPublicSitemapCoverage();
+    const concrete = canonical.filter(({ id }) => coverage.concreteRouteIds.includes(id));
 
-    expect(sitemap).toHaveLength(canonical.length * WEB_LOCALES.length);
+    expect(sitemap).toHaveLength(concrete.length * WEB_LOCALES.length);
+    expect(coverage.concreteRouteIds.length + coverage.unresolvedRouteIds.length).toBe(
+      canonical.length,
+    );
+    expect(coverage.unresolvedRouteIds).toContain('docs-article');
+    expect(sitemap.every(({ url }) => !url.includes('['))).toBe(true);
 
-    for (const route of canonical) {
+    for (const route of concrete) {
       for (const locale of WEB_LOCALES) {
         expect(sitemap).toContainEqual(
           expect.objectContaining({
@@ -47,8 +52,15 @@ describe('sitemap', () => {
 
     expect(() => projectPublicSitemap(canonical.slice(1))).toThrow('PROJECTION_MISSING_ROUTE');
     expect(() =>
-      projectPublicSitemap([...canonical, requireRoute(projectIndexing(), 'account-overview')]),
-    ).toThrow('PROJECTION_PRIVATE_LEAK');
+      projectPublicSitemap([
+        ...canonical,
+        {
+          ...requireRoute(projectIndexing(), 'account-overview'),
+          indexing: 'index',
+          scenarioRequirement: 'available',
+        },
+      ]),
+    ).toThrow(/PROJECTION_(PRIVATE_LEAK|UNKNOWN_ROUTE)/u);
   });
 });
 
@@ -82,18 +94,24 @@ describe('robots', () => {
 
 describe('404', () => {
   it('renders an explicit localized recovery state without redirecting or leaking request data', () => {
-    const portuguese = renderToStaticMarkup(createElement(PublicNotFound, { locale: 'pt-BR' }));
-    const english = renderToStaticMarkup(createElement(PublicNotFound, { locale: 'en' }));
+    const portuguese = createPublicNotFoundModel('pt-BR');
+    const english = createPublicNotFoundModel('en');
+    const componentSource = readFileSync(new URL('./public-not-found.ts', import.meta.url), 'utf8');
 
-    expect(portuguese).toContain('<h1');
-    expect(portuguese).toContain('Página não encontrada');
-    expect(portuguese).toContain('/pt-BR/docs');
-    expect(english).toContain('Page not found');
-    expect(english).toContain('/en/support');
+    expect(componentSource).toMatch(/createElement\(\s*['"]h1['"]/u);
+    expect(componentSource).toContain('tabIndex: -1');
+    expect(portuguese.copy.title).toBe('Página não encontrada');
+    expect(portuguese.destinations.documentation).toBe('/pt-BR/docs');
+    expect(english.copy.title).toBe('Page not found');
+    expect(english.destinations.support).toBe('/en/support');
 
-    for (const output of [portuguese, english]) {
-      expect(output).toContain('public-error-404');
-      expect(output).not.toMatch(/http-equiv=.refresh|window\.location|request|stack/iu);
+    for (const model of [portuguese, english]) {
+      expect(model.routeId).toBe('public-error-404');
+      expect(model.diagnosticId).toBe('LB-WEB-404');
     }
+
+    expect(componentSource).not.toMatch(
+      /http-equiv=.refresh|window\.location|redirect\(|pathname|stack trace|request-id/iu,
+    );
   });
 });

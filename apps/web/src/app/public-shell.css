@@ -219,6 +219,84 @@ main {
   display: none;
 }
 
+.public-not-found {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+  gap: var(--lb-space-6);
+  inline-size: min(100%, 1120px);
+  min-block-size: 560px;
+  margin-inline: auto;
+  padding: clamp(var(--lb-space-5), 8vw, var(--lb-space-7)) var(--lb-screen-padding);
+}
+
+.public-not-found__identity {
+  display: grid;
+  align-content: start;
+  gap: var(--lb-space-2);
+  padding-block-start: var(--lb-space-2);
+  border-block-start: 1px solid var(--lb-cobalt-action);
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+}
+
+.public-not-found__identity > span {
+  color: var(--lb-text-primary);
+  font-size: 64px;
+  font-weight: var(--lb-weight-semibold);
+  line-height: 1;
+}
+
+.public-not-found__content {
+  display: grid;
+  align-content: start;
+  gap: var(--lb-space-3);
+  max-inline-size: 68ch;
+}
+
+.public-not-found__content h1 {
+  margin: 0;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.public-not-found__content > p {
+  margin: 0;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.public-not-found__recovery {
+  color: var(--lb-text-primary) !important;
+  font-weight: var(--lb-weight-semibold);
+}
+
+.public-not-found__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  padding-block: var(--lb-space-3);
+}
+
+.public-not-found__actions .public-action:not(.public-action--primary) {
+  border: 1px solid var(--lb-line-strong);
+}
+
+.public-not-found__diagnostic {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+  font-size: var(--lb-text-label-size);
+}
+
+.public-not-found__diagnostic code {
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+}
+
 @media (width < 1180px) {
   .public-header__bar {
     gap: var(--lb-space-3);
@@ -325,6 +403,21 @@ main {
   .public-footer {
     grid-template-columns: 1fr;
     gap: var(--lb-space-4);
+  }
+
+  .public-not-found {
+    grid-template-columns: 1fr;
+    gap: var(--lb-space-4);
+    min-block-size: 480px;
+  }
+
+  .public-not-found__identity {
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+  }
+
+  .public-not-found__identity > span {
+    font-size: 48px;
   }
 }
 
