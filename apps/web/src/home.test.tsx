@@ -62,14 +62,14 @@ afterEach(async () => {
 });
 
 describe('Home layout and screenshot evidence gate', () => {
-  it('keeps copy, compatibility action, and trust boundary before unavailable media', async () => {
+  it('keeps copy, compatibility action, and trust boundary before admitted real media', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
     }
 
     const props = home.props as Readonly<Record<string, ReactNode>>;
-    expect(props['data-capture-state']).toBe('CAPTURE_MISSING');
+    expect(props['data-capture-state']).toBe('CAPTURE_ADMITTED');
 
     const sharedSource = await import('node:fs/promises').then(({ readFile }) =>
       readFile(

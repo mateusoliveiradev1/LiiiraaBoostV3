@@ -9,7 +9,7 @@ export const CONTENT_BUNDLE_SCHEMA_VERSION = 1 as const;
 
 const REVIEW_MAX_AGE_MS = 180 * 24 * 60 * 60 * 1_000;
 const ALLOWED_EVIDENCE_HOSTS = new Set(['liiiraa.com', 'www.liiiraa.com']);
-const SAFE_ASSET_PATH = /^\/media\/[A-Za-z0-9][A-Za-z0-9._/-]*\.(?:avif|webp)$/u;
+const SAFE_ASSET_PATH = /^\/(?:media|product)\/[A-Za-z0-9][A-Za-z0-9._/-]*\.(?:avif|webp)$/u;
 const RAW_EXECUTABLE_CONTENT =
   /(?:<\s*script\b|<\s*[A-Z][A-Za-z0-9]*\b|dangerouslySetInnerHTML|javascript:|^\s*(?:import|export)\s.+\sfrom\s+['"])/imu;
 const MUTATION_RECIPE =

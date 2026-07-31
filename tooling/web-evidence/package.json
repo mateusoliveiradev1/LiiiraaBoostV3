@@ -14,7 +14,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "readiness": "node readiness.mjs",
     "test": "vitest --run --passWithNoTests",
-    "verify": "pnpm check && pnpm test && node --experimental-strip-types src/capture-desktop.ts"
+    "verify": "pnpm check && pnpm test && node run-desktop-capture.mjs"
   },
   "dependencies": {
     "@liiiraa/contracts-ts": "workspace:*",

@@ -1,53 +1,304 @@
 {
-  "schemaVersion": 1,
-  "source": {
-    "kind": "executable-desktop",
-    "executableUrl": "http://127.0.0.1:4173",
-    "launchCommand": "pnpm --filter @liiiraa/desktop build && pnpm --filter @liiiraa/desktop exec vite preview --host 127.0.0.1 --port 4173 --strictPort",
-    "sourceCommit": "5d51b71",
-    "buildId": "desktop-production-5d51b71",
-    "sourceInputs": []
-  },
+  "captures": [
+    {
+      "buildId": "desktop-production-3c7ebc475638",
+      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
+      "crop": {
+        "height": 900,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "height": 900,
+      "id": "desktop-home-pt-BR",
+      "imageSha256": "a42df9e349cf80668a1c747f7978fe8f532e870d97628918338d5ce5c2b428c7",
+      "locale": "pt-BR",
+      "outputPath": "apps/web/public/product/desktop-home.pt-BR.webp",
+      "review": {
+        "approvedBy": "phase-03-ui-contract",
+        "state": "approved"
+      },
+      "scenarioId": "S01",
+      "sidecarPath": "apps/web/public/product/desktop-home.pt-BR.json",
+      "version": "1.0.0",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "width": 1440
+    },
+    {
+      "buildId": "desktop-production-3c7ebc475638",
+      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
+      "crop": {
+        "height": 900,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "height": 900,
+      "id": "desktop-home-en",
+      "imageSha256": "8e6953d73439019c1f7833bb2a3583d7020bdc858ffe699a67ac38c2a6845127",
+      "locale": "en",
+      "outputPath": "apps/web/public/product/desktop-home.en.webp",
+      "review": {
+        "approvedBy": "phase-03-ui-contract",
+        "state": "approved"
+      },
+      "scenarioId": "S01",
+      "sidecarPath": "apps/web/public/product/desktop-home.en.json",
+      "version": "1.0.0",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "width": 1440
+    }
+  ],
   "environment": {
     "animations": "disabled",
     "browser": "chromium",
-    "browserVersion": "pending-real-capture",
+    "browserVersion": "151.0.7922.34",
     "fonts": ["Manrope Variable", "JetBrains Mono Variable"],
     "frozenClock": "2030-01-15T18:00:00.000Z",
-    "operatingSystem": "Windows pending-real-capture"
+    "operatingSystem": "Windows 10.0.26200"
   },
-  "captures": [
-    {
-      "id": "desktop-home-pt-BR",
-      "version": "1.0.0",
-      "locale": "pt-BR",
-      "scenarioId": "S01",
-      "viewport": { "width": 1440, "height": 900 },
-      "crop": { "x": 0, "y": 0, "width": 1440, "height": 900 },
-      "outputPath": "apps/web/public/product/desktop-home.pt-BR.webp",
-      "sidecarPath": "apps/web/public/product/desktop-home.pt-BR.json",
-      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
-      "buildId": "desktop-production-5d51b71",
-      "imageSha256": "pending-real-capture",
-      "width": 1440,
-      "height": 900,
-      "review": { "state": "approved", "approvedBy": "phase-03-ui-contract" }
-    },
-    {
-      "id": "desktop-home-en",
-      "version": "1.0.0",
-      "locale": "en",
-      "scenarioId": "S01",
-      "viewport": { "width": 1440, "height": 900 },
-      "crop": { "x": 0, "y": 0, "width": 1440, "height": 900 },
-      "outputPath": "apps/web/public/product/desktop-home.en.webp",
-      "sidecarPath": "apps/web/public/product/desktop-home.en.json",
-      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
-      "buildId": "desktop-production-5d51b71",
-      "imageSha256": "pending-real-capture",
-      "width": 1440,
-      "height": 900,
-      "review": { "state": "approved", "approvedBy": "phase-03-ui-contract" }
-    }
-  ]
+  "schemaVersion": 1,
+  "source": {
+    "buildId": "desktop-production-3c7ebc475638",
+    "executableUrl": "http://127.0.0.1:4173",
+    "kind": "executable-desktop",
+    "launchCommand": "pnpm --filter @liiiraa/desktop build && pnpm --filter @liiiraa/desktop exec vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "sourceCommit": "3c7ebc475638fb15b1257f35eb758274e7a85b11",
+    "sourceInputs": [
+      {
+        "path": "apps/desktop/index.html",
+        "sha256": "c983461e66e49616889c14827fdf01da927459a0acca15f72d5988c3c01fd56b"
+      },
+      {
+        "path": "apps/desktop/package.json",
+        "sha256": "139848c5ae9c0d1309822c10212050546df0f1ddddf8779d4537e46d3b37db4f"
+      },
+      {
+        "path": "apps/desktop/public/fonts/jetbrains-mono-variable.woff2",
+        "sha256": "18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e"
+      },
+      {
+        "path": "apps/desktop/public/fonts/manrope-variable.woff2",
+        "sha256": "a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972"
+      },
+      {
+        "path": "apps/desktop/public/fonts/OFL-JetBrains-Mono.txt",
+        "sha256": "403581b69dac5cff4079205e01c6b467e56af449ecbd7247693ddb1baafa005b"
+      },
+      {
+        "path": "apps/desktop/public/fonts/OFL-Manrope.txt",
+        "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+      },
+      {
+        "path": "apps/desktop/src/accessibility-preferences.css",
+        "sha256": "ce37103eabe002a44640085e328cc1cf5a8ebdd0bfe76b73ed4c89d09ec4a668"
+      },
+      {
+        "path": "apps/desktop/src/adaptive-layout.css",
+        "sha256": "c058cbee2cc7d474c367e7fdf5914b65f0d05af401a639e18f569a598ae7ee2a"
+      },
+      {
+        "path": "apps/desktop/src/app.css",
+        "sha256": "b84457c3f9b3becef37409cd3f3f79a6c5e3ef4e9e83da949766e0010e88f832"
+      },
+      {
+        "path": "apps/desktop/src/app.test.tsx",
+        "sha256": "7502d8ddf2f8da8c7fa46f810dc7f1357a3d36f749bcd2660ca526788bb3facd"
+      },
+      {
+        "path": "apps/desktop/src/app.tsx",
+        "sha256": "9b8777f450285c366aece315325701616c898a965de03f1e2663cce982704057"
+      },
+      {
+        "path": "apps/desktop/src/composition.tsx",
+        "sha256": "34477b11bf7345c3fbda1b9005195d6356018c3934eda20b5eefbc26a97403f3"
+      },
+      {
+        "path": "apps/desktop/src/features/account-experience.tsx",
+        "sha256": "2f5c4487bbbbfd9f001ebd74a013a8965c27ce50aca75a3c9fb62c25b3032b82"
+      },
+      {
+        "path": "apps/desktop/src/features/account-profile.test.ts",
+        "sha256": "afb24ade40e2e07df4bbb340afd3779b7634402c735c628ec3570b1dcdbed6a5"
+      },
+      {
+        "path": "apps/desktop/src/features/account-profile.ts",
+        "sha256": "acc7b2928cfad344ba4852a69a2a4e598c4a4b8b83e3868eb3ceeb4f6ca493e1"
+      },
+      {
+        "path": "apps/desktop/src/features/brand-icons.test.tsx",
+        "sha256": "b71c1141e9f23837783cd560d7a12a48d055d049aa44b8a1bbc128e9a30e1505"
+      },
+      {
+        "path": "apps/desktop/src/features/brand-icons.tsx",
+        "sha256": "495026c375787907dda742e01f9117fb7a29da5163c25ab1cf103b7546de3cd8"
+      },
+      {
+        "path": "apps/desktop/src/features/control-center-data.ts",
+        "sha256": "218ca4fa0bcfa2ef096ffef8983b427f598bfc107ecc0038ec4ee7f18330a572"
+      },
+      {
+        "path": "apps/desktop/src/features/game-profiles.test.ts",
+        "sha256": "f99b595a7a1aedacc9d3e0121d4676ff9275bb8bd685a0fb5c23e3aee230c66f"
+      },
+      {
+        "path": "apps/desktop/src/features/game-profiles.ts",
+        "sha256": "cbca236a663563d5028683ad48bd60fb81d0e065d973861f6ac66bff707af971"
+      },
+      {
+        "path": "apps/desktop/src/features/installer-handoff.tsx",
+        "sha256": "6caa290b95c2323ceaf72ab42dabec3ee02affa86f1296ce7ba4e5c358880585"
+      },
+      {
+        "path": "apps/desktop/src/features/notification-center.tsx",
+        "sha256": "c7fd2f75e062f80b985cf228b56661335744f9c8271fe28ea295ea5429166b0a"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-downloads.tsx",
+        "sha256": "c9a3ce2e886f3b98b72a9740d0b3195fb613c2d0669d36572e4ec39fac45fc68"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-installer-handoff.tsx",
+        "sha256": "33f79c523587f3db06d5822bd28e174612a213b06e4c55775d0972426e44a691"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-localization.test.ts",
+        "sha256": "6bbcee748183c78edaadb1e16502b8f67de39d989ccbeb01afb05ec5b56a0590"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-localization.ts",
+        "sha256": "a61002ee92e0a6b1cc352c6fc8bfc1f083c10cf89c141f82e977001413b6de76"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-operations.tsx",
+        "sha256": "7f9c4289fb02619c2bbdc591c68d2e0bf51966a5f8bc584bd16f922695a99e34"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-settings.tsx",
+        "sha256": "99821bd380c1fc46ff84d43102473c28862d31e56ea6ae45053ba6235e55a2bd"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-toast.tsx",
+        "sha256": "df7f70724341cafb1c7b8feeed19bd4a807634490b1363f09bc15f8af4ea968b"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-updater.test.ts",
+        "sha256": "fde42d58974ba49956a0f30d68975cd7b2123715e0665ab5eab5be57a23755d6"
+      },
+      {
+        "path": "apps/desktop/src/features/premium-updater.ts",
+        "sha256": "2da626008bd16c1317bc07d294b2e02b6351b7e595aab48a7489143b45a434df"
+      },
+      {
+        "path": "apps/desktop/src/features/startup.test.tsx",
+        "sha256": "2384f2f14aaa15f12b62d873d30ad9eb126ae2c3f5d61d64df3d50828cb6173a"
+      },
+      {
+        "path": "apps/desktop/src/features/startup.tsx",
+        "sha256": "2a0bd1d229397bc311a25e1d623222a3453b8c4de39c23740f8261670b2afbb8"
+      },
+      {
+        "path": "apps/desktop/src/home-approved.css",
+        "sha256": "cf54b23a0437fa2c834f216f88582c7c773e1e3932500f45c2e96085cef6d470"
+      },
+      {
+        "path": "apps/desktop/src/index.ts",
+        "sha256": "03f9b313e1a7afc46eeb8ad24ac16c9dcfdcd1cdecefde49bae5dc6e84535337"
+      },
+      {
+        "path": "apps/desktop/src/light-theme.css",
+        "sha256": "014f4ac29c9eb36736400b131689e25e7fb638d4318409c0212ddcc5812280f3"
+      },
+      {
+        "path": "apps/desktop/src/locales/en.json",
+        "sha256": "c72e03911fb5d608d602c6456a3d1668cc9f2966d86b8648f620156fc3256bde"
+      },
+      {
+        "path": "apps/desktop/src/locales/i18n.test.tsx",
+        "sha256": "44f0b33577770c4baa9b4dcf5d790982e1216db44eb7dc2ee715f30afea02f79"
+      },
+      {
+        "path": "apps/desktop/src/locales/i18n.ts",
+        "sha256": "e7093e91b2ca36598412a33ec2a7f460c0c3bf11895254aa61716769fd2e4e6d"
+      },
+      {
+        "path": "apps/desktop/src/locales/pseudo.json",
+        "sha256": "b3aa925533f40e5918f5ce2c6a5a73b0f1eb27273694772a252cf0513077b7f2"
+      },
+      {
+        "path": "apps/desktop/src/locales/pt-BR.json",
+        "sha256": "cbbfce906fc36872a3a299f3ad98950edc9d0766bdab04c6b0f07c0c4d1f8bb7"
+      },
+      {
+        "path": "apps/desktop/src/native/launch-on-startup.test.ts",
+        "sha256": "60aa646d4bb53a4bd5d2eaee04a2d34629504f544bf0b32a4e6c0420dbb9c40e"
+      },
+      {
+        "path": "apps/desktop/src/native/launch-on-startup.ts",
+        "sha256": "2f6661494c8bbee96b25bc174913dfff2ff11048c43f13e8f7f6678fe57a0f52"
+      },
+      {
+        "path": "apps/desktop/src/native/shell-bridge.test.ts",
+        "sha256": "cc1879086c0136e0fe5cf4a53f7e9f0ac6c1ab8e860418c6fd352bd7c52b1a96"
+      },
+      {
+        "path": "apps/desktop/src/native/shell-bridge.ts",
+        "sha256": "cf999e291c7d596ee99fd12c2b7b34713802fae7b115d565ea6e8b6c5a06882b"
+      },
+      {
+        "path": "apps/desktop/src/preferences.test.tsx",
+        "sha256": "df6c72be518ffe41e4928611f4dd63b0984c1687f9c07996ed923865106bde26"
+      },
+      {
+        "path": "apps/desktop/src/preferences.tsx",
+        "sha256": "19b38df384dea4a2e1d3ac29b58f1916e8e797d0626dd3aada75d1a14c36d0c2"
+      },
+      {
+        "path": "apps/desktop/src/premium-experience.css",
+        "sha256": "af4fd3c3a34ddf8f38458ebe1d735c74a508d2f095eb7cb332584a9e91959498"
+      },
+      {
+        "path": "apps/desktop/src/premium-operations.css",
+        "sha256": "714ce104e8b99b377601b64b76a192e5a1e76ee1319d83d37c25275a3bb4ced2"
+      },
+      {
+        "path": "apps/desktop/src/profile-experience.css",
+        "sha256": "2c54ed27a9baa64f4e999b9a69901e44af1d184d3eadb54d5eaf6f8c3580878e"
+      },
+      {
+        "path": "apps/desktop/src/react-dom-client.d.ts",
+        "sha256": "e92ec1e3fef51ef94d85e01d835abe9316d3823da07face4cc2d978fe23449c6"
+      },
+      {
+        "path": "apps/desktop/src/routes-approved.css",
+        "sha256": "ded74247711d98fb13a72c5c894228dcb930047964961ca969ebd80aca69a74a"
+      },
+      {
+        "path": "apps/desktop/src/routes.test.tsx",
+        "sha256": "41e8163ea9643e3ebe7a9e67890a0d9b7a0b0ad6cbc47dace689cfeb6cc743bd"
+      },
+      {
+        "path": "apps/desktop/src/routes.tsx",
+        "sha256": "b5984dba33e6fb859f70d3be7aea253003666c373293ce7c67af09ebf8c2e444"
+      },
+      {
+        "path": "apps/desktop/vite.config.ts",
+        "sha256": "3d2dd6ecd25ad4f0158b6c8d262fa9f89ea9c6c4c4b3b6d51752196a99d8341b"
+      },
+      {
+        "path": "contracts/scenarios/desktop-scenarios.json",
+        "sha256": "11c91401e0071c691efca5670fb582033d30a7910973e824b4309f2194833c6a"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "sha256": "b4efe74f5a084c1b0de0e7bfb7ea7776ad00545a78dbeeb1fc3f3fd214d74760"
+      }
+    ]
+  }
 }

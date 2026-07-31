@@ -1,0 +1,11 @@
+{
+  "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
+  "checksum": "a42df9e349cf80668a1c747f7978fe8f532e870d97628918338d5ce5c2b428c7",
+  "crop": "x=0,y=0,width=1440,height=900; non-destructive full-frame",
+  "locale": "pt-BR",
+  "reviewState": "approved",
+  "scenarioId": "S01",
+  "sourceCommit": "3c7ebc475638fb15b1257f35eb758274e7a85b11",
+  "version": "1.0.0",
+  "viewport": "1440x900"
+}

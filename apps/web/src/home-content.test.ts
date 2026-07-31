@@ -4,6 +4,7 @@ import {
   webRoutes,
   type RepositoryContentRecord,
 } from '@liiiraa/web-core';
+import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 import homeEn from './content/public/home.en.json';
@@ -112,22 +113,52 @@ describe('Home content contract', () => {
     expect(authoredText(homeEn)).not.toMatch(forbidden);
   });
 
-  it('fails content admission explicitly until real capture sidecars are present', async () => {
+  it('binds the admitted real captures to Home screenshot and social asset records', async () => {
+    const [ptBrProvenance, enProvenance] = await Promise.all([
+      readFile(new URL('../public/product/desktop-home.pt-BR.json', import.meta.url), 'utf8').then(
+        (source) => JSON.parse(source) as unknown,
+      ),
+      readFile(new URL('../public/product/desktop-home.en.json', import.meta.url), 'utf8').then(
+        (source) => JSON.parse(source) as unknown,
+      ),
+    ]);
     const result = await admitContentBundle(
       [homePtBr, homeEn] as unknown as readonly RepositoryContentRecord[],
       {
-        assetIndex: [],
+        assetIndex: [
+          {
+            id: 'desktop-home-pt-BR-social',
+            path: '/product/desktop-home.pt-BR.webp',
+            purpose: 'social',
+            provenance: ptBrProvenance,
+          },
+          {
+            id: 'desktop-home-pt-BR',
+            path: '/product/desktop-home.pt-BR.webp',
+            purpose: 'screenshot',
+            provenance: ptBrProvenance,
+          },
+          {
+            id: 'desktop-home-en-social',
+            path: '/product/desktop-home.en.webp',
+            purpose: 'social',
+            provenance: enProvenance,
+          },
+          {
+            id: 'desktop-home-en',
+            path: '/product/desktop-home.en.webp',
+            purpose: 'screenshot',
+            provenance: enProvenance,
+          },
+        ],
         clock: new Date('2026-07-31T12:00:00.000Z'),
         routeManifest: webRoutes,
       },
     );
 
-    expect(result).toEqual({
-      error: {
-        code: 'ASSET_MISSING',
-        path: '$.records[0].metadata.socialImageId',
-      },
-      ok: false,
-    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.records).toHaveLength(2);
+    }
   });
 });

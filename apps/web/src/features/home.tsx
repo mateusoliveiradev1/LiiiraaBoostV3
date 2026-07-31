@@ -232,7 +232,7 @@ export const resolveHomeProductCapture = async (
     provenance.scenarioId !== content.productStage.scenarioId ||
     provenance.reviewState !== 'approved' ||
     provenance.sourceCommit.trim().length < 7 ||
-    !/(?:desktop|tauri)/iu.test(provenance.captureCommand) ||
+    !/(?:desktop|tauri|@liiiraa\/web-evidence.*--capture)/iu.test(provenance.captureCommand) ||
     dimensions === undefined
   ) {
     return { code: 'PROVENANCE_MISMATCH', ok: false };
