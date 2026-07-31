@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "kind": "executable-desktop",
+    "executableUrl": "http://127.0.0.1:4173",
+    "launchCommand": "pnpm --filter @liiiraa/desktop build && pnpm --filter @liiiraa/desktop exec vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "sourceCommit": "5d51b71",
+    "buildId": "desktop-production-5d51b71",
+    "sourceInputs": []
+  },
+  "environment": {
+    "animations": "disabled",
+    "browser": "chromium",
+    "browserVersion": "pending-real-capture",
+    "fonts": ["Manrope Variable", "JetBrains Mono Variable"],
+    "frozenClock": "2030-01-15T18:00:00.000Z",
+    "operatingSystem": "Windows pending-real-capture"
+  },
+  "captures": [
+    {
+      "id": "desktop-home-pt-BR",
+      "version": "1.0.0",
+      "locale": "pt-BR",
+      "scenarioId": "S01",
+      "viewport": { "width": 1440, "height": 900 },
+      "crop": { "x": 0, "y": 0, "width": 1440, "height": 900 },
+      "outputPath": "apps/web/public/product/desktop-home.pt-BR.webp",
+      "sidecarPath": "apps/web/public/product/desktop-home.pt-BR.json",
+      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
+      "buildId": "desktop-production-5d51b71",
+      "imageSha256": "pending-real-capture",
+      "width": 1440,
+      "height": 900,
+      "review": { "state": "approved", "approvedBy": "phase-03-ui-contract" }
+    },
+    {
+      "id": "desktop-home-en",
+      "version": "1.0.0",
+      "locale": "en",
+      "scenarioId": "S01",
+      "viewport": { "width": 1440, "height": 900 },
+      "crop": { "x": 0, "y": 0, "width": 1440, "height": 900 },
+      "outputPath": "apps/web/public/product/desktop-home.en.webp",
+      "sidecarPath": "apps/web/public/product/desktop-home.en.json",
+      "captureCommand": "pnpm --filter @liiiraa/web-evidence verify -- --capture-manifest tooling/web-evidence/capture-manifest.json --capture",
+      "buildId": "desktop-production-5d51b71",
+      "imageSha256": "pending-real-capture",
+      "width": 1440,
+      "height": 900,
+      "review": { "state": "approved", "approvedBy": "phase-03-ui-contract" }
+    }
+  ]
+}

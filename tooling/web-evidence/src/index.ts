@@ -1,5 +1,13 @@
 export const WEB_EVIDENCE_SCHEMA_VERSION = 1 as const;
 
+export { captureDesktopProduct, verifyDesktopCapture } from './capture-desktop.js';
+export type {
+  CaptureToolOptions,
+  CaptureVerificationResult,
+  DesktopCaptureEntry,
+  DesktopCaptureManifest,
+} from './capture-desktop.js';
+
 export {
   inspectContentPublicationEvidence,
   inspectReleaseEvidence,

@@ -14,7 +14,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "readiness": "node readiness.mjs",
     "test": "vitest --run --passWithNoTests",
-    "verify": "pnpm check && pnpm test && playwright test"
+    "verify": "pnpm check && pnpm test && node --experimental-strip-types src/capture-desktop.ts"
   },
   "dependencies": {
     "@liiiraa/contracts-ts": "workspace:*",
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.62.0",
+    "@types/node": "24.13.3",
     "vitest": "4.1.10"
   }
 }

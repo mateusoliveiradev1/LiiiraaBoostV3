@@ -1,14 +1,11 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import {
-  type DesktopCaptureManifest,
-  verifyDesktopCapture,
-} from './capture-desktop.js';
+import { type DesktopCaptureManifest, verifyDesktopCapture } from './capture-desktop.js';
 
 const temporaryDirectories: string[] = [];
 const sha256 = (value: Uint8Array | string): string =>
@@ -21,7 +18,14 @@ const writeExactCaptureFixture = async () => {
   const imagePath = 'apps/web/public/product/desktop-home.pt-BR.webp';
   const sidecarPath = 'apps/web/public/product/desktop-home.pt-BR.json';
   const sourcePath = 'apps/desktop/src/app.tsx';
-  const image = Buffer.from('RIFF-real-executable-desktop-webp-fixture');
+  const image = Buffer.alloc(30);
+  image.write('RIFF', 0, 'ascii');
+  image.writeUInt32LE(22, 4);
+  image.write('WEBP', 8, 'ascii');
+  image.write('VP8X', 12, 'ascii');
+  image.writeUInt32LE(10, 16);
+  image.writeUIntLE(1439, 24, 3);
+  image.writeUIntLE(899, 27, 3);
   const source = 'export const executableDesktop = true;\n';
   const checksum = sha256(image);
   const sourceChecksum = sha256(source);
@@ -82,20 +86,13 @@ const writeExactCaptureFixture = async () => {
   const manifestPath = 'tooling/web-evidence/capture-manifest.json';
 
   await Promise.all([
-    writeFile(join(repositoryRoot, imagePath), image, { recursive: false }).catch(async () => {
-      const { mkdir } = await import('node:fs/promises');
-      await mkdir(join(repositoryRoot, 'apps/web/public/product'), { recursive: true });
-      await writeFile(join(repositoryRoot, imagePath), image);
-    }),
-    writeFile(join(repositoryRoot, sourcePath), source, { recursive: false }).catch(async () => {
-      const { mkdir } = await import('node:fs/promises');
-      await mkdir(join(repositoryRoot, 'apps/desktop/src'), { recursive: true });
-      await writeFile(join(repositoryRoot, sourcePath), source);
-    }),
+    mkdir(join(repositoryRoot, 'apps/web/public/product'), { recursive: true }),
+    mkdir(join(repositoryRoot, 'apps/desktop/src'), { recursive: true }),
+    mkdir(join(repositoryRoot, 'tooling/web-evidence'), { recursive: true }),
   ]);
-  const { mkdir } = await import('node:fs/promises');
-  await mkdir(join(repositoryRoot, 'tooling/web-evidence'), { recursive: true });
   await Promise.all([
+    writeFile(join(repositoryRoot, imagePath), image),
+    writeFile(join(repositoryRoot, sourcePath), source),
     writeFile(join(repositoryRoot, sidecarPath), `${JSON.stringify(sidecar, null, 2)}\n`, 'utf8'),
     writeFile(join(repositoryRoot, manifestPath), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8'),
   ]);
@@ -124,42 +121,60 @@ describe('desktop capture provenance', () => {
   });
 
   it.each([
-    ['generated image', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      source: { ...manifest.source, kind: 'generated-image' },
-    })],
-    ['visual probe', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      source: { ...manifest.source, executableUrl: 'file:///visual-probes/desktop-home.html' },
-    })],
-    ['non-canonical scenario', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      captures: manifest.captures.map((capture) => ({ ...capture, scenarioId: 'W01' })),
-    })],
-    ['non-approved viewport', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      captures: manifest.captures.map((capture) => ({
-        ...capture,
-        crop: { height: 768, width: 1024, x: 0, y: 0 },
-        height: 768,
-        viewport: { height: 768, width: 1024 },
-        width: 1024,
-      })),
-    })],
-    ['path outside the product allowlist', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      captures: manifest.captures.map((capture) => ({
-        ...capture,
-        outputPath: 'apps/web/public/mockups/desktop-home.pt-BR.webp',
-      })),
-    })],
-    ['destructive crop', (manifest: DesktopCaptureManifest) => ({
-      ...manifest,
-      captures: manifest.captures.map((capture) => ({
-        ...capture,
-        crop: { height: 800, width: 1280, x: 40, y: 20 },
-      })),
-    })],
+    [
+      'generated image',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        source: { ...manifest.source, kind: 'generated-image' },
+      }),
+    ],
+    [
+      'visual probe',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        source: { ...manifest.source, executableUrl: 'file:///visual-probes/desktop-home.html' },
+      }),
+    ],
+    [
+      'non-canonical scenario',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        captures: manifest.captures.map((capture) => ({ ...capture, scenarioId: 'W01' })),
+      }),
+    ],
+    [
+      'non-approved viewport',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        captures: manifest.captures.map((capture) => ({
+          ...capture,
+          crop: { height: 768, width: 1024, x: 0, y: 0 },
+          height: 768,
+          viewport: { height: 768, width: 1024 },
+          width: 1024,
+        })),
+      }),
+    ],
+    [
+      'path outside the product allowlist',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        captures: manifest.captures.map((capture) => ({
+          ...capture,
+          outputPath: 'apps/web/public/mockups/desktop-home.pt-BR.webp',
+        })),
+      }),
+    ],
+    [
+      'destructive crop',
+      (manifest: DesktopCaptureManifest) => ({
+        ...manifest,
+        captures: manifest.captures.map((capture) => ({
+          ...capture,
+          crop: { height: 800, width: 1280, x: 40, y: 20 },
+        })),
+      }),
+    ],
   ] as const)('rejects %s provenance', async (_name, mutate) => {
     const fixture = await writeExactCaptureFixture();
     await writeFile(
@@ -185,14 +200,18 @@ describe('desktop capture provenance', () => {
       'utf8',
     );
 
-    await writeFile(join(fixture.repositoryRoot, fixture.imagePath), Buffer.concat([
-      originalImage,
-      Buffer.from('tampered'),
-    ]));
-    expect((await verifyDesktopCapture({
-      manifestPath: fixture.manifestPath,
-      repositoryRoot: fixture.repositoryRoot,
-    })).ok).toBe(false);
+    await writeFile(
+      join(fixture.repositoryRoot, fixture.imagePath),
+      Buffer.concat([originalImage, Buffer.from('tampered')]),
+    );
+    expect(
+      (
+        await verifyDesktopCapture({
+          manifestPath: fixture.manifestPath,
+          repositoryRoot: fixture.repositoryRoot,
+        })
+      ).ok,
+    ).toBe(false);
 
     await writeFile(join(fixture.repositoryRoot, fixture.imagePath), originalImage);
     await writeFile(
@@ -200,16 +219,24 @@ describe('desktop capture provenance', () => {
       originalSidecar.replace('"approved"', '"pending"'),
       'utf8',
     );
-    expect((await verifyDesktopCapture({
-      manifestPath: fixture.manifestPath,
-      repositoryRoot: fixture.repositoryRoot,
-    })).ok).toBe(false);
+    expect(
+      (
+        await verifyDesktopCapture({
+          manifestPath: fixture.manifestPath,
+          repositoryRoot: fixture.repositoryRoot,
+        })
+      ).ok,
+    ).toBe(false);
 
     await writeFile(join(fixture.repositoryRoot, fixture.sidecarPath), originalSidecar, 'utf8');
     await writeFile(join(fixture.repositoryRoot, fixture.sourcePath), 'stale source\n', 'utf8');
-    expect((await verifyDesktopCapture({
-      manifestPath: fixture.manifestPath,
-      repositoryRoot: fixture.repositoryRoot,
-    })).ok).toBe(false);
+    expect(
+      (
+        await verifyDesktopCapture({
+          manifestPath: fixture.manifestPath,
+          repositoryRoot: fixture.repositoryRoot,
+        })
+      ).ok,
+    ).toBe(false);
   });
 });
