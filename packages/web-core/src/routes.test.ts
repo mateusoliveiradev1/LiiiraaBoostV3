@@ -14,6 +14,7 @@ import {
   webRoutes,
   type RouteProjection,
 } from './routes.js';
+import { createContentIdentity } from './content.js';
 
 const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-home',
@@ -81,6 +82,13 @@ const expectDeeplyFrozen = (value: unknown): void => {
   }
 };
 
+const requireProjection = (projection: RouteProjection | undefined): RouteProjection => {
+  if (projection === undefined) {
+    throw new Error('Expected canonical route projection');
+  }
+  return projection;
+};
+
 describe('canonical web route manifest', () => {
   it('contains each required route family exactly once as a generated-valid frozen record', () => {
     expect(webRoutes.map(({ id }) => id)).toEqual(REQUIRED_ROUTE_IDS);
@@ -107,13 +115,11 @@ describe('canonical web route manifest', () => {
       ok: true,
       value: '/pt-BR/docs/1.0.0/troubleshooting/LB-403',
     });
-    expect(routeHref('missing-route' as never, { locale: 'en' })).toMatchObject({
+    expect(routeHref('missing-route', { locale: 'en' })).toMatchObject({
       error: { code: 'UNKNOWN_ROUTE_ID' },
       ok: false,
     });
-    expect(
-      routeHref('public-home', { locale: 'en', unexpected: 'value' } as never),
-    ).toMatchObject({
+    expect(routeHref('public-home', { locale: 'en', unexpected: 'value' })).toMatchObject({
       error: { code: 'UNKNOWN_PARAMETER' },
       ok: false,
     });
@@ -212,6 +218,27 @@ describe('canonical web route manifest', () => {
     });
     expect(
       createBoundaryLink({
+        context: {
+          locale: 'en',
+          section: 'troubleshooting',
+          version: 'current',
+        },
+        fromRouteId: 'public-support',
+        toRouteId: 'docs-task',
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        href: 'https://liiiraa.com/en/docs/tasks/troubleshooting?version=current',
+        preservedContext: {
+          locale: 'en',
+          section: 'troubleshooting',
+          version: 'current',
+        },
+      },
+    });
+    expect(
+      createBoundaryLink({
         context: { locale: 'es' as never },
         fromRouteId: 'public-home',
         toRouteId: 'account-overview',
@@ -233,6 +260,35 @@ describe('canonical web route manifest', () => {
     ).toMatchObject({ error: { code: 'UNSAFE_RETURN_ROUTE' }, ok: false });
   });
 
+  it('derives localized content identity and ownership from the canonical route', () => {
+    expect(
+      createContentIdentity({
+        channel: 'stable',
+        locale: 'pt-BR',
+        routeId: 'docs-article',
+        version: '1.0.0',
+      }),
+    ).toEqual({
+      ok: true,
+      value: {
+        channel: 'stable',
+        indexing: 'index',
+        locale: 'pt-BR',
+        owner: 'docs-content',
+        routeId: 'docs-article',
+        version: '1.0.0',
+      },
+    });
+    expect(
+      createContentIdentity({
+        channel: 'stable',
+        locale: 'es',
+        routeId: 'docs-article',
+        version: '1.0.0',
+      }),
+    ).toMatchObject({ error: { code: 'INVALID_LOCALE' }, ok: false });
+  });
+
   it('fails every seeded consumer omission, addition, rename, duplicate, owner, leak, and redirect mutation', () => {
     const navigation = projectNavigation('public');
     const sitemap = projectSitemap();
@@ -244,61 +300,61 @@ describe('canonical web route manifest', () => {
     expect(searchRoute).toBeDefined();
     expect(previewRoute).toBeDefined();
 
-    const mutationMatrix: ReadonlyArray<
-      readonly [
-        string,
-        Parameters<typeof auditRouteProjection>[0],
-        readonly RouteProjection[],
-        string,
-      ]
-    > = [
+    const firstNavigation = requireProjection(navigation[0]);
+    const firstRedirect = requireProjection(redirects[0]);
+    const mutationMatrix: readonly (readonly [
+      string,
+      Parameters<typeof auditRouteProjection>[0],
+      readonly RouteProjection[],
+      string,
+    ])[] = [
       ['missing', 'navigation:public', navigation.slice(1), 'PROJECTION_MISSING_ROUTE'],
       [
         'extra',
         'navigation:public',
-        [...navigation, { ...navigation[0]!, id: 'renamed-route' }],
+        [...navigation, { ...firstNavigation, id: 'renamed-route' }],
         'PROJECTION_UNKNOWN_ROUTE',
       ],
       [
         'renamed href',
         'navigation:public',
-        [{ ...navigation[0]!, href: '/en/renamed' }, ...navigation.slice(1)],
+        [{ ...firstNavigation, href: '/en/renamed' }, ...navigation.slice(1)],
         'PROJECTION_ROUTE_DRIFT',
       ],
       [
         'duplicate',
         'navigation:public',
-        [...navigation, navigation[0]!],
+        [...navigation, firstNavigation],
         'PROJECTION_DUPLICATE_ROUTE',
       ],
       [
         'unowned',
         'navigation:public',
-        [{ ...navigation[0]!, owner: '' }, ...navigation.slice(1)],
+        [{ ...firstNavigation, owner: '' }, ...navigation.slice(1)],
         'PROJECTION_OWNER_DRIFT',
       ],
       [
         'private leak',
         'navigation:public',
-        [...navigation, accountRoute!],
+        [...navigation, requireProjection(accountRoute)],
         'PROJECTION_PRIVATE_LEAK',
       ],
       [
         'noindex leak',
         'sitemap',
-        [...sitemap, searchRoute!],
+        [...sitemap, requireProjection(searchRoute)],
         'PROJECTION_NOINDEX_LEAK',
       ],
       [
         'scenario leak',
         'sitemap',
-        [...sitemap, previewRoute!],
+        [...sitemap, requireProjection(previewRoute)],
         'PROJECTION_SCENARIO_LEAK',
       ],
       [
         'redirect drift',
         'redirects',
-        [{ ...redirects[0]!, href: '/en/renamed' }, ...redirects.slice(1)],
+        [{ ...firstRedirect, href: '/en/renamed' }, ...redirects.slice(1)],
         'PROJECTION_REDIRECT_DRIFT',
       ],
     ];
