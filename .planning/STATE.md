@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-29-PLAN.md
-last_updated: "2026-07-31T11:18:15.103Z"
+stopped_at: Completed 03-30-PLAN.md
+last_updated: "2026-07-31T13:11:34.534Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-27-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 87
+  completed_plans: 88
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 30 of 32
+Plan: 31 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-27-PLAN.md
 
@@ -135,6 +135,7 @@ _Updated after plan completion_
 | Phase 03 P28 | 14min | 2 tasks | 5 files |
 | Phase 03 P25 | 1h12m | 2 tasks | 16 files |
 | Phase 03 P29 | 18min | 2 tasks | 19 files |
+| Phase 03 P30 | 1h 49m | 3 tasks | 55 files |
 
 ## Accumulated Context
 
@@ -366,6 +367,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep generated ScreenshotProvenance sidecars exact and place extended capture evidence in the manifest.
 - [Phase 03]: Capture only the production-built desktop preview at fixed loopback with frozen S01 and full-frame 1440x900 output.
 - [Phase 03]: Hash every relevant desktop source, locale, style, font, scenario, package, and lock input to invalidate stale captures.
+- [Phase 03]: Keep Node-side schema compilation out of browser bundles and expose only generated standalone validators at strict-CSP client boundaries.
+- [Phase 03]: Own account and admin route metadata in server-safe models so page metadata and client experiences share one canonical route projection.
+- [Phase 03]: Bind every Playwright server to its real .localhost hostname and inject the dedicated admin origin at build time so origin assertions are exact.
+- [Phase 03]: Derive all eighteen golden records from W01-W18 and isolate Vitest discovery to src/**/*.test.ts so Playwright suites remain runner-owned.
 
 ### Pending Todos
 
@@ -407,6 +412,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T11:18:15.096Z
-Stopped at: Completed 03-29-PLAN.md
+Last session: 2026-07-31T13:11:34.529Z
+Stopped at: Completed 03-30-PLAN.md
 Resume file: None
