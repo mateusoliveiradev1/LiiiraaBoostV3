@@ -101,15 +101,13 @@ const finalPublication = (): WebPublicationInput => {
     mode: 'final',
     observedCommands: PUBLICATION_GATE_NAMES.map((name) => `pnpm web:gate:${name}`),
     observedFiles,
-    qualityManifests: (['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const).map(
-      (requirement) => ({
-        featureId: `${requirement.toLowerCase()}-final`,
-        hash: sha(`quality:${requirement}`),
-        owner: 'plan-03-32',
-        requirement,
-        state: 'passed',
-      }),
-    ),
+    qualityManifests: (['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const).map((requirement) => ({
+      featureId: `${requirement.toLowerCase()}-final`,
+      hash: sha(`quality:${requirement}`),
+      owner: 'plan-03-32',
+      requirement,
+      state: 'passed',
+    })),
     releaseTruth: {
       developmentArtifactDetected: false,
       downloadAvailable: false,
@@ -249,9 +247,7 @@ describe('approved web rollback', () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.failures.map(({ code }) => code)).toContain(
-      'EXTERNAL_STATE_ROLLBACK_REJECTED',
-    );
+    expect(result.failures.map(({ code }) => code)).toContain('EXTERNAL_STATE_ROLLBACK_REJECTED');
   });
 
   it('rejects the latest faulty deployment and a target absent from approval history', () => {
@@ -272,20 +268,16 @@ describe('approved web rollback', () => {
     });
 
     expect(currentResult.ok).toBe(false);
-    expect(currentResult.failures.map(({ code }) => code)).toContain(
-      'CURRENT_DEPLOYMENT_REJECTED',
-    );
+    expect(currentResult.failures.map(({ code }) => code)).toContain('CURRENT_DEPLOYMENT_REJECTED');
     expect(absentResult.ok).toBe(false);
-    expect(absentResult.failures.map(({ code }) => code)).toContain(
-      'APPROVED_BUNDLE_NOT_FOUND',
-    );
+    expect(absentResult.failures.map(({ code }) => code)).toContain('APPROVED_BUNDLE_NOT_FOUND');
   });
 
   it('refuses to create approval from planned or forged evaluator output', () => {
     const finalInput = finalPublication();
     const plannedInput = { ...finalInput, mode: 'planned' as const };
     const planned = evaluateWebPublication(plannedInput);
-    const forged = { failures: [], fingerprint: sha('forged'), ok: true as const };
+    const forged = { failures: [] as const, fingerprint: sha('forged'), ok: true as const };
 
     const plannedResult = createApprovedWebBundle({
       approvedAt: '2026-07-31T13:30:00.000Z',
@@ -301,9 +293,7 @@ describe('approved web rollback', () => {
     });
 
     expect(plannedResult.ok).toBe(false);
-    expect(plannedResult.failures.map(({ code }) => code)).toContain(
-      'FINAL_PUBLICATION_REQUIRED',
-    );
+    expect(plannedResult.failures.map(({ code }) => code)).toContain('FINAL_PUBLICATION_REQUIRED');
     expect(forgedResult.ok).toBe(false);
     expect(forgedResult.failures.map(({ code }) => code)).toContain(
       'PUBLICATION_APPROVAL_MISMATCH',
