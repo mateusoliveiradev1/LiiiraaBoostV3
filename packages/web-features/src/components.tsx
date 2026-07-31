@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import {
   LbButton,
   LbDialog,
@@ -394,7 +394,7 @@ export interface FilterBarProps {
 }
 
 export const FilterBar = ({ children, label = 'Filter results', onSubmit }: FilterBarProps) => {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit?.();
   };

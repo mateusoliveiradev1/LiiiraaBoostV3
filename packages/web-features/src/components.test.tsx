@@ -26,7 +26,10 @@ import {
   PublicShell,
   RoleScopeRail,
 } from './shells.js';
+import * as storyCatalog from './components.stories.js';
 import { WEB_STORY_AXES } from './components.stories.js';
+
+const readUtf8File = readFileSync as (path: URL, encoding: 'utf8') => string;
 
 const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>
   element.props as Readonly<Record<string, unknown>>;
@@ -51,7 +54,7 @@ const relativeLuminance = (hex: string): number => {
     .replace('#', '')
     .match(/.{2}/gu)
     ?.map((channel) => Number.parseInt(channel, 16) / 255);
-  if (!channels || channels.length !== 3) {
+  if (channels?.length !== 3) {
     throw new Error(`Invalid color: ${hex}`);
   }
   const linear = channels.map((channel) =>
@@ -176,6 +179,31 @@ describe('semantic web components', () => {
 });
 
 describe('visual contract and story axes', () => {
+  it('lists and imports every Storybook catalog composition as a smoke gate', () => {
+    expect(Object.keys(storyCatalog).sort()).toEqual([
+      'AccessibilityModes',
+      'InteractionStates',
+      'LocaleCatalog',
+      'ProvenanceCatalog',
+      'ResponsiveTableCatalog',
+      'StateCatalog',
+      'ViewportCatalog',
+      'WEB_STORY_AXES',
+      'default',
+    ]);
+    for (const storyName of [
+      'AccessibilityModes',
+      'InteractionStates',
+      'LocaleCatalog',
+      'ProvenanceCatalog',
+      'ResponsiveTableCatalog',
+      'StateCatalog',
+      'ViewportCatalog',
+    ] as const) {
+      expect(storyCatalog[storyName]).toBeTypeOf('function');
+    }
+  });
+
   it('enumerates every locked state, locale, viewport, preference, and interaction axis', () => {
     expect(WEB_STORY_AXES.interaction).toEqual([
       'default',
@@ -198,7 +226,7 @@ describe('visual contract and story axes', () => {
   });
 
   it('uses approved tokens, responsive gates, and anti-template constraints', () => {
-    const css = readFileSync(new URL('./web.css', import.meta.url), 'utf8') as string;
+    const css = readUtf8File(new URL('./web.css', import.meta.url), 'utf8');
     expect(css).toContain('var(--lb-space-7)');
     expect(css).toContain('var(--lb-radius-default)');
     expect(css).toContain('var(--lb-layer-modal)');
