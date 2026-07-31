@@ -34,3 +34,7 @@
 
 - `pnpm test:architecture` still reports the two parity mismatches already deferred in Plan 03-18: the live `apps/web` manifest includes `@liiiraa/design-tokens` while the architecture fixture does not, and the root `web:verify:quick` command now uses `tooling/web-evidence/run-web-verify.mjs` while the fixture expects the former check/test chain.
 - `pnpm test:runtime-truth` reaches the unchanged fixture guard and times out after five seconds while inspecting the live workspace graph. Plan 03-25 does not own the fixture guard or architecture expectations; its scoped release checks, tests, production build, artifact scan, and browser verification pass.
+
+## 03-32
+
+- `pnpm verify` passes the workspace toolchain contract and formatting gate, then stops in the unchanged root ESLint gate with 68 pre-existing errors across prior-plan account, admin, public-web, contract, and web-evidence files before the root graph reaches the web phase verifier. The failures include typed-ESLint project-service coverage gaps and rule violations outside Plan 03-32 acceptance ownership. The complete web-evidence unit suite passes 100 tests with one intentional Playwright-owned skip, all three web production builds pass, live public/account/admin development routes return HTTP 200, and `pnpm web:verify:phase -- --mode final` passes independently. The unrelated repository-wide lint backlog remains deferred to the owning plans.
