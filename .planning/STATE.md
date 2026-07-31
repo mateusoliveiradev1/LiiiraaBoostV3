@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-33-PLAN.md
-last_updated: "2026-07-31T16:56:28.133Z"
+stopped_at: Completed 03-34-PLAN.md
+last_updated: "2026-07-31T17:08:40.489Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-33-PLAN.md
+last_activity_desc: Completed 03-34-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 94
-  completed_plans: 91
+  completed_plans: 92
   percent: 20
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 33 of 36
+Plan: 34 of 36
 Status: Ready to execute
-Last activity: 2026-07-31 — Completed 03-33-PLAN.md
+Last activity: 2026-07-31 — Completed 03-34-PLAN.md
 
 Progress: [██████████] 100%
 
@@ -139,6 +139,7 @@ _Updated after plan completion_
 | Phase 03 P31 | 14min | 2 tasks | 5 files |
 | Phase 03 P32 | 1h30m | 2 tasks | 54 files |
 | Phase 03 P33 | 24min | 2 tasks | 8 files |
+| Phase 03 P34 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -384,6 +385,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep account responsibility and error identities as separate closed unions so authored failures can never enter AccountPreviewPage.
 - [Phase 03]: Let the canonical catch-all own account 404 rendering while the proxy preserves HTTP 404 status and the layout supplies localized failure metadata.
 - [Phase 03]: Use the canonical current route only for 500 retry; 403, 404, and 410 recover through same-origin Overview and Support destinations.
+- [Phase 03]: Classify canonical admin error routes before applying the unchanged role-workspace access matrix.
+- [Phase 03]: Recover authored admin 410 only to the localized canonical admin-role route without carrying role, return, credential, or diagnostic context.
+- [Phase 03]: Keep the 410 outcome non-authoritative and derive noindex metadata from the same bilingual redacted copy contract.
 
 ### Pending Todos
 
@@ -425,6 +429,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T16:56:00.698Z
-Stopped at: Completed 03-33-PLAN.md
+Last session: 2026-07-31T17:08:40.484Z
+Stopped at: Completed 03-34-PLAN.md
 Resume file: None
