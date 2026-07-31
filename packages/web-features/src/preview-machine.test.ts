@@ -24,14 +24,16 @@ const completeReceipt = {
   correlationId: CORRELATION_ID,
   nextPhase: 'Phase 4',
   provenance: {
-    kind: 'simulated',
+    fixtureVersion: 'web-scenarios-v1',
+    kind: 'fixture',
     scenarioId: 'W14',
+    value: 'SIMULATED SCENARIO',
   },
   receiptVersion: '1.0',
   remoteStateChanged: false,
   requestedAction: 'admin.review',
   reviewedAt: NOW,
-  reviewedInputs: ['target-reviewed'],
+  reviewedInputs: ['target-reviewed'] as [string, ...string[]],
 } as const;
 
 const adminInput = (
