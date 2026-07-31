@@ -1,5 +1,10 @@
 # Deferred Items
 
+## Resolved in 03-32 regression recovery
+
+- Resolved the Phase 03-18 architecture parity mismatches by refreshing the live `apps/web` dependency and `web:verify:quick` script expectations. The architecture suite now passes in the recursive root graph.
+- Resolved the Phase 03-25 fixture-guard timeout by using a bounded Windows integration timeout appropriate for the live workspace scan, and serialized fixture-guard after desktop tests so its distributable rebuild cannot race active imports. The fixture-guard package test and complete 49-task root test graph now pass.
+
 ## Resolved in 03-11
 
 - Updated live workspace root set, desktop workspace dependency parity, and the exact `@types/node@24.13.3` packaged-harness approval link. The full architecture gate then passed all 46 tests.
@@ -10,7 +15,7 @@
 
 ## 03-18
 
-- `pnpm test:architecture` reports two pre-existing Phase 3 parity mismatches outside Plan 03-18 ownership: the live `apps/web` manifest includes `@liiiraa/design-tokens` while the architecture fixture does not, and the root `web:verify:quick` script now invokes `tooling/web-evidence/run-web-verify.mjs` while its earlier architecture fixture still expects `pnpm web:check && pnpm web:test`. Plan 03-18 does not modify the module manifest, root script, or architecture fixtures; package lint, type, test, build, `pnpm web:check`, and `pnpm web:test` pass.
+- Resolved in Plan 03-32 regression recovery: the live `apps/web` dependency and root `web:verify:quick` script expectations now match the architecture fixtures, and the architecture suite passes in the recursive root graph.
 
 ## 03-21
 
@@ -32,9 +37,8 @@
 
 ## 03-25
 
-- `pnpm test:architecture` still reports the two parity mismatches already deferred in Plan 03-18: the live `apps/web` manifest includes `@liiiraa/design-tokens` while the architecture fixture does not, and the root `web:verify:quick` command now uses `tooling/web-evidence/run-web-verify.mjs` while the fixture expects the former check/test chain.
-- `pnpm test:runtime-truth` reaches the unchanged fixture guard and times out after five seconds while inspecting the live workspace graph. Plan 03-25 does not own the fixture guard or architecture expectations; its scoped release checks, tests, production build, artifact scan, and browser verification pass.
+- Resolved in Plan 03-32 regression recovery: the architecture parity expectations now match the live workspace, the fixture guard uses a bounded Windows integration timeout appropriate for the repository scan, and Turbo orders its destructive rebuild after desktop tests. Both scoped packages and the complete 49-task root test graph pass.
 
 ## 03-32
 
-- `pnpm verify` passes the workspace toolchain contract and formatting gate, then stops in the unchanged root ESLint gate with 68 pre-existing errors across prior-plan account, admin, public-web, contract, and web-evidence files before the root graph reaches the web phase verifier. The failures include typed-ESLint project-service coverage gaps and rule violations outside Plan 03-32 acceptance ownership. The complete web-evidence unit suite passes 100 tests with one intentional Playwright-owned skip, all three web production builds pass, live public/account/admin development routes return HTTP 200, and `pnpm web:verify:phase -- --mode final` passes independently. The unrelated repository-wide lint backlog remains deferred to the owning plans.
+- `pnpm verify` passes the workspace toolchain contract and formatting gate, then stops in the unchanged root ESLint gate with 68 pre-existing errors across prior-plan account, admin, public-web, contract, and web-evidence files before the root graph reaches the web phase verifier. The failures include typed-ESLint project-service coverage gaps and rule violations outside Plan 03-32 acceptance ownership. The complete 49-task root test graph passes, the web-evidence unit suite passes 102 tests with one intentional Playwright-owned skip, all three web production builds pass, live public/account/admin development routes return HTTP 200, and `pnpm web:verify:phase -- --mode final` passes independently. The unrelated repository-wide lint backlog remains deferred to the owning plans.
