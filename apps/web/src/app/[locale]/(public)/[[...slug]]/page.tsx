@@ -8,6 +8,7 @@ import {
   PublicCatalogPage,
   type CatalogSearchParameters,
 } from '../../../../features/public-catalog';
+import { DocumentationExperience } from '../../../../features/documentation';
 import { CommandRunwayHome, getHomeContent } from '../../../../features/home';
 import { ForbiddenState, GoneState, ServerFailureState } from '../../../../features/public-failure';
 import { routing } from '../../../../public-boundary';
@@ -37,6 +38,8 @@ const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-error-403',
   'public-error-410',
   'public-error-500',
+  'docs-index',
+  'docs-task',
 ]);
 
 const resolvePublicCatalogRoute = (
@@ -71,7 +74,18 @@ export const generateMetadata = async ({ params }: PublicCatchAllPageProps): Pro
 
   const metadata = getPublicCatalogMetadata(resolution.locale, resolution.routeId);
   const resolvedMetadata =
-    resolution.routeId === 'public-home' ? getHomeContent(resolution.locale).metadata : metadata;
+    resolution.routeId === 'public-home'
+      ? getHomeContent(resolution.locale).metadata
+      : resolution.routeId === 'docs-index' || resolution.routeId === 'docs-task'
+        ? {
+            title:
+              resolution.locale === 'pt-BR' ? 'Documentação técnica' : 'Technical documentation',
+            description:
+              resolution.locale === 'pt-BR'
+                ? 'Orientação versionada por tarefa, evidência, risco, compatibilidade e recuperação.'
+                : 'Versioned task guidance with evidence, risk, compatibility, and recovery.',
+          }
+        : metadata;
   if (resolvedMetadata === undefined) return {};
 
   const pathname =
@@ -104,6 +118,35 @@ export default async function PublicCatchAllPage({
 
   if (resolution.routeId === 'public-home') {
     return <CommandRunwayHome locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'docs-index') {
+    return (
+      <DocumentationExperience
+        request={{
+          locale: resolution.locale,
+          version: 'current',
+          searchParams: resolvedSearchParams,
+        }}
+      />
+    );
+  }
+
+  if (resolution.routeId === 'docs-task') {
+    const section = slug?.at(-1);
+    if (section === undefined) {
+      notFound();
+    }
+    return (
+      <DocumentationExperience
+        request={{
+          locale: resolution.locale,
+          version: 'tasks',
+          slug: [section],
+          searchParams: resolvedSearchParams,
+        }}
+      />
+    );
   }
 
   if (resolution.routeId === 'public-error-403') {

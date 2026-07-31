@@ -946,3 +946,201 @@
     border-color: CanvasText;
   }
 }
+
+.lb-web-product-frame {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.28fr) minmax(0, 1fr);
+  inline-size: min(100%, 1440px);
+  margin-inline: auto;
+}
+
+.lb-web-product-frame > aside {
+  min-inline-size: 0;
+  padding: var(--lb-space-5) var(--lb-space-3);
+  border-inline-end: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.lb-web-product-frame > aside > details {
+  position: sticky;
+  inset-block-start: 144px;
+}
+
+.lb-web-product-frame summary {
+  min-block-size: 44px;
+  padding-block: var(--lb-space-2);
+  cursor: pointer;
+  font-weight: var(--lb-weight-semibold);
+}
+
+.lb-web-documentation-index ul,
+ol.lb-web-documentation-index {
+  display: grid;
+  gap: var(--lb-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+ol.lb-web-documentation-index li {
+  display: grid;
+  gap: var(--lb-space-1);
+  padding-block: var(--lb-space-2);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-documentation-index small {
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+}
+
+.lb-web-version-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: center;
+  padding-block-end: var(--lb-space-4);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-route-header {
+  display: grid;
+  gap: var(--lb-space-3);
+  max-inline-size: 68ch;
+  padding-block: var(--lb-space-5);
+}
+
+.lb-web-route-header h1,
+.lb-web-route-header p {
+  margin: 0;
+}
+
+.lb-web-route-header h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.lb-web-route-header p {
+  color: var(--lb-text-secondary);
+  font-size: 18px;
+}
+
+.lb-web-article-metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lb-space-2);
+  margin: 0 0 var(--lb-space-5);
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-article-metadata div {
+  min-inline-size: 0;
+  padding: var(--lb-space-3);
+}
+
+.lb-web-article-metadata dt {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.lb-web-article-metadata dd {
+  margin: var(--lb-space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.lb-web-boundary {
+  margin-block: var(--lb-space-4);
+  padding: var(--lb-space-3);
+  border-block: 1px solid var(--lb-status-warning);
+  background: var(--lb-surface-work);
+}
+
+.lb-web-boundary p {
+  max-inline-size: 68ch;
+  color: var(--lb-text-secondary);
+}
+
+.lb-web-status {
+  display: inline-flex;
+  gap: var(--lb-space-1);
+  align-items: center;
+}
+
+.lb-web-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-3);
+  align-items: end;
+  padding-block: var(--lb-space-4);
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-filter-bar > div {
+  display: grid;
+  gap: var(--lb-space-1);
+}
+
+.lb-web-filter-bar input,
+.lb-web-filter-bar select {
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  padding-inline: var(--lb-space-2);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: 6px;
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-inset);
+  font: inherit;
+}
+
+.lb-web-troubleshooting,
+.lb-web-observed-state,
+.lb-web-recovery-escalation,
+.catalog-chapters > section {
+  max-inline-size: 68ch;
+  padding-block: var(--lb-space-4);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.lb-web-troubleshooting > h2,
+.lb-web-observed-state > h2,
+.lb-web-recovery-escalation > h2,
+.catalog-chapters > section > h2 {
+  text-wrap: balance;
+}
+
+.lb-web-table-region {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+@media (width < 960px) {
+  .lb-web-product-frame {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lb-web-product-frame > aside {
+    padding: var(--lb-space-3);
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--lb-line-subtle);
+  }
+
+  .lb-web-product-frame > aside > details {
+    position: static;
+  }
+
+  .lb-web-article-metadata {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lb-web-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lb-web-filter-bar input,
+  .lb-web-filter-bar select {
+    inline-size: 100%;
+  }
+}
