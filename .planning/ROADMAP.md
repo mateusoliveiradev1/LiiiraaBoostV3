@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 36/40 plans complete
+**Plans**: 36/46 plans complete
 
 Plans:
 **Wave 1**
@@ -370,11 +370,38 @@ Plans:
 **Wave 20** *(blocked on Plan 03-37)*
 
 - [ ] 03-38-PLAN.md — Redesign the public shell and artifact-led Home
+
+**Wave 21** *(blocked on Plan 03-38)*
+
 - [ ] 03-39-PLAN.md — Redesign the account shell and responsibility workspaces
 
-**Wave 21** *(blocked on Plans 03-37, 03-38, and 03-39)*
+**Wave 22** *(blocked on Plan 03-39)*
 
-- [ ] 03-40-PLAN.md — Repair admin admission, redesign role/workspace UI, and complete blocking cross-surface review
+- [ ] 03-40-PLAN.md — Repair dedicated admin origin, canonical entry, and fail-closed localized denial
+
+**Wave 23** *(blocked on Plan 03-40)*
+
+- [ ] 03-41-PLAN.md — Redesign admin role landing and representative workspace
+
+**Wave 24** *(blocked on Plan 03-41)*
+
+- [ ] 03-42-PLAN.md — Rebaseline public W01-W09, W17, and G01-G02 evidence
+
+**Wave 25** *(blocked on Plan 03-42)*
+
+- [ ] 03-43-PLAN.md — Rebaseline account W10-W13, W18, and G03-G05 evidence
+
+**Wave 26** *(blocked on Plan 03-43)*
+
+- [ ] 03-44-PLAN.md — Rebaseline admin W14-W16 and G06-G07 evidence
+
+**Wave 27** *(blocked on Plan 03-44)*
+
+- [ ] 03-45-PLAN.md — Run complete matrix preflight and blocking human visual review
+
+**Wave 28** *(blocked on approved Plan 03-45)*
+
+- [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
 
 **UI hint**: yes
 
@@ -522,7 +549,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 36/40 | Gap closure | -          |
+| 3. Complete Web Experience                         | 36/46 | Gap closure | -          |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
