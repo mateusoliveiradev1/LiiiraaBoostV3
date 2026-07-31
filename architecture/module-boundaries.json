@@ -159,6 +159,69 @@
       "status": "active"
     },
     {
+      "id": "web-core",
+      "owner": "web-platform",
+      "layer": "application",
+      "roots": ["packages/web-core"],
+      "publicRoots": ["packages/web-core/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "web-preview",
+      "owner": "web-platform",
+      "layer": "adapter",
+      "roots": ["packages/web-preview"],
+      "publicRoots": ["packages/web-preview/src/index.ts"],
+      "runtimeClass": "fixture",
+      "status": "reserved"
+    },
+    {
+      "id": "web-features",
+      "owner": "web-ui",
+      "layer": "feature",
+      "roots": ["packages/web-features"],
+      "publicRoots": ["packages/web-features/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "web-evidence",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/web-evidence"],
+      "publicRoots": ["tooling/web-evidence/src/index.ts"],
+      "runtimeClass": "tooling",
+      "status": "reserved"
+    },
+    {
+      "id": "web-app",
+      "owner": "web",
+      "layer": "composition",
+      "roots": ["apps/web"],
+      "publicRoots": ["apps/web/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "reserved"
+    },
+    {
+      "id": "account-app",
+      "owner": "account",
+      "layer": "composition",
+      "roots": ["apps/account"],
+      "publicRoots": ["apps/account/src/index.ts"],
+      "runtimeClass": "fixture",
+      "status": "reserved"
+    },
+    {
+      "id": "admin-app",
+      "owner": "admin",
+      "layer": "composition",
+      "roots": ["apps/admin"],
+      "publicRoots": ["apps/admin/src/index.ts"],
+      "runtimeClass": "fixture",
+      "status": "reserved"
+    },
+    {
       "id": "acceptance-policy",
       "owner": "architecture",
       "layer": "tooling",
