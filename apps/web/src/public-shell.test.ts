@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { publicCspProbe, publicHeaderContract } from '../next.config';
@@ -9,7 +11,31 @@ import {
   type ClientRecoveryRouteId,
 } from './public-client-boundary';
 
+const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
+
 describe('public shell', () => {
+  it('uses the approved product lockup without exposing substitute initials', () => {
+    expect(layoutSource).toContain('ProductLockup');
+    expect(layoutSource).not.toContain('public-brand__mark');
+    expect(layoutSource).not.toMatch(/>\s*LB\s*</u);
+  });
+
+  it('keeps internal origin boundaries out of ordinary visitor chrome', () => {
+    expect(layoutSource).not.toContain('public-boundary-notice');
+    expect(layoutSource).not.toMatch(/>\s*PUBLIC\s*</u);
+    expect(shellStyles).not.toContain('.public-boundary-notice');
+  });
+
+  it('retains accessible navigation, locale switching, and responsive menu behavior', () => {
+    expect(layoutSource).toContain('className="public-skip-link"');
+    expect(layoutSource).toContain('hrefLang={alternateLocale}');
+    expect(layoutSource).toContain('className="public-mobile-menu"');
+    expect(layoutSource).toContain("publicBoundaryHref('public-search', locale)");
+    expect(layoutSource).toContain("publicBoundaryHref('releases-index', locale)");
+    expect(shellStyles).toMatch(/@media \(width < 960px\)[\s\S]*\.public-mobile-menu/u);
+  });
+
   it('derives every public navigation pillar and both locale roots from route authority', () => {
     expect(routing.locales).toEqual(['pt-BR', 'en']);
     expect(publicNavigation.map(({ id }) => id)).toEqual([
