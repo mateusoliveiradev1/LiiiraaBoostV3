@@ -6,7 +6,7 @@ import {
   type WebSecurityBoundaryJson,
   type WebShellJson,
   type WebSurfaceJson,
-} from '@liiiraa/contracts-ts';
+} from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 export const WEB_LOCALES = Object.freeze(['pt-BR', 'en'] as const);

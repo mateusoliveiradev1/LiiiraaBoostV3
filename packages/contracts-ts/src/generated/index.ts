@@ -4,4 +4,4 @@
  * This file is read-only. DO NOT EDIT.
  */
 
-export type * from './models.ts';
+export type * from './models.js';

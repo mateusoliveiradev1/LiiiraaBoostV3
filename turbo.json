@@ -14,6 +14,10 @@
       "dependsOn": ["check", "^test"],
       "outputs": ["coverage/**"]
     },
+    "@liiiraa/fixture-guard#test": {
+      "dependsOn": ["check", "^test", "@liiiraa/desktop#test"],
+      "outputs": ["coverage/**"]
+    },
     "build": {
       "dependsOn": ["generate", "^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]

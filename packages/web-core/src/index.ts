@@ -43,7 +43,7 @@ export { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 export type {
   FutureAuthorityCommandJson,
   NoChangeReceiptJson,
-} from '@liiiraa/contracts-ts';
+} from '@liiiraa/contracts-ts/generated';
 export type { WebDocumentValidationResult } from '@liiiraa/contracts-ts/web-validation';
 export { createContentIdentity } from './content.ts';
 export type {

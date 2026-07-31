@@ -567,7 +567,7 @@ const typescriptStage: GenerationStage = {
       {
         path: OUTPUT_PATHS.typescriptIndex,
         value: normalizeGeneratedText(
-          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.ts';`,
+          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.js';`,
         ),
       },
     ];

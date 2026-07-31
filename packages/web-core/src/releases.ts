@@ -2,7 +2,7 @@ import {
   type ReleaseArtifactEvidenceJson,
   type ReleaseRecordJson,
   type ShellReleaseChannelJson,
-} from '@liiiraa/contracts-ts';
+} from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 export type PublicReleaseChannel = Exclude<ShellReleaseChannelJson, 'development'>;

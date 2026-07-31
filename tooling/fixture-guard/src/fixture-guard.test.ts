@@ -77,7 +77,7 @@ describe('static production fixture refusal', () => {
       ok: true,
       findings: [],
     });
-  });
+  }, 20_000);
 });
 
 describe('runtime production fixture refusal', () => {

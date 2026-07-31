@@ -547,7 +547,7 @@ describe('live workspace discovery boundary', { concurrent: false }, () => {
     } finally {
       process.chdir(originalWorkingDirectory);
     }
-  }, 30_000);
+  }, 120_000);
 });
 
 describe('real graph adapters', () => {

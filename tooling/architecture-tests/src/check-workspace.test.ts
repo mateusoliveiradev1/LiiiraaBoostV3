@@ -135,7 +135,7 @@ const phase3WebModules = [
     layer: 'composition',
     runtimeClass: 'production',
     packageName: '@liiiraa/web',
-    workspaceDependencies: ['@liiiraa/web-core', '@liiiraa/web-features'],
+    workspaceDependencies: ['@liiiraa/design-tokens', '@liiiraa/web-core', '@liiiraa/web-features'],
   },
   {
     id: 'account-app',
@@ -361,8 +361,9 @@ describe('Phase 3 live web activation', { concurrent: false }, () => {
         'turbo run test --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin',
       'web:build':
         'turbo run build --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin',
-      'web:verify:quick': 'pnpm web:check && pnpm web:test',
-      'web:verify': 'pnpm web:verify:quick && pnpm web:build',
+      'web:verify:quick': 'node tooling/web-evidence/run-web-verify.mjs',
+      'web:verify':
+        'pnpm web:verify:quick && pnpm web:build && pnpm --filter @liiiraa/web-evidence exec playwright test && pnpm web:verify:phase -- --mode final',
       'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick',
       verify: 'pnpm --filter @liiiraa/desktop verify && pnpm web:verify',
     });

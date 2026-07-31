@@ -1,7 +1,7 @@
 import type { ErrorObject, ValidateFunction } from 'ajv';
 
 import { webDocumentValidator } from './generated/standalone-validators.js';
-import type { WebDocument } from './generated/index.ts';
+import type { WebDocument } from './generated/index.js';
 
 export const WEB_DOCUMENT_SCHEMA_ID =
   'https://schemas.liiiraa.dev/web/v1/web-document.schema.json' as const;
@@ -55,9 +55,7 @@ const structuralIssues = (
     .slice(0, MAX_ISSUES);
 };
 
-const invalidPayload = (
-  errors: ErrorObject[] | null | undefined,
-): WebDocumentValidationResult => ({
+const invalidPayload = (errors: ErrorObject[] | null | undefined): WebDocumentValidationResult => ({
   ok: false,
   error: {
     code: 'PAYLOAD_INVALID',
@@ -87,9 +85,7 @@ const unsafeWebDocumentUriPath = (document: WebDocument): string | null => {
   if ('source' in document && !isSafeWebUri(document.source)) return '$/source';
 
   if ('evidence' in document) {
-    const unsafeIndex = document.evidence.findIndex(
-      (evidence) => !isSafeWebUri(evidence.source),
-    );
+    const unsafeIndex = document.evidence.findIndex((evidence) => !isSafeWebUri(evidence.source));
     if (unsafeIndex !== -1) return `$/evidence/${String(unsafeIndex)}/source`;
   }
 

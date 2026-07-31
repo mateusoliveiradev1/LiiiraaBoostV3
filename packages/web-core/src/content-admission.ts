@@ -2,7 +2,7 @@ import {
   type ContentRecordJson,
   type ScreenshotProvenanceJson,
   type WebRouteRecordJson,
-} from '@liiiraa/contracts-ts';
+} from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
 export const CONTENT_BUNDLE_SCHEMA_VERSION = 1 as const;

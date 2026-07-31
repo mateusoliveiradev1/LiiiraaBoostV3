@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateWebDocument } from '@liiiraa/contracts-ts';
+import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 import {
   auditRouteProjection,
   createBoundaryLink,

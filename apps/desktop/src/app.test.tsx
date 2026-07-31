@@ -189,9 +189,12 @@ describe('scale smoke', () => {
           viewportWidth={viewportWidth}
         />,
       );
-      expect(markup).toContain(`data-shell-width="${width}"`);
-      expect(markup).toContain(`data-goal-rail-width="${String(railWidth)}"`);
-      expect(markup).toContain(`data-inspector-mode="${inspectorMode}"`);
+      const responsiveWidth = viewportWidth / 1.5;
+      const scaledLayout = getResponsiveShellLayout(responsiveWidth);
+      expect(markup).toContain(`data-responsive-width="${String(Math.round(responsiveWidth))}"`);
+      expect(markup).toContain(`data-shell-width="${scaledLayout.width}"`);
+      expect(markup).toContain(`data-goal-rail-width="${String(scaledLayout.railWidth)}"`);
+      expect(markup).toContain(`data-inspector-mode="${scaledLayout.inspectorMode}"`);
       expect(markup).toContain('data-page-horizontal-scroll="forbidden"');
       expect(semanticFindings(markup)).toEqual([]);
     },

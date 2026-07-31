@@ -1,7 +1,5 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
-import webDocumentSchema from '../../../contracts/generated/web/v1/web-document.schema.json' with {
-  type: 'json',
-};
+import webDocumentSchema from '../../../contracts/generated/web/v1/web-document.schema.json' with { type: 'json' };
 import {
   diagnosticValueValidator,
   hostToRendererValidator,
@@ -13,11 +11,10 @@ import type {
   RendererToHostShellCommandJson,
   ShellNavigationIntentJson,
   WebDocument,
-} from './generated/index.ts';
+} from './generated/index.js';
 
 export const DIAGNOSTIC_VALUE_SCHEMA_ID = 'desktop.diagnostic-value.v1' as const;
-export const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID =
-  'desktop.shell.host-to-renderer.v1' as const;
+export const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID = 'desktop.shell.host-to-renderer.v1' as const;
 export const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID =
   'desktop.shell.renderer-to-host.v1' as const;
 export const WEB_DOCUMENT_SCHEMA_ID =
@@ -55,8 +52,7 @@ export type ContractValidationResult<Value> =
       readonly error: ContractValidationError;
     };
 
-export type DiagnosticValueValidationResult =
-  ContractValidationResult<DiagnosticValueJson>;
+export type DiagnosticValueValidationResult = ContractValidationResult<DiagnosticValueJson>;
 export type HostToRendererShellEventValidationResult =
   ContractValidationResult<HostToRendererShellEventJson>;
 export type RendererToHostShellCommandValidationResult =
@@ -64,13 +60,10 @@ export type RendererToHostShellCommandValidationResult =
 export type WebDocumentValidationError = ContractValidationError;
 export type WebDocumentValidationResult = ContractValidationResult<WebDocument>;
 
-const diagnosticValidator =
-  diagnosticValueValidator as ValidateFunction<DiagnosticValueJson>;
+const diagnosticValidator = diagnosticValueValidator as ValidateFunction<DiagnosticValueJson>;
 const shellMessageValidators = {
-  hostToRenderer:
-    hostToRendererValidator as ValidateFunction<HostToRendererShellEventJson>,
-  rendererToHost:
-    rendererToHostValidator as ValidateFunction<RendererToHostShellCommandJson>,
+  hostToRenderer: hostToRendererValidator as ValidateFunction<HostToRendererShellEventJson>,
+  rendererToHost: rendererToHostValidator as ValidateFunction<RendererToHostShellCommandJson>,
 };
 let cachedWebDocumentValidator: ValidateFunction<WebDocument> | undefined;
 
@@ -93,14 +86,9 @@ const bounded = (value: string, maximum: number): string =>
   value.length <= maximum ? value : value.slice(0, maximum);
 
 const issuePath = (error: ErrorObject): string =>
-  bounded(
-    error.instancePath.length === 0 ? '$' : `$${error.instancePath}`,
-    MAX_PATH_LENGTH,
-  );
+  bounded(error.instancePath.length === 0 ? '$' : `$${error.instancePath}`, MAX_PATH_LENGTH);
 
-const structuralIssues = (
-  errors: ErrorObject[] | null | undefined,
-): ContractValidationIssue[] => {
+const structuralIssues = (errors: ErrorObject[] | null | undefined): ContractValidationIssue[] => {
   const unique = new Map<string, ContractValidationIssue>();
 
   for (const error of errors ?? []) {
@@ -114,8 +102,7 @@ const structuralIssues = (
   return [...unique.values()]
     .sort(
       (left, right) =>
-        left.path.localeCompare(right.path) ||
-        left.keyword.localeCompare(right.keyword),
+        left.path.localeCompare(right.path) || left.keyword.localeCompare(right.keyword),
     )
     .slice(0, MAX_ISSUES);
 };
@@ -171,15 +158,11 @@ const isSafeNavigationIntent = (intent: ShellNavigationIntentJson): boolean => {
   );
 };
 
-const hostEventHasSafeNavigation = (
-  event: HostToRendererShellEventJson,
-): boolean =>
+const hostEventHasSafeNavigation = (event: HostToRendererShellEventJson): boolean =>
   event.messageType !== 'desktop.shell.navigation-requested.event' ||
   isSafeNavigationIntent(event.payload.intent);
 
-const rendererCommandHasSafeNavigation = (
-  command: RendererToHostShellCommandJson,
-): boolean => {
+const rendererCommandHasSafeNavigation = (command: RendererToHostShellCommandJson): boolean => {
   if (command.messageType === 'desktop.shell.navigate.command') {
     return isSafeNavigationIntent(command.payload.intent);
   }
@@ -213,9 +196,7 @@ const unsafeWebDocumentUriPath = (document: WebDocument): string | null => {
   }
 
   if ('evidence' in document) {
-    const unsafeIndex = document.evidence.findIndex(
-      (evidence) => !isSafeWebUri(evidence.source),
-    );
+    const unsafeIndex = document.evidence.findIndex((evidence) => !isSafeWebUri(evidence.source));
     if (unsafeIndex !== -1) {
       return `$/evidence/${unsafeIndex}/source`;
     }
@@ -248,12 +229,7 @@ export const validateDiagnosticValue = (
   schemaId: string,
   input: unknown,
 ): DiagnosticValueValidationResult =>
-  validateGeneratedValue(
-    DIAGNOSTIC_VALUE_SCHEMA_ID,
-    schemaId,
-    input,
-    diagnosticValidator,
-  );
+  validateGeneratedValue(DIAGNOSTIC_VALUE_SCHEMA_ID, schemaId, input, diagnosticValidator);
 
 export const validateHostToRendererShellEvent = (
   schemaId: string,
@@ -295,9 +271,7 @@ export const validateRendererToHostShellCommand = (
   return result;
 };
 
-export const validateWebDocument = (
-  input: unknown,
-): WebDocumentValidationResult => {
+export const validateWebDocument = (input: unknown): WebDocumentValidationResult => {
   const validator = getWebDocumentValidator();
   if (!validator(input)) {
     return invalidPayload(WEB_DOCUMENT_SCHEMA_ID, validator.errors);
@@ -305,11 +279,7 @@ export const validateWebDocument = (
 
   const unsafeUriPath = unsafeWebDocumentUriPath(input);
   if (unsafeUriPath !== null) {
-    return invalidSemanticPayload(
-      WEB_DOCUMENT_SCHEMA_ID,
-      unsafeUriPath,
-      'safeUri',
-    );
+    return invalidSemanticPayload(WEB_DOCUMENT_SCHEMA_ID, unsafeUriPath, 'safeUri');
   }
 
   return {
