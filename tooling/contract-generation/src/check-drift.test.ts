@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 import { compareGeneratedArtifacts, findHandwrittenTransportDeclarations } from './check-drift.ts';
 
@@ -160,6 +161,10 @@ function webContractSourceDiagnostics(source: string): string[] {
       'SafeContextKey',
       ['locale', 'version', 'channel', 'destination', 'return-path'],
     ],
+    [
+      'OfficialReleaseOrigin',
+      ['liiiraa-download-origin', 'liiiraa-release-origin'],
+    ],
   ]);
 
   for (const [unionName, expectedLiterals] of exactUnions) {
@@ -173,14 +178,12 @@ function webContractSourceDiagnostics(source: string): string[] {
     'WebIdentifier',
     'WebText',
     'WebPathnameTemplate',
-    'WebVersion',
-    'WebLocale',
     'WebUri',
     'Sha256Digest',
   ]) {
     if (
       !new RegExp(
-        `@minLength\\(1\\)\\s*@maxLength\\(\\d+\\)\\s*scalar\\s+${scalarName}\\s+extends\\s+string`,
+        `@minLength\\([1-9]\\d*\\)\\s*@maxLength\\([1-9]\\d*\\)(?:\\s*@[a-zA-Z]+\\([^\\n]*\\))*\\s*scalar\\s+${scalarName}\\s+extends\\s+string`,
       ).test(source)
     ) {
       diagnostics.push(`unbounded scalar: ${scalarName}`);
@@ -228,6 +231,22 @@ function webContractSourceDiagnostics(source: string): string[] {
     diagnostics.push('NoChangeReceipt.nextPhase must remain Phase 4');
   }
 
+  const futureAuthorityBody =
+    extractDeclarationBody(source, 'model', 'FutureAuthorityCommand') ?? '';
+  if (!/\bphase\s*:\s*"Phase 4"\s*;/.test(futureAuthorityBody)) {
+    diagnostics.push('FutureAuthorityCommand.phase must remain Phase 4');
+  }
+
+  const contentBody =
+    extractDeclarationBody(source, 'model', 'ContentRecord') ?? '';
+  if (
+    !/\blocale\s*:\s*ShellLocale\s*;/.test(contentBody) ||
+    !/\bversion\s*:\s*ShellVersion\s*;/.test(contentBody) ||
+    !/\bchannel\s*:\s*ShellReleaseChannel\s*;/.test(contentBody)
+  ) {
+    diagnostics.push('ContentRecord must reuse closed shell locale/version/channel');
+  }
+
   const artifactBody =
     extractDeclarationBody(source, 'model', 'ReleaseArtifactEvidence') ?? '';
   if (!/\borigin\s*:\s*OfficialReleaseOrigin\s*;/.test(artifactBody)) {
@@ -253,9 +272,10 @@ function webContractSourceDiagnostics(source: string): string[] {
   return diagnostics.sort();
 }
 
-const webContractSource = existsSync(WEB_CONTRACT_PATH)
-  ? readFileSync(WEB_CONTRACT_PATH, 'utf8')
-  : '';
+const webContractSource = await readFile(
+  fileURLToPath(WEB_CONTRACT_PATH),
+  'utf8',
+);
 
 assertDeepEqual(
   webContractSourceDiagnostics(webContractSource),
