@@ -6,15 +6,15 @@ current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
 stopped_at: Completed 03-19-PLAN.md
-last_updated: "2026-07-31T06:58:29.362Z"
+last_updated: "2026-07-31T07:27:41.931Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-19-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 77
-  percent: 86
+  completed_plans: 78
+  percent: 20
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 20 of 32
+Plan: 21 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-19-PLAN.md
 
@@ -125,6 +125,7 @@ _Updated after plan completion_
 | Phase 03 P17 | 16min | 2 tasks | 21 files |
 | Phase 03 P18 | 19min | 2 tasks | 7 files |
 | Phase 03 P19 | 18min | 2 tasks | 7 files |
+| Phase 03 P20 | 3h23m | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -324,6 +325,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Preserve technical punctuation as a full search token while also indexing its delimited components. — Keeps versions, hashes, hardware IDs, and error codes exact without sacrificing natural-language discovery.
 - [Phase 03]: Stale historical content remains public only as noindex, non-actionable history with a validated canonical current route. — Lost evidence can preserve context but cannot support present-tense action.
 - [Phase 03]: Reuse the already-approved exact MiniSearch 7.2.0 identity in web-core without installing or substituting package identity. — The search engine dependency belongs to the package that owns its implementation.
+- [Phase 03]: Fail the Home product stage closed until Plan 03-29 supplies an approved real desktop capture and matching checksum. — Prevents generated, stock, stale, or tampered imagery from becoming product proof.
+- [Phase 03]: Keep Home filesystem and hash validation server-side behind an app-local client UI boundary. — Preserves the media trust boundary without importing client-only React Aria modules into the Server Component.
+- [Phase 03]: Localize evidence metadata and screenshot actions through backward-compatible shared component props. — Prevents English-only evidence labels leaking into the PT-BR Home while preserving existing consumers.
 
 ### Pending Todos
 
@@ -365,6 +369,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T06:58:29.357Z
+Last session: 2026-07-31T07:27:20.256Z
 Stopped at: Completed 03-19-PLAN.md
 Resume file: None
