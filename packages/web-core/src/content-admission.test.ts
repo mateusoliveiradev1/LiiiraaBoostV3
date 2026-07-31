@@ -301,7 +301,7 @@ describe('content admission', () => {
     const invalid = contentRecord('pt-BR', {
       document: {
         ...contentRecord('pt-BR').document,
-        id: secret,
+        id: `${secret}-${'x'.repeat(128)}`,
       },
     });
 
