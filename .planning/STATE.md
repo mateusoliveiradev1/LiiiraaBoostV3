@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-10-PLAN.md
-last_updated: "2026-07-31T03:31:27.325Z"
+stopped_at: Completed 03-11-PLAN.md
+last_updated: "2026-07-31T04:03:09.999Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 68
+  completed_plans: 69
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 11 of 32
+Plan: 12 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -116,6 +116,7 @@ _Updated after plan completion_
 | Phase 03 P07 | 3min | 1 tasks | 4 files |
 | Phase 03 P08 | 4min | 1 tasks | 4 files |
 | Phase 03 P10 | 14m | 1 tasks | 4 files |
+| Phase 03 P11 | 27min | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -287,6 +288,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Compile Ajv lazily once so contracts package import remains compatible with the desktop no-dynamic-code CSP gate. — Preserves existing desktop initialization behavior while still caching the web validator.
 - [Phase 03]: Accept web evidence sources only as credential-free HTTPS URIs in both runtimes. — The generated WebUri is bounded but needs trust-boundary semantics to reject executable or credential-bearing URLs.
 - [Phase 03]: Wrap generated Rust variants in ValidatedWebDocument without duplicating generated DTO fields. — Makes post-schema transport identity explicit while preserving the generated models as field authority.
+- [Phase 03]: Activate exactly the seven predeclared Phase 3 module records and preserve every other reserved record.
+- [Phase 03]: Keep public, account, and admin route-less while giving Next.js a buildable application root; later plans own user-facing routes.
+- [Phase 03]: Reuse already-approved @types/react@19.2.17 in each owning Next app without introducing a new package identity.
 
 ### Pending Todos
 
@@ -328,6 +332,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T03:31:27.317Z
-Stopped at: Completed 03-10-PLAN.md
+Last session: 2026-07-31T04:03:09.991Z
+Stopped at: Completed 03-11-PLAN.md
 Resume file: None
