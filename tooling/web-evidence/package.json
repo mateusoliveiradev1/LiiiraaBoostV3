@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
+    "readiness": "node readiness.mjs",
     "test": "vitest --run --passWithNoTests",
     "verify": "pnpm check && pnpm test && playwright test"
   },

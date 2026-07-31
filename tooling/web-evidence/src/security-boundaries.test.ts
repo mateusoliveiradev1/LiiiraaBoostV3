@@ -97,7 +97,7 @@ describe('web evidence harness self-test: security boundaries', () => {
       (fixture: SecurityBoundaryEvidence) => ({
         ...fixture,
         surfaces: fixture.surfaces.map((surface) =>
-          surface.surface === 'admin' ? { ...surface, indexing: 'index' } : surface,
+          surface.surface === 'admin' ? { ...surface, indexing: 'index' as const } : surface,
         ),
       }),
       'PRIVATE_INDEXING',
@@ -107,9 +107,7 @@ describe('web evidence harness self-test: security boundaries', () => {
       (fixture: SecurityBoundaryEvidence) => ({
         ...fixture,
         surfaces: fixture.surfaces.map((surface) =>
-          surface.surface === 'account'
-            ? { ...surface, cookieScope: '.localhost' }
-            : surface,
+          surface.surface === 'account' ? { ...surface, cookieScope: '.localhost' } : surface,
         ),
       }),
       'COOKIE_SCOPE_VIOLATION',
@@ -120,7 +118,11 @@ describe('web evidence harness self-test: security boundaries', () => {
         ...fixture,
         surfaces: fixture.surfaces.map((surface) =>
           surface.surface === 'admin'
-            ? { ...surface, origin: 'http://account.localhost:3101' }
+            ? {
+                ...surface,
+                cookieScope: 'account.localhost',
+                origin: 'http://account.localhost:3101',
+              }
             : surface,
         ),
       }),
@@ -131,9 +133,7 @@ describe('web evidence harness self-test: security boundaries', () => {
       (fixture: SecurityBoundaryEvidence) => ({
         ...fixture,
         surfaces: fixture.surfaces.map((surface) =>
-          surface.surface === 'public'
-            ? { ...surface, fixtureReferences: ['W01'] }
-            : surface,
+          surface.surface === 'public' ? { ...surface, fixtureReferences: ['W01'] } : surface,
         ),
       }),
       'FIXTURE_LEAKAGE',

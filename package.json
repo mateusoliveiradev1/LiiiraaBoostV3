@@ -46,7 +46,7 @@
     "web:check": "turbo run check --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin",
     "web:test": "turbo run test --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin",
     "web:build": "turbo run build --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin",
-    "web:verify:quick": "pnpm web:check && pnpm web:test",
+    "web:verify:quick": "node tooling/web-evidence/run-web-verify.mjs",
     "web:verify": "pnpm web:verify:quick && pnpm web:build",
     "verify:quick": "pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick",
     "verify": "pnpm --filter @liiiraa/desktop verify && pnpm web:verify"
