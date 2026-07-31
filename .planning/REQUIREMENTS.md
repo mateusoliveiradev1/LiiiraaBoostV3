@@ -33,7 +33,7 @@
 
 - [ ] **WEB-01**: Visitor can understand the product, its evidence policy, supported capabilities, plans, and limitations on the public site
 - [ ] **WEB-02**: Visitor can read versioned technical documentation linked from relevant desktop features
-- [ ] **WEB-03**: User can securely download a signed installer and verify release information
+- [ ] **WEB-03**: User can inspect release channel, version, integrity, and compatibility and complete a fail-closed download-eligibility journey; Phase 3 exposes no installer until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled
 - [ ] **WEB-04**: User can manage profile, security methods, subscription, invoices, active device, and support requests
 - [ ] **WEB-05**: User can revoke the active PC and bind a replacement subject to the 30-day reset cooldown
 - [ ] **WEB-06**: Authorized staff can use an isolated administrative application with role-specific access

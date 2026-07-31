@@ -704,32 +704,42 @@ Generate the nonce with a cryptographically secure per-request value; never deri
 | --- | --------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------- |
 | —   | None. Recommendations are grounded in locked context, live codebase inspection, registry checks, or cited official documentation. | —       | —             |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All five planning questions are resolved below from locked context, official framework constraints, `.planning/STATE.md`, and the package-legitimacy protocol. Execution may still fail closed at the named evidence gate; that is a planned safety outcome, not an unresolved design choice.
+
+| Question | Resolved decision | Enforcement owner |
+|---|---|---|
+| Static public CSP | Keep public routes static-first. Plan 03-15 uses report-only inspection only as a production-build diagnostic, then ships an enforced, build-proven policy with no third-party runtime scripts, request nonce, silent directive weakening, or experimental SRI dependency. If the exact Next output cannot satisfy that contract, the build blocks rather than adding permissive script sources or making the public tree dynamic. | 03-14 security evidence; 03-15 public shell |
+| Demonstrative release manifest route | Render validated demonstrative fields only inside the persistently labeled release UI and fixture evidence. Do not publish sample JSON at the canonical official-manifest URL and do not emit an artifact URL until a publicly trusted record exists, per D-35. | 03-24 decision engine; 03-25 release UI |
+| Surface hostnames | Use environment-validated `public.localhost`, `account.localhost`, and `admin.localhost` defaults for deterministic Phase 3 build/E2E policy tests. Real production DNS and edge/IaC hostnames remain owned by the later distribution/operations phase. | 03-14 browser matrix; 03-15 through 03-17 policies |
+| UI-SPEC approval | `03-UI-SPEC.md` is approved, reconciling its frontmatter/checklist with `.planning/STATE.md` (`stopped_at: Phase 3 UI-SPEC approved`). Plans consume it as the locked design contract. | Planning artifact reconciliation |
+| Recency-flagged package approval | `next@16.2.12`, `@next/mdx@16.2.12`, and `next-intl@4.13.4` remain `SUS` until Plan 03-01 reproduces registry/repository/lifecycle evidence and receives the non-auto-approvable blocking human approval. No install or lockfile resolution may precede it. | 03-01 blocking-human legitimacy gate |
 
 1. **What static CSP is enforceable for the exact public Next 16.2.12 build without weakening the project gate?**
    - What we know: nonce CSP forces dynamic rendering; Next’s static SRI alternative is experimental. [CITED: https://nextjs.org/docs/app/guides/content-security-policy]
-   - What is unclear: the minimal directive set required by the final public bundle and whether experimental SRI is acceptable.
-   - Recommendation: make this a Wave 0 report-only CSP spike against a production build; keep no third-party scripts, record violations, and require security approval before enforcement.
+   - Prior uncertainty: the minimal directive set required by the final public bundle and whether experimental SRI is acceptable; resolved by the fail-closed build-proven policy above.
+   - Resolution implementation: use the Wave 0 security gate plus Plan 03-15 production-build probe; report-only is diagnostic, while the final shipped header is enforced and any unresolved violation blocks completion.
 
 2. **Should the demonstrative release manifest have a public JSON route?**
    - What we know: official manifest and artifact trust must fail closed, while the complete manifest UX must be demonstrated. [VERIFIED: 03-CONTEXT.md]
-   - What is unclear: whether a public sample JSON route could be mistaken for an official canonical release.
-   - Recommendation: render the schema/fields in the labeled scenario UI and fixture tests, but do not publish it at the canonical official-manifest URL until an approved release exists.
+   - Prior uncertainty: whether a public sample JSON route could be mistaken for an official canonical release; resolved by keeping it inside labeled UI/fixture evidence only.
+   - Resolution implementation: render the schema/fields in the labeled scenario UI and fixture tests, but do not publish it at the canonical official-manifest URL until an approved release exists.
 
 3. **Which exact hostnames will represent the three origins?**
    - What we know: distinct origins and policies are locked; infrastructure provisioning is not Phase 3. [VERIFIED: 03-CONTEXT.md]
-   - What is unclear: production DNS names and preview-domain conventions.
-   - Recommendation: define an environment-validated origin map with test defaults (`public.localhost`, `account.localhost`, `admin.localhost`) and defer real DNS/IaC to the infrastructure phase.
+   - Prior uncertainty: production DNS names and preview-domain conventions; resolved for Phase 3 with validated localhost origins and later-phase production DNS ownership.
+   - Resolution implementation: define an environment-validated origin map with test defaults (`public.localhost`, `account.localhost`, `admin.localhost`) and defer real DNS/IaC to the infrastructure phase.
 
 4. **Is `03-UI-SPEC.md` formally approved?**
    - What we know: `.planning/STATE.md` says approved, while UI-SPEC frontmatter and checker boxes say draft/pending. [VERIFIED: codebase grep]
-   - What is unclear: which artifact is authoritative for the sign-off state.
-   - Recommendation: reconcile the metadata before plan execution; do not reinterpret the UI content meanwhile.
+   - Prior uncertainty: which artifact is authoritative for the sign-off state; resolved by reconciling UI-SPEC with the approved state recorded in `.planning/STATE.md`.
+   - Resolution implementation: UI-SPEC metadata, checklist, and approval now match the authoritative approved state; executor plans consume the reconciled artifact.
 
 5. **Will the three recency-flagged packages receive approval?**
    - What we know: Next, `@next/mdx`, and next-intl are official projects and current stack choices, but the legitimacy seam returned SUS because selected releases are under one week old. [VERIFIED: npm registry]
-   - What is unclear: human acceptance of that recency.
-   - Recommendation: planner adds one `checkpoint:human-verify` before the first install, listing registry/repository/postinstall evidence.
+   - Prior uncertainty: human acceptance of that recency; resolved procedurally by the blocking-human Plan 03-01 checkpoint before installation authority is granted.
+   - Resolution implementation: Plan 03-01 owns the non-auto-approvable `checkpoint:human-verify` before first install and lists registry/repository/postinstall evidence.
 
 ## Environment Availability
 

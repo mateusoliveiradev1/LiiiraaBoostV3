@@ -1,9 +1,11 @@
 ---
 phase: 03
 slug: complete-web-experience
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
+planning_signoff: approved
+wave_0_execution: pending
 created: 2026-07-30
 ---
 
@@ -38,10 +40,10 @@ created: 2026-07-30
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-W0-01 | TBD | 0 | WEB-01 | T-03-02 / T-03-09 | Public content remains truthful, bilingual, navigable, accessible, and isolated from preview data | unit + E2E + visual + accessibility | `pnpm web:verify:quick -- --requirement WEB-01` | ❌ W0 | ⬜ pending |
-| 03-W0-02 | TBD | 0 | WEB-02 | T-03-02 / T-03-04 | Locale, version, channel, search, and desktop links resolve only through the typed manifest | contract + unit + E2E | `pnpm web:verify:quick -- --requirement WEB-02` | ❌ W0 | ⬜ pending |
-| 03-W0-03 | TBD | 0 | WEB-03 | T-03-08 | Download and integrity flows fail closed and never expose a development artifact | state-machine + artifact + E2E | `pnpm web:verify:quick -- --requirement WEB-03` | ❌ W0 | ⬜ pending |
-| 03-W0-04 | TBD | 0 | WEB-08 | T-03-01 / T-03-04 / T-03-05 / T-03-06 | Public, account, and admin builds retain distinct headers, origins, indexing, cookies, and fixture boundaries | architecture + build + header smoke | `pnpm web:verify:quick -- --requirement WEB-08` | ❌ W0 | ⬜ pending |
+| 03-W0-01 | 03-14 Task 1 + Task 2 | 7 | WEB-01 | T-03-02 / T-03-09 | Public content remains truthful, bilingual, navigable, accessible, and isolated from preview data | unit + E2E + visual + accessibility | `pnpm web:verify:quick -- --requirement WEB-01` | ❌ W0 | ⬜ pending |
+| 03-W0-02 | 03-14 Task 1 + Task 2 | 7 | WEB-02 | T-03-02 / T-03-04 | Locale, version, channel, search, and desktop links resolve only through the typed manifest | contract + unit + E2E | `pnpm web:verify:quick -- --requirement WEB-02` | ❌ W0 | ⬜ pending |
+| 03-W0-03 | 03-14 Task 1 + Task 2 | 7 | WEB-03 | T-03-08 | Download eligibility and integrity flows fail closed and never expose a development artifact | state-machine + artifact + E2E | `pnpm web:verify:quick -- --requirement WEB-03` | ❌ W0 | ⬜ pending |
+| 03-W0-04 | 03-14 Task 1 + Task 2 | 7 | WEB-08 | T-03-01 / T-03-04 / T-03-05 / T-03-06 | Public, account, and admin builds retain distinct headers, origins, indexing, cookies, and fixture boundaries | architecture + build + header smoke | `pnpm web:verify:quick -- --requirement WEB-08` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -72,11 +74,13 @@ created: 2026-07-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verification backed by Wave 0 dependencies
-- [ ] Sampling continuity: no three consecutive tasks without automated verification
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency stays below 120 seconds
-- [ ] `nyquist_compliant: true` is set in frontmatter
+- [x] All tasks have `<automated>` verification backed by Wave 0 dependencies
+- [x] Sampling continuity: no three consecutive tasks without automated verification
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency stays below 120 seconds
+- [x] `nyquist_compliant: true` is set in frontmatter
 
-**Approval:** pending
+**Planning approval:** approved — every Phase 3 requirement has an explicit Plan 03-14 task mapping and focused automated command before UI fan-out.
+
+**Wave 0 execution:** pending — `wave_0_complete` remains `false` until Plan 03-14 has executed and its evidence harness passes. Planning completeness is not execution evidence.

@@ -267,7 +267,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 1. Visitor can understand the product, evidence policy, supported capabilities, plans, and limitations without fabricated gains or deceptive urgency.
 2. Visitor can browse versioned technical documentation and follow contextual links from the desktop experience to the matching documented behavior.
-3. User can download a signed installer and verify its release channel, version, integrity, and compatibility information.
+3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
 **Plans**: 32 plans
