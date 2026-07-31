@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-27-PLAN.md
-last_updated: "2026-07-31T09:53:54.659Z"
+stopped_at: Completed 03-28-PLAN.md
+last_updated: "2026-07-31T10:16:29.248Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-27-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 84
+  completed_plans: 85
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 27 of 32
+Plan: 28 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-27-PLAN.md
 
@@ -132,6 +132,7 @@ _Updated after plan completion_
 | Phase 03 P23 | 29min | 2 tasks | 9 files |
 | Phase 03 P24 | 13min | 1 tasks | 3 files |
 | Phase 03 P27 | 15min | 2 tasks | 5 files |
+| Phase 03 P28 | 14min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -354,6 +355,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Canonical account-origin routes own account page resolution and scenario selection never comes from URLs, cookies, or environment state. — Prevents path and fixture authority drift.
 - [Phase 03]: Sensitive account reviews terminate only in cancellation or a validated Phase 4 no-change receipt. — Keeps identity, billing, device, privacy, and support authority disconnected.
 - [Phase 03]: Only explicitly safe account draft fields survive degraded preview states. — Support descriptions and privacy payloads are never implicitly retained.
+- [Phase 03]: Project each admin role from one closed route-access matrix and render a localized 403 for every cross-role route attempt.
+- [Phase 03]: Admit diagnostic consent only when purpose, exact field set, expiration, actor, and immutable audit reference all match the requested synthetic object.
+- [Phase 03]: Enforce the 960px high-risk boundary twice: remove confirmation controls semantically through responsive CSS and reject undersized workflow inputs in the preview machine.
 
 ### Pending Todos
 
@@ -395,6 +399,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T09:53:54.537Z
-Stopped at: Completed 03-27-PLAN.md
+Last session: 2026-07-31T10:16:29.242Z
+Stopped at: Completed 03-28-PLAN.md
 Resume file: None
