@@ -26,11 +26,7 @@ const sha = (value: string): string => createHash('sha256').update(value).digest
 const repositoryRoot = join(import.meta.dirname, '../../..');
 const routeReachabilityFile = 'quality/evidence/phase-03/web/route-reachability.json';
 
-type Phase3InputWithReachability = Phase3VerificationInput & {
-  artifacts: Phase3VerificationInput['artifacts'] & {
-    routeReachability?: RouteReachabilityEvidence;
-  };
-};
+type Phase3InputWithReachability = Phase3VerificationInput;
 
 const currentRouteReachability = (): RouteReachabilityEvidence =>
   JSON.parse(
@@ -104,10 +100,10 @@ const completeInput = (): Phase3InputWithReachability => ({
       };
     }),
     locales: [...PHASE_3_LOCALES],
-    proofs: PHASE_3_PROOFS.map(({ file, id }) => ({
+    proofs: PHASE_3_PROOFS.map(({ file, id, owner }) => ({
       file,
       id,
-      owner: 'plan-03-32',
+      owner,
       status: 'passed' as const,
     })),
     publication: {
@@ -188,7 +184,7 @@ describe('Phase 3 route reachability', () => {
 
   it('rejects the complete 53-route declaration when browser reachability proof is absent', () => {
     const input = cloneInput(completeInput());
-    delete input.artifacts.routeReachability;
+    delete (input.artifacts as Partial<Phase3VerificationInput['artifacts']>).routeReachability;
 
     expect(verifyPhase3(input).diagnostics.map(({ code }) => code)).toContain(
       'ROUTE_REACHABILITY_EVIDENCE_SHAPE_INVALID',
@@ -208,7 +204,10 @@ describe('Phase 3 route reachability', () => {
     [
       'surface drift',
       (values: RouteReachabilityObservation[]) => [
-        { ...values[0]!, surface: 'account' as const },
+        {
+          ...values[0]!,
+          surface: values[0]!.surface === 'account' ? ('public' as const) : ('account' as const),
+        },
         ...values.slice(1),
       ],
     ],
@@ -297,16 +296,32 @@ describe('Phase 3 route reachability', () => {
     const owner = cloneInput(completeInput());
     const routeProof = owner.artifacts.proofs.find(({ id }) => id === 'route-reachability');
     if (routeProof !== undefined) routeProof.owner = 'plan-03-32';
+    const status = cloneInput(completeInput());
+    const statusProof = status.artifacts.proofs.find(({ id }) => id === 'route-reachability');
+    if (statusProof !== undefined) statusProof.status = 'planned';
+    const path = cloneInput(completeInput());
+    const pathProof = path.artifacts.proofs.find(({ id }) => id === 'route-reachability');
+    if (pathProof !== undefined) pathProof.file = 'quality/evidence/phase-03/web/routes.json';
     const identity = cloneInput(completeInput());
     identity.artifacts.routeReachability = {
       ...identity.artifacts.routeReachability!,
       owner: 'plan-03-34' as never,
     };
+    const schema = cloneInput(completeInput());
+    schema.artifacts.routeReachability = {
+      ...schema.artifacts.routeReachability!,
+      schemaVersion: 2 as never,
+    };
 
     expect(verifyPhase3(owner).diagnostics.map(({ code }) => code)).toContain(
       'PROOF_OWNER_MISMATCH',
     );
+    expect(verifyPhase3(status).diagnostics.map(({ code }) => code)).toContain('PROOF_NOT_FINAL');
+    expect(verifyPhase3(path).diagnostics.map(({ code }) => code)).toContain('PROOF_PATH_MISMATCH');
     expect(verifyPhase3(identity).diagnostics.map(({ code }) => code)).toContain(
+      'ROUTE_REACHABILITY_EVIDENCE_IDENTITY_INVALID',
+    );
+    expect(verifyPhase3(schema).diagnostics.map(({ code }) => code)).toContain(
       'ROUTE_REACHABILITY_EVIDENCE_IDENTITY_INVALID',
     );
   });
