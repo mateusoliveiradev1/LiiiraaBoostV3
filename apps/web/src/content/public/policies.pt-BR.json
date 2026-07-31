@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "documents": [
+    {
+      "kind": "privacy",
+      "routeId": "public-privacy-policy",
+      "title": "Política de privacidade",
+      "summary": "Local por padrão, coleta mínima por finalidade e consentimento explícito antes de diagnóstico ou medição opcional.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "privacy@liiiraa.com",
+      "sections": [
+        {
+          "heading": "O que este site público armazena",
+          "body": "Esta fase usa apenas estado estritamente necessário de idioma e navegação. Ela não usa análise opcional, publicidade, rastreamento entre sites nem banner de cookies."
+        },
+        {
+          "heading": "Pontos de coleta",
+          "body": "As páginas públicas de suporte e compatibilidade não enviam dados pessoais nem diagnósticos. Um ponto de coleta futuro precisa declarar finalidade, campos obrigatórios, retenção, compartilhamento e revogação antes do consentimento."
+        },
+        {
+          "heading": "Retenção e compartilhamento",
+          "body": "Nenhum caso de suporte, conta, dispositivo, cobrança ou diagnóstico é criado pela experiência pública da Fase 3. Portanto, nenhum desses registros é retido ou compartilhado."
+        },
+        {
+          "heading": "Suas escolhas",
+          "body": "A medição opcional permanecerá desativada até existir consentimento granular. O consentimento futuro deve ser reversível sem remover acesso à segurança, recuperação ou documentação pública."
+        },
+        {
+          "heading": "Responsabilidade",
+          "body": "Dúvidas, correções e futuros pedidos de direitos de dados usam o contato de privacidade responsável acima. A Fase 4 precisa adicionar autoridade autenticada antes que qualquer pedido seja apresentado como enviado."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Política pública inicial para a experiência determinística e sem coleta da Fase 3."
+        }
+      ]
+    },
+    {
+      "kind": "terms",
+      "routeId": "public-terms",
+      "title": "Termos de uso",
+      "summary": "O site atual é uma superfície de informação e prévia determinística, não uma autoridade de checkout ou otimização.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "legal@liiiraa.com",
+      "sections": [
+        {
+          "heading": "Limite atual do serviço",
+          "body": "As páginas públicas da Fase 3 oferecem informações de produto, compatibilidade, evidência, documentação, versão e suporte. Elas não vendem plano, vinculam dispositivo, alteram o Windows nem criam direito."
+        },
+        {
+          "heading": "Termos comerciais",
+          "body": "Nenhum preço, período de cobrança, renovação, tributo, cancelamento, reembolso, regra de dispositivo ou efeito de expiração está ativo porque a autoridade de checkout está indisponível. Uma oferta futura precisa publicar todos esses termos antes da confirmação."
+        },
+        {
+          "heading": "Compatibilidade e evidência",
+          "body": "A compatibilidade depende do ciclo de vida do Windows, da arquitetura, do hardware, do jogo, dos drivers e da evidência de validação disponível. O material público nunca garante ganho em uma máquina não observada."
+        },
+        {
+          "heading": "Uso seguro",
+          "body": "Não trate conteúdo de prévia como permissão para executar scripts ou fazer alterações de sistema sem suporte. Use documentação e recuperação canônicas; nunca contorne um bloqueio de integridade ou disponibilidade."
+        },
+        {
+          "heading": "Alterações",
+          "body": "Mudanças materiais recebem nova versão, data de vigência, resumo em linguagem simples e histórico preservado. Um termo obsoleto não pode continuar acionável silenciosamente."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Termos iniciais sem checkout e sem autoridade nativa para a Fase 3."
+        }
+      ]
+    },
+    {
+      "kind": "security",
+      "routeId": "public-policies",
+      "title": "Segurança e confiança",
+      "summary": "Privilégio mínimo, artefatos assinados, limites explícitos de autoridade, validação em tempo de execução e operações recuperáveis definem o produto.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "security@liiiraa.com",
+      "sections": [
+        {
+          "heading": "Limites de autoridade",
+          "body": "O site público não possui autoridade de conta, administração, pagamento, dispositivo ou otimização nativa. Aplicações pública, de conta e administrativa permanecem em origens e shells separados."
+        },
+        {
+          "heading": "Direção de segurança no desktop",
+          "body": "O renderizador permanece sem privilégios. Operações privilegiadas futuras devem ser específicas, autenticadas, permitidas, auditadas e acompanhadas de recuperação exata; scripts remotos arbitrários são proibidos."
+        },
+        {
+          "heading": "Confiança no artefato",
+          "body": "Um download público permanece bloqueado até que publicador, assinatura, SHA-256, artefato, manifesto, compatibilidade e política da versão concordem. Não existe caminho para continuar mesmo assim."
+        },
+        {
+          "heading": "Relato",
+          "body": "Vulnerabilidades potenciais devem usar o processo de divulgação responsável. O status público explica o impacto ao usuário sem expor detalhes internos sensíveis."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Declaração pública inicial dos limites de segurança da Fase 3 e requisitos para operações nativas futuras."
+        }
+      ]
+    }
+  ],
+  "disclosure": {
+    "routeId": "public-responsible-disclosure",
+    "title": "Divulgação responsável",
+    "summary": "Relate uma vulnerabilidade potencial por um canal seguro e delimitado.",
+    "secureChannel": "security@liiiraa.com",
+    "scope": [
+      "Origens web públicas pertencentes à Liiiraa e artefatos publicados do Liiiraa Boost",
+      "Comportamento de segurança reproduzível que possa ser descrito sem dados pessoais",
+      "Falhas de integridade, autorização, privacidade ou recuperação"
+    ],
+    "prohibitedContent": [
+      "Senhas, tokens de acesso, dados de pagamento ou informações pessoais sem relação",
+      "Teste destrutivo, negação de serviço, persistência ou acesso além da prova mínima",
+      "Divulgação pública antes da coordenação de uma janela segura de resposta"
+    ],
+    "response": "Confirmaremos um relato utilizável, validaremos o escopo e enviaremos atualização pelo canal de relato. O prazo depende da severidade e da reprodutibilidade; nenhuma recompensa ou pagamento é prometido.",
+    "history": [
+      {
+        "version": "1.0.0",
+        "effectiveDate": "2026-07-31",
+        "summary": "Escopo inicial de relato e política de canal seguro."
+      }
+    ]
+  },
+  "status": {
+    "routeId": "public-status",
+    "title": "Status operacional",
+    "overall": "Operacional",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "summary": "As informações públicas estão disponíveis. Download, autoridade de conta e otimização nativa são limites de disponibilidade do produto, não incidentes de serviço.",
+    "components": [
+      {
+        "name": "Produto público e políticas",
+        "state": "operational",
+        "detail": "As informações públicas autorais do repositório estão disponíveis."
+      },
+      {
+        "name": "Documentação e orientação de suporte",
+        "state": "operational",
+        "detail": "A orientação pública de recuperação permanece disponível."
+      },
+      {
+        "name": "Download público confiável",
+        "state": "unavailable",
+        "detail": "Nenhum instalador com confiança pública foi aprovado; este é um bloqueio declarado de versão."
+      },
+      {
+        "name": "Conta e autoridade remota",
+        "state": "demonstrative-preview",
+        "detail": "As prévias da Fase 3 não alteram estado remoto."
+      }
+    ],
+    "incidentHistory": [],
+    "incidentHistoryEmpty": "Nenhum incidente confirmado do serviço público foi publicado. Entradas futuras indicarão componente afetado, impacto ao usuário, atualizações com horário e resolução sem expor detalhes internos sensíveis."
+  }
+}

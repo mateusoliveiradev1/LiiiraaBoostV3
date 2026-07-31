@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "documents": [
+    {
+      "kind": "privacy",
+      "routeId": "public-privacy-policy",
+      "title": "Privacy policy",
+      "summary": "Local-first by default, minimum collection by purpose, and explicit consent before optional diagnostics or measurement.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "privacy@liiiraa.com",
+      "sections": [
+        {
+          "heading": "What this public site stores",
+          "body": "This phase uses only strictly necessary locale and navigation state. It does not use optional analytics, advertising, cross-site tracking, or a cookie banner."
+        },
+        {
+          "heading": "Collection points",
+          "body": "The public support and compatibility pages do not submit personal or diagnostic data. A future collection point must state its purpose, required fields, retention, sharing, and revocation before consent."
+        },
+        {
+          "heading": "Retention and sharing",
+          "body": "No support case, account, device, billing, or diagnostic record is created by the Phase 3 public experience. Therefore none of those records is retained or shared."
+        },
+        {
+          "heading": "Your choices",
+          "body": "Optional measurement will remain off until granular consent exists. Future consent must be reversible without removing access to safety, recovery, or public documentation."
+        },
+        {
+          "heading": "Accountability",
+          "body": "Questions, correction requests, and future data-rights requests use the accountable privacy contact above. Phase 4 must add authenticated request authority before any request is presented as submitted."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Initial public policy for the deterministic, no-collection Phase 3 experience."
+        }
+      ]
+    },
+    {
+      "kind": "terms",
+      "routeId": "public-terms",
+      "title": "Terms of use",
+      "summary": "The current website is an information and deterministic preview surface, not a checkout or optimization authority.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "legal@liiiraa.com",
+      "sections": [
+        {
+          "heading": "Current service boundary",
+          "body": "Phase 3 public pages provide product, compatibility, evidence, documentation, release, and support information. They do not sell a plan, bind a device, modify Windows, or create an entitlement."
+        },
+        {
+          "heading": "Commercial terms",
+          "body": "No price, billing period, renewal, tax, cancellation, refund, device rule, or expiration effect is active because checkout authority is unavailable. Any future offer must publish all of those terms before confirmation."
+        },
+        {
+          "heading": "Compatibility and evidence",
+          "body": "Compatibility depends on the Windows lifecycle, architecture, hardware, game, drivers, and the available validation evidence. Public material never guarantees a gain on an unobserved machine."
+        },
+        {
+          "heading": "Safe use",
+          "body": "Do not treat preview content as permission to run scripts or make unsupported system changes. Use canonical documentation and recovery paths; never bypass an integrity or availability block."
+        },
+        {
+          "heading": "Changes",
+          "body": "Material changes receive a new version, effective date, plain-language summary, and retained history. A stale term cannot silently remain actionable."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Initial no-checkout, no-native-authority terms for Phase 3."
+        }
+      ]
+    },
+    {
+      "kind": "security",
+      "routeId": "public-policies",
+      "title": "Security and trust",
+      "summary": "Least privilege, signed artifacts, explicit authority boundaries, runtime validation, and recoverable operations define the product boundary.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-07-31",
+      "contact": "security@liiiraa.com",
+      "sections": [
+        {
+          "heading": "Authority boundaries",
+          "body": "The public website has no account, administrative, payment, device, or native optimization authority. Public, account, and admin applications remain separate origins and shells."
+        },
+        {
+          "heading": "Desktop safety direction",
+          "body": "The renderer remains unprivileged. Future privileged operations must be operation-specific, authenticated, allowlisted, audited, and paired with exact recovery; arbitrary remote scripts are prohibited."
+        },
+        {
+          "heading": "Artifact trust",
+          "body": "A public download remains blocked until publisher, signature, SHA-256, artifact, manifest, compatibility, and release policy agree. There is no continue-anyway path."
+        },
+        {
+          "heading": "Reporting",
+          "body": "Potential vulnerabilities should use the responsible disclosure process. Public status reports explain user impact without exposing sensitive internal details."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-07-31",
+          "summary": "Initial public statement of Phase 3 security boundaries and future native-operation requirements."
+        }
+      ]
+    }
+  ],
+  "disclosure": {
+    "routeId": "public-responsible-disclosure",
+    "title": "Responsible disclosure",
+    "summary": "Report a potential vulnerability through a scoped, safe channel.",
+    "secureChannel": "security@liiiraa.com",
+    "scope": [
+      "Liiiraa-owned public web origins and published Liiiraa Boost artifacts",
+      "Reproducible security behavior that can be described without personal data",
+      "Integrity, authorization, privacy, or recovery failures"
+    ],
+    "prohibitedContent": [
+      "Passwords, access tokens, payment data, or unrelated personal information",
+      "Destructive testing, denial of service, persistence, or access beyond the minimum proof",
+      "Public disclosure before a safe response window has been coordinated"
+    ],
+    "response": "We will acknowledge a usable report, validate its scope, and provide a status update through the reporting channel. Timing depends on severity and reproducibility; no bounty or payment is promised.",
+    "history": [
+      {
+        "version": "1.0.0",
+        "effectiveDate": "2026-07-31",
+        "summary": "Initial reporting scope and safe-channel policy."
+      }
+    ]
+  },
+  "status": {
+    "routeId": "public-status",
+    "title": "Operational status",
+    "overall": "Operational",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "summary": "Public information is available. Download, account authority, and native optimization are product-availability boundaries, not service incidents.",
+    "components": [
+      {
+        "name": "Public product and policies",
+        "state": "operational",
+        "detail": "Repository-authored public information is available."
+      },
+      {
+        "name": "Documentation and support guidance",
+        "state": "operational",
+        "detail": "Public recovery guidance remains available."
+      },
+      {
+        "name": "Public trusted download",
+        "state": "unavailable",
+        "detail": "No publicly trusted installer has been approved; this is a declared release gate."
+      },
+      {
+        "name": "Account and remote authority",
+        "state": "demonstrative-preview",
+        "detail": "Phase 3 previews change no remote state."
+      }
+    ],
+    "incidentHistory": [],
+    "incidentHistoryEmpty": "No confirmed public service incident has been published. Future entries will name the affected component, user impact, timestamped updates, and resolution without exposing sensitive internals."
+  }
+}

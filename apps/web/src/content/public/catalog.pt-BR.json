@@ -160,7 +160,7 @@
       "translationKey": "public-plans",
       "title": "Planos sem termos ocultos",
       "summary": "Capacidades e consequências comerciais ficam visíveis antes de qualquer confirmação simulada.",
-      "body": "A autoridade de checkout não existe na Fase 3. Os registros abaixo são prévias de capacidades, não ofertas de compra. Não usamos desconto, contagem regressiva, urgência, depoimento nem barreira de segurança paga.",
+      "body": "A autoridade de checkout não existe na Fase 3. Os registros abaixo são prévias de capacidades, não ofertas de compra. A página não usa pressão comercial artificial, endosso fabricado nem barreira de segurança paga.",
       "availability": "demonstrative-preview",
       "validationState": "validated",
       "limitations": [
