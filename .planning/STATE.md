@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
-status: executing
-stopped_at: Completed 03-31-PLAN.md
-last_updated: "2026-07-31T13:28:25.818Z"
+status: verifying
+stopped_at: Completed 03-32-PLAN.md
+last_updated: "2026-07-31T15:07:13.118Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-27-PLAN.md
+last_activity_desc: Completed 03-32-PLAN.md
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 90
-  completed_plans: 89
-  percent: 20
+  completed_plans: 90
+  percent: 30
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 
 Phase: 03 (complete-web-experience) — EXECUTING
 Plan: 32 of 32
-Status: Ready to execute
-Last activity: 2026-07-31 — Completed 03-27-PLAN.md
+Status: Phase complete — ready for verification
+Last activity: 2026-07-31 — Completed 03-32-PLAN.md
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -137,6 +137,7 @@ _Updated after plan completion_
 | Phase 03 P29 | 18min | 2 tasks | 19 files |
 | Phase 03 P30 | 1h 49m | 3 tasks | 55 files |
 | Phase 03 P31 | 14min | 2 tasks | 5 files |
+| Phase 03 P32 | 1h30m | 2 tasks | 54 files |
 
 ## Accumulated Context
 
@@ -375,6 +376,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Require exact observed evidence commands, files, and independent app artifacts before final web publication approval.
 - [Phase 03]: Re-evaluate final publication and match its fingerprint before minting an immutable approved rollback bundle.
 - [Phase 03]: Web rollback redeploys one approved code/content/manifest/asset bundle and excludes databases, external data, and migrations.
+- [Phase 03]: Phase 3 closes only from exact observed WEB evidence while publicDistributionApproved remains false and development artifacts remain rejected.
+- [Phase 03]: Deferred Phase 4 authority and Phase 10 trusted distribution are forbidden Phase 3 evidence, not missing scope.
+- [Phase 03]: Playwright selects web servers only from explicit spec and project targets, so ordinary flags cannot suppress required surfaces.
+- [Phase 03]: Raw workspace TypeScript uses exact source extensions; generated TypeScript import output changes at the owning contract generator while real JavaScript validators retain .js.
 
 ### Pending Todos
 
@@ -416,6 +421,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T13:28:25.812Z
-Stopped at: Completed 03-31-PLAN.md
+Last session: 2026-07-31T15:06:44.110Z
+Stopped at: Completed 03-32-PLAN.md
 Resume file: None

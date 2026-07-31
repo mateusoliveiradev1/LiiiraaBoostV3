@@ -8,7 +8,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 
 - [x] **Phase 1: Product Truth and Modular Contracts** - Establish the versioned, truthful, enforceable foundation shared by every surface and future adapter. (completed 2026-07-27)
 - [x] **Phase 2: Complete Desktop Experience** - Deliver the installable, bespoke, fully navigable desktop UX contract with every planned state represented honestly. (completed 2026-07-30)
-- [ ] **Phase 3: Complete Web Experience** - Deliver the public site, documentation, download path, account shell, and isolated admin shell as one coherent web experience.
+- [x] **Phase 3: Complete Web Experience** - Deliver the public site, documentation, download path, account shell, and isolated admin shell as one coherent web experience. (completed 2026-07-31)
 - [ ] **Phase 4: Identity, Commerce, Devices, and Administration** - Connect secure accounts, subscriptions, device licensing, support, and governed administration end to end.
 - [ ] **Phase 5: Hardware Intelligence and Measured Evidence** - Replace diagnostic scenarios with capability-driven Windows inventory and defensible before/after evidence.
 - [ ] **Phase 6: Transactional Plans and Recovery** - Let users approve, apply, verify, and safely reverse personalized plans through a hardened privilege boundary.
@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 31/32 plans executed
+**Plans**: 32/32 plans complete
 
 Plans:
 **Wave 1**
@@ -348,7 +348,7 @@ Plans:
 
 **Wave 15** *(blocked on Wave 14 completion)*
 
-- [ ] 03-32-PLAN.md — Promote final evidence and recursive Phase 3 acceptance
+- [x] 03-32-PLAN.md — Promote final evidence and recursive Phase 3 acceptance
 
 **UI hint**: yes
 
@@ -496,7 +496,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 31/32 | In Progress|  |
+| 3. Complete Web Experience                         | 32/32 | Complete   | 2026-07-31 |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
