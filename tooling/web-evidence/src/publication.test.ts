@@ -33,8 +33,10 @@ const coherentPublication = (mode: 'planned' | 'final' = 'planned'): WebPublicat
   ] as const;
   const state = mode === 'final' ? 'passed' : 'planned';
   const appState = mode === 'final' ? 'observed' : 'planned';
-  const files = PUBLICATION_GATE_NAMES.map((name) => `quality/evidence/${name}.json`);
-  const commands = PUBLICATION_GATE_NAMES.map((name) => `pnpm web:gate:${name}`);
+  const evidenceFile = (name: PublicationGateName): string => `quality/evidence/${name}.json`;
+  const gateCommand = (name: PublicationGateName): string => `pnpm web:gate:${name}`;
+  const files = PUBLICATION_GATE_NAMES.map(evidenceFile);
+  const commands = PUBLICATION_GATE_NAMES.map(gateCommand);
 
   return {
     appArtifacts: (['public', 'account', 'admin'] as const).map((surface) => ({
@@ -86,10 +88,10 @@ const coherentPublication = (mode: 'planned' | 'final' = 'planned'): WebPublicat
         warningLocales: ['pt-BR', 'en'],
       },
     ],
-    gates: PUBLICATION_GATE_NAMES.map((name, index) => ({
-      command: commands[index]!,
+    gates: PUBLICATION_GATE_NAMES.map((name) => ({
+      command: gateCommand(name),
       evidenceId: `${name}-evidence-v1`,
-      file: files[index]!,
+      file: evidenceFile(name),
       name,
       state,
     })),
@@ -104,15 +106,13 @@ const coherentPublication = (mode: 'planned' | 'final' = 'planned'): WebPublicat
             'apps/admin/.next/standalone',
           ]
         : [],
-    qualityManifests: (['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const).map(
-      (requirement) => ({
-        featureId: `${requirement.toLowerCase()}-phase-03`,
-        hash: sha(`quality:${requirement}`),
-        owner: 'plan-03-32',
-        requirement,
-        state,
-      }),
-    ),
+    qualityManifests: (['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const).map((requirement) => ({
+      featureId: `${requirement.toLowerCase()}-phase-03`,
+      hash: sha(`quality:${requirement}`),
+      owner: 'plan-03-32',
+      requirement,
+      state,
+    })),
     releaseTruth: {
       developmentArtifactDetected: false,
       downloadAvailable: false,
@@ -157,11 +157,10 @@ describe('atomic publication', () => {
     const input = coherentPublication();
     const before = hashInput(input);
 
-    expect(evaluateWebPublication(input)).toEqual({
-      failures: [],
-      fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/u),
-      ok: true,
-    });
+    const result = evaluateWebPublication(input);
+    expect(result.ok).toBe(true);
+    expect(result.failures).toEqual([]);
+    if (result.ok) expect(result.fingerprint).toMatch(/^[a-f0-9]{64}$/u);
     expect(hashInput(input)).toBe(before);
   });
 
