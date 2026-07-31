@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-07-31T03:11:30.315Z"
+stopped_at: Completed 03-10-PLAN.md
+last_updated: "2026-07-31T03:31:27.325Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 67
+  completed_plans: 68
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 10 of 32
+Plan: 11 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
@@ -115,6 +115,7 @@ _Updated after plan completion_
 | Phase 03 P06 | 3min | 1 tasks | 4 files |
 | Phase 03 P07 | 3min | 1 tasks | 4 files |
 | Phase 03 P08 | 4min | 1 tasks | 4 files |
+| Phase 03 P10 | 14m | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -282,6 +283,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep admin preview authority and ordinary navigation disconnected — The admin application remains fixture-classified with authorityConnected and ordinaryNavigationLinked literal false until privileged authority is explicitly implemented.
 - [Phase 03]: Use a distinct admin-preview build identity — The standalone admin artifact cannot be confused with public or account builds.
 - [Phase 03]: Defer installed admin lifecycle checks to Plan 03-11 — Plan 03-11 owns dependency resolution and executable Next.js lifecycle verification.
+- [Phase 03]: Use the generated schema URI as the shared web document runtime schema identifier. — Keeps TypeScript and Rust errors tied to the canonical generated contract.
+- [Phase 03]: Compile Ajv lazily once so contracts package import remains compatible with the desktop no-dynamic-code CSP gate. — Preserves existing desktop initialization behavior while still caching the web validator.
+- [Phase 03]: Accept web evidence sources only as credential-free HTTPS URIs in both runtimes. — The generated WebUri is bounded but needs trust-boundary semantics to reject executable or credential-bearing URLs.
+- [Phase 03]: Wrap generated Rust variants in ValidatedWebDocument without duplicating generated DTO fields. — Makes post-schema transport identity explicit while preserving the generated models as field authority.
 
 ### Pending Todos
 
@@ -323,6 +328,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T03:11:30.309Z
-Stopped at: Completed 03-08-PLAN.md
+Last session: 2026-07-31T03:31:27.317Z
+Stopped at: Completed 03-10-PLAN.md
 Resume file: None
