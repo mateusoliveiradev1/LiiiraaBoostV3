@@ -15,13 +15,21 @@ type Scenario = Readonly<{
 }>;
 
 type VisualEntry = Readonly<{
+  captureId: string;
+  comparisonSource: 'phase-02-approved-desktop-captures';
   forcedColors: 'none' | 'active';
   locale: Scenario['locale'];
+  localeReview: 'pt-BR-default' | 'en-parity';
   motion: 'no-preference' | 'reduce';
+  rebaselineOwner: 'plan-03-42' | 'plan-03-43' | 'plan-03-44';
+  reviewPurpose: string;
+  route: string;
   routeId: string;
-  scenarioId: string;
+  scenarioId?: string;
   snapshotPath: string;
-  sourceHash: string;
+  sourceHash?: string;
+  state: string;
+  surface: Surface;
   textScale: number;
   viewport: string;
   zoom: number;
@@ -107,7 +115,10 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
-  expect(horizontalOverflow, 'The route must not require ordinary two-axis scrolling.').toBeLessThanOrEqual(1);
+  expect(
+    horizontalOverflow,
+    'The route must not require ordinary two-axis scrolling.',
+  ).toBeLessThanOrEqual(1);
 
   const undersizedControls = await page
     .locator('button, input, select, textarea, [role="button"]')
@@ -115,37 +126,78 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
       controls.flatMap((control) => {
         const element = control as HTMLElement;
         const box = element.getBoundingClientRect();
-        const visible = box.width > 0 && box.height > 0 && getComputedStyle(element).visibility !== 'hidden';
+        const visible =
+          box.width > 0 && box.height > 0 && getComputedStyle(element).visibility !== 'hidden';
         return visible && (box.width < 24 || box.height < 24)
-          ? [`${element.tagName.toLowerCase()}#${element.id || 'unnamed'}:${box.width}x${box.height}`]
+          ? [
+              `${element.tagName.toLowerCase()}#${element.id || 'unnamed'}:${box.width}x${box.height}`,
+            ]
           : [];
       }),
     );
-  expect(undersizedControls, 'Interactive controls must meet the 24 CSS px minimum target.').toEqual([]);
+  expect(
+    undersizedControls,
+    'Interactive controls must meet the 24 CSS px minimum target.',
+  ).toEqual([]);
 
   await page.keyboard.press('Tab');
-  const focused = page.locator(':focus');
-  await expect(focused).toHaveCount(1);
-  expect(await focused.boundingBox(), 'Keyboard focus must remain visible in the viewport.').not.toBeNull();
+  const skipLink = page.getByRole('link', { name: /skip to (?:main )?content/iu });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeInViewport();
+
+  await page.keyboard.press('Tab');
+  const ordinaryFocus = page.locator(':focus');
+  await expect(ordinaryFocus).toHaveCount(1);
+  await expect(ordinaryFocus).toBeInViewport();
+  expect(
+    await ordinaryFocus.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return (
+        (style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0) ||
+        style.boxShadow !== 'none'
+      );
+    }),
+    'Ordinary keyboard focus must have a visible authored indicator.',
+  ).toBe(true);
 
   await expectNoBlockingAxeViolations(page);
 };
 
+const resetForNeutralCapture = async (page: Page): Promise<void> => {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    window.scrollTo({ left: 0, top: 0 });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  });
+  await expect(page.locator(':focus')).toHaveCount(0);
+  await expect
+    .poll(() => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
+    .toEqual({ x: 0, y: 0 });
+};
+
 test('@final @public visual manifest is an exact W01-W18 projection', async ({}, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
-  expect(visualManifest.schemaVersion).toBe(1);
+  expect(visualManifest.schemaVersion).toBe(2);
   expect(visualManifest.source).toBe('../../contracts/scenarios/web-scenarios.json');
-  expect(visualManifest.entries.map(({ scenarioId }) => scenarioId)).toEqual(
+  const scenarioEntries = visualManifest.entries.filter(
+    (entry): entry is VisualEntry & Readonly<{ scenarioId: string; sourceHash: string }> =>
+      entry.scenarioId !== undefined && entry.sourceHash !== undefined,
+  );
+  expect(scenarioEntries.map(({ scenarioId }) => scenarioId)).toEqual(
     scenarioDocument.scenarios.map(({ id }) => id),
   );
 
-  for (const [index, scenario] of scenarioDocument.scenarios.entries()) {
-    const entry = visualManifest.entries[index];
+  for (const scenario of scenarioDocument.scenarios) {
+    const entry = scenarioEntries.find(({ scenarioId }) => scenarioId === scenario.id);
     expect(entry).toBeDefined();
     expect(entry).toMatchObject({
+      captureId: scenario.id,
       locale: scenario.locale,
+      route: routeFor(scenario),
       routeId: scenario.routeId,
       scenarioId: scenario.id,
+      surface: surfaceFor(scenario.routeId),
       viewport: scenario.viewport,
     });
     expect(entry?.sourceHash).toBe(
@@ -160,12 +212,33 @@ for (const scenario of scenarioDocument.scenarios) {
   const axis = AXIS_BY_VIEWPORT[scenario.viewport as keyof typeof AXIS_BY_VIEWPORT];
   if (axis === undefined) throw new Error(`Unsupported canonical viewport: ${scenario.viewport}`);
 
-  test(`@final @${surface} ${scenario.id} canonical accessible visual`, async ({ page }, testInfo) => {
+  test(`@final @${surface} ${scenario.id} canonical accessible visual`, async ({
+    page,
+  }, testInfo) => {
     onlyAxis(testInfo, axis);
     expect(String(testInfo.project.metadata['frozenClock'])).toBe(scenario.clock);
     await page.goto(routeFor(scenario), { waitUntil: 'networkidle' });
     await expectAccessibleResponsivePage(page);
+    await resetForNeutralCapture(page);
     await expect(page).toHaveScreenshot(`${scenario.id}.png`, {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+}
+
+for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.startsWith('G'))) {
+  const axis = AXIS_BY_VIEWPORT[entry.viewport as keyof typeof AXIS_BY_VIEWPORT];
+  if (axis === undefined) throw new Error(`Unsupported qualitative viewport: ${entry.viewport}`);
+
+  test(`@final @${entry.surface} ${entry.captureId} qualitative review capture`, async ({
+    page,
+  }, testInfo) => {
+    onlyAxis(testInfo, axis);
+    await page.goto(entry.route, { waitUntil: 'networkidle' });
+    await expectAccessibleResponsivePage(page);
+    await resetForNeutralCapture(page);
+    await expect(page).toHaveScreenshot(`${entry.captureId}.png`, {
       animations: 'disabled',
       fullPage: true,
     });
@@ -197,7 +270,9 @@ for (const surface of ['public', 'account', 'admin'] as const) {
         expect(testInfo.project.metadata['zoomPercent']).toBe(400);
       }
       if (axis === 'reduced-motion') {
-        expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+        expect(
+          await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches),
+        ).toBe(true);
       }
       if (axis === 'forced-colors') {
         expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
