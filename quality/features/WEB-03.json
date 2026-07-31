@@ -10,10 +10,10 @@
       "evidence": [
         {
           "id": "web-03-development-artifact-rejection",
-          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t release-gate",
+          "command": "pnpm web:test",
           "file": "tooling/web-evidence/src/release-gate.test.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -22,10 +22,10 @@
       "evidence": [
         {
           "id": "web-03-download-privacy",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-quick --grep @download-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/releases.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -34,10 +34,10 @@
       "evidence": [
         {
           "id": "web-03-integrity-accessibility",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-forced-colors --grep @integrity",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -46,10 +46,10 @@
       "evidence": [
         {
           "id": "web-03-release-performance",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-final-wide-1440 --grep @performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/releases.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -58,10 +58,10 @@
       "evidence": [
         {
           "id": "web-03-integrity-mismatch-recovery",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/releases.spec.ts --project=public-quick --grep @integrity-mismatch",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/releases.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     }

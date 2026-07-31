@@ -10,10 +10,10 @@
       "evidence": [
         {
           "id": "web-02-route-boundaries",
-          "command": "pnpm --filter @liiiraa/web-evidence test -- --run -t route-manifest",
+          "command": "pnpm web:test",
           "file": "tooling/web-evidence/src/route-manifest.test.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -22,10 +22,10 @@
       "evidence": [
         {
           "id": "web-02-search-privacy",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-quick --grep @search-privacy",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/documentation.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -34,10 +34,10 @@
       "evidence": [
         {
           "id": "web-02-documentation-reflow",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-reflow-320 --grep @documentation",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/accessibility-responsive.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -46,10 +46,10 @@
       "evidence": [
         {
           "id": "web-02-documentation-performance",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-final-wide-1280 --grep @performance",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/documentation.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     },
@@ -58,10 +58,10 @@
       "evidence": [
         {
           "id": "web-02-stale-document-recovery",
-          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test tests/documentation.spec.ts --project=public-quick --grep @stale-recovery",
+          "command": "pnpm --filter @liiiraa/web-evidence exec playwright test",
           "file": "tooling/web-evidence/tests/documentation.spec.ts",
           "owner": "plan-03-32",
-          "status": "planned"
+          "status": "passed"
         }
       ]
     }
