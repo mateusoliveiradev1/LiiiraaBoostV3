@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
-status: verifying
-stopped_at: Completed 03-32-PLAN.md
-last_updated: "2026-07-31T15:07:13.118Z"
+status: executing
+stopped_at: Completed 03-33-PLAN.md
+last_updated: "2026-07-31T16:56:28.133Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-32-PLAN.md
+last_activity_desc: Completed 03-33-PLAN.md
 progress:
   total_phases: 10
-  completed_phases: 3
-  total_plans: 90
-  completed_plans: 90
-  percent: 30
+  completed_phases: 2
+  total_plans: 94
+  completed_plans: 91
+  percent: 20
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 32 of 32
-Status: Phase complete — ready for verification
-Last activity: 2026-07-31 — Completed 03-32-PLAN.md
+Plan: 33 of 36
+Status: Ready to execute
+Last activity: 2026-07-31 — Completed 03-33-PLAN.md
 
 Progress: [██████████] 100%
 
@@ -138,6 +138,7 @@ _Updated after plan completion_
 | Phase 03 P30 | 1h 49m | 3 tasks | 55 files |
 | Phase 03 P31 | 14min | 2 tasks | 5 files |
 | Phase 03 P32 | 1h30m | 2 tasks | 54 files |
+| Phase 03 P33 | 24min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -380,6 +381,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Deferred Phase 4 authority and Phase 10 trusted distribution are forbidden Phase 3 evidence, not missing scope.
 - [Phase 03]: Playwright selects web servers only from explicit spec and project targets, so ordinary flags cannot suppress required surfaces.
 - [Phase 03]: Raw workspace TypeScript uses exact source extensions; generated TypeScript import output changes at the owning contract generator while real JavaScript validators retain .js.
+- [Phase 03]: Keep account responsibility and error identities as separate closed unions so authored failures can never enter AccountPreviewPage.
+- [Phase 03]: Let the canonical catch-all own account 404 rendering while the proxy preserves HTTP 404 status and the layout supplies localized failure metadata.
+- [Phase 03]: Use the canonical current route only for 500 retry; 403, 404, and 410 recover through same-origin Overview and Support destinations.
 
 ### Pending Todos
 
@@ -421,6 +425,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T15:06:44.110Z
-Stopped at: Completed 03-32-PLAN.md
+Last session: 2026-07-31T16:56:00.698Z
+Stopped at: Completed 03-33-PLAN.md
 Resume file: None
