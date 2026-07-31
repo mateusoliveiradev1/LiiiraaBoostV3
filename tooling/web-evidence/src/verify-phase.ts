@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import {
   validateRouteReachabilityEvidence,
   type RouteReachabilityEvidence,
-} from './route-reachability.js';
+} from './route-reachability.ts';
 
 export const PHASE_3_REQUIREMENTS = ['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const;
 export const PHASE_3_SUCCESS_CRITERIA = ['SC-01', 'SC-02', 'SC-03', 'SC-04'] as const;
