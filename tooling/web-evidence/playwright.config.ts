@@ -235,7 +235,7 @@ export default defineConfig({
     cwd: '../..',
     env: app === '@liiiraa/admin' ? { LIIIRAA_ADMIN_ORIGIN: baseURL } : {},
     reuseExistingServer: false,
-    stderr: 'inherit',
+    stderr: 'pipe',
     stdout: 'pipe',
     timeout: 300_000,
     url: `${baseURL}${readinessPath}`,
