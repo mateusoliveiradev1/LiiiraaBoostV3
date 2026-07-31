@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "fixtureLabel": "Fixture sintética da conta",
+  "states": {
+    "offline": "A autoridade da conta da Fase 4 está offline. Campos seguros permanecem somente nesta prévia do navegador.",
+    "stale": "A fixture exibida está desatualizada. Revise dados atualizados antes de qualquer confirmação futura.",
+    "expired": "A prévia da sessão expirou. Revise a entrada novamente; nenhuma sessão ou credencial foi mantida.",
+    "failure": "O limite de autoridade não respondeu. Nenhum estado remoto mudou e a recuperação continua disponível."
+  },
+  "signIn": {
+    "title": "Prévia de entrada",
+    "summary": "Revise as futuras opções de acesso à conta sem criar uma sessão.",
+    "emailLabel": "Endereço de e-mail",
+    "emailHint": "Usado somente nesta prévia determinística e nunca enviado.",
+    "emailAction": "Revisar entrada por e-mail",
+    "socialAction": "Revisar entrada social",
+    "passkeyAction": "Revisar entrada com chave de acesso",
+    "security": "A Fase 4 será responsável por identidade, PKCE, chaves de acesso, MFA, recuperação e emissão de sessão. Esta prévia não controla nenhum deles.",
+    "invalidEmail": "Informe um endereço de e-mail completo, como jogador@example.com."
+  },
+  "overview": {
+    "title": "Visão geral da conta",
+    "summary": "Um mapa por responsabilidades da conta futura, usando somente valores sintéticos.",
+    "emptyTitle": "Nenhuma atividade real da conta",
+    "emptyBody": "Faturas, dispositivos, sessões e solicitações permanecem vazios até a autoridade da Fase 4 ser conectada."
+  },
+  "profile": {
+    "title": "Prévia do perfil",
+    "summary": "Revise um nome público e um idioma sintéticos sem alterar uma conta.",
+    "nameLabel": "Nome de exibição",
+    "localeLabel": "Idioma preferido",
+    "action": "Revisar correção do perfil"
+  },
+  "security": {
+    "title": "Prévia de segurança",
+    "summary": "Inspecione todas as proteções planejadas e revise ações sensíveis sem alterar credenciais ou sessões.",
+    "verifiedEmail": "Fixture de e-mail verificado",
+    "passkey": "Chaves de acesso",
+    "mfa": "Autenticação multifator",
+    "sessions": "Sessões ativas",
+    "recovery": "Métodos de recuperação",
+    "alerts": "Alertas de segurança",
+    "emptyAlerts": "Não há alertas de segurança nesta fixture sintética.",
+    "review": "Revisar",
+    "sessionDetail": "Edge no Windows 11 · sintético · visto por último em 2026-01-15 12:00 UTC",
+    "recoveryDetail": "Códigos de recuperação não são gerados nem exibidos na Fase 3."
+  },
+  "recovery": {
+    "title": "Autoridade indisponível",
+    "safeWork": "Campos seguros preservados",
+    "signIn": "Revisar entrada",
+    "support": "Abrir prévia de suporte"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "fixtureLabel": "Synthetic account fixture",
+  "states": {
+    "offline": "The Phase 4 account authority is offline. Safe draft fields remain only in this browser preview.",
+    "stale": "The displayed fixture is stale. Review refreshed data before any future confirmation.",
+    "expired": "The session preview expired. Review sign-in again; no session or credential was retained.",
+    "failure": "The authority boundary did not respond. No remote state changed and recovery remains available."
+  },
+  "signIn": {
+    "title": "Sign-in preview",
+    "summary": "Review the future account entry choices without creating a session.",
+    "emailLabel": "Email address",
+    "emailHint": "Used only in this deterministic preview and never sent.",
+    "emailAction": "Review email sign-in",
+    "socialAction": "Review social sign-in",
+    "passkeyAction": "Review passkey sign-in",
+    "security": "Phase 4 will own identity verification, PKCE, passkeys, MFA, recovery, and session issuance. This preview owns none of them.",
+    "invalidEmail": "Enter a complete email address, such as player@example.com."
+  },
+  "overview": {
+    "title": "Account overview",
+    "summary": "A responsibility-led map of the future account, using synthetic values only.",
+    "emptyTitle": "No real account activity",
+    "emptyBody": "Invoices, devices, sessions, and requests remain empty until Phase 4 authority is connected."
+  },
+  "profile": {
+    "title": "Profile preview",
+    "summary": "Review a synthetic public name and locale without changing an account.",
+    "nameLabel": "Display name",
+    "localeLabel": "Preferred locale",
+    "action": "Review profile correction"
+  },
+  "security": {
+    "title": "Security preview",
+    "summary": "Inspect every planned protection and review sensitive actions without changing a credential or session.",
+    "verifiedEmail": "Verified email fixture",
+    "passkey": "Passkeys",
+    "mfa": "Multi-factor authentication",
+    "sessions": "Active sessions",
+    "recovery": "Recovery methods",
+    "alerts": "Security alerts",
+    "emptyAlerts": "No security alerts exist in this synthetic fixture.",
+    "review": "Review",
+    "sessionDetail": "Edge on Windows 11 · synthetic · last seen 2026-01-15 12:00 UTC",
+    "recoveryDetail": "Recovery codes are not generated or displayed in Phase 3."
+  },
+  "recovery": {
+    "title": "Authority unavailable",
+    "safeWork": "Safe draft fields preserved",
+    "signIn": "Review sign-in",
+    "support": "Open support preview"
+  }
+}
