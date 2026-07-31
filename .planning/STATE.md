@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-36-PLAN.md
-last_updated: "2026-07-31T18:04:34.831Z"
+stopped_at: Completed 03-37-PLAN.md
+last_updated: "2026-07-31T23:40:44.069Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-35-PLAN.md
+last_activity_desc: Completed 03-37-PLAN.md
 progress:
   total_phases: 10
-  completed_phases: 3
-  total_plans: 94
-  completed_plans: 94
-  percent: 30
+  completed_phases: 2
+  total_plans: 104
+  completed_plans: 95
+  percent: 91
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 36 of 46
-Status: Ready to execute Plan 03-37
-Last activity: 2026-07-31 — Completed 03-35-PLAN.md
+Plan: 38 of 46
+Status: Ready to execute Plan 03-38
+Last activity: 2026-07-31 — Completed 03-37-PLAN.md
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -142,6 +142,7 @@ _Updated after plan completion_
 | Phase 03 P34 | 10min | 2 tasks | 4 files |
 | Phase 03 P35 | 15min | 3 tasks | 6 files |
 | Phase 03 P36 | 32min | 1 tasks | 2 files |
+| Phase 03 P37 | 12min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -397,6 +398,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Each final proof carries its exact owner; route reachability belongs to plan-03-35 while earlier proofs remain plan-03-32.
 - [Phase 03]: Repository proof validation accepts raw or canonical-LF package hashes so Windows CRLF cannot create false mismatches.
 - [Phase 03]: Raw Node TypeScript execution uses the same-package .ts source import while NodeNext consumers retain existing behavior.
+- [Phase 03]: ProductLockup preserves the approved WindowTitleBar SVG paths and exposes only compact/full composition variants. — One primitive prevents brand spoofing and geometry drift across independently deployable surfaces.
+- [Phase 03]: Pre-existing off-contract CSS values are exact owner-bound migration debt for Plans 03-38, 03-39, and 03-41. — The gate blocks new drift without stealing authored surface-redesign scope from the dedicated follow-up plans.
+- [Phase 03]: Visual evidence proves skip-link and ordinary focus visibility before neutralizing focus and scroll for capture. — Accessibility remains tested while durable screenshots stay deterministic and free of transient focus contamination.
 
 ### Pending Todos
 
@@ -438,6 +442,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:04:34.826Z
-Stopped at: Completed 03-36-PLAN.md
+Last session: 2026-07-31T23:40:44.062Z
+Stopped at: Completed 03-37-PLAN.md
 Resume file: None
