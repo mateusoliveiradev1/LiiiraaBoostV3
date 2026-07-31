@@ -1,4 +1,7 @@
-import type { ErrorObject, ValidateFunction } from 'ajv';
+import { Ajv2020, type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
+import webDocumentSchema from '../../../contracts/generated/web/v1/web-document.schema.json' with {
+  type: 'json',
+};
 import {
   diagnosticValueValidator,
   hostToRendererValidator,
@@ -9,6 +12,7 @@ import type {
   HostToRendererShellEventJson,
   RendererToHostShellCommandJson,
   ShellNavigationIntentJson,
+  WebDocument,
 } from './generated/index.js';
 
 export const DIAGNOSTIC_VALUE_SCHEMA_ID = 'desktop.diagnostic-value.v1' as const;
@@ -16,11 +20,14 @@ export const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID =
   'desktop.shell.host-to-renderer.v1' as const;
 export const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID =
   'desktop.shell.renderer-to-host.v1' as const;
+export const WEB_DOCUMENT_SCHEMA_ID =
+  'https://schemas.liiiraa.dev/web/v1/web-document.schema.json' as const;
 
 type ContractSchemaId =
   | typeof DIAGNOSTIC_VALUE_SCHEMA_ID
   | typeof HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID
-  | typeof RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID;
+  | typeof RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID
+  | typeof WEB_DOCUMENT_SCHEMA_ID;
 
 const MAX_ISSUES = 8;
 const MAX_PATH_LENGTH = 256;
@@ -54,6 +61,8 @@ export type HostToRendererShellEventValidationResult =
   ContractValidationResult<HostToRendererShellEventJson>;
 export type RendererToHostShellCommandValidationResult =
   ContractValidationResult<RendererToHostShellCommandJson>;
+export type WebDocumentValidationError = ContractValidationError;
+export type WebDocumentValidationResult = ContractValidationResult<WebDocument>;
 
 const diagnosticValidator =
   diagnosticValueValidator as ValidateFunction<DiagnosticValueJson>;
@@ -62,6 +71,22 @@ const shellMessageValidators = {
     hostToRendererValidator as ValidateFunction<HostToRendererShellEventJson>,
   rendererToHost:
     rendererToHostValidator as ValidateFunction<RendererToHostShellCommandJson>,
+};
+let cachedWebDocumentValidator: ValidateFunction<WebDocument> | undefined;
+
+const getWebDocumentValidator = (): ValidateFunction<WebDocument> => {
+  if (cachedWebDocumentValidator === undefined) {
+    const ajv = new Ajv2020({
+      allErrors: true,
+      strict: true,
+      strictTypes: false,
+      validateFormats: false,
+    });
+    ajv.addKeyword('x-liiiraa-generated');
+    cachedWebDocumentValidator = ajv.compile<WebDocument>(webDocumentSchema);
+  }
+
+  return cachedWebDocumentValidator;
 };
 
 const bounded = (value: string, maximum: number): string =>
@@ -164,6 +189,41 @@ const rendererCommandHasSafeNavigation = (
   return true;
 };
 
+const isSafeWebUri = (input: string): boolean => {
+  if (input.includes('\\') || /\s/u.test(input)) {
+    return false;
+  }
+
+  try {
+    const uri = new URL(input);
+    return (
+      uri.protocol === 'https:' &&
+      uri.hostname.length > 0 &&
+      uri.username.length === 0 &&
+      uri.password.length === 0
+    );
+  } catch {
+    return false;
+  }
+};
+
+const unsafeWebDocumentUriPath = (document: WebDocument): string | null => {
+  if ('source' in document && !isSafeWebUri(document.source)) {
+    return '$/source';
+  }
+
+  if ('evidence' in document) {
+    const unsafeIndex = document.evidence.findIndex(
+      (evidence) => !isSafeWebUri(evidence.source),
+    );
+    if (unsafeIndex !== -1) {
+      return `$/evidence/${unsafeIndex}/source`;
+    }
+  }
+
+  return null;
+};
+
 const validateGeneratedValue = <Value>(
   expectedSchemaId: ContractSchemaId,
   schemaId: string,
@@ -233,4 +293,27 @@ export const validateRendererToHostShellCommand = (
     );
   }
   return result;
+};
+
+export const validateWebDocument = (
+  input: unknown,
+): WebDocumentValidationResult => {
+  const validator = getWebDocumentValidator();
+  if (!validator(input)) {
+    return invalidPayload(WEB_DOCUMENT_SCHEMA_ID, validator.errors);
+  }
+
+  const unsafeUriPath = unsafeWebDocumentUriPath(input);
+  if (unsafeUriPath !== null) {
+    return invalidSemanticPayload(
+      WEB_DOCUMENT_SCHEMA_ID,
+      unsafeUriPath,
+      'safeUri',
+    );
+  }
+
+  return {
+    ok: true,
+    value: input,
+  };
 };

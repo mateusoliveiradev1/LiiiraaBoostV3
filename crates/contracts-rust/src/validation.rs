@@ -4,12 +4,16 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::{
-    DiagnosticValue, HostToRendererShellEvent, RendererToHostShellCommand, ShellNavigationIntent,
+    AdminAuditEvent, ClaimEvidence, ContentRecord, DiagnosticValue, FutureAuthorityCommand,
+    HostToRendererShellEvent, NoChangeReceipt, ReleaseArtifactEvidence, ReleaseRecord,
+    RendererToHostShellCommand, ScreenshotProvenance, ShellNavigationIntent, WebRouteRecord,
 };
 
 pub const DIAGNOSTIC_VALUE_SCHEMA_ID: &str = "desktop.diagnostic-value.v1";
 pub const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID: &str = "desktop.shell.host-to-renderer.v1";
 pub const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID: &str = "desktop.shell.renderer-to-host.v1";
+pub const WEB_DOCUMENT_SCHEMA_ID: &str =
+    "https://schemas.liiiraa.dev/web/v1/web-document.schema.json";
 
 const MAX_ISSUES: usize = 8;
 const MAX_PATH_LENGTH: usize = 256;
@@ -19,6 +23,8 @@ const DIAGNOSTIC_VALUE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/diagnostic-value.schema.json");
 const SHELL_MESSAGE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/shell-message.schema.json");
+const WEB_DOCUMENT_SCHEMA: &str =
+    include_str!("../../../contracts/generated/web/v1/web-document.schema.json");
 
 static DIAGNOSTIC_VALUE_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
     let schema: Value =
@@ -30,6 +36,11 @@ static SHELL_MESSAGE_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(
     let schema: Value =
         serde_json::from_str(SHELL_MESSAGE_SCHEMA).expect("generated shell JSON schema");
     jsonschema::validator_for(&schema).expect("valid generated shell JSON schema")
+});
+static WEB_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
+    let schema: Value =
+        serde_json::from_str(WEB_DOCUMENT_SCHEMA).expect("generated web document JSON schema");
+    jsonschema::validator_for(&schema).expect("valid generated web document JSON schema")
 });
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -51,6 +62,19 @@ pub struct ContractValidationError {
     pub schema_id: Option<&'static str>,
     pub issues: Vec<ContractValidationIssue>,
     pub truncated: bool,
+}
+
+#[derive(Clone, Debug)]
+pub enum ValidatedWebDocument {
+    WebRouteRecord(WebRouteRecord),
+    ClaimEvidence(ClaimEvidence),
+    ContentRecord(ContentRecord),
+    ScreenshotProvenance(ScreenshotProvenance),
+    ReleaseArtifactEvidence(ReleaseArtifactEvidence),
+    ReleaseRecord(ReleaseRecord),
+    FutureAuthorityCommand(FutureAuthorityCommand),
+    NoChangeReceipt(NoChangeReceipt),
+    AdminAuditEvent(AdminAuditEvent),
 }
 
 fn bounded(value: &str, maximum: usize) -> String {
@@ -147,6 +171,80 @@ fn validate_and_deserialize<T: DeserializeOwned>(
     })
 }
 
+fn deserialize_web_document(
+    input: &Value,
+) -> Result<ValidatedWebDocument, ContractValidationError> {
+    if let Ok(document) = serde_json::from_value::<WebRouteRecord>(input.clone()) {
+        return Ok(ValidatedWebDocument::WebRouteRecord(document));
+    }
+    if let Ok(document) = serde_json::from_value::<ClaimEvidence>(input.clone()) {
+        return Ok(ValidatedWebDocument::ClaimEvidence(document));
+    }
+    if let Ok(document) = serde_json::from_value::<ContentRecord>(input.clone()) {
+        return Ok(ValidatedWebDocument::ContentRecord(document));
+    }
+    if let Ok(document) = serde_json::from_value::<ScreenshotProvenance>(input.clone()) {
+        return Ok(ValidatedWebDocument::ScreenshotProvenance(document));
+    }
+    if let Ok(document) = serde_json::from_value::<ReleaseArtifactEvidence>(input.clone()) {
+        return Ok(ValidatedWebDocument::ReleaseArtifactEvidence(document));
+    }
+    if let Ok(document) = serde_json::from_value::<ReleaseRecord>(input.clone()) {
+        return Ok(ValidatedWebDocument::ReleaseRecord(document));
+    }
+    if let Ok(document) = serde_json::from_value::<FutureAuthorityCommand>(input.clone()) {
+        return Ok(ValidatedWebDocument::FutureAuthorityCommand(document));
+    }
+    if let Ok(document) = serde_json::from_value::<NoChangeReceipt>(input.clone()) {
+        return Ok(ValidatedWebDocument::NoChangeReceipt(document));
+    }
+    if let Ok(document) = serde_json::from_value::<AdminAuditEvent>(input.clone()) {
+        return Ok(ValidatedWebDocument::AdminAuditEvent(document));
+    }
+
+    Err(ContractValidationError {
+        code: ContractValidationCode::DeserializationFailed,
+        schema_id: Some(WEB_DOCUMENT_SCHEMA_ID),
+        issues: vec![ContractValidationIssue {
+            path: "$".to_owned(),
+            keyword: "deserialize".to_owned(),
+        }],
+        truncated: false,
+    })
+}
+
+fn is_safe_web_uri(input: &str) -> bool {
+    if input.contains('\\') || input.chars().any(char::is_whitespace) {
+        return false;
+    }
+
+    let Some(remainder) = input.strip_prefix("https://") else {
+        return false;
+    };
+    let authority = remainder
+        .split_once(['/', '?', '#'])
+        .map_or(remainder, |(authority, _)| authority);
+
+    !authority.is_empty()
+        && !authority.contains('@')
+        && !authority.starts_with('.')
+        && !authority.ends_with('.')
+}
+
+fn unsafe_web_document_uri_path(document: &ValidatedWebDocument) -> Option<String> {
+    match document {
+        ValidatedWebDocument::ClaimEvidence(evidence) if !is_safe_web_uri(&evidence.source) => {
+            Some("$/source".to_owned())
+        }
+        ValidatedWebDocument::ContentRecord(content) => content
+            .evidence
+            .iter()
+            .position(|evidence| !is_safe_web_uri(&evidence.source))
+            .map(|index| format!("$/evidence/{index}/source")),
+        _ => None,
+    }
+}
+
 fn is_safe_navigation_intent(intent: &ShellNavigationIntent) -> bool {
     let ShellNavigationIntent::DocumentationNavigationIntent(documentation) = intent else {
         return true;
@@ -236,13 +334,34 @@ pub fn validate_renderer_to_host_shell_command(
     Ok(command)
 }
 
+pub fn validate_web_document(
+    input: &Value,
+) -> Result<ValidatedWebDocument, ContractValidationError> {
+    if !WEB_DOCUMENT_VALIDATOR.is_valid(input) {
+        return Err(invalid_payload(
+            &WEB_DOCUMENT_VALIDATOR,
+            WEB_DOCUMENT_SCHEMA_ID,
+            input,
+        ));
+    }
+
+    let document = deserialize_web_document(input)?;
+    if let Some(path) = unsafe_web_document_uri_path(&document) {
+        return Err(invalid_semantic_payload(
+            WEB_DOCUMENT_SCHEMA_ID,
+            &path,
+            "safeUri",
+        ));
+    }
+
+    Ok(document)
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::{Value, json};
 
-    use super::{
-        ContractValidationCode, WEB_DOCUMENT_SCHEMA_ID, validate_web_document,
-    };
+    use super::{ContractValidationCode, WEB_DOCUMENT_SCHEMA_ID, validate_web_document};
 
     fn fixture_provenance() -> Value {
         json!({
@@ -445,9 +564,7 @@ mod tests {
         assert!(!first.issues.is_empty());
         assert!(first.issues.len() <= 8);
         assert!(first.issues.iter().all(|issue| {
-            issue.path.starts_with('$')
-                && issue.path.len() <= 256
-                && issue.keyword.len() <= 64
+            issue.path.starts_with('$') && issue.path.len() <= 256 && issue.keyword.len() <= 64
         }));
         assert!(!format!("{first:?}").contains(secret));
     }
