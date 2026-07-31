@@ -38,7 +38,7 @@
 - [ ] **WEB-05**: User can revoke the active PC and bind a replacement subject to the 30-day reset cooldown
 - [ ] **WEB-06**: Authorized staff can use an isolated administrative application with role-specific access
 - [ ] **WEB-07**: Administrative access to user-provided diagnostics requires explicit, time-limited consent and creates an immutable audit event
-- [ ] **WEB-08**: Public, account, and administrative surfaces have separate deployment and security policies
+- [x] **WEB-08**: Public, account, and administrative surfaces have separate deployment and security policies
 
 ### Identity, Subscription, and Devices
 
@@ -185,7 +185,7 @@ A v1 requirement is complete only when:
 | WEB-05      | Phase 4  | Pending  |
 | WEB-06      | Phase 4  | Pending  |
 | WEB-07      | Phase 4  | Pending  |
-| WEB-08      | Phase 3  | Pending  |
+| WEB-08      | Phase 3  | Complete |
 | IDEN-01     | Phase 4  | Pending  |
 | IDEN-02     | Phase 4  | Pending  |
 | IDEN-03     | Phase 4  | Pending  |

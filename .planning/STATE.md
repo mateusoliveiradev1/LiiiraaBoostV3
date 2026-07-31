@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: Complete Web Experience
-status: Ready execute
-stopped_at: Phase 3 planning complete — 32 plans ready
-last_updated: "2026-07-31T01:13:12.139Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 3 planning complete
+current_phase: 03
+current_phase_name: complete-web-experience
+status: executing
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-07-31T01:39:17.091Z"
+last_activity: 2026-07-31
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 58
+  completed_plans: 59
   percent: 20
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 
 ## Current Position
 
-Phase: 3 — Complete Web Experience
-Plan: 32 plans ready
-Status: Ready execute
-Last activity: 2026-07-30 — Phase 3 planning complete
+Phase: 03 (complete-web-experience) — EXECUTING
+Plan: 2 of 32
+Status: Ready to execute
+Last activity: 2026-07-31 — Phase 03 execution started
 
 Progress: [████░░░░░░] 44%
 
@@ -106,6 +106,7 @@ _Updated after plan completion_
 | Phase 02 P25 | 26 min | 3 tasks | 11 files |
 | Phase 02 P13 | 35 min | 2 tasks | 21 files |
 | Phase 02 P33 | 5h37 | 3 tasks | 13 files |
+| Phase 03 P01 | 12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -250,6 +251,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 02]: Keep Windows 10 and Windows 11 packaged environments explicitly unresolved — No clean resettable environments are available; image, build, runner, WebView2, reset, support, and provenance facts must not be invented.
 - [Phase 02]: Use only the free self-signed CurrentUser CNG development certificate — Public trust, SmartScreen, production, distribution, and timestamp claims remain blocked or not-applicable until Phase 10.
 - [Phase 02]: Keep CI signing-key-free and unsigned — CI output is separately classified, unstaged, unpublished, non-promotable, and never release-ready.
+- [Phase 03]: Approve only next@16.2.12, @next/mdx@16.2.12, and next-intl@4.13.4 for installation in Plans 03-06 through 03-11. — Human approval is exact-version and exact-scope installation authority, not a broad framework-family approval.
+- [Phase 03]: Require a new legitimacy audit and explicit approval for every version, repository, lifecycle, integrity, package-name, or scope change. — Evidence drift must never inherit authority from a previously reviewed identity.
 
 ### Pending Todos
 
@@ -291,6 +294,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T01:13:12.131Z
-Stopped at: Phase 3 planning complete — 32 plans ready
-Resume file: .planning/phases/03-complete-web-experience/03-UI-SPEC.md
+Last session: 2026-07-31T01:39:17.082Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
