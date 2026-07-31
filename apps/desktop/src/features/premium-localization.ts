@@ -5,6 +5,7 @@ import type { ShellLocale } from '@liiiraa/feature-shell';
 const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   'Acesso direto às configurações e ferramentas nativas do Windows.':
     'Direct access to native Windows settings and tools.',
+  'Aguardando medição': 'Awaiting measurement',
   'Adicionar executável...': 'Add executable...',
   Adaptativo: 'Adaptive',
   Alta: 'High',
@@ -31,6 +32,7 @@ const ENGLISH_COPY: Readonly<Record<string, string>> = Object.freeze({
   Compatibilidade: 'Compatibility',
   Confortável: 'Comfortable',
   Concluído: 'Completed',
+  Competitivo: 'Competitive',
   Consumo: 'Power use',
   Controlado: 'Controlled',
   Configurações: 'Settings',
