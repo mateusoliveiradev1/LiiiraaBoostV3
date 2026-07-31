@@ -43,12 +43,7 @@ export const ADMIN_ENTRY_ROUTE_IDS = Object.freeze([
 
 export type AdminPreviewRoute = (typeof ADMIN_ENTRY_ROUTE_IDS)[number];
 export type AdminPreviewState =
-  | 'ready'
-  | 'offline'
-  | 'stale'
-  | 'expired-session'
-  | 'permission-denied'
-  | 'partial-failure';
+  'ready' | 'offline' | 'stale' | 'expired-session' | 'permission-denied' | 'partial-failure';
 
 type AdminContent = Readonly<
   Omit<typeof adminEnJson, 'locale'> & {
@@ -71,11 +66,7 @@ export type DiagnosticConsent = Readonly<{
   purpose: string;
 }>;
 
-export type DiagnosticConsentDecision =
-  | 'allowed'
-  | 'expired'
-  | 'missing'
-  | 'wrong-scope';
+export type DiagnosticConsentDecision = 'allowed' | 'expired' | 'missing' | 'wrong-scope';
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -105,7 +96,9 @@ const hasSameContentShape = (candidate: unknown, reference: unknown): boolean =>
       referenceKeys.every((key) => hasSameContentShape(candidate[key], reference[key]))
     );
   }
-  return typeof candidate === typeof reference && (typeof candidate !== 'string' || candidate.length > 0);
+  return (
+    typeof candidate === typeof reference && (typeof candidate !== 'string' || candidate.length > 0)
+  );
 };
 
 const admitAdminContent = (candidate: unknown, locale: WebLocale): AdminContent => {
@@ -137,10 +130,8 @@ export const getAdminContent = (locale: WebLocale): AdminContent => ADMIN_CONTEN
 export const isAdminPreviewRoute = (routeId: WebRouteId): routeId is AdminPreviewRoute =>
   ADMIN_ENTRY_ROUTE_IDS.includes(routeId as AdminPreviewRoute);
 
-export const adminRoleCanAccess = (
-  role: AdminPreviewRole,
-  routeId: AdminPreviewRoute,
-): boolean => ROLE_ROUTE_ACCESS[role].includes(routeId as never);
+export const adminRoleCanAccess = (role: AdminPreviewRole, routeId: AdminPreviewRoute): boolean =>
+  ROLE_ROUTE_ACCESS[role].includes(routeId as never);
 
 const routeMetadata = (content: AdminContent, routeId: AdminPreviewRoute) => {
   switch (routeId) {
@@ -165,11 +156,7 @@ export const getAdminPreviewMetadata = (locale: WebLocale, routeId: AdminPreview
   return Object.freeze({ summary: metadata.summary, title: metadata.title });
 };
 
-const hrefFor = (
-  routeId: AdminPreviewRoute,
-  locale: WebLocale,
-  role: AdminPreviewRole,
-): string => {
+const hrefFor = (routeId: AdminPreviewRoute, locale: WebLocale, role: AdminPreviewRole): string => {
   const parameters: Record<string, string> = { locale };
   if (routeId === 'admin-support') parameters['caseId'] = 'case-preview';
   if (routeId === 'admin-operations' || routeId === 'admin-security') {
@@ -223,12 +210,10 @@ const staticReceipt = (
     nextPhase: 'Phase 4' as const,
   });
 
-const createImmutableAuditEvent = (
-  event: AdminAuditEvent,
-): AdminAuditEvent => {
+const createImmutableAuditEvent = (event: AdminAuditEvent): AdminAuditEvent => {
   const validation = validateWebDocument(event);
   if (!validation.ok) throw new Error(`ADMIN_AUDIT_EVENT_INVALID:${event.eventId}`);
-  return deepFreeze(event) as AdminAuditEvent;
+  return deepFreeze(event);
 };
 
 export const ADMIN_AUDIT_EVENTS = deepFreeze([
@@ -292,8 +277,11 @@ export const evaluateDiagnosticConsent = (
   requiredActor: string,
   requiredAuditEventId: string,
 ): DiagnosticConsentDecision => {
-  if (consent === null || consent === undefined || consent.granted !== true) return 'missing';
-  if (Number.isNaN(Date.parse(consent.expiresAt)) || Date.parse(consent.expiresAt) <= Date.parse(now)) {
+  if (consent?.granted !== true) return 'missing';
+  if (
+    Number.isNaN(Date.parse(consent.expiresAt)) ||
+    Date.parse(consent.expiresAt) <= Date.parse(now)
+  ) {
     return 'expired';
   }
   if (
@@ -383,10 +371,14 @@ const useViewportWidth = (fixedWidth?: number): number => {
       setWidth(fixedWidth);
       return undefined;
     }
-    const update = () => setWidth(window.innerWidth);
+    const update = () => {
+      setWidth(window.innerWidth);
+    };
     update();
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    return () => {
+      window.removeEventListener('resize', update);
+    };
   }, [fixedWidth]);
   return width;
 };
@@ -407,7 +399,9 @@ export const AdminNoChangeReceipt = ({
     <dl>
       <div>
         <dt>{content.audit.receipt}</dt>
-        <dd><code>{event.receipt.correlationId}</code></dd>
+        <dd>
+          <code>{event.receipt.correlationId}</code>
+        </dd>
       </div>
       <div>
         <dt>{content.locale === 'pt-BR' ? 'Estado remoto alterado' : 'Remote state changed'}</dt>
@@ -439,7 +433,9 @@ export const CorrelatedEventDetail = ({
         {fields.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
-            <dd><code>{value}</code></dd>
+            <dd>
+              <code>{value}</code>
+            </dd>
           </div>
         ))}
       </dl>
@@ -452,12 +448,17 @@ export const ImmutableAuditTimeline = ({
   content,
   role,
 }: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => {
-  const visibleEvents = role === 'audit'
-    ? ADMIN_AUDIT_EVENTS
-    : ADMIN_AUDIT_EVENTS.filter((event) => event.role === role);
+  const visibleEvents =
+    role === 'audit'
+      ? ADMIN_AUDIT_EVENTS
+      : ADMIN_AUDIT_EVENTS.filter((event) => event.role === role);
   return (
     <article data-admin-workspace="immutable audit">
-      <FixtureHeader content={content} summary={content.audit.summary} title={content.audit.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.audit.summary}
+        title={content.audit.title}
+      />
       <ResponsiveDataTable
         caption={content.audit.caption}
         columns={[
@@ -495,19 +496,39 @@ export const SupportCaseWorkspace = ({
   }
   return (
     <article data-admin-workspace="role-scoped admin support">
-      <FixtureHeader content={content} summary={content.support.summary} title={content.support.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.support.summary}
+        title={content.support.title}
+      />
       <PreviewBoundary description={content.support.summary} />
       <dl>
-        <div><dt>{content.support.caseLabel}</dt><dd>{content.support.subject}</dd></div>
-        <div><dt>{content.audit.target}</dt><dd><code>{content.support.target}</code></dd></div>
-        <div><dt>{content.audit.result}</dt><dd><StatusSignal label={content.support.status} state="preview" /></dd></div>
+        <div>
+          <dt>{content.support.caseLabel}</dt>
+          <dd>{content.support.subject}</dd>
+        </div>
+        <div>
+          <dt>{content.audit.target}</dt>
+          <dd>
+            <code>{content.support.target}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>{content.audit.result}</dt>
+          <dd>
+            <StatusSignal label={content.support.status} state="preview" />
+          </dd>
+        </div>
       </dl>
       <p>{content.support.detail}</p>
       <LbTextArea
         description={content.support.responseHint}
         label={content.support.responseLabel}
         maxLength={600}
-        onChange={(value) => { setCancelled(false); setResponse(value); }}
+        onChange={(value) => {
+          setCancelled(false);
+          setResponse(value);
+        }}
         value={response}
       />
       {cancelled ? <p role="status">{content.support.cancelled}</p> : null}
@@ -523,27 +544,41 @@ export const SupportCaseWorkspace = ({
         </LbButton>
         <LbButton
           isDisabled={response.trim().length === 0}
-          onPress={() => setWorkflow(workflowInput({
-            consent: {
-              expiresAt: '2026-01-15T13:00:00.000Z',
-              granted: true,
-              permittedFields: ['case', 'response'],
-              purpose: content.support.purpose,
-              requestingActor: 'support.preview',
-            },
-            family: 'support',
-            fields: { case: 'case-preview', response },
-            impact: content.support.impact,
-            label: content.support.reviewAction,
-            purpose: content.support.purpose,
-            review: [
-              { field: 'case', label: content.support.caseLabel, before: 'Unreviewed', after: 'Scoped review' },
-              { field: 'response', label: content.support.responseLabel, before: 'Not sent', after: response },
-            ],
-            role: 'support',
-            safeDraftFields: ['case'],
-            viewportWidth,
-          }))}
+          onPress={() => {
+            setWorkflow(
+              workflowInput({
+                consent: {
+                  expiresAt: '2026-01-15T13:00:00.000Z',
+                  granted: true,
+                  permittedFields: ['case', 'response'],
+                  purpose: content.support.purpose,
+                  requestingActor: 'support.preview',
+                },
+                family: 'support',
+                fields: { case: 'case-preview', response },
+                impact: content.support.impact,
+                label: content.support.reviewAction,
+                purpose: content.support.purpose,
+                review: [
+                  {
+                    field: 'case',
+                    label: content.support.caseLabel,
+                    before: 'Unreviewed',
+                    after: 'Scoped review',
+                  },
+                  {
+                    field: 'response',
+                    label: content.support.responseLabel,
+                    before: 'Not sent',
+                    after: response,
+                  },
+                ],
+                role: 'support',
+                safeDraftFields: ['case'],
+                viewportWidth,
+              }),
+            );
+          }}
         >
           {content.support.reviewAction}
         </LbButton>
@@ -571,10 +606,24 @@ export const PurposeAndImpactReview = ({
       {content.locale === 'pt-BR' ? 'Finalidade e impacto' : 'Purpose and impact'}
     </h2>
     <dl>
-      <div><dt>{content.audit.action}</dt><dd>{action}</dd></div>
-      <div><dt>{content.audit.target}</dt><dd><code>{target}</code></dd></div>
-      <div><dt>{content.diagnostics.purposeLabel}</dt><dd>{purpose}</dd></div>
-      <div><dt>{content.locale === 'pt-BR' ? 'Impacto' : 'Impact'}</dt><dd>{impact}</dd></div>
+      <div>
+        <dt>{content.audit.action}</dt>
+        <dd>{action}</dd>
+      </div>
+      <div>
+        <dt>{content.audit.target}</dt>
+        <dd>
+          <code>{target}</code>
+        </dd>
+      </div>
+      <div>
+        <dt>{content.diagnostics.purposeLabel}</dt>
+        <dd>{purpose}</dd>
+      </div>
+      <div>
+        <dt>{content.locale === 'pt-BR' ? 'Impacto' : 'Impact'}</dt>
+        <dd>{impact}</dd>
+      </div>
     </dl>
   </section>
 );
@@ -601,30 +650,47 @@ const CriticalReview = ({
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   return (
     <>
-      <PurposeAndImpactReview action={action} content={content} impact={impact} purpose={purpose} target={target} />
+      <PurposeAndImpactReview
+        action={action}
+        content={content}
+        impact={impact}
+        purpose={purpose}
+        target={target}
+      />
       <p className="admin-viewport-gate__mobile" id="admin-mobile-high-risk-block" role="status">
         {content.operations.mobile}
       </p>
       <div aria-describedby="admin-mobile-high-risk-block" data-high-risk-action="true">
         {workflow === null ? (
           <LbButton
-            onPress={() => setWorkflow(workflowInput({
-              consent: {
-                expiresAt: '2026-01-15T13:00:00.000Z',
-                granted: true,
-                permittedFields: ['target'],
-                purpose,
-                requestingActor: `${role}.preview`,
-              },
-              family: 'admin',
-              fields: { target: `${role}-target-preview` },
-              impact,
-              label: action,
-              purpose,
-              review: [{ field: 'target', label: content.audit.target, before: target, after: 'Review only' }],
-              role,
-              viewportWidth,
-            }))}
+            onPress={() => {
+              setWorkflow(
+                workflowInput({
+                  consent: {
+                    expiresAt: '2026-01-15T13:00:00.000Z',
+                    granted: true,
+                    permittedFields: ['target'],
+                    purpose,
+                    requestingActor: `${role}.preview`,
+                  },
+                  family: 'admin',
+                  fields: { target: `${role}-target-preview` },
+                  impact,
+                  label: action,
+                  purpose,
+                  review: [
+                    {
+                      field: 'target',
+                      label: content.audit.target,
+                      before: target,
+                      after: 'Review only',
+                    },
+                  ],
+                  role,
+                  viewportWidth,
+                }),
+              );
+            }}
           >
             {action}
           </LbButton>
@@ -641,7 +707,11 @@ export const OperationsReview = ({
   viewportWidth,
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
   <article data-admin-workspace="operations">
-    <FixtureHeader content={content} summary={content.operations.summary} title={content.operations.title} />
+    <FixtureHeader
+      content={content}
+      summary={content.operations.summary}
+      title={content.operations.title}
+    />
     <StatusSignal label={content.operations.state} state="warning" />
     <p>{content.operations.detail}</p>
     <CriticalReview
@@ -663,7 +733,11 @@ export const SecurityReview = ({
   viewportWidth,
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
   <article data-admin-workspace="security">
-    <FixtureHeader content={content} summary={content.security.summary} title={content.security.title} />
+    <FixtureHeader
+      content={content}
+      summary={content.security.summary}
+      title={content.security.title}
+    />
     <StatusSignal label={content.security.state} state="warning" />
     <p>{content.security.detail}</p>
     <CriticalReview
@@ -691,7 +765,9 @@ export const ConsentScopePanel = ({
 }>) => (
   <section aria-labelledby="diagnostic-consent-title" className="lb-web-boundary">
     <StatusSignal
-      label={decision === 'allowed' ? content.diagnostics.allowedTitle : content.diagnostics.blockedTitle}
+      label={
+        decision === 'allowed' ? content.diagnostics.allowedTitle : content.diagnostics.blockedTitle
+      }
       state={decision === 'allowed' ? 'preview' : 'error'}
     />
     <h2 id="diagnostic-consent-title">
@@ -699,11 +775,34 @@ export const ConsentScopePanel = ({
     </h2>
     <p>{decision === 'allowed' ? content.diagnostics.summary : content.diagnostics.blockedBody}</p>
     <dl>
-      <div><dt>{content.diagnostics.purposeLabel}</dt><dd>{consent?.purpose ?? content.diagnostics.requiredPurpose}</dd></div>
-      <div><dt>{content.diagnostics.fieldsLabel}</dt><dd>{(consent?.permittedFields ?? content.diagnostics.requiredFields).join(', ')}</dd></div>
-      <div><dt>{content.diagnostics.expirationLabel}</dt><dd><time dateTime={consent?.expiresAt ?? content.diagnostics.expiration}>{consent?.expiresAt ?? content.diagnostics.expiration}</time></dd></div>
-      <div><dt>{content.diagnostics.actorLabel}</dt><dd><code>{consent?.actor ?? content.diagnostics.actor}</code></dd></div>
-      <div><dt>{content.diagnostics.auditLabel}</dt><dd><code>{consent?.auditEventId ?? content.diagnostics.auditReference}</code></dd></div>
+      <div>
+        <dt>{content.diagnostics.purposeLabel}</dt>
+        <dd>{consent?.purpose ?? content.diagnostics.requiredPurpose}</dd>
+      </div>
+      <div>
+        <dt>{content.diagnostics.fieldsLabel}</dt>
+        <dd>{(consent?.permittedFields ?? content.diagnostics.requiredFields).join(', ')}</dd>
+      </div>
+      <div>
+        <dt>{content.diagnostics.expirationLabel}</dt>
+        <dd>
+          <time dateTime={consent?.expiresAt ?? content.diagnostics.expiration}>
+            {consent?.expiresAt ?? content.diagnostics.expiration}
+          </time>
+        </dd>
+      </div>
+      <div>
+        <dt>{content.diagnostics.actorLabel}</dt>
+        <dd>
+          <code>{consent?.actor ?? content.diagnostics.actor}</code>
+        </dd>
+      </div>
+      <div>
+        <dt>{content.diagnostics.auditLabel}</dt>
+        <dd>
+          <code>{consent?.auditEventId ?? content.diagnostics.auditReference}</code>
+        </dd>
+      </div>
     </dl>
   </section>
 );
@@ -729,40 +828,71 @@ export const DiagnosticFieldDisclosure = ({
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   return (
     <article data-admin-workspace="consent-scoped diagnostics" data-consent-decision={decision}>
-      <FixtureHeader content={content} summary={content.diagnostics.summary} title={content.diagnostics.title} />
+      <FixtureHeader
+        content={content}
+        summary={content.diagnostics.summary}
+        title={content.diagnostics.title}
+      />
       <ConsentScopePanel consent={consent} content={content} decision={decision} />
       {admittedConsent !== null ? (
         <section aria-labelledby="diagnostic-fields-title">
           <h2 id="diagnostic-fields-title">{content.diagnostics.allowedTitle}</h2>
           <dl>
-            <div><dt>startup-state</dt><dd><code>synthetic-ready</code></dd></div>
-            <div><dt>application-version</dt><dd><code>1.0.0-preview</code></dd></div>
+            <div>
+              <dt>startup-state</dt>
+              <dd>
+                <code>synthetic-ready</code>
+              </dd>
+            </div>
+            <div>
+              <dt>application-version</dt>
+              <dd>
+                <code>1.0.0-preview</code>
+              </dd>
+            </div>
           </dl>
           <div data-high-risk-action="true">
             {workflow === null ? (
-              <LbButton onPress={() => setWorkflow(workflowInput({
-                consent: {
-                  expiresAt: admittedConsent.expiresAt,
-                  granted: admittedConsent.granted,
-                  permittedFields: admittedConsent.permittedFields,
-                  purpose: admittedConsent.purpose,
-                  requestingActor: admittedConsent.actor,
-                },
-                family: 'diagnostic',
-                fields: { diagnostic: 'diagnostic-preview' },
-                impact: content.diagnostics.denial,
-                label: content.diagnostics.allowedTitle,
-                purpose: admittedConsent.purpose,
-                review: [{ field: 'diagnostic', label: content.diagnostics.title, before: 'Blocked', after: 'Scoped synthetic review' }],
-                role: 'security',
-                viewportWidth,
-              }))}>
+              <LbButton
+                onPress={() => {
+                  setWorkflow(
+                    workflowInput({
+                      consent: {
+                        expiresAt: admittedConsent.expiresAt,
+                        granted: admittedConsent.granted,
+                        permittedFields: admittedConsent.permittedFields,
+                        purpose: admittedConsent.purpose,
+                        requestingActor: admittedConsent.actor,
+                      },
+                      family: 'diagnostic',
+                      fields: { diagnostic: 'diagnostic-preview' },
+                      impact: content.diagnostics.denial,
+                      label: content.diagnostics.allowedTitle,
+                      purpose: admittedConsent.purpose,
+                      review: [
+                        {
+                          field: 'diagnostic',
+                          label: content.diagnostics.title,
+                          before: 'Blocked',
+                          after: 'Scoped synthetic review',
+                        },
+                      ],
+                      role: 'security',
+                      viewportWidth,
+                    }),
+                  );
+                }}
+              >
                 {content.diagnostics.allowedTitle}
               </LbButton>
-            ) : <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />}
+            ) : (
+              <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />
+            )}
           </div>
         </section>
-      ) : <p role="status">{content.diagnostics.denial}</p>}
+      ) : (
+        <p role="status">{content.diagnostics.denial}</p>
+      )}
       <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[1]} />
     </article>
   );
@@ -773,13 +903,21 @@ const RoleLanding = ({
   role,
 }: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => (
   <article data-admin-workspace="role landing">
-    <FixtureHeader content={content} summary={content.landing.summary} title={content.landing.title} />
+    <FixtureHeader
+      content={content}
+      summary={content.landing.summary}
+      title={content.landing.title}
+    />
     <PreviewBoundary description={content.landing.scopeBody} />
     <section aria-labelledby="admin-role-scope-title">
       <h2 id="admin-role-scope-title">{content.landing.scopeTitle}</h2>
       <ul>
         {ROLE_ROUTE_ACCESS[role].map((routeId) => (
-          <li key={routeId}><a href={hrefFor(routeId, content.locale, role)}>{getAdminPreviewMetadata(content.locale, routeId).title}</a></li>
+          <li key={routeId}>
+            <a href={hrefFor(routeId, content.locale, role)}>
+              {getAdminPreviewMetadata(content.locale, routeId).title}
+            </a>
+          </li>
         ))}
       </ul>
     </section>
@@ -790,15 +928,16 @@ const DegradedAdminPreview = ({
   content,
   state,
 }: Readonly<{ content: AdminContent; state: Exclude<AdminPreviewState, 'ready'> }>) => {
-  const message = state === 'offline'
-    ? content.recovery.offline
-    : state === 'stale'
-      ? content.recovery.stale
-      : state === 'expired-session'
-        ? content.recovery.expired
-        : state === 'permission-denied'
-          ? content.recovery.permission
-          : content.recovery.failure;
+  const message =
+    state === 'offline'
+      ? content.recovery.offline
+      : state === 'stale'
+        ? content.recovery.stale
+        : state === 'expired-session'
+          ? content.recovery.expired
+          : state === 'permission-denied'
+            ? content.recovery.permission
+            : content.recovery.failure;
   return (
     <article data-admin-state={state}>
       <FixtureHeader content={content} summary={message} title={content.recovery.title} />
@@ -854,7 +993,11 @@ export const AdminPreviewExperience = ({
     case 'admin-audit-event':
       return (
         <article data-admin-workspace="correlated audit event">
-          <FixtureHeader content={content} summary={content.audit.summary} title={content.audit.title} />
+          <FixtureHeader
+            content={content}
+            summary={content.audit.summary}
+            title={content.audit.title}
+          />
           <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[0]} />
         </article>
       );

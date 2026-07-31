@@ -1,8 +1,4 @@
-import {
-  matchWebRoute,
-  WEB_LOCALES,
-  type WebLocale,
-} from '@liiiraa/web-core';
+import { matchWebRoute, WEB_LOCALES, type WebLocale } from '@liiiraa/web-core';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
@@ -59,7 +55,7 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
   if (!hasLocale(WEB_LOCALES, requestedLocale)) notFound();
   setRequestLocale(requestedLocale);
 
-  const locale = requestedLocale as WebLocale;
+  const locale = requestedLocale;
   const routeId = resolveAdminWorkspace(locale, workspace);
   if (routeId === null) notFound();
 
@@ -67,7 +63,8 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
   const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
   if (!adminRoleCanAccess(role, routeId)) {
     const model = createAdminFailureModel('403', locale);
-    const roleHref = role === 'support' ? model.destinations.role : `${model.destinations.role}?role=${role}`;
+    const roleHref =
+      role === 'support' ? model.destinations.role : `${model.destinations.role}?role=${role}`;
     return (
       <AdminFailureView
         action={<a href={roleHref}>{model.copy.action}</a>}
@@ -84,4 +81,3 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
 
   return <AdminPreviewPage locale={locale} role={role} routeId={routeId} />;
 }
-

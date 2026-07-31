@@ -61,7 +61,8 @@ describe('role-scoped admin', () => {
       for (const routeId of ADMIN_ENTRY_ROUTE_IDS) {
         const parameters: Record<string, string> = { locale };
         if (routeId === 'admin-support') parameters['caseId'] = 'case-preview';
-        if (routeId === 'admin-operations' || routeId === 'admin-security') parameters['reviewId'] = 'review-preview';
+        if (routeId === 'admin-operations' || routeId === 'admin-security')
+          parameters['reviewId'] = 'review-preview';
         if (routeId === 'admin-diagnostics') parameters['diagnosticId'] = 'diagnostic-preview';
         if (routeId === 'admin-audit-event') parameters['eventId'] = 'event-preview';
         expect(routeHref(routeId, parameters).ok).toBe(true);
@@ -106,7 +107,8 @@ describe('immutable audit', () => {
       'result',
       'correlationId',
       'receipt',
-    ]) expect(featureSource).toContain(field);
+    ])
+      expect(featureSource).toContain(field);
     expect(featureSource).toContain('createImmutableAuditEvent');
     expect(featureSource).toContain('validateWebDocument(event)');
     expect(featureSource).toContain('return deepFreeze(event)');
@@ -161,7 +163,9 @@ describe('W15 diagnostic consent guard', () => {
     expect(featureSource).toContain('consent.auditEventId !== requiredAuditEventId');
     expect(featureSource).toContain('!consent.permittedFields.includes(field)');
     expect(featureSource).toContain('!requiredFields.includes(field)');
-    expect(adminEn.diagnostics.blockedBody).toContain('without revealing diagnostic or customer data');
+    expect(adminEn.diagnostics.blockedBody).toContain(
+      'without revealing diagnostic or customer data',
+    );
     expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
   });
 });
@@ -192,11 +196,14 @@ describe('W16 viewport guard and recovery states', () => {
       'expired-session',
       'permission-denied',
       'partial-failure',
-    ]) expect(featureSource).toContain(`'${state}'`);
-    expect(featureSource).toContain('safeDraftFields: [\'case\']');
+    ])
+      expect(featureSource).toContain(`'${state}'`);
+    expect(featureSource).toContain("safeDraftFields: ['case']");
     expect(featureSource).not.toContain("safeDraftFields: ['response']");
     expect(adminEn.recovery.safeDraft).toContain('Response and diagnostic fields are discarded');
-    expect(adminPtBr.recovery.safeDraft).toContain('Resposta e campos de diagnóstico são descartados');
+    expect(adminPtBr.recovery.safeDraft).toContain(
+      'Resposta e campos de diagnóstico são descartados',
+    );
   });
 });
 
