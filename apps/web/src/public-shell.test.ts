@@ -1,0 +1,44 @@
+import { describe, expect, it } from 'vitest';
+
+import { publicCspProbe, publicHeaderContract } from '../next.config';
+import { publicBoundaryHref, publicNavigation, routing } from './public-boundary';
+
+describe('public shell', () => {
+  it('derives every public navigation pillar and both locale roots from route authority', () => {
+    expect(routing.locales).toEqual(['pt-BR', 'en']);
+    expect(publicNavigation.map(({ id }) => id)).toEqual([
+      'public-product',
+      'public-evidence',
+      'public-compatibility',
+      'public-plans',
+      'docs-index',
+      'releases-index',
+    ]);
+    expect(publicBoundaryHref('docs-index', 'pt-BR')).toBe('/pt-BR/docs');
+    expect(publicBoundaryHref('releases-index', 'en')).toBe('/en/releases');
+  });
+});
+
+describe('public CSP', () => {
+  it('keeps the production origin cookie-free, frame-closed, and third-party-free', () => {
+    const headers = Object.fromEntries(
+      publicHeaderContract.map(({ key, value }) => [key.toLowerCase(), value]),
+    );
+    const enforced = headers['content-security-policy'];
+
+    expect(enforced).toContain("default-src 'self'");
+    expect(enforced).toContain("frame-ancestors 'none'");
+    expect(enforced).toContain("object-src 'none'");
+    expect(enforced).toContain("form-action 'self'");
+    const scriptDirective = enforced
+      ?.split(';')
+      .find((directive) => directive.trim().startsWith('script-src'));
+
+    expect(scriptDirective).not.toMatch(/https?:|data:|nonce-/u);
+    expect(Object.keys(headers)).not.toContain('set-cookie');
+    expect(publicCspProbe).toMatchObject({
+      blockingDirectives: ['script-src', 'style-src'],
+      status: 'report-only-blocked',
+    });
+  });
+});

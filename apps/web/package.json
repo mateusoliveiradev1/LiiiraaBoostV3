@@ -11,13 +11,14 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "pnpm run check",
+    "test": "vitest --run",
     "verify": "pnpm run check && pnpm run test && pnpm run build"
   },
   "dependencies": {
+    "@liiiraa/design-tokens": "workspace:*",
     "@liiiraa/web-core": "workspace:*",
     "@liiiraa/web-features": "workspace:*",
     "@next/mdx": "16.2.12",
@@ -28,6 +29,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@types/react": "19.2.17"
+    "@types/react": "19.2.17",
+    "vitest": "4.1.10"
   }
 }
