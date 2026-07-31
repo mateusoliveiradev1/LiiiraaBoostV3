@@ -34,6 +34,7 @@ const OUTPUT_ROOT =
     : join(STAGING_ROOT, 'contracts', 'generated');
 const DESKTOP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'desktop', 'v1');
 const HTTP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'http');
+const WEB_OUTPUT_ROOT = join(OUTPUT_ROOT, 'web', 'v1');
 const TYPESCRIPT_OUTPUT_ROOT = join(
   STAGING_ROOT ?? REPOSITORY_ROOT,
   'packages',
@@ -48,6 +49,7 @@ export const OUTPUT_PATHS = Object.freeze({
   diagnosticValue: join(DESKTOP_OUTPUT_ROOT, 'diagnostic-value.schema.json'),
   inspectSystem: join(DESKTOP_OUTPUT_ROOT, 'inspect-system.schema.json'),
   shellMessage: join(DESKTOP_OUTPUT_ROOT, 'shell-message.schema.json'),
+  webDocument: join(WEB_OUTPUT_ROOT, 'web-document.schema.json'),
   openApi: join(HTTP_OUTPUT_ROOT, 'openapi.json'),
   typescriptModels: join(TYPESCRIPT_OUTPUT_ROOT, 'models.ts'),
   typescriptIndex: join(TYPESCRIPT_OUTPUT_ROOT, 'index.ts'),
@@ -80,7 +82,74 @@ const REQUIRED_DEFINITIONS = Object.freeze([
   'ShellStartupState',
   'ShellTrayPreference',
   'ShellWindowState',
+  'WebIdentifier',
+  'WebText',
+  'WebPathnameTemplate',
+  'WebUri',
+  'Sha256Digest',
+  'WebSurface',
+  'WebShell',
+  'IndexingPolicy',
+  'ValidationState',
+  'CapabilityAvailability',
+  'SafeContextKey',
+  'LocalePolicy',
+  'WebSecurityBoundary',
+  'OfficialReleaseOrigin',
+  'SignatureState',
+  'ScreenshotReviewState',
+  'WebRouteRecord',
+  'ClaimEvidence',
+  'ContentRecord',
+  'ScreenshotProvenance',
+  'ReleaseArtifactEvidence',
+  'ReleaseRecord',
+  'FutureAuthorityCommand',
+  'NoChangeReceipt',
+  'AdminAuditEvent',
 ]);
+
+const WEB_DEFINITION_NAMES = Object.freeze([
+  'WebIdentifier',
+  'WebText',
+  'WebPathnameTemplate',
+  'WebUri',
+  'Sha256Digest',
+  'WebSurface',
+  'WebShell',
+  'IndexingPolicy',
+  'ValidationState',
+  'CapabilityAvailability',
+  'SafeContextKey',
+  'LocalePolicy',
+  'WebSecurityBoundary',
+  'OfficialReleaseOrigin',
+  'SignatureState',
+  'ScreenshotReviewState',
+  'WebRouteRecord',
+  'ClaimEvidence',
+  'ContentRecord',
+  'ScreenshotProvenance',
+  'ReleaseArtifactEvidence',
+  'ReleaseRecord',
+  'FutureAuthorityCommand',
+  'NoChangeReceipt',
+  'AdminAuditEvent',
+]);
+
+const WEB_DOCUMENT_ROOTS = Object.freeze([
+  'WebRouteRecord',
+  'ClaimEvidence',
+  'ContentRecord',
+  'ScreenshotProvenance',
+  'ReleaseArtifactEvidence',
+  'ReleaseRecord',
+  'FutureAuthorityCommand',
+  'NoChangeReceipt',
+  'AdminAuditEvent',
+]);
+
+const WEB_DEFINITION_NAME_SET = new Set<string>(WEB_DEFINITION_NAMES);
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -159,6 +228,70 @@ function inspectionDefinitions(definitions: JsonObject): JsonObject {
   );
 }
 
+function desktopDefinitions(definitions: JsonObject): JsonObject {
+  return Object.fromEntries(
+    Object.entries(definitions).filter(([name]) => !WEB_DEFINITION_NAME_SET.has(name)),
+  );
+}
+
+function collectReferencedDefinitionNames(value: unknown, names: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      collectReferencedDefinitionNames(entry, names);
+    }
+    return;
+  }
+
+  if (!isJsonObject(value)) {
+    return;
+  }
+
+  const reference = value['$ref'];
+  if (typeof reference === 'string' && reference.endsWith('.json')) {
+    names.add(reference.slice(0, -'.json'.length));
+  }
+
+  for (const entry of Object.values(value)) {
+    collectReferencedDefinitionNames(entry, names);
+  }
+}
+
+function webDefinitions(definitions: JsonObject): JsonObject {
+  const selectedNames = new Set<string>(WEB_DOCUMENT_ROOTS);
+  const pendingNames = [...selectedNames];
+
+  while (pendingNames.length > 0) {
+    const name = pendingNames.pop();
+    if (name === undefined) {
+      continue;
+    }
+
+    const definition = definitions[name];
+    if (!isJsonObject(definition)) {
+      throw new Error(`TypeSpec JSON Schema bundle missing web dependency ${name}.`);
+    }
+
+    const referencedNames = new Set<string>();
+    collectReferencedDefinitionNames(definition, referencedNames);
+    for (const referencedName of referencedNames) {
+      if (!selectedNames.has(referencedName)) {
+        selectedNames.add(referencedName);
+        pendingNames.push(referencedName);
+      }
+    }
+  }
+
+  for (const name of WEB_DEFINITION_NAMES) {
+    if (!selectedNames.has(name)) {
+      throw new Error(`Web document schema does not reach required definition ${name}.`);
+    }
+  }
+
+  return Object.fromEntries(
+    Object.entries(definitions).filter(([name]) => selectedNames.has(name)),
+  );
+}
+
 function createRuntimeSchema(
   schemaId: string,
   definitions: JsonObject,
@@ -181,10 +314,7 @@ function inspectMessageRoot(): JsonObject {
 
 function shellMessageRoot(): JsonObject {
   return {
-    oneOf: [
-      { $ref: 'HostToRendererShellEvent.json' },
-      { $ref: 'RendererToHostShellCommand.json' },
-    ],
+    oneOf: [{ $ref: 'HostToRendererShellEvent.json' }, { $ref: 'RendererToHostShellCommand.json' }],
   };
 }
 
@@ -196,6 +326,12 @@ function transportMessageRoot(): JsonObject {
       { $ref: 'HostToRendererShellEvent.json' },
       { $ref: 'RendererToHostShellCommand.json' },
     ],
+  };
+}
+
+function webDocumentRoot(): JsonObject {
+  return {
+    oneOf: WEB_DOCUMENT_ROOTS.map((name) => ({ $ref: `${name}.json` })),
   };
 }
 
@@ -234,7 +370,7 @@ function createOpenApiDocument(definitions: JsonObject): JsonObject {
     openapi: '3.1.0',
     info: {
       title: 'Liiiraa Boost Contracts',
-      version: '1.0.0',
+      version: '1.1.0',
     },
     paths: {},
     components: {
@@ -297,7 +433,9 @@ const schemaStage: GenerationStage = {
   async generate(): Promise<readonly GeneratedArtifact[]> {
     const bundle = await canonicalSchema();
     const definitions = requireDefinitions(bundle);
-    const legacyInspectionDefinitions = inspectionDefinitions(definitions);
+    const legacyDesktopDefinitions = desktopDefinitions(definitions);
+    const legacyInspectionDefinitions = inspectionDefinitions(legacyDesktopDefinitions);
+    const standaloneWebDefinitions = webDefinitions(definitions);
 
     return [
       {
@@ -328,13 +466,24 @@ const schemaStage: GenerationStage = {
         path: OUTPUT_PATHS.shellMessage,
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/desktop/v1/shell-message.schema.json',
-          definitions,
+          legacyDesktopDefinitions,
           shellMessageRoot(),
         ),
       },
       {
+        path: OUTPUT_PATHS.webDocument,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/web/v1/web-document.schema.json',
+          standaloneWebDefinitions,
+          webDocumentRoot(),
+        ),
+      },
+      {
         path: OUTPUT_PATHS.openApi,
-        value: createOpenApiDocument(legacyInspectionDefinitions),
+        value: createOpenApiDocument({
+          ...legacyInspectionDefinitions,
+          ...standaloneWebDefinitions,
+        }),
       },
     ];
   },
@@ -382,8 +531,13 @@ const typescriptStage: GenerationStage = {
   async generate(): Promise<readonly GeneratedArtifact[]> {
     const definitions = requireDefinitions(await canonicalSchema());
     const generatorSchema = rebaseForTypeScript({
-      title: 'MessageEnvelope',
-      ...transportMessageRoot(),
+      title: 'GeneratedContractRoots',
+      type: 'object',
+      properties: {
+        messageEnvelope: transportMessageRoot(),
+        webDocument: webDocumentRoot(),
+      },
+      required: ['messageEnvelope', 'webDocument'],
       $defs: definitions,
     });
 
@@ -391,7 +545,7 @@ const typescriptStage: GenerationStage = {
       throw new Error('Could not build TypeScript transport generator schema.');
     }
 
-    const models = await compileTypeScript(generatorSchema, 'MessageEnvelope', {
+    const models = await compileTypeScript(generatorSchema, 'GeneratedContractRoots', {
       additionalProperties: false,
       bannerComment: GENERATED_TYPESCRIPT_HEADER,
       style: {
@@ -400,11 +554,15 @@ const typescriptStage: GenerationStage = {
       unknownAny: false,
       unreachableDefinitions: true,
     });
+    const transportAliases = [
+      "export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];",
+      "export type WebDocument = GeneratedContractRoots['webDocument'];",
+    ].join('\n');
 
     return [
       {
         path: OUTPUT_PATHS.typescriptModels,
-        value: normalizeGeneratedText(models),
+        value: normalizeGeneratedText(`${models}\n${transportAliases}`),
       },
       {
         path: OUTPUT_PATHS.typescriptIndex,
@@ -458,11 +616,11 @@ const rustStage: GenerationStage = {
       await writeFile(
         schemaPath,
         stableJson(
-        createRuntimeSchema(
-          'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
-          definitions,
-          transportMessageRoot(),
-        ),
+          createRuntimeSchema(
+            'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
+            definitions,
+            transportMessageRoot(),
+          ),
         ),
         'utf8',
       );

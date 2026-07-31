@@ -1,6 +1,183 @@
 {
   "components": {
     "schemas": {
+      "AdminAuditEvent": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "consentReference": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/NoChangeReceipt"
+          },
+          "redactedTarget": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "result": {
+            "const": "simulated-no-change",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          }
+        },
+        "required": [
+          "eventId",
+          "actor",
+          "role",
+          "action",
+          "redactedTarget",
+          "reason",
+          "occurredAt",
+          "result",
+          "correlationId",
+          "receipt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CapabilityAvailability": {
+        "anyOf": [
+          {
+            "const": "available",
+            "type": "string"
+          },
+          {
+            "const": "demonstrative-preview",
+            "type": "string"
+          },
+          {
+            "const": "under-validation",
+            "type": "string"
+          },
+          {
+            "const": "planned",
+            "type": "string"
+          },
+          {
+            "const": "unsupported",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "ClaimEvidence": {
+        "properties": {
+          "applicableVersion": {
+            "$ref": "#/components/schemas/ShellVersion"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/DiagnosticValue"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "source": {
+            "$ref": "#/components/schemas/WebUri"
+          },
+          "unproven": {
+            "type": "boolean"
+          },
+          "validationState": {
+            "$ref": "#/components/schemas/ValidationState"
+          }
+        },
+        "required": [
+          "source",
+          "provenance",
+          "scope",
+          "applicableVersion",
+          "validationState",
+          "unproven"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ContentRecord": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ShellReleaseChannel"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ClaimEvidence"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "indexing": {
+            "$ref": "#/components/schemas/IndexingPolicy"
+          },
+          "lastReviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "locale": {
+            "$ref": "#/components/schemas/ShellLocale"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "routeId": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "staleTreatment": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "validationState": {
+            "$ref": "#/components/schemas/ValidationState"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ShellVersion"
+          }
+        },
+        "required": [
+          "id",
+          "routeId",
+          "locale",
+          "version",
+          "channel",
+          "owner",
+          "lastReviewedAt",
+          "validationState",
+          "evidence",
+          "indexing",
+          "staleTreatment"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "CorrelationId": {
         "maxLength": 128,
         "minLength": 1,
@@ -69,6 +246,45 @@
         "unevaluatedProperties": {
           "not": {}
         }
+      },
+      "FutureAuthorityCommand": {
+        "properties": {
+          "command": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "description": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "phase": {
+            "const": "Phase 4",
+            "type": "string"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/WebSurface"
+          }
+        },
+        "required": [
+          "phase",
+          "surface",
+          "command",
+          "description"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "IndexingPolicy": {
+        "anyOf": [
+          {
+            "const": "index",
+            "type": "string"
+          },
+          {
+            "const": "noindex",
+            "type": "string"
+          }
+        ]
       },
       "InspectionId": {
         "maxLength": 128,
@@ -193,6 +409,22 @@
           "not": {}
         }
       },
+      "LocalePolicy": {
+        "anyOf": [
+          {
+            "const": "required",
+            "type": "string"
+          },
+          {
+            "const": "optional",
+            "type": "string"
+          },
+          {
+            "const": "forbidden",
+            "type": "string"
+          }
+        ]
+      },
       "MeasuredDiagnosticValue": {
         "properties": {
           "kind": {
@@ -276,6 +508,60 @@
           "not": {}
         }
       },
+      "NoChangeReceipt": {
+        "properties": {
+          "authority": {
+            "$ref": "#/components/schemas/FutureAuthorityCommand"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "nextPhase": {
+            "const": "Phase 4",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/FixtureDiagnosticValue"
+          },
+          "receiptVersion": {
+            "$ref": "#/components/schemas/ShellVersion"
+          },
+          "remoteStateChanged": {
+            "const": false,
+            "type": "boolean"
+          },
+          "requestedAction": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewedInputs": {
+            "items": {
+              "$ref": "#/components/schemas/WebIdentifier"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "receiptVersion",
+          "authority",
+          "requestedAction",
+          "reviewedInputs",
+          "reviewedAt",
+          "correlationId",
+          "provenance",
+          "remoteStateChanged",
+          "nextPhase"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "ObservedDiagnosticValue": {
         "properties": {
           "kind": {
@@ -304,6 +590,18 @@
           "not": {}
         }
       },
+      "OfficialReleaseOrigin": {
+        "anyOf": [
+          {
+            "const": "liiiraa-download-origin",
+            "type": "string"
+          },
+          {
+            "const": "liiiraa-release-origin",
+            "type": "string"
+          }
+        ]
+      },
       "ProvenanceDescription": {
         "maxLength": 512,
         "minLength": 1,
@@ -314,10 +612,234 @@
         "minLength": 1,
         "type": "string"
       },
+      "ReleaseArtifactEvidence": {
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/OfficialReleaseOrigin"
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/Sha256Digest"
+          },
+          "signatureState": {
+            "$ref": "#/components/schemas/SignatureState"
+          },
+          "sizeBytes": {
+            "maximum": 10737418240,
+            "minimum": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "publisher",
+          "sha256",
+          "sizeBytes",
+          "signatureState",
+          "origin"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ReleaseRecord": {
+        "properties": {
+          "artifactEvidence": {
+            "$ref": "#/components/schemas/ReleaseArtifactEvidence"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/CapabilityAvailability"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ShellReleaseChannel"
+          },
+          "compatibility": {
+            "items": {
+              "$ref": "#/components/schemas/WebText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "officialArtifact": {
+            "const": "unavailable",
+            "type": "string"
+          },
+          "publicDistributionApproved": {
+            "const": false,
+            "type": "boolean"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ShellVersion"
+          }
+        },
+        "required": [
+          "channel",
+          "version",
+          "compatibility",
+          "manifest",
+          "availability",
+          "publicDistributionApproved",
+          "officialArtifact"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "RequestId": {
         "maxLength": 128,
         "minLength": 1,
         "type": "string"
+      },
+      "SafeContextKey": {
+        "anyOf": [
+          {
+            "const": "locale",
+            "type": "string"
+          },
+          {
+            "const": "version",
+            "type": "string"
+          },
+          {
+            "const": "channel",
+            "type": "string"
+          },
+          {
+            "const": "destination",
+            "type": "string"
+          },
+          {
+            "const": "return-path",
+            "type": "string"
+          }
+        ]
+      },
+      "ScreenshotProvenance": {
+        "properties": {
+          "captureCommand": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "checksum": {
+            "$ref": "#/components/schemas/Sha256Digest"
+          },
+          "crop": {
+            "$ref": "#/components/schemas/WebText"
+          },
+          "locale": {
+            "$ref": "#/components/schemas/ShellLocale"
+          },
+          "reviewState": {
+            "$ref": "#/components/schemas/ScreenshotReviewState"
+          },
+          "scenarioId": {
+            "$ref": "#/components/schemas/ProvenanceIdentifier"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ShellVersion"
+          },
+          "viewport": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          }
+        },
+        "required": [
+          "version",
+          "locale",
+          "scenarioId",
+          "viewport",
+          "captureCommand",
+          "sourceCommit",
+          "checksum",
+          "crop",
+          "reviewState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ScreenshotReviewState": {
+        "anyOf": [
+          {
+            "const": "approved",
+            "type": "string"
+          },
+          {
+            "const": "rejected",
+            "type": "string"
+          },
+          {
+            "const": "pending",
+            "type": "string"
+          }
+        ]
+      },
+      "Sha256Digest": {
+        "maxLength": 64,
+        "minLength": 64,
+        "type": "string"
+      },
+      "ShellLocale": {
+        "anyOf": [
+          {
+            "const": "pt-BR",
+            "type": "string"
+          },
+          {
+            "const": "en",
+            "type": "string"
+          }
+        ]
+      },
+      "ShellReleaseChannel": {
+        "anyOf": [
+          {
+            "const": "development",
+            "type": "string"
+          },
+          {
+            "const": "stable",
+            "type": "string"
+          },
+          {
+            "const": "beta",
+            "type": "string"
+          },
+          {
+            "const": "experimental",
+            "type": "string"
+          }
+        ]
+      },
+      "ShellVersion": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+      },
+      "SignatureState": {
+        "anyOf": [
+          {
+            "const": "verified",
+            "type": "string"
+          },
+          {
+            "const": "mismatch",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          }
+        ]
       },
       "UnavailableDiagnosticValue": {
         "properties": {
@@ -337,12 +859,155 @@
         "unevaluatedProperties": {
           "not": {}
         }
+      },
+      "ValidationState": {
+        "anyOf": [
+          {
+            "const": "validated",
+            "type": "string"
+          },
+          {
+            "const": "under-validation",
+            "type": "string"
+          },
+          {
+            "const": "unproven",
+            "type": "string"
+          },
+          {
+            "const": "stale",
+            "type": "string"
+          }
+        ]
+      },
+      "WebIdentifier": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "WebPathnameTemplate": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "WebRouteRecord": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "indexing": {
+            "$ref": "#/components/schemas/IndexingPolicy"
+          },
+          "localePolicy": {
+            "$ref": "#/components/schemas/LocalePolicy"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/WebIdentifier"
+          },
+          "pathnameTemplate": {
+            "$ref": "#/components/schemas/WebPathnameTemplate"
+          },
+          "safeContextKeys": {
+            "items": {
+              "$ref": "#/components/schemas/SafeContextKey"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "scenarioRequirement": {
+            "$ref": "#/components/schemas/CapabilityAvailability"
+          },
+          "securityBoundary": {
+            "$ref": "#/components/schemas/WebSecurityBoundary"
+          },
+          "shell": {
+            "$ref": "#/components/schemas/WebShell"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/WebSurface"
+          }
+        },
+        "required": [
+          "id",
+          "surface",
+          "shell",
+          "pathnameTemplate",
+          "localePolicy",
+          "indexing",
+          "owner",
+          "scenarioRequirement",
+          "securityBoundary",
+          "safeContextKeys"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "WebSecurityBoundary": {
+        "anyOf": [
+          {
+            "const": "public-origin",
+            "type": "string"
+          },
+          {
+            "const": "account-origin",
+            "type": "string"
+          },
+          {
+            "const": "admin-origin",
+            "type": "string"
+          }
+        ]
+      },
+      "WebShell": {
+        "anyOf": [
+          {
+            "const": "public",
+            "type": "string"
+          },
+          {
+            "const": "account",
+            "type": "string"
+          },
+          {
+            "const": "admin",
+            "type": "string"
+          }
+        ]
+      },
+      "WebSurface": {
+        "anyOf": [
+          {
+            "const": "public",
+            "type": "string"
+          },
+          {
+            "const": "account",
+            "type": "string"
+          },
+          {
+            "const": "admin",
+            "type": "string"
+          }
+        ]
+      },
+      "WebText": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "WebUri": {
+        "maxLength": 2048,
+        "minLength": 1,
+        "type": "string"
       }
     }
   },
   "info": {
     "title": "Liiiraa Boost Contracts",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "openapi": "3.1.0",
   "paths": {},

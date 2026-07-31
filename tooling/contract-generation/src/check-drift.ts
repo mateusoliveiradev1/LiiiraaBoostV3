@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,11 +17,15 @@ const GENERATOR_ENTRY = join(
   'src',
   'generate.ts',
 );
-const GENERATED_DIRECTORY_ROOTS = Object.freeze([
-  join('contracts', 'generated'),
-  join('packages', 'contracts-ts', 'src', 'generated'),
-]);
-const GENERATED_FILE_PATHS = Object.freeze([
+const GENERATED_ARTIFACT_PATHS = Object.freeze([
+  join('contracts', 'generated', 'desktop', 'v1', 'diagnostic-value.schema.json'),
+  join('contracts', 'generated', 'desktop', 'v1', 'inspect-system.schema.json'),
+  join('contracts', 'generated', 'desktop', 'v1', 'message-envelope.schema.json'),
+  join('contracts', 'generated', 'desktop', 'v1', 'shell-message.schema.json'),
+  join('contracts', 'generated', 'http', 'openapi.json'),
+  join('contracts', 'generated', 'web', 'v1', 'web-document.schema.json'),
+  join('packages', 'contracts-ts', 'src', 'generated', 'index.ts'),
+  join('packages', 'contracts-ts', 'src', 'generated', 'models.ts'),
   join('crates', 'contracts-rust', 'src', 'generated.rs'),
 ]);
 const TRANSPORT_DECLARATION_NAMES = Object.freeze([
@@ -89,38 +93,8 @@ function executeFile(
   });
 }
 
-async function listDirectoryFiles(root: string, directory: string): Promise<string[]> {
-  const absoluteDirectory = join(root, directory);
-  let entries;
-
-  try {
-    entries = await readdir(absoluteDirectory, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-
-  const files: string[] = [];
-  for (const entry of entries) {
-    const child = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await listDirectoryFiles(root, child)));
-    } else if (entry.isFile()) {
-      files.push(normalizePath(child));
-    }
-  }
-
-  return files;
-}
-
 async function readGeneratedArtifacts(root: string): Promise<Map<string, string>> {
-  const paths = (
-    await Promise.all(
-      GENERATED_DIRECTORY_ROOTS.map((directory) => listDirectoryFiles(root, directory)),
-    )
-  )
-    .flat()
-    .concat(GENERATED_FILE_PATHS.map(normalizePath))
-    .sort();
+  const paths = GENERATED_ARTIFACT_PATHS.map(normalizePath).sort();
   const artifacts = new Map<string, string>();
 
   for (const path of paths) {
@@ -182,7 +156,7 @@ async function readHandwrittenSourceFiles(): Promise<SourceFile[]> {
     .map(normalizePath)
     .filter((path) => /\.(?:rs|ts|tsx)$/u.test(path))
     .filter((path) => !/(?:^|\/)(?:generated|fixtures)(?:\/|$)/u.test(path))
-    .filter((path) => !GENERATED_FILE_PATHS.map(normalizePath).includes(path))
+    .filter((path) => !GENERATED_ARTIFACT_PATHS.map(normalizePath).includes(path))
     .filter((path) => !/\.(?:spec|test)\.(?:ts|tsx)$/u.test(path))
     .filter((path) => !path.startsWith('packages/contracts-source/'));
 

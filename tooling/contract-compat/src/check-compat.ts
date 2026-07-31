@@ -92,6 +92,82 @@ function stableValue(value: unknown): string {
     .join(',')}}`;
 }
 
+export function compareComponentsOnlyHttpChange(
+  baseline: JsonObject,
+  candidate: JsonObject,
+): string[] | undefined {
+  const baselinePaths = baseline['paths'];
+  const candidatePaths = candidate['paths'];
+  if (
+    !isJsonObject(baselinePaths) ||
+    !isJsonObject(candidatePaths) ||
+    Object.keys(baselinePaths).length > 0 ||
+    Object.keys(candidatePaths).length > 0
+  ) {
+    return undefined;
+  }
+
+  const diagnostics: string[] = [];
+  const baselineInfo = baseline['info'];
+  const candidateInfo = candidate['info'];
+  if (!isJsonObject(baselineInfo) || !isJsonObject(candidateInfo)) {
+    diagnostics.push('HTTP components-only comparison requires info objects.');
+  } else {
+    const baselineInfoWithoutVersion = Object.fromEntries(
+      Object.entries(baselineInfo).filter(([key]) => key !== 'version'),
+    );
+    const candidateInfoWithoutVersion = Object.fromEntries(
+      Object.entries(candidateInfo).filter(([key]) => key !== 'version'),
+    );
+    if (stableValue(baselineInfoWithoutVersion) !== stableValue(candidateInfoWithoutVersion)) {
+      diagnostics.push('HTTP info changed outside info.version.');
+    }
+  }
+
+  const baselineComponents = baseline['components'];
+  const candidateComponents = candidate['components'];
+  const baselineSchemas =
+    isJsonObject(baselineComponents) && isJsonObject(baselineComponents['schemas'])
+      ? baselineComponents['schemas']
+      : undefined;
+  const candidateSchemas =
+    isJsonObject(candidateComponents) && isJsonObject(candidateComponents['schemas'])
+      ? candidateComponents['schemas']
+      : undefined;
+
+  if (baselineSchemas === undefined || candidateSchemas === undefined) {
+    diagnostics.push('HTTP components-only comparison requires component schema objects.');
+  } else {
+    for (const [name, baselineSchema] of Object.entries(baselineSchemas)) {
+      const candidateSchema = candidateSchemas[name];
+      if (candidateSchema === undefined) {
+        diagnostics.push(`HTTP component schema removed: ${name}.`);
+      } else if (stableValue(baselineSchema) !== stableValue(candidateSchema)) {
+        diagnostics.push(`HTTP component schema changed: ${name}.`);
+      }
+    }
+  }
+
+  const normalizeAllowedChanges = (
+    document: JsonObject,
+    info: unknown,
+    components: unknown,
+  ): JsonObject => ({
+    ...document,
+    info: isJsonObject(info) ? { ...info, version: undefined } : info,
+    paths: {},
+    components: isJsonObject(components) ? { ...components, schemas: {} } : components,
+  });
+  if (
+    stableValue(normalizeAllowedChanges(baseline, baselineInfo, baselineComponents)) !==
+    stableValue(normalizeAllowedChanges(candidate, candidateInfo, candidateComponents))
+  ) {
+    diagnostics.push('HTTP document changed outside additive component schemas and info.version.');
+  }
+
+  return [...new Set(diagnostics)].sort();
+}
+
 function parseSemver(version: string): readonly [number, number, number] {
   const match = /^(\d+)\.(\d+)\.(\d+)$/u.exec(version);
   if (match === null) {
@@ -358,6 +434,11 @@ async function compareHttpWithOasdiff(
 ): Promise<string[]> {
   if (stableValue(baseline) === stableValue(candidate)) {
     return [];
+  }
+
+  const componentsOnlyDiagnostics = compareComponentsOnlyHttpChange(baseline, candidate);
+  if (componentsOnlyDiagnostics !== undefined) {
+    return componentsOnlyDiagnostics;
   }
 
   const stagingRoot = await mkdtemp(join(tmpdir(), 'liiiraa-oasdiff-'));

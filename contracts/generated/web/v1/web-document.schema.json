@@ -1,0 +1,990 @@
+{
+  "$defs": {
+    "AdminAuditEvent": {
+      "$id": "AdminAuditEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "WebIdentifier.json"
+        },
+        "actor": {
+          "$ref": "WebIdentifier.json"
+        },
+        "consentReference": {
+          "$ref": "WebIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "eventId": {
+          "$ref": "WebIdentifier.json"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "WebText.json"
+        },
+        "receipt": {
+          "$ref": "NoChangeReceipt.json"
+        },
+        "redactedTarget": {
+          "$ref": "WebText.json"
+        },
+        "result": {
+          "const": "simulated-no-change",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "WebIdentifier.json"
+        }
+      },
+      "required": [
+        "eventId",
+        "actor",
+        "role",
+        "action",
+        "redactedTarget",
+        "reason",
+        "occurredAt",
+        "result",
+        "correlationId",
+        "receipt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CapabilityAvailability": {
+      "$id": "CapabilityAvailability.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "available",
+          "type": "string"
+        },
+        {
+          "const": "demonstrative-preview",
+          "type": "string"
+        },
+        {
+          "const": "under-validation",
+          "type": "string"
+        },
+        {
+          "const": "planned",
+          "type": "string"
+        },
+        {
+          "const": "unsupported",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "ClaimEvidence": {
+      "$id": "ClaimEvidence.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "applicableVersion": {
+          "$ref": "ShellVersion.json"
+        },
+        "provenance": {
+          "$ref": "DiagnosticValue.json"
+        },
+        "scope": {
+          "$ref": "WebText.json"
+        },
+        "source": {
+          "$ref": "WebUri.json"
+        },
+        "unproven": {
+          "type": "boolean"
+        },
+        "validationState": {
+          "$ref": "ValidationState.json"
+        }
+      },
+      "required": [
+        "source",
+        "provenance",
+        "scope",
+        "applicableVersion",
+        "validationState",
+        "unproven"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ContentRecord": {
+      "$id": "ContentRecord.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "channel": {
+          "$ref": "ShellReleaseChannel.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "ClaimEvidence.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "id": {
+          "$ref": "WebIdentifier.json"
+        },
+        "indexing": {
+          "$ref": "IndexingPolicy.json"
+        },
+        "lastReviewedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "locale": {
+          "$ref": "ShellLocale.json"
+        },
+        "owner": {
+          "$ref": "WebIdentifier.json"
+        },
+        "routeId": {
+          "$ref": "WebIdentifier.json"
+        },
+        "staleTreatment": {
+          "$ref": "WebText.json"
+        },
+        "validationState": {
+          "$ref": "ValidationState.json"
+        },
+        "version": {
+          "$ref": "ShellVersion.json"
+        }
+      },
+      "required": [
+        "id",
+        "routeId",
+        "locale",
+        "version",
+        "channel",
+        "owner",
+        "lastReviewedAt",
+        "validationState",
+        "evidence",
+        "indexing",
+        "staleTreatment"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CorrelationId": {
+      "$id": "CorrelationId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "DiagnosticPrimitive": {
+      "$id": "DiagnosticPrimitive.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "DiagnosticValue": {
+      "$id": "DiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "FixtureDiagnosticValue.json"
+        },
+        {
+          "$ref": "ObservedDiagnosticValue.json"
+        },
+        {
+          "$ref": "MeasuredDiagnosticValue.json"
+        },
+        {
+          "$ref": "ModeledDiagnosticValue.json"
+        },
+        {
+          "$ref": "UnavailableDiagnosticValue.json"
+        }
+      ]
+    },
+    "FixtureDiagnosticValue": {
+      "$id": "FixtureDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "fixtureVersion": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "kind": {
+          "const": "fixture",
+          "type": "string"
+        },
+        "scenarioId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "scenarioId",
+        "fixtureVersion"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "FutureAuthorityCommand": {
+      "$id": "FutureAuthorityCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "command": {
+          "$ref": "WebIdentifier.json"
+        },
+        "description": {
+          "$ref": "WebText.json"
+        },
+        "phase": {
+          "const": "Phase 4",
+          "type": "string"
+        },
+        "surface": {
+          "$ref": "WebSurface.json"
+        }
+      },
+      "required": [
+        "phase",
+        "surface",
+        "command",
+        "description"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "IndexingPolicy": {
+      "$id": "IndexingPolicy.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "index",
+          "type": "string"
+        },
+        {
+          "const": "noindex",
+          "type": "string"
+        }
+      ]
+    },
+    "LocalePolicy": {
+      "$id": "LocalePolicy.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "required",
+          "type": "string"
+        },
+        {
+          "const": "optional",
+          "type": "string"
+        },
+        {
+          "const": "forbidden",
+          "type": "string"
+        }
+      ]
+    },
+    "MeasuredDiagnosticValue": {
+      "$id": "MeasuredDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "measured",
+          "type": "string"
+        },
+        "measuredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "method": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "quality": {
+          "anyOf": [
+            {
+              "const": "valid",
+              "type": "string"
+            },
+            {
+              "const": "degraded",
+              "type": "string"
+            },
+            {
+              "const": "insufficient",
+              "type": "string"
+            }
+          ]
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "method",
+        "measuredAt",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ModeledDiagnosticValue": {
+      "$id": "ModeledDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "$ref": "ProvenanceDescription.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "kind": {
+          "const": "modeled",
+          "type": "string"
+        },
+        "modelId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "modelId",
+        "confidence",
+        "assumptions"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "NoChangeReceipt": {
+      "$id": "NoChangeReceipt.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "authority": {
+          "$ref": "FutureAuthorityCommand.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "nextPhase": {
+          "const": "Phase 4",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "FixtureDiagnosticValue.json"
+        },
+        "receiptVersion": {
+          "$ref": "ShellVersion.json"
+        },
+        "remoteStateChanged": {
+          "const": false,
+          "type": "boolean"
+        },
+        "requestedAction": {
+          "$ref": "WebIdentifier.json"
+        },
+        "reviewedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reviewedInputs": {
+          "items": {
+            "$ref": "WebIdentifier.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "receiptVersion",
+        "authority",
+        "requestedAction",
+        "reviewedInputs",
+        "reviewedAt",
+        "correlationId",
+        "provenance",
+        "remoteStateChanged",
+        "nextPhase"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ObservedDiagnosticValue": {
+      "$id": "ObservedDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "observed",
+          "type": "string"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "ProvenanceDescription.json"
+        },
+        "value": {
+          "$ref": "DiagnosticPrimitive.json"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "OfficialReleaseOrigin": {
+      "$id": "OfficialReleaseOrigin.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "liiiraa-download-origin",
+          "type": "string"
+        },
+        {
+          "const": "liiiraa-release-origin",
+          "type": "string"
+        }
+      ]
+    },
+    "ProvenanceDescription": {
+      "$id": "ProvenanceDescription.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ProvenanceIdentifier": {
+      "$id": "ProvenanceIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ReleaseArtifactEvidence": {
+      "$id": "ReleaseArtifactEvidence.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "origin": {
+          "$ref": "OfficialReleaseOrigin.json"
+        },
+        "publisher": {
+          "$ref": "WebText.json"
+        },
+        "sha256": {
+          "$ref": "Sha256Digest.json"
+        },
+        "signatureState": {
+          "$ref": "SignatureState.json"
+        },
+        "sizeBytes": {
+          "maximum": 10737418240,
+          "minimum": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "publisher",
+        "sha256",
+        "sizeBytes",
+        "signatureState",
+        "origin"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ReleaseRecord": {
+      "$id": "ReleaseRecord.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactEvidence": {
+          "$ref": "ReleaseArtifactEvidence.json"
+        },
+        "availability": {
+          "$ref": "CapabilityAvailability.json"
+        },
+        "channel": {
+          "$ref": "ShellReleaseChannel.json"
+        },
+        "compatibility": {
+          "items": {
+            "$ref": "WebText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "manifest": {
+          "$ref": "WebIdentifier.json"
+        },
+        "officialArtifact": {
+          "const": "unavailable",
+          "type": "string"
+        },
+        "publicDistributionApproved": {
+          "const": false,
+          "type": "boolean"
+        },
+        "version": {
+          "$ref": "ShellVersion.json"
+        }
+      },
+      "required": [
+        "channel",
+        "version",
+        "compatibility",
+        "manifest",
+        "availability",
+        "publicDistributionApproved",
+        "officialArtifact"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SafeContextKey": {
+      "$id": "SafeContextKey.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "locale",
+          "type": "string"
+        },
+        {
+          "const": "version",
+          "type": "string"
+        },
+        {
+          "const": "channel",
+          "type": "string"
+        },
+        {
+          "const": "destination",
+          "type": "string"
+        },
+        {
+          "const": "return-path",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenshotProvenance": {
+      "$id": "ScreenshotProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "captureCommand": {
+          "$ref": "WebText.json"
+        },
+        "checksum": {
+          "$ref": "Sha256Digest.json"
+        },
+        "crop": {
+          "$ref": "WebText.json"
+        },
+        "locale": {
+          "$ref": "ShellLocale.json"
+        },
+        "reviewState": {
+          "$ref": "ScreenshotReviewState.json"
+        },
+        "scenarioId": {
+          "$ref": "ProvenanceIdentifier.json"
+        },
+        "sourceCommit": {
+          "$ref": "WebIdentifier.json"
+        },
+        "version": {
+          "$ref": "ShellVersion.json"
+        },
+        "viewport": {
+          "$ref": "WebIdentifier.json"
+        }
+      },
+      "required": [
+        "version",
+        "locale",
+        "scenarioId",
+        "viewport",
+        "captureCommand",
+        "sourceCommit",
+        "checksum",
+        "crop",
+        "reviewState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ScreenshotReviewState": {
+      "$id": "ScreenshotReviewState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "approved",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "type": "string"
+        },
+        {
+          "const": "pending",
+          "type": "string"
+        }
+      ]
+    },
+    "Sha256Digest": {
+      "$id": "Sha256Digest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 64,
+      "type": "string"
+    },
+    "ShellLocale": {
+      "$id": "ShellLocale.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pt-BR",
+          "type": "string"
+        },
+        {
+          "const": "en",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellReleaseChannel": {
+      "$id": "ShellReleaseChannel.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "development",
+          "type": "string"
+        },
+        {
+          "const": "stable",
+          "type": "string"
+        },
+        {
+          "const": "beta",
+          "type": "string"
+        },
+        {
+          "const": "experimental",
+          "type": "string"
+        }
+      ]
+    },
+    "ShellVersion": {
+      "$id": "ShellVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+    },
+    "SignatureState": {
+      "$id": "SignatureState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "verified",
+          "type": "string"
+        },
+        {
+          "const": "mismatch",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "UnavailableDiagnosticValue": {
+      "$id": "UnavailableDiagnosticValue.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "const": "unavailable",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "ProvenanceDescription.json"
+        }
+      },
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ValidationState": {
+      "$id": "ValidationState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "validated",
+          "type": "string"
+        },
+        {
+          "const": "under-validation",
+          "type": "string"
+        },
+        {
+          "const": "unproven",
+          "type": "string"
+        },
+        {
+          "const": "stale",
+          "type": "string"
+        }
+      ]
+    },
+    "WebIdentifier": {
+      "$id": "WebIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "WebPathnameTemplate": {
+      "$id": "WebPathnameTemplate.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "WebRouteRecord": {
+      "$id": "WebRouteRecord.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "id": {
+          "$ref": "WebIdentifier.json"
+        },
+        "indexing": {
+          "$ref": "IndexingPolicy.json"
+        },
+        "localePolicy": {
+          "$ref": "LocalePolicy.json"
+        },
+        "owner": {
+          "$ref": "WebIdentifier.json"
+        },
+        "pathnameTemplate": {
+          "$ref": "WebPathnameTemplate.json"
+        },
+        "safeContextKeys": {
+          "items": {
+            "$ref": "SafeContextKey.json"
+          },
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array"
+        },
+        "scenarioRequirement": {
+          "$ref": "CapabilityAvailability.json"
+        },
+        "securityBoundary": {
+          "$ref": "WebSecurityBoundary.json"
+        },
+        "shell": {
+          "$ref": "WebShell.json"
+        },
+        "surface": {
+          "$ref": "WebSurface.json"
+        }
+      },
+      "required": [
+        "id",
+        "surface",
+        "shell",
+        "pathnameTemplate",
+        "localePolicy",
+        "indexing",
+        "owner",
+        "scenarioRequirement",
+        "securityBoundary",
+        "safeContextKeys"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "WebSecurityBoundary": {
+      "$id": "WebSecurityBoundary.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "public-origin",
+          "type": "string"
+        },
+        {
+          "const": "account-origin",
+          "type": "string"
+        },
+        {
+          "const": "admin-origin",
+          "type": "string"
+        }
+      ]
+    },
+    "WebShell": {
+      "$id": "WebShell.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "public",
+          "type": "string"
+        },
+        {
+          "const": "account",
+          "type": "string"
+        },
+        {
+          "const": "admin",
+          "type": "string"
+        }
+      ]
+    },
+    "WebSurface": {
+      "$id": "WebSurface.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "public",
+          "type": "string"
+        },
+        {
+          "const": "account",
+          "type": "string"
+        },
+        {
+          "const": "admin",
+          "type": "string"
+        }
+      ]
+    },
+    "WebText": {
+      "$id": "WebText.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "WebUri": {
+      "$id": "WebUri.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/web/v1/web-document.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "WebRouteRecord.json"
+    },
+    {
+      "$ref": "ClaimEvidence.json"
+    },
+    {
+      "$ref": "ContentRecord.json"
+    },
+    {
+      "$ref": "ScreenshotProvenance.json"
+    },
+    {
+      "$ref": "ReleaseArtifactEvidence.json"
+    },
+    {
+      "$ref": "ReleaseRecord.json"
+    },
+    {
+      "$ref": "FutureAuthorityCommand.json"
+    },
+    {
+      "$ref": "NoChangeReceipt.json"
+    },
+    {
+      "$ref": "AdminAuditEvent.json"
+    }
+  ],
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}

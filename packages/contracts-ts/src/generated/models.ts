@@ -4,20 +4,50 @@
  * This file is read-only. DO NOT EDIT.
  */
 
-export type MessageEnvelope =
-  InspectSystemRequestJson | InspectSystemResultJson | HostToRendererShellEventJson | RendererToHostShellCommandJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RequestId".
+ */
 export type RequestIdJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CorrelationId".
+ */
 export type CorrelationIdJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InspectionId".
+ */
 export type InspectionIdJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DiagnosticValue".
+ */
 export type DiagnosticValueJson =
   | FixtureDiagnosticValueJson
   | ObservedDiagnosticValueJson
   | MeasuredDiagnosticValueJson
   | ModeledDiagnosticValueJson
   | UnavailableDiagnosticValueJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DiagnosticPrimitive".
+ */
 export type DiagnosticPrimitiveJson = string | number | boolean;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProvenanceIdentifier".
+ */
 export type ProvenanceIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProvenanceDescription".
+ */
 export type ProvenanceDescriptionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "HostToRendererShellEvent".
+ */
 export type HostToRendererShellEventJson =
   | ShellInstallerIdentityEventJson
   | ShellStartupStateChangedEventJson
@@ -27,34 +57,90 @@ export type HostToRendererShellEventJson =
   | ShellCloseRequestedEventJson
   | ShellNotificationPreferenceChangedEventJson
   | ShellWindowStateChangedEventJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellPublisher".
+ */
 export type ShellPublisherJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellVersion".
+ */
 export type ShellVersionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellReleaseChannel".
+ */
 export type ShellReleaseChannelJson = 'development' | 'stable' | 'beta' | 'experimental';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellWindowsCompatibility".
+ */
 export type ShellWindowsCompatibilityJson =
   ShellSupportedWindowsCompatibilityJson | ShellUnsupportedWindowsCompatibilityJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupState".
+ */
 export type ShellStartupStateJson =
   | ShellStartupSplashStateJson
   | ShellStartupUpdatingStateJson
   | ShellStartupReadyStateJson
   | ShellStartupFailureStateJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNavigationIntent".
+ */
 export type ShellNavigationIntentJson =
   | ShellGoalNavigationIntentJson
   | ShellSettingsNavigationIntentJson
   | ShellCalibrationNavigationIntentJson
   | ShellDocumentationNavigationIntentJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellDocumentId".
+ */
 export type ShellDocumentIdJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellLocale".
+ */
 export type ShellLocaleJson = 'pt-BR' | 'en';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellTrayPreference".
+ */
 export type ShellTrayPreferenceJson = 'close-window' | 'keep-game-detection-in-tray';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellCloseContext".
+ */
 export type ShellCloseContextJson = ShellOrdinaryCloseContextJson | ShellRecoveryCloseContextJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationCategory".
+ */
 export type ShellNotificationCategoryJson =
   | 'recovery-required'
   | 'restart-deadline'
   | 'game-profile-restore-failed'
   | 'signed-update-action-required'
   | 'account-security';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellWindowState".
+ */
 export type ShellWindowStateJson =
   ShellNormalWindowStateJson | ShellMaximizedWindowStateJson | ShellMinimizedWindowStateJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellMonitorId".
+ */
 export type ShellMonitorIdJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RendererToHostShellCommand".
+ */
 export type RendererToHostShellCommandJson =
   | ShellNavigateCommandJson
   | ShellSetLocaleCommandJson
@@ -63,10 +149,121 @@ export type RendererToHostShellCommandJson =
   | ShellSetNotificationPreferenceCommandJson
   | ShellShowNotificationCommandJson
   | ShellSaveWindowStateCommandJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellCloseResolution".
+ */
 export type ShellCloseResolutionJson = ShellOrdinaryCloseResolutionJson | ShellRecoveryCloseResolutionJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationTitle".
+ */
 export type ShellNotificationTitleJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationBody".
+ */
 export type ShellNotificationBodyJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebIdentifier".
+ */
+export type WebIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebSurface".
+ */
+export type WebSurfaceJson = 'public' | 'account' | 'admin';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebShell".
+ */
+export type WebShellJson = 'public' | 'account' | 'admin';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebPathnameTemplate".
+ */
+export type WebPathnameTemplateJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "LocalePolicy".
+ */
+export type LocalePolicyJson = 'required' | 'optional' | 'forbidden';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "IndexingPolicy".
+ */
+export type IndexingPolicyJson = 'index' | 'noindex';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CapabilityAvailability".
+ */
+export type CapabilityAvailabilityJson =
+  'available' | 'demonstrative-preview' | 'under-validation' | 'planned' | 'unsupported' | 'unavailable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebSecurityBoundary".
+ */
+export type WebSecurityBoundaryJson = 'public-origin' | 'account-origin' | 'admin-origin';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SafeContextKey".
+ */
+export type SafeContextKeyJson = 'locale' | 'version' | 'channel' | 'destination' | 'return-path';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebUri".
+ */
+export type WebUriJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebText".
+ */
+export type WebTextJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ValidationState".
+ */
+export type ValidationStateJson = 'validated' | 'under-validation' | 'unproven' | 'stale';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Sha256Digest".
+ */
+export type Sha256DigestJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ScreenshotReviewState".
+ */
+export type ScreenshotReviewStateJson = 'approved' | 'rejected' | 'pending';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SignatureState".
+ */
+export type SignatureStateJson = 'verified' | 'mismatch' | 'unavailable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OfficialReleaseOrigin".
+ */
+export type OfficialReleaseOriginJson = 'liiiraa-download-origin' | 'liiiraa-release-origin';
 
+export interface GeneratedContractRoots {
+  messageEnvelope:
+    InspectSystemRequestJson | InspectSystemResultJson | HostToRendererShellEventJson | RendererToHostShellCommandJson;
+  webDocument:
+    | WebRouteRecordJson
+    | ClaimEvidenceJson
+    | ContentRecordJson
+    | ScreenshotProvenanceJson
+    | ReleaseArtifactEvidenceJson
+    | ReleaseRecordJson
+    | FutureAuthorityCommandJson
+    | NoChangeReceiptJson
+    | AdminAuditEventJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InspectSystemRequest".
+ */
 export interface InspectSystemRequestJson {
   schemaVersion: '1.0';
   messageType: 'desktop.inspect-system.request';
@@ -75,9 +272,17 @@ export interface InspectSystemRequestJson {
   issuedAt: string;
   payload: InspectSystemRequestPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InspectSystemRequestPayload".
+ */
 export interface InspectSystemRequestPayloadJson {
   scope: 'summary';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InspectSystemResult".
+ */
 export interface InspectSystemResultJson {
   schemaVersion: '1.0';
   messageType: 'desktop.inspect-system.result';
@@ -86,6 +291,10 @@ export interface InspectSystemResultJson {
   issuedAt: string;
   payload: InspectSystemResultPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InspectSystemResultPayload".
+ */
 export interface InspectSystemResultPayloadJson {
   inspectionId: InspectionIdJson;
   inspectedAt: string;
@@ -93,18 +302,30 @@ export interface InspectSystemResultPayloadJson {
   logicalProcessorCount: DiagnosticValueJson;
   totalMemoryBytes: DiagnosticValueJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FixtureDiagnosticValue".
+ */
 export interface FixtureDiagnosticValueJson {
   kind: 'fixture';
   value: DiagnosticPrimitiveJson;
   scenarioId: ProvenanceIdentifierJson;
   fixtureVersion: ProvenanceIdentifierJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ObservedDiagnosticValue".
+ */
 export interface ObservedDiagnosticValueJson {
   kind: 'observed';
   value: DiagnosticPrimitiveJson;
   source: ProvenanceDescriptionJson;
   observedAt: string;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MeasuredDiagnosticValue".
+ */
 export interface MeasuredDiagnosticValueJson {
   kind: 'measured';
   value: DiagnosticPrimitiveJson;
@@ -112,6 +333,10 @@ export interface MeasuredDiagnosticValueJson {
   measuredAt: string;
   quality: 'valid' | 'degraded' | 'insufficient';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ModeledDiagnosticValue".
+ */
 export interface ModeledDiagnosticValueJson {
   kind: 'modeled';
   value: DiagnosticPrimitiveJson;
@@ -277,10 +502,18 @@ export interface ModeledDiagnosticValueJson {
         ProvenanceDescriptionJson
       ];
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "UnavailableDiagnosticValue".
+ */
 export interface UnavailableDiagnosticValueJson {
   kind: 'unavailable';
   reason: ProvenanceDescriptionJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellInstallerIdentityEvent".
+ */
 export interface ShellInstallerIdentityEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.installer-identity.event';
@@ -289,26 +522,46 @@ export interface ShellInstallerIdentityEventJson {
   issuedAt: string;
   payload: ShellInstallerIdentityEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellInstallerIdentityEventPayload".
+ */
 export interface ShellInstallerIdentityEventPayloadJson {
   installer: ShellInstallerIdentityJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellInstallerIdentity".
+ */
 export interface ShellInstallerIdentityJson {
   publisher: ShellPublisherJson;
   version: ShellVersionJson;
   channel: ShellReleaseChannelJson;
   windowsCompatibility: ShellWindowsCompatibilityJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSupportedWindowsCompatibility".
+ */
 export interface ShellSupportedWindowsCompatibilityJson {
   kind: 'supported';
   detectedBuild: number;
   minimumBuild: number;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellUnsupportedWindowsCompatibility".
+ */
 export interface ShellUnsupportedWindowsCompatibilityJson {
   kind: 'unsupported';
   reason: 'unsupported-build' | 'unsupported-lifecycle';
   detectedBuild: number;
   minimumBuild: number;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupStateChangedEvent".
+ */
 export interface ShellStartupStateChangedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.startup-state-changed.event';
@@ -317,20 +570,40 @@ export interface ShellStartupStateChangedEventJson {
   issuedAt: string;
   payload: ShellStartupStateChangedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupStateChangedEventPayload".
+ */
 export interface ShellStartupStateChangedEventPayloadJson {
   state: ShellStartupStateJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupSplashState".
+ */
 export interface ShellStartupSplashStateJson {
   kind: 'splash';
   step: 'initializing-webview' | 'loading-local-state' | 'validating-installation' | 'opening-shell';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupUpdatingState".
+ */
 export interface ShellStartupUpdatingStateJson {
   kind: 'updating';
   step: 'verifying-signature' | 'installing-update' | 'preparing-rollback';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupReadyState".
+ */
 export interface ShellStartupReadyStateJson {
   kind: 'ready';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellStartupFailureState".
+ */
 export interface ShellStartupFailureStateJson {
   kind: 'failure';
   reason:
@@ -342,6 +615,10 @@ export interface ShellStartupFailureStateJson {
     | 'internal-startup-error';
   recoveryAction: 'install-webview2' | 'view-offline-instructions' | 'retry' | 'rollback' | 'open-safe-mode' | 'exit';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNavigationRequestedEvent".
+ */
 export interface ShellNavigationRequestedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.navigation-requested.event';
@@ -350,27 +627,51 @@ export interface ShellNavigationRequestedEventJson {
   issuedAt: string;
   payload: ShellNavigationRequestedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNavigationRequestedEventPayload".
+ */
 export interface ShellNavigationRequestedEventPayloadJson {
   source: 'second-launch' | 'deep-link' | 'tray' | 'notification';
   intent: ShellNavigationIntentJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellGoalNavigationIntent".
+ */
 export interface ShellGoalNavigationIntentJson {
   kind: 'goal';
   destination: 'home' | 'prepare' | 'improve' | 'measure' | 'recover' | 'assistant' | 'activity' | 'account';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSettingsNavigationIntent".
+ */
 export interface ShellSettingsNavigationIntentJson {
   kind: 'settings';
   destination:
     'general' | 'background' | 'appearance' | 'accessibility' | 'privacy' | 'notifications' | 'updates' | 'advanced';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellCalibrationNavigationIntent".
+ */
 export interface ShellCalibrationNavigationIntentJson {
   kind: 'calibration';
   destination: 'welcome' | 'trust' | 'inventory' | 'diagnosis' | 'recovery' | 'goals' | 'games' | 'summary';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellDocumentationNavigationIntent".
+ */
 export interface ShellDocumentationNavigationIntentJson {
   kind: 'documentation';
   documentId: ShellDocumentIdJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellLocaleChangedEvent".
+ */
 export interface ShellLocaleChangedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.locale-changed.event';
@@ -379,9 +680,17 @@ export interface ShellLocaleChangedEventJson {
   issuedAt: string;
   payload: ShellLocaleChangedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellLocaleChangedEventPayload".
+ */
 export interface ShellLocaleChangedEventPayloadJson {
   locale: ShellLocaleJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellTrayPreferenceChangedEvent".
+ */
 export interface ShellTrayPreferenceChangedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.tray-preference-changed.event';
@@ -390,9 +699,17 @@ export interface ShellTrayPreferenceChangedEventJson {
   issuedAt: string;
   payload: ShellTrayPreferenceChangedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellTrayPreferenceChangedEventPayload".
+ */
 export interface ShellTrayPreferenceChangedEventPayloadJson {
   preference: ShellTrayPreferenceJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellCloseRequestedEvent".
+ */
 export interface ShellCloseRequestedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.close-requested.event';
@@ -401,15 +718,31 @@ export interface ShellCloseRequestedEventJson {
   issuedAt: string;
   payload: ShellCloseRequestedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellCloseRequestedEventPayload".
+ */
 export interface ShellCloseRequestedEventPayloadJson {
   context: ShellCloseContextJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellOrdinaryCloseContext".
+ */
 export interface ShellOrdinaryCloseContextJson {
   kind: 'ordinary';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellRecoveryCloseContext".
+ */
 export interface ShellRecoveryCloseContextJson {
   kind: 'recovery-in-progress';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationPreferenceChangedEvent".
+ */
 export interface ShellNotificationPreferenceChangedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.notification-preference-changed.event';
@@ -418,9 +751,17 @@ export interface ShellNotificationPreferenceChangedEventJson {
   issuedAt: string;
   payload: ShellNotificationPreferenceChangedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationPreferenceChangedEventPayload".
+ */
 export interface ShellNotificationPreferenceChangedEventPayloadJson {
   preference: ShellNotificationPreferenceJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNotificationPreference".
+ */
 export interface ShellNotificationPreferenceJson {
   enabled: boolean;
   focusAssist: 'respect';
@@ -447,6 +788,10 @@ export interface ShellNotificationPreferenceJson {
         ShellNotificationCategoryJson
       ];
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellWindowStateChangedEvent".
+ */
 export interface ShellWindowStateChangedEventJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.window-state-changed.event';
@@ -455,9 +800,17 @@ export interface ShellWindowStateChangedEventJson {
   issuedAt: string;
   payload: ShellWindowStateChangedEventPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellWindowStateChangedEventPayload".
+ */
 export interface ShellWindowStateChangedEventPayloadJson {
   state: ShellWindowStateJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNormalWindowState".
+ */
 export interface ShellNormalWindowStateJson {
   kind: 'normal';
   monitorId: ShellMonitorIdJson;
@@ -466,6 +819,10 @@ export interface ShellNormalWindowStateJson {
   width: number;
   height: number;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellMaximizedWindowState".
+ */
 export interface ShellMaximizedWindowStateJson {
   kind: 'maximized';
   monitorId: ShellMonitorIdJson;
@@ -474,10 +831,18 @@ export interface ShellMaximizedWindowStateJson {
   restoreWidth: number;
   restoreHeight: number;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellMinimizedWindowState".
+ */
 export interface ShellMinimizedWindowStateJson {
   kind: 'minimized';
   restoreState: ShellNormalWindowStateJson | ShellMaximizedWindowStateJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNavigateCommand".
+ */
 export interface ShellNavigateCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.navigate.command';
@@ -486,9 +851,17 @@ export interface ShellNavigateCommandJson {
   issuedAt: string;
   payload: ShellNavigateCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellNavigateCommandPayload".
+ */
 export interface ShellNavigateCommandPayloadJson {
   intent: ShellNavigationIntentJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetLocaleCommand".
+ */
 export interface ShellSetLocaleCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.set-locale.command';
@@ -497,9 +870,17 @@ export interface ShellSetLocaleCommandJson {
   issuedAt: string;
   payload: ShellSetLocaleCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetLocaleCommandPayload".
+ */
 export interface ShellSetLocaleCommandPayloadJson {
   locale: ShellLocaleJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetTrayPreferenceCommand".
+ */
 export interface ShellSetTrayPreferenceCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.set-tray-preference.command';
@@ -508,9 +889,17 @@ export interface ShellSetTrayPreferenceCommandJson {
   issuedAt: string;
   payload: ShellSetTrayPreferenceCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetTrayPreferenceCommandPayload".
+ */
 export interface ShellSetTrayPreferenceCommandPayloadJson {
   preference: ShellTrayPreferenceJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellResolveCloseCommand".
+ */
 export interface ShellResolveCloseCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.resolve-close.command';
@@ -519,17 +908,33 @@ export interface ShellResolveCloseCommandJson {
   issuedAt: string;
   payload: ShellResolveCloseCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellResolveCloseCommandPayload".
+ */
 export interface ShellResolveCloseCommandPayloadJson {
   resolution: ShellCloseResolutionJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellOrdinaryCloseResolution".
+ */
 export interface ShellOrdinaryCloseResolutionJson {
   context: 'ordinary';
   decision: 'close-interface' | 'keep-running-in-tray';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellRecoveryCloseResolution".
+ */
 export interface ShellRecoveryCloseResolutionJson {
   context: 'recovery-in-progress';
   decision: 'keep-running-in-tray' | 'stay-here';
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetNotificationPreferenceCommand".
+ */
 export interface ShellSetNotificationPreferenceCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.set-notification-preference.command';
@@ -538,9 +943,17 @@ export interface ShellSetNotificationPreferenceCommandJson {
   issuedAt: string;
   payload: ShellSetNotificationPreferenceCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSetNotificationPreferenceCommandPayload".
+ */
 export interface ShellSetNotificationPreferenceCommandPayloadJson {
   preference: ShellNotificationPreferenceJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellShowNotificationCommand".
+ */
 export interface ShellShowNotificationCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.show-notification.command';
@@ -549,12 +962,20 @@ export interface ShellShowNotificationCommandJson {
   issuedAt: string;
   payload: ShellShowNotificationCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellShowNotificationCommandPayload".
+ */
 export interface ShellShowNotificationCommandPayloadJson {
   category: ShellNotificationCategoryJson;
   title: ShellNotificationTitleJson;
   body: ShellNotificationBodyJson;
   action: ShellNavigationIntentJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSaveWindowStateCommand".
+ */
 export interface ShellSaveWindowStateCommandJson {
   schemaVersion: '1.0';
   messageType: 'desktop.shell.save-window-state.command';
@@ -563,6 +984,427 @@ export interface ShellSaveWindowStateCommandJson {
   issuedAt: string;
   payload: ShellSaveWindowStateCommandPayloadJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ShellSaveWindowStateCommandPayload".
+ */
 export interface ShellSaveWindowStateCommandPayloadJson {
   state: ShellWindowStateJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WebRouteRecord".
+ */
+export interface WebRouteRecordJson {
+  id: WebIdentifierJson;
+  surface: WebSurfaceJson;
+  shell: WebShellJson;
+  pathnameTemplate: WebPathnameTemplateJson;
+  localePolicy: LocalePolicyJson;
+  indexing: IndexingPolicyJson;
+  owner: WebIdentifierJson;
+  scenarioRequirement: CapabilityAvailabilityJson;
+  securityBoundary: WebSecurityBoundaryJson;
+  /**
+   * @minItems 0
+   * @maxItems 5
+   */
+  safeContextKeys:
+    | []
+    | [SafeContextKeyJson]
+    | [SafeContextKeyJson, SafeContextKeyJson]
+    | [SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson]
+    | [SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson]
+    | [SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson, SafeContextKeyJson];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ClaimEvidence".
+ */
+export interface ClaimEvidenceJson {
+  source: WebUriJson;
+  provenance: DiagnosticValueJson;
+  scope: WebTextJson;
+  applicableVersion: ShellVersionJson;
+  validationState: ValidationStateJson;
+  unproven: boolean;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ContentRecord".
+ */
+export interface ContentRecordJson {
+  id: WebIdentifierJson;
+  routeId: WebIdentifierJson;
+  locale: ShellLocaleJson;
+  version: ShellVersionJson;
+  channel: ShellReleaseChannelJson;
+  owner: WebIdentifierJson;
+  lastReviewedAt: string;
+  validationState: ValidationStateJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  evidence:
+    | [ClaimEvidenceJson]
+    | [ClaimEvidenceJson, ClaimEvidenceJson]
+    | [ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson]
+    | [ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson]
+    | [ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson]
+    | [ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson, ClaimEvidenceJson]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ]
+    | [
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson,
+        ClaimEvidenceJson
+      ];
+  indexing: IndexingPolicyJson;
+  staleTreatment: WebTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ScreenshotProvenance".
+ */
+export interface ScreenshotProvenanceJson {
+  version: ShellVersionJson;
+  locale: ShellLocaleJson;
+  scenarioId: ProvenanceIdentifierJson;
+  viewport: WebIdentifierJson;
+  captureCommand: WebTextJson;
+  sourceCommit: WebIdentifierJson;
+  checksum: Sha256DigestJson;
+  crop: WebTextJson;
+  reviewState: ScreenshotReviewStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ReleaseArtifactEvidence".
+ */
+export interface ReleaseArtifactEvidenceJson {
+  publisher: WebTextJson;
+  sha256: Sha256DigestJson;
+  sizeBytes: string;
+  signatureState: SignatureStateJson;
+  origin: OfficialReleaseOriginJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ReleaseRecord".
+ */
+export interface ReleaseRecordJson {
+  channel: ShellReleaseChannelJson;
+  version: ShellVersionJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  compatibility:
+    | [WebTextJson]
+    | [WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson]
+    | [WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson, WebTextJson]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ]
+    | [
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson,
+        WebTextJson
+      ];
+  manifest: WebIdentifierJson;
+  artifactEvidence?: ReleaseArtifactEvidenceJson;
+  availability: CapabilityAvailabilityJson;
+  publicDistributionApproved: false;
+  officialArtifact: 'unavailable';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FutureAuthorityCommand".
+ */
+export interface FutureAuthorityCommandJson {
+  phase: 'Phase 4';
+  surface: WebSurfaceJson;
+  command: WebIdentifierJson;
+  description: WebTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "NoChangeReceipt".
+ */
+export interface NoChangeReceiptJson {
+  receiptVersion: ShellVersionJson;
+  authority: FutureAuthorityCommandJson;
+  requestedAction: WebIdentifierJson;
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  reviewedInputs: [WebIdentifierJson, ...WebIdentifierJson[]];
+  reviewedAt: string;
+  correlationId: CorrelationIdJson;
+  provenance: FixtureDiagnosticValueJson;
+  remoteStateChanged: false;
+  nextPhase: 'Phase 4';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAuditEvent".
+ */
+export interface AdminAuditEventJson {
+  eventId: WebIdentifierJson;
+  actor: WebIdentifierJson;
+  role: WebIdentifierJson;
+  action: WebIdentifierJson;
+  redactedTarget: WebTextJson;
+  reason: WebTextJson;
+  consentReference?: WebIdentifierJson;
+  occurredAt: string;
+  result: 'simulated-no-change';
+  correlationId: CorrelationIdJson;
+  receipt: NoChangeReceiptJson;
+}
+
+export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];
+export type WebDocument = GeneratedContractRoots['webDocument'];

@@ -28,6 +28,392 @@ pub mod error {
         }
     }
 }
+#[doc = "`AdminAuditEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminAuditEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"action\","]
+#[doc = "    \"actor\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"receipt\","]
+#[doc = "    \"redactedTarget\","]
+#[doc = "    \"result\","]
+#[doc = "    \"role\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"actor\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"consentReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"receipt\": {"]
+#[doc = "      \"$ref\": \"#/definitions/NoChangeReceipt\""]
+#[doc = "    },"]
+#[doc = "    \"redactedTarget\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"result\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"simulated-no-change\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminAuditEvent {
+    pub action: WebIdentifier,
+    pub actor: WebIdentifier,
+    #[serde(
+        rename = "consentReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub consent_reference: ::std::option::Option<WebIdentifier>,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "eventId")]
+    pub event_id: WebIdentifier,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    pub reason: WebText,
+    pub receipt: NoChangeReceipt,
+    #[serde(rename = "redactedTarget")]
+    pub redacted_target: WebText,
+    pub result: AdminAuditEventResult,
+    pub role: WebIdentifier,
+}
+#[doc = "`AdminAuditEventResult`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"simulated-no-change\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAuditEventResult {
+    #[serde(rename = "simulated-no-change")]
+    SimulatedNoChange,
+}
+impl ::std::fmt::Display for AdminAuditEventResult {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SimulatedNoChange => f.write_str("simulated-no-change"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAuditEventResult {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "simulated-no-change" => Ok(Self::SimulatedNoChange),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAuditEventResult {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAuditEventResult {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAuditEventResult {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CapabilityAvailability`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CapabilityAvailability.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"available\","]
+#[doc = "    \"demonstrative-preview\","]
+#[doc = "    \"under-validation\","]
+#[doc = "    \"planned\","]
+#[doc = "    \"unsupported\","]
+#[doc = "    \"unavailable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CapabilityAvailability {
+    #[serde(rename = "available")]
+    Available,
+    #[serde(rename = "demonstrative-preview")]
+    DemonstrativePreview,
+    #[serde(rename = "under-validation")]
+    UnderValidation,
+    #[serde(rename = "planned")]
+    Planned,
+    #[serde(rename = "unsupported")]
+    Unsupported,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for CapabilityAvailability {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Available => f.write_str("available"),
+            Self::DemonstrativePreview => f.write_str("demonstrative-preview"),
+            Self::UnderValidation => f.write_str("under-validation"),
+            Self::Planned => f.write_str("planned"),
+            Self::Unsupported => f.write_str("unsupported"),
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for CapabilityAvailability {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "available" => Ok(Self::Available),
+            "demonstrative-preview" => Ok(Self::DemonstrativePreview),
+            "under-validation" => Ok(Self::UnderValidation),
+            "planned" => Ok(Self::Planned),
+            "unsupported" => Ok(Self::Unsupported),
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CapabilityAvailability {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CapabilityAvailability {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CapabilityAvailability {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ClaimEvidence`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ClaimEvidence.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"applicableVersion\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"scope\","]
+#[doc = "    \"source\","]
+#[doc = "    \"unproven\","]
+#[doc = "    \"validationState\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"applicableVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellVersion\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DiagnosticValue\""]
+#[doc = "    },"]
+#[doc = "    \"scope\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"source\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebUri\""]
+#[doc = "    },"]
+#[doc = "    \"unproven\": {"]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"validationState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ValidationState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClaimEvidence {
+    #[serde(rename = "applicableVersion")]
+    pub applicable_version: ShellVersion,
+    pub provenance: DiagnosticValue,
+    pub scope: WebText,
+    pub source: WebUri,
+    pub unproven: bool,
+    #[serde(rename = "validationState")]
+    pub validation_state: ValidationState,
+}
+#[doc = "`ContentRecord`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ContentRecord.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"channel\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"id\","]
+#[doc = "    \"indexing\","]
+#[doc = "    \"lastReviewedAt\","]
+#[doc = "    \"locale\","]
+#[doc = "    \"owner\","]
+#[doc = "    \"routeId\","]
+#[doc = "    \"staleTreatment\","]
+#[doc = "    \"validationState\","]
+#[doc = "    \"version\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"channel\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellReleaseChannel\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ClaimEvidence\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"id\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"indexing\": {"]
+#[doc = "      \"$ref\": \"#/definitions/IndexingPolicy\""]
+#[doc = "    },"]
+#[doc = "    \"lastReviewedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"locale\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellLocale\""]
+#[doc = "    },"]
+#[doc = "    \"owner\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"routeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"staleTreatment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"validationState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ValidationState\""]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ContentRecord {
+    pub channel: ShellReleaseChannel,
+    pub evidence: ::std::vec::Vec<ClaimEvidence>,
+    pub id: WebIdentifier,
+    pub indexing: IndexingPolicy,
+    #[serde(rename = "lastReviewedAt")]
+    pub last_reviewed_at: ::std::string::String,
+    pub locale: ShellLocale,
+    pub owner: WebIdentifier,
+    #[serde(rename = "routeId")]
+    pub route_id: WebIdentifier,
+    #[serde(rename = "staleTreatment")]
+    pub stale_treatment: WebText,
+    #[serde(rename = "validationState")]
+    pub validation_state: ValidationState,
+    pub version: ShellVersion,
+}
 #[doc = "`CorrelationId`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -337,6 +723,117 @@ impl ::std::convert::TryFrom<::std::string::String> for FixtureDiagnosticValueKi
         value.parse()
     }
 }
+#[doc = "`FutureAuthorityCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FutureAuthorityCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"command\","]
+#[doc = "    \"description\","]
+#[doc = "    \"phase\","]
+#[doc = "    \"surface\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"command\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"description\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"phase\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Phase 4\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"surface\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebSurface\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FutureAuthorityCommand {
+    pub command: WebIdentifier,
+    pub description: WebText,
+    pub phase: FutureAuthorityCommandPhase,
+    pub surface: WebSurface,
+}
+#[doc = "`FutureAuthorityCommandPhase`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Phase 4\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FutureAuthorityCommandPhase {
+    #[serde(rename = "Phase 4")]
+    Phase4,
+}
+impl ::std::fmt::Display for FutureAuthorityCommandPhase {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Phase4 => f.write_str("Phase 4"),
+        }
+    }
+}
+impl ::std::str::FromStr for FutureAuthorityCommandPhase {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Phase 4" => Ok(Self::Phase4),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FutureAuthorityCommandPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FutureAuthorityCommandPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FutureAuthorityCommandPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`HostToRendererShellEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -424,6 +921,80 @@ impl ::std::convert::From<ShellNotificationPreferenceChangedEvent> for HostToRen
 impl ::std::convert::From<ShellWindowStateChangedEvent> for HostToRendererShellEvent {
     fn from(value: ShellWindowStateChangedEvent) -> Self {
         Self::WindowStateChangedEvent(value)
+    }
+}
+#[doc = "`IndexingPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"IndexingPolicy.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"index\","]
+#[doc = "    \"noindex\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum IndexingPolicy {
+    #[serde(rename = "index")]
+    Index,
+    #[serde(rename = "noindex")]
+    Noindex,
+}
+impl ::std::fmt::Display for IndexingPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Index => f.write_str("index"),
+            Self::Noindex => f.write_str("noindex"),
+        }
+    }
+}
+impl ::std::str::FromStr for IndexingPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "index" => Ok(Self::Index),
+            "noindex" => Ok(Self::Noindex),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for IndexingPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for IndexingPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for IndexingPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`InspectSystemRequest`"]
@@ -1045,6 +1616,85 @@ impl<'de> ::serde::Deserialize<'de> for InspectionId {
             })
     }
 }
+#[doc = "`LocalePolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"LocalePolicy.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"required\","]
+#[doc = "    \"optional\","]
+#[doc = "    \"forbidden\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum LocalePolicy {
+    #[serde(rename = "required")]
+    Required,
+    #[serde(rename = "optional")]
+    Optional,
+    #[serde(rename = "forbidden")]
+    Forbidden,
+}
+impl ::std::fmt::Display for LocalePolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Required => f.write_str("required"),
+            Self::Optional => f.write_str("optional"),
+            Self::Forbidden => f.write_str("forbidden"),
+        }
+    }
+}
+impl ::std::str::FromStr for LocalePolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "required" => Ok(Self::Required),
+            "optional" => Ok(Self::Optional),
+            "forbidden" => Ok(Self::Forbidden),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for LocalePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for LocalePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LocalePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`MeasuredDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1368,6 +2018,157 @@ impl ::std::convert::TryFrom<::std::string::String> for ModeledDiagnosticValueKi
         value.parse()
     }
 }
+#[doc = "`NoChangeReceipt`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"NoChangeReceipt.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"authority\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"nextPhase\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"receiptVersion\","]
+#[doc = "    \"remoteStateChanged\","]
+#[doc = "    \"requestedAction\","]
+#[doc = "    \"reviewedAt\","]
+#[doc = "    \"reviewedInputs\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"authority\": {"]
+#[doc = "      \"$ref\": \"#/definitions/FutureAuthorityCommand\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"nextPhase\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Phase 4\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/FixtureDiagnosticValue\""]
+#[doc = "    },"]
+#[doc = "    \"receiptVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellVersion\""]
+#[doc = "    },"]
+#[doc = "    \"remoteStateChanged\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        false"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAction\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"reviewedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"reviewedInputs\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct NoChangeReceipt {
+    pub authority: FutureAuthorityCommand,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "nextPhase")]
+    pub next_phase: NoChangeReceiptNextPhase,
+    pub provenance: FixtureDiagnosticValue,
+    #[serde(rename = "receiptVersion")]
+    pub receipt_version: ShellVersion,
+    #[serde(rename = "remoteStateChanged")]
+    pub remote_state_changed: bool,
+    #[serde(rename = "requestedAction")]
+    pub requested_action: WebIdentifier,
+    #[serde(rename = "reviewedAt")]
+    pub reviewed_at: ::std::string::String,
+    #[serde(rename = "reviewedInputs")]
+    pub reviewed_inputs: ::std::vec::Vec<WebIdentifier>,
+}
+#[doc = "`NoChangeReceiptNextPhase`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Phase 4\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum NoChangeReceiptNextPhase {
+    #[serde(rename = "Phase 4")]
+    Phase4,
+}
+impl ::std::fmt::Display for NoChangeReceiptNextPhase {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Phase4 => f.write_str("Phase 4"),
+        }
+    }
+}
+impl ::std::str::FromStr for NoChangeReceiptNextPhase {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Phase 4" => Ok(Self::Phase4),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for NoChangeReceiptNextPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for NoChangeReceiptNextPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for NoChangeReceiptNextPhase {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ObservedDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1473,6 +2274,80 @@ impl ::std::convert::TryFrom<&::std::string::String> for ObservedDiagnosticValue
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ObservedDiagnosticValueKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OfficialReleaseOrigin`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OfficialReleaseOrigin.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"liiiraa-download-origin\","]
+#[doc = "    \"liiiraa-release-origin\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OfficialReleaseOrigin {
+    #[serde(rename = "liiiraa-download-origin")]
+    LiiiraaDownloadOrigin,
+    #[serde(rename = "liiiraa-release-origin")]
+    LiiiraaReleaseOrigin,
+}
+impl ::std::fmt::Display for OfficialReleaseOrigin {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaDownloadOrigin => f.write_str("liiiraa-download-origin"),
+            Self::LiiiraaReleaseOrigin => f.write_str("liiiraa-release-origin"),
+        }
+    }
+}
+impl ::std::str::FromStr for OfficialReleaseOrigin {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "liiiraa-download-origin" => Ok(Self::LiiiraaDownloadOrigin),
+            "liiiraa-release-origin" => Ok(Self::LiiiraaReleaseOrigin),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OfficialReleaseOrigin {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OfficialReleaseOrigin {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OfficialReleaseOrigin {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -1628,6 +2503,201 @@ impl<'de> ::serde::Deserialize<'de> for ProvenanceIdentifier {
             })
     }
 }
+#[doc = "`ReleaseArtifactEvidence`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ReleaseArtifactEvidence.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"origin\","]
+#[doc = "    \"publisher\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signatureState\","]
+#[doc = "    \"sizeBytes\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"origin\": {"]
+#[doc = "      \"$ref\": \"#/definitions/OfficialReleaseOrigin\""]
+#[doc = "    },"]
+#[doc = "    \"publisher\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Sha256Digest\""]
+#[doc = "    },"]
+#[doc = "    \"signatureState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SignatureState\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maximum\": 10737418240.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ReleaseArtifactEvidence {
+    pub origin: OfficialReleaseOrigin,
+    pub publisher: WebText,
+    pub sha256: Sha256Digest,
+    #[serde(rename = "signatureState")]
+    pub signature_state: SignatureState,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::string::String,
+}
+#[doc = "`ReleaseRecord`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ReleaseRecord.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"availability\","]
+#[doc = "    \"channel\","]
+#[doc = "    \"compatibility\","]
+#[doc = "    \"manifest\","]
+#[doc = "    \"officialArtifact\","]
+#[doc = "    \"publicDistributionApproved\","]
+#[doc = "    \"version\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactEvidence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ReleaseArtifactEvidence\""]
+#[doc = "    },"]
+#[doc = "    \"availability\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CapabilityAvailability\""]
+#[doc = "    },"]
+#[doc = "    \"channel\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellReleaseChannel\""]
+#[doc = "    },"]
+#[doc = "    \"compatibility\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/WebText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"manifest\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"officialArtifact\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unavailable\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"publicDistributionApproved\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        false"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ReleaseRecord {
+    #[serde(
+        rename = "artifactEvidence",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub artifact_evidence: ::std::option::Option<ReleaseArtifactEvidence>,
+    pub availability: CapabilityAvailability,
+    pub channel: ShellReleaseChannel,
+    pub compatibility: ::std::vec::Vec<WebText>,
+    pub manifest: WebIdentifier,
+    #[serde(rename = "officialArtifact")]
+    pub official_artifact: ReleaseRecordOfficialArtifact,
+    #[serde(rename = "publicDistributionApproved")]
+    pub public_distribution_approved: bool,
+    pub version: ShellVersion,
+}
+#[doc = "`ReleaseRecordOfficialArtifact`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unavailable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ReleaseRecordOfficialArtifact {
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for ReleaseRecordOfficialArtifact {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for ReleaseRecordOfficialArtifact {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ReleaseRecordOfficialArtifact {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ReleaseRecordOfficialArtifact {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ReleaseRecordOfficialArtifact {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`RendererToHostShellCommand`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1771,6 +2841,318 @@ impl ::std::convert::TryFrom<::std::string::String> for RequestId {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for RequestId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`SafeContextKey`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SafeContextKey.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"locale\","]
+#[doc = "    \"version\","]
+#[doc = "    \"channel\","]
+#[doc = "    \"destination\","]
+#[doc = "    \"return-path\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SafeContextKey {
+    #[serde(rename = "locale")]
+    Locale,
+    #[serde(rename = "version")]
+    Version,
+    #[serde(rename = "channel")]
+    Channel,
+    #[serde(rename = "destination")]
+    Destination,
+    #[serde(rename = "return-path")]
+    ReturnPath,
+}
+impl ::std::fmt::Display for SafeContextKey {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Locale => f.write_str("locale"),
+            Self::Version => f.write_str("version"),
+            Self::Channel => f.write_str("channel"),
+            Self::Destination => f.write_str("destination"),
+            Self::ReturnPath => f.write_str("return-path"),
+        }
+    }
+}
+impl ::std::str::FromStr for SafeContextKey {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "locale" => Ok(Self::Locale),
+            "version" => Ok(Self::Version),
+            "channel" => Ok(Self::Channel),
+            "destination" => Ok(Self::Destination),
+            "return-path" => Ok(Self::ReturnPath),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SafeContextKey {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SafeContextKey {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SafeContextKey {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ScreenshotProvenance`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ScreenshotProvenance.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"captureCommand\","]
+#[doc = "    \"checksum\","]
+#[doc = "    \"crop\","]
+#[doc = "    \"locale\","]
+#[doc = "    \"reviewState\","]
+#[doc = "    \"scenarioId\","]
+#[doc = "    \"sourceCommit\","]
+#[doc = "    \"version\","]
+#[doc = "    \"viewport\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"captureCommand\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"checksum\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Sha256Digest\""]
+#[doc = "    },"]
+#[doc = "    \"crop\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebText\""]
+#[doc = "    },"]
+#[doc = "    \"locale\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellLocale\""]
+#[doc = "    },"]
+#[doc = "    \"reviewState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ScreenshotReviewState\""]
+#[doc = "    },"]
+#[doc = "    \"scenarioId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProvenanceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellVersion\""]
+#[doc = "    },"]
+#[doc = "    \"viewport\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ScreenshotProvenance {
+    #[serde(rename = "captureCommand")]
+    pub capture_command: WebText,
+    pub checksum: Sha256Digest,
+    pub crop: WebText,
+    pub locale: ShellLocale,
+    #[serde(rename = "reviewState")]
+    pub review_state: ScreenshotReviewState,
+    #[serde(rename = "scenarioId")]
+    pub scenario_id: ProvenanceIdentifier,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: WebIdentifier,
+    pub version: ShellVersion,
+    pub viewport: WebIdentifier,
+}
+#[doc = "`ScreenshotReviewState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ScreenshotReviewState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"approved\","]
+#[doc = "    \"rejected\","]
+#[doc = "    \"pending\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ScreenshotReviewState {
+    #[serde(rename = "approved")]
+    Approved,
+    #[serde(rename = "rejected")]
+    Rejected,
+    #[serde(rename = "pending")]
+    Pending,
+}
+impl ::std::fmt::Display for ScreenshotReviewState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Approved => f.write_str("approved"),
+            Self::Rejected => f.write_str("rejected"),
+            Self::Pending => f.write_str("pending"),
+        }
+    }
+}
+impl ::std::str::FromStr for ScreenshotReviewState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "approved" => Ok(Self::Approved),
+            "rejected" => Ok(Self::Rejected),
+            "pending" => Ok(Self::Pending),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ScreenshotReviewState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ScreenshotReviewState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ScreenshotReviewState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`Sha256Digest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Sha256Digest.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 64,"]
+#[doc = "  \"minLength\": 64,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct Sha256Digest(::std::string::String);
+impl ::std::ops::Deref for Sha256Digest {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<Sha256Digest> for ::std::string::String {
+    fn from(value: Sha256Digest) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for Sha256Digest {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 64usize {
+            return Err("longer than 64 characters".into());
+        }
+        if value.chars().count() < 64usize {
+            return Err("shorter than 64 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for Sha256Digest {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for Sha256Digest {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Sha256Digest {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for Sha256Digest {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -9292,6 +10674,85 @@ impl ::std::convert::From<ShellUnsupportedWindowsCompatibility> for ShellWindows
         Self::UnsupportedWindowsCompatibility(value)
     }
 }
+#[doc = "`SignatureState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SignatureState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"verified\","]
+#[doc = "    \"mismatch\","]
+#[doc = "    \"unavailable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SignatureState {
+    #[serde(rename = "verified")]
+    Verified,
+    #[serde(rename = "mismatch")]
+    Mismatch,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for SignatureState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Verified => f.write_str("verified"),
+            Self::Mismatch => f.write_str("mismatch"),
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for SignatureState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "verified" => Ok(Self::Verified),
+            "mismatch" => Ok(Self::Mismatch),
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SignatureState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SignatureState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SignatureState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`UnavailableDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -9391,5 +10852,703 @@ impl ::std::convert::TryFrom<::std::string::String> for UnavailableDiagnosticVal
         value: ::std::string::String,
     ) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
+    }
+}
+#[doc = "`ValidationState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ValidationState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"validated\","]
+#[doc = "    \"under-validation\","]
+#[doc = "    \"unproven\","]
+#[doc = "    \"stale\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ValidationState {
+    #[serde(rename = "validated")]
+    Validated,
+    #[serde(rename = "under-validation")]
+    UnderValidation,
+    #[serde(rename = "unproven")]
+    Unproven,
+    #[serde(rename = "stale")]
+    Stale,
+}
+impl ::std::fmt::Display for ValidationState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Validated => f.write_str("validated"),
+            Self::UnderValidation => f.write_str("under-validation"),
+            Self::Unproven => f.write_str("unproven"),
+            Self::Stale => f.write_str("stale"),
+        }
+    }
+}
+impl ::std::str::FromStr for ValidationState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "validated" => Ok(Self::Validated),
+            "under-validation" => Ok(Self::UnderValidation),
+            "unproven" => Ok(Self::Unproven),
+            "stale" => Ok(Self::Stale),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ValidationState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ValidationState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ValidationState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`WebIdentifier`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebIdentifier.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WebIdentifier(::std::string::String);
+impl ::std::ops::Deref for WebIdentifier {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WebIdentifier> for ::std::string::String {
+    fn from(value: WebIdentifier) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WebIdentifier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WebIdentifier {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`WebPathnameTemplate`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebPathnameTemplate.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WebPathnameTemplate(::std::string::String);
+impl ::std::ops::Deref for WebPathnameTemplate {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WebPathnameTemplate> for ::std::string::String {
+    fn from(value: WebPathnameTemplate) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WebPathnameTemplate {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebPathnameTemplate {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebPathnameTemplate {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebPathnameTemplate {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WebPathnameTemplate {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`WebRouteRecord`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebRouteRecord.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"id\","]
+#[doc = "    \"indexing\","]
+#[doc = "    \"localePolicy\","]
+#[doc = "    \"owner\","]
+#[doc = "    \"pathnameTemplate\","]
+#[doc = "    \"safeContextKeys\","]
+#[doc = "    \"scenarioRequirement\","]
+#[doc = "    \"securityBoundary\","]
+#[doc = "    \"shell\","]
+#[doc = "    \"surface\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"id\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"indexing\": {"]
+#[doc = "      \"$ref\": \"#/definitions/IndexingPolicy\""]
+#[doc = "    },"]
+#[doc = "    \"localePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/LocalePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"owner\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"pathnameTemplate\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebPathnameTemplate\""]
+#[doc = "    },"]
+#[doc = "    \"safeContextKeys\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/SafeContextKey\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 5,"]
+#[doc = "      \"minItems\": 0"]
+#[doc = "    },"]
+#[doc = "    \"scenarioRequirement\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CapabilityAvailability\""]
+#[doc = "    },"]
+#[doc = "    \"securityBoundary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebSecurityBoundary\""]
+#[doc = "    },"]
+#[doc = "    \"shell\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebShell\""]
+#[doc = "    },"]
+#[doc = "    \"surface\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WebSurface\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct WebRouteRecord {
+    pub id: WebIdentifier,
+    pub indexing: IndexingPolicy,
+    #[serde(rename = "localePolicy")]
+    pub locale_policy: LocalePolicy,
+    pub owner: WebIdentifier,
+    #[serde(rename = "pathnameTemplate")]
+    pub pathname_template: WebPathnameTemplate,
+    #[serde(rename = "safeContextKeys")]
+    pub safe_context_keys: ::std::vec::Vec<SafeContextKey>,
+    #[serde(rename = "scenarioRequirement")]
+    pub scenario_requirement: CapabilityAvailability,
+    #[serde(rename = "securityBoundary")]
+    pub security_boundary: WebSecurityBoundary,
+    pub shell: WebShell,
+    pub surface: WebSurface,
+}
+#[doc = "`WebSecurityBoundary`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebSecurityBoundary.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"public-origin\","]
+#[doc = "    \"account-origin\","]
+#[doc = "    \"admin-origin\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum WebSecurityBoundary {
+    #[serde(rename = "public-origin")]
+    PublicOrigin,
+    #[serde(rename = "account-origin")]
+    AccountOrigin,
+    #[serde(rename = "admin-origin")]
+    AdminOrigin,
+}
+impl ::std::fmt::Display for WebSecurityBoundary {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PublicOrigin => f.write_str("public-origin"),
+            Self::AccountOrigin => f.write_str("account-origin"),
+            Self::AdminOrigin => f.write_str("admin-origin"),
+        }
+    }
+}
+impl ::std::str::FromStr for WebSecurityBoundary {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "public-origin" => Ok(Self::PublicOrigin),
+            "account-origin" => Ok(Self::AccountOrigin),
+            "admin-origin" => Ok(Self::AdminOrigin),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebSecurityBoundary {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebSecurityBoundary {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebSecurityBoundary {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`WebShell`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebShell.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"public\","]
+#[doc = "    \"account\","]
+#[doc = "    \"admin\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum WebShell {
+    #[serde(rename = "public")]
+    Public,
+    #[serde(rename = "account")]
+    Account,
+    #[serde(rename = "admin")]
+    Admin,
+}
+impl ::std::fmt::Display for WebShell {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Public => f.write_str("public"),
+            Self::Account => f.write_str("account"),
+            Self::Admin => f.write_str("admin"),
+        }
+    }
+}
+impl ::std::str::FromStr for WebShell {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "public" => Ok(Self::Public),
+            "account" => Ok(Self::Account),
+            "admin" => Ok(Self::Admin),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebShell {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebShell {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebShell {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`WebSurface`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebSurface.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"public\","]
+#[doc = "    \"account\","]
+#[doc = "    \"admin\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum WebSurface {
+    #[serde(rename = "public")]
+    Public,
+    #[serde(rename = "account")]
+    Account,
+    #[serde(rename = "admin")]
+    Admin,
+}
+impl ::std::fmt::Display for WebSurface {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Public => f.write_str("public"),
+            Self::Account => f.write_str("account"),
+            Self::Admin => f.write_str("admin"),
+        }
+    }
+}
+impl ::std::str::FromStr for WebSurface {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "public" => Ok(Self::Public),
+            "account" => Ok(Self::Account),
+            "admin" => Ok(Self::Admin),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebSurface {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebSurface {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebSurface {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`WebText`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebText.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 1024,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WebText(::std::string::String);
+impl ::std::ops::Deref for WebText {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WebText> for ::std::string::String {
+    fn from(value: WebText) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WebText {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 1024usize {
+            return Err("longer than 1024 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebText {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WebText {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`WebUri`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WebUri.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 2048,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WebUri(::std::string::String);
+impl ::std::ops::Deref for WebUri {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WebUri> for ::std::string::String {
+    fn from(value: WebUri) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WebUri {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 2048usize {
+            return Err("longer than 2048 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WebUri {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WebUri {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WebUri {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WebUri {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
     }
 }
