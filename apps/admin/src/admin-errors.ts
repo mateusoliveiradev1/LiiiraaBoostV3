@@ -1,6 +1,6 @@
 import { routeHref, WEB_LOCALES, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
 
-export type AdminFailureKind = '403' | '404' | '500';
+export type AdminFailureKind = '403' | '404' | '410' | '500';
 
 type AdminFailureCopy = Readonly<{
   action: string;
@@ -27,6 +27,15 @@ const COPY = Object.freeze({
       safeState: 'Nenhum identificador de cliente ou detalhe operacional foi exposto.',
       title: 'Área administrativa não encontrada',
     }),
+    '410': Object.freeze({
+      action: 'Voltar à área da função',
+      affected: 'Esta referência pertence ao histórico e não aceita mais operações.',
+      detail:
+        'O contexto histórico permanece preservado sem restaurar uma responsabilidade encerrada.',
+      safeState:
+        'Nenhuma autoridade foi conectada, nenhum dado operacional foi exposto e nenhuma ação remota foi executada.',
+      title: 'A referência administrativa não está mais disponível',
+    }),
     '500': Object.freeze({
       action: 'Tentar novamente',
       affected: 'A área administrativa de prévia não pôde ser renderizada.',
@@ -50,6 +59,15 @@ const COPY = Object.freeze({
       detail: 'The failure remains visible; we do not redirect to hide the invalid address.',
       safeState: 'No customer identifier or operational detail was exposed.',
       title: 'Administrative area not found',
+    }),
+    '410': Object.freeze({
+      action: 'Return to role workspace',
+      affected: 'This reference is historical and no longer accepts operations.',
+      detail:
+        'The historical context remains preserved without restoring an ended responsibility.',
+      safeState:
+        'No authority was connected, no operational data was exposed, and no remote action ran.',
+      title: 'The administrative reference is no longer available',
     }),
     '500': Object.freeze({
       action: 'Try again',
