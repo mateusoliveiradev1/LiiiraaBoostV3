@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-14-PLAN.md
-last_updated: "2026-07-31T04:58:15.784Z"
+stopped_at: Completed 03-15-PLAN.md
+last_updated: "2026-07-31T05:25:11.423Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 72
- percent: 80
+  completed_plans: 73
+  percent: 20
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 15 of 32
+Plan: 16 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 03 execution started
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 81%
 
 ## Performance Metrics
 
@@ -120,6 +120,7 @@ _Updated after plan completion_
 | Phase 03 P12 | 15min | 1 tasks | 5 files |
 | Phase 03 P13 | 11min | 2 tasks | 8 files |
 | Phase 03 P14 | 10m | 2 tasks | 17 files |
+| Phase 03 P15 | 22min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -303,6 +304,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep harness self-test and real-workspace readiness as separate evidence modes so Wave 0 can pass without fabricating downstream evidence.
 - [Phase 03]: Read the canonical scenario JSON directly in Playwright configuration instead of loading generated runtime validators during config discovery.
 - [Phase 03]: Assign planned WEB-01/02/03/08 evidence to plan-03-32, which owns final evidence promotion.
+- [Phase 03]: Keep the nonce-free public surface static; strict inline-free CSP remains report-only until the observed production bootstrap violations reach zero.
+- [Phase 03]: Publish only concrete canonical sitemap URLs and account for unresolved dynamic route families without emitting bracket placeholders.
+- [Phase 03]: Use the supported Next webpack build path with NodeNext extension aliases until Turbopack resolves workspace .js-to-TypeScript specifiers.
 
 ### Pending Todos
 
@@ -344,6 +348,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T04:58:15.684Z
-Stopped at: Completed 03-14-PLAN.md
+Last session: 2026-07-31T05:24:54.232Z
+Stopped at: Completed 03-15-PLAN.md
 Resume file: None
