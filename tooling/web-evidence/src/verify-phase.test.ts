@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -15,8 +17,25 @@ import {
   verifyPhase3,
   type Phase3VerificationInput,
 } from './verify-phase.js';
+import type {
+  RouteReachabilityEvidence,
+  RouteReachabilityObservation,
+} from './route-reachability.js';
 
 const sha = (value: string): string => createHash('sha256').update(value).digest('hex');
+const repositoryRoot = join(import.meta.dirname, '../../..');
+const routeReachabilityFile = 'quality/evidence/phase-03/web/route-reachability.json';
+
+type Phase3InputWithReachability = Phase3VerificationInput & {
+  artifacts: Phase3VerificationInput['artifacts'] & {
+    routeReachability?: RouteReachabilityEvidence;
+  };
+};
+
+const currentRouteReachability = (): RouteReachabilityEvidence =>
+  JSON.parse(
+    readFileSync(join(repositoryRoot, routeReachabilityFile), 'utf8'),
+  ) as RouteReachabilityEvidence;
 
 const evidenceFileByRequirement = Object.freeze({
   'WEB-01': 'tooling/web-evidence/tests/public.spec.ts',
@@ -25,7 +44,7 @@ const evidenceFileByRequirement = Object.freeze({
   'WEB-08': 'tooling/web-evidence/tests/security-artifacts.spec.ts',
 } as const);
 
-const completeInput = (): Phase3VerificationInput => ({
+const completeInput = (): Phase3InputWithReachability => ({
   artifacts: {
     appArtifacts: [
       {
@@ -100,6 +119,7 @@ const completeInput = (): Phase3VerificationInput => ({
       publicDistributionApproved: false,
     },
     requirements: [...PHASE_3_REQUIREMENTS],
+    routeReachability: currentRouteReachability(),
     routes: [...PHASE_3_ROUTES],
     scenarios: [...PHASE_3_SCENARIOS],
     sourceHashes: PHASE_3_SOURCE_FILES.map((file) => ({ file, sha256: sha(file) })),
@@ -115,6 +135,7 @@ const completeInput = (): Phase3VerificationInput => ({
   repositoryFiles: [
     ...PHASE_3_SOURCE_FILES,
     ...PHASE_3_PROOFS.map(({ file }) => file),
+    routeReachabilityFile,
     'apps/web/.next/standalone',
     'apps/account/.next/standalone',
     'apps/admin/.next/standalone',
@@ -125,7 +146,7 @@ const completeInput = (): Phase3VerificationInput => ({
   ],
 });
 
-const cloneInput = (input: Phase3VerificationInput): Phase3VerificationInput =>
+const cloneInput = (input: Phase3InputWithReachability): Phase3InputWithReachability =>
   structuredClone(input);
 
 describe('Phase 3 final source coverage', () => {
@@ -141,6 +162,7 @@ describe('Phase 3 final source coverage', () => {
         decisions: 86,
         evidenceDimensions: 20,
         requirements: 4,
+        routeOutcomes: 24,
         routes: 53,
         scenarios: 18,
         successCriteria: 4,
@@ -148,6 +170,145 @@ describe('Phase 3 final source coverage', () => {
       expect(result.fingerprint).toMatch(/^[a-f0-9]{64}$/u);
     }
     expect(sha(JSON.stringify(input))).toBe(before);
+  });
+});
+
+describe('Phase 3 route reachability', () => {
+  const replaceObservations = (
+    input: Phase3InputWithReachability,
+    mutate: (observations: RouteReachabilityObservation[]) => RouteReachabilityObservation[],
+  ): void => {
+    const evidence = input.artifacts.routeReachability;
+    if (evidence === undefined) throw new Error('Expected route reachability fixture.');
+    input.artifacts.routeReachability = {
+      ...evidence,
+      observations: mutate([...evidence.observations]),
+    };
+  };
+
+  it('rejects the complete 53-route declaration when browser reachability proof is absent', () => {
+    const input = cloneInput(completeInput());
+    delete input.artifacts.routeReachability;
+
+    expect(verifyPhase3(input).diagnostics.map(({ code }) => code)).toContain(
+      'ROUTE_REACHABILITY_EVIDENCE_SHAPE_INVALID',
+    );
+  });
+
+  it.each([
+    ['missing observation', (values: RouteReachabilityObservation[]) => values.slice(1)],
+    ['duplicate observation', (values: RouteReachabilityObservation[]) => [...values, values[0]!]],
+    [
+      'route identity drift',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, routeId: 'public-error-418' },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'surface drift',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, surface: 'account' as const },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'locale drift',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, locale: 'es' as never },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'semantic status drift',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, semanticStatus: 500 as const },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'collapsed response',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, responseStatus: 404 },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'redirected outcome',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, redirected: true },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'unredacted diagnostics',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, diagnosticsRedacted: false },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'unrecoverable outcome',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, recoveryValid: false },
+        ...values.slice(1),
+      ],
+    ],
+    [
+      'authority-connected outcome',
+      (values: RouteReachabilityObservation[]) => [
+        { ...values[0]!, authorityConnected: true },
+        ...values.slice(1),
+      ],
+    ],
+  ])('rejects a %s mutation', (_label, mutate) => {
+    const input = cloneInput(completeInput());
+    replaceObservations(input, mutate);
+
+    expect(
+      verifyPhase3(input).diagnostics.some(({ code }) => code.startsWith('ROUTE_REACHABILITY_')),
+    ).toBe(true);
+  });
+
+  it.each([
+    ['canonical route source', 'canonicalRouteSourceSha256'],
+    ['public browser spec', 'tooling/web-evidence/tests/public.spec.ts'],
+    ['account browser spec', 'tooling/web-evidence/tests/account.spec.ts'],
+    ['admin browser spec', 'tooling/web-evidence/tests/admin.spec.ts'],
+  ] as const)('rejects stale %s binding', (_label, source) => {
+    const input = cloneInput(completeInput());
+    const evidence = input.artifacts.routeReachability!;
+    input.artifacts.routeReachability =
+      source === 'canonicalRouteSourceSha256'
+        ? { ...evidence, canonicalRouteSourceSha256: '0'.repeat(64) }
+        : {
+            ...evidence,
+            specSourceHashes: { ...evidence.specSourceHashes, [source]: '0'.repeat(64) },
+          };
+
+    expect(verifyPhase3(input).diagnostics.map(({ code }) => code)).toContain(
+      source === 'canonicalRouteSourceSha256'
+        ? 'ROUTE_REACHABILITY_CANONICAL_ROUTE_SOURCE_HASH_MISMATCH'
+        : 'ROUTE_REACHABILITY_SPEC_SOURCE_HASH_MISMATCH',
+    );
+  });
+
+  it('rejects route proof owner, status, path, and artifact identity drift', () => {
+    const owner = cloneInput(completeInput());
+    const routeProof = owner.artifacts.proofs.find(({ id }) => id === 'route-reachability');
+    if (routeProof !== undefined) routeProof.owner = 'plan-03-32';
+    const identity = cloneInput(completeInput());
+    identity.artifacts.routeReachability = {
+      ...identity.artifacts.routeReachability!,
+      owner: 'plan-03-34' as never,
+    };
+
+    expect(verifyPhase3(owner).diagnostics.map(({ code }) => code)).toContain(
+      'PROOF_OWNER_MISMATCH',
+    );
+    expect(verifyPhase3(identity).diagnostics.map(({ code }) => code)).toContain(
+      'ROUTE_REACHABILITY_EVIDENCE_IDENTITY_INVALID',
+    );
   });
 });
 
