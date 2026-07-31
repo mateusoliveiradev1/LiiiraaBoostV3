@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "release-content-v1",
+  "lastReviewedAt": "2026-07-31T00:00:00.000Z",
+  "releaseRecord": {
+    "channel": "stable",
+    "version": "1.0.0",
+    "compatibility": ["Windows 10", "Windows 11"],
+    "manifest": "release-manifest-demonstrative-v1",
+    "availability": "unavailable",
+    "publicDistributionApproved": false,
+    "officialArtifact": "unavailable"
+  },
+  "demonstrativeManifest": {
+    "classification": "demonstrative-not-official",
+    "manifestId": "release-manifest-demonstrative-v1",
+    "artifactId": "not-issued",
+    "channel": "stable",
+    "version": "1.0.0",
+    "architecture": "x86_64-pc-windows-msvc",
+    "windowsLifecycle": ["Windows 10 — under validation", "Windows 11 — under validation"],
+    "compatibility": ["Compatibility check required before any future download"],
+    "publisher": "not-approved",
+    "sha256": "not-issued",
+    "sizeBytes": "not-issued",
+    "signatureState": "not-approved",
+    "origin": "not-published",
+    "provenance": "demonstrative-repository-record",
+    "publicDistributionApproved": false,
+    "artifactAvailable": false
+  },
+  "history": [
+    {
+      "channel": "stable",
+      "version": "1.0.0",
+      "historyState": "current",
+      "status": "public-artifact-unavailable",
+      "sha256": "not-issued"
+    },
+    {
+      "channel": "beta",
+      "version": "0.9.0",
+      "historyState": "unavailable",
+      "status": "historical-artifact-unavailable",
+      "sha256": "not-issued"
+    },
+    {
+      "channel": "experimental",
+      "version": "0.8.0",
+      "historyState": "unsafe",
+      "status": "historical-release-unsafe",
+      "sha256": "withdrawn"
+    }
+  ],
+  "integrityDisagreementFields": [
+    "artifactIdentity",
+    "manifestId",
+    "artifactId",
+    "channel",
+    "version",
+    "architecture",
+    "windowsLifecycle",
+    "compatibility",
+    "publisher",
+    "sha256",
+    "sizeBytes",
+    "signatureState",
+    "origin",
+    "provenance",
+    "publicDistributionApproved",
+    "artifactAvailable"
+  ]
+}

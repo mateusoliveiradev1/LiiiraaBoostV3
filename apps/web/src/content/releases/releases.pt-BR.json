@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "metadata": {
+    "title": "Versões, integridade e elegibilidade de download",
+    "description": "Revise canais, compatibilidade, notas, campos do manifesto e verificação independente antes da aprovação da distribuição."
+  },
+  "identity": {
+    "label": "Informação demonstrativa de versão",
+    "detail": "Este registro do repositório explica o caminho de aceitação. Ele não é manifesto oficial assinado, instalador, espelho nem autorização de distribuição.",
+    "reviewed": "Revisão do conteúdo",
+    "validation": "Registro gerado de versão validado"
+  },
+  "navigation": {
+    "label": "Jornada de versão",
+    "index": "Visão geral das versões",
+    "channel": "Política do canal",
+    "notes": "Notas da versão",
+    "integrity": "Manifesto e integridade",
+    "download": "Elegibilidade de download",
+    "install": "Verificação da instalação",
+    "compatibility": "Verificar compatibilidade",
+    "cancel": "Cancelar e voltar às versões",
+    "help": "Obter suporte público"
+  },
+  "channels": [
+    {
+      "id": "stable",
+      "name": "Estável",
+      "default": true,
+      "requiresOptIn": false,
+      "audience": "Jogadores e usuários em geral que exigem a política de versão suportada.",
+      "risk": "Risco padrão de versão após a aprovação de todas as barreiras de publicação.",
+      "support": "Suporte apenas enquanto a versão permanecer atual ou explicitamente suportada.",
+      "updates": "Somente trilha Estável; sem migração automática para Beta ou Experimental.",
+      "account": "Nenhuma conta é exigida para um futuro download público Estável."
+    },
+    {
+      "id": "beta",
+      "name": "Beta",
+      "default": false,
+      "requiresOptIn": true,
+      "audience": "Testadores que fizeram adesão explícita e podem relatar comportamento de pré-lançamento.",
+      "risk": "O comportamento de pré-lançamento pode mudar e exige adesão explícita.",
+      "support": "Suporte por melhor esforço com orientação de recuperação; não é a promessa de suporte Estável.",
+      "updates": "Somente trilha Beta até o retorno deliberado do usuário à Estável.",
+      "account": "Consentimento de canal é separado da identidade de conta."
+    },
+    {
+      "id": "experimental",
+      "name": "Experimental",
+      "default": false,
+      "requiresOptIn": true,
+      "audience": "Entusiastas de hardware capazes de avaliar mudanças intensas e recuperar com segurança.",
+      "risk": "Comportamento de alta mudança e validação limitada; nunca apresentado ao lado da Estável como escolha equivalente.",
+      "support": "Suporte limitado e expectativas explícitas de recuperação.",
+      "updates": "Política apenas manual com novo reconhecimento a cada mudança material de risco.",
+      "account": "O reconhecimento Experimental não pode ser inferido de sessão, URL ou cookie."
+    }
+  ],
+  "releaseNotes": {
+    "title": "Notas da versão antes da promoção",
+    "summary": "Estas notas descrevem o registro demonstrativo 1.0.0. Elas não anunciam uma compilação disponível para download.",
+    "sections": [
+      {
+        "id": "changes",
+        "title": "Mudanças",
+        "body": "A experiência pública documenta compatibilidade, evidência, recuperação e revisão de integridade antes de distribuir qualquer artefato do otimizador."
+      },
+      {
+        "id": "risks",
+        "title": "Riscos conhecidos",
+        "body": "O suporte ao ciclo de vida do Windows e a validação em hardware representativo permanecem incompletos. Nenhuma alegação de desempenho, compatibilidade ou instalação é inferida do registro demonstrativo."
+      },
+      {
+        "id": "corrections",
+        "title": "Correções",
+        "body": "A linguagem pública agora separa exemplos do repositório, evidência de desenvolvimento e futura distribuição com confiança pública."
+      },
+      {
+        "id": "compatibility",
+        "title": "Compatibilidade",
+        "body": "Windows 10 e Windows 11 usam um único caminho de elegibilidade enquanto o comportamento for equivalente. Arquitetura, ciclo de vida e evidência verificada de hardware ainda devem concordar."
+      },
+      {
+        "id": "migration",
+        "title": "Migração",
+        "body": "Não existe artefato público, portanto não há ação de instalação ou migração. Uma versão futura deve publicar requisitos exatos de migração atomicamente com o manifesto."
+      },
+      {
+        "id": "recovery",
+        "title": "Recuperação",
+        "body": "Cancele quando publicador, assinatura, hash, tamanho, versão, compatibilidade ou manifesto forem diferentes. Mantenha o aplicativo fechado e use o suporte público."
+      }
+    ]
+  },
+  "manifest": {
+    "title": "Campos demonstrativos do manifesto",
+    "notice": "Fora do caminho oficial de confiança. Valores não emitidos ou não aprovados são fatos bloqueantes, não ausência de interface.",
+    "fields": {
+      "manifestId": "Identidade do manifesto canônico legível por máquina",
+      "artifactId": "Identidade exata do artefato vinculada ao manifesto",
+      "channel": "Política Estável, Beta ou Experimental reconhecida separadamente",
+      "version": "Igualdade entre versão do instalador e do manifesto",
+      "architecture": "Arquitetura alvo exata do Windows",
+      "windowsLifecycle": "Evidência de ciclo de vida compatível com Windows 10 e Windows 11",
+      "compatibility": "Escopo validado de compatibilidade de hardware e sistema operacional",
+      "publisher": "Publicador Authenticode esperado",
+      "sha256": "Resumo SHA-256 canônico com 64 caracteres",
+      "sizeBytes": "Tamanho exato do artefato em bytes",
+      "signatureState": "Estado verificado da cadeia Authenticode e do publicador",
+      "origin": "Origem oficial simbólica e controlada da versão",
+      "provenance": "Proveniência de produção com confiança pública",
+      "publicDistributionApproved": "Aprovação explícita de distribuição",
+      "artifactAvailable": "Disponibilidade atômica do artefato"
+    }
+  },
+  "verification": {
+    "title": "Verificação independente",
+    "introduction": "Para um futuro artefato aprovado, execute todas as verificações antes de abri-lo. Uma divergência bloqueia completamente o fluxo.",
+    "steps": [
+      {
+        "id": "authenticode",
+        "title": "Authenticode e publicador",
+        "body": "Inspecione a assinatura digital do Windows, toda a cadeia do certificado, o publicador esperado e o resultado da verificação. Cancele diante de publicador desconhecido, assinatura ausente ou alerta na cadeia."
+      },
+      {
+        "id": "sha256",
+        "title": "SHA-256",
+        "body": "Calcule o resumo do arquivo de forma independente e compare os 64 caracteres hexadecimais com o manifesto canônico. Um único caractere diferente bloqueia o uso."
+      },
+      {
+        "id": "size",
+        "title": "Tamanho do arquivo",
+        "body": "Compare o total exato de bytes, não um valor arredondado, com o manifesto canônico."
+      },
+      {
+        "id": "version",
+        "title": "Versão e arquitetura",
+        "body": "Confirme que os metadados do instalador, o manifesto, as notas e a arquitetura alvo identificam a mesma versão."
+      },
+      {
+        "id": "compatibility",
+        "title": "Ciclo de vida e compatibilidade do Windows",
+        "body": "Confirme que a matriz atual cobre o ciclo de vida do sistema operacional e a arquitetura deste PC antes da instalação."
+      },
+      {
+        "id": "manifest",
+        "title": "Manifesto canônico",
+        "body": "Use somente o manifesto canônico publicado pelo repositório na origem oficial controlada. Espelhos e valores copiados não recebem a marca oficial de confiança."
+      }
+    ],
+    "blocked": "Não existe ação para continuar mesmo assim. Feche o artefato, preserve apenas evidência não sensível e procure o suporte."
+  },
+  "history": {
+    "title": "Histórico de versões",
+    "introduction": "Notas, estado do hash e condição de segurança permanecem inspecionáveis. Binários sem suporte ou inseguros não são oferecidos e downgrade não é promovido.",
+    "records": {
+      "1.0.0": {
+        "title": "Registro demonstrativo Estável 1.0.0",
+        "notes": "Base atual de informação da versão; o artefato público permanece indisponível.",
+        "hash": "Nenhum SHA-256 público foi emitido.",
+        "status": "Informação atual · distribuição bloqueada"
+      },
+      "0.9.0": {
+        "title": "Registro histórico Beta 0.9.0",
+        "notes": "Preservado para histórico da política sem binário acionável.",
+        "hash": "Nenhum SHA-256 público foi emitido.",
+        "status": "Histórico · artefato indisponível"
+      },
+      "0.8.0": {
+        "title": "Registro Experimental 0.8.0 retirado",
+        "notes": "Preservado para explicar a retirada; não deve ser instalado nem usado como destino de downgrade.",
+        "hash": "Retirado do uso público.",
+        "status": "Histórico · inseguro"
+      }
+    }
+  },
+  "downloadGate": {
+    "title": "O download público está bloqueado",
+    "summary": "Nenhum instalador com confiança pública foi aprovado ou disponibilizado. A jornada termina aqui sem link de download.",
+    "reasons": {
+      "artifact-unavailable": "O artefato e sua evidência obrigatória não estão disponíveis atomicamente.",
+      "channel-selection-blocked": "O canal solicitado não recebeu o consentimento direto exigido pela política.",
+      "development-artifact-rejected": "Evidência de desenvolvimento ou autoassinada está categoricamente fora do fluxo público.",
+      "distribution-not-approved": "A aprovação de distribuição pública é falsa no registro gerado da versão.",
+      "historical-release-unavailable": "O artefato histórico está indisponível e não é oferecido como downgrade.",
+      "historical-release-unsafe": "A versão histórica é insegura e permanece não acionável.",
+      "integrity-disagreement": "Pelo menos um fato de versão, manifesto, publicador, assinatura, hash, artefato, proveniência ou compatibilidade diverge.",
+      "official-artifact-unavailable": "O registro canônico declara o artefato oficial indisponível.",
+      "record-invalid": "O registro da versão falhou na validação gerada em tempo de execução."
+    },
+    "assertive": "O download permanece bloqueado. Nenhum desvio, espelho, login de conta ou instalador de desenvolvimento pode continuar este fluxo."
+  },
+  "installation": {
+    "title": "Orientação de instalação segura e cancelamento",
+    "summary": "Estas etapas se tornam acionáveis somente após um futuro download aprovado. Elas não implicam que exista um artefato hoje.",
+    "expectedWarnings": "O Windows deve informar o publicador exato aprovado e uma assinatura válida. Publicador diferente, assinatura ausente, incerteza do SmartScreen ou elevação inesperada são condições de parada.",
+    "steps": [
+      "Verifique Authenticode, publicador, SHA-256, tamanho exato, versão, arquitetura, compatibilidade e manifesto canônico antes de abrir o arquivo.",
+      "Feche jogos e preserve o trabalho antes que um instalador verificado solicite uma alteração esperada no sistema.",
+      "Leia cada solicitação de elevação e cancele se o publicador ou a ação forem diferentes da orientação da versão.",
+      "Após a instalação, confirme a versão instalada e preserve as notas e a orientação de recuperação correspondentes."
+    ],
+    "cancel": "Cancele sem abrir o artefato, não enfraqueça a segurança do Windows e remova a cópia não confiável.",
+    "support": "Use o suporte público apenas com a versão e a categoria da divergência. Não envie credenciais, segredos do dispositivo ou diagnósticos não relacionados."
+  },
+  "analytics": {
+    "title": "Medição de download limitada à finalidade",
+    "body": "Um futuro download público pode registrar somente resultados agregados de elegibilidade e entrega necessários para operar a distribuição. Isso não identifica o PC, não cria conta e não vincula silenciosamente o download público à identidade da conta."
+  }
+}

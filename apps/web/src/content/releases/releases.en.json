@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "metadata": {
+    "title": "Releases, integrity, and download eligibility",
+    "description": "Review channels, compatibility, release notes, manifest fields, and independent verification before distribution is approved."
+  },
+  "identity": {
+    "label": "Demonstrative release information",
+    "detail": "This repository record explains the acceptance path. It is not an official signed manifest, installer, mirror, or distribution authorization.",
+    "reviewed": "Content review",
+    "validation": "Generated release record validated"
+  },
+  "navigation": {
+    "label": "Release journey",
+    "index": "Release overview",
+    "channel": "Channel policy",
+    "notes": "Release notes",
+    "integrity": "Manifest and integrity",
+    "download": "Download eligibility",
+    "install": "Installation verification",
+    "compatibility": "Check compatibility",
+    "cancel": "Cancel and return to releases",
+    "help": "Get public support"
+  },
+  "channels": [
+    {
+      "id": "stable",
+      "name": "Stable",
+      "default": true,
+      "requiresOptIn": false,
+      "audience": "Players and general users who require the supported release policy.",
+      "risk": "Standard release risk after every publication gate passes.",
+      "support": "Supported only while the release remains current or explicitly supported.",
+      "updates": "Stable track only; no automatic move to Beta or Experimental.",
+      "account": "No account is required for a future public Stable download."
+    },
+    {
+      "id": "beta",
+      "name": "Beta",
+      "default": false,
+      "requiresOptIn": true,
+      "audience": "Opted-in testers prepared to report pre-release behavior.",
+      "risk": "Pre-release behavior may change and requires explicit opt-in.",
+      "support": "Best-effort support with recovery guidance; not the Stable support promise.",
+      "updates": "Beta track only until the user deliberately returns to Stable.",
+      "account": "Channel consent is separate from account identity."
+    },
+    {
+      "id": "experimental",
+      "name": "Experimental",
+      "default": false,
+      "requiresOptIn": true,
+      "audience": "Hardware enthusiasts who can evaluate high-change behavior and recover safely.",
+      "risk": "High-change, limited-validation behavior; never presented beside Stable as an equivalent choice.",
+      "support": "Limited support and explicit recovery expectations.",
+      "updates": "Manual-only policy with a new acknowledgement for each material risk change.",
+      "account": "The Experimental acknowledgement cannot be inferred from a session, URL, or cookie."
+    }
+  ],
+  "releaseNotes": {
+    "title": "Release notes before promotion",
+    "summary": "These notes describe the demonstrative 1.0.0 release record. They do not announce a downloadable build.",
+    "sections": [
+      {
+        "id": "changes",
+        "title": "Changes",
+        "body": "The public experience documents compatibility, evidence, recovery, and release-integrity review before any optimizer artifact is distributed."
+      },
+      {
+        "id": "risks",
+        "title": "Known risks",
+        "body": "Windows lifecycle support and representative hardware validation remain incomplete. No performance, compatibility, or installation claim is inferred from the demonstrative record."
+      },
+      {
+        "id": "corrections",
+        "title": "Corrections",
+        "body": "Public release language now separates repository examples, development evidence, and future publicly trusted distribution."
+      },
+      {
+        "id": "compatibility",
+        "title": "Compatibility",
+        "body": "Windows 10 and Windows 11 use one eligibility path while behavior is equivalent. Architecture, lifecycle, and verified hardware evidence must still agree."
+      },
+      {
+        "id": "migration",
+        "title": "Migration",
+        "body": "No public artifact exists, so there is no installation or migration action. A later release must publish exact migration requirements atomically with its manifest."
+      },
+      {
+        "id": "recovery",
+        "title": "Recovery",
+        "body": "Cancel whenever publisher, signature, hash, size, version, compatibility, or manifest differs. Keep the application closed and use public support."
+      }
+    ]
+  },
+  "manifest": {
+    "title": "Demonstrative manifest fields",
+    "notice": "Outside the official trust path. Values marked not issued or not approved are blocking facts, not missing UI.",
+    "fields": {
+      "manifestId": "Canonical machine-readable manifest identity",
+      "artifactId": "Exact artifact identity bound to that manifest",
+      "channel": "Stable, Beta, or separately acknowledged Experimental policy",
+      "version": "Installer and manifest version equality",
+      "architecture": "Exact Windows target architecture",
+      "windowsLifecycle": "Supported Windows 10 and Windows 11 lifecycle evidence",
+      "compatibility": "Validated hardware and operating-system compatibility scope",
+      "publisher": "Expected Authenticode publisher",
+      "sha256": "Canonical 64-character SHA-256 digest",
+      "sizeBytes": "Exact artifact byte length",
+      "signatureState": "Verified Authenticode chain and publisher state",
+      "origin": "Controlled symbolic official release origin",
+      "provenance": "Public-trust production provenance",
+      "publicDistributionApproved": "Explicit distribution approval",
+      "artifactAvailable": "Atomic artifact availability"
+    }
+  },
+  "verification": {
+    "title": "Independent verification",
+    "introduction": "For a future approved artifact, perform every check before running it. One disagreement blocks the flow completely.",
+    "steps": [
+      {
+        "id": "authenticode",
+        "title": "Authenticode and publisher",
+        "body": "Inspect the Windows digital signature, full certificate chain, expected publisher, and verification result. Cancel on an unknown publisher, missing signature, or chain warning."
+      },
+      {
+        "id": "sha256",
+        "title": "SHA-256",
+        "body": "Compute the file digest independently and compare all 64 hexadecimal characters with the canonical manifest. A single different character blocks use."
+      },
+      {
+        "id": "size",
+        "title": "File size",
+        "body": "Compare the exact byte length, not a rounded display value, with the canonical manifest."
+      },
+      {
+        "id": "version",
+        "title": "Version and architecture",
+        "body": "Confirm installer metadata, manifest version, release notes, and target architecture all identify the same release."
+      },
+      {
+        "id": "compatibility",
+        "title": "Windows lifecycle and compatibility",
+        "body": "Confirm the current support matrix covers the operating-system lifecycle and architecture of this PC before installation."
+      },
+      {
+        "id": "manifest",
+        "title": "Canonical manifest",
+        "body": "Use only the repository-published canonical manifest on the controlled official origin. Mirrors and copied values do not receive the official trust mark."
+      }
+    ],
+    "blocked": "There is no continue-anyway action. Close the artifact, preserve only non-sensitive evidence, and contact support."
+  },
+  "history": {
+    "title": "Release history",
+    "introduction": "Notes, hash status, and safety state remain inspectable. Unsupported or unsafe binaries are not offered and downgrade is not promoted.",
+    "records": {
+      "1.0.0": {
+        "title": "1.0.0 demonstrative Stable record",
+        "notes": "Current release-information baseline; public artifact remains unavailable.",
+        "hash": "No public SHA-256 was issued.",
+        "status": "Current information · distribution blocked"
+      },
+      "0.9.0": {
+        "title": "0.9.0 historical Beta record",
+        "notes": "Preserved for policy history without an actionable binary.",
+        "hash": "No public SHA-256 was issued.",
+        "status": "Historical · artifact unavailable"
+      },
+      "0.8.0": {
+        "title": "0.8.0 withdrawn Experimental record",
+        "notes": "Preserved to explain withdrawal; it must not be installed or used as a downgrade target.",
+        "hash": "Withdrawn from public use.",
+        "status": "Historical · unsafe"
+      }
+    }
+  },
+  "downloadGate": {
+    "title": "Public download is blocked",
+    "summary": "No publicly trusted installer has been approved or made available. The journey ends here without a download link.",
+    "reasons": {
+      "artifact-unavailable": "The artifact and its required evidence are not atomically available.",
+      "channel-selection-blocked": "The requested channel does not have the direct consent its policy requires.",
+      "development-artifact-rejected": "Development or self-signed evidence is categorically outside the public flow.",
+      "distribution-not-approved": "Public distribution approval is false in the generated release record.",
+      "historical-release-unavailable": "The historical artifact is unavailable and is not offered as a downgrade.",
+      "historical-release-unsafe": "The historical release is unsafe and remains non-actionable.",
+      "integrity-disagreement": "At least one release, manifest, publisher, signature, hash, artifact, provenance, or compatibility fact disagrees.",
+      "official-artifact-unavailable": "The canonical record declares the official artifact unavailable.",
+      "record-invalid": "The release record failed generated runtime validation."
+    },
+    "assertive": "Download remains blocked. No bypass, mirror, account sign-in, or development installer can continue this flow."
+  },
+  "installation": {
+    "title": "Safe installation and cancellation guidance",
+    "summary": "These steps become actionable only after a future approved download. They do not imply an artifact exists today.",
+    "expectedWarnings": "Windows should report the exact approved publisher and a valid signature. Any different publisher, missing signature, SmartScreen uncertainty, or unexpected elevation request is a stop condition.",
+    "steps": [
+      "Verify Authenticode, publisher, SHA-256, exact size, version, architecture, compatibility, and canonical manifest before running the file.",
+      "Close games and preserve work before a verified installer requests an expected system change.",
+      "Read every elevation prompt and cancel if its publisher or requested action differs from the release guidance.",
+      "After installation, confirm the installed version and retain the matching release notes and recovery guidance."
+    ],
+    "cancel": "Cancel without running the artifact, do not weaken Windows security, and remove the untrusted copy.",
+    "support": "Use public support with the release version and categorical disagreement only. Do not send credentials, device secrets, or unrelated diagnostic data."
+  },
+  "analytics": {
+    "title": "Purpose-bound download measurement",
+    "body": "A future public download may record only aggregate eligibility and delivery outcomes needed to operate distribution. It does not identify the PC, create an account, or silently bind a public download to account identity."
+  }
+}
