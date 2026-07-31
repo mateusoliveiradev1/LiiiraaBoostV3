@@ -1,0 +1,213 @@
+{
+  "document": {
+    "id": "public-home-pt-br",
+    "routeId": "public-home",
+    "locale": "pt-BR",
+    "version": "1.0.0",
+    "channel": "stable",
+    "owner": "public-content",
+    "lastReviewedAt": "2026-07-30T12:00:00.000Z",
+    "validationState": "validated",
+    "evidence": [
+      {
+        "source": "https://liiiraa.com/pt-BR/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-plan-review",
+          "source": "Revisão do fluxo determinístico do aplicativo desktop",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Revisão de planos e consequências na experiência desktop determinística",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/pt-BR/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-evidence-review",
+          "source": "Revisão dos estados de evidência e proveniência do aplicativo desktop",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Estados de origem, validação e indisponibilidade apresentados pelo produto",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/pt-BR/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-recovery-review",
+          "source": "Revisão do histórico e das jornadas de restauração do aplicativo desktop",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Explicações de reversão, histórico e recuperação modeladas no produto",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/pt-BR/compatibility",
+        "provenance": {
+          "kind": "observed",
+          "value": "compatibility-contract-review",
+          "source": "Contrato de compatibilidade e estados indisponíveis do produto",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Windows 10 e 11; confirmação final depende do hardware observado",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/pt-BR/product",
+        "provenance": {
+          "kind": "observed",
+          "value": "product-boundary-review",
+          "source": "Decisões publicadas de segurança e autoridade do produto",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Limites entre interface, diagnóstico e futuras operações privilegiadas",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/pt-BR/releases",
+        "provenance": {
+          "kind": "observed",
+          "value": "distribution-gate-review",
+          "source": "Estado do manifesto público e da aprovação de distribuição",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Canal estável; nenhum instalador com confiança pública foi aprovado",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      }
+    ],
+    "indexing": "index",
+    "staleTreatment": "Bloquear ações e encaminhar para a versão canônica atual."
+  },
+  "translationKey": "public-home",
+  "contentType": "product",
+  "source": "repository",
+  "title": "Prepare seu PC. Prove o resultado. Restaure com controle.",
+  "summary": "Uma jornada técnica para preparar uma sessão, verificar o que é sustentado por evidência e preservar um caminho de volta.",
+  "body": "Liiiraa Boost organiza preparação, prova e restauração sem prometer ganhos antes de observar o hardware. Compatibilidade, validação e distribuição permanecem explícitas.",
+  "metadata": {
+    "title": "Liiiraa Boost | Desempenho com evidência e controle",
+    "description": "Conheça a abordagem de preparação, evidência, compatibilidade e restauração do Liiiraa Boost.",
+    "socialImageId": "desktop-home-pt-BR"
+  },
+  "warnings": [
+    "Compatibilidade e resultado dependem do hardware, da versão do Windows, do jogo e da qualidade da medição.",
+    "O download público permanece bloqueado até existir um instalador com confiança pública aprovada."
+  ],
+  "screenshotAssetIds": [
+    "desktop-home-pt-BR"
+  ],
+  "actionableClaims": [
+    "Verifique a compatibilidade antes de considerar qualquer plano.",
+    "Consulte a origem e o limite de cada afirmação material."
+  ],
+  "identifiers": [
+    "LB-HOME",
+    "WEB-01",
+    "1.0.0"
+  ],
+  "errorCodes": [],
+  "suggestions": [
+    "Verificar compatibilidade",
+    "Ler a metodologia",
+    "Consultar as versões"
+  ],
+  "domain": "product",
+  "risk": "low",
+  "availability": "under-validation",
+  "hero": {
+    "promise": "Prepare seu PC. Prove o resultado. Restaure com controle.",
+    "summary": "Entre na próxima sessão com um plano legível, evidência identificada e recuperação tratada como parte do desempenho — não como nota de rodapé.",
+    "primaryAction": {
+      "label": "Verificar compatibilidade",
+      "routeId": "public-compatibility"
+    },
+    "secondaryAction": {
+      "label": "Conhecer a metodologia",
+      "routeId": "public-evidence"
+    },
+    "trustBoundary": {
+      "title": "O limite vem antes da promessa",
+      "body": "Nenhum ganho é presumido. A compatibilidade final depende do hardware observado, e nenhum instalador com confiança pública está disponível agora."
+    }
+  },
+  "chapters": [
+    {
+      "id": "prepare",
+      "title": "Prepare com um plano que você consegue revisar",
+      "summary": "A experiência desktop modela recomendações, dependências, risco e consequência antes de qualquer futura autoridade nativa.",
+      "claim": "O produto apresenta a preparação como uma revisão explícita, não como um comando genérico sem revisão.",
+      "evidenceIndex": 0,
+      "unprovenBoundary": "Isto comprova a experiência de revisão já implementada; não comprova ganho de desempenho nem aplicação privilegiada."
+    },
+    {
+      "id": "prove",
+      "title": "Prove sem transformar hipótese em resultado",
+      "summary": "Origem, estado de validação, versão e indisponibilidade acompanham o que a interface apresenta como evidência.",
+      "claim": "A interface diferencia fatos observados, prévias simuladas e dados indisponíveis com proveniência persistente.",
+      "evidenceIndex": 1,
+      "unprovenBoundary": "A estrutura de evidência está validada; medições reais por máquina continuam dependentes do futuro motor nativo."
+    },
+    {
+      "id": "restore",
+      "title": "Restaure com o mesmo rigor usado para preparar",
+      "summary": "Histórico, consequência e recuperação são responsabilidades visíveis da jornada, inclusive quando uma ação não pode prosseguir.",
+      "claim": "A experiência desktop inclui jornadas determinísticas de histórico e restauração com explicação do estado seguro.",
+      "evidenceIndex": 2,
+      "unprovenBoundary": "A jornada visual está implementada; a restauração real do Windows permanece fora da autoridade desta fase."
+    },
+    {
+      "id": "compatibility",
+      "title": "Compatibilidade é uma decisão, não um selo genérico",
+      "summary": "Windows 10 e 11 são o limite de plataforma. CPU, GPU, armazenamento, rede e perfil do jogo ainda precisam ser observados.",
+      "claim": "A jornada pública bloqueia conclusões universais e encaminha cada visitante para uma verificação de compatibilidade.",
+      "evidenceIndex": 3,
+      "unprovenBoundary": "A plataforma-alvo está definida; suporte a uma configuração específica não é afirmado sem inventário validado."
+    },
+    {
+      "id": "decisions",
+      "title": "Controle nasce de decisões que podem ser auditadas",
+      "summary": "A interface não recebe poder administrativo por conveniência. Contratos, validação e recuperação delimitam cada futura operação.",
+      "claim": "O produto separa a interface sem privilégios das futuras operações nativas e recusa execução remota arbitrária.",
+      "evidenceIndex": 4,
+      "unprovenBoundary": "A arquitetura e os limites estão documentados; a autoridade nativa segura ainda precisa ser implementada e verificada."
+    },
+    {
+      "id": "releases",
+      "title": "Uma versão só conta quando a cadeia inteira concorda",
+      "summary": "Manifesto, notas, compatibilidade, assinatura e artefato precisam formar uma história verificável antes da distribuição.",
+      "claim": "A distribuição pública continua bloqueada enquanto não existe um instalador com confiança pública aprovada.",
+      "evidenceIndex": 5,
+      "unprovenBoundary": "O bloqueio atual é verificável; nenhuma data de lançamento, reputação SmartScreen ou disponibilidade futura é prometida."
+    }
+  ],
+  "productStage": {
+    "assetId": "desktop-home-pt-BR",
+    "expectedPath": "/product/desktop-home.pt-BR.webp",
+    "sidecarPath": "/product/desktop-home.pt-BR.json",
+    "scenarioId": "S01",
+    "alt": "Tela inicial real do aplicativo desktop Liiiraa Boost em português do Brasil.",
+    "fullScreenshotLabel": "Ver captura completa",
+    "unavailableTitle": "Captura real do produto ainda não admitida",
+    "unavailableBody": "Esta área aceita somente uma captura do aplicativo desktop executável com sidecar aprovado e checksum correspondente. Nenhum mockup ou substituto visual será exibido."
+  },
+  "finalJourney": {
+    "title": "Comece pelo que o seu PC realmente suporta",
+    "body": "A próxima etapa não promete um resultado. Ela organiza o contexto de Windows e hardware necessário para dizer o que está disponível, em validação ou indisponível.",
+    "actionLabel": "Verificar compatibilidade",
+    "routeId": "public-compatibility",
+    "distributionNote": "O download público permanece indisponível até a aprovação de um artefato com confiança pública."
+  }
+}

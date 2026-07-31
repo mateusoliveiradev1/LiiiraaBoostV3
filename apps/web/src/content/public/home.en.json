@@ -1,0 +1,213 @@
+{
+  "document": {
+    "id": "public-home-en",
+    "routeId": "public-home",
+    "locale": "en",
+    "version": "1.0.0",
+    "channel": "stable",
+    "owner": "public-content",
+    "lastReviewedAt": "2026-07-30T12:00:00.000Z",
+    "validationState": "validated",
+    "evidence": [
+      {
+        "source": "https://liiiraa.com/en/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-plan-review",
+          "source": "Review of the deterministic desktop application flow",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Plan and consequence review in the deterministic desktop experience",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/en/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-evidence-review",
+          "source": "Review of desktop evidence and provenance states",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Source, validation, and unavailable states presented by the product",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/en/evidence",
+        "provenance": {
+          "kind": "observed",
+          "value": "desktop-recovery-review",
+          "source": "Review of desktop history and restoration journeys",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Reversal explanations, history, and recovery modeled in the product",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/en/compatibility",
+        "provenance": {
+          "kind": "observed",
+          "value": "compatibility-contract-review",
+          "source": "Product compatibility contract and unavailable states",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Windows 10 and 11; final confirmation depends on observed hardware",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/en/product",
+        "provenance": {
+          "kind": "observed",
+          "value": "product-boundary-review",
+          "source": "Published product safety and authority decisions",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Boundaries between interface, diagnostics, and future privileged operations",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      },
+      {
+        "source": "https://liiiraa.com/en/releases",
+        "provenance": {
+          "kind": "observed",
+          "value": "distribution-gate-review",
+          "source": "Public manifest and distribution approval state",
+          "observedAt": "2026-07-30T12:00:00.000Z"
+        },
+        "scope": "Stable channel; no publicly trusted installer has been approved",
+        "applicableVersion": "1.0.0",
+        "validationState": "validated",
+        "unproven": false
+      }
+    ],
+    "indexing": "index",
+    "staleTreatment": "Block actions and link to the current canonical version."
+  },
+  "translationKey": "public-home",
+  "contentType": "product",
+  "source": "repository",
+  "title": "Prepare your PC. Prove result. Restore control.",
+  "summary": "A technical journey for preparing a session, verifying what evidence supports, and preserving a path back.",
+  "body": "Liiiraa Boost organizes preparation, proof, and restoration without promising gains before hardware is observed. Compatibility, validation, and distribution remain explicit.",
+  "metadata": {
+    "title": "Liiiraa Boost | Evidence-led performance and control",
+    "description": "Explore the Liiiraa Boost approach to preparation, evidence, compatibility, and restoration.",
+    "socialImageId": "desktop-home-en"
+  },
+  "warnings": [
+    "Compatibility and results depend on hardware, Windows version, the game, and measurement quality.",
+    "Public download remains blocked until a publicly trusted installer is approved."
+  ],
+  "screenshotAssetIds": [
+    "desktop-home-en"
+  ],
+  "actionableClaims": [
+    "Check compatibility before considering any plan.",
+    "Review the source and boundary of every material claim."
+  ],
+  "identifiers": [
+    "LB-HOME",
+    "WEB-01",
+    "1.0.0"
+  ],
+  "errorCodes": [],
+  "suggestions": [
+    "Check compatibility",
+    "Read the methodology",
+    "Review releases"
+  ],
+  "domain": "product",
+  "risk": "low",
+  "availability": "under-validation",
+  "hero": {
+    "promise": "Prepare your PC. Prove result. Restore control.",
+    "summary": "Enter the next session with a readable plan, identified evidence, and recovery treated as part of performance — never a footnote.",
+    "primaryAction": {
+      "label": "Check compatibility",
+      "routeId": "public-compatibility"
+    },
+    "secondaryAction": {
+      "label": "Explore the methodology",
+      "routeId": "public-evidence"
+    },
+    "trustBoundary": {
+      "title": "The boundary comes before the promise",
+      "body": "No gain is assumed. Final compatibility depends on observed hardware, and no publicly trusted installer is available now."
+    }
+  },
+  "chapters": [
+    {
+      "id": "prepare",
+      "title": "Prepare with a plan you can review",
+      "summary": "The desktop experience models recommendations, dependencies, risk, and consequence before any future native authority.",
+      "claim": "The product presents preparation as an explicit review, not a generic unchecked action.",
+      "evidenceIndex": 0,
+      "unprovenBoundary": "This proves the implemented review experience; it does not prove a performance gain or privileged application."
+    },
+    {
+      "id": "prove",
+      "title": "Prove without turning a hypothesis into a result",
+      "summary": "Source, validation state, version, and unavailability accompany what the interface presents as evidence.",
+      "claim": "The interface distinguishes observed facts, simulated previews, and unavailable data with persistent provenance.",
+      "evidenceIndex": 1,
+      "unprovenBoundary": "The evidence structure is validated; real per-machine measurements still depend on the future native engine."
+    },
+    {
+      "id": "restore",
+      "title": "Restore with the same rigor used to prepare",
+      "summary": "History, consequence, and recovery are visible journey responsibilities, including when an action cannot proceed.",
+      "claim": "The desktop experience includes deterministic history and restoration journeys with an explanation of the safe state.",
+      "evidenceIndex": 2,
+      "unprovenBoundary": "The visual journey is implemented; real Windows restoration remains outside this phase's authority."
+    },
+    {
+      "id": "compatibility",
+      "title": "Compatibility is a decision, not a generic badge",
+      "summary": "Windows 10 and 11 define the platform boundary. CPU, GPU, storage, network, and game profile still need to be observed.",
+      "claim": "The public journey blocks universal conclusions and routes every visitor to a compatibility check.",
+      "evidenceIndex": 3,
+      "unprovenBoundary": "The target platform is defined; support for a specific configuration is not claimed without validated inventory."
+    },
+    {
+      "id": "decisions",
+      "title": "Control begins with decisions that can be audited",
+      "summary": "The interface does not receive administrative power for convenience. Contracts, validation, and recovery bound every future operation.",
+      "claim": "The product separates the unprivileged interface from future native operations and refuses arbitrary remote execution.",
+      "evidenceIndex": 4,
+      "unprovenBoundary": "The architecture and boundaries are documented; secure native authority still needs implementation and verification."
+    },
+    {
+      "id": "releases",
+      "title": "A release counts only when the whole chain agrees",
+      "summary": "Manifest, notes, compatibility, signature, and artifact must form a verifiable story before distribution.",
+      "claim": "Public distribution remains blocked while no publicly trusted installer has been approved.",
+      "evidenceIndex": 5,
+      "unprovenBoundary": "The current gate is verifiable; no release date, SmartScreen reputation, or future availability is promised."
+    }
+  ],
+  "productStage": {
+    "assetId": "desktop-home-en",
+    "expectedPath": "/product/desktop-home.en.webp",
+    "sidecarPath": "/product/desktop-home.en.json",
+    "scenarioId": "S01",
+    "alt": "Real Liiiraa Boost desktop application Home screen in English.",
+    "fullScreenshotLabel": "View complete screenshot",
+    "unavailableTitle": "Real product capture is not admitted yet",
+    "unavailableBody": "This stage accepts only a capture from the executable desktop application with an approved sidecar and matching checksum. No mockup or visual substitute will be shown."
+  },
+  "finalJourney": {
+    "title": "Start with what your PC actually supports",
+    "body": "The next step does not promise a result. It organizes the Windows and hardware context needed to say what is available, under validation, or unavailable.",
+    "actionLabel": "Check compatibility",
+    "routeId": "public-compatibility",
+    "distributionNote": "Public download remains unavailable until a publicly trusted artifact is approved."
+  }
+}
