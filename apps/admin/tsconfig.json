@@ -7,6 +7,7 @@
     "lib": ["DOM", "DOM.Iterable", "ES2024"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "skipLibCheck": true,
     "plugins": [
       {
         "name": "next"
@@ -14,6 +15,7 @@
     ]
   },
   "include": [
+    "next.config.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",

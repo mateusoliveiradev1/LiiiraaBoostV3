@@ -318,6 +318,10 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
 
   apps/admin:
     dependencies:
@@ -348,6 +352,10 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
 
   apps/desktop:
     dependencies:
@@ -454,6 +462,10 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
 
   packages/contracts-source:
     devDependencies:

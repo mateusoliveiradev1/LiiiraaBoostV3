@@ -33,6 +33,7 @@ const typeCheckedRules = {
 export default defineConfig([
   {
     ignores: [
+      '**/.next/**',
       '**/.turbo/**',
       '**/build/**',
       '**/coverage/**',

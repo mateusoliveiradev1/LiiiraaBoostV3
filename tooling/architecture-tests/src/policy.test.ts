@@ -373,7 +373,10 @@ describe('policy graph fixtures', () => {
 });
 
 const expectedPnpmWorkspaceRoots = [
+  'apps/account',
+  'apps/admin',
   'apps/desktop',
+  'apps/web',
   'packages/contracts-source',
   'packages/contracts-ts',
   'packages/design-system',
@@ -382,12 +385,16 @@ const expectedPnpmWorkspaceRoots = [
   'packages/desktop-production-reference',
   'packages/desktop-simulator',
   'packages/feature-shell',
+  'packages/web-core',
+  'packages/web-features',
+  'packages/web-preview',
   'tooling/acceptance-policy',
   'tooling/architecture-tests',
   'tooling/contract-compat',
   'tooling/contract-generation',
   'tooling/contract-generation-spike',
   'tooling/fixture-guard',
+  'tooling/web-evidence',
   'tooling/workspace-smoke',
 ] as const;
 

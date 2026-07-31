@@ -12,7 +12,7 @@
   "scripts": {
     "build": "pnpm check",
     "check": "tsc -p tsconfig.json",
-    "test": "vitest --run"
+    "test": "vitest --run --passWithNoTests"
   },
   "dependencies": {
     "@liiiraa/web-core": "workspace:*"

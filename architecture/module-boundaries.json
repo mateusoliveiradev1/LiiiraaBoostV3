@@ -165,7 +165,7 @@
       "roots": ["packages/web-core"],
       "publicRoots": ["packages/web-core/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "web-preview",
@@ -174,7 +174,7 @@
       "roots": ["packages/web-preview"],
       "publicRoots": ["packages/web-preview/src/index.ts"],
       "runtimeClass": "fixture",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "web-features",
@@ -183,7 +183,7 @@
       "roots": ["packages/web-features"],
       "publicRoots": ["packages/web-features/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "web-evidence",
@@ -192,7 +192,7 @@
       "roots": ["tooling/web-evidence"],
       "publicRoots": ["tooling/web-evidence/src/index.ts"],
       "runtimeClass": "tooling",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "web-app",
@@ -201,7 +201,7 @@
       "roots": ["apps/web"],
       "publicRoots": ["apps/web/src/index.ts"],
       "runtimeClass": "production",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "account-app",
@@ -210,7 +210,7 @@
       "roots": ["apps/account"],
       "publicRoots": ["apps/account/src/index.ts"],
       "runtimeClass": "fixture",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "admin-app",
@@ -219,7 +219,7 @@
       "roots": ["apps/admin"],
       "publicRoots": ["apps/admin/src/index.ts"],
       "runtimeClass": "fixture",
-      "status": "reserved"
+      "status": "active"
     },
     {
       "id": "acceptance-policy",

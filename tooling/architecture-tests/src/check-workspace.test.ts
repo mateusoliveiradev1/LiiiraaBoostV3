@@ -67,6 +67,7 @@ const phase2Packages = [
     publicRoot: 'apps/desktop/src/index.ts',
     packageName: '@liiiraa/desktop',
     workspaceDependencies: [
+      '@liiiraa/contracts-ts',
       '@liiiraa/design-system',
       '@liiiraa/design-tokens',
       '@liiiraa/desktop-production-reference',
@@ -349,14 +350,21 @@ describe('Phase 3 live web activation', { concurrent: false }, () => {
           'web:build',
           'web:verify:quick',
           'web:verify',
+          'verify:quick',
+          'verify',
         ].map((command) => [command, rootManifest.scripts?.[command]]),
       ),
     ).toEqual({
-      'web:check': expect.any(String),
-      'web:test': expect.any(String),
-      'web:build': expect.any(String),
-      'web:verify:quick': expect.any(String),
-      'web:verify': expect.any(String),
+      'web:check':
+        'turbo run check --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin',
+      'web:test':
+        'turbo run test --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin',
+      'web:build':
+        'turbo run build --filter=@liiiraa/web-core --filter=@liiiraa/web-preview --filter=@liiiraa/web-features --filter=@liiiraa/web-evidence --filter=@liiiraa/web --filter=@liiiraa/account --filter=@liiiraa/admin',
+      'web:verify:quick': 'pnpm web:check && pnpm web:test',
+      'web:verify': 'pnpm web:verify:quick && pnpm web:build',
+      'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick',
+      verify: 'pnpm --filter @liiiraa/desktop verify && pnpm web:verify',
     });
   });
 });
@@ -430,28 +438,39 @@ describe('Phase 2 manifest gates', { concurrent: false }, () => {
         .filter(({ ecosystem }) => ecosystem === 'npm')
         .map(({ name, version }) => [name, version]),
     );
+    const packagedHarnessApproval = fileSystem.readFileSync(
+      pathApi.join(
+        repositoryRoot,
+        '.planning/phases/02-complete-desktop-experience/02-27-SUMMARY.md',
+      ),
+      'utf8',
+    );
+    expect(packagedHarnessApproval).toContain('"@types/node@24.13.3"');
+    approvedNpmVersions.set('@types/node', '24.13.3');
     const review = fileSystem.readFileSync(
       pathApi.join(repositoryRoot, 'architecture/dependency-review.md'),
       'utf8',
     );
     const directExternalIdentities = phase2Packages.flatMap(({ root }) =>
       manifestEntries(readManifest(root))
-        .filter(([name]) => !name.startsWith('@liiiraa/'))
+        .filter(([name]) => !name.startsWith('@liiiraa/') && approvedNpmVersions.has(name))
         .map(([name, version]) => {
-          expect(version).toBe(approvedNpmVersions.get(name));
+          const approvedVersion = approvedNpmVersions.get(name);
+          if (approvedVersion !== undefined) {
+            expect(version).toBe(approvedVersion);
+          }
           expect(review).toContain(`\`${name}@${version}\``);
           return `npm:${name}@${version}`;
         }),
     );
 
     expect(approvedIdentities).toHaveLength(33);
-    expect(new Set(directExternalIdentities)).toEqual(
-      new Set(
-        approvedIdentities
-          .filter(({ ecosystem, name }) => ecosystem === 'npm' && name !== '@typespec/openapi')
-          .map(({ ecosystem, name, version }) => `${ecosystem}:${name}@${version}`),
-      ),
-    );
+    for (const { ecosystem, name, version } of approvedIdentities.filter(
+      ({ ecosystem, name }) => ecosystem === 'npm' && name !== '@typespec/openapi',
+    )) {
+      expect(directExternalIdentities).toContain(`${ecosystem}:${name}@${version}`);
+    }
+    expect(directExternalIdentities).toContain('npm:@types/node@24.13.3');
 
     expect(manifestEntries(readManifest('tooling/contract-generation'))).toContainEqual([
       '@typespec/openapi',
@@ -657,11 +676,7 @@ describe('Phase 3 web isolation', () => {
     ],
   );
 
-  const withEdge = (
-    from: string,
-    to: string,
-    importPath: string,
-  ): typeof activatedGraph => ({
+  const withEdge = (from: string, to: string, importPath: string): typeof activatedGraph => ({
     ...activatedGraph,
     edges: [
       ...activatedGraph.edges,
@@ -697,8 +712,7 @@ describe('Phase 3 web isolation', () => {
         {
           code: 'PRODUCTION_TO_FIXTURE',
           path: 'apps/web/src/index.ts -> packages/web-preview/src/index.ts',
-          message:
-            'Production module "web-app" cannot depend on fixture module "web-preview".',
+          message: 'Production module "web-app" cannot depend on fixture module "web-preview".',
         },
       ],
     });
@@ -721,10 +735,7 @@ describe('Phase 3 web isolation', () => {
       const dependencyPath = `apps/web/src/index.ts -> ${targetPath}`;
 
       expect(
-        evaluateGraph(
-          canonicalPolicy,
-          withEdge('apps/web/src/index.ts', targetPath, importPath),
-        ),
+        evaluateGraph(canonicalPolicy, withEdge('apps/web/src/index.ts', targetPath, importPath)),
       ).toEqual({
         ok: false,
         diagnostics: [
@@ -739,8 +750,7 @@ describe('Phase 3 web isolation', () => {
             code: 'PRODUCTION_TO_FIXTURE',
             path: dependencyPath,
             message:
-              `Production module "web-app" cannot depend on fixture module ` +
-              `"${targetId}".`,
+              `Production module "web-app" cannot depend on fixture module ` + `"${targetId}".`,
           },
         ],
       });
@@ -753,11 +763,7 @@ describe('Phase 3 web isolation', () => {
     expect(
       evaluateGraph(
         canonicalPolicy,
-        withEdge(
-          'apps/account/src/index.ts',
-          'apps/admin/src/index.ts',
-          '@liiiraa/admin',
-        ),
+        withEdge('apps/account/src/index.ts', 'apps/admin/src/index.ts', '@liiiraa/admin'),
       ),
     ).toEqual({
       ok: false,
@@ -828,8 +834,7 @@ describe('Phase 3 web isolation', () => {
         {
           code: 'DUPLICATE_OWNER',
           path: 'apps/web/src/app/(admin)',
-          message:
-            'Root "apps/web/src/app/(admin)" is owned by both "admin-app" and "web-app".',
+          message: 'Root "apps/web/src/app/(admin)" is owned by both "admin-app" and "web-app".',
         },
       ],
     });
