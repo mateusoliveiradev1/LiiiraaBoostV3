@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-22-PLAN.md
-last_updated: "2026-07-31T07:40:13.117Z"
+stopped_at: Completed 03-26-PLAN.md
+last_updated: "2026-07-31T07:59:57.685Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-22-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 79
-  percent: 88
+  completed_plans: 80
+  percent: 20
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 22 of 32
+Plan: 23 of 32
 Status: Ready to execute
 Last activity: 2026-07-31 — Completed 03-22-PLAN.md
 
@@ -127,6 +127,7 @@ _Updated after plan completion_
 | Phase 03 P19 | 18min | 2 tasks | 7 files |
 | Phase 03 P20 | 3h23m | 2 tasks | 13 files |
 | Phase 03 P22 | 9min | 1 tasks | 3 files |
+| Phase 03 P26 | 13min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -332,6 +333,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep documentation locale, version, and channel fallbacks explicit; never silently substitute identity. — Historical guidance remains reachable while navigation changes require an explicit caller decision.
 - [Phase 03]: Permit desktop contextual documentation links only for current supported documents and exact authored sections. — Desktop handoff must not present stale or mismatched guidance as compatible.
 - [Phase 03]: Reject generic executable mutation recipes before documentation resolution or search indexing. — Documentation may explain safe verification but cannot become a remote execution channel.
+- [Phase 03]: Keep FutureAuthorityPort structural in web-features so preview runtime code stays outside production bundles. — Production feature code owns only the browser-safe interface; adapters remain substitutable at the composition boundary.
+- [Phase 03]: Preserve only explicitly allowlisted safe draft fields across preview recovery states. — Offline, stale, expired-session, and partial-failure recovery must not retain sensitive input implicitly.
+- [Phase 03]: Accept completion only after runtime validation of a remoteStateChanged false Phase 4 receipt. — Static typing cannot make an untrusted authority response truthful at runtime.
 
 ### Pending Todos
 
@@ -373,6 +377,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T07:39:53.912Z
-Stopped at: Completed 03-22-PLAN.md
+Last session: 2026-07-31T07:59:57.681Z
+Stopped at: Completed 03-26-PLAN.md
 Resume file: None
