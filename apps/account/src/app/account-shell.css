@@ -332,6 +332,12 @@ button:focus-visible,
 }
 
 @media (forced-colors: active) {
+  .account-skip-link {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
   .account-preview-rail,
   .account-failure__safe-work,
   .account-nav__list a:focus-visible {

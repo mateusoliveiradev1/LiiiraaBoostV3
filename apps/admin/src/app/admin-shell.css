@@ -347,6 +347,13 @@ button:focus-visible,
 }
 
 @media (forced-colors: active) {
+  .admin-skip-link,
+  .admin-brand__mark {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
   .admin-role-rail,
   .admin-failure__safe-state,
   .admin-nav__list a:focus-visible {

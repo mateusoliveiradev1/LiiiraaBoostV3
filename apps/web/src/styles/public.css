@@ -69,14 +69,14 @@
 
 .home-action--primary {
   border-color: var(--lb-cobalt-action);
-  color: var(--lb-surface-canvas);
+  color: var(--lb-text-primary);
   background: var(--lb-cobalt-action);
 }
 
 .home-action--primary:hover {
   border-color: var(--lb-cobalt-signal);
-  color: var(--lb-surface-canvas);
-  background: var(--lb-cobalt-signal);
+  color: var(--lb-text-primary);
+  background: color-mix(in srgb, var(--lb-cobalt-action) 82%, black);
 }
 
 .home-trust-boundary {

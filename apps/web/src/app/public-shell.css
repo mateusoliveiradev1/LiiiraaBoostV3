@@ -445,6 +445,12 @@ main {
 }
 
 @media (forced-colors: active) {
+  .public-skip-link {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
   .public-action--primary,
   .public-mobile-menu__actions a:last-child {
     border-color: ButtonText;
