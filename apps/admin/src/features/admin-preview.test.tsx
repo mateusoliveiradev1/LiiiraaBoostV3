@@ -5,24 +5,15 @@ import {
   validateWebDocument,
   type FutureAuthorityCommandJson,
   type WebLocale,
-  type WebRouteId,
 } from '@liiiraa/web-core';
 import { createWebPreviewAuthority, getWebScenario } from '@liiiraa/web-preview';
 import { describe, expect, it } from 'vitest';
 
 import adminEn from '../content/admin.en.json';
 import adminPtBr from '../content/admin.pt-BR.json';
+import { ADMIN_ENTRY_ROUTE_IDS, ADMIN_ROLE_ROUTE_ACCESS } from '../admin-preview-model';
 
 const featureSource = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
-const ADMIN_ENTRY_ROUTE_IDS = [
-  'admin-role',
-  'admin-support',
-  'admin-operations',
-  'admin-security',
-  'admin-diagnostics',
-  'admin-audit',
-  'admin-audit-event',
-] as const satisfies readonly WebRouteId[];
 
 const shapeOf = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(shapeOf);
@@ -38,12 +29,7 @@ const shapeOf = (value: unknown): unknown => {
 
 describe('role-scoped admin', () => {
   it('projects four distinct closed workspaces and renders a redacted support case', () => {
-    const access = {
-      support: ['admin-role', 'admin-support'],
-      operations: ['admin-role', 'admin-operations', 'admin-audit'],
-      security: ['admin-role', 'admin-security', 'admin-diagnostics', 'admin-audit'],
-      audit: ['admin-role', 'admin-audit', 'admin-audit-event'],
-    } as const;
+    const access = ADMIN_ROLE_ROUTE_ACCESS;
 
     expect(access.support).toEqual(['admin-role', 'admin-support']);
     expect(access.operations).toEqual(['admin-role', 'admin-operations', 'admin-audit']);
@@ -56,7 +42,6 @@ describe('role-scoped admin', () => {
     expect(access.audit).toEqual(['admin-role', 'admin-audit', 'admin-audit-event']);
     expect(new Set(Object.values(access).map((routes) => routes.join(','))).size).toBe(4);
 
-    for (const role of Object.keys(access)) expect(featureSource).toContain(`${role}: [`);
     for (const locale of ['en', 'pt-BR'] as const satisfies readonly WebLocale[]) {
       for (const routeId of ADMIN_ENTRY_ROUTE_IDS) {
         const parameters: Record<string, string> = { locale };
