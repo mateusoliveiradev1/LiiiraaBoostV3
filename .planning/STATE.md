@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-24-PLAN.md
-last_updated: "2026-07-31T09:34:55.729Z"
+stopped_at: Completed 03-27-PLAN.md
+last_updated: "2026-07-31T09:53:54.659Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-22-PLAN.md
+last_activity_desc: Completed 03-27-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 90
-  completed_plans: 83
+  completed_plans: 84
   percent: 20
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 26 of 32
+Plan: 27 of 32
 Status: Ready to execute
-Last activity: 2026-07-31 — Completed 03-22-PLAN.md
+Last activity: 2026-07-31 — Completed 03-27-PLAN.md
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -131,6 +131,7 @@ _Updated after plan completion_
 | Phase 03 P21 | 40min | 3 tasks | 17 files |
 | Phase 03 P23 | 29min | 2 tasks | 9 files |
 | Phase 03 P24 | 13min | 1 tasks | 3 files |
+| Phase 03 P27 | 15min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -350,6 +351,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: decideDownload owns generated validation and direct channel consent input. — Callers cannot forge a validated ReleaseRecord or consented channel selection.
 - [Phase 03]: Keep official distribution as generated symbolic origin identifiers. — Phase 3 must not invent a host, URL, installer, or artifact.
 - [Phase 03]: Keep the available release result unreachable under the current generated schema. — ReleaseRecord still requires false approval and an unavailable official artifact until future canonical contract approval.
+- [Phase 03]: Canonical account-origin routes own account page resolution and scenario selection never comes from URLs, cookies, or environment state. — Prevents path and fixture authority drift.
+- [Phase 03]: Sensitive account reviews terminate only in cancellation or a validated Phase 4 no-change receipt. — Keeps identity, billing, device, privacy, and support authority disconnected.
+- [Phase 03]: Only explicitly safe account draft fields survive degraded preview states. — Support descriptions and privacy payloads are never implicitly retained.
 
 ### Pending Todos
 
@@ -391,6 +395,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T09:34:55.724Z
-Stopped at: Completed 03-24-PLAN.md
+Last session: 2026-07-31T09:53:54.537Z
+Stopped at: Completed 03-27-PLAN.md
 Resume file: None

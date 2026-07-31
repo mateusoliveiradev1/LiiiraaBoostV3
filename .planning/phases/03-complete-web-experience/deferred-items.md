@@ -25,3 +25,7 @@
 
 - Both Plan 03-23 `web:verify:quick` commands pass workspace checks and tests, then stop at the planned Plan 03-32 readiness boundary: `quality/evidence/phase-03/web/docs-routes.json` and `docs-publication.json` do not exist yet.
 - The existing public client bundle exposes generated Ajv standalone-validator `require("ajv/dist/runtime/ucs2length")` through `contracts-ts`/`web-core`; browser hydration falls into the shared error boundary although production SSR, webpack build, script-blocked Axe checks, and 320/390px reflow pass. Correcting generated validator module format or client entry isolation crosses the contracts/package boundary and remains deferred to the owning packaging/evidence plan.
+
+## 03-27
+
+- `pnpm web:verify:quick -- --requirement WEB-08 --grep "account|W11|W12|W13"` passes all 20 workspace check/test tasks, including the complete account suite, then reaches the planned final readiness boundary: public/account/admin standalone build roots plus `quality/evidence/phase-03/web/security-boundaries.json` and `preview-boundaries.json` remain owned by Plan 03-32. Plan 03-27 proves its account production build independently and does not fabricate phase-wide evidence.
