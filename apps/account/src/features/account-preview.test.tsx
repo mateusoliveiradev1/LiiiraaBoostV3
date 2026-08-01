@@ -170,8 +170,8 @@ describe('authored overview and Profile workspaces', () => {
       expect(content.overview.nextTitle.length).toBeGreaterThan(0);
       expect(content.overview.summariesTitle.length).toBeGreaterThan(0);
       expect(JSON.stringify(content.overview)).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
-      expect(JSON.stringify(content.overview)).not.toMatch(/Preview scope|Escopo da pr[eÃ©]via/iu);
-      expect(content.overview.emptyBody).not.toMatch(/synthetic|sint[eÃ©]tic/iu);
+      expect(JSON.stringify(content.overview)).not.toMatch(/Preview scope|Escopo da prévia/iu);
+      expect(content.overview.emptyBody).not.toMatch(/synthetic|sintético/iu);
       expect(content.profile.nameDescription.length).toBeGreaterThan(0);
       expect(content.profile.authorityState.length).toBeGreaterThan(0);
       expect(content.profile.limitations.length).toBeGreaterThan(0);
@@ -183,7 +183,7 @@ describe('authored overview and Profile workspaces', () => {
   it('explains privacy purpose, availability, retention, sharing, cancellation, and no-change outcomes in human terms', () => {
     for (const content of [accountPtBr, accountEn]) {
       const privacyCopy = JSON.stringify(content.privacy);
-      expect(content.privacy.summary).toMatch(/available|dispon[iÃ­]ve/iu);
+      expect(content.privacy.summary).toMatch(/available|dispon(?:i|í)ve/iu);
       expect(content.privacy.purpose.length).toBeGreaterThan(0);
       expect(content.privacy.retention.length).toBeGreaterThan(0);
       expect(content.privacy.sharing.length).toBeGreaterThan(0);

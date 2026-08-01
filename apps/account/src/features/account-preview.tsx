@@ -69,7 +69,6 @@ type AccountContent = Readonly<{
     summariesTitle: string;
     reviewState: string;
     openAction: string;
-    limitationsTitle: string;
     emptyTitle: string;
     emptyBody: string;
   }>;
@@ -304,8 +303,8 @@ const DegradedAccountBody = ({
     <PreviewBoundary
       description={
         content.locale === 'pt-BR'
-          ? 'A autoridade da Fase 4 continua desconectada; nenhuma repetição executa uma ação remota.'
-          : 'Phase 4 authority remains disconnected; retrying cannot execute a remote action.'
+          ? 'Os dados da conta não podem ser atualizados agora. Tentar novamente apenas verifica a disponibilidade; nenhuma alteração é enviada.'
+          : 'Account information cannot be refreshed right now. Retrying only checks availability; it does not submit an account change.'
       }
     />
     <ol className="lb-web-timeline">
@@ -536,18 +535,6 @@ const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => 
         </ul>
       </section>
     </div>
-
-    <aside
-      aria-labelledby="account-limitations-title"
-      className="account-overview__limitations"
-      role="note"
-    >
-      <h2 id="account-limitations-title">{content.overview.limitationsTitle}</h2>
-      <div>
-        <strong>{content.overview.emptyTitle}</strong>
-        <p>{content.overview.emptyBody}</p>
-      </div>
-    </aside>
   </article>
 );
 
@@ -1276,6 +1263,30 @@ export type AccountPreviewExperienceProps = Readonly<{
   state?: AccountPreviewState;
 }>;
 
+const defaultAccountScenarioId = (routeId: AccountPreviewRoute): WebScenarioId =>
+  routeId === 'account-sign-in'
+    ? 'W10'
+    : routeId === 'account-device' ||
+        routeId === 'account-privacy' ||
+        routeId === 'account-support'
+      ? 'W13'
+      : 'W11';
+
+export const resolveAccountScenarioId = (
+  routeId: AccountPreviewRoute,
+  scenarioId?: WebScenarioId,
+): WebScenarioId => {
+  const candidate = scenarioId ?? defaultAccountScenarioId(routeId);
+  const scenario = getWebScenario(candidate);
+  if (
+    scenario.family !== 'account' ||
+    (scenario.routeId !== routeId && !scenario.requiredRouteIds.includes(routeId))
+  ) {
+    throw new Error(`ACCOUNT_SCENARIO_ROUTE_MISMATCH:${candidate}:${routeId}`);
+  }
+  return candidate;
+};
+
 export const AccountPreviewExperience = ({
   locale,
   routeId,
@@ -1283,19 +1294,21 @@ export const AccountPreviewExperience = ({
   state = 'ready',
 }: AccountPreviewExperienceProps) => {
   const content = getAccountContent(locale);
-  const activeScenarioId =
-    scenarioId ??
-    (routeId === 'account-sign-in'
-      ? 'W10'
-      : routeId === 'account-device' ||
-          routeId === 'account-privacy' ||
-          routeId === 'account-support'
-        ? 'W13'
-        : 'W11');
-  if (state === 'loading') return <LoadingAccountPreview content={content} />;
-  if (state === 'empty') return <EmptyAccountPreview content={content} />;
-  if (state !== 'ready') return <DegradedAccountPreview content={content} state={state} />;
-  if (activeScenarioId === 'W12') return <DegradedAccountPreview content={content} />;
+  const activeScenarioId = resolveAccountScenarioId(routeId, scenarioId);
+  const frame = (view: ReactNode) => (
+    <div
+      data-account-preview="deterministic"
+      data-authority-connected="false"
+      data-route-id={routeId}
+      data-scenario-id={activeScenarioId}
+    >
+      {view}
+    </div>
+  );
+  if (state === 'loading') return frame(<LoadingAccountPreview content={content} />);
+  if (state === 'empty') return frame(<EmptyAccountPreview content={content} />);
+  if (state !== 'ready') return frame(<DegradedAccountPreview content={content} state={state} />);
+  if (activeScenarioId === 'W12') return frame(<DegradedAccountPreview content={content} />);
   let view: ReactNode;
   switch (routeId) {
     case 'account-sign-in':
@@ -1329,16 +1342,7 @@ export const AccountPreviewExperience = ({
       view = <SupportRequestComposer content={content} scenarioId={activeScenarioId} />;
       break;
   }
-  return (
-    <div
-      data-account-preview="deterministic"
-      data-authority-connected="false"
-      data-route-id={routeId}
-      data-scenario-id={activeScenarioId}
-    >
-      {view}
-    </div>
-  );
+  return frame(view);
 };
 
 export const AccountPreviewPage = (props: AccountPreviewExperienceProps) => (

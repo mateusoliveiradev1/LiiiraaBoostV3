@@ -3,10 +3,10 @@
   "locale": "pt-BR",
   "fixtureLabel": "Fixture sintética da conta",
   "states": {
-    "offline": "A autoridade da conta da Fase 4 está offline. Campos seguros permanecem somente nesta prévia do navegador.",
-    "stale": "A fixture exibida está desatualizada. Revise dados atualizados antes de qualquer confirmação futura.",
-    "expired": "A prévia da sessão expirou. Revise a entrada novamente; nenhuma sessão ou credencial foi mantida.",
-    "failure": "O limite de autoridade não respondeu. Nenhum estado remoto mudou e a recuperação continua disponível."
+    "offline": "Os dados da conta estão offline. Campos seguros permanecem disponíveis neste navegador.",
+    "stale": "Os dados exibidos podem estar desatualizados. Reconecte e atualize antes de revisá-los.",
+    "expired": "Sua sessão de revisão expirou. Volte à entrada; nenhuma sessão ou credencial foi mantida.",
+    "failure": "Não foi possível atualizar os dados da conta. Nenhuma alteração foi feita, e a recuperação segura continua disponível."
   },
   "signIn": {
     "title": "Prévia de entrada",
@@ -29,9 +29,8 @@
     "summariesTitle": "Conta em resumo",
     "reviewState": "Pronta para revisão",
     "openAction": "Abrir",
-    "limitationsTitle": "Escopo da prévia",
-    "emptyTitle": "Nenhuma atividade autoritativa da conta",
-    "emptyBody": "Registros de cobrança, dispositivo, sessão e suporte permanecem desconectados até a Fase 4. Estes resumos usam dados sintéticos imutáveis."
+    "emptyTitle": "Nenhuma atividade recente na conta",
+    "emptyBody": "Não há registros de cobrança, dispositivo, sessão ou suporte para revisar. Comece pelo Perfil ou Suporte para continuar com segurança."
   },
   "profile": {
     "title": "Prévia do perfil",
@@ -95,11 +94,11 @@
   },
   "privacy": {
     "title": "Central de privacidade",
-    "summary": "Revise consentimento, exportação, correção e exclusão sem criar uma solicitação.",
-    "purpose": "Preparar a solicitação de privacidade selecionada para revisão do titular.",
-    "retention": "Nenhum conteúdo da solicitação é retido por esta prévia da Fase 3.",
-    "sharing": "Nada é enviado ou compartilhado.",
-    "revocation": "Cancele antes do limite da Fase 4; nenhum estado remoto muda.",
+    "summary": "Revise as solicitações de privacidade disponíveis para esta conta sem enviar nenhuma.",
+    "purpose": "Escolha exportação, correção, consentimento ou exclusão e revise o que a solicitação abrangeria.",
+    "retention": "Os detalhes permanecem apenas durante a revisão atual e são apagados ao sair dela.",
+    "sharing": "Nada é carregado, enviado ou compartilhado.",
+    "revocation": "Cancele a qualquer momento. A revisão é encerrada e nenhum dado da conta muda.",
     "exportAction": "Revisar exportação de dados",
     "correctionAction": "Revisar correção de dados",
     "deletionAction": "Revisar exclusão da conta",

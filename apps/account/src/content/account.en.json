@@ -3,10 +3,10 @@
   "locale": "en",
   "fixtureLabel": "Synthetic account fixture",
   "states": {
-    "offline": "The Phase 4 account authority is offline. Safe draft fields remain only in this browser preview.",
-    "stale": "The displayed fixture is stale. Review refreshed data before any future confirmation.",
-    "expired": "The session preview expired. Review sign-in again; no session or credential was retained.",
-    "failure": "The authority boundary did not respond. No remote state changed and recovery remains available."
+    "offline": "Account information is offline. Safe draft fields remain available in this browser.",
+    "stale": "The displayed account information may be out of date. Reconnect and refresh before reviewing it.",
+    "expired": "Your review session expired. Return to sign-in; no session or credential was kept.",
+    "failure": "Account information could not be refreshed. No changes were made, and safe recovery remains available."
   },
   "signIn": {
     "title": "Sign-in preview",
@@ -29,9 +29,8 @@
     "summariesTitle": "Account at a glance",
     "reviewState": "Ready for review",
     "openAction": "Open",
-    "limitationsTitle": "Preview scope",
-    "emptyTitle": "No authoritative account activity",
-    "emptyBody": "Billing, device, session, and support records stay disconnected until Phase 4. These summaries use immutable synthetic data."
+    "emptyTitle": "No recent account activity",
+    "emptyBody": "There are no billing, device, session, or support records to review. Start with Profile or Support to continue safely."
   },
   "profile": {
     "title": "Profile preview",
@@ -95,11 +94,11 @@
   },
   "privacy": {
     "title": "Privacy center",
-    "summary": "Review consent, export, correction, and deletion journeys without creating a request.",
-    "purpose": "Prepare the selected privacy request for the account holder's review.",
-    "retention": "No request content is retained by this Phase 3 preview.",
-    "sharing": "Nothing is uploaded or shared.",
-    "revocation": "Cancel before the Phase 4 authority boundary; no remote state changes.",
+    "summary": "Review the privacy requests available for this account without submitting one.",
+    "purpose": "Choose export, correction, consent, or deletion and review what the request would cover.",
+    "retention": "Request details remain only for the current review and are cleared when you leave it.",
+    "sharing": "Nothing is uploaded, sent, or shared.",
+    "revocation": "Cancel at any time. The review closes and no account data changes.",
     "exportAction": "Review data export",
     "correctionAction": "Review data correction",
     "deletionAction": "Review account deletion",
