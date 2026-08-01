@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import {
   routeHref,
@@ -14,6 +14,10 @@ import adminPtBr from '../content/admin.pt-BR.json';
 import { ADMIN_ENTRY_ROUTE_IDS, ADMIN_ROLE_ROUTE_ACCESS } from '../admin-preview-model';
 
 const featureSource = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
+const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const stylesSource = readFileSync(new URL('../app/admin-shell.css', import.meta.url), 'utf8');
+const navigationUrl = new URL('../admin-navigation.tsx', import.meta.url);
+const navigationSource = existsSync(navigationUrl) ? readFileSync(navigationUrl, 'utf8') : '';
 
 const shapeOf = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(shapeOf);
@@ -28,6 +32,34 @@ const shapeOf = (value: unknown): unknown => {
 };
 
 describe('role-scoped admin', () => {
+  it('renders the exact product lockup and a perceivable current role workspace', () => {
+    expect(layoutSource).toContain('ProductLockup');
+    expect(layoutSource).toContain('<AdminNavigation');
+    expect(layoutSource).not.toContain('admin-brand__mark');
+    expect(navigationSource).toContain('aria-current');
+    expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
+    expect(layoutSource.match(/AdminPreviewProvenance/gu)).toHaveLength(2);
+  });
+
+  it('composes the role landing around next work, recent activity, scope, and workspaces', () => {
+    expect(featureSource).toContain('admin-landing__focus');
+    expect(featureSource).toContain('admin-landing__scope');
+    expect(featureSource).toContain('admin-landing__activity');
+    expect(featureSource).toContain('admin-landing__workspaces');
+    expect(featureSource).not.toContain('canonical route manifest');
+  });
+
+  it('keeps current state non-color-only and reflows the authored landing at 390px', () => {
+    expect(navigationSource).toContain("aria-current={isCurrent ? 'page' : undefined}");
+    expect(stylesSource).toContain('overflow-x: clip');
+    expect(stylesSource).toMatch(
+      /@media \(width < 640px\)[\s\S]*\.admin-landing__layout[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
+    );
+    expect(stylesSource).toMatch(
+      /@media \(width < 640px\)[\s\S]*\.admin-nav__list[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
+    );
+  });
+
   it('projects four distinct closed workspaces and renders a redacted support case', () => {
     const access = ADMIN_ROLE_ROUTE_ACCESS;
 
