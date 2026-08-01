@@ -1,5 +1,9 @@
 # Deferred Items
 
+## 03-61 bounded candidate-selection correction
+
+- The pre-existing `playwright-config.test.ts` expectation that `security-artifacts.spec.ts` starts all three origins even when an explicit public project is selected conflicts with the current explicit-project isolation implemented before this correction. The unrelated test remains deferred to the owning cross-surface server-selection contract; the new candidate-selection dry-list test, TypeScript gate, required filtered browser matrix, and unfiltered motion contract pass independently.
+
 ## 03-41
 
 - Local visual QA at the admitted admin origin confirmed that `/fonts/manrope-variable.woff2` and `/fonts/jetbrains-mono-variable.woff2` return HTTP 404 because no web app currently publishes the token-declared font files. The responsive compositions remain usable with the declared fallbacks, but self-hosted font publication is a pre-existing cross-surface asset concern outside the Plan 03-41 shell/workspace scope.

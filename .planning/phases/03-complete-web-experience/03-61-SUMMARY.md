@@ -14,6 +14,7 @@ requires:
 provides:
   - Closed 25-record candidate-only visual evidence manifest for Plan 03-62
   - Bounded explicit-update capture path for exactly W01-W18 and G01-G07
+  - Permanent Playwright dry-list contract binding each candidate to one owning project
   - Exact executable public, account, and admin geometry contracts
   - Direct Section 17 motion and reduced-motion browser contract
   - Blocking cross-origin Axe, reflow, text-scaling, forced-colors, CSP, and authority gates
@@ -24,11 +25,13 @@ tech-stack:
   patterns:
     - Candidate evidence remains source-bound but cannot become a visual target
     - Ordinary Playwright runs set snapshot updates to none; explicit update mode alone activates candidate capture
+    - Candidate titles carry exact project identity and project grep excludes cross-axis duplicates before runtime
     - Browser geometry and motion policy are asserted from computed DOM values
 
 key-files:
   created:
     - tooling/web-evidence/tests/motion-contract.spec.ts
+    - tooling/web-evidence/src/candidate-capture-selection.test.ts
   modified:
     - tooling/web-evidence/visual-manifest.json
     - tooling/web-evidence/tests/accessibility-responsive.spec.ts
@@ -44,6 +47,7 @@ key-files:
 key-decisions:
   - 'Invalidated W/G pixels remain candidate inputs only; candidate records run accessibility checks without screenshot comparison until Plan 03-62 rebaselines them.'
   - 'Playwright defaults to no snapshot updates in this harness; the explicit Plan 03-62 update flag is the only candidate-capture authority.'
+  - 'Each candidate test carries its exact final-project tag so Playwright selection closes at 25 tests before runtime skips.'
   - 'Explicit Playwright project selection starts only the selected origin, while the unfiltered motion contract starts all three origins.'
   - 'Locked destructive red remains a boundary signal instead of a text background because no label color can provide the required 4.5:1 contrast on that fill.'
 
@@ -77,6 +81,7 @@ status: complete
 - Added a directly executed motion contract for the approved 100/160/200/220/360/480ms roles, easing curves, entrance caps, default-visible content, and reduced-motion removal.
 - Kept serious/critical Axe, keyboard, forced-colors, 200% text, responsive overflow, CSP, noindex, origin, redaction, and no-authority checks blocking without updating screenshots.
 - Restored a bounded candidate writer that stays inert in ordinary runs and maps one explicit update to the exact 25 manifest identities without changing approval or publication state.
+- Bound every candidate title to its exact final project and added a permanent dry-list gate proving exactly 25 unique manifest identities are selected with no duplicates or extras.
 
 ## Task Commits
 
@@ -87,10 +92,12 @@ Each task was committed atomically through its TDD gates:
 3. **Task 2 RED: Add exact geometry and motion browser contracts** - `b3c79c4` (test)
 4. **Task 2 GREEN: Enforce exact browser geometry and motion gates** - `2350137` (feat)
 5. **Bounded correction: Restore explicit candidate capture mode** - `ee9b2d9` (fix)
+6. **Bounded correction: Bind candidate tests to owning projects** - `922ea82` (fix)
 
 ## Files Created/Modified
 
 - `tooling/web-evidence/tests/motion-contract.spec.ts` - Direct computed-style motion, entrance, default-visibility, and reduced-motion contract.
+- `tooling/web-evidence/src/candidate-capture-selection.test.ts` - Permanent no-server/no-screenshot Playwright list contract for the exact 25 candidate project/ID pairs.
 - `tooling/web-evidence/visual-manifest.json` - Exact 25-record candidate matrix with closed origins and no approval/publication authority.
 - `tooling/web-evidence/tests/accessibility-responsive.spec.ts` - Candidate assertions, bounded update-only capture, exact identity proof, and cross-surface Axe/responsive/security diagnostics.
 - `tooling/web-evidence/tests/public.spec.ts` - Exact Cobalt Ignition Bay wide/mobile geometry, route-preserving locale, and navigation assertions.
@@ -109,6 +116,7 @@ Each task was committed atomically through its TDD gates:
 - Browser server startup is derived from both spec identity and explicit project selection so focused runs remain isolated and unfiltered motion runs remain complete.
 - Destructive actions use the locked red as a border signal over canvas; ordinary cobalt CTAs use the canonical dark primary label to satisfy blocking contrast.
 - Ordinary Playwright execution uses `updateSnapshots: 'none'`; the explicit `--update-snapshots` CLI flag overrides it to `changed`, activating the bounded candidate helper without granting approval or publication authority.
+- Candidate tests use adjacent final/surface tags plus an exact project tag; final-project grep admits ordinary surface tests unchanged while selecting each candidate on one axis project only.
 
 ## Bounded Harness Correction
 
@@ -117,6 +125,7 @@ Each task was committed atomically through its TDD gates:
 - Ordinary mode is proven inert because the proof-only update test skips with the harness default `updateSnapshots: 'none'`. Explicit `--update-snapshots` mode is proven active by the same test, which does not call the capture helper and therefore does not consume Plan 03-62's single exact update.
 - No candidate PNG, archive, manifest status, UAT verdict, report, publication record, bundle, package version, or lockfile changed.
 - The local Playwright runtime was repaired with `pnpm install --offline --frozen-lockfile --force` after confirming the pnpm store was untouched. `coreBundle.js` is 3,425,217 bytes, contains zero NUL bytes, and has SHA-256 `3258d1cf334c6afc95f22aa9c292436cb976b391e0437f1359c83b84f0cb9d66`; `pnpm-lock.yaml` remains `86bb89b58b01cadc5d9791c34d69cb18efd2fc0a8f554cdd2e9cc318ca520091`.
+- A second bounded correction fixed project selection without running update mode: RED dry-listing found zero candidates because the surface tag was not adjacent to `@final`; the first tag-order fix exposed 225 cross-axis instances; exact project tags plus candidate-aware project grep reduced the authoritative dry list to 25 unique W/G tests.
 
 ## Deviations from Plan
 
@@ -185,9 +194,18 @@ Each task was committed atomically through its TDD gates:
 - **Verification:** Zero NUL bytes, exact bundle length/hash recorded above, TypeScript and browser suites passed.
 - **Committed in:** Not applicable - deterministic local dependency repair produced no repository diff.
 
+**8. [Rule 1 - Bug] Closed candidate selection at exactly one owning project per identity**
+
+- **Found during:** Plan 03-62 consumed update attempt after the first bounded correction
+- **Issue:** `@candidate-capture` separated `@final` from the surface tag, so final-project grep selected zero candidates. Reordering alone selected every candidate on all nine axes and relied on runtime skips, yielding 225 dry-listed instances instead of an exact 25-test writer set.
+- **Fix:** Added exact project tags to W/G titles, made final-project grep candidate-aware, and added a permanent Vitest contract that invokes Playwright `--list` and compares all project/ID pairs with the manifest.
+- **Files modified:** `tooling/web-evidence/playwright.config.ts`, `tooling/web-evidence/tests/accessibility-responsive.spec.ts`, `tooling/web-evidence/src/candidate-capture-selection.test.ts`
+- **Verification:** RED dry list found 0; intermediate list found 225; final list and permanent contract proved exactly 25 unique W01-W18/G01-G07 entries. Ordinary filtered and motion suites passed without update mode or image changes.
+- **Committed in:** `922ea82`
+
 ---
 
-**Total deviations:** 7 auto-fixed (2 Rule 1, 1 Rule 2, 4 Rule 3)
+**Total deviations:** 8 auto-fixed (3 Rule 1, 1 Rule 2, 4 Rule 3)
 **Impact on plan:** All fixes were required to keep the planned exact gates truthful and blocking; no pixels, UAT verdicts, reports, bundles, packages, or publication authority changed.
 
 ## Issues Encountered
@@ -196,6 +214,7 @@ Each task was committed atomically through its TDD gates:
 - The final pre-fix matrix reported four repeated primary-CTA contrast failures. A shared semantic label correction closed all four, and the exact matrix then passed 54 tests with 446 intentional project/axis skips.
 - The first correction matrix exposed an invalid `Set`/`toHaveLength` proof matcher; switching to the native `Set.size` assertion closed the test-authoring defect without weakening the identity contract.
 - Playwright 1.62's installed types and runner source confirmed ordinary mode defaults to `missing` and a bare `--update-snapshots` flag selects `changed`; the harness now makes that boundary explicit and fail-closed.
+- Playwright project grep is applied during test enumeration, while `onlyAxis` skips at runtime. The permanent dry-list contract therefore validates project closure directly instead of accepting a larger selected set that happens to skip later.
 
 ## TDD Gate Compliance
 
@@ -213,6 +232,9 @@ Each task was committed atomically through its TDD gates:
 - Ordinary candidate-update boundary proof - 1 skipped, proving capture mode is inactive.
 - Explicit `--update-snapshots` proof-only boundary - 1 passed without invoking the screenshot helper or writing candidate pixels.
 - Corrected unfiltered motion suite - 5 passed, 40 intentional project/axis skips, 0 failed.
+- Permanent candidate-selection dry-list Vitest - 1 passed; exactly 25 tests in one file, 25 unique manifest IDs, and exact project/path ownership.
+- Final candidate-aware ordinary filtered matrix - 55 passed, 263 intentional project/axis skips, 0 failed; all 25 candidate routes executed with screenshot capture disabled.
+- Final candidate-aware unfiltered motion suite - 5 passed, 40 intentional project/axis skips, 0 failed.
 - Web-evidence TypeScript check, Prettier, and `git diff --check` passed.
 - Playwright runtime integrity - 3,425,217 bytes, 0 NUL bytes, SHA-256 `3258d1cf334c6afc95f22aa9c292436cb976b391e0437f1359c83b84f0cb9d66`; lockfile SHA-256 unchanged.
 - Focused account/public/admin contrast, reflow, mobile, forced-colors, and geometry reruns all passed.
@@ -230,12 +252,13 @@ None - no external service configuration required.
 
 - Plan 03-62 can capture new pixels against exact candidate identities and executable UI/accessibility contracts.
 - Plan 03-62's exact update command is now the sole writer and will target exactly W01-W18/G01-G07; the proof-only verification did not consume that update.
+- Playwright now enumerates those 25 candidates exactly once under their manifest projects before any runtime execution; no real update command was used for the second correction.
 - Human approval, UAT verdicts, report promotion, publication, and bundle ownership remain intentionally closed.
 
 ## Self-Check: PASSED
 
 - Summary, motion contract, and candidate manifest exist on disk.
-- All four RED/GREEN task commits and corrective commit `ee9b2d9` exist in git history.
+- All four RED/GREEN task commits and corrective commits `ee9b2d9` and `922ea82` exist in git history.
 - No required file or commit is missing.
 
 ---

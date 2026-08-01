@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-61 bounded harness correction
-last_updated: "2026-08-01T19:59:33.287Z"
+stopped_at: Completed second 03-61 bounded harness correction
+last_updated: "2026-08-01T20:20:56.944Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
@@ -492,6 +492,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Explicit Playwright project selection starts only the selected origin, while the unfiltered motion contract starts all three origins.
 - [Phase 03]: Locked destructive red remains a boundary signal instead of a text background because no label color can provide the required 4.5:1 contrast on that fill.
 - [Phase 03]: Keep Playwright snapshot updates disabled by default; only the explicit Plan 03-62 update command may activate bounded W01-W18/G01-G07 candidate capture.
+- [Phase 03]: Bind each W/G candidate test to one exact final project and enforce the 25-test writer set through a permanent Playwright dry-list contract.
 
 ### Pending Todos
 
@@ -533,6 +534,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T19:59:33.281Z
-Stopped at: Completed 03-61 bounded harness correction
+Last session: 2026-08-01T20:20:56.938Z
+Stopped at: Completed second 03-61 bounded harness correction
 Resume file: None
