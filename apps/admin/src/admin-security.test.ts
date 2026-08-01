@@ -140,6 +140,11 @@ describe('admin security boundary', () => {
       );
       const csp = headers['content-security-policy'];
 
+      expect(csp).toBeDefined();
+      if (csp === undefined) {
+        throw new Error('Admin CSP header is required in every runtime mode.');
+      }
+
       expect(csp).toContain(`'nonce-${nonce}'`);
       expect(csp).toContain("'strict-dynamic'");
       expect(csp.includes("'unsafe-eval'")).toBe(allowsEval);
