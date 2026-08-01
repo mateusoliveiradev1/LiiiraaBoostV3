@@ -14,19 +14,29 @@ import {
   EVIDENCE_QUALITY_STATES,
   OPERATIONAL_STATES,
   PROVENANCE_KINDS,
+  SEMANTIC_STATUS_STATES,
   MetricReadout,
   ProvenanceMark,
   QualityMark,
   ScenarioMarker,
   StatusSignal,
+  projectTransportStatus,
 } from './evidence.tsx';
 import {
   LB_INTERACTION_STATES,
+  LB_MOTION_ROLES,
+  EmptyComposition,
   LbButton,
+  LbDataTable,
+  LbDetailRow,
   LbDialog,
   LbDialogActions,
   LbDialogContent,
+  LbDisclosure,
   LbIconButton,
+  LbPanel,
+  LbRowList,
+  LbSkeletonRegion,
 } from './primitives.tsx';
 import { ProductLockup } from './product-lockup.tsx';
 import { GoalRail, RouteHeader, WindowTitleBar } from './shell.tsx';
@@ -88,8 +98,25 @@ describe('authored primitive interaction states', () => {
     });
     expect(elementProps(disabledButton)).toMatchObject({ isDisabled: true });
     expect(elementProps(loadingButton)).toMatchObject({
-      children: 'Preparing',
+      'aria-busy': true,
+      'data-loading': true,
       isPending: true,
+    });
+
+    const defaultMarkup = renderToStaticMarkup(defaultButton);
+    const loadingMarkup = renderToStaticMarkup(loadingButton);
+    expect(defaultMarkup).toContain('class="lb-button-label"');
+    expect(loadingMarkup).toContain('class="lb-button-label"');
+    expect(loadingMarkup).toContain('class="lb-button-loading"');
+    expect(loadingMarkup).toContain('Preparing');
+  });
+
+  it('publishes exact tone, selection, panel, and route-continuity motion roles', () => {
+    expect(LB_MOTION_ROLES).toEqual({
+      panel: '200ms',
+      route: '220ms',
+      selection: '160ms',
+      tone: '100ms',
     });
   });
 
@@ -106,6 +133,37 @@ describe('authored primitive interaction states', () => {
 });
 
 describe('state, provenance, and locale projections', () => {
+  it('projects the complete semantic matrix in localized human language without raw values', () => {
+    expect(SEMANTIC_STATUS_STATES).toEqual([
+      'success',
+      'warning',
+      'critical',
+      'preview',
+      'unavailable',
+      'stale',
+      'offline',
+      'error',
+    ]);
+
+    for (const state of SEMANTIC_STATUS_STATES) {
+      const english = renderToStaticMarkup(<StatusSignal locale="en" state={state} />);
+      const portuguese = renderToStaticMarkup(<StatusSignal locale="pt-BR" state={state} />);
+      expect(english).toContain(`data-state="${state}"`);
+      expect(english).toContain('data-pattern=');
+      expect(english).toContain('aria-hidden="true"');
+      expect(english).not.toContain('undefined');
+      expect(portuguese).not.toContain('undefined');
+      expect(portuguese).not.toEqual(english);
+    }
+
+    expect(projectTransportStatus('simulated-no-change')).toBe('preview');
+    expect(projectTransportStatus('partial-failure')).toBe('warning');
+    expect(projectTransportStatus('unknown-adapter-state')).toBe('unavailable');
+    expect(
+      renderToStaticMarkup(<StatusSignal state={projectTransportStatus('simulated-no-change')} />),
+    ).not.toContain('simulated-no-change');
+  });
+
   it('renders every operational state with text, icon, and a non-color pattern', () => {
     for (const state of OPERATIONAL_STATES) {
       const markup = renderToStaticMarkup(
@@ -126,7 +184,10 @@ describe('state, provenance, and locale projections', () => {
       expect(markup).toContain('data-testid="provenance-mark"');
     }
 
-    expect(renderToStaticMarkup(<ProvenanceMark kind="fixture" />)).toContain('SIMULATED SCENARIO');
+    expect(renderToStaticMarkup(<ProvenanceMark kind="fixture" />)).toContain('Preview');
+    expect(renderToStaticMarkup(<ProvenanceMark kind="fixture" />)).not.toContain(
+      'SIMULATED SCENARIO',
+    );
     expect(renderToStaticMarkup(<ScenarioMarker scenarioId="S02" />)).toContain('DEMO · S02');
 
     const unavailable = renderToStaticMarkup(
@@ -166,6 +227,59 @@ describe('state, provenance, and locale projections', () => {
       expect(markup).toContain(title);
       expect(markup).toContain(purpose);
     }
+  });
+});
+
+describe('material and async composition vocabulary', () => {
+  it('composes one focal panel with tonal context instead of identical nested containers', () => {
+    const markup = renderToStaticMarkup(
+      <main>
+        <LbPanel label="Current task" tone="focal">
+          <h2>Review compatibility</h2>
+          <LbRowList label="Compatibility details">
+            <LbDetailRow label="Operating system" value="Windows 11" />
+          </LbRowList>
+        </LbPanel>
+        <LbPanel label="Context" tone="tonal">
+          <p>Evidence remains local.</p>
+        </LbPanel>
+      </main>,
+    );
+
+    expect(markup.match(/data-material="focal"/gu)).toHaveLength(1);
+    expect(markup.match(/data-material="tonal"/gu)).toHaveLength(1);
+    expect(markup).toContain('aria-label="Current task"');
+    expect(markup).toContain('role="list"');
+    expect(markup).toContain('role="listitem"');
+  });
+
+  it('renders named tables, useful empty guidance, geometry-matched skeletons, and disclosure', () => {
+    const markup = renderToStaticMarkup(
+      <div>
+        <LbDataTable
+          caption="Trusted sources"
+          columns={[{ id: 'source', label: 'Source' }]}
+          rows={[{ cells: { source: 'Local inspection' }, id: 'source-1' }]}
+        />
+        <EmptyComposition
+          action={<LbButton>Check status</LbButton>}
+          detail="Trusted data will appear here with its source identified."
+          title="Nothing needs your attention"
+        />
+        <LbSkeletonRegion label="Loading compatibility" rows={2} />
+        <LbDisclosure label="Evidence details">
+          <p>Source and collection scope.</p>
+        </LbDisclosure>
+      </div>,
+    );
+
+    expect(markup).toContain('<caption>Trusted sources</caption>');
+    expect(markup).toContain('role="status"');
+    expect(markup).toContain('aria-label="Loading compatibility"');
+    expect(markup.match(/class="lb-skeleton"/gu)).toHaveLength(2);
+    expect(markup).toContain('<details');
+    expect(markup).toContain('<summary');
+    expect(semanticAudit(markup)).toEqual([]);
   });
 });
 
