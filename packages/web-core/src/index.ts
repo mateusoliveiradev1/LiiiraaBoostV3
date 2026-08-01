@@ -16,6 +16,7 @@ export {
   projectNavigation,
   projectRedirects,
   projectSitemap,
+  resolveLocalizedCurrentRoute,
   routeHref,
   webRoutes,
 } from './routes.ts';

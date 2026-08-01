@@ -454,6 +454,27 @@ export const matchWebRoute = (
   return closestParameterFailure ?? routeFailure('UNKNOWN_ROUTE', '$.pathname');
 };
 
+export const resolveLocalizedCurrentRoute = (
+  input: Readonly<{
+    pathname: string;
+    securityBoundary: WebSecurityBoundaryJson;
+    targetLocale: WebLocale;
+  }>,
+): WebRouteResult<string> => {
+  const matched = matchWebRoute({
+    pathname: input.pathname,
+    securityBoundary: input.securityBoundary,
+  });
+  if (!matched.ok) {
+    return matched;
+  }
+
+  return routeHref(matched.value.route.id, {
+    ...matched.value.parameters,
+    locale: input.targetLocale,
+  });
+};
+
 export type RouteProjection = Readonly<{
   from?: string;
   href: string;
