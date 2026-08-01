@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-51-PLAN.md
-last_updated: "2026-08-01T05:55:12.097Z"
+stopped_at: Completed 03-52-PLAN.md
+last_updated: "2026-08-01T06:51:04.319Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed 03-51-PLAN.md
+last_activity_desc: Completed 03-52-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 110
-  completed_plans: 107
-  percent: 97
+  completed_plans: 108
+  percent: 98
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 48 of 52
+Plan: 49 of 52
 Status: Ready to execute Plan 03-46
-Last activity: 2026-08-01 — Completed 03-51-PLAN.md
+Last activity: 2026-08-01 — Completed 03-52-PLAN.md
 
-Progress: [██████████] 97%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 107
+- Total plans completed: 108
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -155,6 +155,7 @@ _Updated after plan completion_
 | Phase 03 P49 | 13min | 2 tasks | 10 files |
 | Phase 03 P50 | 17 min | 2 tasks | 7 files |
 | Phase 03 P51 | 20min | 2 tasks | 9 files |
+| Phase 03 P52 | 47min | 3 tasks | 36 files |
 
 ## Accumulated Context
 
@@ -451,6 +452,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep admin pathname awareness inside one narrow client navigation boundary. — Server layout continues to own role admission, identity, provenance, and content.
 - [Phase 03]: Preserve only the server-validated closed role across admin locale changes. — Invalid URL role state never crosses the canonical localized route boundary.
 - [Phase 03]: Use event identity as the essential audit column at reflow widths. — Complete immutable fields remain available through semantic row disclosure without clipped mobile tables.
+- [Phase 03]: Treat all 25 regenerated goldens as qualitative review inputs owned by Plan 03-52; Plan 03-45 retains human approval and Plan 03-46 retains publication authority.
+- [Phase 03]: Preserve canonical route identity during locale changes and retain only already validated admin role context; unmatched browser state fails back safely.
+- [Phase 03]: Keep the React/Turbopack unsafe-eval allowance development-only with browser console checks and production CSP suites enforcing the boundary.
+- [Phase 03]: Regenerate route reachability only through the canonical Plan 03-35 writer so source hashes and bounded observations remain authoritative.
 
 ### Pending Todos
 
@@ -492,6 +497,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T05:54:36.646Z
-Stopped at: Completed 03-51-PLAN.md
+Last session: 2026-08-01T06:51:03.383Z
+Stopped at: Completed 03-52-PLAN.md
 Resume file: None
