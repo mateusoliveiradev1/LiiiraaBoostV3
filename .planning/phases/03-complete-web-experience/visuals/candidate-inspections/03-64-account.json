@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "plan": "03-64",
+  "surface": "account",
+  "inspectedAt": "2026-08-01T22:54:35Z",
+  "sourceRevision": "9249de36b3eba4fb0f29b0978b25caf734ddd424",
+  "inspectionMethod": {
+    "register": "Impeccable product",
+    "detail": "original",
+    "scope": "Closed account subset W10-W13, W18, G03-G05",
+    "referenceUse": "The immutable rejected G04 was used only to verify material improvement from the sparse wireframe; BravoBoost informed only the finish, hierarchy, and product-energy bar. No identity or expression was used as a target."
+  },
+  "manifest": {
+    "path": "tooling/web-evidence/visual-manifest.json",
+    "sha256": "16a2ed74992bca7ba1276b522e8292ff5d5292ee69d87bbc0f360289e85f4781",
+    "exactSubset": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"],
+    "candidateCount": 8,
+    "allCandidate": true,
+    "allApprovedFalse": true,
+    "allPublishedFalse": true,
+    "allVisualTargetFalse": true
+  },
+  "mechanicalChecks": {
+    "allFilesNonempty": true,
+    "allWidthsMatchManifest": true,
+    "allFullPageHeightsMeetViewport": true,
+    "allSha256Lowercase64": true,
+    "rejectedG04Comparison": {
+      "path": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G04-account-final-wide-1440.png",
+      "dimensions": {"width": 1440, "height": 975},
+      "bytes": 61959,
+      "sha256": "7699c77be6ed99f44f13c28dd653a918abca39a604daf6f4f0debb1fd92c134b",
+      "currentG04Distinct": true,
+      "observedImprovement": "The candidate replaces the rejected sparse divider-grid profile with a bounded cobalt focal workspace, an adjacent facts region, stronger hierarchy, and quiet neutral preview chrome."
+    }
+  },
+  "criteria": {
+    "taskFirstPremiumShell": "reject",
+    "topbar72Desktop60Mobile": "pass",
+    "desktopRail264": "pass",
+    "exactlyOneCurrentDestination": "reject",
+    "routePreservingFlagAndTextLocale": "pass",
+    "exactSevenFiveOrEightFourWorkspace": "pass",
+    "focalActionAndContextDensity": "pass",
+    "profileFieldAtMost560": "pass",
+    "quietPreviewProvenance": "reject",
+    "safeNoChangeAuthority": "reject",
+    "mobileCurrentTaskDisclosureAndDomOrder": "pass",
+    "responsive320Reflow": "pass",
+    "readableStatuses": "reject",
+    "deterministicStatePresentation": "reject",
+    "noGenericCardWall": "pass",
+    "noNestedCards": "pass",
+    "noDecorativeGrid": "pass",
+    "noGradientText": "pass",
+    "noBlanketGlass": "pass",
+    "noMarketingTheatrics": "pass"
+  },
+  "candidates": [
+    {
+      "id": "W10",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W10-account-final-desktop-960.png",
+      "manifestPurpose": "Review English desktop premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and sign-in validation.",
+      "dimensions": {"width": 960, "height": 974},
+      "bytes": 60637,
+      "sha256": "1384b104f9b6519f684de38e24f2eba967cc84ede81d907ee93b2659831f9517",
+      "checks": {
+        "shellGeometry": true,
+        "flagAndLanguage": true,
+        "workspaceDensity": true,
+        "focalTask": true,
+        "truthfulNoAuthority": true,
+        "currentDestination": false,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-57",
+      "evidence": "The sign-in route is absent from the responsibility groups. The topbar therefore falls back to `Account responsibilities`, and the canonical desktop navigation has zero aria-current destinations instead of exactly one current sign-in destination."
+    },
+    {
+      "id": "W11",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W11-account-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and account overview truth.",
+      "dimensions": {"width": 1440, "height": 1025},
+      "bytes": 93552,
+      "sha256": "cde78133e64b7e5f1b34a57caca12e2ace9a436d8eba3e7e53df14ee5e256204",
+      "checks": {
+        "shellGeometry": true,
+        "flagAndLanguage": true,
+        "workspaceGeometry": true,
+        "focalTask": true,
+        "usefulDensity": true,
+        "quietAuthorityBoundary": false,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-58",
+      "evidence": "The ordinary Overview repeats shell preview truth in a full `Escopo da prévia / Nenhuma atividade autoritativa da conta` region and exposes `Fase 4` plus implementation-shaped synthetic-data prose. Ordinary routes must rely on the single quiet shell boundary."
+    },
+    {
+      "id": "W12",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W12-account-final-wide-1280.png",
+      "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and degraded recovery hierarchy.",
+      "dimensions": {"width": 1280, "height": 1049},
+      "bytes": 90984,
+      "sha256": "d551aed5d83b20b88aa5bcba717ee2d521cb5c445aa7333c413e65faf8b1000c",
+      "checks": {
+        "shellGeometry": true,
+        "flagAndLanguage": true,
+        "workspaceGeometry": true,
+        "focalTask": true,
+        "manifestStateVisible": false,
+        "degradedRecoveryHierarchy": false,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-62",
+      "evidence": "The manifest binds W12 to `account-offline-stale`, but the candidate shows the normal ready Overview with `Ready for review` and no offline, stale, affected-capability, or recovery treatment. The canonical capture projection routes W12 to the same unqualified `/en/account` page and does not select its declared scenario state."
+    },
+    {
+      "id": "W13",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W13-account-final-wide-1280.png",
+      "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and privacy no-change receipt.",
+      "dimensions": {"width": 1280, "height": 999},
+      "bytes": 83467,
+      "sha256": "9e4f8fd5947f147ad143990f33fbb75dccef365c6ee5d5332e1ce2ca94039261",
+      "checks": {
+        "shellGeometry": true,
+        "flagAndLanguage": true,
+        "workspaceGeometry": true,
+        "focalTask": true,
+        "safeNoChangeAuthority": true,
+        "humanOutcomeCopy": false,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-58",
+      "evidence": "The privacy consequence panel visibly explains retention and revocation through `prévia da Fase 3` and `limite da Fase 4`. The required outcome is already understandable without phase implementation prose, which is forbidden in ordinary user-facing content."
+    },
+    {
+      "id": "W18",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W18-account-final-reflow-320.png",
+      "manifestPurpose": "Review English reflow premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, forced colors, reduced motion, and 400% zoom.",
+      "dimensions": {"width": 320, "height": 1625},
+      "bytes": 55133,
+      "sha256": "e201a870d845a3a9dc12f94f4d0c3422563add276a52af3adfb27e5b490a59ce",
+      "checks": {
+        "topbar60": true,
+        "flagAndLanguage": true,
+        "currentTaskDisclosure": true,
+        "focalFirstDomOrder": true,
+        "noHorizontalOverflow": true,
+        "statusReadable": false,
+        "truthfulNoAuthority": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-57",
+      "evidence": "At the required 320px/400% reflow capture, the primary shell status is visibly clipped to `Remote changes disconnec…`. Reflow has no horizontal page overflow, but a required status is not fully readable."
+    },
+    {
+      "id": "G03",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G03-account-final-mobile-390.png",
+      "manifestPurpose": "Review PT-BR mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and overview comparison with Phase 2.",
+      "dimensions": {"width": 390, "height": 1859},
+      "bytes": 68912,
+      "sha256": "c045574413c3bd9a3be5b042af680bc1f5f79946c518250ec62e3f3ffe214862",
+      "checks": {
+        "topbar60": true,
+        "flagAndLanguage": true,
+        "currentTaskDisclosure": true,
+        "focalFirstDomOrder": true,
+        "usefulDensity": true,
+        "quietAuthorityBoundary": false,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "reject",
+      "owner": "03-58",
+      "evidence": "The mobile Overview preserves the correct focal-first order, but repeats the full `Escopo da prévia / Nenhuma atividade autoritativa da conta` region and exposes `Fase 4` below the already complete shell preview boundary."
+    },
+    {
+      "id": "G04",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G04-account-final-wide-1440.png",
+      "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and profile comparison with Phase 2.",
+      "dimensions": {"width": 1440, "height": 974},
+      "bytes": 71820,
+      "sha256": "b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5",
+      "checks": {
+        "shellGeometry": true,
+        "flagAndLanguage": true,
+        "currentDestination": true,
+        "workspaceSevenFive": true,
+        "profileFieldAtMost560": true,
+        "focalTask": true,
+        "truthfulNoAuthority": true,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "G04 is materially stronger than the immutable rejected G04: exact shell geometry, one active Profile destination, a bounded 7/5 focal workspace, approximately 560px field geometry, adjacent facts, and no purple fixture chrome."
+    },
+    {
+      "id": "G05",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G05-account-final-mobile-390.png",
+      "manifestPurpose": "Review PT-BR mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and profile reflow comparison with Phase 2.",
+      "dimensions": {"width": 390, "height": 1560},
+      "bytes": 53155,
+      "sha256": "8cdb7a5c4b110b8d15a8cd74a875fb38c2285a75774af9d371e566b3ec4bc0fa",
+      "checks": {
+        "topbar60": true,
+        "flagAndLanguage": true,
+        "currentTaskDisclosure": true,
+        "focalFirstDomOrder": true,
+        "profileFieldReflow": true,
+        "truthfulNoAuthority": true,
+        "readable": true,
+        "noGenericScaffold": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "At 390px the focal identity form precedes profile facts in DOM and visual order, the locale control and current-task disclosure remain legible, and the no-change boundary is explicit without a card wall or clipped controls."
+    }
+  ],
+  "automatedVerification": {
+    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep \"W10|W11|W12|W13|W18|G03|G04|G05\"",
+    "result": "pass",
+    "passed": 23,
+    "skipped": 120,
+    "failed": 0,
+    "duration": "1.7m",
+    "updateMode": false
+  },
+  "verdict": "reject",
+  "humanApproved": false,
+  "publicationApproved": false,
+  "rejectionOwners": ["03-57", "03-58", "03-62"],
+  "revisionGate": {
+    "blockedPlans": ["03-66", "03-45", "03-46"],
+    "requiredCorrections": [
+      {
+        "owner": "03-57",
+        "identities": ["W10"],
+        "criterion": "exact current destination and task context",
+        "evidence": "Provide one canonical current destination for sign-in and name the actual sign-in task instead of the fallback responsibility inventory."
+      },
+      {
+        "owner": "03-57",
+        "identities": ["W18"],
+        "criterion": "readable 320px/400% shell status",
+        "evidence": "Reflow the preview status without ellipsis or clipping while preserving the 60px topbar, flag-plus-text locale control, and one current-task disclosure."
+      },
+      {
+        "owner": "03-58",
+        "identities": ["W11", "G03"],
+        "criterion": "single quiet preview boundary on ordinary Overview",
+        "evidence": "Remove the duplicate Preview scope/authority region and phase implementation prose; keep the useful focal workspace and responsibility summaries."
+      },
+      {
+        "owner": "03-58",
+        "identities": ["W13"],
+        "criterion": "human consequence copy without phase implementation language",
+        "evidence": "Express retention, revocation, and no-change outcomes directly without visible Phase 3/Phase 4 wording."
+      },
+      {
+        "owner": "03-62",
+        "identities": ["W12"],
+        "criterion": "capture the manifest-bound offline-stale state",
+        "evidence": "Ensure W12 capture selects its declared scenario/state and visibly records the affected capability, safe remainder, and recovery hierarchy instead of the ready Overview."
+      }
+    ],
+    "requiredSequence": [
+      "After 03-57 or 03-58 source-owner corrections, rerun Plan 03-61 Task 2 including exact unfiltered `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts`.",
+      "After any 03-62 capture correction, run the same exact unfiltered motion command before a fresh bounded Plan 03-62 attempt.",
+      "Run a fresh bounded Plan 03-62 capture attempt.",
+      "Rerun Plan 03-64 original-resolution account inspection.",
+      "Rerun aggregate Plan 03-66 before Plan 03-45 human review."
+    ]
+  }
+}
