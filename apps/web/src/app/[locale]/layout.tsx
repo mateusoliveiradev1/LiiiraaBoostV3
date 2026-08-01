@@ -11,28 +11,20 @@ import { ProductLockup } from '../../../../../packages/design-system/src/product
 
 import {
   accountBoundaryHref,
-  localizedPublicHref,
   publicBoundaryHref,
-  publicNavigation,
   routing,
 } from '../../public-boundary';
+import { PublicNavigation, type PublicNavigationCopy } from '../../public-navigation';
 
 type PublicLocaleLayoutProps = Readonly<{
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }>;
 
-type PublicCopy = Readonly<{
+type PublicCopy = PublicNavigationCopy & Readonly<{
   account: string;
   brandDescription: string;
   footerNavigation: string;
-  language: string;
-  localeName: string;
-  menu: string;
-  navigation: Readonly<Record<string, string>>;
-  primaryNavigation: string;
-  releases: string;
-  search: string;
   skip: string;
 }>;
 
@@ -40,9 +32,8 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     account: 'Conta',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
+    current: 'página atual',
     footerNavigation: 'Navegação complementar',
-    language: 'Idioma',
-    localeName: 'English',
     menu: 'Menu',
     navigation: Object.freeze({
       'docs-index': 'Documentação',
@@ -60,9 +51,8 @@ const COPY = Object.freeze({
   en: Object.freeze({
     account: 'Account',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
+    current: 'current page',
     footerNavigation: 'Supplementary navigation',
-    language: 'Language',
-    localeName: 'Português',
     menu: 'Menu',
     navigation: Object.freeze({
       'docs-index': 'Documentation',
@@ -124,22 +114,6 @@ const Brand = ({ locale }: { readonly locale: (typeof routing.locales)[number] }
   </a>
 );
 
-const NavigationLinks = ({
-  copy,
-  locale,
-}: {
-  readonly copy: PublicCopy;
-  readonly locale: (typeof routing.locales)[number];
-}) => (
-  <>
-    {publicNavigation.map((route) => (
-      <a href={localizedPublicHref(route, locale)} key={route.id}>
-        {copy.navigation[route.id]}
-      </a>
-    ))}
-  </>
-);
-
 export default async function PublicLocaleLayout({ children, params }: PublicLocaleLayoutProps) {
   const { locale } = await params;
 
@@ -150,7 +124,6 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
   setRequestLocale(locale);
 
   const copy = COPY[locale];
-  const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
 
   return (
     <html data-density="comfortable" lang={locale}>
@@ -163,57 +136,7 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
           <div className="public-header__bar">
             <Brand locale={locale} />
 
-            <nav
-              aria-label={copy.primaryNavigation}
-              className="public-navigation public-navigation--desktop"
-            >
-              <NavigationLinks copy={copy} locale={locale} />
-            </nav>
-
-            <div className="public-header__actions">
-              <a
-                aria-label={`${copy.search} · Liiiraa Boost`}
-                className="public-action public-action--quiet"
-                href={publicBoundaryHref('public-search', locale)}
-              >
-                {copy.search}
-              </a>
-              <a
-                aria-label={`${copy.language}: ${copy.localeName}`}
-                className="public-action public-action--quiet"
-                href={`/${alternateLocale}`}
-                hrefLang={alternateLocale}
-                lang={alternateLocale}
-              >
-                {copy.localeName}
-              </a>
-              <a
-                className="public-action public-action--primary"
-                href={publicBoundaryHref('releases-index', locale)}
-              >
-                {copy.releases}
-              </a>
-            </div>
-
-            <details className="public-mobile-menu">
-              <summary>{copy.menu}</summary>
-              <div className="public-mobile-menu__surface">
-                <div className="public-mobile-menu__heading">
-                  <Brand locale={locale} />
-                  <span>{copy.menu}</span>
-                </div>
-                <nav aria-label={copy.primaryNavigation} className="public-navigation">
-                  <NavigationLinks copy={copy} locale={locale} />
-                </nav>
-                <div className="public-mobile-menu__actions">
-                  <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
-                  <a href={`/${alternateLocale}`} hrefLang={alternateLocale} lang={alternateLocale}>
-                    {copy.localeName}
-                  </a>
-                  <a href={publicBoundaryHref('releases-index', locale)}>{copy.releases}</a>
-                </div>
-              </div>
-            </details>
+            <PublicNavigation copy={copy} locale={locale} />
           </div>
         </header>
 
