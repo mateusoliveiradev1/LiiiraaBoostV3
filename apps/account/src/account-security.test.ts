@@ -21,7 +21,10 @@ describe('account security boundary', () => {
   it('applies an exact noindex, frame-closed, third-party-free header contract', () => {
     const nonce = 'dGVzdC1hY2NvdW50LW5vbmNl';
     const headers = Object.fromEntries(
-      accountHeaderContract(nonce).map(({ key, value }) => [key.toLowerCase(), value]),
+      accountHeaderContract(nonce, 'production').map(({ key, value }) => [
+        key.toLowerCase(),
+        value,
+      ]),
     );
     const csp = headers['content-security-policy'];
 
@@ -46,6 +49,38 @@ describe('account security boundary', () => {
     expect(Object.keys(headers)).not.toContain('set-cookie');
     expect(Object.keys(headers)).not.toContain('location');
   });
+
+  it.each([
+    { allowsEval: true, runtimeMode: 'development' },
+    { allowsEval: false, runtimeMode: 'production' },
+    { allowsEval: false, runtimeMode: 'test' },
+  ] as const)(
+    'keeps the $runtimeMode nonce policy isolated with development eval=$allowsEval',
+    ({ allowsEval, runtimeMode }) => {
+      const nonce = `dGVzdC1hY2NvdW50LW5vbmNl-${runtimeMode}`;
+      const headers = Object.fromEntries(
+        accountHeaderContract(nonce, runtimeMode).map(({ key, value }) => [
+          key.toLowerCase(),
+          value,
+        ]),
+      );
+      const csp = headers['content-security-policy'];
+
+      expect(csp).toContain(`'nonce-${nonce}'`);
+      expect(csp).toContain("'strict-dynamic'");
+      expect(csp.includes("'unsafe-eval'")).toBe(allowsEval);
+      expect(csp.match(/'unsafe-eval'/gu)?.length ?? 0).toBe(allowsEval ? 1 : 0);
+      expect(csp).toContain("frame-ancestors 'none'");
+      expect(csp).not.toMatch(/https?:/u);
+      expect(headers).toMatchObject({
+        'cache-control': 'private, no-store, max-age=0',
+        'x-frame-options': 'DENY',
+        'x-robots-tag': 'noindex,nofollow,noarchive',
+      });
+      expect(Object.keys(headers)).not.toContain('set-cookie');
+      expect(Object.keys(headers)).not.toContain('location');
+    },
+  );
 
   it('admits only the canonical web-core safe context keys', () => {
     const accepted = accountContextFromUrl(
