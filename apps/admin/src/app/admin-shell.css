@@ -621,6 +621,10 @@ button:focus-visible,
   background: var(--lb-disabled-fill);
 }
 
+.admin-disconnected-authority .lb-web-status[data-tone='restricted'] {
+  color: var(--lb-text-primary);
+}
+
 .admin-decision__audit {
   display: grid;
   gap: var(--lb-space-3);
