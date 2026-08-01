@@ -92,6 +92,56 @@ describe('release content and routes', () => {
     expect(markup).not.toMatch(/https?:\/\/[^"<]*\.(?:exe|msi|msix)/iu);
     expect(markup).not.toMatch(/continueAnyway|downloadUri|target\/release|phase-02/iu);
   });
+
+  it('prioritizes state, compatibility, integrity, risks, corrections, and recovery', async () => {
+    const resolution = resolveReleasePage({ locale: 'en' });
+    if (resolution === undefined) throw new Error('release index route missing');
+    const markup = renderToStaticMarkup(<ReleaseExperience resolution={resolution} />);
+    const hooks = [
+      'release-state-header',
+      'release-compatibility-movement',
+      'release-integrity-movement',
+      'release-risks-movement',
+      'release-corrections-movement',
+      'release-recovery-movement',
+    ];
+
+    for (const [index, hook] of hooks.entries()) {
+      expect(markup).toContain(hook);
+      if (index > 0) {
+        expect(markup.indexOf(hook)).toBeGreaterThan(markup.indexOf(hooks[index - 1] ?? ''));
+      }
+    }
+
+    const source = await import('node:fs/promises').then(({ readFile }) =>
+      readFile(new URL('./features/releases.tsx', import.meta.url), 'utf8'),
+    );
+    expect(source).not.toContain('continueAnyway');
+    expect(source).not.toMatch(/<a[^>]+download/iu);
+  });
+
+  it('subordinates dense release metadata to an invoked technical disclosure', () => {
+    const resolution = resolveReleasePage({ locale: 'pt-BR' });
+    if (resolution === undefined) throw new Error('release index route missing');
+    const markup = renderToStaticMarkup(<ReleaseExperience resolution={resolution} />);
+
+    expect(markup).toContain('<details class="release-technical-context">');
+    expect(markup).not.toContain('<details class="release-technical-context" open=""');
+    expect(markup.indexOf('release-state-header')).toBeLessThan(
+      markup.indexOf('release-technical-context'),
+    );
+  });
+
+  it('retains channel navigation and integrity guidance without page-level horizontal scroll', async () => {
+    const styles = await import('node:fs/promises').then(({ readFile }) =>
+      readFile(new URL('./styles/public.css', import.meta.url), 'utf8'),
+    );
+
+    expect(styles).toMatch(
+      /@media \(width < 640px\)[\s\S]*\.release-movement[\s\S]*min-inline-size:\s*0/u,
+    );
+    expect(styles).not.toMatch(/\.release-experience\s*\{[\s\S]*overflow-x:\s*auto/u);
+  });
 });
 
 describe('exhaustive DownloadDecision rendering', () => {
