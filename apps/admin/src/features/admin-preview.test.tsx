@@ -93,6 +93,45 @@ describe('role-scoped admin', () => {
     expect(adminEn.support.detail).not.toMatch(/@[a-z0-9.-]+\.[a-z]{2,}/iu);
   });
 
+  it('leads the representative workspace with decision context, evidence, consent, and audit', () => {
+    const supportStart = featureSource.indexOf('export const SupportCaseWorkspace');
+    const supportEnd = featureSource.indexOf('export const PurposeAndImpactReview');
+    const supportSource = featureSource.slice(supportStart, supportEnd);
+
+    expect(supportSource).toContain('admin-decision__context');
+    expect(supportSource).toContain('admin-decision__evidence');
+    expect(supportSource).toContain('admin-decision__constraints');
+    expect(supportSource).toContain('admin-decision__audit');
+    expect(supportSource.indexOf('admin-decision__context')).toBeLessThan(
+      supportSource.indexOf('admin-decision__evidence'),
+    );
+    expect(supportSource.indexOf('admin-decision__constraints')).toBeLessThan(
+      supportSource.indexOf('admin-decision__audit'),
+    );
+  });
+
+  it('keeps authority visibly unavailable while allowing only a no-change review', () => {
+    expect(featureSource).toContain('data-authority-state="disconnected"');
+    expect(featureSource).toContain('data-authority-action="unavailable"');
+    expect(featureSource).toMatch(
+      /data-authority-action="unavailable"[\s\S]*<LbButton[\s\S]*isDisabled/u,
+    );
+    expect(adminEn.support.authorityAction).toContain('Unavailable');
+    expect(adminPtBr.support.authorityAction).toContain('indisponível');
+  });
+
+  it('keeps persistent preview truth singular and localizes human operational meaning', () => {
+    const supportStart = featureSource.indexOf('export const SupportCaseWorkspace');
+    const supportEnd = featureSource.indexOf('export const PurposeAndImpactReview');
+    const supportSource = featureSource.slice(supportStart, supportEnd);
+
+    expect(supportSource).not.toContain('<PreviewBoundary');
+    expect(featureSource).toContain('showProvenance={true}');
+    expect(adminEn.landing.scopeBody).not.toMatch(/manifest|route/iu);
+    expect(adminPtBr.landing.scopeBody).not.toMatch(/manifesto|rota/iu);
+    expect(shapeOf(adminPtBr)).toEqual(shapeOf(adminEn));
+  });
+
   it('keeps route resolution canonical, localized, and fail-closed', () => {
     const routeSource = readFileSync(
       new URL('../app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
