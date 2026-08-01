@@ -443,21 +443,27 @@ const RouteIntroduction = ({
     <header className="catalog-introduction">
       <div className="catalog-introduction__identity">
         <SupportState catalog={catalog} state={record.availability} />
-        <span>
-          {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
-        </span>
       </div>
       <h1>{record.title}</h1>
       <p className="catalog-introduction__summary">{record.summary}</p>
       <p>{record.body}</p>
-      <p className="catalog-introduction__review">
-        {copy.reviewed}:{' '}
-        <time dateTime={catalog.lastReviewedAt}>{catalog.lastReviewedAt.slice(0, 10)}</time> ·{' '}
-        {copy.validation}: {record.validationState}
-      </p>
+      <details className="catalog-introduction__provenance">
+        <summary>{localeSummary(catalog.locale)}</summary>
+        <p>
+          {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
+        </p>
+        <p className="catalog-introduction__review">
+          {copy.reviewed}:{' '}
+          <time dateTime={catalog.lastReviewedAt}>{catalog.lastReviewedAt.slice(0, 10)}</time> ·{' '}
+          {copy.validation}: {record.validationState}
+        </p>
+      </details>
     </header>
   );
 };
+
+const localeSummary = (locale: WebLocale): string =>
+  locale === 'pt-BR' ? 'Origem e revisão deste conteúdo' : 'Content source and review';
 
 const Limitations = ({
   locale,
@@ -479,32 +485,34 @@ export const CapabilitySupportMatrix = ({
 }: Readonly<{ catalog: PublicCatalog; rows: readonly CapabilityRow[] }>) => {
   const copy = copyFor(catalog.locale);
   return (
-    <div className="catalog-table-wrap">
-      <table className="catalog-table">
-        <caption>
-          {catalog.locale === 'pt-BR'
-            ? 'Matriz de suporte e consequência'
-            : 'Support and consequence matrix'}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">{catalog.locale === 'pt-BR' ? 'Capacidade' : 'Capability'}</th>
-            <th scope="col">{copy.availability}</th>
-            <th scope="col">{copy.consequence}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.capability}>
-              <th scope="row">{row.capability}</th>
-              <td data-label={copy.availability}>
-                <SupportState catalog={catalog} state={row.state} />
-              </td>
-              <td data-label={copy.consequence}>{row.consequence}</td>
+    <div className="catalog-decision-field">
+      <div className="catalog-table-wrap">
+        <table className="catalog-table">
+          <caption>
+            {catalog.locale === 'pt-BR'
+              ? 'Matriz de suporte e consequência'
+              : 'Support and consequence matrix'}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{catalog.locale === 'pt-BR' ? 'Capacidade' : 'Capability'}</th>
+              <th scope="col">{copy.availability}</th>
+              <th scope="col">{copy.consequence}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.capability}>
+                <th scope="row">{row.capability}</th>
+                <td data-label={copy.availability}>
+                  <SupportState catalog={catalog} state={row.state} />
+                </td>
+                <td data-label={copy.consequence}>{row.consequence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
@@ -526,7 +534,7 @@ export const PlanComparison = ({
   catalog,
   plans,
 }: Readonly<{ catalog: PublicCatalog; plans: readonly PlanDisclosure[] }>) => (
-  <section aria-labelledby="plan-comparison-title" className="plan-comparison">
+  <section aria-labelledby="plan-comparison-title" className="plan-comparison-ledger">
     <h2 id="plan-comparison-title">
       {catalog.locale === 'pt-BR' ? 'Termos antes da confirmação' : 'Terms before confirmation'}
     </h2>
@@ -534,32 +542,44 @@ export const PlanComparison = ({
       <article className="plan-record" key={plan.id}>
         <header>
           <h3>{plan.name}</h3>
-          <p>{plan.checkoutBoundary}</p>
+          <p>
+            {catalog.locale === 'pt-BR'
+              ? 'Compare o compromisso completo antes de escolher.'
+              : 'Compare the complete commitment before choosing.'}
+          </p>
         </header>
-        <DisclosureList
-          items={[
-            { label: catalog.locale === 'pt-BR' ? 'Preço' : 'Price', value: plan.price },
-            {
-              label: catalog.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
-              value: plan.billingPeriod,
-            },
-            { label: catalog.locale === 'pt-BR' ? 'Renovação' : 'Renewal', value: plan.renewal },
-            { label: catalog.locale === 'pt-BR' ? 'Tributos' : 'Taxes', value: plan.taxes },
-            {
-              label: catalog.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
-              value: plan.cancellation,
-            },
-            { label: catalog.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds', value: plan.refunds },
-            {
-              label: catalog.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
-              value: plan.deviceRules,
-            },
-            {
-              label: catalog.locale === 'pt-BR' ? 'Efeito da expiração' : 'Expiration effects',
-              value: plan.expirationEffects,
-            },
-          ]}
-        />
+        <details className="plan-terms">
+          <summary>
+            {catalog.locale === 'pt-BR'
+              ? 'Revisar preço, renovação, dispositivos e recuperação'
+              : 'Review price, renewal, devices, and recovery'}
+          </summary>
+          <p>{plan.checkoutBoundary}</p>
+          <DisclosureList
+            items={[
+              { label: catalog.locale === 'pt-BR' ? 'Preço' : 'Price', value: plan.price },
+              {
+                label: catalog.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
+                value: plan.billingPeriod,
+              },
+              { label: catalog.locale === 'pt-BR' ? 'Renovação' : 'Renewal', value: plan.renewal },
+              { label: catalog.locale === 'pt-BR' ? 'Tributos' : 'Taxes', value: plan.taxes },
+              {
+                label: catalog.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
+                value: plan.cancellation,
+              },
+              { label: catalog.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds', value: plan.refunds },
+              {
+                label: catalog.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
+                value: plan.deviceRules,
+              },
+              {
+                label: catalog.locale === 'pt-BR' ? 'Efeito da expiração' : 'Expiration effects',
+                value: plan.expirationEffects,
+              },
+            ]}
+          />
+        </details>
         <CapabilitySupportMatrix
           catalog={catalog}
           rows={plan.capabilities.map((capability) => ({
@@ -993,7 +1013,7 @@ const CatalogBody = ({
 }: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => (
   <>
     {record.sections !== undefined && (
-      <div className="catalog-chapters">
+      <div className="catalog-story-sequence">
         {record.sections.map((section) => (
           <section key={section.title}>
             <h2>{section.title}</h2>

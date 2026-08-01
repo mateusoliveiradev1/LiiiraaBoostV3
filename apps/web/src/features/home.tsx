@@ -427,6 +427,12 @@ const IgnitionHero = ({
     >
       {artifact}
     </div>
+    <a className="home-next-movement" href="#prepare-prove-restore">
+      <span>{locale === 'pt-BR' ? 'A seguir' : 'Next'}</span>
+      {locale === 'pt-BR'
+        ? 'Prepare, prove e restaure como uma sequência'
+        : 'Prepare, prove, and restore as one sequence'}
+    </a>
   </section>
 );
 
@@ -437,9 +443,15 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
   const compatibilityHref = publicBoundaryHref('public-compatibility', locale);
   const releasesHref = publicBoundaryHref('releases-index', locale);
   const proofClaims = claims.slice(0, 3);
+  const proofClaim = proofClaims[1];
   const compatibilityClaim = claims.find(({ chapter }) => chapter.id === 'compatibility');
   const heroProofNote = content.warnings[0];
-  if (compatibilityClaim === undefined || heroProofNote === undefined) {
+  if (
+    proofClaims.length !== 3 ||
+    proofClaim === undefined ||
+    compatibilityClaim === undefined ||
+    heroProofNote === undefined
+  ) {
     throw new Error(`HOME_CONTENT_INVALID:${locale}:hero`);
   }
 
@@ -454,45 +466,90 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         proofNote={heroProofNote}
       />
 
-      <section aria-labelledby="home-evidence-title" className="home-evidence-stage">
-        <header className="home-evidence-stage__introduction">
-          <h2 id="home-evidence-title">
-            {locale === 'pt-BR'
-              ? 'Desempenho é uma sequência que pode ser revisada'
-              : 'Performance is a sequence you can review'}
-          </h2>
-          <p>{content.body}</p>
-        </header>
+      <section
+        aria-labelledby="home-prepare-title"
+        className="home-evidence-stage"
+        id="prepare-prove-restore"
+      >
+        <div className="home-prepare-band">
+          <header className="home-prepare-band__introduction">
+            <h2 id="home-prepare-title">
+              {locale === 'pt-BR'
+                ? 'Desempenho é uma sequência que pode ser revisada'
+                : 'Performance is a sequence you can review'}
+            </h2>
+            <p>{content.body}</p>
+          </header>
 
-        <ol className="home-proof-sequence">
-          {proofClaims.map((claim, index) => (
-            <li data-stage={claim.chapter.id} key={claim.chapter.id}>
-              <span aria-hidden="true" className="home-proof-sequence__number">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <div className="home-proof-sequence__copy">
-                <h3>{claim.chapter.title}</h3>
-                <p>{claim.chapter.summary}</p>
-              </div>
-              <EvidenceDisclosure claim={claim} locale={locale} />
-            </li>
-          ))}
-        </ol>
-
-        <div className="home-compatibility-bridge">
-          <div>
-            <h2>{compatibilityClaim.chapter.title}</h2>
-            <p>{compatibilityClaim.chapter.summary}</p>
-          </div>
-          <div>
-            <HomeAction href={compatibilityHref}>{content.finalJourney.actionLabel}</HomeAction>
-            <EvidenceDisclosure claim={compatibilityClaim} locale={locale} />
-          </div>
+          <ol className="home-proof-sequence">
+            {proofClaims.map((claim) => (
+              <li data-stage={claim.chapter.id} key={claim.chapter.id}>
+                <span aria-hidden="true" className="home-prepare-band__signal">
+                  <span />
+                </span>
+                <div className="home-prepare-band__copy">
+                  <h3>{claim.chapter.title}</h3>
+                  <p>{claim.chapter.summary}</p>
+                </div>
+                <EvidenceDisclosure claim={claim} locale={locale} />
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section aria-labelledby="home-release-gate-title" className="home-release-gate">
-        <div>
+      <section aria-labelledby="home-context-title" className="home-context-stage">
+        <div className="home-context-stage__artifact" data-context-crop="real-product">
+          <ProductStageGate admission={capture} locale={locale} />
+        </div>
+        <div className="home-context-stage__proof">
+          <p className="home-context-stage__signal">
+            {locale === 'pt-BR' ? 'Prova no ponto de decisão' : 'Proof at the decision point'}
+          </p>
+          <h2 id="home-context-title">
+            {locale === 'pt-BR'
+              ? 'O resultado fica ao lado do que mudou'
+              : 'The result stays beside what changed'}
+          </h2>
+          <p>{proofClaim.chapter.summary}</p>
+          <EvidenceDisclosure claim={proofClaim} locale={locale} />
+        </div>
+      </section>
+
+      <section aria-labelledby="home-compatibility-title" className="home-compatibility-field">
+        <div className="home-compatibility-field__copy">
+          <p>{locale === 'pt-BR' ? 'Antes de qualquer plano' : 'Before any plan'}</p>
+          <h2 id="home-compatibility-title">{compatibilityClaim.chapter.title}</h2>
+          <p>{compatibilityClaim.chapter.summary}</p>
+        </div>
+        <div className="home-compatibility-field__states" role="list">
+          <div data-state="available" role="listitem">
+            <strong>{locale === 'pt-BR' ? 'Compatível' : 'Supported'}</strong>
+            <span>
+              {locale === 'pt-BR' ? 'A análise confirma o escopo' : 'The review confirms scope'}
+            </span>
+          </div>
+          <div data-state="under-validation" role="listitem">
+            <strong>{locale === 'pt-BR' ? 'Em validação' : 'Under validation'}</strong>
+            <span>
+              {locale === 'pt-BR' ? 'A ação permanece em espera' : 'The action remains on hold'}
+            </span>
+          </div>
+          <div data-state="unavailable" role="listitem">
+            <strong>{locale === 'pt-BR' ? 'Indisponível' : 'Unavailable'}</strong>
+            <span>{locale === 'pt-BR' ? 'Nenhum atalho é oferecido' : 'No bypass is offered'}</span>
+          </div>
+        </div>
+        <div className="home-compatibility-field__action">
+          <HomeAction href={compatibilityHref} primary>
+            {content.finalJourney.actionLabel}
+          </HomeAction>
+          <EvidenceDisclosure claim={compatibilityClaim} locale={locale} />
+        </div>
+      </section>
+
+      <section aria-labelledby="home-release-gate-title" className="home-release-ribbon">
+        <div className="home-release-ribbon__state">
           <StatusSignal
             label={locale === 'pt-BR' ? 'Distribuição bloqueada' : 'Distribution blocked'}
             state="unavailable"
@@ -503,7 +560,7 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
               : 'Public download is not available yet'}
           </h2>
         </div>
-        <div>
+        <div className="home-release-ribbon__action">
           <p>{content.warnings[1]}</p>
           <HomeAction href={releasesHref}>
             {locale === 'pt-BR' ? 'Consultar o estado das versões' : 'Review release status'}

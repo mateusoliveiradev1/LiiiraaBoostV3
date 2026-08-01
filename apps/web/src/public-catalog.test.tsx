@@ -114,7 +114,9 @@ describe('public catalog content', () => {
     expect(styles).toMatch(
       /@media \(width < 640px\)[\s\S]*\.catalog-table,[\s\S]*display:\s*block/u,
     );
-    expect(styles).not.toMatch(/\.plan-comparison-ledger\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/u);
+    expect(styles).not.toMatch(
+      /\.plan-comparison-ledger\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/u,
+    );
   });
 
   it('keeps bilingual compatibility consequences and commercial terms complete at narrow widths', () => {

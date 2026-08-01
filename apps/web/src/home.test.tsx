@@ -216,7 +216,9 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(styles).toMatch(
       /\.home-next-movement\s*\{[\s\S]*min-block-size:\s*44px[\s\S]*margin-block-start:\s*var\(--lb-space-4\)/u,
     );
-    expect(styles).not.toMatch(/\.home-next-movement\s*\{[\s\S]*margin-block-start:\s*(?:[7-9]\d|\d{3,})px/u);
+    expect(styles).not.toMatch(
+      /\.home-next-movement\s*\{[\s\S]*margin-block-start:\s*(?:[7-9]\d|\d{3,})px/u,
+    );
   });
 
   it('keeps evidence metadata in contextual disclosures while visitor headings stay human', async () => {
@@ -225,8 +227,12 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('className="home-evidence-disclosure"');
     expect(homeSource).toContain('className="home-context-stage__proof"');
     expect(homeSource).toContain('className="home-compatibility-field__action"');
-    expect(homeSource).not.toMatch(/<h[1-3][^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu);
-    expect(homeSource).not.toMatch(/<HomeAction[^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu);
+    expect(homeSource).not.toMatch(
+      /<h[1-3][^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu,
+    );
+    expect(homeSource).not.toMatch(
+      /<HomeAction[^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu,
+    );
   });
 
   it('keeps public distribution unavailable without exposing a development installer path', async () => {
