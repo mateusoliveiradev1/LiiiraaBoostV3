@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-37-PLAN.md
-last_updated: "2026-07-31T23:40:44.069Z"
+stopped_at: Completed 03-38-PLAN.md
+last_updated: "2026-08-01T00:02:30.958Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-37-PLAN.md
+last_activity_desc: Completed 03-38-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 104
-  completed_plans: 95
-  percent: 91
+  completed_plans: 96
+  percent: 20
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 38 of 46
-Status: Ready to execute Plan 03-38
-Last activity: 2026-07-31 — Completed 03-37-PLAN.md
+Plan: 39 of 46
+Status: Ready to execute Plan 03-39
+Last activity: 2026-07-31 — Completed 03-38-PLAN.md
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -143,6 +143,7 @@ _Updated after plan completion_
 | Phase 03 P35 | 15min | 3 tasks | 6 files |
 | Phase 03 P36 | 32min | 1 tasks | 2 files |
 | Phase 03 P37 | 12min | 2 tasks | 7 files |
+| Phase 03 P38 | 14min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -401,6 +402,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: ProductLockup preserves the approved WindowTitleBar SVG paths and exposes only compact/full composition variants. — One primitive prevents brand spoofing and geometry drift across independently deployable surfaces.
 - [Phase 03]: Pre-existing off-contract CSS values are exact owner-bound migration debt for Plans 03-38, 03-39, and 03-41. — The gate blocks new drift without stealing authored surface-redesign scope from the dedicated follow-up plans.
 - [Phase 03]: Visual evidence proves skip-link and ordinary focus visibility before neutralizing focus and scroll for capture. — Accessibility remains tested while durable screenshots stay deterministic and free of transient focus contamination.
+- [Phase 03]: Import the dedicated ProductLockup module directly in the public server layout to preserve exact identity without pulling client-only barrels or changing package manifests.
+- [Phase 03]: Keep manifest-bound capture scenario, viewport, and commit metadata truthful but reveal it through localized accessible disclosure.
+- [Phase 03]: Give the real desktop artifact seven of twelve wide columns and visual precedence below 960px while retaining semantic copy order.
+- [Phase 03]: Retain resolved Plan 03-38 token entries as immutable audit history while excluding them from active migration debt.
 
 ### Pending Todos
 
@@ -442,6 +447,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T23:40:44.062Z
-Stopped at: Completed 03-37-PLAN.md
+Last session: 2026-08-01T00:02:30.950Z
+Stopped at: Completed 03-38-PLAN.md
 Resume file: None
