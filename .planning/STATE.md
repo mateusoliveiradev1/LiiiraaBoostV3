@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-62-PLAN.md
-last_updated: "2026-08-01T21:32:03.450Z"
+stopped_at: Completed 03-62 correction-cycle capture
+last_updated: "2026-08-01T22:33:17.686Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
@@ -497,6 +497,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Rejected post-03-52 G01/G04/G06 remain immutable and independently retrievable after candidate capture.
 - [Phase 03]: Mechanical capture changes pixels only; all 25 records remain candidate, unapproved, unpublished, and non-authoritative.
 - [Phase 03]: Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.
+- [Phase 03]: The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.
 
 ### Pending Todos
 
@@ -538,6 +539,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T21:32:03.444Z
-Stopped at: Completed 03-62-PLAN.md
+Last session: 2026-08-01T22:33:16.644Z
+Stopped at: Completed 03-62 correction-cycle capture
 Resume file: None

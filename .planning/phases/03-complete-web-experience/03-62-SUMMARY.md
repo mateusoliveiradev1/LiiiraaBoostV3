@@ -34,6 +34,7 @@ key-decisions:
   - 'Rejected post-03-52 G01/G04/G06 remain immutable and independently retrievable after candidate capture.'
   - 'Mechanical capture changes pixels only; all 25 records remain candidate, unapproved, unpublished, and non-authoritative.'
   - 'Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.'
+  - 'The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.'
 
 patterns-established:
   - 'Capture safety: immutable rejected bytes and candidate bytes are separate durable evidence sets.'
@@ -63,6 +64,7 @@ status: complete
 - Preserved the rejected post-03-52 G01, G04, and G06 bytes before candidate overwrite, including byte size, lowercase SHA-256, owner, rejection status, and source revision `0823833cf3584a16eed5b30e5dd74aa2912724bf`.
 - Passed the permanent 25-pair dry-list gate, the candidate-aware browser matrix, and the unfiltered Section 17 motion contract before entering update mode.
 - Ran one user-authorized mechanical update that regenerated exactly W01-W18 and G01-G07 with no extra file, source, harness, manifest, approval, UAT, report, or publication changes.
+- After replay commit `2d70303`, ran one separately authorized correction-cycle update and committed only the expected W07/W08/W09 pixel changes in `fea8330`.
 
 ## Task Commits
 
@@ -70,6 +72,7 @@ Each task was committed atomically:
 
 1. **Task 1: Archive rejected G01, G04, and G06 immutably** - `21f41d8` (chore)
 2. **Task 2: Perform one mechanical closed-matrix candidate update** - `ee3c1ce` (test)
+3. **Post-source-correction capture: Refresh only W07, W08, and W09** - `fea8330` (test)
 
 ## Files Created/Modified
 
@@ -112,6 +115,16 @@ Each task was committed atomically:
 - An early unfiltered motion preflight encountered a transient corrupted Playwright bundle containing an unexpected NUL byte. Runtime integrity was re-established and the exact unfiltered suite passed before update mode.
 - Two prior bounded attempts produced zero candidate changes. Each stopped at the checkpoint as required; the final attempt proceeded only after explicit user authorization and permanent selection proof.
 
+## Post-Source-Correction Capture
+
+- Required replay commit `2d70303` was present before capture, recording the successful Plan 03-61 replay after the public release and status source corrections.
+- Preflight passed: permanent candidate dry-list 1/1 with exactly 25 unique project/ID pairs; ordinary update proof 1 intentional skip; motion contract 5 passed and 40 intentional skips; rejected archive hashes unchanged.
+- One and only one full correction-cycle `--update-snapshots` command ran. It completed with 44 passed, 152 intentional skips, and 0 failed while executing all 25 candidate capture tests.
+- The tracked delta was exactly `W07-public-final-wide-1440.png`, `W08-public-final-wide-1440.png`, and `W09-public-final-wide-1280.png`; no source, harness, manifest, archive, approval, report, UAT, or publication file changed.
+- All 25 PNGs remained nonempty, matched their declared viewport widths, met or exceeded their viewport heights, and produced lowercase 64-character SHA-256 identities.
+- All 25 manifest entries remained `candidate`, `approved: false`, `published: false`, and `visualTarget: false`.
+- Correction-cycle candidate commit: `fea8330`.
+
 ## Verification
 
 - Permanent candidate dry-list: 1 passed; exactly 25 tests in one file and 25 unique manifest/project identities.
@@ -132,9 +145,9 @@ Each task was committed atomically:
 | W04 | 1280×2336 | `65b714311f45d3a5506ce3cf0c025b9a0dd595292a906940e7f0f23593f0c6c7` |
 | W05 | 1280×3215 | `4460e175bd9b55ca8f44819bde7c6380b022918de350472cb61c64e1b00e0062` |
 | W06 | 960×1157 | `da9906f6e175964ec52ced96f91165d8eeed2a18892426c8f4f9f667e37eb119` |
-| W07 | 1440×3897 | `ba2caf9287b546c1e2a7b436b7a9e1d8edf03e1edc9d297967c30678adcab2ac` |
-| W08 | 1440×3723 | `7e4affd71fd29ac9af48d56e361089954b1887b6334ec48d970f834ad70b3279` |
-| W09 | 1280×1452 | `fa0b57b6363823c30d540c88e7d14e8967755acec284f38b062ea487f5d3229b` |
+| W07 | 1440×2904 | `06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7` |
+| W08 | 1440×2693 | `2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6` |
+| W09 | 1280×1452 | `4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca` |
 | W10 | 960×974 | `1384b104f9b6519f684de38e24f2eba967cc84ede81d907ee93b2659831f9517` |
 | W11 | 1440×1025 | `cde78133e64b7e5f1b34a57caca12e2ace9a436d8eba3e7e53df14ee5e256204` |
 | W12 | 1280×1049 | `d551aed5d83b20b88aa5bcba717ee2d521cb5c445aa7333c413e65faf8b1000c` |
@@ -174,6 +187,7 @@ None - no external service configuration required.
 - Confirmed the three archived PNGs exist, are nonempty, and match `SHA256SUMS.json`.
 - Confirmed all 25 unique candidate PNGs from commit `ee3c1ce` exist.
 - Confirmed task commits `21f41d8` and `ee3c1ce` exist in repository history.
+- Confirmed correction-cycle commit `fea8330` exists and changes exactly W07, W08, and W09.
 - Confirmed this summary exists at the required phase path.
 
 ---
