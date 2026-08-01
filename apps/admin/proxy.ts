@@ -44,7 +44,10 @@ const EMPTY_POLICIES = Object.freeze([
 
 const UNSAFE_CONTEXT_KEYS = Object.freeze(['destination', 'redirect', 'returnPath', 'returnUrl']);
 
-const createContentSecurityPolicy = (nonce: string): string =>
+const createContentSecurityPolicy = (
+  nonce: string,
+  runtimeMode: string | undefined,
+): string =>
   [
     "default-src 'self'",
     "base-uri 'none'",
@@ -57,7 +60,12 @@ const createContentSecurityPolicy = (nonce: string): string =>
     "manifest-src 'self'",
     "media-src 'self'",
     "object-src 'none'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    [
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+      runtimeMode === 'development' ? "'unsafe-eval'" : undefined,
+    ]
+      .filter((directive): directive is string => directive !== undefined)
+      .join(' '),
     `style-src 'self' 'nonce-${nonce}'`,
     "worker-src 'self'",
   ].join('; ');
@@ -197,6 +205,7 @@ export const createAdminRequestNonce = (): string => {
 
 export const adminHeaderContract = (
   nonce: string,
+  runtimeMode: string | undefined,
 ): readonly Readonly<{ key: string; value: string }>[] =>
   Object.freeze([
     Object.freeze({
@@ -205,7 +214,7 @@ export const adminHeaderContract = (
     }),
     Object.freeze({
       key: 'Content-Security-Policy',
-      value: createContentSecurityPolicy(nonce),
+      value: createContentSecurityPolicy(nonce, runtimeMode),
     }),
     Object.freeze({
       key: 'Cross-Origin-Opener-Policy',
@@ -288,8 +297,11 @@ export const AdminAccessBoundary = ({
   });
 };
 
-const applyAdminHeaders = (response: NextResponse, nonce: string): NextResponse => {
-  for (const { key, value } of adminHeaderContract(nonce)) {
+const applyAdminHeaders = (
+  response: NextResponse,
+  headerContract: readonly Readonly<{ key: string; value: string }>[],
+): NextResponse => {
+  for (const { key, value } of headerContract) {
     response.headers.set(key, value);
   }
 
@@ -298,6 +310,7 @@ const applyAdminHeaders = (response: NextResponse, nonce: string): NextResponse 
 
 export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
+  const runtimeMode = process.env.NODE_ENV;
   const boundary = AdminAccessBoundary({
     cookieHeader: request.headers.get('cookie'),
     requestOrigin: requestHeaderOrigin(request),
@@ -306,6 +319,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
 
   if (boundary.reason !== 'deterministic-role-preview') {
     const requestId = boundedRequestId(request);
+    const denialHeaderContract = adminHeaderContract(nonce, 'production');
 
     if (isDocumentNavigation(request)) {
       const locale = denialLocale(request);
@@ -317,7 +331,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
           },
           status: 403,
         }),
-        nonce,
+        denialHeaderContract,
       );
     }
 
@@ -331,12 +345,13 @@ export default function adminProxy(request: NextRequest): NextResponse {
         },
         { status: 403 },
       ),
-      nonce,
+      denialHeaderContract,
     );
   }
 
   const requestHeaders = new Headers(request.headers);
-  const contentSecurityPolicy = adminHeaderContract(nonce).find(
+  const headerContract = adminHeaderContract(nonce, runtimeMode);
+  const contentSecurityPolicy = headerContract.find(
     ({ key }) => key === 'Content-Security-Policy',
   )?.value;
 
@@ -358,7 +373,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
   response.headers.set('x-liiiraa-admin-role', boundary.role);
   response.headers.set('x-liiiraa-preview-authority', 'disconnected');
 
-  return applyAdminHeaders(response, nonce);
+  return applyAdminHeaders(response, headerContract);
 }
 
 export const config = {
