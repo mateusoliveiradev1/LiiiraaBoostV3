@@ -418,7 +418,7 @@ export const ImmutableAuditTimeline = ({
       ? ADMIN_AUDIT_EVENTS
       : ADMIN_AUDIT_EVENTS.filter((event) => event.role === role);
   return (
-    <article data-admin-workspace="immutable audit">
+    <article className="admin-decision admin-audit-timeline" data-admin-workspace="immutable audit">
       <FixtureHeader
         content={content}
         showProvenance={true}
@@ -824,25 +824,65 @@ export const SecurityReview = ({
   content,
   viewportWidth,
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
-  <article data-admin-workspace="security">
+  <article
+    className="admin-decision admin-decision--critical"
+    data-admin-workspace="security"
+    data-authority-state="disconnected"
+  >
     <FixtureHeader
       content={content}
       summary={content.security.summary}
       title={content.security.title}
     />
-    <StatusSignal label={content.security.state} state="warning" />
-    <p>{content.security.detail}</p>
-    <CriticalReview
-      action={content.security.action}
-      content={content}
-      impact={content.security.impact}
-      purpose={content.security.purpose}
-      role="security"
-      scenarioId="W15"
-      target={content.security.target}
-      viewportWidth={viewportWidth}
+    <section aria-labelledby="security-decision-title" className="admin-decision__context">
+      <div>
+        <p>{content.security.reviewLabel}</p>
+        <h2 id="security-decision-title">{content.security.decisionTitle}</h2>
+        <p>{content.security.detail}</p>
+      </div>
+      <StatusSignal label={content.security.state} state="warning" />
+    </section>
+    <section aria-labelledby="security-evidence-title" className="admin-decision__evidence">
+      <h2 id="security-evidence-title">{content.security.evidenceTitle}</h2>
+      <dl>
+        <div>
+          <dt>{content.audit.target}</dt>
+          <dd>
+            <code>{content.security.target}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>{content.diagnostics.purposeLabel}</dt>
+          <dd>{content.security.purpose}</dd>
+        </div>
+        <div>
+          <dt>{content.locale === 'pt-BR' ? 'Impacto' : 'Impact'}</dt>
+          <dd>{content.security.impact}</dd>
+        </div>
+      </dl>
+    </section>
+    <section aria-labelledby="security-constraints-title" className="admin-decision__constraints">
+      <h2 id="security-constraints-title">{content.security.constraintsTitle}</h2>
+      <CriticalReview
+        action={content.security.action}
+        content={content}
+        impact={content.security.impact}
+        purpose={content.security.purpose}
+        role="security"
+        scenarioId="W15"
+        target={content.security.target}
+        viewportWidth={viewportWidth}
+      />
+    </section>
+    <DisconnectedAuthority
+      action={content.security.authorityAction}
+      body={content.security.authorityBody}
+      title={content.security.authorityTitle}
     />
-    <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[3]} />
+    <section aria-labelledby="security-audit-title" className="admin-decision__audit">
+      <h2 id="security-audit-title">{content.security.auditTitle}</h2>
+      <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[3]} />
+    </section>
   </article>
 );
 
@@ -919,73 +959,101 @@ export const DiagnosticFieldDisclosure = ({
   const admittedConsent = decision === 'allowed' && consent != null ? consent : null;
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   return (
-    <article data-admin-workspace="consent-scoped diagnostics" data-consent-decision={decision}>
+    <article
+      className="admin-decision admin-decision--diagnostic"
+      data-admin-workspace="consent-scoped diagnostics"
+      data-consent-decision={decision}
+    >
       <FixtureHeader
         content={content}
         summary={content.diagnostics.summary}
         title={content.diagnostics.title}
       />
-      <ConsentScopePanel consent={consent} content={content} decision={decision} />
-      {admittedConsent !== null ? (
-        <section aria-labelledby="diagnostic-fields-title">
-          <h2 id="diagnostic-fields-title">{content.diagnostics.allowedTitle}</h2>
-          <dl>
-            <div>
-              <dt>startup-state</dt>
-              <dd>
-                <code>synthetic-ready</code>
-              </dd>
-            </div>
-            <div>
-              <dt>application-version</dt>
-              <dd>
-                <code>1.0.0-preview</code>
-              </dd>
-            </div>
-          </dl>
-          <div data-high-risk-action="true">
-            {workflow === null ? (
-              <LbButton
-                onPress={() => {
-                  setWorkflow(
-                    workflowInput({
-                      consent: {
-                        expiresAt: admittedConsent.expiresAt,
-                        granted: admittedConsent.granted,
-                        permittedFields: admittedConsent.permittedFields,
-                        purpose: admittedConsent.purpose,
-                        requestingActor: admittedConsent.actor,
-                      },
-                      family: 'diagnostic',
-                      fields: { diagnostic: 'diagnostic-preview' },
-                      impact: content.diagnostics.denial,
-                      label: content.diagnostics.allowedTitle,
-                      purpose: admittedConsent.purpose,
-                      review: [
-                        {
-                          field: 'diagnostic',
-                          label: content.diagnostics.title,
-                          before: 'Blocked',
-                          after: 'Scoped synthetic review',
+      <section aria-labelledby="diagnostic-decision-title" className="admin-decision__context">
+        <div>
+          <p>{content.diagnostics.auditReference}</p>
+          <h2 id="diagnostic-decision-title">
+            {decision === 'allowed'
+              ? content.diagnostics.allowedTitle
+              : content.diagnostics.blockedTitle}
+          </h2>
+          <p>{content.diagnostics.denial}</p>
+        </div>
+        <StatusSignal
+          label={
+            decision === 'allowed'
+              ? content.diagnostics.allowedTitle
+              : content.diagnostics.blockedTitle
+          }
+          state={decision === 'allowed' ? 'preview' : 'error'}
+        />
+      </section>
+      <div className="admin-diagnostic__scope">
+        <ConsentScopePanel consent={consent} content={content} decision={decision} />
+        {admittedConsent !== null ? (
+          <section aria-labelledby="diagnostic-fields-title" className="admin-decision__evidence">
+            <h2 id="diagnostic-fields-title">{content.diagnostics.allowedTitle}</h2>
+            <dl>
+              <div>
+                <dt>startup-state</dt>
+                <dd>
+                  <code>synthetic-ready</code>
+                </dd>
+              </div>
+              <div>
+                <dt>application-version</dt>
+                <dd>
+                  <code>1.0.0-preview</code>
+                </dd>
+              </div>
+            </dl>
+            <div data-high-risk-action="true">
+              {workflow === null ? (
+                <LbButton
+                  onPress={() => {
+                    setWorkflow(
+                      workflowInput({
+                        consent: {
+                          expiresAt: admittedConsent.expiresAt,
+                          granted: admittedConsent.granted,
+                          permittedFields: admittedConsent.permittedFields,
+                          purpose: admittedConsent.purpose,
+                          requestingActor: admittedConsent.actor,
                         },
-                      ],
-                      role: 'security',
-                      viewportWidth,
-                    }),
-                  );
-                }}
-              >
-                {content.diagnostics.allowedTitle}
-              </LbButton>
-            ) : (
-              <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />
-            )}
-          </div>
-        </section>
-      ) : (
-        <p role="status">{content.diagnostics.denial}</p>
-      )}
-      <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[1]} />
+                        family: 'diagnostic',
+                        fields: { diagnostic: 'diagnostic-preview' },
+                        impact: content.diagnostics.denial,
+                        label: content.diagnostics.allowedTitle,
+                        purpose: admittedConsent.purpose,
+                        review: [
+                          {
+                            field: 'diagnostic',
+                            label: content.diagnostics.title,
+                            before: 'Blocked',
+                            after: 'Scoped synthetic review',
+                          },
+                        ],
+                        role: 'security',
+                        viewportWidth,
+                      }),
+                    );
+                  }}
+                >
+                  {content.diagnostics.allowedTitle}
+                </LbButton>
+              ) : (
+                <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />
+              )}
+            </div>
+          </section>
+        ) : (
+          <p role="status">{content.diagnostics.denial}</p>
+        )}
+      </div>
+      <section aria-labelledby="diagnostic-audit-title" className="admin-decision__audit">
+        <h2 id="diagnostic-audit-title">{content.audit.detailAction}</h2>
+        <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[1]} />
+      </section>
     </article>
   );
 };
@@ -997,26 +1065,36 @@ const RoleLanding = ({
   const routes = ADMIN_ROLE_ROUTE_ACCESS[role];
   const nextRoute = routes.find((routeId) => routeId !== 'admin-role') ?? 'admin-role';
   const nextMetadata = getAdminPreviewMetadata(content.locale, nextRoute);
-  const activity =
-    ADMIN_AUDIT_EVENTS.find((event) => event.role === role) ?? ADMIN_AUDIT_EVENTS[0];
+  const activity = ADMIN_AUDIT_EVENTS.find((event) => event.role === role) ?? ADMIN_AUDIT_EVENTS[0];
   const copy =
     content.locale === 'pt-BR'
       ? {
-          activity: 'Atividade recente da prévia',
+          attention: 'Atenção',
+          available: 'Revisão segura disponível',
           currentRole: 'Função atual',
-          nextAction: 'Próximo trabalho',
+          latest: 'Último evento',
+          nextAction: 'Próxima decisão segura',
+          nextSafeReview: 'Próxima revisão segura',
           open: 'Abrir área de trabalho',
+          queue: 'Fila atribuída',
           result: 'Resultado imutável',
+          task: 'Tarefa',
           workspaces: 'Áreas disponíveis',
         }
       : {
-          activity: 'Recent preview activity',
+          attention: 'Attention',
+          available: 'Safe review available',
           currentRole: 'Current role',
-          nextAction: 'Next work',
+          latest: 'Latest event',
+          nextAction: 'Next safe decision',
+          nextSafeReview: 'Next safe review',
           open: 'Open workspace',
+          queue: 'Assigned queue',
           result: 'Immutable result',
+          task: 'Task',
           workspaces: 'Available workspaces',
         };
+  const queueRoutes = routes.filter((routeId) => routeId !== 'admin-role');
 
   return (
     <article className="admin-landing" data-admin-workspace="role landing">
@@ -1027,7 +1105,11 @@ const RoleLanding = ({
       </header>
 
       <div className="admin-landing__layout">
-        <section aria-labelledby="admin-next-work-title" className="admin-landing__focus">
+        <section
+          aria-labelledby="admin-next-work-title"
+          className="admin-landing__focus"
+          data-decision-priority="next-safe-review"
+        >
           <p>{copy.nextAction}</p>
           <h2 id="admin-next-work-title">{nextMetadata.title}</h2>
           <p>{nextMetadata.summary}</p>
@@ -1044,17 +1126,7 @@ const RoleLanding = ({
             </div>
             <div>
               <dt>{copy.workspaces}</dt>
-              <dd>{routes.length}</dd>
-            </div>
-          </dl>
-        </aside>
-
-        <section aria-labelledby="admin-recent-activity-title" className="admin-landing__activity">
-          <h2 id="admin-recent-activity-title">{copy.activity}</h2>
-          <dl>
-            <div>
-              <dt>{content.audit.action}</dt>
-              <dd>{activity.action}</dd>
+              <dd>{queueRoutes.length}</dd>
             </div>
             <div>
               <dt>{copy.result}</dt>
@@ -1069,26 +1141,42 @@ const RoleLanding = ({
               </dd>
             </div>
           </dl>
-        </section>
+        </aside>
 
-        <section aria-labelledby="admin-workspaces-title" className="admin-landing__workspaces">
-          <h2 id="admin-workspaces-title">{copy.workspaces}</h2>
-          <ul>
-            {routes.map((routeId) => {
-              const metadata = getAdminPreviewMetadata(content.locale, routeId);
-              return (
-                <li key={routeId}>
-                  <a
-                    aria-current={routeId === 'admin-role' ? 'page' : undefined}
-                    href={hrefFor(routeId, content.locale, role)}
-                  >
-                    <span>{metadata.title}</span>
-                    <small>{metadata.summary}</small>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+        <section aria-labelledby="admin-queue-title" className="admin-landing__queue">
+          <h2 id="admin-queue-title">{copy.queue}</h2>
+          <table>
+            <caption>{content.landing.scopeBody}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{copy.task}</th>
+                <th scope="col">{copy.attention}</th>
+                <th scope="col">{copy.latest}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {queueRoutes.map((routeId, index) => {
+                const metadata = getAdminPreviewMetadata(content.locale, routeId);
+                return (
+                  <tr key={routeId}>
+                    <th scope="row">
+                      <a href={hrefFor(routeId, content.locale, role)}>{metadata.title}</a>
+                    </th>
+                    <td>{index === 0 ? copy.nextSafeReview : copy.available}</td>
+                    <td>
+                      {index === 0 ? (
+                        <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
+                      ) : (
+                        <span aria-label={content.locale === 'pt-BR' ? 'Sem evento' : 'No event'}>
+                          —
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </section>
       </div>
     </article>

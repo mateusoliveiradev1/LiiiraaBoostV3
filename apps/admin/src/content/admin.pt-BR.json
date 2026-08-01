@@ -66,13 +66,20 @@
   "security": {
     "title": "Revisão de segurança",
     "summary": "Inspecione um alerta sintético de risco e prepare uma resposta específica sem aceitar uma credencial de segurança.",
+    "decisionTitle": "Mantenha a contenção pendente até revisar as evidências de repetição",
+    "evidenceTitle": "Evidências de contenção",
     "reviewLabel": "Revisão SEC-083",
     "target": "Alvo de segurança ••••-083",
     "state": "Revisão de contenção necessária",
     "detail": "Uma solicitação sintética excedeu a janela esperada de repetição. Nenhuma conta, token, endereço ou valor de diagnóstico está presente.",
     "action": "Revisar ação de contenção",
     "purpose": "Preparar a revisão de contenção para o alerta sintético de segurança.",
-    "impact": "Uma autoridade futura poderia limitar uma sessão identificada. Esta prévia não pode revogar, bloquear nem alterá-la."
+    "impact": "Uma autoridade futura poderia limitar uma sessão identificada. Esta prévia não pode revogar, bloquear nem alterá-la.",
+    "constraintsTitle": "Restrições da decisão de segurança",
+    "authorityTitle": "Autoridade de contenção indisponível",
+    "authorityBody": "Nenhuma credencial de segurança, canal de sessão ou autoridade de revogação está conectada. O alvo sintético permanece inalterado após a revisão.",
+    "authorityAction": "Aplicar contenção — indisponível",
+    "auditTitle": "Trilha imutável da contenção"
   },
   "diagnostics": {
     "title": "Diagnósticos delimitados por consentimento",

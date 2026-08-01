@@ -66,13 +66,20 @@
   "security": {
     "title": "Security review",
     "summary": "Inspect a synthetic risk alert and prepare an object-specific response without accepting a security credential.",
+    "decisionTitle": "Keep containment pending until the retry evidence is reviewed",
+    "evidenceTitle": "Containment evidence",
     "reviewLabel": "Review SEC-083",
     "target": "Security target ••••-083",
     "state": "Containment review required",
     "detail": "A synthetic request exceeded the expected retry window. No account, token, address, or diagnostic value is present.",
     "action": "Review containment action",
     "purpose": "Prepare containment review for the synthetic security alert.",
-    "impact": "A future authority could limit one identified session. This preview cannot revoke, block, or mutate it."
+    "impact": "A future authority could limit one identified session. This preview cannot revoke, block, or mutate it.",
+    "constraintsTitle": "Security decision constraints",
+    "authorityTitle": "Containment authority unavailable",
+    "authorityBody": "No security credential, session channel, or revocation authority is connected. The synthetic target remains unchanged after review.",
+    "authorityAction": "Apply containment — unavailable",
+    "auditTitle": "Immutable containment trail"
   },
   "diagnostics": {
     "title": "Consent-scoped diagnostics",
