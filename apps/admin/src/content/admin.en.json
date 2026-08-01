@@ -10,29 +10,45 @@
   },
   "landing": {
     "title": "Role workspace",
-    "summary": "Review the exact responsibilities assigned to this deterministic role. No credential, customer record, or administrative authority is connected.",
+    "summary": "Prioritize the next safe review and move only through the responsibilities assigned to this preview role.",
     "scopeTitle": "Available responsibilities",
-    "scopeBody": "Navigation is projected from the canonical route manifest and excludes every cross-role responsibility."
+    "scopeBody": "Your navigation contains only workspaces assigned to this preview role; responsibilities owned by other roles remain inaccessible."
   },
   "support": {
     "title": "Support case review",
     "summary": "Read and prepare a response for a synthetic case without exposing a customer identity or sending a message.",
+    "decisionTitle": "Decide whether this response is ready for review",
+    "decisionBody": "The case is waiting for a scoped response review. You can refine the draft and inspect its evidence, but this preview cannot send it.",
+    "evidenceTitle": "Case evidence",
     "caseLabel": "Case SUP-2048",
     "target": "Customer target ••••-042",
     "status": "Awaiting review",
     "subject": "Startup guidance after a Windows update",
     "detail": "The synthetic report contains a startup state and no uploaded diagnostic payload.",
     "responseLabel": "Support response draft",
+    "draftValue": "I reviewed the synthetic startup evidence.",
     "responseHint": "The subject is the only safe draft field. Response text is cleared when the review is cancelled.",
     "reviewAction": "Review support response",
     "cancelAction": "Cancel response draft",
     "cancelled": "Response draft cancelled. No message was sent and no remote event changed.",
     "purpose": "Prepare a scoped response for the synthetic support case.",
-    "impact": "A future submission would send only the reviewed response to the case. This preview sends nothing."
+    "impact": "A future submission would send only the reviewed response to the case. This preview sends nothing.",
+    "constraintsTitle": "Consent and handling scope",
+    "constraintsBody": "Review is limited to the synthetic case and response fields for this support preview actor.",
+    "permittedFields": "case, response",
+    "consentExpires": "2026-01-15T13:00:00.000Z",
+    "consentActor": "support.preview",
+    "consentAudit": "audit-consent-014",
+    "authorityTitle": "Administrative action unavailable",
+    "authorityBody": "No identity, permission, or remote message channel is connected. Only the deterministic no-change review can run.",
+    "authorityAction": "Send response — Unavailable",
+    "auditTitle": "Immutable review trail"
   },
   "operations": {
     "title": "Operations review",
     "summary": "Triage a synthetic release-control alert and review proportional action safeguards without changing an operational system.",
+    "decisionTitle": "Keep publication held while evidence is incomplete",
+    "evidenceTitle": "Release-control evidence",
     "reviewLabel": "Review OPS-117",
     "target": "Deployment target ••••-017",
     "state": "Publication held",
@@ -40,7 +56,12 @@
     "action": "Review publication hold",
     "purpose": "Keep the synthetic release held while evidence is reviewed.",
     "impact": "A future authority could retain the hold for one release object. Phase 3 cannot alter publication state.",
-    "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px."
+    "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px.",
+    "constraintsTitle": "Decision constraints",
+    "authorityTitle": "Publication authority unavailable",
+    "authorityBody": "This preview has no release credential or promotion channel. The hold remains unchanged after review.",
+    "authorityAction": "Retain publication hold — unavailable",
+    "auditTitle": "Immutable decision trail"
   },
   "security": {
     "title": "Security review",

@@ -10,29 +10,45 @@
   },
   "landing": {
     "title": "Área da função",
-    "summary": "Revise as responsabilidades exatas atribuídas a esta função determinística. Nenhuma credencial, registro de cliente ou autoridade administrativa está conectada.",
+    "summary": "Priorize a próxima revisão segura e avance somente pelas responsabilidades atribuídas a esta função de prévia.",
     "scopeTitle": "Responsabilidades disponíveis",
-    "scopeBody": "A navegação é projetada a partir do manifesto canônico de rotas e exclui toda responsabilidade de outra função."
+    "scopeBody": "Sua navegação contém somente áreas atribuídas a esta função de prévia; responsabilidades de outras funções permanecem inacessíveis."
   },
   "support": {
     "title": "Revisão de caso de suporte",
     "summary": "Leia e prepare uma resposta para um caso sintético sem expor a identidade do cliente nem enviar uma mensagem.",
+    "decisionTitle": "Decida se esta resposta está pronta para revisão",
+    "decisionBody": "O caso aguarda uma revisão delimitada da resposta. Você pode refinar o rascunho e inspecionar as evidências, mas esta prévia não pode enviá-lo.",
+    "evidenceTitle": "Evidências do caso",
     "caseLabel": "Caso SUP-2048",
     "target": "Alvo de cliente ••••-042",
     "status": "Aguardando revisão",
     "subject": "Orientação de inicialização após uma atualização do Windows",
     "detail": "O relato sintético contém um estado de inicialização e nenhum diagnóstico enviado.",
     "responseLabel": "Rascunho de resposta do suporte",
+    "draftValue": "Revisei as evidências sintéticas de inicialização.",
     "responseHint": "O assunto é o único campo seguro do rascunho. O texto da resposta é apagado quando a revisão é cancelada.",
     "reviewAction": "Revisar resposta do suporte",
     "cancelAction": "Cancelar rascunho da resposta",
     "cancelled": "Rascunho da resposta cancelado. Nenhuma mensagem foi enviada e nenhum evento remoto mudou.",
     "purpose": "Preparar uma resposta delimitada para o caso sintético de suporte.",
-    "impact": "Um envio futuro mandaria somente a resposta revisada para o caso. Esta prévia não envia nada."
+    "impact": "Um envio futuro mandaria somente a resposta revisada para o caso. Esta prévia não envia nada.",
+    "constraintsTitle": "Escopo de consentimento e tratamento",
+    "constraintsBody": "A revisão é limitada aos campos sintéticos de caso e resposta para este ator de prévia do suporte.",
+    "permittedFields": "case, response",
+    "consentExpires": "2026-01-15T13:00:00.000Z",
+    "consentActor": "support.preview",
+    "consentAudit": "audit-consent-014",
+    "authorityTitle": "Ação administrativa indisponível",
+    "authorityBody": "Nenhuma identidade, permissão ou canal remoto de mensagens está conectado. Somente a revisão determinística sem alteração pode ser executada.",
+    "authorityAction": "Enviar resposta — indisponível",
+    "auditTitle": "Trilha imutável da revisão"
   },
   "operations": {
     "title": "Revisão operacional",
     "summary": "Faça a triagem de um alerta sintético de controle de versão e revise salvaguardas proporcionais sem alterar um sistema operacional.",
+    "decisionTitle": "Mantenha a publicação retida enquanto as evidências estiverem incompletas",
+    "evidenceTitle": "Evidências de controle da versão",
     "reviewLabel": "Revisão OPS-117",
     "target": "Alvo de implantação ••••-017",
     "state": "Publicação retida",
@@ -40,7 +56,12 @@
     "action": "Revisar retenção da publicação",
     "purpose": "Manter a versão sintética retida enquanto as evidências são revisadas.",
     "impact": "Uma autoridade futura poderia manter a retenção de um objeto de versão. A Fase 3 não pode alterar a publicação.",
-    "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px."
+    "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px.",
+    "constraintsTitle": "Restrições da decisão",
+    "authorityTitle": "Autoridade de publicação indisponível",
+    "authorityBody": "Esta prévia não possui credencial de versão nem canal de promoção. A retenção permanece inalterada após a revisão.",
+    "authorityAction": "Manter retenção da publicação — indisponível",
+    "auditTitle": "Trilha imutável da decisão"
   },
   "security": {
     "title": "Revisão de segurança",

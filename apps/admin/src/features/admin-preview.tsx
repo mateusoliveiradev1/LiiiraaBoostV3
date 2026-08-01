@@ -128,12 +128,20 @@ const hrefFor = (routeId: AdminPreviewRoute, locale: WebLocale, role: AdminPrevi
 
 const FixtureHeader = ({
   content,
+  showProvenance = false,
   summary,
   title,
-}: Readonly<{ content: AdminContent; summary: string; title: string }>) => (
+}: Readonly<{
+  content: AdminContent;
+  showProvenance?: boolean;
+  summary: string;
+  title: string;
+}>) => (
   <RouteHeader
     actions={
-      <ProvenanceLabel detail={content.fixtureLabel} kind="simulated" locale={content.locale} />
+      showProvenance ? (
+        <ProvenanceLabel detail={content.fixtureLabel} kind="simulated" locale={content.locale} />
+      ) : undefined
     }
     description={summary}
     title={title}
@@ -413,6 +421,7 @@ export const ImmutableAuditTimeline = ({
     <article data-admin-workspace="immutable audit">
       <FixtureHeader
         content={content}
+        showProvenance={true}
         summary={content.audit.summary}
         title={content.audit.title}
       />
@@ -441,106 +450,192 @@ export const ImmutableAuditTimeline = ({
   );
 };
 
+const DisconnectedAuthority = ({
+  action,
+  body,
+  title,
+}: Readonly<{ action: string; body: string; title: string }>) => (
+  <section
+    aria-labelledby="admin-disconnected-authority-title"
+    className="admin-disconnected-authority"
+    data-authority-action="unavailable"
+    data-authority-state="disconnected"
+  >
+    <div>
+      <StatusSignal label={title} state="unavailable" />
+      <h2 id="admin-disconnected-authority-title">{title}</h2>
+      <p>{body}</p>
+    </div>
+    <LbButton isDisabled>{action}</LbButton>
+  </section>
+);
+
 export const SupportCaseWorkspace = ({
   content,
   viewportWidth,
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => {
-  const [response, setResponse] = useState('I reviewed the synthetic startup evidence.');
+  const [response, setResponse] = useState(content.support.draftValue);
   const [cancelled, setCancelled] = useState(false);
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   if (workflow !== null) {
     return <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W14" />;
   }
   return (
-    <article data-admin-workspace="role-scoped admin support">
+    <article
+      className="admin-decision"
+      data-admin-workspace="role-scoped admin support"
+      data-authority-state="disconnected"
+    >
       <FixtureHeader
         content={content}
         summary={content.support.summary}
         title={content.support.title}
       />
-      <PreviewBoundary description={content.support.summary} />
-      <dl>
+
+      <section aria-labelledby="support-decision-title" className="admin-decision__context">
         <div>
-          <dt>{content.support.caseLabel}</dt>
-          <dd>{content.support.subject}</dd>
+          <p>{content.support.caseLabel}</p>
+          <h2 id="support-decision-title">{content.support.decisionTitle}</h2>
+          <p>{content.support.decisionBody}</p>
         </div>
-        <div>
-          <dt>{content.audit.target}</dt>
-          <dd>
-            <code>{content.support.target}</code>
-          </dd>
-        </div>
-        <div>
-          <dt>{content.audit.result}</dt>
-          <dd>
-            <StatusSignal label={content.support.status} state="preview" />
-          </dd>
-        </div>
-      </dl>
-      <p>{content.support.detail}</p>
-      <LbTextArea
-        description={content.support.responseHint}
-        label={content.support.responseLabel}
-        maxLength={600}
-        onChange={(value) => {
-          setCancelled(false);
-          setResponse(value);
-        }}
-        value={response}
-      />
-      {cancelled ? <p role="status">{content.support.cancelled}</p> : null}
-      <div role="group" aria-label={content.support.responseLabel}>
-        <LbButton
-          onPress={() => {
-            setResponse('');
-            setCancelled(true);
-          }}
-          variant="quiet"
-        >
-          {content.support.cancelAction}
-        </LbButton>
-        <LbButton
-          isDisabled={response.trim().length === 0}
-          onPress={() => {
-            setWorkflow(
-              workflowInput({
-                consent: {
-                  expiresAt: '2026-01-15T13:00:00.000Z',
-                  granted: true,
-                  permittedFields: ['case', 'response'],
-                  purpose: content.support.purpose,
-                  requestingActor: 'support.preview',
-                },
-                family: 'support',
-                fields: { case: 'case-preview', response },
-                impact: content.support.impact,
-                label: content.support.reviewAction,
-                purpose: content.support.purpose,
-                review: [
-                  {
-                    field: 'case',
-                    label: content.support.caseLabel,
-                    before: 'Unreviewed',
-                    after: 'Scoped review',
-                  },
-                  {
-                    field: 'response',
-                    label: content.support.responseLabel,
-                    before: 'Not sent',
-                    after: response,
-                  },
-                ],
-                role: 'support',
-                safeDraftFields: ['case'],
-                viewportWidth,
-              }),
-            );
-          }}
-        >
-          {content.support.reviewAction}
-        </LbButton>
+        <StatusSignal label={content.support.status} state="warning" />
+      </section>
+
+      <section aria-labelledby="support-evidence-title" className="admin-decision__evidence">
+        <h2 id="support-evidence-title">{content.support.evidenceTitle}</h2>
+        <dl>
+          <div>
+            <dt>{content.support.caseLabel}</dt>
+            <dd>{content.support.subject}</dd>
+          </div>
+          <div>
+            <dt>{content.audit.target}</dt>
+            <dd>
+              <code>{content.support.target}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>{content.audit.result}</dt>
+            <dd>{content.support.detail}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <div className="admin-decision__workbench">
+        <section aria-labelledby="support-response-title" className="admin-decision__editor">
+          <h2 id="support-response-title">{content.support.responseLabel}</h2>
+          <LbTextArea
+            description={content.support.responseHint}
+            label={content.support.responseLabel}
+            maxLength={600}
+            onChange={(value) => {
+              setCancelled(false);
+              setResponse(value);
+            }}
+            value={response}
+          />
+          {cancelled ? <p role="status">{content.support.cancelled}</p> : null}
+          <div role="group" aria-label={content.support.responseLabel}>
+            <LbButton
+              onPress={() => {
+                setResponse('');
+                setCancelled(true);
+              }}
+              variant="quiet"
+            >
+              {content.support.cancelAction}
+            </LbButton>
+            <LbButton
+              isDisabled={response.trim().length === 0}
+              onPress={() => {
+                setWorkflow(
+                  workflowInput({
+                    consent: {
+                      expiresAt: content.support.consentExpires,
+                      granted: true,
+                      permittedFields: ['case', 'response'],
+                      purpose: content.support.purpose,
+                      requestingActor: content.support.consentActor,
+                    },
+                    family: 'support',
+                    fields: { case: 'case-preview', response },
+                    impact: content.support.impact,
+                    label: content.support.reviewAction,
+                    purpose: content.support.purpose,
+                    review: [
+                      {
+                        field: 'case',
+                        label: content.support.caseLabel,
+                        before: 'Unreviewed',
+                        after: 'Scoped review',
+                      },
+                      {
+                        field: 'response',
+                        label: content.support.responseLabel,
+                        before: 'Not sent',
+                        after: response,
+                      },
+                    ],
+                    role: 'support',
+                    safeDraftFields: ['case'],
+                    viewportWidth,
+                  }),
+                );
+              }}
+            >
+              {content.support.reviewAction}
+            </LbButton>
+          </div>
+        </section>
+
+        <aside aria-labelledby="support-constraints-title" className="admin-decision__constraints">
+          <h2 id="support-constraints-title">{content.support.constraintsTitle}</h2>
+          <p>{content.support.constraintsBody}</p>
+          <dl>
+            <div>
+              <dt>{content.diagnostics.purposeLabel}</dt>
+              <dd>{content.support.purpose}</dd>
+            </div>
+            <div>
+              <dt>{content.diagnostics.fieldsLabel}</dt>
+              <dd>
+                <code>{content.support.permittedFields}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>{content.diagnostics.expirationLabel}</dt>
+              <dd>
+                <time dateTime={content.support.consentExpires}>
+                  {content.support.consentExpires}
+                </time>
+              </dd>
+            </div>
+            <div>
+              <dt>{content.diagnostics.actorLabel}</dt>
+              <dd>
+                <code>{content.support.consentActor}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>{content.diagnostics.auditLabel}</dt>
+              <dd>
+                <code>{content.support.consentAudit}</code>
+              </dd>
+            </div>
+          </dl>
+        </aside>
       </div>
-      <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[0]} />
+
+      <DisconnectedAuthority
+        action={content.support.authorityAction}
+        body={content.support.authorityBody}
+        title={content.support.authorityTitle}
+      />
+
+      <section aria-labelledby="support-audit-title" className="admin-decision__audit">
+        <h2 id="support-audit-title">{content.support.auditTitle}</h2>
+        <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[0]} />
+      </section>
     </article>
   );
 };
@@ -663,25 +758,65 @@ export const OperationsReview = ({
   content,
   viewportWidth,
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
-  <article data-admin-workspace="operations">
+  <article
+    className="admin-decision admin-decision--critical"
+    data-admin-workspace="operations"
+    data-authority-state="disconnected"
+  >
     <FixtureHeader
       content={content}
       summary={content.operations.summary}
       title={content.operations.title}
     />
-    <StatusSignal label={content.operations.state} state="warning" />
-    <p>{content.operations.detail}</p>
-    <CriticalReview
-      action={content.operations.action}
-      content={content}
-      impact={content.operations.impact}
-      purpose={content.operations.purpose}
-      role="operations"
-      scenarioId="W16"
-      target={content.operations.target}
-      viewportWidth={viewportWidth}
+    <section aria-labelledby="operations-decision-title" className="admin-decision__context">
+      <div>
+        <p>{content.operations.reviewLabel}</p>
+        <h2 id="operations-decision-title">{content.operations.decisionTitle}</h2>
+        <p>{content.operations.detail}</p>
+      </div>
+      <StatusSignal label={content.operations.state} state="warning" />
+    </section>
+    <section aria-labelledby="operations-evidence-title" className="admin-decision__evidence">
+      <h2 id="operations-evidence-title">{content.operations.evidenceTitle}</h2>
+      <dl>
+        <div>
+          <dt>{content.audit.target}</dt>
+          <dd>
+            <code>{content.operations.target}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>{content.diagnostics.purposeLabel}</dt>
+          <dd>{content.operations.purpose}</dd>
+        </div>
+        <div>
+          <dt>{content.locale === 'pt-BR' ? 'Impacto' : 'Impact'}</dt>
+          <dd>{content.operations.impact}</dd>
+        </div>
+      </dl>
+    </section>
+    <section aria-labelledby="operations-constraints-title" className="admin-decision__constraints">
+      <h2 id="operations-constraints-title">{content.operations.constraintsTitle}</h2>
+      <CriticalReview
+        action={content.operations.action}
+        content={content}
+        impact={content.operations.impact}
+        purpose={content.operations.purpose}
+        role="operations"
+        scenarioId="W16"
+        target={content.operations.target}
+        viewportWidth={viewportWidth}
+      />
+    </section>
+    <DisconnectedAuthority
+      action={content.operations.authorityAction}
+      body={content.operations.authorityBody}
+      title={content.operations.authorityTitle}
     />
-    <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[2]} />
+    <section aria-labelledby="operations-audit-title" className="admin-decision__audit">
+      <h2 id="operations-audit-title">{content.operations.auditTitle}</h2>
+      <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[2]} />
+    </section>
   </article>
 );
 

@@ -352,20 +352,6 @@ const TOKEN_MIGRATION_LEDGER = Object.freeze([
     surface: 'account',
     value: '64px',
   },
-  {
-    owner: 'plan-03-41',
-    property: 'padding-block-start',
-    source: 'apps/admin/src/app/admin-shell.css',
-    surface: 'admin',
-    value: '164px',
-  },
-  {
-    owner: 'plan-03-41',
-    property: 'margin-block-start',
-    source: 'apps/admin/src/app/admin-shell.css',
-    surface: 'admin',
-    value: '172px',
-  },
 ] as const);
 
 // Resolved entries remain immutable audit history; only unresolved owners are admitted by the gate.
