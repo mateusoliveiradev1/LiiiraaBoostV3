@@ -17,22 +17,33 @@ type Scenario = Readonly<{
 }>;
 
 type VisualEntry = Readonly<{
+  approved: false;
+  candidatePurpose: 'revised-geometry-focal-state-review';
   captureId: string;
   comparisonSource: 'phase-02-approved-desktop-captures';
   forcedColors: 'none' | 'active';
   locale: Scenario['locale'];
   localeReview: 'pt-BR-default' | 'en-parity';
   motion: 'no-preference' | 'reduce';
-  rebaselineOwner: 'plan-03-52';
+  origin:
+    | 'http://public.localhost:3100'
+    | 'http://account.localhost:3101'
+    | 'http://admin.localhost:3102';
+  priorEvidenceStatus: 'invalidated-rejected-pixels';
+  published: false;
+  rebaselineOwner: 'plan-03-62';
   reviewPurpose: string;
   route: string;
   routeId: string;
   scenarioId?: string;
   snapshotPath: string;
+  sourceBinding: 'current-source-candidate';
   sourceHash?: string;
   state: string;
+  status: 'candidate';
   surface: Surface;
   textScale: number;
+  visualTarget: false;
   viewport: string;
   zoom: number;
 }>;
@@ -278,9 +289,7 @@ test('@final @public development CSP is browser-clean on every separate origin',
           env: {
             ...process.env,
             NODE_ENV: 'development',
-            ...(surface.app === '@liiiraa/admin'
-              ? { LIIIRAA_ADMIN_ORIGIN: surface.origin }
-              : {}),
+            ...(surface.app === '@liiiraa/admin' ? { LIIIRAA_ADMIN_ORIGIN: surface.origin } : {}),
           },
           shell: process.platform === 'win32',
           stdio: 'pipe',
@@ -303,7 +312,9 @@ test('@final @public development CSP is browser-clean on every separate origin',
       expect(response?.headers()['content-security-policy']).toContain("'unsafe-eval'");
       await expect(page.locator('main')).toBeVisible();
       await page.waitForTimeout(500);
-      expect(consoleErrors, `${surface.app} emitted the reported React/Turbopack error`).toEqual([]);
+      expect(consoleErrors, `${surface.app} emitted the reported React/Turbopack error`).toEqual(
+        [],
+      );
       page.off('console', onConsole);
     } finally {
       if (child !== undefined) stopDevelopmentServer(child);
@@ -363,6 +374,61 @@ test('@final @public visual manifest is an exact W01-W18 projection', async ({},
       createHash('sha256').update(JSON.stringify(scenario)).digest('hex'),
     );
     expect(entry?.snapshotPath).toContain(`${scenario.id}-${surfaceFor(scenario.routeId)}-final-`);
+  }
+});
+
+test('@final @public visual manifest closes all 25 records as unapproved Plan 03-62 candidates', async ({}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+
+  expect(visualManifest.entries.map(({ captureId }) => captureId)).toEqual([
+    ...Array.from({ length: 18 }, (_, index) => `W${String(index + 1).padStart(2, '0')}`),
+    ...Array.from({ length: 7 }, (_, index) => `G${String(index + 1).padStart(2, '0')}`),
+  ]);
+  expect(visualManifest.entries).toHaveLength(25);
+
+  const expectedOrigins = {
+    account: 'http://account.localhost:3101',
+    admin: 'http://admin.localhost:3102',
+    public: 'http://public.localhost:3100',
+  } as const satisfies Record<Surface, VisualEntry['origin']>;
+
+  for (const entry of visualManifest.entries) {
+    expect(entry).toMatchObject({
+      approved: false,
+      candidatePurpose: 'revised-geometry-focal-state-review',
+      comparisonSource: 'phase-02-approved-desktop-captures',
+      origin: expectedOrigins[entry.surface],
+      priorEvidenceStatus: 'invalidated-rejected-pixels',
+      published: false,
+      rebaselineOwner: 'plan-03-62',
+      sourceBinding: 'current-source-candidate',
+      status: 'candidate',
+      visualTarget: false,
+    });
+    expect(entry.route).toMatch(/^\/(?:en|pt-BR)(?:\/|$)/u);
+    expect(entry.routeId).not.toHaveLength(0);
+    expect(entry.state).not.toHaveLength(0);
+    expect(entry.viewport).toMatch(/^\d+x\d+$/u);
+    expect(entry.reviewPurpose).toMatch(/(?:identity|shell|navigation|hierarchy|state|recovery)/iu);
+  }
+
+  for (const captureId of ['G01', 'G04', 'G06'] as const) {
+    expect(visualManifest.entries.find((entry) => entry.captureId === captureId)).toMatchObject({
+      priorEvidenceStatus: 'invalidated-rejected-pixels',
+      visualTarget: false,
+    });
+  }
+
+  for (const surface of ['public', 'account', 'admin'] as const) {
+    const entries = visualManifest.entries.filter((entry) => entry.surface === surface);
+    expect(new Set(entries.map(({ locale }) => locale))).toEqual(new Set(['pt-BR', 'en']));
+    expect(entries.some(({ viewport }) => viewport === '390x844')).toBe(true);
+    expect(entries.some(({ viewport }) => viewport !== '390x844' && viewport !== '320x800')).toBe(
+      true,
+    );
+    expect(new Set(entries.map(({ origin }) => origin))).toEqual(
+      new Set([expectedOrigins[surface]]),
+    );
   }
 });
 
