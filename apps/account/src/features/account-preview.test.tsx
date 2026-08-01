@@ -89,6 +89,29 @@ describe('W11 and W12 complete account states', () => {
     expect(featureSource).toContain("hrefFor('account-support', content.locale)");
   });
 
+  it('projects the canonical W12 Overview into an independently renderable offline-stale recovery state', () => {
+    expect(featureSource).toContain('export const resolveAccountScenarioId');
+    expect(featureSource).toContain("if (activeScenarioId === 'W12')");
+    expect(featureSource).toContain(
+      'data-account-state="offline stale expired-session partial-failure"',
+    );
+    expect(featureSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
+    expect(accountEn.states.offline).toMatch(/offline/iu);
+    expect(accountEn.states.stale).toMatch(/out of date|stale/iu);
+    expect(accountEn.states.stale).toMatch(/Reconnect|refresh/iu);
+    expect(featureSource).toContain('<p role="status">');
+  });
+
+  it('admits only canonical route-compatible scenarios without exposing a user selector', () => {
+    const resolverSource = sourceBetween(
+      'export const resolveAccountScenarioId',
+      'export const AccountPreviewExperience',
+    );
+    expect(resolverSource).toContain('getWebScenario(candidate)');
+    expect(resolverSource).toContain('ACCOUNT_SCENARIO_ROUTE_MISMATCH');
+    expect(pageSource).not.toMatch(/searchParams|scenarioId|process\.env/u);
+  });
+
   it('uses accessible compact invoice details and a public stable download boundary', () => {
     const stable = routeHref('releases-channel', { channel: 'stable', locale: 'en' });
     expect(stable).toEqual({ ok: true, value: '/en/releases/stable' });
@@ -102,7 +125,7 @@ describe('W11 and W12 complete account states', () => {
 });
 
 describe('authored overview and Profile workspaces', () => {
-  it('groups next actions, account summaries, and limitations around a clear overview focus', () => {
+  it('groups next actions and account summaries around a clear overview focus', () => {
     const overviewSource = sourceBetween('const OverviewPreview', 'const ProfilePreview');
 
     expect(overviewSource).toContain('account-overview__focus');
@@ -111,7 +134,7 @@ describe('authored overview and Profile workspaces', () => {
     expect(overviewSource).toContain('data-workspace-layout="7/5"');
     expect(overviewSource).toContain('data-workspace-region="focal"');
     expect(overviewSource).toContain('data-workspace-region="context"');
-    expect(overviewSource).toContain('account-overview__limitations');
+    expect(overviewSource).not.toContain('account-overview__limitations');
     expect(overviewSource).toContain("hrefFor('account-profile', content.locale)");
     expect(overviewSource).toContain("hrefFor('account-subscription', content.locale)");
     expect(overviewSource).toContain("hrefFor('account-device', content.locale)");
@@ -146,12 +169,27 @@ describe('authored overview and Profile workspaces', () => {
     for (const content of [accountPtBr, accountEn]) {
       expect(content.overview.nextTitle.length).toBeGreaterThan(0);
       expect(content.overview.summariesTitle.length).toBeGreaterThan(0);
-      expect(content.overview.limitationsTitle.length).toBeGreaterThan(0);
+      expect(JSON.stringify(content.overview)).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
+      expect(JSON.stringify(content.overview)).not.toMatch(/Preview scope|Escopo da pr[eÃ©]via/iu);
+      expect(content.overview.emptyBody).not.toMatch(/synthetic|sint[eÃ©]tic/iu);
       expect(content.profile.nameDescription.length).toBeGreaterThan(0);
       expect(content.profile.authorityState.length).toBeGreaterThan(0);
       expect(content.profile.limitations.length).toBeGreaterThan(0);
       expect(content.recovery.signIn.length).toBeGreaterThan(0);
       expect(content.recovery.support.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('explains privacy purpose, availability, retention, sharing, cancellation, and no-change outcomes in human terms', () => {
+    for (const content of [accountPtBr, accountEn]) {
+      const privacyCopy = JSON.stringify(content.privacy);
+      expect(content.privacy.summary).toMatch(/available|dispon[iÃ­]ve/iu);
+      expect(content.privacy.purpose.length).toBeGreaterThan(0);
+      expect(content.privacy.retention.length).toBeGreaterThan(0);
+      expect(content.privacy.sharing.length).toBeGreaterThan(0);
+      expect(content.privacy.revocation).toMatch(/cancel/iu);
+      expect(content.privacy.revocation).toMatch(/no .*change|nenhum.*muda/iu);
+      expect(privacyCopy).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
     }
   });
 
