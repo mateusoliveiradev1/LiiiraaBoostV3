@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-44-PLAN.md
-last_updated: "2026-08-01T03:27:13.810Z"
+stopped_at: Completed 03-47-PLAN.md
+last_updated: "2026-08-01T04:37:07.815Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed 03-44-PLAN.md
+last_activity_desc: Completed 03-47-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
-  total_plans: 104
-  completed_plans: 102
-  percent: 98
+  total_plans: 110
+  completed_plans: 103
+  percent: 94
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 45 of 46
+Plan: 45 of 52
 Status: Ready to execute Plan 03-45
-Last activity: 2026-08-01 — Completed 03-44-PLAN.md
+Last activity: 2026-08-01 — Completed 03-47-PLAN.md
 
-Progress: [██████████] 98%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 102
+- Total plans completed: 103
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -150,6 +150,7 @@ _Updated after plan completion_
 | Phase 03 P42 | 19min | 3 tasks | 16 files |
 | Phase 03 P43 | 67min | 2 tasks | 10 files |
 | Phase 03 P44 | 15min | 2 tasks | 6 files |
+| Phase 03 P47 | 9 min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -433,6 +434,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Reject raw JSON and generic denial pages as admin visual evidence. — Only admitted localized application UI satisfies the visual contract.
 - [Phase 03]: Use executable visual-manifest identities for G06-G07. — The runnable Playwright snapshot contract is the durable artifact naming authority.
 - [Phase 03]: Keep G06-G07 qualitative-only until Plan 03-45. — This plan regenerates evidence but grants no human or publication approval.
+- [Phase 03]: Grant unsafe-eval only when the explicit runtime mode is exactly development; unknown, production, and test modes remain strict. — An exact comparison restores React/Turbopack development debugging without broadening any optimized or test response.
+- [Phase 03]: Keep authored admin denial responses on the strict production CSP contract even during local development. — Rejected origins must never inherit a development-only script execution capability.
 
 ### Pending Todos
 
@@ -474,6 +477,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T03:26:30.320Z
-Stopped at: Completed 03-44-PLAN.md
+Last session: 2026-08-01T04:36:10.664Z
+Stopped at: Completed 03-47-PLAN.md
 Resume file: None
