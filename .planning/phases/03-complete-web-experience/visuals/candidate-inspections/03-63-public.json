@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "plan": "03-63",
   "surface": "public",
-  "inspectedAt": "2026-08-01T21:43:35Z",
-  "sourceRevision": "ed9a8c0cecfa9159e5ca1eb6ec89189ab559bc9a",
+  "inspectedAt": "2026-08-01T22:38:32Z",
+  "sourceRevision": "c88713be06cd7db2946e62d7067b2e1d45bafade",
   "inspectionMethod": {
     "register": "Impeccable brand",
     "detail": "original",
@@ -62,11 +62,11 @@
     "dominantPrimaryCta": "pass",
     "productStageVisibility": "pass",
     "committedOriginalCobalt": "pass",
-    "distinctLongFormRhythms": "reject",
+    "distinctLongFormRhythms": "pass",
     "navigationAndFlagLanguage": "pass",
     "responsiveWidthsRepresented": [1440, 1280, 960, 390],
     "responsive320": "not represented by a public identity in this exact closed subset; no claim made",
-    "contrastAndReadability": "reject",
+    "contrastAndReadability": "pass",
     "noHorizontalOverflow": "pass",
     "noGenericIdenticalCardWall": "pass",
     "noRepeatedEyebrowScaffold": "pass",
@@ -218,60 +218,15 @@
       "id": "W07",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W07-public-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and the fail-closed release gate.",
-      "dimensions": {"width": 1440, "height": 3897},
-      "bytes": 389808,
-      "sha256": "ba2caf9287b546c1e2a7b436b7a9e1d8edf03e1edc9d297967c30678adcab2ac",
+      "dimensions": {"width": 1440, "height": 2904},
+      "bytes": 298242,
+      "sha256": "06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
         "headlineHierarchy": true,
-        "releaseDecisionProminent": false,
-        "contentRhythm": false,
-        "contrastReadable": false,
-        "noOverflow": true,
-        "noGenericScaffold": true,
-        "truthful": true,
-        "noCopy": true
-      },
-      "verdict": "reject",
-      "owner": "03-56",
-      "evidence": "The release route is dominated by a multi-screen raw manifest/repository field dump and machine identifiers before the visitor reaches the blocked-download decision, so implementation-shaped evidence outweighs compatibility, risk, correction, recovery, and action hierarchy."
-    },
-    {
-      "id": "W08",
-      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W08-public-final-wide-1440.png",
-      "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and blocked integrity-mismatch recovery.",
-      "dimensions": {"width": 1440, "height": 3723},
-      "bytes": 349078,
-      "sha256": "7e4affd71fd29ac9af48d56e361089954b1887b6334ec48d970f834ad70b3279",
-      "checks": {
-        "shellNavigation": true,
-        "flagAndLanguage": true,
-        "headlineHierarchy": true,
-        "integrityRecoveryProminent": false,
-        "contentRhythm": false,
-        "contrastReadable": false,
-        "noOverflow": true,
-        "noGenericScaffold": true,
-        "truthful": true,
-        "noCopy": true
-      },
-      "verdict": "reject",
-      "owner": "03-56",
-      "evidence": "The integrity candidate repeats the same dense manifest-first rhythm as W07 and makes raw machine fields the primary visual experience; the actual blocked outcome and recovery choices arrive only after several screens of technical inventory."
-    },
-    {
-      "id": "W09",
-      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W09-public-final-wide-1280.png",
-      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and partial-outage guidance.",
-      "dimensions": {"width": 1280, "height": 1452},
-      "bytes": 139981,
-      "sha256": "fa0b57b6363823c30d540c88e7d14e8967755acec284f38b062ea487f5d3229b",
-      "checks": {
-        "shellNavigation": true,
-        "flagAndLanguage": true,
-        "headlineHierarchy": true,
-        "localizedHumanStatus": false,
+        "releaseDecisionProminent": true,
+        "technicalDisclosureClosed": true,
         "contentRhythm": true,
         "contrastReadable": true,
         "noOverflow": true,
@@ -279,9 +234,56 @@
         "truthful": true,
         "noCopy": true
       },
-      "verdict": "reject",
-      "owner": "03-56",
-      "evidence": "Ordinary PT-BR status chrome visibly exposes `As prévias da Fase 3` and the raw English value `demonstrative-preview`, directly violating the ban on phase/implementation language and raw enum-shaped status copy."
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The release route leads with the blocked public-download decision, human compatibility and recovery guidance, and safe actions. Raw manifest and repository identifiers remain available only inside closed localized technical disclosures."
+    },
+    {
+      "id": "W08",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W08-public-final-wide-1440.png",
+      "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and blocked integrity-mismatch recovery.",
+      "dimensions": {"width": 1440, "height": 2693},
+      "bytes": 258230,
+      "sha256": "2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "integrityRecoveryProminent": true,
+        "technicalDisclosureClosed": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The integrity candidate leads with the blocked outcome, safe recovery choices, and independent verification guidance. Raw manifest and repository evidence is subordinate and contained inside closed technical disclosures."
+    },
+    {
+      "id": "W09",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W09-public-final-wide-1280.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and partial-outage guidance.",
+      "dimensions": {"width": 1280, "height": 1452},
+      "bytes": 142090,
+      "sha256": "4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "localizedHumanStatus": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The PT-BR status route uses localized human labels such as `Operacional`, `Indisponível`, and `Prévia demonstrativa`; it exposes no phase language, internal implementation terminology, or raw enum values."
     },
     {
       "id": "W17",
@@ -363,34 +365,11 @@
     "passed": 14,
     "skipped": 16,
     "failed": 0,
-    "duration": "1.2m",
+    "duration": "1.1m",
     "updateMode": false
   },
-  "verdict": "reject",
+  "verdict": "pass",
   "humanApproved": false,
   "publicationApproved": false,
-  "rejectionOwners": ["03-56"],
-  "revisionGate": {
-    "blockedPlans": ["03-66", "03-45", "03-46"],
-    "requiredCorrections": [
-      {
-        "owner": "03-56",
-        "identities": ["W07", "W08"],
-        "criterion": "release-route content hierarchy and long-form rhythm",
-        "evidence": "Lead with the human release/integrity decision, compatibility, risk, recovery, and action; subordinate raw manifest fields to contextual disclosure or a bounded technical section."
-      },
-      {
-        "owner": "03-56",
-        "identities": ["W09"],
-        "criterion": "localized human status copy",
-        "evidence": "Remove phase language and raw enum-shaped English status from ordinary PT-BR chrome."
-      }
-    ],
-    "requiredSequence": [
-      "Rerun Plan 03-61 Task 2, including exact unfiltered `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts`.",
-      "Run a fresh bounded Plan 03-62 capture attempt.",
-      "Rerun Plan 03-63 original-resolution public inspection.",
-      "Rerun aggregate Plan 03-66 before Plan 03-45 human review."
-    ]
-  }
+  "rejectionOwners": []
 }
