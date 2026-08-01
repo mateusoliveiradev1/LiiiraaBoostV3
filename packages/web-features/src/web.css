@@ -1,5 +1,6 @@
 .lb-web-shell {
   min-block-size: 100%;
+  overflow-x: clip;
   color: var(--lb-text-primary);
   background: var(--lb-surface-canvas);
   font: var(--lb-weight-regular) var(--lb-text-body-size) / var(--lb-text-body-line)
@@ -52,15 +53,40 @@
 .lb-web-navigation-link,
 .lb-web-locale-switcher {
   display: inline-flex;
+  gap: var(--lb-space-2);
   align-items: center;
   min-block-size: var(--lb-control-min-size);
+}
+
+.lb-web-navigation-link {
+  position: relative;
+  inline-size: 100%;
+  padding-inline: var(--lb-space-3);
+  color: var(--lb-text-secondary);
+  text-decoration: none;
+  transition:
+    color var(--lb-motion-hover-duration) linear,
+    background var(--lb-motion-control-duration) var(--lb-motion-easing);
+}
+
+.lb-web-navigation-link:hover {
+  color: var(--lb-text-primary);
+  background: var(--lb-panel-raised);
 }
 
 .lb-web-navigation-link[data-current='page'] {
   color: var(--lb-text-primary);
   font-weight: var(--lb-weight-semibold);
-  text-decoration-color: var(--lb-cobalt-signal);
-  text-decoration-thickness: var(--lb-focus-width);
+  background: var(--lb-panel-raised);
+}
+
+.lb-web-task-rail .lb-web-navigation-link[data-current='page']::before {
+  position: absolute;
+  inset-block: var(--lb-space-2);
+  inset-inline-start: 0;
+  inline-size: 3px;
+  background: var(--lb-accent-electric);
+  content: '';
 }
 
 .lb-web-locale-switcher {
@@ -103,10 +129,17 @@
   z-index: var(--lb-layer-sticky);
   inset-block-start: 0;
   justify-content: space-between;
-  min-block-size: var(--lb-space-7);
+  min-block-size: 72px;
   padding-inline: var(--lb-screen-padding);
   border-block-end: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-inset);
+}
+
+.lb-web-product-home {
+  display: inline-flex;
+  align-items: center;
+  color: var(--lb-text-primary);
+  text-decoration: none;
 }
 
 .lb-web-public-header nav ul,
@@ -152,11 +185,21 @@
 
 .lb-web-command-runway {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--lb-space-6);
   align-items: center;
+  justify-items: center;
   min-block-size: calc(100vh - var(--lb-space-7));
   padding: var(--lb-space-7) var(--lb-screen-padding);
+}
+
+.lb-web-command-copy,
+.lb-web-command-artifact {
+  inline-size: min(100%, 1120px);
+}
+
+.lb-web-command-copy {
+  text-align: center;
 }
 
 .lb-web-command-copy,
@@ -219,7 +262,7 @@
 .lb-web-command-artifact {
   align-self: stretch;
   padding: var(--lb-space-3);
-  border-inline-start: 1px solid var(--lb-line-strong);
+  border-block-start: 1px solid var(--lb-line-strong);
   background: var(--lb-surface-inset);
 }
 
@@ -331,14 +374,12 @@
 }
 
 .lb-web-boundary,
-.lb-web-preview-rail,
 .lb-web-role-rail {
   padding: var(--lb-space-3) var(--lb-screen-padding);
   border-block: 1px solid var(--lb-line-strong);
   background: var(--lb-surface-work);
 }
 
-.lb-web-preview-rail,
 .lb-web-role-rail {
   position: sticky;
   z-index: var(--lb-layer-sticky);
@@ -357,7 +398,6 @@
 }
 
 .lb-web-boundary p,
-.lb-web-preview-rail span,
 .lb-web-role-rail span {
   color: var(--lb-text-secondary);
 }
@@ -514,25 +554,137 @@
 
 .lb-web-product-frame {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
-  min-block-size: calc(100vh - var(--lb-space-7));
+  grid-template-columns: 264px minmax(0, 1fr);
+  min-block-size: calc(100vh - 112px);
 }
 
-.lb-web-product-frame > nav {
-  padding: var(--lb-space-3);
-  border-inline-end: 1px solid var(--lb-line-subtle);
-  background: var(--lb-surface-inset);
+.lb-web-product-frame[data-product-surface='admin'] {
+  grid-template-columns: 280px minmax(0, 1fr);
 }
 
-.lb-web-product-frame > nav ul {
+.lb-web-task-rail {
+  padding: var(--lb-space-4);
+  background: var(--lb-canvas-inset);
+}
+
+.lb-web-task-rail ul {
   position: sticky;
-  inset-block-start: calc(var(--lb-space-7) + var(--lb-space-4));
+  inset-block-start: calc(112px + var(--lb-space-4));
+  display: flex;
   flex-direction: column;
+  gap: var(--lb-space-1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.lb-web-navigation-icon {
+  flex: 0 0 auto;
+  color: inherit;
+}
+
+.lb-web-current-task {
+  display: none;
+}
+
+.lb-web-product-topbar {
+  position: sticky;
+  z-index: var(--lb-layer-sticky);
+  inset-block-start: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--lb-space-3);
+  align-items: center;
+  min-block-size: 72px;
+  padding-inline: var(--lb-screen-padding);
+  background: var(--lb-canvas-inset);
+}
+
+.lb-web-product-context {
+  overflow: hidden;
+  color: var(--lb-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-web-product-tools {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
+.lb-web-preview-band {
+  position: sticky;
+  z-index: var(--lb-layer-sticky);
+  inset-block-start: 72px;
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  block-size: 40px;
+  padding-inline: var(--lb-screen-padding);
+  overflow: hidden;
+  color: var(--lb-text-secondary);
+  background: var(--lb-panel);
+}
+
+.lb-web-preview-band strong {
+  flex: 0 0 auto;
+  color: var(--lb-text-primary);
+}
+
+.lb-web-preview-band > span:last-of-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-web-preview-symbol {
+  color: var(--lb-accent-cyan);
+}
+
+.lb-web-product-workspace {
+  display: grid;
+  gap: var(--lb-space-5);
+  inline-size: 100%;
+  max-inline-size: 1240px;
+  margin-inline: auto;
+}
+
+.lb-web-product-workspace[data-workspace-ratio='7/5'] {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+}
+
+.lb-web-product-workspace[data-workspace-ratio='8/4'] {
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+}
+
+.lb-web-workspace-focal,
+.lb-web-workspace-context {
+  min-inline-size: 0;
+  padding: var(--lb-space-5);
+  border-radius: var(--lb-radius-panel);
+}
+
+.lb-web-workspace-focal {
+  border-block-start: 1px solid var(--lb-accent-cyan);
+  background: var(--lb-panel-raised);
+}
+
+.lb-web-workspace-context {
+  background: var(--lb-panel);
+}
+
+.lb-web-product-workspace .lb-field {
+  max-inline-size: 560px;
 }
 
 .lb-web-product-frame > main {
   min-inline-size: 0;
-  padding: var(--lb-space-4);
+  inline-size: 100%;
+  max-inline-size: 1320px;
+  padding: var(--lb-space-5);
+  margin-inline: auto;
+  transition: background var(--lb-motion-route-duration) var(--lb-motion-easing);
 }
 
 .lb-web-admin-gate {
@@ -573,7 +725,6 @@
 
   .lb-web-command-artifact {
     order: 2;
-    border-inline-start: 0;
     border-block-start: 1px solid var(--lb-line-strong);
   }
 
@@ -581,22 +732,55 @@
     grid-template-columns: 1fr;
   }
 
-  .lb-web-product-frame > nav {
-    border-inline-end: 0;
-    border-block-end: 1px solid var(--lb-line-subtle);
+  .lb-web-task-rail {
+    display: none;
   }
 
-  .lb-web-product-frame > nav ul {
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
+  .lb-web-current-task {
+    display: block;
+    background: var(--lb-canvas-inset);
   }
 
-  .lb-web-role-rail,
-  .lb-web-preview-rail {
+  .lb-web-current-task summary {
+    display: flex;
+    gap: var(--lb-space-2);
+    align-items: center;
+    justify-content: space-between;
+    min-block-size: 48px;
+    padding-inline: var(--lb-screen-padding);
+    cursor: pointer;
+  }
+
+  .lb-web-current-task nav ul {
+    display: grid;
+    gap: var(--lb-space-1);
+    padding: 0 var(--lb-screen-padding) var(--lb-space-3);
+    margin: 0;
+    list-style: none;
+  }
+
+  .lb-web-product-topbar {
+    min-block-size: 60px;
+  }
+
+  .lb-web-preview-band {
+    inset-block-start: 60px;
+  }
+
+  .lb-web-product-workspace,
+  .lb-web-product-workspace[data-workspace-ratio='7/5'],
+  .lb-web-product-workspace[data-workspace-ratio='8/4'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lb-web-role-rail {
     position: static;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .lb-web-preview-band {
+    position: static;
   }
 
   .lb-web-high-risk > :not(p) {
@@ -676,8 +860,10 @@
       [data-lb-control],
       .lb-web-status,
       .lb-web-boundary,
-      .lb-web-preview-rail,
+      .lb-web-preview-band,
       .lb-web-role-rail,
+      .lb-web-workspace-focal,
+      .lb-web-workspace-context,
       .lb-web-table-region,
       .lb-web-toast
     ) {
@@ -690,6 +876,10 @@
 
   .lb-web-navigation-link[data-current='page'] {
     color: LinkText;
-    text-decoration-color: Highlight;
+    background: Highlight;
+  }
+
+  .lb-web-task-rail .lb-web-navigation-link[data-current='page']::before {
+    background: HighlightText;
   }
 }

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { LbButton, LbLink } from '@liiiraa/design-system';
+import { LbButton, ProductIcon, ProductLockup, type ProductIconName } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
 
 export interface ShellNavigationItem {
   readonly href: string;
+  readonly icon?: ProductIconName;
   readonly id: string;
   readonly label: string;
 }
@@ -17,17 +18,20 @@ const SkipLink = ({ mainId }: { readonly mainId: string }) => (
 const NavigationList = ({
   activeId,
   items,
+  markCurrent = true,
+  showIcons = false,
 }: {
   readonly activeId?: string;
   readonly items: readonly ShellNavigationItem[];
+  readonly markCurrent?: boolean;
+  readonly showIcons?: boolean;
 }) => {
-  const activeIndex =
-    activeId === undefined ? -1 : items.findIndex((item) => item.id === activeId);
+  const activeIndex = activeId === undefined ? -1 : items.findIndex((item) => item.id === activeId);
 
   return (
     <ul>
       {items.map((item, index) => {
-        const isCurrent = index === activeIndex;
+        const isCurrent = markCurrent && index === activeIndex;
         return (
           <li key={item.id}>
             <a
@@ -37,10 +41,15 @@ const NavigationList = ({
               data-destination-kind="internal"
               href={item.href}
             >
-              {item.label}
-              {isCurrent ? (
-                <span className="lb-visually-hidden"> (current page)</span>
+              {showIcons ? (
+                <ProductIcon
+                  className="lb-web-navigation-icon"
+                  name={item.icon ?? 'app'}
+                  size={18}
+                />
               ) : null}
+              <span className="lb-web-navigation-label">{item.label}</span>
+              {isCurrent ? <span className="lb-visually-hidden"> (current page)</span> : null}
             </a>
           </li>
         );
@@ -60,11 +69,7 @@ export interface LocaleSwitcherProps {
   readonly targetLocale: WebLocale;
 }
 
-export const LocaleSwitcher = ({
-  href,
-  sourceLocale,
-  targetLocale,
-}: LocaleSwitcherProps) => {
+export const LocaleSwitcher = ({ href, sourceLocale, targetLocale }: LocaleSwitcherProps) => {
   const target = LOCALE_PRESENTATION[targetLocale];
   const accessibleName =
     sourceLocale === 'pt-BR'
@@ -79,8 +84,7 @@ export const LocaleSwitcher = ({
       href={href}
       hrefLang={targetLocale}
     >
-      <span aria-hidden="true">{target.flag}</span>
-      {' '}
+      <span aria-hidden="true">{target.flag}</span>{' '}
       <span lang={targetLocale}>{target.language}</span>
     </a>
   );
@@ -102,7 +106,9 @@ export const PublicHeader = ({
   search,
 }: PublicHeaderProps) => (
   <header className="lb-web-public-header">
-    <LbLink href="/">Liiiraa Boost</LbLink>
+    <a aria-label="Liiiraa Boost home" className="lb-web-product-home" href="/">
+      <ProductLockup />
+    </a>
     <nav aria-label="Primary navigation">
       <NavigationList {...(activeId === undefined ? {} : { activeId })} items={navigation} />
     </nav>
@@ -187,12 +193,115 @@ export const PublicShell = ({
   </div>
 );
 
-export const AccountPreviewRail = ({ children }: { readonly children?: ReactNode }) => (
-  <aside className="lb-web-preview-rail" role="note">
-    <strong>Deterministic preview</strong>
-    <span>No remote account authority is connected.</span>
+export interface ProductTopbarProps {
+  readonly context: string;
+  readonly homeHref?: string;
+  readonly localeControl: ReactNode;
+  readonly tools?: ReactNode;
+}
+
+export const ProductTopbar = ({
+  context,
+  homeHref = '/',
+  localeControl,
+  tools,
+}: ProductTopbarProps) => (
+  <header className="lb-web-product-topbar">
+    <a aria-label="Liiiraa Boost" className="lb-web-product-home" href={homeHref}>
+      <ProductLockup />
+    </a>
+    <strong className="lb-web-product-context">{context}</strong>
+    <div className="lb-web-product-tools">
+      {tools}
+      {localeControl}
+    </div>
+  </header>
+);
+
+export interface PreviewStatusBandProps {
+  readonly children?: ReactNode;
+  readonly locale?: WebLocale;
+}
+
+export const PreviewStatusBand = ({ children, locale = 'en' }: PreviewStatusBandProps) => (
+  <aside className="lb-web-preview-band" data-preview-status="disconnected" role="status">
+    <span aria-hidden="true" className="lb-web-preview-symbol">
+      ○
+    </span>
+    <strong>
+      {locale === 'pt-BR' ? 'Alterações remotas desconectadas' : 'Remote changes disconnected'}
+    </strong>
+    <span>
+      {locale === 'pt-BR'
+        ? 'Revise o fluxo com dados sintéticos; nada muda fora desta prévia.'
+        : 'Review the flow with synthetic data; nothing changes outside this preview.'}
+    </span>
     {children}
   </aside>
+);
+
+export interface TaskNavigationProps {
+  readonly activeId?: string;
+  readonly label: string;
+  readonly navigation: readonly ShellNavigationItem[];
+}
+
+export const TaskRail = ({ activeId, label, navigation }: TaskNavigationProps) => (
+  <nav aria-label={label} className="lb-web-task-rail">
+    <NavigationList
+      {...(activeId === undefined ? {} : { activeId })}
+      items={navigation}
+      showIcons
+    />
+  </nav>
+);
+
+export const CurrentTaskDisclosure = ({ activeId, label, navigation }: TaskNavigationProps) => {
+  const current = navigation.find((item) => item.id === activeId) ?? navigation[0];
+
+  return (
+    <details className="lb-web-current-task">
+      <summary data-lb-control>
+        <span>{label}</span>
+        <strong>{current?.label ?? label}</strong>
+      </summary>
+      <nav aria-label={label}>
+        <NavigationList
+          {...(activeId === undefined ? {} : { activeId })}
+          items={navigation}
+          markCurrent={false}
+          showIcons
+        />
+      </nav>
+    </details>
+  );
+};
+
+export interface ProductWorkspaceProps {
+  readonly context: ReactNode;
+  readonly focal: ReactNode;
+  readonly label: string;
+  readonly ratio?: '7/5' | '8/4';
+}
+
+export const ProductWorkspace = ({
+  context,
+  focal,
+  label,
+  ratio = '7/5',
+}: ProductWorkspaceProps) => (
+  <section aria-label={label} className="lb-web-product-workspace" data-workspace-ratio={ratio}>
+    <div className="lb-web-workspace-focal" data-material="focal">
+      {focal}
+    </div>
+    <aside className="lb-web-workspace-context" data-material="tonal">
+      {context}
+    </aside>
+  </section>
+);
+
+export const AccountPreviewRail = ({ children }: { readonly children?: ReactNode }) => (
+  <PreviewStatusBand>{children}</PreviewStatusBand>
 );
 
 export interface AccountShellProps {
@@ -216,10 +325,17 @@ export const AccountShell = ({
     <SkipLink mainId={mainId} />
     {header}
     {previewRail}
-    <div className="lb-web-product-frame">
-      <nav aria-label="Account responsibilities">
-        <NavigationList {...(activeId === undefined ? {} : { activeId })} items={navigation} />
-      </nav>
+    <div className="lb-web-product-frame" data-product-surface="account">
+      {TaskRail({
+        ...(activeId === undefined ? {} : { activeId }),
+        label: 'Account responsibilities',
+        navigation,
+      })}
+      {CurrentTaskDisclosure({
+        ...(activeId === undefined ? {} : { activeId }),
+        label: 'Current account task',
+        navigation,
+      })}
       <main id={mainId}>{children}</main>
     </div>
   </div>
@@ -234,7 +350,7 @@ export const RoleScopeRail = ({
 }) => (
   <aside className="lb-web-role-rail" aria-label="Administrative role scope">
     <strong>{role}</strong>
-    <span>Published preview · authority disconnected</span>
+    <span>Remote changes disconnected</span>
     <ul>
       {scope.map((entry) => (
         <li key={entry}>{entry}</li>
@@ -282,10 +398,17 @@ export const AdminShell = ({
     <SkipLink mainId={mainId} />
     {header}
     {roleRail}
-    <div className="lb-web-product-frame">
-      <nav aria-label="Role-specific administration">
-        <NavigationList {...(activeId === undefined ? {} : { activeId })} items={navigation} />
-      </nav>
+    <div className="lb-web-product-frame" data-product-surface="admin">
+      {TaskRail({
+        ...(activeId === undefined ? {} : { activeId }),
+        label: 'Role-specific administration',
+        navigation,
+      })}
+      {CurrentTaskDisclosure({
+        ...(activeId === undefined ? {} : { activeId }),
+        label: 'Current administrative task',
+        navigation,
+      })}
       <main id={mainId}>{children}</main>
     </div>
   </div>
