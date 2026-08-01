@@ -42,14 +42,48 @@ describe('role-scoped admin', () => {
   });
 
   it('composes the role landing around next work, recent activity, scope, and workspaces', () => {
+    const landingSource = featureSource.slice(
+      featureSource.indexOf('const ADMIN_ROLE_FOCAL_ROUTE'),
+      featureSource.indexOf('const DegradedAdminPreview'),
+    );
+
+    expect(landingSource).toContain("support: 'admin-support'");
+    expect(landingSource).toContain("operations: 'admin-operations'");
+    expect(landingSource).toContain("security: 'admin-security'");
+    expect(landingSource).toContain("audit: 'admin-audit'");
     expect(featureSource).toContain('admin-landing__focus');
     expect(featureSource).toContain('admin-landing__scope');
     expect(featureSource).toContain('admin-landing__queue');
     expect(featureSource).toContain('data-decision-priority="next-safe-review"');
-    expect(featureSource).toContain('<table');
-    expect(featureSource).toContain('<caption>');
+    expect(landingSource).toContain('data-admin-grid="8-4"');
+    expect(landingSource).toContain('data-admin-role={role}');
+    expect(landingSource).toContain('data-focal-route={nextRoute}');
+    expect(landingSource).toContain('<ResponsiveDataTable');
+    expect(landingSource).toContain('detail:');
     expect(featureSource).not.toContain('admin-landing__workspaces');
     expect(featureSource).not.toContain('canonical route manifest');
+  });
+
+  it('uses an exact 8/4 focal composition and fills the lower workspace with task rows', () => {
+    expect(stylesSource).toMatch(
+      /\.admin-landing__layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*2fr\)\s+minmax\(0,\s*1fr\)/u,
+    );
+    expect(stylesSource).toMatch(
+      /\.admin-landing__queue\s*\{[\s\S]*min-block-size:\s*calc\(var\(--lb-space-7\)\s*\*\s*4\)/u,
+    );
+    expect(stylesSource).toMatch(
+      /\.admin-landing__queue[\s\S]*\.lb-responsive-table/u,
+    );
+  });
+
+  it('projects audit transport values into localized human status before rendering', () => {
+    expect(featureSource).toContain('const presentAuditEvent');
+    expect(featureSource).toContain("result: content.locale === 'pt-BR'");
+    expect(featureSource).toContain("action: content.locale === 'pt-BR'");
+    expect(featureSource).not.toContain('<StatusSignal label={event.result}');
+    expect(featureSource).not.toContain('action: event.action,');
+    expect(adminEn.receipt.title).toBe('Preview complete — no change was made');
+    expect(adminPtBr.receipt.title).toBe('Prévia concluída — nenhuma alteração foi feita');
   });
 
   it('keeps current state non-color-only and reflows the authored landing at 390px', () => {
