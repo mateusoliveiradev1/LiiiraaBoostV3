@@ -27,7 +27,7 @@ describe('admin shell', () => {
     expect(navigation).toContain('useSearchParams');
     expect(navigation).toContain('resolveLocalizedCurrentRoute');
     expect(navigation).toContain("securityBoundary: 'admin-origin'");
-    expect(navigation).toContain('ADMIN_PREVIEW_ROLES.includes');
+    expect(navigation).toContain('roleParameter === role');
     expect(navigation).toContain('currentItems.length === 1');
     expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigation).toContain('<LocaleSwitcher');

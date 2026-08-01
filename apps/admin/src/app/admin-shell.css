@@ -55,7 +55,7 @@ button:focus-visible,
 .admin-header__bar {
   display: flex;
   align-items: center;
-  gap: var(--lb-space-4);
+  gap: var(--lb-space-3);
   min-block-size: var(--lb-space-7);
   inline-size: min(100%, calc(var(--lb-space-7) * 20));
   margin-inline: auto;
@@ -66,7 +66,6 @@ button:focus-visible,
   display: inline-flex;
   align-items: center;
   gap: var(--lb-space-2);
-  margin-inline-end: auto;
   text-decoration: none;
 }
 
@@ -102,24 +101,52 @@ button:focus-visible,
 }
 
 .admin-header__origin {
-  max-inline-size: 48ch;
+  max-inline-size: 44ch;
   margin: 0;
+  margin-inline-start: auto;
   color: var(--lb-text-secondary);
   font-size: var(--lb-text-label-size);
 }
 
-.admin-locale {
+.admin-header__role,
+.admin-header__task {
+  display: grid;
+  gap: var(--lb-space-1);
+  min-inline-size: 0;
+  padding-inline-start: var(--lb-space-3);
+  border-inline-start: 1px solid var(--lb-line-subtle);
+}
+
+.admin-header__role span,
+.admin-header__task span {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.admin-header__role strong,
+.admin-header__task strong {
+  overflow: hidden;
+  color: var(--lb-text-primary);
+  font-size: var(--lb-text-label-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-header .lb-web-locale-switcher {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: var(--lb-space-2);
   min-block-size: var(--lb-control-min-size);
   padding-inline: var(--lb-space-3);
   border: 1px solid var(--lb-line-strong);
   border-radius: var(--lb-radius-default);
+  font-size: var(--lb-text-label-size);
   text-decoration: none;
 }
 
-.admin-locale:hover,
-.admin-locale:focus-visible {
+.admin-header .lb-web-locale-switcher:hover,
+.admin-header .lb-web-locale-switcher:focus-visible {
   border-color: var(--lb-cobalt-signal);
   background: var(--lb-surface-raised);
 }
@@ -174,6 +201,10 @@ button:focus-visible,
   padding: var(--lb-space-4);
   border-inline-end: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-inset);
+}
+
+.admin-nav__mobile {
+  display: none;
 }
 
 .admin-nav__label {
@@ -766,15 +797,17 @@ button:focus-visible,
 
 @media (width < 960px) {
   .admin-header__bar {
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
     gap: var(--lb-space-2);
     padding-block: var(--lb-space-3);
   }
 
   .admin-header__origin {
-    flex-basis: 100%;
-    order: 3;
+    display: none;
+  }
+
+  .admin-header__role {
+    margin-inline-start: auto;
   }
 
   .admin-role-rail {
@@ -786,17 +819,35 @@ button:focus-visible,
     border-inline: 0;
   }
 
-  .admin-nav {
+  .admin-nav__desktop {
+    display: none;
+  }
+
+  .admin-nav__mobile {
+    display: block;
     overflow: hidden;
     padding: var(--lb-space-3) var(--lb-screen-padding);
     border-inline-end: 0;
     border-block-end: 1px solid var(--lb-line-subtle);
+    background: var(--lb-surface-inset);
   }
 
-  .admin-nav__list {
+  .admin-nav__mobile > summary {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: var(--lb-space-2);
+    min-block-size: var(--lb-control-min-size);
+    color: var(--lb-text-secondary);
+    cursor: pointer;
+    list-style-position: inside;
+  }
+
+  .admin-nav__mobile > summary strong {
+    color: var(--lb-text-primary);
+  }
+
+  .admin-nav__mobile nav {
+    padding-block-start: var(--lb-space-2);
   }
 
   .admin-landing__layout {
@@ -836,14 +887,17 @@ button:focus-visible,
     display: none;
   }
 
+  .admin-header__role {
+    display: none;
+  }
+
+  .admin-header__task {
+    margin-inline-start: auto;
+  }
+
   .admin-role-rail {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .admin-nav__list {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
   }
 
   #admin-main {
@@ -897,6 +951,16 @@ button:focus-visible,
   .admin-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (width < 400px) {
+  .admin-header__task {
+    display: none;
+  }
+
+  .admin-header .lb-web-locale-switcher {
+    margin-inline-start: auto;
   }
 }
 
