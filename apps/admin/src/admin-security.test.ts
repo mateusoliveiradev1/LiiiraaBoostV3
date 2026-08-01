@@ -9,22 +9,65 @@ import adminProxy, {
   createAdminRequestNonce,
 } from '../proxy';
 import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
-import { resolveAdminOrigin } from './admin-runtime';
+import {
+  ADMIN_CANONICAL_ENTRY,
+  ADMIN_LOCAL_ORIGIN,
+  resolveAdminOrigin,
+} from './admin-runtime';
 
 describe('admin security boundary', () => {
-  it('uses a dedicated preview origin and never claims connected authority', () => {
-    expect(ADMIN_TEST_ORIGIN).toBe('https://admin.localhost');
+  it('uses the exact dedicated local origin and never claims connected authority', () => {
+    const packageJson = JSON.parse(
+      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+    ) as { readonly scripts: Readonly<Record<string, string>> };
+
+    expect(packageJson.scripts.dev).toBe(
+      'next dev --webpack --hostname admin.localhost --port 3002',
+    );
+    expect(ADMIN_LOCAL_ORIGIN).toBe('http://admin.localhost:3002');
+    expect(ADMIN_TEST_ORIGIN).toBe(ADMIN_LOCAL_ORIGIN);
     expect(ADMIN_RUNTIME_BOUNDARY).toEqual({
       authoritativeAccessConnected: false,
       cookiePolicy: 'reject-cross-surface',
       indexing: 'noindex',
-      origin: ADMIN_TEST_ORIGIN,
+      origin: ADMIN_LOCAL_ORIGIN,
     });
-    expect(resolveAdminOrigin('http://admin.localhost:3102')).toBe('http://admin.localhost:3102');
+    expect(resolveAdminOrigin()).toBe(ADMIN_LOCAL_ORIGIN);
+    expect(resolveAdminOrigin('http://admin.localhost:3102')).toBe(
+      'http://admin.localhost:3102',
+    );
     expect(() => resolveAdminOrigin('https://user@admin.localhost')).toThrow(
       'credential-free dedicated origin',
     );
     expect(() => resolveAdminOrigin('http://admin.example.com')).toThrow(
+      'credential-free dedicated origin',
+    );
+  });
+
+  it('publishes only the canonical localized admin entries', () => {
+    expect(ADMIN_CANONICAL_ENTRY).toEqual({
+      en: '/en/admin',
+      'pt-BR': '/pt-BR/admin',
+    });
+    expect(Object.isFrozen(ADMIN_CANONICAL_ENTRY)).toBe(true);
+    expect(Object.values(ADMIN_CANONICAL_ENTRY)).not.toContain('/en');
+    expect(Object.values(ADMIN_CANONICAL_ENTRY)).not.toContain('/pt-BR');
+  });
+
+  it('requires an explicit exact production origin and rejects localhost lookalikes', () => {
+    expect(resolveAdminOrigin('https://admin.liiiraa.com')).toBe(
+      'https://admin.liiiraa.com',
+    );
+    expect(() => resolveAdminOrigin('http://localhost:3002')).toThrow(
+      'credential-free dedicated origin',
+    );
+    expect(() => resolveAdminOrigin('http://preview.admin.localhost:3002')).toThrow(
+      'credential-free dedicated origin',
+    );
+    expect(() => resolveAdminOrigin('http://admin.localhost.example:3002')).toThrow(
+      'credential-free dedicated origin',
+    );
+    expect(() => resolveAdminOrigin('https://*.liiiraa.com')).toThrow(
       'credential-free dedicated origin',
     );
   });
@@ -89,8 +132,8 @@ describe('admin security boundary', () => {
       adminHeaderContract('comparison-nonce').find(({ key }) => key === 'Permissions-Policy')
         ?.value,
     ).toContain('display-capture=()');
-    expect(ADMIN_TEST_ORIGIN).not.toContain('account.');
-    expect(ADMIN_TEST_ORIGIN).not.toBe('https://liiiraa.com');
+    expect(ADMIN_LOCAL_ORIGIN).not.toContain('account.');
+    expect(ADMIN_LOCAL_ORIGIN).not.toBe('https://liiiraa.com');
   });
 
   it('admits only closed preview roles and rejects cross-surface state', () => {
