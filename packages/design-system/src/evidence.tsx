@@ -71,9 +71,9 @@ interface VisualProjection {
 const PROVENANCE_PROJECTION: Readonly<Record<ProvenanceKind, VisualProjection>> = Object.freeze({
   fixture: {
     icon: FlaskConical,
-    label: 'Fixture',
-    pattern: 'diagonal-stripe',
-    tone: 'experimental',
+    label: 'Preview',
+    pattern: 'dashed',
+    tone: 'neutral',
   },
   observed: { icon: Eye, label: 'Observed', pattern: 'solid', tone: 'neutral' },
   measured: { icon: Gauge, label: 'Measured', pattern: 'solid', tone: 'success' },
@@ -169,15 +169,50 @@ const OPERATIONAL_PROJECTION: Readonly<Record<OperationalState, VisualProjection
   },
   fixture: {
     icon: FlaskConical,
-    label: 'Simulated scenario',
-    pattern: 'diagonal-stripe',
-    tone: 'experimental',
+    label: 'Preview',
+    pattern: 'dashed',
+    tone: 'neutral',
   },
 });
 
+export const SEMANTIC_STATUS_STATES = Object.freeze([
+  'success',
+  'warning',
+  'critical',
+  'preview',
+  'unavailable',
+  'stale',
+  'offline',
+  'error',
+] as const);
+export type SemanticStatusState = (typeof SEMANTIC_STATUS_STATES)[number];
+export type StatusSignalState = OperationalState | SemanticStatusState;
+
+const SEMANTIC_STATUS_PROJECTION: Readonly<Record<SemanticStatusState, VisualProjection>> =
+  Object.freeze({
+    success: { icon: CheckCircle2, label: 'Verified', pattern: 'solid', tone: 'success' },
+    warning: {
+      icon: AlertTriangle,
+      label: 'Attention required',
+      pattern: 'dashed',
+      tone: 'warning',
+    },
+    critical: { icon: OctagonAlert, label: 'Action blocked', pattern: 'double', tone: 'critical' },
+    preview: { icon: Eye, label: 'Preview', pattern: 'dashed', tone: 'neutral' },
+    unavailable: {
+      icon: CircleSlash2,
+      label: 'Unavailable',
+      pattern: 'dotted',
+      tone: 'restricted',
+    },
+    stale: { icon: Clock3, label: 'Out of date', pattern: 'dashed', tone: 'warning' },
+    offline: { icon: WifiOff, label: 'Offline', pattern: 'dashed', tone: 'warning' },
+    error: { icon: OctagonAlert, label: 'Could not load', pattern: 'double', tone: 'critical' },
+  });
+
 const PT_BR_LABELS = Object.freeze({
   provenance: {
-    fixture: 'Cenário simulado',
+    fixture: 'Prévia',
     observed: 'Observado',
     measured: 'Medido',
     modeled: 'Estimado',
@@ -209,11 +244,22 @@ const PT_BR_LABELS = Object.freeze({
     'contradictory-evidence': 'Evidência contraditória',
     fixture: 'Cenário simulado',
   },
+  semantic: {
+    success: 'Verificado',
+    warning: 'Atenção necessária',
+    critical: 'Ação bloqueada',
+    preview: 'Prévia',
+    unavailable: 'Indisponível',
+    stale: 'Desatualizado',
+    offline: 'Sem conexão',
+    error: 'Não foi possível carregar',
+  },
 } satisfies {
   readonly provenance: Readonly<Record<ProvenanceKind, string>>;
   readonly freshness: Readonly<Record<EvidenceFreshness, string>>;
   readonly quality: Readonly<Record<EvidenceQuality, string>>;
   readonly operational: Readonly<Record<OperationalState, string>>;
+  readonly semantic: Readonly<Record<SemanticStatusState, string>>;
 });
 
 const isPtBr = (locale: EvidenceLocale | undefined): boolean => locale === 'pt-BR';
@@ -222,7 +268,7 @@ interface MarkProps {
   readonly detail?: string | undefined;
   readonly label?: string | undefined;
   readonly projection: VisualProjection;
-  readonly state?: OperationalState;
+  readonly state?: StatusSignalState;
   readonly testId?: string;
 }
 
@@ -253,7 +299,7 @@ export interface ProvenanceMarkProps {
 
 export const ProvenanceMark = ({ detail, kind, locale }: ProvenanceMarkProps) => (
   <Mark
-    detail={kind === 'fixture' ? (detail ?? 'SIMULATED SCENARIO') : detail}
+    detail={detail}
     label={isPtBr(locale) ? PT_BR_LABELS.provenance[kind] : undefined}
     projection={PROVENANCE_PROJECTION[kind]}
     testId="provenance-mark"
@@ -294,14 +340,53 @@ export interface StatusSignalProps {
   readonly detail?: string;
   readonly label?: string;
   readonly locale?: EvidenceLocale;
-  readonly state: OperationalState;
+  readonly state: StatusSignalState;
 }
+
+const isSemanticStatus = (state: StatusSignalState): state is SemanticStatusState =>
+  SEMANTIC_STATUS_STATES.includes(state as SemanticStatusState);
+
+export const projectTransportStatus = (value: string): SemanticStatusState => {
+  const normalized = value.trim().toLowerCase();
+
+  if (['ready', 'success', 'verified', 'approved', 'current'].includes(normalized)) {
+    return 'success';
+  }
+  if (['warning', 'degraded', 'partial-failure', 'restart-pending'].includes(normalized)) {
+    return 'warning';
+  }
+  if (['critical', 'blocked', 'contradictory-evidence'].includes(normalized)) {
+    return 'critical';
+  }
+  if (['preview', 'fixture', 'simulated-no-change', 'no-change'].includes(normalized)) {
+    return 'preview';
+  }
+  if (['stale', 'stale-evidence'].includes(normalized)) {
+    return 'stale';
+  }
+  if (normalized === 'offline') {
+    return 'offline';
+  }
+  if (['error', 'recovery', 'recoverable-error'].includes(normalized)) {
+    return 'error';
+  }
+  return 'unavailable';
+};
 
 export const StatusSignal = ({ detail, label, locale, state }: StatusSignalProps) => (
   <Mark
     detail={detail}
-    label={label ?? (isPtBr(locale) ? PT_BR_LABELS.operational[state] : undefined)}
-    projection={OPERATIONAL_PROJECTION[state]}
+    label={
+      label ??
+      (isPtBr(locale)
+        ? isSemanticStatus(state)
+          ? PT_BR_LABELS.semantic[state]
+          : PT_BR_LABELS.operational[state]
+        : undefined)
+    }
+    projection={
+      isSemanticStatus(state) ? SEMANTIC_STATUS_PROJECTION[state] : OPERATIONAL_PROJECTION[state]
+    }
     state={state}
     testId="status-signal"
   />

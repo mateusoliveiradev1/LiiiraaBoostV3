@@ -25,7 +25,6 @@ import {
 import {
   LB_INTERACTION_STATES,
   LB_MOTION_ROLES,
-  EmptyComposition,
   LbButton,
   LbDataTable,
   LbDetailRow,
@@ -39,7 +38,7 @@ import {
   LbSkeletonRegion,
 } from './primitives.tsx';
 import { ProductLockup } from './product-lockup.tsx';
-import { GoalRail, RouteHeader, WindowTitleBar } from './shell.tsx';
+import { EmptyComposition, GoalRail, RouteHeader, WindowTitleBar } from './shell.tsx';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 

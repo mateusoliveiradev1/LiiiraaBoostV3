@@ -368,8 +368,25 @@
 }
 
 .lb-button {
+  display: grid;
   min-inline-size: var(--lb-row-primary-size);
   padding-inline: var(--lb-space-3);
+}
+
+.lb-button-label,
+.lb-button-loading {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+}
+
+.lb-button-loading,
+.lb-button[data-loading] .lb-button-label {
+  visibility: hidden;
+}
+
+.lb-button[data-loading] .lb-button-loading {
+  visibility: visible;
 }
 
 .lb-icon-button {
@@ -698,6 +715,75 @@
   border: 1px dashed var(--lb-line-strong);
   border-radius: var(--lb-radius-default);
   background: var(--lb-surface-work);
+}
+
+.lb-material-panel {
+  display: grid;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-4);
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: var(--lb-radius-panel);
+  color: var(--lb-text-primary);
+  background: var(--lb-panel);
+  transition:
+    border-color var(--lb-motion-hover-duration) linear,
+    background var(--lb-motion-panel-duration) var(--lb-motion-easing);
+}
+
+.lb-material-panel[data-material='focal'] {
+  border-block-start-color: var(--lb-accent-cyan);
+  background: var(--lb-panel-raised);
+}
+
+.lb-row-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.lb-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--lb-space-1) var(--lb-space-3);
+  align-items: center;
+  min-block-size: var(--lb-row-standard-size);
+  padding-block: var(--lb-space-2);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.lb-detail-row-detail {
+  grid-column: 1 / -1;
+  max-inline-size: 70ch;
+  color: var(--lb-text-secondary);
+}
+
+.lb-skeleton-region {
+  display: grid;
+  gap: var(--lb-space-2);
+}
+
+.lb-disclosure {
+  border-block: 1px solid var(--lb-line-subtle);
+  color: var(--lb-text-primary);
+  background: var(--lb-panel);
+}
+
+.lb-disclosure summary {
+  min-block-size: var(--lb-control-min-size);
+  padding: var(--lb-space-3);
+  cursor: pointer;
+  transition:
+    color var(--lb-motion-hover-duration) linear,
+    background var(--lb-motion-panel-duration) var(--lb-motion-easing);
+}
+
+.lb-disclosure summary:focus-visible {
+  outline: var(--lb-focus-width) solid var(--lb-forced-focus);
+  outline-offset: calc(var(--lb-focus-width) * -1);
+}
+
+.lb-disclosure-content {
+  padding: 0 var(--lb-space-3) var(--lb-space-3);
 }
 
 .lb-title-bar {

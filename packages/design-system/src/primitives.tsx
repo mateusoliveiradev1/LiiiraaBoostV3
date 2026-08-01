@@ -56,6 +56,13 @@ export const LB_INTERACTION_STATES = Object.freeze([
   'loading',
 ] as const);
 
+export const LB_MOTION_ROLES = Object.freeze({
+  panel: '200ms',
+  route: '220ms',
+  selection: '160ms',
+  tone: '100ms',
+} as const);
+
 export interface LbButtonProps {
   readonly children: ReactNode;
   readonly isDisabled?: boolean;
@@ -76,15 +83,26 @@ export const LbButton = ({
   variant = 'secondary',
 }: LbButtonProps) => (
   <Button
+    aria-busy={isLoading || undefined}
     className="lb-button"
     data-lb-control
     data-lb-variant={variant}
+    data-loading={isLoading || undefined}
     isDisabled={isDisabled}
     isPending={isLoading}
     type={type}
     {...(onPress ? { onPress } : {})}
   >
-    {isLoading ? loadingLabel : children}
+    <span aria-hidden={isLoading || undefined} className="lb-button-label">
+      {children}
+    </span>
+    <span
+      aria-hidden={!isLoading || undefined}
+      className="lb-button-loading"
+      data-visible={isLoading || undefined}
+    >
+      {loadingLabel}
+    </span>
   </Button>
 );
 
@@ -569,4 +587,112 @@ export const LbSkeleton = ({
   inlineSize = '100%',
 }: LbSkeletonProps) => (
   <div aria-hidden="true" className="lb-skeleton" style={{ blockSize, inlineSize }} />
+);
+
+export type LbPanelTone = 'tonal' | 'focal';
+
+export interface LbPanelProps {
+  readonly children: ReactNode;
+  readonly label: string;
+  readonly tone?: LbPanelTone;
+}
+
+export const LbPanel = ({ children, label, tone = 'tonal' }: LbPanelProps) => (
+  <section aria-label={label} className="lb-material-panel" data-lb-region data-material={tone}>
+    {children}
+  </section>
+);
+
+export interface LbRowListProps {
+  readonly children: ReactNode;
+  readonly label: string;
+}
+
+export const LbRowList = ({ children, label }: LbRowListProps) => (
+  <ul aria-label={label} className="lb-row-list" role="list">
+    {children}
+  </ul>
+);
+
+export interface LbDetailRowProps {
+  readonly detail?: ReactNode;
+  readonly label: ReactNode;
+  readonly value: ReactNode;
+}
+
+export const LbDetailRow = ({ detail, label, value }: LbDetailRowProps) => (
+  <li className="lb-detail-row" data-material="row" role="listitem">
+    <span className="lb-detail-row-label">{label}</span>
+    <strong className="lb-detail-row-value">{value}</strong>
+    {detail ? <span className="lb-detail-row-detail">{detail}</span> : null}
+  </li>
+);
+
+export interface LbDataTableColumn {
+  readonly id: string;
+  readonly label: ReactNode;
+}
+
+export interface LbDataTableRow {
+  readonly cells: Readonly<Record<string, ReactNode>>;
+  readonly id: string;
+}
+
+export interface LbDataTableProps {
+  readonly caption: string;
+  readonly columns: readonly LbDataTableColumn[];
+  readonly rows: readonly LbDataTableRow[];
+}
+
+export const LbDataTable = ({ caption, columns, rows }: LbDataTableProps) => (
+  <div className="lb-table-viewport" data-lb-region>
+    <table>
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          {columns.map((column) => (
+            <th key={column.id} scope="col">
+              {column.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.id}>
+            {columns.map((column) => (
+              <td key={column.id}>{row.cells[column.id]}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+export interface LbSkeletonRegionProps {
+  readonly label: string;
+  readonly rows?: number;
+}
+
+export const LbSkeletonRegion = ({ label, rows = 3 }: LbSkeletonRegionProps) => (
+  <div aria-label={label} className="lb-skeleton-region" data-lb-region role="status">
+    <span className="lb-visually-hidden">{label}</span>
+    {Array.from({ length: rows }, (_, index) => (
+      <LbSkeleton key={index} />
+    ))}
+  </div>
+);
+
+export interface LbDisclosureProps {
+  readonly children: ReactNode;
+  readonly defaultOpen?: boolean;
+  readonly label: string;
+}
+
+export const LbDisclosure = ({ children, defaultOpen = false, label }: LbDisclosureProps) => (
+  <details className="lb-disclosure" data-lb-region open={defaultOpen || undefined}>
+    <summary data-lb-control>{label}</summary>
+    <div className="lb-disclosure-content">{children}</div>
+  </details>
 );
