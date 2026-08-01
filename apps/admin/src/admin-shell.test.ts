@@ -19,6 +19,56 @@ import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
 
 describe('admin shell', () => {
+  it('owns one role-scoped current task and preserves only validated role context', () => {
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+
+    expect(navigation).toContain("'use client'");
+    expect(navigation).toContain('usePathname');
+    expect(navigation).toContain('useSearchParams');
+    expect(navigation).toContain('resolveLocalizedCurrentRoute');
+    expect(navigation).toContain("securityBoundary: 'admin-origin'");
+    expect(navigation).toContain('ADMIN_PREVIEW_ROLES.includes');
+    expect(navigation).toContain('currentItems.length === 1');
+    expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
+    expect(navigation).toContain('<LocaleSwitcher');
+    expect(navigation).toContain("searchParameters.get('role')");
+  });
+
+  it('collapses narrow role navigation into a compact current-task disclosure', () => {
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+
+    expect(navigation).toContain('admin-nav__desktop');
+    expect(navigation).toContain('admin-nav__mobile');
+    expect(navigation).toContain('<details');
+    expect(navigation).toContain('<summary>');
+    expect(navigation).toContain('{currentLabel}');
+    expect(styles).toMatch(/\.admin-nav__mobile\s*\{[\s\S]*display:\s*none/u);
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-nav__desktop\s*\{[\s\S]*display:\s*none/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-nav__mobile\s*\{[\s\S]*display:\s*block/u,
+    );
+    expect(styles).not.toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
+    );
+  });
+
+  it('renders a premium role and task topbar with accessible flag language switching', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+
+    expect(layout).toContain('admin-header__role');
+    expect(navigation).toContain('admin-header__task');
+    expect(navigation).toContain('sourceLocale={locale}');
+    expect(navigation).toContain('targetLocale={alternateLocale}');
+    expect(navigation).toContain('fallbackLocaleHref');
+    expect(navigation).toContain('resolveLocalizedCurrentRoute({');
+    expect(navigation).toContain('<LocaleSwitcher');
+    expect(navigation).not.toContain('aria-label={`${locale');
+  });
+
   it('persists disconnected fixture provenance and scopes every role', () => {
     expect(ADMIN_WEB_COMPOSITION).toEqual({
       authorityConnected: false,
