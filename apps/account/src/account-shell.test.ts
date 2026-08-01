@@ -132,6 +132,63 @@ describe('account shell', () => {
     );
   });
 
+  it('renders one closed 48px mobile disclosure named for the current route', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(navigationSource.match(/<details\b/gu) ?? []).toHaveLength(1);
+    expect(navigationSource).not.toMatch(/<details[^>]*\bopen\b/iu);
+    expect(navigationSource).toContain('<strong>{currentLabel}</strong>');
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__desktop\s*\{[\s\S]*display:\s*none[\s\S]*\.account-nav__mobile summary\s*\{[\s\S]*min-block-size:\s*48px/u,
+    );
+  });
+
+  it('opens the native disclosure to every responsibility while retaining one current page', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(navigationSource).toContain('<details className="account-nav account-nav__mobile">');
+    expect(navigationSource).toContain('<nav aria-label={label}>');
+    expect(navigationSource).toContain('groups={groups} markCurrent={false}');
+    expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
+    expect(navigationSource).not.toMatch(/onKeyDown|onClick|role="button"/u);
+  });
+
+  it('reflows at 320px with one task label, a 60px topbar, and no page overflow', () => {
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toContain('overflow-x: clip');
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-header__bar\s*\{[\s\S]*min-block-size:\s*60px[\s\S]*block-size:\s*60px/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-header__task\s*\{[\s\S]*display:\s*none/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*min-inline-size:\s*0/u,
+    );
+    expect(styles).not.toContain('100vw');
+  });
+
+  it('preserves the canonical account route when switching locale on mobile', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(navigationSource.match(/resolveLocalizedCurrentRoute\(\{/gu) ?? []).toHaveLength(2);
+    expect(navigationSource).toContain("securityBoundary: 'account-origin'");
+    expect(navigationSource).toContain('targetLocale: alternateLocale');
+    expect(navigationSource).toContain('localizedAlternateRoute.ok');
+    expect(navigationSource).toContain(': fallbackLocaleHref');
+  });
+
   it('keeps the topbar contextual, bilingual, and visibly disconnected', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
