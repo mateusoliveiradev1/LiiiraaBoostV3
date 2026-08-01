@@ -395,11 +395,26 @@ Plans:
 
 - [x] 03-44-PLAN.md — Rebaseline admin W14-W16 and G06-G07 evidence
 
-**Wave 27** *(blocked on Plan 03-44)*
+**Wave 27** *(second visual-rejection gap closure; blocked on Plan 03-44)*
+
+- [ ] 03-47-PLAN.md — Prove development-only Turbopack CSP compatibility on all three surfaces
+- [ ] 03-48-PLAN.md — Add canonical active-route and route-preserving locale foundations
+
+**Wave 28** *(blocked on Plan 03-48)*
+
+- [ ] 03-49-PLAN.md — Author the premium public application shell and artifact-led Home
+- [ ] 03-50-PLAN.md — Author the premium account shell and compact responsibility navigation
+- [ ] 03-51-PLAN.md — Author the premium admin shell and compact role/task navigation
+
+**Wave 29** *(blocked on Plans 03-47 and 03-49 through 03-51)*
+
+- [ ] 03-52-PLAN.md — Prove cross-surface behavior and rebaseline all W01-W18/G01-G07 evidence
+
+**Wave 30** *(blocked on Plan 03-52)*
 
 - [ ] 03-45-PLAN.md — Run complete matrix preflight and blocking human visual review
 
-**Wave 28** *(blocked on approved Plan 03-45)*
+**Wave 31** *(blocked on approved Plan 03-45)*
 
 - [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
 
