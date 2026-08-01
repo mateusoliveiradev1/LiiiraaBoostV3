@@ -135,6 +135,12 @@ const scenarioIdsBySurface = Object.freeze({
 
 const chromium = devices['Desktop Chrome'];
 
+const finalProjectGrep = (surface: (typeof surfaces)[number]['surface'], axis: string): RegExp =>
+  new RegExp(
+    `(?:@final @${surface}(?! @candidate-capture)|@final @${surface} @candidate-capture @project-${surface}-final-${axis}(?:\\s|$))`,
+    'u',
+  );
+
 export const selectWebTestSurfaces = (
   arguments_: readonly string[],
 ): readonly (typeof surfaces)[number][] => {
@@ -184,7 +190,7 @@ const quickProjects: Project[] = surfaces.map(({ baseURL, surface }) => ({
 
 const finalProjects: Project[] = surfaces.flatMap(({ baseURL, surface }) =>
   axes.map((axis) => ({
-    grep: new RegExp(`@final @${surface}`, 'u'),
+    grep: finalProjectGrep(surface, axis.id),
     metadata: {
       axis: axis.id,
       finalOnly: true,

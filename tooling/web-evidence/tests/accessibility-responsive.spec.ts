@@ -504,7 +504,7 @@ for (const scenario of scenarioDocument.scenarios) {
   const axis = AXIS_BY_VIEWPORT[scenario.viewport as keyof typeof AXIS_BY_VIEWPORT];
   if (axis === undefined) throw new Error(`Unsupported canonical viewport: ${scenario.viewport}`);
 
-  test(`@final @candidate-capture @${surface} ${scenario.id} canonical accessible visual`, async ({
+  test(`@final @${surface} @candidate-capture @project-${surface}-final-${axis} ${scenario.id} canonical accessible visual`, async ({
     page,
   }, testInfo) => {
     onlyAxis(testInfo, axis);
@@ -526,7 +526,7 @@ for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.s
   const axis = AXIS_BY_VIEWPORT[entry.viewport as keyof typeof AXIS_BY_VIEWPORT];
   if (axis === undefined) throw new Error(`Unsupported qualitative viewport: ${entry.viewport}`);
 
-  test(`@final @candidate-capture @${entry.surface} ${entry.captureId} qualitative review capture`, async ({
+  test(`@final @${entry.surface} @candidate-capture @project-${entry.surface}-final-${axis} ${entry.captureId} qualitative review capture`, async ({
     page,
   }, testInfo) => {
     onlyAxis(testInfo, axis);
