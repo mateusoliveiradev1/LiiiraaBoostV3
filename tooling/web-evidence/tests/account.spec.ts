@@ -67,6 +67,49 @@ const advanceToConfirmation = async (page: Page, locale: 'en' | 'pt-BR') => {
   await expect(page.locator('[data-preview-state="confirming"]')).toBeVisible();
 };
 
+test('@final @account navigation and language preserve the active security responsibility', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await page.goto('/en/account/security');
+
+  const current = page.locator('a[aria-current="page"]:visible');
+  await expect(current).toHaveCount(1);
+  await expect(current).toContainText('Security');
+
+  const locale = page.locator('a.lb-web-locale-switcher:visible');
+  await expect(locale).toHaveCount(1);
+  await expect(locale).toHaveAccessibleName('Switch language to Português');
+  await expect(locale).toContainText('🇧🇷');
+  await expect(locale).toContainText('Português');
+  await expect(locale).toHaveAttribute('href', '/pt-BR/account/security');
+
+  await locale.click();
+  await expect(page).toHaveURL(/\/pt-BR\/account\/security$/u);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+});
+
+for (const axis of ['mobile-390', 'reflow-320'] as const) {
+  test(`@final @account compact navigation is closed and keyboard-operable at ${axis}`, async ({
+    page,
+  }, testInfo) => {
+    onlyAxis(testInfo, axis);
+    await page.goto('/en/account/profile');
+
+    const disclosure = page.locator('details.account-nav__mobile');
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    await expect(disclosure.locator('summary')).toContainText('Profile');
+    await expect(disclosure.getByRole('link')).toBeHidden();
+
+    await disclosure.locator('summary').focus();
+    await expect(disclosure.locator('summary')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(disclosure).toHaveAttribute('open', '');
+    await expect(disclosure.getByRole('link', { name: 'Security', exact: true })).toBeVisible();
+  });
+}
+
 test('@final @account W10 validates sign-in and completes without creating a session', async ({
   page,
 }, testInfo) => {

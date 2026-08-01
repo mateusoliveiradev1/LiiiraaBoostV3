@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
@@ -21,7 +23,7 @@ type VisualEntry = Readonly<{
   locale: Scenario['locale'];
   localeReview: 'pt-BR-default' | 'en-parity';
   motion: 'no-preference' | 'reduce';
-  rebaselineOwner: 'plan-03-42' | 'plan-03-43' | 'plan-03-44';
+  rebaselineOwner: 'plan-03-52';
   reviewPurpose: string;
   route: string;
   routeId: string;
@@ -42,6 +44,57 @@ const scenarioDocument = JSON.parse(
 const visualManifest = JSON.parse(
   readFileSync(new URL('../visual-manifest.json', import.meta.url), 'utf8'),
 ) as Readonly<{ entries: readonly VisualEntry[]; schemaVersion: number; source: string }>;
+
+const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const REACT_EVAL_CSP_ERROR =
+  /(?:eval\(\) is not supported in this environment|React requires eval\(\) in development mode)/iu;
+
+const developmentSurfaces = Object.freeze([
+  {
+    app: '@liiiraa/web',
+    origin: 'http://public.localhost:3200',
+    route: '/en/docs/current',
+  },
+  {
+    app: '@liiiraa/account',
+    origin: 'http://account.localhost:3201',
+    route: '/en/account/security',
+  },
+  {
+    app: '@liiiraa/admin',
+    origin: 'http://admin.localhost:3202',
+    route: '/en/admin/audit?role=audit',
+  },
+] as const);
+
+const waitForDevelopmentServer = async (
+  child: ChildProcessWithoutNullStreams,
+  url: string,
+  output: readonly string[],
+): Promise<void> => {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (child.exitCode !== null) {
+      throw new Error(`Development server exited early (${child.exitCode}).\n${output.join('')}`);
+    }
+    try {
+      const response = await fetch(url, { redirect: 'manual' });
+      if (response.status < 500) return;
+    } catch {
+      // The server is still compiling its first route.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(`Development server did not become ready: ${url}\n${output.join('')}`);
+};
+
+const stopDevelopmentServer = (child: ChildProcessWithoutNullStreams): void => {
+  if (child.pid === undefined || child.exitCode !== null) return;
+  if (process.platform === 'win32') {
+    spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+    return;
+  }
+  process.kill(-child.pid, 'SIGTERM');
+};
 
 const AXIS_BY_VIEWPORT = Object.freeze({
   '1280x800': 'wide-1280',
@@ -183,6 +236,86 @@ const resetForNeutralCapture = async (page: Page): Promise<void> => {
     .poll(() => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
     .toEqual({ x: 0, y: 0 });
 };
+
+test('@final @public development CSP is browser-clean on every separate origin', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  test.setTimeout(180_000);
+
+  for (const surface of developmentSurfaces) {
+    const output: string[] = [];
+    const child = spawn(
+      process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+      [
+        '--filter',
+        surface.app,
+        'dev',
+        '--hostname',
+        new URL(surface.origin).hostname,
+        '--port',
+        new URL(surface.origin).port,
+      ],
+      {
+        cwd: repositoryRoot,
+        detached: process.platform !== 'win32',
+        env: {
+          ...process.env,
+          NODE_ENV: 'development',
+          ...(surface.app === '@liiiraa/admin'
+            ? { LIIIRAA_ADMIN_ORIGIN: surface.origin }
+            : {}),
+        },
+        stdio: 'pipe',
+      },
+    );
+    child.stdout.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
+    child.stderr.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
+
+    try {
+      const url = `${surface.origin}${surface.route}`;
+      await waitForDevelopmentServer(child, url, output);
+      const consoleErrors: string[] = [];
+      const onConsole = (message: { text(): string }) => {
+        if (REACT_EVAL_CSP_ERROR.test(message.text())) consoleErrors.push(message.text());
+      };
+      page.on('console', onConsole);
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+      expect(response).not.toBeNull();
+      expect(response?.headers()['content-security-policy']).toContain("'unsafe-eval'");
+      await expect(page.locator('main')).toBeVisible();
+      await page.waitForTimeout(500);
+      expect(consoleErrors, `${surface.app} emitted the reported React/Turbopack error`).toEqual([]);
+      page.off('console', onConsole);
+    } finally {
+      stopDevelopmentServer(child);
+    }
+  }
+});
+
+test('@final @public CSP origin, noindex, authority, role, and release gates remain closed', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+
+  await page.goto('http://public.localhost:3100/en/download/stable/current');
+  expect(new URL(page.url()).origin).toBe('http://public.localhost:3100');
+  await expect(page.locator('a[href$=".exe"]')).toHaveCount(0);
+  await expect(page.locator('[data-release-route="releases-download"]')).toBeVisible();
+
+  await page.goto('http://account.localhost:3101/en/account/security');
+  expect(new URL(page.url()).origin).toBe('http://account.localhost:3101');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/iu);
+  await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
+  await expect(page.locator('[data-authority-connected="true"]')).toHaveCount(0);
+
+  await page.goto('http://admin.localhost:3102/en/admin/audit?role=audit');
+  expect(new URL(page.url()).origin).toBe('http://admin.localhost:3102');
+  await expect(page).toHaveURL(/\?role=audit$/u);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/iu);
+  await expect(page.locator('[data-authority="disconnected"]')).not.toHaveCount(0);
+  await expect(page.locator('[data-authority="connected"]')).toHaveCount(0);
+});
 
 test('@final @public visual manifest is an exact W01-W18 projection', async ({}, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');

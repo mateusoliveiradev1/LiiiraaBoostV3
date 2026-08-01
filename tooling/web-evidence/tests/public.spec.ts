@@ -79,6 +79,29 @@ const expectScenarioRoutesCanonical = (id: string) => {
   expect(record.requiredRouteIds.every((routeId) => canonicalRouteIds.has(routeId))).toBe(true);
 };
 
+test('@final @public navigation and language preserve the active documentation route', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await gotoWithRecoverableRetry(page, '/en/docs/current');
+
+  const current = page.locator('a[aria-current="page"]:visible');
+  await expect(current).toHaveCount(1);
+  await expect(current).toContainText('Documentation');
+
+  const locale = page.locator('a.lb-web-locale-switcher:visible');
+  await expect(locale).toHaveCount(1);
+  await expect(locale).toHaveAccessibleName('Switch language to Português');
+  await expect(locale).toContainText('🇧🇷');
+  await expect(locale).toContainText('Português');
+  await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
+
+  await locale.click();
+  await expect(page).toHaveURL(/\/pt-BR\/docs\/current$/u);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+});
+
 test('@final @public W01 keeps the PT-BR command runway truthful and distribution gated', async ({
   page,
 }, testInfo) => {

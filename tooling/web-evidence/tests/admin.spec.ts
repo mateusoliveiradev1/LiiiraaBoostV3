@@ -46,6 +46,49 @@ const advanceButtonWorkflow = async (page: Page) => {
   await page.getByRole('button', { name: 'Complete reauthentication simulation' }).click();
 };
 
+test('@final @admin navigation and language preserve the active audit role', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await page.goto('/en/admin/audit?role=audit');
+
+  const current = page.locator('a[aria-current="page"]:visible');
+  await expect(current).toHaveCount(1);
+  await expect(current).toContainText('Audit');
+
+  const locale = page.locator('a.lb-web-locale-switcher:visible');
+  await expect(locale).toHaveCount(1);
+  await expect(locale).toHaveAccessibleName('Switch language to Português');
+  await expect(locale).toContainText('🇧🇷');
+  await expect(locale).toContainText('Português');
+  await expect(locale).toHaveAttribute('href', '/pt-BR/admin/audit?role=audit');
+
+  await locale.click();
+  await expect(page).toHaveURL(/\/pt-BR\/admin\/audit\?role=audit$/u);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+});
+
+for (const axis of ['mobile-390', 'reflow-320'] as const) {
+  test(`@final @admin compact navigation is closed and keyboard-operable at ${axis}`, async ({
+    page,
+  }, testInfo) => {
+    onlyAxis(testInfo, axis);
+    await page.goto('/en/admin/support/case-preview?role=support');
+
+    const disclosure = page.locator('details.admin-nav__mobile');
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    await expect(disclosure.locator('summary')).toContainText('Support case');
+    await expect(disclosure.getByRole('link')).toBeHidden();
+
+    await disclosure.locator('summary').focus();
+    await expect(disclosure.locator('summary')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(disclosure).toHaveAttribute('open', '');
+    await expect(disclosure.getByRole('link', { name: 'Audit', exact: true })).toBeVisible();
+  });
+}
+
 test('@final @admin W14 keeps support role-scoped, redacted, cancellable, and immutable', async ({
   page,
 }, testInfo) => {
