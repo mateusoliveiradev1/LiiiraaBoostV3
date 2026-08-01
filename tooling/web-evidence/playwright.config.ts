@@ -226,6 +226,7 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',
   testDir: './tests',
   timeout: 30_000,
+  updateSnapshots: 'none',
   use: {
     actionTimeout: 5_000,
     screenshot: 'only-on-failure',

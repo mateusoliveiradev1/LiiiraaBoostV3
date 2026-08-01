@@ -257,6 +257,35 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   await expectNoBlockingAxeViolations(page);
 };
 
+const resetForNeutralCapture = async (page: Page): Promise<void> => {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    window.scrollTo({ left: 0, top: 0 });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  });
+  await expect(page.locator(':focus')).toHaveCount(0);
+  await expect
+    .poll(() => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
+    .toEqual({ x: 0, y: 0 });
+};
+
+const isCandidateCaptureUpdate = (testInfo: TestInfo): boolean =>
+  ['all', 'changed', 'missing'].includes(testInfo.config.updateSnapshots);
+
+const captureCandidateIfUpdating = async (
+  page: Page,
+  testInfo: TestInfo,
+  captureId: string,
+): Promise<void> => {
+  if (!isCandidateCaptureUpdate(testInfo)) return;
+  await resetForNeutralCapture(page);
+  await expect(page).toHaveScreenshot(`${captureId}.png`, {
+    animations: 'disabled',
+    fullPage: true,
+  });
+};
+
 test('@final @public development CSP is browser-clean on every separate origin', async ({
   page,
 }, testInfo) => {
@@ -439,12 +468,43 @@ test('@final @public visual manifest closes all 25 records as unapproved Plan 03
   }
 });
 
+test('@final @public candidate capture update mode enumerates exactly W01-W18 and G01-G07', async ({}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  const expectedCaptureIds = [
+    ...Array.from({ length: 18 }, (_, index) => `W${String(index + 1).padStart(2, '0')}`),
+    ...Array.from({ length: 7 }, (_, index) => `G${String(index + 1).padStart(2, '0')}`),
+  ];
+  const captureIdentities = visualManifest.entries.map(
+    ({ captureId, snapshotPath, surface, viewport }) => ({
+      captureId,
+      project: `${surface}-final-${AXIS_BY_VIEWPORT[viewport as keyof typeof AXIS_BY_VIEWPORT]}`,
+      snapshotPath,
+    }),
+  );
+
+  expect(captureIdentities.map(({ captureId }) => captureId)).toEqual(expectedCaptureIds);
+  expect(new Set(captureIdentities.map(({ captureId }) => captureId)).size).toBe(25);
+  expect(new Set(captureIdentities.map(({ snapshotPath }) => snapshotPath)).size).toBe(25);
+  for (const identity of captureIdentities) {
+    expect(identity.snapshotPath).toBe(
+      `tests/__screenshots__/accessibility-responsive.spec.ts/${identity.captureId}-${identity.project}.png`,
+    );
+  }
+});
+
+test('@final @public candidate update flag activates deterministic capture mode', async ({}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  test.skip(!isCandidateCaptureUpdate(testInfo), 'Proof-only gate runs only with update mode.');
+  expect(isCandidateCaptureUpdate(testInfo)).toBe(true);
+  expect(visualManifest.entries).toHaveLength(25);
+});
+
 for (const scenario of scenarioDocument.scenarios) {
   const surface = surfaceFor(scenario.routeId);
   const axis = AXIS_BY_VIEWPORT[scenario.viewport as keyof typeof AXIS_BY_VIEWPORT];
   if (axis === undefined) throw new Error(`Unsupported canonical viewport: ${scenario.viewport}`);
 
-  test(`@final @${surface} ${scenario.id} canonical accessible visual`, async ({
+  test(`@final @candidate-capture @${surface} ${scenario.id} canonical accessible visual`, async ({
     page,
   }, testInfo) => {
     onlyAxis(testInfo, axis);
@@ -458,6 +518,7 @@ for (const scenario of scenarioDocument.scenarios) {
         visualTarget: false,
       },
     );
+    await captureCandidateIfUpdating(page, testInfo, scenario.id);
   });
 }
 
@@ -465,7 +526,7 @@ for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.s
   const axis = AXIS_BY_VIEWPORT[entry.viewport as keyof typeof AXIS_BY_VIEWPORT];
   if (axis === undefined) throw new Error(`Unsupported qualitative viewport: ${entry.viewport}`);
 
-  test(`@final @${entry.surface} ${entry.captureId} qualitative review capture`, async ({
+  test(`@final @candidate-capture @${entry.surface} ${entry.captureId} qualitative review capture`, async ({
     page,
   }, testInfo) => {
     onlyAxis(testInfo, axis);
@@ -476,6 +537,7 @@ for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.s
       status: 'candidate',
       visualTarget: false,
     });
+    await captureCandidateIfUpdating(page, testInfo, entry.captureId);
   });
 }
 
