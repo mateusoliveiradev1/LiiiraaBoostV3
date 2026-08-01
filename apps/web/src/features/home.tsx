@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import {
-  ClaimEvidenceRow,
   CommandRunwayHero,
   RealProductStage,
   StatusSignal,
@@ -278,20 +277,38 @@ const EVIDENCE_LABELS = Object.freeze({
   }),
 });
 
-const ChapterEvidence = ({
+const EvidenceDisclosure = ({
   claim,
   locale,
 }: Readonly<{ claim: HomeClaimRecord; locale: HomeLocale }>) => (
-  <ClaimEvidenceRow
-    claim={claim.chapter.claim}
-    labels={EVIDENCE_LABELS[locale]}
-    provenance="derived"
-    scope={claim.evidence.scope}
-    source={claim.evidence.source}
-    unprovenBoundary={claim.chapter.unprovenBoundary}
-    validationState={locale === 'pt-BR' ? 'Validado' : 'Validated'}
-    version={claim.evidence.applicableVersion}
-  />
+  <details className="home-evidence-disclosure">
+    <summary>{locale === 'pt-BR' ? 'Inspecionar evidência' : 'Inspect evidence'}</summary>
+    <div>
+      <p>{claim.chapter.claim}</p>
+      <dl>
+        <div>
+          <dt>{EVIDENCE_LABELS[locale].source}</dt>
+          <dd>{claim.evidence.source}</dd>
+        </div>
+        <div>
+          <dt>{EVIDENCE_LABELS[locale].scope}</dt>
+          <dd>{claim.evidence.scope}</dd>
+        </div>
+        <div>
+          <dt>{EVIDENCE_LABELS[locale].version}</dt>
+          <dd>{claim.evidence.applicableVersion}</dd>
+        </div>
+        <div>
+          <dt>{EVIDENCE_LABELS[locale].validationState}</dt>
+          <dd>{locale === 'pt-BR' ? 'Validado' : 'Validated'}</dd>
+        </div>
+      </dl>
+      <p>
+        <strong>{EVIDENCE_LABELS[locale].unprovenBoundary}: </strong>
+        {claim.chapter.unprovenBoundary}
+      </p>
+    </div>
+  </details>
 );
 
 const ProductStageGate = ({
@@ -359,6 +376,11 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
   const compatibilityHref = publicBoundaryHref('public-compatibility', locale);
   const evidenceHref = publicBoundaryHref('public-evidence', locale);
   const releasesHref = publicBoundaryHref('releases-index', locale);
+  const proofClaims = claims.slice(0, 3);
+  const compatibilityClaim = claims.find(({ chapter }) => chapter.id === 'compatibility');
+  if (compatibilityClaim === undefined) {
+    throw new Error(`HOME_CONTENT_INVALID:${locale}:compatibility`);
+  }
 
   return (
     <div className="public-home" data-capture-state={capture.code}>
@@ -366,8 +388,8 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         artifact={<ProductStageGate admission={capture} locale={locale} />}
         boundary={
           <aside className="home-trust-boundary" role="note">
-            <strong>{content.hero.trustBoundary.title}</strong>
-            <p>{content.hero.trustBoundary.body}</p>
+            <strong>{locale === 'pt-BR' ? 'O limite da promessa' : 'The promise boundary'}</strong>
+            <p>{content.warnings[0]}</p>
           </aside>
         }
         cta={
@@ -382,28 +404,41 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         summary={content.hero.summary}
       />
 
-      <section aria-labelledby="home-method-title" className="home-method">
-        <header className="home-method__introduction">
-          <p>{locale === 'pt-BR' ? 'Prepare · Prove · Restaure' : 'Prepare · Prove · Restore'}</p>
-          <h2 id="home-method-title">
+      <section aria-labelledby="home-evidence-title" className="home-evidence-stage">
+        <header className="home-evidence-stage__introduction">
+          <h2 id="home-evidence-title">
             {locale === 'pt-BR'
-              ? 'Preparação, evidência e recuperação em uma única sequência'
-              : 'Preparation, evidence, and recovery in one sequence'}
+              ? 'Desempenho é uma sequência que pode ser revisada'
+              : 'Performance is a sequence you can review'}
           </h2>
           <p>{content.body}</p>
         </header>
 
-        <ol className="home-chapter-sequence">
-          {claims.map((claim) => (
-            <li className="home-chapter" data-chapter={claim.chapter.id} key={claim.chapter.id}>
-              <div className="home-chapter__copy">
-                <h2>{claim.chapter.title}</h2>
+        <ol className="home-proof-sequence">
+          {proofClaims.map((claim, index) => (
+            <li data-stage={claim.chapter.id} key={claim.chapter.id}>
+              <span aria-hidden="true" className="home-proof-sequence__number">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div className="home-proof-sequence__copy">
+                <h3>{claim.chapter.title}</h3>
                 <p>{claim.chapter.summary}</p>
               </div>
-              <ChapterEvidence claim={claim} locale={locale} />
+              <EvidenceDisclosure claim={claim} locale={locale} />
             </li>
           ))}
         </ol>
+
+        <div className="home-compatibility-bridge">
+          <div>
+            <h2>{compatibilityClaim.chapter.title}</h2>
+            <p>{compatibilityClaim.chapter.summary}</p>
+          </div>
+          <div>
+            <HomeAction href={compatibilityHref}>{content.finalJourney.actionLabel}</HomeAction>
+            <EvidenceDisclosure claim={compatibilityClaim} locale={locale} />
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="home-release-gate-title" className="home-release-gate">
@@ -423,19 +458,6 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
           <HomeAction href={releasesHref}>
             {locale === 'pt-BR' ? 'Consultar o estado das versões' : 'Review release status'}
           </HomeAction>
-        </div>
-      </section>
-
-      <section aria-labelledby="home-final-title" className="home-final-journey">
-        <div>
-          <h2 id="home-final-title">{content.finalJourney.title}</h2>
-          <p>{content.finalJourney.body}</p>
-        </div>
-        <div className="home-final-journey__action">
-          <HomeAction href={compatibilityHref} primary>
-            {content.finalJourney.actionLabel}
-          </HomeAction>
-          <p>{content.finalJourney.distributionNote}</p>
         </div>
       </section>
     </div>

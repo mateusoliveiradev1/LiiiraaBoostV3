@@ -78,7 +78,7 @@ describe('Home content contract', () => {
 
   it('uses the approved promise and gated compatibility action exactly', () => {
     expect(homePtBr.hero.promise).toBe('Prepare seu PC. Prove o resultado. Restaure com controle.');
-    expect(homeEn.hero.promise).toBe('Prepare your PC. Prove result. Restore control.');
+    expect(homeEn.hero.promise).toBe('Prepare your PC. Prove the result. Restore with control.');
     expect(homePtBr.hero.primaryAction.label).toBe('Verificar compatibilidade');
     expect(homeEn.hero.primaryAction.label).toBe('Check compatibility');
     expect(homePtBr.finalJourney.actionLabel).toBe('Verificar compatibilidade');

@@ -94,7 +94,7 @@
   "translationKey": "public-home",
   "contentType": "product",
   "source": "repository",
-  "title": "Prepare your PC. Prove result. Restore control.",
+  "title": "Prepare your PC. Prove the result. Restore with control.",
   "summary": "A technical journey for preparing a session, verifying what evidence supports, and preserving a path back.",
   "body": "Liiiraa Boost organizes preparation, proof, and restoration without promising gains before hardware is observed. Compatibility, validation, and distribution remain explicit.",
   "metadata": {
@@ -118,7 +118,7 @@
   "risk": "low",
   "availability": "under-validation",
   "hero": {
-    "promise": "Prepare your PC. Prove result. Restore control.",
+    "promise": "Prepare your PC. Prove the result. Restore with control.",
     "summary": "Enter the next session with a readable plan, identified evidence, and recovery treated as part of performance — never a footnote.",
     "primaryAction": {
       "label": "Check compatibility",
