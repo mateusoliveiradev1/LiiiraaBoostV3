@@ -15,6 +15,81 @@ import {
 } from './account-preview-model';
 
 describe('account shell', () => {
+  it('uses the exact desktop shell geometry and bounded workspace', () => {
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /\.account-header__bar\s*\{[\s\S]*min-block-size:\s*72px[\s\S]*max-inline-size:\s*1440px/u,
+    );
+    expect(styles).toMatch(
+      /\.account-preview-rail\s*\{[\s\S]*min-block-size:\s*40px[\s\S]*block-size:\s*40px/u,
+    );
+    expect(styles).toMatch(
+      /\.account-workspace__frame\s*\{[\s\S]*grid-template-columns:\s*264px minmax\(0, 1fr\)/u,
+    );
+    expect(styles).toMatch(
+      /#account-main\s*\{[\s\S]*max-inline-size:\s*1240px[\s\S]*justify-self:\s*center/u,
+    );
+  });
+
+  it('keeps one calm topbar story with branded account, task, safe session, and locale', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain('<ProductLockup />');
+    expect(layoutSource).toContain("{locale === 'pt-BR' ? 'Conta' : 'Account'}");
+    expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
+    expect(layoutSource).toContain("accountState: 'No session connected'");
+    expect(navigationSource).toContain('account-header__task');
+    expect(navigationSource).toContain('<LocaleSwitcher');
+    expect(navigationSource).toContain('sourceLocale={locale}');
+    expect(navigationSource).toContain('targetLocale={alternateLocale}');
+    expect(navigationSource).not.toContain('account-header__fragment');
+  });
+
+  it('gives only the current responsibility an icon, raised fill, and cobalt edge', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(navigationSource).toContain('<ResponsibilityIcon');
+    expect(navigationSource).toContain("aria-current={isCurrent ? 'page' : undefined}");
+    expect(styles).toMatch(
+      /\.account-nav__list a\[aria-current='page'\]\s*\{[\s\S]*background:\s*var\(--lb-surface-raised\)/u,
+    );
+    expect(styles).toMatch(
+      /\.account-nav__list a\[aria-current='page'\]::before\s*\{[\s\S]*inline-size:\s*3px[\s\S]*background:\s*var\(--lb-accent-electric\)/u,
+    );
+    expect(styles).toMatch(
+      /\.account-nav__list a:not\(\[aria-current='page'\]\)\s*\{[\s\S]*color:\s*var\(--lb-text-secondary\)/u,
+    );
+  });
+
+  it('uses the locked quiet preview message without implementation vocabulary', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain("previewLabel: 'Alterações remotas desconectadas'");
+    expect(layoutSource).toContain("previewLabel: 'Remote changes disconnected'");
+    expect(layoutSource).toContain(
+      'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
+    );
+    expect(layoutSource).toContain(
+      'You can review the flow with synthetic data; nothing changes outside this preview.',
+    );
+    expect(layoutSource).not.toMatch(/phase|fixture|adapter|manifest/iu);
+  });
+
   it('marks exactly the pathname-matched responsibility as the current page', () => {
     const navigationUrl = new URL('./account-navigation.tsx', import.meta.url);
     expect(existsSync(navigationUrl)).toBe(true);
