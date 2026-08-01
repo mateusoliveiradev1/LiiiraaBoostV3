@@ -1,4 +1,6 @@
-import { isValidElement } from 'react';
+import { isValidElement, type ReactNode } from 'react';
+// @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
+import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { matchWebRoute, type WebRouteId } from '@liiiraa/web-core';
 
@@ -7,6 +9,8 @@ import {
   getPublicCatalogMetadata,
   PublicCatalogPage,
 } from './features/public-catalog';
+
+const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
 const CATALOG_ROUTES = [
   'public-product',
@@ -157,5 +161,16 @@ describe('public policies and operational trust', () => {
         expect(isValidElement(page)).toBe(true);
       }
     }
+  });
+
+  it('renders W09 with localized human status instead of fixture and enum language', () => {
+    const markup = renderToStaticMarkup(
+      <PublicCatalogPage locale="pt-BR" routeId="public-status" />,
+    );
+
+    expect(markup).toContain('Prévia demonstrativa');
+    expect(markup).toContain('sem alterar dados ou ações remotas');
+    expect(markup).not.toContain('As prévias da Fase 3');
+    expect(markup).not.toMatch(/>demonstrative-preview</u);
   });
 });

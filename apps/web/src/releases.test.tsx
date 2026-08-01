@@ -93,6 +93,39 @@ describe('release content and routes', () => {
     expect(markup).not.toMatch(/continueAnyway|downloadUri|target\/release|phase-02/iu);
   });
 
+  it('leads W07 and W08 with the human decision and keeps machine evidence secondary', () => {
+    const w07 = resolveDownloadPage({ channel: 'stable', locale: 'pt-BR', version: 'current' });
+    const w08 = resolveReleasePage({
+      locale: 'en',
+      release: ['stable', 'current', 'integrity'],
+    });
+    if (w07 === undefined || w08 === undefined) throw new Error('release scenario route missing');
+
+    const w07Markup = renderToStaticMarkup(<ReleaseExperience resolution={w07} />);
+    const w08Markup = renderToStaticMarkup(<ReleaseExperience resolution={w08} />);
+
+    for (const markup of [w07Markup, w08Markup]) {
+      const decision = markup.indexOf('lb-web-download-gate');
+      const integrity = markup.indexOf('lb-web-release-integrity');
+      const manifest = markup.indexOf('release-manifest-disclosure');
+      const provenance = markup.indexOf('release-technical-context');
+
+      expect(decision).toBeGreaterThan(-1);
+      expect(decision).toBeLessThan(integrity);
+      expect(decision).toBeLessThan(manifest);
+      expect(decision).toBeLessThan(provenance);
+      expect(markup).toContain('<details class="release-manifest-disclosure">');
+      expect(markup).not.toContain('<details class="release-manifest-disclosure" open=""');
+      expect(markup).toContain('<details class="release-decision-technical-context">');
+      expect(markup).not.toMatch(/<p>\s*<code>distribution-not-approved<\/code>/u);
+    }
+
+    expect(w07Markup).toContain('Registro técnico da decisão');
+    expect(w07Markup).toContain('Ver detalhes técnicos de integridade');
+    expect(w08Markup).toContain('Technical decision record');
+    expect(w08Markup).toContain('View technical integrity details');
+  });
+
   it('prioritizes state, compatibility, integrity, risks, corrections, and recovery', async () => {
     const resolution = resolveReleasePage({ locale: 'en' });
     if (resolution === undefined) throw new Error('release index route missing');
