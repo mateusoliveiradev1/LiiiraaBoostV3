@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-60-PLAN.md
-last_updated: "2026-08-01T18:21:42.290Z"
+stopped_at: Completed 03-61-PLAN.md
+last_updated: "2026-08-01T19:28:32.371Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 116
+  completed_plans: 117
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 9 of 66
+Plan: 10 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -164,6 +164,7 @@ _Updated after plan completion_
 | Phase 03 P56 | 16min | 2 tasks | 9 files |
 | Phase 03 P58 | 17min | 2 tasks | 3 files |
 | Phase 03 P60 | 11min | 2 tasks | 3 files |
+| Phase 03 P61 | 58min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -487,6 +488,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Give each admin role an explicit focal route instead of deriving priority from route order. — Makes operator priority authored, stable, and reviewable.
 - [Phase 03]: Project immutable audit transports into localized human action, role, and result copy before rendering. — Preserves validated evidence without exposing raw transport enums in ordinary chrome.
 - [Phase 03]: Omit high-risk admin and diagnostic controls from mobile DOM semantics below 960px while preserving safe review. — Keeps mobile useful while enforcing the desktop-class authority boundary in presentation and workflow policy.
+- [Phase 03]: Invalidated W/G pixels remain candidate inputs only; candidate records run accessibility checks without screenshot comparison until Plan 03-62 rebaselines them.
+- [Phase 03]: Explicit Playwright project selection starts only the selected origin, while the unfiltered motion contract starts all three origins.
+- [Phase 03]: Locked destructive red remains a boundary signal instead of a text background because no label color can provide the required 4.5:1 contrast on that fill.
 
 ### Pending Todos
 
@@ -528,6 +532,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T18:21:20.234Z
-Stopped at: Completed 03-60-PLAN.md
+Last session: 2026-08-01T19:28:32.365Z
+Stopped at: Completed 03-61-PLAN.md
 Resume file: None
