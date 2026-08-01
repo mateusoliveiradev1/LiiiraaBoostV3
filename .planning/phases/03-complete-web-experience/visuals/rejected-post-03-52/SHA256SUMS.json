@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sourcePlan": "03-52",
+  "status": "rejected",
+  "sourceRevision": "0823833cf3584a16eed5b30e5dd74aa2912724bf",
+  "archivedByPlan": "03-62",
+  "files": [
+    {
+      "id": "G01",
+      "sourcePath": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G01-public-final-wide-1440.png",
+      "archivePath": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G01-public-final-wide-1440.png",
+      "byteSize": 301979,
+      "sha256": "45c2e171e9d9b2c296649eb6898cab3d1c1ccc50b10f54c9cd0fb6fec68809e2",
+      "ownerPlan": "03-52",
+      "status": "rejected",
+      "sourceRevision": "0823833cf3584a16eed5b30e5dd74aa2912724bf"
+    },
+    {
+      "id": "G04",
+      "sourcePath": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G04-account-final-wide-1440.png",
+      "archivePath": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G04-account-final-wide-1440.png",
+      "byteSize": 61959,
+      "sha256": "7699c77be6ed99f44f13c28dd653a918abca39a604daf6f4f0debb1fd92c134b",
+      "ownerPlan": "03-52",
+      "status": "rejected",
+      "sourceRevision": "0823833cf3584a16eed5b30e5dd74aa2912724bf"
+    },
+    {
+      "id": "G06",
+      "sourcePath": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G06-admin-final-wide-1440.png",
+      "archivePath": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G06-admin-final-wide-1440.png",
+      "byteSize": 82960,
+      "sha256": "83b2a631b06583d33d0f2961801c74a9292b46ef4603df1227ea678921309b6f",
+      "ownerPlan": "03-52",
+      "status": "rejected",
+      "sourceRevision": "0823833cf3584a16eed5b30e5dd74aa2912724bf"
+    }
+  ]
+}
