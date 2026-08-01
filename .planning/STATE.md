@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-62 correction-cycle capture
-last_updated: "2026-08-01T22:33:17.686Z"
+stopped_at: Completed 03-63-PLAN.md
+last_updated: "2026-08-01T22:43:01.239Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 118
+  completed_plans: 119
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 11 of 66
+Plan: 12 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -166,6 +166,7 @@ _Updated after plan completion_
 | Phase 03 P60 | 11min | 2 tasks | 3 files |
 | Phase 03 P61 | 58min | 2 tasks | 12 files |
 | Phase 03 P62 | 1h 52m | 2 tasks | 29 files |
+| Phase 03 P63 | 54min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -498,6 +499,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Mechanical capture changes pixels only; all 25 records remain candidate, unapproved, unpublished, and non-authoritative.
 - [Phase 03]: Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.
 - [Phase 03]: The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.
+- [Phase 03]: Accept the corrected public subset only as a non-human candidate verdict; human and publication approval remain false.
+- [Phase 03]: Keep raw release manifest and repository identifiers subordinate inside closed localized technical disclosures.
 
 ### Pending Todos
 
@@ -539,6 +542,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T22:33:16.644Z
-Stopped at: Completed 03-62 correction-cycle capture
+Last session: 2026-08-01T22:43:01.233Z
+Stopped at: Completed 03-63-PLAN.md
 Resume file: None
