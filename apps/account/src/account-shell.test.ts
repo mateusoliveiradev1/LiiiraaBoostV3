@@ -105,6 +105,29 @@ describe('account shell', () => {
     expect(navigationSource).toContain('<LocaleSwitcher');
   });
 
+  it('keeps sign-in as one canonical current destination with truthful entry copy', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain("signIn: 'Entrar'");
+    expect(layoutSource).toContain("signIn: 'Sign in'");
+    expect(layoutSource).toContain("routeHref('account-sign-in', { locale })");
+    expect(layoutSource).toContain('entryItems={signInEntryItems}');
+    expect(navigationSource).toContain('entryItems: readonly AccountNavigationItem[]');
+    expect(navigationSource).toContain('const allItems = [...entryItems, ...responsibilityItems]');
+    expect(navigationSource).toContain('const visibleGroups =');
+    expect(navigationSource).toContain('groups={visibleGroups} markCurrent');
+    expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
+    expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
+    expect(layoutSource).toContain("accountState: 'No session connected'");
+  });
+
   it('collapses narrow navigation into a current-task disclosure without stacking inventory', () => {
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
@@ -174,6 +197,21 @@ describe('account shell', () => {
       /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*min-inline-size:\s*0/u,
     );
     expect(styles).not.toContain('100vw');
+  });
+
+  it('wraps the complete preview status at 320px and 400% text reflow', () => {
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /@media \(width < 760px\)[\s\S]*\.account-preview-rail \.lb-status-mark\s*\{[\s\S]*flex-wrap:\s*wrap[\s\S]*min-inline-size:\s*0/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 760px\)[\s\S]*\.account-preview-rail \.lb-status-detail\s*\{[\s\S]*min-inline-size:\s*0[\s\S]*overflow:\s*visible[\s\S]*overflow-wrap:\s*anywhere[\s\S]*text-overflow:\s*clip[\s\S]*white-space:\s*normal/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__mobile summary\s*\{[\s\S]*min-block-size:\s*48px/u,
+    );
+    expect(styles).toContain('overflow-x: clip');
   });
 
   it('preserves the canonical account route when switching locale on mobile', () => {
