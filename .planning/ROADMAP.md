@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 50/52 plans executed
+**Plans**: 50/62 plans executed
 
 Plans:
 **Wave 1**
@@ -410,11 +410,39 @@ Plans:
 
 - [x] 03-52-PLAN.md — Prove cross-surface behavior and rebaseline all W01-W18/G01-G07 evidence
 
-**Wave 30** *(blocked on Plan 03-52)*
+**Wave 30** *(third visual-rejection gap closure; blocked on Plan 03-52)*
+
+- [ ] 03-53-PLAN.md — Establish exact Cobalt Ignition Bay tokens, typography, local fonts, and contrast gates
+
+**Wave 31** *(blocked on Plan 03-53)*
+
+- [ ] 03-54-PLAN.md — Build the shared material, component-state, and workspace vocabulary
+
+**Wave 32** *(blocked on Plan 03-54; parallel surface shells)*
+
+- [ ] 03-55-PLAN.md — Author the branded public shell and centered cinematic product hero
+- [ ] 03-57-PLAN.md — Author the premium account shell and responsive responsibility navigation
+- [ ] 03-59-PLAN.md — Author the premium admin shell and role-scoped responsive navigation
+
+**Wave 33** *(blocked on each owning Wave 32 shell; parallel surface content)*
+
+- [ ] 03-56-PLAN.md — Compose public long-form movements and authored documentation/release rhythm
+- [ ] 03-58-PLAN.md — Compose dense account responsibility workspaces and complete preview states
+- [ ] 03-60-PLAN.md — Compose focal admin decision workspaces, queues, consent, and audit context
+
+**Wave 34** *(blocked on Plans 03-56, 03-58, and 03-60)*
+
+- [ ] 03-61-PLAN.md — Encode exact candidate manifest, geometry, WCAG, locale, CSP, and truth gates
+
+**Wave 35** *(blocked on Plan 03-61)*
+
+- [ ] 03-62-PLAN.md — Regenerate and inspect all 25 unapproved W/G candidates and prove stable replay
+
+**Wave 36** *(blocked on Plan 03-62)*
 
 - [ ] 03-45-PLAN.md — Run complete matrix preflight and blocking human visual review
 
-**Wave 31** *(blocked on approved Plan 03-45)*
+**Wave 37** *(blocked on approved Plan 03-45)*
 
 - [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
 
