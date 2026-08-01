@@ -172,6 +172,9 @@ describe('authored overview and Profile workspaces', () => {
       expect(JSON.stringify(content.overview)).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
       expect(JSON.stringify(content.overview)).not.toMatch(/Preview scope|Escopo da prévia/iu);
       expect(content.overview.emptyBody).not.toMatch(/synthetic|sintético/iu);
+      expect(
+        [content.subscription.summary, content.device.summary, content.support.summary].join(' '),
+      ).not.toMatch(/Phase\s*[34]|Fase\s*[34]|synthetic|sintético|simulated|simulado/iu);
       expect(content.profile.nameDescription.length).toBeGreaterThan(0);
       expect(content.profile.authorityState.length).toBeGreaterThan(0);
       expect(content.profile.limitations.length).toBeGreaterThan(0);

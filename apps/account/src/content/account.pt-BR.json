@@ -60,7 +60,7 @@
   },
   "subscription": {
     "title": "Assinatura",
-    "summary": "Revise termos transparentes do Premium antes de um limite simulado de cobrança.",
+    "summary": "Revise termos do Premium, período de cobrança, cancelamento, reembolsos e regras de dispositivo.",
     "plan": "Prévia Premium",
     "price": "R$ 29,90 — preço ilustrativo, não uma oferta",
     "billingPeriod": "Mensal",
@@ -80,7 +80,7 @@
   },
   "device": {
     "title": "Dispositivo",
-    "summary": "Revise uma vinculação sintética de um dispositivo e a consequência da troca.",
+    "summary": "Revise os dados do dispositivo atual e o intervalo de 30 dias para troca.",
     "label": "DESKTOP-PREVIEW-01",
     "detail": "Windows 11 · fixture sintética · nenhum identificador de hardware coletado",
     "cooldown": "Uma troca confirmada iniciaria um intervalo de 30 dias na Fase 4. Esta prévia não revoga nem vincula um dispositivo.",
@@ -106,7 +106,7 @@
   },
   "support": {
     "title": "Suporte",
-    "summary": "Componha e revise uma solicitação sintética sem enviar ou fazer upload.",
+    "summary": "Prepare uma solicitação de suporte e revise o conteúdo antes de qualquer envio.",
     "subjectLabel": "Assunto",
     "bodyLabel": "Descrição",
     "action": "Revisar solicitação de suporte",

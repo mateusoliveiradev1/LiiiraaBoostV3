@@ -60,7 +60,7 @@
   },
   "subscription": {
     "title": "Subscription",
-    "summary": "Review transparent Premium terms before a simulated billing boundary.",
+    "summary": "Review Premium terms, billing timing, cancellation, refunds, and device rules.",
     "plan": "Premium preview",
     "price": "R$ 29.90 — illustrative price, not an offer",
     "billingPeriod": "Monthly",
@@ -80,7 +80,7 @@
   },
   "device": {
     "title": "Device",
-    "summary": "Review a synthetic one-device binding and its replacement consequence.",
+    "summary": "Review the current device details and the 30-day replacement cooldown.",
     "label": "DESKTOP-PREVIEW-01",
     "detail": "Windows 11 · synthetic fixture · no hardware identifier collected",
     "cooldown": "A confirmed replacement would start a 30-day cooldown in Phase 4. This preview does not revoke or bind a device.",
@@ -106,7 +106,7 @@
   },
   "support": {
     "title": "Support",
-    "summary": "Compose and review a synthetic support request without sending or uploading anything.",
+    "summary": "Prepare a support request and review its contents before anything is sent.",
     "subjectLabel": "Subject",
     "bodyLabel": "Description",
     "action": "Review support request",
