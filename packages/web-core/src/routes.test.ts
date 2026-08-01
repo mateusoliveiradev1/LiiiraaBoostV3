@@ -10,6 +10,7 @@ import {
   projectNavigation,
   projectRedirects,
   projectSitemap,
+  resolveLocalizedCurrentRoute,
   routeHref,
   webRoutes,
   type RouteProjection,
@@ -88,6 +89,143 @@ const requireProjection = (projection: RouteProjection | undefined): RouteProjec
   }
   return projection;
 };
+
+describe('localized current route projection', () => {
+  const routeMatrix = Object.freeze([
+    {
+      boundary: 'public-origin',
+      expected: '/en',
+      pathname: '/pt-BR',
+      routeId: 'public-home',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/pt-BR/docs/tasks/troubleshooting',
+      pathname: '/en/docs/tasks/troubleshooting',
+      routeId: 'docs-task',
+      targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/en/docs/1.0.0/articles/frame-pacing',
+      pathname: '/pt-BR/docs/1.0.0/articles/frame-pacing',
+      routeId: 'docs-article',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/pt-BR/docs/history/1.0.0/legacy-install',
+      pathname: '/en/docs/history/1.0.0/legacy-install',
+      routeId: 'docs-history',
+      targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/en/releases/beta/1.0.0/integrity',
+      pathname: '/pt-BR/releases/beta/1.0.0/integrity',
+      routeId: 'releases-integrity',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/pt-BR/download/experimental/current',
+      pathname: '/en/download/experimental/current',
+      routeId: 'releases-download',
+      targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'account-origin',
+      expected: '/en/account/profile',
+      pathname: '/pt-BR/account/profile',
+      routeId: 'account-profile',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'admin-origin',
+      expected: '/pt-BR/admin/support/CASE-2048',
+      pathname: '/en/admin/support/CASE-2048',
+      routeId: 'admin-support',
+      targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'admin-origin',
+      expected: '/en/admin/security/REVIEW-8',
+      pathname: '/pt-BR/admin/security/REVIEW-8',
+      routeId: 'admin-security',
+      targetLocale: 'en',
+    },
+  ] as const);
+
+  it('changes only the locale while preserving the canonical route and path parameters', () => {
+    for (const entry of routeMatrix) {
+      const source = matchWebRoute({
+        pathname: entry.pathname,
+        securityBoundary: entry.boundary,
+      });
+      expect(source, entry.routeId).toMatchObject({
+        ok: true,
+        value: { route: { id: entry.routeId } },
+      });
+
+      const localized = resolveLocalizedCurrentRoute({
+        pathname: entry.pathname,
+        securityBoundary: entry.boundary,
+        targetLocale: entry.targetLocale,
+      });
+      expect(localized, entry.routeId).toEqual({ ok: true, value: entry.expected });
+
+      if (source.ok && localized.ok) {
+        const projected = matchWebRoute({
+          pathname: localized.value,
+          securityBoundary: entry.boundary,
+        });
+        expect(projected, entry.routeId).toMatchObject({
+          ok: true,
+          value: {
+            parameters: { ...source.value.parameters, locale: entry.targetLocale },
+            route: { id: source.value.route.id },
+          },
+        });
+      }
+    }
+  });
+
+  it('keeps profile, support case, documentation identity, and release identity unchanged', () => {
+    expect(routeMatrix).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ routeId: 'account-profile' }),
+        expect.objectContaining({ pathname: expect.stringContaining('CASE-2048') }),
+        expect.objectContaining({ pathname: expect.stringContaining('frame-pacing') }),
+        expect.objectContaining({ pathname: expect.stringContaining('/beta/1.0.0/') }),
+      ]),
+    );
+  });
+
+  it.each([
+    ['', 'public-origin', 'en', 'EMPTY_PATHNAME'],
+    ['not-a-path', 'public-origin', 'en', 'UNSAFE_PATHNAME'],
+    ['/pt-BR/account/profile', 'public-origin', 'en', 'UNKNOWN_ROUTE'],
+    ['/pt-BR/admin/support/CASE-2048', 'account-origin', 'en', 'UNKNOWN_ROUTE'],
+    ['/pt-BR/unknown', 'public-origin', 'en', 'UNKNOWN_ROUTE'],
+    ['/pt-BR/docs?version=current', 'public-origin', 'en', 'UNSAFE_PATHNAME'],
+    ['/pt-BR/releases#stable', 'public-origin', 'en', 'UNSAFE_PATHNAME'],
+    ['/es/account/profile', 'account-origin', 'en', 'INVALID_LOCALE'],
+    ['https://user:secret@evil.example/pt-BR', 'public-origin', 'en', 'UNSAFE_PATHNAME'],
+    ['/pt-BR/account/profile', 'account-origin', 'es', 'INVALID_LOCALE'],
+  ] as const)(
+    'fails closed for unsafe locale projection input %s',
+    (pathname, securityBoundary, targetLocale, code) => {
+      expect(
+        resolveLocalizedCurrentRoute({
+          pathname,
+          securityBoundary,
+          targetLocale: targetLocale as never,
+        }),
+      ).toMatchObject({ error: { code }, ok: false });
+    },
+  );
+});
 
 describe('canonical web route manifest', () => {
   it('contains each required route family exactly once as a generated-valid frozen record', () => {
