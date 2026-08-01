@@ -15,6 +15,8 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
+import { AccountNavigation, type AccountNavigationGroup } from '../../account-navigation';
 import { createAccountFailureModel } from '../../account-errors';
 import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
@@ -47,10 +49,6 @@ const NAVIGATION_GROUPS = Object.freeze([
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    boundary:
-      'Origem dedicada da conta. Conteúdo público abre em outra origem e nenhum estado de sessão é transferido.',
-    footer:
-      'Prévia local e determinística. Esta origem não autentica, cobra, vincula dispositivos ou envia suporte.',
     language: 'English',
     navigation: 'Responsabilidades da conta',
     preview:
@@ -60,10 +58,6 @@ const COPY = Object.freeze({
     skip: 'Ir para o conteúdo da conta',
   }),
   en: Object.freeze({
-    boundary:
-      'Dedicated account origin. Public content opens on another origin and no session state transfers.',
-    footer:
-      'Local deterministic preview. This origin does not authenticate, charge, bind devices, or submit support.',
     language: 'Português',
     navigation: 'Account responsibilities',
     preview:
@@ -128,10 +122,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function AccountLocaleLayout({
-  children,
-  params,
-}: AccountLocaleLayoutProps) {
+export default async function AccountLocaleLayout({ children, params }: AccountLocaleLayoutProps) {
   const { locale } = await params;
   if (!hasLocale(WEB_LOCALES, locale)) {
     notFound();
@@ -140,6 +131,22 @@ export default async function AccountLocaleLayout({
   setRequestLocale(locale);
   const copy = COPY[locale];
   const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
+  const navigationGroups = NAVIGATION_GROUPS.map((group): AccountNavigationGroup => ({
+    ...(group.ids.length > 1 ? { label: group.label[locale] } : {}),
+    items: group.ids.map((routeId) => ({
+      href: localizedHref(routeId, locale),
+      label:
+        routeId === 'account-subscription'
+          ? locale === 'pt-BR'
+            ? 'Assinatura'
+            : 'Subscription'
+          : routeId === 'account-invoices'
+            ? locale === 'pt-BR'
+              ? 'Faturas'
+              : 'Invoices'
+            : group.label[locale],
+    })),
+  }));
 
   return (
     <html
@@ -156,17 +163,11 @@ export default async function AccountLocaleLayout({
         <header className="account-header">
           <div className="account-header__bar">
             <a className="account-brand" href={localizedHref('account-overview', locale)}>
-              <span aria-hidden="true" className="account-brand__mark">
-                LB
-              </span>
-              <span>
-                <strong>Liiiraa Boost</strong>
-                <small> Account</small>
+              <ProductLockup />
+              <span className="account-brand__surface">
+                {locale === 'pt-BR' ? 'Conta' : 'Account'}
               </span>
             </a>
-            <p className="account-header__origin" role="note">
-              {copy.boundary}
-            </p>
             <a
               aria-label={`${locale === 'pt-BR' ? 'Idioma' : 'Language'}: ${copy.language}`}
               className="account-locale"
@@ -185,53 +186,24 @@ export default async function AccountLocaleLayout({
           data-authority="disconnected"
         >
           <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
-          <strong>{copy.previewLabel}</strong>
           <p>{copy.preview}</p>
         </aside>
 
         <div className="account-workspace">
-          <nav aria-label={copy.navigation} className="account-nav">
-            <p className="account-nav__label">{copy.navigation}</p>
-            <ol className="account-nav__list">
-              {NAVIGATION_GROUPS.map((group) => (
-                <li key={group.ids.join(':')}>
-                  {group.ids.length === 1 ? (
-                    <a href={localizedHref(group.ids[0], locale)}>{group.label[locale]}</a>
-                  ) : (
-                    <>
-                      <strong className="account-nav__group-label">{group.label[locale]}</strong>
-                      <ul className="account-nav__group">
-                        {group.ids.map((routeId) => (
-                          <li key={routeId}>
-                            <a href={localizedHref(routeId, locale)}>
-                              {routeId === 'account-subscription'
-                                ? locale === 'pt-BR'
-                                  ? 'Assinatura'
-                                  : 'Subscription'
-                                : locale === 'pt-BR'
-                                  ? 'Faturas'
-                                  : 'Invoices'}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </nav>
-
-          <main id="account-main" tabIndex={-1}>
-            {children}
-          </main>
+          <div className="account-workspace__frame">
+            <AccountNavigation groups={navigationGroups} label={copy.navigation} />
+            <main id="account-main" tabIndex={-1}>
+              {children}
+            </main>
+          </div>
         </div>
 
         <footer className="account-footer">
-          <span>{copy.footer}</span>
-          <a href={publicHomeHref(locale)}>
-            {copy.publicLink} <span aria-hidden="true">↗</span>
-          </a>
+          <div className="account-footer__bar">
+            <a href={publicHomeHref(locale)}>
+              {copy.publicLink} <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </footer>
       </body>
     </html>

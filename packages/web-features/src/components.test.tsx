@@ -370,7 +370,7 @@ const TOKEN_MIGRATION_LEDGER = Object.freeze([
 
 // Resolved entries remain immutable audit history; only unresolved owners are admitted by the gate.
 const KNOWN_TOKEN_MIGRATION_DEBT = Object.freeze(
-  TOKEN_MIGRATION_LEDGER.filter(({ owner }) => owner !== 'plan-03-38'),
+  TOKEN_MIGRATION_LEDGER.filter(({ owner }) => owner !== 'plan-03-38' && owner !== 'plan-03-39'),
 );
 
 const elementProps = (element: ReactElement): Readonly<Record<string, unknown>> =>

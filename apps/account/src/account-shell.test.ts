@@ -51,7 +51,7 @@ describe('account shell', () => {
       runtimeClass: 'fixture',
       surface: 'account',
     });
-    expect((layoutSource.match(/<main\b/gu) ?? [])).toHaveLength(1);
+    expect(layoutSource.match(/<main\b/gu) ?? []).toHaveLength(1);
     expect(layoutSource).toContain('href="#account-main"');
     expect(layoutSource).toContain('account-preview-rail');
     expect(layoutSource).toContain('data-authority="disconnected"');
@@ -60,13 +60,14 @@ describe('account shell', () => {
     expect(layoutSource).toContain('<AccountNavigation');
     expect(layoutSource).not.toContain('account-header__origin');
     expect(layoutSource).not.toContain('copy.footer');
-    expect((layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? [])).toHaveLength(1);
+    expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
     for (const routeId of routeIds) {
       expect(layoutSource).toContain(routeId);
     }
     expect(styles).toMatch(/\.account-workspace__frame\s*\{[\s\S]*max-inline-size:/u);
     expect(styles).toContain('overflow-x: clip');
-    expect(styles).toMatch(/@media \(width < 760px\)[\s\S]*flex-wrap: wrap/u);
+    expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*flex-wrap: wrap/u);
+    expect(styles).toMatch(/@media \(width < 760px\)[\s\S]*flex-basis: 100%/u);
     expect(styles).not.toContain('grid-auto-flow: column');
     expect(styles).not.toContain('overflow-x: auto');
     expect(styles).toContain('@media (forced-colors: active)');
@@ -132,18 +133,12 @@ describe('account errors', () => {
     expect(createAccountFailureModel('403', 'en').copy.detail).toMatch(
       /permission|responsibility/iu,
     );
-    expect(createAccountFailureModel('410', 'en').copy.detail).toMatch(
-      /historical|no longer/iu,
-    );
+    expect(createAccountFailureModel('410', 'en').copy.detail).toMatch(/historical|no longer/iu);
     expect(createAccountFailureModel('410', 'pt-BR').copy.recovery).toMatch(
       /vis[aã]o geral|suporte/iu,
     );
-    expect(createAccountFailureModel('500', 'en').copy.recovery).toMatch(
-      /try again|support/iu,
-    );
-    expect(createAccountFailureModel('404', 'en').copy.detail).toMatch(
-      /address|route/iu,
-    );
+    expect(createAccountFailureModel('500', 'en').copy.recovery).toMatch(/try again|support/iu);
+    expect(createAccountFailureModel('404', 'en').copy.detail).toMatch(/address|route/iu);
   });
 
   it('preserves locale, redacts diagnostics, and offers explicit safe recovery', () => {
@@ -153,10 +148,7 @@ describe('account errors', () => {
       '500',
       'user@example.com stack at C:\\private\\secret.ts',
     );
-    const errorSource = readFileSync(
-      new URL('./app/[locale]/error.tsx', import.meta.url),
-      'utf8',
-    );
+    const errorSource = readFileSync(new URL('./app/[locale]/error.tsx', import.meta.url), 'utf8');
     const pageSource = readFileSync(
       new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
       'utf8',
@@ -172,12 +164,10 @@ describe('account errors', () => {
     expect(english.destinations.support).toBe('/en/account/support');
     expect(english.correlationId).toBe('LB-A500-opaque_42');
     expect(rejected).toBe('LB-A500-REDACTED');
-    expect(
-      redactedAccountCorrelationId('500', 'stack at /srv/account/private.ts'),
-    ).toBe('LB-A500-REDACTED');
-    expect(redactedAccountCorrelationId('500', '{"request":"profile"}')).toBe(
+    expect(redactedAccountCorrelationId('500', 'stack at /srv/account/private.ts')).toBe(
       'LB-A500-REDACTED',
     );
+    expect(redactedAccountCorrelationId('500', '{"request":"profile"}')).toBe('LB-A500-REDACTED');
     expect(redactedAccountCorrelationId('500', 'arbitrary diagnostic text')).toBe(
       'LB-A500-REDACTED',
     );
@@ -190,7 +180,7 @@ describe('account errors', () => {
     expect(pageSource).not.toMatch(/redirect\(/u);
     expect(proxySource).toContain("requestHeaders.set('x-liiiraa-account-failure-kind', '404')");
     expect(proxySource).toContain('isNotFound ? { status: 404 }');
-    expect(layoutSource).toContain("x-liiiraa-account-failure-kind");
+    expect(layoutSource).toContain('x-liiiraa-account-failure-kind');
     expect(layoutSource).toContain("createAccountFailureModel('404', locale)");
   });
 
@@ -216,7 +206,7 @@ describe('account errors', () => {
     expect(pageSource).toContain("resolution.kind === 'unknown' ? '404'");
     expect(pageSource).not.toMatch(/redirect\(|cookies\(|fetch\(|window\.location/iu);
 
-    expect((failureViewSource.match(/<h1\b/gu) ?? [])).toHaveLength(1);
+    expect(failureViewSource.match(/<h1\b/gu) ?? []).toHaveLength(1);
     expect(failureViewSource).toContain('data-route-heading');
     expect(failureViewSource).toContain("role={kind === '500' ? 'alert' : undefined}");
     expect(failureViewSource).toContain('account-failure__affected');
