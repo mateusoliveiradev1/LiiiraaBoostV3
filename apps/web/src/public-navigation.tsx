@@ -9,11 +9,11 @@ import { localizedPublicHref, publicBoundaryHref, publicNavigation } from './pub
 export type PublicPillarId = (typeof publicNavigation)[number]['id'];
 
 export type PublicNavigationCopy = Readonly<{
+  compatibility: string;
   current: string;
   menu: string;
   navigation: Readonly<Record<PublicPillarId, string>>;
   primaryNavigation: string;
-  releases: string;
   search: string;
 }>;
 
@@ -148,11 +148,13 @@ export const PublicNavigation = ({
         {localeControl}
         <a
           className="public-action public-action--primary"
-          href={publicBoundaryHref('releases-index', locale)}
+          href={publicBoundaryHref('public-compatibility', locale)}
         >
-          {copy.releases}
+          {copy.compatibility}
         </a>
       </div>
+
+      <div className="public-mobile-locale">{localeControl}</div>
 
       <details className="public-mobile-menu">
         <summary>{copy.menu}</summary>
@@ -163,7 +165,7 @@ export const PublicNavigation = ({
           <div className="public-mobile-menu__actions">
             <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
             {localeControl}
-            <a href={publicBoundaryHref('releases-index', locale)}>{copy.releases}</a>
+            <a href={publicBoundaryHref('public-compatibility', locale)}>{copy.compatibility}</a>
           </div>
         </div>
       </details>

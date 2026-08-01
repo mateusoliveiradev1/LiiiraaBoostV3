@@ -9,11 +9,7 @@ import type { ReactNode } from 'react';
 
 import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
 
-import {
-  accountBoundaryHref,
-  publicBoundaryHref,
-  routing,
-} from '../../public-boundary';
+import { accountBoundaryHref, publicBoundaryHref, routing } from '../../public-boundary';
 import { PublicNavigation, type PublicNavigationCopy } from '../../public-navigation';
 
 type PublicLocaleLayoutProps = Readonly<{
@@ -21,18 +17,20 @@ type PublicLocaleLayoutProps = Readonly<{
   params: Promise<{ locale: string }>;
 }>;
 
-type PublicCopy = PublicNavigationCopy & Readonly<{
-  account: string;
-  brandDescription: string;
-  footerNavigation: string;
-  skip: string;
-}>;
+type PublicCopy = PublicNavigationCopy &
+  Readonly<{
+    account: string;
+    brandDescription: string;
+    footerNavigation: string;
+    skip: string;
+  }>;
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     account: 'Conta',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
     current: 'página atual',
+    compatibility: 'Verificar compatibilidade',
     footerNavigation: 'Navegação complementar',
     menu: 'Menu',
     navigation: Object.freeze({
@@ -44,7 +42,6 @@ const COPY = Object.freeze({
       'releases-index': 'Download / Versões',
     }),
     primaryNavigation: 'Navegação principal',
-    releases: 'Ver versões',
     search: 'Pesquisar',
     skip: 'Ir para o conteúdo principal',
   }),
@@ -52,6 +49,7 @@ const COPY = Object.freeze({
     account: 'Account',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
     current: 'current page',
+    compatibility: 'Check compatibility',
     footerNavigation: 'Supplementary navigation',
     menu: 'Menu',
     navigation: Object.freeze({
@@ -63,7 +61,6 @@ const COPY = Object.freeze({
       'releases-index': 'Download / Releases',
     }),
     primaryNavigation: 'Primary navigation',
-    releases: 'View releases',
     search: 'Search',
     skip: 'Skip to main content',
   }),

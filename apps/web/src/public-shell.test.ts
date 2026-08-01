@@ -10,10 +10,7 @@ import {
   clientPublicBoundaryHref,
   type ClientRecoveryRouteId,
 } from './public-client-boundary';
-import {
-  getPublicNavigationState,
-  type PublicPillarId,
-} from './public-navigation';
+import { getPublicNavigationState, type PublicPillarId } from './public-navigation';
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
@@ -27,19 +24,25 @@ describe('public shell', () => {
     ['/en/plans', 'public-plans'],
     ['/en/docs/current/articles/measurement-basics', 'docs-index'],
     ['/en/releases/stable/1.0.0', 'releases-index'],
-  ] as const)('projects %s to one current task pillar on desktop and mobile', (pathname, activeId) => {
-    const state = getPublicNavigationState(pathname, 'en');
+  ] as const)(
+    'projects %s to one current task pillar on desktop and mobile',
+    (pathname, activeId) => {
+      const state = getPublicNavigationState(pathname, 'en');
 
-    expect(state.items.filter((item) => item.current).map((item) => item.id)).toEqual([
-      activeId satisfies PublicPillarId,
-    ]);
-    expect(state.mobileItems.filter((item) => item.current).map((item) => item.id)).toEqual([
-      activeId satisfies PublicPillarId,
-    ]);
-  });
+      expect(state.items.filter((item) => item.current).map((item) => item.id)).toEqual([
+        activeId satisfies PublicPillarId,
+      ]);
+      expect(state.mobileItems.filter((item) => item.current).map((item) => item.id)).toEqual([
+        activeId satisfies PublicPillarId,
+      ]);
+    },
+  );
 
   it.each([
-    ['/pt-BR/docs/current/articles/measurement-basics', '/en/docs/current/articles/measurement-basics'],
+    [
+      '/pt-BR/docs/current/articles/measurement-basics',
+      '/en/docs/current/articles/measurement-basics',
+    ],
     ['/pt-BR/docs/current', '/en/docs/current'],
     ['/pt-BR/releases/stable/1.0.0', '/en/releases/stable/1.0.0'],
     ['/pt-BR/search', '/en/search'],
@@ -162,8 +165,7 @@ describe('public shell', () => {
 describe('public CSP', () => {
   const headersFor = (runtimeMode: 'development' | 'production' | 'test') => {
     const builder = Reflect.get(publicConfig, 'buildPublicHeaderContract') as
-      | ((mode: typeof runtimeMode) => readonly { key: string; value: string }[])
-      | undefined;
+      ((mode: typeof runtimeMode) => readonly { key: string; value: string }[]) | undefined;
     const contract = builder?.(runtimeMode) ?? publicConfig.publicHeaderContract;
 
     return Object.fromEntries(contract.map(({ key, value }) => [key.toLowerCase(), value]));
