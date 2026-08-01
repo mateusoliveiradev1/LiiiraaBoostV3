@@ -1,16 +1,16 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task."
 created: 2026-07-31T19:29:11.6816453-03:00
-updated: 2026-08-01T00:52:41-03:00
+updated: 2026-08-01T02:24:30-03:00
 ---
 
 ## Current Focus
 
-hypothesis: CONFIRMED — the account applies correct low-level tokens and truthful preview semantics to a missing account-specific composition: an unconstrained wide canvas, skeletal route markup, absent active navigation/task grouping, and duplicated provenance copy create the wireframe; the visual pipeline snapshots only overview and validates stability/accessibility rather than polish, leaving profile unreviewed.
-test: completed static differential trace from UI-SPEC and approved Phase 2 account capture through account layout/components/CSS and W11 Playwright/visual-manifest coverage
-expecting: confirmed by direct source, checked-in golden, user screenshot, and test assertions
-next_action: Plan another gap-closure round for a stronger logged-in shell, compact mobile task navigation, and a route-preserving locale control; do not modify production code in this checkpoint continuation.
+hypothesis: RESOLVED — Plan 03-50 replaced the unconstrained route-list shell with a constrained application frame, canonical active-route navigation, a compact native mobile disclosure, route-preserving flag-plus-language switching, quiet persistent preview truth, and task-specific semantic workspaces.
+test: account Vitest suite, TypeScript check, optimized Next build, Impeccable detector, and direct 1440px/390px/320px browser captures of Overview and Profile
+expecting: achieved — desktop presents one active responsibility and useful authored density; mobile keeps the route inventory collapsed while naming the current task; preview authority remains visibly disconnected without dominating ordinary controls
+next_action: Re-run named human UAT after the sibling public and admin gap-closure plans complete.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -82,6 +82,12 @@ started: Observed during Phase 03 UAT; whether an earlier account design was acc
 ## Resolution
 
 root_cause: The account surface has no authored account-specific visual composition. The custom shell gives the main column unlimited width and the route implementation renders generic primitives (header, full-width field/table, bare definition list/button) with no focal workspace, useful grouped density, current-route state, or desktop-derived visual hierarchy. The compact shared type tokens (13/15/20/28px) and 100%-width inputs are technically compliant but become visually tiny and sparse across a roughly 1600px content plane. Preview truth is then duplicated in the origin note, global rail, route provenance, field descriptions, sensitive boundaries, and footer, making internal fixture/authority language more prominent than the task. Tests allowed it because W11 has only an overview golden; profile and the other required routes receive semantic traversal only, screenshots test pixel stability/accessibility rather than visual quality, the sole golden is captured with the skip link focused, and no assertion/reviewer gate measures hierarchy, density, active state, copy dominance, or coherence with the approved Phase 2 account capture.
-fix:
-verification: Diagnose-only. Root cause confirmed by direct comparison of the user capture, checked-in W11 1440x900 golden, approved Phase 2 account capture, implementation/CSS/token trace, canonical scenario manifest, and exact Playwright assertions.
-files_changed: []
+fix: Plan 03-50 made one pathname-aware client owner resolve canonical account routes, current responsibility, and alternate-locale hrefs. The server layout now supplies a familiar topbar identity and one quiet disconnected-preview note. Below 960px the full rail is replaced by a closed native details disclosure. Account routes now use bounded focal regions, semantic rows, tables, definition lists, and consequence-specific review regions instead of interchangeable primitive panels. A 320px follow-up removed the redundant truncated topbar task while retaining the full task name in the disclosure.
+verification: PASS — `rtk pnpm --filter @liiiraa/account test -- --run` (30/30), `rtk pnpm --filter @liiiraa/account check`, `rtk pnpm --filter @liiiraa/account build`, Impeccable detector (0 findings), and direct Playwright captures at 1440x900, 390x844, and 320x800. The captures showed one active desktop responsibility, visible flag-plus-language control, collapsed mobile navigation, bounded Profile controls, and readable 320px reflow.
+files_changed:
+  - apps/account/src/app/[locale]/layout.tsx
+  - apps/account/src/account-navigation.tsx
+  - apps/account/src/app/account-shell.css
+  - apps/account/src/account-shell.test.ts
+  - apps/account/src/features/account-preview.tsx
+  - apps/account/src/features/account-preview.test.tsx
