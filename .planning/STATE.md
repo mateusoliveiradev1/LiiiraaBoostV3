@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-39-PLAN.md
-last_updated: "2026-08-01T00:20:39.475Z"
+stopped_at: Completed 03-40-PLAN.md
+last_updated: "2026-08-01T00:40:27.821Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-38-PLAN.md
+last_activity_desc: Completed 03-40-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 104
-  completed_plans: 97
-  percent: 20
+  completed_plans: 98
+  percent: 94
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 40 of 46
-Status: Ready to execute Plan 03-39
-Last activity: 2026-07-31 — Completed 03-38-PLAN.md
+Plan: 41 of 46
+Status: Ready to execute Plan 03-41
+Last activity: 2026-07-31 — Completed 03-40-PLAN.md
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 79
+- Total plans completed: 98
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -145,6 +145,7 @@ _Updated after plan completion_
 | Phase 03 P37 | 12min | 2 tasks | 7 files |
 | Phase 03 P38 | 14min | 2 tasks | 11 files |
 | Phase 03 P39 | 11min | 2 tasks | 9 files |
+| Phase 03 P40 | 14min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -411,6 +412,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Render deterministic preview truth once in the account shell and reserve route boundaries for distinct sensitive consequences. — Persistent truth stays quiet without obscuring sensitive action context.
 - [Phase 03]: Compose account Overview around next actions and compact responsibility summaries while Profile separates reviewable fields from unavailable authority. — Useful density and explicit action state replace the rejected wireframe composition.
 - [Phase 03]: Retain resolved Plan 03-39 token entries as audit history while excluding them from active migration debt. — The scale gate remains exact without treating resolved values as live debt.
+- [Phase 03]: Bind ordinary local admin development to http://admin.localhost:3002 and publish only /pt-BR/admin and /en/admin as UAT entries.
+- [Phase 03]: Classify an HTML admin denial only when navigation metadata and text/html acceptance agree; ambiguous or programmatic requests retain bounded JSON.
+- [Phase 03]: Use the normalized Host header plus request protocol for exact admin admission because Next can normalize nextUrl.origin to the bound server hostname.
+- [Phase 03]: Keep browser denial copy generic and localized while preserving only an already-present syntax-bounded request identifier.
 
 ### Pending Todos
 
@@ -452,6 +457,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T00:20:39.469Z
-Stopped at: Completed 03-39-PLAN.md
+Last session: 2026-08-01T00:39:52.953Z
+Stopped at: Completed 03-40-PLAN.md
 Resume file: None
