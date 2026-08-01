@@ -90,6 +90,26 @@ test('@final @account navigation and language preserve the active security respo
   await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
 });
 
+test('@final @account geometry preserves the 72 264 40 workspace and useful regions', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await page.goto('/en/account/profile');
+
+  expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(72);
+  expect((await page.locator('.account-nav__desktop').boundingBox())?.width).toBe(264);
+  expect((await page.locator('.account-preview-rail').boundingBox())?.height).toBe(40);
+  const main = await page.locator('#account-main').boundingBox();
+  expect((main?.width ?? 0) / 1440).toBeGreaterThanOrEqual(0.75);
+  expect(Number.parseFloat(await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize))).toBe(32);
+  await expect(page.locator('[data-workspace-region="focal"]')).toBeVisible();
+  await expect(page.locator('[data-workspace-region="context"]')).toBeVisible();
+  await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+
+  await page.goto('/en/sign-in');
+  expect((await page.locator('main form').boundingBox())?.width).toBeLessThanOrEqual(560);
+});
+
 for (const axis of ['mobile-390', 'reflow-320'] as const) {
   test(`@final @account compact navigation is closed and keyboard-operable at ${axis}`, async ({
     page,
@@ -99,6 +119,14 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
 
     const disclosure = page.locator('details.account-nav__mobile');
     await expect(disclosure).not.toHaveAttribute('open', '');
+    expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(60);
+    expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    expect((await page.locator('.account-header .lb-web-locale-switcher').boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+    await expect(page.locator('a[aria-current="page"]')).toHaveCount(1);
+    await expect(page.locator('[data-high-risk-action="true"]')).toHaveCount(0);
     await expect(disclosure.locator('summary')).toContainText('Profile');
     await expect(disclosure.getByRole('link')).toBeHidden();
 

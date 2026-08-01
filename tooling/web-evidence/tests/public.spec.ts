@@ -106,6 +106,50 @@ test('@final @public navigation and language preserve the active documentation r
   ).toHaveCount(1);
 });
 
+test('@final @public Cobalt Ignition Bay geometry keeps the focal product above the fold', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await gotoWithRecoverableRetry(page, '/en');
+
+  const header = await page.locator('.public-header__bar').boundingBox();
+  const heading = page.getByRole('heading', { level: 1 });
+  const stage = await page.locator('.home-ignition-hero__stage').boundingBox();
+  expect(header?.height).toBe(72);
+  const headingSize = Number.parseFloat(await heading.evaluate((node) => getComputedStyle(node).fontSize));
+  expect(headingSize).toBeGreaterThanOrEqual(52);
+  expect(headingSize).toBeLessThanOrEqual(76);
+  expect(stage).not.toBeNull();
+  expect(stage?.width).toBeGreaterThanOrEqual(1_000);
+  expect(Math.abs((stage?.x ?? 0) + (stage?.width ?? 0) / 2 - 720)).toBeLessThanOrEqual(2);
+  expect(stage?.y).toBeLessThanOrEqual(560);
+  expect(Math.min((stage?.y ?? 0) + (stage?.height ?? 0), 900) - Math.max(stage?.y ?? 0, 0)).toBeGreaterThanOrEqual(260);
+});
+
+for (const axis of ['mobile-390', 'reflow-320'] as const) {
+  test(`@final @public mobile geometry navigation locale and reflow close at ${axis}`, async ({
+    page,
+  }, testInfo) => {
+    onlyAxis(testInfo, axis);
+    await gotoWithRecoverableRetry(page, '/en');
+
+    expect((await page.locator('.public-header__bar').boundingBox())?.height).toBe(60);
+    const disclosure = page.locator('details.public-mobile-menu');
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    const locale = page.locator('.public-mobile-locale .lb-web-locale-switcher');
+    expect((await locale.boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    await expect(locale).toContainText('Português');
+    await expect(locale).toHaveAttribute('href', '/pt-BR');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+    await disclosure.locator('summary').click();
+    await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+    await expect(page.locator('[data-high-risk-action="true"]')).toHaveCount(0);
+  });
+}
+
 test('@final @public W01 keeps the PT-BR command runway truthful and distribution gated', async ({
   page,
 }, testInfo) => {
