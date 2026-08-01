@@ -24,7 +24,8 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
 import { type AccountPreviewRoute } from '../account-preview-model';
-export type AccountPreviewState = 'ready' | 'offline' | 'stale' | 'expired-session' | 'failure';
+export type AccountPreviewState =
+  'loading' | 'ready' | 'empty' | 'offline' | 'stale' | 'expired-session' | 'failure';
 
 type AccountContent = Readonly<{
   schemaVersion: 1;
@@ -556,7 +557,10 @@ export const SecurityMethodList = ({
   content,
   onReview,
 }: Readonly<{ content: AccountContent; onReview: (family: 'passkey' | 'mfa') => void }>) => (
-  <section aria-labelledby="security-methods-title" className="lb-web-security-methods">
+  <section
+    aria-labelledby="security-methods-title"
+    className="lb-web-security-methods account-security__methods"
+  >
     <h2 id="security-methods-title">{content.security.verifiedEmail}</h2>
     <ul>
       {(['passkey', 'mfa'] as const).map((family) => (
@@ -576,7 +580,10 @@ export const SessionList = ({
   content,
   onReview,
 }: Readonly<{ content: AccountContent; onReview: () => void }>) => (
-  <section aria-labelledby="session-list-title" className="lb-web-session-list">
+  <section
+    aria-labelledby="session-list-title"
+    className="lb-web-session-list account-security__sessions"
+  >
     <h2 id="session-list-title">{content.security.sessions}</h2>
     <ul>
       <li>
@@ -616,19 +623,28 @@ const SecurityPreview = ({
     );
   }
   return (
-    <article data-account-state="ready">
+    <article className="account-responsibility account-security" data-account-state="ready">
       <FixtureHeader summary={content.security.summary} title={content.security.title} />
-      <PreviewBoundary description={content.signIn.security} />
-      <SecurityMethodList content={content} onReview={reviewSecurity} />
-      <SessionList content={content} onReview={() => reviewSecurity('session')} />
-      <section aria-labelledby="recovery-title" className="lb-web-recovery-review">
-        <h2 id="recovery-title">{content.security.recovery}</h2>
-        <p>{content.security.recoveryDetail}</p>
+      <div className="account-security__workspace">
+        <div className="account-security__primary">
+          <SecurityMethodList content={content} onReview={reviewSecurity} />
+          <SessionList content={content} onReview={() => reviewSecurity('session')} />
+        </div>
+        <aside aria-labelledby="recovery-title" className="account-security__recovery">
+          <h2 id="recovery-title">{content.security.recovery}</h2>
+          <p>{content.security.recoveryDetail}</p>
+          <StatusSignal
+            label={
+              content.locale === 'pt-BR' ? 'Indisponível nesta fase' : 'Unavailable in this phase'
+            }
+            state="unavailable"
+          />
+        </aside>
+      </div>
+      <section aria-labelledby="security-alerts-title" className="account-security__alerts">
+        <h2 id="security-alerts-title">{content.security.alerts}</h2>
+        <EmptyComposition description={content.security.emptyAlerts} />
       </section>
-      <EmptyComposition
-        description={content.security.emptyAlerts}
-        title={content.security.alerts}
-      />
     </article>
   );
 };
@@ -652,7 +668,7 @@ const CollectionDisclosure = ({
         ? 'Limite de coleta e consentimento'
         : 'Collection and consent boundary'}
     </h2>
-    <dl>
+    <dl className="account-definition-list">
       <div>
         <dt>{content.locale === 'pt-BR' ? 'Finalidade' : 'Purpose'}</dt>
         <dd>{purpose}</dd>
@@ -719,10 +735,19 @@ export const SubscriptionSummary = ({
     ],
   ] as const;
   return (
-    <article className="lb-web-subscription" data-account-state="ready">
+    <article
+      className="account-responsibility account-subscription lb-web-subscription"
+      data-account-state="ready"
+    >
       <FixtureHeader summary={content.subscription.summary} title={content.subscription.title} />
-      <StatusSignal label={content.subscription.plan} state="preview" />
-      <dl>
+      <div className="account-subscription__summary">
+        <strong>{content.subscription.plan}</strong>
+        <StatusSignal
+          label={content.locale === 'pt-BR' ? 'Termos para revisão' : 'Terms for review'}
+          state="preview"
+        />
+      </div>
+      <dl className="account-definition-list">
         {terms.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
@@ -730,35 +755,41 @@ export const SubscriptionSummary = ({
           </div>
         ))}
       </dl>
-      <PreviewBoundary description={content.subscription.summary} />
-      <LbButton
-        onPress={() => {
-          setWorkflow(
-            actionInput({
-              family: 'billing',
-              fields: { plan: 'premium-preview' },
-              impact: content.subscription.expirationEffects,
-              label: content.subscription.action,
-              review: [
-                {
-                  field: 'plan',
-                  label: content.subscription.plan,
-                  before: 'No authoritative plan',
-                  after: 'Premium review only',
-                },
-              ],
-            }),
-          );
-        }}
-      >
-        {content.subscription.action}
-      </LbButton>
+      <div className="account-sensitive-action">
+        <p>
+          {content.locale === 'pt-BR'
+            ? 'A próxima etapa abre uma revisão sem cobrança.'
+            : 'The next step opens a review without charging.'}
+        </p>
+        <LbButton
+          onPress={() => {
+            setWorkflow(
+              actionInput({
+                family: 'billing',
+                fields: { plan: 'premium-preview' },
+                impact: content.subscription.expirationEffects,
+                label: content.subscription.action,
+                review: [
+                  {
+                    field: 'plan',
+                    label: content.subscription.plan,
+                    before: 'No authoritative plan',
+                    after: 'Premium review only',
+                  },
+                ],
+              }),
+            );
+          }}
+        >
+          {content.subscription.action}
+        </LbButton>
+      </div>
     </article>
   );
 };
 
 export const InvoiceTable = ({ content }: Readonly<{ content: AccountContent }>) => (
-  <article data-account-state="empty">
+  <article className="account-responsibility account-invoices" data-account-state="empty">
     <FixtureHeader summary={content.invoices.summary} title={content.invoices.title} />
     <ResponsiveDataTable
       caption={content.invoices.caption}
@@ -801,38 +832,50 @@ export const DeviceBindingReview = ({
     );
   }
   return (
-    <article className="lb-web-device-review" data-account-state="sensitive-review">
+    <article
+      className="account-responsibility account-device lb-web-device-review"
+      data-account-state="sensitive-review"
+    >
       <FixtureHeader summary={content.device.summary} title={content.device.title} />
-      <dl>
-        <div>
-          <dt>{content.device.label}</dt>
-          <dd>{content.device.detail}</dd>
-        </div>
-      </dl>
-      <PreviewBoundary description={content.device.cooldown} />
-      <LbButton
-        onPress={() =>
-          setWorkflow(
-            actionInput({
-              family: 'device',
-              fields: { device: 'desktop-preview-01' },
-              impact: content.device.cooldown,
-              label: content.device.action,
-              review: [
-                {
-                  field: 'device',
-                  label: content.device.label,
-                  before: 'Synthetic binding retained',
-                  after: 'Replacement reviewed only',
-                },
-              ],
-            }),
-          )
-        }
-        variant="destructive"
-      >
-        {content.device.action}
-      </LbButton>
+      <div className="account-device__workspace">
+        <dl className="account-definition-list">
+          <div>
+            <dt>{content.locale === 'pt-BR' ? 'Dispositivo em revisão' : 'Device under review'}</dt>
+            <dd>{content.device.label}</dd>
+          </div>
+          <div>
+            <dt>{content.locale === 'pt-BR' ? 'Detalhes coletados' : 'Collected details'}</dt>
+            <dd>{content.device.detail}</dd>
+          </div>
+        </dl>
+        <PreviewBoundary description={content.device.cooldown} />
+      </div>
+      <div className="account-sensitive-action">
+        <p>{content.device.cooldown}</p>
+        <LbButton
+          onPress={() =>
+            setWorkflow(
+              actionInput({
+                family: 'device',
+                fields: { device: 'desktop-preview-01' },
+                impact: content.device.cooldown,
+                label: content.device.action,
+                review: [
+                  {
+                    field: 'device',
+                    label: content.device.label,
+                    before: 'Synthetic binding retained',
+                    after: 'Replacement reviewed only',
+                  },
+                ],
+              }),
+            )
+          }
+          variant="destructive"
+        >
+          {content.device.action}
+        </LbButton>
+      </div>
     </article>
   );
 };
@@ -841,13 +884,20 @@ export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent
   const releaseHref = routeHref('releases-channel', { channel: 'stable', locale: content.locale });
   if (!releaseHref.ok) throw new Error('ACCOUNT_PUBLIC_RELEASE_ROUTE_UNAVAILABLE');
   return (
-    <article data-account-state="public-transition">
+    <article
+      className="account-responsibility account-downloads"
+      data-account-state="public-transition"
+    >
       <FixtureHeader summary={content.downloads.summary} title={content.downloads.title} />
-      <PreviewBoundary
-        description={content.downloads.boundary}
-        title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
-      />
-      <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>{content.downloads.action}</a>
+      <div className="account-downloads__handoff">
+        <PreviewBoundary
+          description={content.downloads.boundary}
+          title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
+        />
+        <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>
+          {content.downloads.action}
+        </a>
+      </div>
     </article>
   );
 };
@@ -937,10 +987,15 @@ export const PrivacyCenter = ({
     );
   };
   return (
-    <article className="lb-web-privacy-center" data-account-state="sensitive-review">
+    <article
+      className="account-responsibility account-privacy lb-web-privacy-center"
+      data-account-state="sensitive-review"
+    >
       <FixtureHeader summary={content.privacy.summary} title={content.privacy.title} />
-      <ConsentReview content={content} />
-      <DataRequestReview content={content} onSelect={selectRequest} />
+      <div className="account-privacy__workspace">
+        <ConsentReview content={content} />
+        <DataRequestReview content={content} onSelect={selectRequest} />
+      </div>
     </article>
   );
 };
@@ -976,65 +1031,76 @@ export const SupportRequestComposer = ({
     );
   }
   return (
-    <article className="lb-web-support-composer" data-account-state="sensitive-review">
+    <article
+      className="account-responsibility account-support lb-web-support-composer"
+      data-account-state="sensitive-review"
+    >
       <FixtureHeader summary={content.support.summary} title={content.support.title} />
-      <CollectionDisclosure
-        content={content}
-        purpose={content.support.purpose}
-        retention={content.support.retention}
-        revocation={content.support.revocation}
-        sharing={content.support.sharing}
-      />
-      <SensitiveFieldReview content={content} />
-      <LbTextField
-        label={content.support.subjectLabel}
-        maxLength={120}
-        onChange={setSubject}
-        value={subject}
-      />
-      <LbTextArea
-        label={content.support.bodyLabel}
-        maxLength={600}
-        onChange={setDescription}
-        value={description}
-      />
-      <LbButton
-        onPress={() =>
-          setWorkflow(
-            actionInput({
-              consent: {
-                expiresAt: '2026-01-15T13:00:00.000Z',
-                granted: true,
-                permittedFields: ['subject', 'description'],
-                purpose: content.support.purpose,
-                requestingActor: 'account-holder',
-              },
-              family: 'support',
-              fields: { description, subject },
-              impact: content.support.sharing,
-              label: content.support.action,
-              purpose: content.support.purpose,
-              review: [
-                {
-                  field: 'subject',
-                  label: content.support.subjectLabel,
-                  before: 'No request',
-                  after: subject,
-                },
-                {
-                  field: 'description',
-                  label: content.support.bodyLabel,
-                  before: 'No request',
-                  after: description,
-                },
-              ],
-              safeDraftFields: ['subject'],
-            }),
-          )
-        }
-      >
-        {content.support.action}
-      </LbButton>
+      <div className="account-support__workspace">
+        <div className="account-support__guidance">
+          <CollectionDisclosure
+            content={content}
+            purpose={content.support.purpose}
+            retention={content.support.retention}
+            revocation={content.support.revocation}
+            sharing={content.support.sharing}
+          />
+          <SensitiveFieldReview content={content} />
+        </div>
+        <div className="account-support__fields">
+          <LbTextField
+            label={content.support.subjectLabel}
+            maxLength={120}
+            onChange={setSubject}
+            value={subject}
+          />
+          <LbTextArea
+            label={content.support.bodyLabel}
+            maxLength={600}
+            onChange={setDescription}
+            value={description}
+          />
+          <div className="account-sensitive-action">
+            <LbButton
+              onPress={() =>
+                setWorkflow(
+                  actionInput({
+                    consent: {
+                      expiresAt: '2026-01-15T13:00:00.000Z',
+                      granted: true,
+                      permittedFields: ['subject', 'description'],
+                      purpose: content.support.purpose,
+                      requestingActor: 'account-holder',
+                    },
+                    family: 'support',
+                    fields: { description, subject },
+                    impact: content.support.sharing,
+                    label: content.support.action,
+                    purpose: content.support.purpose,
+                    review: [
+                      {
+                        field: 'subject',
+                        label: content.support.subjectLabel,
+                        before: 'No request',
+                        after: subject,
+                      },
+                      {
+                        field: 'description',
+                        label: content.support.bodyLabel,
+                        before: 'No request',
+                        after: description,
+                      },
+                    ],
+                    safeDraftFields: ['subject'],
+                  }),
+                )
+              }
+            >
+              {content.support.action}
+            </LbButton>
+          </div>
+        </div>
+      </div>
     </article>
   );
 };
