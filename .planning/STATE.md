@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-43-PLAN.md
-last_updated: "2026-08-01T03:03:16.444Z"
-last_activity: 2026-07-31
-last_activity_desc: Completed 03-43-PLAN.md
+stopped_at: Completed 03-44-PLAN.md
+last_updated: "2026-08-01T03:27:13.810Z"
+last_activity: 2026-08-01
+last_activity_desc: Completed 03-44-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 104
-  completed_plans: 101
-  percent: 97
+  completed_plans: 102
+  percent: 98
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 44 of 46
-Status: Ready to execute Plan 03-44
-Last activity: 2026-07-31 — Completed 03-43-PLAN.md
+Plan: 45 of 46
+Status: Ready to execute Plan 03-45
+Last activity: 2026-08-01 — Completed 03-44-PLAN.md
 
-Progress: [██████████] 97%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 101
+- Total plans completed: 102
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -149,6 +149,7 @@ _Updated after plan completion_
 | Phase 03 P41 | 15min | 2 tasks | 8 files |
 | Phase 03 P42 | 19min | 3 tasks | 16 files |
 | Phase 03 P43 | 67min | 2 tasks | 10 files |
+| Phase 03 P44 | 15min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -429,6 +430,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Rebaseline account evidence from the authored post-03-39 workspace; do not preserve the rejected sparse wireframe merely because it was pixel-stable.
 - [Phase 03]: Treat public, account, and administrative skip-link labels as one bilingual accessibility contract while retaining surface-specific accessible names.
 - [Phase 03]: Keep G03-G05 as qualitative-review inputs only; Plan 03-45 retains ownership of named human approval and publication decisions.
+- [Phase 03]: Reject raw JSON and generic denial pages as admin visual evidence. — Only admitted localized application UI satisfies the visual contract.
+- [Phase 03]: Use executable visual-manifest identities for G06-G07. — The runnable Playwright snapshot contract is the durable artifact naming authority.
+- [Phase 03]: Keep G06-G07 qualitative-only until Plan 03-45. — This plan regenerates evidence but grants no human or publication approval.
 
 ### Pending Todos
 
@@ -470,6 +474,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T03:03:16.439Z
-Stopped at: Completed 03-43-PLAN.md
+Last session: 2026-08-01T03:26:30.320Z
+Stopped at: Completed 03-44-PLAN.md
 Resume file: None
