@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { projectNavigation } from '@liiiraa/web-core';
 import { ACCOUNT_WEB_COMPOSITION } from './index';
@@ -15,6 +15,18 @@ import {
 } from './account-preview-model';
 
 describe('account shell', () => {
+  it('marks exactly the pathname-matched responsibility as the current page', () => {
+    const navigationUrl = new URL('./account-navigation.tsx', import.meta.url);
+    expect(existsSync(navigationUrl)).toBe(true);
+
+    const navigationSource = existsSync(navigationUrl) ? readFileSync(navigationUrl, 'utf8') : '';
+    expect(navigationSource).toContain("'use client'");
+    expect(navigationSource).toContain('usePathname');
+    expect(navigationSource).toContain("aria-current={isCurrent ? 'page' : undefined}");
+    expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
+    expect(navigationSource).toContain('currentCount === 1');
+  });
+
   it('projects every canonical account responsibility and keeps preview authority visible', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
@@ -44,12 +56,22 @@ describe('account shell', () => {
     expect(layoutSource).toContain('account-preview-rail');
     expect(layoutSource).toContain('data-authority="disconnected"');
     expect(layoutSource).toContain('ACCOUNT_WEB_COMPOSITION');
+    expect(layoutSource).toContain('ProductLockup');
+    expect(layoutSource).toContain('<AccountNavigation');
+    expect(layoutSource).not.toContain('account-header__origin');
+    expect(layoutSource).not.toContain('copy.footer');
+    expect((layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? [])).toHaveLength(1);
     for (const routeId of routeIds) {
       expect(layoutSource).toContain(routeId);
     }
-    expect(styles).toMatch(/@media \(width < 760px\)[\s\S]*grid-auto-flow: column/u);
+    expect(styles).toMatch(/\.account-workspace__frame\s*\{[\s\S]*max-inline-size:/u);
+    expect(styles).toContain('overflow-x: clip');
+    expect(styles).toMatch(/@media \(width < 760px\)[\s\S]*flex-wrap: wrap/u);
+    expect(styles).not.toContain('grid-auto-flow: column');
+    expect(styles).not.toContain('overflow-x: auto');
     expect(styles).toContain('@media (forced-colors: active)');
     expect(styles).toContain('min-block-size: 44px');
+    expect(styles).toContain("a[aria-current='page']");
     expect(styles).not.toMatch(/account-nav[\s\S]*icon-only/iu);
   });
 });
