@@ -707,13 +707,16 @@ export const createRepositoryPhase3Input = (
       fileHash(repositoryRoot, packageFile),
       canonicalTextFileHash(repositoryRoot, packageFile),
     ]);
+    const plannedHash = canonicalTextFileHash(repositoryRoot, packageFile);
     const bundled = approvedBundle.appArtifacts.find((artifact) => artifact.surface === surface);
     return {
       classification: 'production-build' as const,
       hash:
         bundled !== undefined && expectedHashes.has(bundled.hash)
           ? bundled.hash
-          : 'bundle-hash-mismatch',
+          : mode === 'planned'
+            ? plannedHash
+            : 'bundle-hash-mismatch',
       path: bundled?.path ?? expectedPath,
       state:
         bundled?.path === expectedPath && nonEmptyDirectory(repositoryRoot, expectedPath)
