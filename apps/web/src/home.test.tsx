@@ -67,7 +67,23 @@ afterEach(async () => {
 });
 
 describe('Home layout and screenshot evidence gate', () => {
-  it('makes the admitted desktop artifact dominant without hiding the next action', async () => {
+  it('leads with the approved bilingual promise and compatibility action before heavy media', async () => {
+    expect(getHomeContent('pt-BR').hero).toMatchObject({
+      primaryAction: { label: 'Verificar compatibilidade' },
+      promise: 'Prepare seu PC. Prove o resultado. Restaure com controle.',
+    });
+    expect(getHomeContent('en').hero).toMatchObject({
+      primaryAction: { label: 'Check compatibility' },
+      promise: 'Prepare your PC. Prove the result. Restore with control.',
+    });
+
+    const sharedSource = await readSource('../../../packages/web-features/src/components.tsx');
+    expect(sharedSource.indexOf('className="lb-web-command-copy"')).toBeLessThan(
+      sharedSource.indexOf('className="lb-web-command-artifact"'),
+    );
+  });
+
+  it('makes the admitted desktop artifact dominant wide while keeping copy first on mobile', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
@@ -82,23 +98,43 @@ describe('Home layout and screenshot evidence gate', () => {
     ]);
 
     expect(styles).toContain('grid-template-columns: minmax(0, 5fr) minmax(0, 7fr)');
-    expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.public-home \.lb-web-command-artifact\s*\{[\s\S]*order: -1/u,
-    );
+    expect(styles).not.toMatch(/\.lb-web-command-artifact\s*\{[^}]*order:\s*-1/u);
     expect(sharedSource).toContain('className="lb-web-command-action"');
   });
 
-  it('keeps one trust statement and progressively discloses localized capture metadata', async () => {
+  it('keeps evidence provenance contextual instead of exposing raw capture metadata', async () => {
     const [homeSource, sharedSource] = await Promise.all([
       readSource('./features/home.tsx'),
       readSource('../../../packages/web-features/src/components.tsx'),
     ]);
 
     expect(homeSource.match(/className="home-trust-boundary"/gu)).toHaveLength(1);
+    expect(homeSource).toContain('className="home-evidence-disclosure"');
+    expect(homeSource).not.toContain('ClaimEvidenceRow');
     expect(sharedSource).toContain('className="lb-web-product-provenance"');
     expect(sharedSource.indexOf('className="lb-web-product-provenance"')).toBeLessThan(
       sharedSource.indexOf('detail={provenance}'),
     );
+  });
+
+  it('uses authored evidence stages and rows instead of a repeated card or chapter wall', async () => {
+    const homeSource = await readSource('./features/home.tsx');
+    const styles = await readSource('./styles/public.css');
+
+    expect(homeSource).toContain('className="home-evidence-stage"');
+    expect(homeSource).toContain('className="home-proof-sequence"');
+    expect(homeSource).not.toContain('className="home-chapter"');
+    expect(styles).not.toContain('.home-chapter');
+    expect(styles).not.toMatch(/border-radius:\s*(?:2[4-9]|[3-9]\d)px/u);
+  });
+
+  it('keeps public distribution unavailable without exposing a development installer path', async () => {
+    const homeSource = await readSource('./features/home.tsx');
+
+    expect(homeSource).toContain("publicBoundaryHref('releases-index', locale)");
+    expect(homeSource).toContain('Distribution blocked');
+    expect(homeSource).not.toContain("publicBoundaryHref('releases-download'");
+    expect(homeSource).not.toMatch(/['"`]\/[^'"`\s]+\.exe|development installer|self-signed/iu);
   });
 
   it('uses the canonical public type and spacing scale instead of oversized hero values', async () => {
