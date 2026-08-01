@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-57-PLAN.md
-last_updated: "2026-08-01T17:11:13.746Z"
+stopped_at: Completed 03-59-PLAN.md
+last_updated: "2026-08-01T17:23:12.160Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 112
+  completed_plans: 113
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 5 of 66
+Plan: 6 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -160,6 +160,7 @@ _Updated after plan completion_
 | Phase 03 P54 | 21min | 2 tasks | 7 files |
 | Phase 03 P55 | 15min | 2 tasks | 6 files |
 | Phase 03 P57 | 12min | 2 tasks | 4 files |
+| Phase 03 P59 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -472,6 +473,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep the server layout as the canonical owner of routes, localized groups, noindex metadata, preview truth, and fixture composition.
 - [Phase 03]: Keep one canonical desktop aria-current anchor while the mobile disclosure names the current task without duplicating current-page semantics.
 - [Phase 03]: Use the localized preview label as explicit provenance detail while rendering the locked remote-changes-disconnected copy once.
+- [Phase 03]: Keep one canonical desktop aria-current destination while the mobile disclosure names the same current task without duplicate semantics. — Preserves one unambiguous current-page relationship in the DOM while keeping mobile context explicit.
+- [Phase 03]: Keep mobile high-risk unavailability beside the affected workflow instead of in permanent shell chrome. — Safe review remains useful while authority constraints appear only where they change the available action.
 
 ### Pending Todos
 
@@ -513,6 +516,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T17:11:13.741Z
-Stopped at: Completed 03-57-PLAN.md
+Last session: 2026-08-01T17:23:12.155Z
+Stopped at: Completed 03-59-PLAN.md
 Resume file: None
