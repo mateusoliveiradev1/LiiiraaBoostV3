@@ -71,17 +71,16 @@ describe('role-scoped admin', () => {
     expect(stylesSource).toMatch(
       /\.admin-landing__queue\s*\{[\s\S]*min-block-size:\s*calc\(var\(--lb-space-7\)\s*\*\s*4\)/u,
     );
-    expect(stylesSource).toMatch(
-      /\.admin-landing__queue[\s\S]*\.lb-responsive-table/u,
-    );
+    expect(stylesSource).toMatch(/\.admin-landing__queue[\s\S]*\.lb-web-table-region/u);
   });
 
   it('projects audit transport values into localized human status before rendering', () => {
     expect(featureSource).toContain('const presentAuditEvent');
-    expect(featureSource).toContain("result: content.locale === 'pt-BR'");
-    expect(featureSource).toContain("action: content.locale === 'pt-BR'");
+    expect(featureSource).toMatch(/const action\s*=\s*content\.locale === 'pt-BR'/u);
+    expect(featureSource).toMatch(/result:\s*content\.locale === 'pt-BR'/u);
     expect(featureSource).not.toContain('<StatusSignal label={event.result}');
     expect(featureSource).not.toContain('action: event.action,');
+    expect(featureSource).not.toContain('<code>synthetic-ready</code>');
     expect(adminEn.receipt.title).toBe('Preview complete — no change was made');
     expect(adminPtBr.receipt.title).toBe('Prévia concluída — nenhuma alteração foi feita');
   });

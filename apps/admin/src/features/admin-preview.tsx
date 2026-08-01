@@ -234,6 +234,31 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
   }),
 ] as const);
 
+const presentAuditEvent = (content: AdminContent, event: AdminAuditEvent) => {
+  const action =
+    content.locale === 'pt-BR'
+      ? {
+          'admin.review': 'Revisão administrativa',
+          'diagnostic.review': 'Revisão de diagnóstico',
+          'support.review': 'Revisão de resposta de suporte',
+        }[event.action]
+      : {
+          'admin.review': 'Administrative review',
+          'diagnostic.review': 'Diagnostic review',
+          'support.review': 'Support response review',
+        }[event.action];
+
+  return Object.freeze({
+    action,
+    result: content.locale === 'pt-BR' ? 'Nenhuma alteração remota' : 'No remote change',
+    role: Object.hasOwn(content.roles, event.role)
+      ? content.roles[event.role as AdminPreviewRole]
+      : content.locale === 'pt-BR'
+        ? 'Função indisponível'
+        : 'Role unavailable',
+  });
+};
+
 export const evaluateDiagnosticConsent = (
   consent: DiagnosticConsent | null | undefined,
   requiredPurpose: string,
@@ -380,15 +405,16 @@ export const CorrelatedEventDetail = ({
   content,
   event,
 }: Readonly<{ content: AdminContent; event: AdminAuditEvent }>) => {
+  const presentation = presentAuditEvent(content, event);
   const fields = [
     [content.audit.actor, event.actor],
-    [content.audit.role, event.role],
-    [content.audit.action, event.action],
+    [content.audit.role, presentation.role],
+    [content.audit.action, presentation.action],
     [content.audit.target, event.redactedTarget],
     [content.audit.reason, event.reason],
     [content.audit.consent, event.consentReference ?? content.audit.noConsent],
     [content.audit.timestamp, event.occurredAt],
-    [content.audit.result, event.result],
+    [content.audit.result, presentation.result],
     [content.audit.correlation, event.correlationId],
   ] as const;
   return (
@@ -434,17 +460,20 @@ export const ImmutableAuditTimeline = ({
           { id: 'result', label: content.audit.result, essential: false },
           { id: 'time', label: content.audit.timestamp, essential: false },
         ]}
-        rows={visibleEvents.map((event) => ({
-          id: event.eventId,
-          cells: {
-            event: <code>{event.eventId}</code>,
-            actor: <code>{event.actor}</code>,
-            action: event.action,
-            result: <StatusSignal label={event.result} state="preview" />,
-            time: <time dateTime={event.occurredAt}>{event.occurredAt}</time>,
-          },
-          detail: <CorrelatedEventDetail content={content} event={event} />,
-        }))}
+        rows={visibleEvents.map((event) => {
+          const presentation = presentAuditEvent(content, event);
+          return {
+            id: event.eventId,
+            cells: {
+              event: <code>{event.eventId}</code>,
+              actor: <code>{event.actor}</code>,
+              action: presentation.action,
+              result: <StatusSignal label={presentation.result} state="preview" />,
+              time: <time dateTime={event.occurredAt}>{event.occurredAt}</time>,
+            },
+            detail: <CorrelatedEventDetail content={content} event={event} />,
+          };
+        })}
       />
     </article>
   );
@@ -1001,7 +1030,9 @@ export const DiagnosticFieldDisclosure = ({
               <div>
                 <dt>startup-state</dt>
                 <dd>
-                  <code>synthetic-ready</code>
+                  {content.locale === 'pt-BR'
+                    ? 'Inicialização pronta nesta prévia'
+                    : 'Startup ready in this preview'}
                 </dd>
               </div>
               <div>
@@ -1062,14 +1093,22 @@ export const DiagnosticFieldDisclosure = ({
   );
 };
 
+const ADMIN_ROLE_FOCAL_ROUTE = Object.freeze({
+  support: 'admin-support',
+  operations: 'admin-operations',
+  security: 'admin-security',
+  audit: 'admin-audit',
+} satisfies Readonly<Record<AdminPreviewRole, AdminPreviewRoute>>);
+
 const RoleLanding = ({
   content,
   role,
 }: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => {
   const routes = ADMIN_ROLE_ROUTE_ACCESS[role];
-  const nextRoute = routes.find((routeId) => routeId !== 'admin-role') ?? 'admin-role';
+  const nextRoute = ADMIN_ROLE_FOCAL_ROUTE[role];
   const nextMetadata = getAdminPreviewMetadata(content.locale, nextRoute);
   const activity = ADMIN_AUDIT_EVENTS.find((event) => event.role === role) ?? ADMIN_AUDIT_EVENTS[0];
+  const activityPresentation = presentAuditEvent(content, activity);
   const copy =
     content.locale === 'pt-BR'
       ? {
@@ -1101,14 +1140,19 @@ const RoleLanding = ({
   const queueRoutes = routes.filter((routeId) => routeId !== 'admin-role');
 
   return (
-    <article className="admin-landing" data-admin-workspace="role landing">
+    <article
+      className="admin-landing"
+      data-admin-role={role}
+      data-admin-workspace="role landing"
+      data-focal-route={nextRoute}
+    >
       <header className="admin-landing__header">
         <p>{copy.currentRole}</p>
         <h1>{content.roles[role]}</h1>
         <span data-state="current">{content.landing.title}</span>
       </header>
 
-      <div className="admin-landing__layout">
+      <div className="admin-landing__layout" data-admin-grid="8-4">
         <section
           aria-labelledby="admin-next-work-title"
           className="admin-landing__focus"
@@ -1135,7 +1179,7 @@ const RoleLanding = ({
             <div>
               <dt>{copy.result}</dt>
               <dd>
-                <StatusSignal label={activity.result} state="preview" />
+                <StatusSignal label={activityPresentation.result} state="preview" />
               </dd>
             </div>
             <div>
@@ -1149,38 +1193,48 @@ const RoleLanding = ({
 
         <section aria-labelledby="admin-queue-title" className="admin-landing__queue">
           <h2 id="admin-queue-title">{copy.queue}</h2>
-          <table>
-            <caption>{content.landing.scopeBody}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{copy.task}</th>
-                <th scope="col">{copy.attention}</th>
-                <th scope="col">{copy.latest}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {queueRoutes.map((routeId, index) => {
-                const metadata = getAdminPreviewMetadata(content.locale, routeId);
-                return (
-                  <tr key={routeId}>
-                    <th scope="row">
-                      <a href={hrefFor(routeId, content.locale, role)}>{metadata.title}</a>
-                    </th>
-                    <td>{index === 0 ? copy.nextSafeReview : copy.available}</td>
-                    <td>
-                      {index === 0 ? (
-                        <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
-                      ) : (
-                        <span aria-label={content.locale === 'pt-BR' ? 'Sem evento' : 'No event'}>
-                          —
-                        </span>
-                      )}
-                    </td>
-                  </tr>
+          <ResponsiveDataTable
+            caption={content.landing.scopeBody}
+            columns={[
+              { id: 'task', label: copy.task },
+              { id: 'attention', label: copy.attention, essential: false },
+              { id: 'latest', label: copy.latest, essential: false },
+            ]}
+            rows={queueRoutes.map((routeId, index) => {
+              const metadata = getAdminPreviewMetadata(content.locale, routeId);
+              const attention = index === 0 ? copy.nextSafeReview : copy.available;
+              const latest =
+                index === 0 ? (
+                  <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
+                ) : (
+                  <span aria-label={content.locale === 'pt-BR' ? 'Sem evento' : 'No event'}>—</span>
                 );
-              })}
-            </tbody>
-          </table>
+              return {
+                id: routeId,
+                cells: {
+                  task: <a href={hrefFor(routeId, content.locale, role)}>{metadata.title}</a>,
+                  attention,
+                  latest,
+                },
+                detail: (
+                  <dl className="admin-landing__queue-detail">
+                    <div>
+                      <dt>{copy.task}</dt>
+                      <dd>{metadata.title}</dd>
+                    </div>
+                    <div>
+                      <dt>{copy.attention}</dt>
+                      <dd>{attention}</dd>
+                    </div>
+                    <div>
+                      <dt>{copy.latest}</dt>
+                      <dd>{latest}</dd>
+                    </div>
+                  </dl>
+                ),
+              };
+            })}
+          />
         </section>
       </div>
     </article>
