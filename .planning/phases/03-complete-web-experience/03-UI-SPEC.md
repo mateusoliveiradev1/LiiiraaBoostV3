@@ -159,17 +159,13 @@ All values are multiples of four. No arbitrary local values.
 |---|---:|---|
 | `space-1` | 4px | Icon/label micro-gap |
 | `space-2` | 8px | Compact inline gap |
-| `space-3` | 12px | Dense row/control separation |
-| `space-4` | 16px | Default control/content gap; mobile edge |
-| `space-5` | 24px | Panel padding; compact section gap |
-| `space-6` | 32px | Workspace gap; desktop panel padding |
-| `space-7` | 48px | Page intro and mobile chapter gap |
-| `space-8` | 64px | Public hero grouping; major product break |
-| `space-9` | 80px | Public medium chapter interval |
-| `space-10` | 96px | Public wide chapter interval |
-| `space-11` | 128px | Maximum cinematic separation; public wide only |
+| `space-3` | 16px | Default control/content gap; mobile edge |
+| `space-4` | 24px | Panel padding; compact section gap |
+| `space-5` | 32px | Workspace gap; desktop panel padding |
+| `space-6` | 48px | Page intro and mobile chapter gap |
+| `space-7` | 64px | Public hero grouping; major product break |
 
-Public chapter rhythm must vary, for example `96 → 64 → 128 → 80`; repeating the same 96/128px gap down the page is forbidden. Account/admin use 12/16/24/32/48 only. Pointer targets remain at least 44×44px.
+These seven values are the complete spacing-token set. Public cinematic rhythm comes from composition, not extra tokens: alternate 64px and 48px section padding, use 32px internal group gaps, and create larger perceived pauses by pairing a 64px section edge with a distinct tonal transition. Account/admin use 16/24/32/48 only. Pointer targets remain at least 44×44px.
 
 ### Grid
 
@@ -196,14 +192,14 @@ No nested panel repeats the same rounded rectangle more than two levels deep.
 |---|---|---|
 | E0 | Canvas | Flat near-black page field; no shadow |
 | E1 | Workspace/panel | Tonal step plus optional 1px outer boundary; no large shadow |
-| E2 | Focal/raised panel | Tonal step, 1px highlight edge, `0 16px 48px rgb(0 0 0 / 28%)`; at most one permanent E2 focal region per viewport |
-| E3 | Overlay | `0 24px 72px rgb(0 0 0 / 52%)`; dialogs, menus, command/search only |
+| E2 | Focal/raised panel | Tonal step plus one 1px highlight edge and **no shadow**; at most one permanent E2 focal region per viewport |
+| E3 | Overlay | `0 24px 64px rgb(0 0 0 / 52%)`; dialogs, menus, command/search only |
 
 Thin dividers may separate rows inside a semantic table/list. They may not form the entire page into a spreadsheet-like grid. Prefer tonal groups, spacing, headings, and one outer boundary.
 
 ### Glow limits
 
-- Hero bloom: one radial cobalt-to-cyan bloom behind the real product artifact, maximum 520×360px visible footprint, maximum 20% peak opacity, blur 96px.
+- Hero bloom: one radial cobalt-to-cyan bloom behind the real product artifact, maximum 520×360px visible footprint, maximum 20% peak opacity, blur 64px.
 - Action/selection glow: maximum `0 0 24px` at 14% accent opacity; only primary CTA or current selection, never both in the same local group.
 - Maximum two glowing elements visible in one viewport.
 - No glow on body copy, semantic warnings, ordinary cards, every button, or inactive navigation.
@@ -245,7 +241,7 @@ Exactly two weights exist: 400 and 600. Data reuses label/body sizes and does no
 Rules:
 
 - The public H1 retains the approved promise and uses deliberate three-line wrapping on wide screens. It must not appear as a small paragraph beside the screenshot.
-- Account/admin page H1 is 32px at every desktop width and 28px below 640px. Navigation never shrinks below 14px.
+- Account/admin page H1 remains 32px at every viewport width. Navigation never shrinks below 14px. The product scale therefore remains exactly 14/16/24/32px with no mobile-only fifth size.
 - Body copy never shrinks below 16px on account/admin or 17px on public marketing sections.
 - JetBrains Mono is restricted to hashes, versions, timestamps, IDs, codes, and tabular numbers. Purple mono fixture labels are forbidden.
 - Headings use balanced wrapping; body uses pretty wrapping. No repeated tiny uppercase eyebrows.
@@ -264,6 +260,8 @@ Use OKLCH as the canonical source, with generated sRGB fallbacks. Final token im
 | Secondary panel 30% `--lb-panel` | `oklch(0.180 0.032 258)` | Sidebars, product panels, rows, section bands |
 | Raised panel `--lb-panel-raised` | `oklch(0.225 0.045 257)` | Focal workspace and overlays |
 | Electric cobalt 10% `--lb-accent-electric` | `oklch(0.670 0.210 255)` | Primary CTA, active task, committed selection, product-stage edge |
+| Electric cobalt hover `--lb-accent-electric-hover` | `oklch(0.730 0.190 250)` | Primary CTA hover only |
+| Electric cobalt pressed `--lb-accent-electric-pressed` | `oklch(0.610 0.200 255)` | Primary CTA pressed only |
 | Cyan edge `--lb-accent-cyan` | `oklch(0.820 0.135 220)` | Focus ring, small highlight, artifact edge; never a second CTA color |
 | Primary text | `oklch(0.965 0.012 255)` | H1, headings, critical values |
 | Secondary text | `oklch(0.760 0.030 255)` | Body and explanations |
@@ -282,6 +280,20 @@ Accent is reserved for:
 5. the real-product stage edge and its one bounded bloom.
 
 Accent is not used for all links, inactive icons, every panel border, ordinary positive states, or decorative text.
+
+### Primary CTA contrast pairs
+
+The electric cobalt fill never uses white text. Its label is the dark canvas token so normal-size CTA text remains at least 4.5:1.
+
+| State | Background | Label/boundary | Required test |
+|---|---|---|---|
+| Default/loading | `--lb-accent-electric` | `--lb-canvas`; loading preserves the same pair and button width | computed contrast ≥4.5:1 |
+| Hover | `--lb-accent-electric-hover` | `--lb-canvas` | computed contrast ≥4.5:1 |
+| Pressed | `--lb-accent-electric-pressed` | `--lb-canvas` | computed contrast ≥4.5:1; no scale animation |
+| Disabled | `--lb-canvas-inset` | `--lb-text-secondary` plus `--lb-strong-line` boundary | computed contrast ≥4.5:1; state is not expressed by opacity alone |
+| Forced colors | system `ButtonFace` | system `ButtonText` plus 1px `ButtonText` boundary; focus uses `Highlight` | browser forced-colors assertion; authored fill/glow removed |
+
+Automated token tests must evaluate every pair in sRGB after OKLCH conversion. A color adjustment that drops any pair below 4.5:1 blocks the build.
 
 ### Semantic colors
 
@@ -315,7 +327,7 @@ Experimental/preview state must not use purple in ordinary chrome. Color never c
 At ≥1280px:
 
 - Hero uses a centered 12-column composition, `min-height: calc(100svh - 72px)`, maximum 920px.
-- Promise group spans columns 3–11, max width 940px, center aligned. H1 begins 64–80px below the header.
+- Promise group spans columns 3–11, max width 940px, center aligned. H1 begins 64px below the header.
 - H1 uses the exact approved promise: **“Prepare seu PC. Prove o resultado. Restaure com controle.”** / **“Prepare your PC. Prove the result. Restore with control.”**
 - Lead is one paragraph, max 58ch, placed 24px below H1.
 - CTA pair sits 32px below the lead. Primary is solid electric cobalt; secondary is a quiet outlined action. The two must not have equal visual weight.
@@ -415,6 +427,8 @@ Reuse React Aria behavior behind authored Liiiraa components.
 
 `LbButton`, `LbIconButton`, `LbLink`, `LbTextField`, `LbSearchField`, `LbSelect`, `LbTabs`, `LbDialog`, `LbPopover`, `LbDisclosure`, `LbMenu`, `LbToast`, `StatusChip`, `SystemStatusBand`, `RouteHeader`, `Breadcrumbs`, `EmptyComposition`, `OperationalFailure`, `VerificationReceipt`, `ResponsiveDataTable`, `DetailRow`, `FilterBar`, `Pagination`, `BoundaryTransitionNotice`, `NoChangeReceipt`.
 
+Every `LbIconButton` requires a non-empty localized accessible name passed to `aria-label` and the same human label in a visible tooltip on both hover and keyboard focus. On coarse-pointer/mobile contexts, or whenever the action is ambiguous, destructive, consent-related, or high risk, the control must render persistent visible text instead of relying on a tooltip. Icon shape alone is never the label, and a tooltip never replaces the programmatic name.
+
 ### Public compositions
 
 `PublicTopbar`, `PublicMobileMenu`, `LocaleSwitcher`, `IgnitionHero`, `CobaltProductStage`, `PrepareProveRestoreBand`, `ContextEvidenceStage`, `CompatibilityDecision`, `ReleaseBoundary`, `DocumentationIndex`, `ReleaseIntegrityPanel`, `DownloadAvailabilityGate`, `PolicyDocument`, `StatusSummary`.
@@ -435,7 +449,8 @@ Reuse React Aria behavior behind authored Liiiraa components.
 
 | Component | Default | Hover | Focus-visible | Selected/active | Disabled/loading | Error/critical |
 |---|---|---|---|---|---|---|
-| Primary button | Electric cobalt fill, white 14/600 label | +6% lightness, one bounded 14% glow | 2px cyan ring + 2px offset | 2px downward press, no scale | Neutral fill; label remains ≥4.5:1; loading preserves width | Destructive red only for destructive action |
+| Primary button | Electric cobalt fill, dark `--lb-canvas` 14/600 label | Hover cobalt + dark label, one bounded 14% glow | 2px cyan ring + 2px offset | Pressed cobalt + dark label; 2px downward press, no scale | Disabled inset/secondary pair; loading retains default pair and width; all pairs ≥4.5:1 | Destructive red only for destructive action |
+| Icon button | Icon plus non-empty localized `aria-label`; visible tooltip on hover/focus | Raised neutral and tooltip visible | Cyan ring and tooltip visible | Pressed inset tone | Disabled reason available; mobile/ambiguous/high-risk action uses persistent visible text | Destructive icon-only action forbidden |
 | Secondary button | Raised neutral, strong boundary | Lighter neutral boundary | 2px cyan ring | Pressed inset tone | Neutral disabled, reason available | Critical outline only when action resolves error |
 | Nav item | Transparent, secondary text | Raised neutral | Cyan ring | 3px cobalt edge + raised fill + primary text | Hidden when unauthorized; unavailable reason if visible | Never red merely because route has an alert |
 | Locale control | Neutral control, flag + text | Raised neutral | Cyan ring | Menu/list selection with check + language text | Current locale remains readable | Invalid route state safely targets locale Home |
@@ -546,7 +561,7 @@ Revoke device/session, account deletion, privacy request, support data, diagnost
 | Public headline entrance | 360ms | `cubic-bezier(0.16, 1, 0.3, 1)` | public first load only |
 | Public product-stage entrance | 480ms, max 80ms delay | `cubic-bezier(0.16, 1, 0.3, 1)` | public first load only |
 
-- Public entrance translation is at most 12px; product stage may use opacity plus 0.985→1 scale. No larger zoom.
+- Public entrance translation is at most 8px; product stage may use opacity plus 0.985→1 scale. No larger zoom.
 - Account/admin have no orchestrated page-load sequence. Motion only confirms state/navigation.
 - No bounce, elastic spring, parallax, scan line, particles, count-up metrics, pulsing CTA, animated grid, or infinite ambient loop.
 - Reduced motion removes translation, scale, stagger, and glow animation; state changes use immediate or ≤100ms opacity/tone.
@@ -607,7 +622,7 @@ G01, G04, G06 and every current W/G capture are rejected qualitative baselines. 
 - Product artifact, not evidence prose, is the largest visual object.
 - No PUBLIC rail, purple preview badge, raw scenario/viewport/commit string, or implementation prose above the fold.
 - One bounded cobalt/cyan bloom is visible; no green reference color or decorative grid appears.
-- The next movement is visually hinted below the fold without a blank gap greater than 128px.
+- The next movement is visually hinted below the fold without a blank gap greater than 64px.
 
 ### Account 1440×900 acceptance
 
@@ -630,7 +645,7 @@ G01, G04, G06 and every current W/G capture are rejected qualitative baselines. 
 
 - 60px topbar; full or compact approved lockup; flag + text locale; one menu/task disclosure control.
 - Current task navigation is collapsed by default and opens without clipping or duplicate current-page semantics.
-- H1 is 40–52px public and 28px product; body is at least 16px.
+- H1 is 40–52px public and 32px product; body is at least 16px.
 - CTA/control height is at least 48px; no horizontal page scroll.
 - Product crop remains legible, with full screenshot access.
 - Account/admin show the focal task before secondary facts; high-risk admin controls are absent below 960px with a concise reason.
