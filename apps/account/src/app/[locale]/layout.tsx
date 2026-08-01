@@ -47,6 +47,18 @@ const NAVIGATION_GROUPS = Object.freeze([
   { ids: ['account-support'], label: { 'pt-BR': 'Suporte', en: 'Support' } },
 ] as const satisfies readonly NavigationGroup[]);
 
+const NAVIGATION_ICONS = Object.freeze({
+  'account-device': 'device',
+  'account-downloads': 'download',
+  'account-invoices': 'list',
+  'account-overview': 'speedometer',
+  'account-privacy': 'lock',
+  'account-profile': 'profile',
+  'account-security': 'shield',
+  'account-subscription': 'crown',
+  'account-support': 'toolbox',
+} as const);
+
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     accountIdentity: 'Conta demonstrativa',
@@ -54,8 +66,8 @@ const COPY = Object.freeze({
     currentTask: 'Responsabilidade atual',
     navigation: 'Responsabilidades da conta',
     preview:
-      'Autoridade remota desconectada. Revisões usam dados sintéticos e não executam mudanças.',
-    previewLabel: 'Prévia desconectada',
+      'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
+    previewLabel: 'Alterações remotas desconectadas',
     publicLink: 'Ir para a superfície pública',
     skip: 'Ir para o conteúdo da conta',
   }),
@@ -64,8 +76,8 @@ const COPY = Object.freeze({
     accountState: 'No session connected',
     currentTask: 'Current responsibility',
     navigation: 'Account responsibilities',
-    preview: 'Remote authority is disconnected. Reviews use synthetic data and make no changes.',
-    previewLabel: 'Disconnected preview',
+    preview: 'You can review the flow with synthetic data; nothing changes outside this preview.',
+    previewLabel: 'Remote changes disconnected',
     publicLink: 'Go to the public surface',
     skip: 'Skip to account content',
   }),
@@ -138,6 +150,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
     ...(group.ids.length > 1 ? { label: group.label[locale] } : {}),
     items: group.ids.map((routeId) => ({
       href: localizedHref(routeId, locale),
+      icon: NAVIGATION_ICONS[routeId],
       label:
         routeId === 'account-subscription'
           ? locale === 'pt-BR'
@@ -191,8 +204,11 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
               data-authority="disconnected"
               role="note"
             >
-              <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
-              <p>{copy.preview}</p>
+              <AccountPreviewProvenance detail="" locale={locale} />
+              <p>
+                <strong>{copy.previewLabel}</strong>
+                <span>{copy.preview}</span>
+              </p>
             </aside>
           }
         >

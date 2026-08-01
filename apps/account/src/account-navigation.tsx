@@ -2,11 +2,13 @@
 
 import { LocaleSwitcher } from '@liiiraa/web-features';
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
+import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 export type AccountNavigationItem = Readonly<{
   href: string;
+  icon: ProductIconName;
   label: string;
 }>;
 
@@ -28,6 +30,10 @@ type AccountNavigationProps = Readonly<{
 }>;
 
 const normalizePathname = (pathname: string): string => pathname.replace(/\/+$/u, '') || '/';
+
+function ResponsibilityIcon({ name }: Readonly<{ name: ProductIconName }>) {
+  return <ProductIcon className="account-nav__icon" name={name} size={18} />;
+}
 
 function NavigationGroups({
   currentHref,
@@ -58,7 +64,8 @@ function NavigationGroups({
                     data-current={isCurrent ? 'page' : undefined}
                     href={item.href}
                   >
-                    {item.label}
+                    <ResponsibilityIcon name={item.icon} />
+                    <span>{item.label}</span>
                   </a>
                 </li>
               );
