@@ -21,6 +21,7 @@ type AccountNavigationProps = Readonly<{
   alternateLocale: WebLocale;
   children: ReactNode;
   currentTaskLabel: string;
+  entryItems: readonly AccountNavigationItem[];
   fallbackLocaleHref: string;
   groups: readonly AccountNavigationGroup[];
   header: ReactNode;
@@ -81,6 +82,7 @@ export function AccountNavigation({
   alternateLocale,
   children,
   currentTaskLabel,
+  entryItems,
   fallbackLocaleHref,
   groups,
   header,
@@ -95,13 +97,20 @@ export function AccountNavigation({
     targetLocale: locale,
   });
   const currentHref = localizedCurrentRoute.ok ? localizedCurrentRoute.value : undefined;
-  const items = groups.flatMap(({ items: groupItems }) => groupItems);
-  const currentItems = items.filter(
+  const responsibilityItems = groups.flatMap(({ items: groupItems }) => groupItems);
+  const allItems = [...entryItems, ...responsibilityItems];
+  const currentItems = allItems.filter(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
   const currentItem = currentItems.length === 1 ? currentItems[0] : undefined;
   const currentLabel = currentItem?.label ?? label;
+  const currentEntryItems = entryItems.filter(
+    ({ href }) =>
+      currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
+  );
+  const visibleGroups =
+    currentEntryItems.length === 1 ? [{ items: currentEntryItems }, ...groups] : groups;
   const localizedAlternateRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'account-origin',
@@ -130,7 +139,7 @@ export function AccountNavigation({
         <div className="account-workspace__frame">
           <nav aria-label={label} className="account-nav account-nav__desktop">
             <p className="account-nav__label">{label}</p>
-            <NavigationGroups currentHref={currentHref} groups={groups} markCurrent />
+            <NavigationGroups currentHref={currentHref} groups={visibleGroups} markCurrent />
           </nav>
 
           <details className="account-nav account-nav__mobile">
@@ -140,7 +149,11 @@ export function AccountNavigation({
               <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
             </summary>
             <nav aria-label={label}>
-              <NavigationGroups currentHref={currentHref} groups={groups} markCurrent={false} />
+              <NavigationGroups
+                currentHref={currentHref}
+                groups={visibleGroups}
+                markCurrent={false}
+              />
             </nav>
           </details>
 

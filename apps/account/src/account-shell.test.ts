@@ -178,7 +178,8 @@ describe('account shell', () => {
 
     expect(navigationSource).toContain('<details className="account-nav account-nav__mobile">');
     expect(navigationSource).toContain('<nav aria-label={label}>');
-    expect(navigationSource).toContain('groups={groups} markCurrent={false}');
+    expect(navigationSource).toContain('groups={visibleGroups}');
+    expect(navigationSource).toContain('markCurrent={false}');
     expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
     expect(navigationSource).not.toMatch(/onKeyDown|onClick|role="button"/u);
   });

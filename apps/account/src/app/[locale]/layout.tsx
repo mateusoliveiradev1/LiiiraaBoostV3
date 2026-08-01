@@ -16,7 +16,11 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
-import { AccountNavigation, type AccountNavigationGroup } from '../../account-navigation';
+import {
+  AccountNavigation,
+  type AccountNavigationGroup,
+  type AccountNavigationItem,
+} from '../../account-navigation';
 import { createAccountFailureModel } from '../../account-errors';
 import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
@@ -69,6 +73,7 @@ const COPY = Object.freeze({
       'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
     previewLabel: 'Alterações remotas desconectadas',
     publicLink: 'Ir para a superfície pública',
+    signIn: 'Entrar',
     skip: 'Ir para o conteúdo da conta',
   }),
   en: Object.freeze({
@@ -79,6 +84,7 @@ const COPY = Object.freeze({
     preview: 'You can review the flow with synthetic data; nothing changes outside this preview.',
     previewLabel: 'Remote changes disconnected',
     publicLink: 'Go to the public surface',
+    signIn: 'Sign in',
     skip: 'Skip to account content',
   }),
 });
@@ -90,6 +96,14 @@ const localizedHref = (routeId: WebRouteId, locale: WebLocale): string => {
   const result = routeHref(routeId, { locale });
   if (!result.ok) {
     throw new Error(`Account navigation route is unavailable: ${routeId}`);
+  }
+  return result.value;
+};
+
+const localizedSignInHref = (locale: WebLocale): string => {
+  const result = routeHref('account-sign-in', { locale });
+  if (!result.ok) {
+    throw new Error('Canonical account sign-in route is unavailable.');
   }
   return result.value;
 };
@@ -163,6 +177,13 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
             : group.label[locale],
     })),
   }));
+  const signInEntryItems: readonly AccountNavigationItem[] = [
+    {
+      href: localizedSignInHref(locale),
+      icon: 'profile',
+      label: copy.signIn,
+    },
+  ];
 
   return (
     <html
@@ -179,6 +200,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
         <AccountNavigation
           alternateLocale={alternateLocale}
           currentTaskLabel={copy.currentTask}
+          entryItems={signInEntryItems}
           fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
           groups={navigationGroups}
           header={

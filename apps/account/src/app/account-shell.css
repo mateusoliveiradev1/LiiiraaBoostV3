@@ -838,6 +838,22 @@ button:focus-visible,
     align-items: flex-start;
   }
 
+  .account-preview-rail .lb-status-mark {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    min-inline-size: 0;
+  }
+
+  .account-preview-rail .lb-status-detail {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
   .account-preview-rail p {
     flex: 1 1 calc(100% - var(--lb-space-7));
     flex-direction: column;
