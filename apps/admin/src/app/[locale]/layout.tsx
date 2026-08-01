@@ -29,14 +29,13 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     boundary: 'Origem administrativa dedicada. Cookies públicos e da conta não são aceitos.',
     desktop: 'Ações de alto risco exigem uma viewport de classe desktop com pelo menos 960 px.',
-    footer:
-      'Prévia operacional determinística. Nenhuma credencial ou autoridade administrativa está conectada.',
     mobile:
       'Revisão segura, triagem, casos e auditoria permanecem disponíveis. Ações de alto risco estão bloqueadas nesta viewport.',
     navigation: 'Escopo da função',
     currentTask: 'Tarefa atual',
-    preview:
-      'Autoridade desconectada — o escopo é demonstrativo e nenhuma mutação remota pode ocorrer.',
+    preview: 'Alterações remotas desconectadas',
+    previewDetail:
+      'Dados sintéticos sustentam esta revisão; esta prévia não pode alterar sistemas remotos.',
     previewLabel: 'Prévia administrativa',
     surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
@@ -45,13 +44,13 @@ const COPY = Object.freeze({
   en: Object.freeze({
     boundary: 'Dedicated administrative origin. Public and account cookies are not accepted.',
     desktop: 'High-risk actions require a desktop-class viewport at least 960px wide.',
-    footer:
-      'Deterministic operational preview. No credential or administrative authority is connected.',
     mobile:
       'Safe review, triage, cases, and audit remain available. High-risk actions are blocked in this viewport.',
     navigation: 'Role scope',
     currentTask: 'Current task',
-    preview: 'Disconnected authority — scope is demonstrative and no remote mutation can occur.',
+    preview: 'Remote changes disconnected',
+    previewDetail:
+      'Synthetic data supports this review; this preview cannot change remote systems.',
     previewLabel: 'Administrative preview',
     surface: 'Operations',
     skip: 'Skip to administrative content',
@@ -139,13 +138,14 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           preview={
             <aside
               aria-label={copy.previewLabel}
-              className="admin-role-rail"
+              className="admin-preview-band"
               data-authority="disconnected"
               data-preview-role={role}
+              role="status"
             >
               <AdminPreviewProvenance detail={copy.previewLabel} locale={locale} />
-              <strong>{ADMIN_ROLE_COPY[role][locale]}</strong>
-              <p>{copy.preview}</p>
+              <strong>{copy.preview}</strong>
+              <span className="admin-preview-band__detail">{copy.previewDetail}</span>
             </aside>
           }
           role={role}
@@ -170,13 +170,6 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
             {children}
           </main>
         </AdminNavigation>
-
-        <footer className="admin-footer">
-          <span>{copy.footer}</span>
-          <span>
-            {locale === 'pt-BR' ? 'Função' : 'Role'}: {ADMIN_ROLE_COPY[role][locale]}
-          </span>
-        </footer>
       </body>
     </html>
   );

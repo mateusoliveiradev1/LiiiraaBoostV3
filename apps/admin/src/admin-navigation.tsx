@@ -124,7 +124,10 @@ export function AdminNavigation({
 
       <div className="admin-workspace">
         <nav aria-label={label} className="admin-nav admin-nav__desktop">
-          <p className="admin-nav__label">{label}</p>
+          <div className="admin-nav__identity">
+            <span>{label}</span>
+            <strong>{roleLabel}</strong>
+          </div>
           <NavigationItems currentHref={currentHref} items={items} markCurrent />
         </nav>
 
