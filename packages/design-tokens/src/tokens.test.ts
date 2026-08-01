@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { readFile, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 import {
   COLOR_TOKENS,
@@ -111,24 +112,60 @@ describe('Pre-Dawn Flight Deck token contract', () => {
     );
   });
 
-  it('ships the free variable fonts and their OFL licenses with the desktop app', async () => {
-    const fontDirectory = new URL('../../../apps/desktop/public/fonts/', import.meta.url);
+  it('locks every web font identity beside its reviewed OFL license', async () => {
+    const fontDirectory = new URL('../../../apps/web/public/fonts/', import.meta.url);
     const assets = [
-      'manrope-variable.woff2',
-      'jetbrains-mono-variable.woff2',
-      'OFL-Manrope.txt',
-      'OFL-JetBrains-Mono.txt',
-    ];
+      {
+        file: 'manrope-variable.woff2',
+        license: 'OFL-Manrope.txt',
+        sha256: 'a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972',
+      },
+      {
+        file: 'jetbrains-mono-variable.woff2',
+        license: 'OFL-JetBrains-Mono.txt',
+        sha256: '18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e',
+      },
+      {
+        file: 'saira-semi-condensed-variable.woff2',
+        license: 'OFL-Saira-Semi-Condensed.txt',
+        sha256: 'd5f1ee1ce85a2f6611d76bcd98738132f4706b099dc167f02c2093a1ec5eb975',
+      },
+    ] as const;
 
     for (const asset of assets) {
-      expect((await stat(new URL(asset, fontDirectory))).size).toBeGreaterThan(1_000);
-    }
+      const fontBytes = await readFile(new URL(asset.file, fontDirectory));
+      const license = await readFile(new URL(asset.license, fontDirectory), 'utf8');
 
-    expect(await readFile(new URL('OFL-Manrope.txt', fontDirectory), 'utf8')).toContain(
-      'SIL OPEN FONT LICENSE',
+      expect((await stat(new URL(asset.file, fontDirectory))).size).toBeGreaterThan(1_000);
+      expect(fontBytes.subarray(0, 4).toString('ascii')).toBe('wOF2');
+      expect(createHash('sha256').update(fontBytes).digest('hex')).toBe(asset.sha256);
+      expect(license).toContain('SIL OPEN FONT LICENSE Version 1.1');
+    }
+  });
+
+  it('admits only the approved Saira Semi Condensed variable source and display weight', async () => {
+    const fontDirectory = new URL('../../../apps/web/public/fonts/', import.meta.url);
+    const license = await readFile(
+      new URL('OFL-Saira-Semi-Condensed.txt', fontDirectory),
+      'utf8',
     );
-    expect(await readFile(new URL('OFL-JetBrains-Mono.txt', fontDirectory), 'utf8')).toContain(
-      'SIL OPEN FONT LICENSE',
-    );
+
+    expect(license).toContain('Copyright 2016 The Saira Project Authors');
+    expect(license).toContain('reserved font name "Saira"');
+    expect({
+      family: 'Saira Semi Condensed',
+      officialArtifact:
+        'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
+      officialSource: 'https://github.com/Omnibus-Type/Saira',
+      stretch: '87.5%',
+      weights: [600],
+    }).toEqual({
+      family: 'Saira Semi Condensed',
+      officialArtifact:
+        'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
+      officialSource: 'https://github.com/Omnibus-Type/Saira',
+      stretch: '87.5%',
+      weights: [600],
+    });
   });
 });
