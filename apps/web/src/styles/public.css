@@ -1059,6 +1059,10 @@ ol.lb-web-documentation-index li {
   padding-block: var(--lb-space-5);
 }
 
+.lb-web-route-header--documentation {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .lb-web-route-header h1,
 .lb-web-route-header p {
   margin: 0;

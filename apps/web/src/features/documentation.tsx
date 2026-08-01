@@ -137,7 +137,7 @@ const StaleDocumentNotice = ({
 );
 
 const RouteHeader = ({ description, title }: Readonly<{ description: string; title: string }>) => (
-  <header className="lb-web-route-header">
+  <header className="lb-web-route-header lb-web-route-header--documentation">
     <h1 tabIndex={-1}>{title}</h1>
     <p>{description}</p>
   </header>
