@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-41-PLAN.md
-last_updated: "2026-08-01T01:03:15.702Z"
+stopped_at: Completed 03-42-PLAN.md
+last_updated: "2026-08-01T01:36:08.507Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 03-41-PLAN.md
+last_activity_desc: Completed 03-42-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 104
-  completed_plans: 99
-  percent: 95
+  completed_plans: 100
+  percent: 96
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 42 of 46
-Status: Ready to execute Plan 03-42
-Last activity: 2026-07-31 — Completed 03-41-PLAN.md
+Plan: 43 of 46
+Status: Ready to execute Plan 03-43
+Last activity: 2026-07-31 — Completed 03-42-PLAN.md
 
-Progress: [██████████] 95%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 99
+- Total plans completed: 100
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -147,6 +147,7 @@ _Updated after plan completion_
 | Phase 03 P39 | 11min | 2 tasks | 9 files |
 | Phase 03 P40 | 14min | 2 tasks | 4 files |
 | Phase 03 P41 | 15min | 2 tasks | 8 files |
+| Phase 03 P42 | 19min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -421,6 +422,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Render deterministic admin preview truth once in the shell and reserve extra fixture provenance for immutable audit context.
 - [Phase 03]: Separate safe no-change review from unavailable administrative authority through explicit disabled controls.
 - [Phase 03]: Compose the admin role landing and representative workspaces around the operator's next decision instead of route-manifest prose.
+- [Phase 03]: Reject pixel-stable captures when their route or composition contradicts the UAT contract; W04 must capture canonical historical guidance, not an authored 404. — Visual stability cannot override scenario truth.
+- [Phase 03]: Keep public Home goldens free of the rejected PUBLIC rail and raw open provenance while retaining truthful localized details in disclosure. — Visitor hierarchy must foreground the real product artifact without exposing internal verification scaffolding.
+- [Phase 03]: Use executable Playwright project naming and visual-manifest paths as the canonical G01-G02 artifact identities. — The runnable snapshot contract is the durable naming authority.
 
 ### Pending Todos
 
@@ -462,6 +466,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T01:02:40.231Z
-Stopped at: Completed 03-41-PLAN.md
+Last session: 2026-08-01T01:35:52.131Z
+Stopped at: Completed 03-42-PLAN.md
 Resume file: None
