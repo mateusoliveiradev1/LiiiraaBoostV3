@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { LbButton, LbLink } from '@liiiraa/design-system';
+import type { WebLocale } from '@liiiraa/web-core';
 
 export interface ShellNavigationItem {
   readonly href: string;
@@ -19,20 +20,71 @@ const NavigationList = ({
 }: {
   readonly activeId?: string;
   readonly items: readonly ShellNavigationItem[];
-}) => (
-  <ul>
-    {items.map((item) => (
-      <li key={item.id}>
-        <LbLink href={item.href}>
-          {item.label}
-          {item.id === activeId ? (
-            <span className="lb-visually-hidden"> (current page)</span>
-          ) : null}
-        </LbLink>
-      </li>
-    ))}
-  </ul>
-);
+}) => {
+  const activeIndex =
+    activeId === undefined ? -1 : items.findIndex((item) => item.id === activeId);
+
+  return (
+    <ul>
+      {items.map((item, index) => {
+        const isCurrent = index === activeIndex;
+        return (
+          <li key={item.id}>
+            <a
+              aria-current={isCurrent ? 'page' : undefined}
+              className="lb-link lb-web-navigation-link"
+              data-current={isCurrent ? 'page' : undefined}
+              data-destination-kind="internal"
+              href={item.href}
+            >
+              {item.label}
+              {isCurrent ? (
+                <span className="lb-visually-hidden"> (current page)</span>
+              ) : null}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+const LOCALE_PRESENTATION = Object.freeze({
+  en: Object.freeze({ flag: '🇺🇸', language: 'English' }),
+  'pt-BR': Object.freeze({ flag: '🇧🇷', language: 'Português' }),
+} satisfies Readonly<Record<WebLocale, Readonly<{ flag: string; language: string }>>>);
+
+export interface LocaleSwitcherProps {
+  readonly href: string;
+  readonly sourceLocale: WebLocale;
+  readonly targetLocale: WebLocale;
+}
+
+export const LocaleSwitcher = ({
+  href,
+  sourceLocale,
+  targetLocale,
+}: LocaleSwitcherProps) => {
+  const target = LOCALE_PRESENTATION[targetLocale];
+  const accessibleName =
+    sourceLocale === 'pt-BR'
+      ? `Mudar idioma para ${target.language}`
+      : `Switch language to ${target.language}`;
+
+  return (
+    <a
+      aria-label={accessibleName}
+      className="lb-link lb-web-locale-switcher"
+      data-destination-kind="internal"
+      href={href}
+      hrefLang={targetLocale}
+    >
+      <span aria-hidden="true">{target.flag}</span>
+      {' '}
+      <span lang={targetLocale}>{target.language}</span>
+    </a>
+  );
+};
 
 export interface PublicHeaderProps {
   readonly activeId?: string;

@@ -49,6 +49,25 @@
   outline-offset: var(--lb-focus-separation);
 }
 
+.lb-web-navigation-link,
+.lb-web-locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--lb-control-min-size);
+}
+
+.lb-web-navigation-link[data-current='page'] {
+  color: var(--lb-text-primary);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration-color: var(--lb-cobalt-signal);
+  text-decoration-thickness: var(--lb-focus-width);
+}
+
+.lb-web-locale-switcher {
+  gap: var(--lb-space-2);
+  padding-inline: var(--lb-space-2);
+}
+
 .lb-web-skip-link {
   position: fixed;
   z-index: var(--lb-layer-tooltip);
@@ -667,5 +686,10 @@
 
   .lb-web-shell :where(a, button, input, select, summary):focus-visible {
     outline-color: Highlight;
+  }
+
+  .lb-web-navigation-link[data-current='page'] {
+    color: LinkText;
+    text-decoration-color: Highlight;
   }
 }

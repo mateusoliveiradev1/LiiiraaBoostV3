@@ -470,7 +470,7 @@ describe('locale and navigation shell primitives', () => {
       expect(props['onClick']).toBeUndefined();
       expect(visibleText(switcher)).toBe(visibleLabel);
       expect(flagElement).toBeDefined();
-      expect(elementProps(flagElement as ReactElement)['aria-hidden']).toBe(true);
+      expect(elementProps(flagElement as ReactElement)['aria-hidden']).toBe('true');
     },
   );
 
