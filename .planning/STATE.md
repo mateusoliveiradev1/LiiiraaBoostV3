@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-50-PLAN.md
-last_updated: "2026-08-01T05:29:40.381Z"
+stopped_at: Completed 03-51-PLAN.md
+last_updated: "2026-08-01T05:55:12.097Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed 03-50-PLAN.md
+last_activity_desc: Completed 03-51-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 110
-  completed_plans: 106
-  percent: 96
+  completed_plans: 107
+  percent: 97
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 47 of 52
+Plan: 48 of 52
 Status: Ready to execute Plan 03-46
-Last activity: 2026-08-01 — Completed 03-50-PLAN.md
+Last activity: 2026-08-01 — Completed 03-51-PLAN.md
 
-Progress: [██████████] 95%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 105
+- Total plans completed: 107
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -154,6 +154,7 @@ _Updated after plan completion_
 | Phase 03 P48 | 6 min | 2 tasks | 6 files |
 | Phase 03 P49 | 13min | 2 tasks | 10 files |
 | Phase 03 P50 | 17 min | 2 tasks | 7 files |
+| Phase 03 P51 | 20min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -447,6 +448,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep pathname awareness in one AccountNavigation client boundary while the server layout supplies identity and preview-truth slots. — Canonical server-owned content stays separate from the only browser pathname owner.
 - [Phase 03]: Below 960px replace account route inventory with a native current-task disclosure while preserving one canonical desktop aria-current anchor. — Mobile stays compact without duplicate current-page semantics.
 - [Phase 03]: Ordinary account routes rely on one shell preview boundary; consequence reviews and no-change receipts retain contextual truth. — Safety remains persistent without dominating normal task controls.
+- [Phase 03]: Keep admin pathname awareness inside one narrow client navigation boundary. — Server layout continues to own role admission, identity, provenance, and content.
+- [Phase 03]: Preserve only the server-validated closed role across admin locale changes. — Invalid URL role state never crosses the canonical localized route boundary.
+- [Phase 03]: Use event identity as the essential audit column at reflow widths. — Complete immutable fields remain available through semantic row disclosure without clipped mobile tables.
 
 ### Pending Todos
 
@@ -488,6 +492,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T05:29:40.376Z
-Stopped at: Completed 03-50-PLAN.md
+Last session: 2026-08-01T05:54:36.646Z
+Stopped at: Completed 03-51-PLAN.md
 Resume file: None

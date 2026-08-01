@@ -1,16 +1,16 @@
 ---
-status: diagnosed
-trigger: "Phase 03 UAT admin visual/routing gap: localized admin root at localhost:3002/pt-BR exposes raw access-denied JSON; user said `nao gostei de nenhum dos 3 viu`."
+status: resolved
+trigger: 'Phase 03 UAT admin visual/routing gap: localized admin root at localhost:3002/pt-BR exposes raw access-denied JSON; user said `nao gostei de nenhum dos 3 viu`.'
 created: 2026-07-31T19:30:00-03:00
-updated: 2026-08-01T00:52:41-03:00
+updated: 2026-08-01T02:52:00-03:00
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed — the UAT launcher violates the proxy's exact dedicated-origin contract, causing a pre-render JSON denial; the requested localized root also differs from the canonical admin landing. After those are aligned, an independently under-authored and insufficiently reviewed role shell remains.
-test: Live HTTP reproduction, running-process inspection, focused security tests, canonical route tracing, and direct inspection of visual baselines and capture coverage.
-expecting: Confirmed observations match the complete causal chain.
-next_action: Plan another gap-closure round for a stronger role/task shell, compact mobile admin navigation, and a route-preserving locale control; do not modify production code in this checkpoint continuation.
+hypothesis: Resolved — Plan 03-40 aligned the exact dedicated origin and localized HTML/JSON denial behavior; Plan 03-51 closed the remaining role/task shell, mobile navigation, language switching, and operational workspace gaps without broadening authority.
+test: Full admin unit/type/build/security gates, focused Playwright W14-W16 at 1440/390, W18 axe/reflow at 320, Impeccable detector, and manual inspection of fresh 1440/390/320 captures.
+expecting: Admitted exact-origin routes render one role-scoped current task, preserve canonical workspace and validated role across locale changes, collapse mobile navigation, and keep high-risk authority unavailable.
+next_action: Plan 03-52 may regenerate the declared visual evidence from this current composition; no further production fix is required by this diagnosis.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -77,6 +77,6 @@ started: Observed during Phase 03 UAT; earlier working behavior is not establish
 ## Resolution
 
 root_cause: The localized UAT request is intercepted by the admin proxy before React because the running server (`next dev --webpack --port 3002`) serves `http://localhost:3002`, while the proxy admits only exact equality with `LIIIRAA_ADMIN_ORIGIN` (default `https://admin.localhost`). Every origin rejection is deliberately emitted as raw 403 JSON. The requested `/pt-BR` path is also not the canonical admin landing (`/pt-BR/admin`), but that route mismatch is masked by the earlier proxy rejection. Once launch origin and path are corrected, the remaining interface still fails the visual truth: the role landing is a minimal header/boundary/plain-list composition with internal fixture/manifest copy; existing goldens cover only support/security/operations workflows, capture an expanded skip-link focus state, and enforce pixel stability/accessibility rather than premium qualitative conformance, allowing a sparse template-like shell to pass.
-fix: Not applied in diagnose-only mode. Align the UAT/dev launcher and navigation with one declared dedicated admin origin and the canonical localized landing; replace raw proxy transport denial for human document navigation with a safe authored localized access response without weakening fail-closed admission; then redesign and visually re-baseline the admin landing/workspaces against the Phase 2 desktop and Phase 03 UI contract.
-verification: Reproduced exact live 403 JSON at `http://localhost:3002/pt-BR`; confirmed the same denial at `/pt-BR/admin` under the unadmitted origin; inspected the port-3002 process command; confirmed canonical/injected test origin and path; ran 6 focused security tests successfully; inspected W14/W15 baselines and visual scenario coverage.
-files_changed: []
+fix: Plan 03-40 bound ordinary development to `http://admin.localhost:3002` and authored localized HTML denials while preserving bounded JSON. Plan 03-51 then introduced the canonical resolver-backed flag/language switch, validated role retention, role/current-task topbar, compact sub-960px disclosure, semantic assigned queue, and decision-first support, operations, security, diagnostics, and audit workspaces. Diagnostic consent, redaction, immutable audit fields, disabled authority, and `remoteStateChanged=false` remain unchanged at consequence boundaries.
+verification: Admin tests pass 46/46; focused security passes 16/16; TypeScript and production build pass; W14/W15 wide and W16 mobile Playwright flows pass; W18 320px axe/reflow passes; Impeccable reports zero findings; manual 1440/390/320 inspection confirmed the premium operational hierarchy and responsive audit disclosure.
+files_changed: [apps/admin/src/app/[locale]/layout.tsx, apps/admin/src/admin-navigation.tsx, apps/admin/src/app/admin-shell.css, apps/admin/src/features/admin-preview.tsx, apps/admin/src/content/admin.pt-BR.json, apps/admin/src/content/admin.en.json]
