@@ -21,7 +21,7 @@ describe('admin security boundary', () => {
       readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
     ) as { readonly scripts: Readonly<Record<string, string>> };
 
-    expect(packageJson.scripts.dev).toBe(
+    expect(packageJson.scripts['dev']).toBe(
       'next dev --webpack --hostname admin.localhost --port 3002',
     );
     expect(ADMIN_LOCAL_ORIGIN).toBe('http://admin.localhost:3002');
@@ -139,20 +139,20 @@ describe('admin security boundary', () => {
   it('admits only closed preview roles and rejects cross-surface state', () => {
     const defaultPreview = AdminAccessBoundary({
       cookieHeader: null,
-      url: new URL('https://admin.localhost/pt-BR/admin'),
+      url: new URL(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin`),
     });
     const preview = AdminAccessBoundary({
       cookieHeader: null,
-      url: new URL('https://admin.localhost/en/admin?role=security'),
+      url: new URL(`${ADMIN_LOCAL_ORIGIN}/en/admin?role=security`),
     });
     const foreignCookie = AdminAccessBoundary({
       cookieHeader: 'account_session=opaque',
-      url: new URL('https://admin.localhost/en/admin?role=audit'),
+      url: new URL(`${ADMIN_LOCAL_ORIGIN}/en/admin?role=audit`),
     });
     const arbitraryReturn = AdminAccessBoundary({
       cookieHeader: null,
       url: new URL(
-        'https://admin.localhost/en/admin?role=operations&returnUrl=https://evil.example',
+        `${ADMIN_LOCAL_ORIGIN}/en/admin?role=operations&returnUrl=https://evil.example`,
       ),
     });
     const foreignOrigin = AdminAccessBoundary({
@@ -185,9 +185,11 @@ describe('admin security boundary', () => {
   });
 
   it('propagates only disconnected preview markers and blocks unsafe requests', () => {
-    const safe = adminProxy(new NextRequest('https://admin.localhost/pt-BR/admin?role=support'));
+    const safe = adminProxy(
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`),
+    );
     const unsafe = adminProxy(
-      new NextRequest('https://admin.localhost/pt-BR/admin?returnPath=/account', {
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?returnPath=/account`, {
         headers: {
           cookie: 'public_session=opaque',
         },

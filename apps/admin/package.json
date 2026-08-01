@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --webpack --hostname admin.localhost --port 3002",
     "build": "next build --webpack",
     "start": "next start",
     "check": "tsc -p tsconfig.json --noEmit",
