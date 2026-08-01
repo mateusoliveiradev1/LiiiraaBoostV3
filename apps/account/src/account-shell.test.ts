@@ -125,7 +125,7 @@ describe('account shell', () => {
       /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*display:\s*block/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.account-header__task\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 960px\)[\s\S]*\.account-header__task\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).not.toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,

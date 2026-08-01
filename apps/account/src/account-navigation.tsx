@@ -137,6 +137,7 @@ export function AccountNavigation({
             <summary>
               <span>{currentTaskLabel}</span>
               <strong>{currentLabel}</strong>
+              <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
             </summary>
             <nav aria-label={label}>
               <NavigationGroups currentHref={currentHref} groups={groups} markCurrent={false} />
