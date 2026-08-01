@@ -68,6 +68,19 @@ describe('admin security boundary', () => {
     );
   });
 
+  it('rejects a generic localhost Host header even when Next normalizes the request URL origin', () => {
+    const response = adminProxy(
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin`, {
+        headers: {
+          host: 'localhost:3002',
+        },
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get('x-liiiraa-admin-role')).toBeNull();
+  });
+
   it('creates a fresh cryptographically random nonce for every request', () => {
     const first = createAdminRequestNonce();
     const second = createAdminRequestNonce();
