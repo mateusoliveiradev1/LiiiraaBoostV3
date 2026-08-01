@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 1,
+  "plan": "03-63",
+  "surface": "public",
+  "inspectedAt": "2026-08-01T21:43:35Z",
+  "sourceRevision": "ed9a8c0cecfa9159e5ca1eb6ec89189ab559bc9a",
+  "inspectionMethod": {
+    "register": "Impeccable brand",
+    "detail": "original",
+    "scope": "Closed public subset W01-W09, W17, G01-G02",
+    "referenceUse": "BravoBoost was used only as an energy, focal-scale, finish, product-staging, CTA-hierarchy, and rhythm benchmark; no identity or expression was used as a target."
+  },
+  "manifest": {
+    "path": "tooling/web-evidence/visual-manifest.json",
+    "sha256": "16a2ed74992bca7ba1276b522e8292ff5d5292ee69d87bbc0f360289e85f4781",
+    "exactSubset": [
+      "W01",
+      "W02",
+      "W03",
+      "W04",
+      "W05",
+      "W06",
+      "W07",
+      "W08",
+      "W09",
+      "W17",
+      "G01",
+      "G02"
+    ],
+    "candidateCount": 12,
+    "allCandidate": true,
+    "allApprovedFalse": true,
+    "allPublishedFalse": true
+  },
+  "mechanicalChecks": {
+    "allFilesNonempty": true,
+    "allWidthsMatchManifest": true,
+    "allFullPageHeightsMeetViewport": true,
+    "allSha256Lowercase64": true,
+    "duplicatePairsExpected": [
+      {
+        "ids": ["W01", "G01"],
+        "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4"
+      },
+      {
+        "ids": ["W02", "G02"],
+        "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230"
+      }
+    ],
+    "rejectedG01Comparison": {
+      "path": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G01-public-final-wide-1440.png",
+      "dimensions": {"width": 1440, "height": 2383},
+      "bytes": 301979,
+      "sha256": "45c2e171e9d9b2c296649eb6898cab3d1c1ccc50b10f54c9cd0fb6fec68809e2",
+      "currentG01Distinct": true,
+      "observedImprovement": "The candidate replaces the rejected split hero with a centered three-line promise, decisive cobalt CTA, and dominant real product stage."
+    }
+  },
+  "criteria": {
+    "cinematicCenteredHierarchy": "pass",
+    "strongShortHeadline": "pass",
+    "dominantPrimaryCta": "pass",
+    "productStageVisibility": "pass",
+    "committedOriginalCobalt": "pass",
+    "distinctLongFormRhythms": "reject",
+    "navigationAndFlagLanguage": "pass",
+    "responsiveWidthsRepresented": [1440, 1280, 960, 390],
+    "responsive320": "not represented by a public identity in this exact closed subset; no claim made",
+    "contrastAndReadability": "reject",
+    "noHorizontalOverflow": "pass",
+    "noGenericIdenticalCardWall": "pass",
+    "noRepeatedEyebrowScaffold": "pass",
+    "noGradientText": "pass",
+    "noDecorativeGrid": "pass",
+    "noBlanketGlass": "pass",
+    "noBravoBoostCopy": "pass"
+  },
+  "candidates": [
+    {
+      "id": "W01",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W01-public-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and the distribution-gated Home truth.",
+      "dimensions": {"width": 1440, "height": 3212},
+      "bytes": 509004,
+      "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "heroHeadline": true,
+        "primaryCtaDominant": true,
+        "productStageDominant": true,
+        "cobaltOriginalAndControlled": true,
+        "responsiveHierarchy": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The wide Home materially replaces the rejected split composition with a centered three-line promise, decisive CTA hierarchy, dominant 1120px real-product stage, and a visible next-movement cue."
+    },
+    {
+      "id": "W02",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W02-public-final-mobile-390.png",
+      "manifestPurpose": "Review English mobile strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and complete Home parity.",
+      "dimensions": {"width": 390, "height": 4329},
+      "bytes": 299538,
+      "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "heroHeadline": true,
+        "primaryCtaDominant": true,
+        "productStageLegible": true,
+        "cobaltOriginalAndControlled": true,
+        "responsiveHierarchy": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "At 390px the promise, stacked CTAs, proof note, product crop, complete-screenshot action, evidence detail, and next movement preserve the required order without clipping."
+    },
+    {
+      "id": "W03",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W03-public-final-wide-1280.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and current documentation version identity.",
+      "dimensions": {"width": 1280, "height": 1473},
+      "bytes": 129934,
+      "sha256": "bda5e79c8782e0f726266ea5d16961c5a00857be57d29cae5a9abb7477316b34",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The documentation index uses a task-appropriate persistent index, bounded search controls, and semantic rows while retaining active public chrome and readable density."
+    },
+    {
+      "id": "W04",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W04-public-final-wide-1280.png",
+      "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and historical-documentation recovery.",
+      "dimensions": {"width": 1280, "height": 2336},
+      "bytes": 176604,
+      "sha256": "65b714311f45d3a5506ce3cf0c025b9a0dd595292a906940e7f0f23593f0c6c7",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The historical notice and current canonical alternative precede a distinct long-form recovery document with readable split sections and bounded technical detail."
+    },
+    {
+      "id": "W05",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W05-public-final-wide-1280.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and safe troubleshooting escalation.",
+      "dimensions": {"width": 1280, "height": 3215},
+      "bytes": 282630,
+      "sha256": "4460e175bd9b55ca8f44819bde7c6380b022918de350472cb61c64e1b00e0062",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The troubleshooting route prioritizes observed state, safe steps, recovery, and escalation before its structured technical reference; long identifiers wrap without page overflow."
+    },
+    {
+      "id": "W06",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W06-public-final-desktop-960.png",
+      "manifestPurpose": "Review English desktop strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and authored search recovery.",
+      "dimensions": {"width": 960, "height": 1157},
+      "bytes": 85872,
+      "sha256": "da9906f6e175964ec52ced96f91165d8eeed2a18892426c8f4f9f667e37eb119",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The 960px search empty state has a clear query/filter task, an authored recovery explanation, compact chrome, and no blank or horizontally clipped control region."
+    },
+    {
+      "id": "W07",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W07-public-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and the fail-closed release gate.",
+      "dimensions": {"width": 1440, "height": 3897},
+      "bytes": 389808,
+      "sha256": "ba2caf9287b546c1e2a7b436b7a9e1d8edf03e1edc9d297967c30678adcab2ac",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "releaseDecisionProminent": false,
+        "contentRhythm": false,
+        "contrastReadable": false,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "reject",
+      "owner": "03-56",
+      "evidence": "The release route is dominated by a multi-screen raw manifest/repository field dump and machine identifiers before the visitor reaches the blocked-download decision, so implementation-shaped evidence outweighs compatibility, risk, correction, recovery, and action hierarchy."
+    },
+    {
+      "id": "W08",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W08-public-final-wide-1440.png",
+      "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and blocked integrity-mismatch recovery.",
+      "dimensions": {"width": 1440, "height": 3723},
+      "bytes": 349078,
+      "sha256": "7e4affd71fd29ac9af48d56e361089954b1887b6334ec48d970f834ad70b3279",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "integrityRecoveryProminent": false,
+        "contentRhythm": false,
+        "contrastReadable": false,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "reject",
+      "owner": "03-56",
+      "evidence": "The integrity candidate repeats the same dense manifest-first rhythm as W07 and makes raw machine fields the primary visual experience; the actual blocked outcome and recovery choices arrive only after several screens of technical inventory."
+    },
+    {
+      "id": "W09",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W09-public-final-wide-1280.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and partial-outage guidance.",
+      "dimensions": {"width": 1280, "height": 1452},
+      "bytes": 139981,
+      "sha256": "fa0b57b6363823c30d540c88e7d14e8967755acec284f38b062ea487f5d3229b",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "localizedHumanStatus": false,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "reject",
+      "owner": "03-56",
+      "evidence": "Ordinary PT-BR status chrome visibly exposes `As prévias da Fase 3` and the raw English value `demonstrative-preview`, directly violating the ban on phase/implementation language and raw enum-shaped status copy."
+    },
+    {
+      "id": "W17",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W17-public-final-desktop-960.png",
+      "manifestPurpose": "Review PT-BR desktop strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and authored same-origin 404 recovery.",
+      "dimensions": {"width": 960, "height": 932},
+      "bytes": 57116,
+      "sha256": "485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "headlineHierarchy": true,
+        "safeRecoveryActions": true,
+        "contentRhythm": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The authored 404 clearly states the failure, exposes no request data, offers three same-origin safe destinations, and remains compact and legible at 960px."
+    },
+    {
+      "id": "G01",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G01-public-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and comparison with approved Phase 2 captures.",
+      "dimensions": {"width": 1440, "height": 3212},
+      "bytes": 509004,
+      "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "heroHeadline": true,
+        "primaryCtaDominant": true,
+        "productStageDominant": true,
+        "cobaltOriginalAndControlled": true,
+        "responsiveHierarchy": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "G01 is byte-identical to W01 and carries the same centered headline, decisive CTA, dominant product stage, and substantial improvement over the immutable rejected G01."
+    },
+    {
+      "id": "G02",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G02-public-final-mobile-390.png",
+      "manifestPurpose": "Review English mobile strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and comparison with approved Phase 2 captures.",
+      "dimensions": {"width": 390, "height": 4329},
+      "bytes": 299538,
+      "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230",
+      "checks": {
+        "shellNavigation": true,
+        "flagAndLanguage": true,
+        "heroHeadline": true,
+        "primaryCtaDominant": true,
+        "productStageLegible": true,
+        "cobaltOriginalAndControlled": true,
+        "responsiveHierarchy": true,
+        "contrastReadable": true,
+        "noOverflow": true,
+        "noGenericScaffold": true,
+        "truthful": true,
+        "noCopy": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "G02 is byte-identical to W02 and preserves the complete mobile hierarchy, original cobalt signature, readable product crop, and accessible locale text without copying the reference."
+    }
+  ],
+  "automatedVerification": {
+    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep \"W01|W02|W03|W04|W05|W06|W07|W08|W09|W17|G01|G02\"",
+    "result": "pass",
+    "passed": 14,
+    "skipped": 16,
+    "failed": 0,
+    "duration": "1.2m",
+    "updateMode": false
+  },
+  "verdict": "reject",
+  "humanApproved": false,
+  "publicationApproved": false,
+  "rejectionOwners": ["03-56"],
+  "revisionGate": {
+    "blockedPlans": ["03-66", "03-45", "03-46"],
+    "requiredCorrections": [
+      {
+        "owner": "03-56",
+        "identities": ["W07", "W08"],
+        "criterion": "release-route content hierarchy and long-form rhythm",
+        "evidence": "Lead with the human release/integrity decision, compatibility, risk, recovery, and action; subordinate raw manifest fields to contextual disclosure or a bounded technical section."
+      },
+      {
+        "owner": "03-56",
+        "identities": ["W09"],
+        "criterion": "localized human status copy",
+        "evidence": "Remove phase language and raw enum-shaped English status from ordinary PT-BR chrome."
+      }
+    ],
+    "requiredSequence": [
+      "Rerun Plan 03-61 Task 2, including exact unfiltered `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts`.",
+      "Run a fresh bounded Plan 03-62 capture attempt.",
+      "Rerun Plan 03-63 original-resolution public inspection.",
+      "Rerun aggregate Plan 03-66 before Plan 03-45 human review."
+    ]
+  }
+}
