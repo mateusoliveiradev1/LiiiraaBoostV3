@@ -94,7 +94,10 @@ describe('admin security boundary', () => {
   it('applies the strictest noindex, frame-closed, external-free header contract', () => {
     const nonce = 'dGVzdC1hZG1pbi1ub25jZQ==';
     const headers = Object.fromEntries(
-      adminHeaderContract(nonce).map(({ key, value }) => [key.toLowerCase(), value]),
+      adminHeaderContract(nonce, 'production').map(({ key, value }) => [
+        key.toLowerCase(),
+        value,
+      ]),
     );
     const csp = headers['content-security-policy'];
 
@@ -121,6 +124,38 @@ describe('admin security boundary', () => {
     expect(Object.keys(headers)).not.toContain('location');
   });
 
+  it.each([
+    { allowsEval: true, runtimeMode: 'development' },
+    { allowsEval: false, runtimeMode: 'production' },
+    { allowsEval: false, runtimeMode: 'test' },
+  ] as const)(
+    'keeps admitted $runtimeMode nonce policy isolated with development eval=$allowsEval',
+    ({ allowsEval, runtimeMode }) => {
+      const nonce = `dGVzdC1hZG1pbi1ub25jZQ-${runtimeMode}`;
+      const headers = Object.fromEntries(
+        adminHeaderContract(nonce, runtimeMode).map(({ key, value }) => [
+          key.toLowerCase(),
+          value,
+        ]),
+      );
+      const csp = headers['content-security-policy'];
+
+      expect(csp).toContain(`'nonce-${nonce}'`);
+      expect(csp).toContain("'strict-dynamic'");
+      expect(csp.includes("'unsafe-eval'")).toBe(allowsEval);
+      expect(csp.match(/'unsafe-eval'/gu)?.length ?? 0).toBe(allowsEval ? 1 : 0);
+      expect(csp).toContain("frame-ancestors 'none'");
+      expect(csp).not.toMatch(/https?:/u);
+      expect(headers).toMatchObject({
+        'cache-control': 'private, no-store, max-age=0',
+        'x-frame-options': 'DENY',
+        'x-robots-tag': 'noindex,nofollow,noarchive',
+      });
+      expect(Object.keys(headers)).not.toContain('set-cookie');
+      expect(Object.keys(headers)).not.toContain('location');
+    },
+  );
+
   it('stays distinct from public and account origins, cookies, and CSP policy', () => {
     const publicConfig = readFileSync(new URL('../../web/next.config.ts', import.meta.url), 'utf8');
     const accountConfig = readFileSync(
@@ -129,7 +164,10 @@ describe('admin security boundary', () => {
     );
     const accountProxy = readFileSync(new URL('../../account/proxy.ts', import.meta.url), 'utf8');
     const adminCsp = Object.fromEntries(
-      adminHeaderContract('comparison-nonce').map(({ key, value }) => [key.toLowerCase(), value]),
+      adminHeaderContract('comparison-nonce', 'production').map(({ key, value }) => [
+        key.toLowerCase(),
+        value,
+      ]),
     )['content-security-policy'];
 
     expect(publicConfig).toContain("'unsafe-inline'");
@@ -138,8 +176,9 @@ describe('admin security boundary', () => {
     expect(adminCsp).not.toContain("'unsafe-inline'");
     expect(adminCsp).toContain("'strict-dynamic'");
     expect(
-      adminHeaderContract('comparison-nonce').find(({ key }) => key === 'Permissions-Policy')
-        ?.value,
+      adminHeaderContract('comparison-nonce', 'production').find(
+        ({ key }) => key === 'Permissions-Policy',
+      )?.value,
     ).toContain('display-capture=()');
     expect(ADMIN_LOCAL_ORIGIN).not.toContain('account.');
     expect(ADMIN_LOCAL_ORIGIN).not.toBe('https://liiiraa.com');
@@ -239,6 +278,7 @@ describe('admin security boundary', () => {
 
       expect(response.status).toBe(403);
       expect(response.headers.get('content-type')).toContain('text/html');
+      expect(response.headers.get('content-security-policy')).not.toContain("'unsafe-eval'");
       expect(body).toContain(`lang="${locale}"`);
       expect(body).toContain(title);
       expect(body).toContain(recovery);
@@ -303,6 +343,7 @@ describe('admin security boundary', () => {
     for (const response of responses) {
       expect(response.headers.get('cache-control')).toBe('private, no-store, max-age=0');
       expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
+      expect(response.headers.get('content-security-policy')).not.toContain("'unsafe-eval'");
       expect(response.headers.get('x-frame-options')).toBe('DENY');
       expect(response.headers.get('x-content-type-options')).toBe('nosniff');
       expect(response.headers.get('set-cookie')).toBeNull();
