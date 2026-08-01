@@ -1,5 +1,9 @@
 # Deferred Items
 
+## 03-58 rejected account-content correction
+
+- The targeted W11 browser replay reaches the current account shell but the pre-existing `account.spec.ts` assertion still requires the complementary accessible name `Prévia determinística`; Plan 03-57 now renders the current shell label as `Prévia`. The W13 browser journey passes, and the complete account unit/type/build gates pass. Updating the shell or cross-plan browser assertion is deferred to Plan 03-57 ownership; Plan 03-58 did not edit either surface.
+
 ## 03-61 bounded candidate-selection correction
 
 - The pre-existing `playwright-config.test.ts` expectation that `security-artifacts.spec.ts` starts all three origins even when an explicit public project is selected conflicts with the current explicit-project isolation implemented before this correction. The unrelated test remains deferred to the owning cross-surface server-selection contract; the new candidate-selection dry-list test, TypeScript gate, required filtered browser matrix, and unfiltered motion contract pass independently.

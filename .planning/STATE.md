@@ -6,7 +6,7 @@ current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
 stopped_at: Completed 03-63-PLAN.md
-last_updated: "2026-08-01T22:43:01.239Z"
+last_updated: "2026-08-01T23:26:28.017Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
@@ -501,6 +501,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.
 - [Phase 03]: Accept the corrected public subset only as a non-human candidate verdict; human and publication approval remain false.
 - [Phase 03]: Keep raw release manifest and repository identifiers subordinate inside closed localized technical disclosures.
+- [Phase 03]: Keep the shell as the sole persistent preview-truth owner — Ordinary account workspaces stay task-first while sensitive Privacy and degraded states explain human consequences directly.
+- [Phase 03]: Admit explicit account scenarios through canonical registry and route compatibility — Account pages expose no URL, environment, or browser-controlled scenario selector.
 
 ### Pending Todos
 
@@ -542,6 +544,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T22:43:01.233Z
+Last session: 2026-08-01T23:26:13.054Z
 Stopped at: Completed 03-63-PLAN.md
 Resume file: None
