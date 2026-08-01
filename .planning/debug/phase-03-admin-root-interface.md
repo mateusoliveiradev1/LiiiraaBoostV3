@@ -2,7 +2,7 @@
 status: resolved
 trigger: 'Phase 03 UAT admin visual/routing gap: localized admin root at localhost:3002/pt-BR exposes raw access-denied JSON; user said `nao gostei de nenhum dos 3 viu`.'
 created: 2026-07-31T19:30:00-03:00
-updated: 2026-08-01T02:52:00-03:00
+updated: 2026-08-01T07:46:14-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-08-01T02:52:00-03:00
 hypothesis: Resolved — Plan 03-40 aligned the exact dedicated origin and localized HTML/JSON denial behavior; Plan 03-51 closed the remaining role/task shell, mobile navigation, language switching, and operational workspace gaps without broadening authority.
 test: Full admin unit/type/build/security gates, focused Playwright W14-W16 at 1440/390, W18 axe/reflow at 320, Impeccable detector, and manual inspection of fresh 1440/390/320 captures.
 expecting: Admitted exact-origin routes render one role-scoped current task, preserve canonical workspace and validated role across locale changes, collapse mobile navigation, and keep high-risk authority unavailable.
-next_action: Plan 03-52 may regenerate the declared visual evidence from this current composition; no further production fix is required by this diagnosis.
+next_action: Plan another cross-surface quality round; do not treat technical resolution or stable goldens as visual approval.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -18,6 +18,13 @@ reported: "navegaçao ruim na troca de idioma tem q ser a bandeira e tals na are
 verdict: Rejected after the clean 03-45 preflight. The earlier origin/access-state diagnosis no longer describes the whole remaining gap: the rendered admin surface still needs a stronger premium application identity, task hierarchy, useful density, and substantially better compact mobile navigation.
 locale_constraint: Switching languages must preserve the active admin workspace and visibly combine a flag with the language label; an explicit accessible language name remains mandatory.
 impact: The admin visual gap remains failed and Plan 03-46 stays blocked.
+
+## Plan 03-45 Post-03-52 Rejection
+
+reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais bonito td"
+verdict: Rejected after the post-03-52 preflight. None of W01-W18 or G01-G07 is human-approved.
+qualitative_reference: `https://app.bravoboost.com.br/` is the user-named reference for a materially stronger level of overall beauty, finish, and composition. Use it only to calibrate the quality bar; do not copy its layout, branding, assets, wording, or proprietary expression.
+impact: The admin visual gap remains failed and Plan 03-46 remains blocked despite deterministic tests and stable captures.
 
 ## Symptoms
 

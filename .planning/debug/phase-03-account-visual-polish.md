@@ -2,7 +2,7 @@
 status: resolved
 trigger: "Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task."
 created: 2026-07-31T19:29:11.6816453-03:00
-updated: 2026-08-01T02:24:30-03:00
+updated: 2026-08-01T07:46:14-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-08-01T02:24:30-03:00
 hypothesis: RESOLVED — Plan 03-50 replaced the unconstrained route-list shell with a constrained application frame, canonical active-route navigation, a compact native mobile disclosure, route-preserving flag-plus-language switching, quiet persistent preview truth, and task-specific semantic workspaces.
 test: account Vitest suite, TypeScript check, optimized Next build, Impeccable detector, and direct 1440px/390px/320px browser captures of Overview and Profile
 expecting: achieved — desktop presents one active responsibility and useful authored density; mobile keeps the route inventory collapsed while naming the current task; preview authority remains visibly disconnected without dominating ordinary controls
-next_action: Re-run named human UAT after the sibling public and admin gap-closure plans complete.
+next_action: Plan another cross-surface quality round; do not treat technical resolution or stable goldens as visual approval.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -18,6 +18,13 @@ reported: "navegaçao ruim na troca de idioma tem q ser a bandeira e tals na are
 verdict: Rejected after the clean 03-45 preflight. The account shell still lacks premium hierarchy and useful density; navigation is weak, the mobile route list is especially poor/overlong, and language switching must preserve the active responsibility route while showing a visible flag plus textual language label.
 accessibility_constraint: A flag alone is insufficient. The control must keep an explicit accessible language name in both locales.
 impact: The account visual gap remains failed and Plan 03-46 stays blocked.
+
+## Plan 03-45 Post-03-52 Rejection
+
+reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais bonito td"
+verdict: Rejected after the post-03-52 preflight. None of W01-W18 or G01-G07 is human-approved.
+qualitative_reference: `https://app.bravoboost.com.br/` is the user-named reference for a materially stronger level of overall beauty, finish, and composition. Use it only to calibrate the quality bar; do not copy its layout, branding, assets, wording, or proprietary expression.
+impact: The account visual gap remains failed and Plan 03-46 remains blocked despite deterministic tests and stable captures.
 
 ## Symptoms
 

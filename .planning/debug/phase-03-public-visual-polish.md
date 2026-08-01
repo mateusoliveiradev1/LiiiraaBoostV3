@@ -2,7 +2,7 @@
 status: resolved
 trigger: "Phase 03 UAT public visual gap: user said `nao gostei de nenhum dos 3 viu`; public Home exposes boundary/evidence metadata and has an oversized, awkward hero with weak pacing."
 created: 2026-07-31T19:28:32.0992839-03:00
-updated: 2026-08-01T00:52:41-03:00
+updated: 2026-08-01T07:46:14-03:00
 ---
 
 ## Current Focus
@@ -17,6 +17,13 @@ next_action: Plan another gap-closure round for authored cross-surface identity,
 reported: "ainda nao ficou legal nao nao tem cara de web app forte navegaçao ruim na troca de idioma tem q ser a bandeira e tals"
 verdict: Rejected after the clean 03-45 preflight. The public shell still lacks a strong authored web-app identity, navigation remains weak, and the locale control must preserve the current route while showing a visible flag plus language label with an explicit accessible text name.
 impact: The visual gap remains failed, no W01-W18/G01-G07 approval exists, and Plan 03-46 stays blocked.
+
+## Plan 03-45 Post-03-52 Rejection
+
+reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais bonito td"
+verdict: Rejected after the post-03-52 preflight. None of W01-W18 or G01-G07 is human-approved.
+qualitative_reference: `https://app.bravoboost.com.br/` is the user-named reference for a materially stronger level of overall beauty, finish, and composition. Use it only to calibrate the quality bar; do not copy its layout, branding, assets, wording, or proprietary expression.
+impact: The public visual gap remains failed and Plan 03-46 remains blocked despite deterministic tests and stable captures.
 
 ## Symptoms
 
