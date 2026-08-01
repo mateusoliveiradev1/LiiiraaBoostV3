@@ -21,6 +21,7 @@ import {
   AccountShell,
   AdminShell,
   AdminViewportGate,
+  LocaleSwitcher,
   PublicFooter,
   PublicHeader,
   PublicShell,
@@ -377,6 +378,38 @@ const intrinsicTags = (node: ReactNode): readonly string[] => {
   return tags;
 };
 
+const resolvedIntrinsicElements = (node: ReactNode): readonly ReactElement[] => {
+  const elements: ReactElement[] = [];
+  const visit = (candidate: ReactNode): void => {
+    if (!isValidElement(candidate)) {
+      return;
+    }
+    if (typeof candidate.type === 'function') {
+      const component = candidate.type as (props: Readonly<Record<string, unknown>>) => ReactNode;
+      visit(component(elementProps(candidate)));
+      return;
+    }
+    if (typeof candidate.type === 'string') {
+      elements.push(candidate);
+      Children.forEach(elementProps(candidate)['children'] as ReactNode, visit);
+    }
+  };
+  visit(node);
+  return elements;
+};
+
+const visibleText = (node: ReactNode): string => {
+  let text = '';
+  Children.forEach(node, (candidate) => {
+    if (typeof candidate === 'string' || typeof candidate === 'number') {
+      text += String(candidate);
+    } else if (isValidElement(candidate)) {
+      text += visibleText(elementProps(candidate)['children'] as ReactNode);
+    }
+  });
+  return text;
+};
+
 const relativeLuminance = (hex: string): number => {
   const channels = hex
     .replace('#', '')
@@ -401,6 +434,99 @@ const navigation = Object.freeze([
   { href: '/product', id: 'product', label: 'Product' },
   { href: '/docs', id: 'docs', label: 'Documentation' },
 ]);
+
+describe('locale and navigation shell primitives', () => {
+  it.each([
+    {
+      accessibleName: 'Mudar idioma para English',
+      flag: '🇺🇸',
+      href: '/en/account/profile',
+      sourceLocale: 'pt-BR',
+      targetLocale: 'en',
+      visibleLabel: '🇺🇸 English',
+    },
+    {
+      accessibleName: 'Switch language to Português',
+      flag: '🇧🇷',
+      href: '/pt-BR/admin/support/CASE-2048',
+      sourceLocale: 'en',
+      targetLocale: 'pt-BR',
+      visibleLabel: '🇧🇷 Português',
+    },
+  ] as const)(
+    'renders the $targetLocale locale as a native flag-plus-language link',
+    ({ accessibleName, flag, href, sourceLocale, targetLocale, visibleLabel }) => {
+      const switcher = LocaleSwitcher({ href, sourceLocale, targetLocale });
+      const props = elementProps(switcher);
+      const children = Children.toArray(props['children'] as ReactNode);
+      const flagElement = children.find(
+        (child): child is ReactElement => isValidElement(child) && visibleText(child) === flag,
+      );
+
+      expect(switcher.type).toBe('a');
+      expect(props['href']).toBe(href);
+      expect(props['aria-label']).toBe(accessibleName);
+      expect(props['role']).toBeUndefined();
+      expect(props['onClick']).toBeUndefined();
+      expect(visibleText(switcher)).toBe(visibleLabel);
+      expect(flagElement).toBeDefined();
+      expect(elementProps(flagElement as ReactElement)['aria-hidden']).toBe(true);
+    },
+  );
+
+  it('marks exactly one active navigation anchor and leaves inactive anchors unselected', () => {
+    const shells = [
+      PublicHeader({
+        activeId: 'docs',
+        cta: <a href="/compatibility">Check compatibility</a>,
+        localeControl: <span>Locale</span>,
+        navigation,
+        search: <input aria-label="Search" />,
+      }),
+      AccountShell({
+        activeId: 'docs',
+        children: 'Account responsibility',
+        header: <header>Account</header>,
+        navigation,
+        previewRail: <aside>Preview</aside>,
+      }),
+      AdminShell({
+        activeId: 'docs',
+        children: 'Administrative review',
+        header: <header>Administration</header>,
+        navigation,
+        roleRail: <aside>Role</aside>,
+      }),
+    ];
+
+    for (const shell of shells) {
+      const navigationAnchors = resolvedIntrinsicElements(shell).filter((element) => {
+        const href = elementProps(element)['href'];
+        return element.type === 'a' && navigation.some((item) => item.href === href);
+      });
+      const currentAnchors = navigationAnchors.filter(
+        (element) => elementProps(element)['aria-current'] === 'page',
+      );
+
+      expect(navigationAnchors).toHaveLength(navigation.length);
+      expect(currentAnchors).toHaveLength(1);
+      expect(elementProps(currentAnchors[0] as ReactElement)).toMatchObject({
+        'aria-current': 'page',
+        'data-current': 'page',
+        href: '/docs',
+      });
+      expect(
+        navigationAnchors
+          .filter((element) => element !== currentAnchors[0])
+          .every(
+            (element) =>
+              elementProps(element)['aria-current'] === undefined &&
+              elementProps(element)['data-current'] === undefined,
+          ),
+      ).toBe(true);
+    }
+  });
+});
 
 describe('semantic web components', () => {
   it('projects every state and provenance with persistent text and non-color signals', () => {
