@@ -16,6 +16,7 @@ import {
 } from './public-navigation';
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
 
 describe('public shell', () => {
@@ -66,6 +67,31 @@ describe('public shell', () => {
     expect(layoutSource).not.toMatch(/>\s*LB\s*</u);
   });
 
+  it('builds a substantial 72px branded desktop topbar with six intent pillars', () => {
+    expect(publicNavigation).toHaveLength(6);
+    expect(shellStyles).toMatch(
+      /\.public-header__bar\s*\{[\s\S]*max-inline-size:\s*1280px;[\s\S]*min-block-size:\s*72px;[\s\S]*margin-inline:\s*auto;/u,
+    );
+    expect(layoutSource).toContain('<ProductLockup />');
+    expect(navigationSource).toContain("publicBoundaryHref('public-compatibility', locale)");
+    expect(navigationSource).toContain('public-action--primary');
+  });
+
+  it('uses a 60px mobile topbar and a full-height task menu with 48px targets', () => {
+    expect(shellStyles).toMatch(
+      /@media \(width < 1100px\)[\s\S]*\.public-navigation--desktop[\s\S]*display:\s*none/u,
+    );
+    expect(shellStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.public-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
+    );
+    expect(shellStyles).toMatch(
+      /\.public-mobile-menu__surface\s*\{[\s\S]*position:\s*fixed;[\s\S]*inset:\s*60px 0 0;[\s\S]*overflow:\s*auto/u,
+    );
+    expect(shellStyles).toMatch(
+      /\.public-mobile-menu > summary\s*\{[\s\S]*min-inline-size:\s*48px;[\s\S]*min-block-size:\s*48px/u,
+    );
+  });
+
   it('keeps internal origin boundaries out of ordinary visitor chrome', () => {
     expect(layoutSource).not.toContain('public-boundary-notice');
     expect(layoutSource).not.toMatch(/>\s*PUBLIC\s*</u);
@@ -81,6 +107,21 @@ describe('public shell', () => {
     expect(shellStyles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.public-navigation--desktop[\s\S]*display:\s*none/u,
     );
+  });
+
+  it('keeps native route-preserving locale anchors and fails unmatched paths to Home', () => {
+    expect(navigationSource).not.toMatch(/from ['"]next\/link['"]/u);
+    expect(navigationSource).toContain('href={state.localeHref}');
+    expect(getPublicNavigationState('/pt-BR/not-a-canonical-route', 'pt-BR').localeHref).toBe(
+      '/en',
+    );
+  });
+
+  it('retains visible focus, skip-link, forced-color, and noindex boundary hooks', () => {
+    expect(layoutSource).toContain('className="public-skip-link"');
+    expect(shellStyles).toContain(':focus-visible');
+    expect(shellStyles).toContain('@media (forced-colors: active)');
+    expect(publicConfig.publicHeaderContract).toEqual(expect.any(Array));
   });
 
   it('derives every public navigation pillar and both locale roots from route authority', () => {
