@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed second 03-61 bounded harness correction
-last_updated: "2026-08-01T20:20:56.944Z"
+stopped_at: Completed 03-62-PLAN.md
+last_updated: "2026-08-01T21:32:03.450Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 117
+  completed_plans: 118
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 10 of 66
+Plan: 11 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -165,6 +165,7 @@ _Updated after plan completion_
 | Phase 03 P58 | 17min | 2 tasks | 3 files |
 | Phase 03 P60 | 11min | 2 tasks | 3 files |
 | Phase 03 P61 | 58min | 2 tasks | 12 files |
+| Phase 03 P62 | 1h 52m | 2 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -493,6 +494,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Locked destructive red remains a boundary signal instead of a text background because no label color can provide the required 4.5:1 contrast on that fill.
 - [Phase 03]: Keep Playwright snapshot updates disabled by default; only the explicit Plan 03-62 update command may activate bounded W01-W18/G01-G07 candidate capture.
 - [Phase 03]: Bind each W/G candidate test to one exact final project and enforce the 25-test writer set through a permanent Playwright dry-list contract.
+- [Phase 03]: Rejected post-03-52 G01/G04/G06 remain immutable and independently retrievable after candidate capture.
+- [Phase 03]: Mechanical capture changes pixels only; all 25 records remain candidate, unapproved, unpublished, and non-authoritative.
+- [Phase 03]: Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.
 
 ### Pending Todos
 
@@ -534,6 +538,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T20:20:56.938Z
-Stopped at: Completed second 03-61 bounded harness correction
+Last session: 2026-08-01T21:32:03.444Z
+Stopped at: Completed 03-62-PLAN.md
 Resume file: None
