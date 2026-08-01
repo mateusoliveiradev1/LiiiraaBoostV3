@@ -13,6 +13,7 @@ requires:
     provides: admin focal workspace composition
 provides:
   - Closed 25-record candidate-only visual evidence manifest for Plan 03-62
+  - Bounded explicit-update capture path for exactly W01-W18 and G01-G07
   - Exact executable public, account, and admin geometry contracts
   - Direct Section 17 motion and reduced-motion browser contract
   - Blocking cross-origin Axe, reflow, text-scaling, forced-colors, CSP, and authority gates
@@ -22,6 +23,7 @@ tech-stack:
   added: []
   patterns:
     - Candidate evidence remains source-bound but cannot become a visual target
+    - Ordinary Playwright runs set snapshot updates to none; explicit update mode alone activates candidate capture
     - Browser geometry and motion policy are asserted from computed DOM values
 
 key-files:
@@ -41,6 +43,7 @@ key-files:
 
 key-decisions:
   - 'Invalidated W/G pixels remain candidate inputs only; candidate records run accessibility checks without screenshot comparison until Plan 03-62 rebaselines them.'
+  - 'Playwright defaults to no snapshot updates in this harness; the explicit Plan 03-62 update flag is the only candidate-capture authority.'
   - 'Explicit Playwright project selection starts only the selected origin, while the unfiltered motion contract starts all three origins.'
   - 'Locked destructive red remains a boundary signal instead of a text background because no label color can provide the required 4.5:1 contrast on that fill.'
 
@@ -73,6 +76,7 @@ status: complete
 - Added exact public, account, and admin geometry/navigation assertions at wide, 390px mobile, and 320px reflow axes.
 - Added a directly executed motion contract for the approved 100/160/200/220/360/480ms roles, easing curves, entrance caps, default-visible content, and reduced-motion removal.
 - Kept serious/critical Axe, keyboard, forced-colors, 200% text, responsive overflow, CSP, noindex, origin, redaction, and no-authority checks blocking without updating screenshots.
+- Restored a bounded candidate writer that stays inert in ordinary runs and maps one explicit update to the exact 25 manifest identities without changing approval or publication state.
 
 ## Task Commits
 
@@ -82,16 +86,17 @@ Each task was committed atomically through its TDD gates:
 2. **Task 1 GREEN: Bind visual records to candidate status** - `677e572` (feat)
 3. **Task 2 RED: Add exact geometry and motion browser contracts** - `b3c79c4` (test)
 4. **Task 2 GREEN: Enforce exact browser geometry and motion gates** - `2350137` (feat)
+5. **Bounded correction: Restore explicit candidate capture mode** - `ee9b2d9` (fix)
 
 ## Files Created/Modified
 
 - `tooling/web-evidence/tests/motion-contract.spec.ts` - Direct computed-style motion, entrance, default-visibility, and reduced-motion contract.
 - `tooling/web-evidence/visual-manifest.json` - Exact 25-record candidate matrix with closed origins and no approval/publication authority.
-- `tooling/web-evidence/tests/accessibility-responsive.spec.ts` - Candidate assertions plus cross-surface Axe, responsive, security, and overflow diagnostics.
+- `tooling/web-evidence/tests/accessibility-responsive.spec.ts` - Candidate assertions, bounded update-only capture, exact identity proof, and cross-surface Axe/responsive/security diagnostics.
 - `tooling/web-evidence/tests/public.spec.ts` - Exact Cobalt Ignition Bay wide/mobile geometry, route-preserving locale, and navigation assertions.
 - `tooling/web-evidence/tests/account.spec.ts` - Exact account shell/workspace and compact-navigation assertions.
 - `tooling/web-evidence/tests/admin.spec.ts` - Exact admin shell/grid/status and compact-navigation assertions.
-- `tooling/web-evidence/playwright.config.ts` - Spec/project-aware origin startup for focused and multi-origin runs.
+- `tooling/web-evidence/playwright.config.ts` - Spec/project-aware origin startup plus a fail-closed ordinary snapshot policy.
 - `packages/web-features/src/components.test.tsx` - Candidate-only manifest projection and origin contract.
 - `packages/design-tokens/src/tokens.css` - Canonical responsive geometry tokens and accessible destructive treatment.
 - `apps/web/src/app/public-shell.css` - Tokenized public geometry, approved motion duration, and forced-colors CTA specificity.
@@ -103,6 +108,15 @@ Each task was committed atomically through its TDD gates:
 - Candidate records continue to prove route, locale, viewport, scenario, source, and accessibility truth, but their invalidated pixels are not compared or promoted.
 - Browser server startup is derived from both spec identity and explicit project selection so focused runs remain isolated and unfiltered motion runs remain complete.
 - Destructive actions use the locked red as a border signal over canvas; ordinary cobalt CTAs use the canonical dark primary label to satisfy blocking contrast.
+- Ordinary Playwright execution uses `updateSnapshots: 'none'`; the explicit `--update-snapshots` CLI flag overrides it to `changed`, activating the bounded candidate helper without granting approval or publication authority.
+
+## Bounded Harness Correction
+
+- Commit `2350137` correctly stopped ordinary comparison against invalidated pixels but also removed every candidate screenshot call, so Plan 03-62's exact update command could not produce W01-W18/G01-G07.
+- The correction calls `toHaveScreenshot` only from tests tagged `@candidate-capture` and only when explicit update mode is active. Each of the 25 manifest records has one unique capture ID, snapshot path, surface, viewport, and Playwright project mapping.
+- Ordinary mode is proven inert because the proof-only update test skips with the harness default `updateSnapshots: 'none'`. Explicit `--update-snapshots` mode is proven active by the same test, which does not call the capture helper and therefore does not consume Plan 03-62's single exact update.
+- No candidate PNG, archive, manifest status, UAT verdict, report, publication record, bundle, package version, or lockfile changed.
+- The local Playwright runtime was repaired with `pnpm install --offline --frozen-lockfile --force` after confirming the pnpm store was untouched. `coreBundle.js` is 3,425,217 bytes, contains zero NUL bytes, and has SHA-256 `3258d1cf334c6afc95f22aa9c292436cb976b391e0437f1359c83b84f0cb9d66`; `pnpm-lock.yaml` remains `86bb89b58b01cadc5d9791c34d69cb18efd2fc0a8f554cdd2e9cc318ca520091`.
 
 ## Deviations from Plan
 
@@ -153,15 +167,35 @@ Each task was committed atomically through its TDD gates:
 - **Verification:** Account reflow/text/reduced-motion and admin reflow accessibility contracts passed.
 - **Committed in:** `2350137`
 
+**6. [Rule 1 - Bug] Restored bounded candidate generation without ordinary screenshot comparison**
+
+- **Found during:** Post-completion Plan 03-61 correction
+- **Issue:** Removing invalid candidate comparisons also removed every screenshot call, so the exact Plan 03-62 update command would generate zero candidates. Playwright 1.62 also defaults ordinary runs to `updateSnapshots: 'missing'`, which is not a safe discriminator for explicit update intent.
+- **Fix:** Set the harness default to `none`, retained CLI override behavior, added one guarded capture helper call per W/G test, and proved all 25 manifest/project/path identities are unique and exact.
+- **Files modified:** `tooling/web-evidence/playwright.config.ts`, `tooling/web-evidence/tests/accessibility-responsive.spec.ts`
+- **Verification:** Ordinary proof skipped; explicit update proof passed without invoking screenshot capture; the full ordinary matrix and motion contract passed.
+- **Committed in:** `ee9b2d9`
+
+**7. [Rule 3 - Blocking] Repaired the corrupted installed Playwright runtime deterministically**
+
+- **Found during:** Post-completion Plan 03-61 correction
+- **Issue:** The installed Playwright `coreBundle.js` was corrupted, blocking trustworthy browser verification while the package store itself remained intact.
+- **Fix:** Reinstalled from the existing store with offline, frozen-lockfile, forced relinking; no dependency or lockfile content changed.
+- **Files modified:** None in git; local installed dependency only.
+- **Verification:** Zero NUL bytes, exact bundle length/hash recorded above, TypeScript and browser suites passed.
+- **Committed in:** Not applicable - deterministic local dependency repair produced no repository diff.
+
 ---
 
-**Total deviations:** 5 auto-fixed (1 Rule 1, 1 Rule 2, 3 Rule 3)
+**Total deviations:** 7 auto-fixed (2 Rule 1, 1 Rule 2, 4 Rule 3)
 **Impact on plan:** All fixes were required to keep the planned exact gates truthful and blocking; no pixels, UAT verdicts, reports, bundles, packages, or publication authority changed.
 
 ## Issues Encountered
 
 - The first broad filtered run exposed rejected screenshot comparisons and real contrast/reflow defects together. Candidate screenshot comparisons were retired, then the remaining Axe and overflow defects were fixed without weakening thresholds.
 - The final pre-fix matrix reported four repeated primary-CTA contrast failures. A shared semantic label correction closed all four, and the exact matrix then passed 54 tests with 446 intentional project/axis skips.
+- The first correction matrix exposed an invalid `Set`/`toHaveLength` proof matcher; switching to the native `Set.size` assertion closed the test-authoring defect without weakening the identity contract.
+- Playwright 1.62's installed types and runner source confirmed ordinary mode defaults to `missing` and a bare `--update-snapshots` flag selects `changed`; the harness now makes that boundary explicit and fail-closed.
 
 ## TDD Gate Compliance
 
@@ -175,6 +209,12 @@ Each task was committed atomically through its TDD gates:
 - Candidate manifest Playwright gate - 2 passed, 16 skipped.
 - `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts` - 5 passed, 40 skipped.
 - Exact filtered public/account/admin/accessibility matrix - 54 passed, 446 skipped.
+- Corrected-config filtered public/account/admin/accessibility matrix - 30 passed, 263 intentional project/axis skips, 0 failed.
+- Ordinary candidate-update boundary proof - 1 skipped, proving capture mode is inactive.
+- Explicit `--update-snapshots` proof-only boundary - 1 passed without invoking the screenshot helper or writing candidate pixels.
+- Corrected unfiltered motion suite - 5 passed, 40 intentional project/axis skips, 0 failed.
+- Web-evidence TypeScript check, Prettier, and `git diff --check` passed.
+- Playwright runtime integrity - 3,425,217 bytes, 0 NUL bytes, SHA-256 `3258d1cf334c6afc95f22aa9c292436cb976b391e0437f1359c83b84f0cb9d66`; lockfile SHA-256 unchanged.
 - Focused account/public/admin contrast, reflow, mobile, forced-colors, and geometry reruns all passed.
 - Diff whitespace and Prettier checks passed for changed formatted files; canonical precision in the design-token authority was preserved.
 
@@ -189,12 +229,13 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - Plan 03-62 can capture new pixels against exact candidate identities and executable UI/accessibility contracts.
+- Plan 03-62's exact update command is now the sole writer and will target exactly W01-W18/G01-G07; the proof-only verification did not consume that update.
 - Human approval, UAT verdicts, report promotion, publication, and bundle ownership remain intentionally closed.
 
 ## Self-Check: PASSED
 
 - Summary, motion contract, and candidate manifest exist on disk.
-- All four RED/GREEN task commits exist in git history.
+- All four RED/GREEN task commits and corrective commit `ee9b2d9` exist in git history.
 - No required file or commit is missing.
 
 ---
