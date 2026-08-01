@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-55-PLAN.md
-last_updated: "2026-08-01T16:53:27.586Z"
+stopped_at: Completed 03-57-PLAN.md
+last_updated: "2026-08-01T17:11:13.746Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 111
+  completed_plans: 112
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 4 of 66
+Plan: 5 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -159,6 +159,7 @@ _Updated after plan completion_
 | Phase 03 P53 | 16min | 2 tasks | 7 files |
 | Phase 03 P54 | 21min | 2 tasks | 7 files |
 | Phase 03 P55 | 15min | 2 tasks | 6 files |
+| Phase 03 P57 | 12min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -468,6 +469,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Use compatibility, not release availability, as the unequal primary action in both desktop and mobile public chrome.
 - [Phase 03]: Preserve canonical locale destinations through native anchors while unmatched browser state fails safely to the target-locale Home.
 - [Phase 03]: Render the approved promise as three authored wide-screen lines above the checksum-admitted product capture, while allowing safe narrow-screen reflow.
+- [Phase 03]: Keep the server layout as the canonical owner of routes, localized groups, noindex metadata, preview truth, and fixture composition.
+- [Phase 03]: Keep one canonical desktop aria-current anchor while the mobile disclosure names the current task without duplicating current-page semantics.
+- [Phase 03]: Use the localized preview label as explicit provenance detail while rendering the locked remote-changes-disconnected copy once.
 
 ### Pending Todos
 
@@ -509,6 +513,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T16:53:27.581Z
-Stopped at: Completed 03-55-PLAN.md
+Last session: 2026-08-01T17:11:13.741Z
+Stopped at: Completed 03-57-PLAN.md
 Resume file: None
