@@ -109,16 +109,18 @@ describe('Home layout and screenshot evidence gate', () => {
   });
 
   it('uses a 52-76px three-line display promise and unequal compatibility actions', async () => {
-    const [homeSource, shellStyles] = await Promise.all([
+    const [homeSource, shellStyles, tokenStyles] = await Promise.all([
       readSource('./features/home.tsx'),
       readSource('./app/public-shell.css'),
+      readSource('../../../packages/design-tokens/src/tokens.css'),
     ]);
 
     expect(homeSource).toContain('splitHeroPromise');
     expect(homeSource).toContain('primary>');
     expect(shellStyles).toMatch(
-      /\.home-ignition-hero__promise\s*\{[\s\S]*font-family:\s*var\(--lb-font-display\);[\s\S]*font-size:\s*clamp\(52px, 6vw, 76px\);/u,
+      /\.home-ignition-hero__promise\s*\{[\s\S]*font-family:\s*var\(--lb-font-display\);[\s\S]*font-size:\s*var\(--lb-public-hero-display-size\);/u,
     );
+    expect(tokenStyles).toMatch(/--lb-public-hero-display-size:\s*clamp\(52px, 6vw, 76px\);/u);
     expect(shellStyles).toMatch(
       /\.home-action--primary\s*\{[\s\S]*background:\s*var\(--lb-accent-electric\);/u,
     );
