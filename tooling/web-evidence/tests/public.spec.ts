@@ -94,7 +94,11 @@ test('@final @public W01 keeps the PT-BR command runway truthful and distributio
   await expect(
     page.getByRole('link', { name: 'Verificar compatibilidade', exact: true }).first(),
   ).toBeVisible();
-  await expect(page.getByRole('note').filter({ hasText: 'Superfície pública' })).toBeVisible();
+  await expect(
+    page.getByRole('note').filter({ hasText: 'O que esta captura comprova' }),
+  ).toBeVisible();
+  await expect(page.locator('.public-boundary')).toHaveCount(0);
+  await expect(page.locator('main')).not.toContainText(/Superfície pública|\bPUBLIC\b/u);
   await expect(page.locator('.public-home')).toHaveAttribute(
     'data-capture-state',
     'CAPTURE_ADMITTED',

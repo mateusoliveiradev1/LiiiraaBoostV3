@@ -61,7 +61,7 @@ const routeFor = ({ locale, routeId }: Scenario): string => {
     case 'docs-index':
       return `/${locale}/docs/current`;
     case 'docs-history':
-      return `/${locale}/docs/history/1.0.0/getting-started`;
+      return `/${locale}/docs/history/1.0.0/legacy-capture`;
     case 'docs-troubleshooting':
       return `/${locale}/docs/current/troubleshooting/lb-err-0x80070005`;
     case 'public-search':
@@ -140,8 +140,16 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
     'Interactive controls must meet the 24 CSS px minimum target.',
   ).toEqual([]);
 
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    document.body.tabIndex = -1;
+    document.body.focus();
+    document.body.removeAttribute('tabindex');
+  });
   await page.keyboard.press('Tab');
-  const skipLink = page.getByRole('link', { name: /skip to (?:main )?content/iu });
+  const skipLink = page.getByRole('link', {
+    name: /(?:skip to (?:main )?content|ir para o conteúdo principal)/iu,
+  });
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeInViewport();
 
