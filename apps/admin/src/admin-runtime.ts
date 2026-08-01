@@ -6,6 +6,33 @@ export const ADMIN_CANONICAL_ENTRY = Object.freeze({
   'pt-BR': '/pt-BR/admin',
 } as const);
 
+export type AdminLocale = keyof typeof ADMIN_CANONICAL_ENTRY;
+
+export const ADMIN_DENIAL_COPY = Object.freeze({
+  en: Object.freeze({
+    body: 'This request did not match the isolated administrative origin. No session was created and no application data was loaded.',
+    recovery: 'Open the secure admin entry',
+    reference: 'Request reference',
+    title: 'Administrative access not authorized',
+  }),
+  'pt-BR': Object.freeze({
+    body: 'Esta solicitação não corresponde à origem administrativa isolada. Nenhuma sessão foi criada e nenhum dado do aplicativo foi carregado.',
+    recovery: 'Abrir entrada administrativa segura',
+    reference: 'Referência da solicitação',
+    title: 'Acesso administrativo não autorizado',
+  }),
+} satisfies Readonly<
+  Record<
+    AdminLocale,
+    Readonly<{
+      body: string;
+      recovery: string;
+      reference: string;
+      title: string;
+    }>
+  >
+>);
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

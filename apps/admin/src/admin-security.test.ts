@@ -9,11 +9,7 @@ import adminProxy, {
   createAdminRequestNonce,
 } from '../proxy';
 import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
-import {
-  ADMIN_CANONICAL_ENTRY,
-  ADMIN_LOCAL_ORIGIN,
-  resolveAdminOrigin,
-} from './admin-runtime';
+import { ADMIN_CANONICAL_ENTRY, ADMIN_LOCAL_ORIGIN, resolveAdminOrigin } from './admin-runtime';
 
 describe('admin security boundary', () => {
   afterEach(() => {
@@ -37,9 +33,7 @@ describe('admin security boundary', () => {
       origin: ADMIN_LOCAL_ORIGIN,
     });
     expect(resolveAdminOrigin()).toBe(ADMIN_LOCAL_ORIGIN);
-    expect(resolveAdminOrigin('http://admin.localhost:3102')).toBe(
-      'http://admin.localhost:3102',
-    );
+    expect(resolveAdminOrigin('http://admin.localhost:3102')).toBe('http://admin.localhost:3102');
     expect(() => resolveAdminOrigin('https://user@admin.localhost')).toThrow(
       'credential-free dedicated origin',
     );
@@ -59,9 +53,7 @@ describe('admin security boundary', () => {
   });
 
   it('requires an explicit exact production origin and rejects localhost lookalikes', () => {
-    expect(resolveAdminOrigin('https://admin.liiiraa.com')).toBe(
-      'https://admin.liiiraa.com',
-    );
+    expect(resolveAdminOrigin('https://admin.liiiraa.com')).toBe('https://admin.liiiraa.com');
     expect(() => resolveAdminOrigin('http://localhost:3002')).toThrow(
       'credential-free dedicated origin',
     );
@@ -155,9 +147,7 @@ describe('admin security boundary', () => {
     });
     const arbitraryReturn = AdminAccessBoundary({
       cookieHeader: null,
-      url: new URL(
-        `${ADMIN_LOCAL_ORIGIN}/en/admin?role=operations&returnUrl=https://evil.example`,
-      ),
+      url: new URL(`${ADMIN_LOCAL_ORIGIN}/en/admin?role=operations&returnUrl=https://evil.example`),
     });
     const foreignOrigin = AdminAccessBoundary({
       cookieHeader: null,
@@ -189,9 +179,7 @@ describe('admin security boundary', () => {
   });
 
   it('propagates only disconnected preview markers and blocks unsafe requests', () => {
-    const safe = adminProxy(
-      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`),
-    );
+    const safe = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`));
     const unsafe = adminProxy(
       new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?returnPath=/account`, {
         headers: {
@@ -221,41 +209,38 @@ describe('admin security boundary', () => {
       title: 'Administrative access not authorized',
       recovery: 'Open the secure admin entry',
     },
-  ])('returns an authored localized HTML denial for $locale document navigation', async ({
-    locale,
-    recovery,
-    title,
-  }) => {
-    const response = adminProxy(
-      new NextRequest(`https://account.localhost/${locale}/admin`, {
-        headers: {
-          accept: 'text/html,application/xhtml+xml',
-          'sec-fetch-dest': 'document',
-          'sec-fetch-mode': 'navigate',
-          'x-request-id': 'request-42',
-        },
-      }),
-    );
-    const body = await response.text();
+  ])(
+    'returns an authored localized HTML denial for $locale document navigation',
+    async ({ locale, recovery, title }) => {
+      const response = adminProxy(
+        new NextRequest(`https://account.localhost/${locale}/admin`, {
+          headers: {
+            accept: 'text/html,application/xhtml+xml',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'x-request-id': 'request-42',
+          },
+        }),
+      );
+      const body = await response.text();
 
-    expect(response.status).toBe(403);
-    expect(response.headers.get('content-type')).toContain('text/html');
-    expect(body).toContain(`lang="${locale}"`);
-    expect(body).toContain(title);
-    expect(body).toContain(recovery);
-    expect(body).toContain(
-      `href="${ADMIN_LOCAL_ORIGIN}/${locale}/admin"`,
-    );
-    expect(body).toContain('request-42');
-    expect(body).not.toMatch(/authoritativeAccessConnected|fixture|preview role/iu);
-    expect(body).not.toContain('<script');
-  });
+      expect(response.status).toBe(403);
+      expect(response.headers.get('content-type')).toContain('text/html');
+      expect(body).toContain(`lang="${locale}"`);
+      expect(body).toContain(title);
+      expect(body).toContain(recovery);
+      expect(body).toContain(`href="${ADMIN_LOCAL_ORIGIN}/${locale}/admin"`);
+      expect(body).toContain('request-42');
+      expect(body).not.toMatch(/authoritativeAccessConnected|fixture|preview role/iu);
+      expect(body).not.toContain('<script');
+    },
+  );
 
   it('keeps rejected non-document requests as bounded JSON with equivalent semantics', async () => {
     const response = adminProxy(
       new NextRequest('https://account.localhost/en/admin?role=security', {
         headers: {
-          accept: 'application/json',
+          accept: 'text/html,application/xhtml+xml',
           'sec-fetch-dest': 'empty',
           'x-request-id': 'api-request-7',
         },
@@ -274,7 +259,7 @@ describe('admin security boundary', () => {
 
   it('escapes or removes untrusted denial data and never forwards a rejected request', async () => {
     const nextSpy = vi.spyOn(NextResponse, 'next');
-    const response = adminProxy(
+    const rejectedRequests = [
       new NextRequest(
         'https://account.localhost/pt-BR/admin?returnUrl=%3Cscript%3Ealert(1)%3C%2Fscript%3E',
         {
@@ -286,19 +271,29 @@ describe('admin security boundary', () => {
           },
         },
       ),
-    );
-    const body = await response.text();
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/en/admin`, {
+        headers: { cookie: 'account_session=opaque' },
+      }),
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/en/admin?returnPath=/account`),
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/en/admin?role=administrator`),
+    ];
+    const responses = rejectedRequests.map((request) => adminProxy(request));
+    const body = await responses[0]?.text();
 
-    expect(response.status).toBe(403);
+    expect(responses).toHaveLength(4);
+    expect(responses.every((response) => response.status === 403)).toBe(true);
     expect(nextSpy).not.toHaveBeenCalled();
     expect(body).not.toContain('<img');
     expect(body).not.toContain('<script');
     expect(body).not.toContain('returnUrl');
-    expect(response.headers.get('cache-control')).toBe('private, no-store, max-age=0');
-    expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
-    expect(response.headers.get('x-frame-options')).toBe('DENY');
-    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
-    expect(response.headers.get('set-cookie')).toBeNull();
-    expect(response.headers.get('location')).toBeNull();
+
+    for (const response of responses) {
+      expect(response.headers.get('cache-control')).toBe('private, no-store, max-age=0');
+      expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
+      expect(response.headers.get('x-frame-options')).toBe('DENY');
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+      expect(response.headers.get('set-cookie')).toBeNull();
+      expect(response.headers.get('location')).toBeNull();
+    }
   });
 });
