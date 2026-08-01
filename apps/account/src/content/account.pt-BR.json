@@ -21,15 +21,28 @@
   },
   "overview": {
     "title": "Visão geral da conta",
-    "summary": "Um mapa por responsabilidades da conta futura, usando somente valores sintéticos.",
-    "emptyTitle": "Nenhuma atividade real da conta",
-    "emptyBody": "Faturas, dispositivos, sessões e solicitações permanecem vazios até a autoridade da Fase 4 ser conectada."
+    "summary": "Revise as próximas responsabilidades da conta em um espaço de trabalho focado.",
+    "nextTitle": "Conclua o essencial da conta",
+    "nextBody": "Revise o perfil público e os métodos de segurança planejados antes de avançar para assinatura ou dispositivo.",
+    "nextAction": "Revisar perfil",
+    "securityAction": "Inspecionar segurança",
+    "summariesTitle": "Conta em resumo",
+    "reviewState": "Pronta para revisão",
+    "openAction": "Abrir",
+    "limitationsTitle": "Escopo da prévia",
+    "emptyTitle": "Nenhuma atividade autoritativa da conta",
+    "emptyBody": "Registros de cobrança, dispositivo, sessão e suporte permanecem desconectados até a Fase 4. Estes resumos usam dados sintéticos imutáveis."
   },
   "profile": {
     "title": "Prévia do perfil",
     "summary": "Revise um nome público e um idioma sintéticos sem alterar uma conta.",
     "nameLabel": "Nome de exibição",
+    "nameDescription": "Exibido como nome público nesta revisão local. Máximo de 80 caracteres.",
     "localeLabel": "Idioma preferido",
+    "editorTitle": "Identidade pública da conta",
+    "factsTitle": "Dados do perfil",
+    "authorityState": "Salvamento remoto indisponível",
+    "limitations": "O nome e o idioma exibidos permanecem nesta prévia do navegador. A revisão prepara um comprovante sem mudança; ela não atualiza uma conta.",
     "action": "Revisar correção do perfil"
   },
   "security": {

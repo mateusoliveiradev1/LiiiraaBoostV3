@@ -6,7 +6,6 @@ import {
   PreviewBoundary,
   PreviewReceipt,
   PreviewWorkflow,
-  ProvenanceLabel,
   ResponsiveDataTable,
   StatusSignal,
   createPreviewWorkflowMachine,
@@ -24,11 +23,7 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
-import {
-  ACCOUNT_ENTRY_ROUTE_IDS,
-  getAccountPreviewMetadata,
-  type AccountPreviewRoute,
-} from '../account-preview-model';
+import { type AccountPreviewRoute } from '../account-preview-model';
 export type AccountPreviewState = 'ready' | 'offline' | 'stale' | 'expired-session' | 'failure';
 
 type AccountContent = Readonly<{
@@ -50,6 +45,14 @@ type AccountContent = Readonly<{
   overview: Readonly<{
     title: string;
     summary: string;
+    nextTitle: string;
+    nextBody: string;
+    nextAction: string;
+    securityAction: string;
+    summariesTitle: string;
+    reviewState: string;
+    openAction: string;
+    limitationsTitle: string;
     emptyTitle: string;
     emptyBody: string;
   }>;
@@ -57,7 +60,12 @@ type AccountContent = Readonly<{
     title: string;
     summary: string;
     nameLabel: string;
+    nameDescription: string;
     localeLabel: string;
+    editorTitle: string;
+    factsTitle: string;
+    authorityState: string;
+    limitations: string;
     action: string;
   }>;
   security: Readonly<{
@@ -244,11 +252,9 @@ const PreviewWorkflowRunner = ({
 };
 
 const FixtureHeader = ({
-  content,
   summary,
   title,
 }: Readonly<{
-  content: AccountContent;
   summary: string;
   title: string;
 }>) => (
@@ -257,17 +263,12 @@ const FixtureHeader = ({
       <h1 tabIndex={-1}>{title}</h1>
       <p>{summary}</p>
     </div>
-    <ProvenanceLabel detail={content.fixtureLabel} kind="simulated" locale={content.locale} />
   </header>
 );
 
 const DegradedAccountPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article data-account-state="offline stale expired-session partial-failure">
-    <FixtureHeader
-      content={content}
-      summary={content.states.failure}
-      title={content.recovery.title}
-    />
+    <FixtureHeader summary={content.states.failure} title={content.recovery.title} />
     <PreviewBoundary
       description={
         content.locale === 'pt-BR'
@@ -347,11 +348,7 @@ export const SignInPreview = ({
 
   return (
     <article className="lb-web-sign-in" data-account-state="sign-in-preview">
-      <FixtureHeader
-        content={content}
-        summary={content.signIn.summary}
-        title={content.signIn.title}
-      />
+      <FixtureHeader summary={content.signIn.summary} title={content.signIn.title} />
       <PreviewBoundary description={content.signIn.security} />
       <form noValidate onSubmit={startEmail}>
         {error !== null ? (
@@ -402,41 +399,66 @@ export const SignInPreview = ({
 };
 
 const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
-  <article data-account-state="ready">
-    <FixtureHeader
-      content={content}
-      summary={content.overview.summary}
-      title={content.overview.title}
-    />
-    <ResponsiveDataTable
-      caption={
-        content.locale === 'pt-BR' ? 'Responsabilidades da conta' : 'Account responsibilities'
-      }
-      columns={[
-        {
-          id: 'responsibility',
-          label: content.locale === 'pt-BR' ? 'Responsabilidade' : 'Responsibility',
-        },
-        { id: 'state', label: content.locale === 'pt-BR' ? 'Estado' : 'State' },
-        { id: 'action', label: content.locale === 'pt-BR' ? 'Ação' : 'Action', essential: false },
-      ]}
-      rows={ACCOUNT_ENTRY_ROUTE_IDS.filter((id) => id !== 'account-sign-in').map((routeId) => {
-        const metadata = getAccountPreviewMetadata(content.locale, routeId);
-        return {
-          id: routeId,
-          cells: {
-            responsibility: metadata.title,
-            state: <StatusSignal label="Fixture" state="preview" />,
-            action: <a href={hrefFor(routeId, content.locale)}>{content.security.review}</a>,
-          },
-          detail: <a href={hrefFor(routeId, content.locale)}>{metadata.summary}</a>,
-        };
-      })}
-    />
-    <EmptyComposition
-      description={content.overview.emptyBody}
-      title={content.overview.emptyTitle}
-    />
+  <article className="account-responsibility account-overview" data-account-state="ready">
+    <FixtureHeader summary={content.overview.summary} title={content.overview.title} />
+    <div className="account-overview__layout">
+      <section aria-labelledby="account-next-title" className="account-overview__focus">
+        <div className="account-overview__section-heading">
+          <h2 id="account-next-title">{content.overview.nextTitle}</h2>
+          <StatusSignal label={content.overview.reviewState} state="preview" />
+        </div>
+        <p>{content.overview.nextBody}</p>
+        <nav aria-label={content.overview.nextTitle} className="account-overview__actions">
+          <a href={hrefFor('account-profile', content.locale)}>{content.overview.nextAction}</a>
+          <a href={hrefFor('account-security', content.locale)}>
+            {content.overview.securityAction}
+          </a>
+        </nav>
+      </section>
+
+      <section aria-labelledby="account-summaries-title" className="account-overview__summaries">
+        <h2 id="account-summaries-title">{content.overview.summariesTitle}</h2>
+        <ul>
+          {[
+            {
+              detail: content.subscription.summary,
+              href: hrefFor('account-subscription', content.locale),
+              title: content.subscription.title,
+            },
+            {
+              detail: content.device.summary,
+              href: hrefFor('account-device', content.locale),
+              title: content.device.title,
+            },
+            {
+              detail: content.support.summary,
+              href: hrefFor('account-support', content.locale),
+              title: content.support.title,
+            },
+          ].map((item) => (
+            <li key={item.href}>
+              <div>
+                <strong>{item.title}</strong>
+                <p>{item.detail}</p>
+              </div>
+              <a href={item.href}>{content.overview.openAction}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+
+    <aside
+      aria-labelledby="account-limitations-title"
+      className="account-overview__limitations"
+      role="note"
+    >
+      <h2 id="account-limitations-title">{content.overview.limitationsTitle}</h2>
+      <div>
+        <strong>{content.overview.emptyTitle}</strong>
+        <p>{content.overview.emptyBody}</p>
+      </div>
+    </aside>
   </article>
 );
 
@@ -452,54 +474,80 @@ const ProfilePreview = ({
     );
   }
   return (
-    <article data-account-state="ready">
-      <FixtureHeader
-        content={content}
-        summary={content.profile.summary}
-        title={content.profile.title}
-      />
-      <LbTextField
-        description={content.fixtureLabel}
-        isRequired
-        label={content.profile.nameLabel}
-        maxLength={80}
-        onChange={setDisplayName}
-        value={displayName}
-      />
-      <dl>
-        <div>
-          <dt>{content.profile.localeLabel}</dt>
-          <dd>{content.locale}</dd>
-        </div>
-      </dl>
-      <LbButton
-        onPress={() => {
-          setWorkflow(
-            actionInput({
-              family: 'auth',
-              fields: { displayName, locale: content.locale },
-              label: content.profile.action,
-              review: [
-                {
-                  field: 'displayName',
-                  label: content.profile.nameLabel,
-                  before: 'Astra Preview',
-                  after: displayName,
-                },
-                {
-                  field: 'locale',
-                  label: content.profile.localeLabel,
-                  before: content.locale,
-                  after: content.locale,
-                },
-              ],
-              safeDraftFields: ['displayName', 'locale'],
-            }),
-          );
-        }}
-      >
-        {content.profile.action}
-      </LbButton>
+    <article className="account-responsibility account-profile" data-account-state="ready">
+      <FixtureHeader summary={content.profile.summary} title={content.profile.title} />
+      <div className="account-profile__layout">
+        <section aria-labelledby="profile-editor-title" className="account-profile__editor">
+          <h2 id="profile-editor-title">{content.profile.editorTitle}</h2>
+          <div className="account-profile__control">
+            <LbTextField
+              description={content.profile.nameDescription}
+              isRequired
+              label={content.profile.nameLabel}
+              maxLength={80}
+              onChange={setDisplayName}
+              value={displayName}
+            />
+          </div>
+          <dl className="account-profile__facts">
+            <div>
+              <dt>{content.profile.localeLabel}</dt>
+              <dd>{content.locale}</dd>
+            </div>
+            <div data-authority-action="unavailable">
+              <dt>{content.profile.factsTitle}</dt>
+              <dd>
+                <StatusSignal label={content.profile.authorityState} state="unavailable" />
+              </dd>
+            </div>
+          </dl>
+          <div className="account-profile__actions">
+            <LbButton
+              onPress={() => {
+                setWorkflow(
+                  actionInput({
+                    family: 'auth',
+                    fields: { displayName, locale: content.locale },
+                    label: content.profile.action,
+                    review: [
+                      {
+                        field: 'displayName',
+                        label: content.profile.nameLabel,
+                        before: 'Astra Preview',
+                        after: displayName,
+                      },
+                      {
+                        field: 'locale',
+                        label: content.profile.localeLabel,
+                        before: content.locale,
+                        after: content.locale,
+                      },
+                    ],
+                    safeDraftFields: ['displayName', 'locale'],
+                  }),
+                );
+              }}
+            >
+              {content.profile.action}
+            </LbButton>
+          </div>
+        </section>
+
+        <aside aria-labelledby="profile-facts-title" className="account-profile__context">
+          <h2 id="profile-facts-title">{content.profile.factsTitle}</h2>
+          <p>{content.profile.limitations}</p>
+          <dl>
+            <div>
+              <dt>{content.profile.nameLabel}</dt>
+              <dd>{displayName}</dd>
+            </div>
+            <div>
+              <dt>{content.profile.localeLabel}</dt>
+              <dd>{content.locale}</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
     </article>
   );
 };
@@ -569,11 +617,7 @@ const SecurityPreview = ({
   }
   return (
     <article data-account-state="ready">
-      <FixtureHeader
-        content={content}
-        summary={content.security.summary}
-        title={content.security.title}
-      />
+      <FixtureHeader summary={content.security.summary} title={content.security.title} />
       <PreviewBoundary description={content.signIn.security} />
       <SecurityMethodList content={content} onReview={reviewSecurity} />
       <SessionList content={content} onReview={() => reviewSecurity('session')} />
@@ -676,11 +720,7 @@ export const SubscriptionSummary = ({
   ] as const;
   return (
     <article className="lb-web-subscription" data-account-state="ready">
-      <FixtureHeader
-        content={content}
-        summary={content.subscription.summary}
-        title={content.subscription.title}
-      />
+      <FixtureHeader summary={content.subscription.summary} title={content.subscription.title} />
       <StatusSignal label={content.subscription.plan} state="preview" />
       <dl>
         {terms.map(([label, value]) => (
@@ -719,11 +759,7 @@ export const SubscriptionSummary = ({
 
 export const InvoiceTable = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article data-account-state="empty">
-    <FixtureHeader
-      content={content}
-      summary={content.invoices.summary}
-      title={content.invoices.title}
-    />
+    <FixtureHeader summary={content.invoices.summary} title={content.invoices.title} />
     <ResponsiveDataTable
       caption={content.invoices.caption}
       columns={[
@@ -766,11 +802,7 @@ export const DeviceBindingReview = ({
   }
   return (
     <article className="lb-web-device-review" data-account-state="sensitive-review">
-      <FixtureHeader
-        content={content}
-        summary={content.device.summary}
-        title={content.device.title}
-      />
+      <FixtureHeader summary={content.device.summary} title={content.device.title} />
       <dl>
         <div>
           <dt>{content.device.label}</dt>
@@ -810,11 +842,7 @@ export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent
   if (!releaseHref.ok) throw new Error('ACCOUNT_PUBLIC_RELEASE_ROUTE_UNAVAILABLE');
   return (
     <article data-account-state="public-transition">
-      <FixtureHeader
-        content={content}
-        summary={content.downloads.summary}
-        title={content.downloads.title}
-      />
+      <FixtureHeader summary={content.downloads.summary} title={content.downloads.title} />
       <PreviewBoundary
         description={content.downloads.boundary}
         title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
@@ -910,11 +938,7 @@ export const PrivacyCenter = ({
   };
   return (
     <article className="lb-web-privacy-center" data-account-state="sensitive-review">
-      <FixtureHeader
-        content={content}
-        summary={content.privacy.summary}
-        title={content.privacy.title}
-      />
+      <FixtureHeader summary={content.privacy.summary} title={content.privacy.title} />
       <ConsentReview content={content} />
       <DataRequestReview content={content} onSelect={selectRequest} />
     </article>
@@ -953,11 +977,7 @@ export const SupportRequestComposer = ({
   }
   return (
     <article className="lb-web-support-composer" data-account-state="sensitive-review">
-      <FixtureHeader
-        content={content}
-        summary={content.support.summary}
-        title={content.support.title}
-      />
+      <FixtureHeader summary={content.support.summary} title={content.support.title} />
       <CollectionDisclosure
         content={content}
         purpose={content.support.purpose}

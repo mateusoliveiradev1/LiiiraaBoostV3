@@ -21,15 +21,28 @@
   },
   "overview": {
     "title": "Account overview",
-    "summary": "A responsibility-led map of the future account, using synthetic values only.",
-    "emptyTitle": "No real account activity",
-    "emptyBody": "Invoices, devices, sessions, and requests remain empty until Phase 4 authority is connected."
+    "summary": "Review the next account responsibilities from one focused workspace.",
+    "nextTitle": "Complete the account essentials",
+    "nextBody": "Review the public profile and planned security methods before moving into subscription or device responsibilities.",
+    "nextAction": "Review profile",
+    "securityAction": "Inspect security",
+    "summariesTitle": "Account at a glance",
+    "reviewState": "Ready for review",
+    "openAction": "Open",
+    "limitationsTitle": "Preview scope",
+    "emptyTitle": "No authoritative account activity",
+    "emptyBody": "Billing, device, session, and support records stay disconnected until Phase 4. These summaries use immutable synthetic data."
   },
   "profile": {
     "title": "Profile preview",
     "summary": "Review a synthetic public name and locale without changing an account.",
     "nameLabel": "Display name",
+    "nameDescription": "Shown as the public name in this local review. Maximum 80 characters.",
     "localeLabel": "Preferred locale",
+    "editorTitle": "Public account identity",
+    "factsTitle": "Profile facts",
+    "authorityState": "Remote save unavailable",
+    "limitations": "The displayed name and locale remain in this browser preview. Reviewing prepares a no-change receipt; it does not update an account.",
     "action": "Review profile correction"
   },
   "security": {
