@@ -77,13 +77,15 @@ describe('Home layout and screenshot evidence gate', () => {
       promise: 'Prepare your PC. Prove the result. Restore with control.',
     });
 
-    const sharedSource = await readSource('../../../packages/web-features/src/components.tsx');
-    expect(sharedSource.indexOf('className="lb-web-command-copy"')).toBeLessThan(
-      sharedSource.indexOf('className="lb-web-command-artifact"'),
+    const homeSource = await readSource('./features/home.tsx');
+    expect(homeSource).toContain('data-hero-layout="centered-12-column"');
+    expect(homeSource).toContain('className="home-ignition-hero__promise"');
+    expect(homeSource.indexOf('className="home-ignition-hero__copy"')).toBeLessThan(
+      homeSource.indexOf('className="home-ignition-hero__stage"'),
     );
   });
 
-  it('makes the admitted desktop artifact dominant wide while keeping copy first on mobile', async () => {
+  it('stages a centered 1120px desktop artifact with explicit above-fold geometry hooks', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
@@ -92,14 +94,67 @@ describe('Home layout and screenshot evidence gate', () => {
     const props = home.props as Readonly<Record<string, ReactNode>>;
     expect(props['data-capture-state']).toBe('CAPTURE_ADMITTED');
 
-    const [styles, sharedSource] = await Promise.all([
-      readSource('./styles/public.css'),
+    const [shellStyles, homeSource] = await Promise.all([
+      readSource('./app/public-shell.css'),
+      readSource('./features/home.tsx'),
+    ]);
+
+    expect(homeSource).toContain('data-stage-max-width="1120"');
+    expect(homeSource).toContain('data-stage-max-top="560"');
+    expect(homeSource).toContain('data-stage-min-visible="260"');
+    expect(shellStyles).toMatch(
+      /\.home-ignition-hero__stage\s*\{[\s\S]*inline-size:\s*min\(calc\(100vw - 48px\), 1120px\);/u,
+    );
+    expect(shellStyles).toContain('aspect-ratio: 16 / 9');
+  });
+
+  it('uses a 52-76px three-line display promise and unequal compatibility actions', async () => {
+    const [homeSource, shellStyles] = await Promise.all([
+      readSource('./features/home.tsx'),
+      readSource('./app/public-shell.css'),
+    ]);
+
+    expect(homeSource).toContain('splitHeroPromise');
+    expect(homeSource).toContain('primary>');
+    expect(shellStyles).toMatch(
+      /\.home-ignition-hero__promise\s*\{[\s\S]*font-family:\s*var\(--lb-font-display\);[\s\S]*font-size:\s*clamp\(52px, 6vw, 76px\);/u,
+    );
+    expect(shellStyles).toMatch(
+      /\.home-action--primary\s*\{[\s\S]*background:\s*var\(--lb-accent-electric\);/u,
+    );
+  });
+
+  it('keeps mobile copy first with a 16:10 crop, full-image action, and 48px controls', async () => {
+    const [homeSource, shellStyles, sharedSource] = await Promise.all([
+      readSource('./features/home.tsx'),
+      readSource('./app/public-shell.css'),
       readSource('../../../packages/web-features/src/components.tsx'),
     ]);
 
-    expect(styles).toContain('grid-template-columns: minmax(0, 5fr) minmax(0, 7fr)');
-    expect(styles).not.toMatch(/\.lb-web-command-artifact\s*\{[^}]*order:\s*-1/u);
-    expect(sharedSource).toContain('className="lb-web-command-action"');
+    expect(homeSource.indexOf('className="home-ignition-hero__copy"')).toBeLessThan(
+      homeSource.indexOf('className="home-ignition-hero__stage"'),
+    );
+    expect(shellStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.home-ignition-hero__stage img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
+    );
+    expect(shellStyles).toMatch(/\.home-action\s*\{[\s\S]*min-block-size:\s*48px/u);
+    expect(sharedSource).toContain('completeScreenshotLabel');
+  });
+
+  it('uses the exact bounded first-load motion roles with a complete reduced-motion override', async () => {
+    const shellStyles = await readSource('./app/public-shell.css');
+
+    expect(shellStyles).toMatch(
+      /\.home-ignition-hero__promise\s*\{[\s\S]*animation:[^;]*360ms[^;]*cubic-bezier\(0\.16, 1, 0\.3, 1\)/u,
+    );
+    expect(shellStyles).toMatch(
+      /\.home-ignition-hero__stage\s*\{[\s\S]*animation:[^;]*480ms[^;]*80ms[^;]*cubic-bezier\(0\.16, 1, 0\.3, 1\)/u,
+    );
+    expect(shellStyles).toContain('transform: translateY(8px)');
+    expect(shellStyles).toContain('transform: scale(0.985)');
+    expect(shellStyles).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.home-ignition-hero__promise,[\s\S]*\.home-ignition-hero__stage\s*\{[\s\S]*animation:\s*none/u,
+    );
   });
 
   it('keeps evidence provenance contextual instead of exposing raw capture metadata', async () => {
@@ -135,15 +190,6 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('Distribution blocked');
     expect(homeSource).not.toContain("publicBoundaryHref('releases-download'");
     expect(homeSource).not.toMatch(/['"`]\/[^'"`\s]+\.exe|development installer|self-signed/iu);
-  });
-
-  it('uses the canonical public type and spacing scale instead of oversized hero values', async () => {
-    const styles = await readSource('./styles/public.css');
-    const homeStyles = styles.slice(0, styles.indexOf('.public-catalog'));
-
-    expect(homeStyles).not.toMatch(/font-size:\s*clamp\(/u);
-    expect(homeStyles).not.toMatch(/(?:gap|padding[^:]*):[^;]*(?:80|88|96|112|144)px/u);
-    expect(homeStyles).toContain('font-size: var(--lb-text-display-size)');
   });
 
   it('admits only an approved executable capture with a matching image checksum', async () => {
