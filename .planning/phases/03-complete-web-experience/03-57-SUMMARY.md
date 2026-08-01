@@ -1,6 +1,6 @@
 ---
 phase: 03-complete-web-experience
-plan: "57"
+plan: '57'
 subsystem: ui
 tags: [nextjs, react, account-shell, responsive-navigation, accessibility]
 
@@ -12,6 +12,7 @@ provides:
   - native 48px current-task disclosure below 960px with route-preserving locale links
   - one canonical aria-current destination across desktop and mobile account navigation
   - canonical sign-in current-task projection and fully wrapped 320px preview status
+  - W11 browser evidence bound to the exact PT-BR preview note name while preserving the visible preview label
 affects: [03-61, account-visual-evidence, account-uat]
 
 tech-stack:
@@ -27,20 +28,23 @@ key-files:
     - apps/account/src/account-navigation.tsx
     - apps/account/src/app/account-shell.css
     - apps/account/src/account-shell.test.ts
+    - tooling/web-evidence/tests/account.spec.ts
 
 key-decisions:
-  - "Keep the server layout as the canonical owner of routes, localized groups, noindex metadata, preview truth, and fixture composition."
-  - "Keep one canonical desktop aria-current anchor while the mobile disclosure names the current task without duplicating current-page semantics."
-  - "Use the localized preview label as explicit provenance detail while rendering the locked remote-changes-disconnected copy once."
-  - "Project sign-in as a contextual canonical entry only when it is current, preserving responsibility ownership and one aria-current."
+  - 'Keep the server layout as the canonical owner of routes, localized groups, noindex metadata, preview truth, and fixture composition.'
+  - 'Keep one canonical desktop aria-current anchor while the mobile disclosure names the current task without duplicating current-page semantics.'
+  - 'Use the localized preview label as explicit provenance detail while rendering the locked remote-changes-disconnected copy once.'
+  - 'Project sign-in as a contextual canonical entry only when it is current, preserving responsibility ownership and one aria-current.'
+  - 'Assert W11 against the computed PT-BR note name Alterações remotas desconectadas; Prévia remains visible content rather than the accessible name.'
 
 patterns-established:
-  - "Responsive account navigation: replace the desktop responsibility rail with a closed native disclosure below 960px."
-  - "Preview truth: keep human-readable provenance explicit without exposing raw fixture or adapter metadata in ordinary chrome."
+  - 'Responsive account navigation: replace the desktop responsibility rail with a closed native disclosure below 960px.'
+  - 'Preview truth: keep human-readable provenance explicit without exposing raw fixture or adapter metadata in ordinary chrome.'
+  - 'Browser evidence: bind exact role/name assertions to the computed accessibility tree and verify subordinate visible labels separately.'
 
 requirements-completed: [WEB-08]
 
-duration: 20min
+duration: 28min
 completed: 2026-08-01
 status: complete
 ---
@@ -51,11 +55,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 20 min (12 min initial execution + 8 min rejection correction)
+- **Duration:** 28 min (12 min initial execution + 8 min rejection correction + 8 min W11 evidence correction)
 - **Started:** 2026-08-01T16:58:05Z
-- **Completed:** 2026-08-01T23:06:55Z
+- **Completed:** 2026-08-01T23:33:10Z
 - **Tasks:** 2
-- **Files modified:** 4
+- **Files modified:** 5
 
 ## Accomplishments
 
@@ -64,6 +68,7 @@ status: complete
 - Replaced the mobile route inventory below 960px with a closed 48px native current-task disclosure that reflows without horizontal page overflow at 320px.
 - Made the complete bilingual preview status wrap at 320px/400%-equivalent reflow instead of inheriting a single-line ellipsis.
 - Preserved noindex, same-origin routing, deterministic preview truth, forced-colors support, reduced-motion behavior, and the existing CSP boundary.
+- Corrected W11 browser evidence to assert the exact PT-BR `note` name **Alterações remotas desconectadas** while separately proving the visible **Prévia** label.
 
 ## Task Commits
 
@@ -76,6 +81,7 @@ Each TDD gate and implementation was committed atomically:
 5. **Rule 2 correction: keep preview provenance detail explicit** - `5c5cd43` (fix)
 6. **03-64 rejection RED: encode sign-in and status-wrap contracts** - `34197e5` (test)
 7. **03-64 rejection GREEN: close rejected account shell states** - `b28dabd` (fix)
+8. **03-58 evidence correction: align W11 preview semantics** - `3e5b0a4` (test)
 
 ## Files Created/Modified
 
@@ -83,6 +89,7 @@ Each TDD gate and implementation was committed atomically:
 - `apps/account/src/account-navigation.tsx` - Keeps pathname awareness inside one client boundary and exposes desktop/mobile responsibility navigation.
 - `apps/account/src/app/account-shell.css` - Defines the exact desktop geometry, compact responsive disclosure, narrow-width reflow, focus, forced-colors, and reduced-motion behavior.
 - `apps/account/src/account-shell.test.ts` - Enforces desktop shell, mobile disclosure, locale preservation, preview copy, and reflow contracts.
+- `tooling/web-evidence/tests/account.spec.ts` - Enforces W11 against the exact persistent PT-BR preview note and its visible **Prévia** label.
 
 ## Decisions Made
 
@@ -92,6 +99,7 @@ Each TDD gate and implementation was committed atomically:
 - The preview band uses exact bilingual human copy and an explicit localized provenance label, with raw fixture and adapter values kept out of ordinary chrome.
 - Canonical sign-in is projected as a contextual entry only while `/[locale]/sign-in` is current; the server supplies its bounded route and bilingual label, and the existing client boundary performs pathname matching.
 - The account shell overrides the shared status-detail ellipsis only below 760px, allowing full preview truth to wrap without changing the global design-system behavior.
+- W11 follows the computed accessibility tree: the persistent status surface is a `note` named **Alterações remotas desconectadas**, while **Prévia** is verified as exact visible content inside that note.
 
 ## Deviations from Plan
 
@@ -106,10 +114,19 @@ Each TDD gate and implementation was committed atomically:
 - **Verification:** All 16 account shell tests, strict TypeScript, optimized Next.js build, ESLint, Prettier, and the scoped stub scan pass.
 - **Committed in:** `5c5cd43`
 
+**2. [Rule 1 - Bug] Corrected stale W11 preview semantics**
+
+- **Found during:** Plan 03-58 verification replay of W11
+- **Issue:** The browser assertion expected a complementary region named `Prévia determinística`, but the computed accessibility tree exposes the persistent preview surface as a `note` named `Alterações remotas desconectadas`; `Prévia` is visible subordinate content.
+- **Fix:** Asserted the exact PT-BR note role/name and separately verified the exact visible `Prévia` label without changing shell markup or copy.
+- **Files modified:** `tooling/web-evidence/tests/account.spec.ts`
+- **Verification:** Focused W11 Playwright passed; account shell 18/18, full account 46/46, strict TypeScript, Prettier, and `git diff --check` passed.
+- **Committed in:** `3e5b0a4`
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 missing critical)
-**Impact on plan:** The correction strengthens the required preview-truth boundary without expanding scope.
+**Total deviations:** 2 auto-fixed (1 missing critical, 1 bug)
+**Impact on plan:** Both corrections strengthen the preview-truth contract without changing product source, shell geometry, localized copy, screenshots, or the visual manifest.
 
 ## TDD Gate Compliance
 
@@ -117,6 +134,7 @@ Each TDD gate and implementation was committed atomically:
 - GREEN commits follow their respective RED gates: `f05298b` and `623e6df`.
 - The 03-64 rejection correction has a dedicated RED commit (`34197e5`) before its GREEN commit (`b28dabd`).
 - The final correction was verified against the complete 18-test account shell suite.
+- The W11 evidence-only correction is committed atomically as `3e5b0a4`; it changes no implementation behavior and therefore requires no new GREEN commit.
 
 ## 03-64 Rejection Correction
 
@@ -125,11 +143,19 @@ Each TDD gate and implementation was committed atomically:
 - The native current-task disclosure remains closed by default, retains its 48px minimum target, and the document retains exactly one canonical `aria-current`.
 - No account workspace/content, visual golden, screenshot manifest, dependency, CSP, or trust-boundary files changed.
 
+## 03-58 W11 Evidence Correction
+
+- Reproduced the stale W11 failure against `complementary` / **Prévia determinística** before changing the browser contract.
+- Rejected an intermediate `complementary` / **Prévia** assertion because the captured accessibility tree proved the persistent rail is a `note` named **Alterações remotas desconectadas**.
+- Bound W11 to that exact role/name and retained an exact visible-content assertion for **Prévia** across all nine PT-BR responsibilities.
+- No account shell, feature source, localized copy, screenshot, golden, or visual-manifest files changed.
+
 ## Verification
 
 - `pnpm --filter @liiiraa/account exec vitest run src/account-shell.test.ts` - 18 passed.
-- `pnpm --filter @liiiraa/account exec vitest run` - full account package passed, 43 tests across 3 files.
+- `pnpm --filter @liiiraa/account exec vitest run` - full account package passed, 46 tests across 3 files.
 - `pnpm --filter @liiiraa/account check` - strict TypeScript passed.
+- `pnpm --filter @liiiraa/web-evidence exec playwright test tests/account.spec.ts --project=account-final-wide-1440 --grep "W11 exposes"` - 1 passed after reproducing the stale failure.
 - `pnpm --filter @liiiraa/account build` - optimized Next.js build passed.
 - ESLint on the modified TypeScript files passed.
 - Prettier check and `git diff --check` passed.
@@ -153,8 +179,9 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - All four plan-owned implementation/test files and this summary exist on disk.
-- All seven Plan 03-57 task and correction commits exist in git history.
+- All eight Plan 03-57 task and correction commits exist in git history.
 
 ---
-*Phase: 03-complete-web-experience*
-*Completed: 2026-08-01*
+
+_Phase: 03-complete-web-experience_
+_Completed: 2026-08-01_
