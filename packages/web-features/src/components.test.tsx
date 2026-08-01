@@ -39,7 +39,7 @@ type VisualManifestEntry = Readonly<{
   comparisonSource: string;
   locale: 'pt-BR' | 'en';
   localeReview: 'pt-BR-default' | 'en-parity';
-  rebaselineOwner: 'plan-03-42' | 'plan-03-43' | 'plan-03-44';
+  rebaselineOwner: 'plan-03-52';
   reviewPurpose: string;
   route: string;
   routeId: string;
@@ -735,16 +735,29 @@ describe('visual contract and story axes', () => {
     for (const entry of visualManifest.entries) {
       expect(entry).toMatchObject({
         comparisonSource: 'phase-02-approved-desktop-captures',
-        rebaselineOwner:
-          entry.surface === 'public'
-            ? 'plan-03-42'
-            : entry.surface === 'account'
-              ? 'plan-03-43'
-              : 'plan-03-44',
+        rebaselineOwner: 'plan-03-52',
       });
       expect(entry.route).toMatch(new RegExp(`^/${entry.locale}(?:/|$)`, 'u'));
-      expect(entry.reviewPurpose.length).toBeGreaterThan(12);
+      expect(entry.reviewPurpose).toMatch(/(?:PT-BR|English)/u);
+      expect(entry.reviewPurpose).toMatch(/(?:wide|mobile|desktop|reflow)/u);
       expect(entry.state.length).toBeGreaterThan(0);
+
+      if (entry.surface === 'public') {
+        expect(entry.reviewPurpose).toMatch(/strong app identity/u);
+        expect(entry.reviewPurpose).toMatch(/active task navigation/u);
+        expect(entry.reviewPurpose).toMatch(/route-preserving locale control/u);
+        expect(entry.reviewPurpose).toMatch(/artifact hierarchy/u);
+      } else {
+        expect(entry.reviewPurpose).toMatch(/premium shell and current context/u);
+        expect(entry.reviewPurpose).toMatch(/useful density/u);
+        expect(entry.reviewPurpose).toMatch(/compact mobile navigation/u);
+        expect(entry.reviewPurpose).toMatch(/route-preserving locale control/u);
+        expect(entry.reviewPurpose).toMatch(/deterministic no-authority/u);
+      }
+
+      expect(Object.keys(entry)).not.toEqual(
+        expect.arrayContaining(['approved', 'approval', 'publication', 'published']),
+      );
     }
 
     for (const surface of ['public', 'account', 'admin'] as const) {
