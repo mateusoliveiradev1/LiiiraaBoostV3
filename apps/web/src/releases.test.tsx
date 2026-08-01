@@ -121,9 +121,17 @@ describe('release content and routes', () => {
     }
 
     expect(w07Markup).toContain('Registro técnico da decisão');
+    expect(w07Markup).toContain('Integridade e recuperação');
     expect(w07Markup).toContain('Ver detalhes técnicos de integridade');
+    expect(w07Markup.indexOf('release-manifest-disclosure')).toBeLessThan(
+      w07Markup.indexOf('Campos demonstrativos do manifesto'),
+    );
     expect(w08Markup).toContain('Technical decision record');
+    expect(w08Markup).toContain('Integrity and recovery');
     expect(w08Markup).toContain('View technical integrity details');
+    expect(w08Markup.indexOf('release-manifest-disclosure')).toBeLessThan(
+      w08Markup.indexOf('Demonstrative manifest fields'),
+    );
   });
 
   it('prioritizes state, compatibility, integrity, risks, corrections, and recovery', async () => {
