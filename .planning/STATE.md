@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-48-PLAN.md
-last_updated: "2026-08-01T04:50:05.375Z"
+stopped_at: Completed 03-49-PLAN.md
+last_updated: "2026-08-01T05:05:14.186Z"
 last_activity: 2026-08-01
 last_activity_desc: Completed 03-48-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 110
-  completed_plans: 104
-  percent: 95
+  completed_plans: 105
+  percent: 20
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 46 of 52
+Plan: 47 of 52
 Status: Ready to execute Plan 03-46
 Last activity: 2026-08-01 — Completed 03-48-PLAN.md
 
@@ -152,6 +152,7 @@ _Updated after plan completion_
 | Phase 03 P44 | 15min | 2 tasks | 6 files |
 | Phase 03 P47 | 9 min | 3 tasks | 8 files |
 | Phase 03 P48 | 6 min | 2 tasks | 6 files |
+| Phase 03 P49 | 13min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -439,6 +440,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep authored admin denial responses on the strict production CSP contract even during local development. — Rejected origins must never inherit a development-only script execution capability.
 - [Phase 03]: Project locales only after canonical boundary matching — Only matched path parameters plus the target locale may reach routeHref; arbitrary URL state is rejected.
 - [Phase 03]: Keep locale and shared navigation controls as native anchors — Native links retain browser behavior while explicit language and current-page semantics remain available.
+- [Phase 03]: Project active public pillars and locale destinations only after canonical route matching; unmatched paths fail back to the target-locale Home. — Prevents arbitrary pathname state from crossing the localized public navigation boundary.
+- [Phase 03]: Keep public chrome server-owned while isolating pathname awareness in one narrow client navigation component. — Preserves locale validation and metadata on the server while enabling exact active-route behavior.
+- [Phase 03]: Use one primary compatibility action and keep screenshot/evidence metadata behind native disclosures. — Protects visitor hierarchy without weakening truthful evidence or distribution gates.
 
 ### Pending Todos
 
@@ -480,6 +484,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T04:48:46.636Z
-Stopped at: Completed 03-48-PLAN.md
+Last session: 2026-08-01T05:05:14.178Z
+Stopped at: Completed 03-49-PLAN.md
 Resume file: None

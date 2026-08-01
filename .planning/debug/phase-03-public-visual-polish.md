@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Phase 03 UAT public visual gap: user said `nao gostei de nenhum dos 3 viu`; public Home exposes boundary/evidence metadata and has an oversized, awkward hero with weak pacing."
 created: 2026-07-31T19:28:32.0992839-03:00
 updated: 2026-08-01T00:52:41-03:00
@@ -86,6 +86,6 @@ started: Observed during Phase 03 UAT; prior accepted state not reported.
 ## Resolution
 
 root_cause: A layered design-contract enforcement failure. `apps/web/src/styles/public.css` overrides the canonical 13/15/20/28 typography and 4/8/16/24/32/48/64 spacing with 44–88px hero type, multiple 52–68px headings, 80–144px whitespace, a 780px hero floor, and repeated 96px chapter padding, making copy dominate the real artifact and producing weak pacing. `apps/web/src/app/[locale]/layout.tsx` persistently exposes an internal `PUBLIC` origin rail and a placeholder boxed-LB brand, while `apps/web/src/features/home.tsx` repeats a hero trust boundary and serializes S01/viewport/commit provenance into an always-visible, English-defaulted caption. Tests explicitly require boundary-before-media and the public rail, scan only shared `web.css` for token compliance, and compare W01 against an already-rejected checked-in baseline. Thus deterministic/accessibility gates stayed green while the app-level hierarchy, branding, copy prioritization, and human visual approval were never enforced.
-fix: Not applied (diagnose-only). Redesign the public shell/Home on canonical tokens; restore the approved brand lockup; keep origin/provenance truth contextual or progressively disclosed rather than persistent primary copy; make the desktop artifact visually dominant; and expand tests to scan app CSS plus require named human approval for golden baselines.
-verification: Root cause confirmed by direct source/golden comparison, correct capture admission, and 64 focused tests passing unchanged despite the observed contract violations. No fix verification performed.
-files_changed: []
+fix: Plan 03-49 replaced the static route row with a canonical pathname-aware public navigation, one active task pillar per desktop/mobile projection, a compact native mobile disclosure, and a route-preserving flag-plus-language LocaleSwitcher. Home now uses the locked 5/7 Command Runway, keeps copy and compatibility first semantically and on mobile, gives the admitted desktop artifact wide-screen dominance, and replaces the six always-open metadata chapters with a three-step authored sequence plus contextual evidence disclosures. Distribution remains fail closed.
+verification: `rtk pnpm --filter @liiiraa/web test -- --run` passed 60 tests, `rtk pnpm --filter @liiiraa/web check` passed, `rtk pnpm --filter @liiiraa/web build` completed the optimized production build, and the Impeccable detector reported no banned patterns in the modified public interface files. Human visual approval remains owned by the later visual evidence/UAT plan.
+files_changed: [apps/web/src/app/[locale]/layout.tsx, apps/web/src/public-navigation.tsx, apps/web/src/app/public-shell.css, apps/web/src/public-shell.test.ts, apps/web/src/features/home.tsx, apps/web/src/styles/public.css, apps/web/src/home.test.tsx, apps/web/src/content/public/home.en.json, apps/web/src/home-content.test.ts]
