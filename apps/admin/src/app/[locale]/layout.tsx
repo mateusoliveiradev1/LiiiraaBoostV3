@@ -28,9 +28,6 @@ type AdminLocaleLayoutProps = Readonly<{
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     boundary: 'Origem administrativa dedicada. Cookies públicos e da conta não são aceitos.',
-    desktop: 'Ações de alto risco exigem uma viewport de classe desktop com pelo menos 960 px.',
-    mobile:
-      'Revisão segura, triagem, casos e auditoria permanecem disponíveis. Ações de alto risco estão bloqueadas nesta viewport.',
     navigation: 'Escopo da função',
     currentTask: 'Tarefa atual',
     preview: 'Alterações remotas desconectadas',
@@ -39,13 +36,9 @@ const COPY = Object.freeze({
     previewLabel: 'Prévia administrativa',
     surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
-    viewport: 'Política de viewport',
   }),
   en: Object.freeze({
     boundary: 'Dedicated administrative origin. Public and account cookies are not accepted.',
-    desktop: 'High-risk actions require a desktop-class viewport at least 960px wide.',
-    mobile:
-      'Safe review, triage, cases, and audit remain available. High-risk actions are blocked in this viewport.',
     navigation: 'Role scope',
     currentTask: 'Current task',
     preview: 'Remote changes disconnected',
@@ -54,7 +47,6 @@ const COPY = Object.freeze({
     previewLabel: 'Administrative preview',
     surface: 'Operations',
     skip: 'Skip to administrative content',
-    viewport: 'Viewport policy',
   }),
 });
 
@@ -150,20 +142,6 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           }
           role={role}
           roleLabel={ADMIN_ROLE_COPY[role][locale]}
-          viewportPolicy={
-            <section
-              aria-labelledby="admin-viewport-policy"
-              className="admin-viewport-gate"
-              data-viewport-gate="960"
-              role="region"
-            >
-              <h2 id="admin-viewport-policy">{copy.viewport}</h2>
-              <p className="admin-viewport-gate__desktop">{copy.desktop}</p>
-              <p className="admin-viewport-gate__mobile" role="status">
-                {copy.mobile}
-              </p>
-            </section>
-          }
         >
           <main id="admin-main" tabIndex={-1}>
             <AdminFocusHandoff />

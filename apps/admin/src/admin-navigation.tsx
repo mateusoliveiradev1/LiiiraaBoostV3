@@ -25,7 +25,6 @@ type AdminNavigationProps = Readonly<{
   preview: ReactNode;
   role: AdminPreviewRole;
   roleLabel: string;
-  viewportPolicy: ReactNode;
 }>;
 
 const normalizePathname = (href: string): string =>
@@ -76,7 +75,6 @@ export function AdminNavigation({
   preview,
   role,
   roleLabel,
-  viewportPolicy,
 }: AdminNavigationProps) {
   const pathname = usePathname();
   const searchParameters = useSearchParams();
@@ -141,10 +139,7 @@ export function AdminNavigation({
           </nav>
         </details>
 
-        <div className="admin-main-column">
-          {viewportPolicy}
-          {children}
-        </div>
+        <div className="admin-main-column">{children}</div>
       </div>
     </>
   );

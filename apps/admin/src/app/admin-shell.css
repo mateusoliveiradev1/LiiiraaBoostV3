@@ -275,31 +275,6 @@ button:focus-visible,
   min-inline-size: 0;
 }
 
-.admin-viewport-gate {
-  display: flex;
-  align-items: baseline;
-  gap: var(--lb-space-3);
-  padding: var(--lb-space-2) var(--lb-screen-padding);
-  border-block-end: 1px solid var(--lb-line-subtle);
-  background: var(--lb-surface-work);
-}
-
-.admin-viewport-gate h2,
-.admin-viewport-gate p {
-  margin: 0;
-}
-
-.admin-viewport-gate h2 {
-  flex: 0 0 auto;
-  font-size: var(--lb-text-label-size);
-}
-
-.admin-viewport-gate p {
-  max-inline-size: 76ch;
-  color: var(--lb-text-secondary);
-  font-size: var(--lb-text-label-size);
-}
-
 .admin-viewport-gate__mobile {
   display: none;
 }
@@ -846,7 +821,7 @@ button:focus-visible,
   .admin-nav__mobile {
     display: block;
     overflow: hidden;
-    padding: var(--lb-space-3) var(--lb-screen-padding);
+    padding-inline: var(--lb-screen-padding);
     border-inline-end: 0;
     border-block-end: 1px solid var(--lb-line-subtle);
     background: var(--lb-surface-inset);
@@ -856,18 +831,27 @@ button:focus-visible,
     display: flex;
     align-items: center;
     gap: var(--lb-space-2);
-    min-block-size: var(--lb-control-min-size);
+    block-size: 48px;
+    min-inline-size: 0;
     color: var(--lb-text-secondary);
     cursor: pointer;
     list-style-position: inside;
   }
 
+  .admin-nav__mobile > summary span {
+    flex: 0 0 auto;
+  }
+
   .admin-nav__mobile > summary strong {
+    min-inline-size: 0;
+    overflow: hidden;
     color: var(--lb-text-primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .admin-nav__mobile nav {
-    padding-block-start: var(--lb-space-2);
+    padding-block: var(--lb-space-2) var(--lb-space-3);
   }
 
   .admin-landing__layout {
@@ -887,7 +871,6 @@ button:focus-visible,
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .admin-viewport-gate__desktop,
   [data-high-risk-action='true'] {
     display: none !important;
   }
@@ -918,7 +901,12 @@ button:focus-visible,
     display: none;
   }
 
+  .admin-preview-band .lb-status-detail {
+    display: none;
+  }
+
   #admin-main {
+    padding-inline: 16px;
     padding-block-start: var(--lb-space-4);
   }
 

@@ -157,7 +157,7 @@ describe('admin shell', () => {
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
   });
 
-  it('provides skip, focus, role rail, and semantic viewport gate contracts', () => {
+  it('provides skip, focus, preview, and semantic viewport gate contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
@@ -165,8 +165,7 @@ describe('admin shell', () => {
     expect(layout).toContain('href="#admin-main"');
     expect(layout).toContain('className="admin-preview-band"');
     expect(layout).toContain('data-authority="disconnected"');
-    expect(layout).toContain('data-viewport-gate="960"');
-    expect(layout).toContain('role="region"');
+    expect(layout).not.toContain('data-viewport-gate="960"');
     expect(layout).toContain('<main id="admin-main" tabIndex={-1}>');
     expect(focus).toContain('#admin-main > h1');
     expect(styles).toMatch(
