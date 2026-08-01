@@ -143,9 +143,11 @@ export const selectWebTestSurfaces = (
       (argument) => /\.(?:spec|pw)\.ts(?:$|:)/u.test(argument) || argument.startsWith('--project='),
     )
     .join(' ');
+  const hasExplicitProject = selector.includes('--project=');
   const startsEverySurface =
     selector.length === 0 ||
-    /accessibility-responsive|security-artifacts|matrix\.config/u.test(selector);
+    (!hasExplicitProject &&
+      /accessibility-responsive|motion-contract|security-artifacts|matrix\.config/u.test(selector));
   return surfaces.filter(({ surface }) =>
     startsEverySurface
       ? true

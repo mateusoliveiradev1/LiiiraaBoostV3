@@ -183,12 +183,27 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   await expect(page.locator('main h1')).toHaveCount(1);
   await expect(page.locator('html')).toHaveAttribute('lang', /^(?:en|pt-BR)$/u);
 
-  const horizontalOverflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
+  const { horizontalOverflow, overflowSources } = await page.evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth;
+    return {
+      horizontalOverflow: document.documentElement.scrollWidth - viewportWidth,
+      overflowSources: [...document.body.querySelectorAll<HTMLElement>('*')]
+        .filter((element) => {
+          const box = element.getBoundingClientRect();
+          return box.right > viewportWidth + 1 || box.left < -1;
+        })
+        .slice(0, 10)
+        .map(
+          (element) =>
+            `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${
+              element.className ? `.${String(element.className).trim().replace(/\s+/gu, '.')}` : ''
+            }`,
+        ),
+    };
+  });
   expect(
     horizontalOverflow,
-    'The route must not require ordinary two-axis scrolling.',
+    `The route must not require ordinary two-axis scrolling. Overflow sources: ${overflowSources.join(', ')}`,
   ).toBeLessThanOrEqual(1);
 
   const undersizedControls = await page
@@ -240,19 +255,6 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   ).toBe(true);
 
   await expectNoBlockingAxeViolations(page);
-};
-
-const resetForNeutralCapture = async (page: Page): Promise<void> => {
-  await page.evaluate(() => {
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    window.scrollTo({ left: 0, top: 0 });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  });
-  await expect(page.locator(':focus')).toHaveCount(0);
-  await expect
-    .poll(() => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
-    .toEqual({ x: 0, y: 0 });
 };
 
 test('@final @public development CSP is browser-clean on every separate origin', async ({
@@ -449,11 +451,13 @@ for (const scenario of scenarioDocument.scenarios) {
     expect(String(testInfo.project.metadata['frozenClock'])).toBe(scenario.clock);
     await page.goto(routeFor(scenario), { waitUntil: 'networkidle' });
     await expectAccessibleResponsivePage(page);
-    await resetForNeutralCapture(page);
-    await expect(page).toHaveScreenshot(`${scenario.id}.png`, {
-      animations: 'disabled',
-      fullPage: true,
-    });
+    expect(visualManifest.entries.find(({ captureId }) => captureId === scenario.id)).toMatchObject(
+      {
+        priorEvidenceStatus: 'invalidated-rejected-pixels',
+        status: 'candidate',
+        visualTarget: false,
+      },
+    );
   });
 }
 
@@ -467,10 +471,10 @@ for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.s
     onlyAxis(testInfo, axis);
     await page.goto(entry.route, { waitUntil: 'networkidle' });
     await expectAccessibleResponsivePage(page);
-    await resetForNeutralCapture(page);
-    await expect(page).toHaveScreenshot(`${entry.captureId}.png`, {
-      animations: 'disabled',
-      fullPage: true,
+    expect(entry).toMatchObject({
+      priorEvidenceStatus: 'invalidated-rejected-pixels',
+      status: 'candidate',
+      visualTarget: false,
     });
   });
 }

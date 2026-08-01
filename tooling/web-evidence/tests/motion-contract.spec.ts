@@ -93,12 +93,18 @@ test('@final @public content and actions are available before entrance animation
   onlyAxis(testInfo, 'wide-1440');
   await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
-  const primaryAction = page.getByRole('link', { name: 'Check compatibility', exact: true }).first();
+  const primaryAction = page
+    .getByRole('link', { name: 'Check compatibility', exact: true })
+    .first();
   await expect(primaryAction).toBeVisible();
   expect(
     await primaryAction.evaluate((element) => {
       const style = getComputedStyle(element);
-      return { animationName: style.animationName, opacity: style.opacity, visibility: style.visibility };
+      return {
+        animationName: style.animationName,
+        opacity: style.opacity,
+        visibility: style.visibility,
+      };
     }),
   ).toEqual({ animationName: 'none', opacity: '1', visibility: 'visible' });
 });
@@ -107,6 +113,7 @@ test('@final @public reduced motion removes transform scale stagger and glow ani
   page,
 }, testInfo) => {
   onlyAxis(testInfo, 'reduced-motion');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/pt-BR', { waitUntil: 'domcontentloaded' });
 
   const reduced = await page.locator('.home-ignition-hero__stage').evaluate((stage) => {
@@ -151,9 +158,13 @@ for (const surface of ['account', 'admin'] as const) {
       waitUntil: 'domcontentloaded',
     });
 
-    const animated = await page.locator('main, main h1, main a, main button').evaluateAll((elements) =>
-      elements.filter((element) => getComputedStyle(element).animationName !== 'none').map((element) => element.tagName),
-    );
+    const animated = await page
+      .locator('main, main h1, main a, main button')
+      .evaluateAll((elements) =>
+        elements
+          .filter((element) => getComputedStyle(element).animationName !== 'none')
+          .map((element) => element.tagName),
+      );
     expect(animated).toEqual([]);
     await expect(page.locator('main h1')).toBeVisible();
     await expect(page.locator('main a, main button').first()).toBeVisible();

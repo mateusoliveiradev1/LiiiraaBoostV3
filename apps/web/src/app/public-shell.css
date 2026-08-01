@@ -41,7 +41,7 @@ summary:focus-visible,
   background: var(--lb-text-primary);
   font-weight: var(--lb-weight-semibold);
   transform: translateY(calc(-100% - var(--lb-space-3)));
-  transition: transform 140ms var(--lb-motion-easing);
+  transition: transform var(--lb-motion-control-duration) var(--lb-motion-easing);
 }
 
 .public-skip-link:focus {
@@ -707,6 +707,7 @@ main {
     background: ButtonFace;
   }
 
+  body .public-home .home-action--primary,
   .public-action--primary,
   .public-mobile-menu__actions a:last-child,
   .public-navigation a[data-current='page'] {

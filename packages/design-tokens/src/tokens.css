@@ -425,7 +425,9 @@
 }
 
 .lb-button[data-lb-variant='destructive'] {
-  background: var(--lb-destructive-fill);
+  border-color: var(--lb-destructive-fill);
+  color: var(--lb-text-primary);
+  background: var(--lb-canvas);
 }
 
 .lb-button[data-lb-variant='quiet'],

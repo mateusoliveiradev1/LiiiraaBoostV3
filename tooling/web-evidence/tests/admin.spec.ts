@@ -78,16 +78,24 @@ test('@final @admin geometry preserves the 72 280 40 focal queue workspace', asy
   expect((await page.locator('.admin-header__bar').boundingBox())?.height).toBe(72);
   expect((await page.locator('.admin-nav__desktop').boundingBox())?.width).toBe(280);
   expect((await page.locator('.admin-preview-band').boundingBox())?.height).toBe(40);
-  expect(Number.parseFloat(await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize))).toBe(32);
+  expect(
+    Number.parseFloat(
+      await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize),
+    ),
+  ).toBe(32);
   await expect(page.locator('[data-admin-grid="8-4"]')).toBeVisible();
-  const gridColumns = await page.locator('[data-admin-grid="8-4"]').evaluate((node) =>
-    getComputedStyle(node).gridTemplateColumns.split(' ').map(Number.parseFloat),
-  );
+  const gridColumns = await page
+    .locator('[data-admin-grid="8-4"]')
+    .evaluate((node) =>
+      getComputedStyle(node).gridTemplateColumns.split(' ').map(Number.parseFloat),
+    );
   expect(gridColumns[0] / gridColumns[1]).toBeGreaterThanOrEqual(1.95);
   await expect(page.locator('.admin-landing__queue')).toBeVisible();
   await expect(page.locator('.admin-landing__queue table')).toBeVisible();
-  await expect(page.locator('[data-state="current"]')).toContainText('Operations control desk');
-  await expect(page.locator('.lb-status-signal')).not.toHaveCount(0);
+  await expect(page.locator('.admin-nav__desktop a[aria-current="page"]')).toContainText(
+    'Role workspace',
+  );
+  await expect(page.locator('.lb-web-status')).not.toHaveCount(0);
 });
 
 for (const axis of ['mobile-390', 'reflow-320'] as const) {
@@ -101,7 +109,9 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     await expect(disclosure).not.toHaveAttribute('open', '');
     expect((await page.locator('.admin-header__bar').boundingBox())?.height).toBe(60);
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
-    expect((await page.locator('.admin-header .lb-web-locale-switcher').boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    expect(
+      (await page.locator('.admin-header .lb-web-locale-switcher').boundingBox())?.height,
+    ).toBeGreaterThanOrEqual(48);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       await page.evaluate(() => document.documentElement.clientWidth),
     );

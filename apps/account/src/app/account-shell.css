@@ -388,12 +388,14 @@ button:focus-visible,
 
 .account-overview__actions a:first-child {
   border-color: var(--lb-cobalt-action);
+  color: var(--lb-primary-label);
   background: var(--lb-cobalt-action);
 }
 
 .account-overview__actions a:hover,
 .account-overview__actions a:focus-visible {
   border-color: var(--lb-cobalt-signal);
+  color: var(--lb-text-primary);
   background: var(--lb-surface-raised);
 }
 
@@ -560,8 +562,8 @@ button:focus-visible,
 
 .account-definition-list > div {
   display: grid;
-  grid-template-columns: minmax(calc(var(--lb-space-7) * 2), 0.45fr) minmax(0, 1fr);
-  gap: var(--lb-space-3);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-1);
   align-content: start;
   padding-block: var(--lb-space-3);
   border-block-end: 1px solid var(--lb-line-subtle);
@@ -576,6 +578,7 @@ button:focus-visible,
 .account-definition-list dd {
   min-inline-size: 0;
   margin: 0;
+  overflow-wrap: anywhere;
   text-wrap: pretty;
 }
 
