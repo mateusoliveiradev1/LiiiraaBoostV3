@@ -49,7 +49,30 @@ test('@final @public W07 renders a complete demonstrative manifest and a termina
   await expect(page.getByRole('heading', { name: /download público|download.*bloqueado/iu })).toBeVisible();
   await expect(page.locator('.lb-web-manifest')).toContainText(/SHA-256|Authenticode|publisher|publicDistributionApproved/iu);
   await expect(page.locator('p[aria-live="assertive"]')).toContainText(/bloqueado|continuar/iu);
-  await expect(page.getByRole('link', { name: 'Verificar compatibilidade', exact: true })).toBeVisible();
+  const compatibilityLinks = page.getByRole('link', {
+    name: 'Verificar compatibilidade',
+    exact: true,
+  });
+  await expect(compatibilityLinks).toHaveCount(2);
+
+  const terminalGate = page.getByRole('alert').filter({
+    has: page.getByRole('heading', { name: 'O download público está bloqueado', exact: true }),
+  });
+  const terminalActions = terminalGate.getByRole('navigation', {
+    name: 'O download público está bloqueado',
+    exact: true,
+  });
+  await expect(
+    terminalActions.getByRole('link', { name: 'Verificar compatibilidade', exact: true }),
+  ).toBeVisible();
+  const terminalActionHrefs = await terminalActions.getByRole('link').evaluateAll((links) =>
+    links.map((link) => link.getAttribute('href')),
+  );
+  expect(terminalActionHrefs).toEqual([
+    '/pt-BR/compatibility',
+    '/pt-BR/releases',
+    '/pt-BR/support',
+  ]);
   await assertNoExecutableArtifact(page);
 });
 
