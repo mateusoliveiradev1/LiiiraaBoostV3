@@ -21,7 +21,6 @@ import {
   PostDownloadGuide,
   ReleaseChannelSelector,
   ReleaseIntegrityPanel,
-  RouteHeader,
   SignatureVerificationGuide,
   StatusSignal,
 } from './release-ui';
@@ -535,7 +534,7 @@ const ChannelPolicies = ({
         </a>
       ))}
     </nav>
-    <div className="catalog-chapters">
+    <div className="release-channel-ledger">
       {content.channels.map((channel) => (
         <section aria-labelledby={`release-channel-${channel.id}`} key={channel.id}>
           <h3 id={`release-channel-${channel.id}`}>{channel.name}</h3>
@@ -580,17 +579,54 @@ const ChannelPolicies = ({
   </ReleaseChannelSelector>
 );
 
-const ReleaseNotes = ({ content }: Readonly<{ content: ReleaseContent }>) => (
-  <section aria-labelledby="release-notes-title">
+const RELEASE_MOVEMENT_ORDER = Object.freeze([
+  'compatibility',
+  'changes',
+  'risks',
+  'corrections',
+  'migration',
+  'recovery',
+] as const);
+
+const ReleaseNotes = ({
+  content,
+  resolution,
+}: Readonly<{ content: ReleaseContent; resolution: ReleasePageResolution }>) => (
+  <section aria-labelledby="release-notes-title" className="release-notes-movement">
     <h2 id="release-notes-title">{content.releaseNotes.title}</h2>
     <p>{content.releaseNotes.summary}</p>
-    <div className="catalog-chapters">
-      {content.releaseNotes.sections.map((section) => (
-        <section id={`release-note-${section.id}`} key={section.id}>
-          <h3>{section.title}</h3>
-          <p>{section.body}</p>
-        </section>
-      ))}
+    <div className="release-notes-flow">
+      {RELEASE_MOVEMENT_ORDER.map((id) =>
+        content.releaseNotes.sections.find((section) => section.id === id),
+      ).map((section, index) => {
+        if (section === undefined) throw new Error('RELEASE_CONTENT_INVALID:movement');
+        return (
+          <div key={section.id}>
+            <section
+              className={`release-movement release-${section.id}-movement`}
+              id={`release-note-${section.id}`}
+            >
+              <h3>{section.title}</h3>
+              <p>{section.body}</p>
+            </section>
+            {index === 0 ? (
+              <section className="release-movement release-integrity-movement">
+                <h3>{content.manifest.title}</h3>
+                <p>{content.manifest.notice}</p>
+                <a
+                  href={requiredHref('releases-integrity', {
+                    channel: resolution.channel,
+                    locale: resolution.locale,
+                    version: resolution.version,
+                  })}
+                >
+                  {content.navigation.integrity}
+                </a>
+              </section>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   </section>
 );
@@ -812,7 +848,7 @@ const RouteComposition = ({
             locale={resolution.locale}
             selectedChannel={resolution.channel}
           />
-          <ReleaseNotes content={content} />
+          <ReleaseNotes content={content} resolution={resolution} />
           <ReleaseHistory content={content} />
           <AnalyticsDisclosure content={content} />
         </>
@@ -825,13 +861,13 @@ const RouteComposition = ({
             locale={resolution.locale}
             selectedChannel={resolution.channel}
           />
-          <ReleaseNotes content={content} />
+          <ReleaseNotes content={content} resolution={resolution} />
         </>
       );
     case 'releases-version':
       return (
         <>
-          <ReleaseNotes content={content} />
+          <ReleaseNotes content={content} resolution={resolution} />
           <ReleaseHistory content={content} />
         </>
       );
@@ -868,7 +904,10 @@ export const ReleaseExperience = ({
   const content = getReleaseContent(resolution.locale);
   const decision = decisionFor(resolution);
   return (
-    <div className="lb-web-product-frame" data-release-route={resolution.routeId}>
+    <div
+      className="release-experience lb-web-product-frame"
+      data-release-route={resolution.routeId}
+    >
       <ChannelNavigation
         channel={resolution.channel}
         content={content}
@@ -876,29 +915,43 @@ export const ReleaseExperience = ({
         version={resolution.version}
       />
       <article className="public-catalog">
-        <RouteHeader description={content.metadata.description} title={content.metadata.title} />
-        <ArticleMetadata
-          entries={[
-            { label: content.identity.label, value: content.identity.detail },
-            {
-              label: resolution.locale === 'pt-BR' ? 'Canal' : 'Channel',
-              value: <code>{resolution.channel}</code>,
-            },
-            {
-              label: resolution.locale === 'pt-BR' ? 'Versão' : 'Version',
-              value: <code>{resolution.version}</code>,
-            },
-            {
-              label: content.identity.reviewed,
-              value: (
-                <time dateTime={RELEASE_METADATA.lastReviewedAt}>
-                  {RELEASE_METADATA.lastReviewedAt.slice(0, 10)}
-                </time>
-              ),
-            },
-            { label: content.identity.validation, value: <code>ReleaseRecord</code> },
-          ]}
-        />
+        <header className="release-state-header lb-web-route-header">
+          <StatusSignal
+            label={resolution.locale === 'pt-BR' ? 'Download bloqueado' : 'Download blocked'}
+            state="unavailable"
+          />
+          <h1 tabIndex={-1}>{content.metadata.title}</h1>
+          <p>{content.metadata.description}</p>
+        </header>
+        <details className="release-technical-context">
+          <summary>
+            {resolution.locale === 'pt-BR'
+              ? 'Canal, versão e origem desta informação'
+              : 'Channel, version, and information source'}
+          </summary>
+          <ArticleMetadata
+            entries={[
+              { label: content.identity.label, value: content.identity.detail },
+              {
+                label: resolution.locale === 'pt-BR' ? 'Canal' : 'Channel',
+                value: <code>{resolution.channel}</code>,
+              },
+              {
+                label: resolution.locale === 'pt-BR' ? 'Versão' : 'Version',
+                value: <code>{resolution.version}</code>,
+              },
+              {
+                label: content.identity.reviewed,
+                value: (
+                  <time dateTime={RELEASE_METADATA.lastReviewedAt}>
+                    {RELEASE_METADATA.lastReviewedAt.slice(0, 10)}
+                  </time>
+                ),
+              },
+              { label: content.identity.validation, value: <code>ReleaseRecord</code> },
+            ]}
+          />
+        </details>
         <RouteComposition content={content} resolution={resolution} />
         <DownloadDecisionView content={content} decision={decision} locale={resolution.locale} />
       </article>

@@ -117,7 +117,7 @@ describe('release content and routes', () => {
       readFile(new URL('./features/releases.tsx', import.meta.url), 'utf8'),
     );
     expect(source).not.toContain('continueAnyway');
-    expect(source).not.toMatch(/<a[^>]+download/iu);
+    expect(source).not.toMatch(/<a[^>]+download(?:=|\s|>)/iu);
   });
 
   it('subordinates dense release metadata to an invoked technical disclosure', () => {

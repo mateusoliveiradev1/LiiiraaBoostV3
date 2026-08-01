@@ -64,6 +64,9 @@ const SECTION_KINDS = Object.freeze([
   'recovery',
   'technical-detail',
 ] as const);
+const DOCUMENTATION_READING_ORDER = new Map(
+  SECTION_KINDS.map((kind, index) => [kind, index] as const),
+);
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -334,6 +337,7 @@ const copyFor = (locale: WebLocale) =>
         risk: 'Risco',
         search: 'Pesquisar',
         sections: 'Seções',
+        technicalContext: 'Versão, risco e origem deste documento',
         validation: 'Validação',
         version: 'Versão',
       }
@@ -365,6 +369,7 @@ const copyFor = (locale: WebLocale) =>
         risk: 'Risk',
         search: 'Search',
         sections: 'Sections',
+        technicalContext: 'Document version, risk, and source',
         validation: 'Validation',
         version: 'Version',
       };
@@ -701,8 +706,19 @@ const ArticleSection = ({
   children,
   heading,
   id,
-}: Readonly<{ children: ReactNode; heading: string; id: string }>) => (
-  <section id={id} tabIndex={-1}>
+  kind,
+}: Readonly<{
+  children: ReactNode;
+  heading: string;
+  id: string;
+  kind: DocumentationArticle['sections'][number]['kind'];
+}>) => (
+  <section
+    className={kind === 'technical-detail' ? 'documentation-deep-detail' : undefined}
+    data-documentation-kind={kind}
+    id={id}
+    tabIndex={-1}
+  >
     <h2>{heading}</h2>
     {children}
   </section>
@@ -779,47 +795,50 @@ const DocumentationArticleView = ({
           )
         ) : null}
         <RouteHeader description={document.summary} title={document.title} />
-        <ArticleMetadata
-          entries={[
-            { label: copy.version, value: <code>{document.identity.version}</code> },
-            { label: copy.channel, value: <code>{document.identity.channel}</code> },
-            {
-              label: copy.lastReview,
-              value: (
-                <time dateTime={document.metadata.lastReviewedAt}>
-                  {document.metadata.lastReviewedAt.slice(0, 10)}
-                </time>
-              ),
-            },
-            { label: copy.owner, value: document.metadata.owner },
-            {
-              label: copy.validation,
-              value: (
-                <StatusSignal
-                  label={document.metadata.validationState}
-                  state={
-                    document.metadata.validationState === 'validated'
-                      ? 'success'
-                      : document.metadata.validationState === 'unsupported'
-                        ? 'stale'
-                        : 'warning'
-                  }
-                />
-              ),
-            },
-            { label: copy.risk, value: document.risk },
-            {
-              label: copy.platform,
-              value: document.platform.map((platform) => <code key={platform}>{platform} </code>),
-            },
-            {
-              label: copy.releaseReferences,
-              value: document.metadata.releaseReferences.map((reference) => (
-                <code key={reference}>{reference} </code>
-              )),
-            },
-          ]}
-        />
+        <details className="documentation-technical-context">
+          <summary>{copy.technicalContext}</summary>
+          <ArticleMetadata
+            entries={[
+              { label: copy.version, value: <code>{document.identity.version}</code> },
+              { label: copy.channel, value: <code>{document.identity.channel}</code> },
+              {
+                label: copy.lastReview,
+                value: (
+                  <time dateTime={document.metadata.lastReviewedAt}>
+                    {document.metadata.lastReviewedAt.slice(0, 10)}
+                  </time>
+                ),
+              },
+              { label: copy.owner, value: document.metadata.owner },
+              {
+                label: copy.validation,
+                value: (
+                  <StatusSignal
+                    label={document.metadata.validationState}
+                    state={
+                      document.metadata.validationState === 'validated'
+                        ? 'success'
+                        : document.metadata.validationState === 'unsupported'
+                          ? 'stale'
+                          : 'warning'
+                    }
+                  />
+                ),
+              },
+              { label: copy.risk, value: document.risk },
+              {
+                label: copy.platform,
+                value: document.platform.map((platform) => <code key={platform}>{platform} </code>),
+              },
+              {
+                label: copy.releaseReferences,
+                value: document.metadata.releaseReferences.map((reference) => (
+                  <code key={reference}>{reference} </code>
+                )),
+              },
+            ]}
+          />
+        </details>
         <details open>
           <summary>{copy.articleIndex}</summary>
           <DocumentationIndex
@@ -832,28 +851,39 @@ const DocumentationArticleView = ({
           />
         </details>
         <TroubleshootingComposition document={document} locale={locale} />
-        <div className="catalog-chapters">
-          {document.sections.map((section) => (
-            <ArticleSection heading={section.heading} id={section.id} key={section.id}>
-              <p>{section.body}</p>
-              {section.kind === 'evidence' ? (
-                <ul aria-label={copy.evidence}>
-                  {document.metadata.evidenceReferences.map((reference) => (
-                    <li key={reference}>
-                      <code>{reference}</code>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              {section.kind === 'technical-detail' && document.identifiers.length > 0 ? (
-                <p className="lb-web-table-region" tabIndex={0}>
-                  {document.identifiers.map((identifier) => (
-                    <code key={identifier}>{identifier} </code>
-                  ))}
-                </p>
-              ) : null}
-            </ArticleSection>
-          ))}
+        <div className="documentation-article-flow">
+          {[...document.sections]
+            .sort(
+              (left, right) =>
+                (DOCUMENTATION_READING_ORDER.get(left.kind) ?? Number.MAX_SAFE_INTEGER) -
+                (DOCUMENTATION_READING_ORDER.get(right.kind) ?? Number.MAX_SAFE_INTEGER),
+            )
+            .map((section) => (
+              <ArticleSection
+                heading={section.heading}
+                id={section.id}
+                key={section.id}
+                kind={section.kind}
+              >
+                <p>{section.body}</p>
+                {section.kind === 'evidence' ? (
+                  <ul aria-label={copy.evidence}>
+                    {document.metadata.evidenceReferences.map((reference) => (
+                      <li key={reference}>
+                        <code>{reference}</code>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {section.kind === 'technical-detail' && document.identifiers.length > 0 ? (
+                  <p className="lb-web-table-region" tabIndex={0}>
+                    {document.identifiers.map((identifier) => (
+                      <code key={identifier}>{identifier} </code>
+                    ))}
+                  </p>
+                ) : null}
+              </ArticleSection>
+            ))}
         </div>
       </article>
     </div>
@@ -887,7 +917,10 @@ const DocumentationIndexView = ({
           searchParams={request.searchParams}
           version={version}
         />
-        <section aria-labelledby="documentation-task-index-title">
+        <section
+          aria-labelledby="documentation-task-index-title"
+          className="documentation-index-workspace"
+        >
           <h2 id="documentation-task-index-title">{domain ?? copy.index}</h2>
           <ol className="lb-web-documentation-index">
             {items.map((item) => (
