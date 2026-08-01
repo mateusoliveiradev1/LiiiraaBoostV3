@@ -240,6 +240,16 @@ Each task was committed atomically through its TDD gates:
 - Focused account/public/admin contrast, reflow, mobile, forced-colors, and geometry reruns all passed.
 - Diff whitespace and Prettier checks passed for changed formatted files; canonical precision in the design-token authority was preserved.
 
+## Post-Source-Correction Replay
+
+- Replayed Plan 03-61 after the public and hero evidence owner corrections `473aa9b`, `2b9b935`, `dc650b8`, `40c85a2`, `bc2d32b`, and `395647f`, followed by the scoped W07 evidence correction `29b3013` and its owner record `8a94091`.
+- Permanent candidate selection passed 1 test and proved exactly 25 unique W01-W18/G01-G07 project/ID pairs.
+- The default-off candidate update proof skipped its single test as intended; no `--update-snapshots` command was run.
+- The focused W07/W08/W09 release, status, channel, and geometry replay passed 7 tests with 56 intentional project/axis skips.
+- The ordinary candidate-aware public/account/admin/accessibility matrix passed 55 tests with 263 intentional project/axis skips.
+- The exact unfiltered motion contract passed 5 tests with 40 intentional project/axis skips.
+- No application source, evidence harness, manifest, archive, candidate screenshot, package, or lockfile changed during this replay. The unrelated untracked `apps/desktop/src-tauri/gen/` directory was preserved untouched.
+
 ## Known Stubs
 
 None - no placeholder, TODO, FIXME, empty UI data source, or future-only stub was introduced.
