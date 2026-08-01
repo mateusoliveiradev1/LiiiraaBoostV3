@@ -287,7 +287,7 @@ describe('task-specific account workspace density', () => {
     expect(profileSource).toContain("safeDraftFields: ['displayName', 'locale']");
     expect(deviceSource).not.toContain('safeDraftFields:');
     expect(privacySource).not.toContain('safeDraftFields:');
-    expect(supportSource).toContain("fields: { description, subject }");
+    expect(supportSource).toContain('fields: { description, subject }');
     expect(supportSource).toContain("safeDraftFields: ['subject']");
     expect(supportSource).not.toContain("safeDraftFields: ['description'");
   });

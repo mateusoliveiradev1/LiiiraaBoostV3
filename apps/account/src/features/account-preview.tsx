@@ -1,6 +1,6 @@
 'use client';
 
-import { LbButton, LbTextArea, LbTextField } from '@liiiraa/design-system';
+import { LbButton, LbSkeletonRegion, LbTextArea, LbTextField } from '@liiiraa/design-system';
 import {
   EmptyComposition,
   PreviewBoundary,
@@ -26,6 +26,22 @@ import accountPtBrJson from '../content/account.pt-BR.json';
 import { type AccountPreviewRoute } from '../account-preview-model';
 export type AccountPreviewState =
   'loading' | 'ready' | 'empty' | 'offline' | 'stale' | 'expired-session' | 'failure';
+
+type DegradedAccountState = Exclude<AccountPreviewState, 'empty' | 'loading' | 'ready'>;
+
+const DEGRADED_ACCOUNT_STATES = Object.freeze([
+  'offline',
+  'stale',
+  'expired-session',
+  'failure',
+] as const satisfies readonly DegradedAccountState[]);
+
+const DEGRADED_ACCOUNT_STATE_LABELS = Object.freeze({
+  offline: Object.freeze({ en: 'Offline', 'pt-BR': 'Sem conexão' }),
+  stale: Object.freeze({ en: 'Review required', 'pt-BR': 'Revisão necessária' }),
+  'expired-session': Object.freeze({ en: 'Session expired', 'pt-BR': 'Sessão expirada' }),
+  failure: Object.freeze({ en: 'Retryable failure', 'pt-BR': 'Falha recuperável' }),
+} satisfies Readonly<Record<DegradedAccountState, Readonly<Record<WebLocale, string>>>>);
 
 type AccountContent = Readonly<{
   schemaVersion: 1;
@@ -267,8 +283,23 @@ const FixtureHeader = ({
   </header>
 );
 
-const DegradedAccountPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
-  <article data-account-state="offline stale expired-session partial-failure">
+const stateContentKey = (state: DegradedAccountState): keyof AccountContent['states'] =>
+  state === 'expired-session' ? 'expired' : state;
+
+const stateSignal = (state: DegradedAccountState): 'error' | 'offline' | 'stale' | 'warning' =>
+  state === 'failure'
+    ? 'error'
+    : state === 'offline'
+      ? 'offline'
+      : state === 'stale'
+        ? 'stale'
+        : 'warning';
+
+const DegradedAccountBody = ({
+  content,
+  states,
+}: Readonly<{ content: AccountContent; states: readonly DegradedAccountState[] }>) => (
+  <>
     <FixtureHeader summary={content.states.failure} title={content.recovery.title} />
     <PreviewBoundary
       description={
@@ -278,21 +309,70 @@ const DegradedAccountPreview = ({ content }: Readonly<{ content: AccountContent 
       }
     />
     <ol className="lb-web-timeline">
-      {(['offline', 'stale', 'expired', 'failure'] as const).map((state) => (
+      {states.map((state) => (
         <li key={state}>
           <StatusSignal
-            label={state === 'failure' ? 'Failure' : state}
-            state={state === 'failure' ? 'error' : 'warning'}
+            label={DEGRADED_ACCOUNT_STATE_LABELS[state][content.locale]}
+            state={stateSignal(state)}
           />
-          <p>{content.states[state]}</p>
+          <p>{content.states[stateContentKey(state)]}</p>
         </li>
       ))}
     </ol>
     <p role="status">
-      <strong>{content.recovery.safeWork}:</strong> displayName, locale, supportSubject.
+      <strong>{content.recovery.safeWork}:</strong>{' '}
+      {content.locale === 'pt-BR'
+        ? 'Nome de exibição, idioma e assunto do suporte permanecem disponíveis; os detalhes da mensagem são apagados.'
+        : 'Display name, language, and support subject remain available; message details are cleared.'}
     </p>
     <nav aria-label={content.locale === 'pt-BR' ? 'Recuperação segura' : 'Safe recovery'}>
       <a href={hrefFor('account-sign-in', content.locale)}>{content.recovery.signIn}</a>{' '}
+      <a href={hrefFor('account-support', content.locale)}>{content.recovery.support}</a>
+    </nav>
+  </>
+);
+
+const DegradedAccountPreview = ({
+  content,
+  state,
+}: Readonly<{ content: AccountContent; state?: DegradedAccountState }>) => {
+  if (state === undefined) {
+    return (
+      <article data-account-state="offline stale expired-session partial-failure">
+        <DegradedAccountBody content={content} states={DEGRADED_ACCOUNT_STATES} />
+      </article>
+    );
+  }
+  return (
+    <article data-account-state={state === 'failure' ? 'partial-failure' : state}>
+      <DegradedAccountBody content={content} states={[state]} />
+    </article>
+  );
+};
+
+const LoadingAccountPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
+  <article aria-busy="true" className="account-responsibility" data-account-state="loading">
+    <FixtureHeader
+      summary={
+        content.locale === 'pt-BR'
+          ? 'Preparando o espaço de trabalho sem contatar uma autoridade remota.'
+          : 'Preparing the workspace without contacting remote authority.'
+      }
+      title={content.overview.title}
+    />
+    <LbSkeletonRegion
+      label={content.locale === 'pt-BR' ? 'Carregando dados da conta' : 'Loading account data'}
+      rows={4}
+    />
+  </article>
+);
+
+const EmptyAccountPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
+  <article className="account-responsibility" data-account-state="empty">
+    <FixtureHeader summary={content.overview.emptyBody} title={content.overview.emptyTitle} />
+    <EmptyComposition description={content.overview.emptyBody} />
+    <nav aria-label={content.locale === 'pt-BR' ? 'Próximas ações seguras' : 'Next safe actions'}>
+      <a href={hrefFor('account-profile', content.locale)}>{content.overview.nextAction}</a>{' '}
       <a href={hrefFor('account-support', content.locale)}>{content.recovery.support}</a>
     </nav>
   </article>
@@ -1193,12 +1273,14 @@ export type AccountPreviewExperienceProps = Readonly<{
   locale: WebLocale;
   routeId: AccountPreviewRoute;
   scenarioId?: WebScenarioId;
+  state?: AccountPreviewState;
 }>;
 
 export const AccountPreviewExperience = ({
   locale,
   routeId,
   scenarioId,
+  state = 'ready',
 }: AccountPreviewExperienceProps) => {
   const content = getAccountContent(locale);
   const activeScenarioId =
@@ -1210,6 +1292,9 @@ export const AccountPreviewExperience = ({
           routeId === 'account-support'
         ? 'W13'
         : 'W11');
+  if (state === 'loading') return <LoadingAccountPreview content={content} />;
+  if (state === 'empty') return <EmptyAccountPreview content={content} />;
+  if (state !== 'ready') return <DegradedAccountPreview content={content} state={state} />;
   if (activeScenarioId === 'W12') return <DegradedAccountPreview content={content} />;
   let view: ReactNode;
   switch (routeId) {
