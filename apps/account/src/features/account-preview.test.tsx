@@ -107,6 +107,10 @@ describe('authored overview and Profile workspaces', () => {
 
     expect(overviewSource).toContain('account-overview__focus');
     expect(overviewSource).toContain('account-overview__summaries');
+    expect(overviewSource).toContain('account-workspace-split');
+    expect(overviewSource).toContain('data-workspace-layout="7/5"');
+    expect(overviewSource).toContain('data-workspace-region="focal"');
+    expect(overviewSource).toContain('data-workspace-region="context"');
     expect(overviewSource).toContain('account-overview__limitations');
     expect(overviewSource).toContain("hrefFor('account-profile', content.locale)");
     expect(overviewSource).toContain("hrefFor('account-subscription', content.locale)");
@@ -122,6 +126,8 @@ describe('authored overview and Profile workspaces', () => {
     expect(profileSource).toContain('account-profile__editor');
     expect(profileSource).toContain('account-profile__facts');
     expect(profileSource).toContain('account-profile__actions');
+    expect(profileSource).toContain('account-workspace-split');
+    expect(profileSource).toContain('data-workspace-layout="7/5"');
     expect(profileSource).toContain('content.profile.nameDescription');
     expect(profileSource).toContain('content.profile.authorityState');
     expect(profileSource).toContain('data-authority-action="unavailable"');
@@ -142,11 +148,20 @@ describe('authored overview and Profile workspaces', () => {
       expect(content.overview.summariesTitle.length).toBeGreaterThan(0);
       expect(content.overview.limitationsTitle.length).toBeGreaterThan(0);
       expect(content.profile.nameDescription.length).toBeGreaterThan(0);
-      expect(content.profile.authorityState.length).toBeGreaterThan(0);
+    expect(content.profile.authorityState.length).toBeGreaterThan(0);
       expect(content.profile.limitations.length).toBeGreaterThan(0);
       expect(content.recovery.signIn.length).toBeGreaterThan(0);
       expect(content.recovery.support.length).toBeGreaterThan(0);
     }
+  });
+
+  it('uses the exact 7/5 profile geometry with a field measure no wider than 560px', () => {
+    expect(accountStyles).toMatch(
+      /\.account-workspace-split\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*7fr\)\s+minmax\(0,\s*5fr\)/u,
+    );
+    expect(accountStyles).toMatch(
+      /\.account-profile__control\s*\{[\s\S]*max-inline-size:\s*min\(100%,\s*560px\)/u,
+    );
   });
 });
 
@@ -180,19 +195,59 @@ describe('task-specific account workspace density', () => {
 
     expect(securitySource).toContain('account-responsibility account-security');
     expect(securitySource).toContain('account-security__workspace');
+    expect(securitySource).toContain('data-workspace-region="focal"');
+    expect(securitySource).toContain('data-workspace-region="context"');
     expect(securitySource).not.toContain('<PreviewBoundary');
     expect(subscriptionSource).toContain('account-responsibility account-subscription');
+    expect(subscriptionSource).toContain('account-subscription__workspace');
+    expect(subscriptionSource).toContain('data-workspace-region="focal"');
+    expect(subscriptionSource).toContain('data-workspace-region="context"');
     expect(subscriptionSource).toContain('account-definition-list');
     expect(subscriptionSource).not.toContain('<PreviewBoundary');
     expect(invoiceSource).toContain('account-responsibility account-invoices');
+    expect(invoiceSource).toContain('account-invoices__workspace');
+    expect(invoiceSource).toContain('data-workspace-region="focal"');
+    expect(invoiceSource).toContain('data-workspace-region="context"');
     expect(invoiceSource).toContain('ResponsiveDataTable');
     expect(deviceSource).toContain('account-responsibility account-device');
+    expect(deviceSource).toContain('data-workspace-region="focal"');
+    expect(deviceSource).toContain('data-workspace-region="context"');
     expect(deviceSource).toContain('account-sensitive-action');
     expect(downloadsSource).toContain('account-responsibility account-downloads');
+    expect(downloadsSource).toContain('data-workspace-region="focal"');
+    expect(downloadsSource).toContain('data-workspace-region="context"');
     expect(privacySource).toContain('account-responsibility account-privacy');
+    expect(privacySource).toContain('data-workspace-region="focal"');
+    expect(privacySource).toContain('data-workspace-region="context"');
     expect(supportSource).toContain('account-responsibility account-support');
     expect(supportSource).toContain('account-support__fields');
+    expect(supportSource).toContain('data-workspace-region="focal"');
+    expect(supportSource).toContain('data-workspace-region="context"');
     expect(accountStyles).not.toMatch(/box-shadow:\s*0\s+\d+px\s+(?:1[6-9]|[2-9]\d)px/iu);
+  });
+
+  it('places each mobile focal task before contextual facts and reflows without page scroll', () => {
+    const privacySource = sourceBetween(
+      'export const PrivacyCenter',
+      'export const SensitiveFieldReview',
+    );
+    const supportSource = sourceBetween(
+      'export const SupportRequestComposer',
+      'export type AccountPreviewExperienceProps',
+    );
+
+    expect(privacySource.indexOf('<DataRequestReview')).toBeGreaterThanOrEqual(0);
+    expect(privacySource.indexOf('<DataRequestReview')).toBeLessThan(
+      privacySource.indexOf('<ConsentReview'),
+    );
+    expect(supportSource.indexOf('account-support__fields')).toBeGreaterThanOrEqual(0);
+    expect(supportSource.indexOf('account-support__fields')).toBeLessThan(
+      supportSource.indexOf('account-support__guidance'),
+    );
+    expect(accountStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-workspace-split\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
+    );
+    expect(accountStyles).toMatch(/\.account-workspace-split\s*\{[\s\S]*inline-size:\s*100%/u);
   });
 
   it('keeps every deterministic degraded and terminal path explicit and bilingual', () => {
