@@ -148,7 +148,7 @@ const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   });
   await page.keyboard.press('Tab');
   const skipLink = page.getByRole('link', {
-    name: /(?:skip to (?:main )?content|ir para o conteúdo principal)/iu,
+    name: /(?:skip to (?:main |account )?content|ir para o conteúdo (?:principal|da conta))/iu,
   });
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeInViewport();

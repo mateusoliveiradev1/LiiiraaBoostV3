@@ -227,6 +227,18 @@ button:focus-visible,
   gap: var(--lb-space-5);
 }
 
+.lb-web-sign-in form {
+  display: grid;
+  gap: var(--lb-space-2);
+  max-inline-size: calc(var(--lb-space-7) * 7);
+}
+
+.lb-web-sign-in > [role='group'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+}
+
 .account-overview__layout,
 .account-profile__layout {
   display: grid;
