@@ -280,7 +280,9 @@ describe('immutable audit', () => {
     );
 
     expect(auditSource).toContain("{ id: 'event'");
-    expect(auditSource).not.toContain("{ id: 'event', label: content.audit.event, essential: false }");
+    expect(auditSource).not.toContain(
+      "{ id: 'event', label: content.audit.event, essential: false }",
+    );
     expect(auditSource).toContain("{ id: 'actor', label: content.audit.actor, essential: false }");
     expect(auditSource).toContain('detail: <CorrelatedEventDetail');
     for (const field of [
@@ -328,7 +330,6 @@ describe('W15 diagnostic consent guard', () => {
     );
     expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
   });
-
 });
 
 describe('W16 viewport guard and recovery states', () => {

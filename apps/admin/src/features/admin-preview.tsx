@@ -741,44 +741,50 @@ const CriticalReview = ({
       <p className="admin-viewport-gate__mobile" id="admin-mobile-high-risk-block" role="status">
         {content.operations.mobile}
       </p>
-      <div aria-describedby="admin-mobile-high-risk-block" data-high-risk-action="true">
-        {workflow === null ? (
-          <LbButton
-            onPress={() => {
-              setWorkflow(
-                workflowInput({
-                  consent: {
-                    expiresAt: '2026-01-15T13:00:00.000Z',
-                    granted: true,
-                    permittedFields: ['target'],
-                    purpose,
-                    requestingActor: `${role}.preview`,
-                  },
-                  family: 'admin',
-                  fields: { target: `${role}-target-preview` },
-                  impact,
-                  label: action,
-                  purpose,
-                  review: [
-                    {
-                      field: 'target',
-                      label: content.audit.target,
-                      before: target,
-                      after: 'Review only',
+      {viewportWidth >= 960 ? (
+        <div aria-describedby="admin-mobile-high-risk-block" data-high-risk-action="true">
+          {workflow === null ? (
+            <LbButton
+              onPress={() => {
+                setWorkflow(
+                  workflowInput({
+                    consent: {
+                      expiresAt: '2026-01-15T13:00:00.000Z',
+                      granted: true,
+                      permittedFields: ['target'],
+                      purpose,
+                      requestingActor: `${role}.preview`,
                     },
-                  ],
-                  role,
-                  viewportWidth,
-                }),
-              );
-            }}
-          >
-            {action}
-          </LbButton>
-        ) : (
-          <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
-        )}
-      </div>
+                    family: 'admin',
+                    fields: { target: `${role}-target-preview` },
+                    impact,
+                    label: action,
+                    purpose,
+                    review: [
+                      {
+                        field: 'target',
+                        label: content.audit.target,
+                        before: target,
+                        after: 'Review only',
+                      },
+                    ],
+                    role,
+                    viewportWidth,
+                  }),
+                );
+              }}
+            >
+              {action}
+            </LbButton>
+          ) : (
+            <PreviewWorkflowRunner
+              input={workflow}
+              locale={content.locale}
+              scenarioId={scenarioId}
+            />
+          )}
+        </div>
+      ) : null}
     </>
   );
 };
@@ -1042,44 +1048,60 @@ export const DiagnosticFieldDisclosure = ({
                 </dd>
               </div>
             </dl>
-            <div data-high-risk-action="true">
-              {workflow === null ? (
-                <LbButton
-                  onPress={() => {
-                    setWorkflow(
-                      workflowInput({
-                        consent: {
-                          expiresAt: admittedConsent.expiresAt,
-                          granted: admittedConsent.granted,
-                          permittedFields: admittedConsent.permittedFields,
-                          purpose: admittedConsent.purpose,
-                          requestingActor: admittedConsent.actor,
-                        },
-                        family: 'diagnostic',
-                        fields: { diagnostic: 'diagnostic-preview' },
-                        impact: content.diagnostics.denial,
-                        label: content.diagnostics.allowedTitle,
-                        purpose: admittedConsent.purpose,
-                        review: [
-                          {
-                            field: 'diagnostic',
-                            label: content.diagnostics.title,
-                            before: 'Blocked',
-                            after: 'Scoped synthetic review',
+            <p
+              className="admin-viewport-gate__mobile"
+              id="diagnostic-mobile-high-risk-block"
+              role="status"
+            >
+              {content.operations.mobile}
+            </p>
+            {viewportWidth >= 960 ? (
+              <div
+                aria-describedby="diagnostic-mobile-high-risk-block"
+                data-high-risk-action="true"
+              >
+                {workflow === null ? (
+                  <LbButton
+                    onPress={() => {
+                      setWorkflow(
+                        workflowInput({
+                          consent: {
+                            expiresAt: admittedConsent.expiresAt,
+                            granted: admittedConsent.granted,
+                            permittedFields: admittedConsent.permittedFields,
+                            purpose: admittedConsent.purpose,
+                            requestingActor: admittedConsent.actor,
                           },
-                        ],
-                        role: 'security',
-                        viewportWidth,
-                      }),
-                    );
-                  }}
-                >
-                  {content.diagnostics.allowedTitle}
-                </LbButton>
-              ) : (
-                <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />
-              )}
-            </div>
+                          family: 'diagnostic',
+                          fields: { diagnostic: 'diagnostic-preview' },
+                          impact: content.diagnostics.denial,
+                          label: content.diagnostics.allowedTitle,
+                          purpose: admittedConsent.purpose,
+                          review: [
+                            {
+                              field: 'diagnostic',
+                              label: content.diagnostics.title,
+                              before: 'Blocked',
+                              after: 'Scoped synthetic review',
+                            },
+                          ],
+                          role: 'security',
+                          viewportWidth,
+                        }),
+                      );
+                    }}
+                  >
+                    {content.diagnostics.allowedTitle}
+                  </LbButton>
+                ) : (
+                  <PreviewWorkflowRunner
+                    input={workflow}
+                    locale={content.locale}
+                    scenarioId="W15"
+                  />
+                )}
+              </div>
+            ) : null}
           </section>
         ) : (
           <p role="status">{content.diagnostics.denial}</p>
