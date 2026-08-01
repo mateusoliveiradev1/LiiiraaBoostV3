@@ -83,6 +83,37 @@ describe('admin shell', () => {
     );
   });
 
+  it('keeps the mobile disclosure exactly 48px and preserves one canonical current task', () => {
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+
+    expect(navigation).toContain('<details className="admin-nav admin-nav__mobile">');
+    expect(navigation).toContain('markCurrent={false}');
+    expect(navigation.match(/aria-current=/gu)).toHaveLength(1);
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-nav__mobile > summary\s*\{[\s\S]*block-size:\s*48px/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 640px\)[\s\S]*#admin-main\s*\{[\s\S]*padding-inline:\s*16px/u,
+    );
+  });
+
+  it('keeps safe mobile review while removing high-risk semantics with a contextual reason', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+    const feature = readFileSync(new URL('./features/admin-preview.tsx', import.meta.url), 'utf8');
+
+    expect(layout).not.toContain('viewportPolicy=');
+    expect(navigation).not.toContain('viewportPolicy');
+    expect(feature).toContain('id="admin-mobile-high-risk-block"');
+    expect(feature).toContain('aria-describedby="admin-mobile-high-risk-block"');
+    expect(feature).toContain('viewportWidth');
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\[data-high-risk-action='true'\]\s*\{[\s\S]*display:\s*none !important/u,
+    );
+  });
+
   it('renders a premium role and task topbar with accessible flag language switching', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
