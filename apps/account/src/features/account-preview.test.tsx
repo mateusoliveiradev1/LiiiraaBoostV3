@@ -252,6 +252,13 @@ describe('task-specific account workspace density', () => {
 
   it('keeps every deterministic degraded and terminal path explicit and bilingual', () => {
     expect(featureSource).toContain("'loading'");
+    expect(featureSource).toContain('LbSkeletonRegion');
+    expect(featureSource).toContain('state?: AccountPreviewState');
+    expect(featureSource).toContain("state = 'ready'");
+    expect(featureSource).toContain("if (state === 'loading')");
+    expect(featureSource).toContain("if (state === 'empty')");
+    expect(featureSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
+    expect(featureSource).not.toContain("label={state === 'failure' ? 'Failure' : state}");
     expect(featureSource).toContain('data-account-state="empty"');
     expect(featureSource).toContain(
       'data-account-state="offline stale expired-session partial-failure"',
@@ -260,6 +267,29 @@ describe('task-specific account workspace density', () => {
     expect(featureSource).toContain('safeDraftFields');
     expect(featureSource).toContain('PreviewReceipt');
     expect(shapeOf(accountPtBr)).toEqual(shapeOf(accountEn));
+  });
+
+  it('retains only explicitly safe drafts across degraded sensitive workflows', () => {
+    const profileSource = sourceBetween('const ProfilePreview', 'export const SecurityMethodList');
+    const deviceSource = sourceBetween(
+      'export const DeviceBindingReview',
+      'export const DownloadsPreview',
+    );
+    const privacySource = sourceBetween(
+      'export const PrivacyCenter',
+      'export const SensitiveFieldReview',
+    );
+    const supportSource = sourceBetween(
+      'export const SupportRequestComposer',
+      'export type AccountPreviewExperienceProps',
+    );
+
+    expect(profileSource).toContain("safeDraftFields: ['displayName', 'locale']");
+    expect(deviceSource).not.toContain('safeDraftFields:');
+    expect(privacySource).not.toContain('safeDraftFields:');
+    expect(supportSource).toContain("fields: { description, subject }");
+    expect(supportSource).toContain("safeDraftFields: ['subject']");
+    expect(supportSource).not.toContain("safeDraftFields: ['description'");
   });
 
   it('constrains form and detail measures while preserving semantic reflow', () => {
