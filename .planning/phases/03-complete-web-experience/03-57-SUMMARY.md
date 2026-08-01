@@ -11,6 +11,7 @@ provides:
   - exact 72px topbar, 40px preview band, 264px responsibility rail, and max-1240 account workspace
   - native 48px current-task disclosure below 960px with route-preserving locale links
   - one canonical aria-current destination across desktop and mobile account navigation
+  - canonical sign-in current-task projection and fully wrapped 320px preview status
 affects: [03-61, account-visual-evidence, account-uat]
 
 tech-stack:
@@ -31,6 +32,7 @@ key-decisions:
   - "Keep the server layout as the canonical owner of routes, localized groups, noindex metadata, preview truth, and fixture composition."
   - "Keep one canonical desktop aria-current anchor while the mobile disclosure names the current task without duplicating current-page semantics."
   - "Use the localized preview label as explicit provenance detail while rendering the locked remote-changes-disconnected copy once."
+  - "Project sign-in as a contextual canonical entry only when it is current, preserving responsibility ownership and one aria-current."
 
 patterns-established:
   - "Responsive account navigation: replace the desktop responsibility rail with a closed native disclosure below 960px."
@@ -38,7 +40,7 @@ patterns-established:
 
 requirements-completed: [WEB-08]
 
-duration: 12min
+duration: 20min
 completed: 2026-08-01
 status: complete
 ---
@@ -49,17 +51,18 @@ status: complete
 
 ## Performance
 
-- **Duration:** 12 min
+- **Duration:** 20 min (12 min initial execution + 8 min rejection correction)
 - **Started:** 2026-08-01T16:58:05Z
-- **Completed:** 2026-08-01T17:09:28Z
+- **Completed:** 2026-08-01T23:06:55Z
 - **Tasks:** 2
 - **Files modified:** 4
 
 ## Accomplishments
 
 - Replaced the sparse account frame with the required 72px branded topbar, 40px preview band, 264px responsibility rail, and centered max-1240 workspace.
-- Preserved all eight canonical account responsibilities, route-aware locale switching, and exactly one `aria-current` destination.
+- Preserved every canonical account responsibility, route-aware locale switching, and exactly one `aria-current` destination, including the sign-in entry route.
 - Replaced the mobile route inventory below 960px with a closed 48px native current-task disclosure that reflows without horizontal page overflow at 320px.
+- Made the complete bilingual preview status wrap at 320px/400%-equivalent reflow instead of inheriting a single-line ellipsis.
 - Preserved noindex, same-origin routing, deterministic preview truth, forced-colors support, reduced-motion behavior, and the existing CSP boundary.
 
 ## Task Commits
@@ -71,6 +74,8 @@ Each TDD gate and implementation was committed atomically:
 3. **Task 2 RED: encode mobile disclosure contract** - `7219dc2` (test)
 4. **Task 2 GREEN: replace mobile inventory with task disclosure** - `623e6df` (feat)
 5. **Rule 2 correction: keep preview provenance detail explicit** - `5c5cd43` (fix)
+6. **03-64 rejection RED: encode sign-in and status-wrap contracts** - `34197e5` (test)
+7. **03-64 rejection GREEN: close rejected account shell states** - `b28dabd` (fix)
 
 ## Files Created/Modified
 
@@ -85,6 +90,8 @@ Each TDD gate and implementation was committed atomically:
 - The hidden canonical desktop link retains the page's sole `aria-current` on mobile, while the disclosure summary communicates the current task without creating a second current-page semantic.
 - Phosphor responsibility icons continue to flow through `@liiiraa/design-system`; no new package or parallel icon system was added.
 - The preview band uses exact bilingual human copy and an explicit localized provenance label, with raw fixture and adapter values kept out of ordinary chrome.
+- Canonical sign-in is projected as a contextual entry only while `/[locale]/sign-in` is current; the server supplies its bounded route and bilingual label, and the existing client boundary performs pathname matching.
+- The account shell overrides the shared status-detail ellipsis only below 760px, allowing full preview truth to wrap without changing the global design-system behavior.
 
 ## Deviations from Plan
 
@@ -108,16 +115,26 @@ Each TDD gate and implementation was committed atomically:
 
 - RED commits exist for both behavior groups: `e86fa8b` and `7219dc2`.
 - GREEN commits follow their respective RED gates: `f05298b` and `623e6df`.
-- The final correction was verified against the complete 16-test account shell suite.
+- The 03-64 rejection correction has a dedicated RED commit (`34197e5`) before its GREEN commit (`b28dabd`).
+- The final correction was verified against the complete 18-test account shell suite.
+
+## 03-64 Rejection Correction
+
+- **W10 at 960px:** `/en/sign-in` now shows one visible canonical `aria-current="page"` link labeled **Sign in**. The topbar names **Sign in**, while **No session connected** and disconnected preview authority remain unchanged.
+- **W18 at 320px / 400%-equivalent:** **Remote changes disconnected** wraps completely with computed `white-space: normal`, `text-overflow: clip`, and `overflow-wrap: anywhere`; measured clipping is false and document horizontal overflow remains zero.
+- The native current-task disclosure remains closed by default, retains its 48px minimum target, and the document retains exactly one canonical `aria-current`.
+- No account workspace/content, visual golden, screenshot manifest, dependency, CSP, or trust-boundary files changed.
 
 ## Verification
 
-- `pnpm --filter @liiiraa/account exec vitest run src/account-shell.test.ts` - 16 passed.
+- `pnpm --filter @liiiraa/account exec vitest run src/account-shell.test.ts` - 18 passed.
+- `pnpm --filter @liiiraa/account exec vitest run` - full account package passed, 43 tests across 3 files.
 - `pnpm --filter @liiiraa/account check` - strict TypeScript passed.
 - `pnpm --filter @liiiraa/account build` - optimized Next.js build passed.
 - ESLint on the modified TypeScript files passed.
 - Prettier check and `git diff --check` passed.
 - Impeccable product-register detector reported zero findings.
+- Exact non-update Playwright inspection for W10 desktop-960 and W18 reflow-320 - 5 passed, with temporary inspection assertions 2 passed.
 - Scoped stub scan found no placeholder, TODO, FIXME, empty-detail, or hardcoded empty-value patterns.
 
 ## Issues Encountered
@@ -130,13 +147,13 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- The exact account shell contract is ready for Plan 03-61 browser geometry and visual evidence.
+- The corrected account shell is ready for the required Plan 03-61 browser replay and fresh bounded Plan 03-62 capture attempt.
 - No blockers, known stubs, new dependencies, or new security-relevant surfaces remain.
 
 ## Self-Check: PASSED
 
 - All four plan-owned implementation/test files and this summary exist on disk.
-- All five Plan 03-57 task and correction commits exist in git history.
+- All seven Plan 03-57 task and correction commits exist in git history.
 
 ---
 *Phase: 03-complete-web-experience*
