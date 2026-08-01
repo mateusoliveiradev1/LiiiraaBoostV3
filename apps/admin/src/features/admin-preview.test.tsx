@@ -44,8 +44,11 @@ describe('role-scoped admin', () => {
   it('composes the role landing around next work, recent activity, scope, and workspaces', () => {
     expect(featureSource).toContain('admin-landing__focus');
     expect(featureSource).toContain('admin-landing__scope');
-    expect(featureSource).toContain('admin-landing__activity');
-    expect(featureSource).toContain('admin-landing__workspaces');
+    expect(featureSource).toContain('admin-landing__queue');
+    expect(featureSource).toContain('data-decision-priority="next-safe-review"');
+    expect(featureSource).toContain('<table');
+    expect(featureSource).toContain('<caption>');
+    expect(featureSource).not.toContain('admin-landing__workspaces');
     expect(featureSource).not.toContain('canonical route manifest');
   });
 
@@ -55,9 +58,7 @@ describe('role-scoped admin', () => {
     expect(stylesSource).toMatch(
       /@media \(width < 640px\)[\s\S]*\.admin-landing__layout[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
     );
-    expect(stylesSource).toMatch(
-      /@media \(width < 640px\)[\s\S]*\.admin-nav__list[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
-    );
+    expect(stylesSource).toMatch(/@media \(width < 960px\)[\s\S]*\.admin-nav__mobile/u);
   });
 
   it('projects four distinct closed workspaces and renders a redacted support case', () => {
@@ -108,6 +109,47 @@ describe('role-scoped admin', () => {
     expect(supportSource.indexOf('admin-decision__constraints')).toBeLessThan(
       supportSource.indexOf('admin-decision__audit'),
     );
+  });
+
+  it('gives every workspace task-appropriate semantic structure and one focal decision', () => {
+    const operationsSource = featureSource.slice(
+      featureSource.indexOf('export const OperationsReview'),
+      featureSource.indexOf('export const SecurityReview'),
+    );
+    const securitySource = featureSource.slice(
+      featureSource.indexOf('export const SecurityReview'),
+      featureSource.indexOf('export const ConsentScopePanel'),
+    );
+    const diagnosticsSource = featureSource.slice(
+      featureSource.indexOf('export const DiagnosticFieldDisclosure'),
+      featureSource.indexOf('const RoleLanding'),
+    );
+
+    for (const source of [operationsSource, securitySource]) {
+      expect(source).toContain('admin-decision__context');
+      expect(source).toContain('admin-decision__evidence');
+      expect(source).toContain('admin-decision__constraints');
+      expect(source).toContain('admin-decision__audit');
+      expect(source).toContain('<DisconnectedAuthority');
+    }
+    expect(diagnosticsSource).toContain('admin-decision__context');
+    expect(diagnosticsSource).toContain('admin-diagnostic__scope');
+    expect(diagnosticsSource).toContain('admin-decision__audit');
+    expect(featureSource).toContain('<ResponsiveDataTable');
+  });
+
+  it('keeps consent scope adjacent to redacted immutable diagnostic correlation', () => {
+    const diagnosticsSource = featureSource.slice(
+      featureSource.indexOf('export const DiagnosticFieldDisclosure'),
+      featureSource.indexOf('const RoleLanding'),
+    );
+
+    expect(diagnosticsSource.indexOf('<ConsentScopePanel')).toBeGreaterThan(-1);
+    expect(diagnosticsSource.indexOf('<CorrelatedEventDetail')).toBeGreaterThan(
+      diagnosticsSource.indexOf('<ConsentScopePanel'),
+    );
+    expect(diagnosticsSource).toContain('data-consent-decision={decision}');
+    expect(diagnosticsSource).toContain('data-high-risk-action="true"');
   });
 
   it('keeps authority visibly unavailable while allowing only a no-change review', () => {
