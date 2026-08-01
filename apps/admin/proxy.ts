@@ -29,6 +29,7 @@ export type AdminAccessBoundaryResult = Readonly<{
 
 type AdminAccessBoundaryInput = Readonly<{
   cookieHeader: string | null;
+  requestOrigin?: string | null;
   url: URL;
 }>;
 
@@ -106,6 +107,32 @@ const boundedRequestId = (request: NextRequest): string | undefined => {
   return candidate !== null && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(candidate)
     ? candidate
     : undefined;
+};
+
+const requestHeaderOrigin = (request: NextRequest): string | null => {
+  const host = request.headers.get('host');
+
+  if (host === null) {
+    return request.nextUrl.origin;
+  }
+
+  try {
+    const candidate = new URL(`${request.nextUrl.protocol}//${host}`);
+
+    if (
+      candidate.username.length > 0 ||
+      candidate.password.length > 0 ||
+      candidate.pathname !== '/' ||
+      candidate.search.length > 0 ||
+      candidate.hash.length > 0
+    ) {
+      return null;
+    }
+
+    return candidate.origin;
+  } catch {
+    return null;
+  }
 };
 
 const escapeHtml = (value: string): string =>
@@ -216,12 +243,13 @@ export const adminHeaderContract = (
 
 export const AdminAccessBoundary = ({
   cookieHeader,
+  requestOrigin,
   url,
 }: AdminAccessBoundaryInput): AdminAccessBoundaryResult => {
   const requestedRole = url.searchParams.get('role');
   const role = isAdminPreviewRole(requestedRole) ? requestedRole : 'support';
 
-  if (url.origin !== resolveAdminOrigin()) {
+  if ((requestOrigin === undefined ? url.origin : requestOrigin) !== resolveAdminOrigin()) {
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'origin-rejected',
@@ -272,6 +300,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
   const boundary = AdminAccessBoundary({
     cookieHeader: request.headers.get('cookie'),
+    requestOrigin: requestHeaderOrigin(request),
     url: request.nextUrl,
   });
 
