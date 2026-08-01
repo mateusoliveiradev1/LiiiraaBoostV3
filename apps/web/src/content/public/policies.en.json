@@ -163,7 +163,7 @@
       {
         "name": "Account and remote authority",
         "state": "demonstrative-preview",
-        "detail": "Phase 3 previews change no remote state."
+        "detail": "The account preview lets visitors inspect the experience without changing remote data or actions."
       }
     ],
     "incidentHistory": [],

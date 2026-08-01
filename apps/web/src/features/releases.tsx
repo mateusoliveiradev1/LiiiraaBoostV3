@@ -640,24 +640,50 @@ const IntegrityReview = ({
   content,
   locale,
 }: Readonly<{ content: ReleaseContent; locale: WebLocale }>) => (
-  <ReleaseIntegrityPanel description={content.manifest.notice} title={content.manifest.title}>
-    <BoundaryTransitionNotice
-      description={content.identity.detail}
-      title={content.identity.label}
-    />
-    <ManifestFieldList
-      fields={MANIFEST_FIELDS.map((field) => ({
-        label: content.manifest.fields[field],
-        value: valueForManifestField(field),
-      }))}
-    />
-    <section aria-labelledby="release-integrity-disagreement-title" role="alert">
+  <ReleaseIntegrityPanel
+    description={
+      locale === 'pt-BR'
+        ? 'Se qualquer evidência da versão divergir, não execute o artefato. Mantenha-o fechado e use as ações seguras acima.'
+        : 'If any release evidence differs, do not run the artifact. Keep it closed and use the safe actions above.'
+    }
+    title={locale === 'pt-BR' ? 'Integridade e recuperação' : 'Integrity and recovery'}
+  >
+    <section
+      aria-labelledby="release-integrity-disagreement-title"
+      className="release-integrity-decision"
+      role="alert"
+    >
       <h3 id="release-integrity-disagreement-title">
         {locale === 'pt-BR'
           ? 'Toda divergência bloqueia o download'
           : 'Every integrity disagreement blocks download'}
       </h3>
       <p>{content.downloadGate.reasons['integrity-disagreement']}</p>
+      <p>{content.verification.blocked}</p>
+    </section>
+    <details className="release-manifest-disclosure">
+      <summary>
+        {locale === 'pt-BR'
+          ? 'Ver detalhes técnicos de integridade'
+          : 'View technical integrity details'}
+      </summary>
+      <h3>{content.manifest.title}</h3>
+      <p>{content.manifest.notice}</p>
+      <BoundaryTransitionNotice
+        description={content.identity.detail}
+        title={content.identity.label}
+      />
+      <ManifestFieldList
+        fields={MANIFEST_FIELDS.map((field) => ({
+          label: content.manifest.fields[field],
+          value: valueForManifestField(field),
+        }))}
+      />
+      <p>
+        {locale === 'pt-BR'
+          ? 'Campos que devem concordar exatamente'
+          : 'Fields that must agree exactly'}
+      </p>
       <ul>
         {RELEASE_METADATA.integrityDisagreementFields.map((field) => (
           <li key={field}>
@@ -665,8 +691,7 @@ const IntegrityReview = ({
           </li>
         ))}
       </ul>
-      <p>{content.verification.blocked}</p>
-    </section>
+    </details>
   </ReleaseIntegrityPanel>
 );
 
@@ -784,10 +809,26 @@ export const DownloadDecisionView = ({
           title={content.downloadGate.title}
         >
           <p aria-live="assertive">{content.downloadGate.assertive}</p>
-          <p>
-            <code>{decision.reason}</code> · <code>{decision.historyState}</code>
-          </p>
           <GateActions content={content} locale={locale} />
+          <details className="release-decision-technical-context">
+            <summary>
+              {locale === 'pt-BR' ? 'Registro técnico da decisão' : 'Technical decision record'}
+            </summary>
+            <dl className="catalog-disclosure-list">
+              <div>
+                <dt>{locale === 'pt-BR' ? 'Motivo registrado' : 'Recorded reason'}</dt>
+                <dd>
+                  <code>{decision.reason}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>{locale === 'pt-BR' ? 'Estado da versão' : 'Release state'}</dt>
+                <dd>
+                  <code>{decision.historyState}</code>
+                </dd>
+              </div>
+            </dl>
+          </details>
         </DownloadAvailabilityGate>
       );
     }
@@ -923,6 +964,8 @@ export const ReleaseExperience = ({
           <h1 tabIndex={-1}>{content.metadata.title}</h1>
           <p>{content.metadata.description}</p>
         </header>
+        <DownloadDecisionView content={content} decision={decision} locale={resolution.locale} />
+        <RouteComposition content={content} resolution={resolution} />
         <details className="release-technical-context">
           <summary>
             {resolution.locale === 'pt-BR'
@@ -952,8 +995,6 @@ export const ReleaseExperience = ({
             ]}
           />
         </details>
-        <RouteComposition content={content} resolution={resolution} />
-        <DownloadDecisionView content={content} decision={decision} locale={resolution.locale} />
       </article>
     </div>
   );

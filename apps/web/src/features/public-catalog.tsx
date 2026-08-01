@@ -328,6 +328,16 @@ const POLICIES = Object.freeze({
   'pt-BR': admitPolicies(policiesPtBrJson, 'pt-BR'),
 });
 
+const statusStateLabel = (
+  locale: WebLocale,
+  state: CapabilitySupportState | 'operational',
+): string =>
+  state === 'operational'
+    ? locale === 'pt-BR'
+      ? 'Operacional'
+      : 'Operational'
+    : CATALOGS[locale].supportStates[state].label;
+
 const assertLocaleParity = (): void => {
   const recordIdentity = (catalog: PublicCatalog): string =>
     catalog.records.map(({ routeId, translationKey }) => `${routeId}:${translationKey}`).join('|');
@@ -957,7 +967,7 @@ export const StatusSummary = ({
               <div>
                 <h3>{component.name}</h3>
                 <span className="catalog-state" data-state={component.state}>
-                  {component.state}
+                  {statusStateLabel(locale, component.state)}
                 </span>
               </div>
               <p>{component.detail}</p>

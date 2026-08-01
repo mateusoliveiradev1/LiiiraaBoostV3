@@ -1313,6 +1313,65 @@ ol.lb-web-documentation-index li {
   border-block: 1px solid var(--lb-line-subtle);
 }
 
+.release-experience .lb-web-download-gate {
+  display: grid;
+  gap: var(--lb-space-3);
+  margin-block: var(--lb-space-5) var(--lb-space-6);
+  padding: var(--lb-space-5);
+  border: 1px solid var(--lb-line-strong);
+  background: var(--lb-surface-inset);
+}
+
+.release-experience .lb-web-download-gate h2 {
+  max-inline-size: 20ch;
+  margin: 0;
+  font-family: var(--lb-font-display);
+  font-size: var(--lb-text-display-size);
+  line-height: var(--lb-text-display-line);
+  letter-spacing: -0.03em;
+}
+
+.release-experience .lb-web-download-gate > p {
+  max-inline-size: 68ch;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.release-decision-technical-context,
+.release-manifest-disclosure {
+  margin-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.release-decision-technical-context > summary,
+.release-manifest-disclosure > summary {
+  min-block-size: 48px;
+  padding-block: var(--lb-space-3);
+  color: var(--lb-text-primary);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  cursor: pointer;
+}
+
+.release-integrity-decision {
+  display: grid;
+  gap: var(--lb-space-2);
+  max-inline-size: 72ch;
+  padding-block: var(--lb-space-4);
+  border-block: 1px solid var(--lb-line-strong);
+}
+
+.release-integrity-decision > :where(h3, p),
+.release-manifest-disclosure > p {
+  margin: 0;
+}
+
+.release-manifest-disclosure .lb-web-boundary,
+.release-manifest-disclosure .lb-web-manifest {
+  margin-block-end: var(--lb-space-4);
+}
+
 .documentation-technical-context > summary,
 .release-technical-context > summary {
   min-block-size: 48px;
