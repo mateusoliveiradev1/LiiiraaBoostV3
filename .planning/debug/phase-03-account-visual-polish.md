@@ -2,7 +2,7 @@
 status: diagnosed
 trigger: "Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task."
 created: 2026-07-31T19:29:11.6816453-03:00
-updated: 2026-07-31T19:34:39.4901020-03:00
+updated: 2026-08-01T00:52:41-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,14 @@ updated: 2026-07-31T19:34:39.4901020-03:00
 hypothesis: CONFIRMED — the account applies correct low-level tokens and truthful preview semantics to a missing account-specific composition: an unconstrained wide canvas, skeletal route markup, absent active navigation/task grouping, and duplicated provenance copy create the wireframe; the visual pipeline snapshots only overview and validates stability/accessibility rather than polish, leaving profile unreviewed.
 test: completed static differential trace from UI-SPEC and approved Phase 2 account capture through account layout/components/CSS and W11 Playwright/visual-manifest coverage
 expecting: confirmed by direct source, checked-in golden, user screenshot, and test assertions
-next_action: return the root-cause report to the parent orchestrator; do not modify production code in diagnose-only mode
+next_action: Plan another gap-closure round for a stronger logged-in shell, compact mobile task navigation, and a route-preserving locale control; do not modify production code in this checkpoint continuation.
+
+## Plan 03-45 Follow-up Rejection
+
+reported: "navegaçao ruim na troca de idioma tem q ser a bandeira e tals na area logada tbm tem q ser melhor e tals"
+verdict: Rejected after the clean 03-45 preflight. The account shell still lacks premium hierarchy and useful density; navigation is weak, the mobile route list is especially poor/overlong, and language switching must preserve the active responsibility route while showing a visible flag plus textual language label.
+accessibility_constraint: A flag alone is insufficient. The control must keep an explicit accessible language name in both locales.
+impact: The account visual gap remains failed and Plan 03-46 stays blocked.
 
 ## Symptoms
 

@@ -2,7 +2,7 @@
 status: diagnosed
 trigger: "Phase 03 UAT admin visual/routing gap: localized admin root at localhost:3002/pt-BR exposes raw access-denied JSON; user said `nao gostei de nenhum dos 3 viu`."
 created: 2026-07-31T19:30:00-03:00
-updated: 2026-07-31T19:34:00-03:00
+updated: 2026-08-01T00:52:41-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,14 @@ updated: 2026-07-31T19:34:00-03:00
 hypothesis: Confirmed — the UAT launcher violates the proxy's exact dedicated-origin contract, causing a pre-render JSON denial; the requested localized root also differs from the canonical admin landing. After those are aligned, an independently under-authored and insufficiently reviewed role shell remains.
 test: Live HTTP reproduction, running-process inspection, focused security tests, canonical route tracing, and direct inspection of visual baselines and capture coverage.
 expecting: Confirmed observations match the complete causal chain.
-next_action: Return the diagnose-only root-cause report to the Phase 03 UAT orchestrator.
+next_action: Plan another gap-closure round for a stronger role/task shell, compact mobile admin navigation, and a route-preserving locale control; do not modify production code in this checkpoint continuation.
+
+## Plan 03-45 Follow-up Rejection
+
+reported: "navegaçao ruim na troca de idioma tem q ser a bandeira e tals na area logada tbm tem q ser melhor e tals"
+verdict: Rejected after the clean 03-45 preflight. The earlier origin/access-state diagnosis no longer describes the whole remaining gap: the rendered admin surface still needs a stronger premium application identity, task hierarchy, useful density, and substantially better compact mobile navigation.
+locale_constraint: Switching languages must preserve the active admin workspace and visibly combine a flag with the language label; an explicit accessible language name remains mandatory.
+impact: The admin visual gap remains failed and Plan 03-46 stays blocked.
 
 ## Symptoms
 

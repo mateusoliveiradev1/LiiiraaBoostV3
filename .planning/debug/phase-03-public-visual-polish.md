@@ -2,7 +2,7 @@
 status: diagnosed
 trigger: "Phase 03 UAT public visual gap: user said `nao gostei de nenhum dos 3 viu`; public Home exposes boundary/evidence metadata and has an oversized, awkward hero with weak pacing."
 created: 2026-07-31T19:28:32.0992839-03:00
-updated: 2026-07-31T19:33:30.3783989-03:00
+updated: 2026-08-01T00:52:41-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,13 @@ updated: 2026-07-31T19:33:30.3783989-03:00
 hypothesis: CONFIRMED — app-local public composition/copy bypasses the design contract and automated coverage institutionalizes the rejected hierarchy.
 test: Existing Home/public-shell and shared visual-contract tests were run unchanged against the current source.
 expecting: Confirmation requires the tests to stay green while the checked source and golden retain the rejected off-token hierarchy, boundary rail, and raw provenance.
-next_action: Return the root-cause report to the orchestrator; do not implement fixes in diagnose-only mode.
+next_action: Plan another gap-closure round for authored cross-surface identity, navigation, and route-preserving locale controls; do not treat stable goldens as approval.
+
+## Plan 03-45 Follow-up Rejection
+
+reported: "ainda nao ficou legal nao nao tem cara de web app forte navegaçao ruim na troca de idioma tem q ser a bandeira e tals"
+verdict: Rejected after the clean 03-45 preflight. The public shell still lacks a strong authored web-app identity, navigation remains weak, and the locale control must preserve the current route while showing a visible flag plus language label with an explicit accessible text name.
+impact: The visual gap remains failed, no W01-W18/G01-G07 approval exists, and Plan 03-46 stays blocked.
 
 ## Symptoms
 

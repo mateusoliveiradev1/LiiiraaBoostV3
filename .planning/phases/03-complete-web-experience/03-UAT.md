@@ -3,14 +3,14 @@ status: diagnosed
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-07-31T19:35:48-03:00
+updated: 2026-08-01T00:52:41-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[testing complete]
+[testing complete — Plan 03-45 rejected; gaps remain open]
 
 ## Plan 03-45 Preflight
 
@@ -26,20 +26,49 @@ result: passed — automated stability only; human approval remains pending and 
 | `rtk pnpm test` | PASS — Turbo completed 49/49 workspace tasks. |
 | `rtk pnpm --filter @liiiraa/admin exec vitest run src/admin-security.test.ts` | PASS — 13/13 admin boundary tests; document navigation remains localized HTML while bounded JSON is reserved for programmatic requests. |
 
+## Plan 03-45 Human Review Verdict
+
+date: 2026-08-01T00:52:41-03:00
+verdict: rejected — no W01-W18 or G01-G07 visual approval was granted; Plan 03-46 remains blocked.
+reported: "ainda nao ficou legal nao nao tem cara de web app forte navegaçao ruim na troca de idioma tem q ser a bandeira e tals na area logada tbm tem q ser melhor e tals"
+runtime_reported: "Console Error: eval() is not supported in this environment... React requires eval() in development mode... Next.js 16.2.12 (Turbopack)"
+
+The clean preflight proves deterministic rendering and regression stability only. The reviewer explicitly rejected the qualitative result and reported these unresolved defects:
+
+1. Public, account, and admin still lack one strong, authored Liiiraa Boost web-application identity.
+2. Navigation is weak across the three surfaces; account/admin mobile navigation is especially poor and overlong instead of collapsing into a task-oriented pattern.
+3. The locale switcher must preserve the current route and visibly combine a flag with the language label. The accessible name must contain language text because a flag alone is insufficient.
+4. Logged-in account/admin surfaces need a stronger premium application shell, clearer hierarchy, useful density, and task-oriented navigation.
+5. Development CSP conflicts with React/Next 16 Turbopack's eval-based debugging. Any `unsafe-eval` allowance must be development-only; production CSP must remain strict, and automated tests must prove the split.
+
 ## Tests
 
 ### 1. Cross-surface visual polish and desktop consistency
 
 expected: Public, account, and admin goldens in both locales have coherent branding, clear hierarchy/readability, and distinctive non-template visual quality when compared with the approved Phase 2 desktop captures.
 result: issue
-reported: "nao gostei de nenhum dos 3 viu"
+reported: "nao gostei de nenhum dos 3 viu"; follow-up: "ainda nao ficou legal nao nao tem cara de web app forte"
+severity: major
+
+### 2. Cross-surface navigation, locale switching, and authenticated shells
+
+expected: Public, account, and admin provide clear current-location and task-oriented navigation; mobile account/admin navigation collapses without an overlong route list; locale switching preserves the current route and exposes a visible flag plus language label with an accessible textual name; logged-in shells feel like premium applications with deliberate hierarchy and useful density.
+result: issue
+reported: "navegaçao ruim na troca de idioma tem q ser a bandeira e tals na area logada tbm tem q ser melhor e tals"
+severity: major
+
+### 3. React/Next development CSP compatibility
+
+expected: Next.js 16.2.12 development under Turbopack supports React's eval-based debugging without console failures, while production responses never allow `unsafe-eval`; tests prove the environment-specific CSP split.
+result: issue
+reported: "Console Error: eval() is not supported in this environment... React requires eval() in development mode... Next.js 16.2.12 (Turbopack)"
 severity: major
 
 ## Summary
 
-total: 1
+total: 3
 passed: 0
-issues: 1
+issues: 3
 pending: 0
 skipped: 0
 blocked: 0
@@ -48,10 +77,10 @@ blocked: 0
 
 - truth: "The public Home presents a premium, focused Liiiraa Boost story coherent with the approved desktop product, without exposing internal boundary or evidence metadata as primary interface copy."
   status: failed
-  reason: "User reported: nao gostei de nenhum dos 3 viu. The supplied public capture shows an oversized, awkward hero, weak pacing, large unused regions, an internal-looking PUBLIC boundary rail, and raw capture provenance competing with the product story."
+  reason: "The reviewer first reported `nao gostei de nenhum dos 3 viu` and, after the 03-38 through 03-44 gap work, explicitly rejected the refreshed result again: `ainda nao ficou legal nao nao tem cara de web app forte`. The public surface still lacks a strong authored web-app identity and its navigation/locale control do not provide the expected product-grade orientation."
   severity: major
   test: 1
-  root_cause: "App-local public CSS and shell composition bypass the approved scale and hierarchy: oversized type/whitespace subordinate the real product capture, while permanent PUBLIC and raw capture-provenance strings expose internal verification metadata. Existing tests require that rejected rail and compare against an already-rejected baseline instead of gating visual quality."
+  root_cause: "The refreshed public composition is deterministic but still fails the human quality contract: shell, hierarchy, and navigation read as a collection of web pages rather than one authored Liiiraa Boost application. The locale affordance changes language without the required route-preserving, visible flag-plus-label control, and pixel stability cannot certify identity or navigation quality."
   artifacts:
     - path: "apps/web/src/styles/public.css"
       issue: "Off-scale hero typography, oversized spacing, and excessive vertical rhythm create the sparse composition."
@@ -65,14 +94,16 @@ blocked: 0
     - "Recompose the public Home around canonical scale, tighter pacing, the approved brand lockup, and a dominant real desktop artifact."
     - "Move origin and capture metadata into contextual disclosure while keeping truthful evidence accessible."
     - "Extend visual gates to app-local CSS and require named human approval for refreshed goldens."
+    - "Create a strong authored public application shell with clear current-location and task-oriented navigation."
+    - "Replace the locale link with a current-route-preserving control that shows a flag plus language label and retains an explicit accessible text name."
   debug_session: ".planning/debug/phase-03-public-visual-polish.md"
 
 - truth: "The account surface feels like a finished premium product shell with strong task hierarchy, useful density, and a quiet but persistent simulated-authority boundary."
   status: failed
-  reason: "User reported: nao gostei de nenhum dos 3 viu. The supplied account capture resembles an unfinished wireframe: tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging that dominates the actual task."
+  reason: "The reviewer first reported `nao gostei de nenhum dos 3 viu` and explicitly rejected the refreshed account result again: `navegaçao ruim ... na area logada tbm tem q ser melhor`. The logged-in shell still lacks premium application hierarchy and useful density; navigation remains weak, and the mobile route list is especially poor and overlong."
   severity: major
   test: 1
-  root_cause: "The account implementation uses accessible generic primitives without an authored account-specific composition. An unconstrained wide main column stretches compact controls across the viewport, navigation has no strong current-task state, and sparse route content is overwhelmed by repeated fixture/authority copy."
+  root_cause: "The account shell remains route-list-first instead of task-first. At narrow widths its navigation expands into a long wrapped/full-width list rather than a compact disclosure pattern, while the locale link targets a surface default instead of preserving the active responsibility route. The content shell still lacks enough hierarchy, density, and task context to read as a premium logged-in application."
   artifacts:
     - path: "apps/account/src/features/account-preview.tsx"
       issue: "Route compositions are skeletal and repeat provenance at route and field level."
@@ -86,14 +117,16 @@ blocked: 0
     - "Create a constrained, authored product workspace with active navigation, focal identity/task regions, and route-specific density."
     - "Consolidate preview messaging into one quiet persistent boundary, repeated only for sensitive review and receipts."
     - "Add neutral-state goldens for Profile and representative responsibility routes with hierarchy and density review gates."
+    - "Replace the overlong mobile route list with a compact accessible navigation disclosure that preserves current-location context."
+    - "Make the locale control preserve the active account route and show a flag plus language label with explicit accessible text."
   debug_session: ".planning/debug/phase-03-account-visual-polish.md"
 
 - truth: "The admin origin renders a designed, localized premium administration shell or authored access state instead of exposing raw transport data."
   status: failed
-  reason: "User reported: nao gostei de nenhum dos 3 viu. The supplied admin capture renders raw access-denied JSON at the root, so there is no coherent visual interface to review."
+  reason: "The reviewer first reported `nao gostei de nenhum dos 3 viu` and explicitly rejected the refreshed admin result again: `navegaçao ruim ... na area logada tbm tem q ser melhor`. Even after the origin/access-state corrections, the authenticated admin shell still lacks a strong premium application identity, task hierarchy, useful density, and compact mobile navigation."
   severity: major
   test: 1
-  root_cause: "The local UAT server uses http://localhost:3002 while the fail-closed admin proxy expects the dedicated LIIIRAA_ADMIN_ORIGIN (default https://admin.localhost), so the request is rejected before React and returns raw JSON. The reviewed path also omits the canonical /[locale]/admin landing, whose current composition remains minimally authored and template-like."
+  root_cause: "The origin/access-state defect was addressed by the preceding gap plans, but the qualitative shell remains unresolved. Admin navigation is still presented as a broad route inventory instead of a role/task-oriented workflow, its narrow-screen form becomes overlong, and locale switching returns to a role landing rather than preserving the active workspace. Automated goldens prove stability, not premium operational coherence."
   artifacts:
     - path: "apps/admin/proxy.ts"
       issue: "Exact origin enforcement rejects the generic localhost UAT origin before the authored application route can render."
@@ -107,4 +140,25 @@ blocked: 0
     - "Align local/UAT launch and navigation with one declared dedicated admin origin and the canonical /[locale]/admin route."
     - "Preserve fail-closed security while rendering an authored localized access-denied document for browser navigation."
     - "Redesign and re-baseline the role landing and representative workspaces against the approved desktop visual contract."
+    - "Replace the overlong mobile admin route list with a compact accessible role/task navigation pattern."
+    - "Make the locale control preserve the active admin workspace and show a flag plus language label with explicit accessible text."
   debug_session: ".planning/debug/phase-03-admin-root-interface.md"
+
+- truth: "Development CSP supports React and Next.js 16.2.12 Turbopack debugging without weakening the production security boundary."
+  status: failed
+  reason: "The reviewer reported `Console Error: eval() is not supported in this environment... React requires eval() in development mode... Next.js 16.2.12 (Turbopack)`. The current development policy blocks React's eval-based debugging path, so the review environment is not clean even though production must continue to reject eval."
+  severity: major
+  test: 3
+  root_cause: "CSP construction is not split by runtime mode for the Next development toolchain. Public headers and the account/admin nonce policies omit `unsafe-eval` unconditionally, which is appropriate for production but conflicts with the reported React/Turbopack development behavior."
+  artifacts:
+    - path: "apps/web/next.config.ts"
+      issue: "Public CSP directives do not expose a tested development-only script policy."
+    - path: "apps/account/proxy.ts"
+      issue: "Account nonce CSP is strict in every mode and needs an explicit, tested development-only branch if this surface reproduces the error."
+    - path: "apps/admin/proxy.ts"
+      issue: "Admin nonce CSP is strict in every mode and needs an explicit, tested development-only branch if this surface reproduces the error."
+  missing:
+    - "Reproduce and identify every affected Next development surface under Turbopack."
+    - "Allow `unsafe-eval` only in development CSP where React debugging requires it; never emit it in production."
+    - "Add tests that assert the development allowance and the production prohibition independently for public, account, and admin."
+  debug_session: ".planning/debug/phase-03-development-csp-turbopack.md"
