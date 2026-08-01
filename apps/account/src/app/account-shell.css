@@ -218,6 +218,7 @@ button:focus-visible,
 .account-nav__list a {
   display: flex;
   align-items: center;
+  gap: var(--lb-space-2);
   min-block-size: 44px;
   padding-inline: var(--lb-space-3);
   color: var(--lb-text-secondary);
@@ -845,6 +846,12 @@ button:focus-visible,
   .account-security__sessions li {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--lb-space-2);
+  }
+}
+
+@media (width < 400px) {
+  .account-header__task {
+    display: none;
   }
 }
 
