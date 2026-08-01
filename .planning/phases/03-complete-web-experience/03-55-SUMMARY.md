@@ -1,6 +1,6 @@
 ---
 phase: 03-complete-web-experience
-plan: "55"
+plan: '55'
 subsystem: ui
 tags: [nextjs, responsive-navigation, i18n, accessibility, product-hero, visual-evidence]
 
@@ -32,13 +32,13 @@ key-files:
     - apps/web/src/home.test.tsx
 
 key-decisions:
-  - "Use compatibility, not release availability, as the unequal primary action in both desktop and mobile public chrome."
-  - "Preserve canonical locale destinations through native anchors while unmatched browser state fails safely to the target-locale Home."
-  - "Render the approved promise as three authored wide-screen lines above the checksum-admitted product capture, while allowing safe narrow-screen reflow."
+  - 'Use compatibility, not release availability, as the unequal primary action in both desktop and mobile public chrome.'
+  - 'Preserve canonical locale destinations through native anchors while unmatched browser state fails safely to the target-locale Home.'
+  - 'Render the approved promise as three authored wide-screen lines above the checksum-admitted product capture, while allowing safe narrow-screen reflow.'
 
 patterns-established:
-  - "Public mobile chrome keeps flag-plus-language visible outside the menu and repeats the complete locale action inside the full-height task surface."
-  - "Hero media carries intrinsic capture dimensions, bounded display crops, complete-image access, and provenance only through an invoked disclosure."
+  - 'Public mobile chrome keeps flag-plus-language visible outside the menu and repeats the complete locale action inside the full-height task surface.'
+  - 'Hero media carries intrinsic capture dimensions, bounded display crops, complete-image access, and provenance only through an invoked disclosure.'
 
 requirements-completed: [WEB-01, WEB-03, WEB-08]
 
@@ -138,6 +138,15 @@ Each TDD gate was committed atomically:
 - Task 2 RED `ee34bc2` failed on five missing hero behaviors before GREEN `e5f3a81` passed the 13-test hero gate.
 - Both required RED commits precede their corresponding GREEN commits.
 
+## Owner Correction Replay
+
+- **Trigger:** Plan 03-56 replay exposed one stale Plan 03-55 Home contract that still expected the hero's `clamp(52px, 6vw, 76px)` value to be declared directly in `public-shell.css`.
+- **Correction:** `apps/web/src/home.test.tsx` now verifies that the hero consumes `var(--lb-public-hero-display-size)` and independently verifies that the canonical design token resolves to the exact approved clamp.
+- **Scope:** Test-only; no hero source, CSS, layout, assets, or screenshots changed.
+- **Commit:** `bc2d32b` (`test(03-55): follow canonical hero display token`)
+- **Replay results:** Targeted Home contract 1/1 passed; complete `@liiiraa/web` suite 81/81 passed; strict package TypeScript and the 10-task public workspace check passed; the production Next build and Prettier check passed.
+- **Verification note:** An initial TypeScript check overlapped Next's `.next/types` regeneration and transiently reported missing generated route files. The serialized rerun after the successful build passed with no source changes.
+
 ## Known Stubs
 
 None. The public-download unavailable state is an intentional fail-closed product boundary, not a placeholder.
@@ -171,8 +180,9 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - All six plan-owned implementation files and this summary exist on disk.
-- RED/GREEN commits `4b381f5`, `e601da9`, `ee34bc2`, and `e5f3a81` resolve in Git history.
+- RED/GREEN commits `4b381f5`, `e601da9`, `ee34bc2`, and `e5f3a81`, plus owner-correction commit `bc2d32b`, resolve in Git history.
 
 ---
-*Phase: 03-complete-web-experience*
-*Completed: 2026-08-01*
+
+_Phase: 03-complete-web-experience_
+_Completed: 2026-08-01_
