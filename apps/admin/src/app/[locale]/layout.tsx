@@ -8,8 +8,10 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
 
 import { AdminFocusHandoff } from '../../admin-focus-handoff';
+import { AdminNavigation } from '../../admin-navigation';
 import { AdminPreviewProvenance } from '../../admin-preview-provenance';
 import {
   ADMIN_ROLE_COPY,
@@ -36,6 +38,7 @@ const COPY = Object.freeze({
     preview:
       'Autoridade desconectada — o escopo é demonstrativo e nenhuma mutação remota pode ocorrer.',
     previewLabel: 'Prévia administrativa',
+    surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
     viewport: 'Política de viewport',
   }),
@@ -50,6 +53,7 @@ const COPY = Object.freeze({
     navigation: 'Role scope',
     preview: 'Disconnected authority — scope is demonstrative and no remote mutation can occur.',
     previewLabel: 'Administrative preview',
+    surface: 'Operations',
     skip: 'Skip to administrative content',
     viewport: 'Viewport policy',
   }),
@@ -113,13 +117,8 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         <header className="admin-header">
           <div className="admin-header__bar">
             <a className="admin-brand" href={localizedRoleHref(locale, role)}>
-              <span aria-hidden="true" className="admin-brand__mark">
-                LB
-              </span>
-              <span>
-                <strong>Liiiraa Boost</strong>
-                <small> Admin</small>
-              </span>
+              <ProductLockup />
+              <span className="admin-brand__surface">{copy.surface}</span>
             </a>
             <p className="admin-header__origin" role="note">
               {copy.boundary}
@@ -148,16 +147,7 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         </aside>
 
         <div className="admin-workspace">
-          <nav aria-label={copy.navigation} className="admin-nav">
-            <p className="admin-nav__label">{copy.navigation}</p>
-            <ol className="admin-nav__list">
-              {navigation.map((item) => (
-                <li key={item.routeId}>
-                  <a href={item.href}>{item.label}</a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <AdminNavigation items={navigation} label={copy.navigation} />
 
           <div className="admin-main-column">
             <section

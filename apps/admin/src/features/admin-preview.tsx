@@ -858,28 +858,107 @@ export const DiagnosticFieldDisclosure = ({
 const RoleLanding = ({
   content,
   role,
-}: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => (
-  <article data-admin-workspace="role landing">
-    <FixtureHeader
-      content={content}
-      summary={content.landing.summary}
-      title={content.landing.title}
-    />
-    <PreviewBoundary description={content.landing.scopeBody} />
-    <section aria-labelledby="admin-role-scope-title">
-      <h2 id="admin-role-scope-title">{content.landing.scopeTitle}</h2>
-      <ul>
-        {ADMIN_ROLE_ROUTE_ACCESS[role].map((routeId) => (
-          <li key={routeId}>
-            <a href={hrefFor(routeId, content.locale, role)}>
-              {getAdminPreviewMetadata(content.locale, routeId).title}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-  </article>
-);
+}: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => {
+  const routes = ADMIN_ROLE_ROUTE_ACCESS[role];
+  const nextRoute = routes.find((routeId) => routeId !== 'admin-role') ?? 'admin-role';
+  const nextMetadata = getAdminPreviewMetadata(content.locale, nextRoute);
+  const activity =
+    ADMIN_AUDIT_EVENTS.find((event) => event.role === role) ?? ADMIN_AUDIT_EVENTS[0];
+  const copy =
+    content.locale === 'pt-BR'
+      ? {
+          activity: 'Atividade recente da prévia',
+          currentRole: 'Função atual',
+          nextAction: 'Próximo trabalho',
+          open: 'Abrir área de trabalho',
+          result: 'Resultado imutável',
+          workspaces: 'Áreas disponíveis',
+        }
+      : {
+          activity: 'Recent preview activity',
+          currentRole: 'Current role',
+          nextAction: 'Next work',
+          open: 'Open workspace',
+          result: 'Immutable result',
+          workspaces: 'Available workspaces',
+        };
+
+  return (
+    <article className="admin-landing" data-admin-workspace="role landing">
+      <header className="admin-landing__header">
+        <p>{copy.currentRole}</p>
+        <h1>{content.roles[role]}</h1>
+        <span data-state="current">{content.landing.title}</span>
+      </header>
+
+      <div className="admin-landing__layout">
+        <section aria-labelledby="admin-next-work-title" className="admin-landing__focus">
+          <p>{copy.nextAction}</p>
+          <h2 id="admin-next-work-title">{nextMetadata.title}</h2>
+          <p>{nextMetadata.summary}</p>
+          <a href={hrefFor(nextRoute, content.locale, role)}>{copy.open}</a>
+        </section>
+
+        <aside aria-labelledby="admin-role-scope-title" className="admin-landing__scope">
+          <h2 id="admin-role-scope-title">{content.landing.scopeTitle}</h2>
+          <p>{content.landing.summary}</p>
+          <dl>
+            <div>
+              <dt>{copy.currentRole}</dt>
+              <dd>{content.roles[role]}</dd>
+            </div>
+            <div>
+              <dt>{copy.workspaces}</dt>
+              <dd>{routes.length}</dd>
+            </div>
+          </dl>
+        </aside>
+
+        <section aria-labelledby="admin-recent-activity-title" className="admin-landing__activity">
+          <h2 id="admin-recent-activity-title">{copy.activity}</h2>
+          <dl>
+            <div>
+              <dt>{content.audit.action}</dt>
+              <dd>{activity.action}</dd>
+            </div>
+            <div>
+              <dt>{copy.result}</dt>
+              <dd>
+                <StatusSignal label={activity.result} state="preview" />
+              </dd>
+            </div>
+            <div>
+              <dt>{content.audit.timestamp}</dt>
+              <dd>
+                <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="admin-workspaces-title" className="admin-landing__workspaces">
+          <h2 id="admin-workspaces-title">{copy.workspaces}</h2>
+          <ul>
+            {routes.map((routeId) => {
+              const metadata = getAdminPreviewMetadata(content.locale, routeId);
+              return (
+                <li key={routeId}>
+                  <a
+                    aria-current={routeId === 'admin-role' ? 'page' : undefined}
+                    href={hrefFor(routeId, content.locale, role)}
+                  >
+                    <span>{metadata.title}</span>
+                    <small>{metadata.summary}</small>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
+    </article>
+  );
+};
 
 const DegradedAdminPreview = ({
   content,
