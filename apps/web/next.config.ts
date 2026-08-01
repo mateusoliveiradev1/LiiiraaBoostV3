@@ -1,21 +1,27 @@
 import createMDX from '@next/mdx';
 import type { NextConfig } from 'next';
 
-const enforcedCsp = [
-  "default-src 'self'",
-  "base-uri 'none'",
-  "connect-src 'self'",
-  "font-src 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "img-src 'self' data:",
-  "manifest-src 'self'",
-  "media-src 'self'",
-  "object-src 'none'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "worker-src 'self'",
-].join('; ');
+const enforcedCspFor = (runtimeMode: string | undefined) =>
+  [
+    "default-src 'self'",
+    "base-uri 'none'",
+    "connect-src 'self'",
+    "font-src 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "img-src 'self' data:",
+    "manifest-src 'self'",
+    "media-src 'self'",
+    "object-src 'none'",
+    [
+      "script-src 'self' 'unsafe-inline'",
+      runtimeMode === 'development' ? "'unsafe-eval'" : undefined,
+    ]
+      .filter((directive): directive is string => directive !== undefined)
+      .join(' '),
+    "style-src 'self' 'unsafe-inline'",
+    "worker-src 'self'",
+  ].join('; ');
 
 const reportOnlyCsp = [
   "default-src 'self'",
@@ -40,24 +46,27 @@ export const publicCspProbe = Object.freeze({
   status: 'report-only-blocked',
 } as const);
 
-export const publicHeaderContract = Object.freeze([
-  Object.freeze({
-    key: 'Cache-Control',
-    value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
-  }),
-  Object.freeze({ key: 'Content-Security-Policy', value: enforcedCsp }),
-  Object.freeze({ key: 'Content-Security-Policy-Report-Only', value: reportOnlyCsp }),
-  Object.freeze({ key: 'Cross-Origin-Opener-Policy', value: 'same-origin' }),
-  Object.freeze({ key: 'Cross-Origin-Resource-Policy', value: 'same-origin' }),
-  Object.freeze({
-    key: 'Permissions-Policy',
-    value:
-      'accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
-  }),
-  Object.freeze({ key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }),
-  Object.freeze({ key: 'X-Content-Type-Options', value: 'nosniff' }),
-  Object.freeze({ key: 'X-Frame-Options', value: 'DENY' }),
-] as const);
+export const buildPublicHeaderContract = (runtimeMode: string | undefined) =>
+  Object.freeze([
+    Object.freeze({
+      key: 'Cache-Control',
+      value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+    }),
+    Object.freeze({ key: 'Content-Security-Policy', value: enforcedCspFor(runtimeMode) }),
+    Object.freeze({ key: 'Content-Security-Policy-Report-Only', value: reportOnlyCsp }),
+    Object.freeze({ key: 'Cross-Origin-Opener-Policy', value: 'same-origin' }),
+    Object.freeze({ key: 'Cross-Origin-Resource-Policy', value: 'same-origin' }),
+    Object.freeze({
+      key: 'Permissions-Policy',
+      value:
+        'accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
+    }),
+    Object.freeze({ key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }),
+    Object.freeze({ key: 'X-Content-Type-Options', value: 'nosniff' }),
+    Object.freeze({ key: 'X-Frame-Options', value: 'DENY' }),
+  ] as const);
+
+export const publicHeaderContract = buildPublicHeaderContract('production');
 
 const nextConfig = {
   output: 'standalone',
@@ -65,7 +74,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        headers: publicHeaderContract.map((header) => ({ ...header })),
+        headers: buildPublicHeaderContract(process.env.NODE_ENV).map((header) => ({ ...header })),
         source: '/:path*',
       },
     ];
