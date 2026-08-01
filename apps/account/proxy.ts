@@ -22,7 +22,10 @@ const EMPTY_POLICIES = Object.freeze([
   'usb=()',
 ]);
 
-const createContentSecurityPolicy = (nonce: string): string =>
+const createContentSecurityPolicy = (
+  nonce: string,
+  runtimeMode: string | undefined,
+): string =>
   [
     "default-src 'self'",
     "base-uri 'none'",
@@ -35,7 +38,12 @@ const createContentSecurityPolicy = (nonce: string): string =>
     "manifest-src 'self'",
     "media-src 'self'",
     "object-src 'none'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    [
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+      runtimeMode === 'development' ? "'unsafe-eval'" : undefined,
+    ]
+      .filter((directive): directive is string => directive !== undefined)
+      .join(' '),
     `style-src 'self' 'nonce-${nonce}'`,
     "worker-src 'self'",
   ].join('; ');
@@ -47,12 +55,13 @@ export const createRequestNonce = (): string => {
 
 export const accountHeaderContract = (
   nonce: string,
+  runtimeMode: string | undefined,
 ): readonly Readonly<{ key: string; value: string }>[] =>
   Object.freeze([
     Object.freeze({ key: 'Cache-Control', value: 'private, no-store, max-age=0' }),
     Object.freeze({
       key: 'Content-Security-Policy',
-      value: createContentSecurityPolicy(nonce),
+      value: createContentSecurityPolicy(nonce, runtimeMode),
     }),
     Object.freeze({ key: 'Cross-Origin-Opener-Policy', value: 'same-origin' }),
     Object.freeze({ key: 'Cross-Origin-Resource-Policy', value: 'same-origin' }),
@@ -105,7 +114,7 @@ export default function accountProxy(request: NextRequest): NextResponse {
   const nonce = createRequestNonce();
   const requestHeaders = new Headers(request.headers);
   const safeContext = accountContextFromUrl(request.nextUrl);
-  const headerContract = accountHeaderContract(nonce);
+  const headerContract = accountHeaderContract(nonce, process.env.NODE_ENV);
   const contentSecurityPolicy = headerContract.find(
     ({ key }) => key === 'Content-Security-Policy',
   )?.value;
