@@ -974,8 +974,12 @@ export const DiagnosticFieldDisclosure = ({
           <p>{content.diagnostics.auditReference}</p>
           <h2 id="diagnostic-decision-title">
             {decision === 'allowed'
-              ? content.diagnostics.allowedTitle
-              : content.diagnostics.blockedTitle}
+              ? content.locale === 'pt-BR'
+                ? 'Revisão de diagnóstico admitida'
+                : 'Diagnostic review admitted'
+              : content.locale === 'pt-BR'
+                ? 'O consentimento não admite esta revisão'
+                : 'Consent does not admit this review'}
           </h2>
           <p>{content.diagnostics.denial}</p>
         </div>
