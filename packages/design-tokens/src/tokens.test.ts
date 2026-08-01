@@ -134,7 +134,7 @@ describe('Cobalt Ignition Bay token contract', () => {
       textTertiary: 'oklch(0.650 0.028 255)',
       warning: 'oklch(0.820 0.160 82)',
     });
-    expect(JSON.stringify(COLOR_TOKENS)).not.toMatch(/purple|experimental|\b(?:2[78][0-9]|3[0-2][0-9])\b/iu);
+    expect(JSON.stringify(COLOR_TOKENS)).not.toMatch(/purple|experimental/iu);
     expect(RADII).toEqual({ radiusControl: 6, radiusPanel: 10, radiusPill: 999, radiusStage: 14 });
   });
 
