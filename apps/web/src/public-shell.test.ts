@@ -10,11 +10,55 @@ import {
   clientPublicBoundaryHref,
   type ClientRecoveryRouteId,
 } from './public-client-boundary';
+import {
+  getPublicNavigationState,
+  type PublicPillarId,
+} from './public-navigation';
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
 
 describe('public shell', () => {
+  it.each([
+    ['/en/product', 'public-product'],
+    ['/en/evidence', 'public-evidence'],
+    ['/en/compatibility', 'public-compatibility'],
+    ['/en/plans', 'public-plans'],
+    ['/en/docs/current/articles/measurement-basics', 'docs-index'],
+    ['/en/releases/stable/1.0.0', 'releases-index'],
+  ] as const)('projects %s to one current task pillar on desktop and mobile', (pathname, activeId) => {
+    const state = getPublicNavigationState(pathname, 'en');
+
+    expect(state.items.filter((item) => item.current).map((item) => item.id)).toEqual([
+      activeId satisfies PublicPillarId,
+    ]);
+    expect(state.mobileItems.filter((item) => item.current).map((item) => item.id)).toEqual([
+      activeId satisfies PublicPillarId,
+    ]);
+  });
+
+  it.each([
+    ['/pt-BR/docs/current/articles/measurement-basics', '/en/docs/current/articles/measurement-basics'],
+    ['/pt-BR/releases/stable/1.0.0', '/en/releases/stable/1.0.0'],
+    ['/pt-BR/search', '/en/search'],
+    ['/pt-BR/support', '/en/support'],
+  ] as const)('preserves the canonical route while switching %s', (pathname, expectedHref) => {
+    expect(getPublicNavigationState(pathname, 'pt-BR').localeHref).toBe(expectedHref);
+  });
+
+  it('shows the target flag and language with an explicit textual accessible name', () => {
+    expect(getPublicNavigationState('/pt-BR/docs', 'pt-BR')).toMatchObject({
+      localeAccessibleName: 'Mudar idioma para English',
+      localeFlag: '🇺🇸',
+      localeLabel: 'English',
+    });
+    expect(getPublicNavigationState('/en/docs', 'en')).toMatchObject({
+      localeAccessibleName: 'Switch language to Português',
+      localeFlag: '🇧🇷',
+      localeLabel: 'Português',
+    });
+  });
+
   it('uses the approved product lockup without exposing substitute initials', () => {
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).not.toContain('public-brand__mark');
@@ -29,11 +73,13 @@ describe('public shell', () => {
 
   it('retains accessible navigation, locale switching, and responsive menu behavior', () => {
     expect(layoutSource).toContain('className="public-skip-link"');
-    expect(layoutSource).toContain('hrefLang={alternateLocale}');
-    expect(layoutSource).toContain('className="public-mobile-menu"');
-    expect(layoutSource).toContain("publicBoundaryHref('public-search', locale)");
-    expect(layoutSource).toContain("publicBoundaryHref('releases-index', locale)");
-    expect(shellStyles).toMatch(/@media \(width < 960px\)[\s\S]*\.public-mobile-menu/u);
+    expect(layoutSource).toContain('<PublicNavigation');
+    expect(shellStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.public-mobile-menu__surface\s*\{[\s\S]*position:\s*fixed/u,
+    );
+    expect(shellStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.public-navigation--desktop[\s\S]*display:\s*none/u,
+    );
   });
 
   it('derives every public navigation pillar and both locale roots from route authority', () => {
