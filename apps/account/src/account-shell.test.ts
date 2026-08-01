@@ -22,9 +22,59 @@ describe('account shell', () => {
     const navigationSource = existsSync(navigationUrl) ? readFileSync(navigationUrl, 'utf8') : '';
     expect(navigationSource).toContain("'use client'");
     expect(navigationSource).toContain('usePathname');
+    expect(navigationSource).toContain('resolveLocalizedCurrentRoute');
+    expect(navigationSource).toContain("securityBoundary: 'account-origin'");
     expect(navigationSource).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
-    expect(navigationSource).toContain('currentCount === 1');
+    expect(navigationSource).toContain('currentItems.length === 1');
+    expect(navigationSource).toContain('<LocaleSwitcher');
+  });
+
+  it('collapses narrow navigation into a current-task disclosure without stacking inventory', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(navigationSource).toContain('className="account-nav__desktop"');
+    expect(navigationSource).toContain('className="account-nav__mobile"');
+    expect(navigationSource).toContain('<details');
+    expect(navigationSource).toContain('<summary>');
+    expect(navigationSource).toContain('{currentLabel}');
+    expect(styles).toMatch(
+      /\.account-nav__mobile\s*\{[\s\S]*display:\s*none/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__desktop\s*\{[\s\S]*display:\s*none/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*display:\s*block/u,
+    );
+    expect(styles).not.toMatch(
+      /@media \(width < 960px\)[\s\S]*\.account-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
+    );
+  });
+
+  it('keeps the topbar contextual, bilingual, and visibly disconnected', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain('account-header__identity');
+    expect(layoutSource).toContain('account-header__identity-state');
+    expect(layoutSource).toContain('account-header__task');
+    expect(layoutSource).toContain('data-authority="disconnected"');
+    expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
+    expect(navigationSource).toContain("sourceLocale={locale}");
+    expect(navigationSource).toContain("targetLocale={alternateLocale}");
+    expect(navigationSource).toContain('resolveLocalizedCurrentRoute({');
+    expect(navigationSource).toContain("fallbackLocaleHref");
   });
 
   it('projects every canonical account responsibility and keeps preview authority visible', () => {
@@ -66,8 +116,7 @@ describe('account shell', () => {
     }
     expect(styles).toMatch(/\.account-workspace__frame\s*\{[\s\S]*max-inline-size:/u);
     expect(styles).toContain('overflow-x: clip');
-    expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*flex-wrap: wrap/u);
-    expect(styles).toMatch(/@media \(width < 760px\)[\s\S]*flex-basis: 100%/u);
+    expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*account-nav__mobile/u);
     expect(styles).not.toContain('grid-auto-flow: column');
     expect(styles).not.toContain('overflow-x: auto');
     expect(styles).toContain('@media (forced-colors: active)');
