@@ -56,11 +56,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 29 min total (16 min initial execution + 13 min inspection correction)
+- **Duration:** 32 min total (16 min initial execution + 13 min inspection correction + 3 min evidence-test correction)
 - **Started:** 2026-08-01T17:26:19Z
 - **Completed:** 2026-08-01T17:41:58Z
 - **Tasks:** 2
-- **Files modified:** 11
+- **Files modified:** 12
 
 ## Accomplishments
 
@@ -81,6 +81,7 @@ Each TDD gate was committed atomically:
 5. **03-63 correction RED: public release inspection regressions** - `473aa9b` (test)
 6. **03-63 correction RED: manifest framing disclosure boundary** - `2b9b935` (test)
 7. **03-63 correction GREEN: human release decision hierarchy** - `dc650b8` (fix)
+8. **03-61 evidence correction: scoped W07 terminal action assertion** - `29b3013` (test)
 
 ## Files Created/Modified
 
@@ -95,6 +96,7 @@ Each TDD gate was committed atomically:
 - `apps/web/src/public-catalog.test.tsx` - Compatibility and plan composition, bilingual consequence, and 320px reflow gates.
 - `apps/web/src/documentation.test.tsx` - Documentation hierarchy, historical guidance, invoked metadata, and narrow-layout gates.
 - `apps/web/src/releases.test.tsx` - Release hierarchy, progressive metadata, responsive integrity, and no-bypass gates.
+- `tooling/web-evidence/tests/releases.spec.ts` - Semantic W07 terminal-gate action ownership without positional selectors.
 
 ## Decisions Made
 
@@ -167,6 +169,15 @@ None. The public download-unavailable state is an intentional fail-closed author
 - W09 browser text inspection confirmed no visible `Fase 3` or `demonstrative-preview` at either width.
 - Full public suite result: 80/81 passed; the sole failure is the unrelated stale Home literal-token assertion documented above.
 
+### 03-61 Evidence-Test Correction
+
+- Replaced the page-wide W07 compatibility-link uniqueness assertion with semantic scoping through the blocked alert and its named terminal action navigation.
+- Confirmed both legitimate accessible `Verificar compatibilidade` links remain and the terminal actions preserve compatibility → releases → support order without `first()` or `nth()`.
+- Focused Playwright W07/W08/W09 gate across the owning 1440 and 1280 projects - 3 passed, 3 expected axis skips, 0 failed.
+- `rtk pnpm --filter @liiiraa/web-evidence check` - strict TypeScript passed.
+- Release/status unit suite - 2 files, 25 tests passed.
+- No screenshot, candidate inspection, or visual-manifest file changed.
+
 ## Threat Review
 
 - Product and catalog claims retain source, scope, version, validation state, and unproven-boundary evidence in bilingual native disclosures.
@@ -185,7 +196,7 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - Created file `apps/web/src/documentation.test.tsx` exists and is tracked.
-- Task commits `9704c47`, `c849bc0`, `091a01d`, `3565d67`, `473aa9b`, `2b9b935`, and `dc650b8` exist in repository history.
+- Task commits `9704c47`, `c849bc0`, `091a01d`, `3565d67`, `473aa9b`, `2b9b935`, `dc650b8`, and `29b3013` exist in repository history.
 
 ---
 *Phase: 03-complete-web-experience*
