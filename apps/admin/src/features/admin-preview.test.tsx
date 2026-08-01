@@ -18,6 +18,10 @@ const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.m
 const stylesSource = readFileSync(new URL('../app/admin-shell.css', import.meta.url), 'utf8');
 const navigationUrl = new URL('../admin-navigation.tsx', import.meta.url);
 const navigationSource = existsSync(navigationUrl) ? readFileSync(navigationUrl, 'utf8') : '';
+const previewMachineSource = readFileSync(
+  new URL('../../../../packages/web-features/src/preview-machine.ts', import.meta.url),
+  'utf8',
+);
 
 const shapeOf = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(shapeOf);
@@ -268,6 +272,31 @@ describe('immutable audit', () => {
     expect(validateWebDocument(result.receipt).ok).toBe(true);
     expect(result.receipt).toMatchObject({ nextPhase: 'Phase 4', remoteStateChanged: false });
   });
+
+  it('keeps event identity essential while full immutable detail remains progressively available', () => {
+    const auditSource = featureSource.slice(
+      featureSource.indexOf('export const ImmutableAuditTimeline'),
+      featureSource.indexOf('const DisconnectedAuthority'),
+    );
+
+    expect(auditSource).toContain("{ id: 'event'");
+    expect(auditSource).not.toContain("{ id: 'event', label: content.audit.event, essential: false }");
+    expect(auditSource).toContain("{ id: 'actor', label: content.audit.actor, essential: false }");
+    expect(auditSource).toContain('detail: <CorrelatedEventDetail');
+    for (const field of [
+      'eventId',
+      'actor',
+      'role',
+      'action',
+      'redactedTarget',
+      'reason',
+      'consentReference',
+      'occurredAt',
+      'result',
+      'correlationId',
+    ])
+      expect(featureSource).toContain(field);
+  });
 });
 
 describe('W15 diagnostic consent guard', () => {
@@ -299,6 +328,7 @@ describe('W15 diagnostic consent guard', () => {
     );
     expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
   });
+
 });
 
 describe('W16 viewport guard and recovery states', () => {
@@ -320,6 +350,22 @@ describe('W16 viewport guard and recovery states', () => {
     expect(featureSource).toContain('viewportWidth');
   });
 
+  it('keeps safe mobile review visible while omitting high-risk authority from semantics', () => {
+    const criticalSource = featureSource.slice(
+      featureSource.indexOf('const CriticalReview'),
+      featureSource.indexOf('export const OperationsReview'),
+    );
+    const diagnosticSource = featureSource.slice(
+      featureSource.indexOf('export const DiagnosticFieldDisclosure'),
+      featureSource.indexOf('const ADMIN_ROLE_FOCAL_ROUTE'),
+    );
+
+    expect(criticalSource).toMatch(/viewportWidth\s*>=\s*960\s*\?/u);
+    expect(diagnosticSource).toMatch(/viewportWidth\s*>=\s*960\s*\?/u);
+    expect(criticalSource).toContain('admin-mobile-high-risk-block');
+    expect(featureSource).toContain('data-authority-action="unavailable"');
+  });
+
   it('authors offline, stale, expired, permission, and partial-failure recovery safely', () => {
     for (const state of [
       'offline',
@@ -339,6 +385,28 @@ describe('W16 viewport guard and recovery states', () => {
 });
 
 describe('admin no-change authority', () => {
+  it('requires purpose, impact, reauthentication, proportional confirmation, role, and desktop review', () => {
+    const adminPolicy = previewMachineSource.slice(
+      previewMachineSource.indexOf('admin: policy('),
+      previewMachineSource.indexOf('} satisfies Readonly'),
+    );
+    const diagnosticPolicy = previewMachineSource.slice(
+      previewMachineSource.indexOf('diagnostic: policy('),
+      previewMachineSource.indexOf('consent: policy('),
+    );
+
+    for (const policySource of [adminPolicy, diagnosticPolicy]) {
+      expect(policySource).toContain('requiresConsent: true');
+      expect(policySource).toContain('requiresDesktopViewport: true');
+      expect(policySource).toContain('requiresImpact: true');
+      expect(policySource).toContain('requiresPurpose: true');
+      expect(policySource).toContain('requiresRole: true');
+    }
+    expect(previewMachineSource).toContain('requiresReauthentication: true');
+    expect(adminPolicy).toContain('buttonConfirmation');
+    expect(diagnosticPolicy).toContain('phraseConfirmation');
+  });
+
   it.each([
     ['support', 'W14'],
     ['diagnostic', 'W15'],
