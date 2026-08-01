@@ -21,11 +21,16 @@ import {
   AccountShell,
   AdminShell,
   AdminViewportGate,
+  CurrentTaskDisclosure,
   LocaleSwitcher,
+  ProductTopbar,
+  ProductWorkspace,
+  PreviewStatusBand,
   PublicFooter,
   PublicHeader,
   PublicShell,
   RoleScopeRail,
+  TaskRail,
 } from './shells.tsx';
 import * as storyCatalog from './components.stories.tsx';
 import { WEB_STORY_AXES } from './components.stories.tsx';
@@ -527,6 +532,28 @@ describe('locale and navigation shell primitives', () => {
       ).toBe(true);
     }
   });
+
+  it('gives the single current task a label, icon, raised fill hook, and cobalt edge hook', () => {
+    const rail = TaskRail({ activeId: 'docs', label: 'Account responsibilities', navigation });
+    const anchors = resolvedIntrinsicElements(rail).filter((element) => element.type === 'a');
+    const current = anchors.filter(
+      (element) => elementProps(element)['aria-current'] === 'page',
+    );
+
+    expect(current).toHaveLength(1);
+    expect(visibleText(current[0] as ReactElement)).toContain('Documentation');
+    expect(
+      resolvedIntrinsicElements(current[0] as ReactElement).some(
+        (element) => elementProps(element)['className'] === 'lb-web-navigation-icon',
+      ),
+    ).toBe(true);
+    expect(elementProps(current[0] as ReactElement)['data-current']).toBe('page');
+
+    const css = readUtf8File(new URL('./web.css', import.meta.url), 'utf8');
+    expect(css).toContain('.lb-web-navigation-link[data-current=\'page\']::before');
+    expect(css).toContain('inline-size: 3px;');
+    expect(css).toContain('background: var(--lb-accent-electric);');
+  });
 });
 
 describe('semantic web components', () => {
@@ -630,6 +657,86 @@ describe('semantic web components', () => {
     expect(intrinsicTags(accountShell)).toEqual(expect.arrayContaining(['nav', 'main']));
     expect(elementProps(adminShell)['data-register']).toBe('product');
     expect(intrinsicTags(adminShell)).toEqual(expect.arrayContaining(['nav', 'main']));
+  });
+
+  it('composes branded product chrome, quiet preview truth, and mobile task disclosure', () => {
+    const topbar = ProductTopbar({
+      context: 'Account',
+      localeControl: <a href="/pt-BR/account">🇧🇷 Português</a>,
+      tools: <span>Profile</span>,
+    });
+    const preview = PreviewStatusBand({ locale: 'en' });
+    const disclosure = CurrentTaskDisclosure({
+      activeId: 'docs',
+      label: 'Current task',
+      navigation,
+    });
+
+    const topbarElements = resolvedIntrinsicElements(topbar);
+    expect(
+      topbarElements.some(
+        (element) => elementProps(element)['aria-label'] === 'Liiiraa Boost',
+      ),
+    ).toBe(true);
+    expect(elementProps(preview)).toMatchObject({
+      'data-preview-status': 'disconnected',
+      role: 'status',
+    });
+    expect(visibleText(preview)).toContain('Remote changes disconnected');
+    expect(disclosure.type).toBe('details');
+    expect(visibleText(disclosure)).toContain('Documentation');
+    expect(
+      resolvedIntrinsicElements(disclosure).filter(
+        (element) => elementProps(element)['aria-current'] === 'page',
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('supports 7/5 and 8/4 focal workspaces with contextual regions and progressive rows', () => {
+    for (const ratio of ['7/5', '8/4'] as const) {
+      const workspace = ProductWorkspace({
+        context: <aside aria-label="Context">Trusted source status</aside>,
+        focal: (
+          <section aria-label="Current task">
+            <ResponsiveDataTable
+              caption="Trusted sources"
+              columns={[
+                { id: 'source', label: 'Source' },
+                { essential: false, id: 'scope', label: 'Scope' },
+              ]}
+              rows={[
+                {
+                  cells: { scope: 'Local only', source: 'Inspection' },
+                  detail: <p>Complete source detail</p>,
+                  id: 'source-1',
+                },
+              ]}
+            />
+          </section>
+        ),
+        label: 'Compatibility workspace',
+        ratio,
+      });
+
+      expect(elementProps(workspace)).toMatchObject({
+        'aria-label': 'Compatibility workspace',
+        'data-workspace-ratio': ratio,
+      });
+      expect(visibleText(workspace)).toContain('Complete source detail');
+    }
+
+    const css = readUtf8File(new URL('./web.css', import.meta.url), 'utf8');
+    expect(css).toContain("[data-workspace-ratio='7/5']");
+    expect(css).toContain("[data-workspace-ratio='8/4']");
+    expect(css).toContain('max-inline-size: 560px');
+    expect(css).toContain('overflow-x: clip');
+  });
+
+  it('keeps raw scenario transport and rejected experimental chrome out of shared shells', () => {
+    const source = readUtf8File(new URL('./shells.tsx', import.meta.url), 'utf8');
+    expect(source).not.toMatch(
+      /simulated-no-change|scenarioId|adapter|manifest|phase\s*4|purple/iu,
+    );
   });
 });
 
