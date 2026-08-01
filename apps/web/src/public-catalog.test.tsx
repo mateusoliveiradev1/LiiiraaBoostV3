@@ -95,6 +95,45 @@ describe('public catalog content', () => {
       /"routeId":"(?:account|admin|internal|scenario)-/u,
     );
   });
+
+  it('uses semantic compatibility and plan decisions instead of equal card walls', async () => {
+    const [source, styles] = await Promise.all([
+      import('node:fs/promises').then(({ readFile }) =>
+        readFile(new URL('./features/public-catalog.tsx', import.meta.url), 'utf8'),
+      ),
+      import('node:fs/promises').then(({ readFile }) =>
+        readFile(new URL('./styles/public.css', import.meta.url), 'utf8'),
+      ),
+    ]);
+
+    expect(source).toContain('className="catalog-decision-field"');
+    expect(source).toContain('className="plan-comparison-ledger"');
+    expect(source).toContain('<table className="catalog-table"');
+    expect(source).toContain('<details className="plan-terms"');
+    expect(source).not.toContain('plan-card');
+    expect(styles).toMatch(
+      /@media \(width < 640px\)[\s\S]*\.catalog-table,[\s\S]*display:\s*block/u,
+    );
+    expect(styles).not.toMatch(/\.plan-comparison-ledger\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/u);
+  });
+
+  it('keeps bilingual compatibility consequences and commercial terms complete at narrow widths', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const catalog = getPublicCatalog(locale);
+      const compatibility = catalog.records.find(
+        ({ routeId }) => routeId === 'public-compatibility',
+      );
+      const plans = catalog.records.find(({ routeId }) => routeId === 'public-plans');
+
+      expect(compatibility?.supportMatrix?.length).toBeGreaterThan(0);
+      expect(
+        compatibility?.supportMatrix?.every(
+          ({ capability, consequence }) => capability.length > 0 && consequence.length > 0,
+        ),
+      ).toBe(true);
+      expect(plans?.plans?.every(({ checkoutBoundary }) => checkoutBoundary.length > 0)).toBe(true);
+    }
+  });
 });
 
 describe('public policies and operational trust', () => {

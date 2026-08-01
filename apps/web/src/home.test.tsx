@@ -183,6 +183,52 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(styles).not.toMatch(/border-radius:\s*(?:2[4-9]|[3-9]\d)px/u);
   });
 
+  it('orders five distinct public movements from ignition through the release boundary', async () => {
+    const homeSource = await readSource('./features/home.tsx');
+    const movementHooks = [
+      'home-ignition-hero',
+      'home-prepare-band',
+      'home-context-stage',
+      'home-compatibility-field',
+      'home-release-ribbon',
+    ];
+
+    for (const [index, hook] of movementHooks.entries()) {
+      expect(homeSource).toContain(`className="${hook}`);
+      if (index > 0) {
+        expect(homeSource.indexOf(hook)).toBeGreaterThan(
+          homeSource.indexOf(movementHooks[index - 1] ?? ''),
+        );
+      }
+    }
+    expect(homeSource).not.toContain('home-feature-card');
+    expect(homeSource).not.toContain('home-chapter-card');
+  });
+
+  it('hints the next movement directly below the hero without an unexplained large gap', async () => {
+    const [homeSource, styles] = await Promise.all([
+      readSource('./features/home.tsx'),
+      readSource('./styles/public.css'),
+    ]);
+
+    expect(homeSource).toContain('href="#prepare-prove-restore"');
+    expect(homeSource).toContain('className="home-next-movement"');
+    expect(styles).toMatch(
+      /\.home-next-movement\s*\{[\s\S]*min-block-size:\s*44px[\s\S]*margin-block-start:\s*var\(--lb-space-4\)/u,
+    );
+    expect(styles).not.toMatch(/\.home-next-movement\s*\{[\s\S]*margin-block-start:\s*(?:[7-9]\d|\d{3,})px/u);
+  });
+
+  it('keeps evidence metadata in contextual disclosures while visitor headings stay human', async () => {
+    const homeSource = await readSource('./features/home.tsx');
+
+    expect(homeSource).toContain('className="home-evidence-disclosure"');
+    expect(homeSource).toContain('className="home-context-stage__proof"');
+    expect(homeSource).toContain('className="home-compatibility-field__action"');
+    expect(homeSource).not.toMatch(/<h[1-3][^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu);
+    expect(homeSource).not.toMatch(/<HomeAction[^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu);
+  });
+
   it('keeps public distribution unavailable without exposing a development installer path', async () => {
     const homeSource = await readSource('./features/home.tsx');
 
