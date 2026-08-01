@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-56-PLAN.md
-last_updated: "2026-08-01T17:46:12.627Z"
+stopped_at: Completed 03-58-PLAN.md
+last_updated: "2026-08-01T18:04:17.092Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 114
+  completed_plans: 115
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 7 of 66
+Plan: 8 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -162,6 +162,7 @@ _Updated after plan completion_
 | Phase 03 P57 | 12min | 2 tasks | 4 files |
 | Phase 03 P59 | 7min | 2 tasks | 4 files |
 | Phase 03 P56 | 16min | 2 tasks | 9 files |
+| Phase 03 P58 | 17min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -479,6 +480,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Reuse the checksum-admitted desktop capture as the contextual evidence focal point so the product itself carries attention without invented telemetry or illustration.
 - [Phase 03]: Keep version, ownership, validation, commercial, and manifest detail complete but subordinate it to human outcomes through native disclosures.
 - [Phase 03]: Order release guidance as compatibility, integrity, risk, corrections, and recovery while leaving the canonical download decision as the sole artifact authority.
+- [Phase 03]: Use focal-first DOM order for account responsibilities with exact 7/5 or 8/4 desktop geometry. — Mobile preserves semantic task priority without CSS reordering or duplicate content.
+- [Phase 03]: Expose deterministic account presentation states as typed inputs while preserving W12. — Complete localized state evidence stays available without changing the canonical scenario or workflow authority.
+- [Phase 03]: Keep account safe-draft retention narrow by responsibility. — Profile retains display name and locale, Support retains subject only, and Device and Privacy retain no payloads.
 
 ### Pending Todos
 
@@ -520,6 +524,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T17:46:12.620Z
-Stopped at: Completed 03-56-PLAN.md
+Last session: 2026-08-01T18:03:53.567Z
+Stopped at: Completed 03-58-PLAN.md
 Resume file: None
