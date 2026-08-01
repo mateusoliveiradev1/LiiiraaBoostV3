@@ -101,7 +101,11 @@ test('@final @account geometry preserves the 72 264 40 workspace and useful regi
   expect((await page.locator('.account-preview-rail').boundingBox())?.height).toBe(40);
   const main = await page.locator('#account-main').boundingBox();
   expect((main?.width ?? 0) / 1440).toBeGreaterThanOrEqual(0.75);
-  expect(Number.parseFloat(await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize))).toBe(32);
+  expect(
+    Number.parseFloat(
+      await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize),
+    ),
+  ).toBe(32);
   await expect(page.locator('[data-workspace-region="focal"]')).toBeVisible();
   await expect(page.locator('[data-workspace-region="context"]')).toBeVisible();
   await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
@@ -121,7 +125,9 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     await expect(disclosure).not.toHaveAttribute('open', '');
     expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(60);
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
-    expect((await page.locator('.account-header .lb-web-locale-switcher').boundingBox())?.height).toBeGreaterThanOrEqual(48);
+    expect(
+      (await page.locator('.account-header .lb-web-locale-switcher').boundingBox())?.height,
+    ).toBeGreaterThanOrEqual(48);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       await page.evaluate(() => document.documentElement.clientWidth),
     );
@@ -191,7 +197,12 @@ test('@final @account W11 exposes every responsibility with persistent preview p
       'data-route-id',
       routeId,
     );
-    await expect(page.getByRole('complementary', { name: 'Prévia determinística' })).toBeVisible();
+    const previewStatus = page.getByRole('note', {
+      name: 'Alterações remotas desconectadas',
+      exact: true,
+    });
+    await expect(previewStatus).toBeVisible();
+    await expect(previewStatus.getByText('Prévia', { exact: true })).toBeVisible();
     await expectNoDeadControls(page);
   }
 });
