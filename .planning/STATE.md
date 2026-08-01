@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-40-PLAN.md
-last_updated: "2026-08-01T00:40:27.821Z"
+stopped_at: Completed 03-41-PLAN.md
+last_updated: "2026-08-01T01:02:40.238Z"
 last_activity: 2026-07-31
 last_activity_desc: Completed 03-40-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 104
-  completed_plans: 98
-  percent: 94
+  completed_plans: 99
+  percent: 20
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 41 of 46
+Plan: 42 of 46
 Status: Ready to execute Plan 03-41
 Last activity: 2026-07-31 — Completed 03-40-PLAN.md
 
@@ -146,6 +146,7 @@ _Updated after plan completion_
 | Phase 03 P38 | 14min | 2 tasks | 11 files |
 | Phase 03 P39 | 11min | 2 tasks | 9 files |
 | Phase 03 P40 | 14min | 2 tasks | 4 files |
+| Phase 03 P41 | 15min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -416,6 +417,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Classify an HTML admin denial only when navigation metadata and text/html acceptance agree; ambiguous or programmatic requests retain bounded JSON.
 - [Phase 03]: Use the normalized Host header plus request protocol for exact admin admission because Next can normalize nextUrl.origin to the bound server hostname.
 - [Phase 03]: Keep browser denial copy generic and localized while preserving only an already-present syntax-bounded request identifier.
+- [Phase 03]: Keep admin pathname awareness inside one narrow client navigation while role projection and admission remain server-owned.
+- [Phase 03]: Render deterministic admin preview truth once in the shell and reserve extra fixture provenance for immutable audit context.
+- [Phase 03]: Separate safe no-change review from unavailable administrative authority through explicit disabled controls.
+- [Phase 03]: Compose the admin role landing and representative workspaces around the operator's next decision instead of route-manifest prose.
 
 ### Pending Todos
 
@@ -457,6 +462,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T00:39:52.953Z
-Stopped at: Completed 03-40-PLAN.md
+Last session: 2026-08-01T01:02:40.231Z
+Stopped at: Completed 03-41-PLAN.md
 Resume file: None

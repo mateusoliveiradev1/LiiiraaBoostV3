@@ -1,5 +1,9 @@
 # Deferred Items
 
+## 03-41
+
+- Local visual QA at the admitted admin origin confirmed that `/fonts/manrope-variable.woff2` and `/fonts/jetbrains-mono-variable.woff2` return HTTP 404 because no web app currently publishes the token-declared font files. The responsive compositions remain usable with the declared fallbacks, but self-hosted font publication is a pre-existing cross-surface asset concern outside the Plan 03-41 shell/workspace scope.
+
 ## Resolved in 03-32 regression recovery
 
 - Resolved the Phase 03-18 architecture parity mismatches by refreshing the live `apps/web` dependency and `web:verify:quick` script expectations. The architecture suite now passes in the recursive root graph.
