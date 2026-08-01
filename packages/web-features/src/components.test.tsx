@@ -40,16 +40,23 @@ const readUtf8File = readFileSync as (path: URL, encoding: 'utf8') => string;
 type ReviewSurface = 'public' | 'account' | 'admin';
 
 type VisualManifestEntry = Readonly<{
+  approved: false;
+  candidatePurpose: 'revised-geometry-focal-state-review';
   captureId: string;
   comparisonSource: string;
   locale: 'pt-BR' | 'en';
   localeReview: 'pt-BR-default' | 'en-parity';
-  rebaselineOwner: 'plan-03-52';
+  priorEvidenceStatus: 'invalidated-rejected-pixels';
+  published: false;
+  rebaselineOwner: 'plan-03-62';
   reviewPurpose: string;
   route: string;
   routeId: string;
+  sourceBinding: 'current-source-candidate';
   state: string;
+  status: 'candidate';
   surface: ReviewSurface;
+  visualTarget: false;
   viewport: string;
 }>;
 
@@ -60,6 +67,7 @@ const visualManifest = JSON.parse(
   ),
 ) as Readonly<{
   entries: readonly VisualManifestEntry[];
+  origins: Readonly<Record<ReviewSurface, string>>;
   schemaVersion: number;
 }>;
 
@@ -837,13 +845,29 @@ describe('visual contract and story axes', () => {
 
     expect(visualManifest.schemaVersion).toBe(2);
     expect(visualManifest.entries.map(({ captureId }) => captureId)).toEqual(expectedCaptureIds);
+    expect(visualManifest.entries).toHaveLength(25);
+    expect(visualManifest.origins).toEqual({
+      account: 'http://account.localhost:3101',
+      admin: 'http://admin.localhost:3102',
+      public: 'http://public.localhost:3100',
+    });
 
     for (const entry of visualManifest.entries) {
       expect(entry).toMatchObject({
+        approved: false,
+        candidatePurpose: 'revised-geometry-focal-state-review',
         comparisonSource: 'phase-02-approved-desktop-captures',
-        rebaselineOwner: 'plan-03-52',
+        priorEvidenceStatus: 'invalidated-rejected-pixels',
+        published: false,
+        rebaselineOwner: 'plan-03-62',
+        sourceBinding: 'current-source-candidate',
+        status: 'candidate',
+        visualTarget: false,
       });
       expect(entry.route).toMatch(new RegExp(`^/${entry.locale}(?:/|$)`, 'u'));
+      expect(new URL(entry.route, visualManifest.origins[entry.surface]).origin).toBe(
+        visualManifest.origins[entry.surface],
+      );
       expect(entry.reviewPurpose).toMatch(/(?:PT-BR|English)/u);
       expect(entry.reviewPurpose).toMatch(/(?:wide|mobile|desktop|reflow)/u);
       expect(entry.state.length).toBeGreaterThan(0);
@@ -860,10 +884,13 @@ describe('visual contract and story axes', () => {
         expect(entry.reviewPurpose).toMatch(/route-preserving locale control/u);
         expect(entry.reviewPurpose).toMatch(/deterministic no-authority/u);
       }
+    }
 
-      expect(Object.keys(entry)).not.toEqual(
-        expect.arrayContaining(['approved', 'approval', 'publication', 'published']),
-      );
+    for (const captureId of ['G01', 'G04', 'G06']) {
+      expect(visualManifest.entries.find((entry) => entry.captureId === captureId)).toMatchObject({
+        priorEvidenceStatus: 'invalidated-rejected-pixels',
+        visualTarget: false,
+      });
     }
 
     for (const surface of ['public', 'account', 'admin'] as const) {

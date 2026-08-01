@@ -46,6 +46,7 @@
   --lb-public-section-display-size: clamp(36px, 4vw, 48px);
   --lb-public-section-display-line: 1.02;
   --lb-public-hero-display-size: clamp(52px, 6vw, 76px);
+  --lb-public-hero-mobile-display-size: clamp(40px, 11.5vw, 52px);
   --lb-public-hero-display-line: 0.96;
   --lb-document-label-size: 14px;
   --lb-document-label-line: 20px;
@@ -151,6 +152,7 @@
   --lb-row-standard-size: 52px;
   --lb-row-primary-size: 64px;
   --lb-screen-padding: 32px;
+  --lb-admin-workspace-max: 1320px;
   --lb-grid-gutter: 24px;
   --lb-control-gap: 16px;
   --lb-section-gap: 24px;

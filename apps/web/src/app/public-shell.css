@@ -234,7 +234,7 @@ summary:focus-visible,
   max-inline-size: 15ch;
   margin: 0;
   font-family: var(--lb-font-display);
-  font-size: clamp(52px, 6vw, 76px);
+  font-size: var(--lb-public-hero-display-size);
   font-stretch: 87.5%;
   font-weight: var(--lb-weight-semibold);
   line-height: 0.96;
@@ -251,7 +251,7 @@ summary:focus-visible,
   max-inline-size: 58ch;
   margin: var(--lb-space-4) 0 0;
   color: var(--lb-text-secondary);
-  font-size: 17px;
+  font-size: var(--lb-public-body-size);
   line-height: 28px;
   text-wrap: pretty;
 }
@@ -290,7 +290,7 @@ body .public-home .home-action--primary:hover {
 
 .home-ignition-hero .home-trust-boundary p {
   color: var(--lb-text-tertiary);
-  font-size: 14px;
+  font-size: var(--lb-public-label-size);
   line-height: 20px;
 }
 
@@ -301,7 +301,7 @@ body .public-home .home-action--primary:hover {
   justify-self: center;
   inline-size: min(calc(100vw - 48px), 1120px);
   margin-block-start: var(--lb-space-3);
-  scroll-margin-block-start: 88px;
+  scroll-margin-block-start: calc(var(--lb-space-7) + var(--lb-space-4));
   transform-origin: center top;
   animation: home-stage-enter 480ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -627,13 +627,13 @@ main {
   }
 
   .home-ignition-hero__promise {
-    font-size: clamp(40px, 11.5vw, 52px);
+    font-size: var(--lb-public-hero-mobile-display-size);
   }
 
   .home-ignition-hero__stage {
     inline-size: 100%;
     margin-block-start: var(--lb-space-5);
-    scroll-margin-block-start: 76px;
+    scroll-margin-block-start: calc(var(--lb-space-7) + var(--lb-space-3) - var(--lb-space-1));
   }
 
   body .public-home .home-ignition-hero__stage .lb-web-product-stage img {

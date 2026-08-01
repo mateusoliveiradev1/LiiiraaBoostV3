@@ -57,7 +57,7 @@ button:focus-visible,
   align-items: center;
   gap: var(--lb-space-3);
   min-block-size: 72px;
-  inline-size: min(100%, 1320px);
+  inline-size: min(100%, var(--lb-admin-workspace-max));
   margin-inline: auto;
   padding-inline: var(--lb-screen-padding);
 }
@@ -159,7 +159,7 @@ button:focus-visible,
   align-items: center;
   gap: var(--lb-space-3);
   block-size: 40px;
-  padding-inline: max(var(--lb-screen-padding), calc((100% - 1320px) / 2));
+  padding-inline: max(var(--lb-screen-padding), calc((100% - var(--lb-admin-workspace-max)) / 2));
   border-block-end: 1px solid var(--lb-line-strong);
   background: var(--lb-surface-work);
   white-space: nowrap;
@@ -187,7 +187,7 @@ button:focus-visible,
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   inline-size: 100%;
-  max-inline-size: 1320px;
+  max-inline-size: var(--lb-admin-workspace-max);
   min-block-size: calc(100vh - 112px);
   margin-inline: auto;
   border-inline: 1px solid var(--lb-line-subtle);

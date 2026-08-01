@@ -8,6 +8,9 @@ import { expect, test, type Page, type TestInfo } from '@playwright/test';
 
 type Surface = 'public' | 'account' | 'admin';
 
+type VisualOrigin =
+  'http://public.localhost:3100' | 'http://account.localhost:3101' | 'http://admin.localhost:3102';
+
 type Scenario = Readonly<{
   clock: string;
   id: string;
@@ -25,10 +28,6 @@ type VisualEntry = Readonly<{
   locale: Scenario['locale'];
   localeReview: 'pt-BR-default' | 'en-parity';
   motion: 'no-preference' | 'reduce';
-  origin:
-    | 'http://public.localhost:3100'
-    | 'http://account.localhost:3101'
-    | 'http://admin.localhost:3102';
   priorEvidenceStatus: 'invalidated-rejected-pixels';
   published: false;
   rebaselineOwner: 'plan-03-62';
@@ -54,7 +53,12 @@ const scenarioDocument = JSON.parse(
 
 const visualManifest = JSON.parse(
   readFileSync(new URL('../visual-manifest.json', import.meta.url), 'utf8'),
-) as Readonly<{ entries: readonly VisualEntry[]; schemaVersion: number; source: string }>;
+) as Readonly<{
+  entries: readonly VisualEntry[];
+  origins: Readonly<Record<Surface, VisualOrigin>>;
+  schemaVersion: number;
+  source: string;
+}>;
 
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const REACT_EVAL_CSP_ERROR =
@@ -390,14 +394,14 @@ test('@final @public visual manifest closes all 25 records as unapproved Plan 03
     account: 'http://account.localhost:3101',
     admin: 'http://admin.localhost:3102',
     public: 'http://public.localhost:3100',
-  } as const satisfies Record<Surface, VisualEntry['origin']>;
+  } as const satisfies Record<Surface, VisualOrigin>;
+  expect(visualManifest.origins).toEqual(expectedOrigins);
 
   for (const entry of visualManifest.entries) {
     expect(entry).toMatchObject({
       approved: false,
       candidatePurpose: 'revised-geometry-focal-state-review',
       comparisonSource: 'phase-02-approved-desktop-captures',
-      origin: expectedOrigins[entry.surface],
       priorEvidenceStatus: 'invalidated-rejected-pixels',
       published: false,
       rebaselineOwner: 'plan-03-62',
@@ -406,6 +410,9 @@ test('@final @public visual manifest closes all 25 records as unapproved Plan 03
       visualTarget: false,
     });
     expect(entry.route).toMatch(/^\/(?:en|pt-BR)(?:\/|$)/u);
+    expect(new URL(entry.route, visualManifest.origins[entry.surface]).origin).toBe(
+      expectedOrigins[entry.surface],
+    );
     expect(entry.routeId).not.toHaveLength(0);
     expect(entry.state).not.toHaveLength(0);
     expect(entry.viewport).toMatch(/^\d+x\d+$/u);
@@ -426,9 +433,7 @@ test('@final @public visual manifest closes all 25 records as unapproved Plan 03
     expect(entries.some(({ viewport }) => viewport !== '390x844' && viewport !== '320x800')).toBe(
       true,
     );
-    expect(new Set(entries.map(({ origin }) => origin))).toEqual(
-      new Set([expectedOrigins[surface]]),
-    );
+    expect(visualManifest.origins[surface]).toBe(expectedOrigins[surface]);
   }
 });
 
