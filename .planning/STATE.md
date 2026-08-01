@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-49-PLAN.md
-last_updated: "2026-08-01T05:06:15.198Z"
+stopped_at: Completed 03-50-PLAN.md
+last_updated: "2026-08-01T05:29:40.381Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed 03-49-PLAN.md
+last_activity_desc: Completed 03-50-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 110
-  completed_plans: 105
-  percent: 95
+  completed_plans: 106
+  percent: 96
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 46 of 52
+Plan: 47 of 52
 Status: Ready to execute Plan 03-46
-Last activity: 2026-08-01 — Completed 03-49-PLAN.md
+Last activity: 2026-08-01 — Completed 03-50-PLAN.md
 
 Progress: [██████████] 95%
 
@@ -153,6 +153,7 @@ _Updated after plan completion_
 | Phase 03 P47 | 9 min | 3 tasks | 8 files |
 | Phase 03 P48 | 6 min | 2 tasks | 6 files |
 | Phase 03 P49 | 13min | 2 tasks | 10 files |
+| Phase 03 P50 | 17 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -443,6 +444,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Project active public pillars and locale destinations only after canonical route matching; unmatched paths fail back to the target-locale Home. — Prevents arbitrary pathname state from crossing the localized public navigation boundary.
 - [Phase 03]: Keep public chrome server-owned while isolating pathname awareness in one narrow client navigation component. — Preserves locale validation and metadata on the server while enabling exact active-route behavior.
 - [Phase 03]: Use one primary compatibility action and keep screenshot/evidence metadata behind native disclosures. — Protects visitor hierarchy without weakening truthful evidence or distribution gates.
+- [Phase 03]: Keep pathname awareness in one AccountNavigation client boundary while the server layout supplies identity and preview-truth slots. — Canonical server-owned content stays separate from the only browser pathname owner.
+- [Phase 03]: Below 960px replace account route inventory with a native current-task disclosure while preserving one canonical desktop aria-current anchor. — Mobile stays compact without duplicate current-page semantics.
+- [Phase 03]: Ordinary account routes rely on one shell preview boundary; consequence reviews and no-change receipts retain contextual truth. — Safety remains persistent without dominating normal task controls.
 
 ### Pending Todos
 
@@ -484,6 +488,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T05:05:14.178Z
-Stopped at: Completed 03-49-PLAN.md
+Last session: 2026-08-01T05:29:40.376Z
+Stopped at: Completed 03-50-PLAN.md
 Resume file: None
