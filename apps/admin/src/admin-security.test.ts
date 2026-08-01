@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
-import { describe, expect, it } from 'vitest';
-import { NextRequest } from 'next/server';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
 
 import adminProxy, {
   AdminAccessBoundary,
@@ -16,6 +16,10 @@ import {
 } from './admin-runtime';
 
 describe('admin security boundary', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('uses the exact dedicated local origin and never claims connected authority', () => {
     const packageJson = JSON.parse(
       readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
@@ -204,5 +208,97 @@ describe('admin security boundary', () => {
     expect(unsafe.status).toBe(403);
     expect(unsafe.headers.get('set-cookie')).toBeNull();
     expect(unsafe.headers.get('location')).toBeNull();
+  });
+
+  it.each([
+    {
+      locale: 'pt-BR',
+      title: 'Acesso administrativo não autorizado',
+      recovery: 'Abrir entrada administrativa segura',
+    },
+    {
+      locale: 'en',
+      title: 'Administrative access not authorized',
+      recovery: 'Open the secure admin entry',
+    },
+  ])('returns an authored localized HTML denial for $locale document navigation', async ({
+    locale,
+    recovery,
+    title,
+  }) => {
+    const response = adminProxy(
+      new NextRequest(`https://account.localhost/${locale}/admin`, {
+        headers: {
+          accept: 'text/html,application/xhtml+xml',
+          'sec-fetch-dest': 'document',
+          'sec-fetch-mode': 'navigate',
+          'x-request-id': 'request-42',
+        },
+      }),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get('content-type')).toContain('text/html');
+    expect(body).toContain(`lang="${locale}"`);
+    expect(body).toContain(title);
+    expect(body).toContain(recovery);
+    expect(body).toContain(
+      `href="${ADMIN_LOCAL_ORIGIN}/${locale}/admin"`,
+    );
+    expect(body).toContain('request-42');
+    expect(body).not.toMatch(/authoritativeAccessConnected|fixture|preview role/iu);
+    expect(body).not.toContain('<script');
+  });
+
+  it('keeps rejected non-document requests as bounded JSON with equivalent semantics', async () => {
+    const response = adminProxy(
+      new NextRequest('https://account.localhost/en/admin?role=security', {
+        headers: {
+          accept: 'application/json',
+          'sec-fetch-dest': 'empty',
+          'x-request-id': 'api-request-7',
+        },
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    await expect(response.json()).resolves.toEqual({
+      authoritativeAccessConnected: false,
+      code: 'ADMIN_PREVIEW_ACCESS_DENIED',
+      reason: 'origin-rejected',
+      requestId: 'api-request-7',
+    });
+  });
+
+  it('escapes or removes untrusted denial data and never forwards a rejected request', async () => {
+    const nextSpy = vi.spyOn(NextResponse, 'next');
+    const response = adminProxy(
+      new NextRequest(
+        'https://account.localhost/pt-BR/admin?returnUrl=%3Cscript%3Ealert(1)%3C%2Fscript%3E',
+        {
+          headers: {
+            accept: 'text/html',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'x-request-id': '<img src=x onerror=alert(1)>',
+          },
+        },
+      ),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(403);
+    expect(nextSpy).not.toHaveBeenCalled();
+    expect(body).not.toContain('<img');
+    expect(body).not.toContain('<script');
+    expect(body).not.toContain('returnUrl');
+    expect(response.headers.get('cache-control')).toBe('private, no-store, max-age=0');
+    expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
+    expect(response.headers.get('x-frame-options')).toBe('DENY');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(response.headers.get('location')).toBeNull();
   });
 });
