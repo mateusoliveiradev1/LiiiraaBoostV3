@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 50/62 plans executed
+**Plans**: 50/66 plans executed
 
 Plans:
 **Wave 1**
@@ -436,13 +436,23 @@ Plans:
 
 **Wave 35** *(blocked on Plan 03-61)*
 
-- [ ] 03-62-PLAN.md — Regenerate and inspect all 25 unapproved W/G candidates and prove stable replay
+- [ ] 03-62-PLAN.md — Archive rejected G01/G04/G06 and perform one mechanical 25-candidate update
 
-**Wave 36** *(blocked on Plan 03-62)*
+**Wave 36** *(blocked on Plan 03-62; parallel surface inspections)*
+
+- [ ] 03-63-PLAN.md — Inspect twelve public candidates at original resolution
+- [ ] 03-64-PLAN.md — Inspect eight account candidates at original resolution
+- [ ] 03-65-PLAN.md — Inspect five admin candidates at original resolution
+
+**Wave 37** *(blocked on Plans 03-63 through 03-65)*
+
+- [ ] 03-66-PLAN.md — Aggregate the exact inspected set and pass no-update replay/build/regression
+
+**Wave 38** *(blocked on Plan 03-66)*
 
 - [ ] 03-45-PLAN.md — Run complete matrix preflight and blocking human visual review
 
-**Wave 37** *(blocked on approved Plan 03-45)*
+**Wave 39** *(blocked on approved Plan 03-45)*
 
 - [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
 
