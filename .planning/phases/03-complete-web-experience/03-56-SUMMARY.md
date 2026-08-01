@@ -37,7 +37,7 @@ key-files:
 key-decisions:
   - "Reuse the checksum-admitted desktop capture as the contextual evidence focal point so the product itself carries attention without invented telemetry or illustration."
   - "Keep version, ownership, validation, commercial, and manifest detail complete but subordinate it to human outcomes through native disclosures."
-  - "Order release guidance as compatibility, integrity, risk, corrections, and recovery while leaving the canonical download decision as the sole artifact authority."
+  - "Lead release and integrity routes with the canonical blocked decision, safe next actions, and recovery guidance while keeping machine evidence complete inside closed native disclosures."
 
 patterns-established:
   - "Public long-form rhythm uses stage, connected band, evidence field, decision workspace, and boundary ribbon instead of repeated cards."
@@ -56,11 +56,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 16 min
+- **Duration:** 29 min total (16 min initial execution + 13 min inspection correction)
 - **Started:** 2026-08-01T17:26:19Z
 - **Completed:** 2026-08-01T17:41:58Z
 - **Tasks:** 2
-- **Files modified:** 9
+- **Files modified:** 11
 
 ## Accomplishments
 
@@ -78,6 +78,9 @@ Each TDD gate was committed atomically:
 2. **Task 1 GREEN: authored Home and public catalog movements** - `c849bc0` (feat)
 3. **Task 2 RED: documentation and release rhythm contracts** - `091a01d` (test)
 4. **Task 2 GREEN: task-led documentation and integrity-led releases** - `3565d67` (feat)
+5. **03-63 correction RED: public release inspection regressions** - `473aa9b` (test)
+6. **03-63 correction RED: manifest framing disclosure boundary** - `2b9b935` (test)
+7. **03-63 correction GREEN: human release decision hierarchy** - `dc650b8` (fix)
 
 ## Files Created/Modified
 
@@ -86,6 +89,8 @@ Each TDD gate was committed atomically:
 - `apps/web/src/features/documentation.tsx` - Explicit purpose-to-detail reading order, invoked technical context, and narrow index workspace.
 - `apps/web/src/features/releases.tsx` - State-first header, invoked release metadata, semantic channel ledger, and ordered release movements.
 - `apps/web/src/styles/public.css` - Cobalt tonal rhythm, 40px support-route headings, semantic rows, mobile reflow, forced-color structure, and zero card-wall layouts.
+- `apps/web/src/content/public/policies.pt-BR.json` - Visitor-facing PT-BR status language without internal phase identifiers.
+- `apps/web/src/content/public/policies.en.json` - English parity for visitor-facing account-preview status language.
 - `apps/web/src/home.test.tsx` - Home movement order, next-chapter hint, contextual evidence, and visitor-copy gates.
 - `apps/web/src/public-catalog.test.tsx` - Compatibility and plan composition, bilingual consequence, and 320px reflow gates.
 - `apps/web/src/documentation.test.tsx` - Documentation hierarchy, historical guidance, invoked metadata, and narrow-layout gates.
@@ -95,7 +100,8 @@ Each TDD gate was committed atomically:
 
 - Reused the admitted real desktop artifact in the contextual proof movement. This keeps attention on truthful product evidence and avoids invented diagrams, screenshots, or performance claims.
 - Kept ordinary headings and actions direct while moving validation state, ownership, release references, commercial boundaries, and manifest detail into native disclosures.
-- Kept the download decision renderer last and authoritative. Narrative reordering never grants distribution authority or exposes an installer path.
+- Made the download decision renderer first and authoritative on download and integrity routes. Narrative reordering never grants distribution authority or exposes an installer path.
+- Kept manifest fields, provenance, raw decision reasons, and contract identifiers complete but available only through localized closed native disclosures.
 
 ## Deviations from Plan
 
@@ -127,12 +133,15 @@ Each TDD gate was committed atomically:
 ## Issues Encountered
 
 - The existing development server was reused for read-only responsive inspection and left running unchanged.
+- The complete public suite currently has one unrelated stale Home assertion: `home.test.tsx` expects literal `clamp(52px, 6vw, 76px)` while the unchanged Home CSS uses canonical `var(--lb-public-hero-display-size)`. The failure existed outside the W07/W08/W09 correction scope, so no Home file was edited; ownership was routed back to the Home plan.
 
 ## TDD Gate Compliance
 
 - Task 1 RED `9704c47` failed on four planned public movement behaviors before GREEN `c849bc0` passed 23/23 targeted tests.
 - Task 2 RED `091a01d` failed on six planned documentation/release behaviors before GREEN `3565d67` passed 20/20 targeted tests.
-- Both RED commits precede their corresponding GREEN commits.
+- Inspection correction RED `473aa9b` proved W07/W08 rendered machine evidence before the blocked decision and W09 exposed internal phase/enum language; GREEN `dc650b8` passes all 25 release/catalog tests.
+- Supplemental RED `2b9b935` proved manifest framing still remained visible outside disclosure before GREEN moved it behind the technical boundary.
+- Every RED commit precedes its corresponding GREEN implementation commit.
 
 ## Known Stubs
 
@@ -146,6 +155,17 @@ None. The public download-unavailable state is an intentional fail-closed author
 - `rtk pnpm web:check` - 10/10 workspace checks passed.
 - Impeccable detector on all changed public feature and style sources - zero findings.
 - Headless Chromium at 1440, 960, 390, and 320 widths across Home, Product, Docs, and Releases - 16/16 views had no horizontal page overflow.
+
+### 03-63 Inspection Correction
+
+- `rtk pnpm --filter @liiiraa/web exec vitest run src/releases.test.tsx src/public-catalog.test.tsx` - 2 files, 25 tests passed.
+- `rtk pnpm --filter @liiiraa/web check` - strict TypeScript passed.
+- `rtk pnpm --filter @liiiraa/web build` - Next.js 16.2.12 production build passed.
+- Impeccable detector on the corrected release, status, and public style sources - zero findings.
+- Headless Chromium on W07, W08, and W09 at 1440 and 390 CSS pixels - 6/6 views had zero horizontal overflow.
+- W07/W08 browser measurements confirmed the blocked decision precedes integrity content and both manifest/provenance disclosures are closed by default at both widths.
+- W09 browser text inspection confirmed no visible `Fase 3` or `demonstrative-preview` at either width.
+- Full public suite result: 80/81 passed; the sole failure is the unrelated stale Home literal-token assertion documented above.
 
 ## Threat Review
 
@@ -165,7 +185,7 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - Created file `apps/web/src/documentation.test.tsx` exists and is tracked.
-- Task commits `9704c47`, `c849bc0`, `091a01d`, and `3565d67` exist in repository history.
+- Task commits `9704c47`, `c849bc0`, `091a01d`, `3565d67`, `473aa9b`, `2b9b935`, and `dc650b8` exist in repository history.
 
 ---
 *Phase: 03-complete-web-experience*
