@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { publicCspProbe, publicHeaderContract } from '../next.config';
+import * as publicConfig from '../next.config';
 import { publicBoundaryHref, publicNavigation, routing } from './public-boundary';
 import {
   CLIENT_WEB_LOCALES,
@@ -72,10 +72,50 @@ describe('public shell', () => {
 });
 
 describe('public CSP', () => {
+  const headersFor = (runtimeMode: 'development' | 'production' | 'test') => {
+    const builder = Reflect.get(publicConfig, 'buildPublicHeaderContract') as
+      | ((mode: typeof runtimeMode) => readonly { key: string; value: string }[])
+      | undefined;
+    const contract = builder?.(runtimeMode) ?? publicConfig.publicHeaderContract;
+
+    return Object.fromEntries(contract.map(({ key, value }) => [key.toLowerCase(), value]));
+  };
+
+  it('constructs an explicit development policy for React and Turbopack debugging', () => {
+    expect(Reflect.get(publicConfig, 'buildPublicHeaderContract')).toBeTypeOf('function');
+
+    const enforced = headersFor('development')['content-security-policy'];
+    const scriptDirective = enforced
+      ?.split(';')
+      .find((directive) => directive.trim().startsWith('script-src'));
+
+    expect(scriptDirective).toBe(" script-src 'self' 'unsafe-inline' 'unsafe-eval'");
+    expect(scriptDirective?.match(/'unsafe-eval'/gu)).toHaveLength(1);
+  });
+
+  it.each(['production', 'test'] as const)(
+    'keeps the %s policy no-eval while retaining the public static contract',
+    (runtimeMode) => {
+      const headers = headersFor(runtimeMode);
+      const enforced = headers['content-security-policy'];
+      const reportOnly = headers['content-security-policy-report-only'];
+
+      expect(enforced).toContain("script-src 'self' 'unsafe-inline'");
+      expect(enforced).not.toContain("'unsafe-eval'");
+      expect(reportOnly).toContain("script-src 'self'");
+      expect(reportOnly).not.toContain("'unsafe-eval'");
+      expect(enforced).toContain("frame-ancestors 'none'");
+      expect(enforced).toContain("object-src 'none'");
+      expect(enforced).toContain("base-uri 'none'");
+      expect(enforced).toContain("form-action 'self'");
+      expect(headers['cross-origin-opener-policy']).toBe('same-origin');
+      expect(headers['cross-origin-resource-policy']).toBe('same-origin');
+      expect(Object.keys(headers)).not.toContain('set-cookie');
+    },
+  );
+
   it('keeps the production origin cookie-free, frame-closed, and third-party-free', () => {
-    const headers = Object.fromEntries(
-      publicHeaderContract.map(({ key, value }) => [key.toLowerCase(), value]),
-    );
+    const headers = headersFor('production');
     const enforced = headers['content-security-policy'];
 
     expect(enforced).toContain("default-src 'self'");
@@ -88,7 +128,7 @@ describe('public CSP', () => {
 
     expect(scriptDirective).not.toMatch(/https?:|data:|nonce-/u);
     expect(Object.keys(headers)).not.toContain('set-cookie');
-    expect(publicCspProbe).toMatchObject({
+    expect(publicConfig.publicCspProbe).toMatchObject({
       blockingDirectives: ['script-src', 'style-src'],
       status: 'report-only-blocked',
     });
