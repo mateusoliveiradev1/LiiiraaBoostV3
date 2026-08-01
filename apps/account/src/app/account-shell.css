@@ -177,12 +177,6 @@ button:focus-visible,
   line-height: var(--lb-text-label-line);
 }
 
-.account-preview-rail p strong {
-  flex: 0 0 auto;
-  color: var(--lb-text-primary);
-  font-weight: var(--lb-weight-semibold);
-}
-
 .account-workspace {
   background: var(--lb-surface-canvas);
 }

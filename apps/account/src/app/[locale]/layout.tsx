@@ -204,11 +204,8 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
               data-authority="disconnected"
               role="note"
             >
-              <AccountPreviewProvenance detail="" locale={locale} />
-              <p>
-                <strong>{copy.previewLabel}</strong>
-                <span>{copy.preview}</span>
-              </p>
+              <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
+              <p>{copy.preview}</p>
             </aside>
           }
         >
