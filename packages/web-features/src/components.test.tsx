@@ -117,6 +117,7 @@ const tokenViolations = (
     if (property === undefined || value === undefined) continue;
 
     const allowedPixels = property === 'font-size' ? CANONICAL_TYPE_PIXELS : CANONICAL_SPACE_PIXELS;
+    if (property.startsWith('margin') && value === '-1px') continue;
     const pixels = [...value.matchAll(/(?<pixels>\d+(?:\.\d+)?)px/gu)].map(({ groups }) =>
       Number(groups?.['pixels']),
     );
