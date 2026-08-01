@@ -37,14 +37,12 @@ describe('account shell', () => {
     );
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
-    expect(navigationSource).toContain('className="account-nav__desktop"');
-    expect(navigationSource).toContain('className="account-nav__mobile"');
+    expect(navigationSource).toContain('account-nav__desktop');
+    expect(navigationSource).toContain('account-nav__mobile');
     expect(navigationSource).toContain('<details');
     expect(navigationSource).toContain('<summary>');
     expect(navigationSource).toContain('{currentLabel}');
-    expect(styles).toMatch(
-      /\.account-nav__mobile\s*\{[\s\S]*display:\s*none/u,
-    );
+    expect(styles).toMatch(/\.account-nav__mobile\s*\{[\s\S]*display:\s*none/u);
     expect(styles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__desktop\s*\{[\s\S]*display:\s*none/u,
     );
@@ -68,13 +66,13 @@ describe('account shell', () => {
 
     expect(layoutSource).toContain('account-header__identity');
     expect(layoutSource).toContain('account-header__identity-state');
-    expect(layoutSource).toContain('account-header__task');
+    expect(navigationSource).toContain('account-header__task');
     expect(layoutSource).toContain('data-authority="disconnected"');
     expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
-    expect(navigationSource).toContain("sourceLocale={locale}");
-    expect(navigationSource).toContain("targetLocale={alternateLocale}");
+    expect(navigationSource).toContain('sourceLocale={locale}');
+    expect(navigationSource).toContain('targetLocale={alternateLocale}');
     expect(navigationSource).toContain('resolveLocalizedCurrentRoute({');
-    expect(navigationSource).toContain("fallbackLocaleHref");
+    expect(navigationSource).toContain('fallbackLocaleHref');
   });
 
   it('projects every canonical account responsibility and keeps preview authority visible', () => {
@@ -101,7 +99,14 @@ describe('account shell', () => {
       runtimeClass: 'fixture',
       surface: 'account',
     });
-    expect(layoutSource.match(/<main\b/gu) ?? []).toHaveLength(1);
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+    expect([
+      ...(layoutSource.match(/<main\b/gu) ?? []),
+      ...(navigationSource.match(/<main\b/gu) ?? []),
+    ]).toHaveLength(1);
     expect(layoutSource).toContain('href="#account-main"');
     expect(layoutSource).toContain('account-preview-rail');
     expect(layoutSource).toContain('data-authority="disconnected"');

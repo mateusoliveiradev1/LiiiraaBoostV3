@@ -49,20 +49,23 @@ const NAVIGATION_GROUPS = Object.freeze([
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    language: 'English',
+    accountIdentity: 'Conta demonstrativa',
+    accountState: 'Nenhuma sessão conectada',
+    currentTask: 'Responsabilidade atual',
     navigation: 'Responsabilidades da conta',
     preview:
-      'Autoridade desconectada: validações e revisões são demonstrativas; nenhuma mudança remota é executada.',
-    previewLabel: 'Prévia determinística',
+      'Autoridade remota desconectada. Revisões usam dados sintéticos e não executam mudanças.',
+    previewLabel: 'Prévia desconectada',
     publicLink: 'Ir para a superfície pública',
     skip: 'Ir para o conteúdo da conta',
   }),
   en: Object.freeze({
-    language: 'Português',
+    accountIdentity: 'Demonstration account',
+    accountState: 'No session connected',
+    currentTask: 'Current responsibility',
     navigation: 'Account responsibilities',
-    preview:
-      'Disconnected authority: validation and review are demonstrative; no remote change is executed.',
-    previewLabel: 'Deterministic preview',
+    preview: 'Remote authority is disconnected. Reviews use synthetic data and make no changes.',
+    previewLabel: 'Disconnected preview',
     publicLink: 'Go to the public surface',
     skip: 'Skip to account content',
   }),
@@ -160,43 +163,41 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           {copy.skip}
         </a>
 
-        <header className="account-header">
-          <div className="account-header__bar">
-            <a className="account-brand" href={localizedHref('account-overview', locale)}>
-              <ProductLockup />
-              <span className="account-brand__surface">
-                {locale === 'pt-BR' ? 'Conta' : 'Account'}
-              </span>
-            </a>
-            <a
-              aria-label={`${locale === 'pt-BR' ? 'Idioma' : 'Language'}: ${copy.language}`}
-              className="account-locale"
-              href={localizedHref('account-overview', alternateLocale)}
-              hrefLang={alternateLocale}
-              lang={alternateLocale}
+        <AccountNavigation
+          alternateLocale={alternateLocale}
+          currentTaskLabel={copy.currentTask}
+          fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
+          groups={navigationGroups}
+          header={
+            <>
+              <a className="account-brand" href={localizedHref('account-overview', locale)}>
+                <ProductLockup />
+                <span className="account-brand__surface">
+                  {locale === 'pt-BR' ? 'Conta' : 'Account'}
+                </span>
+              </a>
+              <div className="account-header__identity">
+                <strong>{copy.accountIdentity}</strong>
+                <span className="account-header__identity-state">{copy.accountState}</span>
+              </div>
+            </>
+          }
+          label={copy.navigation}
+          locale={locale}
+          preview={
+            <aside
+              aria-label={copy.previewLabel}
+              className="account-preview-rail"
+              data-authority="disconnected"
+              role="note"
             >
-              {copy.language}
-            </a>
-          </div>
-        </header>
-
-        <aside
-          aria-label={copy.previewLabel}
-          className="account-preview-rail"
-          data-authority="disconnected"
+              <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
+              <p>{copy.preview}</p>
+            </aside>
+          }
         >
-          <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
-          <p>{copy.preview}</p>
-        </aside>
-
-        <div className="account-workspace">
-          <div className="account-workspace__frame">
-            <AccountNavigation groups={navigationGroups} label={copy.navigation} />
-            <main id="account-main" tabIndex={-1}>
-              {children}
-            </main>
-          </div>
-        </div>
+          {children}
+        </AccountNavigation>
 
         <footer className="account-footer">
           <div className="account-footer__bar">
