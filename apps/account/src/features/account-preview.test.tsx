@@ -150,6 +150,73 @@ describe('authored overview and Profile workspaces', () => {
   });
 });
 
+describe('task-specific account workspace density', () => {
+  it('uses semantic structures matched to each responsibility instead of repeated cards', () => {
+    const securitySource = sourceBetween('const SecurityPreview', 'const CollectionDisclosure');
+    const subscriptionSource = sourceBetween(
+      'export const SubscriptionSummary',
+      'export const InvoiceTable',
+    );
+    const invoiceSource = sourceBetween(
+      'export const InvoiceTable',
+      'export const DeviceBindingReview',
+    );
+    const deviceSource = sourceBetween(
+      'export const DeviceBindingReview',
+      'export const DownloadsPreview',
+    );
+    const downloadsSource = sourceBetween(
+      'export const DownloadsPreview',
+      'export const ConsentReview',
+    );
+    const privacySource = sourceBetween(
+      'export const PrivacyCenter',
+      'export const SensitiveFieldReview',
+    );
+    const supportSource = sourceBetween(
+      'export const SupportRequestComposer',
+      'export type AccountPreviewExperienceProps',
+    );
+
+    expect(securitySource).toContain('account-responsibility account-security');
+    expect(securitySource).toContain('account-security__workspace');
+    expect(securitySource).not.toContain('<PreviewBoundary');
+    expect(subscriptionSource).toContain('account-responsibility account-subscription');
+    expect(subscriptionSource).toContain('account-definition-list');
+    expect(subscriptionSource).not.toContain('<PreviewBoundary');
+    expect(invoiceSource).toContain('account-responsibility account-invoices');
+    expect(invoiceSource).toContain('ResponsiveDataTable');
+    expect(deviceSource).toContain('account-responsibility account-device');
+    expect(deviceSource).toContain('account-sensitive-action');
+    expect(downloadsSource).toContain('account-responsibility account-downloads');
+    expect(privacySource).toContain('account-responsibility account-privacy');
+    expect(supportSource).toContain('account-responsibility account-support');
+    expect(supportSource).toContain('account-support__fields');
+    expect(accountStyles).not.toMatch(/box-shadow:\s*0\s+\d+px\s+(?:1[6-9]|[2-9]\d)px/iu);
+  });
+
+  it('keeps every deterministic degraded and terminal path explicit and bilingual', () => {
+    expect(featureSource).toContain("'loading'");
+    expect(featureSource).toContain('data-account-state="empty"');
+    expect(featureSource).toContain(
+      'data-account-state="offline stale expired-session partial-failure"',
+    );
+    expect(featureSource).toContain('PreviewWorkflow');
+    expect(featureSource).toContain('safeDraftFields');
+    expect(featureSource).toContain('PreviewReceipt');
+    expect(shapeOf(accountPtBr)).toEqual(shapeOf(accountEn));
+  });
+
+  it('constrains form and detail measures while preserving semantic reflow', () => {
+    expect(accountStyles).toMatch(/#account-main\s*\{[\s\S]*max-inline-size:/u);
+    expect(accountStyles).toMatch(/\.account-definition-list\s*\{[\s\S]*display:\s*grid/u);
+    expect(accountStyles).toMatch(/\.account-support__fields\s*\{[\s\S]*max-inline-size:/u);
+    expect(accountStyles).toMatch(
+      /@media \(width < 760px\)[\s\S]*\.account-definition-list\s*>\s*div/u,
+    );
+  });
+});
+
 describe('W13 sensitive account no-change authority', () => {
   const command = (family: 'device' | 'privacy' | 'support'): FutureAuthorityCommandJson => ({
     command: `${family}.review`,
