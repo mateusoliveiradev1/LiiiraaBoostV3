@@ -19,6 +19,40 @@ import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
 
 describe('admin shell', () => {
+  it('enforces the exact desktop operations shell geometry', () => {
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*72px/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-preview-band\s*\{[\s\S]*block-size:\s*40px/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*280px minmax\(0, 1fr\)/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-workspace\s*\{[\s\S]*max-inline-size:\s*1320px/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
+    );
+  });
+
+  it('keeps operational identity, task, origin, role, and locale legible without raw fixture chrome', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+
+    expect(layout).toContain('<ProductLockup />');
+    expect(layout).toContain('admin-brand__surface');
+    expect(layout).toContain('admin-header__role');
+    expect(layout).toContain('admin-header__origin');
+    expect(navigation).toContain('admin-header__task');
+    expect(navigation).toContain('<LocaleSwitcher');
+    expect(layout).toContain('data-authority="disconnected"');
+    expect(layout).not.toMatch(/>\s*(fixture|simulated-no-change)\s*</iu);
+  });
+
   it('owns one role-scoped current task and preserves only validated role context', () => {
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
 
