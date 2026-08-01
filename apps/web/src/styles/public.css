@@ -1117,6 +1117,10 @@ ol.lb-web-documentation-index li {
   align-items: center;
 }
 
+.lb-web-status[data-tone='restricted'] {
+  color: var(--lb-text-primary);
+}
+
 .lb-web-filter-bar {
   display: flex;
   flex-wrap: wrap;

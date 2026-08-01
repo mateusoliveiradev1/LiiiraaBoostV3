@@ -51,8 +51,14 @@ export const getPublicNavigationState = (
   sourceLocale: WebLocale,
 ): PublicNavigationState => {
   const targetLocale: WebLocale = sourceLocale === 'pt-BR' ? 'en' : 'pt-BR';
+  const normalizedPathname = pathname.replace(/\/+$/u, '') || '/';
+  const isCurrentDocsIndex = normalizedPathname === `/${sourceLocale}/docs/current`;
   const match = matchWebRoute({ pathname, securityBoundary: 'public-origin' });
-  const activeId = match.ok ? projectActivePillar(match.value.route.id) : undefined;
+  const activeId = isCurrentDocsIndex
+    ? 'docs-index'
+    : match.ok
+      ? projectActivePillar(match.value.route.id)
+      : undefined;
   const localized = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'public-origin',
@@ -76,7 +82,9 @@ export const getPublicNavigationState = (
     localeFlag,
     localeHref: localized.ok
       ? localized.value
-      : publicBoundaryHref('public-home', targetLocale),
+      : isCurrentDocsIndex
+        ? `/${targetLocale}/docs/current`
+        : publicBoundaryHref('public-home', targetLocale),
     localeLabel,
     mobileItems: items.map((item) => ({ ...item })),
     targetLocale,

@@ -52,16 +52,19 @@ const REACT_EVAL_CSP_ERROR =
 const developmentSurfaces = Object.freeze([
   {
     app: '@liiiraa/web',
+    existingOrigin: 'http://public.localhost:3000',
     origin: 'http://public.localhost:3200',
     route: '/en/docs/current',
   },
   {
     app: '@liiiraa/account',
+    existingOrigin: 'http://account.localhost:3001',
     origin: 'http://account.localhost:3201',
     route: '/en/account/security',
   },
   {
     app: '@liiiraa/admin',
+    existingOrigin: 'http://admin.localhost:3002',
     origin: 'http://admin.localhost:3202',
     route: '/en/admin/audit?role=audit',
   },
@@ -245,36 +248,51 @@ test('@final @public development CSP is browser-clean on every separate origin',
 
   for (const surface of developmentSurfaces) {
     const output: string[] = [];
-    const child = spawn(
-      process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
-      [
-        '--filter',
-        surface.app,
-        'dev',
-        '--hostname',
-        new URL(surface.origin).hostname,
-        '--port',
-        new URL(surface.origin).port,
-      ],
-      {
-        cwd: repositoryRoot,
-        detached: process.platform !== 'win32',
-        env: {
-          ...process.env,
-          NODE_ENV: 'development',
-          ...(surface.app === '@liiiraa/admin'
-            ? { LIIIRAA_ADMIN_ORIGIN: surface.origin }
-            : {}),
-        },
-        stdio: 'pipe',
-      },
-    );
-    child.stdout.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
-    child.stderr.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
+    let origin = surface.origin;
+    let child: ChildProcessWithoutNullStreams | undefined;
 
     try {
-      const url = `${surface.origin}${surface.route}`;
-      await waitForDevelopmentServer(child, url, output);
+      const existingResponse = await fetch(`${surface.existingOrigin}${surface.route}`);
+      if (existingResponse.headers.get('content-security-policy')?.includes("'unsafe-eval'")) {
+        origin = surface.existingOrigin;
+      }
+    } catch {
+      // No compatible existing development server; start an isolated evidence server below.
+    }
+
+    if (origin === surface.origin) {
+      child = spawn(
+        process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+        [
+          '--filter',
+          surface.app,
+          'dev',
+          '--hostname',
+          new URL(surface.origin).hostname,
+          '--port',
+          new URL(surface.origin).port,
+        ],
+        {
+          cwd: repositoryRoot,
+          detached: process.platform !== 'win32',
+          env: {
+            ...process.env,
+            NODE_ENV: 'development',
+            ...(surface.app === '@liiiraa/admin'
+              ? { LIIIRAA_ADMIN_ORIGIN: surface.origin }
+              : {}),
+          },
+          shell: process.platform === 'win32',
+          stdio: 'pipe',
+        },
+      );
+      child.stdout.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
+      child.stderr.on('data', (chunk: Buffer) => output.push(chunk.toString('utf8')));
+    }
+
+    try {
+      const url = `${origin}${surface.route}`;
+      if (child !== undefined) await waitForDevelopmentServer(child, url, output);
       const consoleErrors: string[] = [];
       const onConsole = (message: { text(): string }) => {
         if (REACT_EVAL_CSP_ERROR.test(message.text())) consoleErrors.push(message.text());
@@ -288,7 +306,7 @@ test('@final @public development CSP is browser-clean on every separate origin',
       expect(consoleErrors, `${surface.app} emitted the reported React/Turbopack error`).toEqual([]);
       page.off('console', onConsole);
     } finally {
-      stopDevelopmentServer(child);
+      if (child !== undefined) stopDevelopmentServer(child);
     }
   }
 });

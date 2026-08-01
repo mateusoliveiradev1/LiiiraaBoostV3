@@ -85,7 +85,9 @@ test('@final @public navigation and language preserve the active documentation r
   onlyAxis(testInfo, 'wide-1440');
   await gotoWithRecoverableRetry(page, '/en/docs/current');
 
-  const current = page.locator('a[aria-current="page"]:visible');
+  const current = page.locator(
+    'nav.public-navigation--desktop:visible a[aria-current="page"]',
+  );
   await expect(current).toHaveCount(1);
   await expect(current).toContainText('Documentation');
 
@@ -99,7 +101,9 @@ test('@final @public navigation and language preserve the active documentation r
   await locale.click();
   await expect(page).toHaveURL(/\/pt-BR\/docs\/current$/u);
   await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
-  await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+  await expect(
+    page.locator('nav.public-navigation--desktop:visible a[aria-current="page"]'),
+  ).toHaveCount(1);
 });
 
 test('@final @public W01 keeps the PT-BR command runway truthful and distribution gated', async ({

@@ -85,7 +85,9 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     await expect(disclosure.locator('summary')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(disclosure).toHaveAttribute('open', '');
-    await expect(disclosure.getByRole('link', { name: 'Audit', exact: true })).toBeVisible();
+    await expect(
+      disclosure.getByRole('link', { name: 'Role workspace', exact: true }),
+    ).toBeVisible();
   });
 }
 

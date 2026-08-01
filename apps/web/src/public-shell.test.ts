@@ -39,6 +39,7 @@ describe('public shell', () => {
 
   it.each([
     ['/pt-BR/docs/current/articles/measurement-basics', '/en/docs/current/articles/measurement-basics'],
+    ['/pt-BR/docs/current', '/en/docs/current'],
     ['/pt-BR/releases/stable/1.0.0', '/en/releases/stable/1.0.0'],
     ['/pt-BR/search', '/en/search'],
     ['/pt-BR/support', '/en/support'],
