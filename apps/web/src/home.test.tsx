@@ -135,7 +135,7 @@ describe('Home layout and screenshot evidence gate', () => {
       homeSource.indexOf('className="home-ignition-hero__stage"'),
     );
     expect(shellStyles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.home-ignition-hero__stage img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
+      /@media \(width < 960px\)[\s\S]*\.home-ignition-hero__stage[^\{]*img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
     );
     expect(shellStyles).toMatch(/\.home-action\s*\{[\s\S]*min-block-size:\s*48px/u);
     expect(sharedSource).toContain('completeScreenshotLabel');

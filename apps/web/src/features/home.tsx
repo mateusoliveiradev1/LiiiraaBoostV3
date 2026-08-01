@@ -2,11 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import {
-  CommandRunwayHero,
-  RealProductStage,
-  StatusSignal,
-} from './home-web-components';
+import { RealProductStage, StatusSignal } from './home-web-components';
 import { validateWebDocument } from '@liiiraa/web-core';
 import type { ReactNode } from 'react';
 
@@ -369,39 +365,93 @@ const HomeAction = ({
   </a>
 );
 
+const splitHeroPromise = (promise: string): readonly string[] => {
+  const lines = promise.match(/[^.]+\./gu)?.map((line) => line.trim()) ?? [];
+  if (lines.length !== 3 || lines.join(' ') !== promise) {
+    throw new Error('HOME_CONTENT_INVALID:hero-promise');
+  }
+  return lines;
+};
+
+const HERO_LEAD = Object.freeze({
+  en: 'Plan around your hardware, inspect the evidence, and keep a clear path back.',
+  'pt-BR': 'Planeje para o seu hardware, inspecione as evidências e preserve um caminho de volta.',
+});
+
+const HERO_PRODUCT_ACTION = Object.freeze({
+  en: 'See the product in action',
+  'pt-BR': 'Ver o produto em ação',
+});
+
+const IgnitionHero = ({
+  artifact,
+  compatibilityHref,
+  locale,
+  primaryAction,
+  promise,
+  proofNote,
+}: Readonly<{
+  artifact: ReactNode;
+  compatibilityHref: string;
+  locale: HomeLocale;
+  primaryAction: string;
+  promise: string;
+  proofNote: string;
+}>) => (
+  <section className="home-ignition-hero" data-hero-layout="centered-12-column">
+    <div className="home-ignition-hero__copy">
+      <h1 aria-label={promise} className="home-ignition-hero__promise">
+        {splitHeroPromise(promise).map((line) => (
+          <span aria-hidden="true" key={line}>
+            {line}
+          </span>
+        ))}
+      </h1>
+      <p className="home-ignition-hero__lead">{HERO_LEAD[locale]}</p>
+      <div className="home-ignition-hero__actions">
+        <HomeAction href={compatibilityHref} primary>
+          {primaryAction}
+        </HomeAction>
+        <HomeAction href="#product-stage">{HERO_PRODUCT_ACTION[locale]}</HomeAction>
+      </div>
+      <aside className="home-trust-boundary" role="note">
+        <p>{proofNote}</p>
+      </aside>
+    </div>
+    <div
+      className="home-ignition-hero__stage"
+      data-stage-max-top="560"
+      data-stage-max-width="1120"
+      data-stage-min-visible="260"
+      id="product-stage"
+    >
+      {artifact}
+    </div>
+  </section>
+);
+
 export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocale }>) => {
   const content = getHomeContent(locale);
   const claims = getHomeClaims(locale);
   const capture = await resolveHomeProductCapture(locale);
   const compatibilityHref = publicBoundaryHref('public-compatibility', locale);
-  const evidenceHref = publicBoundaryHref('public-evidence', locale);
   const releasesHref = publicBoundaryHref('releases-index', locale);
   const proofClaims = claims.slice(0, 3);
   const compatibilityClaim = claims.find(({ chapter }) => chapter.id === 'compatibility');
-  if (compatibilityClaim === undefined) {
-    throw new Error(`HOME_CONTENT_INVALID:${locale}:compatibility`);
+  const heroProofNote = content.warnings[0];
+  if (compatibilityClaim === undefined || heroProofNote === undefined) {
+    throw new Error(`HOME_CONTENT_INVALID:${locale}:hero`);
   }
 
   return (
     <div className="public-home" data-capture-state={capture.code}>
-      <CommandRunwayHero
+      <IgnitionHero
         artifact={<ProductStageGate admission={capture} locale={locale} />}
-        boundary={
-          <aside className="home-trust-boundary" role="note">
-            <strong>{locale === 'pt-BR' ? 'O limite da promessa' : 'The promise boundary'}</strong>
-            <p>{content.warnings[0]}</p>
-          </aside>
-        }
-        cta={
-          <>
-            <HomeAction href={compatibilityHref} primary>
-              {content.hero.primaryAction.label}
-            </HomeAction>
-            <HomeAction href={evidenceHref}>{content.hero.secondaryAction.label}</HomeAction>
-          </>
-        }
+        compatibilityHref={compatibilityHref}
+        locale={locale}
+        primaryAction={content.hero.primaryAction.label}
         promise={content.hero.promise}
-        summary={content.hero.summary}
+        proofNote={heroProofNote}
       />
 
       <section aria-labelledby="home-evidence-title" className="home-evidence-stage">
