@@ -429,8 +429,8 @@ export const ImmutableAuditTimeline = ({
         caption={content.audit.caption}
         columns={[
           { id: 'event', label: content.locale === 'pt-BR' ? 'Evento' : 'Event' },
-          { id: 'actor', label: content.audit.actor },
-          { id: 'action', label: content.audit.action },
+          { id: 'actor', label: content.audit.actor, essential: false },
+          { id: 'action', label: content.audit.action, essential: false },
           { id: 'result', label: content.audit.result, essential: false },
           { id: 'time', label: content.audit.timestamp, essential: false },
         ]}
