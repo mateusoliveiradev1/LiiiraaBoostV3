@@ -286,6 +286,7 @@ button:focus-visible,
 .account-responsibility {
   display: grid;
   gap: var(--lb-space-5);
+  inline-size: 100%;
 }
 
 .lb-web-sign-in form {
@@ -300,23 +301,36 @@ button:focus-visible,
   gap: var(--lb-space-2);
 }
 
-.account-overview__layout,
-.account-profile__layout {
+.account-workspace-split {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(calc(var(--lb-space-7) * 4), 0.6fr);
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: var(--lb-space-4);
   align-items: start;
+  inline-size: 100%;
 }
 
-.account-overview__focus,
-.account-profile__editor {
+.account-workspace-split[data-workspace-layout='8/4'] {
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+}
+
+.account-workspace-split > [data-workspace-region] {
+  min-inline-size: 0;
+}
+
+.account-workspace-split > [data-workspace-region='focal'] {
   display: grid;
   gap: var(--lb-space-4);
-  min-inline-size: 0;
   padding: var(--lb-space-5);
-  border: 1px solid var(--lb-line-subtle);
-  border-radius: var(--lb-radius-default);
-  background: var(--lb-surface-inset);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-raised);
+}
+
+.account-workspace-split > [data-workspace-region='context'] {
+  display: grid;
+  gap: var(--lb-space-3);
+  align-content: start;
+  padding-block: var(--lb-space-3);
 }
 
 .account-overview__section-heading {
@@ -331,7 +345,10 @@ button:focus-visible,
 .account-overview__summaries h2,
 .account-overview__limitations h2,
 .account-profile__editor h2,
-.account-profile__context h2 {
+.account-profile__context h2,
+.account-subscription__context h2,
+.account-invoices__context h2,
+.account-downloads__focus h2 {
   margin: 0;
   font-size: var(--lb-text-heading-size);
   line-height: var(--lb-text-heading-line);
@@ -429,15 +446,8 @@ button:focus-visible,
   gap: var(--lb-space-1);
 }
 
-.account-profile__layout {
-  grid-template-columns: minmax(0, 1fr) minmax(
-      calc(var(--lb-space-7) * 4),
-      calc(var(--lb-space-7) * 5)
-    );
-}
-
 .account-profile__control {
-  max-inline-size: calc(var(--lb-space-7) * 7);
+  max-inline-size: min(100%, 560px);
 }
 
 .account-profile__facts,
@@ -481,15 +491,6 @@ button:focus-visible,
 
 .account-profile__context dl {
   grid-template-columns: 1fr;
-}
-
-.account-security__workspace,
-.account-privacy__workspace,
-.account-support__workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(calc(var(--lb-space-7) * 4), 0.8fr);
-  gap: var(--lb-space-4);
-  align-items: start;
 }
 
 .account-security__primary,
@@ -601,14 +602,13 @@ button:focus-visible,
   max-inline-size: 60ch;
 }
 
-.account-device__workspace,
-.account-downloads__handoff {
+.account-device__focus,
+.account-downloads__focus {
   display: grid;
   gap: var(--lb-space-4);
-  max-inline-size: calc(var(--lb-space-7) * 12);
 }
 
-.account-downloads__handoff > a {
+.account-downloads__focus > a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -623,24 +623,14 @@ button:focus-visible,
   text-decoration: none;
 }
 
-.account-downloads__handoff > a:hover,
-.account-downloads__handoff > a:focus-visible {
+.account-downloads__focus > a:hover,
+.account-downloads__focus > a:focus-visible {
   border-color: var(--lb-cobalt-signal);
   background: var(--lb-surface-raised);
 }
 
-.account-privacy__workspace {
-  grid-template-columns: minmax(0, 1.15fr) minmax(calc(var(--lb-space-7) * 4), 0.85fr);
-}
-
-.account-support__workspace {
-  grid-template-columns: minmax(0, 1fr) minmax(calc(var(--lb-space-7) * 5), 0.8fr);
-}
-
 .account-support__fields {
-  max-inline-size: calc(var(--lb-space-7) * 7);
-  padding-block: var(--lb-space-3);
-  border-block: 1px solid var(--lb-line-subtle);
+  max-inline-size: min(100%, 560px);
 }
 
 .account-footer {
@@ -823,11 +813,7 @@ button:focus-visible,
     padding-block-start: var(--lb-space-4);
   }
 
-  .account-overview__layout,
-  .account-profile__layout,
-  .account-security__workspace,
-  .account-privacy__workspace,
-  .account-support__workspace {
+  .account-workspace-split {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -859,8 +845,7 @@ button:focus-visible,
     padding-inline: var(--lb-space-2);
   }
 
-  .account-overview__focus,
-  .account-profile__editor {
+  .account-workspace-split > [data-workspace-region='focal'] {
     padding: var(--lb-space-4);
   }
 
@@ -909,6 +894,7 @@ button:focus-visible,
 
   .account-preview-rail,
   .account-definition-list,
+  .account-workspace-split > [data-workspace-region='focal'],
   .account-failure__safe-work,
   .account-nav__list a[aria-current='page'],
   .account-nav__list a:focus-visible {

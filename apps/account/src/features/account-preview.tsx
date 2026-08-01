@@ -402,8 +402,12 @@ export const SignInPreview = ({
 const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article className="account-responsibility account-overview" data-account-state="ready">
     <FixtureHeader summary={content.overview.summary} title={content.overview.title} />
-    <div className="account-overview__layout">
-      <section aria-labelledby="account-next-title" className="account-overview__focus">
+    <div className="account-overview__layout account-workspace-split" data-workspace-layout="7/5">
+      <section
+        aria-labelledby="account-next-title"
+        className="account-overview__focus"
+        data-workspace-region="focal"
+      >
         <div className="account-overview__section-heading">
           <h2 id="account-next-title">{content.overview.nextTitle}</h2>
           <StatusSignal label={content.overview.reviewState} state="preview" />
@@ -417,7 +421,11 @@ const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => 
         </nav>
       </section>
 
-      <section aria-labelledby="account-summaries-title" className="account-overview__summaries">
+      <section
+        aria-labelledby="account-summaries-title"
+        className="account-overview__summaries"
+        data-workspace-region="context"
+      >
         <h2 id="account-summaries-title">{content.overview.summariesTitle}</h2>
         <ul>
           {[
@@ -477,8 +485,12 @@ const ProfilePreview = ({
   return (
     <article className="account-responsibility account-profile" data-account-state="ready">
       <FixtureHeader summary={content.profile.summary} title={content.profile.title} />
-      <div className="account-profile__layout">
-        <section aria-labelledby="profile-editor-title" className="account-profile__editor">
+      <div className="account-profile__layout account-workspace-split" data-workspace-layout="7/5">
+        <section
+          aria-labelledby="profile-editor-title"
+          className="account-profile__editor"
+          data-workspace-region="focal"
+        >
           <h2 id="profile-editor-title">{content.profile.editorTitle}</h2>
           <div className="account-profile__control">
             <LbTextField
@@ -534,7 +546,11 @@ const ProfilePreview = ({
           </div>
         </section>
 
-        <aside aria-labelledby="profile-facts-title" className="account-profile__context">
+        <aside
+          aria-labelledby="profile-facts-title"
+          className="account-profile__context"
+          data-workspace-region="context"
+        >
           <h2 id="profile-facts-title">{content.profile.factsTitle}</h2>
           <p>{content.profile.limitations}</p>
           <dl>
@@ -625,12 +641,19 @@ const SecurityPreview = ({
   return (
     <article className="account-responsibility account-security" data-account-state="ready">
       <FixtureHeader summary={content.security.summary} title={content.security.title} />
-      <div className="account-security__workspace">
-        <div className="account-security__primary">
+      <div
+        className="account-security__workspace account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <div className="account-security__primary" data-workspace-region="focal">
           <SecurityMethodList content={content} onReview={reviewSecurity} />
           <SessionList content={content} onReview={() => reviewSecurity('session')} />
         </div>
-        <aside aria-labelledby="recovery-title" className="account-security__recovery">
+        <aside
+          aria-labelledby="recovery-title"
+          className="account-security__recovery"
+          data-workspace-region="context"
+        >
           <h2 id="recovery-title">{content.security.recovery}</h2>
           <p>{content.security.recoveryDetail}</p>
           <StatusSignal
@@ -740,49 +763,69 @@ export const SubscriptionSummary = ({
       data-account-state="ready"
     >
       <FixtureHeader summary={content.subscription.summary} title={content.subscription.title} />
-      <div className="account-subscription__summary">
-        <strong>{content.subscription.plan}</strong>
-        <StatusSignal
-          label={content.locale === 'pt-BR' ? 'Termos para revisão' : 'Terms for review'}
-          state="preview"
-        />
-      </div>
-      <dl className="account-definition-list">
-        {terms.map(([label, value]) => (
-          <div key={label}>
-            <dt>{label}</dt>
-            <dd>{value}</dd>
+      <div
+        className="account-subscription__workspace account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <section className="account-subscription__focus" data-workspace-region="focal">
+          <div className="account-subscription__summary">
+            <strong>{content.subscription.plan}</strong>
+            <StatusSignal
+              label={content.locale === 'pt-BR' ? 'Termos para revisão' : 'Terms for review'}
+              state="preview"
+            />
           </div>
-        ))}
-      </dl>
-      <div className="account-sensitive-action">
-        <p>
-          {content.locale === 'pt-BR'
-            ? 'A próxima etapa abre uma revisão sem cobrança.'
-            : 'The next step opens a review without charging.'}
-        </p>
-        <LbButton
-          onPress={() => {
-            setWorkflow(
-              actionInput({
-                family: 'billing',
-                fields: { plan: 'premium-preview' },
-                impact: content.subscription.expirationEffects,
-                label: content.subscription.action,
-                review: [
-                  {
-                    field: 'plan',
-                    label: content.subscription.plan,
-                    before: 'No authoritative plan',
-                    after: 'Premium review only',
-                  },
-                ],
-              }),
-            );
-          }}
-        >
-          {content.subscription.action}
-        </LbButton>
+          <dl className="account-definition-list">
+            {terms.slice(0, 4).map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="account-sensitive-action">
+            <p>
+              {content.locale === 'pt-BR'
+                ? 'A próxima etapa abre uma revisão sem cobrança.'
+                : 'The next step opens a review without charging.'}
+            </p>
+            <LbButton
+              onPress={() => {
+                setWorkflow(
+                  actionInput({
+                    family: 'billing',
+                    fields: { plan: 'premium-preview' },
+                    impact: content.subscription.expirationEffects,
+                    label: content.subscription.action,
+                    review: [
+                      {
+                        field: 'plan',
+                        label: content.subscription.plan,
+                        before: 'No authoritative plan',
+                        after: 'Premium review only',
+                      },
+                    ],
+                  }),
+                );
+              }}
+            >
+              {content.subscription.action}
+            </LbButton>
+          </div>
+        </section>
+        <aside className="account-subscription__context" data-workspace-region="context">
+          <h2>
+            {content.locale === 'pt-BR' ? 'Proteções da assinatura' : 'Subscription safeguards'}
+          </h2>
+          <dl className="account-definition-list">
+            {terms.slice(4).map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
       </div>
     </article>
   );
@@ -791,33 +834,47 @@ export const SubscriptionSummary = ({
 export const InvoiceTable = ({ content }: Readonly<{ content: AccountContent }>) => (
   <article className="account-responsibility account-invoices" data-account-state="empty">
     <FixtureHeader summary={content.invoices.summary} title={content.invoices.title} />
-    <ResponsiveDataTable
-      caption={content.invoices.caption}
-      columns={[
-        { id: 'reference', label: content.locale === 'pt-BR' ? 'Referência' : 'Reference' },
-        { id: 'state', label: content.locale === 'pt-BR' ? 'Estado' : 'State' },
-        { id: 'amount', label: content.locale === 'pt-BR' ? 'Valor' : 'Amount', essential: false },
-        { id: 'date', label: content.locale === 'pt-BR' ? 'Data' : 'Date', essential: false },
-      ]}
-      rows={[
-        {
-          id: 'invoice-schema-preview',
-          cells: {
-            reference: <code>INV-PREVIEW</code>,
-            state: (
-              <StatusSignal
-                label={content.locale === 'pt-BR' ? 'Não emitida' : 'Not issued'}
-                state="preview"
-              />
-            ),
-            amount: 'R$ 0,00',
-            date: '—',
-          },
-          detail: <p>{content.invoices.empty}</p>,
-        },
-      ]}
-    />
-    <EmptyComposition description={content.invoices.empty} />
+    <div
+      className="account-invoices__workspace account-workspace-split"
+      data-workspace-layout="8/4"
+    >
+      <section data-workspace-region="focal">
+        <ResponsiveDataTable
+          caption={content.invoices.caption}
+          columns={[
+            { id: 'reference', label: content.locale === 'pt-BR' ? 'Referência' : 'Reference' },
+            { id: 'state', label: content.locale === 'pt-BR' ? 'Estado' : 'State' },
+            {
+              id: 'amount',
+              label: content.locale === 'pt-BR' ? 'Valor' : 'Amount',
+              essential: false,
+            },
+            { id: 'date', label: content.locale === 'pt-BR' ? 'Data' : 'Date', essential: false },
+          ]}
+          rows={[
+            {
+              id: 'invoice-schema-preview',
+              cells: {
+                reference: <code>INV-PREVIEW</code>,
+                state: (
+                  <StatusSignal
+                    label={content.locale === 'pt-BR' ? 'Não emitida' : 'Not issued'}
+                    state="preview"
+                  />
+                ),
+                amount: 'R$ 0,00',
+                date: '—',
+              },
+              detail: <p>{content.invoices.empty}</p>,
+            },
+          ]}
+        />
+      </section>
+      <aside className="account-invoices__context" data-workspace-region="context">
+        <h2>{content.locale === 'pt-BR' ? 'Histórico de cobrança' : 'Billing history'}</h2>
+        <EmptyComposition description={content.invoices.empty} />
+      </aside>
+    </div>
   </article>
 );
 
@@ -837,44 +894,53 @@ export const DeviceBindingReview = ({
       data-account-state="sensitive-review"
     >
       <FixtureHeader summary={content.device.summary} title={content.device.title} />
-      <div className="account-device__workspace">
-        <dl className="account-definition-list">
-          <div>
-            <dt>{content.locale === 'pt-BR' ? 'Dispositivo em revisão' : 'Device under review'}</dt>
-            <dd>{content.device.label}</dd>
+      <div
+        className="account-device__workspace account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <section className="account-device__focus" data-workspace-region="focal">
+          <dl className="account-definition-list">
+            <div>
+              <dt>
+                {content.locale === 'pt-BR' ? 'Dispositivo em revisão' : 'Device under review'}
+              </dt>
+              <dd>{content.device.label}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Detalhes coletados' : 'Collected details'}</dt>
+              <dd>{content.device.detail}</dd>
+            </div>
+          </dl>
+          <div className="account-sensitive-action">
+            <p>{content.device.cooldown}</p>
+            <LbButton
+              onPress={() =>
+                setWorkflow(
+                  actionInput({
+                    family: 'device',
+                    fields: { device: 'desktop-preview-01' },
+                    impact: content.device.cooldown,
+                    label: content.device.action,
+                    review: [
+                      {
+                        field: 'device',
+                        label: content.device.label,
+                        before: 'Synthetic binding retained',
+                        after: 'Replacement reviewed only',
+                      },
+                    ],
+                  }),
+                )
+              }
+              variant="destructive"
+            >
+              {content.device.action}
+            </LbButton>
           </div>
-          <div>
-            <dt>{content.locale === 'pt-BR' ? 'Detalhes coletados' : 'Collected details'}</dt>
-            <dd>{content.device.detail}</dd>
-          </div>
-        </dl>
-        <PreviewBoundary description={content.device.cooldown} />
-      </div>
-      <div className="account-sensitive-action">
-        <p>{content.device.cooldown}</p>
-        <LbButton
-          onPress={() =>
-            setWorkflow(
-              actionInput({
-                family: 'device',
-                fields: { device: 'desktop-preview-01' },
-                impact: content.device.cooldown,
-                label: content.device.action,
-                review: [
-                  {
-                    field: 'device',
-                    label: content.device.label,
-                    before: 'Synthetic binding retained',
-                    after: 'Replacement reviewed only',
-                  },
-                ],
-              }),
-            )
-          }
-          variant="destructive"
-        >
-          {content.device.action}
-        </LbButton>
+        </section>
+        <aside data-workspace-region="context">
+          <PreviewBoundary description={content.device.cooldown} />
+        </aside>
       </div>
     </article>
   );
@@ -889,14 +955,22 @@ export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent
       data-account-state="public-transition"
     >
       <FixtureHeader summary={content.downloads.summary} title={content.downloads.title} />
-      <div className="account-downloads__handoff">
-        <PreviewBoundary
-          description={content.downloads.boundary}
-          title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
-        />
-        <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>
-          {content.downloads.action}
-        </a>
+      <div
+        className="account-downloads__handoff account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <section className="account-downloads__focus" data-workspace-region="focal">
+          <h2>{content.locale === 'pt-BR' ? 'Canal público estável' : 'Public stable channel'}</h2>
+          <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>
+            {content.downloads.action}
+          </a>
+        </section>
+        <aside data-workspace-region="context">
+          <PreviewBoundary
+            description={content.downloads.boundary}
+            title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
+          />
+        </aside>
       </div>
     </article>
   );
@@ -992,9 +1066,16 @@ export const PrivacyCenter = ({
       data-account-state="sensitive-review"
     >
       <FixtureHeader summary={content.privacy.summary} title={content.privacy.title} />
-      <div className="account-privacy__workspace">
-        <ConsentReview content={content} />
-        <DataRequestReview content={content} onSelect={selectRequest} />
+      <div
+        className="account-privacy__workspace account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <div className="account-privacy__requests" data-workspace-region="focal">
+          <DataRequestReview content={content} onSelect={selectRequest} />
+        </div>
+        <aside className="account-privacy__context" data-workspace-region="context">
+          <ConsentReview content={content} />
+        </aside>
       </div>
     </article>
   );
@@ -1036,18 +1117,11 @@ export const SupportRequestComposer = ({
       data-account-state="sensitive-review"
     >
       <FixtureHeader summary={content.support.summary} title={content.support.title} />
-      <div className="account-support__workspace">
-        <div className="account-support__guidance">
-          <CollectionDisclosure
-            content={content}
-            purpose={content.support.purpose}
-            retention={content.support.retention}
-            revocation={content.support.revocation}
-            sharing={content.support.sharing}
-          />
-          <SensitiveFieldReview content={content} />
-        </div>
-        <div className="account-support__fields">
+      <div
+        className="account-support__workspace account-workspace-split"
+        data-workspace-layout="7/5"
+      >
+        <div className="account-support__fields" data-workspace-region="focal">
           <LbTextField
             label={content.support.subjectLabel}
             maxLength={120}
@@ -1100,6 +1174,16 @@ export const SupportRequestComposer = ({
             </LbButton>
           </div>
         </div>
+        <aside className="account-support__guidance" data-workspace-region="context">
+          <CollectionDisclosure
+            content={content}
+            purpose={content.support.purpose}
+            retention={content.support.retention}
+            revocation={content.support.revocation}
+            sharing={content.support.sharing}
+          />
+          <SensitiveFieldReview content={content} />
+        </aside>
       </div>
     </article>
   );

@@ -148,7 +148,7 @@ describe('authored overview and Profile workspaces', () => {
       expect(content.overview.summariesTitle.length).toBeGreaterThan(0);
       expect(content.overview.limitationsTitle.length).toBeGreaterThan(0);
       expect(content.profile.nameDescription.length).toBeGreaterThan(0);
-    expect(content.profile.authorityState.length).toBeGreaterThan(0);
+      expect(content.profile.authorityState.length).toBeGreaterThan(0);
       expect(content.profile.limitations.length).toBeGreaterThan(0);
       expect(content.recovery.signIn.length).toBeGreaterThan(0);
       expect(content.recovery.support.length).toBeGreaterThan(0);
