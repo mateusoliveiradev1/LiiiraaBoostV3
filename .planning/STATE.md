@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-47-PLAN.md
-last_updated: "2026-08-01T04:37:07.815Z"
+stopped_at: Completed 03-48-PLAN.md
+last_updated: "2026-08-01T04:50:05.375Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed 03-47-PLAN.md
+last_activity_desc: Completed 03-48-PLAN.md
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 110
-  completed_plans: 103
-  percent: 94
+  completed_plans: 104
+  percent: 95
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 45 of 52
-Status: Ready to execute Plan 03-45
-Last activity: 2026-08-01 — Completed 03-47-PLAN.md
+Plan: 46 of 52
+Status: Ready to execute Plan 03-46
+Last activity: 2026-08-01 — Completed 03-48-PLAN.md
 
-Progress: [█████████░] 94%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 103
+- Total plans completed: 104
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -151,6 +151,7 @@ _Updated after plan completion_
 | Phase 03 P43 | 67min | 2 tasks | 10 files |
 | Phase 03 P44 | 15min | 2 tasks | 6 files |
 | Phase 03 P47 | 9 min | 3 tasks | 8 files |
+| Phase 03 P48 | 6 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -436,6 +437,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep G06-G07 qualitative-only until Plan 03-45. — This plan regenerates evidence but grants no human or publication approval.
 - [Phase 03]: Grant unsafe-eval only when the explicit runtime mode is exactly development; unknown, production, and test modes remain strict. — An exact comparison restores React/Turbopack development debugging without broadening any optimized or test response.
 - [Phase 03]: Keep authored admin denial responses on the strict production CSP contract even during local development. — Rejected origins must never inherit a development-only script execution capability.
+- [Phase 03]: Project locales only after canonical boundary matching — Only matched path parameters plus the target locale may reach routeHref; arbitrary URL state is rejected.
+- [Phase 03]: Keep locale and shared navigation controls as native anchors — Native links retain browser behavior while explicit language and current-page semantics remain available.
 
 ### Pending Todos
 
@@ -477,6 +480,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T04:36:10.664Z
-Stopped at: Completed 03-47-PLAN.md
+Last session: 2026-08-01T04:48:46.636Z
+Stopped at: Completed 03-48-PLAN.md
 Resume file: None
