@@ -1,16 +1,16 @@
 ---
 status: resolved
-trigger: "Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task."
+trigger: 'Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task.'
 created: 2026-07-31T19:29:11.6816453-03:00
-updated: 2026-08-02T01:13:09-03:00
+updated: 2026-08-02T19:08:00-03:00
 ---
 
 ## Current Focus
 
-hypothesis: RESOLVED — Plan 03-50 replaced the unconstrained route-list shell with a constrained application frame, canonical active-route navigation, a compact native mobile disclosure, route-preserving flag-plus-language switching, quiet persistent preview truth, and task-specific semantic workspaces.
-test: account Vitest suite, TypeScript check, optimized Next build, Impeccable detector, and direct 1440px/390px/320px browser captures of Overview and Profile
-expecting: achieved — desktop presents one active responsibility and useful authored density; mobile keeps the route inventory collapsed while naming the current task; preview authority remains visibly disconnected without dominating ordinary controls
-next_action: Keep the prior account source diagnosis resolved, but invalidate candidate approval confidence until the shared runtime/capture gate is repaired; then reinspect every account candidate at original resolution before renewed human review.
+hypothesis: RESOLVED — the user-approved Direction 3 replaces the rejected account topology with a 248px grouped sidebar, 64px utility topbar, flexible task workspace, and 320px contextual inspector. The Overview now leads with the next responsibility, four truthful readiness rows, and a local activity ledger.
+test: account Vitest suite, TypeScript check, optimized Next build, architecture gate, Impeccable detector, direct 1440/1280/960/390/320 browser captures, and account Playwright geometry/navigation/authority/reflow flows
+expecting: achieved — implementation and evidence checks pass without side-stripe accents, fake metrics, 7/5 Overview topology, route-loss on locale change, or 320px horizontal overflow; the eight account candidates are ready for blocking human review
+next_action: Return to the blocking 03-45 human review. Never run 03-46 without literal `approved`.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -31,6 +31,14 @@ impact: The account visual gap remains failed and Plan 03-46 remains blocked des
 verdict: REJECTED AS PART OF THE 25-CANDIDATE SET — no account identity is human-approved and Plan 03-46 stays blocked.
 evidence_boundary: The reviewer supplied five screenshots and named the systemic public/capture failure, but did not cite a specific account pixel defect. Do not invent one. Account is invalidated because the shared gate produced a false-negative qualitative PASS, not because the prior account source fix is proven regressed.
 required_follow_up: After the capture-parity gate and public failure are corrected, rerun original-resolution account inspection for W10-W13, W18, and G03-G05 and present them again for explicit human review.
+
+## User-approved Direction 3 Correction
+
+reported: "vamos na 3"
+direction: Workspace + Inspector — persistent grouped sidebar, compact breadcrumb/help/flag-language topbar, flexible task center, persistent contextual account inspector, and structural collapse below 1180px.
+implementation: The shell is now a `248px minmax(0, 1fr) 320px` application grid. Navigation is grouped as Essential, Plan and billing, Product, and Account and help with explicit localized route labels. The Overview prioritizes the next responsibility, account readiness, and recent truthful activity; the prior Overview 7/5 split is prohibited. Preview provenance is subordinate, the inspector contains only synthetic/no-authority facts, and mobile keeps one closed native disclosure.
+quality_fixes: Removed the authored cobalt side stripe, isolated inspector icons behind a Client boundary so the Next Server layout builds cleanly, normalized account h2 typography to 600, applied the data font to machine/invoice identifiers, and removed the 320px overflow by dropping the redundant topbar help icon where Support remains available in the disclosure.
+verification_so_far: PASS — 55/55 account unit tests, TypeScript, production Next build, architecture 46/46, zero Impeccable detector findings, account Playwright geometry/locale/navigation/authority/mobile flows, direct visual inspection at 1440x900, 1280x800, 960x800, 390x844, and 320x800, eight account candidate recaptures, original-resolution inspection, and closed 25/25 aggregate validation. Human approval remains pending.
 
 ## Symptoms
 
@@ -98,9 +106,10 @@ root_cause: The account surface has no authored account-specific visual composit
 fix: Plan 03-50 made one pathname-aware client owner resolve canonical account routes, current responsibility, and alternate-locale hrefs. The server layout now supplies a familiar topbar identity and one quiet disconnected-preview note. Below 960px the full rail is replaced by a closed native details disclosure. Account routes now use bounded focal regions, semantic rows, tables, definition lists, and consequence-specific review regions instead of interchangeable primitive panels. A 320px follow-up removed the redundant truncated topbar task while retaining the full task name in the disclosure.
 verification: PASS — `rtk pnpm --filter @liiiraa/account test -- --run` (30/30), `rtk pnpm --filter @liiiraa/account check`, `rtk pnpm --filter @liiiraa/account build`, Impeccable detector (0 findings), and direct Playwright captures at 1440x900, 390x844, and 320x800. The captures showed one active desktop responsibility, visible flag-plus-language control, collapsed mobile navigation, bounded Profile controls, and readable 320px reflow.
 files_changed:
-  - apps/account/src/app/[locale]/layout.tsx
-  - apps/account/src/account-navigation.tsx
-  - apps/account/src/app/account-shell.css
-  - apps/account/src/account-shell.test.ts
-  - apps/account/src/features/account-preview.tsx
-  - apps/account/src/features/account-preview.test.tsx
+
+- apps/account/src/app/[locale]/layout.tsx
+- apps/account/src/account-navigation.tsx
+- apps/account/src/app/account-shell.css
+- apps/account/src/account-shell.test.ts
+- apps/account/src/features/account-preview.tsx
+- apps/account/src/features/account-preview.test.tsx

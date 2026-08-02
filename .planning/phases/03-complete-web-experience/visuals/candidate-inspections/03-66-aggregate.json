@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "plan": "03-66",
-  "closedAt": "2026-08-02T18:10:09Z",
-  "replayStartedAt": "2026-08-02T18:05:00Z",
-  "sourceRevision": "647bd86396be53155e9bd564974b45d712d0498f",
+  "closedAt": "2026-08-02T22:08:00Z",
+  "replayStartedAt": "2026-08-02T22:02:00Z",
+  "sourceRevision": "53af142c2a12005d512bfb17b67b820ec513a77f",
   "inspectionRecords": [
     {
       "plan": "03-63",
@@ -31,7 +31,7 @@
       "plan": "03-64",
       "surface": "account",
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-64-account.json",
-      "sha256": "f2eac452541dc6d5806d8f48def9c60140170c74fb483dd1cc7a79d8f3bf636f",
+      "sha256": "70e5082eaaa2f925b23a7ff358cac8cc1988f769fc869d3c8a3c98c655acc463",
       "verdict": "pass",
       "candidateCount": 8,
       "exactSubset": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"]
@@ -167,7 +167,7 @@
     },
     "surfaceUnitSuites": {
       "public": { "result": "pass", "passed": 81, "failed": 0 },
-      "account": { "result": "pass", "passed": 50, "failed": 0 },
+      "account": { "result": "pass", "passed": 55, "failed": 0 },
       "admin": { "result": "pass", "passed": 58, "failed": 0 },
       "webFeatures": { "result": "pass", "passed": 36, "failed": 0 }
     },
