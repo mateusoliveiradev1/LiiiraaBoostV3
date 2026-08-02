@@ -21,13 +21,20 @@ import { ADMIN_WEB_COMPOSITION } from './index';
 describe('admin shell', () => {
   it('enforces the exact desktop operations shell geometry', () => {
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+    const tokens = readFileSync(
+      new URL('../../../packages/design-tokens/src/tokens.css', import.meta.url),
+      'utf8',
+    );
 
     expect(styles).toMatch(/\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*72px/u);
     expect(styles).toMatch(/\.admin-preview-band\s*\{[\s\S]*block-size:\s*40px/u);
     expect(styles).toMatch(
       /\.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*280px minmax\(0, 1fr\)/u,
     );
-    expect(styles).toMatch(/\.admin-workspace\s*\{[\s\S]*max-inline-size:\s*1320px/u);
+    expect(tokens).toMatch(/--lb-admin-workspace-max:\s*1320px;/u);
+    expect(styles).toMatch(
+      /\.admin-workspace\s*\{[\s\S]*max-inline-size:\s*var\(--lb-admin-workspace-max\)/u,
+    );
     expect(styles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
     );
