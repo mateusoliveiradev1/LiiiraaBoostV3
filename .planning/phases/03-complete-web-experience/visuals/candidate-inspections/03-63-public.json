@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "plan": "03-63",
   "surface": "public",
-  "inspectedAt": "2026-08-01T22:38:32Z",
-  "sourceRevision": "c88713be06cd7db2946e62d7067b2e1d45bafade",
+  "inspectedAt": "2026-08-02T18:02:19Z",
+  "sourceRevision": "647bd86396be53155e9bd564974b45d712d0498f",
   "inspectionMethod": {
     "register": "Impeccable brand",
     "detail": "original",
@@ -40,11 +40,11 @@
     "duplicatePairsExpected": [
       {
         "ids": ["W01", "G01"],
-        "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4"
+        "sha256": "c542a2bcaedeb3cc5b38e5899263c20a32f8eb2b6aa9478f392913ebb876347e"
       },
       {
         "ids": ["W02", "G02"],
-        "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230"
+        "sha256": "0d88903778f1c9832f0a1623825343b313c42221fad9b056181236d2c0abeaaf"
       }
     ],
     "rejectedG01Comparison": {
@@ -81,8 +81,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W01-public-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and the distribution-gated Home truth.",
       "dimensions": {"width": 1440, "height": 3212},
-      "bytes": 509004,
-      "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4",
+      "bytes": 507328,
+      "sha256": "c542a2bcaedeb3cc5b38e5899263c20a32f8eb2b6aa9478f392913ebb876347e",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -106,8 +106,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W02-public-final-mobile-390.png",
       "manifestPurpose": "Review English mobile strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and complete Home parity.",
       "dimensions": {"width": 390, "height": 4329},
-      "bytes": 299538,
-      "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230",
+      "bytes": 299638,
+      "sha256": "0d88903778f1c9832f0a1623825343b313c42221fad9b056181236d2c0abeaaf",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -130,9 +130,9 @@
       "id": "W03",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W03-public-final-wide-1280.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and current documentation version identity.",
-      "dimensions": {"width": 1280, "height": 1473},
-      "bytes": 129934,
-      "sha256": "bda5e79c8782e0f726266ea5d16961c5a00857be57d29cae5a9abb7477316b34",
+      "dimensions": {"width": 1280, "height": 1436},
+      "bytes": 152376,
+      "sha256": "c74b2833ec083aa8571d0c2a62d30c990f061300a56aa26b328d885229ffa74c",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -153,8 +153,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W04-public-final-wide-1280.png",
       "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and historical-documentation recovery.",
       "dimensions": {"width": 1280, "height": 2336},
-      "bytes": 176604,
-      "sha256": "65b714311f45d3a5506ce3cf0c025b9a0dd595292a906940e7f0f23593f0c6c7",
+      "bytes": 177874,
+      "sha256": "4316739d6956f3e918b2cf9457c19ea7da76822360814c5cc115b8c4576e51c9",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -175,8 +175,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W05-public-final-wide-1280.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and safe troubleshooting escalation.",
       "dimensions": {"width": 1280, "height": 3215},
-      "bytes": 282630,
-      "sha256": "4460e175bd9b55ca8f44819bde7c6380b022918de350472cb61c64e1b00e0062",
+      "bytes": 275372,
+      "sha256": "c2eb9051eb43fb786c9caf4eb48d39d563b184cd274f462595ae597efde69834",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -196,9 +196,9 @@
       "id": "W06",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W06-public-final-desktop-960.png",
       "manifestPurpose": "Review English desktop strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and authored search recovery.",
-      "dimensions": {"width": 960, "height": 1157},
-      "bytes": 85872,
-      "sha256": "da9906f6e175964ec52ced96f91165d8eeed2a18892426c8f4f9f667e37eb119",
+      "dimensions": {"width": 960, "height": 1188},
+      "bytes": 94492,
+      "sha256": "bd1620564e962172ca2549bad6f50af0f71cebdab4d5aae2664b5b9771c857ac",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -218,9 +218,9 @@
       "id": "W07",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W07-public-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and the fail-closed release gate.",
-      "dimensions": {"width": 1440, "height": 2904},
-      "bytes": 298242,
-      "sha256": "06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7",
+      "dimensions": {"width": 1440, "height": 2847},
+      "bytes": 294031,
+      "sha256": "561121f89fd765f4b9cc2f98f2fedd8dab67952a5392371238065bcd70e5f79e",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -242,9 +242,9 @@
       "id": "W08",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W08-public-final-wide-1440.png",
       "manifestPurpose": "Review English wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and blocked integrity-mismatch recovery.",
-      "dimensions": {"width": 1440, "height": 2693},
-      "bytes": 258230,
-      "sha256": "2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6",
+      "dimensions": {"width": 1440, "height": 2665},
+      "bytes": 255452,
+      "sha256": "a12a5fdc1e00f1df5760e361e23b1ae185aa581eea0f89fec6e70cb5981f2482",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -266,9 +266,9 @@
       "id": "W09",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W09-public-final-wide-1280.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and partial-outage guidance.",
-      "dimensions": {"width": 1280, "height": 1452},
-      "bytes": 142090,
-      "sha256": "4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca",
+      "dimensions": {"width": 1280, "height": 1335},
+      "bytes": 140357,
+      "sha256": "ce84d388730f8b2e5c943160d6c07d12e6e80b1f837c4d1585afa07566924678",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -290,8 +290,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W17-public-final-desktop-960.png",
       "manifestPurpose": "Review PT-BR desktop strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and authored same-origin 404 recovery.",
       "dimensions": {"width": 960, "height": 932},
-      "bytes": 57116,
-      "sha256": "485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128",
+      "bytes": 57340,
+      "sha256": "e8fd0ce6853927c4f817f57c9aa03f8c38de046bb555b6c37d316905cf03e3cf",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -313,8 +313,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G01-public-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and comparison with approved Phase 2 captures.",
       "dimensions": {"width": 1440, "height": 3212},
-      "bytes": 509004,
-      "sha256": "6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4",
+      "bytes": 507328,
+      "sha256": "c542a2bcaedeb3cc5b38e5899263c20a32f8eb2b6aa9478f392913ebb876347e",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -338,8 +338,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G02-public-final-mobile-390.png",
       "manifestPurpose": "Review English mobile strong app identity, active task navigation, route-preserving locale control, artifact hierarchy, and comparison with approved Phase 2 captures.",
       "dimensions": {"width": 390, "height": 4329},
-      "bytes": 299538,
-      "sha256": "910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230",
+      "bytes": 299638,
+      "sha256": "0d88903778f1c9832f0a1623825343b313c42221fad9b056181236d2c0abeaaf",
       "checks": {
         "shellNavigation": true,
         "flagAndLanguage": true,
@@ -360,12 +360,12 @@
     }
   ],
   "automatedVerification": {
-    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep \"W01|W02|W03|W04|W05|W06|W07|W08|W09|W17|G01|G02\"",
+    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts",
     "result": "pass",
-    "passed": 14,
-    "skipped": 16,
+    "passed": 44,
+    "skipped": 161,
     "failed": 0,
-    "duration": "1.1m",
+    "duration": "3.6m",
     "updateMode": false
   },
   "verdict": "pass",

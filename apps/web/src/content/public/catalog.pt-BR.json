@@ -12,7 +12,7 @@
     "demonstrative-preview": {
       "label": "Prévia demonstrativa",
       "consequence": "Você pode revisar a interação completa, mas nenhum estado nativo ou remoto é alterado.",
-      "evidence": "Adaptadores determinísticos da Fase 3 e recibos sem alteração."
+      "evidence": "Prévia local controlada e recibos que confirmam que nada foi alterado."
     },
     "under-validation": {
       "label": "Em validação",
@@ -22,7 +22,7 @@
     "planned": {
       "label": "Planejado",
       "consequence": "A capacidade faz parte do roteiro e ainda não está disponível para uso.",
-      "evidence": "A fase responsável é indicada; nenhuma data de entrega é prometida."
+      "evidence": "O item aparece como futuro e nenhuma data de entrega é prometida."
     },
     "unsupported": {
       "label": "Não suportado",
@@ -32,7 +32,7 @@
     "unavailable": {
       "label": "Indisponível",
       "consequence": "A ação está bloqueada e não há desvio.",
-      "evidence": "A autoridade ou o artefato de confiança ausente é identificado."
+      "evidence": "A página explica o que falta para liberar a ação com segurança."
     }
   },
   "records": [
@@ -40,13 +40,13 @@
       "routeId": "public-product",
       "contentType": "product",
       "translationKey": "public-product",
-      "title": "Controle de desempenho que você pode inspecionar",
-      "summary": "Preparação, evidência e restauração formam uma sequência revisável.",
-      "body": "O Liiiraa Boost está construindo um otimizador desktop para Windows 10 e 11 que mantém cada recomendação explicável e reversível. Esta fase comprova a interface e os contratos; ela não afirma ganhos medidos de hardware nem autoridade nativa.",
+      "title": "Mais desempenho para jogar, sem perder o controle",
+      "summary": "O Liiiraa Boost analisa seu PC, recomenda apenas o que combina com ele e mostra o antes e o depois.",
+      "body": "Você decide o que aplicar e mantém um caminho claro para desfazer cada mudança. O app ainda está em desenvolvimento, por isso os resultados só aparecerão depois de medir o seu próprio PC.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
-        "A observação de hardware real e as alterações privilegiadas do Windows chegam em fases posteriores.",
+        "A leitura de hardware real e as alterações do Windows ainda não estão disponíveis nesta versão pública.",
         "Nenhum ganho, contagem de problemas, data de lançamento ou compatibilidade universal é afirmado."
       ],
       "evidence": [
@@ -61,16 +61,16 @@
       ],
       "sections": [
         {
-          "title": "Prepare",
-          "body": "Revise dependências, risco e consequências antes de qualquer operação futura."
+          "title": "Antes de mexer",
+          "body": "Confira Windows, hardware, drivers e o jogo para evitar ajustes genéricos."
         },
         {
-          "title": "Prove",
-          "body": "Inspecione fonte, escopo, versão, estado de validação e o que permanece não comprovado."
+          "title": "Veja o resultado",
+          "body": "Compare antes e depois com dados do seu próprio PC — sem porcentagens inventadas."
         },
         {
-          "title": "Restaure",
-          "body": "Mantenha histórico e recuperação visíveis como parte do plano, nunca como detalhe posterior."
+          "title": "Volte quando quiser",
+          "body": "Cada mudança mantém histórico e um caminho de restauração fácil de encontrar."
         }
       ]
     },
@@ -78,14 +78,14 @@
       "routeId": "public-evidence",
       "contentType": "evidence",
       "translationKey": "public-evidence",
-      "title": "Evidência antes da conclusão",
-      "summary": "As afirmações permanecem ligadas à origem, ao escopo, à versão e ao limite de validação.",
-      "body": "A evidência atual comprova o comportamento autoral do produto e estados determinísticos de prévia. Ela não comprova ganho em um PC não observado. Valores medidos, observados, derivados, informados pelo usuário, simulados e indisponíveis permanecem visivelmente distintos.",
+      "title": "Resultados que você consegue conferir",
+      "summary": "Cada melhoria precisa vir de uma medição no seu próprio PC, não de uma estimativa genérica.",
+      "body": "O Liiiraa Boost mostra o antes e o depois, explica de onde veio cada número e deixa claro quando algo ainda não pôde ser medido. Assim, uma hipótese nunca aparece como promessa.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Evidência de prévia determinística não substitui medição em hardware Windows representativo.",
-        "Um esquema validado não torna um valor simulado autoritativo."
+        "A prévia atual mostra como o produto separa informações; ela ainda não mede um PC real.",
+        "Um valor simulado continua sendo apenas um exemplo, nunca um resultado."
       ],
       "evidence": [
         {
@@ -99,12 +99,12 @@
       ],
       "sections": [
         {
-          "title": "O que está comprovado",
-          "body": "A propriedade das rotas, a admissão de conteúdo, os limites de prévia e a interação de recuperação são executáveis."
+          "title": "O que conta como resultado",
+          "body": "Uma comparação feita na mesma máquina, com origem e condições visíveis."
         },
         {
-          "title": "O que não está comprovado",
-          "body": "Nenhum registro público atual sustenta um resultado numérico de desempenho para uma máquina real."
+          "title": "O que nunca vira promessa",
+          "body": "Simulações, estimativas e testes de interface não são apresentados como ganho real."
         }
       ]
     },
@@ -112,9 +112,9 @@
       "routeId": "public-compatibility",
       "contentType": "compatibility",
       "translationKey": "public-compatibility",
-      "title": "Um fluxo de compatibilidade, limites explícitos",
-      "summary": "Windows 10 e Windows 11 compartilham uma revisão até que evidência verificada exija uma diferença.",
-      "body": "Selecione a geração do Windows e a arquitetura que você realmente usa. O resultado descreve apenas o limite atual de suporte; CPU, GPU, armazenamento, perfil do jogo, drivers e evidência de ciclo de vida ainda determinam se uma otimização futura pode ser recomendada.",
+      "title": "Seu PC é compatível?",
+      "summary": "Confira agora o Windows e o tipo de sistema. A análise completa de hardware chegará junto com o app.",
+      "body": "A verificação considera processador, placa de vídeo, drivers e o jogo antes de recomendar qualquer ajuste. Se faltar informação ou a configuração não for suportada, o Liiiraa Boost explica isso sem forçar um resultado.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
@@ -133,24 +133,24 @@
       ],
       "supportMatrix": [
         {
-          "capability": "Revisão para Windows 10 e Windows 11",
+          "capability": "Windows 10 e Windows 11",
           "state": "available",
-          "consequence": "As mesmas perguntas e regras de evidência se aplicam às duas gerações do Windows."
+          "consequence": "A verificação inicial funciona da mesma forma nas duas versões do Windows."
         },
         {
-          "capability": "Recomendação específica para o hardware",
+          "capability": "Análise do seu hardware",
           "state": "under-validation",
-          "consequence": "Nenhuma recomendação é mostrada antes de existir inventário real e evidência do perfil."
+          "consequence": "As recomendações só aparecem depois que o app identifica os componentes do PC."
         },
         {
-          "capability": "Aplicação nativa e reversão",
+          "capability": "Aplicar e desfazer ajustes",
           "state": "planned",
-          "consequence": "A interface pode ser revisada, mas o estado do Windows não muda na Fase 3."
+          "consequence": "Você pode conhecer o fluxo, mas esta versão pública ainda não altera o Windows."
         },
         {
-          "capability": "Compilações não suportadas do Windows",
+          "capability": "Versões antigas ou não suportadas do Windows",
           "state": "unsupported",
-          "consequence": "Nenhuma otimização ou conclusão de compatibilidade é oferecida."
+          "consequence": "O app não recomenda ajustes quando não consegue garantir suporte seguro."
         }
       ]
     },
@@ -158,14 +158,14 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "Planos sem termos ocultos",
-      "summary": "Capacidades e consequências comerciais ficam visíveis antes de qualquer confirmação simulada.",
-      "body": "A autoridade de checkout não existe na Fase 3. Os registros abaixo são prévias de capacidades, não ofertas de compra. A página não usa pressão comercial artificial, endosso fabricado nem barreira de segurança paga.",
+      "title": "Os planos ainda não estão à venda",
+      "summary": "Você pode conhecer o produto agora e decidir depois, sem preço fictício ou condição escondida.",
+      "body": "Quando as assinaturas forem abertas, preço, renovação, dispositivos incluídos, cancelamento e reembolso aparecerão juntos antes da compra. Até lá, esta página mostra somente o que já pode ser explorado.",
       "availability": "demonstrative-preview",
       "validationState": "validated",
       "limitations": [
-        "Nenhum plano pago, transação, direito, renovação ou reembolso pode ser criado nesta fase.",
-        "Preços e termos comerciais finais exigem autoridade da Fase 4 e uma nova publicação revisada."
+        "Nenhum plano pago, cobrança, renovação ou reembolso pode ser criado nesta prévia.",
+        "Preços e termos comerciais serão publicados somente quando a compra estiver realmente disponível."
       ],
       "evidence": [
         {
@@ -179,32 +179,32 @@
       ],
       "plans": [
         {
-          "id": "phase-3-preview",
-          "name": "Prévia determinística do produto",
+          "id": "product-preview",
+          "name": "Prévia do Liiiraa Boost",
           "price": "Não está à venda",
           "billingPeriod": "Sem período de cobrança",
           "renewal": "Sem renovação automática",
           "taxes": "Nenhum tributo é cobrado porque não há transação disponível",
-          "cancellation": "Não existe algo para cancelar na Fase 3",
+          "cancellation": "Não existe assinatura ou compra para cancelar",
           "refunds": "Nenhum pagamento é aceito, portanto não pode existir evento de reembolso",
           "deviceRules": "Nenhum direito ou vínculo de dispositivo é criado",
           "expirationEffects": "O acesso à prévia não cria nem expira um direito pago",
-          "checkoutBoundary": "Autoridade da Fase 4 obrigatória; a confirmação permanece simulada e não altera estado remoto",
+          "checkoutBoundary": "A compra ainda não está disponível; qualquer confirmação nesta prévia é apenas demonstrativa e não gera cobrança",
           "capabilities": [
             {
-              "name": "Revisão pública de produto, evidência e compatibilidade",
+              "name": "Conhecer o produto e checar compatibilidade",
               "state": "available"
             },
             {
-              "name": "Fluxos de conta, cobrança e dispositivo",
+              "name": "Conta, assinatura e dispositivos",
               "state": "demonstrative-preview"
             },
             {
-              "name": "Aplicação e reversão de otimização nativa",
+              "name": "Aplicar e desfazer ajustes no Windows",
               "state": "planned"
             },
             {
-              "name": "Instalador público confiável",
+              "name": "Baixar o instalador oficial",
               "state": "unavailable"
             }
           ]
@@ -248,11 +248,11 @@
       "translationKey": "public-support",
       "title": "O suporte começa por um caminho seguro",
       "summary": "Comece pela documentação pública e compartilhe somente os dados mínimos necessários.",
-      "body": "O suporte público explica recuperação e escalonamento sem coletar diagnósticos nesta fase. Envios futuros precisam visualizar cada campo, permitir remoção e exigir consentimento explícito.",
+      "body": "O suporte público ajuda você a recuperar o caminho com segurança sem coletar diagnósticos nesta página. Se um envio for habilitado no futuro, cada campo deverá ser visível, removível e autorizado por você.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Nenhum caso, anexo, pacote de diagnóstico ou registro de conta é enviado na Fase 3.",
+        "Nenhum caso, anexo, pacote de diagnóstico ou registro de conta é enviado por esta página.",
         "Não inclua senhas, segredos de autenticação, dados de pagamento nem informações pessoais sem relação."
       ],
       "evidence": [
@@ -262,7 +262,7 @@
           "scope": "Solução pública de problemas e escalonamento de recuperação",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "A autoridade de casos autenticados e diagnósticos com consentimento chegam na Fase 4."
+          "unprovenBoundary": "Abertura de casos e envio de diagnósticos com consentimento ainda não estão disponíveis."
         }
       ],
       "collectionPoint": {

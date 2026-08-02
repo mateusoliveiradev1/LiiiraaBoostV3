@@ -12,7 +12,7 @@
     "demonstrative-preview": {
       "label": "Demonstrative preview",
       "consequence": "You can review the complete interaction, but no native or remote state changes.",
-      "evidence": "Deterministic Phase 3 adapters and no-change receipts."
+      "evidence": "A controlled local preview and receipts that confirm nothing was changed."
     },
     "under-validation": {
       "label": "Under validation",
@@ -22,7 +22,7 @@
     "planned": {
       "label": "Planned",
       "consequence": "The capability is part of the roadmap and is not available for use.",
-      "evidence": "The owning roadmap phase is named; no delivery date is promised."
+      "evidence": "The item is clearly marked as future work and no delivery date is promised."
     },
     "unsupported": {
       "label": "Unsupported",
@@ -32,7 +32,7 @@
     "unavailable": {
       "label": "Unavailable",
       "consequence": "The action is blocked and no bypass is provided.",
-      "evidence": "The missing authority or trust artifact is identified."
+      "evidence": "The page explains what is still required before the action can be safely enabled."
     }
   },
   "records": [
@@ -40,13 +40,13 @@
       "routeId": "public-product",
       "contentType": "product",
       "translationKey": "public-product",
-      "title": "Performance control you can inspect",
-      "summary": "Preparation, evidence, and restoration are one reviewable sequence.",
-      "body": "Liiiraa Boost is building a Windows 10 and 11 desktop optimizer that keeps every recommendation explainable and reversible. This phase proves the interface and contracts; it does not claim measured hardware gains or native authority.",
+      "title": "More gaming performance without giving up control",
+      "summary": "Liiiraa Boost analyzes your PC, recommends only what fits it, and shows the before and after.",
+      "body": "You decide what to apply and keep a clear way to undo every change. The app is still in development, so results will appear only after your own PC has been measured.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
-        "Real hardware observation and privileged Windows changes arrive in later phases.",
+        "Real-hardware inspection and Windows changes are not available in this public version yet.",
         "No gain, issue count, launch date, or universal compatibility is claimed."
       ],
       "evidence": [
@@ -61,16 +61,16 @@
       ],
       "sections": [
         {
-          "title": "Prepare",
-          "body": "Review dependencies, risk, and consequences before any future operation."
+          "title": "Before anything changes",
+          "body": "Check Windows, hardware, drivers, and the game to avoid generic tweaks."
         },
         {
-          "title": "Prove",
-          "body": "Inspect source, scope, version, validation state, and what remains unproven."
+          "title": "See the result",
+          "body": "Compare before and after using data from your own PC — no invented percentages."
         },
         {
-          "title": "Restore",
-          "body": "Keep history and recovery visible as part of the plan, not as an afterthought."
+          "title": "Go back whenever you need",
+          "body": "Every change keeps a history and an easy-to-find restoration path."
         }
       ]
     },
@@ -78,14 +78,14 @@
       "routeId": "public-evidence",
       "contentType": "evidence",
       "translationKey": "public-evidence",
-      "title": "Evidence before conclusions",
-      "summary": "Claims stay attached to their origin, scope, version, and validation boundary.",
-      "body": "The current evidence proves authored product behavior and deterministic preview states. It does not prove a gain on an unobserved PC. Measured, observed, derived, user-provided, simulated, and unavailable values remain visibly distinct.",
+      "title": "Results you can verify",
+      "summary": "Every improvement must come from a measurement on your own PC, not a generic estimate.",
+      "body": "Liiiraa Boost shows the before and after, explains where each number came from, and makes it clear when something could not be measured yet. A hypothesis never appears as a promise.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Deterministic preview evidence cannot substitute for representative Windows hardware measurement.",
-        "A validated schema does not make a simulated value authoritative."
+        "The current preview shows how the product separates information; it does not measure a real PC yet.",
+        "A simulated value remains an example, never a result."
       ],
       "evidence": [
         {
@@ -99,12 +99,12 @@
       ],
       "sections": [
         {
-          "title": "What is proven",
-          "body": "Route ownership, content admission, preview boundaries, and recovery interaction are executable."
+          "title": "What counts as a result",
+          "body": "A comparison made on the same machine with visible sources and conditions."
         },
         {
-          "title": "What is not proven",
-          "body": "No public record currently supports a numerical performance result for a real machine."
+          "title": "What never becomes a promise",
+          "body": "Simulations, estimates, and interface tests are never presented as real gains."
         }
       ]
     },
@@ -112,9 +112,9 @@
       "routeId": "public-compatibility",
       "contentType": "compatibility",
       "translationKey": "public-compatibility",
-      "title": "One compatibility flow, explicit limits",
-      "summary": "Windows 10 and Windows 11 share one review flow until verified evidence requires a difference.",
-      "body": "Select the Windows generation and architecture you actually use. The result describes the current support boundary only; CPU, GPU, storage, game profile, drivers, and lifecycle evidence still determine whether a future optimization can be recommended.",
+      "title": "Is your PC compatible?",
+      "summary": "Check Windows and system type now. Full hardware analysis will arrive with the app.",
+      "body": "The check considers your processor, graphics card, drivers, and game before recommending any adjustment. If information is missing or a configuration is unsupported, Liiiraa Boost explains it instead of forcing a result.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
@@ -133,24 +133,24 @@
       ],
       "supportMatrix": [
         {
-          "capability": "Windows 10 and Windows 11 review flow",
+          "capability": "Windows 10 and Windows 11",
           "state": "available",
-          "consequence": "The same questions and evidence rules apply to both Windows generations."
+          "consequence": "The initial check works the same way on both Windows versions."
         },
         {
-          "capability": "Hardware-specific recommendation",
+          "capability": "Your hardware analysis",
           "state": "under-validation",
-          "consequence": "No recommendation is shown before real inventory and profile evidence exist."
+          "consequence": "Recommendations appear only after the app identifies the PC components."
         },
         {
-          "capability": "Native apply and rollback",
+          "capability": "Apply and undo adjustments",
           "state": "planned",
-          "consequence": "The interface can be reviewed, but Windows state cannot be changed in Phase 3."
+          "consequence": "You can explore the flow, but this public version does not change Windows yet."
         },
         {
-          "capability": "Unsupported Windows builds",
+          "capability": "Old or unsupported Windows versions",
           "state": "unsupported",
-          "consequence": "No optimization or compatibility conclusion is offered."
+          "consequence": "The app does not recommend adjustments when safe support cannot be guaranteed."
         }
       ]
     },
@@ -158,14 +158,14 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "Plans without hidden terms",
-      "summary": "Capabilities and commercial consequences are visible before any simulated confirmation.",
-      "body": "Checkout authority does not exist in Phase 3. The records below are capability previews, not offers to purchase. The page uses no artificial commercial pressure, fabricated endorsement, or safety paywall.",
+      "title": "Plans are not on sale yet",
+      "summary": "You can explore the product now and decide later, without fictional prices or hidden conditions.",
+      "body": "When subscriptions open, price, renewal, included devices, cancellation, and refunds will appear together before purchase. Until then, this page shows only what you can already explore.",
       "availability": "demonstrative-preview",
       "validationState": "validated",
       "limitations": [
-        "No paid plan, transaction, entitlement, renewal, or refund can be created in this phase.",
-        "Final prices and commercial terms require Phase 4 authority and a new reviewed publication."
+        "No paid plan, charge, renewal, or refund can be created from this preview.",
+        "Prices and commercial terms will be published only when purchase is genuinely available."
       ],
       "evidence": [
         {
@@ -179,32 +179,32 @@
       ],
       "plans": [
         {
-          "id": "phase-3-preview",
-          "name": "Deterministic product preview",
+          "id": "product-preview",
+          "name": "Liiiraa Boost preview",
           "price": "Not for sale",
           "billingPeriod": "No billing period",
           "renewal": "No automatic renewal",
           "taxes": "No taxes are charged because no transaction is available",
-          "cancellation": "Nothing to cancel in Phase 3",
+          "cancellation": "There is no subscription or purchase to cancel",
           "refunds": "No payment is accepted, so no refund event can exist",
           "deviceRules": "No device entitlement or binding is created",
           "expirationEffects": "Preview access does not create or expire a paid entitlement",
-          "checkoutBoundary": "Phase 4 authority required; confirmation remains simulated and changes no remote state",
+          "checkoutBoundary": "Purchase is not available yet; any confirmation in this preview is demonstrative and creates no charge",
           "capabilities": [
             {
-              "name": "Public product, evidence, and compatibility review",
+              "name": "Explore the product and check compatibility",
               "state": "available"
             },
             {
-              "name": "Account, billing, and device workflows",
+              "name": "Account, subscription, and devices",
               "state": "demonstrative-preview"
             },
             {
-              "name": "Native optimization apply and rollback",
+              "name": "Apply and undo Windows adjustments",
               "state": "planned"
             },
             {
-              "name": "Public trusted installer",
+              "name": "Download the official installer",
               "state": "unavailable"
             }
           ]
@@ -248,11 +248,11 @@
       "translationKey": "public-support",
       "title": "Support begins with a safe path",
       "summary": "Start with public documentation and share only the minimum data needed.",
-      "body": "Public support explains recovery and escalation without collecting diagnostics in this phase. Future submissions must preview every field, allow removal, and require explicit consent.",
+      "body": "Public support helps you recover safely without collecting diagnostics on this page. If submissions are enabled later, every field must be visible, removable, and explicitly approved by you.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "No support case, attachment, diagnostic bundle, or account record is submitted in Phase 3.",
+        "No support case, attachment, diagnostic bundle, or account record is submitted by this page.",
         "Do not include passwords, authentication secrets, payment data, or unrelated personal information."
       ],
       "evidence": [
@@ -262,7 +262,7 @@
           "scope": "Public troubleshooting and recovery escalation",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Authenticated case authority and consent-scoped diagnostics arrive in Phase 4."
+          "unprovenBoundary": "Authenticated cases and consent-scoped diagnostic submission are not available yet."
         }
       ],
       "collectionPoint": {

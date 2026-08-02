@@ -444,21 +444,111 @@ const EvidenceDisclosure = ({
   );
 };
 
+type CatalogRoutePresentation = Readonly<{
+  kicker: string;
+  primary: Readonly<{ href: string; label: string }>;
+  secondary: Readonly<{ href: string; label: string }>;
+}>;
+
+const routePresentation = (locale: WebLocale, routeId: WebRouteId): CatalogRoutePresentation => {
+  const href = (id: WebRouteId) => publicBoundaryHref(id, locale);
+  const portuguese = locale === 'pt-BR';
+
+  switch (routeId) {
+    case 'public-product':
+      return {
+        kicker: portuguese ? 'Feito para jogar' : 'Built for gaming',
+        primary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Ver como funciona' : 'See how it works',
+        },
+        secondary: {
+          href: href('public-compatibility'),
+          label: portuguese ? 'Checar meu PC' : 'Check my PC',
+        },
+      };
+    case 'public-evidence':
+      return {
+        kicker: portuguese ? 'Sem números inventados' : 'No invented numbers',
+        primary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Ver como medimos' : 'See how we measure',
+        },
+        secondary: {
+          href: href('public-product'),
+          label: portuguese ? 'Como funciona' : 'How it works',
+        },
+      };
+    case 'public-compatibility':
+      return {
+        kicker: portuguese ? 'Comece pelo seu PC' : 'Start with your PC',
+        primary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Checar meu PC' : 'Check my PC',
+        },
+        secondary: {
+          href: href('public-support'),
+          label: portuguese ? 'Preciso de ajuda' : 'I need help',
+        },
+      };
+    case 'public-plans':
+      return {
+        kicker: portuguese ? 'Sem venda antecipada' : 'No early sale',
+        primary: {
+          href: href('public-product'),
+          label: portuguese ? 'Conhecer o produto' : 'Explore the product',
+        },
+        secondary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Ver o que está incluído' : 'See what is included',
+        },
+      };
+    default:
+      return {
+        kicker: 'Liiiraa Boost',
+        primary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Continuar' : 'Continue',
+        },
+        secondary: {
+          href: href('public-product'),
+          label: portuguese ? 'Conhecer o produto' : 'Explore the product',
+        },
+      };
+  }
+};
+
 const RouteIntroduction = ({
   catalog,
   record,
 }: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
   const copy = copyFor(catalog.locale);
+  const presentation = routePresentation(catalog.locale, record.routeId);
   return (
-    <header className="catalog-introduction">
-      <div className="catalog-introduction__identity">
-        <SupportState catalog={catalog} state={record.availability} />
-      </div>
+    <header className="catalog-introduction" data-route-purpose={record.routeId}>
+      <p className="catalog-introduction__kicker">{presentation.kicker}</p>
       <h1>{record.title}</h1>
       <p className="catalog-introduction__summary">{record.summary}</p>
-      <p>{record.body}</p>
+      <p className="catalog-introduction__body">{record.body}</p>
+      <nav
+        aria-label={catalog.locale === 'pt-BR' ? 'Próximos passos' : 'Next steps'}
+        className="catalog-introduction__actions"
+      >
+        <a
+          className="public-action public-action--primary catalog-primary-action"
+          href={presentation.primary.href}
+        >
+          {presentation.primary.label}
+        </a>
+        <a className="public-action" href={presentation.secondary.href}>
+          {presentation.secondary.label}
+        </a>
+      </nav>
       <details className="catalog-introduction__provenance">
         <summary>{localeSummary(catalog.locale)}</summary>
+        <div className="catalog-introduction__identity">
+          <SupportState catalog={catalog} state={record.availability} />
+        </div>
         <p>
           {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
         </p>
@@ -473,7 +563,7 @@ const RouteIntroduction = ({
 };
 
 const localeSummary = (locale: WebLocale): string =>
-  locale === 'pt-BR' ? 'Origem e revisão deste conteúdo' : 'Content source and review';
+  locale === 'pt-BR' ? 'Detalhes técnicos e revisão' : 'Technical details and review';
 
 const Limitations = ({
   locale,
@@ -493,31 +583,38 @@ export const CapabilitySupportMatrix = ({
   catalog,
   rows,
 }: Readonly<{ catalog: PublicCatalog; rows: readonly CapabilityRow[] }>) => {
-  const copy = copyFor(catalog.locale);
   return (
     <div className="catalog-decision-field">
       <div className="catalog-table-wrap">
         <table className="catalog-table">
           <caption>
             {catalog.locale === 'pt-BR'
-              ? 'Matriz de suporte e consequência'
-              : 'Support and consequence matrix'}
+              ? 'O que já podemos verificar'
+              : 'What we can check today'}
           </caption>
           <thead>
             <tr>
-              <th scope="col">{catalog.locale === 'pt-BR' ? 'Capacidade' : 'Capability'}</th>
-              <th scope="col">{copy.availability}</th>
-              <th scope="col">{copy.consequence}</th>
+              <th scope="col">{catalog.locale === 'pt-BR' ? 'Verificação' : 'Check'}</th>
+              <th scope="col">{catalog.locale === 'pt-BR' ? 'Situação' : 'Status'}</th>
+              <th scope="col">
+                {catalog.locale === 'pt-BR' ? 'O que isso significa' : 'What this means'}
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.capability}>
                 <th scope="row">{row.capability}</th>
-                <td data-label={copy.availability}>
+                <td data-label={catalog.locale === 'pt-BR' ? 'Situação' : 'Status'}>
                   <SupportState catalog={catalog} state={row.state} />
                 </td>
-                <td data-label={copy.consequence}>{row.consequence}</td>
+                <td
+                  data-label={
+                    catalog.locale === 'pt-BR' ? 'O que isso significa' : 'What this means'
+                  }
+                >
+                  {row.consequence}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -546,7 +643,7 @@ export const PlanComparison = ({
 }: Readonly<{ catalog: PublicCatalog; plans: readonly PlanDisclosure[] }>) => (
   <section aria-labelledby="plan-comparison-title" className="plan-comparison-ledger">
     <h2 id="plan-comparison-title">
-      {catalog.locale === 'pt-BR' ? 'Termos antes da confirmação' : 'Terms before confirmation'}
+      {catalog.locale === 'pt-BR' ? 'O que já pode ser conhecido' : 'What you can explore now'}
     </h2>
     {plans.map((plan) => (
       <article className="plan-record" key={plan.id}>
@@ -554,8 +651,8 @@ export const PlanComparison = ({
           <h3>{plan.name}</h3>
           <p>
             {catalog.locale === 'pt-BR'
-              ? 'Compare o compromisso completo antes de escolher.'
-              : 'Compare the complete commitment before choosing.'}
+              ? 'Veja o que existe hoje e o que ainda depende do lançamento.'
+              : 'See what exists today and what still depends on launch.'}
           </p>
         </header>
         <details className="plan-terms">
@@ -1021,7 +1118,7 @@ const CatalogBody = ({
   catalog,
   record,
 }: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => (
-  <>
+  <div id="catalog-route-body">
     {record.sections !== undefined && (
       <div className="catalog-story-sequence">
         {record.sections.map((section) => (
@@ -1048,7 +1145,7 @@ const CatalogBody = ({
         />
       ))}
     </section>
-  </>
+  </div>
 );
 
 const PublicCatalogComposition = ({

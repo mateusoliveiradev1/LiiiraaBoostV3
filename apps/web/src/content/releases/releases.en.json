@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "locale": "en",
   "metadata": {
-    "title": "Releases, integrity, and download eligibility",
-    "description": "Review channels, compatibility, release notes, manifest fields, and independent verification before distribution is approved."
+    "title": "The Windows app is not available yet",
+    "description": "We are preparing a safe public release. For now, you can check your PC, explore the product, and see what must be verified before download."
   },
   "identity": {
     "label": "Demonstrative release information",
@@ -12,16 +12,16 @@
     "validation": "Generated release record validated"
   },
   "navigation": {
-    "label": "Release journey",
-    "index": "Release overview",
-    "channel": "Channel policy",
-    "notes": "Release notes",
-    "integrity": "Manifest and integrity",
-    "download": "Download eligibility",
-    "install": "Installation verification",
-    "compatibility": "Check compatibility",
-    "cancel": "Cancel and return to releases",
-    "help": "Get public support"
+    "label": "Download the app",
+    "index": "When it will be available",
+    "channel": "App versions",
+    "notes": "What changed",
+    "integrity": "How to check safety",
+    "download": "Download for Windows",
+    "install": "Before installation",
+    "compatibility": "Check my PC",
+    "cancel": "Go back",
+    "help": "Contact support"
   },
   "channels": [
     {
@@ -177,20 +177,20 @@
     }
   },
   "downloadGate": {
-    "title": "Public download is blocked",
-    "summary": "No publicly trusted installer has been approved or made available. The journey ends here without a download link.",
+    "title": "There is no public installer yet",
+    "summary": "Download will appear only when the release, signature, compatibility, and recovery path are ready for real use.",
     "reasons": {
       "artifact-unavailable": "The artifact and its required evidence are not atomically available.",
       "channel-selection-blocked": "The requested channel does not have the direct consent its policy requires.",
       "development-artifact-rejected": "Development or self-signed evidence is categorically outside the public flow.",
-      "distribution-not-approved": "Public distribution approval is false in the generated release record.",
+      "distribution-not-approved": "We are still completing the checks required before publishing the installer.",
       "historical-release-unavailable": "The historical artifact is unavailable and is not offered as a downgrade.",
       "historical-release-unsafe": "The historical release is unsafe and remains non-actionable.",
       "integrity-disagreement": "At least one release, manifest, publisher, signature, hash, artifact, provenance, or compatibility fact disagrees.",
       "official-artifact-unavailable": "The canonical record declares the official artifact unavailable.",
-      "record-invalid": "The release record failed generated runtime validation."
+      "record-invalid": "This release information did not pass the safety check."
     },
-    "assertive": "Download remains blocked. No bypass, mirror, account sign-in, or development installer can continue this flow."
+    "assertive": "Do not use mirrors, development installers, or links sent by third parties."
   },
   "installation": {
     "title": "Safe installation and cancellation guidance",

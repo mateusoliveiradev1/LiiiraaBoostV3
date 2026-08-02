@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "plan": "03-66",
-  "closedAt": "2026-08-02T03:35:24Z",
-  "replayStartedAt": "2026-08-02T03:22:00Z",
-  "sourceRevision": "623084a417958282b6ccaac92270e68e893cf0bc",
+  "closedAt": "2026-08-02T18:10:09Z",
+  "replayStartedAt": "2026-08-02T18:05:00Z",
+  "sourceRevision": "647bd86396be53155e9bd564974b45d712d0498f",
   "inspectionRecords": [
     {
       "plan": "03-63",
       "surface": "public",
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-63-public.json",
-      "sha256": "787886426fddf62a4f6991ba022d66cb943cc73425cec264f21e6b0ceab19f8c",
+      "sha256": "5fd809831187ffe32e594d4fd117170555a6b2cec5c767f7a83f9df63c729c0a",
       "verdict": "pass",
       "candidateCount": 12,
       "exactSubset": [
@@ -31,7 +31,7 @@
       "plan": "03-64",
       "surface": "account",
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-64-account.json",
-      "sha256": "cd7b812b0c413d902a1673aa4e9960f7dc60d304ac3c1c3c9863037b2b4c7486",
+      "sha256": "f2eac452541dc6d5806d8f48def9c60140170c74fb483dd1cc7a79d8f3bf636f",
       "verdict": "pass",
       "candidateCount": 8,
       "exactSubset": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"]
@@ -40,7 +40,7 @@
       "plan": "03-65",
       "surface": "admin",
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-65-admin.json",
-      "sha256": "32edd959c0fc6a1cd9fa4fb8f44527ffc54c7bfd179eb64d000c97947b3231b7",
+      "sha256": "907ef29b6681e9a141ce80da12100c3afda43949353bf394fda09ff96cff280c",
       "verdict": "pass",
       "candidateCount": 5,
       "exactSubset": ["W14", "W15", "W16", "G06", "G07"]
@@ -125,8 +125,8 @@
       {
         "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts",
         "result": "pass",
-        "passed": 43,
-        "skipped": 153,
+        "passed": 44,
+        "skipped": 161,
         "failed": 0
       },
       {

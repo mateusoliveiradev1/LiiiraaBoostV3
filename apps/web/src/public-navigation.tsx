@@ -145,7 +145,6 @@ export const PublicNavigation = ({
         >
           {copy.search}
         </a>
-        {localeControl}
         <a
           className="public-action public-action--primary"
           href={publicBoundaryHref('public-compatibility', locale)}
@@ -154,7 +153,7 @@ export const PublicNavigation = ({
         </a>
       </div>
 
-      <div className="public-mobile-locale">{localeControl}</div>
+      <div className="public-header__locale">{localeControl}</div>
 
       <details className="public-mobile-menu">
         <summary>{copy.menu}</summary>
@@ -164,7 +163,6 @@ export const PublicNavigation = ({
           </nav>
           <div className="public-mobile-menu__actions">
             <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
-            {localeControl}
             <a href={publicBoundaryHref('public-compatibility', locale)}>{copy.compatibility}</a>
           </div>
         </div>

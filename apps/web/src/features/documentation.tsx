@@ -315,20 +315,24 @@ const copyFor = (locale: WebLocale) =>
         articleIndex: 'Índice deste documento',
         canonical: 'Orientação atual canônica',
         channel: 'Canal',
+        chooseTask: 'Escolha o que você quer fazer',
         compatibility: 'Compatibilidade',
-        current: 'Atual',
-        documentation: 'Documentação técnica',
+        current: 'Guias atuais',
+        documentation: 'Central de ajuda',
         empty: 'Nenhum documento admitido corresponde à busca e aos filtros.',
         evidence: 'Evidências',
-        filters: 'Pesquisar e filtrar documentação',
-        historical: 'Histórico 1.0.0',
-        index: 'Índice da documentação',
+        filters: 'Pesquisar na ajuda',
+        historical: 'Versões anteriores',
+        index: 'Guias rápidos',
         lastReview: 'Última revisão',
-        nextAction: 'Comece pela próxima ação; aprofunde somente quando precisar.',
+        nextAction:
+          'Encontre o caminho certo para preparar, medir, otimizar ou restaurar com segurança.',
         observed: 'Estado observado',
         owner: 'Responsável',
         platform: 'Plataforma',
-        query: 'Termo, identificador ou código de erro',
+        moreFilters: 'Filtrar por assunto, Windows ou risco',
+        query: 'Como podemos ajudar?',
+        queryExample: 'Ex.: preparar uma partida ou desfazer um ajuste',
         recovery: 'Recuperação e escalonamento',
         releaseReferences: 'Referências de lançamento',
         reset: 'Limpar filtros',
@@ -337,6 +341,7 @@ const copyFor = (locale: WebLocale) =>
         search: 'Pesquisar',
         sections: 'Seções',
         technicalContext: 'Versão, risco e origem deste documento',
+        technicalLinks: 'Ajuda técnica e códigos de erro',
         validation: 'Validação',
         version: 'Versão',
       }
@@ -347,20 +352,23 @@ const copyFor = (locale: WebLocale) =>
         articleIndex: 'In this document',
         canonical: 'Current canonical guidance',
         channel: 'Channel',
+        chooseTask: 'Choose what you want to do',
         compatibility: 'Compatibility',
-        current: 'Current',
-        documentation: 'Technical documentation',
+        current: 'Current guides',
+        documentation: 'Help center',
         empty: 'No admitted document matches the query and filters.',
         evidence: 'Evidence',
-        filters: 'Search and filter documentation',
-        historical: 'History 1.0.0',
-        index: 'Documentation index',
+        filters: 'Search help',
+        historical: 'Previous versions',
+        index: 'Quick guides',
         lastReview: 'Last reviewed',
-        nextAction: 'Start with the next action, then disclose deeper detail only when needed.',
+        nextAction: 'Find the right path to prepare, measure, optimize, or restore safely.',
         observed: 'Observed state',
         owner: 'Accountable owner',
         platform: 'Platform',
-        query: 'Term, identifier, or error code',
+        moreFilters: 'Filter by topic, Windows, or risk',
+        query: 'How can we help?',
+        queryExample: 'Example: prepare a gaming session or undo a change',
         recovery: 'Recovery and escalation',
         releaseReferences: 'Release references',
         reset: 'Clear filters',
@@ -369,6 +377,7 @@ const copyFor = (locale: WebLocale) =>
         search: 'Search',
         sections: 'Sections',
         technicalContext: 'Document version, risk, and source',
+        technicalLinks: 'Technical help and error codes',
         validation: 'Validation',
         version: 'Version',
       };
@@ -379,6 +388,36 @@ const firstSearchValue = (value: SearchValue): string =>
 const relativeHref = (href: string): string => {
   const url = new URL(href);
   return `${url.pathname}${url.hash}`;
+};
+
+const domainLabel = (locale: WebLocale, domain: DocumentationDomain): string => {
+  const labels =
+    locale === 'pt-BR'
+      ? {
+          'getting-started': 'Primeiros passos',
+          measuring: 'Medição e resultados',
+          optimizing: 'Otimização',
+          preparing: 'Preparação',
+          restoring: 'Restauração',
+          troubleshooting: 'Resolver problemas',
+        }
+      : {
+          'getting-started': 'Getting started',
+          measuring: 'Measurement and results',
+          optimizing: 'Optimization',
+          preparing: 'Preparation',
+          restoring: 'Restoration',
+          troubleshooting: 'Troubleshooting',
+        };
+  return labels[domain];
+};
+
+const riskLabel = (locale: WebLocale, risk: (typeof RISK_VALUES)[number]): string => {
+  const labels =
+    locale === 'pt-BR'
+      ? { critical: 'Crítico', high: 'Alto', low: 'Baixo', medium: 'Médio', none: 'Sem risco' }
+      : { critical: 'Critical', high: 'High', low: 'Low', medium: 'Medium', none: 'No risk' };
+  return labels[risk];
 };
 
 const articleForRoute = (
@@ -502,6 +541,7 @@ const indexItems = (locale: WebLocale, version: WebVersion) =>
       return {
         id: `${article.kind}:${article.identity.slug}`,
         label: article.title,
+        summary: article.summary,
         href: relativeHref(resolution.value.href),
         domain: article.domain,
       };
@@ -512,18 +552,16 @@ const DocumentationNavigation = ({
   version,
 }: Readonly<{ locale: WebLocale; version: WebVersion }>) => {
   const copy = copyFor(locale);
+  const items = indexItems(locale, version).map(({ id, label, href }) => ({ id, label, href }));
   return (
     <aside aria-label={copy.index}>
       <details open>
         <summary>{copy.index}</summary>
-        <DocumentationIndex
-          items={indexItems(locale, version).map(({ id, label, href }) => ({
-            id,
-            label,
-            href,
-          }))}
-          label={copy.index}
-        />
+        <DocumentationIndex items={items.slice(0, 5)} label={copy.index} />
+      </details>
+      <details className="documentation-technical-links">
+        <summary>{copy.technicalLinks}</summary>
+        <DocumentationIndex items={items.slice(5)} label={copy.technicalLinks} />
       </details>
     </aside>
   );
@@ -536,26 +574,25 @@ const DocumentationVersionControl = ({
   const copy = copyFor(locale);
   return (
     <VersionSelector label={`${copy.version} · ${copy.channel}`}>
-      <strong>
-        {copy.version}: <code>{selectedVersion}</code>
-      </strong>
+      <strong>{selectedVersion === 'current' ? copy.current : copy.historical}</strong>
       <span>
-        {copy.channel}: <code>{selectedVersion === 'current' ? 'stable' : 'beta'}</code>
+        {selectedVersion === 'current'
+          ? locale === 'pt-BR'
+            ? 'Recomendado para uso agora'
+            : 'Recommended for use now'
+          : locale === 'pt-BR'
+            ? 'Somente para consulta'
+            : 'For reference only'}
       </span>
-      <a
-        aria-current={selectedVersion === 'current' ? 'page' : undefined}
-        className="public-action"
-        href={`/${locale}/docs/current`}
-      >
-        {copy.current}
-      </a>
-      <a
-        aria-current={selectedVersion === '1.0.0' ? 'page' : undefined}
-        className="public-action"
-        href={`/${locale}/docs/history/1.0.0/legacy-capture`}
-      >
-        {copy.historical}
-      </a>
+      {selectedVersion === 'current' ? (
+        <a className="public-action" href={`/${locale}/docs/history/1.0.0/legacy-capture`}>
+          {copy.historical}
+        </a>
+      ) : (
+        <a className="public-action" href={`/${locale}/docs/current`}>
+          {copy.current}
+        </a>
+      )}
     </VersionSelector>
   );
 };
@@ -571,67 +608,79 @@ const SearchControls = ({
 }>) => {
   const copy = copyFor(locale);
   return (
-    <form action={action} className="lb-web-filter-bar" method="get" role="search">
-      <div>
+    <form
+      aria-label={copy.filters}
+      action={action}
+      className="lb-web-filter-bar documentation-help-search"
+      method="get"
+      role="search"
+    >
+      <div className="documentation-help-search__query">
         <label htmlFor="documentation-query">{copy.query}</label>
         <input
           defaultValue={firstSearchValue(searchParams?.q)}
           id="documentation-query"
           name="q"
+          placeholder={copy.queryExample}
           type="search"
         />
-      </div>
-      <div>
-        <label htmlFor="documentation-domain">{copy.sections}</label>
-        <select
-          defaultValue={firstSearchValue(searchParams?.domain)}
-          id="documentation-domain"
-          name="domain"
-        >
-          <option value="">{copy.allDomains}</option>
-          {DOCUMENTATION_DOMAINS.map((domain) => (
-            <option key={domain} value={domain}>
-              {domain}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label htmlFor="documentation-platform">{copy.platform}</label>
-        <select
-          defaultValue={firstSearchValue(searchParams?.platform)}
-          id="documentation-platform"
-          name="platform"
-        >
-          <option value="">{copy.allPlatforms}</option>
-          {DOCUMENTATION_PLATFORMS.map((platform) => (
-            <option key={platform} value={platform}>
-              {platform}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label htmlFor="documentation-risk">{copy.risk}</label>
-        <select
-          defaultValue={firstSearchValue(searchParams?.risk)}
-          id="documentation-risk"
-          name="risk"
-        >
-          <option value="">{copy.allRisks}</option>
-          {RISK_VALUES.map((risk) => (
-            <option key={risk} value={risk}>
-              {risk}
-            </option>
-          ))}
-        </select>
       </div>
       <button className="public-action public-action--primary" type="submit">
         {copy.search}
       </button>
-      <a className="public-action" href={action}>
-        {copy.reset}
-      </a>
+      <details className="documentation-help-search__filters">
+        <summary>{copy.moreFilters}</summary>
+        <div className="documentation-help-search__filter-grid">
+          <div>
+            <label htmlFor="documentation-domain">{copy.sections}</label>
+            <select
+              defaultValue={firstSearchValue(searchParams?.domain)}
+              id="documentation-domain"
+              name="domain"
+            >
+              <option value="">{copy.allDomains}</option>
+              {DOCUMENTATION_DOMAINS.map((domain) => (
+                <option key={domain} value={domain}>
+                  {domainLabel(locale, domain)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="documentation-platform">{copy.platform}</label>
+            <select
+              defaultValue={firstSearchValue(searchParams?.platform)}
+              id="documentation-platform"
+              name="platform"
+            >
+              <option value="">{copy.allPlatforms}</option>
+              {DOCUMENTATION_PLATFORMS.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform === 'windows-10' ? 'Windows 10' : 'Windows 11'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="documentation-risk">{copy.risk}</label>
+            <select
+              defaultValue={firstSearchValue(searchParams?.risk)}
+              id="documentation-risk"
+              name="risk"
+            >
+              <option value="">{copy.allRisks}</option>
+              {RISK_VALUES.map((risk) => (
+                <option key={risk} value={risk}>
+                  {riskLabel(locale, risk)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <a className="public-action" href={action}>
+            {copy.reset}
+          </a>
+        </div>
+      </details>
     </form>
   );
 };
@@ -691,7 +740,8 @@ const SearchResults = ({
               <a href={relativeHref(result.href)}>{result.document.title}</a>
               <p>{result.document.summary}</p>
               <small>
-                {result.matchedBy} · {result.document.domain} · {result.document.risk}
+                {domainLabel(locale, result.document.domain)} ·{' '}
+                {riskLabel(locale, result.document.risk)}
               </small>
             </li>
           ))}
@@ -903,6 +953,7 @@ const DocumentationIndexView = ({
   const items = indexItems(locale, version).filter((item) =>
     domain === undefined ? true : item.domain === domain,
   );
+  const taskItems = domain === undefined ? items.slice(0, 5) : items;
   return (
     <div className="lb-web-product-frame">
       <DocumentationNavigation locale={locale} version={version} />
@@ -920,12 +971,15 @@ const DocumentationIndexView = ({
           aria-labelledby="documentation-task-index-title"
           className="documentation-index-workspace"
         >
-          <h2 id="documentation-task-index-title">{domain ?? copy.index}</h2>
+          <h2 id="documentation-task-index-title">
+            {domain === undefined ? copy.chooseTask : domainLabel(locale, domain)}
+          </h2>
           <ol className="lb-web-documentation-index">
-            {items.map((item) => (
-              <li key={item.id}>
+            {taskItems.map((item) => (
+              <li className="documentation-task-card" key={item.id}>
                 <a href={item.href}>{item.label}</a>
-                <small>{item.domain}</small>
+                <p>{item.summary}</p>
+                <small>{domainLabel(locale, item.domain)}</small>
               </li>
             ))}
           </ol>

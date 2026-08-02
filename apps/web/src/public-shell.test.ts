@@ -70,6 +70,20 @@ describe('public shell', () => {
     });
   });
 
+  it('uses visitor task language and renders one route-preserving graphical locale control', () => {
+    expect(layoutSource).toContain("'public-product': 'Como funciona'");
+    expect(layoutSource).toContain("'public-evidence': 'Como comprovamos'");
+    expect(layoutSource).toContain("'public-compatibility': 'Seu PC'");
+    expect(layoutSource).toContain("'docs-index': 'Ajuda'");
+    expect(layoutSource).toContain("'releases-index': 'Baixar'");
+    expect(layoutSource).toContain("'public-product': 'How it works'");
+    expect(layoutSource).toContain("'public-evidence': 'How we verify'");
+    expect(layoutSource).toContain("'public-compatibility': 'Your PC'");
+    expect(navigationSource.match(/<LocaleSwitcher/gu)).toHaveLength(1);
+    expect(navigationSource).toContain('className="public-header__locale"');
+    expect(navigationSource).not.toContain('public-mobile-locale');
+  });
+
   it('uses the approved product lockup without exposing substitute initials', () => {
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).not.toContain('public-brand__mark');

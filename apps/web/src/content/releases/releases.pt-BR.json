@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "locale": "pt-BR",
   "metadata": {
-    "title": "Versões, integridade e elegibilidade de download",
-    "description": "Revise canais, compatibilidade, notas, campos do manifesto e verificação independente antes da aprovação da distribuição."
+    "title": "O app para Windows ainda não está disponível",
+    "description": "Estamos preparando uma versão pública segura. Enquanto isso, você pode verificar seu PC, conhecer o produto e acompanhar o que será exigido antes do download."
   },
   "identity": {
     "label": "Informação demonstrativa de versão",
@@ -12,16 +12,16 @@
     "validation": "Registro gerado de versão validado"
   },
   "navigation": {
-    "label": "Jornada de versão",
-    "index": "Visão geral das versões",
-    "channel": "Política do canal",
-    "notes": "Notas da versão",
-    "integrity": "Manifesto e integridade",
-    "download": "Elegibilidade de download",
-    "install": "Verificação da instalação",
-    "compatibility": "Verificar compatibilidade",
-    "cancel": "Cancelar e voltar às versões",
-    "help": "Obter suporte público"
+    "label": "Baixar o app",
+    "index": "Quando estará disponível",
+    "channel": "Versões do app",
+    "notes": "O que mudou",
+    "integrity": "Como conferir a segurança",
+    "download": "Baixar para Windows",
+    "install": "Antes de instalar",
+    "compatibility": "Checar meu PC",
+    "cancel": "Voltar",
+    "help": "Falar com o suporte"
   },
   "channels": [
     {
@@ -177,20 +177,20 @@
     }
   },
   "downloadGate": {
-    "title": "O download público está bloqueado",
-    "summary": "Nenhum instalador com confiança pública foi aprovado ou disponibilizado. A jornada termina aqui sem link de download.",
+    "title": "Ainda não há um instalador público",
+    "summary": "O download só aparecerá quando a versão, a assinatura, a compatibilidade e o caminho de recuperação estiverem prontos para uso real.",
     "reasons": {
       "artifact-unavailable": "O artefato e sua evidência obrigatória não estão disponíveis atomicamente.",
       "channel-selection-blocked": "O canal solicitado não recebeu o consentimento direto exigido pela política.",
       "development-artifact-rejected": "Evidência de desenvolvimento ou autoassinada está categoricamente fora do fluxo público.",
-      "distribution-not-approved": "A aprovação de distribuição pública é falsa no registro gerado da versão.",
+      "distribution-not-approved": "Ainda estamos concluindo as verificações necessárias antes de publicar o instalador.",
       "historical-release-unavailable": "O artefato histórico está indisponível e não é oferecido como downgrade.",
       "historical-release-unsafe": "A versão histórica é insegura e permanece não acionável.",
       "integrity-disagreement": "Pelo menos um fato de versão, manifesto, publicador, assinatura, hash, artefato, proveniência ou compatibilidade diverge.",
       "official-artifact-unavailable": "O registro canônico declara o artefato oficial indisponível.",
-      "record-invalid": "O registro da versão falhou na validação gerada em tempo de execução."
+      "record-invalid": "As informações desta versão não passaram pela verificação de segurança."
     },
-    "assertive": "O download permanece bloqueado. Nenhum desvio, espelho, login de conta ou instalador de desenvolvimento pode continuar este fluxo."
+    "assertive": "Não use espelhos, instaladores de desenvolvimento ou links enviados por terceiros."
   },
   "installation": {
     "title": "Orientação de instalação segura e cancelamento",

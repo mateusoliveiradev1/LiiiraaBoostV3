@@ -94,6 +94,15 @@
   padding-inline: var(--lb-space-2);
 }
 
+.lb-web-locale-flag {
+  flex: 0 0 auto;
+  inline-size: 22px;
+  block-size: 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--lb-text-primary) 28%, transparent);
+  border-radius: 3px;
+}
+
 .lb-web-skip-link {
   position: fixed;
   z-index: var(--lb-layer-tooltip);

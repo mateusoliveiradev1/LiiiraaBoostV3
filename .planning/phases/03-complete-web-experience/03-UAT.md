@@ -1,16 +1,16 @@
 ---
-status: diagnosed
+status: testing
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-02T14:13:49-03:00
+updated: 2026-08-02T15:10:09-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[testing complete — Plan 03-45 rejected; gaps remain open]
+[awaiting human review — route language, navigation, documentation hierarchy, and graphical locale flags were remediated; Plan 03-46 remains blocked]
 
 ## Plan 03-45 Preflight
 
@@ -108,6 +108,30 @@ The reviewer supplied seven route screenshots. They show a structurally styled b
 7. Dense technical evidence remains necessary for trust, but it must move into closed, contextual disclosures after the plain-language outcome and next action.
 
 Mandatory correction: rewrite both locales around visitor task and benefit, remove phase/implementation chronology from ordinary copy, create route-specific hierarchy and CTAs, subordinate provenance/version/integrity detail to disclosures, and prove a route-preserving flag-plus-language locale control before any recapture.
+
+## Plan 03-45 Preflight — Route language and navigation remediation
+
+date: 2026-08-02T15:10:09-03:00
+result: passed — automated and non-human visual inspection only. Human approval remains false; every prior UAT issue stays open until the reviewer evaluates the refreshed packet, and Plan 03-46 remains blocked.
+
+| Command or gate | Result |
+| --- | --- |
+| Immutable rejected archive verification | PASS — 3/3 archived G01/G04/G06 hashes still match their recorded bytes. |
+| Mechanical candidate update | PASS — exactly one 25-candidate update-mode execution completed; 45 applicable tests passed and 160 project-matrix skips were expected. |
+| `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts` | PASS — 44 applicable tests passed, 161 project-matrix skips were expected, and no update mode was used. |
+| Candidate inspection records | PASS — public 12/12, account 8/8, and admin 5/5 hashes, byte sizes, and dimensions match the current PNGs; all records remain `humanApproved: false`. |
+| `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts` | PASS — 5 applicable tests passed and 40 project-matrix skips were expected. |
+| `rtk pnpm --filter @liiiraa/web-features exec vitest run src/components.test.tsx -t "qualitative-review metadata\|visual contract"` | PASS — 6 tests passed and 10 unrelated tests were skipped. |
+| Public, account, and admin independent production builds | PASS — all three Next.js webpack builds and strict TypeScript gates completed. |
+| `rtk pnpm test` | PASS — Turbo completed 49/49 workspace tasks; public tests passed 95/95 and web-features passed 36/36. |
+
+### Remediation presented for review
+
+- Public navigation now uses visitor goals: `Como funciona`, `Como comprovamos`, `Seu PC`, `Planos`, `Ajuda`, and `Baixar`, with localized English equivalents.
+- Locale controls preserve the current route and render one inline graphical Brazil or United States flag with a full language label and accessible name; emoji rendering is not relied upon.
+- Product, proof, compatibility, plans, documentation, and releases lead with plain visitor outcomes and next actions; advanced provenance, integrity, and error-code material is subordinate or disclosed contextually.
+- Documentation search leads with `Como podemos ajudar?`, groups primary goals under `Escolha o que você quer fazer`, and keeps technical/error-code navigation secondary.
+- Account and admin retain their task-first shells and graphical route-preserving locale controls; publication and remote authority remain unavailable in preview.
 
 ## Tests
 

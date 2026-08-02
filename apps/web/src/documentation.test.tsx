@@ -11,7 +11,10 @@ import {
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 const visibleText = (markup: string): string =>
-  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
+  markup
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
 
 const currentArticleRequest = () => {
   const document = documentationCatalog.find(
@@ -91,16 +94,34 @@ describe('authored documentation rhythm', () => {
     expect(styles).not.toMatch(/\.documentation-article-flow\s*\{[\s\S]*overflow-x:\s*auto/u);
   });
 
-  it('presents the documentation index as visitor tasks without raw route identifiers', () => {
+  it('presents the documentation index as visitor tasks without raw route identifiers', async () => {
     const markup = renderToStaticMarkup(
       <DocumentationExperience request={{ locale: 'pt-BR', version: 'current' }} />,
     );
     const text = visibleText(markup);
+    const styles = await import('node:fs/promises').then(({ readFile }) =>
+      readFile(new URL('./styles/public.css', import.meta.url), 'utf8'),
+    );
 
     expect(text).toContain('Central de ajuda');
     expect(text).toContain('Guias atuais');
-    expect(text).not.toMatch(/\b(?:current|stable|getting-started|preparing|measuring|optimizing|restoring)\b/u);
+    expect(text).toContain('Como podemos ajudar?');
+    expect(text).toContain('Escolha o que você quer fazer');
+    expect(text).not.toContain('Índice da documentação');
+    expect(text).not.toMatch(
+      /\b(?:current|stable|getting-started|preparing|measuring|optimizing|restoring)\b/u,
+    );
     expect(markup).toContain('documentation-task-card');
+    expect(markup).toContain('documentation-technical-links');
+    const taskWorkspace = markup.slice(markup.indexOf('documentation-index-workspace'));
+    expect(visibleText(taskWorkspace)).not.toContain('LB-ERR:0x80070005');
+    expect(visibleText(taskWorkspace)).not.toContain('identificadores de evidência');
+    expect(markup).toContain(
+      'class="lb-web-route-header lb-web-route-header--documentation"',
+    );
+    expect(styles).toMatch(
+      /\.lb-web-route-header\.lb-web-route-header--documentation\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/u,
+    );
   });
 
   it('keeps historical guidance explicit and canonical instead of redirecting it away', () => {

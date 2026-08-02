@@ -12,7 +12,10 @@ import {
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 const visibleText = (markup: string): string =>
-  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
+  markup
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
 
 const CATALOG_ROUTES = [
   'public-product',
@@ -25,20 +28,18 @@ const CATALOG_ROUTES = [
 
 describe('public catalog content', () => {
   it.each([
-    ['pt-BR', 'public-product', 'Conheça o produto'],
-    ['pt-BR', 'public-evidence', 'Entenda as evidências'],
-    ['pt-BR', 'public-compatibility', 'Verificar compatibilidade'],
-    ['pt-BR', 'public-plans', 'Explorar o produto'],
-    ['en', 'public-product', 'Explore the product'],
-    ['en', 'public-evidence', 'Understand the evidence'],
-    ['en', 'public-compatibility', 'Check compatibility'],
+    ['pt-BR', 'public-product', 'Ver como funciona'],
+    ['pt-BR', 'public-evidence', 'Ver como medimos'],
+    ['pt-BR', 'public-compatibility', 'Checar meu PC'],
+    ['pt-BR', 'public-plans', 'Conhecer o produto'],
+    ['en', 'public-product', 'See how it works'],
+    ['en', 'public-evidence', 'See how we measure'],
+    ['en', 'public-compatibility', 'Check my PC'],
     ['en', 'public-plans', 'Explore the product'],
   ] as const)(
     'leads %s %s with a route-specific visitor outcome and next action',
     (locale, routeId, action) => {
-      const markup = renderToStaticMarkup(
-        <PublicCatalogPage locale={locale} routeId={routeId} />,
-      );
+      const markup = renderToStaticMarkup(<PublicCatalogPage locale={locale} routeId={routeId} />);
       const introduction = markup.slice(0, markup.indexOf('catalog-introduction__provenance'));
 
       expect(markup).toContain(`data-route-purpose="${routeId}"`);
@@ -55,6 +56,33 @@ describe('public catalog content', () => {
       const catalog = getPublicCatalog(locale);
       expect(JSON.stringify(catalog)).not.toMatch(/\b(?:Fase|Phase)\s+[0-9]+\b/iu);
     }
+  });
+
+  it('frames the four discovery routes in player language before technical detail', () => {
+    const expected = [
+      ['pt-BR', 'public-product', 'Mais desempenho para jogar, sem perder o controle'],
+      ['pt-BR', 'public-evidence', 'Resultados que você consegue conferir'],
+      ['pt-BR', 'public-compatibility', 'Seu PC é compatível?'],
+      ['pt-BR', 'public-plans', 'Os planos ainda não estão à venda'],
+      ['en', 'public-product', 'More gaming performance without giving up control'],
+      ['en', 'public-evidence', 'Results you can verify'],
+      ['en', 'public-compatibility', 'Is your PC compatible?'],
+      ['en', 'public-plans', 'Plans are not on sale yet'],
+    ] as const;
+
+    for (const [locale, routeId, heading] of expected) {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId={routeId} />,
+      );
+      expect(visibleText(markup)).toContain(heading);
+    }
+
+    const compatibility = renderToStaticMarkup(
+      <PublicCatalogPage locale="pt-BR" routeId="public-compatibility" />,
+    );
+    expect(visibleText(compatibility)).toContain('O que já podemos verificar');
+    expect(visibleText(compatibility)).toContain('O que isso significa');
+    expect(visibleText(compatibility)).not.toContain('Matriz de suporte e consequência');
   });
 
   it('resolves every catalog path through canonical manifest authority', () => {

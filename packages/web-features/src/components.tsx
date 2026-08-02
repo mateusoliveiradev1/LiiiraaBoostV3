@@ -715,16 +715,18 @@ export const DownloadAvailabilityGate = ({
   description = 'No publicly trusted installer has been approved. There is no continue option.',
   reason,
   statusLabel = 'Blocked',
+  statusState = 'error',
   title = 'Public download is not available yet',
 }: {
   readonly children?: ReactNode;
   readonly description?: string;
   readonly reason: string;
   readonly statusLabel?: string;
+  readonly statusState?: 'error' | 'warning';
   readonly title?: string;
 }) => (
   <section className="lb-web-download-gate" role="alert">
-    <StatusSignal detail={reason} label={statusLabel} state="error" />
+    <StatusSignal detail={reason} label={statusLabel} state={statusState} />
     <h2>{title}</h2>
     <p>{description}</p>
     {children}

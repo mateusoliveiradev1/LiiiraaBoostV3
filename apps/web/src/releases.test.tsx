@@ -16,7 +16,10 @@ import {
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 const visibleText = (markup: string): string =>
-  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
+  markup
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
 
 const blockedReasons = [
   'artifact-unavailable',
@@ -41,6 +44,9 @@ describe('release content and routes', () => {
 
     expect(visibleText(ptMarkup)).toContain('O app para Windows ainda não está disponível');
     expect(visibleText(enMarkup)).toContain('The Windows app is not available yet');
+    expect(visibleText(ptMarkup)).toContain('Quando estará disponível');
+    expect(visibleText(ptMarkup)).toContain('Como conferir a segurança');
+    expect(visibleText(ptMarkup)).not.toContain('Status do download');
     expect(ptMarkup).toContain('release-visitor-actions');
     expect(enMarkup).toContain('release-visitor-actions');
     expect(ptMarkup.indexOf('release-state-header')).toBeLessThan(
@@ -103,7 +109,9 @@ describe('release content and routes', () => {
       renderToStaticMarkup(<ReleaseExperience resolution={w08} />),
     ].join('\n');
 
-    expect(markup).toContain('O download público está bloqueado');
+    expect(markup).toContain('Ainda não há um instalador público');
+    expect(markup).toContain('Em preparação');
+    expect(markup).not.toContain('>Bloqueado<');
     expect(markup).toContain('Every integrity disagreement blocks download');
     expect(markup).toContain('role="alert"');
     expect(markup).toContain('publicDistributionApproved');

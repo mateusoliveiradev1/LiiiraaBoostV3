@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "plan": "03-65",
   "surface": "admin",
-  "inspectedAt": "2026-08-02T02:14:41Z",
-  "sourceRevision": "8a969ca6d7280d27aa9736325893d69d59fbbba6",
+  "inspectedAt": "2026-08-02T18:02:19Z",
+  "sourceRevision": "647bd86396be53155e9bd564974b45d712d0498f",
   "inspectionMethod": {
     "register": "Impeccable product",
     "detail": "original",
@@ -28,9 +28,8 @@
     "allSha256Lowercase64": true,
     "postReplayHashesUnchanged": true,
     "boundedCaptureDelta": {
-      "commit": "d88b81b",
-      "changedCandidates": ["W14", "W15", "W16", "G07"],
-      "unchangedCandidates": ["G06"],
+      "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --update-snapshots",
+      "allCandidatePngsRegenerated": true,
       "onlyExpectedCandidatePngsChanged": true
     },
     "rejectedG06Comparison": {
@@ -39,7 +38,7 @@
       "bytes": 82960,
       "sha256": "83b2a631b06583d33d0f2961801c74a9292b46ef4603df1227ea678921309b6f",
       "currentG06Distinct": true,
-      "currentG06UnchangedFromPriorPass": true,
+      "currentG06Reinspected": true,
       "observedImprovement": "The candidate removes the rejected permanent viewport banner and raw simulated-no-change badge, strengthens the 8/4 focal workspace, and fills the lower area with a semantic assigned queue."
     }
   },
@@ -83,8 +82,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W14-admin-final-wide-1440.png",
       "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and support-role redaction.",
       "dimensions": {"width": 1440, "height": 2421},
-      "bytes": 171662,
-      "sha256": "960063303b0afc4f469b2dd2f5e373d92c5e5556c35968ddeb90557c3ce919aa",
+      "bytes": 171954,
+      "sha256": "249b56c7474db4c75c6760d8c19775f57cc9f70a244a6b458742860e02a4356c",
       "checks": {
         "originRoleTaskLocale": true,
         "focalDecision": true,
@@ -104,8 +103,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W15-admin-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and blocked security consent.",
       "dimensions": {"width": 1440, "height": 2353},
-      "bytes": 172371,
-      "sha256": "e21da72135bc0c8740465de80a7c163591ae8c78dd0297cf0fbaa21220f1f5c1",
+      "bytes": 172540,
+      "sha256": "c483e5411896f0513a63d7a439d544c4b924add82a3f2eb6fb82267309a466c2",
       "checks": {
         "originRoleTaskLocale": true,
         "focalDecision": true,
@@ -126,8 +125,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W16-admin-final-mobile-390.png",
       "manifestPurpose": "Review English mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and the high-risk viewport boundary.",
       "dimensions": {"width": 390, "height": 3448},
-      "bytes": 129464,
-      "sha256": "0af012b14a57e54d4de4eaf16e3183d7da3755e92d8874559ee55aafc7587333",
+      "bytes": 129789,
+      "sha256": "2d3b29a9734c06119f23b197d3c9635b08269a67449c3c69e7608a6934e52b83",
       "checks": {
         "topbar60": true,
         "flagAndLanguage": true,
@@ -149,8 +148,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G06-admin-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and role-landing comparison with Phase 2.",
       "dimensions": {"width": 1440, "height": 1113},
-      "bytes": 85696,
-      "sha256": "01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc",
+      "bytes": 85745,
+      "sha256": "c81aab1e799b8fd05619ac7dba135a72cf31d1cea72134e41b13aa790c04ca4e",
       "checks": {
         "originRoleTaskLocale": true,
         "eightFourFocalDecision": true,
@@ -165,15 +164,15 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "G06 remains byte-identical to its prior PASS and retains the bounded cobalt 8/4 decision workspace, contextual role scope, translated no-change status, dense assigned queue, exact navigation, and no raw enum or permanent viewport banner."
+      "evidence": "G06 was reinspected at original resolution and retains the bounded cobalt 8/4 decision workspace, contextual role scope, translated no-change status, dense assigned queue, exact navigation, and no raw enum or permanent viewport banner."
     },
     {
       "id": "G07",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G07-admin-final-mobile-390.png",
       "manifestPurpose": "Review English mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and support comparison with Phase 2.",
       "dimensions": {"width": 390, "height": 4004},
-      "bytes": 144867,
-      "sha256": "24b82e5eacb3b00de62b2a89559601b3a32a6e7310e0b3aa9bedf2fa09ff074b",
+      "bytes": 145193,
+      "sha256": "384e8336e86a59426157f80b76b2da8c7bd87ea6c15f1e439ee23f5b24a1eb31",
       "checks": {
         "topbar60": true,
         "flagAndLanguage": true,
@@ -192,12 +191,12 @@
     }
   ],
   "automatedVerification": {
-    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep \"W14|W15|W16|G06|G07\"",
+    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts",
     "result": "pass",
-    "passed": 6,
-    "skipped": 8,
+    "passed": 44,
+    "skipped": 161,
     "failed": 0,
-    "duration": "1.4m",
+    "duration": "3.6m",
     "updateMode": false
   },
   "supplementalVerification": [

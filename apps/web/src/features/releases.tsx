@@ -773,7 +773,10 @@ const GateActions = ({
   content,
   locale,
 }: Readonly<{ content: ReleaseContent; locale: WebLocale }>) => (
-  <nav aria-label={content.downloadGate.title} className="public-not-found__actions">
+  <nav
+    aria-label={content.downloadGate.title}
+    className="public-not-found__actions release-visitor-actions"
+  >
     <a
       className="public-action public-action--primary"
       href={publicBoundaryHref('public-compatibility', locale)}
@@ -805,7 +808,8 @@ export const DownloadDecisionView = ({
         <DownloadAvailabilityGate
           description={content.downloadGate.summary}
           reason={reason}
-          statusLabel={locale === 'pt-BR' ? 'Bloqueado' : 'Blocked'}
+          statusLabel={locale === 'pt-BR' ? 'Em preparação' : 'Coming soon'}
+          statusState="warning"
           title={content.downloadGate.title}
         >
           <p aria-live="assertive">{content.downloadGate.assertive}</p>
@@ -958,7 +962,7 @@ export const ReleaseExperience = ({
       <article className="public-catalog">
         <header className="release-state-header lb-web-route-header">
           <StatusSignal
-            label={resolution.locale === 'pt-BR' ? 'Download bloqueado' : 'Download blocked'}
+            label={resolution.locale === 'pt-BR' ? 'Em preparação' : 'Coming soon'}
             state="unavailable"
           />
           <h1 tabIndex={-1}>{content.metadata.title}</h1>

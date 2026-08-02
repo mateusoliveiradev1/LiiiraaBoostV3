@@ -59,9 +59,41 @@ const NavigationList = ({
 };
 
 const LOCALE_PRESENTATION = Object.freeze({
-  en: Object.freeze({ flag: '🇺🇸', language: 'English' }),
-  'pt-BR': Object.freeze({ flag: '🇧🇷', language: 'Português' }),
-} satisfies Readonly<Record<WebLocale, Readonly<{ flag: string; language: string }>>>);
+  en: Object.freeze({ flag: 'us', language: 'English' }),
+  'pt-BR': Object.freeze({ flag: 'br', language: 'Português' }),
+} satisfies Readonly<Record<WebLocale, Readonly<{ flag: 'br' | 'us'; language: string }>>>);
+
+const LocaleFlag = ({ country }: Readonly<{ country: 'br' | 'us' }>) =>
+  country === 'br' ? (
+    <svg
+      aria-hidden="true"
+      className="lb-web-locale-flag"
+      data-locale-flag="br"
+      focusable="false"
+      viewBox="0 0 24 16"
+    >
+      <rect fill="#199447" height="16" width="24" />
+      <path d="M12 2 21 8l-9 6-9-6 9-6Z" fill="#f8d447" />
+      <circle cx="12" cy="8" fill="#21468b" r="3.4" />
+      <path d="M9.2 7.25c2.2-.55 4.2-.2 5.9.85" fill="none" stroke="#fff" strokeWidth=".65" />
+    </svg>
+  ) : (
+    <svg
+      aria-hidden="true"
+      className="lb-web-locale-flag"
+      data-locale-flag="us"
+      focusable="false"
+      viewBox="0 0 24 16"
+    >
+      <rect fill="#fff" height="16" width="24" />
+      <path d="M0 0h24v2H0zm0 4h24v2H0zm0 4h24v2H0zm0 4h24v2H0" fill="#c83a4b" />
+      <path d="M0 0h10v9H0z" fill="#24457f" />
+      <path
+        d="m2 2 .35.7.8.1-.58.55.14.8L2 3.78l-.71.37.14-.8-.58-.55.8-.1L2 2Zm3 0 .35.7.8.1-.58.55.14.8L5 3.78l-.71.37.14-.8-.58-.55.8-.1L5 2Zm3 0 .35.7.8.1-.58.55.14.8L8 3.78l-.71.37.14-.8-.58-.55.8-.1L8 2ZM3.5 5l.35.7.8.1-.58.55.14.8-.71-.37-.71.37.14-.8-.58-.55.8-.1L3.5 5Zm3 0 .35.7.8.1-.58.55.14.8-.71-.37-.71.37.14-.8-.58-.55.8-.1L6.5 5Z"
+        fill="#fff"
+      />
+    </svg>
+  );
 
 export interface LocaleSwitcherProps {
   readonly href: string;
@@ -84,7 +116,7 @@ export const LocaleSwitcher = ({ href, sourceLocale, targetLocale }: LocaleSwitc
       href={href}
       hrefLang={targetLocale}
     >
-      <span aria-hidden="true">{target.flag}</span>{' '}
+      {LocaleFlag({ country: target.flag })}
       <span lang={targetLocale}>{target.language}</span>
     </a>
   );

@@ -160,7 +160,7 @@ summary:focus-visible,
   margin-inline-start: auto;
 }
 
-.public-header__actions .lb-web-locale-switcher {
+.public-header__locale .lb-web-locale-switcher {
   display: inline-flex;
   gap: var(--lb-space-1);
   align-items: center;
@@ -204,8 +204,8 @@ summary:focus-visible,
   background: var(--lb-accent-electric-hover);
 }
 
-.public-mobile-locale {
-  display: none;
+.public-header__locale {
+  order: 3;
 }
 
 .home-ignition-hero {
@@ -504,16 +504,15 @@ main {
     display: none;
   }
 
-  .public-mobile-locale,
   .public-mobile-menu {
     display: block;
   }
 
-  .public-mobile-locale {
+  .public-header__locale {
     margin-inline-start: auto;
   }
 
-  .public-mobile-locale .lb-web-locale-switcher {
+  .public-header__locale .lb-web-locale-switcher {
     display: inline-flex;
     align-items: center;
     gap: var(--lb-space-1);
@@ -574,12 +573,6 @@ main {
   .public-mobile-menu__actions {
     display: grid;
     gap: var(--lb-space-2);
-  }
-
-  .public-mobile-menu__actions .lb-web-locale-switcher {
-    display: flex;
-    gap: var(--lb-space-1);
-    align-items: center;
   }
 
   .public-mobile-menu__actions a:last-child {
