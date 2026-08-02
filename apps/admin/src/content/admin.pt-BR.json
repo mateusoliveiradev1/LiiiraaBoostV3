@@ -52,10 +52,10 @@
     "reviewLabel": "Revisão OPS-117",
     "target": "Alvo de implantação ••••-017",
     "state": "Publicação retida",
-    "detail": "A fixture informa divergência no manifesto. A publicação permanece bloqueada e nenhum artefato é promovido.",
+    "detail": "A revisão sintética indica divergência no manifesto. A publicação permanece bloqueada e nenhum artefato é promovido.",
     "action": "Revisar retenção da publicação",
     "purpose": "Manter a versão sintética retida enquanto as evidências são revisadas.",
-    "impact": "Uma autoridade futura poderia manter a retenção de um objeto de versão. A Fase 3 não pode alterar a publicação.",
+    "impact": "A publicação permanece retida para este objeto de versão; esta prévia não pode alterar esse estado.",
     "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px.",
     "constraintsTitle": "Restrições da decisão",
     "authorityTitle": "Autoridade de publicação indisponível",
@@ -114,11 +114,29 @@
     "correlation": "Correlação",
     "receipt": "Comprovante sem alteração",
     "detailAction": "Inspecionar evento correlacionado completo",
-    "noConsent": "Não exigido para este evento"
+    "noConsent": "Não exigido para este evento",
+    "events": {
+      "admin-event-001": {
+        "target": "Alvo de cliente ••••-042",
+        "reason": "Revisar uma resposta sintética de suporte"
+      },
+      "admin-event-002": {
+        "target": "Alvo de diagnóstico ••••-015",
+        "reason": "Registrar uma revisão bloqueada de consentimento para diagnóstico"
+      },
+      "admin-event-003": {
+        "target": "Alvo de implantação ••••-017",
+        "reason": "Revisar uma retenção sintética de publicação"
+      },
+      "admin-event-004": {
+        "target": "Alvo de segurança ••••-083",
+        "reason": "Revisar uma ação sintética de contenção"
+      }
+    }
   },
   "receipt": {
     "title": "Prévia concluída — nenhuma alteração foi feita",
-    "body": "A revisão alcançou o limite desconectado da Fase 4. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis."
+    "body": "Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis."
   },
   "recovery": {
     "title": "Capacidade administrativa indisponível",

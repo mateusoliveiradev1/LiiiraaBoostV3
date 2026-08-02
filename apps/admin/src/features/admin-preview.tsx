@@ -39,7 +39,14 @@ export type AdminPreviewState =
   'ready' | 'offline' | 'stale' | 'expired-session' | 'permission-denied' | 'partial-failure';
 
 type AdminContent = Readonly<
-  Omit<typeof adminEnJson, 'locale'> & {
+  Omit<typeof adminEnJson, 'audit' | 'locale'> & {
+    readonly audit: Readonly<
+      Omit<typeof adminEnJson.audit, 'events'> & {
+        readonly events: Readonly<
+          Record<string, Readonly<{ readonly reason: string; readonly target: string }>>
+        >;
+      }
+    >;
     readonly locale: WebLocale;
   }
 >;
@@ -235,6 +242,10 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
 ] as const);
 
 const presentAuditEvent = (content: AdminContent, event: AdminAuditEvent) => {
+  const eventCopy = content.audit.events[event.eventId] ?? {
+    reason: content.locale === 'pt-BR' ? 'Motivo indisponível' : 'Reason unavailable',
+    target: content.locale === 'pt-BR' ? 'Alvo indisponível' : 'Target unavailable',
+  };
   const action =
     content.locale === 'pt-BR'
       ? {
@@ -250,12 +261,14 @@ const presentAuditEvent = (content: AdminContent, event: AdminAuditEvent) => {
 
   return Object.freeze({
     action,
+    reason: eventCopy.reason,
     result: content.locale === 'pt-BR' ? 'Nenhuma alteração remota' : 'No remote change',
     role: Object.hasOwn(content.roles, event.role)
       ? content.roles[event.role as AdminPreviewRole]
       : content.locale === 'pt-BR'
         ? 'Função indisponível'
         : 'Role unavailable',
+    target: eventCopy.target,
   });
 };
 
@@ -410,8 +423,8 @@ export const CorrelatedEventDetail = ({
     [content.audit.actor, event.actor],
     [content.audit.role, presentation.role],
     [content.audit.action, presentation.action],
-    [content.audit.target, event.redactedTarget],
-    [content.audit.reason, event.reason],
+    [content.audit.target, presentation.target],
+    [content.audit.reason, presentation.reason],
     [content.audit.consent, event.consentReference ?? content.audit.noConsent],
     [content.audit.timestamp, event.occurredAt],
     [content.audit.result, presentation.result],
@@ -496,6 +509,21 @@ const DisconnectedAuthority = ({
       <p>{body}</p>
     </div>
     <LbButton isDisabled>{action}</LbButton>
+  </section>
+);
+
+const MobileAuthorityNotice = ({ body, title }: Readonly<{ body: string; title: string }>) => (
+  <section
+    aria-labelledby="admin-mobile-authority-title"
+    className="admin-disconnected-authority"
+    data-authority-action="omitted"
+    data-authority-state="disconnected"
+  >
+    <div>
+      <StatusSignal label={title} state="unavailable" />
+      <h2 id="admin-mobile-authority-title">{title}</h2>
+      <p>{body}</p>
+    </div>
   </section>
 );
 
@@ -843,11 +871,18 @@ export const OperationsReview = ({
         viewportWidth={viewportWidth}
       />
     </section>
-    <DisconnectedAuthority
-      action={content.operations.authorityAction}
-      body={content.operations.authorityBody}
-      title={content.operations.authorityTitle}
-    />
+    {viewportWidth >= 960 ? (
+      <DisconnectedAuthority
+        action={content.operations.authorityAction}
+        body={content.operations.authorityBody}
+        title={content.operations.authorityTitle}
+      />
+    ) : (
+      <MobileAuthorityNotice
+        body={content.operations.authorityBody}
+        title={content.operations.authorityTitle}
+      />
+    )}
     <section aria-labelledby="operations-audit-title" className="admin-decision__audit">
       <h2 id="operations-audit-title">{content.operations.auditTitle}</h2>
       <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[2]} />
@@ -909,11 +944,18 @@ export const SecurityReview = ({
         viewportWidth={viewportWidth}
       />
     </section>
-    <DisconnectedAuthority
-      action={content.security.authorityAction}
-      body={content.security.authorityBody}
-      title={content.security.authorityTitle}
-    />
+    {viewportWidth >= 960 ? (
+      <DisconnectedAuthority
+        action={content.security.authorityAction}
+        body={content.security.authorityBody}
+        title={content.security.authorityTitle}
+      />
+    ) : (
+      <MobileAuthorityNotice
+        body={content.security.authorityBody}
+        title={content.security.authorityTitle}
+      />
+    )}
     <section aria-labelledby="security-audit-title" className="admin-decision__audit">
       <h2 id="security-audit-title">{content.security.auditTitle}</h2>
       <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[3]} />

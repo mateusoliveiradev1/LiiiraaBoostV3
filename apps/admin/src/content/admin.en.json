@@ -52,10 +52,10 @@
     "reviewLabel": "Review OPS-117",
     "target": "Deployment target ••••-017",
     "state": "Publication held",
-    "detail": "The fixture reports a manifest mismatch. Publication remains blocked and no artifact is promoted.",
+    "detail": "The synthetic review reports a manifest mismatch. Publication remains blocked and no artifact is promoted.",
     "action": "Review publication hold",
     "purpose": "Keep the synthetic release held while evidence is reviewed.",
-    "impact": "A future authority could retain the hold for one release object. Phase 3 cannot alter publication state.",
+    "impact": "Publication remains held for this release object; this preview cannot change that state.",
     "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px.",
     "constraintsTitle": "Decision constraints",
     "authorityTitle": "Publication authority unavailable",
@@ -114,11 +114,29 @@
     "correlation": "Correlation",
     "receipt": "No-change receipt",
     "detailAction": "Inspect complete correlated event",
-    "noConsent": "Not required for this event"
+    "noConsent": "Not required for this event",
+    "events": {
+      "admin-event-001": {
+        "target": "Customer target ••••-042",
+        "reason": "Review a synthetic support response"
+      },
+      "admin-event-002": {
+        "target": "Diagnostic target ••••-015",
+        "reason": "Record a blocked diagnostic consent review"
+      },
+      "admin-event-003": {
+        "target": "Deployment target ••••-017",
+        "reason": "Review a synthetic publication hold"
+      },
+      "admin-event-004": {
+        "target": "Security target ••••-083",
+        "reason": "Review a synthetic containment action"
+      }
+    }
   },
   "receipt": {
     "title": "Preview complete — no change was made",
-    "body": "The review reached the disconnected Phase 4 boundary. No remote state changed; the receipt and correlated audit record remain synthetic and immutable."
+    "body": "Review complete. No remote state changed; the receipt and correlated audit record remain synthetic and immutable."
   },
   "recovery": {
     "title": "Administrative capability unavailable",

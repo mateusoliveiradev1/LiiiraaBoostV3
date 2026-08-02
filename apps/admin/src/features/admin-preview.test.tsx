@@ -109,7 +109,9 @@ describe('role-scoped admin', () => {
       adminEn.receipt.body,
       adminPtBr.receipt.body,
     ]) {
-      expect(copy).not.toMatch(/(?:phase|fase)\s+[34]|milestone|implementation|implementação|adapter|adaptador/iu);
+      expect(copy).not.toMatch(
+        /(?:phase|fase)\s+[34]|milestone|implementation|implementação|adapter|adaptador/iu,
+      );
     }
     expect(adminEn.operations.detail).not.toMatch(/\bfixture\b/iu);
     expect(adminPtBr.operations.detail).not.toMatch(/\bfixture\b/iu);
