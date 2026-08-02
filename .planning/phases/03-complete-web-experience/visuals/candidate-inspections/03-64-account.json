@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "plan": "03-64",
   "surface": "account",
-  "inspectedAt": "2026-08-02T22:08:00Z",
-  "sourceRevision": "53af142c2a12005d512bfb17b67b820ec513a77f",
+  "inspectedAt": "2026-08-02T22:51:40Z",
+  "sourceRevision": "a9a32a7a5a497af52ec98bef86915e610437470d",
   "inspectionMethod": {
     "register": "Impeccable product",
     "detail": "original",
@@ -55,16 +55,20 @@
     "noDecorativeGrid": "pass",
     "noGradientText": "pass",
     "noBlanketGlass": "pass",
-    "noMarketingTheatrics": "pass"
+    "noMarketingTheatrics": "pass",
+    "noNestedScrollContexts": "pass",
+    "noHorizontalOverflow": "pass",
+    "noEmptyFooterBand": "pass",
+    "mobileInspectorCollapsedByDefault": "pass"
   },
   "candidates": [
     {
       "id": "W10",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W10-account-final-desktop-960.png",
       "manifestPurpose": "Review English desktop premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and sign-in validation.",
-      "dimensions": { "width": 960, "height": 1427 },
-      "bytes": 72183,
-      "sha256": "6c60492e0d9c3111c12a45774e551f42fbf9fcac8476b8c0d828a2bfd9acb609",
+      "dimensions": { "width": 960, "height": 900 },
+      "bytes": 47885,
+      "sha256": "ba244a1ee74bbdc71fbad1dd2546d03f29705f80c067422ce42f55e9c828049c",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -84,9 +88,9 @@
       "id": "W11",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W11-account-final-wide-1440.png",
       "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and account overview truth.",
-      "dimensions": { "width": 1440, "height": 1219 },
-      "bytes": 126686,
-      "sha256": "0f7cf1347aa375ac49593e714b509313b252dfdfd560322e3824c797f96e16ed",
+      "dimensions": { "width": 1440, "height": 1018 },
+      "bytes": 126118,
+      "sha256": "b7164f0cd5b428155740fabc85fdac15e6c1323a219cf17b8038094ac94377d3",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -99,15 +103,15 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "The duplicate Overview preview region and phase prose are removed. The candidate presents one active Overview destination, one high-priority responsibility, a four-row readiness table, recent local activity, and the single quiet shell authority boundary."
+      "evidence": "The duplicate Overview preview region and phase prose are removed. The candidate presents one active Overview destination, one high-priority responsibility, a compact four-row readiness table, recent local activity, and one quiet shell authority boundary. The inspector is part of the shell flow with no nested scrollbar, horizontal overflow, or empty footer band."
     },
     {
       "id": "W12",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W12-account-final-wide-1280.png",
       "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and degraded recovery hierarchy.",
-      "dimensions": { "width": 1280, "height": 1281 },
-      "bytes": 118057,
-      "sha256": "fcfd861a091485a7fee4287a7a8bc88ce3508ba6d75f04a77731a979eb6d31ff",
+      "dimensions": { "width": 1280, "height": 1152 },
+      "bytes": 118322,
+      "sha256": "ed5efe92f63b9d299466b9320ea63956e359ec4dc134371808959f3a9a976294",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -126,9 +130,9 @@
       "id": "W13",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W13-account-final-wide-1280.png",
       "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and privacy no-change receipt.",
-      "dimensions": { "width": 1280, "height": 1253 },
-      "bytes": 116206,
-      "sha256": "158979e67a84afabd0af855085838dd8beca6efbe26d22938a8cd1e252d12bf3",
+      "dimensions": { "width": 1280, "height": 1092 },
+      "bytes": 117198,
+      "sha256": "39b4affc06b1bd7e33d4f8e7276edf54b8124f1d833482274d5cf11ce200aa75",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -147,9 +151,9 @@
       "id": "W18",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W18-account-final-reflow-320.png",
       "manifestPurpose": "Review English reflow premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, forced colors, reduced motion, and 400% zoom.",
-      "dimensions": { "width": 320, "height": 2411 },
-      "bytes": 77948,
-      "sha256": "dfab2a8b8985e4dca73893e6286b8cd4587654b7018b62a35e557b11e9824b16",
+      "dimensions": { "width": 320, "height": 1504 },
+      "bytes": 53511,
+      "sha256": "5fb7ce88b31c734dea9627f7c5dca2b6e77268d85d7bdababd61968f86347e94",
       "checks": {
         "topbar60": true,
         "flagAndLanguage": true,
@@ -162,15 +166,15 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "At 320px/400% the Preview label and `Remote changes disconnected` status wrap fully without ellipsis or horizontal clipping; the locale control, Privacy disclosure, focal-first order, and no-change privacy content remain readable."
+      "evidence": "At 320px/400% the Preview label and `Remote changes disconnected` status wrap fully without ellipsis or horizontal clipping; the locale control, Privacy disclosure, focal-first order, and no-change privacy content remain readable. The contextual inspector starts collapsed and the full-page height drops from 2411px to 1504px."
     },
     {
       "id": "G03",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G03-account-final-mobile-390.png",
       "manifestPurpose": "Review PT-BR mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and overview comparison with Phase 2.",
-      "dimensions": { "width": 390, "height": 2644 },
-      "bytes": 94653,
-      "sha256": "804506f1a4b208326d4b2c53ea9a6abbf662b7cadd58b7ff9c5c36f49eca41f3",
+      "dimensions": { "width": 390, "height": 1721 },
+      "bytes": 67747,
+      "sha256": "7b69b69f0fcc8be8c6bb6fa3c96db27e3cc69be0fc83f328d96e3ebb2ca228bd",
       "checks": {
         "topbar60": true,
         "flagAndLanguage": true,
@@ -183,15 +187,15 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "The mobile Overview keeps the focal account task before the responsibility summary, exposes one legible current-task disclosure, and relies on the single quiet shell boundary without duplicate preview or phase prose."
+      "evidence": "The mobile Overview keeps the focal account task before the readiness and activity summaries, exposes one legible current-task disclosure, and relies on a collapsed contextual inspector without duplicate preview or phase prose. Its full-page height drops from 2644px to 1721px while preserving all required content."
     },
     {
       "id": "G04",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G04-account-final-wide-1440.png",
       "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and profile comparison with Phase 2.",
-      "dimensions": { "width": 1440, "height": 973 },
-      "bytes": 102192,
-      "sha256": "be889cf8f6c8610f04c0e496cedc8eaa13f46e74375cbd1e5357fbf34c843d8f",
+      "dimensions": { "width": 1440, "height": 955 },
+      "bytes": 101987,
+      "sha256": "cefd43ea20e8baae7ec8172f26aba16f65510205b007ab52d2b7c269340b946b",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -205,15 +209,15 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "G04 remains materially stronger than the immutable rejected G04: exact shell geometry, one active Profile destination, a bounded 7/5 focal workspace, approximately 560px field geometry, adjacent facts, and no purple fixture chrome."
+      "evidence": "G04 remains materially stronger than the immutable rejected G04: exact shell geometry, one active Profile destination, a bounded 7/5 focal workspace, approximately 560px field geometry, adjacent facts, no purple fixture chrome, and no independent inspector scrollbar or footer band."
     },
     {
       "id": "G05",
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G05-account-final-mobile-390.png",
       "manifestPurpose": "Review PT-BR mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and profile reflow comparison with Phase 2.",
-      "dimensions": { "width": 390, "height": 2314 },
-      "bytes": 76572,
-      "sha256": "d310eb5507544bde0e00a1d83a8e4397559590b0c91e57dc4b34383f0639d0c9",
+      "dimensions": { "width": 390, "height": 1407 },
+      "bytes": 49952,
+      "sha256": "b8be2ff8e08c67584cb42038388e666890cab83ce049bbe7e47e4eca9124e916",
       "checks": {
         "topbar60": true,
         "flagAndLanguage": true,
@@ -226,7 +230,7 @@
       },
       "verdict": "pass",
       "owner": null,
-      "evidence": "At 390px the focal identity form precedes profile facts in DOM and visual order, the preview status wraps cleanly, and the locale control, current-task disclosure, and no-change boundary remain legible without clipped controls."
+      "evidence": "At 390px the focal identity form precedes profile facts in DOM and visual order, the preview status wraps cleanly, and the locale control and current-task disclosure remain legible without clipped controls. The contextual inspector starts collapsed and the full-page height drops from 2314px to 1407px."
     }
   ],
   "automatedVerification": {
@@ -235,7 +239,7 @@
     "passed": 9,
     "skipped": 19,
     "failed": 0,
-    "duration": "37.0s",
+    "duration": "47.1s",
     "updateMode": false
   },
   "verdict": "pass",

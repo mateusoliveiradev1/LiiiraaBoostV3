@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "plan": "03-66",
-  "closedAt": "2026-08-02T22:08:00Z",
-  "replayStartedAt": "2026-08-02T22:02:00Z",
-  "sourceRevision": "53af142c2a12005d512bfb17b67b820ec513a77f",
+  "closedAt": "2026-08-02T22:51:40Z",
+  "replayStartedAt": "2026-08-02T22:49:12Z",
+  "sourceRevision": "a9a32a7a5a497af52ec98bef86915e610437470d",
   "inspectionRecords": [
     {
       "plan": "03-63",
@@ -31,7 +31,7 @@
       "plan": "03-64",
       "surface": "account",
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-64-account.json",
-      "sha256": "70e5082eaaa2f925b23a7ff358cac8cc1988f769fc869d3c8a3c98c655acc463",
+      "sha256": "c3b3aee22a264a848157fa6bfb4bc9fa58bb6d01d8227406d843f3aa02bdf3d6",
       "verdict": "pass",
       "candidateCount": 8,
       "exactSubset": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"]
@@ -152,6 +152,19 @@
       }
     ],
     "result": "pass"
+  },
+  "accountCorrectionReplay": {
+    "sourceRevision": "a9a32a7a5a497af52ec98bef86915e610437470d",
+    "scope": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"],
+    "updateCommand": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=account-final-wide-1440 --project=account-final-wide-1280 --project=account-final-desktop-960 --project=account-final-mobile-390 --project=account-final-reflow-320 --grep W10|W11|W12|W13|W18|G03|G04|G05 --update-snapshots",
+    "replayCommand": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=account-final-wide-1440 --project=account-final-wide-1280 --project=account-final-desktop-960 --project=account-final-mobile-390 --project=account-final-reflow-320 --grep W10|W11|W12|W13|W18|G03|G04|G05",
+    "result": "pass",
+    "passed": 9,
+    "skipped": 19,
+    "failed": 0,
+    "screenshotsChangedDuringReplay": false,
+    "humanApproved": false,
+    "publicationApproved": false
   },
   "supplementalGates": {
     "routeAndContractSuites": {
