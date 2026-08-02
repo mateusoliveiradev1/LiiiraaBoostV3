@@ -11,6 +11,8 @@ import {
 } from './features/public-catalog';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
+const visibleText = (markup: string): string =>
+  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
 
 const CATALOG_ROUTES = [
   'public-product',
@@ -22,6 +24,39 @@ const CATALOG_ROUTES = [
 ] as const satisfies readonly WebRouteId[];
 
 describe('public catalog content', () => {
+  it.each([
+    ['pt-BR', 'public-product', 'Conheça o produto'],
+    ['pt-BR', 'public-evidence', 'Entenda as evidências'],
+    ['pt-BR', 'public-compatibility', 'Verificar compatibilidade'],
+    ['pt-BR', 'public-plans', 'Explorar o produto'],
+    ['en', 'public-product', 'Explore the product'],
+    ['en', 'public-evidence', 'Understand the evidence'],
+    ['en', 'public-compatibility', 'Check compatibility'],
+    ['en', 'public-plans', 'Explore the product'],
+  ] as const)(
+    'leads %s %s with a route-specific visitor outcome and next action',
+    (locale, routeId, action) => {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId={routeId} />,
+      );
+      const introduction = markup.slice(0, markup.indexOf('catalog-introduction__provenance'));
+
+      expect(markup).toContain(`data-route-purpose="${routeId}"`);
+      expect(markup).toContain('catalog-primary-action');
+      expect(visibleText(markup)).toContain(action);
+      expect(visibleText(introduction)).not.toMatch(
+        /\b(?:Fase|Phase|authority|autoridade|manifest|manifesto|validation state|estado de validação|implementation|implementação)\b/iu,
+      );
+    },
+  );
+
+  it('keeps internal implementation chronology out of bilingual visitor content', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const catalog = getPublicCatalog(locale);
+      expect(JSON.stringify(catalog)).not.toMatch(/\b(?:Fase|Phase)\s+[0-9]+\b/iu);
+    }
+  });
+
   it('resolves every catalog path through canonical manifest authority', () => {
     for (const locale of ['pt-BR', 'en'] as const) {
       for (const routeId of CATALOG_ROUTES) {
@@ -62,7 +97,7 @@ describe('public catalog content', () => {
       );
       const plan = record?.plans?.[0];
 
-      expect(plan?.checkoutBoundary).toMatch(/Phase 4|Fase 4/u);
+      expect(plan?.checkoutBoundary).toMatch(/compra|purchase/iu);
       expect(plan?.price.length).toBeGreaterThan(0);
       expect(plan?.billingPeriod.length).toBeGreaterThan(0);
       expect(plan?.renewal.length).toBeGreaterThan(0);

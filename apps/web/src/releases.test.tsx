@@ -15,6 +15,8 @@ import {
 } from './features/releases';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
+const visibleText = (markup: string): string =>
+  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
 
 const blockedReasons = [
   'artifact-unavailable',
@@ -29,6 +31,23 @@ const blockedReasons = [
 ] as const satisfies readonly DownloadBlockedReason[];
 
 describe('release content and routes', () => {
+  it('explains download availability in plain language before release mechanics', () => {
+    const pt = resolveReleasePage({ locale: 'pt-BR' });
+    const en = resolveReleasePage({ locale: 'en' });
+    if (pt === undefined || en === undefined) throw new Error('release index route missing');
+
+    const ptMarkup = renderToStaticMarkup(<ReleaseExperience resolution={pt} />);
+    const enMarkup = renderToStaticMarkup(<ReleaseExperience resolution={en} />);
+
+    expect(visibleText(ptMarkup)).toContain('O app para Windows ainda não está disponível');
+    expect(visibleText(enMarkup)).toContain('The Windows app is not available yet');
+    expect(ptMarkup).toContain('release-visitor-actions');
+    expect(enMarkup).toContain('release-visitor-actions');
+    expect(ptMarkup.indexOf('release-state-header')).toBeLessThan(
+      ptMarkup.indexOf('release-technical-context'),
+    );
+  });
+
   it('admits bilingual parity against the generated fail-closed release record', () => {
     const english = getReleaseContent('en');
     const portuguese = getReleaseContent('pt-BR');

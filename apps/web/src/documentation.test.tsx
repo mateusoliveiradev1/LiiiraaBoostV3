@@ -10,6 +10,8 @@ import {
 } from './features/documentation';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
+const visibleText = (markup: string): string =>
+  markup.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
 
 const currentArticleRequest = () => {
   const document = documentationCatalog.find(
@@ -87,6 +89,18 @@ describe('authored documentation rhythm', () => {
       /@media \(width < 640px\)[\s\S]*\.documentation-index-workspace[\s\S]*min-inline-size:\s*0/u,
     );
     expect(styles).not.toMatch(/\.documentation-article-flow\s*\{[\s\S]*overflow-x:\s*auto/u);
+  });
+
+  it('presents the documentation index as visitor tasks without raw route identifiers', () => {
+    const markup = renderToStaticMarkup(
+      <DocumentationExperience request={{ locale: 'pt-BR', version: 'current' }} />,
+    );
+    const text = visibleText(markup);
+
+    expect(text).toContain('Central de ajuda');
+    expect(text).toContain('Guias atuais');
+    expect(text).not.toMatch(/\b(?:current|stable|getting-started|preparing|measuring|optimizing|restoring)\b/u);
+    expect(markup).toContain('documentation-task-card');
   });
 
   it('keeps historical guidance explicit and canonical instead of redirecting it away', () => {

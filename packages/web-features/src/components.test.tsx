@@ -453,19 +453,19 @@ describe('locale and navigation shell primitives', () => {
   it.each([
     {
       accessibleName: 'Mudar idioma para English',
-      flag: '🇺🇸',
+      flag: 'us',
       href: '/en/account/profile',
       sourceLocale: 'pt-BR',
       targetLocale: 'en',
-      visibleLabel: '🇺🇸 English',
+      visibleLabel: 'English',
     },
     {
       accessibleName: 'Switch language to Português',
-      flag: '🇧🇷',
+      flag: 'br',
       href: '/pt-BR/admin/support/CASE-2048',
       sourceLocale: 'en',
       targetLocale: 'pt-BR',
-      visibleLabel: '🇧🇷 Português',
+      visibleLabel: 'Português',
     },
   ] as const)(
     'renders the $targetLocale locale as a native flag-plus-language link',
@@ -474,7 +474,8 @@ describe('locale and navigation shell primitives', () => {
       const props = elementProps(switcher);
       const children = Children.toArray(props['children'] as ReactNode);
       const flagElement = children.find(
-        (child): child is ReactElement => isValidElement(child) && visibleText(child) === flag,
+        (child): child is ReactElement =>
+          isValidElement(child) && elementProps(child)['data-locale-flag'] === flag,
       );
 
       expect(switcher.type).toBe('a');
@@ -485,6 +486,7 @@ describe('locale and navigation shell primitives', () => {
       expect(visibleText(switcher)).toBe(visibleLabel);
       expect(flagElement).toBeDefined();
       expect(elementProps(flagElement as ReactElement)['aria-hidden']).toBe('true');
+      expect((flagElement as ReactElement).type).toBe('svg');
     },
   );
 
