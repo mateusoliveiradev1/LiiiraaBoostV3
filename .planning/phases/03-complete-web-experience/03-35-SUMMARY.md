@@ -15,6 +15,7 @@ provides:
   - Browser-observed W17 proof for all 24 canonical surface/status/locale outcomes
   - Closed deterministic route-reachability contract with atomic surface-slice writes
   - Source-bound privacy-safe evidence for response, semantic state, localization, recovery, redaction, and authority
+  - Post-03-66 owner correction with current public, account, and admin Playwright source fingerprints
 affects: [03-36, WEB-01, WEB-08, phase-03-verification]
 
 tech-stack:
@@ -38,6 +39,7 @@ key-decisions:
   - 'Canonical webRoutes and WEB_LOCALES are the only authority for the 24 expected W17 observation identities.'
   - 'Reachability evidence stores only bounded outcomes and content/source SHA-256 values; raw browser text and diagnostics never cross the durable evidence boundary.'
   - 'A complete surface slice replaces only that surface, and status becomes passed only when all three current-source-bound slices form the exact closed set.'
+  - 'When owning Playwright specs change without changing validated route outcomes, refresh the proof only through the canonical Plan 03-35 writer; never hand-edit generated evidence.'
 
 patterns-established:
   - 'Browser reachability: assert response, unchanged URL, semantic code, exact localized H1, redaction, live recovery, and disconnected authority before hashing content.'
@@ -117,6 +119,15 @@ None - plan executed exactly as written.
 - `rtk pnpm --filter @liiiraa/web-evidence check` - PASS, strict NodeNext TypeScript.
 - Prettier, `git diff --check`, current source-hash comparison, exact 24-key closed-set comparison, and bounded observation-field scan - PASS.
 
+## Post-03-66 Owner Correction (2026-08-01)
+
+- Reproduced the two routed Plan 03-66 proof-graph failures before regeneration: `completeInput()` returned `ok: false`, and the checked-in canonical-line-endings graph returned `ok: false`.
+- Regenerated `quality/evidence/phase-03/web/route-reachability.json` exclusively through `writeRouteReachabilityEvidence`, replacing the complete public, account, and admin slices in canonical order.
+- Preserved the canonical route fingerprint and all 24 validated observations byte-for-byte at the field level; only the three stale owning Playwright spec fingerprints changed to their current authoritative SHA-256 values.
+- Confirmed a second three-surface writer pass was byte-identical (`3f65be58328468eacfe3ca2f2fce5872926e50e8880ea760a22621b1e5d35e79`) and independently validated with zero diagnostics.
+- Focused Phase 3 acceptance returned GREEN (2/2), route-reachability writer/hash/idempotency coverage returned GREEN (21/21), combined route-manifest/reachability coverage returned GREEN (30/30), canonical web-route coverage returned GREEN (18/18), strict TypeScript passed, and the generated JSON passed Prettier.
+- No screenshot, product source, route observation, approval state, publication state, or Tauri generated artifact was changed.
+
 ## Known Stubs
 
 None. Empty arrays in the changed test/tooling sources are runtime collectors initialized before observations, not unwired UI data or placeholder outcomes.
@@ -141,6 +152,7 @@ None - no external service configuration required.
 - RED `3105b8a`, GREEN `ec3567d`, public/account `627cc90`, and admin `8573f2b` resolve in repository history.
 - The evidence contains exactly 24 unique current-source-bound observations and validates as `passed` without unbounded fields.
 - Focused contract, TypeScript, formatting, three optimized builds, exact three-origin Playwright matrix, and diff checks passed against the committed implementation.
+- The post-03-66 canonical writer replay is byte-idempotent and both previously failing Phase 3 proof-graph acceptance tests pass.
 
 ---
 
