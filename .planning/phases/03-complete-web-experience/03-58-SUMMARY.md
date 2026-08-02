@@ -14,6 +14,7 @@ provides:
   - unchanged fail-closed no-change workflows with narrow safe-draft retention
   - task-first Overview and human Privacy/degraded copy with canonical route-compatible scenario admission
   - bilingual W10 sign-in availability and no-action copy without milestone ownership prose
+  - server-owned account shell consuming ProductLockup through the public design-system boundary
 affects: [03-61, account-visual-evidence, account-uat]
 
 tech-stack:
@@ -26,8 +27,11 @@ tech-stack:
     - consequence-specific preview copy stated as user outcomes rather than implementation chronology
 
 key-files:
-  created: []
+  created:
+    - apps/account/src/account-product-lockup.tsx
   modified:
+    - apps/account/src/app/[locale]/layout.tsx
+    - apps/account/src/account-shell.test.ts
     - apps/account/src/features/account-preview.tsx
     - apps/account/src/features/account-preview.test.tsx
     - apps/account/src/app/account-shell.css
@@ -41,30 +45,32 @@ key-decisions:
   - 'Keep the shell as the sole persistent preview-truth owner while ordinary Overview summaries stay task-first and sensitive Privacy/degraded states explain consequences directly.'
   - 'Admit explicit account scenarios through the canonical registry and route compatibility before rendering; do not expose URL, environment, or browser-controlled scenario selectors.'
   - 'Describe unavailable sign-in verification through direct availability, remote-verification, authority, and account-action outcomes in both locales; never expose milestone ownership in the W10 composition.'
+  - 'Keep the account locale layout server-owned and isolate the canonical design-system barrel behind one app-owned client ProductLockup bridge.'
 
 patterns-established:
   - 'Account workspace regions identify focal and contextual responsibility through data-workspace-region without creating a parallel card system.'
   - 'Degraded state labels are localized human language rendered through text-plus-pattern StatusSignal semantics.'
   - 'Canonical W12 projection remains independently renderable through a validated typed prop while ordinary account routes default safely.'
+  - 'Server-owned Next.js layouts consume client-heavy public barrels through narrow app-owned bridges instead of private package paths.'
 
 requirements-completed: [WEB-08]
 
-duration: 37min
-completed: 2026-08-01
+duration: 40min
+completed: 2026-08-02
 status: complete
 ---
 
 # Phase 03 Plan 58: Dense Account Workspaces Summary
 
-**Premium task-first account workspaces with localized human consequence copy, canonical fail-closed scenario admission, and complete responsive degraded-state recovery**
+**Premium task-first account workspaces with localized fail-closed journeys and a server-safe public ProductLockup boundary**
 
 ## Performance
 
-- **Duration:** 37 min (17 min initial execution + 15 min first rejection correction + 5 min W10 copy correction)
+- **Duration:** 40 min (37 min workspace/copy execution + 3 min architecture correction)
 - **Started:** 2026-08-01T17:45:00Z
-- **Completed:** 2026-08-02T00:54:43Z
+- **Completed:** 2026-08-02T03:10:42Z
 - **Tasks:** 2
-- **Files modified:** 5
+- **Files modified:** 8
 
 ## Accomplishments
 
@@ -77,6 +83,7 @@ status: complete
 - Rewrote Privacy and degraded-state guidance in both locales around availability, purpose, retention, sharing, cancellation, no-change outcome, stale data, and recovery.
 - Added canonical registry and route-compatibility admission before scenario rendering; W12 remains independently renderable without a URL, environment, or browser-controlled selector.
 - Closed the remaining Plan 03-64 W10 rejection with direct bilingual identity-verification availability and no-action copy, removing Phase 4 ownership and implementation inventory from the visible sign-in boundary.
+- Closed the Plan 03-66 account architecture blocker by replacing the private design-system source import with an account-owned client bridge to the public `@liiiraa/design-system` export while retaining server layout ownership.
 
 ## Task Commits
 
@@ -90,6 +97,7 @@ Each TDD gate was committed atomically:
 6. **Rejection GREEN: task-first copy and fail-closed scenario admission** - `68ce7e7` (fix)
 7. **Visual correction: remove remaining ordinary synthetic summaries** - `13d5b70` (fix)
 8. **W10 correction: replace sign-in milestone ownership prose** - `47eca40` (fix)
+9. **03-66 architecture correction: public ProductLockup boundary** - `ead3a7a` (fix)
 
 ## Files Created/Modified
 
@@ -98,6 +106,9 @@ Each TDD gate was committed atomically:
 - `apps/account/src/app/account-shell.css` - Provides exact 7/5–8/4 workspace geometry, one E2 focal material, 560px field bounds, structural mobile reflow, and forced-color treatment.
 - `apps/account/src/content/account.en.json` - Supplies concise English Overview, Privacy, degraded recovery, and sign-in availability outcomes without phase-shaped implementation prose.
 - `apps/account/src/content/account.pt-BR.json` - Preserves equivalent PT-BR task, consequence, retention, cancellation, stale, recovery, and sign-in availability guidance.
+- `apps/account/src/app/[locale]/layout.tsx` - Keeps canonical account shell composition server-owned while importing the app-local ProductLockup bridge.
+- `apps/account/src/account-product-lockup.tsx` - Narrow client bridge to the canonical public `@liiiraa/design-system` export.
+- `apps/account/src/account-shell.test.ts` - Rejects private design-system traversal and verifies the exact public bridge contract.
 
 ## Decisions Made
 
@@ -108,6 +119,7 @@ Each TDD gate was committed atomically:
 - Ordinary Overview relies on the shell's single persistent preview boundary. Route content explains tasks, while Privacy and degraded states retain only consequence-specific no-change guidance.
 - `resolveAccountScenarioId` resolves every explicit scenario through the canonical registry and rejects non-account or route-mismatched scenarios before rendering; the canonical page accepts no user-controlled scenario input.
 - The sign-in boundary states that identity verification is unavailable, performs no remote verification, and has no authority to take account actions; implementation phase ownership is not user-facing product copy.
+- The account layout remains a Server Component; only the narrow app-owned ProductLockup bridge is client-marked so Next.js does not traverse unrelated client-only design-system barrel exports from the server boundary.
 
 ## Deviations from Plan
 
@@ -131,10 +143,19 @@ Each TDD gate was committed atomically:
 - **Verification:** The focused test failed on the old Phase 4 sentence before the copy change, then the 23-test preview suite, complete 50-test account suite, TypeScript check, production build, formatting, and `git diff --check` passed.
 - **Committed in:** `47eca40`
 
+**3. [Rule 3 - Blocking Issue] Replaced the private account ProductLockup import with the public package boundary**
+
+- **Found during:** Plan 03-66 aggregate architecture gate
+- **Issue:** The account server layout imported `packages/design-system/src/product-lockup.tsx` through a private relative source path, violating the monorepo public-module boundary.
+- **Fix:** Added a narrow account-owned `'use client'` bridge that renders the unchanged public `@liiiraa/design-system` ProductLockup and changed the server layout to import that local bridge. The direct workspace dependency and lockfile link already existed, so neither manifest required mutation.
+- **Files modified:** `apps/account/src/app/[locale]/layout.tsx`, `apps/account/src/account-product-lockup.tsx`, `apps/account/src/account-shell.test.ts`
+- **Verification:** Focused shell 18/18, exact ProductLockup render 1/1, complete account 50/50, strict TypeScript, production build, Prettier, and diff checks passed; the architecture gate narrowed from two violations to the single independently owned admin import.
+- **Committed in:** `ead3a7a`
+
 ---
 
-**Total deviations:** 2 auto-fixed bugs.
-**Impact on plan:** Both corrections were necessary to satisfy the rejected single-boundary content contract and did not change shell, capture, manifest, or workflow authority.
+**Total deviations:** 3 auto-fixed issues (2 Rule 1 bugs, 1 Rule 3 blocker).
+**Impact on plan:** The corrections satisfy the rejected content and architecture contracts without changing capture evidence, workflow authority, package versions, or runtime behavior.
 
 ## Issues Encountered
 
@@ -165,6 +186,16 @@ None. The empty safe-draft default is an intentional fail-closed workflow bounda
 - Temporary original-resolution inspection passed for W11 wide, G03 mobile, W13 wide, and W12 wide/mobile without modifying evidence snapshots, visual manifests, or capture mapping.
 - Targeted W13 browser workflow passed; the sole W11 stale shell-label assertion is deferred to Plan 03-57 ownership.
 
+### 03-66 Architecture Correction
+
+- `rtk pnpm --filter @liiiraa/account exec vitest run src/account-shell.test.ts` - 18/18 shell tests passed.
+- `rtk pnpm --filter @liiiraa/design-system exec vitest run src/design-system.test.tsx -t ProductLockup` - exact ProductLockup render contract passed.
+- `rtk pnpm --filter @liiiraa/account exec vitest run` - complete 50/50 account tests passed.
+- `rtk pnpm --filter @liiiraa/account run check` - strict TypeScript passed.
+- `rtk pnpm --filter @liiiraa/account run build` - optimized Next.js production build passed with the locale layout remaining server-owned.
+- `rtk pnpm test:architecture` - account violation closed; aggregate output narrowed exactly from two private ProductLockup imports to the one admin-owned import.
+- Prettier and `git diff --check` passed for the bounded three-file source/test delta; no screenshots, evidence manifests, dependencies, or lockfile entries changed.
+
 ## Threat Review
 
 - No endpoint, authentication path, schema, storage channel, upload path, network call, cookie/session mutation, dependency, or file-access surface was introduced.
@@ -180,13 +211,14 @@ None - no external service configuration or package installation required.
 ## Next Phase Readiness
 
 - W10 source ownership is corrected without changing screenshots; Plan 03-61 can now rerun its full verification contract, including the unfiltered motion suite.
+- The account portion of the Plan 03-66 architecture blocker is closed; the remaining private ProductLockup import belongs exclusively to the admin owner.
 - After Plan 03-61 passes, Plan 03-62 can perform a fresh bounded capture and Plan 03-64 can rerun original-resolution account inspection before aggregate Plan 03-66.
 - No Plan 03-58 blockers, known stubs, remote authority, or sensitive-data claims remain.
 
 ## Self-Check: PASSED
 
-- All five plan-owned implementation/test/content files and this summary exist on disk.
-- Initial and correction commits `c3cacef`, `a5138a4`, `96a21b7`, `e5c0f8c`, `2bd13b4`, `68ce7e7`, `13d5b70`, and `47eca40` resolve in Git history.
+- All eight plan-owned implementation/test/content files and this summary exist on disk.
+- Initial and correction commits `c3cacef`, `a5138a4`, `96a21b7`, `e5c0f8c`, `2bd13b4`, `68ce7e7`, `13d5b70`, `47eca40`, and `ead3a7a` resolve in Git history.
 - The focused 23-test and complete 50-test account suites pass after W10 rejection closure.
 
 ---
