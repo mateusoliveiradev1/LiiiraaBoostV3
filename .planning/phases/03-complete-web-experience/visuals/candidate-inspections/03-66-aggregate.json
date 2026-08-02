@@ -103,7 +103,144 @@
     "skipped": 10,
     "failed": 0
   },
-  "verdict": "pass",
+  "finalReplay": {
+    "updateMode": false,
+    "screenshotsChanged": false,
+    "orderedCommands": [
+      {
+        "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts",
+        "result": "pass",
+        "passed": 5,
+        "skipped": 40,
+        "failed": 0
+      },
+      {
+        "command": "rtk pnpm --filter @liiiraa/web-features exec vitest run src/components.test.tsx -t \"qualitative-review metadata|visual contract\"",
+        "result": "pass",
+        "passed": 6,
+        "skipped": 10,
+        "failed": 0
+      },
+      {
+        "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts",
+        "result": "pass",
+        "passed": 43,
+        "skipped": 153,
+        "failed": 0
+      },
+      {
+        "command": "rtk pnpm --filter @liiiraa/web build",
+        "result": "pass"
+      },
+      {
+        "command": "rtk pnpm --filter @liiiraa/account build",
+        "result": "pass"
+      },
+      {
+        "command": "rtk pnpm --filter @liiiraa/admin build",
+        "result": "pass"
+      },
+      {
+        "command": "rtk pnpm test",
+        "result": "fail",
+        "failedPackage": "@liiiraa/web-evidence",
+        "passed": 139,
+        "skipped": 1,
+        "failed": 3
+      }
+    ],
+    "result": "blocked"
+  },
+  "supplementalGates": {
+    "routeAndContractSuites": {
+      "webCore": { "result": "pass", "passed": 109, "failed": 0 },
+      "routeReachability": { "result": "pass", "passed": 21, "failed": 0 },
+      "crossLanguageContracts": {
+        "result": "pass",
+        "typescriptPassed": 37,
+        "rustPassed": 10,
+        "generationDrift": "pass",
+        "compatibility": "pass"
+      }
+    },
+    "surfaceUnitSuites": {
+      "public": { "result": "pass", "passed": 81, "failed": 0 },
+      "account": { "result": "pass", "passed": 50, "failed": 0 },
+      "admin": { "result": "pass", "passed": 58, "failed": 0 },
+      "webFeatures": { "result": "pass", "passed": 36, "failed": 0 }
+    },
+    "strictTypeScript": {
+      "result": "pass",
+      "packages": [
+        "@liiiraa/web-core",
+        "@liiiraa/web-features",
+        "@liiiraa/web-evidence",
+        "@liiiraa/web",
+        "@liiiraa/account",
+        "@liiiraa/admin"
+      ]
+    },
+    "cspUnsafeEvalBoundary": {
+      "result": "pass",
+      "publicPassed": 4,
+      "accountPassed": 7,
+      "adminPassed": 16,
+      "contractValidatorPassed": 1,
+      "browserAllOriginsPassed": true
+    },
+    "candidateOwnerMatrix": {
+      "command": "rtk pnpm --filter @liiiraa/web-evidence exec vitest run src/candidate-capture-selection.test.ts",
+      "result": "pass",
+      "passed": 1,
+      "exactOwners": 25,
+      "uniqueIdentities": 25
+    },
+    "sourceManifestIntegrity": {
+      "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --project=public-final-wide-1440 --grep \"visual manifest\"",
+      "result": "pass",
+      "passed": 2,
+      "candidateBytesHashesDimensions": "25/25",
+      "rejectedArchiveHashes": "3/3"
+    },
+    "impeccableDesignContracts": {
+      "result": "pass",
+      "designTokensPassed": 11,
+      "designSystemPassed": 19,
+      "visualContractPassed": 6
+    },
+    "formatAndDiff": {
+      "planOwnedFormatting": "pass",
+      "gitDiffCheck": "pass",
+      "trackedDeltaAfterReplay": []
+    },
+    "architecture": {
+      "command": "rtk pnpm test:architecture",
+      "result": "fail",
+      "workspaceDeepImportViolations": 3,
+      "cargoViolations": 0
+    }
+  },
+  "blockers": [
+    {
+      "owner": "@liiiraa/web-evidence",
+      "gate": "workspace regression",
+      "details": [
+        "playwright-config.test.ts expects a project-filtered security-artifacts command to start public, account, and admin, but current selection starts public only",
+        "verify-phase.test.ts rejects the exact closed Phase 3 evidence graph",
+        "verify-phase.test.ts rejects the checked-in proof graph across canonical line endings"
+      ],
+      "priorRecord": ".planning/phases/03-complete-web-experience/03-62-SUMMARY.md#deferred-issues"
+    },
+    {
+      "owner": "architecture policy consumers",
+      "gate": "workspace architecture",
+      "details": [
+        "Three existing imports target packages/design-system/src/product-lockup.tsx through a private path"
+      ],
+      "priorRecord": ".planning/phases/03-complete-web-experience/03-62-SUMMARY.md#deferred-issues"
+    }
+  ],
+  "verdict": "blocked",
   "humanApproved": false,
   "publicationApproved": false
 }
