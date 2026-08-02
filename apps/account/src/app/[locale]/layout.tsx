@@ -15,13 +15,13 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
 import {
   AccountNavigation,
   type AccountNavigationGroup,
   type AccountNavigationItem,
 } from '../../account-navigation';
 import { createAccountFailureModel } from '../../account-errors';
+import { ProductLockup } from '../../account-product-lockup';
 import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
 

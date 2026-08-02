@@ -37,12 +37,21 @@ describe('account shell', () => {
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
     );
+    const productLockupSource = readFileSync(
+      new URL('./account-product-lockup.tsx', import.meta.url),
+      'utf8',
+    );
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
     );
 
     expect(layoutSource).toContain('<ProductLockup />');
+    expect(layoutSource).toContain("from '../../account-product-lockup'");
+    expect(layoutSource).not.toContain('packages/design-system/src');
+    expect(productLockupSource).toContain("'use client'");
+    expect(productLockupSource).toContain("from '@liiiraa/design-system'");
+    expect(productLockupSource).toContain('<DesignSystemProductLockup />');
     expect(layoutSource).toContain("{locale === 'pt-BR' ? 'Conta' : 'Account'}");
     expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
     expect(layoutSource).toContain("accountState: 'No session connected'");
