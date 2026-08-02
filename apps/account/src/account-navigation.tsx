@@ -19,6 +19,8 @@ export type AccountNavigationGroup = Readonly<{
 
 type AccountNavigationProps = Readonly<{
   alternateLocale: WebLocale;
+  authBrand: ReactNode;
+  authIntro: ReactNode;
   brand: ReactNode;
   children: ReactNode;
   currentTaskLabel: string;
@@ -87,6 +89,8 @@ function NavigationGroups({
 
 export function AccountNavigation({
   alternateLocale,
+  authBrand,
+  authIntro,
   brand,
   children,
   currentTaskLabel,
@@ -137,6 +141,7 @@ export function AccountNavigation({
   );
   const visibleGroups =
     currentEntryItems.length === 1 ? [{ items: currentEntryItems }, ...groups] : groups;
+  const isAuthRoute = currentEntryItems.length === 1;
   const localizedAlternateRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'account-origin',
@@ -145,6 +150,30 @@ export function AccountNavigation({
   const localeHref = localizedAlternateRoute.ok
     ? localizedAlternateRoute.value
     : fallbackLocaleHref;
+
+  if (isAuthRoute) {
+    return (
+      <div className="account-auth-shell">
+        <header className="account-auth-shell__header">
+          <div className="account-auth-shell__brand">{authBrand}</div>
+          <div className="account-auth-shell__tools">
+            <span className="account-auth-shell__public">{publicLink}</span>
+            <LocaleSwitcher
+              href={localeHref}
+              sourceLocale={locale}
+              targetLocale={alternateLocale}
+            />
+          </div>
+        </header>
+        <div className="account-auth-shell__stage">
+          <aside className="account-auth-shell__context">{authIntro}</aside>
+          <main className="account-auth-shell__main" id="account-main" tabIndex={-1}>
+            <div className="account-auth-shell__panel">{children}</div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="account-app-shell">

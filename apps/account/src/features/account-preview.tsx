@@ -2,6 +2,7 @@
 
 import {
   LbButton,
+  LbCheckbox,
   LbSkeletonRegion,
   LbTextArea,
   LbTextField,
@@ -53,6 +54,29 @@ type AccountContent = Readonly<{
     passkeyAction: string;
     security: string;
     invalidEmail: string;
+  }>;
+  signUp: Readonly<{
+    title: string;
+    summary: string;
+    nameLabel: string;
+    nameHint: string;
+    emailLabel: string;
+    emailHint: string;
+    passwordLabel: string;
+    passwordHint: string;
+    confirmLabel: string;
+    consentLabel: string;
+    action: string;
+    entryPrompt: string;
+    entryAction: string;
+    signInPrompt: string;
+    signInAction: string;
+    security: string;
+    invalidName: string;
+    invalidEmail: string;
+    invalidPassword: string;
+    invalidConfirmation: string;
+    invalidConsent: string;
   }>;
   overview: Readonly<{
     title: string;
@@ -176,6 +200,7 @@ const admitAccountContent = (candidate: unknown, locale: WebLocale): AccountCont
     !nonEmpty(candidate['fixtureLabel']) ||
     !isRecord(candidate['states']) ||
     !isRecord(candidate['signIn']) ||
+    !isRecord(candidate['signUp']) ||
     !isRecord(candidate['overview']) ||
     !isRecord(candidate['profile']) ||
     !isRecord(candidate['security']) ||
@@ -209,6 +234,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
 export const validatePreviewEmail = (value: string): boolean =>
   value.length <= 254 && EMAIL_PATTERN.test(value);
+
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,128}$/u;
+
+export const validatePreviewPassword = (value: string): boolean => PASSWORD_PATTERN.test(value);
 
 const actionInput = ({
   consent,
@@ -354,7 +383,6 @@ export const SignInPreview = ({
   return (
     <article className="lb-web-sign-in" data-account-state="sign-in-preview">
       <FixtureHeader summary={content.signIn.summary} title={content.signIn.title} />
-      <PreviewBoundary description={content.signIn.security} />
       <form noValidate onSubmit={startEmail}>
         {error !== null ? (
           <div aria-labelledby="sign-in-error-title" role="alert" tabIndex={-1}>
@@ -370,6 +398,7 @@ export const SignInPreview = ({
             errorMessage={error ?? undefined}
             isInvalid={error !== null}
             isRequired
+            inputType="email"
             label={content.signIn.emailLabel}
             maxLength={254}
             onChange={setEmail}
@@ -378,8 +407,11 @@ export const SignInPreview = ({
         </div>
         <LbButton type="submit">{content.signIn.emailAction}</LbButton>
       </form>
+      <div className="account-auth-divider" role="separator">
+        <span>{content.locale === 'pt-BR' ? 'ou escolha outra opção' : 'or choose another option'}</span>
+      </div>
       <div
-        aria-label={content.locale === 'pt-BR' ? 'Outras opções futuras' : 'Other future choices'}
+        aria-label={content.locale === 'pt-BR' ? 'Outras opções de acesso' : 'Other access options'}
         role="group"
       >
         <LbButton
@@ -399,6 +431,152 @@ export const SignInPreview = ({
           {content.signIn.passkeyAction}
         </LbButton>
       </div>
+      <p className="account-auth-switch">
+        <span>{content.signUp.entryPrompt}</span>{' '}
+        <a href={hrefFor('account-sign-up', content.locale)}>{content.signUp.entryAction}</a>
+      </p>
+      <p className="account-auth-security" role="note">
+        <ProductIcon name="lock" size={16} />
+        <span>{content.signIn.security}</span>
+      </p>
+    </article>
+  );
+};
+
+type SignUpField = 'confirmation' | 'consent' | 'email' | 'name' | 'password';
+
+export const SignUpPreview = ({
+  content,
+  scenarioId,
+}: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<SignUpField, string>>>({});
+  const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
+
+  if (workflow !== null) {
+    return (
+      <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+    );
+  }
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextErrors: Partial<Record<SignUpField, string>> = {};
+    if (displayName.trim().length < 2) nextErrors.name = content.signUp.invalidName;
+    if (!validatePreviewEmail(email)) nextErrors.email = content.signUp.invalidEmail;
+    if (!validatePreviewPassword(password)) nextErrors.password = content.signUp.invalidPassword;
+    if (password !== confirmation) nextErrors.confirmation = content.signUp.invalidConfirmation;
+    if (!consent) nextErrors.consent = content.signUp.invalidConsent;
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setWorkflow(
+      actionInput({
+        family: 'auth',
+        fields: { displayName: displayName.trim(), email },
+        label: content.signUp.action,
+        purpose: content.signUp.security,
+        review: [
+          {
+            field: 'displayName',
+            label: content.signUp.nameLabel,
+            before: 'Not provided',
+            after: displayName.trim(),
+          },
+          {
+            field: 'email',
+            label: content.signUp.emailLabel,
+            before: 'Not provided',
+            after: email,
+          },
+        ],
+      }),
+    );
+  };
+
+  const errorMessages = Object.values(errors);
+  return (
+    <article className="lb-web-sign-up" data-account-state="sign-up-preview">
+      <FixtureHeader summary={content.signUp.summary} title={content.signUp.title} />
+      <form noValidate onSubmit={submit}>
+        {errorMessages.length > 0 ? (
+          <div className="account-auth-errors" role="alert" tabIndex={-1}>
+            <strong>
+              {content.locale === 'pt-BR'
+                ? 'Revise os dados para continuar'
+                : 'Review your details to continue'}
+            </strong>
+            <ul>
+              {errorMessages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <LbTextField
+          description={content.signUp.nameHint}
+          errorMessage={errors.name}
+          isInvalid={errors.name !== undefined}
+          isRequired
+          label={content.signUp.nameLabel}
+          maxLength={80}
+          onChange={setDisplayName}
+          value={displayName}
+        />
+        <LbTextField
+          description={content.signUp.emailHint}
+          errorMessage={errors.email}
+          inputType="email"
+          isInvalid={errors.email !== undefined}
+          isRequired
+          label={content.signUp.emailLabel}
+          maxLength={254}
+          onChange={setEmail}
+          value={email}
+        />
+        <div className="account-auth-passwords">
+          <LbTextField
+            description={content.signUp.passwordHint}
+            errorMessage={errors.password}
+            inputType="password"
+            isInvalid={errors.password !== undefined}
+            isRequired
+            label={content.signUp.passwordLabel}
+            maxLength={128}
+            onChange={setPassword}
+            value={password}
+          />
+          <LbTextField
+            errorMessage={errors.confirmation}
+            inputType="password"
+            isInvalid={errors.confirmation !== undefined}
+            isRequired
+            label={content.signUp.confirmLabel}
+            maxLength={128}
+            onChange={setConfirmation}
+            value={confirmation}
+          />
+        </div>
+        <div className="account-auth-consent">
+          <LbCheckbox isSelected={consent} onChange={setConsent} value="terms">
+            {content.signUp.consentLabel}
+          </LbCheckbox>
+          {errors.consent === undefined ? null : <p role="status">{errors.consent}</p>}
+        </div>
+        <LbButton type="submit">{content.signUp.action}</LbButton>
+      </form>
+      <p className="account-auth-switch">
+        <span>{content.signUp.signInPrompt}</span>{' '}
+        <a href={hrefFor('account-sign-in', content.locale)}>{content.signUp.signInAction}</a>
+      </p>
+      <p className="account-auth-security" role="note">
+        <ProductIcon name="lock" size={16} />
+        <span>{content.signUp.security}</span>
+      </p>
     </article>
   );
 };
@@ -1269,6 +1447,9 @@ export const AccountPreviewExperience = ({
   switch (routeId) {
     case 'account-sign-in':
       view = <SignInPreview content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-sign-up':
+      view = <SignUpPreview content={content} scenarioId={activeScenarioId} />;
       break;
     case 'account-overview':
       view = <OverviewPreview content={content} />;

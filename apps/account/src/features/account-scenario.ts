@@ -3,7 +3,7 @@ import { getWebScenario, type WebScenarioId } from '@liiiraa/web-preview';
 import type { AccountPreviewRoute } from '../account-preview-model';
 
 const defaultAccountScenarioId = (routeId: AccountPreviewRoute): WebScenarioId =>
-  routeId === 'account-sign-in'
+  routeId === 'account-sign-in' || routeId === 'account-sign-up'
     ? 'W10'
     : routeId === 'account-device' || routeId === 'account-privacy' || routeId === 'account-support'
       ? 'W13'

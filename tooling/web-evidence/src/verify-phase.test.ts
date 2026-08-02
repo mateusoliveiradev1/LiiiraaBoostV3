@@ -160,7 +160,7 @@ describe('Phase 3 final source coverage', () => {
         evidenceDimensions: 20,
         requirements: 4,
         routeOutcomes: 24,
-        routes: 53,
+        routes: 54,
         scenarios: 18,
         successCriteria: 4,
       });
@@ -189,7 +189,7 @@ describe('Phase 3 route reachability', () => {
     };
   };
 
-  it('rejects the complete 53-route declaration when browser reachability proof is absent', () => {
+  it('rejects the complete 54-route declaration when browser reachability proof is absent', () => {
     const input = cloneInput(completeInput());
     delete (input.artifacts as Partial<Phase3VerificationInput['artifacts']>).routeReachability;
 

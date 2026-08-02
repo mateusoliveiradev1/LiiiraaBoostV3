@@ -205,16 +205,24 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   const mutations = mutationRequests(page);
 
   await page.goto('/en/sign-in');
-  await expect(page.getByRole('heading', { level: 1, name: 'Sign-in preview' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Sign in to your account' })).toBeVisible();
+  await expect(page.locator('.account-auth-shell')).toBeVisible();
+  await expect(page.locator('.account-app-shell')).toHaveCount(0);
+  await expect(page.locator('.account-sidebar')).toHaveCount(0);
+  await expect(page.locator('.account-inspector')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Create a free account' })).toHaveAttribute(
+    'href',
+    '/en/sign-up',
+  );
   await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
   await page.getByRole('textbox', { name: 'Email address' }).fill('invalid-address');
-  await page.getByRole('button', { name: 'Review email sign-in' }).click();
+  await page.getByRole('button', { name: 'Continue with email' }).click();
   await expect(page.getByRole('alert', { name: 'Correct the email address' })).toContainText(
     'Enter a complete email address',
   );
 
   await page.getByRole('textbox', { name: 'Email address' }).fill('player@example.com');
-  await page.getByRole('button', { name: 'Review email sign-in' }).click();
+  await page.getByRole('button', { name: 'Continue with email' }).click();
   await advanceToConfirmation(page, 'en');
   await page.getByRole('button', { name: 'Review sign in' }).click();
 
@@ -225,6 +233,39 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   await expect(receipt).toHaveAttribute('data-remote-state-changed', 'false');
   expect(mutations).toEqual([]);
   await expectNoDeadControls(page);
+});
+
+test('@final @account sign-up is standalone, validates locally, and preserves locale', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'desktop-960');
+  const mutations = mutationRequests(page);
+
+  await page.goto('/pt-BR/sign-up');
+  await expect(page.getByRole('heading', { level: 1, name: 'Criar sua conta' })).toBeVisible();
+  await expect(page.locator('.account-auth-shell')).toBeVisible();
+  await expect(page.locator('.account-app-shell')).toHaveCount(0);
+  await expect(page.locator('.account-sidebar')).toHaveCount(0);
+  await expect(page.locator('.account-inspector')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Entrar', exact: true })).toHaveAttribute(
+    'href',
+    '/pt-BR/sign-in',
+  );
+
+  await page.getByRole('button', { name: 'Criar conta', exact: true }).click();
+  await expect(page.locator('.account-auth-errors')).toContainText(
+    'Revise os dados para continuar',
+  );
+
+  await page.getByRole('textbox', { name: 'Como devemos chamar você?' }).fill('Lira');
+  await page.getByRole('textbox', { name: 'Endereço de e-mail' }).fill('lira@example.com');
+  await page.getByLabel('Crie uma senha').fill('SenhaSegura123');
+  await page.getByLabel('Confirme sua senha').fill('SenhaSegura123');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Criar conta', exact: true }).click();
+
+  await expect(page.locator('body')).not.toContainText('SenhaSegura123');
+  expect(mutations).toEqual([]);
 });
 
 test('@final @account W11 exposes every responsibility with persistent preview provenance', async ({

@@ -6,6 +6,7 @@ import type { AccountFailureKind } from './account-errors';
 
 export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
   'account-sign-in',
+  'account-sign-up',
   'account-overview',
   'account-profile',
   'account-security',
@@ -34,9 +35,7 @@ export const isAccountPreviewRoute = (routeId: WebRouteId): routeId is AccountPr
 export const isAccountErrorRoute = (routeId: WebRouteId): routeId is AccountErrorRoute =>
   ACCOUNT_ERROR_ROUTE_IDS.includes(routeId as AccountErrorRoute);
 
-export const accountFailureKindForRoute = (
-  routeId: AccountErrorRoute,
-): AccountFailureKind => {
+export const accountFailureKindForRoute = (routeId: AccountErrorRoute): AccountFailureKind => {
   switch (routeId) {
     case 'account-error-403':
       return '403';
@@ -56,6 +55,8 @@ export const getAccountPreviewMetadata = (locale: WebLocale, routeId: AccountPre
   switch (routeId) {
     case 'account-sign-in':
       return { title: content.signIn.title, summary: content.signIn.summary };
+    case 'account-sign-up':
+      return { title: content.signUp.title, summary: content.signUp.summary };
     case 'account-overview':
       return { title: content.overview.title, summary: content.overview.summary };
     case 'account-profile':

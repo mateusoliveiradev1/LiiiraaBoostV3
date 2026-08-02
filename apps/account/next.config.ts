@@ -10,6 +10,7 @@ export const ACCOUNT_RUNTIME_BOUNDARY = Object.freeze({
 } as const);
 
 const nextConfig = {
+  devIndicators: false,
   output: "standalone",
   poweredByHeader: false,
   typedRoutes: true,

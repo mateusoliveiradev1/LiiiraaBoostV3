@@ -8,7 +8,12 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "pt-BR",
       "routeId": "public-home",
-      "requiredRouteIds": ["public-home", "public-evidence", "public-compatibility", "releases-download"],
+      "requiredRouteIds": [
+        "public-home",
+        "public-evidence",
+        "public-compatibility",
+        "releases-download"
+      ],
       "latencyMs": 120,
       "provenance": {
         "kind": "fixture",
@@ -22,7 +27,12 @@
       "consent": "not-applicable",
       "viewport": "1440x900",
       "terminalState": "distribution-gated",
-      "requiredProof": ["command-runway", "evidence-stage", "compatibility-cta", "screenshot-provenance"],
+      "requiredProof": [
+        "command-runway",
+        "evidence-stage",
+        "compatibility-cta",
+        "screenshot-provenance"
+      ],
       "deltaPaths": ["locale", "routeId", "terminalState"]
     },
     {
@@ -70,7 +80,12 @@
       "consent": "not-applicable",
       "viewport": "1280x800",
       "terminalState": "current-documentation",
-      "requiredProof": ["task-index", "version-control", "document-metadata", "contextual-deep-link"],
+      "requiredProof": [
+        "task-index",
+        "version-control",
+        "document-metadata",
+        "contextual-deep-link"
+      ],
       "deltaPaths": ["family", "routeId", "requiredRouteIds", "terminalState"]
     },
     {
@@ -224,7 +239,7 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "en",
       "routeId": "account-sign-in",
-      "requiredRouteIds": ["account-sign-in"],
+      "requiredRouteIds": ["account-sign-in", "account-sign-up"],
       "latencyMs": 240,
       "provenance": {
         "kind": "fixture",
@@ -238,7 +253,12 @@
       "consent": "not-applicable",
       "viewport": "960x900",
       "terminalState": "sign-in-preview",
-      "requiredProof": ["validation", "future-choices", "authority-boundary", "no-invented-session"],
+      "requiredProof": [
+        "validation",
+        "future-choices",
+        "authority-boundary",
+        "no-invented-session"
+      ],
       "deltaPaths": ["family", "locale", "routeId", "role", "viewport", "terminalState"]
     },
     {
@@ -248,7 +268,17 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "pt-BR",
       "routeId": "account-overview",
-      "requiredRouteIds": ["account-overview", "account-profile", "account-security", "account-subscription", "account-invoices", "account-device", "account-downloads", "account-privacy", "account-support"],
+      "requiredRouteIds": [
+        "account-overview",
+        "account-profile",
+        "account-security",
+        "account-subscription",
+        "account-invoices",
+        "account-device",
+        "account-downloads",
+        "account-privacy",
+        "account-support"
+      ],
       "latencyMs": 160,
       "provenance": {
         "kind": "fixture",
@@ -263,7 +293,15 @@
       "viewport": "1440x900",
       "terminalState": "account-ready-preview",
       "requiredProof": ["responsibility-routes", "persistent-provenance"],
-      "deltaPaths": ["locale", "routeId", "requiredRouteIds", "latencyMs", "consent", "viewport", "terminalState"]
+      "deltaPaths": [
+        "locale",
+        "routeId",
+        "requiredRouteIds",
+        "latencyMs",
+        "consent",
+        "viewport",
+        "terminalState"
+      ]
     },
     {
       "id": "W12",
@@ -287,7 +325,14 @@
       "viewport": "1280x800",
       "terminalState": "authority-unavailable",
       "requiredProof": ["preserved-safe-work", "unavailable-authority", "recovery-path"],
-      "deltaPaths": ["locale", "requiredRouteIds", "latencyMs", "consent", "viewport", "terminalState"]
+      "deltaPaths": [
+        "locale",
+        "requiredRouteIds",
+        "latencyMs",
+        "consent",
+        "viewport",
+        "terminalState"
+      ]
     },
     {
       "id": "W13",
@@ -335,7 +380,15 @@
       "viewport": "1440x900",
       "terminalState": "admin-support-review",
       "requiredProof": ["role-navigation", "case-review", "redacted-target", "audit-preview"],
-      "deltaPaths": ["family", "locale", "routeId", "requiredRouteIds", "latencyMs", "role", "terminalState"]
+      "deltaPaths": [
+        "family",
+        "locale",
+        "routeId",
+        "requiredRouteIds",
+        "latencyMs",
+        "role",
+        "terminalState"
+      ]
     },
     {
       "id": "W15",
@@ -358,7 +411,14 @@
       "consent": "preview-denied",
       "viewport": "1440x900",
       "terminalState": "diagnostic-consent-blocked",
-      "requiredProof": ["access-blocked", "purpose", "permitted-fields", "expiration", "actor", "audit-explanation"],
+      "requiredProof": [
+        "access-blocked",
+        "purpose",
+        "permitted-fields",
+        "expiration",
+        "actor",
+        "audit-explanation"
+      ],
       "deltaPaths": ["locale", "routeId", "requiredRouteIds", "role", "consent", "terminalState"]
     },
     {
@@ -392,7 +452,20 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "pt-BR",
       "routeId": "public-error-404",
-      "requiredRouteIds": ["public-error-404", "public-error-403", "public-error-410", "public-error-500", "account-error-404", "account-error-403", "account-error-410", "account-error-500", "admin-error-404", "admin-error-403", "admin-error-410", "admin-error-500"],
+      "requiredRouteIds": [
+        "public-error-404",
+        "public-error-403",
+        "public-error-410",
+        "public-error-500",
+        "account-error-404",
+        "account-error-403",
+        "account-error-410",
+        "account-error-500",
+        "admin-error-404",
+        "admin-error-403",
+        "admin-error-410",
+        "admin-error-500"
+      ],
       "latencyMs": 80,
       "provenance": {
         "kind": "fixture",
@@ -407,7 +480,14 @@
       "viewport": "960x900",
       "terminalState": "authored-errors",
       "requiredProof": ["distinct-error-states", "locale-preserved", "diagnostics-redacted"],
-      "deltaPaths": ["locale", "routeId", "requiredRouteIds", "latencyMs", "viewport", "terminalState"]
+      "deltaPaths": [
+        "locale",
+        "routeId",
+        "requiredRouteIds",
+        "latencyMs",
+        "viewport",
+        "terminalState"
+      ]
     },
     {
       "id": "W18",
@@ -416,7 +496,14 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "en",
       "routeId": "account-privacy",
-      "requiredRouteIds": ["public-home", "public-search", "docs-index", "releases-integrity", "account-privacy", "admin-audit"],
+      "requiredRouteIds": [
+        "public-home",
+        "public-search",
+        "docs-index",
+        "releases-integrity",
+        "account-privacy",
+        "admin-audit"
+      ],
       "latencyMs": 0,
       "provenance": {
         "kind": "fixture",
@@ -430,8 +517,27 @@
       "consent": "preview-granted",
       "viewport": "320x800",
       "terminalState": "accessible-no-change-receipt",
-      "requiredProof": ["forced-colors", "reduced-motion", "four-hundred-percent-zoom", "complete-navigation", "forms", "tables", "focus", "status", "receipt"],
-      "deltaPaths": ["family", "locale", "routeId", "requiredRouteIds", "latencyMs", "role", "viewport", "terminalState"]
+      "requiredProof": [
+        "forced-colors",
+        "reduced-motion",
+        "four-hundred-percent-zoom",
+        "complete-navigation",
+        "forms",
+        "tables",
+        "focus",
+        "status",
+        "receipt"
+      ],
+      "deltaPaths": [
+        "family",
+        "locale",
+        "routeId",
+        "requiredRouteIds",
+        "latencyMs",
+        "role",
+        "viewport",
+        "terminalState"
+      ]
     }
   ]
 }

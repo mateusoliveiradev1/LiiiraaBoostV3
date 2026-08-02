@@ -161,6 +161,7 @@ export interface LbTextFieldProps extends LbFieldCopy {
   readonly isDisabled?: boolean;
   readonly isInvalid?: boolean;
   readonly isRequired?: boolean;
+  readonly inputType?: 'email' | 'password' | 'text';
   readonly maxLength?: number;
   readonly name?: string;
   readonly onChange?: (value: string) => void;
@@ -178,13 +179,14 @@ const FieldCopy = ({ description, errorMessage }: Omit<LbFieldCopy, 'label'>) =>
 export const LbTextField = ({
   description,
   errorMessage,
+  inputType = 'text',
   label,
   maxLength,
   ...fieldProps
 }: LbTextFieldProps) => (
   <TextField className="lb-field" {...fieldProps}>
     <Label>{label}</Label>
-    <Input className="lb-input" data-lb-control maxLength={maxLength} />
+    <Input className="lb-input" data-lb-control maxLength={maxLength} type={inputType} />
     <FieldCopy description={description} errorMessage={errorMessage} />
   </TextField>
 );

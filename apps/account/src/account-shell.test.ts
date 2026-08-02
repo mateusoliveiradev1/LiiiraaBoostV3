@@ -130,13 +130,14 @@ describe('account shell', () => {
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
     );
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
     expect(layoutSource).toContain("signIn: 'Entrar'");
     expect(layoutSource).toContain("signIn: 'Sign in'");
     expect(layoutSource).toContain("signUp: 'Criar conta'");
     expect(layoutSource).toContain("signUp: 'Create account'");
-    expect(layoutSource).toContain("routeHref('account-sign-in', { locale })");
-    expect(layoutSource).toContain("routeHref('account-sign-up', { locale })");
+    expect(layoutSource).toContain("localizedAuthHref('account-sign-in', locale)");
+    expect(layoutSource).toContain("localizedAuthHref('account-sign-up', locale)");
     expect(layoutSource).toContain('entryItems={authEntryItems}');
     expect(navigationSource).toContain('entryItems: readonly AccountNavigationItem[]');
     expect(navigationSource).toContain('const allItems = [...entryItems, ...responsibilityItems]');
@@ -340,10 +341,9 @@ describe('account shell', () => {
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
     );
-    expect([
-      ...(layoutSource.match(/<main\b/gu) ?? []),
-      ...(navigationSource.match(/<main\b/gu) ?? []),
-    ]).toHaveLength(1);
+    expect(layoutSource.match(/<main\b/gu) ?? []).toHaveLength(0);
+    expect(navigationSource.match(/<main\b/gu) ?? []).toHaveLength(2);
+    expect(navigationSource).toContain('if (isAuthRoute)');
     expect(layoutSource).toContain('href="#account-main"');
     expect(layoutSource).toContain('account-preview-rail');
     expect(layoutSource).toContain('data-authority="disconnected"');
@@ -356,7 +356,7 @@ describe('account shell', () => {
     for (const routeId of routeIds) {
       expect(layoutSource).toContain(routeId);
     }
-    expect(styles).toMatch(/\.account-app-shell\s*\{[\s\S]*inline-size:\s*min\(100%, 1760px\)/u);
+    expect(styles).toMatch(/\.account-app-shell\s*\{[\s\S]*inline-size:\s*100%/u);
     expect(styles).toContain('overflow-x: clip');
     expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*account-nav__mobile/u);
     expect(styles).not.toContain('grid-auto-flow: column');

@@ -85,6 +85,11 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     accountIdentity: 'Conta demonstrativa',
     accountState: 'Nenhuma sessão conectada',
+    authBody:
+      'Gerencie sua assinatura, mantenha seus dispositivos protegidos e acesse o aplicativo para Windows.',
+    authEyebrow: 'Sua conta Liiiraa Boost',
+    authPoints: ['Assinatura e downloads', 'Dispositivos autorizados', 'Segurança e suporte'],
+    authTitle: 'Seu desempenho começa com uma conta confiável.',
     currentTask: 'Responsabilidade atual',
     deviceAction: 'Revisar dispositivo',
     deviceDetail: 'Windows 11 · não vinculado',
@@ -102,10 +107,11 @@ const COPY = Object.freeze({
     preview:
       'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
     previewLabel: 'Alterações remotas desconectadas',
-    publicLink: 'Ir para a superfície pública',
+    publicLink: 'Voltar ao site',
     securityAction: 'Revisar segurança',
     securityTitle: 'Segurança',
     signIn: 'Entrar',
+    signUp: 'Criar conta',
     skip: 'Ir para o conteúdo da conta',
     supportAction: 'Abrir suporte',
     supportTitle: 'Suporte',
@@ -114,6 +120,11 @@ const COPY = Object.freeze({
   en: Object.freeze({
     accountIdentity: 'Demonstration account',
     accountState: 'No session connected',
+    authBody:
+      'Manage your subscription, keep devices protected, and access the Windows application.',
+    authEyebrow: 'Your Liiiraa Boost account',
+    authPoints: ['Subscription and downloads', 'Authorized devices', 'Security and support'],
+    authTitle: 'Your performance starts with an account you can trust.',
     currentTask: 'Current responsibility',
     deviceAction: 'Review device',
     deviceDetail: 'Windows 11 · not linked',
@@ -130,10 +141,11 @@ const COPY = Object.freeze({
     planTitle: 'Premium preview',
     preview: 'You can review the flow with synthetic data; nothing changes outside this preview.',
     previewLabel: 'Remote changes disconnected',
-    publicLink: 'Go to the public surface',
+    publicLink: 'Back to website',
     securityAction: 'Review security',
     securityTitle: 'Security',
     signIn: 'Sign in',
+    signUp: 'Create account',
     skip: 'Skip to account content',
     supportAction: 'Open support',
     supportTitle: 'Support',
@@ -152,10 +164,13 @@ const localizedHref = (routeId: WebRouteId, locale: WebLocale): string => {
   return result.value;
 };
 
-const localizedSignInHref = (locale: WebLocale): string => {
-  const result = routeHref('account-sign-in', { locale });
+const localizedAuthHref = (
+  routeId: 'account-sign-in' | 'account-sign-up',
+  locale: WebLocale,
+): string => {
+  const result = routeHref(routeId, { locale });
   if (!result.ok) {
-    throw new Error('Canonical account sign-in route is unavailable.');
+    throw new Error(`Canonical account auth route is unavailable: ${routeId}`);
   }
   return result.value;
 };
@@ -220,11 +235,16 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
       label: NAVIGATION_LABELS[routeId][locale],
     })),
   }));
-  const signInEntryItems: readonly AccountNavigationItem[] = [
+  const authEntryItems: readonly AccountNavigationItem[] = [
     {
-      href: localizedSignInHref(locale),
+      href: localizedAuthHref('account-sign-in', locale),
       icon: 'profile',
       label: copy.signIn,
+    },
+    {
+      href: localizedAuthHref('account-sign-up', locale),
+      icon: 'sparkle',
+      label: copy.signUp,
     },
   ];
 
@@ -242,6 +262,23 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
 
         <AccountNavigation
           alternateLocale={alternateLocale}
+          authBrand={
+            <a className="account-brand" href={publicHomeHref(locale)}>
+              <ProductLockup />
+            </a>
+          }
+          authIntro={
+            <div className="account-auth-intro">
+              <span>{copy.authEyebrow}</span>
+              <strong>{copy.authTitle}</strong>
+              <p>{copy.authBody}</p>
+              <ul>
+                {copy.authPoints.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+          }
           brand={
             <a className="account-brand" href={localizedHref('account-overview', locale)}>
               <ProductLockup />
@@ -249,7 +286,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
             </a>
           }
           currentTaskLabel={copy.currentTask}
-          entryItems={signInEntryItems}
+          entryItems={authEntryItems}
           fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
           groups={navigationGroups}
           identity={

@@ -69,6 +69,7 @@ export const buildPublicHeaderContract = (runtimeMode: string | undefined) =>
 export const publicHeaderContract = buildPublicHeaderContract('production');
 
 const nextConfig = {
+  devIndicators: false,
   output: 'standalone',
   typedRoutes: true,
   async headers() {

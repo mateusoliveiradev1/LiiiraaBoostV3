@@ -44,6 +44,7 @@ export const PHASE_3_ROUTES = [
   'releases-download',
   'releases-install',
   'account-sign-in',
+  'account-sign-up',
   'account-overview',
   'account-profile',
   'account-security',

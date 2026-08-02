@@ -904,14 +904,276 @@ button:focus-visible,
 }
 
 /* Approved account direction: task workspace with persistent contextual inspector. */
+.account-auth-shell {
+  min-block-size: 100dvh;
+  inline-size: 100%;
+  background: var(--lb-surface-canvas);
+}
+
+.account-auth-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-4);
+  inline-size: min(100%, 1280px);
+  min-block-size: 72px;
+  margin-inline: auto;
+  padding-inline: var(--lb-screen-padding);
+}
+
+.account-auth-shell__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+  gap: clamp(var(--lb-space-7), 8vw, calc(var(--lb-space-7) * 2));
+  align-items: center;
+  inline-size: min(100%, 1180px);
+  min-block-size: calc(100dvh - 72px);
+  margin-inline: auto;
+  padding: var(--lb-space-3) var(--lb-screen-padding) var(--lb-space-4);
+}
+
+.account-auth-shell__context {
+  min-inline-size: 0;
+}
+
+.account-auth-shell__brand .account-brand {
+  margin: 0;
+}
+
+.account-auth-shell__tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--lb-space-3);
+}
+
+.account-auth-shell__public a,
+.account-auth-switch a {
+  color: var(--lb-cobalt-signal);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-auth-shell .lb-web-locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lb-space-2);
+  min-block-size: 44px;
+  padding-inline: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  background: transparent;
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-auth-intro {
+  display: grid;
+  gap: var(--lb-space-4);
+  max-inline-size: 560px;
+}
+
+.account-auth-intro > span {
+  color: var(--lb-cobalt-signal);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-auth-intro > strong {
+  max-inline-size: 16ch;
+  font-size: 2.75rem;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.account-auth-intro p {
+  max-inline-size: 58ch;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.account-auth-intro ul {
+  display: grid;
+  margin: var(--lb-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-auth-intro li {
+  padding-block: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+  color: var(--lb-text-secondary);
+}
+
+#account-main.account-auth-shell__main {
+  inline-size: 100%;
+  max-inline-size: none;
+  padding: 0;
+}
+
+.account-auth-shell__panel {
+  display: grid;
+  align-items: center;
+  inline-size: 100%;
+  margin-inline: auto;
+  padding: var(--lb-space-4);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-inset);
+}
+
+.account-auth-shell__panel > [data-account-preview='deterministic'] {
+  inline-size: 100%;
+}
+
+.account-auth-shell .lb-web-sign-in,
+.account-auth-shell .lb-web-sign-up {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-3);
+}
+
+.account-auth-shell .lb-web-route-header {
+  order: 1;
+  grid-column: 1;
+  padding-block-end: var(--lb-space-2);
+  border: 0;
+}
+
+.account-auth-shell .lb-web-route-header h1,
+.account-auth-shell .lb-web-route-header p {
+  margin: 0;
+}
+
+.account-auth-shell .lb-web-route-header h1 {
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.account-auth-shell .lb-web-route-header p {
+  color: var(--lb-text-secondary);
+}
+
+.account-auth-shell .lb-web-sign-in > form,
+.account-auth-shell .lb-web-sign-up > form {
+  order: 2;
+  grid-column: 1;
+  display: grid;
+  gap: var(--lb-space-3);
+  inline-size: 100%;
+  max-inline-size: none;
+  padding: var(--lb-space-2) 0 0;
+  border: 0;
+  background: transparent;
+}
+
+.account-auth-shell .lb-web-sign-up > form {
+  gap: var(--lb-space-2);
+}
+
+.account-auth-shell .lb-web-sign-up .lb-field {
+  gap: var(--lb-space-1);
+}
+
+.account-auth-shell .lb-web-sign-in > form > .lb-button:last-child,
+.account-auth-shell .lb-web-sign-up > form > .lb-button:last-child {
+  inline-size: 100%;
+}
+
+.account-auth-shell .lb-web-sign-in > [role='group'] {
+  order: 4;
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-auth-divider {
+  order: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--lb-space-3);
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+  text-align: center;
+}
+
+.account-auth-divider::before,
+.account-auth-divider::after {
+  content: '';
+  flex: 1;
+  block-size: 1px;
+  background: var(--lb-line-subtle);
+}
+
+.account-auth-switch {
+  order: 5;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  text-align: center;
+}
+
+.account-auth-security {
+  order: 6;
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: flex-start;
+  margin: 0;
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.account-auth-security svg {
+  flex: 0 0 auto;
+  margin-block-start: 0.15em;
+}
+
+.account-auth-passwords {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-3);
+}
+
+.account-auth-consent {
+  display: grid;
+  gap: var(--lb-space-1);
+}
+
+.account-auth-consent .lb-choice > span:first-child {
+  opacity: 0;
+}
+
+.account-auth-consent p,
+.account-auth-errors {
+  color: var(--lb-critical);
+}
+
+.account-auth-consent p {
+  margin: 0;
+  font-size: var(--lb-text-label-size);
+}
+
+.account-auth-errors {
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-critical);
+  border-radius: var(--lb-radius-default);
+  background: var(--lb-surface-inset);
+}
+
+.account-auth-errors ul {
+  margin-block: var(--lb-space-2) 0;
+  padding-inline-start: var(--lb-space-4);
+}
+
 .account-app-shell {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr) 320px;
   grid-template-rows: 64px minmax(calc(100dvh - 64px), auto);
   min-block-size: 100vh;
-  inline-size: min(100%, 1760px);
-  margin-inline: auto;
-  border-inline: 1px solid var(--lb-line-subtle);
+  inline-size: 100%;
   background: var(--lb-surface-canvas);
 }
 
@@ -1477,6 +1739,57 @@ button:focus-visible,
   inline-size: 100%;
 }
 
+@media (width < 900px) {
+  .account-auth-shell__stage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    align-items: start;
+    min-block-size: calc(100dvh - 72px);
+    padding-block-start: var(--lb-space-5);
+  }
+
+  .account-auth-shell__context {
+    display: none;
+  }
+
+  #account-main.account-auth-shell__main {
+    inline-size: min(100%, 520px);
+    margin-inline: auto;
+  }
+
+  .account-auth-shell__panel {
+    align-items: start;
+  }
+}
+
+@media (width < 560px) {
+  .account-auth-shell__public {
+    display: none;
+  }
+
+  .account-auth-shell__tools {
+    justify-content: flex-end;
+  }
+
+  .account-auth-shell__header {
+    min-block-size: 64px;
+    padding-inline: var(--lb-space-3);
+  }
+
+  .account-auth-shell__stage {
+    min-block-size: calc(100dvh - 64px);
+    padding: var(--lb-space-3);
+  }
+
+  .account-auth-shell__panel {
+    padding: var(--lb-space-4);
+  }
+
+  .account-auth-shell .lb-web-route-header h1 {
+    font-size: 1.75rem;
+  }
+}
+
 @media (width < 1180px) {
   .account-app-shell {
     grid-template-columns: minmax(0, 1fr);
@@ -1671,7 +1984,12 @@ button:focus-visible,
   .account-privacy__requests .lb-web-data-request > [role='group'],
   .account-privacy__context .account-definition-list,
   .lb-web-sign-in,
-  .lb-web-sign-in > [role='group'] {
+  .lb-web-sign-in > [role='group'],
+  .account-auth-shell .lb-web-sign-in > [role='group'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-auth-passwords {
     grid-template-columns: minmax(0, 1fr);
   }
 

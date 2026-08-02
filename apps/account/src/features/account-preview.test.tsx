@@ -187,10 +187,10 @@ describe('authored overview and Profile workspaces', () => {
 
   it('keeps the W10 sign-in boundary user-facing and free of implementation ownership', () => {
     expect(accountEn.signIn.security).toBe(
-      'Identity verification is unavailable in this preview. This preview performs no remote verification and has no authority to take account actions.',
+      'This demonstration environment does not create a real session or send credentials.',
     );
     expect(accountPtBr.signIn.security).toBe(
-      'A verificação de identidade não está disponível nesta prévia. Esta prévia não realiza verificação remota nem tem autoridade para executar ações na conta.',
+      'Este ambiente de demonstração não cria uma sessão real nem envia credenciais.',
     );
     for (const copy of [accountPtBr.signIn.security, accountEn.signIn.security]) {
       expect(copy).not.toMatch(

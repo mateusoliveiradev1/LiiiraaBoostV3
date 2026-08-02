@@ -155,6 +155,10 @@ const rawWebRoutes = [
     owner: 'account-auth',
     safeContextKeys: ['locale', 'destination', 'return-path'],
   }),
+  accountRoute('account-sign-up', '/[locale]/sign-up', {
+    owner: 'account-auth',
+    safeContextKeys: ['locale', 'destination', 'return-path'],
+  }),
   accountRoute('account-overview', '/[locale]/account', {
     owner: 'account-navigation',
     safeContextKeys: ['locale', 'destination', 'return-path'],

@@ -9,6 +9,7 @@ import {
 const ADMIN_BUILD_ID_PREFIX = 'admin-preview';
 
 const nextConfig = {
+  devIndicators: false,
   env: {
     LIIIRAA_ADMIN_ORIGIN: resolveAdminOrigin(),
   },
