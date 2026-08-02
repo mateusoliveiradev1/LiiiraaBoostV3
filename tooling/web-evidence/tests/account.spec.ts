@@ -139,6 +139,32 @@ test('@final @account geometry preserves the 248 workspace 320 inspector shell a
   expect((await page.locator('main form').boundingBox())?.width).toBeLessThanOrEqual(560);
 });
 
+test('@final @account 1920 shell has one scroll context and no empty footer band', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.goto('/pt-BR/account');
+
+  const geometry = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    nestedVerticalScrollers: Array.from(
+      document.querySelectorAll<HTMLElement>('.account-app-shell *'),
+    )
+      .filter((element) => {
+        const overflowY = getComputedStyle(element).overflowY;
+        return /^(auto|scroll)$/u.test(overflowY) && element.scrollHeight > element.clientHeight;
+      })
+      .map((element) => element.className),
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
+  expect(geometry.nestedVerticalScrollers).toEqual([]);
+  await expect(page.locator('.account-footer')).toHaveCount(0);
+  await expect(page.locator('.account-inspector__public')).toBeVisible();
+});
+
 for (const axis of ['mobile-390', 'reflow-320'] as const) {
   test(`@final @account compact navigation is closed and keyboard-operable at ${axis}`, async ({
     page,
@@ -147,7 +173,10 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     await page.goto('/en/account/profile');
 
     const disclosure = page.locator('details.account-nav__mobile');
+    const inspectorDisclosure = page.locator('details.account-inspector__disclosure');
     await expect(disclosure).not.toHaveAttribute('open', '');
+    await expect(inspectorDisclosure).not.toHaveAttribute('open', '');
+    await expect(inspectorDisclosure.locator('.account-inspector__body')).toBeHidden();
     expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(64);
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
     expect(

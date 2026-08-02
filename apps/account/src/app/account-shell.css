@@ -4,12 +4,15 @@
 
 html {
   min-inline-size: 320px;
+  max-inline-size: 100%;
+  overflow-x: clip;
   background: var(--lb-surface-canvas);
   scroll-padding-block-start: calc(var(--lb-space-7) * 2 + var(--lb-space-4));
 }
 
 body {
   min-block-size: 100vh;
+  max-inline-size: 100%;
   margin: 0;
   overflow-x: clip;
   color: var(--lb-text-primary);
@@ -146,7 +149,6 @@ button:focus-visible,
   background: var(--lb-surface-work);
 }
 
-.account-footer,
 .account-failure__detail {
   color: var(--lb-text-secondary);
 }
@@ -627,20 +629,6 @@ button:focus-visible,
   max-inline-size: min(100%, 560px);
 }
 
-.account-footer {
-  border-block-start: 1px solid var(--lb-line-subtle);
-  background: var(--lb-surface-inset);
-  font-size: var(--lb-text-label-size);
-}
-
-.account-footer__bar {
-  display: flex;
-  justify-content: flex-end;
-  inline-size: min(100%, calc(var(--lb-space-7) * 20));
-  margin-inline: auto;
-  padding: var(--lb-space-4) var(--lb-screen-padding);
-}
-
 .account-failure {
   display: grid;
   align-content: start;
@@ -815,10 +803,6 @@ button:focus-visible,
   .account-overview__limitations {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .account-footer {
-    display: grid;
-  }
 }
 
 @media (width < 760px) {
@@ -923,7 +907,7 @@ button:focus-visible,
 .account-app-shell {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr) 320px;
-  grid-template-rows: 64px minmax(calc(100vh - 64px), auto);
+  grid-template-rows: 64px minmax(calc(100dvh - 64px), auto);
   min-block-size: 100vh;
   inline-size: min(100%, 1760px);
   margin-inline: auto;
@@ -938,8 +922,8 @@ button:focus-visible,
   grid-row: 1 / -1;
   display: flex;
   flex-direction: column;
-  min-block-size: 100vh;
-  max-block-size: 100vh;
+  align-self: start;
+  min-block-size: 100dvh;
   border-inline-end: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-inset);
 }
@@ -964,7 +948,6 @@ button:focus-visible,
 .account-sidebar .account-nav {
   flex: 1 1 auto;
   padding: var(--lb-space-4) var(--lb-space-2);
-  overflow-y: auto;
   border: 0;
 }
 
@@ -1095,7 +1078,7 @@ button:focus-visible,
 }
 
 .account-preview-slot {
-  padding: var(--lb-space-4) var(--lb-space-5) 0;
+  padding: var(--lb-space-3) var(--lb-space-4) 0;
 }
 
 .account-preview-rail {
@@ -1116,36 +1099,41 @@ button:focus-visible,
 
 #account-main {
   max-inline-size: none;
-  padding: var(--lb-space-4) var(--lb-space-5) var(--lb-space-7);
+  padding: var(--lb-space-3) var(--lb-space-4) var(--lb-space-4);
 }
 
 .account-inspector {
-  position: sticky;
-  inset-block-start: 64px;
   grid-column: 3;
   grid-row: 2;
   min-inline-size: 0;
-  max-block-size: calc(100vh - 64px);
-  padding: var(--lb-space-5) var(--lb-space-4);
-  overflow-y: auto;
+  padding: var(--lb-space-4);
   border-inline-start: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-work);
 }
 
+.account-inspector__disclosure > summary {
+  display: none;
+}
+
+.account-inspector__body {
+  display: grid;
+  gap: var(--lb-space-3);
+}
+
 .account-inspector__content {
   display: grid;
-  gap: var(--lb-space-4);
+  gap: var(--lb-space-3);
 }
 
 .account-inspector__account {
-  padding-block-end: var(--lb-space-4);
+  padding-block-end: var(--lb-space-3);
   border-block-end: 1px solid var(--lb-line-subtle);
 }
 
 .account-inspector__section {
   display: grid;
   gap: var(--lb-space-2);
-  padding-block-end: var(--lb-space-4);
+  padding-block-end: var(--lb-space-3);
   border-block-end: 1px solid var(--lb-line-subtle);
 }
 
@@ -1231,13 +1219,26 @@ button:focus-visible,
   border-block-end: 0;
 }
 
+.account-inspector__public {
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.account-inspector__public a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--lb-text-secondary);
+  font-size: var(--lb-text-label-size);
+}
+
 .account-nav__list a[aria-current='page'] {
   border-color: var(--lb-line-strong);
   background: var(--lb-surface-raised);
 }
 
 .account-responsibility {
-  gap: var(--lb-space-4);
+  gap: var(--lb-space-3);
 }
 
 .account-responsibility > .lb-web-route-header {
@@ -1260,7 +1261,7 @@ button:focus-visible,
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--lb-space-4);
   align-items: center;
-  padding: var(--lb-space-4);
+  padding: var(--lb-space-3);
   border: 1px solid var(--lb-line-strong);
   border-radius: var(--lb-radius-panel);
   background: var(--lb-surface-raised);
@@ -1340,7 +1341,7 @@ button:focus-visible,
 }
 
 .account-overview__readiness li {
-  min-block-size: 56px;
+  min-block-size: 48px;
   padding-inline: var(--lb-space-4);
   border-block-end: 1px solid var(--lb-line-subtle);
 }
@@ -1545,12 +1546,46 @@ button:focus-visible,
   }
 
   .account-inspector {
-    position: static;
     grid-column: 1;
     grid-row: 3;
-    max-block-size: none;
+    padding: 0 var(--lb-screen-padding);
     border-inline-start: 0;
     border-block-start: 1px solid var(--lb-line-subtle);
+    background: var(--lb-surface-inset);
+  }
+
+  .account-inspector__disclosure > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--lb-space-2);
+    align-items: center;
+    min-block-size: 52px;
+    color: var(--lb-text-primary);
+    font-size: var(--lb-text-label-size);
+    font-weight: var(--lb-weight-semibold);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .account-inspector__disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .account-inspector__disclosure:not([open]) > .account-inspector__body {
+    display: none;
+  }
+
+  .account-inspector__disclosure[open] > .account-inspector__body {
+    display: grid;
+    padding-block-end: var(--lb-space-4);
+  }
+
+  .account-inspector__disclosure-icon {
+    transition: transform var(--lb-motion-control-duration) var(--lb-motion-easing-standard);
+  }
+
+  .account-inspector__disclosure[open] .account-inspector__disclosure-icon {
+    transform: rotate(90deg);
   }
 
   .account-inspector__content {
@@ -1626,7 +1661,7 @@ button:focus-visible,
   }
 
   .account-inspector {
-    padding: var(--lb-space-4) var(--lb-space-3);
+    padding: 0 var(--lb-space-3);
   }
 
   .account-inspector__content {

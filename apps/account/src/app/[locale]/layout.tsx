@@ -286,20 +286,17 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
               <p>{copy.preview}</p>
             </aside>
           }
+          publicLink={
+            <a href={publicHomeHref(locale)}>
+              {copy.publicLink} <span aria-hidden="true">↗</span>
+            </a>
+          }
           supportHref={localizedHref('account-support', locale)}
           supportLabel={copy.help}
           surfaceLabel={copy.surface}
         >
           {children}
         </AccountNavigation>
-
-        <footer className="account-footer">
-          <div className="account-footer__bar">
-            <a href={publicHomeHref(locale)}>
-              {copy.publicLink} <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-        </footer>
       </body>
     </html>
   );

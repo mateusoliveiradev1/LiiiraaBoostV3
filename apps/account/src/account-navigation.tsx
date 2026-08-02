@@ -4,7 +4,7 @@ import { LocaleSwitcher } from '@liiiraa/web-features';
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
 import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 export type AccountNavigationItem = Readonly<{
   href: string;
@@ -31,6 +31,7 @@ type AccountNavigationProps = Readonly<{
   label: string;
   locale: WebLocale;
   preview: ReactNode;
+  publicLink: ReactNode;
   supportHref: string;
   supportLabel: string;
   surfaceLabel: string;
@@ -98,11 +99,24 @@ export function AccountNavigation({
   label,
   locale,
   preview,
+  publicLink,
   supportHref,
   supportLabel,
   surfaceLabel,
 }: AccountNavigationProps) {
   const pathname = usePathname();
+  const inspectorDisclosureRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const wideShell = window.matchMedia('(min-width: 1180px)');
+    const synchronizeInspector = () => {
+      if (inspectorDisclosureRef.current !== null) {
+        inspectorDisclosureRef.current.open = wideShell.matches;
+      }
+    };
+    synchronizeInspector();
+    wideShell.addEventListener('change', synchronizeInspector);
+    return () => wideShell.removeEventListener('change', synchronizeInspector);
+  }, []);
   const localizedCurrentRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'account-origin',
@@ -196,7 +210,20 @@ export function AccountNavigation({
       </div>
 
       <aside aria-label={inspectorLabel} className="account-inspector">
-        {inspector}
+        <details className="account-inspector__disclosure" open ref={inspectorDisclosureRef}>
+          <summary>
+            <span>{inspectorLabel}</span>
+            <ProductIcon
+              className="account-inspector__disclosure-icon"
+              name="chevronRight"
+              size={18}
+            />
+          </summary>
+          <div className="account-inspector__body">
+            {inspector}
+            <div className="account-inspector__public">{publicLink}</div>
+          </div>
+        </details>
       </aside>
     </div>
   );

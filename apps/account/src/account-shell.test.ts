@@ -22,12 +22,13 @@ describe('account shell', () => {
       /\.account-app-shell\s*\{[\s\S]*grid-template-columns:\s*248px minmax\(0, 1fr\) 320px[\s\S]*grid-template-rows:\s*64px/u,
     );
     expect(styles).toMatch(
-      /\.account-sidebar\s*\{[\s\S]*grid-column:\s*1[\s\S]*min-block-size:\s*100vh[\s\S]*max-block-size:\s*100vh/u,
+      /\.account-sidebar\s*\{[\s\S]*grid-column:\s*1[\s\S]*min-block-size:\s*100dvh/u,
     );
     expect(styles).toMatch(/\.account-workspace\s*\{[\s\S]*grid-column:\s*2[\s\S]*grid-row:\s*2/u);
-    expect(styles).toMatch(
-      /\.account-inspector\s*\{[\s\S]*position:\s*sticky[\s\S]*grid-column:\s*3[\s\S]*max-block-size:\s*calc\(100vh - 64px\)/u,
-    );
+    expect(styles).toMatch(/\.account-inspector\s*\{[\s\S]*grid-column:\s*3[\s\S]*grid-row:\s*2/u);
+    expect(styles).not.toMatch(/\.account-inspector\s*\{[^}]*overflow-y:\s*auto/u);
+    expect(styles).not.toMatch(/\.account-sidebar \.account-nav\s*\{[^}]*overflow-y:\s*auto/u);
+    expect(styles).toMatch(/html\s*\{[^}]*overflow-x:\s*clip/u);
     expect(styles).toMatch(/\.account-preview-slot\s*\{[\s\S]*padding:/u);
   });
 
@@ -158,23 +159,26 @@ describe('account shell', () => {
       /@media \(width < 1180px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*display:\s*block/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 1180px\)[\s\S]*\.account-inspector\s*\{[\s\S]*position:\s*static[\s\S]*grid-row:\s*3/u,
+      /@media \(width < 1180px\)[\s\S]*\.account-inspector\s*\{[\s\S]*grid-row:\s*3[\s\S]*\.account-inspector__disclosure:not\(\[open\]\) > \.account-inspector__body\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).not.toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
     );
   });
 
-  it('renders one closed 48px mobile disclosure named for the current route', () => {
+  it('renders closed native disclosures for mobile navigation and the contextual inspector', () => {
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
     );
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
-    expect(navigationSource.match(/<details\b/gu) ?? []).toHaveLength(1);
-    expect(navigationSource).not.toMatch(/<details[^>]*\bopen\b/iu);
+    expect(navigationSource.match(/<details\b/gu) ?? []).toHaveLength(2);
+    expect(navigationSource).toContain("window.matchMedia('(min-width: 1180px)')");
+    expect(navigationSource).toContain('inspectorDisclosureRef.current.open = wideShell.matches');
     expect(navigationSource).toContain('<strong>{currentLabel}</strong>');
+    expect(navigationSource).toContain('className="account-inspector__disclosure"');
+    expect(navigationSource).toContain('<span>{inspectorLabel}</span>');
     expect(styles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__desktop\s*\{[\s\S]*display:\s*none[\s\S]*\.account-nav__mobile summary\s*\{[\s\S]*min-block-size:\s*48px/u,
     );
