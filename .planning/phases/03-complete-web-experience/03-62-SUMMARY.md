@@ -46,6 +46,7 @@ key-decisions:
   - 'Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.'
   - 'The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.'
   - 'W12 capture uses a hard-coded account-overview/W12 projection validated by resolveAccountScenarioId, with no runtime selector or normal route-registry entry.'
+  - 'The fresh post-replay account capture is accepted only as W10, W11, W12, W13, W18, G03, and source-proven mobile-rail G05; G04 remains unchanged.'
 
 patterns-established:
   - 'Capture safety: immutable rejected bytes and candidate bytes are separate durable evidence sets.'
@@ -77,6 +78,7 @@ status: complete
 - Passed the permanent 25-pair dry-list gate, the candidate-aware browser matrix, and the unfiltered Section 17 motion contract before entering update mode.
 - Ran one user-authorized mechanical update that regenerated exactly W01-W18 and G01-G07 with no extra file, source, harness, manifest, approval, UAT, report, or publication changes.
 - After replay commit `2d70303`, ran one separately authorized correction-cycle update and committed only the expected W07/W08/W09 pixel changes in `fea8330`.
+- After the W12 capture-authority correction and Plan 03-61 replay `27d6902`, ran one fresh bounded writer cycle and committed exactly seven account candidate PNGs in `81e4abd`.
 
 ## Task Commits
 
@@ -86,6 +88,7 @@ Each task was committed atomically:
 2. **Task 2: Perform one mechanical closed-matrix candidate update** - `ee3c1ce` (test)
 3. **Post-source-correction capture: Refresh only W07, W08, and W09** - `fea8330` (test)
 4. **Post-rejection correction: Bind W12 evidence to canonical degraded account state** - `6d05c1b` (fix)
+5. **Fresh bounded account capture: Refresh corrected W10-W13, W18, G03, and G05 candidates** - `81e4abd` (test)
 
 ## Files Created/Modified
 
@@ -102,6 +105,7 @@ Each task was committed atomically:
 - Required exact pre-enumeration ownership before update mode; runtime skips alone are not accepted as proof of a bounded writer set.
 - Made no visual judgment. Plans 03-63 through 03-65 retain qualitative inspection ownership, and human/publication gates remain closed.
 - Kept W12 capture closed: no URL, query, cookie, storage, environment, or user-controlled scenario selector exists, and the capture module is outside the Next route tree.
+- Accepted the fresh account delta only after proving exact seven-file ownership; G05 was admitted as a source-bound mobile-rail consequence of `b28dabd`, while G04 remained byte-identical.
 
 ## Deviations from Plan
 
@@ -153,6 +157,16 @@ Each task was committed atomically:
 - Focused W12 proof passed 1/1 on `account-final-wide-1280`, including exact scenario/state assertions, accessible recovery names, Axe, horizontal-overflow, and responsive viewport checks.
 - Account verification passed 49/49 tests, TypeScript, the Next production build, focused ESLint for every new module/test, Prettier, and `git diff --check`.
 
+## Fresh Bounded W12 Candidate Capture
+
+- Plan 03-61 replay commit `27d6902` was present before capture. The permanent dry-list passed 1/1 with exactly 25 candidate/project owners, all 25 manifest records were candidate/unapproved/unpublished/non-authoritative, and the rejected G01/G04/G06 archive passed 3/3 SHA-256 checks.
+- Exactly one authorized command ran: `pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --update-snapshots`. It completed with 44 passed, 152 intentional skips, and 0 failed.
+- The accepted tracked delta was exactly `W10-account-final-desktop-960.png`, `W11-account-final-wide-1440.png`, `W12-account-final-wide-1280.png`, `W13-account-final-wide-1280.png`, `W18-account-final-reflow-320.png`, `G03-account-final-mobile-390.png`, and `G05-account-final-mobile-390.png`.
+- G05 was accepted under the bounded exception with concrete source evidence: 1,910 changed pixels (0.3139%), bounded to x=27..373/y=69..92 in the mobile preview rail. Source-owner commit `b28dabd` added the applicable `<760px` `.account-preview-rail .lb-status-mark/.lb-status-detail` wrapping rule after the prior baseline. G04 remained byte-identical at `b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5` because the mobile rule does not apply at 1440px.
+- W12’s committed pixels visibly and semantically show `Authority unavailable`, `Offline`, `Review required`, `Session expired`, `Retryable failure`, safe preserved fields, and safe recovery links. The pre-capture DOM gate asserted `data-scenario-id="W12"` and `data-account-state="offline stale expired-session partial-failure"`; the image is not the ready W11 Overview projection.
+- Post-capture verification passed: permanent dry-list 1/1, TypeScript, formatting, `git diff --check`, canonical source hashes 18/18, candidate closure 25/25, exact delta 7/7, screenshot dimensions 25/25, and immutable archive identity 3/3.
+- No manifest status, approval, UAT, report, publication, or source-owner file changed. Commit `81e4abd` contains only the seven candidate PNGs.
+
 ## Deferred Issues
 
 - The unmodified web-evidence unit suite retains three pre-existing failures in Playwright surface selection and Phase 3 proof-graph acceptance; this correction did not alter those owners.
@@ -182,20 +196,20 @@ Each task was committed atomically:
 | W07 |  1440×2904 | `06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7` |
 | W08 |  1440×2693 | `2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6` |
 | W09 |  1280×1452 | `4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca` |
-| W10 |    960×974 | `1384b104f9b6519f684de38e24f2eba967cc84ede81d907ee93b2659831f9517` |
-| W11 |  1440×1025 | `cde78133e64b7e5f1b34a57caca12e2ace9a436d8eba3e7e53df14ee5e256204` |
-| W12 |  1280×1049 | `d551aed5d83b20b88aa5bcba717ee2d521cb5c445aa7333c413e65faf8b1000c` |
-| W13 |   1280×999 | `9e4f8fd5947f147ad143990f33fbb75dccef365c6ee5d5332e1ce2ca94039261` |
+| W10 |    960×974 | `896402657fab2d29b89859c7c2eddc6385e1f9ba6f60dd198b6f547aa9111259` |
+| W11 |   1440×974 | `c6ac40907b198f503db630c97d9081e341636d9c574f4f3b5a1abfdf1ee66bf9` |
+| W12 |  1280×1104 | `ddefdf9f957263a09f3cb27194d14ec7f943c6b07daee3107b9caf6fc28945a7` |
+| W13 |  1280×1119 | `c15e8d0a352125463b7f5f221e426ee84029e3e43ff882fc6f52087a13fca1ca` |
 | W14 |  1440×2445 | `ab0ed8139f0641a713c619cb7e15eeab6f92916a927a8fa7ef550e6c08aff77b` |
 | W15 |  1440×2377 | `07383504a78494f15eb516c78e851cc6522d613ccf2d0c5c886c3dff7acc1d28` |
 | W16 |   390×3588 | `a1ab2808371fc37aeef4e3e68e64c151181331c6df5eec01f672c4bc4e989fd0` |
 | W17 |    960×932 | `485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128` |
-| W18 |   320×1625 | `e201a870d845a3a9dc12f94f4d0c3422563add276a52af3adfb27e5b490a59ce` |
+| W18 |   320×1671 | `2a7d54459a0ddddabd3236fb43b0b86efc40b0999fa4798438dc98043acf19df` |
 | G01 |  1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
 | G02 |   390×4329 | `910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230` |
-| G03 |   390×1859 | `c045574413c3bd9a3be5b042af680bc1f5f79946c518250ec62e3f3ffe214862` |
+| G03 |   390×1623 | `ac8b5230c71d67044ab2c617f2350cd641174d7771bad0d11097d17ef2019de8` |
 | G04 |   1440×974 | `b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5` |
-| G05 |   390×1560 | `8cdb7a5c4b110b8d15a8cd74a875fb38c2285a75774af9d371e566b3ec4bc0fa` |
+| G05 |   390×1560 | `16c82870dcb58227ed84e808929686947efa3b80fa8807754e722325d08fdbc4` |
 | G06 |  1440×1113 | `01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc` |
 | G07 |   390×4028 | `c131485f71daa9c24d3eadae7eed9b825b010a319d41a80182b5901812a13a14` |
 
@@ -230,6 +244,7 @@ None - no external service configuration required.
 - Confirmed correction-cycle commit `fea8330` exists and changes exactly W07, W08, and W09.
 - Confirmed W12 correction commit `6d05c1b` exists and the focused canonical W12 browser proof passes without updating snapshots.
 - Confirmed the capture module, resolver, degraded-state component, and W12 unit test exist outside the normal route tree.
+- Confirmed fresh bounded capture commit `81e4abd` exists and changes exactly the seven recorded account candidate PNGs.
 - Confirmed this summary exists at the required phase path.
 
 ---
