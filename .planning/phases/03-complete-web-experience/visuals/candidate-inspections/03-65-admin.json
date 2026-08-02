@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "plan": "03-65",
+  "surface": "admin",
+  "inspectedAt": "2026-08-02T01:29:55Z",
+  "sourceRevision": "bf94f96bde05e67102b6a9cb87fbff4a7eaca577",
+  "inspectionMethod": {
+    "register": "Impeccable product",
+    "detail": "original",
+    "scope": "Closed admin subset W14-W16 and G06-G07",
+    "referenceUse": "The immutable rejected G06 was used only to verify material improvement in role-landing hierarchy. No rejected pixel was treated as a visual target."
+  },
+  "manifest": {
+    "path": "tooling/web-evidence/visual-manifest.json",
+    "sha256": "16a2ed74992bca7ba1276b522e8292ff5d5292ee69d87bbc0f360289e85f4781",
+    "exactSubset": ["W14", "W15", "W16", "G06", "G07"],
+    "candidateCount": 5,
+    "allCandidate": true,
+    "allApprovedFalse": true,
+    "allPublishedFalse": true,
+    "allVisualTargetFalse": true
+  },
+  "mechanicalChecks": {
+    "allFilesNonempty": true,
+    "allWidthsMatchManifest": true,
+    "allFullPageHeightsMeetViewport": true,
+    "allSha256Lowercase64": true,
+    "postReplayHashesUnchanged": true,
+    "rejectedG06Comparison": {
+      "path": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G06-admin-final-wide-1440.png",
+      "dimensions": {"width": 1440, "height": 1193},
+      "bytes": 82960,
+      "sha256": "83b2a631b06583d33d0f2961801c74a9292b46ef4603df1227ea678921309b6f",
+      "currentG06Distinct": true,
+      "observedImprovement": "The candidate removes the rejected permanent viewport banner and raw simulated-no-change badge, strengthens the 8/4 focal workspace, and fills the lower area with a semantic assigned queue."
+    }
+  },
+  "criteria": {
+    "admittedLocalizedApplicationUi": {"verdict": "pass", "owner": null},
+    "noRawJsonOrGenericDenialPage": {"verdict": "pass", "owner": null},
+    "roleTaskOriginAndLocaleClarity": {"verdict": "pass", "owner": null},
+    "roleFocalWorkspaceHierarchy": {"verdict": "pass", "owner": null},
+    "queueTableAndAuditReflow": {"verdict": "pass", "owner": null},
+    "safeReviewVersusUnavailableAuthority": {"verdict": "pass", "owner": null},
+    "mobileHighRiskControlOmission": {
+      "verdict": "reject",
+      "owner": "03-60",
+      "finding": "W16 still renders a disabled `Retain publication hold — unavailable` button at 390px. The admin mobile contract requires high-risk execution controls to be semantically absent below 960px, with only safe review and a concise reason remaining."
+    },
+    "routePreservingFlagAndTextLocale": {"verdict": "pass", "owner": null},
+    "localizedHumanOperationalCopy": {
+      "verdict": "reject",
+      "owner": "03-60",
+      "finding": "PT-BR W15 exposes untranslated transport-backed audit values, including `Security target ••••-083` and `Review a synthetic containment action`."
+    },
+    "accessibleStatusAndFocusSemantics": {"verdict": "pass", "owner": null},
+    "typographySpacingAndDensity": {"verdict": "pass", "owner": null},
+    "noRawTransportEnum": {"verdict": "pass", "owner": null},
+    "noInternalPhaseProse": {
+      "verdict": "reject",
+      "owner": "03-60",
+      "finding": "W14, W15, W16, and G07 expose `Phase 4`/`Fase 4` in ordinary receipt copy; W16 also exposes `Phase 3` in its operational impact copy. UI-SPEC Sections 15 and 23 explicitly forbid Phase implementation language in ordinary task UI."
+    },
+    "noClippingOrHorizontalOverflow": {"verdict": "pass", "owner": null},
+    "authenticStrongWebAppNavigation": {"verdict": "pass", "owner": null}
+  },
+  "candidates": [
+    {
+      "id": "W14",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W14-admin-final-wide-1440.png",
+      "manifestPurpose": "Review English wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and support-role redaction.",
+      "dimensions": {"width": 1440, "height": 2445},
+      "bytes": 173529,
+      "sha256": "ab0ed8139f0641a713c619cb7e15eeab6f92916a927a8fa7ef550e6c08aff77b",
+      "checks": {
+        "originRoleTaskLocale": true,
+        "focalDecision": true,
+        "supportEvidenceAndConsentAdjacency": true,
+        "immutableAuditTrail": true,
+        "unavailableAuthority": true,
+        "noRawJson": true,
+        "noOverflow": true,
+        "noInternalPhaseProse": false
+      },
+      "verdict": "reject",
+      "owner": "03-60",
+      "evidence": "The task-first support workspace, redaction, consent scope, disabled authority, and audit trail are clear, but the final receipt exposes `disconnected Phase 4 boundary` in ordinary user-facing copy."
+    },
+    {
+      "id": "W15",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W15-admin-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and blocked security consent.",
+      "dimensions": {"width": 1440, "height": 2377},
+      "bytes": 174330,
+      "sha256": "07383504a78494f15eb516c78e851cc6522d613ccf2d0c5c886c3dff7acc1d28",
+      "checks": {
+        "originRoleTaskLocale": true,
+        "focalDecision": true,
+        "securityEvidenceAndConsentAdjacency": true,
+        "immutableAuditTrail": true,
+        "unavailableAuthority": true,
+        "noRawJson": true,
+        "noOverflow": true,
+        "localizedAuditValues": false,
+        "noInternalPhaseProse": false
+      },
+      "verdict": "reject",
+      "owner": "03-60",
+      "evidence": "The security workspace and no-authority boundary are structurally complete, but the PT-BR audit detail leaks English `Security target` and `Review a synthetic containment action`, and the receipt exposes `Fase 4`."
+    },
+    {
+      "id": "W16",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W16-admin-final-mobile-390.png",
+      "manifestPurpose": "Review English mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and the high-risk viewport boundary.",
+      "dimensions": {"width": 390, "height": 3588},
+      "bytes": 133464,
+      "sha256": "a1ab2808371fc37aeef4e3e68e64c151181331c6df5eec01f672c4bc4e989fd0",
+      "checks": {
+        "topbar60": true,
+        "flagAndLanguage": true,
+        "currentTaskDisclosure": true,
+        "safeReviewVisible": true,
+        "highRiskExecutionControlAbsent": false,
+        "unavailableAuthorityReason": true,
+        "auditReflow": true,
+        "noRawJson": true,
+        "noOverflow": true,
+        "noInternalPhaseProse": false
+      },
+      "verdict": "reject",
+      "owner": "03-60",
+      "evidence": "The mobile stack is readable and safe review remains available, but a disabled publication-action button remains semantically present below 960px. The impact and receipt copy also expose `Phase 3` and `Phase 4`."
+    },
+    {
+      "id": "G06",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G06-admin-final-wide-1440.png",
+      "manifestPurpose": "Review PT-BR wide premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and role-landing comparison with Phase 2.",
+      "dimensions": {"width": 1440, "height": 1113},
+      "bytes": 85696,
+      "sha256": "01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc",
+      "checks": {
+        "originRoleTaskLocale": true,
+        "eightFourFocalDecision": true,
+        "assignedQueueUseful": true,
+        "humanReadableStatus": true,
+        "noRawJson": true,
+        "noRawTransportEnum": true,
+        "noPermanentViewportBanner": true,
+        "noOverflow": true,
+        "strongNavigation": true
+      },
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "G06 materially improves on the immutable rejected G06 with a bounded cobalt decision workspace, contextual 8/4 scope panel, translated no-change status, dense assigned queue, exact role navigation, and no raw enum or permanent viewport banner."
+    },
+    {
+      "id": "G07",
+      "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/G07-admin-final-mobile-390.png",
+      "manifestPurpose": "Review English mobile premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and support comparison with Phase 2.",
+      "dimensions": {"width": 390, "height": 4028},
+      "bytes": 145916,
+      "sha256": "c131485f71daa9c24d3eadae7eed9b825b010a319d41a80182b5901812a13a14",
+      "checks": {
+        "topbar60": true,
+        "flagAndLanguage": true,
+        "currentTaskDisclosure": true,
+        "focalTaskFirst": true,
+        "supportConsentAndAuditReflow": true,
+        "unavailableAuthority": true,
+        "noRawJson": true,
+        "noOverflow": true,
+        "noInternalPhaseProse": false
+      },
+      "verdict": "reject",
+      "owner": "03-60",
+      "evidence": "The support workflow reflows cleanly with readable task, consent, audit, and unavailable-authority regions, but the no-change receipt exposes `disconnected Phase 4 boundary` in ordinary mobile copy."
+    }
+  ],
+  "automatedVerification": {
+    "command": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --grep \"W14|W15|W16|G06|G07\"",
+    "result": "pass",
+    "passed": 6,
+    "skipped": 8,
+    "failed": 0,
+    "duration": "1.5m",
+    "updateMode": false
+  },
+  "revisionGate": {
+    "triggered": true,
+    "owner": "03-60",
+    "requiredSequence": [
+      "Correct admin content/workspace presentation in Plan 03-60.",
+      "Rerun Plan 03-61 Task 2 including the exact unfiltered motion-contract command.",
+      "Run a fresh bounded Plan 03-62 capture attempt.",
+      "Rerun Plan 03-65 original-resolution inspection.",
+      "Rerun aggregate Plan 03-66 before Plan 03-45."
+    ],
+    "exactMotionCommand": "rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts"
+  },
+  "verdict": "reject",
+  "humanApproved": false,
+  "publicationApproved": false,
+  "rejectionOwners": ["03-60"]
+}
