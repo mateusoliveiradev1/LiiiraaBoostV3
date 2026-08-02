@@ -203,9 +203,18 @@ Each task was committed atomically through its TDD gates:
 - **Verification:** RED dry list found 0; intermediate list found 225; final list and permanent contract proved exactly 25 unique W01-W18/G01-G07 entries. Ordinary filtered and motion suites passed without update mode or image changes.
 - **Committed in:** `922ea82`
 
+**9. [Rule 1 - Test Bug] Bound admin workspace geometry to its canonical design token**
+
+- **Found during:** Post-completion full admin-suite replay reported by Plan 03-60
+- **Issue:** `apps/admin/src/admin-shell.test.ts` still required the pre-token literal `max-inline-size: 1320px`, while Plan 03-61 commit `677e572` established `--lb-admin-workspace-max: 1320px` as the shared authority and migrated the admin shell to consume it.
+- **Fix:** Kept the token-backed source intact and changed the brittle test to assert both the exact token value and `.admin-workspace` consumption of `var(--lb-admin-workspace-max)`.
+- **Files modified:** `apps/admin/src/admin-shell.test.ts`
+- **Verification:** Focused RED reproduced the literal mismatch; focused GREEN passed 1 selected test, the complete admin suite passed 58/58, and TypeScript, Prettier, and `git diff --check` passed.
+- **Committed in:** `f053880`
+
 ---
 
-**Total deviations:** 8 auto-fixed (3 Rule 1, 1 Rule 2, 4 Rule 3)
+**Total deviations:** 9 auto-fixed (4 Rule 1, 1 Rule 2, 4 Rule 3)
 **Impact on plan:** All fixes were required to keep the planned exact gates truthful and blocking; no pixels, UAT verdicts, reports, bundles, packages, or publication authority changed.
 
 ## Issues Encountered
@@ -267,6 +276,13 @@ Each task was committed atomically through its TDD gates:
 - The exact unfiltered motion contract started public, account, and admin and passed 5 tests with 40 intentional project/axis skips.
 - The web-evidence TypeScript check, focused harness/manifest Prettier check, and `git diff --check` passed.
 - Snapshot update mode was never enabled. No source, harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
+
+## Post-Admin-Suite Token Contract Correction
+
+- Preserved the Plan 03-61 token-backed source established by `677e572`: `--lb-admin-workspace-max` remains exactly `1320px`, and the admin workspace continues to consume that shared authority.
+- Focused RED failed 1 selected test on the stale literal assertion; focused GREEN passed 1 selected test with 15 intentionally filtered tests.
+- The complete admin Vitest suite passed 58/58 across 3 test files after the test-only correction `f053880`.
+- Strict admin TypeScript, focused Prettier, and `git diff --check` passed. No screenshot update command ran, and no source CSS, design token, evidence artifact, package, or lockfile changed.
 
 ## Known Stubs
 
