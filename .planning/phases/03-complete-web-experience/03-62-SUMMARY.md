@@ -15,6 +15,7 @@ provides:
   - Candidate pixels with no human approval or publication authority
   - Selector-free W12 evidence projection bound to the canonical account scenario resolver
   - W10-only candidate refresh after the source-owned sign-in boundary correction
+  - Exact W14/W15/W16/G07 admin candidate refresh with G06 byte-identical
 affects: [03-63, 03-64, 03-65, visual-review, web-evidence]
 
 tech-stack:
@@ -49,6 +50,7 @@ key-decisions:
   - 'W12 capture uses a hard-coded account-overview/W12 projection validated by resolveAccountScenarioId, with no runtime selector or normal route-registry entry.'
   - 'The fresh post-replay account capture is accepted only as W10, W11, W12, W13, W18, G03, and source-proven mobile-rail G05; G04 remains unchanged.'
   - 'The post-W10-copy capture is accepted only when the tracked delta is exactly W10 and every other candidate, manifest, archive, and authority record remains unchanged.'
+  - 'The post-admin-correction capture is accepted only when the tracked delta is exactly W14, W15, W16, and G07; G06 and every non-admin candidate must remain byte-identical.'
 
 patterns-established:
   - 'Capture safety: immutable rejected bytes and candidate bytes are separate durable evidence sets.'
@@ -57,7 +59,7 @@ patterns-established:
 
 requirements-completed: [WEB-01, WEB-02, WEB-03, WEB-08]
 
-duration: 2h 02m
+duration: 2h 12m
 completed: 2026-08-01
 status: complete
 ---
@@ -68,9 +70,9 @@ status: complete
 
 ## Performance
 
-- **Duration:** 2h 02m
+- **Duration:** 2h 12m
 - **Started:** 2026-08-01T19:34:10Z
-- **Completed:** 2026-08-02T01:13:09Z
+- **Completed:** 2026-08-02T02:05:26Z
 - **Tasks:** 2
 - **Files modified:** 29
 
@@ -82,6 +84,7 @@ status: complete
 - After replay commit `2d70303`, ran one separately authorized correction-cycle update and committed only the expected W07/W08/W09 pixel changes in `fea8330`.
 - After the W12 capture-authority correction and Plan 03-61 replay `27d6902`, ran one fresh bounded writer cycle and committed exactly seven account candidate PNGs in `81e4abd`.
 - After the W10 source-owner correction and Plan 03-61 replay `9110777`, ran one fresh bounded writer cycle and committed exactly the W10 account sign-in candidate in `db3847e`.
+- After the admin source-owner correction and full Plan 03-61 replay `7a85efb`, ran one fresh bounded writer cycle and committed exactly W14, W15, W16, and G07 in `d88b81b`; G06 remained byte-identical.
 
 ## Task Commits
 
@@ -93,6 +96,7 @@ Each task was committed atomically:
 4. **Post-rejection correction: Bind W12 evidence to canonical degraded account state** - `6d05c1b` (fix)
 5. **Fresh bounded account capture: Refresh corrected W10-W13, W18, G03, and G05 candidates** - `81e4abd` (test)
 6. **Fresh bounded W10 capture: Refresh corrected sign-in candidate only** - `db3847e` (test)
+7. **Fresh bounded admin capture: Refresh corrected W14/W15/W16/G07 candidates** - `d88b81b` (test)
 
 ## Files Created/Modified
 
@@ -111,6 +115,7 @@ Each task was committed atomically:
 - Kept W12 capture closed: no URL, query, cookie, storage, environment, or user-controlled scenario selector exists, and the capture module is outside the Next route tree.
 - Accepted the fresh account delta only after proving exact seven-file ownership; G05 was admitted as a source-bound mobile-rail consequence of `b28dabd`, while G04 remained byte-identical.
 - Accepted the post-copy delta only after proving W10 was the sole tracked change; the manifest, rejected archive, other 24 candidates, source, harness, approval, and publication records remained byte-identical.
+- Accepted the post-admin delta only after proving W14/W15/W16/G07 were the sole tracked changes and G06 retained its exact prior hash.
 
 ## Deviations from Plan
 
@@ -183,6 +188,17 @@ Each task was committed atomically:
 - Post-capture verification passed: live W10 source binding and manifest closure 3/3, permanent dry-list 1/1, screenshot dimensions 25/25, immutable archive identity 3/3, TypeScript, formatting, and `git diff --check`.
 - All records remain candidate-only and unapproved/unpublished/non-authoritative. Commit `db3847e` contains only the corrected W10 PNG.
 
+## Fresh Bounded Admin Candidate Capture
+
+- Full Plan 03-61 replay commit `7a85efb` was present before capture, recording exact green dry-list, browser, motion, admin-suite, TypeScript, formatting, and diff gates after admin source-owner correction `57a8608` and token-contract correction `f053880`.
+- Preflight passed before update mode: permanent dry-list 1/1 with exactly 25 candidate/project owners; manifest source binding and candidate closure 3/3; all 25 records remained `candidate`, `approved: false`, `published: false`, and `visualTarget: false`; rejected archive identity passed 3/3; tracked tree was clean.
+- Exactly one authorized command ran: `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/accessibility-responsive.spec.ts --update-snapshots`. It completed with 44 passed, 152 intentional skips, and 0 failed.
+- The tracked delta was exactly `W14-admin-final-wide-1440.png`, `W15-admin-final-wide-1440.png`, `W16-admin-final-mobile-390.png`, and `G07-admin-final-mobile-390.png`. No other candidate, manifest, archive, source, harness, approval, UAT, report, or publication file changed.
+- G06 remained byte-identical at 85,696 bytes, 1440×1113, and SHA-256 `01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc`.
+- Original-resolution inspection confirmed no visible Phase/Fase 3/4 or implementation chronology. W15 presents the PT-BR security target and reason; W16 and G07 omit high-risk publication or remote-action controls on mobile while retaining safe review, evidence, and no-change outcomes.
+- Post-capture verification passed: live W14/W15/W16/G06/G07 source binding and manifest closure 7/7, permanent dry-list 1/1, screenshot dimensions 25/25, immutable archive identity 3/3, TypeScript, formatting, and `git diff --check`.
+- All records remain candidate-only and unapproved/unpublished/non-authoritative. Commit `d88b81b` contains only the four corrected admin PNGs.
+
 ## Deferred Issues
 
 - The unmodified web-evidence unit suite retains three pre-existing failures in Playwright surface selection and Phase 3 proof-graph acceptance; this correction did not alter those owners.
@@ -194,7 +210,7 @@ Each task was committed atomically:
 - Permanent candidate dry-list: 1 passed; exactly 25 tests in one file and 25 unique manifest/project identities.
 - Candidate-aware ordinary browser matrix: 55 passed, 263 intentional skips, 0 failed; update mode disabled.
 - Unfiltered motion contract: 5 passed, 40 intentional skips, 0 failed.
-- Latest authorized W10 update command: 44 passed, 152 intentional skips, 0 failed; Playwright explicitly regenerated W10 only because the other 24 candidate pixels remained current.
+- Latest authorized admin update command: 44 passed, 152 intentional skips, 0 failed; Playwright explicitly regenerated W14, W15, W16, and G07 while G06 and the other 20 candidates remained current.
 - Git diff before commit contained exactly the 25 manifest PNG paths and no other tracked file.
 - Every PNG was nonempty, had a 64-character lowercase SHA-256, matched its declared viewport width, and had full-page height at least the declared viewport height.
 - Rejected archive identity passed before and after update: G01 `45c2e171e9d9b2c296649eb6898cab3d1c1ccc50b10f54c9cd0fb6fec68809e2`, G04 `7699c77be6ed99f44f13c28dd653a918abca39a604daf6f4f0debb1fd92c134b`, G06 `83b2a631b06583d33d0f2961801c74a9292b46ef4603df1227ea678921309b6f`.
@@ -216,9 +232,9 @@ Each task was committed atomically:
 | W11 |   1440×974 | `c6ac40907b198f503db630c97d9081e341636d9c574f4f3b5a1abfdf1ee66bf9` |
 | W12 |  1280×1104 | `ddefdf9f957263a09f3cb27194d14ec7f943c6b07daee3107b9caf6fc28945a7` |
 | W13 |  1280×1119 | `c15e8d0a352125463b7f5f221e426ee84029e3e43ff882fc6f52087a13fca1ca` |
-| W14 |  1440×2445 | `ab0ed8139f0641a713c619cb7e15eeab6f92916a927a8fa7ef550e6c08aff77b` |
-| W15 |  1440×2377 | `07383504a78494f15eb516c78e851cc6522d613ccf2d0c5c886c3dff7acc1d28` |
-| W16 |   390×3588 | `a1ab2808371fc37aeef4e3e68e64c151181331c6df5eec01f672c4bc4e989fd0` |
+| W14 |  1440×2421 | `960063303b0afc4f469b2dd2f5e373d92c5e5556c35968ddeb90557c3ce919aa` |
+| W15 |  1440×2353 | `e21da72135bc0c8740465de80a7c163591ae8c78dd0297cf0fbaa21220f1f5c1` |
+| W16 |   390×3448 | `0af012b14a57e54d4de4eaf16e3183d7da3755e92d8874559ee55aafc7587333` |
 | W17 |    960×932 | `485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128` |
 | W18 |   320×1671 | `2a7d54459a0ddddabd3236fb43b0b86efc40b0999fa4798438dc98043acf19df` |
 | G01 |  1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
@@ -227,7 +243,7 @@ Each task was committed atomically:
 | G04 |   1440×974 | `b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5` |
 | G05 |   390×1560 | `16c82870dcb58227ed84e808929686947efa3b80fa8807754e722325d08fdbc4` |
 | G06 |  1440×1113 | `01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc` |
-| G07 |   390×4028 | `c131485f71daa9c24d3eadae7eed9b825b010a319d41a80182b5901812a13a14` |
+| G07 |   390×4004 | `24b82e5eacb3b00de62b2a89559601b3a32a6e7310e0b3aa9bedf2fa09ff074b` |
 
 ## Known Stubs
 
@@ -251,6 +267,7 @@ None - no external service configuration required.
 
 - Plans 03-63 through 03-65 can inspect the mechanically refreshed public, account, and admin candidate sets against the immutable rejected references.
 - Plan 03-64 can now re-inspect W10 at original resolution against the source-owned human sign-in boundary copy.
+- Plan 03-65 can now re-inspect W14, W15, W16, G06, and G07 at original resolution against the corrected admin presentation contract.
 - Candidate status grants no qualitative, human, UAT, report, publication, or distribution approval.
 
 ## Self-Check: PASSED
@@ -263,6 +280,7 @@ None - no external service configuration required.
 - Confirmed the capture module, resolver, degraded-state component, and W12 unit test exist outside the normal route tree.
 - Confirmed fresh bounded capture commit `81e4abd` exists and changes exactly the seven recorded account candidate PNGs.
 - Confirmed fresh bounded W10 commit `db3847e` exists and changes exactly `W10-account-final-desktop-960.png`.
+- Confirmed fresh bounded admin commit `d88b81b` exists and changes exactly W14, W15, W16, and G07 while G06 remains byte-identical.
 - Confirmed this summary exists at the required phase path.
 
 ---
