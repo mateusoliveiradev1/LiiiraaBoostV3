@@ -7,10 +7,9 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { ProductLockup } from '../../../../../packages/design-system/src/product-lockup.tsx';
-
 import { accountBoundaryHref, publicBoundaryHref, routing } from '../../public-boundary';
 import { PublicNavigation, type PublicNavigationCopy } from '../../public-navigation';
+import { ProductLockup } from '../../public-product-lockup';
 
 type PublicLocaleLayoutProps = Readonly<{
   children: ReactNode;

@@ -18,6 +18,7 @@
     "verify": "pnpm run check && pnpm run test && pnpm run build"
   },
   "dependencies": {
+    "@liiiraa/design-system": "workspace:*",
     "@liiiraa/design-tokens": "workspace:*",
     "@liiiraa/web-core": "workspace:*",
     "@liiiraa/web-features": "workspace:*",
