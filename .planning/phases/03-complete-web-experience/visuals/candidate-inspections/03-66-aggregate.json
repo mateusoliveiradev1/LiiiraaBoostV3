@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
   "plan": "03-66",
-  "closedAt": "2026-08-02T02:23:06Z",
-  "sourceRevision": "1cde546a703106bec3fc7ee491b69c00cd8c62e9",
+  "closedAt": "2026-08-02T03:35:24Z",
+  "replayStartedAt": "2026-08-02T03:22:00Z",
+  "sourceRevision": "623084a417958282b6ccaac92270e68e893cf0bc",
   "inspectionRecords": [
     {
       "plan": "03-63",
@@ -142,14 +143,15 @@
       },
       {
         "command": "rtk pnpm test",
-        "result": "fail",
-        "failedPackage": "@liiiraa/web-evidence",
-        "passed": 139,
-        "skipped": 1,
-        "failed": 3
+        "result": "pass",
+        "tasksPassed": 49,
+        "tasksTotal": 49,
+        "webEvidencePassed": 142,
+        "webEvidenceSkipped": 1,
+        "failed": 0
       }
     ],
-    "result": "blocked"
+    "result": "pass"
   },
   "supplementalGates": {
     "routeAndContractSuites": {
@@ -215,32 +217,15 @@
     },
     "architecture": {
       "command": "rtk pnpm test:architecture",
-      "result": "fail",
-      "workspaceDeepImportViolations": 3,
+      "result": "pass",
+      "adaptersExecuted": { "workspace": 1, "cargo": 1 },
+      "testsPassed": 46,
+      "workspaceDeepImportViolations": 0,
       "cargoViolations": 0
     }
   },
-  "blockers": [
-    {
-      "owner": "@liiiraa/web-evidence",
-      "gate": "workspace regression",
-      "details": [
-        "playwright-config.test.ts expects a project-filtered security-artifacts command to start public, account, and admin, but current selection starts public only",
-        "verify-phase.test.ts rejects the exact closed Phase 3 evidence graph",
-        "verify-phase.test.ts rejects the checked-in proof graph across canonical line endings"
-      ],
-      "priorRecord": ".planning/phases/03-complete-web-experience/03-62-SUMMARY.md#deferred-issues"
-    },
-    {
-      "owner": "architecture policy consumers",
-      "gate": "workspace architecture",
-      "details": [
-        "Three existing imports target packages/design-system/src/product-lockup.tsx through a private path"
-      ],
-      "priorRecord": ".planning/phases/03-complete-web-experience/03-62-SUMMARY.md#deferred-issues"
-    }
-  ],
-  "verdict": "blocked",
+  "blockers": [],
+  "verdict": "pass",
   "humanApproved": false,
   "publicationApproved": false
 }
