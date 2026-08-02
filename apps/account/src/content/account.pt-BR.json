@@ -16,7 +16,7 @@
     "emailAction": "Revisar entrada por e-mail",
     "socialAction": "Revisar entrada social",
     "passkeyAction": "Revisar entrada com chave de acesso",
-    "security": "A Fase 4 será responsável por identidade, PKCE, chaves de acesso, MFA, recuperação e emissão de sessão. Esta prévia não controla nenhum deles.",
+    "security": "A verificação de identidade não está disponível nesta prévia. Esta prévia não realiza verificação remota nem tem autoridade para executar ações na conta.",
     "invalidEmail": "Informe um endereço de e-mail completo, como jogador@example.com."
   },
   "overview": {

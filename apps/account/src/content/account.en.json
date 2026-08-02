@@ -16,7 +16,7 @@
     "emailAction": "Review email sign-in",
     "socialAction": "Review social sign-in",
     "passkeyAction": "Review passkey sign-in",
-    "security": "Phase 4 will own identity verification, PKCE, passkeys, MFA, recovery, and session issuance. This preview owns none of them.",
+    "security": "Identity verification is unavailable in this preview. This preview performs no remote verification and has no authority to take account actions.",
     "invalidEmail": "Enter a complete email address, such as player@example.com."
   },
   "overview": {

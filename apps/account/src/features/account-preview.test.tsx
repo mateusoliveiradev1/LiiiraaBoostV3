@@ -176,6 +176,20 @@ describe('authored overview and Profile workspaces', () => {
     expect(featureSource).toContain('<PreviewBoundary');
   });
 
+  it('keeps the W10 sign-in boundary user-facing and free of implementation ownership', () => {
+    expect(accountEn.signIn.security).toBe(
+      'Identity verification is unavailable in this preview. This preview performs no remote verification and has no authority to take account actions.',
+    );
+    expect(accountPtBr.signIn.security).toBe(
+      'A verificação de identidade não está disponível nesta prévia. Esta prévia não realiza verificação remota nem tem autoridade para executar ações na conta.',
+    );
+    for (const copy of [accountPtBr.signIn.security, accountEn.signIn.security]) {
+      expect(copy).not.toMatch(
+        /Phase\s*\d+|Fase\s*\d+|milestone|marco|implementation|implementa(?:ção|r)|\bowns?\b|responsável/iu,
+      );
+    }
+  });
+
   it('keeps PT-BR and English labels, states, recovery, and limitations equivalent', () => {
     expect(shapeOf(accountPtBr)).toEqual(shapeOf(accountEn));
     for (const content of [accountPtBr, accountEn]) {
