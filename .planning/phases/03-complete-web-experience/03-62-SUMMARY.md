@@ -13,6 +13,7 @@ provides:
   - Immutable rejected post-03-52 G01/G04/G06 archive with SHA-256 identity
   - Exactly 25 mechanically refreshed W01-W18/G01-G07 candidate screenshots
   - Candidate pixels with no human approval or publication authority
+  - Selector-free W12 evidence projection bound to the canonical account scenario resolver
 affects: [03-63, 03-64, 03-65, visual-review, web-evidence]
 
 tech-stack:
@@ -20,6 +21,7 @@ tech-stack:
   patterns:
     - Archive rejected evidence before any bounded snapshot update
     - Prove exact candidate/project closure with a permanent dry-list gate before update mode
+    - Render internal scenario evidence from a route-unreachable serializer with escaped canonical copy
 
 key-files:
   created:
@@ -27,18 +29,28 @@ key-files:
     - .planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G04-account-final-wide-1440.png
     - .planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/G06-admin-final-wide-1440.png
     - .planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/SHA256SUMS.json
+    - apps/account/src/capture/w12.ts
+    - apps/account/src/capture/w12.test.ts
+    - apps/account/src/features/account-degraded-preview.tsx
+    - apps/account/src/features/account-scenario.ts
   modified:
     - tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/
+    - tooling/web-evidence/tests/accessibility-responsive.spec.ts
+    - apps/account/src/features/account-preview.tsx
+    - apps/account/src/features/account-preview.test.tsx
+    - apps/account/src/index.ts
 
 key-decisions:
   - 'Rejected post-03-52 G01/G04/G06 remain immutable and independently retrievable after candidate capture.'
   - 'Mechanical capture changes pixels only; all 25 records remain candidate, unapproved, unpublished, and non-authoritative.'
   - 'Update mode runs only after the permanent dry list proves exactly one owning project for every W01-W18/G01-G07 identity.'
   - 'The post-source-correction capture is accepted only when its tracked delta is exactly W07, W08, and W09.'
+  - 'W12 capture uses a hard-coded account-overview/W12 projection validated by resolveAccountScenarioId, with no runtime selector or normal route-registry entry.'
 
 patterns-established:
   - 'Capture safety: immutable rejected bytes and candidate bytes are separate durable evidence sets.'
   - 'Bounded update: one explicitly authorized command follows dry-list, browser, motion, archive, and status gates.'
+  - 'Capture authority: canonical JSON copy is escaped into a script-free static document while the hydrated application remains unmodified.'
 
 requirements-completed: [WEB-01, WEB-02, WEB-03, WEB-08]
 
@@ -73,17 +85,23 @@ Each task was committed atomically:
 1. **Task 1: Archive rejected G01, G04, and G06 immutably** - `21f41d8` (chore)
 2. **Task 2: Perform one mechanical closed-matrix candidate update** - `ee3c1ce` (test)
 3. **Post-source-correction capture: Refresh only W07, W08, and W09** - `fea8330` (test)
+4. **Post-rejection correction: Bind W12 evidence to canonical degraded account state** - `6d05c1b` (fix)
 
 ## Files Created/Modified
 
 - `.planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/` - Independent rejected G01/G04/G06 PNGs and immutable identity metadata.
 - `tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/` - Exact mechanically refreshed 18 canonical and 7 qualitative-review candidate PNGs.
+- `apps/account/src/capture/w12.ts` - Test-only, route-unreachable W12 serializer using escaped canonical account copy.
+- `apps/account/src/features/account-scenario.ts` - Side-effect-free canonical account scenario resolver shared by production and capture evidence.
+- `apps/account/src/features/account-degraded-preview.tsx` - Shared production degraded-state presentation extracted without changing account behavior.
+- `tooling/web-evidence/tests/accessibility-responsive.spec.ts` - Manifest-bound W12 projection into a fresh script-free account-shell document.
 
 ## Decisions Made
 
 - Kept evidence states separate: archived pixels are rejected references, while refreshed pixels are candidates only.
 - Required exact pre-enumeration ownership before update mode; runtime skips alone are not accepted as proof of a bounded writer set.
 - Made no visual judgment. Plans 03-63 through 03-65 retain qualitative inspection ownership, and human/publication gates remain closed.
+- Kept W12 capture closed: no URL, query, cookie, storage, environment, or user-controlled scenario selector exists, and the capture module is outside the Next route tree.
 
 ## Deviations from Plan
 
@@ -125,6 +143,22 @@ Each task was committed atomically:
 - All 25 manifest entries remained `candidate`, `approved: false`, `published: false`, and `visualTarget: false`.
 - Correction-cycle candidate commit: `fea8330`.
 
+## Post-Rejection W12 Capture-Authority Correction
+
+- Commit `6d05c1b` corrected the bounded W12 harness after later review found that `/en/account` rendered the ordinary ready projection instead of canonical `W12` / `account-offline-stale` evidence.
+- `createW12AccountCaptureProjection` hard-codes `account-overview` and `W12`, then validates the pair through `resolveAccountScenarioId('account-overview', 'W12')`.
+- The capture serializer accepts no runtime input. It reads the canonical English account JSON, validates every required degraded/recovery field, and escapes all interpolated copy and route hrefs.
+- Playwright clones the already-rendered account shell, replaces the preview only in the detached clone, removes every script, and loads the result as a fresh static document. The live hydrated DOM is never mutated.
+- The normal account catch-all route contains no reference to the capture module or scenario selector. No screenshot update ran during this correction.
+- Focused W12 proof passed 1/1 on `account-final-wide-1280`, including exact scenario/state assertions, accessible recovery names, Axe, horizontal-overflow, and responsive viewport checks.
+- Account verification passed 49/49 tests, TypeScript, the Next production build, focused ESLint for every new module/test, Prettier, and `git diff --check`.
+
+## Deferred Issues
+
+- The unmodified web-evidence unit suite retains three pre-existing failures in Playwright surface selection and Phase 3 proof-graph acceptance; this correction did not alter those owners.
+- Architecture verification now reports no W12/account capture violation. It remains nonzero only for three pre-existing design-system deep imports from account/admin layouts.
+- Full-file ESLint for `account-preview.tsx` still reports legacy `FormEvent` and shorthand-void findings. All new capture, resolver, degraded-state, and unit-test files pass focused ESLint.
+
 ## Verification
 
 - Permanent candidate dry-list: 1 passed; exactly 25 tests in one file and 25 unique manifest/project identities.
@@ -137,37 +171,43 @@ Each task was committed atomically:
 
 ### Candidate Dimensions and SHA-256
 
-| ID | Dimensions | SHA-256 |
-|---|---:|---|
-| W01 | 1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
-| W02 | 390×4329 | `910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230` |
-| W03 | 1280×1473 | `bda5e79c8782e0f726266ea5d16961c5a00857be57d29cae5a9abb7477316b34` |
-| W04 | 1280×2336 | `65b714311f45d3a5506ce3cf0c025b9a0dd595292a906940e7f0f23593f0c6c7` |
-| W05 | 1280×3215 | `4460e175bd9b55ca8f44819bde7c6380b022918de350472cb61c64e1b00e0062` |
-| W06 | 960×1157 | `da9906f6e175964ec52ced96f91165d8eeed2a18892426c8f4f9f667e37eb119` |
-| W07 | 1440×2904 | `06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7` |
-| W08 | 1440×2693 | `2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6` |
-| W09 | 1280×1452 | `4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca` |
-| W10 | 960×974 | `1384b104f9b6519f684de38e24f2eba967cc84ede81d907ee93b2659831f9517` |
-| W11 | 1440×1025 | `cde78133e64b7e5f1b34a57caca12e2ace9a436d8eba3e7e53df14ee5e256204` |
-| W12 | 1280×1049 | `d551aed5d83b20b88aa5bcba717ee2d521cb5c445aa7333c413e65faf8b1000c` |
-| W13 | 1280×999 | `9e4f8fd5947f147ad143990f33fbb75dccef365c6ee5d5332e1ce2ca94039261` |
-| W14 | 1440×2445 | `ab0ed8139f0641a713c619cb7e15eeab6f92916a927a8fa7ef550e6c08aff77b` |
-| W15 | 1440×2377 | `07383504a78494f15eb516c78e851cc6522d613ccf2d0c5c886c3dff7acc1d28` |
-| W16 | 390×3588 | `a1ab2808371fc37aeef4e3e68e64c151181331c6df5eec01f672c4bc4e989fd0` |
-| W17 | 960×932 | `485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128` |
-| W18 | 320×1625 | `e201a870d845a3a9dc12f94f4d0c3422563add276a52af3adfb27e5b490a59ce` |
-| G01 | 1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
-| G02 | 390×4329 | `910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230` |
-| G03 | 390×1859 | `c045574413c3bd9a3be5b042af680bc1f5f79946c518250ec62e3f3ffe214862` |
-| G04 | 1440×974 | `b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5` |
-| G05 | 390×1560 | `8cdb7a5c4b110b8d15a8cd74a875fb38c2285a75774af9d371e566b3ec4bc0fa` |
-| G06 | 1440×1113 | `01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc` |
-| G07 | 390×4028 | `c131485f71daa9c24d3eadae7eed9b825b010a319d41a80182b5901812a13a14` |
+| ID  | Dimensions | SHA-256                                                            |
+| --- | ---------: | ------------------------------------------------------------------ |
+| W01 |  1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
+| W02 |   390×4329 | `910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230` |
+| W03 |  1280×1473 | `bda5e79c8782e0f726266ea5d16961c5a00857be57d29cae5a9abb7477316b34` |
+| W04 |  1280×2336 | `65b714311f45d3a5506ce3cf0c025b9a0dd595292a906940e7f0f23593f0c6c7` |
+| W05 |  1280×3215 | `4460e175bd9b55ca8f44819bde7c6380b022918de350472cb61c64e1b00e0062` |
+| W06 |   960×1157 | `da9906f6e175964ec52ced96f91165d8eeed2a18892426c8f4f9f667e37eb119` |
+| W07 |  1440×2904 | `06b0091aec9698599d491e7697820a670e543a8ce7061e66bd3e83f1282877f7` |
+| W08 |  1440×2693 | `2743c174140890dcf3edda7644c8df8812e5438aef4dc73fe4e04daf17252fa6` |
+| W09 |  1280×1452 | `4662b64e6dd8fe738bba3a58ac82ac3531fdb16762b252396fd474e281bd1cca` |
+| W10 |    960×974 | `1384b104f9b6519f684de38e24f2eba967cc84ede81d907ee93b2659831f9517` |
+| W11 |  1440×1025 | `cde78133e64b7e5f1b34a57caca12e2ace9a436d8eba3e7e53df14ee5e256204` |
+| W12 |  1280×1049 | `d551aed5d83b20b88aa5bcba717ee2d521cb5c445aa7333c413e65faf8b1000c` |
+| W13 |   1280×999 | `9e4f8fd5947f147ad143990f33fbb75dccef365c6ee5d5332e1ce2ca94039261` |
+| W14 |  1440×2445 | `ab0ed8139f0641a713c619cb7e15eeab6f92916a927a8fa7ef550e6c08aff77b` |
+| W15 |  1440×2377 | `07383504a78494f15eb516c78e851cc6522d613ccf2d0c5c886c3dff7acc1d28` |
+| W16 |   390×3588 | `a1ab2808371fc37aeef4e3e68e64c151181331c6df5eec01f672c4bc4e989fd0` |
+| W17 |    960×932 | `485a9204561f7484640825d313e7bb45aee09eb599c5b38d686fed37cc4c4128` |
+| W18 |   320×1625 | `e201a870d845a3a9dc12f94f4d0c3422563add276a52af3adfb27e5b490a59ce` |
+| G01 |  1440×3212 | `6e58fa2a9265949944a9c5162abbfa762847737e78877dfdd1633d8c148482f4` |
+| G02 |   390×4329 | `910bbc21263189b2a90993b6c5002cd3d25ff2acd31dc3430c786c5db094d230` |
+| G03 |   390×1859 | `c045574413c3bd9a3be5b042af680bc1f5f79946c518250ec62e3f3ffe214862` |
+| G04 |   1440×974 | `b50d8259433c245c6abb5939ca36ca27e420c6fd583487de0fc0f7adee5544e5` |
+| G05 |   390×1560 | `8cdb7a5c4b110b8d15a8cd74a875fb38c2285a75774af9d371e566b3ec4bc0fa` |
+| G06 |  1440×1113 | `01246eb7729d8c368684da68623039bf4536cc6f17bb035686052f7a089520dc` |
+| G07 |   390×4028 | `c131485f71daa9c24d3eadae7eed9b825b010a319d41a80182b5901812a13a14` |
 
 ## Known Stubs
 
-None - the plan changed only archive metadata and PNG evidence; no UI data source or placeholder was introduced.
+None - the W12 serializer uses validated canonical account copy and contains no placeholder or unwired data source.
+
+## Threat Flags
+
+| Flag                                   | File                              | Description                                                                                                                                                                            |
+| -------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| threat_flag: test-only-html-projection | `apps/account/src/capture/w12.ts` | Canonical fixture copy crosses into a static evidence document; every interpolated value is escaped, the serializer accepts no visitor input, and the browser document is script-free. |
 
 ## Authentication Gates
 
@@ -188,6 +228,8 @@ None - no external service configuration required.
 - Confirmed all 25 unique candidate PNGs from commit `ee3c1ce` exist.
 - Confirmed task commits `21f41d8` and `ee3c1ce` exist in repository history.
 - Confirmed correction-cycle commit `fea8330` exists and changes exactly W07, W08, and W09.
+- Confirmed W12 correction commit `6d05c1b` exists and the focused canonical W12 browser proof passes without updating snapshots.
+- Confirmed the capture module, resolver, degraded-state component, and W12 unit test exist outside the normal route tree.
 - Confirmed this summary exists at the required phase path.
 
 ---
