@@ -150,10 +150,12 @@ export const selectWebTestSurfaces = (
     )
     .join(' ');
   const hasExplicitProject = selector.includes('--project=');
+  const isCrossSurfaceSecurityRun = /security-artifacts\.spec\.ts/u.test(selector);
   const startsEverySurface =
     selector.length === 0 ||
+    isCrossSurfaceSecurityRun ||
     (!hasExplicitProject &&
-      /accessibility-responsive|motion-contract|security-artifacts|matrix\.config/u.test(selector));
+      /accessibility-responsive|motion-contract|matrix\.config/u.test(selector));
   return surfaces.filter(({ surface }) =>
     startsEverySurface
       ? true
