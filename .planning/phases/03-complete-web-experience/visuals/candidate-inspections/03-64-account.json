@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "plan": "03-64",
   "surface": "account",
-  "inspectedAt": "2026-08-02T00:47:19Z",
-  "sourceRevision": "1d619e3d0d131de5f50b6b202c4c6ef3bd88e4e3",
+  "inspectedAt": "2026-08-02T01:17:46Z",
+  "sourceRevision": "0eb41b5f2193f774c6674c06a0df29728282afb5",
   "inspectionMethod": {
     "register": "Impeccable product",
     "detail": "original",
@@ -43,7 +43,7 @@
     "exactSevenFiveOrEightFourWorkspace": "pass",
     "focalActionAndContextDensity": "pass",
     "profileFieldAtMost560": "pass",
-    "quietPreviewProvenance": "reject",
+    "quietPreviewProvenance": "pass",
     "safeNoChangeAuthority": "pass",
     "mobileCurrentTaskDisclosureAndDomOrder": "pass",
     "responsive320Reflow": "pass",
@@ -62,8 +62,8 @@
       "path": "tooling/web-evidence/tests/__screenshots__/accessibility-responsive.spec.ts/W10-account-final-desktop-960.png",
       "manifestPurpose": "Review English desktop premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and sign-in validation.",
       "dimensions": {"width": 960, "height": 974},
-      "bytes": 61606,
-      "sha256": "896402657fab2d29b89859c7c2eddc6385e1f9ba6f60dd198b6f547aa9111259",
+      "bytes": 61480,
+      "sha256": "a44b16caaa7456da28778f8d41bb4ad5d045e7e5e71aa8e18b37a095c8ed12f1",
       "checks": {
         "shellGeometry": true,
         "flagAndLanguage": true,
@@ -71,13 +71,13 @@
         "focalTask": true,
         "truthfulNoAuthority": true,
         "currentDestination": true,
-        "humanOutcomeCopy": false,
+        "humanOutcomeCopy": true,
         "readable": true,
         "noGenericScaffold": true
       },
-      "verdict": "reject",
-      "owner": "03-58",
-      "evidence": "The canonical Sign in destination and current-task context are corrected, but the focal Preview boundary still exposes milestone ownership through `Phase 4 will own identity verification, PKCE, passkeys, MFA, recovery, and session issuance.` Ordinary user-facing content must explain the available no-authority outcome without phase or implementation prose."
+      "verdict": "pass",
+      "owner": null,
+      "evidence": "The canonical Sign in destination and current-task context remain correct. The focal boundary now states directly that identity verification is unavailable, performs no remote verification, and has no authority to take account actions, with no phase, milestone, implementation, or ownership prose."
     },
     {
       "id": "W11",
@@ -234,29 +234,11 @@
     "passed": 23,
     "skipped": 120,
     "failed": 0,
-    "duration": "2.4m",
-    "updateMode": false,
-    "note": "The first attempt hit a transient Next.js TypeScript worker `Invalid or unexpected token`; a direct web build then passed, and the exact filtered replay passed on rerun without source or snapshot changes."
+    "duration": "2.1m",
+    "updateMode": false
   },
-  "verdict": "reject",
+  "verdict": "pass",
   "humanApproved": false,
   "publicationApproved": false,
-  "rejectionOwners": ["03-58"],
-  "revisionGate": {
-    "blockedPlans": ["03-66", "03-45", "03-46"],
-    "requiredCorrections": [
-      {
-        "owner": "03-58",
-        "identities": ["W10"],
-        "criterion": "human sign-in boundary copy without milestone implementation language",
-        "evidence": "Replace the visible `Phase 4 will own identity verification...` sentence with direct user-facing no-authority and availability language while preserving the corrected Sign in navigation and focused sign-in workspace."
-      }
-    ],
-    "requiredSequence": [
-      "After the 03-58 source-owner correction, rerun Plan 03-61 Task 2 including exact unfiltered `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/motion-contract.spec.ts`.",
-      "Run a fresh bounded Plan 03-62 capture attempt.",
-      "Rerun Plan 03-64 original-resolution account inspection.",
-      "Rerun aggregate Plan 03-66 before Plan 03-45 human review."
-    ]
-  }
+  "rejectionOwners": []
 }
