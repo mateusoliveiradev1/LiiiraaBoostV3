@@ -43,6 +43,7 @@ const REQUIRED_ROUTE_IDS = Object.freeze([
   'releases-download',
   'releases-install',
   'account-sign-in',
+  'account-sign-up',
   'account-overview',
   'account-profile',
   'account-security',

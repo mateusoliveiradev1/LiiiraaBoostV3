@@ -30,6 +30,11 @@ describe('account shell', () => {
     expect(styles).not.toMatch(/\.account-sidebar \.account-nav\s*\{[^}]*overflow-y:\s*auto/u);
     expect(styles).toMatch(/html\s*\{[^}]*overflow-x:\s*clip/u);
     expect(styles).toMatch(/\.account-preview-slot\s*\{[\s\S]*padding:/u);
+    expect(styles).toMatch(/\.account-app-shell\s*\{[\s\S]*inline-size:\s*100%/u);
+    expect(styles).not.toMatch(
+      /\.account-app-shell\s*\{[^}]*inline-size:\s*min\(100%,\s*1760px\)/u,
+    );
+    expect(styles).not.toMatch(/\.account-app-shell\s*\{[^}]*margin-inline:\s*auto/u);
   });
 
   it('keeps one compact utility topbar with route context, help, and visible locale control', () => {
@@ -116,7 +121,7 @@ describe('account shell', () => {
     expect(navigationSource).toContain('<LocaleSwitcher');
   });
 
-  it('keeps sign-in as one canonical current destination with truthful entry copy', () => {
+  it('gives sign-in and account creation canonical routes in a dedicated auth shell', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
@@ -128,13 +133,22 @@ describe('account shell', () => {
 
     expect(layoutSource).toContain("signIn: 'Entrar'");
     expect(layoutSource).toContain("signIn: 'Sign in'");
+    expect(layoutSource).toContain("signUp: 'Criar conta'");
+    expect(layoutSource).toContain("signUp: 'Create account'");
     expect(layoutSource).toContain("routeHref('account-sign-in', { locale })");
-    expect(layoutSource).toContain('entryItems={signInEntryItems}');
+    expect(layoutSource).toContain("routeHref('account-sign-up', { locale })");
+    expect(layoutSource).toContain('entryItems={authEntryItems}');
     expect(navigationSource).toContain('entryItems: readonly AccountNavigationItem[]');
     expect(navigationSource).toContain('const allItems = [...entryItems, ...responsibilityItems]');
     expect(navigationSource).toContain('const visibleGroups =');
+    expect(navigationSource).toContain('const isAuthRoute = currentEntryItems.length === 1');
+    expect(navigationSource).toContain('className="account-auth-shell"');
+    expect(navigationSource).toContain('className="account-auth-shell__main"');
     expect(navigationSource).toContain('groups={visibleGroups} markCurrent');
     expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
+    expect(styles).toMatch(
+      /\.account-auth-shell\s*\{[\s\S]*min-block-size:\s*100dvh[\s\S]*inline-size:\s*100%/u,
+    );
     expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
     expect(layoutSource).toContain("accountState: 'No session connected'");
   });
@@ -377,6 +391,7 @@ describe('account errors', () => {
     expect(isAccountErrorRoute('account-security')).toBe(false);
     expect(ACCOUNT_ENTRY_ROUTE_IDS).toEqual([
       'account-sign-in',
+      'account-sign-up',
       'account-overview',
       'account-profile',
       'account-security',

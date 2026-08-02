@@ -29,6 +29,7 @@ const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.m
 const accountStyles = readFileSync(new URL('../app/account-shell.css', import.meta.url), 'utf8');
 const ACCOUNT_ENTRY_ROUTE_IDS = [
   'account-sign-in',
+  'account-sign-up',
   'account-overview',
   'account-profile',
   'account-security',
@@ -61,8 +62,8 @@ const sourceBetween = (start: string, end: string): string => {
 };
 
 describe('account responsibility routes and locales', () => {
-  it('covers sign-in plus every canonical account responsibility in both locales', () => {
-    expect(ACCOUNT_ENTRY_ROUTE_IDS.slice(1)).toEqual(
+  it('covers sign-in, account creation, and every canonical responsibility in both locales', () => {
+    expect(ACCOUNT_ENTRY_ROUTE_IDS.slice(2)).toEqual(
       projectNavigation('account').map(({ id }) => id),
     );
     for (const locale of ['pt-BR', 'en'] as const satisfies readonly WebLocale[]) {
@@ -80,12 +81,19 @@ describe('account responsibility routes and locales', () => {
     expect(featureSource).toContain('href="#preview-email"');
     expect(featureSource).toMatch(/role="alert" tabIndex=\{-1\}/u);
     expect(featureSource).toContain('PreviewWorkflow');
+    expect(featureSource).toContain('export const SignUpPreview');
+    expect(featureSource).toContain('data-account-state="sign-up-preview"');
+    expect(featureSource).toContain("hrefFor('account-sign-up', content.locale)");
+    expect(featureSource).toContain("hrefFor('account-sign-in', content.locale)");
+    expect(accountPtBr.signUp.title).toBe('Criar sua conta');
+    expect(accountEn.signUp.title).toBe('Create your account');
   });
 });
 
 describe('W11 and W12 complete account states', () => {
   it('renders ready responsibility data and degraded recovery without hiding preview provenance', () => {
-    expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(1));
+    expect(getWebScenario('W10').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(0, 2));
+    expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(2));
     expect(getWebScenario('W12')).toMatchObject({ terminalState: 'authority-unavailable' });
     expect(featureSource).toContain('data-authority-connected="false"');
     expect(degradedSource).toContain(
