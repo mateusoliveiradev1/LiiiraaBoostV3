@@ -286,6 +286,54 @@ const captureCandidateIfUpdating = async (
   });
 };
 
+const projectInternalAccountScenario = async (page: Page, scenario: Scenario): Promise<void> => {
+  if (scenario.id !== 'W12') return;
+  expect(scenario).toMatchObject({
+    locale: 'en',
+    routeId: 'account-overview',
+    terminalState: 'authority-unavailable',
+  });
+  const { createW12AccountCaptureProjection } = await import('../../../apps/account/src/index.ts');
+  const projection = await createW12AccountCaptureProjection();
+  expect(projection).toMatchObject({
+    locale: scenario.locale,
+    routeId: scenario.routeId,
+    scenarioId: scenario.id,
+  });
+
+  const staticDocument = await page.evaluate((captureMarkup) => {
+    const documentClone = document.documentElement.cloneNode(true) as HTMLElement;
+    const currentProjection = documentClone.querySelector('[data-account-preview="deterministic"]');
+    const template = document.createElement('template');
+    template.innerHTML = captureMarkup.trim();
+    const captureProjection = template.content.firstElementChild;
+    if (currentProjection === null || captureProjection === null) {
+      throw new Error('W12_CAPTURE_PROJECTION_UNAVAILABLE');
+    }
+    currentProjection.replaceWith(captureProjection);
+    documentClone.querySelectorAll('script').forEach((script) => script.remove());
+    documentClone.dataset['evidenceProjection'] = 'W12';
+    return `<!doctype html>${documentClone.outerHTML}`;
+  }, projection.markup);
+  await page.setContent(staticDocument, { waitUntil: 'load' });
+
+  const experience = page.locator('[data-account-preview="deterministic"]');
+  await expect(page.locator('html')).toHaveAttribute('data-evidence-projection', 'W12');
+  await expect(page.locator('script')).toHaveCount(0);
+  await expect(experience).toHaveAttribute('data-scenario-id', 'W12');
+  await expect(experience.locator('article')).toHaveAttribute(
+    'data-account-state',
+    'offline stale expired-session partial-failure',
+  );
+  await expect(experience).toContainText('Account information cannot be refreshed right now.');
+  await expect(experience.locator('p[role="status"]')).toContainText(
+    'Display name, language, and support subject remain available',
+  );
+  await expect(
+    experience.getByRole('navigation', { name: 'Safe recovery' }).getByRole('link'),
+  ).toHaveText(['Review sign-in', 'Open support preview']);
+};
+
 test('@final @public development CSP is browser-clean on every separate origin', async ({
   page,
 }, testInfo) => {
@@ -510,6 +558,7 @@ for (const scenario of scenarioDocument.scenarios) {
     onlyAxis(testInfo, axis);
     expect(String(testInfo.project.metadata['frozenClock'])).toBe(scenario.clock);
     await page.goto(routeFor(scenario), { waitUntil: 'networkidle' });
+    await projectInternalAccountScenario(page, scenario);
     await expectAccessibleResponsivePage(page);
     expect(visualManifest.entries.find(({ captureId }) => captureId === scenario.id)).toMatchObject(
       {

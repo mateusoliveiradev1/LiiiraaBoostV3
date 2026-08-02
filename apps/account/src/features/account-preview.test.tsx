@@ -15,6 +15,12 @@ import accountEn from '../content/account.en.json';
 import accountPtBr from '../content/account.pt-BR.json';
 
 const featureSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
+const degradedSource = readFileSync(
+  new URL('./account-degraded-preview.tsx', import.meta.url),
+  'utf8',
+);
+const scenarioSource = readFileSync(new URL('./account-scenario.ts', import.meta.url), 'utf8');
+const captureSource = readFileSync(new URL('../capture/w12.ts', import.meta.url), 'utf8');
 const pageSource = readFileSync(
   new URL('../app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
   'utf8',
@@ -82,33 +88,39 @@ describe('W11 and W12 complete account states', () => {
     expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(1));
     expect(getWebScenario('W12')).toMatchObject({ terminalState: 'authority-unavailable' });
     expect(featureSource).toContain('data-authority-connected="false"');
-    expect(featureSource).toContain(
+    expect(degradedSource).toContain(
       'data-account-state="offline stale expired-session partial-failure"',
     );
-    expect(featureSource).toContain("hrefFor('account-sign-in', content.locale)");
-    expect(featureSource).toContain("hrefFor('account-support', content.locale)");
+    expect(degradedSource).toContain("hrefFor('account-sign-in', content.locale)");
+    expect(degradedSource).toContain("hrefFor('account-support', content.locale)");
   });
 
   it('projects the canonical W12 Overview into an independently renderable offline-stale recovery state', () => {
-    expect(featureSource).toContain('export const resolveAccountScenarioId');
+    expect(scenarioSource).toContain('export const resolveAccountScenarioId');
     expect(featureSource).toContain("if (activeScenarioId === 'W12')");
-    expect(featureSource).toContain(
+    expect(degradedSource).toContain(
       'data-account-state="offline stale expired-session partial-failure"',
     );
-    expect(featureSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
+    expect(degradedSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
     expect(accountEn.states.offline).toMatch(/offline/iu);
     expect(accountEn.states.stale).toMatch(/out of date|stale/iu);
     expect(accountEn.states.stale).toMatch(/Reconnect|refresh/iu);
-    expect(featureSource).toContain('<p role="status">');
+    expect(degradedSource).toContain('<p role="status">');
+  });
+
+  it('wires the test-owned W12 capture through the canonical resolver without a selector', () => {
+    expect(captureSource).toContain('createW12AccountCaptureProjection = ()');
+    expect(captureSource).toContain("resolveAccountScenarioId('account-overview', 'W12')");
+    expect(captureSource).toContain('scenarioId,');
+    expect(captureSource).not.toMatch(
+      /searchParams|process\.env|document\.cookie|localStorage|sessionStorage/iu,
+    );
+    expect(pageSource).not.toContain('capture/w12');
   });
 
   it('admits only canonical route-compatible scenarios without exposing a user selector', () => {
-    const resolverSource = sourceBetween(
-      'export const resolveAccountScenarioId',
-      'export const AccountPreviewExperience',
-    );
-    expect(resolverSource).toContain('getWebScenario(candidate)');
-    expect(resolverSource).toContain('ACCOUNT_SCENARIO_ROUTE_MISMATCH');
+    expect(scenarioSource).toContain('getWebScenario(candidate)');
+    expect(scenarioSource).toContain('ACCOUNT_SCENARIO_ROUTE_MISMATCH');
     expect(pageSource).not.toMatch(/searchParams|scenarioId|process\.env/u);
   });
 
@@ -298,10 +310,10 @@ describe('task-specific account workspace density', () => {
     expect(featureSource).toContain("state = 'ready'");
     expect(featureSource).toContain("if (state === 'loading')");
     expect(featureSource).toContain("if (state === 'empty')");
-    expect(featureSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
+    expect(degradedSource).toContain('DEGRADED_ACCOUNT_STATE_LABELS');
     expect(featureSource).not.toContain("label={state === 'failure' ? 'Failure' : state}");
     expect(featureSource).toContain('data-account-state="empty"');
-    expect(featureSource).toContain(
+    expect(degradedSource).toContain(
       'data-account-state="offline stale expired-session partial-failure"',
     );
     expect(featureSource).toContain('PreviewWorkflow');

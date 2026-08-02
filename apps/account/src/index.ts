@@ -3,3 +3,5 @@ export const ACCOUNT_WEB_COMPOSITION = {
   surface: "account",
   authorityConnected: false,
 } as const;
+
+export { createW12AccountCaptureProjection } from "./capture/w12";
