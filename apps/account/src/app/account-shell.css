@@ -1265,6 +1265,13 @@ button:focus-visible,
   color: var(--lb-text-secondary);
 }
 
+.account-sidebar__entry .account-nav__list a:hover,
+.account-sidebar__entry .account-nav__list a:focus-visible {
+  border-color: var(--lb-line-strong);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-work);
+}
+
 .account-header {
   grid-column: 2 / -1;
   grid-row: 1;

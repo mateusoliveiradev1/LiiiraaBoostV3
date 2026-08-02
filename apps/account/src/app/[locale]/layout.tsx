@@ -72,19 +72,19 @@ const NAVIGATION_LABELS = Object.freeze({
 const NAVIGATION_ICONS = Object.freeze({
   'account-device': 'device',
   'account-downloads': 'download',
-  'account-invoices': 'list',
-  'account-overview': 'speedometer',
+  'account-invoices': 'receipt',
+  'account-overview': 'gauge',
   'account-privacy': 'lock',
   'account-profile': 'profile',
   'account-security': 'shield',
   'account-subscription': 'crown',
-  'account-support': 'toolbox',
+  'account-support': 'lifebuoy',
 } as const);
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     accountIdentity: 'Conta demonstrativa',
-    accountState: 'Nenhuma sessão conectada',
+    accountState: 'Sessão de demonstração ativa',
     authBody:
       'Gerencie sua assinatura, mantenha seus dispositivos protegidos e acesse o aplicativo para Windows.',
     authEyebrow: 'Sua conta Liiiraa Boost',
@@ -111,6 +111,7 @@ const COPY = Object.freeze({
     securityAction: 'Revisar segurança',
     securityTitle: 'Segurança',
     signIn: 'Entrar',
+    signOut: 'Sair',
     signUp: 'Criar conta',
     skip: 'Ir para o conteúdo da conta',
     supportAction: 'Abrir suporte',
@@ -119,7 +120,7 @@ const COPY = Object.freeze({
   }),
   en: Object.freeze({
     accountIdentity: 'Demonstration account',
-    accountState: 'No session connected',
+    accountState: 'Demo session active',
     authBody:
       'Manage your subscription, keep devices protected, and access the Windows application.',
     authEyebrow: 'Your Liiiraa Boost account',
@@ -145,6 +146,7 @@ const COPY = Object.freeze({
     securityAction: 'Review security',
     securityTitle: 'Security',
     signIn: 'Sign in',
+    signOut: 'Sign out',
     signUp: 'Create account',
     skip: 'Skip to account content',
     supportAction: 'Open support',
@@ -235,7 +237,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
       label: NAVIGATION_LABELS[routeId][locale],
     })),
   }));
-  const authEntryItems: readonly AccountNavigationItem[] = [
+  const authRouteItems: readonly AccountNavigationItem[] = [
     {
       href: localizedAuthHref('account-sign-in', locale),
       icon: 'profile',
@@ -243,10 +245,15 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
     },
     {
       href: localizedAuthHref('account-sign-up', locale),
-      icon: 'sparkle',
+      icon: 'userAdd',
       label: copy.signUp,
     },
   ];
+  const authenticatedAction: AccountNavigationItem = {
+    href: localizedAuthHref('account-sign-in', locale),
+    icon: 'logout',
+    label: copy.signOut,
+  };
 
   return (
     <html
@@ -262,6 +269,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
 
         <AccountNavigation
           alternateLocale={alternateLocale}
+          authenticatedAction={authenticatedAction}
           authBrand={
             <a className="account-brand" href={publicHomeHref(locale)}>
               <ProductLockup />
@@ -286,7 +294,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
             </a>
           }
           currentTaskLabel={copy.currentTask}
-          entryItems={authEntryItems}
+          authRouteItems={authRouteItems}
           fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
           groups={navigationGroups}
           identity={

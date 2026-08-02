@@ -148,9 +148,7 @@ describe('account shell', () => {
     expect(navigationSource).toContain(
       'const allItems = [...authRouteItems, ...responsibilityItems]',
     );
-    expect(navigationSource).toContain(
-      'const isAuthRoute = currentAuthRouteItems.length === 1',
-    );
+    expect(navigationSource).toContain('const isAuthRoute = currentAuthRouteItems.length === 1');
     expect(navigationSource).toContain('className="account-auth-shell"');
     expect(navigationSource).toContain('className="account-auth-shell__main"');
     expect(navigationSource).toContain('groups={[{ items: [authenticatedAction] }]}');
@@ -251,7 +249,7 @@ describe('account shell', () => {
 
     expect(navigationSource).toContain('<details className="account-nav account-nav__mobile">');
     expect(navigationSource).toContain('<nav aria-label={label}>');
-    expect(navigationSource).toContain('groups={visibleGroups}');
+    expect(navigationSource).toContain('groups={groups}');
     expect(navigationSource).toContain('markCurrent={false}');
     expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
     expect(navigationSource).not.toMatch(/onKeyDown|onClick|role="button"/u);

@@ -19,12 +19,13 @@ export type AccountNavigationGroup = Readonly<{
 
 type AccountNavigationProps = Readonly<{
   alternateLocale: WebLocale;
+  authenticatedAction: AccountNavigationItem;
   authBrand: ReactNode;
   authIntro: ReactNode;
   brand: ReactNode;
   children: ReactNode;
   currentTaskLabel: string;
-  entryItems: readonly AccountNavigationItem[];
+  authRouteItems: readonly AccountNavigationItem[];
   fallbackLocaleHref: string;
   groups: readonly AccountNavigationGroup[];
   identity: ReactNode;
@@ -89,12 +90,13 @@ function NavigationGroups({
 
 export function AccountNavigation({
   alternateLocale,
+  authenticatedAction,
   authBrand,
   authIntro,
   brand,
   children,
   currentTaskLabel,
-  entryItems,
+  authRouteItems,
   fallbackLocaleHref,
   groups,
   identity,
@@ -119,7 +121,9 @@ export function AccountNavigation({
     };
     synchronizeInspector();
     wideShell.addEventListener('change', synchronizeInspector);
-    return () => wideShell.removeEventListener('change', synchronizeInspector);
+    return () => {
+      wideShell.removeEventListener('change', synchronizeInspector);
+    };
   }, []);
   const localizedCurrentRoute = resolveLocalizedCurrentRoute({
     pathname,
@@ -128,20 +132,18 @@ export function AccountNavigation({
   });
   const currentHref = localizedCurrentRoute.ok ? localizedCurrentRoute.value : undefined;
   const responsibilityItems = groups.flatMap(({ items: groupItems }) => groupItems);
-  const allItems = [...entryItems, ...responsibilityItems];
+  const allItems = [...authRouteItems, ...responsibilityItems];
   const currentItems = allItems.filter(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
   const currentItem = currentItems.length === 1 ? currentItems[0] : undefined;
   const currentLabel = currentItem?.label ?? label;
-  const currentEntryItems = entryItems.filter(
+  const currentAuthRouteItems = authRouteItems.filter(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
-  const visibleGroups =
-    currentEntryItems.length === 1 ? [{ items: currentEntryItems }, ...groups] : groups;
-  const isAuthRoute = currentEntryItems.length === 1;
+  const isAuthRoute = currentAuthRouteItems.length === 1;
   const localizedAlternateRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'account-origin',
@@ -181,15 +183,15 @@ export function AccountNavigation({
         <div className="account-sidebar__brand">{brand}</div>
         <nav aria-label={label} className="account-nav account-nav__desktop">
           <p className="account-nav__label">{label}</p>
-          <NavigationGroups currentHref={currentHref} groups={visibleGroups} markCurrent />
+          <NavigationGroups currentHref={currentHref} groups={groups} markCurrent />
         </nav>
         <div className="account-sidebar__footer">
           <div className="account-sidebar__identity">{identity}</div>
           <nav aria-label={surfaceLabel} className="account-sidebar__entry">
             <NavigationGroups
               currentHref={currentHref}
-              groups={[{ items: entryItems }]}
-              markCurrent
+              groups={[{ items: [authenticatedAction] }]}
+              markCurrent={false}
             />
           </nav>
         </div>
@@ -205,7 +207,7 @@ export function AccountNavigation({
           </nav>
           <div className="account-header__tools">
             <a className="account-header__support" href={supportHref}>
-              <ProductIcon name="info" size={18} />
+              <ProductIcon name="lifebuoy" size={18} />
               <span>{supportLabel}</span>
             </a>
             <LocaleSwitcher
@@ -225,11 +227,7 @@ export function AccountNavigation({
             <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
           </summary>
           <nav aria-label={label}>
-            <NavigationGroups
-              currentHref={currentHref}
-              groups={visibleGroups}
-              markCurrent={false}
-            />
+            <NavigationGroups currentHref={currentHref} groups={groups} markCurrent={false} />
           </nav>
         </details>
         <div className="account-preview-slot">{preview}</div>

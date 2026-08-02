@@ -211,7 +211,9 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   const mutations = mutationRequests(page);
 
   await page.goto('/en/sign-in');
-  await expect(page.getByRole('heading', { level: 1, name: 'Sign in to your account' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Sign in to your account' }),
+  ).toBeVisible();
   await expect(page.locator('.account-auth-shell')).toBeVisible();
   await expect(page.locator('.account-app-shell')).toHaveCount(0);
   await expect(page.locator('.account-sidebar')).toHaveCount(0);

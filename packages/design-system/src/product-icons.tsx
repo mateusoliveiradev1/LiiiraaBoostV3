@@ -36,6 +36,7 @@ import {
   Info as InfoIcon,
   Key as KeyIcon,
   Leaf as LeafIcon,
+  Lifebuoy as LifebuoyIcon,
   Lightning as LightningIcon,
   Link as LinkIcon,
   ListChecks as ListChecksIcon,
@@ -52,6 +53,7 @@ import {
   Power as PowerIcon,
   Pulse as PulseIcon,
   PushPin as PushPinIcon,
+  Receipt as ReceiptIcon,
   RocketLaunch as RocketLaunchIcon,
   Scales as ScalesIcon,
   Scan as ScanIcon,
@@ -70,6 +72,7 @@ import {
   Trash as TrashIcon,
   Usb as UsbIcon,
   UserCircle as UserCircleIcon,
+  UserPlus as UserPlusIcon,
   Warning as WarningIcon,
   Waveform as WaveformIcon,
   WifiHigh as WifiHighIcon,
@@ -113,6 +116,7 @@ const PRODUCT_ICONS = Object.freeze({
   info: InfoIcon,
   key: KeyIcon,
   leaf: LeafIcon,
+  lifebuoy: LifebuoyIcon,
   languages: GlobeIcon,
   lightning: LightningIcon,
   link: LinkIcon,
@@ -134,6 +138,7 @@ const PRODUCT_ICONS = Object.freeze({
   profile: UserCircleIcon,
   radar: ScanIcon,
   recovery: ArrowCounterClockwiseIcon,
+  receipt: ReceiptIcon,
   rocket: RocketLaunchIcon,
   scales: ScalesIcon,
   search: MagnifyingGlassIcon,
@@ -153,6 +158,7 @@ const PRODUCT_ICONS = Object.freeze({
   toolbox: ToolboxIcon,
   trash: TrashIcon,
   usb: UsbIcon,
+  userAdd: UserPlusIcon,
   warning: WarningIcon,
   wifi: WifiHighIcon,
   windows: WindowsLogoIcon,
@@ -177,7 +183,11 @@ export const ProductIcon = ({
   const IconComponent = PRODUCT_ICONS[name];
 
   return (
-    <span aria-hidden="true" className={['lb-product-icon', className].filter(Boolean).join(' ')}>
+    <span
+      aria-hidden="true"
+      className={['lb-product-icon', className].filter(Boolean).join(' ')}
+      data-icon-library="phosphor"
+    >
       <IconComponent size={size} weight={weight} />
     </span>
   );

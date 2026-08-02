@@ -45,6 +45,7 @@ declare module '@phosphor-icons/react' {
   export const Info: IconComponent;
   export const Key: IconComponent;
   export const Leaf: IconComponent;
+  export const Lifebuoy: IconComponent;
   export const Lightning: IconComponent;
   export const Link: IconComponent;
   export const ListChecks: IconComponent;
@@ -61,6 +62,7 @@ declare module '@phosphor-icons/react' {
   export const Power: IconComponent;
   export const Pulse: IconComponent;
   export const PushPin: IconComponent;
+  export const Receipt: IconComponent;
   export const RocketLaunch: IconComponent;
   export const Scales: IconComponent;
   export const Scan: IconComponent;
@@ -79,6 +81,7 @@ declare module '@phosphor-icons/react' {
   export const Trash: IconComponent;
   export const Usb: IconComponent;
   export const UserCircle: IconComponent;
+  export const UserPlus: IconComponent;
   export const Warning: IconComponent;
   export const Waveform: IconComponent;
   export const WifiHigh: IconComponent;
