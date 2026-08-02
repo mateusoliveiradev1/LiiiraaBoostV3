@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-63-PLAN.md
-last_updated: "2026-08-01T23:26:28.017Z"
+stopped_at: Completed 03-64-PLAN.md
+last_updated: "2026-08-02T01:21:16.841Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 119
+  completed_plans: 120
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 12 of 66
+Plan: 13 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -167,6 +167,7 @@ _Updated after plan completion_
 | Phase 03 P61 | 58min | 2 tasks | 12 files |
 | Phase 03 P62 | 1h 52m | 2 tasks | 29 files |
 | Phase 03 P63 | 54min | 1 tasks | 1 files |
+| Phase 03 P64 | 10min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -503,6 +504,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Keep raw release manifest and repository identifiers subordinate inside closed localized technical disclosures.
 - [Phase 03]: Keep the shell as the sole persistent preview-truth owner — Ordinary account workspaces stay task-first while sensitive Privacy and degraded states explain human consequences directly.
 - [Phase 03]: Admit explicit account scenarios through canonical registry and route compatibility — Account pages expose no URL, environment, or browser-controlled scenario selector.
+- [Phase 03]: Accept all eight account candidates after W10 uses direct identity-unavailable, no-remote-verification, and no-authority language. — Original-resolution inspection and the full filtered replay both pass.
+- [Phase 03]: Keep account human and publication approval false at Plan 03-64. — This plan records bounded candidate quality only; later gates own human and publication authority.
 
 ### Pending Todos
 
@@ -544,6 +547,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T23:26:13.054Z
-Stopped at: Completed 03-63-PLAN.md
+Last session: 2026-08-02T01:21:16.836Z
+Stopped at: Completed 03-64-PLAN.md
 Resume file: None
