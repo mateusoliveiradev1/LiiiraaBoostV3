@@ -250,6 +250,15 @@ Each task was committed atomically through its TDD gates:
 - The exact unfiltered motion contract passed 5 tests with 40 intentional project/axis skips.
 - No application source, evidence harness, manifest, archive, candidate screenshot, package, or lockfile changed during this replay. The unrelated untracked `apps/desktop/src-tauri/gen/` directory was preserved untouched.
 
+## Post-W12-Correction Replay
+
+- Replayed Plan 03-61 after `6d05c1b` bound W12 capture to the canonical account state and `d169fc2` recorded that Plan 03-62 correction.
+- The permanent dry-list contract passed 1 test and proved exactly 25 unique project/ID pairs with no duplicate or extra W01-W18/G01-G07 selection.
+- The live candidate-aware browser matrix passed all 25 tests with no skips or failures: 12 public candidates across four projects, 8 account candidates across five projects, and 5 admin candidates across two projects. W12 passed on `account-final-wide-1280`.
+- The exact unfiltered motion contract started all required origins and passed 5 tests with 40 intentional project/axis skips.
+- The web-evidence TypeScript check, focused harness/manifest Prettier check, and `git diff --check` passed.
+- Snapshot update mode was never enabled. No application source, evidence harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
+
 ## Known Stubs
 
 None - no placeholder, TODO, FIXME, empty UI data source, or future-only stub was introduced.
