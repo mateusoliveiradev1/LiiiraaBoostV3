@@ -17,7 +17,6 @@ import {
 import type { ReactNode } from 'react';
 
 import documentationMetadata from '../content/docs/docs.metadata.json';
-import '../styles/public.css';
 
 type SearchValue = string | readonly string[] | undefined;
 

@@ -15,6 +15,12 @@ import { getPublicNavigationState, type PublicPillarId } from './public-navigati
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
+const routeOwnedSources = [
+  './app/[locale]/(public)/[[...slug]]/page.tsx',
+  './app/[locale]/download/[channel]/[version]/page.tsx',
+  './app/[locale]/releases/[[...release]]/page.tsx',
+  './features/documentation.tsx',
+].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8'));
 
 describe('public shell', () => {
   it.each([
@@ -68,6 +74,12 @@ describe('public shell', () => {
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).not.toContain('public-brand__mark');
     expect(layoutSource).not.toMatch(/>\s*LB\s*</u);
+  });
+
+  it('owns all public authoring styles at the locale layout boundary', () => {
+    expect(layoutSource).toContain("import '../public-shell.css';");
+    expect(layoutSource).toContain("import '../../styles/public.css';");
+    expect(routeOwnedSources.every((source) => !source.includes('styles/public.css'))).toBe(true);
   });
 
   it('builds a substantial 72px branded desktop topbar with six intent pillars', () => {

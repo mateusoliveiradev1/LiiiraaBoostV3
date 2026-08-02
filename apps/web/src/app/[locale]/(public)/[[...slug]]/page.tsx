@@ -12,7 +12,6 @@ import { DocumentationExperience } from '../../../../features/documentation';
 import { CommandRunwayHome, getHomeContent } from '../../../../features/home';
 import { ForbiddenState, GoneState, ServerFailureState } from '../../../../features/public-failure';
 import { routing } from '../../../../public-boundary';
-import '../../../../styles/public.css';
 
 type PublicCatchAllPageProps = Readonly<{
   params: Promise<{

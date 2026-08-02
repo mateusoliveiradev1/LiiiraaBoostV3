@@ -69,7 +69,7 @@ const developmentSurfaces = Object.freeze([
     app: '@liiiraa/web',
     existingOrigin: 'http://public.localhost:3000',
     origin: 'http://public.localhost:3200',
-    route: '/en/docs/current',
+    route: '/en',
   },
   {
     app: '@liiiraa/account',
@@ -178,10 +178,149 @@ const expectNoBlockingAxeViolations = async (page: Page): Promise<void> => {
   expect(blocking, `Blocking axe findings:\n${JSON.stringify(blocking, null, 2)}`).toEqual([]);
 };
 
+const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
+  if ((await page.locator('.public-home').count()) === 0) return;
+
+  const parity = await page.evaluate(() => {
+    const requiredSelectors = [
+      '.public-header',
+      '.home-ignition-hero',
+      '.home-ignition-hero__promise',
+      '.home-ignition-hero__stage',
+      '.home-prepare-band__introduction',
+      '.home-context-stage',
+      '.home-compatibility-field',
+      '.home-compatibility-field__states > div',
+      '.home-release-ribbon',
+    ] as const;
+    const missing = requiredSelectors.filter(
+      (selector) => document.querySelector(selector) === null,
+    );
+    const elementFor = (selector: (typeof requiredSelectors)[number]): HTMLElement => {
+      const element = document.querySelector(selector);
+      if (!(element instanceof HTMLElement)) {
+        throw new Error(`PUBLIC_HOME_AUTHORING_PARITY:missing:${selector}`);
+      }
+      return element;
+    };
+    const boxAndStyle = (selector: (typeof requiredSelectors)[number]) => {
+      const element = elementFor(selector);
+      const box = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        bottom: box.bottom,
+        columnGap: Number.parseFloat(style.columnGap),
+        display: style.display,
+        fontSize: Number.parseFloat(style.fontSize),
+        height: box.height,
+        left: box.left,
+        position: style.position,
+        right: box.right,
+        textAlign: style.textAlign,
+        top: box.top,
+        width: box.width,
+      };
+    };
+    const visibleLocaleCount = [...document.querySelectorAll('.lb-web-locale-switcher')].filter(
+      (node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        if (node.closest('details:not([open])') !== null) return false;
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return (
+          box.width > 0 &&
+          box.height > 0 &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden'
+        );
+      },
+    ).length;
+
+    return {
+      compatibility: boxAndStyle('.home-compatibility-field'),
+      compatibilityRow: boxAndStyle('.home-compatibility-field__states > div'),
+      context: boxAndStyle('.home-context-stage'),
+      header: boxAndStyle('.public-header'),
+      headerCount: document.querySelectorAll('.public-header').length,
+      heading: boxAndStyle('.home-ignition-hero__promise'),
+      hero: boxAndStyle('.home-ignition-hero'),
+      missing,
+      prepare: boxAndStyle('.home-prepare-band__introduction'),
+      release: boxAndStyle('.home-release-ribbon'),
+      stage: boxAndStyle('.home-ignition-hero__stage'),
+      viewportWidth: document.documentElement.clientWidth,
+      visibleLocaleCount,
+    };
+  });
+
+  expect(parity.missing, 'PUBLIC_HOME_AUTHORING_PARITY: required nodes must exist').toEqual([]);
+  expect(parity.headerCount, 'PUBLIC_HOME_AUTHORING_PARITY: exactly one header').toBe(1);
+  expect(parity.visibleLocaleCount, 'PUBLIC_HOME_AUTHORING_PARITY: one locale projection').toBe(1);
+  expect(parity.header.position, 'PUBLIC_HOME_AUTHORING_PARITY: sticky shell').toBe('sticky');
+  expect(
+    parity.header.height,
+    'PUBLIC_HOME_AUTHORING_PARITY: authored header height',
+  ).toBeGreaterThanOrEqual(60);
+  expect(
+    parity.header.height,
+    'PUBLIC_HOME_AUTHORING_PARITY: authored header height',
+  ).toBeLessThanOrEqual(74);
+  expect(
+    Math.abs(parity.header.bottom - parity.hero.top),
+    'PUBLIC_HOME_AUTHORING_PARITY: header must not overlap initial hero geometry',
+  ).toBeLessThanOrEqual(1);
+  expect(parity.hero.display, 'PUBLIC_HOME_AUTHORING_PARITY: hero grid binding').toBe('grid');
+  expect(parity.hero.position, 'PUBLIC_HOME_AUTHORING_PARITY: hero positioning binding').toBe(
+    'relative',
+  );
+  expect(parity.heading.textAlign, 'PUBLIC_HOME_AUTHORING_PARITY: centered promise').toBe('center');
+  expect(
+    parity.heading.fontSize,
+    'PUBLIC_HOME_AUTHORING_PARITY: authored promise scale',
+  ).toBeGreaterThanOrEqual(parity.viewportWidth >= 960 ? 52 : 36);
+  expect(
+    parity.heading.fontSize,
+    'PUBLIC_HOME_AUTHORING_PARITY: bounded promise scale',
+  ).toBeLessThanOrEqual(80);
+  expect(
+    parity.hero.width,
+    'PUBLIC_HOME_AUTHORING_PARITY: bounded hero measure',
+  ).toBeLessThanOrEqual(1_320);
+  expect(
+    Math.abs(parity.hero.left + parity.hero.width / 2 - parity.viewportWidth / 2),
+    'PUBLIC_HOME_AUTHORING_PARITY: centered hero measure',
+  ).toBeLessThanOrEqual(2);
+  expect(parity.stage.position, 'PUBLIC_HOME_AUTHORING_PARITY: staged product positioning').toBe(
+    'relative',
+  );
+  expect(
+    parity.stage.width,
+    'PUBLIC_HOME_AUTHORING_PARITY: controlled product width',
+  ).toBeGreaterThanOrEqual(parity.hero.width * (parity.viewportWidth >= 960 ? 0.75 : 0.8));
+  expect(parity.prepare.display, 'PUBLIC_HOME_AUTHORING_PARITY: sequence grid binding').toBe(
+    'grid',
+  );
+  expect(parity.context.display, 'PUBLIC_HOME_AUTHORING_PARITY: context grid binding').toBe('grid');
+  expect(
+    parity.compatibility.display,
+    'PUBLIC_HOME_AUTHORING_PARITY: compatibility grid binding',
+  ).toBe('grid');
+  expect(parity.release.display, 'PUBLIC_HOME_AUTHORING_PARITY: release grid binding').toBe('grid');
+  expect(
+    parity.compatibilityRow.display,
+    'PUBLIC_HOME_AUTHORING_PARITY: label/value grid binding',
+  ).toBe('grid');
+  expect(
+    parity.compatibilityRow.columnGap,
+    'PUBLIC_HOME_AUTHORING_PARITY: label/value gap',
+  ).toBeGreaterThanOrEqual(16);
+};
+
 const expectAccessibleResponsivePage = async (page: Page): Promise<void> => {
   await expect(page.locator('main')).toHaveCount(1);
   await expect(page.locator('main h1')).toHaveCount(1);
   await expect(page.locator('html')).toHaveAttribute('lang', /^(?:en|pt-BR)$/u);
+  await expectPublicHomeAuthoringParity(page);
 
   const { horizontalOverflow, overflowSources } = await page.evaluate(() => {
     const viewportWidth = document.documentElement.clientWidth;
@@ -273,17 +412,29 @@ const resetForNeutralCapture = async (page: Page): Promise<void> => {
 const isCandidateCaptureUpdate = (testInfo: TestInfo): boolean =>
   ['all', 'changed', 'missing'].includes(testInfo.config.updateSnapshots);
 
-const captureCandidateIfUpdating = async (
-  page: Page,
-  testInfo: TestInfo,
-  captureId: string,
-): Promise<void> => {
-  if (!isCandidateCaptureUpdate(testInfo)) return;
+const expectCurrentCandidatePixels = async (page: Page, captureId: string): Promise<void> => {
   await resetForNeutralCapture(page);
   await expect(page).toHaveScreenshot(`${captureId}.png`, {
     animations: 'disabled',
     fullPage: true,
   });
+};
+
+const installStalePublicAuthoringSelectors = async (page: Page): Promise<readonly string[]> => {
+  const neutralized: string[] = [];
+  await page.route('**/*.css*', async (route) => {
+    const response = await route.fetch();
+    const body = await response.text();
+    const staleBody = body
+      .replaceAll('.home-ignition-', '.stale-home-ignition-')
+      .replaceAll('.home-prepare-', '.stale-home-prepare-')
+      .replaceAll('.home-context-', '.stale-home-context-')
+      .replaceAll('.home-compatibility-', '.stale-home-compatibility-')
+      .replaceAll('.home-release-', '.stale-home-release-');
+    if (staleBody !== body) neutralized.push(route.request().url());
+    await route.fulfill({ body: staleBody, response });
+  });
+  return neutralized;
 };
 
 const projectInternalAccountScenario = async (page: Page, scenario: Scenario): Promise<void> => {
@@ -394,6 +545,7 @@ test('@final @public development CSP is browser-clean on every separate origin',
       expect(response).not.toBeNull();
       expect(response?.headers()['content-security-policy']).toContain("'unsafe-eval'");
       await expect(page.locator('main')).toBeVisible();
+      if (surface.app === '@liiiraa/web') await expectPublicHomeAuthoringParity(page);
       await page.waitForTimeout(500);
       expect(consoleErrors, `${surface.app} emitted the reported React/Turbopack error`).toEqual(
         [],
@@ -547,6 +699,21 @@ test('@final @public candidate update flag activates deterministic capture mode'
   expect(visualManifest.entries).toHaveLength(25);
 });
 
+test('@final @public authored style parity rejects stale Home selector bindings', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  const neutralized = await installStalePublicAuthoringSelectors(page);
+
+  await page.goto('/pt-BR', { waitUntil: 'networkidle' });
+
+  await expect(expectAccessibleResponsivePage(page)).rejects.toThrow(
+    /PUBLIC_HOME_AUTHORING_PARITY/u,
+  );
+  expect(neutralized.length).toBeGreaterThan(0);
+  await expect(page.locator('.public-header__bar')).toBeVisible();
+});
+
 for (const scenario of scenarioDocument.scenarios) {
   const surface = surfaceFor(scenario.routeId);
   const axis = AXIS_BY_VIEWPORT[scenario.viewport as keyof typeof AXIS_BY_VIEWPORT];
@@ -567,7 +734,7 @@ for (const scenario of scenarioDocument.scenarios) {
         visualTarget: false,
       },
     );
-    await captureCandidateIfUpdating(page, testInfo, scenario.id);
+    await expectCurrentCandidatePixels(page, scenario.id);
   });
 }
 
@@ -586,7 +753,7 @@ for (const entry of visualManifest.entries.filter(({ captureId }) => captureId.s
       status: 'candidate',
       visualTarget: false,
     });
-    await captureCandidateIfUpdating(page, testInfo, entry.captureId);
+    await expectCurrentCandidatePixels(page, entry.captureId);
   });
 }
 

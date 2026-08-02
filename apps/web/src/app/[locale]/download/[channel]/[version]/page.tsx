@@ -6,7 +6,6 @@ import {
   ReleaseExperience,
   resolveDownloadPage,
 } from '../../../../../features/releases';
-import '../../../../../styles/public.css';
 
 type DownloadPageProps = Readonly<{
   params: Promise<{
