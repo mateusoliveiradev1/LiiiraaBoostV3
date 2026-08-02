@@ -212,9 +212,18 @@ Each task was committed atomically through its TDD gates:
 - **Verification:** Focused RED reproduced the literal mismatch; focused GREEN passed 1 selected test, the complete admin suite passed 58/58, and TypeScript, Prettier, and `git diff --check` passed.
 - **Committed in:** `f053880`
 
+**10. [Rule 1 - Bug] Started every origin for cross-surface security evidence**
+
+- **Found during:** Plan 03-66 security-artifact verification
+- **Issue:** An explicit public Playwright project caused `security-artifacts.spec.ts` to start only the public server even though the spec verifies public, account, and admin origins.
+- **Fix:** Added an exact `security-artifacts.spec.ts` cross-surface exception while retaining the existing explicit-project isolation for ordinary focused commands.
+- **Files modified:** `tooling/web-evidence/playwright.config.ts`
+- **Verification:** Focused RED passed 2 policies and failed the cross-surface policy; GREEN passed all 3. The 25-candidate matrix and unfiltered motion contract remained green.
+- **Committed in:** `6dec630`
+
 ---
 
-**Total deviations:** 9 auto-fixed (4 Rule 1, 1 Rule 2, 4 Rule 3)
+**Total deviations:** 10 auto-fixed (5 Rule 1, 1 Rule 2, 4 Rule 3)
 **Impact on plan:** All fixes were required to keep the planned exact gates truthful and blocking; no pixels, UAT verdicts, reports, bundles, packages, or publication authority changed.
 
 ## Issues Encountered
@@ -291,6 +300,14 @@ Each task was committed atomically through its TDD gates:
 - The exact unfiltered motion contract started public, account, and admin and passed 5 tests with 40 intentional project/axis skips.
 - The complete admin Vitest suite passed 58/58 across 3 test files. Strict admin and web-evidence TypeScript, focused Prettier, and `git diff --check` passed.
 - No source, test harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed during this replay; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
+
+## Cross-Surface Security Server Correction
+
+- Focused config RED passed 2 tests and failed 1 because `security-artifacts.spec.ts` plus `--project=public-final-wide-1440` selected only the public server. Config GREEN passed all 3 policies after correction `6dec630`.
+- Bare full-suite selection still starts all origins, and ordinary focused public, account, admin, or explicit-project commands remain bounded to their owning surface.
+- The permanent candidate dry-list passed 1 test, and the live candidate-aware matrix passed all 25 project/ID pairs with no skips, failures, or snapshot updates.
+- The exact unfiltered motion contract started all three origins and passed 5 tests with 40 intentional project/axis skips. Web-evidence TypeScript, focused Prettier, and `git diff --check` passed.
+- No screenshot, manifest, archive, approval/publication artifact, application source, package, or lockfile changed; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
 
 ## Known Stubs
 
