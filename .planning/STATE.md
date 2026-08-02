@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-64-PLAN.md
-last_updated: "2026-08-02T01:21:16.841Z"
+stopped_at: Completed 03-65-PLAN.md with revision gate to 03-60
+last_updated: "2026-08-02T01:33:41.727Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 124
-  completed_plans: 120
+  completed_plans: 121
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 13 of 66
+Plan: 14 of 66
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
@@ -168,6 +168,7 @@ _Updated after plan completion_
 | Phase 03 P62 | 1h 52m | 2 tasks | 29 files |
 | Phase 03 P63 | 54min | 1 tasks | 1 files |
 | Phase 03 P64 | 10min | 1 tasks | 2 files |
+| Phase 03 P65 | 5min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -506,6 +507,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Admit explicit account scenarios through canonical registry and route compatibility — Account pages expose no URL, environment, or browser-controlled scenario selector.
 - [Phase 03]: Accept all eight account candidates after W10 uses direct identity-unavailable, no-remote-verification, and no-authority language. — Original-resolution inspection and the full filtered replay both pass.
 - [Phase 03]: Keep account human and publication approval false at Plan 03-64. — This plan records bounded candidate quality only; later gates own human and publication authority.
+- [Phase 03]: Reject W14, W15, W16, and G07 under Plan 03-60; G06 passes original-resolution inspection. — Visible internal Phase prose, untranslated PT-BR audit values, and mobile high-risk control presence violate the admin content contract.
+- [Phase 03]: A passing ordinary replay cannot override qualitative admin content defects. — The exact no-update replay passed while the original-resolution images still violated explicit UI-SPEC copy and mobile authority rules.
 
 ### Pending Todos
 
@@ -547,6 +550,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-02T01:21:16.836Z
-Stopped at: Completed 03-64-PLAN.md
+Last session: 2026-08-02T01:33:41.718Z
+Stopped at: Completed 03-65-PLAN.md with revision gate to 03-60
 Resume file: None
