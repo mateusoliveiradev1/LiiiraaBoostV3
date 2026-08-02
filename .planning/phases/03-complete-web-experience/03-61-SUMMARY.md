@@ -284,6 +284,14 @@ Each task was committed atomically through its TDD gates:
 - The complete admin Vitest suite passed 58/58 across 3 test files after the test-only correction `f053880`.
 - Strict admin TypeScript, focused Prettier, and `git diff --check` passed. No screenshot update command ran, and no source CSS, design token, evidence artifact, package, or lockfile changed.
 
+## Full Post-Admin-Correction Replay
+
+- The permanent dry-list owner proof passed 1 test and selected exactly 25 unique W01-W18/G01-G07 project/ID pairs.
+- The candidate-aware browser matrix passed all 25 tests with no skips or failures and no snapshot update mode. W14, W15, and G06 passed on `admin-final-wide-1440`; W16 and G07 passed on `admin-final-mobile-390`.
+- The exact unfiltered motion contract started public, account, and admin and passed 5 tests with 40 intentional project/axis skips.
+- The complete admin Vitest suite passed 58/58 across 3 test files. Strict admin and web-evidence TypeScript, focused Prettier, and `git diff --check` passed.
+- No source, test harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed during this replay; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
+
 ## Known Stubs
 
 None - no placeholder, TODO, FIXME, empty UI data source, or future-only stub was introduced.
