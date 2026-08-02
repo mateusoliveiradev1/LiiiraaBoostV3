@@ -1,6 +1,6 @@
 ---
 phase: 03-complete-web-experience
-plan: "58"
+plan: '58'
 subsystem: ui
 tags: [nextjs, react, account-workspace, responsive-layout, accessibility, preview-safety, i18n]
 
@@ -13,6 +13,7 @@ provides:
   - localized loading, empty, offline, stale, expired-session, and retryable-failure presentations
   - unchanged fail-closed no-change workflows with narrow safe-draft retention
   - task-first Overview and human Privacy/degraded copy with canonical route-compatible scenario admission
+  - bilingual W10 sign-in availability and no-action copy without milestone ownership prose
 affects: [03-61, account-visual-evidence, account-uat]
 
 tech-stack:
@@ -22,6 +23,7 @@ tech-stack:
     - localized deterministic state projection around an unchanged typed workflow machine
     - safe-draft allowlists that exclude privacy and support message payloads
     - canonical scenario registry admission before account state projection
+    - consequence-specific preview copy stated as user outcomes rather than implementation chronology
 
 key-files:
   created: []
@@ -33,20 +35,21 @@ key-files:
     - apps/account/src/content/account.pt-BR.json
 
 key-decisions:
-  - "Use focal-first DOM order for every account responsibility, then apply exact 7/5 or 8/4 desktop geometry so mobile requires no semantic reordering."
-  - "Expose deterministic account presentation state as a typed optional input while preserving the existing W12 combined degraded-state catalog."
-  - "Keep the canonical preview workflow machine unchanged and retain only display name/locale for Profile and subject for Support; Device and Privacy retain no drafts."
-  - "Keep the shell as the sole persistent preview-truth owner while ordinary Overview summaries stay task-first and sensitive Privacy/degraded states explain consequences directly."
-  - "Admit explicit account scenarios through the canonical registry and route compatibility before rendering; do not expose URL, environment, or browser-controlled scenario selectors."
+  - 'Use focal-first DOM order for every account responsibility, then apply exact 7/5 or 8/4 desktop geometry so mobile requires no semantic reordering.'
+  - 'Expose deterministic account presentation state as a typed optional input while preserving the existing W12 combined degraded-state catalog.'
+  - 'Keep the canonical preview workflow machine unchanged and retain only display name/locale for Profile and subject for Support; Device and Privacy retain no drafts.'
+  - 'Keep the shell as the sole persistent preview-truth owner while ordinary Overview summaries stay task-first and sensitive Privacy/degraded states explain consequences directly.'
+  - 'Admit explicit account scenarios through the canonical registry and route compatibility before rendering; do not expose URL, environment, or browser-controlled scenario selectors.'
+  - 'Describe unavailable sign-in verification through direct availability, remote-verification, authority, and account-action outcomes in both locales; never expose milestone ownership in the W10 composition.'
 
 patterns-established:
-  - "Account workspace regions identify focal and contextual responsibility through data-workspace-region without creating a parallel card system."
-  - "Degraded state labels are localized human language rendered through text-plus-pattern StatusSignal semantics."
-  - "Canonical W12 projection remains independently renderable through a validated typed prop while ordinary account routes default safely."
+  - 'Account workspace regions identify focal and contextual responsibility through data-workspace-region without creating a parallel card system.'
+  - 'Degraded state labels are localized human language rendered through text-plus-pattern StatusSignal semantics.'
+  - 'Canonical W12 projection remains independently renderable through a validated typed prop while ordinary account routes default safely.'
 
 requirements-completed: [WEB-08]
 
-duration: 32min
+duration: 37min
 completed: 2026-08-01
 status: complete
 ---
@@ -57,9 +60,9 @@ status: complete
 
 ## Performance
 
-- **Duration:** 32 min (17 min initial execution + 15 min rejection correction)
+- **Duration:** 37 min (17 min initial execution + 15 min first rejection correction + 5 min W10 copy correction)
 - **Started:** 2026-08-01T17:45:00Z
-- **Completed:** 2026-08-01T18:01:56Z
+- **Completed:** 2026-08-02T00:54:43Z
 - **Tasks:** 2
 - **Files modified:** 5
 
@@ -73,6 +76,7 @@ status: complete
 - Closed the Plan 03-64 W11/G03 rejection by removing the duplicate Overview authority region and all ordinary Overview phase/synthetic implementation prose while preserving its focal actions and responsibility summaries.
 - Rewrote Privacy and degraded-state guidance in both locales around availability, purpose, retention, sharing, cancellation, no-change outcome, stale data, and recovery.
 - Added canonical registry and route-compatibility admission before scenario rendering; W12 remains independently renderable without a URL, environment, or browser-controlled selector.
+- Closed the remaining Plan 03-64 W10 rejection with direct bilingual identity-verification availability and no-action copy, removing Phase 4 ownership and implementation inventory from the visible sign-in boundary.
 
 ## Task Commits
 
@@ -85,14 +89,15 @@ Each TDD gate was committed atomically:
 5. **Rejection RED: account copy and state contracts** - `2bd13b4` (test)
 6. **Rejection GREEN: task-first copy and fail-closed scenario admission** - `68ce7e7` (fix)
 7. **Visual correction: remove remaining ordinary synthetic summaries** - `13d5b70` (fix)
+8. **W10 correction: replace sign-in milestone ownership prose** - `47eca40` (fix)
 
 ## Files Created/Modified
 
 - `apps/account/src/features/account-preview.tsx` - Adds focal/context workspace composition, localized state presentations, and typed state selection while preserving existing workflow authority.
-- `apps/account/src/features/account-preview.test.tsx` - Enforces route density, exact geometry, mobile order, state completeness, safe draft retention, cancellation, and validated no-change receipts.
+- `apps/account/src/features/account-preview.test.tsx` - Enforces route density, exact geometry, mobile order, state completeness, safe draft retention, cancellation, validated no-change receipts, and user-facing W10 sign-in copy.
 - `apps/account/src/app/account-shell.css` - Provides exact 7/5–8/4 workspace geometry, one E2 focal material, 560px field bounds, structural mobile reflow, and forced-color treatment.
-- `apps/account/src/content/account.en.json` - Supplies concise English Overview, Privacy, and degraded recovery outcomes without phase-shaped implementation prose.
-- `apps/account/src/content/account.pt-BR.json` - Preserves equivalent PT-BR task, consequence, retention, cancellation, stale, and recovery guidance.
+- `apps/account/src/content/account.en.json` - Supplies concise English Overview, Privacy, degraded recovery, and sign-in availability outcomes without phase-shaped implementation prose.
+- `apps/account/src/content/account.pt-BR.json` - Preserves equivalent PT-BR task, consequence, retention, cancellation, stale, recovery, and sign-in availability guidance.
 
 ## Decisions Made
 
@@ -102,12 +107,14 @@ Each TDD gate was committed atomically:
 - Status copy is localized human language and continues through `StatusSignal`, which supplies explicit text, a symbol, and a pattern rather than relying on color alone.
 - Ordinary Overview relies on the shell's single persistent preview boundary. Route content explains tasks, while Privacy and degraded states retain only consequence-specific no-change guidance.
 - `resolveAccountScenarioId` resolves every explicit scenario through the canonical registry and rejects non-account or route-mismatched scenarios before rendering; the canonical page accepts no user-controlled scenario input.
+- The sign-in boundary states that identity verification is unavailable, performs no remote verification, and has no authority to take account actions; implementation phase ownership is not user-facing product copy.
 
 ## Deviations from Plan
 
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Visual content bug] Removed remaining synthetic/simulated prose from ordinary Overview summaries**
+
 - **Found during:** Post-GREEN W11/G03 visual inspection
 - **Issue:** The duplicate limitations region was gone, but reused subscription, device, and support summaries still repeated implementation-shaped preview language beneath the shell truth.
 - **Fix:** Rewrote the three responsibility summaries in both locales around the user's actual review task and added a regression assertion covering all ordinary Overview summary copy.
@@ -115,21 +122,31 @@ Each TDD gate was committed atomically:
 - **Verification:** Focused 21-test suite, complete 46-test account suite, TypeScript, production build, formatting, detector, and W11/G03 screenshots passed.
 - **Committed in:** `13d5b70`
 
+**2. [Rule 1 - Visual content bug] Replaced milestone ownership prose in W10 sign-in**
+
+- **Found during:** Plan 03-64 original-resolution account inspection
+- **Issue:** The W10 sign-in focal boundary exposed Phase 4 ownership and an internal implementation inventory instead of the human availability and no-action outcome.
+- **Fix:** Replaced only the bilingual `signIn.security` strings with direct identity-verification availability, remote-verification, authority, and account-action language; retained the existing consequence-specific boundary and the shell's sole persistent preview truth.
+- **Files modified:** `apps/account/src/content/account.en.json`, `apps/account/src/content/account.pt-BR.json`, `apps/account/src/features/account-preview.test.tsx`
+- **Verification:** The focused test failed on the old Phase 4 sentence before the copy change, then the 23-test preview suite, complete 50-test account suite, TypeScript check, production build, formatting, and `git diff --check` passed.
+- **Committed in:** `47eca40`
+
 ---
 
-**Total deviations:** 1 auto-fixed bug.
-**Impact on plan:** The correction was necessary to satisfy the rejected single-boundary content contract and did not change shell, capture, manifest, or workflow authority.
+**Total deviations:** 2 auto-fixed bugs.
+**Impact on plan:** Both corrections were necessary to satisfy the rejected single-boundary content contract and did not change shell, capture, manifest, or workflow authority.
 
 ## Issues Encountered
 
 - The first uncommitted Task 2 RED draft attempted to validate the cancellation receipt through the no-change document validator. It was corrected before the RED commit because the plan requires cancellation to remain distinct and only the no-change terminal receipt to be schema-valid.
-- A targeted W11 browser replay still expects the pre-03-57 complementary name `Prévia determinística` while the current shell exposes `Prévia`. This stale shell/harness assertion is recorded in `deferred-items.md` for Plan 03-57; Plan 03-58 did not edit the shell or browser harness. The W13 browser journey passed.
+- A targeted W11 browser replay initially expected the pre-03-57 complementary name `Prévia determinística` while the current shell exposed `Prévia`. Subsequent shell/evidence work resolved that stale assertion, and the fresh Plan 03-64 inspection passed W11.
 
 ## TDD Gate Compliance
 
 - Task 1 RED `c3cacef` failed on five planned workspace/geometry/mobile-order gaps before GREEN `a5138a4` passed the filtered 9-test gate and complete 17-test suite.
 - Task 2 RED `96a21b7` failed only on the missing state-presentation contract before GREEN `e5c0f8c` passed all 18 account preview tests.
 - Rejection RED `2bd13b4` failed on five precise copy, W12 projection, and scenario-admission contracts before GREEN `68ce7e7` passed all 21 focused tests.
+- The W10 post-plan correction was observed RED against the old Phase 4 sentence, then its regression and bilingual fix were committed atomically in `47eca40` as required by the rejection handoff.
 - Every RED commit precedes its corresponding GREEN commit.
 
 ## Known Stubs
@@ -138,7 +155,8 @@ None. The empty safe-draft default is an intentional fail-closed workflow bounda
 
 ## Verification
 
-- `rtk pnpm --filter @liiiraa/account exec vitest run` - 46/46 tests passed across account shell, preview, routes, states, and safety journeys.
+- `rtk pnpm --filter @liiiraa/account exec vitest run src/features/account-preview.test.tsx` - 23/23 preview tests passed, including the exact bilingual W10 copy and implementation-language ban.
+- `rtk pnpm --filter @liiiraa/account exec vitest run` - 50/50 tests passed across account shell, preview, routes, states, and safety journeys.
 - `rtk pnpm --filter @liiiraa/account run check` - strict TypeScript passed.
 - `rtk pnpm --filter @liiiraa/account run build` - optimized Next.js 16.2.12 production build passed after the temporary W12 inspection harness was restored.
 - `rtk prettier --check ...` - all five plan-owned files passed formatting.
@@ -161,16 +179,17 @@ None - no external service configuration or package installation required.
 
 ## Next Phase Readiness
 
-- Plan 03-62 retains ownership of mapping the bounded W12 candidate capture to the already-renderable canonical degraded projection; Plan 03-58 did not alter capture infrastructure.
-- Plan 03-64 can re-inspect W11/G03/W13 after Plan 03-57 closes its stale W11 shell-label assertion and Plan 03-62 selects W12.
+- W10 source ownership is corrected without changing screenshots; Plan 03-61 can now rerun its full verification contract, including the unfiltered motion suite.
+- After Plan 03-61 passes, Plan 03-62 can perform a fresh bounded capture and Plan 03-64 can rerun original-resolution account inspection before aggregate Plan 03-66.
 - No Plan 03-58 blockers, known stubs, remote authority, or sensitive-data claims remain.
 
 ## Self-Check: PASSED
 
 - All five plan-owned implementation/test/content files and this summary exist on disk.
-- Initial and correction commits `c3cacef`, `a5138a4`, `96a21b7`, `e5c0f8c`, `2bd13b4`, `68ce7e7`, and `13d5b70` resolve in Git history.
-- The focused 21-test and complete 46-test account suites pass after rejection closure.
+- Initial and correction commits `c3cacef`, `a5138a4`, `96a21b7`, `e5c0f8c`, `2bd13b4`, `68ce7e7`, `13d5b70`, and `47eca40` resolve in Git history.
+- The focused 23-test and complete 50-test account suites pass after W10 rejection closure.
 
 ---
-*Phase: 03-complete-web-experience*
-*Completed: 2026-08-01*
+
+_Phase: 03-complete-web-experience_
+_Completed: 2026-08-01_
