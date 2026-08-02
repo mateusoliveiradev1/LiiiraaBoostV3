@@ -89,6 +89,52 @@ describe('role-scoped admin', () => {
     expect(adminPtBr.receipt.title).toBe('Prévia concluída — nenhuma alteração foi feita');
   });
 
+  it('uses direct localized outcomes without exposing internal delivery prose', () => {
+    expect(adminEn.operations.impact).toBe(
+      'Publication remains held for this release object; this preview cannot change that state.',
+    );
+    expect(adminPtBr.operations.impact).toBe(
+      'A publicação permanece retida para este objeto de versão; esta prévia não pode alterar esse estado.',
+    );
+    expect(adminEn.receipt.body).toBe(
+      'Review complete. No remote state changed; the receipt and correlated audit record remain synthetic and immutable.',
+    );
+    expect(adminPtBr.receipt.body).toBe(
+      'Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis.',
+    );
+
+    for (const copy of [
+      adminEn.operations.impact,
+      adminPtBr.operations.impact,
+      adminEn.receipt.body,
+      adminPtBr.receipt.body,
+    ]) {
+      expect(copy).not.toMatch(/(?:phase|fase)\s+[34]|milestone|implementation|implementação|adapter|adaptador/iu);
+    }
+    expect(adminEn.operations.detail).not.toMatch(/\bfixture\b/iu);
+    expect(adminPtBr.operations.detail).not.toMatch(/\bfixture\b/iu);
+  });
+
+  it('localizes W15 audit target and reason without mutating validated transport records', () => {
+    expect(adminEn.audit.events['admin-event-004']).toEqual({
+      reason: 'Review a synthetic containment action',
+      target: 'Security target ••••-083',
+    });
+    expect(adminPtBr.audit.events['admin-event-004']).toEqual({
+      reason: 'Revisar uma ação sintética de contenção',
+      target: 'Alvo de segurança ••••-083',
+    });
+    expect(featureSource).toContain('const eventCopy = content.audit.events[event.eventId]');
+    expect(featureSource).toContain('reason: eventCopy.reason');
+    expect(featureSource).toContain('target: eventCopy.target');
+    expect(featureSource).not.toContain('[content.audit.target, event.redactedTarget]');
+    expect(featureSource).not.toContain('[content.audit.reason, event.reason]');
+
+    expect(featureSource).toContain("redactedTarget: 'Security target ••••-083'");
+    expect(featureSource).toContain("reason: 'Review a synthetic containment action'");
+    expect(featureSource).toContain('return deepFreeze(event)');
+  });
+
   it('keeps current state non-color-only and reflows the authored landing at 390px', () => {
     expect(navigationSource).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(stylesSource).toContain('overflow-x: clip');
@@ -365,6 +411,31 @@ describe('W16 viewport guard and recovery states', () => {
     expect(diagnosticSource).toMatch(/viewportWidth\s*>=\s*960\s*\?/u);
     expect(criticalSource).toContain('admin-mobile-high-risk-block');
     expect(featureSource).toContain('data-authority-action="unavailable"');
+  });
+
+  it('omits the W16 publication control from mobile markup while retaining review and reason', () => {
+    const mobileNoticeSource = featureSource.slice(
+      featureSource.indexOf('const MobileAuthorityNotice'),
+      featureSource.indexOf('export const SupportCaseWorkspace'),
+    );
+    const criticalSource = featureSource.slice(
+      featureSource.indexOf('const CriticalReview'),
+      featureSource.indexOf('export const OperationsReview'),
+    );
+    const operationsSource = featureSource.slice(
+      featureSource.indexOf('export const OperationsReview'),
+      featureSource.indexOf('export const SecurityReview'),
+    );
+
+    expect(criticalSource).toContain('<PurposeAndImpactReview');
+    expect(criticalSource).toContain('admin-mobile-high-risk-block');
+    expect(mobileNoticeSource).toContain('data-authority-action="omitted"');
+    expect(mobileNoticeSource).not.toContain('<LbButton');
+    expect(operationsSource).toMatch(
+      /viewportWidth\s*>=\s*960\s*\?[\s\S]*<DisconnectedAuthority[\s\S]*:\s*\([\s\S]*<MobileAuthorityNotice/u,
+    );
+    expect(operationsSource).toContain('body={content.operations.authorityBody}');
+    expect(operationsSource).toContain('title={content.operations.authorityTitle}');
   });
 
   it('authors offline, stale, expired, permission, and partial-failure recovery safely', () => {
