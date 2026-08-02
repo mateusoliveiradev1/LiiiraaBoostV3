@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-65 correction-cycle PASS; ready for 03-66
-last_updated: "2026-08-02T02:17:24.723Z"
-last_activity: 2026-08-01
-last_activity_desc: Phase 03 execution started
+stopped_at: "Blocked 03-66 aggregate replay; owner corrections required"
+last_updated: "2026-08-02T02:39:42.641Z"
+last_activity: 2026-08-02
+last_activity_desc: Plan 03-66 aggregate replay blocked on owner regressions
 progress:
   total_phases: 10
   completed_phases: 2
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 14 of 66
-Status: Ready to execute
-Last activity: 2026-08-01 — Phase 03 execution started
+Plan: 66 of 66
+Status: Blocked pending owner corrections
+Last activity: 2026-08-02 — Plan 03-66 aggregate replay blocked on owner regressions
 
 Progress: [██████████] 98%
 
@@ -522,6 +522,8 @@ None yet.
 - [Phase 4]: Better Auth, device binding, billing provider, and administrative access must pass explicit security gates.
 - [Phase 5]: Windows support matrix and measurement methodology must be proven before compatibility or gain claims.
 - [Phase 6]: Privileged IPC identity, replay resistance, journal durability, reboot recovery, and disk-full behavior are high-risk research areas.
+- Phase 03 Plan 66: @liiiraa/web-evidence workspace regression has 3 failures (playwright-config cross-surface selection and 2 verify-phase proof-graph acceptance tests); return to Plans 03-61/03-36 owners.
+- Phase 03 Plan 66: architecture gate has 3 ProductLockup private deep imports in public/account/admin locale layouts; return to design-system and app-shell owners.
 
 ## Deferred Items
 
@@ -551,6 +553,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-02T02:17:24.716Z
-Stopped at: Completed 03-65 correction-cycle PASS; ready for 03-66
-Resume file: None
+Last session: 2026-08-02T02:39:25.102Z
+Stopped at: Blocked 03-66 aggregate replay; owner corrections required
+Resume file: .planning/phases/03-complete-web-experience/03-66-SUMMARY.md
