@@ -3,7 +3,7 @@ status: diagnosed
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-01T07:46:14-03:00
+updated: 2026-08-02T01:13:09-03:00
 ---
 
 # Phase 03 UAT
@@ -60,6 +60,34 @@ date: 2026-08-01T07:46:14-03:00
 verdict: rejected — none of W01-W18 or G01-G07 received human visual approval; Plan 03-46 remains blocked and every existing visual gap stays failed.
 reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais bonito td"
 qualitative_reference: `https://app.bravoboost.com.br/` is a user-named reference for stronger overall beauty, finish, and composition only. It must inform the quality bar without copying its layout, branding, assets, wording, or proprietary expression.
+
+## Plan 03-45 Human Review Verdict — Post-03-66
+
+date: 2026-08-02T01:13:09-03:00
+verdict: rejected — the reviewer supplied five screenshots and explicitly rejected the packet. None of W01-W18 or G01-G07 is approved; no publication authority exists and Plan 03-46 remains blocked.
+scope: all 25 candidates are rejected as one review set. The screenshots specifically expose a catastrophic public landing failure, and that false-negative is sufficient to invalidate confidence in the shared visual/capture gate even though the reviewer did not cite individual account or admin pixels.
+approval_boundary: `humanApproved`, `publicationApproved`, manifest approval state, screenshot bytes, and publication artifacts remain unchanged.
+
+### Failure Classes
+
+| Class | Severity | Human evidence |
+| --- | --- | --- |
+| Public stylesheet/composition parity | blocking | The shared header remains visibly styled while the authored landing composition appears absent or collapsed. The hero reads as raw, left-aligned, default-sized content without the intended measure, spacing, or focal geometry. |
+| Header/full-page capture contamination | blocking | The sticky header duplicates or overlaps content during the long capture instead of remaining one stable, non-obstructing shell. |
+| Product staging and narrative hierarchy | blocking | The desktop screenshot is pasted nearly full-viewport as a raw artifact, repeats later, and does not behave as one authored proof stage inside a coherent landing narrative. |
+| Rhythm, disclosure, and content formatting | major | Long sparse ruled sections, very large dead regions, raw disclosure markers, collapsed label/value pairs such as `CompatívelA análise...`, and a plain unfinished footer/content treatment make the page read as broken documentation rather than a finished product. |
+| Locale-control coherence | major | English locale UI is duplicated in `us English`-style output instead of one clear route-preserving flag-plus-language control. |
+| Qualitative gate false negative | blocking | Plans 03-63 through 03-66 passed the same set that the human screenshots expose as systemically broken. Pixel stability, hashes, accessibility, and agent inspection did not prove runtime stylesheet parity or finished visual composition. |
+| Cross-surface approval integrity | blocking | Because the shared review gate missed the public failure, account and admin cannot inherit approval from their prior non-human PASS records; all 25 identities require renewed human review after gate repair. |
+
+### Mandatory Correction Route Before Any Re-capture
+
+1. **Public source/style owner (`apps/web`)** — reproduce every reviewer screenshot at the same route, viewport, runtime mode, and source revision. Compare loaded CSS chunks, import order, DOM class bindings, computed styles, and bounding boxes for `public-header`, `home-ignition-hero`, `home-prepare-band`, `home-context-stage`, `home-compatibility-field`, and `home-release-ribbon`. Distinguish a source composition defect from stylesheet delivery/hydration/capture mismatch before changing pixels.
+2. **Public composition owner (`apps/web/src/features/home.tsx`, `apps/web/src/app/public-shell.css`, `apps/web/src/styles/public.css`)** — correct hero measure/alignment/spacing, product-stage scale and repetition, section rhythm, label/value gaps, disclosure treatment, footer finish, and full-page sticky-header behavior. The product artifact must be staged as proof, not pasted as an uncontrolled raw viewport.
+3. **Locale/shared-control owner (`apps/web/src/public-navigation.tsx`, `@liiiraa/web-features`)** — reproduce and remove duplicate `us English`-style output while preserving one visible flag-plus-language label, an explicit accessible language name, and the current route.
+4. **Capture-parity owner (`tooling/web-evidence`)** — add fail-closed computed-style and geometry sentinels that fail if the authored landing stylesheet is absent, selectors fall back, header instances overlap, labels collapse, locale text duplicates, or the product stage becomes uncontrolled. Prove these sentinels fail against an intentionally missing/disabled authorial stylesheet.
+5. **Inspection owners (03-63/64/65 and 03-66)** — treat their prior PASS records as non-human historical results only. After source and gate repair, inspect public/account/admin at original resolution again and confirm runtime/capture parity; do not infer an account/admin pixel defect that the reviewer did not name.
+6. **Sequence owner** — do not run Plan 03-62 capture yet. First complete the root-cause investigation and gate-hardening work, then run the full `03-61 -> 03-62 -> 03-63/64/65 -> 03-66 -> 03-45` chain. Plan 03-46 stays blocked until a later literal `approved` response covers all 25 identities.
 
 ## Tests
 

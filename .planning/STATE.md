@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-66-PLAN.md; awaiting Plan 03-45 human review
-last_updated: "2026-08-02T03:40:05.117Z"
+stopped_at: Plan 03-45 human review rejected; Plan 03-46 blocked pending root-cause isolation, gate hardening, replay, and renewed approval
+last_updated: "2026-08-02T04:16:21.447Z"
 last_activity: 2026-08-02
-last_activity_desc: Plan 03-66 aggregate replay completed; Plan 03-45 human review remains pending
+last_activity_desc: Plan 03-66 aggregate replay completed with approval and publication still false
 progress:
   total_phases: 10
   completed_phases: 2
@@ -525,6 +525,7 @@ None yet.
 - [Phase 4]: Better Auth, device binding, billing provider, and administrative access must pass explicit security gates.
 - [Phase 5]: Windows support matrix and measurement methodology must be proven before compatibility or gain claims.
 - [Phase 6]: Privileged IPC identity, replay resistance, journal durability, reboot recovery, and disk-full behavior are high-risk research areas.
+- Phase 03 Plan 03-45 human review rejected all W01-W18/G01-G07 after five screenshots exposed collapsed public landing composition and a systemic runtime/capture qualitative-gate false negative; Plan 03-46 is blocked pending apps/web root-cause isolation, gate hardening, full replay/recapture/reinspection, and renewed human approval.
 
 ## Deferred Items
 
@@ -554,6 +555,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-02T03:40:05.112Z
-Stopped at: Completed 03-66-PLAN.md; awaiting Plan 03-45 human review
-Resume file: None
+Last session: 2026-08-02T04:16:21.441Z
+Stopped at: Plan 03-45 human review rejected; Plan 03-46 blocked pending root-cause isolation, gate hardening, replay, and renewed approval
+Resume file: .planning/debug/phase-03-public-visual-polish.md

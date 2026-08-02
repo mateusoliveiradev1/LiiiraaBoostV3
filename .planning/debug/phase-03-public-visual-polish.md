@@ -1,16 +1,16 @@
 ---
-status: resolved
+status: investigating
 trigger: "Phase 03 UAT public visual gap: user said `nao gostei de nenhum dos 3 viu`; public Home exposes boundary/evidence metadata and has an oversized, awkward hero with weak pacing."
 created: 2026-07-31T19:28:32.0992839-03:00
-updated: 2026-08-01T07:46:14-03:00
+updated: 2026-08-02T01:13:09-03:00
 ---
 
 ## Current Focus
 
-hypothesis: CONFIRMED — app-local public composition/copy bypasses the design contract and automated coverage institutionalizes the rejected hierarchy.
-test: Existing Home/public-shell and shared visual-contract tests were run unchanged against the current source.
-expecting: Confirmation requires the tests to stay green while the checked source and golden retain the rejected off-token hierarchy, boundary rail, and raw provenance.
-next_action: Plan another gap-closure round for authored cross-surface identity, navigation, and route-preserving locale controls; do not treat stable goldens as approval.
+hypothesis: INVESTIGATING — the reviewer runtime and the passing candidate pixels do not share the same effective authored landing composition. The differential may be stylesheet delivery/import order, selector/class binding, runtime hydration, or full-page capture behavior; it is not yet safe to call any one cause confirmed.
+test: Reproduce the five reviewer screenshots at identical routes, viewports, runtime mode, and source revision; compare loaded CSS chunks, DOM classes, computed styles, and boxes for the header, hero, product stages, sequence, compatibility rows, disclosures, locale control, and footer.
+expecting: The investigation must explain why shell styling can remain visible while the landing collapses, why the sticky header duplicates/overlaps in a long capture, and why the existing automated/inspection gates accepted the mismatched result.
+next_action: Complete the public source/style and capture-parity investigation, harden computed-style/geometry gates with a deliberate missing-stylesheet negative test, and only then authorize a new 03-61 through 03-62 cycle.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -24,6 +24,17 @@ reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais 
 verdict: Rejected after the post-03-52 preflight. None of W01-W18 or G01-G07 is human-approved.
 qualitative_reference: `https://app.bravoboost.com.br/` is the user-named reference for a materially stronger level of overall beauty, finish, and composition. Use it only to calibrate the quality bar; do not copy its layout, branding, assets, wording, or proprietary expression.
 impact: The public visual gap remains failed and Plan 03-46 remains blocked despite deterministic tests and stable captures.
+
+## Plan 03-45 Post-03-66 Human Rejection
+
+verdict: REJECTED — five reviewer screenshots expose a catastrophically collapsed public landing. All W01-W18/G01-G07 remain unapproved and Plan 03-46 stays blocked.
+observed: The header retains recognizable shell styling, but the authored landing appears absent/collapsed: raw left-aligned/default-sized hero, no coherent width or spacing, duplicated/overlapping sticky header in the long capture, uncontrolled and repeated desktop artifact, sparse ruled text with dead space, raw disclosure markers, collapsed label/value gaps, unfinished footer/content, and duplicated English locale output.
+gate_failure: The 03-63 and 03-66 PASS records are historical non-human results only. They did not prove that the reviewer runtime and captured runtime loaded the same effective authorial CSS or that full-page capture preserved valid composition.
+investigation_owners:
+  - "apps/web: isolate stylesheet delivery/import/class/computed-style parity and repair composition only after the cause is reproducible."
+  - "public shell and locale controls: remove sticky overlap and duplicated locale presentation while preserving accessibility and route state."
+  - "tooling/web-evidence: add missing-style negative coverage plus computed-style, bounding-box, label-gap, locale uniqueness, and header-overlap sentinels."
+recapture_gate: No Plan 03-62 capture before the investigations and negative gate proof pass.
 
 ## Symptoms
 

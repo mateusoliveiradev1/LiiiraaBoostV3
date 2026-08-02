@@ -2,7 +2,7 @@
 status: resolved
 trigger: "Phase 03 UAT account visual gap: user said verbatim `nao gostei de nenhum dos 3 viu`; account screenshot resembles an unfinished wireframe with tiny typography, weak hierarchy, excessive unused space, and simulation/provenance messaging dominating the task."
 created: 2026-07-31T19:29:11.6816453-03:00
-updated: 2026-08-01T07:46:14-03:00
+updated: 2026-08-02T01:13:09-03:00
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-08-01T07:46:14-03:00
 hypothesis: RESOLVED — Plan 03-50 replaced the unconstrained route-list shell with a constrained application frame, canonical active-route navigation, a compact native mobile disclosure, route-preserving flag-plus-language switching, quiet persistent preview truth, and task-specific semantic workspaces.
 test: account Vitest suite, TypeScript check, optimized Next build, Impeccable detector, and direct 1440px/390px/320px browser captures of Overview and Profile
 expecting: achieved — desktop presents one active responsibility and useful authored density; mobile keeps the route inventory collapsed while naming the current task; preview authority remains visibly disconnected without dominating ordinary controls
-next_action: Plan another cross-surface quality round; do not treat technical resolution or stable goldens as visual approval.
+next_action: Keep the prior account source diagnosis resolved, but invalidate candidate approval confidence until the shared runtime/capture gate is repaired; then reinspect every account candidate at original resolution before renewed human review.
 
 ## Plan 03-45 Follow-up Rejection
 
@@ -25,6 +25,12 @@ reported: "gostei ainda nao olha https://app.bravoboost.com.br/ como e bem mais 
 verdict: Rejected after the post-03-52 preflight. None of W01-W18 or G01-G07 is human-approved.
 qualitative_reference: `https://app.bravoboost.com.br/` is the user-named reference for a materially stronger level of overall beauty, finish, and composition. Use it only to calibrate the quality bar; do not copy its layout, branding, assets, wording, or proprietary expression.
 impact: The account visual gap remains failed and Plan 03-46 remains blocked despite deterministic tests and stable captures.
+
+## Plan 03-45 Post-03-66 Checkpoint Invalidation
+
+verdict: REJECTED AS PART OF THE 25-CANDIDATE SET — no account identity is human-approved and Plan 03-46 stays blocked.
+evidence_boundary: The reviewer supplied five screenshots and named the systemic public/capture failure, but did not cite a specific account pixel defect. Do not invent one. Account is invalidated because the shared gate produced a false-negative qualitative PASS, not because the prior account source fix is proven regressed.
+required_follow_up: After the capture-parity gate and public failure are corrected, rerun original-resolution account inspection for W10-W13, W18, and G03-G05 and present them again for explicit human review.
 
 ## Symptoms
 
