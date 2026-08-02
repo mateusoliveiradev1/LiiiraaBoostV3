@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "plan": "03-66",
+  "closedAt": "2026-08-02T02:23:06Z",
+  "sourceRevision": "1cde546a703106bec3fc7ee491b69c00cd8c62e9",
+  "inspectionRecords": [
+    {
+      "plan": "03-63",
+      "surface": "public",
+      "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-63-public.json",
+      "sha256": "787886426fddf62a4f6991ba022d66cb943cc73425cec264f21e6b0ceab19f8c",
+      "verdict": "pass",
+      "candidateCount": 12,
+      "exactSubset": [
+        "W01",
+        "W02",
+        "W03",
+        "W04",
+        "W05",
+        "W06",
+        "W07",
+        "W08",
+        "W09",
+        "W17",
+        "G01",
+        "G02"
+      ]
+    },
+    {
+      "plan": "03-64",
+      "surface": "account",
+      "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-64-account.json",
+      "sha256": "cd7b812b0c413d902a1673aa4e9960f7dc60d304ac3c1c3c9863037b2b4c7486",
+      "verdict": "pass",
+      "candidateCount": 8,
+      "exactSubset": ["W10", "W11", "W12", "W13", "W18", "G03", "G04", "G05"]
+    },
+    {
+      "plan": "03-65",
+      "surface": "admin",
+      "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-65-admin.json",
+      "sha256": "32edd959c0fc6a1cd9fa4fb8f44527ffc54c7bfd179eb64d000c97947b3231b7",
+      "verdict": "pass",
+      "candidateCount": 5,
+      "exactSubset": ["W14", "W15", "W16", "G06", "G07"]
+    }
+  ],
+  "closedSet": {
+    "candidateCount": 25,
+    "uniqueCandidateCount": 25,
+    "expectedIdentities": [
+      "W01",
+      "W02",
+      "W03",
+      "W04",
+      "W05",
+      "W06",
+      "W07",
+      "W08",
+      "W09",
+      "W10",
+      "W11",
+      "W12",
+      "W13",
+      "W14",
+      "W15",
+      "W16",
+      "W17",
+      "W18",
+      "G01",
+      "G02",
+      "G03",
+      "G04",
+      "G05",
+      "G06",
+      "G07"
+    ],
+    "allRecordsPass": true,
+    "subsetsDisjoint": true,
+    "exactCoverage": true,
+    "allCandidateHashesCurrent": true
+  },
+  "manifest": {
+    "path": "tooling/web-evidence/visual-manifest.json",
+    "sha256": "16a2ed74992bca7ba1276b522e8292ff5d5292ee69d87bbc0f360289e85f4781",
+    "candidateCount": 25,
+    "allCandidate": true,
+    "allApprovedFalse": true,
+    "allPublishedFalse": true,
+    "allVisualTargetFalse": true
+  },
+  "rejectedArchive": {
+    "metadataPath": ".planning/phases/03-complete-web-experience/visuals/rejected-post-03-52/SHA256SUMS.json",
+    "metadataSha256": "98ba34e3e8c8ba2310cbe35c54d8e4f8a7ed5b781bd9ec821d94bcb0f9787882",
+    "fileCount": 3,
+    "allHashesCurrent": true,
+    "allCandidatesDistinct": true
+  },
+  "fastManifestSmoke": {
+    "command": "rtk pnpm --filter @liiiraa/web-features exec vitest run src/components.test.tsx -t \"qualitative-review metadata|visual contract\"",
+    "result": "pass",
+    "passed": 6,
+    "skipped": 10,
+    "failed": 0
+  },
+  "verdict": "pass",
+  "humanApproved": false,
+  "publicationApproved": false
+}
