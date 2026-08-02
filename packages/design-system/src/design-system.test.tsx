@@ -38,6 +38,7 @@ import {
   LbSkeletonRegion,
 } from './primitives.tsx';
 import { ProductLockup } from './product-lockup.tsx';
+import { ProductIcon } from './product-icons.tsx';
 import { EmptyComposition, GoalRail, RouteHeader, WindowTitleBar } from './shell.tsx';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
@@ -283,6 +284,23 @@ describe('material and async composition vocabulary', () => {
 });
 
 describe('approved product identity', () => {
+  it('renders account semantics from the single approved Phosphor icon family', () => {
+    const markup = renderToStaticMarkup(
+      <div>
+        <ProductIcon name="gauge" />
+        <ProductIcon name="profile" />
+        <ProductIcon name="shield" />
+        <ProductIcon name="receipt" />
+        <ProductIcon name="lifebuoy" />
+        <ProductIcon name="logout" />
+      </div>,
+    );
+
+    expect(markup.match(/data-icon-library="phosphor"/gu)).toHaveLength(6);
+    expect(markup.match(/<svg/gu)).toHaveLength(6);
+    expect(semanticAudit(markup)).toEqual([]);
+  });
+
   it('renders the approved mark paths and wordmark with an accessible product name', () => {
     const markup = renderToStaticMarkup(<ProductLockup />);
 

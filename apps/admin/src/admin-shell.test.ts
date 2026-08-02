@@ -19,6 +19,17 @@ import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
 
 describe('admin shell', () => {
+  it('publishes the official brand favicon from the root app boundary', () => {
+    const iconUrl = new URL('./app/icon.svg', import.meta.url);
+
+    expect(existsSync(iconUrl)).toBe(true);
+    if (!existsSync(iconUrl)) return;
+
+    const icon = readFileSync(iconUrl, 'utf8');
+    expect(icon).toContain('aria-label="Liiiraa Boost"');
+    expect(icon).toContain('M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z');
+  });
+
   it('enforces the exact desktop operations shell geometry', () => {
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
     const tokens = readFileSync(

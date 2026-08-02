@@ -73,6 +73,12 @@ test('@final @account navigation and language preserve the active security respo
   onlyAxis(testInfo, 'wide-1440');
   await page.goto('/en/account/security');
 
+  await expect(page.getByRole('link', { name: 'Sign in', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Create account', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Sign out', exact: true })).toBeVisible();
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /icon\.svg/u);
+  await expect(page.locator('.account-sidebar [data-icon-library="phosphor"]')).not.toHaveCount(0);
+
   const current = page.locator('a[aria-current="page"]:visible');
   await expect(current).toHaveCount(1);
   await expect(current).toContainText('Security');

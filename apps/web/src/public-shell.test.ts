@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
@@ -23,6 +23,17 @@ const routeOwnedSources = [
 ].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8'));
 
 describe('public shell', () => {
+  it('publishes the official brand favicon from the root app boundary', () => {
+    const iconUrl = new URL('./app/icon.svg', import.meta.url);
+
+    expect(existsSync(iconUrl)).toBe(true);
+    if (!existsSync(iconUrl)) return;
+
+    const icon = readFileSync(iconUrl, 'utf8');
+    expect(icon).toContain('aria-label="Liiiraa Boost"');
+    expect(icon).toContain('M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z');
+  });
+
   it.each([
     ['/en/product', 'public-product'],
     ['/en/evidence', 'public-evidence'],

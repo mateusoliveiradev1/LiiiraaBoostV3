@@ -60,8 +60,8 @@ describe('account shell', () => {
     expect(layoutSource).toContain(
       '<span className="account-brand__surface">{copy.surface}</span>',
     );
-    expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
-    expect(layoutSource).toContain("accountState: 'No session connected'");
+    expect(layoutSource).toContain("accountState: 'Sessão de demonstração ativa'");
+    expect(layoutSource).toContain("accountState: 'Demo session active'");
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('account-header__support');
     expect(navigationSource).toContain('href={supportHref}');
@@ -138,20 +138,64 @@ describe('account shell', () => {
     expect(layoutSource).toContain("signUp: 'Create account'");
     expect(layoutSource).toContain("localizedAuthHref('account-sign-in', locale)");
     expect(layoutSource).toContain("localizedAuthHref('account-sign-up', locale)");
-    expect(layoutSource).toContain('entryItems={authEntryItems}');
-    expect(navigationSource).toContain('entryItems: readonly AccountNavigationItem[]');
-    expect(navigationSource).toContain('const allItems = [...entryItems, ...responsibilityItems]');
-    expect(navigationSource).toContain('const visibleGroups =');
-    expect(navigationSource).toContain('const isAuthRoute = currentEntryItems.length === 1');
+    expect(layoutSource).toContain('authRouteItems={authRouteItems}');
+    expect(layoutSource).toContain('authenticatedAction={authenticatedAction}');
+    expect(layoutSource).toContain("icon: 'logout'");
+    expect(layoutSource).toContain("signOut: 'Sair'");
+    expect(layoutSource).toContain("signOut: 'Sign out'");
+    expect(navigationSource).toContain('authRouteItems: readonly AccountNavigationItem[]');
+    expect(navigationSource).toContain('authenticatedAction: AccountNavigationItem');
+    expect(navigationSource).toContain(
+      'const allItems = [...authRouteItems, ...responsibilityItems]',
+    );
+    expect(navigationSource).toContain(
+      'const isAuthRoute = currentAuthRouteItems.length === 1',
+    );
     expect(navigationSource).toContain('className="account-auth-shell"');
     expect(navigationSource).toContain('className="account-auth-shell__main"');
-    expect(navigationSource).toContain('groups={visibleGroups} markCurrent');
+    expect(navigationSource).toContain('groups={[{ items: [authenticatedAction] }]}');
+    expect(navigationSource).not.toContain('groups={[{ items: authRouteItems }]}');
     expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
     expect(styles).toMatch(
       /\.account-auth-shell\s*\{[\s\S]*min-block-size:\s*100dvh[\s\S]*inline-size:\s*100%/u,
     );
-    expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
-    expect(layoutSource).toContain("accountState: 'No session connected'");
+    expect(layoutSource).toContain("accountState: 'Sessão de demonstração ativa'");
+    expect(layoutSource).toContain("accountState: 'Demo session active'");
+  });
+
+  it('uses explicit Phosphor semantics for every authenticated responsibility', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain("'account-overview': 'gauge'");
+    expect(layoutSource).toContain("'account-profile': 'profile'");
+    expect(layoutSource).toContain("'account-security': 'shield'");
+    expect(layoutSource).toContain("'account-subscription': 'crown'");
+    expect(layoutSource).toContain("'account-invoices': 'receipt'");
+    expect(layoutSource).toContain("'account-device': 'device'");
+    expect(layoutSource).toContain("'account-downloads': 'download'");
+    expect(layoutSource).toContain("'account-privacy': 'lock'");
+    expect(layoutSource).toContain("'account-support': 'lifebuoy'");
+    expect(navigationSource).toContain('<ProductIcon name="lifebuoy" size={18} />');
+    expect(layoutSource).not.toContain("icon: 'sparkle'");
+  });
+
+  it('publishes the official brand favicon for every account route', () => {
+    const iconUrl = new URL('./app/icon.svg', import.meta.url);
+
+    expect(existsSync(iconUrl)).toBe(true);
+    if (!existsSync(iconUrl)) return;
+
+    const icon = readFileSync(iconUrl, 'utf8');
+    expect(icon).toContain('aria-label="Liiiraa Boost"');
+    expect(icon).toContain('M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z');
+    expect(icon).toContain('m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z');
   });
 
   it('collapses the sidebar and reflows the inspector below the task on narrower screens', () => {
