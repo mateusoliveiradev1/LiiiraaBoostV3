@@ -3,7 +3,7 @@ status: diagnosed
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-02T01:13:09-03:00
+updated: 2026-08-02T14:13:49-03:00
 ---
 
 # Phase 03 UAT
@@ -89,6 +89,26 @@ approval_boundary: `humanApproved`, `publicationApproved`, manifest approval sta
 5. **Inspection owners (03-63/64/65 and 03-66)** — treat their prior PASS records as non-human historical results only. After source and gate repair, inspect public/account/admin at original resolution again and confirm runtime/capture parity; do not infer an account/admin pixel defect that the reviewer did not name.
 6. **Sequence owner** — do not run Plan 03-62 capture yet. First complete the root-cause investigation and gate-hardening work, then run the full `03-61 -> 03-62 -> 03-63/64/65 -> 03-66 -> 03-45` chain. Plan 03-46 stays blocked until a later literal `approved` response covers all 25 identities.
 
+## Plan 03-45 Human Review Verdict — Route language and navigation
+
+date: 2026-08-02T14:13:49-03:00
+verdict: rejected — the public route set remains unapproved; Plan 03-46 remains blocked.
+reported: "vamos melhorar as rotas ? muito termos tecnicos e tals ee sinto que da para melhorar e muitooooo tudo e no seletor te temos ainda nao esta as banderinhas"
+scope: `/product`, `/evidence`, `/compatibility`, `/plans`, `/documentation`, and `/releases`, plus the shared public navigation and locale control in PT-BR and English.
+approval_boundary: no candidate, manifest approval state, screenshot, or publication artifact is approved or promoted by this feedback.
+
+The reviewer supplied seven route screenshots. They show a structurally styled but visitor-hostile public experience:
+
+1. Primary headings and body copy expose internal validation, authority, origin, version, manifest, implementation, and phase vocabulary before explaining visitor benefit.
+2. Product, evidence, compatibility, and plans share the same sparse document template instead of distinct task-led compositions and clear next actions.
+3. Plans leaks `Fase 3`/`Fase 4` implementation chronology into commercial copy.
+4. Documentation exposes raw identifiers such as `current`, `stable`, and English slugs as visible primary content.
+5. Releases leads with generated-record and approval mechanics instead of a plain download-status explanation and safe visitor choices.
+6. The locale control still renders `us English`-style text rather than one visible `🇧🇷 Português` / `🇺🇸 English` control with a full textual accessible name.
+7. Dense technical evidence remains necessary for trust, but it must move into closed, contextual disclosures after the plain-language outcome and next action.
+
+Mandatory correction: rewrite both locales around visitor task and benefit, remove phase/implementation chronology from ordinary copy, create route-specific hierarchy and CTAs, subordinate provenance/version/integrity detail to disclosures, and prove a route-preserving flag-plus-language locale control before any recapture.
+
 ## Tests
 
 ### 1. Cross-surface visual polish and desktop consistency
@@ -112,11 +132,18 @@ result: issue
 reported: "Console Error: eval() is not supported in this environment... React requires eval() in development mode... Next.js 16.2.12 (Turbopack)"
 severity: major
 
+### 4. Public route purpose, plain language, and flag locale control
+
+expected: Every public route explains its visitor purpose and next action in plain PT-BR/English before technical detail; implementation chronology is absent; technical evidence is progressively disclosed; locale switching preserves the current canonical route and visibly renders `🇧🇷 Português` or `🇺🇸 English` with an accessible textual name.
+result: issue
+reported: "vamos melhorar as rotas ? muito termos tecnicos e tals ee sinto que da para melhorar e muitooooo tudo e no seletor te temos ainda nao esta as banderinhas"
+severity: major
+
 ## Summary
 
-total: 3
+total: 4
 passed: 0
-issues: 3
+issues: 4
 pending: 0
 skipped: 0
 blocked: 0

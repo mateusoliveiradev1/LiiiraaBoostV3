@@ -1,27 +1,33 @@
 ---
-status: awaiting_human_verify
+status: investigating
 trigger: "Phase 03 UAT public visual gap: user said `nao gostei de nenhum dos 3 viu`; public Home exposes boundary/evidence metadata and has an oversized, awkward hero with weak pacing."
 created: 2026-07-31T19:28:32.0992839-03:00
-updated: 2026-08-02T02:19:50-03:00
+updated: 2026-08-02T14:13:49-03:00
 ---
 
 ## Current Focus
 
 reasoning_checkpoint:
-  hypothesis: "Route-level `public.css` delivery and the absence of effective-style/current-pixel assertions let a dev/HMR runtime render current Home markup against a stale CSS generation while shell selectors continued to apply, and let Plan 03-66 accept it."
+  hypothesis: "The stylesheet-parity failure is fixed, but the public catalog, documentation, and release routes still project internal content records directly into ordinary visitor copy and reuse one sparse documentary composition; the locale control also exposes a textual country-code token instead of a real flag-plus-language affordance."
   confirming_evidence:
     - "The exact dev process started 23 seconds before the reviewer captures; those pixels show stable shell selectors plus unbound Home and locale-projection selectors."
     - "A retained stale `.next/dev` chunk contains `.public-header*` but zero `.home-ignition-*`/`.public-mobile-locale` rules, while a fresh navigation loads the current chunk and passes geometry."
     - "The deliberate stale-selector browser test reproduces the mechanism and the current aggregate helper resolves, yielding the expected RED failure: `Received promise resolved instead of rejected`."
-  falsification_test: "If co-locating `public.css` at `[locale]/layout.tsx`, adding computed/box sentinels, and making no-update capture compare current pixels still allows the stale-selector negative fixture to resolve or changes public CSS scope outside `apps/web`, the hypothesis is wrong."
-  fix_rationale: "One layout-owned CSS boundary ties shell and authored public composition to the same route lifecycle; runtime computed/geometry assertions catch missing or non-binding selectors; unconditional screenshot comparison proves current pixels rather than manifest/history only."
+  falsification_test: "If the route models already contain visitor-first localized copy, no internal phase/implementation prose is rendered outside disclosures, and the locale projection already emits visible Unicode flags at runtime, then the hypothesis is wrong."
+  fix_rationale: "Keep canonical content/evidence authority intact, but introduce a visitor-first presentation projection: outcome and action first, technical proof in closed disclosures, route-specific compositions, and one route-preserving flag-plus-language control with explicit accessible text."
   blind_spots: "The original browser cache/HMR event log is unavailable, so the precise browser cache transition cannot be replayed bit-for-bit; the fix therefore targets the directly observed stale effective-style state rather than one browser-internal trigger."
 tdd_checkpoint:
   test_file: "tooling/web-evidence/tests/accessibility-responsive.spec.ts"
   test_name: "@final @public authored style parity rejects stale Home selector bindings"
   status: "green"
   failure_output: "RED proved the helper resolved; GREEN now rejects stale bindings through `PUBLIC_HOME_AUTHORING_PARITY`."
-next_action: Ask the reviewer to open the public Home from a fresh development startup, navigate/scroll the page, and confirm that the authored composition remains intact; archive only after they reply `confirmed fixed`.
+next_action: Add failing route-copy/locale tests, implement the public presentation rewrite in both locales, run source/build/browser gates, then replay 03-61 through 03-66 before returning to the 03-45 human checkpoint.
+
+## Plan 03-45 Route-Language Rejection
+
+reported: "vamos melhorar as rotas ? muito termos tecnicos e tals ee sinto que da para melhorar e muitooooo tudo e no seletor te temos ainda nao esta as banderinhas"
+verdict: The seven supplied screenshots reject the public supporting routes and shared locale affordance. Product, evidence, compatibility, plans, documentation, and releases expose internal validation/authority/version/phase vocabulary as primary content, reuse a sparse documentary template, and do not provide strong visitor-oriented next actions. The locale projection still reads like `us English` rather than one clear flag-plus-language control.
+impact: W01-W18 and G01-G07 remain unapproved, Plan 03-46 remains blocked, and no screenshot may be promoted before plain-language, route-composition, locale, source, build, and browser gates pass.
 
 ## Plan 03-45 Follow-up Rejection
 
