@@ -259,6 +259,15 @@ Each task was committed atomically through its TDD gates:
 - The web-evidence TypeScript check, focused harness/manifest Prettier check, and `git diff --check` passed.
 - Snapshot update mode was never enabled. No application source, evidence harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
 
+## Post-W10-Correction Replay
+
+- Replayed Plan 03-61 after `47eca40` clarified the W10 identity preview boundary and `fe953b4` recorded that Phase 03-58 correction.
+- The permanent dry-list contract passed 1 test and again proved exactly 25 unique W01-W18/G01-G07 project/ID pairs.
+- The candidate-aware browser matrix passed all 25 tests with no skips or failures: 12 public, 8 account, and 5 admin candidates. W10 passed on its owning `account-final-desktop-960` project.
+- The exact unfiltered motion contract started public, account, and admin and passed 5 tests with 40 intentional project/axis skips.
+- The web-evidence TypeScript check, focused harness/manifest Prettier check, and `git diff --check` passed.
+- Snapshot update mode was never enabled. No source, harness, manifest, archive, candidate screenshot, approval/publication artifact, package, or lockfile changed; the unrelated untracked `apps/desktop/src-tauri/gen/` directory remained untouched.
+
 ## Known Stubs
 
 None - no placeholder, TODO, FIXME, empty UI data source, or future-only stub was introduced.
