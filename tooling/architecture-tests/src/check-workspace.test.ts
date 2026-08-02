@@ -135,7 +135,12 @@ const phase3WebModules = [
     layer: 'composition',
     runtimeClass: 'production',
     packageName: '@liiiraa/web',
-    workspaceDependencies: ['@liiiraa/design-tokens', '@liiiraa/web-core', '@liiiraa/web-features'],
+    workspaceDependencies: [
+      '@liiiraa/design-system',
+      '@liiiraa/design-tokens',
+      '@liiiraa/web-core',
+      '@liiiraa/web-features',
+    ],
   },
   {
     id: 'account-app',

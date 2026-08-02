@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
@@ -43,8 +43,18 @@ describe('admin shell', () => {
   it('keeps operational identity, task, origin, role, and locale legible without raw fixture chrome', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const productLockupUrl = new URL('./admin-product-lockup.tsx', import.meta.url);
 
+    expect(existsSync(productLockupUrl)).toBe(true);
+    if (!existsSync(productLockupUrl)) return;
+
+    const productLockupSource = readFileSync(productLockupUrl, 'utf8');
     expect(layout).toContain('<ProductLockup />');
+    expect(layout).toContain("from '../../admin-product-lockup'");
+    expect(layout).not.toContain('packages/design-system/src');
+    expect(productLockupSource).toContain("'use client'");
+    expect(productLockupSource).toContain("from '@liiiraa/design-system'");
+    expect(productLockupSource).toContain('<DesignSystemProductLockup />');
     expect(layout).toContain('admin-brand__surface');
     expect(layout).toContain('admin-header__role');
     expect(layout).toContain('admin-header__origin');
