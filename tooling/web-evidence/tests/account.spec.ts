@@ -112,6 +112,29 @@ test('@final @account geometry preserves the 248 workspace 320 inspector shell a
   await expect(page.locator('[data-workspace-region="context"]')).toBeVisible();
   await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
 
+  const shellScrollContract = await page.evaluate(() => {
+    const nestedVerticalScrollers = Array.from(
+      document.querySelectorAll<HTMLElement>('.account-app-shell *'),
+    )
+      .filter((element) => {
+        const overflowY = getComputedStyle(element).overflowY;
+        return /^(auto|scroll)$/u.test(overflowY) && element.scrollHeight > element.clientHeight;
+      })
+      .map((element) => element.className);
+
+    return {
+      documentClientWidth: document.documentElement.clientWidth,
+      documentScrollWidth: document.documentElement.scrollWidth,
+      nestedVerticalScrollers,
+    };
+  });
+  expect(shellScrollContract.documentScrollWidth).toBeLessThanOrEqual(
+    shellScrollContract.documentClientWidth,
+  );
+  expect(shellScrollContract.nestedVerticalScrollers).toEqual([]);
+  await expect(page.locator('.account-footer')).toHaveCount(0);
+  await expect(page.locator('.account-inspector__public')).toBeVisible();
+
   await page.goto('/en/sign-in');
   expect((await page.locator('main form').boundingBox())?.width).toBeLessThanOrEqual(560);
 });
