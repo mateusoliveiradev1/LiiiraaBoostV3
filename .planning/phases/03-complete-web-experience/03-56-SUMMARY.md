@@ -24,7 +24,10 @@ tech-stack:
 key-files:
   created:
     - apps/web/src/documentation.test.tsx
+    - apps/web/src/public-product-lockup.tsx
   modified:
+    - apps/web/package.json
+    - apps/web/src/app/[locale]/layout.tsx
     - apps/web/src/features/home.tsx
     - apps/web/src/features/public-catalog.tsx
     - apps/web/src/features/documentation.tsx
@@ -33,6 +36,7 @@ key-files:
     - apps/web/src/home.test.tsx
     - apps/web/src/public-catalog.test.tsx
     - apps/web/src/releases.test.tsx
+    - pnpm-lock.yaml
 
 key-decisions:
   - "Reuse the checksum-admitted desktop capture as the contextual evidence focal point so the product itself carries attention without invented telemetry or illustration."
@@ -56,11 +60,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 32 min total (16 min initial execution + 13 min inspection correction + 3 min evidence-test correction)
+- **Duration:** 39 min total (16 min initial execution + 13 min inspection correction + 3 min evidence-test correction + 7 min architecture correction)
 - **Started:** 2026-08-01T17:26:19Z
 - **Completed:** 2026-08-01T17:41:58Z
 - **Tasks:** 2
-- **Files modified:** 12
+- **Files modified:** 16
 
 ## Accomplishments
 
@@ -82,6 +86,7 @@ Each TDD gate was committed atomically:
 6. **03-63 correction RED: manifest framing disclosure boundary** - `2b9b935` (test)
 7. **03-63 correction GREEN: human release decision hierarchy** - `dc650b8` (fix)
 8. **03-61 evidence correction: scoped W07 terminal action assertion** - `29b3013` (test)
+9. **03-66 architecture correction: public ProductLockup boundary** - `8fda0a4` (fix)
 
 ## Files Created/Modified
 
@@ -97,6 +102,9 @@ Each TDD gate was committed atomically:
 - `apps/web/src/documentation.test.tsx` - Documentation hierarchy, historical guidance, invoked metadata, and narrow-layout gates.
 - `apps/web/src/releases.test.tsx` - Release hierarchy, progressive metadata, responsive integrity, and no-bypass gates.
 - `tooling/web-evidence/tests/releases.spec.ts` - Semantic W07 terminal-gate action ownership without positional selectors.
+- `apps/web/src/app/[locale]/layout.tsx` - Server-owned public shell consuming an app-local ProductLockup boundary instead of a private package path.
+- `apps/web/src/public-product-lockup.tsx` - Narrow client bridge to the canonical `@liiiraa/design-system` export.
+- `apps/web/package.json` and `pnpm-lock.yaml` - Explicit local workspace dependency for the public design-system API.
 
 ## Decisions Made
 
@@ -127,10 +135,19 @@ Each TDD gate was committed atomically:
 - **Verification:** Browser measurement reports 40px support-route H1s with no horizontal overflow at every required width.
 - **Committed in:** `3565d67`
 
+**3. [Rule 3 - Blocking Issue] Preserved the server layout across the public package import**
+
+- **Found during:** 03-66 architecture correction production build
+- **Issue:** Importing the design-system root directly from the server layout caused Next.js to traverse client-only barrel exports using React state and React Aria.
+- **Fix:** Kept the locale layout server-owned and contained the canonical package import in a narrow app-owned client bridge that renders the unchanged shared `ProductLockup`.
+- **Files modified:** `apps/web/src/app/[locale]/layout.tsx`, `apps/web/src/public-product-lockup.tsx`, `apps/web/package.json`, `pnpm-lock.yaml`
+- **Verification:** Focused shell and lockup tests, strict TypeScript, and the production Next.js build pass.
+- **Committed in:** `8fda0a4`
+
 ---
 
-**Total deviations:** 2 auto-fixed (2 Rule 1 bugs)
-**Impact on plan:** Both corrections strengthened the specified release and typography gates without adding dependencies, authority, claims, or scope.
+**Total deviations:** 3 auto-fixed (2 Rule 1 bugs, 1 Rule 3 blocking issue)
+**Impact on plan:** The corrections strengthened release, typography, and module-boundary gates without adding external dependencies, authority, claims, or product scope.
 
 ## Issues Encountered
 
@@ -178,6 +195,15 @@ None. The public download-unavailable state is an intentional fail-closed author
 - Release/status unit suite - 2 files, 25 tests passed.
 - No screenshot, candidate inspection, or visual-manifest file changed.
 
+### 03-66 Architecture Correction
+
+- `rtk pnpm --filter @liiiraa/web exec vitest run src/public-shell.test.ts` - 1 file, 25 tests passed.
+- `rtk pnpm --filter @liiiraa/design-system exec vitest run src/design-system.test.tsx -t "ProductLockup"` - exact ProductLockup render contract passed.
+- `rtk pnpm --filter @liiiraa/web check` - strict TypeScript passed.
+- `rtk pnpm --filter @liiiraa/web build` - Next.js 16.2.12 production build passed with the locale layout remaining a Server Component.
+- `rtk pnpm test:architecture` - the public owner violation is closed; the aggregate gate narrowed from three private ProductLockup imports to the two independently owned account/admin imports.
+- Prettier and `git diff --check` passed for the bounded source and manifest delta; no screenshots or visual evidence changed.
+
 ## Threat Review
 
 - Product and catalog claims retain source, scope, version, validation state, and unproven-boundary evidence in bilingual native disclosures.
@@ -196,7 +222,7 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - Created file `apps/web/src/documentation.test.tsx` exists and is tracked.
-- Task commits `9704c47`, `c849bc0`, `091a01d`, `3565d67`, `473aa9b`, `2b9b935`, `dc650b8`, and `29b3013` exist in repository history.
+- Task commits `9704c47`, `c849bc0`, `091a01d`, `3565d67`, `473aa9b`, `2b9b935`, `dc650b8`, `29b3013`, and `8fda0a4` exist in repository history.
 
 ---
 *Phase: 03-complete-web-experience*
