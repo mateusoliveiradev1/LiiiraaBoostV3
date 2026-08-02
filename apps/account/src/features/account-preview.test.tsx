@@ -137,20 +137,21 @@ describe('W11 and W12 complete account states', () => {
 });
 
 describe('authored overview and Profile workspaces', () => {
-  it('groups next actions and account summaries around a clear overview focus', () => {
+  it('centers the overview on priority, truthful readiness, and recent activity', () => {
     const overviewSource = sourceBetween('const OverviewPreview', 'const ProfilePreview');
 
-    expect(overviewSource).toContain('account-overview__focus');
-    expect(overviewSource).toContain('account-overview__summaries');
-    expect(overviewSource).toContain('account-workspace-split');
-    expect(overviewSource).toContain('data-workspace-layout="7/5"');
-    expect(overviewSource).toContain('data-workspace-region="focal"');
-    expect(overviewSource).toContain('data-workspace-region="context"');
+    expect(overviewSource).toContain('account-overview__priority');
+    expect(overviewSource).toContain('account-overview__readiness');
+    expect(overviewSource).toContain('account-overview__activity');
+    expect(overviewSource).not.toContain('account-workspace-split');
+    expect(overviewSource).not.toContain('data-workspace-layout="7/5"');
     expect(overviewSource).not.toContain('account-overview__limitations');
     expect(overviewSource).toContain("hrefFor('account-profile', content.locale)");
+    expect(overviewSource).toContain("hrefFor('account-security', content.locale)");
     expect(overviewSource).toContain("hrefFor('account-subscription', content.locale)");
     expect(overviewSource).toContain("hrefFor('account-device', content.locale)");
-    expect(overviewSource).toContain("hrefFor('account-support', content.locale)");
+    expect(overviewSource).toContain('readinessItems.map');
+    expect(overviewSource).toContain('content.overview.noAuthorityTitle');
     expect(overviewSource).not.toContain('ResponsiveDataTable');
     expect(overviewSource).not.toContain('EmptyComposition');
   });
@@ -315,6 +316,27 @@ describe('task-specific account workspace density', () => {
       /@media \(width < 960px\)[\s\S]*\.account-workspace-split\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
     );
     expect(accountStyles).toMatch(/\.account-workspace-split\s*\{[\s\S]*inline-size:\s*100%/u);
+  });
+
+  it('keeps privacy review readable inside the three-column account shell', () => {
+    expect(accountStyles).toMatch(
+      /\.account-privacy__workspace\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
+    );
+    expect(accountStyles).toMatch(
+      /\.account-privacy__context \.account-definition-list\s*\{[\s\S]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/u,
+    );
+    expect(accountStyles).toMatch(
+      /@media \(width < 760px\)[\s\S]*\.account-privacy__context \.account-definition-list[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
+    );
+  });
+
+  it('composes W10 as a focused two-region entry gateway before mobile reflow', () => {
+    expect(accountStyles).toMatch(
+      /\.lb-web-sign-in\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*0\.9fr\)\s+minmax\(360px,\s*1\.1fr\)/u,
+    );
+    expect(accountStyles).toMatch(
+      /\.lb-web-sign-in > \.lb-web-boundary\s*\{[\s\S]*grid-column:\s*1[\s\S]*grid-row:\s*2 \/ span 2/u,
+    );
   });
 
   it('keeps every deterministic degraded and terminal path explicit and bilingual', () => {

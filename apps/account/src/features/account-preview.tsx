@@ -1,6 +1,13 @@
 'use client';
 
-import { LbButton, LbSkeletonRegion, LbTextArea, LbTextField } from '@liiiraa/design-system';
+import {
+  LbButton,
+  LbSkeletonRegion,
+  LbTextArea,
+  LbTextField,
+  ProductIcon,
+  type ProductIconName,
+} from '@liiiraa/design-system';
 import {
   EmptyComposition,
   PreviewBoundary,
@@ -50,10 +57,22 @@ type AccountContent = Readonly<{
   overview: Readonly<{
     title: string;
     summary: string;
+    responsibilityLabel: string;
     nextTitle: string;
     nextBody: string;
     nextAction: string;
     securityAction: string;
+    checklistTitle: string;
+    pendingState: string;
+    noBillingState: string;
+    notLinkedState: string;
+    subscriptionAction: string;
+    deviceAction: string;
+    recentTitle: string;
+    localPreviewTitle: string;
+    localPreviewBody: string;
+    noAuthorityTitle: string;
+    noAuthorityBody: string;
     summariesTitle: string;
     reviewState: string;
     openAction: string;
@@ -384,20 +403,61 @@ export const SignInPreview = ({
   );
 };
 
-const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => (
-  <article className="account-responsibility account-overview" data-account-state="ready">
-    <FixtureHeader summary={content.overview.summary} title={content.overview.title} />
-    <div className="account-overview__layout account-workspace-split" data-workspace-layout="7/5">
-      <section
-        aria-labelledby="account-next-title"
-        className="account-overview__focus"
-        data-workspace-region="focal"
-      >
-        <div className="account-overview__section-heading">
+const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => {
+  const readinessItems: readonly Readonly<{
+    action: string;
+    href: string;
+    icon: ProductIconName;
+    state: string;
+    title: string;
+    tone: 'pending' | 'unavailable';
+  }>[] = [
+    {
+      action: content.overview.nextAction,
+      href: hrefFor('account-profile', content.locale),
+      icon: 'profile',
+      state: content.overview.pendingState,
+      title: content.profile.title,
+      tone: 'pending',
+    },
+    {
+      action: content.overview.securityAction,
+      href: hrefFor('account-security', content.locale),
+      icon: 'shield',
+      state: content.overview.pendingState,
+      title: content.security.title,
+      tone: 'pending',
+    },
+    {
+      action: content.overview.subscriptionAction,
+      href: hrefFor('account-subscription', content.locale),
+      icon: 'crown',
+      state: content.overview.noBillingState,
+      title: content.subscription.title,
+      tone: 'unavailable',
+    },
+    {
+      action: content.overview.deviceAction,
+      href: hrefFor('account-device', content.locale),
+      icon: 'device',
+      state: content.overview.notLinkedState,
+      title: content.device.title,
+      tone: 'unavailable',
+    },
+  ];
+
+  return (
+    <article className="account-responsibility account-overview" data-account-state="ready">
+      <FixtureHeader summary={content.overview.summary} title={content.overview.title} />
+
+      <section aria-labelledby="account-next-title" className="account-overview__priority">
+        <div className="account-overview__priority-copy">
+          <span className="account-overview__responsibility">
+            {content.overview.responsibilityLabel}
+          </span>
           <h2 id="account-next-title">{content.overview.nextTitle}</h2>
-          <StatusSignal label={content.overview.reviewState} state="preview" />
+          <p>{content.overview.nextBody}</p>
         </div>
-        <p>{content.overview.nextBody}</p>
         <nav aria-label={content.overview.nextTitle} className="account-overview__actions">
           <a href={hrefFor('account-profile', content.locale)}>{content.overview.nextAction}</a>
           <a href={hrefFor('account-security', content.locale)}>
@@ -406,43 +466,57 @@ const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => 
         </nav>
       </section>
 
-      <section
-        aria-labelledby="account-summaries-title"
-        className="account-overview__summaries"
-        data-workspace-region="context"
-      >
-        <h2 id="account-summaries-title">{content.overview.summariesTitle}</h2>
+      <section aria-labelledby="account-readiness-title" className="account-overview__readiness">
+        <div className="account-overview__section-heading">
+          <h2 id="account-readiness-title">{content.overview.checklistTitle}</h2>
+          <StatusSignal label={content.overview.reviewState} state="preview" />
+        </div>
+        <div className="account-overview__readiness-head" aria-hidden="true">
+          <span>{content.locale === 'pt-BR' ? 'Etapa' : 'Step'}</span>
+          <span>{content.locale === 'pt-BR' ? 'Estado' : 'State'}</span>
+          <span>{content.locale === 'pt-BR' ? 'Próxima ação' : 'Next action'}</span>
+        </div>
         <ul>
-          {[
-            {
-              detail: content.subscription.summary,
-              href: hrefFor('account-subscription', content.locale),
-              title: content.subscription.title,
-            },
-            {
-              detail: content.device.summary,
-              href: hrefFor('account-device', content.locale),
-              title: content.device.title,
-            },
-            {
-              detail: content.support.summary,
-              href: hrefFor('account-support', content.locale),
-              title: content.support.title,
-            },
-          ].map((item) => (
+          {readinessItems.map((item) => (
             <li key={item.href}>
-              <div>
+              <span className="account-overview__readiness-title">
+                <ProductIcon name={item.icon} size={18} />
                 <strong>{item.title}</strong>
-                <p>{item.detail}</p>
-              </div>
-              <a href={item.href}>{content.overview.openAction}</a>
+              </span>
+              <span className="account-overview__readiness-state" data-readiness-tone={item.tone}>
+                <span aria-hidden="true" className="account-overview__state-dot" />
+                {item.state}
+              </span>
+              <a href={item.href}>
+                {item.action} <ProductIcon name="chevronRight" size={16} />
+              </a>
             </li>
           ))}
         </ul>
       </section>
-    </div>
-  </article>
-);
+
+      <section aria-labelledby="account-activity-title" className="account-overview__activity">
+        <h2 id="account-activity-title">{content.overview.recentTitle}</h2>
+        <ul>
+          <li>
+            <ProductIcon name="browser" size={19} />
+            <span>
+              <strong>{content.overview.localPreviewTitle}</strong>
+              <span>{content.overview.localPreviewBody}</span>
+            </span>
+          </li>
+          <li>
+            <ProductIcon name="info" size={19} />
+            <span>
+              <strong>{content.overview.noAuthorityTitle}</strong>
+              <span>{content.overview.noAuthorityBody}</span>
+            </span>
+          </li>
+        </ul>
+      </section>
+    </article>
+  );
+};
 
 const ProfilePreview = ({
   content,

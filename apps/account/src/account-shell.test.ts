@@ -15,24 +15,23 @@ import {
 } from './account-preview-model';
 
 describe('account shell', () => {
-  it('uses the exact desktop shell geometry and bounded workspace', () => {
+  it('uses the approved workspace, persistent sidebar, and inspector geometry', () => {
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
     expect(styles).toMatch(
-      /\.account-header__bar\s*\{[\s\S]*min-block-size:\s*72px[\s\S]*max-inline-size:\s*1440px/u,
+      /\.account-app-shell\s*\{[\s\S]*grid-template-columns:\s*248px minmax\(0, 1fr\) 320px[\s\S]*grid-template-rows:\s*64px/u,
     );
     expect(styles).toMatch(
-      /\.account-preview-rail\s*\{[\s\S]*min-block-size:\s*40px[\s\S]*block-size:\s*40px/u,
+      /\.account-sidebar\s*\{[\s\S]*grid-column:\s*1[\s\S]*min-block-size:\s*100vh[\s\S]*max-block-size:\s*100vh/u,
     );
+    expect(styles).toMatch(/\.account-workspace\s*\{[\s\S]*grid-column:\s*2[\s\S]*grid-row:\s*2/u);
     expect(styles).toMatch(
-      /\.account-workspace__frame\s*\{[\s\S]*grid-template-columns:\s*264px minmax\(0, 1fr\)/u,
+      /\.account-inspector\s*\{[\s\S]*position:\s*sticky[\s\S]*grid-column:\s*3[\s\S]*max-block-size:\s*calc\(100vh - 64px\)/u,
     );
-    expect(styles).toMatch(
-      /#account-main\s*\{[\s\S]*max-inline-size:\s*1240px[\s\S]*justify-self:\s*center/u,
-    );
+    expect(styles).toMatch(/\.account-preview-slot\s*\{[\s\S]*padding:/u);
   });
 
-  it('keeps one calm topbar story with branded account, task, safe session, and locale', () => {
+  it('keeps one compact utility topbar with route context, help, and visible locale control', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
@@ -52,17 +51,21 @@ describe('account shell', () => {
     expect(productLockupSource).toContain("'use client'");
     expect(productLockupSource).toContain("from '@liiiraa/design-system'");
     expect(productLockupSource).toContain('<DesignSystemProductLockup />');
-    expect(layoutSource).toContain("{locale === 'pt-BR' ? 'Conta' : 'Account'}");
+    expect(layoutSource).toContain(
+      '<span className="account-brand__surface">{copy.surface}</span>',
+    );
     expect(layoutSource).toContain("accountState: 'Nenhuma sessão conectada'");
     expect(layoutSource).toContain("accountState: 'No session connected'");
-    expect(navigationSource).toContain('account-header__task');
+    expect(navigationSource).toContain('account-header__route');
+    expect(navigationSource).toContain('account-header__support');
+    expect(navigationSource).toContain('href={supportHref}');
     expect(navigationSource).toContain('<LocaleSwitcher');
     expect(navigationSource).toContain('sourceLocale={locale}');
     expect(navigationSource).toContain('targetLocale={alternateLocale}');
     expect(navigationSource).not.toContain('account-header__fragment');
   });
 
-  it('gives only the current responsibility an icon, raised fill, and cobalt edge', () => {
+  it('gives every responsibility an icon and the current route a full-surface selection', () => {
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
@@ -74,9 +77,7 @@ describe('account shell', () => {
     expect(styles).toMatch(
       /\.account-nav__list a\[aria-current='page'\]\s*\{[\s\S]*background:\s*var\(--lb-surface-raised\)/u,
     );
-    expect(styles).toMatch(
-      /\.account-nav__list a\[aria-current='page'\]::before\s*\{[\s\S]*inline-size:\s*3px[\s\S]*background:\s*var\(--lb-accent-electric\)/u,
-    );
+    expect(styles).not.toContain(".account-nav__list a[aria-current='page']::before");
     expect(styles).toMatch(
       /\.account-nav__list a:not\(\[aria-current='page'\]\)\s*\{[\s\S]*color:\s*var\(--lb-text-secondary\)/u,
     );
@@ -137,7 +138,7 @@ describe('account shell', () => {
     expect(layoutSource).toContain("accountState: 'No session connected'");
   });
 
-  it('collapses narrow navigation into a current-task disclosure without stacking inventory', () => {
+  it('collapses the sidebar and reflows the inspector below the task on narrower screens', () => {
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
@@ -151,13 +152,13 @@ describe('account shell', () => {
     expect(navigationSource).toContain('{currentLabel}');
     expect(styles).toMatch(/\.account-nav__mobile\s*\{[\s\S]*display:\s*none/u);
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.account-nav__desktop\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 1180px\)[\s\S]*\.account-sidebar\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*display:\s*block/u,
+      /@media \(width < 1180px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*display:\s*block/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.account-header__task\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 1180px\)[\s\S]*\.account-inspector\s*\{[\s\S]*position:\s*static[\s\S]*grid-row:\s*3/u,
     );
     expect(styles).not.toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
@@ -193,20 +194,48 @@ describe('account shell', () => {
     expect(navigationSource).not.toMatch(/onKeyDown|onClick|role="button"/u);
   });
 
-  it('reflows at 320px with one task label, a 60px topbar, and no page overflow', () => {
+  it('reflows at 320px with compact utilities and no page overflow', () => {
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
     expect(styles).toContain('overflow-x: clip');
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.account-header__bar\s*\{[\s\S]*min-block-size:\s*60px[\s\S]*block-size:\s*60px/u,
-    );
-    expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.account-header__task\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 760px\)[\s\S]*\.account-header__route,[\s\S]*\.account-header__support span\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*min-inline-size:\s*0/u,
     );
     expect(styles).not.toContain('100vw');
+  });
+
+  it('groups navigation by responsibility without collapsing route labels into group labels', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain(
+      "ids: ['account-overview', 'account-profile', 'account-security']",
+    );
+    expect(layoutSource).toContain("ids: ['account-subscription', 'account-invoices']");
+    expect(layoutSource).toContain("ids: ['account-device', 'account-downloads']");
+    expect(layoutSource).toContain("ids: ['account-privacy', 'account-support']");
+    expect(layoutSource).toContain('label: NAVIGATION_LABELS[routeId][locale]');
+  });
+
+  it('keeps avatar initials readable against the cobalt identity surface', () => {
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /\.account-identity__avatar\s*\{[\s\S]*color:\s*var\(--lb-surface-canvas\)[\s\S]*background:\s*var\(--lb-cobalt-action\)/u,
+    );
+  });
+
+  it('maps avatar initials to system colors in Windows forced-colors mode', () => {
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /@media \(forced-colors: active\)[\s\S]*\.account-identity__avatar\s*\{[\s\S]*color:\s*ButtonText[\s\S]*background:\s*ButtonFace/u,
+    );
   });
 
   it('wraps the complete preview status at 320px and 400% text reflow', () => {
@@ -237,7 +266,7 @@ describe('account shell', () => {
     expect(navigationSource).toContain(': fallbackLocaleHref');
   });
 
-  it('keeps the topbar contextual, bilingual, and visibly disconnected', () => {
+  it('keeps the topbar contextual, bilingual, and the inspector truthfully disconnected', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
@@ -246,10 +275,17 @@ describe('account shell', () => {
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
     );
+    const inspectorSource = readFileSync(
+      new URL('./account-inspector.tsx', import.meta.url),
+      'utf8',
+    );
 
-    expect(layoutSource).toContain('account-header__identity');
-    expect(layoutSource).toContain('account-header__identity-state');
-    expect(navigationSource).toContain('account-header__task');
+    expect(layoutSource).toContain('inspectorLabel={copy.inspectorLabel}');
+    expect(layoutSource).toContain('<AccountInspector');
+    expect(inspectorSource).toContain('account-inspector__account');
+    expect(inspectorSource).toContain('account-inspector__machine');
+    expect(navigationSource).toContain('account-header__route');
+    expect(navigationSource).toContain('aria-label={inspectorLabel}');
     expect(layoutSource).toContain('data-authority="disconnected"');
     expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
     expect(navigationSource).toContain('sourceLocale={locale}');
@@ -302,7 +338,7 @@ describe('account shell', () => {
     for (const routeId of routeIds) {
       expect(layoutSource).toContain(routeId);
     }
-    expect(styles).toMatch(/\.account-workspace__frame\s*\{[\s\S]*max-inline-size:/u);
+    expect(styles).toMatch(/\.account-app-shell\s*\{[\s\S]*inline-size:\s*min\(100%, 1760px\)/u);
     expect(styles).toContain('overflow-x: clip');
     expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*account-nav__mobile/u);
     expect(styles).not.toContain('grid-auto-flow: column');

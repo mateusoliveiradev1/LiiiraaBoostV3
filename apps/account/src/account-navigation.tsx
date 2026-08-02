@@ -19,15 +19,21 @@ export type AccountNavigationGroup = Readonly<{
 
 type AccountNavigationProps = Readonly<{
   alternateLocale: WebLocale;
+  brand: ReactNode;
   children: ReactNode;
   currentTaskLabel: string;
   entryItems: readonly AccountNavigationItem[];
   fallbackLocaleHref: string;
   groups: readonly AccountNavigationGroup[];
-  header: ReactNode;
+  identity: ReactNode;
+  inspector: ReactNode;
+  inspectorLabel: string;
   label: string;
   locale: WebLocale;
   preview: ReactNode;
+  supportHref: string;
+  supportLabel: string;
+  surfaceLabel: string;
 }>;
 
 const normalizePathname = (pathname: string): string => pathname.replace(/\/+$/u, '') || '/';
@@ -80,15 +86,21 @@ function NavigationGroups({
 
 export function AccountNavigation({
   alternateLocale,
+  brand,
   children,
   currentTaskLabel,
   entryItems,
   fallbackLocaleHref,
   groups,
-  header,
+  identity,
+  inspector,
+  inspectorLabel,
   label,
   locale,
   preview,
+  supportHref,
+  supportLabel,
+  surfaceLabel,
 }: AccountNavigationProps) {
   const pathname = usePathname();
   const localizedCurrentRoute = resolveLocalizedCurrentRoute({
@@ -121,47 +133,71 @@ export function AccountNavigation({
     : fallbackLocaleHref;
 
   return (
-    <>
+    <div className="account-app-shell">
+      <aside className="account-sidebar">
+        <div className="account-sidebar__brand">{brand}</div>
+        <nav aria-label={label} className="account-nav account-nav__desktop">
+          <p className="account-nav__label">{label}</p>
+          <NavigationGroups currentHref={currentHref} groups={visibleGroups} markCurrent />
+        </nav>
+        <div className="account-sidebar__footer">
+          <div className="account-sidebar__identity">{identity}</div>
+          <nav aria-label={surfaceLabel} className="account-sidebar__entry">
+            <NavigationGroups
+              currentHref={currentHref}
+              groups={[{ items: entryItems }]}
+              markCurrent
+            />
+          </nav>
+        </div>
+      </aside>
+
       <header className="account-header">
         <div className="account-header__bar">
-          {header}
-          <div className="account-header__task">
-            <span>{currentTaskLabel}</span>
+          <div className="account-header__mobile-brand">{brand}</div>
+          <nav aria-label={currentTaskLabel} className="account-header__route">
+            <span>{surfaceLabel}</span>
+            <ProductIcon name="chevronRight" size={14} />
             <strong>{currentLabel}</strong>
+          </nav>
+          <div className="account-header__tools">
+            <a className="account-header__support" href={supportHref}>
+              <ProductIcon name="info" size={18} />
+              <span>{supportLabel}</span>
+            </a>
+            <LocaleSwitcher
+              href={localeHref}
+              sourceLocale={locale}
+              targetLocale={alternateLocale}
+            />
           </div>
-          <LocaleSwitcher href={localeHref} sourceLocale={locale} targetLocale={alternateLocale} />
         </div>
       </header>
 
-      {preview}
-
       <div className="account-workspace">
-        <div className="account-workspace__frame">
-          <nav aria-label={label} className="account-nav account-nav__desktop">
-            <p className="account-nav__label">{label}</p>
-            <NavigationGroups currentHref={currentHref} groups={visibleGroups} markCurrent />
+        <details className="account-nav account-nav__mobile">
+          <summary>
+            <span>{currentTaskLabel}</span>
+            <strong>{currentLabel}</strong>
+            <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
+          </summary>
+          <nav aria-label={label}>
+            <NavigationGroups
+              currentHref={currentHref}
+              groups={visibleGroups}
+              markCurrent={false}
+            />
           </nav>
-
-          <details className="account-nav account-nav__mobile">
-            <summary>
-              <span>{currentTaskLabel}</span>
-              <strong>{currentLabel}</strong>
-              <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
-            </summary>
-            <nav aria-label={label}>
-              <NavigationGroups
-                currentHref={currentHref}
-                groups={visibleGroups}
-                markCurrent={false}
-              />
-            </nav>
-          </details>
-
-          <main id="account-main" tabIndex={-1}>
-            {children}
-          </main>
-        </div>
+        </details>
+        <div className="account-preview-slot">{preview}</div>
+        <main id="account-main" tabIndex={-1}>
+          {children}
+        </main>
       </div>
-    </>
+
+      <aside aria-label={inspectorLabel} className="account-inspector">
+        {inspector}
+      </aside>
+    </div>
   );
 }

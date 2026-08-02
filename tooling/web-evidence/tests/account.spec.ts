@@ -80,7 +80,7 @@ test('@final @account navigation and language preserve the active security respo
   const locale = page.locator('a.lb-web-locale-switcher:visible');
   await expect(locale).toHaveCount(1);
   await expect(locale).toHaveAccessibleName('Switch language to Português');
-  await expect(locale).toContainText('🇧🇷');
+  await expect(locale.locator('[data-locale-flag="br"]')).toBeVisible();
   await expect(locale).toContainText('Português');
   await expect(locale).toHaveAttribute('href', '/pt-BR/account/security');
 
@@ -90,17 +90,19 @@ test('@final @account navigation and language preserve the active security respo
   await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
 });
 
-test('@final @account geometry preserves the 72 264 40 workspace and useful regions', async ({
+test('@final @account geometry preserves the 248 workspace 320 inspector shell and useful regions', async ({
   page,
 }, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
   await page.goto('/en/account/profile');
 
-  expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(72);
-  expect((await page.locator('.account-nav__desktop').boundingBox())?.width).toBe(264);
-  expect((await page.locator('.account-preview-rail').boundingBox())?.height).toBe(40);
+  expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(64);
+  expect((await page.locator('.account-sidebar').boundingBox())?.width).toBe(248);
+  expect((await page.locator('.account-inspector').boundingBox())?.width).toBe(320);
+  await expect(page.locator('.account-preview-slot .account-preview-rail')).toBeVisible();
   const main = await page.locator('#account-main').boundingBox();
-  expect((main?.width ?? 0) / 1440).toBeGreaterThanOrEqual(0.75);
+  expect((main?.width ?? 0) / 1440).toBeGreaterThanOrEqual(0.55);
+  expect((main?.width ?? 0) / 1440).toBeLessThanOrEqual(0.65);
   expect(
     Number.parseFloat(
       await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize),
@@ -123,11 +125,11 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
 
     const disclosure = page.locator('details.account-nav__mobile');
     await expect(disclosure).not.toHaveAttribute('open', '');
-    expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(60);
+    expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(64);
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
     expect(
       (await page.locator('.account-header .lb-web-locale-switcher').boundingBox())?.height,
-    ).toBeGreaterThanOrEqual(48);
+    ).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       await page.evaluate(() => document.documentElement.clientWidth),
     );
@@ -213,19 +215,19 @@ test('@final @account W12 keeps degraded recovery authored and authority disconn
   onlyAxis(testInfo, 'wide-1280');
   await page.goto('/en/account');
   await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
-  await expect(page.getByText(/No real account activity/u)).toBeVisible();
-  await expect(page.locator('body')).toContainText(
-    /No remote account authority|authority is connected/iu,
-  );
+  await expect(page.getByText('No authoritative activity', { exact: true })).toBeVisible();
+  await expect(page.locator('body')).toContainText(/No remote event or account change/iu);
 
-  const source = readFileSync(
-    new URL('../../../apps/account/src/features/account-preview.tsx', import.meta.url),
+  const degradedSource = readFileSync(
+    new URL('../../../apps/account/src/features/account-degraded-preview.tsx', import.meta.url),
     'utf8',
   );
   for (const state of ['offline', 'stale', 'expired-session', 'partial-failure']) {
-    expect(source).toContain(state);
+    expect(degradedSource).toContain(state);
   }
-  expect(source).toContain('displayName, locale, supportSubject');
+  expect(degradedSource).toContain(
+    'Display name, language, and support subject remain available; message details are cleared.',
+  );
 });
 
 test('@final @account W13 proves cancellation and a phrase-confirmed no-change privacy receipt', async ({
