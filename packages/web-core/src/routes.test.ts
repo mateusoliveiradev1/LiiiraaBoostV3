@@ -20,6 +20,7 @@ import { createContentIdentity } from './content.ts';
 
 const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-home',
+  'public-about',
   'public-product',
   'public-results',
   'public-evidence',
@@ -297,6 +298,42 @@ describe('canonical web route manifest', () => {
         securityBoundary: 'evil-origin' as never,
       }),
     ).toMatchObject({ error: { code: 'UNKNOWN_ORIGIN' }, ok: false });
+  });
+
+  it('keeps About canonical, localized, indexed, sitemap-visible, and publicly owned', () => {
+    expect(routeHref('public-about', { locale: 'pt-BR' })).toEqual({
+      ok: true,
+      value: '/pt-BR/about',
+    });
+    expect(routeHref('public-about', { locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/about',
+    });
+    expect(
+      resolveLocalizedCurrentRoute({
+        pathname: '/pt-BR/about',
+        securityBoundary: 'public-origin',
+        targetLocale: 'en',
+      }),
+    ).toEqual({ ok: true, value: '/en/about' });
+
+    const about = projectIndexing().find(({ id }) => id === 'public-about');
+    expect(about).toMatchObject({
+      href: '/[locale]/about',
+      indexing: 'index',
+      owner: 'public-content',
+      scenarioRequirement: 'available',
+      securityBoundary: 'public-origin',
+      shell: 'public',
+      surface: 'public',
+    });
+    expect(projectSitemap().map(({ id }) => id)).toContain('public-about');
+    expect(projectRedirects()).toContainEqual(
+      expect.objectContaining({
+        from: '/[locale]/about/',
+        id: 'public-about',
+      }),
+    );
   });
 
   it('derives private-safe navigation, breadcrumbs, sitemap, redirects, desktop links, and indexing', () => {

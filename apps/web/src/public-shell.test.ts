@@ -10,11 +10,23 @@ import {
   clientPublicBoundaryHref,
   type ClientRecoveryRouteId,
 } from './public-client-boundary';
-import { getPublicNavigationState, type PublicPillarId } from './public-navigation';
+import {
+  getPublicFooterState,
+  getPublicNavigationState,
+  type PublicPillarId,
+} from './public-navigation';
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
+const publicCatchAllSource = readFileSync(
+  new URL('./app/[locale]/(public)/[[...slug]]/page.tsx', import.meta.url),
+  'utf8',
+);
+const aboutCatalogs = [
+  JSON.parse(readFileSync(new URL('./content/public/catalog.pt-BR.json', import.meta.url), 'utf8')),
+  JSON.parse(readFileSync(new URL('./content/public/catalog.en.json', import.meta.url), 'utf8')),
+] as const;
 const routeOwnedSources = [
   './app/[locale]/(public)/[[...slug]]/page.tsx',
   './app/[locale]/download/[channel]/[version]/page.tsx',
@@ -55,6 +67,7 @@ describe('public shell', () => {
   );
 
   it.each([
+    ['/pt-BR/about', '/en/about'],
     [
       '/pt-BR/docs/current/articles/measurement-basics',
       '/en/docs/current/articles/measurement-basics',
@@ -178,6 +191,74 @@ describe('public shell', () => {
     ]);
     expect(publicBoundaryHref('docs-index', 'pt-BR')).toBe('/pt-BR/docs');
     expect(publicBoundaryHref('releases-index', 'en')).toBe('/en/releases');
+  });
+
+  it('renders a truthful bilingual about story limited to the D-107 narrative', () => {
+    expect(publicCatchAllSource).toContain("'public-about'");
+    expect(publicCatchAllSource).toContain('className="public-about"');
+
+    for (const catalog of aboutCatalogs) {
+      expect(catalog.about).toMatchObject({
+        routeId: 'public-about',
+        chapters: expect.any(Array),
+      });
+      expect(catalog.about.chapters.map(({ id }: { id: string }) => id)).toEqual([
+        'motivation',
+        'principles',
+        'trust',
+        'reversibility',
+        'ambition',
+      ]);
+      expect(JSON.stringify(catalog.about)).not.toMatch(
+        /\b(founder|founder-led|founded|fundador|fundadora|fundada|customers?|clientes?|users?|usuários?|awards?|prêmios?|partners?|parceiros?|traction|tração|team|equipe|testimonials?|depoimentos?)\b/iu,
+      );
+      expect(JSON.stringify(catalog.about)).not.toMatch(/\b(?:19|20)\d{2}\b/u);
+    }
+  });
+
+  it('projects the complete localized footer from canonical destinations on every public shell', () => {
+    expect(layoutSource).toContain('<PublicFooter');
+
+    const expectedGroups = {
+      company: ['about', 'contact'],
+      legal: ['terms', 'privacy', 'security', 'essential-storage', 'responsible-disclosure'],
+      product: ['how-it-works', 'your-pc', 'results', 'plans', 'download'],
+      resources: ['documentation', 'help', 'releases', 'status'],
+    };
+
+    for (const [locale, pathname, targetPathname] of [
+      ['pt-BR', '/pt-BR/about', '/en/about'],
+      ['en', '/en/about', '/pt-BR/about'],
+    ] as const) {
+      const footer = getPublicFooterState(pathname, locale);
+      expect(
+        Object.fromEntries(
+          footer.groups.map((group) => [group.id, group.links.map(({ id }) => id)]),
+        ),
+      ).toEqual(expectedGroups);
+      expect(
+        footer.groups
+          .flatMap(({ links }) => links)
+          .every(({ href }) => href.startsWith(`/${locale}/`)),
+      ).toBe(true);
+      expect(footer.localeHref).toBe(targetPathname);
+      expect(footer.ctaHref).toBe(`/${locale}/download`);
+    }
+  });
+
+  it('keeps the complete footer useful at 320px and route-preserving at 400% zoom', () => {
+    expect(shellStyles).toMatch(
+      /\.public-footer__groups\s*\{[\s\S]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/u,
+    );
+    expect(shellStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.public-footer__groups\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/u,
+    );
+    expect(shellStyles).toMatch(
+      /@media \(width < 480px\)[\s\S]*\.public-footer__groups\s*\{[\s\S]*grid-template-columns:\s*1fr/u,
+    );
+    expect(shellStyles).toMatch(
+      /\.public-footer__link\s*\{[\s\S]*min-block-size:\s*44px/u,
+    );
   });
 
   it('keeps the client recovery subset byte-equal to canonical server routes', () => {
