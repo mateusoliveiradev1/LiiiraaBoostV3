@@ -481,64 +481,68 @@ describe('W15 diagnostic consent guard', () => {
   });
 });
 
-describe('W16 viewport guard and recovery states', () => {
-  it('preserves safe review while blocking high-risk administration below 960px', () => {
-    const scenario = getWebScenario('W16');
-    const styles = readFileSync(new URL('../app/admin-shell.css', import.meta.url), 'utf8');
-    expect(scenario).toMatchObject({
-      role: 'operations',
-      terminalState: 'high-risk-viewport-blocked',
-      viewport: '390x844',
-    });
-    expect(scenario.requiredProof).toEqual(['safe-review', 'high-risk-action-blocked']);
-    expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\[data-high-risk-action='true'\][\s\S]*display: none !important/u,
+describe('D-105 contextual evidence and zoom-safe high-risk review', () => {
+  it('exposes selected-work evidence, consent, impact, and permitted actions while preserving queue context', () => {
+    const landingSource = featureSource.slice(
+      featureSource.indexOf('const RoleLanding'),
+      featureSource.indexOf('const DegradedAdminPreview'),
     );
-    expect(featureSource).toContain('data-high-risk-action="true"');
-    expect(featureSource).toContain('admin-mobile-high-risk-block');
-    expect(featureSource).toContain('aria-describedby="admin-mobile-high-risk-block"');
-    expect(featureSource).toContain('viewportWidth');
+
+    for (const key of ['history', 'consent', 'impact', 'permittedAction']) {
+      expect(adminEn.queue).toHaveProperty(key);
+      expect(adminPtBr.queue).toHaveProperty(key);
+    }
+    expect(landingSource).toContain('admin-queue__selection-evidence');
+    expect(landingSource).toContain('selectedItem.lastEvent');
+    expect(landingSource).toContain('content.queue.consentGuarded');
+    expect(landingSource).toContain('content.queue.impact');
+    expect(landingSource).toContain('content.queue.permittedAction');
+    expect(landingSource).toContain('createAdminQueueHref(');
   });
 
-  it('keeps safe mobile review visible while omitting high-risk authority from semantics', () => {
-    const criticalSource = featureSource.slice(
-      featureSource.indexOf('const CriticalReview'),
-      featureSource.indexOf('export const OperationsReview'),
+  it.each([1440, 960, 390, 320])(
+    'keeps permitted high-risk vertical review reachable at %ipx and supported zoom',
+    () => {
+      const criticalSource = featureSource.slice(
+        featureSource.indexOf('const CriticalReview'),
+        featureSource.indexOf('export const OperationsReview'),
+      );
+
+      expect(criticalSource).toContain('<PurposeAndImpactReview');
+      expect(criticalSource).toContain(
+        'data-high-risk-sequence="evidence-impact-reauth-confirm-receipt"',
+      );
+      expect(criticalSource).not.toMatch(/viewportWidth\s*>=\s*960/u);
+      expect(stylesSource).toMatch(
+        /\.admin-high-risk-flow[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
+      );
+      expect(stylesSource).not.toMatch(
+        /\[data-high-risk-action='true'\][\s\S]{0,120}display:\s*none/u,
+      );
+    },
+  );
+
+  it('uses role and consent guards instead of pixels and keeps denial free of protected data', () => {
+    const experienceSource = featureSource.slice(
+      featureSource.indexOf('export const AdminPreviewExperience'),
+      featureSource.indexOf('export const AdminPreviewPage'),
     );
     const diagnosticSource = featureSource.slice(
       featureSource.indexOf('export const DiagnosticFieldDisclosure'),
-      featureSource.indexOf('const ADMIN_ROLE_FOCAL_ROUTE'),
+      featureSource.indexOf('const RoleLanding'),
     );
 
-    expect(criticalSource).toMatch(/viewportWidth\s*>=\s*960\s*\?/u);
-    expect(diagnosticSource).toMatch(/viewportWidth\s*>=\s*960\s*\?/u);
-    expect(criticalSource).toContain('admin-mobile-high-risk-block');
-    expect(featureSource).toContain('data-authority-action="unavailable"');
-  });
-
-  it('omits the W16 publication control from mobile markup while retaining review and reason', () => {
-    const mobileNoticeSource = featureSource.slice(
-      featureSource.indexOf('const MobileAuthorityNotice'),
-      featureSource.indexOf('export const SupportCaseWorkspace'),
+    expect(experienceSource.indexOf('adminRoleCanAccess(role, routeId)')).toBeLessThan(
+      experienceSource.indexOf('switch (routeId)'),
     );
-    const criticalSource = featureSource.slice(
-      featureSource.indexOf('const CriticalReview'),
-      featureSource.indexOf('export const OperationsReview'),
+    expect(diagnosticSource).toContain("decision === 'allowed' && consent != null");
+    expect(diagnosticSource).toContain('admittedConsent !== null');
+    expect(adminEn.diagnostics.blockedBody).toContain('without revealing diagnostic or customer data');
+    expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
+    expect(featureSource).not.toMatch(/viewportWidth\s*>=\s*960/u);
+    expect(stylesSource).not.toMatch(
+      /\[data-high-risk-action='true'\][\s\S]{0,120}display:\s*none/u,
     );
-    const operationsSource = featureSource.slice(
-      featureSource.indexOf('export const OperationsReview'),
-      featureSource.indexOf('export const SecurityReview'),
-    );
-
-    expect(criticalSource).toContain('<PurposeAndImpactReview');
-    expect(criticalSource).toContain('admin-mobile-high-risk-block');
-    expect(mobileNoticeSource).toContain('data-authority-action="omitted"');
-    expect(mobileNoticeSource).not.toContain('<LbButton');
-    expect(operationsSource).toMatch(
-      /viewportWidth\s*>=\s*960\s*\?[\s\S]*<DisconnectedAuthority[\s\S]*:\s*\([\s\S]*<MobileAuthorityNotice/u,
-    );
-    expect(operationsSource).toContain('body={content.operations.authorityBody}');
-    expect(operationsSource).toContain('title={content.operations.authorityTitle}');
   });
 
   it('authors offline, stale, expired, permission, and partial-failure recovery safely', () => {
