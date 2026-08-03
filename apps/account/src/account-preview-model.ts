@@ -161,7 +161,30 @@ export const admitAccountHomeScenario = (candidate: unknown): AccountHomeScenari
   const planKind = candidate['plan']['kind'];
   const planState = candidate['plan']['state'];
   const actionKind = candidate['recommendedAction']['kind'];
+  const actionRouteId = candidate['recommendedAction']['routeId'];
+  const mfaState = candidate['security']['mfa'];
   const passkeyState = candidate['security']['passkey'];
+
+  if (
+    (billingState !== 'active' && billingState !== 'none' && billingState !== 'pending') ||
+    (pcState !== 'linked' && pcState !== 'unlinked') ||
+    (planKind !== 'essential' && planKind !== 'premium') ||
+    (planState !== 'active' && planState !== 'pending') ||
+    (actionKind !== 'complete-payment' &&
+      actionKind !== 'configure-passkey' &&
+      actionKind !== 'link-pc') ||
+    (mfaState !== 'configured' && mfaState !== 'not-configured') ||
+    (passkeyState !== 'configured' && passkeyState !== 'not-configured')
+  ) {
+    throw new Error('ACCOUNT_HOME_SCENARIO_INVALID:state');
+  }
+  if (
+    (actionKind === 'link-pc' && actionRouteId !== 'account-device') ||
+    (actionKind === 'configure-passkey' && actionRouteId !== 'account-security') ||
+    (actionKind === 'complete-payment' && actionRouteId !== 'account-subscription')
+  ) {
+    throw new Error('ACCOUNT_HOME_SCENARIO_INVALID:recommended-action');
+  }
 
   if (id === 'essential' && (planKind !== 'essential' || planState !== 'active')) {
     return contradiction('essential:plan');

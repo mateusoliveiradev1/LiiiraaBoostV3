@@ -203,6 +203,12 @@ describe('authored overview and Profile workspaces', () => {
         recommendedAction: { kind: 'link-pc', routeId: 'account-device' },
       }),
     ).toThrow('ACCOUNT_HOME_SCENARIO_CONTRADICTION:linked-pc:link-action');
+    expect(() =>
+      admitAccountHomeScenario({
+        ...active,
+        security: { mfa: 'unknown', passkey: 'not-configured' },
+      }),
+    ).toThrow('ACCOUNT_HOME_SCENARIO_INVALID:state');
   });
 
   it('makes overview answer plan, device, security, and one recommended action first', () => {
