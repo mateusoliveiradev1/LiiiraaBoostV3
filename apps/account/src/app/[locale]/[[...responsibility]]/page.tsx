@@ -67,7 +67,6 @@ export async function generateMetadata({
     const metadata = createAccountFailureModel('404', locale).copy;
     return {
       description: metadata.detail,
-      robots: { follow: false, index: false, nocache: true },
       title: `${metadata.title} — Liiiraa Boost`,
     };
   }
@@ -75,14 +74,12 @@ export async function generateMetadata({
     const metadata = getAccountPreviewMetadata(locale, resolution.routeId);
     return {
       description: metadata.summary,
-      robots: { follow: false, index: false, nocache: true },
       title: `${metadata.title} — Liiiraa Boost`,
     };
   }
   const metadata = createAccountFailureModel(resolution.failureKind, locale).copy;
   return {
     description: metadata.detail,
-    robots: { follow: false, index: false, nocache: true },
     title: `${metadata.title} — Liiiraa Boost`,
   };
 }

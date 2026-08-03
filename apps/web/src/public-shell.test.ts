@@ -17,6 +17,7 @@ import {
   getPublicNavigationState,
   type PublicPillarId,
 } from './public-navigation';
+import { generateMetadata as generatePublicCatchAllMetadata } from './app/[locale]/(public)/[[...slug]]/page';
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
@@ -176,6 +177,27 @@ describe('public shell', () => {
     expect(shellStyles).toContain(':focus-visible');
     expect(shellStyles).toContain('@media (forced-colors: active)');
     expect(publicConfig.publicHeaderContract).toEqual(expect.any(Array));
+    expect(publicCatchAllSource).toContain('indexing: resolution.value.route.indexing');
+    expect(publicCatchAllSource).toContain("resolution.indexing === 'noindex'");
+    expect(publicCatchAllSource).toContain('robots: { follow: false, index: false }');
+  });
+
+  it('projects noindex metadata for every public error without inventing copy metadata', async () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      for (const code of ['403', '404', '410', '500'] as const) {
+        const metadata = await generatePublicCatchAllMetadata({
+          params: Promise.resolve({ locale, slug: ['errors', code] }),
+          searchParams: Promise.resolve({}),
+        });
+
+        expect(metadata.robots, `${locale} public error ${code}`).toEqual({
+          follow: false,
+          index: false,
+        });
+        expect(metadata.description).toBeUndefined();
+        expect(metadata.title).toBeUndefined();
+      }
+    }
   });
 
   it('derives every public navigation pillar and both locale roots from route authority', () => {
@@ -211,6 +233,9 @@ describe('public shell', () => {
       );
       expect(JSON.stringify(catalog.about)).not.toMatch(/\b(?:19|20)\d{2}\b/u);
     }
+
+    expect(getPublicNavigationState('/pt-BR/about', 'pt-BR').activeId).toBe('public-product');
+    expect(getPublicNavigationState('/en/about', 'en').activeId).toBe('public-product');
   });
 
   it('projects the complete localized footer from canonical destinations on every public shell', () => {

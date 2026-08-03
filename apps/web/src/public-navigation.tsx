@@ -142,6 +142,7 @@ const TASK_PILLARS = new Set<string>(publicNavigation.map(({ id }) => id));
 const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
   if (TASK_PILLARS.has(routeId)) return routeId;
   if (routeId === 'public-home') return 'public-product';
+  if (routeId === 'public-about') return 'public-product';
   if (routeId === 'public-evidence') return 'public-results';
   if (routeId.startsWith('releases-')) return 'public-download';
   if (

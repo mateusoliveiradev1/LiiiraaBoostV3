@@ -152,6 +152,10 @@ describe('account shell', () => {
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
     );
+    const pageSource = readFileSync(
+      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
 
     expect(layoutSource).not.toContain('previewLabel:');
     expect(layoutSource).not.toContain('account-preview-rail');
@@ -162,6 +166,8 @@ describe('account shell', () => {
       'Your account brings plan, security, device, downloads, and support together.',
     );
     expect(layoutSource).not.toMatch(/phase|fixture|adapter|manifest/iu);
+    expect(layoutSource).toContain('robots:');
+    expect(pageSource).not.toContain('robots:');
   });
 
   it('marks exactly the pathname-matched responsibility as the current page', () => {

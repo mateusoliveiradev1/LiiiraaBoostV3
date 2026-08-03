@@ -42,6 +42,7 @@ const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-terms',
   'public-responsible-disclosure',
   'public-error-403',
+  'public-error-404',
   'public-error-410',
   'public-error-500',
   'docs-index',
@@ -150,7 +151,13 @@ const PublicAboutPage = ({ locale }: Readonly<{ locale: WebLocale }>) => {
 const resolvePublicCatalogRoute = (
   locale: string,
   slug: readonly string[] | undefined,
-): Readonly<{ locale: WebLocale; routeId: WebRouteId }> | undefined => {
+):
+  | Readonly<{
+      indexing: 'index' | 'noindex';
+      locale: WebLocale;
+      routeId: WebRouteId;
+    }>
+  | undefined => {
   if (!hasLocale(routing.locales, locale)) {
     return undefined;
   }
@@ -167,6 +174,7 @@ const resolvePublicCatalogRoute = (
   }
 
   return {
+    indexing: resolution.value.route.indexing,
     locale,
     routeId: resolution.value.route.id,
   };
@@ -197,7 +205,10 @@ export const generateMetadata = async ({ params }: PublicCatchAllPageProps): Pro
                     : 'Versioned task guidance with evidence, risk, compatibility, and recovery.',
               }
             : metadata;
-  if (resolvedMetadata === undefined) return {};
+
+  const indexingMetadata =
+    resolution.indexing === 'noindex' ? ({ robots: { follow: false, index: false } } as const) : {};
+  if (resolvedMetadata === undefined) return indexingMetadata;
 
   const pathname =
     slug === undefined || slug.length === 0
@@ -212,6 +223,7 @@ export const generateMetadata = async ({ params }: PublicCatchAllPageProps): Pro
       },
     },
     description: resolvedMetadata.description,
+    ...indexingMetadata,
     title: resolvedMetadata.title,
   };
 };
@@ -270,6 +282,10 @@ export default async function PublicCatchAllPage({
 
   if (resolution.routeId === 'public-error-403') {
     return <ForbiddenState locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-error-404') {
+    notFound();
   }
 
   if (resolution.routeId === 'public-error-410') {

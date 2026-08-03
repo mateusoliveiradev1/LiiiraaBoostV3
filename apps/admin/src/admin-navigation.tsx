@@ -157,7 +157,12 @@ export function AdminNavigation({
       <header className="admin-header">
         <div className="admin-header__bar">
           {header}
-          <form action={searchActionHref} className="admin-header__search" method="get" role="search">
+          <form
+            action={searchActionHref}
+            className="admin-header__search"
+            method="get"
+            role="search"
+          >
             <ProductIcon name="search" size={17} />
             <label className="lb-visually-hidden" htmlFor="admin-global-search">
               {searchLabel}
@@ -183,7 +188,7 @@ export function AdminNavigation({
             {queueState.owner !== 'all' ? (
               <input name="owner" type="hidden" value={queueState.owner} />
             ) : null}
-            <button type="submit">
+            <button aria-label={searchAction} type="submit">
               <ProductIcon name="search" size={16} />
               <span>{searchAction}</span>
             </button>

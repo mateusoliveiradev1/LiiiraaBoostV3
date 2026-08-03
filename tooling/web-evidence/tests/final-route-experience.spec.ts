@@ -24,6 +24,16 @@ const COVERED_AXES = ['wide-1440', 'desktop-960', 'mobile-390', 'reflow-320'] as
 const ERROR_ROUTE = /-error-(?:403|404|410|500)$/u;
 const FORBIDDEN_ORDINARY_COPY =
   /\b(?:phase|fase|fixture|adapter|illustrative|ilustrativo|raw[- ]?enum|enum(?:eração)? bruta)\b/iu;
+// D-110 proof classes: testimonial, benchmark gain, customer count, review score,
+// hardware result, company milestone, security certification, and operational metric.
+const FORBIDDEN_FABRICATED_PROOF =
+  /\b(?:testimonial|depoimento|benchmark gain|ganho de benchmark|customer count|contagem de clientes|review score|nota de avaliação|hardware result|resultado de hardware|company milestone|marco da empresa|security certification|certificação de segurança|operational metric|métrica operacional)\b/iu;
+
+const SURFACE_ORIGINS = Object.freeze({
+  account: 'http://account.localhost:3101',
+  admin: 'http://admin.localhost:3102',
+  public: 'http://public.localhost:3100',
+} satisfies Record<Surface, string>);
 
 const routeParameters = Object.freeze({
   article: 'getting-started',
@@ -42,7 +52,7 @@ const routeParameters = Object.freeze({
 const surfaceFor = (route: WebRoute): Surface => route.surface as Surface;
 
 const roleFor = (routeId: string): string | undefined => {
-  if (routeId === 'admin-support') return 'support';
+  if (routeId === 'admin-support') return undefined;
   if (routeId === 'admin-operations') return 'operations';
   if (routeId === 'admin-security' || routeId === 'admin-diagnostics') return 'security';
   if (routeId === 'admin-audit' || routeId === 'admin-audit-event') return 'audit';
@@ -74,20 +84,6 @@ const pathFor = (route: WebRoute, locale: WebLocale): string => {
   return role === undefined ? href.value : `${href.value}?role=${role}`;
 };
 
-const isHighRisk = (route: WebRoute): boolean =>
-  route.id === 'public-home' ||
-  route.id === 'public-evidence' ||
-  route.owner === 'public-navigation' ||
-  route.id === 'releases-integrity' ||
-  route.id === 'releases-download' ||
-  route.owner.endsWith('-errors') ||
-  route.owner === 'account-auth' ||
-  route.id === 'account-security' ||
-  route.id === 'account-subscription' ||
-  route.id === 'account-device' ||
-  route.id === 'account-privacy' ||
-  route.surface === 'admin';
-
 const onlyAxis = (testInfo: TestInfo, axis: string): void => {
   test.skip(testInfo.project.metadata['axis'] !== axis, `Covered by the ${axis} project.`);
 };
@@ -104,7 +100,8 @@ const expectNoBlockingAxeViolations = async (page: Page): Promise<void> => {
   expect(blocking, `Blocking axe findings:\n${JSON.stringify(blocking, null, 2)}`).toEqual([]);
 };
 
-const visibleLocaleControl = (page: Page) => page.locator('a.lb-web-locale-switcher:visible');
+const visibleLocaleControl = (page: Page) =>
+  page.locator('header a.lb-web-locale-switcher:visible');
 
 const expectRoutePreservingLocale = async (
   page: Page,
@@ -126,10 +123,7 @@ const expectRoutePreservingLocale = async (
   );
 };
 
-const expectCurrentLocation = async (
-  page: Page,
-  route: WebRoute,
-): Promise<void> => {
+const expectCurrentLocation = async (page: Page, route: WebRoute): Promise<void> => {
   if (
     ERROR_ROUTE.test(route.id) ||
     ['account-sign-in', 'account-sign-up', 'account-onboarding'].includes(route.id)
@@ -156,7 +150,8 @@ const expectCurrentLocation = async (
     const disclosure = page.locator(mobileSelector);
     await expect(disclosure).toHaveCount(1);
     if (surface === 'public') {
-      if ((await disclosure.getAttribute('open')) === null) await disclosure.locator('summary').click();
+      if ((await disclosure.getAttribute('open')) === null)
+        await disclosure.locator('summary').click();
       current = disclosure.locator('a[aria-current="page"]:visible');
     } else {
       await expect(disclosure.locator('summary strong:visible')).toHaveText(/\S/u);
@@ -168,17 +163,19 @@ const expectCurrentLocation = async (
 
 const expectTargetsAndFocus = async (page: Page): Promise<void> => {
   const undersized = await page
-    .locator('main button:visible, main summary:visible, main input:visible, main select:visible, main textarea:visible, main .public-action:visible')
+    .locator(
+      'main button:visible, main summary:visible, main input:visible, main select:visible, main textarea:visible, main .public-action:visible',
+    )
     .evaluateAll((nodes) =>
       nodes
         .map((node) => {
           const input = node instanceof HTMLInputElement ? node : undefined;
           const labelledTarget =
             input !== undefined && ['checkbox', 'radio'].includes(input.type)
-              ? input.closest('label') ??
+              ? (input.closest('label') ??
                 (input.id.length > 0
                   ? document.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(input.id)}"]`)
-                  : null)
+                  : null))
               : null;
           const target = labelledTarget ?? node;
           return {
@@ -189,9 +186,10 @@ const expectTargetsAndFocus = async (page: Page): Promise<void> => {
         })
         .filter(({ height, width }) => height < 44 || width < 44),
     );
-  expect(undersized, `Interactive targets below 44px:\n${JSON.stringify(undersized, null, 2)}`).toEqual(
-    [],
-  );
+  expect(
+    undersized,
+    `Interactive targets below 44px:\n${JSON.stringify(undersized, null, 2)}`,
+  ).toEqual([]);
 
   await page.locator('body').press('Home');
   await page.keyboard.press('Tab');
@@ -217,9 +215,9 @@ const expectSurfaceAuthority = async (page: Page, surface: Surface, route: WebRo
     await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
     if (!['account-sign-in', 'account-sign-up', 'account-onboarding'].includes(route.id)) {
       await expect(page.getByRole('link', { name: /^(?:Entrar|Sign in)$/u })).toHaveCount(0);
-      await expect(page.getByRole('link', { name: /^(?:Criar conta|Create account)$/u })).toHaveCount(
-        0,
-      );
+      await expect(
+        page.getByRole('link', { name: /^(?:Criar conta|Create account)$/u }),
+      ).toHaveCount(0);
     }
   }
   if (surface === 'admin') {
@@ -228,11 +226,139 @@ const expectSurfaceAuthority = async (page: Page, surface: Surface, route: WebRo
   }
 };
 
-const inspectRoute = async (
+const expectHomeCommercialSequence = async (page: Page): Promise<void> => {
+  const movementSelectors = [
+    '.home-ignition-hero',
+    '.home-player-problem',
+    '.home-workflow',
+    '.home-competitive-mode',
+    '.home-results-method',
+    '.home-mode-split',
+    '.home-safety-runway',
+    '.home-faq',
+    '.home-final-cta',
+  ] as const;
+  const positions: number[] = [];
+  for (const selector of movementSelectors) {
+    const movement = page.locator(selector);
+    await expect(movement).toHaveCount(1);
+    positions.push(await movement.evaluate((node) => node.getBoundingClientRect().top + scrollY));
+  }
+  expect(positions).toEqual([...positions].sort((left, right) => left - right));
+  await expect(page.locator('[data-proof-policy="product-methodology-only"]')).toHaveCount(1);
+  await expect(page.locator('[data-proof-object="checksum-admitted-desktop-capture"]')).toHaveCount(
+    1,
+  );
+  const copy = await page.locator('main').innerText();
+  expect(copy).not.toMatch(FORBIDDEN_FABRICATED_PROOF);
+};
+
+const expectAboutTruthBoundary = async (page: Page): Promise<void> => {
+  const chapterIds = await page
+    .locator('.public-about__chapter')
+    .evaluateAll((chapters) => chapters.map((chapter) => chapter.getAttribute('data-chapter')));
+  expect(chapterIds).toEqual(['motivation', 'principles', 'trust', 'reversibility', 'ambition']);
+  expect(await page.locator('main').innerText()).not.toMatch(
+    /\b(?:founder|fundador|founded|fundada|award|prêmio|partner|parceiro|customers?|clientes?|traction|tração)\b/iu,
+  );
+};
+
+const expectFooterTrustLayer = async (page: Page): Promise<void> => {
+  const footer = page.locator('footer.public-footer');
+  await expect(footer).toHaveCount(1);
+  await expect(footer.locator('.public-footer__groups > nav')).toHaveCount(4);
+  await expect(footer.locator('a.lb-web-locale-switcher')).toHaveCount(1);
+  await expect(footer.locator('.public-footer__cta')).toHaveCount(1);
+  await expect(footer.locator('.public-footer__closing')).toContainText(/Liiiraa Boost/iu);
+};
+
+const expectPublicOutcomes = async (page: Page, route: WebRoute): Promise<void> => {
+  await expectFooterTrustLayer(page);
+  if (route.id === 'public-home') await expectHomeCommercialSequence(page);
+  if (route.id === 'public-about') await expectAboutTruthBoundary(page);
+  if (['public-privacy-policy', 'public-terms'].includes(route.id)) {
+    await expect(page.locator('.policy-document__header')).toHaveCount(1);
+    await expect(page.locator('.policy-review-notice')).toHaveCount(1);
+    await expect(page.locator('.policy-history')).toHaveCount(1);
+  }
+  if (route.id === 'public-privacy-policy') {
+    await expect(page.locator('.privacy-practice-ledger article')).toHaveCount(5);
+  }
+  if (route.id === 'public-responsible-disclosure') {
+    await expect(page.locator('.policy-document')).toHaveCount(1);
+  }
+};
+
+const expectPrivacyConsentLedger = async (page: Page): Promise<void> => {
+  const records = page.locator('.account-consent-record');
+  await expect(records).toHaveCount(3);
+  await expect(page.locator('.account-privacy__requests details')).toHaveCount(3);
+  for (const record of await records.all()) {
+    await expect(record.locator('dl')).toContainText(/\S/u);
+    await expect(record.locator('details')).toHaveCount(1);
+  }
+};
+
+const expectAccountOutcomes = async (page: Page, route: WebRoute): Promise<void> => {
+  if (!['account-sign-in', 'account-sign-up', 'account-onboarding'].includes(route.id)) {
+    await expect(page.locator('nav.account-nav__desktop .account-nav__group > li > a')).toHaveCount(
+      5,
+    );
+  }
+  if (route.id === 'account-overview') {
+    await expect(page.locator('[data-account-home-region="primary"]')).toHaveCount(1);
+    await expect(page.locator('[data-account-home-fact]')).toHaveCount(3);
+    await expect(page.locator('.account-overview__recommendation a')).toHaveCount(1);
+  }
+  if (route.id === 'account-privacy') await expectPrivacyConsentLedger(page);
+};
+
+const expectZoomSafeAdminActions = async (page: Page, route: WebRoute): Promise<void> => {
+  if (route.id === 'admin-diagnostics') {
+    await expect(page.locator('[data-consent-decision="missing"]')).toBeVisible();
+    await expect(page.locator('[data-high-risk-action="true"]')).toHaveCount(0);
+    return;
+  }
+  if (!['admin-operations', 'admin-security'].includes(route.id)) return;
+  const review = page.locator('[data-high-risk-action="true"]');
+  await expect(review).not.toHaveCount(0);
+  await expect(review.first()).toHaveAttribute(
+    'data-high-risk-sequence',
+    'evidence-impact-reauth-confirm-receipt',
+  );
+  await expect(review.first()).toBeVisible();
+};
+
+const expectAdminOutcomes = async (page: Page, route: WebRoute): Promise<void> => {
+  if (route.id === 'admin-role') {
+    await expect(page.locator('.admin-queue__filters')).toHaveCount(1);
+    await expect(page.locator('.admin-landing__queue table')).toHaveCount(1);
+    await expect(page.locator('.admin-queue__selection')).toHaveCount(1);
+    await expect(page.locator('.admin-queue__filters select')).toHaveCount(4);
+  }
+  await expectZoomSafeAdminActions(page, route);
+};
+
+const expectIndexingAndDistribution = async (
   page: Page,
+  responseHeaders: Readonly<Record<string, string>>,
   route: WebRoute,
-  locale: WebLocale,
 ): Promise<void> => {
+  expect(new URL(page.url()).origin).toBe(SURFACE_ORIGINS[surfaceFor(route)]);
+  expect(responseHeaders['content-security-policy']).toMatch(/default-src\s+'self'/u);
+  if (route.indexing === 'noindex') {
+    const robotPolicies = await page
+      .locator('meta[name="robots"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('content') ?? ''));
+    expect(robotPolicies.length).toBeGreaterThan(0);
+    expect(robotPolicies.every((policy) => /noindex/iu.test(policy))).toBe(true);
+  }
+  if (route.id === 'releases-download' || route.id === 'public-download') {
+    await expect(page.locator('a[href$=".exe"]')).toHaveCount(0);
+  }
+};
+
+const inspectRoute = async (page: Page, route: WebRoute, locale: WebLocale): Promise<void> => {
   const path = pathFor(route, locale);
   const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => {
@@ -247,12 +373,20 @@ const inspectRoute = async (
   await expect(page.locator('main')).toHaveCount(1);
   await expect(page.locator('main h1:visible'), `One H1 for ${route.id}:${locale}`).toHaveCount(1);
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /icon\.svg/u);
-  await expect(page.locator('.public-brand:visible, .account-brand:visible, .admin-brand:visible')).not.toHaveCount(0);
+  await expect(
+    page.locator('.public-brand:visible, .account-brand:visible, .admin-brand:visible'),
+  ).not.toHaveCount(0);
 
   const ordinaryCopy = (
-    await page.locator('main h1:visible, main h2:visible, main h3:visible, main button:visible, main .public-action:visible').allInnerTexts()
+    await page
+      .locator(
+        'main h1:visible, main h2:visible, main h3:visible, main button:visible, main .public-action:visible',
+      )
+      .allInnerTexts()
   ).join(' ');
-  expect(ordinaryCopy, `Internal copy on ${route.id}:${locale}`).not.toMatch(FORBIDDEN_ORDINARY_COPY);
+  expect(ordinaryCopy, `Internal copy on ${route.id}:${locale}`).not.toMatch(
+    FORBIDDEN_ORDINARY_COPY,
+  );
 
   const width = await page.evaluate(() => ({
     client: document.documentElement.clientWidth,
@@ -266,6 +400,10 @@ const inspectRoute = async (
   await expectCurrentLocation(page, route);
   await expectTargetsAndFocus(page);
   await expectSurfaceAuthority(page, surfaceFor(route), route);
+  await expectIndexingAndDistribution(page, response?.headers() ?? {}, route);
+  if (route.surface === 'public') await expectPublicOutcomes(page, route);
+  if (route.surface === 'account') await expectAccountOutcomes(page, route);
+  if (route.surface === 'admin') await expectAdminOutcomes(page, route);
   await expectNoBlockingAxeViolations(page);
 };
 
@@ -282,18 +420,16 @@ for (const route of webRoutes) {
 
 for (const surface of ['public', 'account', 'admin'] as const) {
   for (const axis of COVERED_AXES) {
-    test(`@final @${surface} complete canonical route matrix at ${axis}`, async ({ page }, testInfo) => {
+    test(`@final @${surface} complete canonical route matrix at ${axis}`, async ({
+      page,
+    }, testInfo) => {
       onlyAxis(testInfo, axis);
       test.setTimeout(10 * 60 * 1_000);
-      const routes = webRoutes.filter(
-        (route) => route.surface === surface && (axis === 'wide-1440' || axis === 'mobile-390' || isHighRisk(route)),
-      );
+      const routes = webRoutes.filter((route) => route.surface === surface);
 
       for (const route of routes) {
         for (const locale of WEB_LOCALES) {
-          await test.step(`${route.id}:${locale}`, async () =>
-            inspectRoute(page, route, locale),
-          );
+          await test.step(`${route.id}:${locale}`, async () => inspectRoute(page, route, locale));
         }
       }
     });
@@ -302,7 +438,9 @@ for (const surface of ['public', 'account', 'admin'] as const) {
 
 for (const surface of ['public', 'account', 'admin'] as const) {
   for (const axis of ['reduced-motion', 'forced-colors'] as const) {
-    test(`@final @${surface} ${axis} keeps the flagship shell operable`, async ({ page }, testInfo) => {
+    test(`@final @${surface} ${axis} keeps the flagship shell operable`, async ({
+      page,
+    }, testInfo) => {
       onlyAxis(testInfo, axis);
       const representative = webRoutes.find((route) =>
         surface === 'public'
@@ -315,8 +453,10 @@ for (const surface of ['public', 'account', 'admin'] as const) {
       await inspectRoute(page, representative, 'en');
 
       if (axis === 'reduced-motion') {
-        const activeAnimations = await page.evaluate(() =>
-          document.getAnimations().filter((animation) => animation.playState === 'running').length,
+        const activeAnimations = await page.evaluate(
+          () =>
+            document.getAnimations().filter((animation) => animation.playState === 'running')
+              .length,
         );
         expect(activeAnimations).toBe(0);
       }

@@ -232,9 +232,9 @@ describe('role-scoped admin', () => {
     expect(stylesSource).toMatch(
       /@media \(width < 640px\)[\s\S]*\.admin-landing__layout[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
     );
-    expect(stylesSource).toMatch(/@media \(width < 960px\)[\s\S]*\.admin-nav__mobile/u);
+    expect(stylesSource).toMatch(/@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile/u);
     expect(stylesSource).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
     );
   });
 

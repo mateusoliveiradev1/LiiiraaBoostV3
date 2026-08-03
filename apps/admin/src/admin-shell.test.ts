@@ -50,7 +50,7 @@ describe('admin shell', () => {
       /\.admin-workspace\s*\{[\s\S]*max-inline-size:\s*var\(--lb-admin-workspace-max\)/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
     );
   });
 
@@ -88,9 +88,21 @@ describe('admin shell', () => {
     expect(layout).toContain('alertsLabel={copy.alerts}');
     expect(navigation).toContain('className="admin-header__search"');
     expect(navigation).toContain('type="search"');
+    expect(navigation).toContain('<button aria-label={searchAction} type="submit">');
     expect(navigation).toContain('aria-live="polite"');
     expect(navigation).toContain('{roleLabel}');
     expect(navigation).not.toMatch(/public navigation|account navigation/iu);
+  });
+
+  it('keeps the queue and compact header inside the 960px and 320px reflow boundaries', () => {
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+
+    expect(styles).toMatch(
+      /@media \(width <= 1100px\)[\s\S]*\.admin-queue__filters[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__account\s*\{[\s\S]*display:\s*none/u,
+    );
   });
 
   it('filters bounded global search by validated role before matching redacted records', () => {
@@ -171,13 +183,13 @@ describe('admin shell', () => {
     expect(navigation).toContain('{currentLabel}');
     expect(styles).toMatch(/\.admin-nav__mobile\s*\{[\s\S]*display:\s*none/u);
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-nav__desktop\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-nav__desktop\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-nav__mobile\s*\{[\s\S]*display:\s*block/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile\s*\{[\s\S]*display:\s*block/u,
     );
     expect(styles).not.toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
     );
   });
 
@@ -189,7 +201,7 @@ describe('admin shell', () => {
     expect(navigation).toContain('markCurrent={false}');
     expect(navigation.match(/aria-current=/gu)).toHaveLength(1);
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.admin-nav__mobile > summary\s*\{[\s\S]*block-size:\s*48px/u,
+      /@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile > summary\s*\{[\s\S]*block-size:\s*48px/u,
     );
     expect(styles).toMatch(
       /@media \(width < 640px\)[\s\S]*#admin-main\s*\{[\s\S]*padding-inline:\s*16px/u,
