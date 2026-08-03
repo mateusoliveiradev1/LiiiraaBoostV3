@@ -162,4 +162,25 @@ describe('D-100 complete canonical route experience contract', () => {
       expect(finalRouteExperienceSource).toContain(detector);
     }
   });
+
+  it('defines one collision-free canonical candidate identity per route, locale, and bounded width', () => {
+    const candidateBlock = /\/\/ canonical-candidate:start([\s\S]*?)\/\/ canonical-candidate:end/u.exec(
+      finalRouteExperienceSource,
+    )?.[1];
+
+    expect(candidateBlock).toBeDefined();
+    expect(candidateBlock).toContain('@canonical-candidate');
+    expect(candidateBlock).toContain('@candidate-capture @project-${surface}-final-${axis}');
+    expect(candidateBlock).toContain('webRoutes.flatMap');
+    expect(candidateBlock).toContain('WEB_LOCALES.flatMap');
+    expect(candidateBlock).toContain('COVERED_AXES.map');
+    expect(candidateBlock).toContain("[surface, route.id, locale, axis, state].join('--')");
+    expect(candidateBlock).toContain('toHaveScreenshot');
+    expect(candidateBlock).toContain('new Set');
+    expect(candidateBlock).not.toMatch(
+      /wide-1280|tablet-768|text-200|reduced-motion|forced-colors/u,
+    );
+
+    expect(webRoutes.length * WEB_LOCALES.length * 4).toBeGreaterThan(0);
+  });
 });
