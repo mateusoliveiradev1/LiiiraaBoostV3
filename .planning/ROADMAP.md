@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 64/66 plans executed
+**Plans**: 64/72 plans executed
 
 Plans:
 **Wave 1**
@@ -448,11 +448,29 @@ Plans:
 
 - [x] 03-66-PLAN.md — Aggregate the exact inspected set and pass no-update replay/build/regression
 
-**Wave 38** *(blocked on Plan 03-66)*
+**Wave 38** *(launch-ready contract expansion; blocked on Plan 03-66)*
 
-- [ ] 03-45-PLAN.md — Run complete matrix preflight and blocking human visual review
+- [ ] 03-67-PLAN.md — Lock final commercial, lifecycle, route, and editorial contracts
 
-**Wave 39** *(blocked on approved Plan 03-45)*
+**Wave 39** *(blocked on Plan 03-67; parallel public acquisition and service content)*
+
+- [ ] 03-68-PLAN.md — Rebuild Home and public acquisition routes as the final sales experience
+- [ ] 03-69-PLAN.md — Finish documentation, download, releases, status, support, policy, and error routes
+
+**Wave 40** *(blocked on Plan 03-67; parallel product surfaces)*
+
+- [ ] 03-70-PLAN.md — Finish authentication, onboarding, and the complete customer account experience
+- [ ] 03-71-PLAN.md — Finish the isolated role-scoped administrative experience
+
+**Wave 41** *(blocked on Plans 03-68 through 03-71)*
+
+- [ ] 03-72-PLAN.md — Consolidate every canonical route, state, locale, breakpoint, and final evidence candidate
+
+**Wave 44** *(blocked on Plan 03-72)*
+
+- [ ] 03-45-PLAN.md — Run complete route-matrix preflight and blocking human visual review
+
+**Wave 45** *(blocked on approved Plan 03-45)*
 
 - [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
 

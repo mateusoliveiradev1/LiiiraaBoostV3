@@ -721,3 +721,57 @@ Stop for design review if implementation would:
 - [x] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending — previous approval superseded by third explicit human visual rejection on 2026-08-01.
+
+---
+
+## 25. Final Launch-Ready Web Experience Addendum
+
+This addendum supersedes any earlier ordinary-UX wording or navigation that exposes Phase 3 implementation language. It does not supersede truth, security, provenance, accessibility, download-integrity, or no-change authority boundaries.
+
+### 25.1 Flagship quality bar and complete route pass
+
+- Every canonical public, docs, auth-preview, account-preview, and admin-preview destination receives a final pass for purpose, customer-facing copy, CTA, navigation, density, hierarchy, responsive behavior, accessibility, and complete state handling.
+- Validate PT-BR and English at 1440, 960, 390, and 320 CSS pixels. At each width the useful composition reaches the viewport edges defined by the shell tokens without unexplained side gutters, gray footer bands, clipped navigation, horizontal page scroll, or excessive vertical scroll caused by duplicated prose.
+- Customer surfaces must never display `Phase 3`, `Phase 4`, `fixture`, `simulated`, `adapter`, `preview demonstrativa`, `preço ilustrativo`, route-manifest language, raw authority enums, scenario identifiers, build IDs, or evidence-pipeline prose. Sensitive actions may explain that they are unavailable without naming implementation phases.
+- Use the established icon library consistently. AI sparkle/wand icons are forbidden unless the labeled capability is actually AI. Every route inherits the real favicon and accessible Liiiraa Boost lockup.
+
+### 25.2 Public acquisition architecture
+
+- Primary navigation is Product, Results, Compatibility, Plans, Download, and one `Baixar grátis` / `Download free` CTA. Documentation and operational links live in contextual navigation or the utility footer.
+- The Home sequence is fixed: real desktop capture; player problem; analyze/optimize/prove; Essential versus Competitive; results methodology; safety/restoration; Free versus Premium; price; FAQ/objections; repeated download CTA.
+- Approved lead: `Seu PC pode entregar uma experiência mais estável. Analise o hardware, aplique otimizações seguras e entre no jogo com menos processos, menos interrupções e controle total para desfazer.` English receives equivalent editorial review, not literal machine translation.
+- Mode Competitive promise: prepare Windows to concentrate resources on the game, reduce interference during the match, then restore the previous state. Claims about FPS, frametime, interruption, or latency always disclose scope and evidence.
+
+### 25.3 Final plan and entitlement presentation
+
+| Contract | Free — Essential Mode | Premium — Competitive Mode |
+|---|---|---|
+| Price | Free forever; no card | R$ 29,90/month, R$ 249,90/year; US$ 6.99/month, US$ 59.99/year |
+| Core | Safe basic optimization, manual apply, one active game profile, diagnostics/benchmark, processes/startup, safe power plan | Hardware calibration, advanced optimization, unlimited profiles, automatic per-game activation, advanced comparison, personalized assistant |
+| Safety | Complete history and restoration | Complete history and restoration; never paywalled after expiry |
+| Account | May operate locally without login | Account activation for one active PC |
+| Limits | No ads, daily limits, or fake trial countdown | Device transfer/reset once per 30 days; 30-day offline Premium grace |
+| Support | Docs/community/email; up to 72 business hours | Initial response within 24 business hours |
+
+- Card supports monthly and annual; Pix supports annual; boleto is absent at launch. Full refund within seven days of the first subscription. Cancellation retains access until cycle end.
+- Terms before confirmation include billing period, renewal, taxes when applicable, cancellation, refund, one-PC rule, reset cooldown, offline grace, and expiry behavior.
+- Phase 3 checkout preserves `data-checkout-authority="disconnected"` and performs no network charge. This contract must not appear as apologetic internal copy in the visual hierarchy.
+
+### 25.4 Onboarding and lifecycle
+
+- Web onboarding: enter/create account; verify email and prepare passkey/MFA; choose Free/Premium; complete simulated payment if applicable; download; preview first-PC activation; manage plan/device/support.
+- Web never claims deep hardware analysis. Installed-app analysis uses `liiiraaboost://analyze`; otherwise route to download. Results remain local unless the user explicitly opts into a bounded account summary.
+- Desktop onboarding remains the machine journey described by D-97 and has no aggression slider.
+- Download/release shows version, date, Windows support, size, notes, signature, SHA-256, channel, and supported history. Stable is default, Beta is explicit opt-in, and Experimental is internal initially.
+
+### 25.5 Final human acceptance
+
+The new candidate set must cover all canonical routes, not only representative W/G captures. Human acceptance asks:
+
+1. Does every public route immediately communicate a customer goal and credible product value?
+2. Can a new visitor understand Free, Premium, Competitive Mode, price, safety, device rules, refund, and next action without reading technical documentation?
+3. Do login, onboarding, account, and admin look like one real product family while retaining the appropriate brand/product registers?
+4. Are all locale, responsive, error, empty, loading, offline, permission, session, and no-authority states authored rather than improvised?
+5. Is the experience original, visually strong, easy to navigate, commercially convincing, and free of implementation language?
+
+Plan 03-45 stays blocked until the user explicitly approves this complete route matrix.
