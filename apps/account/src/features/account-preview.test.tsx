@@ -13,6 +13,10 @@ import { describe, expect, it } from 'vitest';
 
 import accountEn from '../content/account.en.json';
 import accountPtBr from '../content/account.pt-BR.json';
+import {
+  admitAccountHomeScenario,
+  getAccountHomeScenario,
+} from '../account-preview-model';
 
 const featureSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
 const degradedSource = readFileSync(
@@ -167,6 +171,65 @@ describe('W11 and W12 complete account states', () => {
 });
 
 describe('authored overview and Profile workspaces', () => {
+  it('admits coherent Essential, active Premium, and pending Premium overview truth', () => {
+    const essential = getAccountHomeScenario('essential');
+    const active = getAccountHomeScenario('premium-active');
+    const pending = getAccountHomeScenario('premium-pending');
+
+    expect(essential).toMatchObject({
+      billing: { state: 'none' },
+      pc: { state: 'unlinked' },
+      plan: { kind: 'essential', state: 'active' },
+      remoteStateChanged: false,
+    });
+    expect(active).toMatchObject({
+      billing: { state: 'active' },
+      pc: { state: 'linked' },
+      plan: { kind: 'premium', state: 'active' },
+      remoteStateChanged: false,
+    });
+    expect(pending).toMatchObject({
+      billing: { state: 'pending' },
+      pc: { state: 'unlinked' },
+      plan: { kind: 'premium', state: 'pending' },
+      remoteStateChanged: false,
+    });
+    expect(() =>
+      admitAccountHomeScenario({ ...active, billing: { state: 'none' } }),
+    ).toThrow('ACCOUNT_HOME_SCENARIO_CONTRADICTION:premium-active:billing');
+    expect(() =>
+      admitAccountHomeScenario({
+        ...active,
+        recommendedAction: { kind: 'link-pc', routeId: 'account-device' },
+      }),
+    ).toThrow('ACCOUNT_HOME_SCENARIO_CONTRADICTION:linked-pc:link-action');
+  });
+
+  it('makes overview answer plan, device, security, and one recommended action first', () => {
+    const overviewSource = sourceBetween('const OverviewPreview', 'const ProfilePreview');
+
+    expect(overviewSource).toContain("getAccountHomeScenario('premium-active')");
+    expect(overviewSource).toContain('data-account-home-region="primary"');
+    expect(overviewSource).toContain('data-account-home-fact="plan"');
+    expect(overviewSource).toContain('data-account-home-fact="pc"');
+    expect(overviewSource).toContain('data-account-home-fact="security"');
+    expect(overviewSource.match(/data-recommended-action/gu) ?? []).toHaveLength(1);
+    expect(overviewSource).not.toContain('readinessItems.map');
+    expect(overviewSource).not.toContain('account-overview__activity');
+  });
+
+  it('keeps the last coherent overview summary and one recovery action when degraded', () => {
+    expect(featureSource).toContain('const DegradedOverviewPreview');
+    expect(featureSource).toContain('data-account-home-state="degraded"');
+    expect(featureSource).toContain('lastTrustworthyScenario');
+    expect(featureSource.match(/data-overview-recovery-action/gu) ?? []).toHaveLength(1);
+    for (const content of [accountPtBr, accountEn]) {
+      expect(content.overview.degradedTitle.length).toBeGreaterThan(0);
+      expect(content.overview.degradedBody.length).toBeGreaterThan(0);
+      expect(content.overview.recoveryAction.length).toBeGreaterThan(0);
+    }
+  });
+
   it('centers the overview on priority, truthful readiness, and recent activity', () => {
     const overviewSource = sourceBetween('const OverviewPreview', 'const ProfilePreview');
 
