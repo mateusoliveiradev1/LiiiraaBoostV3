@@ -436,6 +436,43 @@ for (const surface of ['public', 'account', 'admin'] as const) {
   }
 }
 
+// canonical-candidate:start
+const CANONICAL_CANDIDATES = webRoutes.flatMap((route) =>
+  WEB_LOCALES.flatMap((locale) =>
+    COVERED_AXES.map((axis) => {
+      const surface = surfaceFor(route);
+      const state = ERROR_ROUTE.test(route.id)
+        ? route.id.slice(route.id.lastIndexOf('error-'))
+        : 'ready';
+      const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
+
+      return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
+    }),
+  ),
+);
+
+const canonicalCandidateIdentities = new Set(
+  CANONICAL_CANDIDATES.map(({ snapshotIdentity }) => snapshotIdentity),
+);
+if (canonicalCandidateIdentities.size !== CANONICAL_CANDIDATES.length) {
+  throw new Error('CANONICAL_CANDIDATE_IDENTITY_COLLISION');
+}
+
+for (const candidate of CANONICAL_CANDIDATES) {
+  const { axis, locale, route, snapshotIdentity, surface } = candidate;
+  test(`@final @${surface} @candidate-capture @project-${surface}-final-${axis} @canonical-candidate ${snapshotIdentity}`, async ({
+    page,
+  }, testInfo) => {
+    onlyAxis(testInfo, axis);
+    await page.goto(pathFor(route, locale), { waitUntil: 'networkidle' });
+    await expect(page).toHaveScreenshot(`${snapshotIdentity}.png`, {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+}
+// canonical-candidate:end
+
 for (const surface of ['public', 'account', 'admin'] as const) {
   for (const axis of ['reduced-motion', 'forced-colors'] as const) {
     test(`@final @${surface} ${axis} keeps the flagship shell operable`, async ({

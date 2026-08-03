@@ -164,9 +164,10 @@ describe('D-100 complete canonical route experience contract', () => {
   });
 
   it('defines one collision-free canonical candidate identity per route, locale, and bounded width', () => {
-    const candidateBlock = /\/\/ canonical-candidate:start([\s\S]*?)\/\/ canonical-candidate:end/u.exec(
-      finalRouteExperienceSource,
-    )?.[1];
+    const candidateBlock =
+      /\/\/ canonical-candidate:start([\s\S]*?)\/\/ canonical-candidate:end/u.exec(
+        finalRouteExperienceSource,
+      )?.[1];
 
     expect(candidateBlock).toBeDefined();
     expect(candidateBlock).toContain('@canonical-candidate');
