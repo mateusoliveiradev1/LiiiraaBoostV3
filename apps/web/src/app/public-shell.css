@@ -4,6 +4,7 @@
 
 html {
   min-inline-size: 320px;
+  overflow-x: clip;
   background: var(--lb-surface-canvas);
   scroll-padding-block-start: var(--lb-space-7);
 }
@@ -11,6 +12,7 @@ html {
 body {
   min-block-size: 100vh;
   margin: 0;
+  overflow-x: clip;
   color: var(--lb-text-primary);
   background: var(--lb-surface-canvas);
   font: var(--lb-weight-regular) var(--lb-text-body-size) / var(--lb-text-body-line)
@@ -60,6 +62,7 @@ summary:focus-visible,
   display: flex;
   align-items: center;
   gap: var(--lb-space-4);
+  inline-size: min(100%, 1280px);
   max-inline-size: 1280px;
   min-block-size: 72px;
   margin-inline: auto;
@@ -385,7 +388,7 @@ main {
   align-items: start;
   padding: var(--lb-space-6) var(--lb-screen-padding);
   border-block-start: 1px solid var(--lb-line-subtle);
-  background: var(--lb-surface-inset);
+  background: var(--lb-surface-canvas);
 }
 
 .public-footer p {

@@ -85,6 +85,8 @@ describe('public shell', () => {
     expect(layoutSource).toContain("'public-results': 'Resultados'");
     expect(layoutSource).toContain("'public-compatibility': 'Seu PC'");
     expect(layoutSource).toContain("'public-download': 'Download'");
+    expect(layoutSource).toContain("download: 'Baixar grátis'");
+    expect(layoutSource).toContain("download: 'Download free'");
     expect(layoutSource).toContain("'public-product': 'How it works'");
     expect(layoutSource).toContain("'public-results': 'Results'");
     expect(layoutSource).toContain("'public-compatibility': 'Your PC'");
@@ -113,6 +115,8 @@ describe('public shell', () => {
     expect(layoutSource).toContain('<ProductLockup />');
     expect(navigationSource).toContain("publicBoundaryHref('public-download', locale)");
     expect(navigationSource).toContain('public-action--primary');
+    expect(shellStyles).toMatch(/html\s*\{[\s\S]*overflow-x:\s*clip/u);
+    expect(shellStyles).toMatch(/body\s*\{[\s\S]*overflow-x:\s*clip/u);
   });
 
   it('uses a 60px mobile topbar and a full-height task menu with 48px targets', () => {

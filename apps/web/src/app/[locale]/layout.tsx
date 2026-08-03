@@ -30,7 +30,7 @@ const COPY = Object.freeze({
     account: 'Conta',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
     current: 'página atual',
-    compatibility: 'Baixar grátis',
+    download: 'Baixar grátis',
     footerNavigation: 'Navegação complementar',
     menu: 'Menu',
     navigation: Object.freeze({
@@ -48,7 +48,7 @@ const COPY = Object.freeze({
     account: 'Account',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
     current: 'current page',
-    compatibility: 'Download free',
+    download: 'Download free',
     footerNavigation: 'Supplementary navigation',
     menu: 'Menu',
     navigation: Object.freeze({
