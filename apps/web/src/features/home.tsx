@@ -500,7 +500,7 @@ const IgnitionHero = ({
     </div>
     <div
       className="home-ignition-hero__stage"
-      data-stage-max-top="560"
+      data-stage-max-top="640"
       data-stage-max-width="1120"
       data-stage-min-visible="260"
       id="product-stage"

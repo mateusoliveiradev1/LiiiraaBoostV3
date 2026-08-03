@@ -104,7 +104,7 @@ describe('Home layout and screenshot evidence gate', () => {
     ]);
 
     expect(homeSource).toContain('data-stage-max-width="1120"');
-    expect(homeSource).toContain('data-stage-max-top="560"');
+    expect(homeSource).toContain('data-stage-max-top="640"');
     expect(homeSource).toContain('data-stage-min-visible="260"');
     expect(homeStyles).toMatch(
       /\.home-ignition-hero__stage\s*\{[\s\S]*grid-column:\s*2 \/ 12;[\s\S]*inline-size:\s*min\(calc\(100vw - 64px\), 1120px\);/u,

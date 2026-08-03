@@ -123,9 +123,16 @@ Tasks 1–3 are delivered together in the final atomic Plan 03-72 commit so impl
 - **Fix:** Rebuilt all surface slices using the allowlisted writer command; no hash was edited by hand.
 - **Verification:** Evidence status is `passed` with 24 complete localized observations and current canonical/spec source hashes.
 
+**5. [Completion Audit - Contract Drift] Aligned the hero's DOM geometry contract with the browser-observed limit**
+
+- **Found during:** Post-commit requirement-by-requirement completion audit
+- **Issue:** The final browser gate correctly allowed the centered product stage at up to 640px from the viewport top, but the source still advertised the superseded `data-stage-max-top="560"` value.
+- **Fix:** Updated the authored DOM contract and its unit assertion to 640px without changing layout or candidate pixels.
+- **Verification:** Web 108/108, the web/admin production builds, and the complete final route matrix (18 applicable passes) all passed again.
+
 ---
 
-**Total deviations:** 4 auto-fixed (2 bugs, 1 missing critical, 1 blocking evidence renewal)
+**Total deviations:** 5 auto-fixed (2 bugs, 1 missing critical, 1 blocking evidence renewal, 1 completion-audit contract drift)
 **Impact on plan:** Every change was required to make the declared final experience reachable, testable, and reviewable; no Phase 4 authority or production publication capability was added.
 
 ## Issues Encountered
