@@ -992,8 +992,8 @@ export const GlobalSearch = ({
         {query.length === 0 ? (
           <p>
             {catalog.locale === 'pt-BR'
-              ? 'Envie uma busca para consultar apenas o índice público admitido.'
-              : 'Submit a query to inspect only the admitted public index.'}
+              ? 'Pesquise por uma tarefa, dúvida ou recurso do Liiiraa Boost.'
+              : 'Search for a task, question, or Liiiraa Boost feature.'}
           </p>
         ) : results.length === 0 ? (
           <div className="global-search__empty">
@@ -1010,30 +1010,10 @@ export const GlobalSearch = ({
                 <li key={result.id}>
                   <a href={publicBoundaryHref(result.routeId, catalog.locale)}>{result.title}</a>
                   <p>{result.summary}</p>
-                  <dl>
-                    <div>
-                      <dt>{catalog.locale === 'pt-BR' ? 'Tipo' : 'Type'}</dt>
-                      <dd>{result.contentType}</dd>
-                    </div>
-                    <div>
-                      <dt>{catalog.locale === 'pt-BR' ? 'Idioma' : 'Locale'}</dt>
-                      <dd>{result.locale}</dd>
-                    </div>
-                    <div>
-                      <dt>{copyFor(catalog.locale).version}</dt>
-                      <dd>
-                        <code>{result.version}</code>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>{copyFor(catalog.locale).availability}</dt>
-                      <dd>{catalog.supportStates[result.availability].label}</dd>
-                    </div>
-                    <div>
-                      <dt>{copyFor(catalog.locale).validation}</dt>
-                      <dd>{result.validationState}</dd>
-                    </div>
-                  </dl>
+                  <small>
+                    {catalog.locale === 'pt-BR' ? 'Conteúdo público' : 'Public guidance'} ·{' '}
+                    {catalog.supportStates[result.availability].label}
+                  </small>
                 </li>
               ))}
             </ol>
@@ -1049,10 +1029,14 @@ export const PolicyDocument = ({
   policy,
 }: Readonly<{ locale: WebLocale; policy: PolicyVersion }>) => {
   const copy = copyFor(locale);
+  const policyLabel =
+    locale === 'pt-BR'
+      ? { privacy: 'Privacidade', security: 'Segurança', terms: 'Termos' }[policy.kind]
+      : { privacy: 'Privacy', security: 'Security', terms: 'Terms' }[policy.kind];
   return (
     <article className="policy-document">
       <header className="policy-document__header">
-        <span>{policy.kind}</span>
+        <span>{policyLabel}</span>
         <h1>{policy.title}</h1>
         <p>{policy.summary}</p>
         <dl>
@@ -1108,7 +1092,7 @@ const ResponsibleDisclosure = ({
   return (
     <article className="policy-document">
       <header className="policy-document__header">
-        <span>security</span>
+        <span>{locale === 'pt-BR' ? 'Segurança' : 'Security'}</span>
         <h1>{disclosure.title}</h1>
         <p>{disclosure.summary}</p>
         <a
@@ -1192,6 +1176,11 @@ export const StatusSummary = ({
   policies,
 }: Readonly<{ locale: WebLocale; policies: Policies }>) => {
   const status = policies.status;
+  const updatedAt = new Intl.DateTimeFormat(locale, {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone: 'America/Sao_Paulo',
+  }).format(new Date(status.updatedAt));
   return (
     <article className="status-summary">
       <header>
@@ -1202,8 +1191,19 @@ export const StatusSummary = ({
         <p>{status.summary}</p>
         <p>
           {locale === 'pt-BR' ? 'Atualizado' : 'Updated'}:{' '}
-          <time dateTime={status.updatedAt}>{status.updatedAt}</time>
+          <time dateTime={status.updatedAt}>{updatedAt}</time>
         </p>
+        <nav aria-label={locale === 'pt-BR' ? 'Ajuda operacional' : 'Operational help'}>
+          <a
+            className="public-action public-action--primary"
+            href={publicBoundaryHref('public-support', locale)}
+          >
+            {locale === 'pt-BR' ? 'Preciso de ajuda' : 'I need help'}
+          </a>
+          <a className="public-action" href={publicBoundaryHref('releases-index', locale)}>
+            {locale === 'pt-BR' ? 'Ver versões' : 'View releases'}
+          </a>
+        </nav>
       </header>
       <section aria-labelledby="status-components-title">
         <h2 id="status-components-title">{copyFor(locale).components}</h2>
@@ -1419,6 +1419,70 @@ const CompatibilityExperience = ({
   );
 };
 
+const SupportExperience = ({
+  catalog,
+  record,
+}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
+  const portuguese = catalog.locale === 'pt-BR';
+  const sections = record.sections ?? [];
+  return (
+    <section aria-labelledby="support-options-title" className="support-service">
+      <header>
+        <h2 id="support-options-title">
+          {portuguese ? 'Escolha o melhor caminho' : 'Choose the best path'}
+        </h2>
+        <p>
+          {portuguese
+            ? 'Comece pela opção mais rápida. Se você precisar de acompanhamento, o e-mail mantém o contexto da solicitação.'
+            : 'Start with the fastest option. When you need follow-through, email keeps the request context together.'}
+        </p>
+      </header>
+      <div className="support-service__options">
+        <a href={publicBoundaryHref('docs-index', catalog.locale)}>
+          <strong>{portuguese ? 'Resolver com um guia' : 'Solve it with a guide'}</strong>
+          <span>
+            {portuguese
+              ? 'Instalação, medição, restauração e erros'
+              : 'Installation, measurement, restoration, and errors'}
+          </span>
+          <small>{portuguese ? 'Disponível agora' : 'Available now'}</small>
+        </a>
+        <a href={publicBoundaryHref('public-status', catalog.locale)}>
+          <strong>{portuguese ? 'Verificar o serviço' : 'Check the service'}</strong>
+          <span>
+            {portuguese
+              ? 'Saúde atual e histórico de incidentes'
+              : 'Current health and incident history'}
+          </span>
+          <small>{portuguese ? 'Atualização imediata' : 'Immediate update'}</small>
+        </a>
+        <a href="mailto:support@liiiraa.com">
+          <strong>{portuguese ? 'Falar com o suporte' : 'Contact support'}</strong>
+          <span>
+            {portuguese
+              ? 'Dúvidas que precisam de acompanhamento'
+              : 'Questions that need follow-through'}
+          </span>
+          <small>support@liiiraa.com</small>
+        </a>
+      </div>
+      <section aria-labelledby="support-response-title" className="support-response-ledger">
+        <h2 id="support-response-title">
+          {portuguese ? 'Prazos e prioridades' : 'Response times and priorities'}
+        </h2>
+        <div>
+          {sections.map((section) => (
+            <article key={section.title}>
+              <h3>{section.title}</h3>
+              <p>{section.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+};
+
 const CatalogAcquisitionExperience = ({
   catalog,
   record,
@@ -1432,8 +1496,9 @@ const CatalogAcquisitionExperience = ({
       return <CompatibilityExperience catalog={catalog} record={record} />;
     case 'public-plans':
     case 'public-search':
-    case 'public-support':
       return null;
+    case 'public-support':
+      return <SupportExperience catalog={catalog} record={record} />;
   }
 };
 
@@ -1449,7 +1514,7 @@ const CatalogBody = ({
   <div id="catalog-route-body">
     <CatalogAcquisitionExperience catalog={catalog} record={record} />
     {record.sections !== undefined &&
-      !['public-product', 'public-results'].includes(record.routeId) && (
+      !['public-product', 'public-results', 'public-support'].includes(record.routeId) && (
         <div className="catalog-story-sequence">
           {record.sections.map((section) => (
             <section key={section.title}>

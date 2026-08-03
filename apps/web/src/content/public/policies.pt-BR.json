@@ -14,7 +14,7 @@
       "sections": [
         {
           "heading": "O que este site público armazena",
-          "body": "Esta fase usa apenas estado estritamente necessário de idioma e navegação. Ela não usa análise opcional, publicidade, rastreamento entre sites nem banner de cookies."
+          "body": "Este site usa apenas o estado estritamente necessário de idioma e navegação. Não usamos análise opcional, publicidade, rastreamento entre sites nem banner de cookies porque não há cookies opcionais ativos."
         },
         {
           "heading": "Pontos de coleta",
@@ -22,7 +22,7 @@
         },
         {
           "heading": "Retenção e compartilhamento",
-          "body": "Nenhum caso de suporte, conta, dispositivo, cobrança ou diagnóstico é criado pela experiência pública da Fase 3. Portanto, nenhum desses registros é retido ou compartilhado."
+          "body": "Navegar pelas páginas públicas não cria caso de suporte, conta, dispositivo, cobrança ou diagnóstico. Portanto, nenhum desses registros é retido ou compartilhado por esta navegação."
         },
         {
           "heading": "Suas escolhas",
@@ -30,14 +30,14 @@
         },
         {
           "heading": "Responsabilidade",
-          "body": "Dúvidas, correções e futuros pedidos de direitos de dados usam o contato de privacidade responsável acima. A Fase 4 precisa adicionar autoridade autenticada antes que qualquer pedido seja apresentado como enviado."
+          "body": "Dúvidas e correções usam o contato de privacidade responsável acima. Pedidos que envolvam dados de conta exigirão autenticação antes de serem apresentados como enviados."
         }
       ],
       "history": [
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Política pública inicial para a experiência determinística e sem coleta da Fase 3."
+          "summary": "Política pública inicial para navegação sem coleta opcional."
         }
       ]
     },
@@ -45,18 +45,18 @@
       "kind": "terms",
       "routeId": "public-terms",
       "title": "Termos de uso",
-      "summary": "O site atual é uma superfície de informação e prévia determinística, não uma autoridade de checkout ou otimização.",
+      "summary": "Estes termos explicam o uso do site, as condições comerciais publicadas e os limites entre a web e o aplicativo Windows.",
       "version": "1.0.0",
       "effectiveDate": "2026-07-31",
       "contact": "legal@liiiraa.com",
       "sections": [
         {
           "heading": "Limite atual do serviço",
-          "body": "As páginas públicas da Fase 3 oferecem informações de produto, compatibilidade, evidência, documentação, versão e suporte. Elas não vendem plano, vinculam dispositivo, alteram o Windows nem criam direito."
+          "body": "As páginas públicas oferecem informações de produto, compatibilidade, evidência, documentação, versões, planos e suporte. Alterações no Windows acontecem somente no aplicativo desktop depois de revisão e confirmação."
         },
         {
           "heading": "Termos comerciais",
-          "body": "Nenhum preço, período de cobrança, renovação, tributo, cancelamento, reembolso, regra de dispositivo ou efeito de expiração está ativo porque a autoridade de checkout está indisponível. Uma oferta futura precisa publicar todos esses termos antes da confirmação."
+          "body": "Os preços, períodos de cobrança, renovação, formas de pagamento, cancelamento, reembolso, regra de um PC e efeito de expiração exibidos em Planos devem ser revisados novamente antes da confirmação da compra."
         },
         {
           "heading": "Compatibilidade e evidência",
@@ -64,7 +64,7 @@
         },
         {
           "heading": "Uso seguro",
-          "body": "Não trate conteúdo de prévia como permissão para executar scripts ou fazer alterações de sistema sem suporte. Use documentação e recuperação canônicas; nunca contorne um bloqueio de integridade ou disponibilidade."
+          "body": "Não execute scripts recebidos de terceiros nem faça alterações sem um caminho de recuperação. Use a documentação oficial e nunca contorne um bloqueio de integridade ou disponibilidade."
         },
         {
           "heading": "Alterações",
@@ -75,7 +75,7 @@
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Termos iniciais sem checkout e sem autoridade nativa para a Fase 3."
+          "summary": "Versão inicial dos termos públicos, comerciais e de uso seguro."
         }
       ]
     },
@@ -83,7 +83,7 @@
       "kind": "security",
       "routeId": "public-policies",
       "title": "Segurança e confiança",
-      "summary": "Privilégio mínimo, artefatos assinados, limites explícitos de autoridade, validação em tempo de execução e operações recuperáveis definem o produto.",
+      "summary": "Permissões limitadas, downloads assinados, verificações antes de cada ação e caminhos de recuperação protegem o produto.",
       "version": "1.0.0",
       "effectiveDate": "2026-07-31",
       "contact": "security@liiiraa.com",
@@ -109,7 +109,7 @@
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Declaração pública inicial dos limites de segurança da Fase 3 e requisitos para operações nativas futuras."
+          "summary": "Declaração pública inicial dos limites de segurança e requisitos para operações no Windows."
         }
       ]
     }
@@ -143,12 +143,12 @@
     "title": "Status operacional",
     "overall": "Operacional",
     "updatedAt": "2026-07-31T12:00:00.000Z",
-    "summary": "As informações públicas estão disponíveis. Download, autoridade de conta e otimização nativa são limites de disponibilidade do produto, não incidentes de serviço.",
+    "summary": "O site, a documentação e o suporte estão funcionando. O download oficial e a área da conta continuam indisponíveis porque ainda não foram lançados.",
     "components": [
       {
         "name": "Produto público e políticas",
         "state": "operational",
-        "detail": "As informações públicas autorais do repositório estão disponíveis."
+        "detail": "Produto, compatibilidade, planos e políticas estão disponíveis."
       },
       {
         "name": "Documentação e orientação de suporte",
@@ -158,15 +158,15 @@
       {
         "name": "Download público confiável",
         "state": "unavailable",
-        "detail": "Nenhum instalador com confiança pública foi aprovado; este é um bloqueio declarado de versão."
+        "detail": "O instalador oficial ainda não foi publicado. Nenhum arquivo provisório é oferecido."
       },
       {
-        "name": "Conta e autoridade remota",
-        "state": "demonstrative-preview",
-        "detail": "A prévia de conta permite conhecer a experiência sem alterar dados ou ações remotas."
+        "name": "Conta e gerenciamento online",
+        "state": "unavailable",
+        "detail": "Entrada, assinatura e gerenciamento do dispositivo ainda não estão disponíveis para uso real."
       }
     ],
     "incidentHistory": [],
-    "incidentHistoryEmpty": "Nenhum incidente confirmado do serviço público foi publicado. Entradas futuras indicarão componente afetado, impacto ao usuário, atualizações com horário e resolução sem expor detalhes internos sensíveis."
+    "incidentHistoryEmpty": "Não há incidentes confirmados no site, na documentação ou no suporte neste momento."
   }
 }

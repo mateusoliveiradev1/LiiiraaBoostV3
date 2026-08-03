@@ -248,7 +248,7 @@
       "translationKey": "public-search",
       "title": "Find an answer without wasting time",
       "summary": "Search product, results, compatibility, plans, documentation, and support in one place.",
-      "body": "Results show the subject, availability, and version so you can choose the right information.",
+      "body": "Results show the subject and availability so you can choose the right information.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
@@ -278,7 +278,7 @@
       "contentType": "support",
       "translationKey": "public-support",
       "title": "The right help for each situation",
-      "summary": "Start with documentation or the community and contact support when you need follow-through.",
+      "summary": "Start with documentation, check service status, or contact support when you need follow-through.",
       "body": "Free receives an email response within 72 business hours. Premium receives an initial response within 24 business hours. Billing, security, and restoration are prioritized on every plan.",
       "availability": "available",
       "validationState": "validated",
@@ -299,7 +299,7 @@
       "sections": [
         {
           "title": "Free · within 72 business hours",
-          "body": "Documentation, community, and email support for general questions and issues."
+          "body": "Documentation and email support for general questions and issues."
         },
         {
           "title": "Premium · within 24 business hours",

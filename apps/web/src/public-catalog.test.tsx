@@ -261,6 +261,44 @@ describe('public catalog content', () => {
     );
   });
 
+  it('presents search results as customer guidance without internal publication metadata', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage
+          locale={locale}
+          routeId="public-search"
+          searchParams={{ q: locale === 'pt-BR' ? 'produto' : 'product' }}
+        />,
+      );
+      const results = markup.slice(markup.indexOf('global-search__results'));
+
+      expect(results).toContain(locale === 'pt-BR' ? 'Conteúdo público' : 'Public guidance');
+      expect(results).not.toMatch(
+        /<dt>(?:Tipo|Type|Idioma|Locale|Versão|Version|Validação|Validation)<\/dt>/iu,
+      );
+      expect(results).not.toMatch(/validated|demonstrative-preview|translationKey/iu);
+    }
+  });
+
+  it('offers documentation, live status, and email support with exact response expectations', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId="public-support" />,
+      );
+      const text = visibleText(markup);
+
+      expect(markup).toContain(`href="/${locale}/docs"`);
+      expect(markup).toContain(`href="/${locale}/status"`);
+      expect(markup).toContain('href="mailto:support@liiiraa.com"');
+      expect(text).toMatch(/72 horas úteis|72 business hours/iu);
+      expect(text).toMatch(/24 horas úteis|24 business hours/iu);
+      expect(text).toMatch(/cobrança|billing/iu);
+      expect(text).toMatch(/segurança|security/iu);
+      expect(text).toMatch(/restauração|restoration/iu);
+      expect(markup).toContain('class="support-service__options"');
+    }
+  });
+
   it('uses semantic compatibility and plan decisions instead of equal card walls', async () => {
     const [source, styles] = await Promise.all([
       import('node:fs/promises').then(({ readFile }) =>
@@ -330,14 +368,45 @@ describe('public policies and operational trust', () => {
     }
   });
 
-  it('renders W09 with localized human status instead of fixture and enum language', () => {
-    const markup = renderToStaticMarkup(
-      <PublicCatalogPage locale="pt-BR" routeId="public-status" />,
-    );
+  it('renders human operational status and safe escalation without enum language', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId="public-status" />,
+      );
+      const text = visibleText(markup);
 
-    expect(markup).toContain('Revisão disponível');
-    expect(markup).toContain('sem alterar dados ou ações remotas');
-    expect(markup).not.toContain('As prévias da Fase 3');
-    expect(markup).not.toMatch(/>demonstrative-preview</u);
+      expect(text).toContain(
+        locale === 'pt-BR' ? 'Conta e gerenciamento online' : 'Account and online management',
+      );
+      expect(text).toContain(locale === 'pt-BR' ? 'Indisponível agora' : 'Unavailable now');
+      expect(markup).toContain(`href="/${locale}/support"`);
+      expect(markup).toContain(`href="/${locale}/releases"`);
+      expect(markup).not.toMatch(/>demonstrative-preview</u);
+      expect(text).not.toMatch(/Fase|Phase|prévia determinística|deterministic preview/iu);
+    }
+  });
+
+  it('keeps versioned policies readable and free of internal delivery language', () => {
+    const policyRoutes = [
+      'public-privacy-policy',
+      'public-terms',
+      'public-responsible-disclosure',
+    ] as const satisfies readonly WebRouteId[];
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      for (const routeId of policyRoutes) {
+        const markup = renderToStaticMarkup(
+          <PublicCatalogPage locale={locale} routeId={routeId} />,
+        );
+        const text = visibleText(markup);
+
+        expect(text).toMatch(/1\.0\.0/u);
+        expect(text).toContain('2026-07-31');
+        expect(text).not.toMatch(
+          /Fase\s*\d|Phase\s*\d|prévia determinística|deterministic preview|fixture|adapter/iu,
+        );
+        expect(markup).not.toMatch(/>privacy<|>security<|>terms</u);
+      }
+    }
   });
 });

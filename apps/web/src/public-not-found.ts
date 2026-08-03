@@ -21,7 +21,7 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     detail:
       'O endereço não corresponde a uma página pública disponível. Nenhum dado de solicitação foi exibido.',
-    diagnostics: 'Diagnóstico redigido',
+    diagnostics: 'Código para o suporte',
     documentation: 'Abrir documentação',
     home: 'Voltar ao início',
     recovery: 'Escolha um destino seguro para continuar.',
@@ -31,7 +31,7 @@ const COPY = Object.freeze({
   en: Object.freeze({
     detail:
       'The address does not match an available public page. No request data has been displayed.',
-    diagnostics: 'Redacted diagnostic',
+    diagnostics: 'Support code',
     documentation: 'Open documentation',
     home: 'Return home',
     recovery: 'Choose a safe destination to continue.',
@@ -71,7 +71,6 @@ export const PublicNotFound = ({ locale }: { readonly locale: PublicLocale }) =>
       'div',
       { className: 'public-not-found__identity' },
       createElement('span', { 'aria-hidden': true }, '404'),
-      createElement('code', null, model.routeId),
     ),
     createElement(
       'div',

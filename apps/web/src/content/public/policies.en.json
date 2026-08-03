@@ -14,7 +14,7 @@
       "sections": [
         {
           "heading": "What this public site stores",
-          "body": "This phase uses only strictly necessary locale and navigation state. It does not use optional analytics, advertising, cross-site tracking, or a cookie banner."
+          "body": "This site uses only strictly necessary locale and navigation state. We do not use optional analytics, advertising, cross-site tracking, or a cookie banner because no optional cookies are active."
         },
         {
           "heading": "Collection points",
@@ -22,7 +22,7 @@
         },
         {
           "heading": "Retention and sharing",
-          "body": "No support case, account, device, billing, or diagnostic record is created by the Phase 3 public experience. Therefore none of those records is retained or shared."
+          "body": "Browsing public pages does not create a support case, account, device, billing, or diagnostic record. None of those records is retained or shared through this navigation."
         },
         {
           "heading": "Your choices",
@@ -30,14 +30,14 @@
         },
         {
           "heading": "Accountability",
-          "body": "Questions, correction requests, and future data-rights requests use the accountable privacy contact above. Phase 4 must add authenticated request authority before any request is presented as submitted."
+          "body": "Questions and correction requests use the accountable privacy contact above. Requests involving account data will require authentication before they are presented as submitted."
         }
       ],
       "history": [
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial public policy for the deterministic, no-collection Phase 3 experience."
+          "summary": "Initial public policy for navigation without optional collection."
         }
       ]
     },
@@ -45,18 +45,18 @@
       "kind": "terms",
       "routeId": "public-terms",
       "title": "Terms of use",
-      "summary": "The current website is an information and deterministic preview surface, not a checkout or optimization authority.",
+      "summary": "These terms explain website use, published commercial conditions, and the boundary between the web and the Windows application.",
       "version": "1.0.0",
       "effectiveDate": "2026-07-31",
       "contact": "legal@liiiraa.com",
       "sections": [
         {
           "heading": "Current service boundary",
-          "body": "Phase 3 public pages provide product, compatibility, evidence, documentation, release, and support information. They do not sell a plan, bind a device, modify Windows, or create an entitlement."
+          "body": "Public pages provide product, compatibility, evidence, documentation, releases, plans, and support information. Windows changes happen only in the desktop application after review and confirmation."
         },
         {
           "heading": "Commercial terms",
-          "body": "No price, billing period, renewal, tax, cancellation, refund, device rule, or expiration effect is active because checkout authority is unavailable. Any future offer must publish all of those terms before confirmation."
+          "body": "The prices, billing periods, renewal, payment methods, cancellation, refund, one-PC rule, and expiration effect shown on Plans must be reviewed again before purchase confirmation."
         },
         {
           "heading": "Compatibility and evidence",
@@ -64,7 +64,7 @@
         },
         {
           "heading": "Safe use",
-          "body": "Do not treat preview content as permission to run scripts or make unsupported system changes. Use canonical documentation and recovery paths; never bypass an integrity or availability block."
+          "body": "Do not run scripts received from third parties or make changes without a recovery path. Use official documentation and never bypass an integrity or availability block."
         },
         {
           "heading": "Changes",
@@ -75,7 +75,7 @@
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial no-checkout, no-native-authority terms for Phase 3."
+          "summary": "Initial public, commercial, and safe-use terms."
         }
       ]
     },
@@ -83,7 +83,7 @@
       "kind": "security",
       "routeId": "public-policies",
       "title": "Security and trust",
-      "summary": "Least privilege, signed artifacts, explicit authority boundaries, runtime validation, and recoverable operations define the product boundary.",
+      "summary": "Limited permissions, signed downloads, checks before every action, and recovery paths protect the product.",
       "version": "1.0.0",
       "effectiveDate": "2026-07-31",
       "contact": "security@liiiraa.com",
@@ -109,7 +109,7 @@
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial public statement of Phase 3 security boundaries and future native-operation requirements."
+          "summary": "Initial public statement of security boundaries and Windows-operation requirements."
         }
       ]
     }
@@ -143,12 +143,12 @@
     "title": "Operational status",
     "overall": "Operational",
     "updatedAt": "2026-07-31T12:00:00.000Z",
-    "summary": "Public information is available. Download, account authority, and native optimization are product-availability boundaries, not service incidents.",
+    "summary": "The site, documentation, and support are working. The official download and account area remain unavailable because they have not launched yet.",
     "components": [
       {
         "name": "Public product and policies",
         "state": "operational",
-        "detail": "Repository-authored public information is available."
+        "detail": "Product, compatibility, plans, and policies are available."
       },
       {
         "name": "Documentation and support guidance",
@@ -158,15 +158,15 @@
       {
         "name": "Public trusted download",
         "state": "unavailable",
-        "detail": "No publicly trusted installer has been approved; this is a declared release gate."
+        "detail": "The official installer has not been published yet. No provisional file is offered."
       },
       {
-        "name": "Account and remote authority",
-        "state": "demonstrative-preview",
-        "detail": "The account preview lets visitors inspect the experience without changing remote data or actions."
+        "name": "Account and online management",
+        "state": "unavailable",
+        "detail": "Sign-in, subscriptions, and device management are not yet available for real use."
       }
     ],
     "incidentHistory": [],
-    "incidentHistoryEmpty": "No confirmed public service incident has been published. Future entries will name the affected component, user impact, timestamped updates, and resolution without exposing sensitive internals."
+    "incidentHistoryEmpty": "There are no confirmed incidents affecting the site, documentation, or support right now."
   }
 }

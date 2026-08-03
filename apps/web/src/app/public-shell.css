@@ -461,6 +461,10 @@ main {
   text-wrap: balance;
 }
 
+.public-not-found__content h1:focus {
+  outline: none;
+}
+
 .public-not-found__content > p {
   margin: 0;
   color: var(--lb-text-secondary);

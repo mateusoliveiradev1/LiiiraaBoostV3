@@ -248,7 +248,7 @@
       "translationKey": "public-search",
       "title": "Encontre uma resposta sem perder tempo",
       "summary": "Pesquise produto, resultados, compatibilidade, planos, documentação e suporte em um só lugar.",
-      "body": "Os resultados mostram o assunto, a disponibilidade e a versão para ajudar você a escolher a informação certa.",
+      "body": "Os resultados mostram o assunto e a disponibilidade para ajudar você a escolher a informação certa.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
@@ -278,7 +278,7 @@
       "contentType": "support",
       "translationKey": "public-support",
       "title": "Ajuda certa para cada situação",
-      "summary": "Comece pela documentação ou comunidade e fale com o suporte quando precisar de acompanhamento.",
+      "summary": "Comece pela documentação, confira o status do serviço ou fale com o suporte quando precisar de acompanhamento.",
       "body": "Free recebe resposta por e-mail em até 72 horas úteis. Premium recebe resposta inicial em até 24 horas úteis. Cobrança, segurança e restauração têm prioridade em qualquer plano.",
       "availability": "available",
       "validationState": "validated",
@@ -299,7 +299,7 @@
       "sections": [
         {
           "title": "Free · até 72 horas úteis",
-          "body": "Documentação, comunidade e suporte por e-mail para dúvidas e problemas gerais."
+          "body": "Documentação e suporte por e-mail para dúvidas e problemas gerais."
         },
         {
           "title": "Premium · até 24 horas úteis",
