@@ -31,11 +31,11 @@ describe('public catalog content', () => {
     ['pt-BR', 'public-product', 'Ver como funciona'],
     ['pt-BR', 'public-evidence', 'Ver como medimos'],
     ['pt-BR', 'public-compatibility', 'Checar meu PC'],
-    ['pt-BR', 'public-plans', 'Ver plano Premium'],
+    ['pt-BR', 'public-plans', 'Continuar com Premium'],
     ['en', 'public-product', 'See how it works'],
     ['en', 'public-evidence', 'See how we measure'],
     ['en', 'public-compatibility', 'Check my PC'],
-    ['en', 'public-plans', 'View Premium plan'],
+    ['en', 'public-plans', 'Continue with Premium'],
   ] as const)(
     'leads %s %s with a route-specific visitor outcome and next action',
     (locale, routeId, action) => {
@@ -71,9 +71,7 @@ describe('public catalog content', () => {
     ] as const;
 
     for (const [locale, routeId, heading] of expected) {
-      const markup = renderToStaticMarkup(
-        <PublicCatalogPage locale={locale} routeId={routeId} />,
-      );
+      const markup = renderToStaticMarkup(<PublicCatalogPage locale={locale} routeId={routeId} />);
       expect(visibleText(markup)).toContain(heading);
     }
 
@@ -147,7 +145,7 @@ describe('public catalog content', () => {
       );
 
       expect(markup).toContain('class="plan-purchase-stage"');
-      expect(markup).toContain('class="plan-offer"');
+      expect(markup).toMatch(/class="[^"]*\bplan-offer\b/u);
       expect(markup).toContain('class="plan-price"');
       expect(markup).toContain('data-checkout-authority="disconnected"');
       expect(markup).toContain('data-icon-library="phosphor"');
@@ -156,9 +154,7 @@ describe('public catalog content', () => {
       expect(visibleText(markup)).toContain(
         locale === 'pt-BR' ? 'Continuar com Premium' : 'Continue with Premium',
       );
-      expect(markup).toContain(
-        `href="https://account.liiiraa.com/${locale}/sign-in"`,
-      );
+      expect(markup).toContain(`href="https://account.liiiraa.com/${locale}/sign-in"`);
       expect(visibleText(markup)).not.toContain(
         locale === 'pt-BR' ? 'Não está à venda' : 'Not for sale',
       );
@@ -209,7 +205,7 @@ describe('public catalog content', () => {
       /@media \(width < 640px\)[\s\S]*\.catalog-table,[\s\S]*display:\s*block/u,
     );
     expect(styles).not.toMatch(
-      /\.plan-comparison-ledger\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/u,
+      /\.plan-comparison-ledger\s*\{[^}]*grid-template-columns:\s*repeat\(3/u,
     );
     expect(styles).toMatch(
       /\.plan-purchase-stage\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.15fr\) minmax\(280px, 0\.85fr\)/u,

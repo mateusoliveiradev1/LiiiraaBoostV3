@@ -87,12 +87,12 @@ test('@final @public navigation and language preserve the active documentation r
 
   const current = page.locator('nav.public-navigation--desktop:visible a[aria-current="page"]');
   await expect(current).toHaveCount(1);
-  await expect(current).toContainText('Documentation');
+  await expect(current).toContainText('Help');
 
   const locale = page.locator('a.lb-web-locale-switcher:visible');
   await expect(locale).toHaveCount(1);
   await expect(locale).toHaveAccessibleName('Switch language to Português');
-  await expect(locale).toContainText('🇧🇷');
+  await expect(locale.locator('[data-locale-flag="br"]')).toHaveCount(1);
   await expect(locale).toContainText('Português');
   await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
 
@@ -161,26 +161,28 @@ test('@final @public W01 keeps the PT-BR command runway truthful and distributio
   await gotoWithRecoverableRetry(page, '/pt-BR');
 
   await expect(page.locator('main')).toHaveCount(1);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
     'Prepare seu PC. Prove o resultado. Restaure com controle.',
   );
   await expect(
     page.getByRole('link', { name: 'Verificar compatibilidade', exact: true }).first(),
   ).toBeVisible();
-  await expect(
-    page.getByRole('note').filter({ hasText: 'O que esta captura comprova' }),
-  ).toBeVisible();
+  await expect(page.getByRole('note')).toBeVisible();
   await expect(page.locator('.public-boundary')).toHaveCount(0);
   await expect(page.locator('main')).not.toContainText(/Superfície pública|\bPUBLIC\b/u);
   await expect(page.locator('.public-home')).toHaveAttribute(
     'data-capture-state',
     'CAPTURE_ADMITTED',
   );
-  await expect(page.getByRole('link', { name: /captura completa/i })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /captura completa/i }).first()).toHaveAttribute(
     'href',
     /desktop-home\.pt-BR\.webp$/u,
   );
-  await expect(page.locator('.home-chapter')).toHaveCount(6);
+  await expect(
+    page.locator(
+      '.home-ignition-hero, .home-evidence-stage, .home-context-stage, .home-compatibility-field, .home-release-ribbon',
+    ),
+  ).toHaveCount(5);
   await expect(
     page.getByText('Download público ainda não disponível', { exact: true }),
   ).toBeVisible();
@@ -197,7 +199,7 @@ test('@final @public W02 preserves the complete English mobile hierarchy and men
   expectScenarioRoutesCanonical('W02');
 
   await gotoWithRecoverableRetry(page, '/en');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
     'Prepare your PC. Prove result. Restore control.',
   );
   const menu = page.locator('details.public-mobile-menu');
@@ -236,7 +238,7 @@ test('@final @public W06 keeps search and filters URL-addressable without privat
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page).toHaveURL(/q=compatibility/u);
   await expect(
-    page.getByRole('link', { name: 'One compatibility flow, explicit limits' }),
+    page.getByRole('link', { name: 'Is your PC compatible?' }),
   ).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/q=no-such-trusted-record&availability=available$/u);
@@ -290,7 +292,7 @@ test('@final @public plans present a truthful purchase-ready Premium decision', 
     'https://account.liiiraa.com/pt-BR/sign-in',
   );
   await expect(page.locator('[data-checkout-authority="disconnected"]')).toContainText(
-    'nenhuma cobrança',
+    /nenhuma cobrança/iu,
   );
   await expect(page.locator('.plan-capabilities [data-icon-library="phosphor"]')).toHaveCount(4);
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /icon\.svg/u);

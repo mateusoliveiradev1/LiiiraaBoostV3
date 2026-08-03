@@ -554,6 +554,10 @@
   padding: clamp(var(--lb-space-5), 7vw, var(--lb-space-7)) var(--lb-screen-padding);
 }
 
+.public-catalog[data-route-id='public-plans'] {
+  padding-block: clamp(24px, 3vw, 40px) var(--lb-space-7);
+}
+
 .catalog-introduction,
 .policy-document__header,
 .status-summary > header {
@@ -645,8 +649,7 @@
   padding-block: var(--lb-space-2);
 }
 
-.catalog-introduction[data-route-purpose='public-compatibility'],
-.catalog-introduction[data-route-purpose='public-plans'] {
+.catalog-introduction[data-route-purpose='public-compatibility'] {
   padding: var(--lb-space-6);
   margin-block-end: var(--lb-space-5);
   background: var(--lb-panel);
@@ -882,38 +885,193 @@
   color: var(--lb-text-secondary);
 }
 
+.plan-comparison-ledger {
+  padding-block: 0;
+  border-block-start: 0;
+}
+
+.plan-offer__label {
+  color: var(--lb-accent-cyan);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
 .plan-record {
-  padding: var(--lb-space-5);
-  background: var(--lb-surface-inset);
+  overflow: hidden;
+  border: 1px solid var(--lb-line-strong);
   border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-inset);
 }
 
-.plan-record > header {
+.plan-purchase-stage {
   display: grid;
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
-  gap: var(--lb-space-5);
-  padding-block-end: var(--lb-space-4);
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
 }
 
-.plan-record h3 {
+.plan-offer,
+.plan-checkout {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(32px, 4.5vw, 64px);
+}
+
+.plan-offer {
+  justify-content: center;
+  gap: var(--lb-space-4);
   margin: 0;
-  font-size: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.plan-record > header p {
+.plan-offer__label,
+.plan-checkout__status {
+  display: inline-flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  inline-size: fit-content;
+}
+
+.plan-offer h1 {
+  max-inline-size: 12ch;
+  margin: 0;
+  font-size: clamp(42px, 4.7vw, 68px);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.plan-offer__summary {
+  max-inline-size: 48ch;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.plan-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: baseline;
+  margin: var(--lb-space-2) 0;
+}
+
+.plan-price strong {
+  color: var(--lb-text-primary);
+  font-size: clamp(48px, 4.6vw, 64px);
+  font-weight: var(--lb-weight-semibold);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.plan-price span {
+  color: var(--lb-text-secondary);
+  font-size: var(--lb-text-label-size);
+}
+
+.plan-capabilities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--lb-space-5);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.plan-capabilities li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  align-items: center;
+  min-block-size: 64px;
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.plan-capabilities .lb-product-icon {
+  color: var(--lb-accent-cyan);
+}
+
+.plan-capabilities .catalog-state {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.plan-checkout {
+  justify-content: center;
+  gap: var(--lb-space-4);
+  border-inline-start: 1px solid var(--lb-line-strong);
+  background: var(--lb-surface-raised);
+}
+
+.plan-checkout__status {
+  color: var(--lb-accent-cyan);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.plan-checkout h2 {
+  max-inline-size: 12ch;
+  margin: var(--lb-space-2) 0 0;
+  font-size: clamp(28px, 3vw, 38px);
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.plan-checkout p,
+.plan-checkout small {
   margin: 0;
   color: var(--lb-text-secondary);
 }
 
-.plan-terms {
-  border-block: 1px solid var(--lb-line-subtle);
+.plan-checkout__action {
+  justify-content: center;
+  inline-size: 100%;
+  margin-block-start: var(--lb-space-2);
 }
 
-.plan-terms > p {
-  max-inline-size: 70ch;
+.plan-checkout__secondary {
+  justify-content: center;
+  inline-size: 100%;
+}
+
+.plan-checkout small {
+  font-size: var(--lb-text-label-size);
+  text-align: center;
+}
+
+.plan-inclusions {
+  padding: var(--lb-space-5) clamp(32px, 4.5vw, 64px);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.plan-inclusions h2 {
+  margin: 0 0 var(--lb-space-3);
+  font-size: 20px;
+}
+
+.plan-record__disclosures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.plan-terms,
+.plan-provenance {
+  max-inline-size: none;
   margin: 0;
-  padding: var(--lb-space-3);
-  color: var(--lb-text-secondary);
+  padding-inline: clamp(32px, 4.5vw, 64px);
+  border: 0;
+}
+
+.plan-provenance {
+  grid-column: auto;
+  border-inline-start: 1px solid var(--lb-line-subtle);
+}
+
+.plan-provenance p {
+  margin-block: 0 var(--lb-space-3);
 }
 
 .global-search {
@@ -1071,7 +1229,8 @@
 
   .catalog-story-sequence section,
   .catalog-introduction,
-  .plan-record > header,
+  .plan-purchase-stage,
+  .plan-record__disclosures,
   .global-search form,
   .policy-document__body section,
   .disclosure-columns,
@@ -1099,9 +1258,65 @@
     grid-row: auto;
   }
 
-  .catalog-introduction[data-route-purpose='public-compatibility'],
-  .catalog-introduction[data-route-purpose='public-plans'] {
+  .catalog-introduction[data-route-purpose='public-compatibility'] {
     padding: var(--lb-space-4);
+  }
+
+  .plan-offer,
+  .plan-checkout {
+    gap: var(--lb-space-3);
+    padding: var(--lb-space-4);
+  }
+
+  .plan-checkout {
+    border-block-start: 1px solid var(--lb-line-strong);
+    border-inline-start: 0;
+  }
+
+  .plan-offer h1 {
+    font-size: clamp(38px, 11vw, 44px);
+    line-height: 1.04;
+  }
+
+  .plan-offer__summary {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .plan-price strong {
+    font-size: 44px;
+  }
+
+  .plan-price {
+    margin-block: 0;
+  }
+
+  .plan-inclusions {
+    padding: var(--lb-space-4);
+  }
+
+  .plan-capabilities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .plan-capabilities li {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-block: var(--lb-space-2);
+  }
+
+  .plan-capabilities .catalog-state {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .plan-terms,
+  .plan-provenance {
+    padding-inline: var(--lb-space-4);
+  }
+
+  .plan-provenance {
+    border-block-start: 1px solid var(--lb-line-subtle);
+    border-inline-start: 0;
   }
 
   .catalog-evidence dl,

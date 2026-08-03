@@ -5,7 +5,8 @@ import catalogEnJson from '../content/public/catalog.en.json';
 import catalogPtBrJson from '../content/public/catalog.pt-BR.json';
 import policiesEnJson from '../content/public/policies.en.json';
 import policiesPtBrJson from '../content/public/policies.pt-BR.json';
-import { publicBoundaryHref } from '../public-boundary';
+import { accountBoundaryHref, publicBoundaryHref } from '../public-boundary';
+import { PublicProductIcon } from '../public-product-icon';
 
 export type CapabilitySupportState =
   | 'available'
@@ -30,6 +31,14 @@ type CapabilityRow = Readonly<{
   consequence: string;
 }>;
 
+type CatalogRouteId =
+  | 'public-product'
+  | 'public-evidence'
+  | 'public-compatibility'
+  | 'public-plans'
+  | 'public-search'
+  | 'public-support';
+
 export type PlanDisclosure = Readonly<{
   id: string;
   name: string;
@@ -49,7 +58,7 @@ export type PlanDisclosure = Readonly<{
 }>;
 
 export type PublicCatalogRecord = Readonly<{
-  routeId: WebRouteId;
+  routeId: CatalogRouteId;
   contentType: string;
   translationKey: string;
   title: string;
@@ -450,7 +459,10 @@ type CatalogRoutePresentation = Readonly<{
   secondary: Readonly<{ href: string; label: string }>;
 }>;
 
-const routePresentation = (locale: WebLocale, routeId: WebRouteId): CatalogRoutePresentation => {
+const routePresentation = (
+  locale: WebLocale,
+  routeId: CatalogRouteId,
+): CatalogRoutePresentation => {
   const href = (id: WebRouteId) => publicBoundaryHref(id, locale);
   const portuguese = locale === 'pt-BR';
 
@@ -493,26 +505,38 @@ const routePresentation = (locale: WebLocale, routeId: WebRouteId): CatalogRoute
       };
     case 'public-plans':
       return {
-        kicker: portuguese ? 'Sem venda antecipada' : 'No early sale',
+        kicker: portuguese ? 'Premium com transparência' : 'Premium with transparency',
         primary: {
-          href: href('public-product'),
-          label: portuguese ? 'Conhecer o produto' : 'Explore the product',
+          href: accountBoundaryHref(locale),
+          label: portuguese ? 'Continuar com Premium' : 'Continue with Premium',
         },
         secondary: {
-          href: '#catalog-route-body',
-          label: portuguese ? 'Ver o que está incluído' : 'See what is included',
+          href: href('public-compatibility'),
+          label: portuguese ? 'Checar meu PC' : 'Check my PC',
         },
       };
-    default:
+    case 'public-search':
       return {
-        kicker: 'Liiiraa Boost',
+        kicker: portuguese ? 'Conteúdo confiável' : 'Trusted content',
         primary: {
           href: '#catalog-route-body',
-          label: portuguese ? 'Continuar' : 'Continue',
+          label: portuguese ? 'Buscar agora' : 'Search now',
         },
         secondary: {
           href: href('public-product'),
           label: portuguese ? 'Conhecer o produto' : 'Explore the product',
+        },
+      };
+    case 'public-support':
+      return {
+        kicker: portuguese ? 'Ajuda com contexto' : 'Help with context',
+        primary: {
+          href: '#catalog-route-body',
+          label: portuguese ? 'Ver opções de suporte' : 'View support options',
+        },
+        secondary: {
+          href: href('docs-index'),
+          label: portuguese ? 'Abrir documentação' : 'Open documentation',
         },
       };
   }
@@ -588,9 +612,7 @@ export const CapabilitySupportMatrix = ({
       <div className="catalog-table-wrap">
         <table className="catalog-table">
           <caption>
-            {catalog.locale === 'pt-BR'
-              ? 'O que já podemos verificar'
-              : 'What we can check today'}
+            {catalog.locale === 'pt-BR' ? 'O que já podemos verificar' : 'What we can check today'}
           </caption>
           <thead>
             <tr>
@@ -640,65 +662,134 @@ const DisclosureList = ({
 export const PlanComparison = ({
   catalog,
   plans,
-}: Readonly<{ catalog: PublicCatalog; plans: readonly PlanDisclosure[] }>) => (
-  <section aria-labelledby="plan-comparison-title" className="plan-comparison-ledger">
-    <h2 id="plan-comparison-title">
-      {catalog.locale === 'pt-BR' ? 'O que já pode ser conhecido' : 'What you can explore now'}
-    </h2>
-    {plans.map((plan) => (
-      <article className="plan-record" key={plan.id}>
-        <header>
-          <h3>{plan.name}</h3>
-          <p>
-            {catalog.locale === 'pt-BR'
-              ? 'Veja o que existe hoje e o que ainda depende do lançamento.'
-              : 'See what exists today and what still depends on launch.'}
-          </p>
-        </header>
-        <details className="plan-terms">
-          <summary>
-            {catalog.locale === 'pt-BR'
-              ? 'Revisar preço, renovação, dispositivos e recuperação'
-              : 'Review price, renewal, devices, and recovery'}
-          </summary>
-          <p>{plan.checkoutBoundary}</p>
-          <DisclosureList
-            items={[
-              { label: catalog.locale === 'pt-BR' ? 'Preço' : 'Price', value: plan.price },
-              {
-                label: catalog.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
-                value: plan.billingPeriod,
-              },
-              { label: catalog.locale === 'pt-BR' ? 'Renovação' : 'Renewal', value: plan.renewal },
-              { label: catalog.locale === 'pt-BR' ? 'Tributos' : 'Taxes', value: plan.taxes },
-              {
-                label: catalog.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
-                value: plan.cancellation,
-              },
-              { label: catalog.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds', value: plan.refunds },
-              {
-                label: catalog.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
-                value: plan.deviceRules,
-              },
-              {
-                label: catalog.locale === 'pt-BR' ? 'Efeito da expiração' : 'Expiration effects',
-                value: plan.expirationEffects,
-              },
-            ]}
-          />
-        </details>
-        <CapabilitySupportMatrix
-          catalog={catalog}
-          rows={plan.capabilities.map((capability) => ({
-            capability: capability.name,
-            consequence: catalog.supportStates[capability.state].consequence,
-            state: capability.state,
-          }))}
-        />
-      </article>
-    ))}
-  </section>
-);
+  record,
+}: Readonly<{
+  catalog: PublicCatalog;
+  plans: readonly PlanDisclosure[];
+  record: PublicCatalogRecord;
+}>) => {
+  const presentation = routePresentation(catalog.locale, record.routeId);
+
+  return (
+    <section aria-labelledby="plan-comparison-title" className="plan-comparison-ledger">
+      {plans.map((plan) => (
+        <article className="plan-record" id={plan.id} key={plan.id}>
+          <div className="plan-purchase-stage">
+            <header className="catalog-introduction plan-offer" data-route-purpose={record.routeId}>
+              <span className="plan-offer__label">
+                <PublicProductIcon name="crown" size={18} weight="bold" />
+                {plan.name}
+              </span>
+              <h1 id="plan-comparison-title">{record.title}</h1>
+              <p className="plan-offer__summary">{record.summary}</p>
+              <p aria-label={`${plan.price} ${plan.billingPeriod}`} className="plan-price">
+                <strong>{plan.price}</strong>
+                <span>{plan.billingPeriod}</span>
+              </p>
+            </header>
+
+            <aside className="plan-checkout" data-checkout-authority="disconnected">
+              <span className="plan-checkout__status">
+                <PublicProductIcon name="shield" size={18} />
+                {catalog.locale === 'pt-BR' ? 'Prévia segura' : 'Safe preview'}
+              </span>
+              <h2>
+                {catalog.locale === 'pt-BR' ? 'Comece pela sua conta' : 'Start with your account'}
+              </h2>
+              <p>{plan.checkoutBoundary}</p>
+              <a
+                className="public-action public-action--primary catalog-primary-action plan-checkout__action"
+                href={presentation.primary.href}
+              >
+                {presentation.primary.label}
+              </a>
+              <a
+                className="public-action plan-checkout__secondary"
+                href={presentation.secondary.href}
+              >
+                {presentation.secondary.label}
+              </a>
+              <small>
+                {catalog.locale === 'pt-BR'
+                  ? 'Nenhuma cobrança será criada nesta prévia.'
+                  : 'No charge will be created in this preview.'}
+              </small>
+            </aside>
+          </div>
+
+          <section className="plan-inclusions">
+            <h2>{catalog.locale === 'pt-BR' ? 'O que você recebe' : 'What you get'}</h2>
+            <ul
+              aria-label={catalog.locale === 'pt-BR' ? 'Recursos do plano' : 'Plan features'}
+              className="plan-capabilities"
+            >
+              {plan.capabilities.map((capability, index) => {
+                const icons = ['gauge', 'profile', 'recovery', 'download'] as const;
+                return (
+                  <li key={capability.name}>
+                    <PublicProductIcon name={icons[index] ?? 'check'} size={20} />
+                    <span>{capability.name}</span>
+                    <SupportState catalog={catalog} state={capability.state} />
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <div className="plan-record__disclosures">
+            <details className="plan-terms">
+              <summary>
+                {catalog.locale === 'pt-BR'
+                  ? 'Conferir renovação, cancelamento, dispositivos e reembolso'
+                  : 'Review renewal, cancellation, devices, and refunds'}
+              </summary>
+              <DisclosureList
+                items={[
+                  { label: catalog.locale === 'pt-BR' ? 'Preço' : 'Price', value: plan.price },
+                  {
+                    label: catalog.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
+                    value: plan.billingPeriod,
+                  },
+                  {
+                    label: catalog.locale === 'pt-BR' ? 'Renovação' : 'Renewal',
+                    value: plan.renewal,
+                  },
+                  { label: catalog.locale === 'pt-BR' ? 'Tributos' : 'Taxes', value: plan.taxes },
+                  {
+                    label: catalog.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
+                    value: plan.cancellation,
+                  },
+                  {
+                    label: catalog.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds',
+                    value: plan.refunds,
+                  },
+                  {
+                    label: catalog.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
+                    value: plan.deviceRules,
+                  },
+                  {
+                    label:
+                      catalog.locale === 'pt-BR' ? 'Efeito da expiração' : 'Expiration effects',
+                    value: plan.expirationEffects,
+                  },
+                ]}
+              />
+            </details>
+            <details className="catalog-introduction__provenance plan-provenance">
+              <summary>{localeSummary(catalog.locale)}</summary>
+              <div className="catalog-introduction__identity">
+                <SupportState catalog={catalog} state={record.availability} />
+              </div>
+              <p>
+                {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
+              </p>
+            </details>
+          </div>
+        </article>
+      ))}
+    </section>
+  );
+};
 
 const normalizeSearchValue = (value: string | readonly string[] | undefined): string =>
   typeof value === 'string' ? value : (value?.[0] ?? '');
@@ -1116,8 +1207,13 @@ const CollectionPoint = ({
 
 const CatalogBody = ({
   catalog,
+  includePlans = true,
   record,
-}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => (
+}: Readonly<{
+  catalog: PublicCatalog;
+  includePlans?: boolean;
+  record: PublicCatalogRecord;
+}>) => (
   <div id="catalog-route-body">
     {record.sections !== undefined && (
       <div className="catalog-story-sequence">
@@ -1132,7 +1228,9 @@ const CatalogBody = ({
     {record.supportMatrix !== undefined && (
       <CapabilitySupportMatrix catalog={catalog} rows={record.supportMatrix} />
     )}
-    {record.plans !== undefined && <PlanComparison catalog={catalog} plans={record.plans} />}
+    {includePlans && record.plans !== undefined && (
+      <PlanComparison catalog={catalog} plans={record.plans} record={record} />
+    )}
     <CollectionPoint locale={catalog.locale} record={record} />
     <Limitations limitations={record.limitations} locale={catalog.locale} />
     <section aria-labelledby="catalog-evidence-title" className="catalog-evidence-list">
@@ -1204,6 +1302,15 @@ export const PublicCatalogPage = ({ locale, routeId, searchParams }: PublicCatal
 
   const record = catalog.records.find((candidate) => candidate.routeId === routeId);
   if (record === undefined) throw new Error(`PUBLIC_CATALOG_ROUTE_MISSING:${routeId}`);
+
+  if (routeId === 'public-plans' && record.plans !== undefined) {
+    return (
+      <PublicCatalogComposition routeId={routeId}>
+        <PlanComparison catalog={catalog} plans={record.plans} record={record} />
+        <CatalogBody catalog={catalog} includePlans={false} record={record} />
+      </PublicCatalogComposition>
+    );
+  }
 
   return (
     <PublicCatalogComposition routeId={routeId}>

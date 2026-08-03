@@ -158,14 +158,14 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "Plans are not on sale yet",
-      "summary": "You can explore the product now and decide later, without fictional prices or hidden conditions.",
-      "body": "When subscriptions open, price, renewal, included devices, cancellation, and refunds will appear together before purchase. Until then, this page shows only what you can already explore.",
+      "title": "The plan for gaming with more control",
+      "summary": "See the complete Premium experience and know exactly what happens before you continue.",
+      "body": "The displayed price is illustrative and checkout does not create a charge yet. You can compare access, review the terms, and start with your account without commitment.",
       "availability": "demonstrative-preview",
       "validationState": "validated",
       "limitations": [
         "No paid plan, charge, renewal, or refund can be created from this preview.",
-        "Prices and commercial terms will be published only when purchase is genuinely available."
+        "R$29.90 is an illustrative price; final price, taxes, and terms will be confirmed before a real purchase."
       ],
       "evidence": [
         {
@@ -179,20 +179,20 @@
       ],
       "plans": [
         {
-          "id": "product-preview",
-          "name": "Liiiraa Boost preview",
-          "price": "Not for sale",
-          "billingPeriod": "No billing period",
-          "renewal": "No automatic renewal",
-          "taxes": "No taxes are charged because no transaction is available",
-          "cancellation": "There is no subscription or purchase to cancel",
-          "refunds": "No payment is accepted, so no refund event can exist",
-          "deviceRules": "No device entitlement or binding is created",
-          "expirationEffects": "Preview access does not create or expire a paid entitlement",
-          "checkoutBoundary": "Purchase is not available yet; any confirmation in this preview is demonstrative and creates no charge",
+          "id": "premium-preview",
+          "name": "Liiiraa Boost Premium",
+          "price": "R$29.90",
+          "billingPeriod": "per month · illustrative price",
+          "renewal": "Monthly renewal is planned; confirmation is not available yet",
+          "taxes": "Taxes will be calculated and shown in the real checkout before confirmation",
+          "cancellation": "Cancellation will be managed from the account; the current flow is demonstrative only",
+          "refunds": "The final refund policy will be shown before purchase confirmation",
+          "deviceRules": "Device quantity will be stated in the real checkout; this preview creates no binding",
+          "expirationEffects": "Security, history, and recovery remain accessible; paid benefits will require an active subscription",
+          "checkoutBoundary": "Safe preview: purchase and billing are not connected yet. Continuing opens the account without creating a purchase.",
           "capabilities": [
             {
-              "name": "Explore the product and check compatibility",
+              "name": "PC diagnostics and compatibility",
               "state": "available"
             },
             {
@@ -200,11 +200,11 @@
               "state": "demonstrative-preview"
             },
             {
-              "name": "Apply and undo Windows adjustments",
+              "name": "Explainable and reversible optimizations",
               "state": "planned"
             },
             {
-              "name": "Download the official installer",
+              "name": "Official download for Windows",
               "state": "unavailable"
             }
           ]

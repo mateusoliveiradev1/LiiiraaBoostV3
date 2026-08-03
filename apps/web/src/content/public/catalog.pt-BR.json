@@ -158,14 +158,14 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "Os planos ainda não estão à venda",
-      "summary": "Você pode conhecer o produto agora e decidir depois, sem preço fictício ou condição escondida.",
-      "body": "Quando as assinaturas forem abertas, preço, renovação, dispositivos incluídos, cancelamento e reembolso aparecerão juntos antes da compra. Até lá, esta página mostra somente o que já pode ser explorado.",
+      "title": "O plano para jogar com mais controle",
+      "summary": "Veja a experiência Premium completa e saiba exatamente o que acontece antes de continuar.",
+      "body": "O valor exibido é ilustrativo e o checkout ainda não gera cobrança. Você pode comparar o acesso, revisar as condições e começar pela sua conta sem compromisso.",
       "availability": "demonstrative-preview",
       "validationState": "validated",
       "limitations": [
         "Nenhum plano pago, cobrança, renovação ou reembolso pode ser criado nesta prévia.",
-        "Preços e termos comerciais serão publicados somente quando a compra estiver realmente disponível."
+        "R$ 29,90 é um valor ilustrativo; preço final, tributos e termos serão confirmados antes da compra real."
       ],
       "evidence": [
         {
@@ -179,20 +179,20 @@
       ],
       "plans": [
         {
-          "id": "product-preview",
-          "name": "Prévia do Liiiraa Boost",
-          "price": "Não está à venda",
-          "billingPeriod": "Sem período de cobrança",
-          "renewal": "Sem renovação automática",
-          "taxes": "Nenhum tributo é cobrado porque não há transação disponível",
-          "cancellation": "Não existe assinatura ou compra para cancelar",
-          "refunds": "Nenhum pagamento é aceito, portanto não pode existir evento de reembolso",
-          "deviceRules": "Nenhum direito ou vínculo de dispositivo é criado",
-          "expirationEffects": "O acesso à prévia não cria nem expira um direito pago",
-          "checkoutBoundary": "A compra ainda não está disponível; qualquer confirmação nesta prévia é apenas demonstrativa e não gera cobrança",
+          "id": "premium-preview",
+          "name": "Liiiraa Boost Premium",
+          "price": "R$ 29,90",
+          "billingPeriod": "por mês · valor ilustrativo",
+          "renewal": "Renovação mensal prevista; a confirmação ainda não está disponível",
+          "taxes": "Tributos serão calculados e exibidos no checkout real antes da confirmação",
+          "cancellation": "O cancelamento será gerenciado pela conta; o fluxo atual é apenas demonstrativo",
+          "refunds": "A política final de reembolso será exibida antes da confirmação da compra",
+          "deviceRules": "A quantidade de dispositivos será informada no checkout real; nenhum vínculo é criado nesta prévia",
+          "expirationEffects": "Segurança, histórico e restauração permanecem acessíveis; benefícios pagos dependerão da assinatura ativa",
+          "checkoutBoundary": "Prévia segura: a compra e a cobrança ainda não estão conectadas. Continuar abre a conta sem criar compra.",
           "capabilities": [
             {
-              "name": "Conhecer o produto e checar compatibilidade",
+              "name": "Diagnóstico e compatibilidade do PC",
               "state": "available"
             },
             {
@@ -200,11 +200,11 @@
               "state": "demonstrative-preview"
             },
             {
-              "name": "Aplicar e desfazer ajustes no Windows",
+              "name": "Otimizações explicáveis e reversíveis",
               "state": "planned"
             },
             {
-              "name": "Baixar o instalador oficial",
+              "name": "Download oficial para Windows",
               "state": "unavailable"
             }
           ]
