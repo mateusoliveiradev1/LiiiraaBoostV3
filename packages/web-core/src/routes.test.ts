@@ -3,6 +3,7 @@ import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 import {
   auditRouteProjection,
   createBoundaryLink,
+  createDesktopAnalyzeLink,
   matchWebRoute,
   projectBreadcrumbs,
   projectDesktopLinks,
@@ -20,9 +21,11 @@ import { createContentIdentity } from './content.ts';
 const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-home',
   'public-product',
+  'public-results',
   'public-evidence',
   'public-compatibility',
   'public-plans',
+  'public-download',
   'public-search',
   'public-support',
   'public-status',
@@ -44,6 +47,7 @@ const REQUIRED_ROUTE_IDS = Object.freeze([
   'releases-install',
   'account-sign-in',
   'account-sign-up',
+  'account-onboarding',
   'account-overview',
   'account-profile',
   'account-security',
@@ -134,6 +138,13 @@ describe('localized current route projection', () => {
       pathname: '/en/download/experimental/current',
       routeId: 'releases-download',
       targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'account-origin',
+      expected: '/en/login',
+      pathname: '/pt-BR/login',
+      routeId: 'account-sign-in',
+      targetLocale: 'en',
     },
     {
       boundary: 'account-origin',
@@ -291,11 +302,10 @@ describe('canonical web route manifest', () => {
   it('derives private-safe navigation, breadcrumbs, sitemap, redirects, desktop links, and indexing', () => {
     expect(projectNavigation('public').map(({ id }) => id)).toEqual([
       'public-product',
-      'public-evidence',
+      'public-results',
       'public-compatibility',
       'public-plans',
-      'docs-index',
-      'releases-index',
+      'public-download',
     ]);
     expect(projectNavigation('account').map(({ id }) => id)).toEqual([
       'account-overview',
@@ -397,6 +407,12 @@ describe('canonical web route manifest', () => {
         toRouteId: 'account-overview',
       }),
     ).toMatchObject({ error: { code: 'UNSAFE_RETURN_ROUTE' }, ok: false });
+  });
+
+  it('creates only the allowlisted desktop analysis action without URL state', () => {
+    expect(createDesktopAnalyzeLink()).toBe('liiiraaboost://analyze');
+    expect(createDesktopAnalyzeLink()).not.toContain('?');
+    expect(createDesktopAnalyzeLink()).not.toContain('#');
   });
 
   it('derives localized content identity and ownership from the canonical route', () => {

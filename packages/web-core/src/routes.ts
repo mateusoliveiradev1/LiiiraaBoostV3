@@ -88,11 +88,13 @@ const adminRoute = <const Id extends string>(
 const rawWebRoutes = [
   publicRoute('public-home', '/[locale]'),
   publicRoute('public-product', '/[locale]/product', { owner: 'public-navigation' }),
-  publicRoute('public-evidence', '/[locale]/evidence', { owner: 'public-navigation' }),
+  publicRoute('public-results', '/[locale]/results', { owner: 'public-navigation' }),
+  publicRoute('public-evidence', '/[locale]/evidence', { owner: 'public-content' }),
   publicRoute('public-compatibility', '/[locale]/compatibility', {
     owner: 'public-navigation',
   }),
   publicRoute('public-plans', '/[locale]/plans', { owner: 'public-navigation' }),
+  publicRoute('public-download', '/[locale]/download', { owner: 'public-navigation' }),
   publicRoute('public-search', '/[locale]/search', { indexing: 'noindex' }),
   publicRoute('public-support', '/[locale]/support'),
   publicRoute('public-status', '/[locale]/status'),
@@ -101,7 +103,7 @@ const rawWebRoutes = [
   publicRoute('public-terms', '/[locale]/policies/terms'),
   publicRoute('public-responsible-disclosure', '/[locale]/responsible-disclosure'),
   publicRoute('docs-index', '/[locale]/docs', {
-    owner: 'public-navigation',
+    owner: 'docs-content',
     safeContextKeys: ['locale', 'version'],
   }),
   publicRoute('docs-task', '/[locale]/docs/tasks/[section]', {
@@ -126,7 +128,7 @@ const rawWebRoutes = [
     safeContextKeys: ['locale', 'version'],
   }),
   publicRoute('releases-index', '/[locale]/releases', {
-    owner: 'public-navigation',
+    owner: 'release-content',
     safeContextKeys: ['locale', 'version', 'channel'],
   }),
   publicRoute('releases-channel', '/[locale]/releases/[channel]', {
@@ -151,11 +153,15 @@ const rawWebRoutes = [
     owner: 'release-content',
     safeContextKeys: ['locale', 'version', 'channel'],
   }),
-  accountRoute('account-sign-in', '/[locale]/sign-in', {
+  accountRoute('account-sign-in', '/[locale]/login', {
     owner: 'account-auth',
     safeContextKeys: ['locale', 'destination', 'return-path'],
   }),
-  accountRoute('account-sign-up', '/[locale]/sign-up', {
+  accountRoute('account-sign-up', '/[locale]/register', {
+    owner: 'account-auth',
+    safeContextKeys: ['locale', 'destination', 'return-path'],
+  }),
+  accountRoute('account-onboarding', '/[locale]/onboarding', {
     owner: 'account-auth',
     safeContextKeys: ['locale', 'destination', 'return-path'],
   }),
@@ -478,6 +484,9 @@ export const resolveLocalizedCurrentRoute = (
     locale: input.targetLocale,
   });
 };
+
+export const createDesktopAnalyzeLink = (): 'liiiraaboost://analyze' =>
+  'liiiraaboost://analyze';
 
 export type RouteProjection = Readonly<{
   from?: string;
