@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 70/82 plans executed
+**Plans**: 80/82 plans executed
 
 Plans:
 **Wave 1**
@@ -468,28 +468,28 @@ Plans:
 
 **Wave 42** *(parallel additive launch-readiness slices; each blocked on Plan 03-72)*
 
-- [ ] 03-73-PLAN.md — Recompose the flagship Home around conversion, real product proof, and non-fabrication
-- [ ] 03-74-PLAN.md — Redesign account navigation and Home around coherent customer goals
-- [ ] 03-75-PLAN.md — Center Admin on role-scoped global search and one operational queue
-- [ ] 03-77-PLAN.md — Add the truthful About route and complete utility/trust footer
-- [ ] 03-78-PLAN.md — Complete bilingual public legal, privacy, security, storage, and disclosure content
+- [x] 03-73-PLAN.md — Recompose the flagship Home around conversion, real product proof, and non-fabrication
+- [x] 03-74-PLAN.md — Redesign account navigation and Home around coherent customer goals
+- [x] 03-75-PLAN.md — Center Admin on role-scoped global search and one operational queue
+- [x] 03-77-PLAN.md — Add the truthful About route and complete utility/trust footer
+- [x] 03-78-PLAN.md — Complete bilingual public legal, privacy, security, storage, and disclosure content
 
 **Wave 43** *(dependency-ordered account/admin completion)*
 
-- [ ] 03-79-PLAN.md — Deliver authenticated privacy consent and data-rights workflows
-- [ ] 03-80-PLAN.md — Add contextual admin evidence and zoom-safe high-risk review
+- [x] 03-79-PLAN.md — Deliver authenticated privacy consent and data-rights workflows
+- [x] 03-80-PLAN.md — Add contextual admin evidence and zoom-safe high-risk review
 
 **Wave 44** *(blocked on Plans 03-73 through 03-80)*
 
-- [ ] 03-76-PLAN.md — Harden the D-87–D-110 matrix and deterministic all-route candidate identities
+- [x] 03-76-PLAN.md — Harden the D-87–D-110 matrix and deterministic all-route candidate identities
 
 **Wave 45** *(blocked on Plan 03-76)*
 
-- [ ] 03-81-PLAN.md — Recapture and inspect every canonical route in both locales and all required widths
+- [x] 03-81-PLAN.md — Recapture and inspect every canonical route in both locales and all required widths
 
 **Wave 46** *(blocked on Plan 03-81)*
 
-- [ ] 03-82-PLAN.md — Pass clean builds/regressions and bind the pending-human-review handoff
+- [x] 03-82-PLAN.md — Pass clean builds/regressions and bind the pending-human-review handoff
 
 **Wave 47** *(blocked on Plan 03-82)*
 
@@ -645,7 +645,7 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 69/72 | In Progress|  |
+| 3. Complete Web Experience                         | 80/82 | In Progress|  |
 | 4. Identity, Commerce, Devices, and Administration | 0/TBD          | Not started | -          |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
