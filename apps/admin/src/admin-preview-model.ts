@@ -383,7 +383,11 @@ export const projectAdminQueue = ({
 };
 
 export const searchAdminQueue = (
-  input: Pick<ProjectAdminQueueInput, 'locale' | 'query' | 'role'>,
+  input: Readonly<{
+    locale: WebLocale;
+    query: string;
+    role: AdminPreviewRole;
+  }>,
 ): readonly AdminQueueItem[] => {
   const admittedQuery = admitQueueQuery(input.query);
   if (input.query.trim() && !admittedQuery) return Object.freeze([]);
