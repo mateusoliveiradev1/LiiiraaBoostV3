@@ -11,7 +11,12 @@ import { describe, expect, it } from 'vitest';
 
 import adminEn from '../content/admin.en.json';
 import adminPtBr from '../content/admin.pt-BR.json';
-import { ADMIN_ENTRY_ROUTE_IDS, ADMIN_ROLE_ROUTE_ACCESS } from '../admin-preview-model';
+import {
+  ADMIN_ENTRY_ROUTE_IDS,
+  ADMIN_ROLE_ROUTE_ACCESS,
+  projectAdminQueue,
+  selectAdminQueueItem,
+} from '../admin-preview-model';
 
 const featureSource = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
 const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
@@ -36,6 +41,90 @@ const shapeOf = (value: unknown): unknown => {
 };
 
 describe('role-scoped admin', () => {
+  it('projects one deterministic operational queue with every D-105 triage field', () => {
+    const queue = projectAdminQueue({ locale: 'en', role: 'security' });
+
+    expect(queue.length).toBeGreaterThan(1);
+    expect(queue.map(({ id }) => id)).toEqual(['SEC-083', 'DIA-015']);
+    expect(queue[0]).toMatchObject({
+      age: '38 min',
+      id: 'SEC-083',
+      lastEvent: 'Containment retry evidence recorded',
+      owner: 'security.operator',
+      priority: 'critical',
+      sla: '22 min left',
+      status: 'attention',
+    });
+    expect(Object.keys(queue[0] ?? {}).sort()).toEqual(
+      [
+        'age',
+        'hrefRouteId',
+        'id',
+        'lastEvent',
+        'owner',
+        'priority',
+        'redactedTarget',
+        'sla',
+        'status',
+        'summary',
+      ].sort(),
+    );
+  });
+
+  it('applies closed filters and saved views after role admission', () => {
+    expect(
+      projectAdminQueue({ locale: 'en', role: 'security', savedView: 'sla-risk' }).map(
+        ({ id }) => id,
+      ),
+    ).toEqual(['SEC-083']);
+    expect(
+      projectAdminQueue({
+        locale: 'en',
+        owner: 'unassigned',
+        role: 'audit',
+        savedView: 'all-permitted',
+      }).map(({ id }) => id),
+    ).toEqual(['AUD-221']);
+    expect(
+      projectAdminQueue({
+        locale: 'en',
+        priority: 'normal',
+        role: 'security',
+        savedView: 'all-permitted',
+      }).map(({ id }) => id),
+    ).toEqual(['DIA-015']);
+  });
+
+  it('preserves queue context while selecting exactly one role-permitted item', () => {
+    const queue = projectAdminQueue({ locale: 'pt-BR', role: 'operations' });
+    expect(selectAdminQueueItem(queue, 'OPS-117')?.id).toBe('OPS-117');
+    expect(selectAdminQueueItem(queue, 'SEC-083')).toBeUndefined();
+    expect(selectAdminQueueItem(queue, '../../audit')).toBeUndefined();
+
+    const landingSource = featureSource.slice(
+      featureSource.indexOf('const RoleLanding'),
+      featureSource.indexOf('const DegradedAdminPreview'),
+    );
+    expect(landingSource).toContain('createAdminQueueHref');
+    expect(landingSource).toContain('selectAdminQueueItem');
+    expect(landingSource).toContain('aria-current={isSelected ? \'true\' : undefined}');
+    expect(landingSource).toContain('admin-queue__selection');
+  });
+
+  it('authors complete queue loading, empty, stale, offline, and partial states', () => {
+    const landingSource = featureSource.slice(
+      featureSource.indexOf('const RoleLanding'),
+      featureSource.indexOf('const DegradedAdminPreview'),
+    );
+    for (const state of ['loading', 'empty', 'stale', 'offline', 'partial-failure']) {
+      expect(landingSource).toContain(`'${state}'`);
+    }
+    expect(landingSource).toContain('aria-busy={state === \'loading\'}');
+    expect(landingSource).toContain('role="status"');
+    expect(adminEn.queue.emptyBody).toContain('saved view');
+    expect(adminPtBr.queue.emptyBody).toContain('visão salva');
+  });
+
   it('renders the exact product lockup and a perceivable current role workspace', () => {
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).toContain('<AdminNavigation');

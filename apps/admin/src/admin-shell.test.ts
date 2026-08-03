@@ -10,10 +10,13 @@ import {
 import {
   ADMIN_ENTRY_ROUTE_IDS,
   ADMIN_ERROR_ROUTE_IDS,
+  createAdminQueueHref,
   adminFailureKindForRoute,
   adminRoleCanAccess,
   isAdminErrorRoute,
   isAdminPreviewRoute,
+  parseAdminQueueUrlState,
+  searchAdminQueue,
 } from './admin-preview-model';
 import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
@@ -74,6 +77,72 @@ describe('admin shell', () => {
     expect(layout).toContain('isolatedLabel={copy.isolated}');
     expect(layout).not.toContain('AdminPreviewProvenance');
     expect(layout).not.toMatch(/>\s*(fixture|simulated-no-change)\s*</iu);
+  });
+
+  it('puts localized role-scoped search, queue view, alerts, and operator identity in the shell', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+
+    expect(layout).toContain('searchLabel={copy.searchLabel}');
+    expect(layout).toContain('currentQueueLabel={copy.currentQueue}');
+    expect(layout).toContain('alertsLabel={copy.alerts}');
+    expect(navigation).toContain('className="admin-header__search"');
+    expect(navigation).toContain('type="search"');
+    expect(navigation).toContain('aria-live="polite"');
+    expect(navigation).toContain('{roleLabel}');
+    expect(navigation).not.toMatch(/public navigation|account navigation/iu);
+  });
+
+  it('filters bounded global search by validated role before matching redacted records', () => {
+    const supportOwn = searchAdminQueue({ locale: 'en', query: 'SUP-2048', role: 'support' });
+    const supportDenied = searchAdminQueue({ locale: 'en', query: 'SEC-083', role: 'support' });
+    const securityOwn = searchAdminQueue({ locale: 'en', query: 'SEC-083', role: 'security' });
+    const unsafeDiagnostic = searchAdminQueue({
+      locale: 'en',
+      query: 'C:\\private\\memory.dmp user@example.com',
+      role: 'support',
+    });
+
+    expect(supportOwn.map(({ id }) => id)).toEqual(['SUP-2048']);
+    expect(supportDenied).toEqual([]);
+    expect(securityOwn.map(({ id }) => id)).toContain('SEC-083');
+    expect(unsafeDiagnostic).toEqual([]);
+    expect(JSON.stringify(supportOwn)).not.toMatch(/correlation|diagnosticPayload|occurredAt/iu);
+  });
+
+  it('preserves only closed locale, role, query, saved-view, and filter navigation state', () => {
+    const state = parseAdminQueueUrlState(
+      new URLSearchParams(
+        'q=SUP-2048&view=sla-risk&priority=high&status=attention&owner=mine&selected=SUP-2048&returnUrl=https://evil.example&diagnosticPayload=secret',
+      ),
+    );
+
+    expect(state).toEqual({
+      owner: 'mine',
+      priority: 'high',
+      query: 'SUP-2048',
+      savedView: 'sla-risk',
+      selectedId: 'SUP-2048',
+      status: 'attention',
+    });
+    expect(createAdminQueueHref('/en/admin', 'support', state)).toBe(
+      '/en/admin?q=SUP-2048&view=sla-risk&priority=high&status=attention&owner=mine&selected=SUP-2048',
+    );
+
+    const unsafe = parseAdminQueueUrlState(
+      new URLSearchParams(
+        'q=%00'.padEnd(140, 'x') +
+          '&view=administrator&priority=urgent&status=all-data&owner=other&selected=../../audit',
+      ),
+    );
+    expect(unsafe).toEqual({
+      owner: 'all',
+      priority: 'all',
+      query: '',
+      savedView: 'assigned',
+      selectedId: undefined,
+      status: 'all',
+    });
   });
 
   it('owns one role-scoped current task and preserves only validated role context', () => {
