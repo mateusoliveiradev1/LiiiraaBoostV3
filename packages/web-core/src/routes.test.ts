@@ -33,6 +33,7 @@ const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-policies',
   'public-privacy-policy',
   'public-terms',
+  'public-essential-storage',
   'public-responsible-disclosure',
   'docs-index',
   'docs-task',
@@ -103,6 +104,13 @@ describe('localized current route projection', () => {
       expected: '/en',
       pathname: '/pt-BR',
       routeId: 'public-home',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'public-origin',
+      expected: '/en/policies/essential-storage',
+      pathname: '/pt-BR/policies/essential-storage',
+      routeId: 'public-essential-storage',
       targetLocale: 'en',
     },
     {
@@ -256,6 +264,26 @@ describe('canonical web route manifest', () => {
   });
 
   it('resolves exact localized parameters and rejects unknown routes, parameters, and origins', () => {
+    expect(routeHref('public-essential-storage', { locale: 'pt-BR' })).toEqual({
+      ok: true,
+      value: '/pt-BR/policies/essential-storage',
+    });
+    expect(routeHref('public-essential-storage', { locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/policies/essential-storage',
+    });
+    expect(
+      matchWebRoute({
+        pathname: '/en/policies/essential-storage',
+        securityBoundary: 'public-origin',
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        parameters: { locale: 'en' },
+        route: { id: 'public-essential-storage' },
+      },
+    });
     expect(
       routeHref('docs-troubleshooting', {
         code: 'LB-403',

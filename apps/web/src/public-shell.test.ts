@@ -253,6 +253,7 @@ describe('public shell', () => {
       ['en', '/en/about', '/pt-BR/about'],
     ] as const) {
       const footer = getPublicFooterState(pathname, locale);
+      const legalLinks = footer.groups.find(({ id }) => id === 'legal')?.links;
       expect(
         Object.fromEntries(
           footer.groups.map((group) => [group.id, group.links.map(({ id }) => id)]),
@@ -263,9 +264,24 @@ describe('public shell', () => {
           .flatMap(({ links }) => links)
           .every(({ href }) => href.startsWith(`/${locale}/`)),
       ).toBe(true);
+      expect(Object.fromEntries((legalLinks ?? []).map(({ href, id }) => [id, href]))).toEqual({
+        'essential-storage': `/${locale}/policies/essential-storage`,
+        privacy: `/${locale}/policies/privacy`,
+        'responsible-disclosure': `/${locale}/responsible-disclosure`,
+        security: `/${locale}/policies`,
+        terms: `/${locale}/policies/terms`,
+      });
+      expect(new Set((legalLinks ?? []).map(({ href }) => href)).size).toBe(5);
+      expect((legalLinks ?? []).every(({ href }) => href.length > 0)).toBe(true);
       expect(footer.localeHref).toBe(targetPathname);
       expect(footer.ctaHref).toBe(`/${locale}/download`);
     }
+  });
+
+  it('admits Essential Storage through the public catch-all allowlist', () => {
+    expect(publicCatchAllSource).toMatch(
+      /CATALOG_ROUTES[\s\S]*'public-essential-storage'/u,
+    );
   });
 
   it('keeps the complete footer useful at 320px and route-preserving at 400% zoom', () => {
