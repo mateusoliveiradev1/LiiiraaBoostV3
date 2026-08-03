@@ -32,6 +32,50 @@ const pageSource = readFileSync(
 const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('../account-navigation.tsx', import.meta.url), 'utf8');
 const accountStyles = readFileSync(new URL('../app/account-shell.css', import.meta.url), 'utf8');
+const publicPolicies = {
+  en: JSON.parse(
+    readFileSync(
+      new URL('../../../web/src/content/public/policies.en.json', import.meta.url),
+      'utf8',
+    ),
+  ) as {
+    documents: Array<{
+      kind: string;
+      privacyDetails?: {
+        practices: Array<{
+          data: string;
+          id: string;
+          purpose: string;
+          retention: string;
+          revocation: string;
+          sharing: string;
+          title: string;
+        }>;
+      };
+    }>;
+  },
+  'pt-BR': JSON.parse(
+    readFileSync(
+      new URL('../../../web/src/content/public/policies.pt-BR.json', import.meta.url),
+      'utf8',
+    ),
+  ) as {
+    documents: Array<{
+      kind: string;
+      privacyDetails?: {
+        practices: Array<{
+          data: string;
+          id: string;
+          purpose: string;
+          retention: string;
+          revocation: string;
+          sharing: string;
+          title: string;
+        }>;
+      };
+    }>;
+  },
+} as const;
 const ACCOUNT_ENTRY_ROUTE_IDS = [
   'account-sign-in',
   'account-sign-up',
@@ -321,6 +365,89 @@ describe('authored overview and Profile workspaces', () => {
       expect(content.privacy.revocation).toMatch(/cancel/iu);
       expect(content.privacy.revocation).toMatch(/no .*change|nenhum.*muda/iu);
       expect(privacyCopy).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
+    }
+  });
+
+  it('keeps telemetry, support diagnostics, and personalized AI as independent consent ledgers', () => {
+    const expectedIds = ['optional-telemetry', 'support-diagnostics', 'personalized-ai'];
+
+    for (const content of [accountPtBr, accountEn]) {
+      expect(content.privacy.consents.map(({ id }) => id)).toEqual(expectedIds);
+      for (const consent of content.privacy.consents) {
+        expect(consent.purpose.length).toBeGreaterThan(0);
+        expect(consent.dataClasses.length).toBeGreaterThan(0);
+        expect(consent.retention.length).toBeGreaterThan(0);
+        expect(consent.sharing.length).toBeGreaterThan(0);
+        expect(consent.state).toMatch(/off|desativad/iu);
+        expect(consent.history.length).toBeGreaterThan(0);
+        expect(consent.revocationEffect.length).toBeGreaterThan(0);
+        expect(consent.noChangeReceipt).toMatchObject({ remoteStateChanged: false });
+      }
+    }
+
+    const privacySource = sourceBetween(
+      'export const ConsentLedger',
+      'export const DataRightsJourneys',
+    );
+    expect(privacySource).toContain('data-consent-purpose={consent.id}');
+    expect(privacySource).toContain('consent.dataClasses');
+    expect(privacySource).toContain('consent.history');
+    expect(privacySource).toContain('consent.revocationEffect');
+  });
+
+  it('models export, correction, and deletion as complete cancellable no-change journeys', () => {
+    const expectedIds = ['export', 'correction', 'deletion'];
+
+    for (const content of [accountPtBr, accountEn]) {
+      expect(content.privacy.rights.map(({ id }) => id)).toEqual(expectedIds);
+      for (const request of content.privacy.rights) {
+        expect(request.scope.length).toBeGreaterThan(0);
+        expect(request.consequences.length).toBeGreaterThan(0);
+        expect(request.retentionExceptions.length).toBeGreaterThan(0);
+        expect(request.review.length).toBeGreaterThan(0);
+        expect(request.cancellation).toMatch(/cancel/iu);
+        expect(request.noChangeReceipt).toMatchObject({ remoteStateChanged: false });
+      }
+    }
+
+    const privacySource = sourceBetween(
+      'export const DataRightsJourneys',
+      'export const PrivacyCenter',
+    );
+    expect(privacySource).toContain('data-rights-request={request.id}');
+    expect(privacySource).toContain('request.retentionExceptions');
+    expect(privacySource).toContain('request.cancellation');
+    expect(privacySource).toContain('request.noChangeReceipt.remoteStateChanged');
+  });
+
+  it('matches public privacy terminology in both locales and preserves structured no-change results', () => {
+    for (const content of [accountPtBr, accountEn]) {
+      const policy = publicPolicies[content.locale].documents.find(
+        (document) => document.kind === 'privacy',
+      );
+      expect(policy?.privacyDetails).toBeDefined();
+      const practices = policy?.privacyDetails?.practices ?? [];
+
+      for (const consent of content.privacy.consents) {
+        const practice = practices.find(({ id }) => id === consent.id);
+        expect(practice).toBeDefined();
+        expect(consent).toMatchObject({
+          dataClasses: practice?.data,
+          purpose: practice?.purpose,
+          retention: practice?.retention,
+          revocationEffect: practice?.revocation,
+          sharing: practice?.sharing,
+          title: practice?.title,
+        });
+        expect(consent.noChangeReceipt.remoteStateChanged).toBe(false);
+      }
+
+      for (const request of content.privacy.rights) {
+        expect(request.noChangeReceipt).toEqual({
+          receiptKind: 'no-change',
+          remoteStateChanged: false,
+        });
+      }
     }
   });
 
