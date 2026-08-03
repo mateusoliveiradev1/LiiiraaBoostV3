@@ -40,6 +40,7 @@ const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-policies',
   'public-privacy-policy',
   'public-terms',
+  'public-essential-storage',
   'public-responsible-disclosure',
   'public-error-403',
   'public-error-404',

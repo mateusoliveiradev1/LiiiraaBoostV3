@@ -104,7 +104,7 @@ const FOOTER_GROUPS = Object.freeze([
       Object.freeze({ id: 'terms', routeId: 'public-terms' }),
       Object.freeze({ id: 'privacy', routeId: 'public-privacy-policy' }),
       Object.freeze({ id: 'security', routeId: 'public-policies' }),
-      Object.freeze({ id: 'essential-storage', routeId: 'public-privacy-policy' }),
+      Object.freeze({ id: 'essential-storage', routeId: 'public-essential-storage' }),
       Object.freeze({
         id: 'responsible-disclosure',
         routeId: 'public-responsible-disclosure',

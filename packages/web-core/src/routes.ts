@@ -102,6 +102,7 @@ const rawWebRoutes = [
   publicRoute('public-policies', '/[locale]/policies'),
   publicRoute('public-privacy-policy', '/[locale]/policies/privacy'),
   publicRoute('public-terms', '/[locale]/policies/terms'),
+  publicRoute('public-essential-storage', '/[locale]/policies/essential-storage'),
   publicRoute('public-responsible-disclosure', '/[locale]/responsible-disclosure'),
   publicRoute('docs-index', '/[locale]/docs', {
     owner: 'docs-content',
