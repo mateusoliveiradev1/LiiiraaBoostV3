@@ -13,10 +13,7 @@ import { describe, expect, it } from 'vitest';
 
 import accountEn from '../content/account.en.json';
 import accountPtBr from '../content/account.pt-BR.json';
-import {
-  admitAccountHomeScenario,
-  getAccountHomeScenario,
-} from '../account-preview-model';
+import { admitAccountHomeScenario, getAccountHomeScenario } from '../account-preview-model';
 
 const featureSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
 const degradedSource = readFileSync(
@@ -30,7 +27,10 @@ const pageSource = readFileSync(
   'utf8',
 );
 const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
-const navigationSource = readFileSync(new URL('../account-navigation.tsx', import.meta.url), 'utf8');
+const navigationSource = readFileSync(
+  new URL('../account-navigation.tsx', import.meta.url),
+  'utf8',
+);
 const accountStyles = readFileSync(new URL('../app/account-shell.css', import.meta.url), 'utf8');
 const publicPolicies = {
   en: JSON.parse(
@@ -140,11 +140,14 @@ describe('account responsibility routes and locales', () => {
   });
 
   it('renders bilingual onboarding and hands deep analysis to the Windows app', () => {
-    const onboardingSource = sourceBetween('export const OnboardingPreview', 'const OverviewPreview');
+    const onboardingSource = sourceBetween(
+      'export const OnboardingPreview',
+      'const OverviewPreview',
+    );
 
     expect(onboardingSource).toContain('data-session-created="false"');
     expect(onboardingSource).toContain('data-authority-connected="false"');
-    expect(onboardingSource).toContain("createDesktopAnalyzeLink()");
+    expect(onboardingSource).toContain('createDesktopAnalyzeLink()');
     expect(onboardingSource).toContain("routeHref('public-download'");
     expect(onboardingSource).toContain("plan === 'premium'");
     expect(onboardingSource).toContain("data-payment-review={plan === 'premium'");
@@ -238,9 +241,9 @@ describe('authored overview and Profile workspaces', () => {
       plan: { kind: 'premium', state: 'pending' },
       remoteStateChanged: false,
     });
-    expect(() =>
-      admitAccountHomeScenario({ ...active, billing: { state: 'none' } }),
-    ).toThrow('ACCOUNT_HOME_SCENARIO_CONTRADICTION:premium-active:billing');
+    expect(() => admitAccountHomeScenario({ ...active, billing: { state: 'none' } })).toThrow(
+      'ACCOUNT_HOME_SCENARIO_CONTRADICTION:premium-active:billing',
+    );
     expect(() =>
       admitAccountHomeScenario({
         ...active,
@@ -393,6 +396,8 @@ describe('authored overview and Profile workspaces', () => {
     expect(privacySource).toContain('consent.dataClasses');
     expect(privacySource).toContain('consent.history');
     expect(privacySource).toContain('consent.revocationEffect');
+    expect(featureSource).toContain('PRIVACY_CONSENT_IDS');
+    expect(featureSource).toContain('isNoChangeReceipt');
   });
 
   it('models export, correction, and deletion as complete cancellable no-change journeys', () => {
@@ -418,11 +423,13 @@ describe('authored overview and Profile workspaces', () => {
     expect(privacySource).toContain('request.retentionExceptions');
     expect(privacySource).toContain('request.cancellation');
     expect(privacySource).toContain('request.noChangeReceipt.remoteStateChanged');
+    expect(featureSource).toContain('DATA_RIGHTS_REQUEST_IDS');
   });
 
   it('matches public privacy terminology in both locales and preserves structured no-change results', () => {
     for (const content of [accountPtBr, accountEn]) {
-      const policy = publicPolicies[content.locale].documents.find(
+      const locale = content.locale === 'pt-BR' ? 'pt-BR' : 'en';
+      const policy = publicPolicies[locale].documents.find(
         (document) => document.kind === 'privacy',
       );
       expect(policy?.privacyDetails).toBeDefined();
@@ -478,7 +485,7 @@ describe('authored overview and Profile workspaces', () => {
     }
     expect(featureSource).not.toMatch(/licenseKey|license-key|input[^\n]+hwid/iu);
     expect(featureSource).toContain("fields: { device: 'protected-device-01' }");
-    expect(featureSource).toContain("request === 'telemetry'");
+    expect(accountEn.privacy.consents).toHaveLength(3);
   });
 
   it('uses the exact 7/5 profile geometry with a field measure no wider than 560px', () => {

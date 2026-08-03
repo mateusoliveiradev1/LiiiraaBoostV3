@@ -190,8 +190,13 @@
   },
   "privacy": {
     "title": "Central de privacidade",
-    "summary": "Revise as solicitações de privacidade disponíveis para esta conta sem enviar nenhuma.",
-    "purpose": "Escolha exportação, correção, consentimento ou exclusão e revise o que a solicitação abrangeria.",
+    "summary": "Controle de forma independente cada escolha opcional disponível e revise seus direitos antes que qualquer informação saia desta conta.",
+    "consentTitle": "Suas escolhas opcionais",
+    "consentSummary": "Telemetria, diagnósticos de suporte e IA personalizada permanecem separados. Uma escolha nunca ativa outra.",
+    "rightsTitle": "Acesse e controle seus dados",
+    "rightsSummary": "Abra uma solicitação para entender escopo, consequências, exceções e verificação de identidade. Você pode cancelar antes da confirmação.",
+    "policyAction": "Ler a política de privacidade completa",
+    "purpose": "Revise um consentimento específico ou uma solicitação de direito sem conceder autoridade para alterar dados remotos da conta.",
     "retention": "Os detalhes permanecem apenas durante a revisão atual e são apagados ao sair dela.",
     "sharing": "Nada é carregado, enviado ou compartilhado.",
     "revocation": "Cancele a qualquer momento. A revisão é encerrada e nenhum dado da conta muda.",
@@ -200,7 +205,105 @@
     "deletionAction": "Revisar exclusão da conta",
     "consentAction": "Revisar consentimento opcional",
     "telemetryAction": "Revisar telemetria opcional",
-    "telemetry": "Telemetria e resumos de diagnóstico ficam desativados por padrão e só podem ser enviados com consentimento específico e revogável."
+    "telemetry": "Telemetria e resumos de diagnóstico ficam desativados por padrão e só podem ser enviados com consentimento específico e revogável.",
+    "consents": [
+      {
+        "id": "optional-telemetry",
+        "title": "Telemetria opcional",
+        "state": "Desativada",
+        "purpose": "Entender estabilidade e uso do produto por métricas proporcionais, agregadas e vinculadas a uma finalidade explicada antes da coleta.",
+        "dataClasses": "Somente as classes exibidas na escolha de consentimento; nunca conteúdo pessoal, diagnóstico de suporte ou atividade entre sites por padrão.",
+        "retention": "Desativada agora. Antes da ativação, a interface informará um prazo limitado e a política registrará o período aplicável.",
+        "sharing": "Nenhum dado opcional é compartilhado enquanto a telemetria está desativada; futuros operadores precisam ser identificados antes do consentimento.",
+        "history": ["2026-08-03 — Desativada por padrão; nenhuma telemetria opcional foi enviada."],
+        "revocationEffect": "Pode ser recusada ou revogada sem perder segurança, restauração ou documentação. A revogação interrompe novas coletas e explica o destino de dados anteriores.",
+        "actionLabel": "Revisar escolha de telemetria",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "support-diagnostics",
+        "title": "Diagnósticos enviados ao suporte",
+        "state": "Desativados",
+        "purpose": "Investigar um pedido de suporte específico usando apenas o pacote que você revisar e autorizar para aquele atendimento.",
+        "dataClasses": "Campos técnicos visíveis na revisão do pacote, com segredos, credenciais e informações sem relação excluídos antes do envio.",
+        "retention": "Nenhum diagnóstico é enviado agora. O prazo do atendimento e a exclusão correspondente serão mostrados antes de qualquer envio real.",
+        "sharing": "Somente pessoas e operadores necessários ao atendimento autorizado, todos ainda sujeitos a identificação antes do lançamento do suporte remoto.",
+        "history": [
+          "2026-08-03 — Desativados por padrão; nenhum pacote de diagnóstico foi autorizado."
+        ],
+        "revocationEffect": "Cancelar antes do envio descarta o pacote. Depois do envio, a revogação interrompe novos acessos e oferece o caminho de exclusão aplicável.",
+        "actionLabel": "Revisar consentimento de diagnóstico",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "personalized-ai",
+        "title": "IA personalizada",
+        "state": "Desativada",
+        "purpose": "Usar contexto que você escolher para produzir orientação personalizada sem transformar diagnósticos locais em treinamento ou processamento oculto.",
+        "dataClasses": "Somente perguntas e contexto apresentados na tela de consentimento; diagnóstico, histórico e identidade ficam excluídos até seleção explícita.",
+        "retention": "Desativada agora. Prazos para solicitações, respostas e contexto serão informados antes de qualquer processamento em nuvem.",
+        "sharing": "Nenhum provedor recebe dados enquanto a IA personalizada está desativada; qualquer futuro operador e finalidade serão informados antes do envio.",
+        "history": [
+          "2026-08-03 — Desativada por padrão; nenhuma pergunta ou contexto da conta foi enviado."
+        ],
+        "revocationEffect": "Revogar interrompe novos envios e a personalização futura. A interface explicará como excluir o contexto anterior sujeito a obrigações aplicáveis.",
+        "actionLabel": "Revisar escolha de IA personalizada",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      }
+    ],
+    "rights": [
+      {
+        "id": "export",
+        "title": "Acesso e exportação",
+        "scope": "Perfil da conta, métodos de segurança, registros de assinatura, referências de dispositivos vinculados, histórico de consentimento e metadados de atendimentos disponíveis à futura autoridade de conta.",
+        "consequences": "Preparar uma exportação não altera nem exclui dados. A futura autoridade verificaria a identidade antes de expor uma cópia portátil.",
+        "retentionExceptions": "Segredos, materiais de recuperação, dados de outras pessoas e detalhes de segurança que criariam risco são excluídos. Registros protegidos por lei podem ser descritos sem expor conteúdo restrito.",
+        "review": "Revise categorias incluídas, formato portátil, canal de entrega, verificação de identidade e qualquer limitação legal antes da confirmação.",
+        "cancellation": "Cancele antes da confirmação para descartar esta revisão. Nenhuma exportação é criada ou entregue.",
+        "actionLabel": "Revisar acesso e exportação",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "correction",
+        "title": "Corrigir dados da conta",
+        "scope": "Dados de perfil e conta que você identificar como incompletos, inexatos ou desatualizados, junto às evidências necessárias para revisar a correção.",
+        "consequences": "Uma correção confirmada poderia atualizar usos futuros da conta e preservar o registro da solicitação e do resultado.",
+        "retentionExceptions": "Registros imutáveis de cobrança, segurança, prevenção a fraude e auditoria não são reescritos silenciosamente; uma correção permitida é vinculada ao registro original.",
+        "review": "Compare valor atual, valor proposto, motivo, evidência de apoio e verificação de identidade antes da confirmação.",
+        "cancellation": "Cancele antes da confirmação para descartar o valor proposto e a revisão de apoio. Nenhum campo da conta muda.",
+        "actionLabel": "Revisar correção de dados",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "deletion",
+        "title": "Excluir dados da conta",
+        "scope": "A futura conta e os dados opcionais em nuvem associados a ela. Dados locais do PC permanecem sob seu controle nesse PC.",
+        "consequences": "A exclusão poderia remover acesso à conta, vínculos de dispositivo e licença, histórico de consentimento em nuvem e registros de suporte. Segurança, restauração e documentação públicas permanecem disponíveis.",
+        "retentionExceptions": "Registros de cobrança, segurança, prevenção a fraude, disputa e auditoria podem ser retidos ou restritos somente por obrigação legal documentada e pelo prazo aplicável.",
+        "review": "Revise serviços afetados, limites entre dados locais e em nuvem, obrigações ativas, verificação de identidade e a consequência final irreversível antes da confirmação.",
+        "cancellation": "Cancele antes da confirmação para manter a conta e todos os registros remotos sem alterações.",
+        "actionLabel": "Revisar exclusão da conta",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      }
+    ]
   },
   "support": {
     "title": "Suporte",

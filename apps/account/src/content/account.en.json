@@ -190,8 +190,13 @@
   },
   "privacy": {
     "title": "Privacy center",
-    "summary": "Review the privacy requests available for this account without submitting one.",
-    "purpose": "Choose export, correction, consent, or deletion and review what the request would cover.",
+    "summary": "Control each available optional use of your data independently and review your data rights before anything leaves this account.",
+    "consentTitle": "Your optional choices",
+    "consentSummary": "Telemetry, support diagnostics, and personalized AI remain separate. One choice never enables another.",
+    "rightsTitle": "Access and control your data",
+    "rightsSummary": "Open a request to understand its scope, consequences, exceptions, and identity review. You can cancel before confirmation.",
+    "policyAction": "Read the full privacy policy",
+    "purpose": "Review one specific consent or data-rights request without granting authority to change remote account data.",
     "retention": "Request details remain only for the current review and are cleared when you leave it.",
     "sharing": "Nothing is uploaded, sent, or shared.",
     "revocation": "Cancel at any time. The review closes and no account data changes.",
@@ -200,7 +205,101 @@
     "deletionAction": "Review account deletion",
     "consentAction": "Review optional consent",
     "telemetryAction": "Review optional telemetry",
-    "telemetry": "Telemetry and diagnostic summaries are off by default and can be sent only with specific, revocable consent."
+    "telemetry": "Telemetry and diagnostic summaries are off by default and can be sent only with specific, revocable consent.",
+    "consents": [
+      {
+        "id": "optional-telemetry",
+        "title": "Optional telemetry",
+        "state": "Off",
+        "purpose": "Understand product stability and use through proportionate, aggregate measurements tied to a purpose explained before collection.",
+        "dataClasses": "Only the classes shown in the consent choice; never personal content, support diagnostics, or cross-site activity by default.",
+        "retention": "Disabled now. Before activation, the interface will state a limited period and the policy will record the applicable duration.",
+        "sharing": "No optional data is shared while telemetry is disabled; future processors must be identified before consent is requested.",
+        "history": ["2026-08-03 — Off by default; no optional telemetry was sent."],
+        "revocationEffect": "You can refuse or withdraw without losing safety, restoration, or documentation. Withdrawal stops new collection and explains what happens to earlier data.",
+        "actionLabel": "Review telemetry choice",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "support-diagnostics",
+        "title": "Diagnostics sent to support",
+        "state": "Off",
+        "purpose": "Investigate one support request using only the package that you review and authorize for that specific case.",
+        "dataClasses": "Technical fields visible in the package review, with secrets, credentials, and unrelated information excluded before sending.",
+        "retention": "No diagnostics are sent now. The case period and related deletion timing will appear before any real submission.",
+        "sharing": "Only people and processors needed for the authorized case, all still subject to identification before remote support launches.",
+        "history": ["2026-08-03 — Off by default; no diagnostic package was authorized."],
+        "revocationEffect": "Canceling before submission discards the package. After submission, withdrawal stops new access and provides the applicable deletion path.",
+        "actionLabel": "Review diagnostic consent",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "personalized-ai",
+        "title": "Personalized AI",
+        "state": "Off",
+        "purpose": "Use context you choose to provide personalized guidance without turning local diagnostics into hidden training or processing.",
+        "dataClasses": "Only questions and context shown in the consent screen; diagnostics, history, and identity stay excluded until explicitly selected.",
+        "retention": "Disabled now. Periods for prompts, responses, and context will be stated before any cloud processing takes place.",
+        "sharing": "No provider receives data while personalized AI is disabled; every future processor and purpose will be disclosed before sending.",
+        "history": ["2026-08-03 — Off by default; no prompt or account context was sent."],
+        "revocationEffect": "Withdrawal stops new submissions and future personalization. The interface will explain how to delete earlier context subject to applicable duties.",
+        "actionLabel": "Review personalized AI choice",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      }
+    ],
+    "rights": [
+      {
+        "id": "export",
+        "title": "Access and export",
+        "scope": "Account profile, security methods, subscription records, linked-device references, consent history, and support-case metadata available to the future account authority.",
+        "consequences": "Preparing an export does not change or delete data. The future authority would verify identity before exposing a portable copy.",
+        "retentionExceptions": "Secrets, recovery material, other people's data, and security details that would create risk are excluded. Legally protected records may be described without exposing restricted content.",
+        "review": "Review the included categories, portable format, delivery channel, identity check, and any lawful limitation before confirmation.",
+        "cancellation": "Cancel before confirmation to discard this review. No export is created or delivered.",
+        "actionLabel": "Review access and export",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "correction",
+        "title": "Correct account data",
+        "scope": "Profile and account data you identify as incomplete, inaccurate, or outdated, together with evidence needed to review the correction.",
+        "consequences": "A confirmed correction could update future account use while preserving a trace of the request and its outcome.",
+        "retentionExceptions": "Immutable billing, security, fraud-prevention, and audit records are not silently rewritten; an allowed correction is linked to the original record.",
+        "review": "Compare the current value, proposed value, reason, supporting evidence, and identity check before confirmation.",
+        "cancellation": "Cancel before confirmation to discard the proposed value and supporting review. No account field changes.",
+        "actionLabel": "Review data correction",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      },
+      {
+        "id": "deletion",
+        "title": "Delete account data",
+        "scope": "The future account and optional cloud data associated with it. Local PC data remains under your control on that PC.",
+        "consequences": "Deletion could remove account access, device and license links, cloud consent history, and support records. Public safety, recovery, and documentation remain available.",
+        "retentionExceptions": "Billing, security, fraud-prevention, dispute, and audit records may be retained or restricted only for a documented legal duty and its applicable period.",
+        "review": "Review affected services, local-versus-cloud boundaries, active obligations, identity verification, and the final irreversible consequence before confirmation.",
+        "cancellation": "Cancel before confirmation to leave the account and all remote records unchanged.",
+        "actionLabel": "Review account deletion",
+        "noChangeReceipt": {
+          "receiptKind": "no-change",
+          "remoteStateChanged": false
+        }
+      }
+    ]
   },
   "support": {
     "title": "Support",

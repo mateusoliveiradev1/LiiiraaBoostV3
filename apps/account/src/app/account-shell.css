@@ -2208,31 +2208,132 @@ button:focus-visible,
 /* Sensitive privacy work is sequential: choose a request, then review its boundary. */
 .account-privacy__workspace {
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--lb-space-5);
+  gap: var(--lb-space-7);
 }
 
-.account-privacy__requests .lb-web-data-request > h2,
+.account-privacy__section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-3);
+  align-items: start;
+  justify-content: space-between;
+  padding-block-end: var(--lb-space-3);
+  border-block-end: 1px solid var(--lb-line-strong);
+}
+
+.account-privacy__section-heading > div {
+  display: grid;
+  gap: var(--lb-space-2);
+  max-inline-size: 68ch;
+}
+
+.account-privacy__section-heading h2,
+.account-privacy__section-heading p,
 .account-privacy__context .lb-web-consent-review > h2 {
   margin: 0;
 }
 
-.account-privacy__requests .lb-web-data-request > [role='group'] {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--lb-space-2);
+.account-privacy__section-heading p,
+.account-consent-record > header p,
+.account-consent-record__action p {
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
 }
 
-.account-privacy__requests .lb-button {
-  inline-size: 100%;
-  justify-content: flex-start;
+.account-data-rights,
+.account-consent-ledger,
+.account-consent-ledger__records,
+.account-data-rights__journeys,
+.account-consent-record {
+  display: grid;
+  gap: var(--lb-space-4);
+}
+
+.account-data-rights__journey,
+.account-consent-record {
+  padding-block: var(--lb-space-3);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.account-data-rights__journey > summary {
+  display: flex;
+  gap: var(--lb-space-3);
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 44px;
+  color: var(--lb-text-primary);
+  cursor: pointer;
+}
+
+.account-data-rights__journey > summary > span:first-child {
+  font-size: var(--lb-text-title-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-data-rights__journey > summary > span:last-child {
+  color: var(--lb-cobalt-signal);
+  font-size: var(--lb-text-label-size);
+}
+
+.account-data-rights__journey > div {
+  display: grid;
+  gap: var(--lb-space-3);
+  padding-block-start: var(--lb-space-3);
+}
+
+.account-data-rights__journey .lb-button {
+  justify-self: start;
+}
+
+.account-consent-record > header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.account-consent-record > header > div {
+  display: grid;
+  gap: var(--lb-space-1);
+  max-inline-size: 68ch;
+}
+
+.account-consent-record h3,
+.account-consent-record p {
+  margin: 0;
+}
+
+.account-consent-record details > summary {
+  min-block-size: 44px;
+  color: var(--lb-cobalt-signal);
+  cursor: pointer;
+}
+
+.account-consent-record details ol {
+  margin-block: var(--lb-space-2) 0;
+  padding-inline-start: var(--lb-space-5);
+  color: var(--lb-text-secondary);
+}
+
+.account-consent-record__action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-3);
+  align-items: center;
+  justify-content: space-between;
 }
 
 .account-privacy__context {
+  display: grid;
+  gap: var(--lb-space-6);
   padding-block: 0;
 }
 
 .account-privacy__context .lb-web-consent-review {
   gap: var(--lb-space-4);
+  padding-block-start: var(--lb-space-2);
+  border-block-start: 1px solid var(--lb-line-subtle);
 }
 
 .account-privacy__context .account-definition-list {
@@ -2535,6 +2636,8 @@ button:focus-visible,
 
   .account-privacy__requests .lb-web-data-request > [role='group'],
   .account-privacy__context .account-definition-list,
+  .account-consent-record .account-definition-list,
+  .account-data-rights__journey .account-definition-list,
   .lb-web-sign-in,
   .lb-web-sign-in > [role='group'],
   .account-auth-shell .lb-web-sign-in > [role='group'] {

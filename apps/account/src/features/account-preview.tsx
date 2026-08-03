@@ -36,10 +36,7 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
-import {
-  getAccountHomeScenario,
-  type AccountPreviewRoute,
-} from '../account-preview-model';
+import { getAccountHomeScenario, type AccountPreviewRoute } from '../account-preview-model';
 import { DegradedAccountPreview, FixtureHeader } from './account-degraded-preview';
 import { resolveAccountScenarioId } from './account-scenario';
 
@@ -235,6 +232,11 @@ type AccountContent = Readonly<{
   privacy: Readonly<{
     title: string;
     summary: string;
+    consentTitle: string;
+    consentSummary: string;
+    rightsTitle: string;
+    rightsSummary: string;
+    policyAction: string;
     purpose: string;
     retention: string;
     sharing: string;
@@ -245,6 +247,36 @@ type AccountContent = Readonly<{
     consentAction: string;
     telemetryAction: string;
     telemetry: string;
+    consents: readonly Readonly<{
+      id: 'optional-telemetry' | 'personalized-ai' | 'support-diagnostics';
+      title: string;
+      state: string;
+      purpose: string;
+      dataClasses: string;
+      retention: string;
+      sharing: string;
+      history: readonly string[];
+      revocationEffect: string;
+      actionLabel: string;
+      noChangeReceipt: Readonly<{
+        receiptKind: 'no-change';
+        remoteStateChanged: false;
+      }>;
+    }>[];
+    rights: readonly Readonly<{
+      id: 'correction' | 'deletion' | 'export';
+      title: string;
+      scope: string;
+      consequences: string;
+      retentionExceptions: string;
+      review: string;
+      cancellation: string;
+      actionLabel: string;
+      noChangeReceipt: Readonly<{
+        receiptKind: 'no-change';
+        remoteStateChanged: false;
+      }>;
+    }>[];
   }>;
   support: Readonly<{
     title: string;
@@ -276,6 +308,83 @@ const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
+const PRIVACY_CONSENT_IDS = Object.freeze([
+  'optional-telemetry',
+  'support-diagnostics',
+  'personalized-ai',
+] as const);
+const DATA_RIGHTS_REQUEST_IDS = Object.freeze(['export', 'correction', 'deletion'] as const);
+
+const hasTextKeys = (value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean =>
+  keys.every((key) => nonEmpty(value[key]));
+
+const isNoChangeReceipt = (value: unknown): boolean =>
+  isRecord(value) && value['receiptKind'] === 'no-change' && value['remoteStateChanged'] === false;
+
+const isPrivacyContent = (value: unknown): boolean => {
+  if (
+    !isRecord(value) ||
+    !hasTextKeys(value, [
+      'title',
+      'summary',
+      'consentTitle',
+      'consentSummary',
+      'rightsTitle',
+      'rightsSummary',
+      'policyAction',
+      'purpose',
+      'retention',
+      'sharing',
+      'revocation',
+    ]) ||
+    !Array.isArray(value['consents']) ||
+    !Array.isArray(value['rights'])
+  ) {
+    return false;
+  }
+
+  const consents = value['consents'];
+  const rights = value['rights'];
+  return (
+    consents.length === PRIVACY_CONSENT_IDS.length &&
+    consents.every(
+      (consent, index) =>
+        isRecord(consent) &&
+        consent['id'] === PRIVACY_CONSENT_IDS[index] &&
+        hasTextKeys(consent, [
+          'title',
+          'state',
+          'purpose',
+          'dataClasses',
+          'retention',
+          'sharing',
+          'revocationEffect',
+          'actionLabel',
+        ]) &&
+        Array.isArray(consent['history']) &&
+        consent['history'].length > 0 &&
+        consent['history'].every(nonEmpty) &&
+        isNoChangeReceipt(consent['noChangeReceipt']),
+    ) &&
+    rights.length === DATA_RIGHTS_REQUEST_IDS.length &&
+    rights.every(
+      (request, index) =>
+        isRecord(request) &&
+        request['id'] === DATA_RIGHTS_REQUEST_IDS[index] &&
+        hasTextKeys(request, [
+          'title',
+          'scope',
+          'consequences',
+          'retentionExceptions',
+          'review',
+          'cancellation',
+          'actionLabel',
+        ]) &&
+        isNoChangeReceipt(request['noChangeReceipt']),
+    )
+  );
+};
+
 const admitAccountContent = (candidate: unknown, locale: WebLocale): AccountContent => {
   if (
     !isRecord(candidate) ||
@@ -293,7 +402,7 @@ const admitAccountContent = (candidate: unknown, locale: WebLocale): AccountCont
     !isRecord(candidate['invoices']) ||
     !isRecord(candidate['device']) ||
     !isRecord(candidate['downloads']) ||
-    !isRecord(candidate['privacy']) ||
+    !isPrivacyContent(candidate['privacy']) ||
     !isRecord(candidate['support']) ||
     !isRecord(candidate['recovery'])
   ) {
@@ -493,7 +602,9 @@ export const SignInPreview = ({
         <LbButton type="submit">{content.signIn.emailAction}</LbButton>
       </form>
       <div className="account-auth-divider" role="separator">
-        <span>{content.locale === 'pt-BR' ? 'ou escolha outra opção' : 'or choose another option'}</span>
+        <span>
+          {content.locale === 'pt-BR' ? 'ou escolha outra opção' : 'or choose another option'}
+        </span>
       </div>
       <div
         aria-label={content.locale === 'pt-BR' ? 'Outras opções de acesso' : 'Other access options'}
@@ -861,10 +972,7 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
                   {content.onboarding.openAppAction}
                 </a>
                 <span>{content.onboarding.notInstalledPrompt}</span>
-                <a
-                  href={`${WEB_ORIGINS['public-origin']}${publicDownload.value}`}
-                  rel="noreferrer"
-                >
+                <a href={`${WEB_ORIGINS['public-origin']}${publicDownload.value}`} rel="noreferrer">
                   <ProductIcon name="download" size={18} />
                   {content.onboarding.downloadAction}
                 </a>
@@ -895,9 +1003,7 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
             </LbButton>
             {isLast ? null : (
               <LbButton
-                onPress={() =>
-                  setActiveStep((current) => Math.min(steps.length - 1, current + 1))
-                }
+                onPress={() => setActiveStep((current) => Math.min(steps.length - 1, current + 1))}
                 variant="primary"
               >
                 {content.onboarding.nextAction}
@@ -988,7 +1094,10 @@ const DegradedOverviewPreview = ({ content }: Readonly<{ content: AccountContent
       className="account-responsibility account-overview account-overview--degraded"
       data-account-home-state="degraded"
     >
-      <FixtureHeader summary={content.overview.degradedBody} title={content.overview.degradedTitle} />
+      <FixtureHeader
+        summary={content.overview.degradedBody}
+        title={content.overview.degradedTitle}
+      />
       <dl className="account-overview__facts" aria-label={content.overview.summary}>
         <div>
           <dt>{content.overview.planTitle}</dt>
@@ -1284,9 +1393,7 @@ const CollectionDisclosure = ({
       </div>
     </dl>
     <a href={`${WEB_ORIGINS['public-origin']}${hrefFor('public-privacy-policy', content.locale)}`}>
-      {content.locale === 'pt-BR'
-        ? 'Ler política de privacidade completa'
-        : 'Read the full privacy policy'}
+      {content.privacy.policyAction}
     </a>
   </section>
 );
@@ -1302,8 +1409,14 @@ export const SubscriptionSummary = ({
     );
   }
   const terms = [
-    [content.locale === 'pt-BR' ? 'Plano Essential' : 'Essential plan', content.subscription.essentialPlan],
-    [content.locale === 'pt-BR' ? 'Benefícios Premium' : 'Premium benefits', content.subscription.premiumBenefits],
+    [
+      content.locale === 'pt-BR' ? 'Plano Essential' : 'Essential plan',
+      content.subscription.essentialPlan,
+    ],
+    [
+      content.locale === 'pt-BR' ? 'Benefícios Premium' : 'Premium benefits',
+      content.subscription.premiumBenefits,
+    ],
     [content.locale === 'pt-BR' ? 'Preço' : 'Price', content.subscription.price],
     [
       content.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
@@ -1311,7 +1424,10 @@ export const SubscriptionSummary = ({
     ],
     [content.locale === 'pt-BR' ? 'Renovação' : 'Renewal', content.subscription.renewal],
     [content.locale === 'pt-BR' ? 'Tributos' : 'Taxes', content.subscription.taxes],
-    [content.locale === 'pt-BR' ? 'Formas de pagamento' : 'Payment methods', content.subscription.paymentMethods],
+    [
+      content.locale === 'pt-BR' ? 'Formas de pagamento' : 'Payment methods',
+      content.subscription.paymentMethods,
+    ],
     [
       content.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
       content.subscription.cancellation,
@@ -1591,48 +1707,175 @@ export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent
   );
 };
 
-export const ConsentReview = ({ content }: Readonly<{ content: AccountContent }>) => (
-  <CollectionDisclosure
-    content={content}
-    purpose={content.privacy.purpose}
-    retention={content.privacy.retention}
-    revocation={content.privacy.revocation}
-    sharing={content.privacy.sharing}
-  />
+type ConsentPurposeId = AccountContent['privacy']['consents'][number]['id'];
+type DataRightsRequestId = AccountContent['privacy']['rights'][number]['id'];
+type PrivacyActionId = ConsentPurposeId | DataRightsRequestId;
+
+export const ConsentLedger = ({
+  content,
+  onSelect,
+}: Readonly<{
+  content: AccountContent;
+  onSelect: (request: ConsentPurposeId) => void;
+}>) => (
+  <section aria-labelledby="consent-ledger-title" className="account-consent-ledger">
+    <header className="account-privacy__section-heading">
+      <div>
+        <h2 id="consent-ledger-title">{content.privacy.consentTitle}</h2>
+        <p>{content.privacy.consentSummary}</p>
+      </div>
+      <StatusSignal
+        label={
+          content.locale === 'pt-BR' ? 'Três escolhas independentes' : 'Three independent choices'
+        }
+        state="preview"
+      />
+    </header>
+    <div className="account-consent-ledger__records">
+      {content.privacy.consents.map((consent) => (
+        <article
+          className="account-consent-record"
+          data-consent-purpose={consent.id}
+          key={consent.id}
+        >
+          <header>
+            <div>
+              <h3>{consent.title}</h3>
+              <p>{consent.purpose}</p>
+            </div>
+            <StatusSignal label={consent.state} state="unavailable" />
+          </header>
+          <dl className="account-definition-list">
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Classes de dados' : 'Data classes'}</dt>
+              <dd>{consent.dataClasses}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Retenção' : 'Retention'}</dt>
+              <dd>{consent.retention}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Compartilhamento' : 'Sharing'}</dt>
+              <dd>{consent.sharing}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Efeito da retirada' : 'Withdrawal effect'}</dt>
+              <dd>{consent.revocationEffect}</dd>
+            </div>
+          </dl>
+          <details>
+            <summary>
+              {content.locale === 'pt-BR' ? 'Histórico da escolha' : 'Choice history'}
+            </summary>
+            <ol>
+              {consent.history.map((entry) => (
+                <li key={entry}>{entry}</li>
+              ))}
+            </ol>
+          </details>
+          <div className="account-consent-record__action">
+            <p>
+              {content.locale === 'pt-BR'
+                ? 'A revisão termina com um recibo sem alteração remota.'
+                : 'The review ends with a receipt confirming no remote change.'}
+            </p>
+            <LbButton onPress={() => onSelect(consent.id)} variant="secondary">
+              {consent.actionLabel}
+            </LbButton>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+);
+
+export const DataRightsJourneys = ({
+  content,
+  onSelect,
+}: Readonly<{
+  content: AccountContent;
+  onSelect: (request: DataRightsRequestId) => void;
+}>) => (
+  <section aria-labelledby="data-rights-title" className="account-data-rights">
+    <header className="account-privacy__section-heading">
+      <div>
+        <h2 id="data-rights-title">{content.privacy.rightsTitle}</h2>
+        <p>{content.privacy.rightsSummary}</p>
+      </div>
+    </header>
+    <div className="account-data-rights__journeys">
+      {content.privacy.rights.map((request) => (
+        <details
+          className="account-data-rights__journey"
+          data-rights-request={request.id}
+          key={request.id}
+        >
+          <summary>
+            <span>{request.title}</span>
+            <span>{content.locale === 'pt-BR' ? 'Revisar detalhes' : 'Review details'}</span>
+          </summary>
+          <div>
+            <dl className="account-definition-list">
+              <div>
+                <dt>{content.locale === 'pt-BR' ? 'Escopo' : 'Scope'}</dt>
+                <dd>{request.scope}</dd>
+              </div>
+              <div>
+                <dt>{content.locale === 'pt-BR' ? 'Consequências' : 'Consequences'}</dt>
+                <dd>{request.consequences}</dd>
+              </div>
+              <div>
+                <dt>
+                  {content.locale === 'pt-BR' ? 'Exceções de retenção' : 'Retention exceptions'}
+                </dt>
+                <dd>{request.retentionExceptions}</dd>
+              </div>
+              <div>
+                <dt>{content.locale === 'pt-BR' ? 'Revisão' : 'Review'}</dt>
+                <dd>{request.review}</dd>
+              </div>
+              <div>
+                <dt>{content.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation'}</dt>
+                <dd>{request.cancellation}</dd>
+              </div>
+              <div>
+                <dt>{content.locale === 'pt-BR' ? 'Resultado desta prévia' : 'Preview result'}</dt>
+                <dd>
+                  {request.noChangeReceipt.remoteStateChanged
+                    ? content.locale === 'pt-BR'
+                      ? 'Alteração remota'
+                      : 'Remote change'
+                    : content.locale === 'pt-BR'
+                      ? 'Nenhuma alteração remota'
+                      : 'No remote change'}
+                </dd>
+              </div>
+            </dl>
+            <LbButton
+              onPress={() => onSelect(request.id)}
+              variant={request.id === 'deletion' ? 'destructive' : 'secondary'}
+            >
+              {request.actionLabel}
+            </LbButton>
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+);
+
+export const ConsentReview = ({
+  content,
+  onSelect,
+}: Readonly<{ content: AccountContent; onSelect: (request: ConsentPurposeId) => void }>) => (
+  <ConsentLedger content={content} onSelect={onSelect} />
 );
 
 export const DataRequestReview = ({
   content,
   onSelect,
-}: Readonly<{
-  content: AccountContent;
-  onSelect: (request: 'consent' | 'correction' | 'deletion' | 'export' | 'telemetry') => void;
-}>) => (
-  <section aria-labelledby="data-request-title" className="lb-web-data-request">
-    <h2 id="data-request-title">
-      {content.locale === 'pt-BR' ? 'Solicitações disponíveis' : 'Available requests'}
-    </h2>
-    <div
-      role="group"
-      aria-label={content.locale === 'pt-BR' ? 'Solicitações de privacidade' : 'Privacy requests'}
-    >
-      <LbButton onPress={() => onSelect('export')} variant="secondary">
-        {content.privacy.exportAction}
-      </LbButton>
-      <LbButton onPress={() => onSelect('correction')} variant="secondary">
-        {content.privacy.correctionAction}
-      </LbButton>
-      <LbButton onPress={() => onSelect('consent')} variant="secondary">
-        {content.privacy.consentAction}
-      </LbButton>
-      <LbButton onPress={() => onSelect('telemetry')} variant="secondary">
-        {content.privacy.telemetryAction}
-      </LbButton>
-      <LbButton onPress={() => onSelect('deletion')} variant="destructive">
-        {content.privacy.deletionAction}
-      </LbButton>
-    </div>
-  </section>
+}: Readonly<{ content: AccountContent; onSelect: (request: DataRightsRequestId) => void }>) => (
+  <DataRightsJourneys content={content} onSelect={onSelect} />
 );
 
 export const PrivacyCenter = ({
@@ -1645,41 +1888,42 @@ export const PrivacyCenter = ({
       <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
     );
   }
-  const selectRequest = (
-    request: 'consent' | 'correction' | 'deletion' | 'export' | 'telemetry',
-  ) => {
-    const family = request === 'consent' || request === 'telemetry' ? 'consent' : 'privacy';
-    const labels = {
-      consent: content.privacy.consentAction,
-      correction: content.privacy.correctionAction,
-      deletion: content.privacy.deletionAction,
-      export: content.privacy.exportAction,
-      telemetry: content.privacy.telemetryAction,
-    } as const;
+  const selectRequest = (request: PrivacyActionId) => {
+    const consent = content.privacy.consents.find(({ id }) => id === request);
+    const rightsRequest = content.privacy.rights.find(({ id }) => id === request);
+    if (consent === undefined && rightsRequest === undefined) {
+      throw new Error('ACCOUNT_PRIVACY_ACTION_INVALID');
+    }
+    const family = consent === undefined ? 'privacy' : 'consent';
+    const label = consent?.actionLabel ?? rightsRequest?.actionLabel ?? '';
+    const purpose = consent?.purpose ?? rightsRequest?.review ?? '';
+    const impact = consent?.revocationEffect ?? rightsRequest?.consequences ?? '';
+    const field = consent === undefined ? 'requestType' : 'consentPurpose';
     setWorkflow(
       actionInput({
         consent: {
-          expiresAt: '2026-01-15T13:00:00.000Z',
+          expiresAt: '2099-01-01T00:00:00.000Z',
           granted: true,
-          permittedFields: ['request-type'],
-          purpose: content.privacy.purpose,
+          permittedFields: [field],
+          purpose,
           requestingActor: 'account-holder',
         },
         family,
-        fields: { requestType: request },
-        impact: content.privacy.revocation,
-        label: labels[request],
-        purpose: content.privacy.purpose,
+        fields: { [field]: request },
+        impact,
+        label,
+        purpose,
         review: [
           {
-            field: 'requestType',
-            label: labels[request],
+            field,
+            label,
             before:
-              content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
+              consent?.state ??
+              (content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started'),
             after:
               content.locale === 'pt-BR'
-                ? 'Solicitação preparada para confirmação'
-                : 'Request prepared for confirmation',
+                ? 'Revisão preparada sem aplicar alterações'
+                : 'Review prepared without applying changes',
           },
         ],
       }),
@@ -1699,10 +1943,14 @@ export const PrivacyCenter = ({
           <DataRequestReview content={content} onSelect={selectRequest} />
         </div>
         <aside className="account-privacy__context" data-workspace-region="context">
-          <ConsentReview content={content} />
-          <p className="account-privacy__telemetry" role="note">
-            {content.privacy.telemetry}
-          </p>
+          <ConsentReview content={content} onSelect={selectRequest} />
+          <CollectionDisclosure
+            content={content}
+            purpose={content.privacy.purpose}
+            retention={content.privacy.retention}
+            revocation={content.privacy.revocation}
+            sharing={content.privacy.sharing}
+          />
         </aside>
       </div>
     </article>
@@ -1790,14 +2038,18 @@ export const SupportRequestComposer = ({
                         field: 'subject',
                         label: content.support.subjectLabel,
                         before:
-                          content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
+                          content.locale === 'pt-BR'
+                            ? 'Nenhuma solicitação iniciada'
+                            : 'No request started',
                         after: subject,
                       },
                       {
                         field: 'description',
                         label: content.support.bodyLabel,
                         before:
-                          content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
+                          content.locale === 'pt-BR'
+                            ? 'Nenhuma solicitação iniciada'
+                            : 'No request started',
                         after: description,
                       },
                     ],
@@ -1811,7 +2063,10 @@ export const SupportRequestComposer = ({
           </div>
         </div>
         <aside className="account-support__guidance" data-workspace-region="context">
-          <section className="account-support__service-level" aria-labelledby="support-service-title">
+          <section
+            className="account-support__service-level"
+            aria-labelledby="support-service-title"
+          >
             <h2 id="support-service-title">
               {content.locale === 'pt-BR' ? 'Prazo de atendimento' : 'Response time'}
             </h2>
