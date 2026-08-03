@@ -37,7 +37,7 @@ export type PublicNavigationState = Readonly<{
 const TASK_PILLARS = new Set<string>(publicNavigation.map(({ id }) => id));
 
 const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
-  return TASK_PILLARS.has(routeId) ? (routeId as PublicPillarId) : undefined;
+  return TASK_PILLARS.has(routeId) ? routeId : undefined;
 };
 
 export const getPublicNavigationState = (
@@ -108,7 +108,7 @@ export const PublicNavigation = ({
   copy,
   locale,
 }: Readonly<{ copy: PublicNavigationCopy; locale: WebLocale }>) => {
-  const pathname = usePathname() ?? publicBoundaryHref('public-home', locale);
+  const pathname = usePathname();
   const state = getPublicNavigationState(pathname, locale);
   const localeControl = (
     <LocaleSwitcher
