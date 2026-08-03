@@ -3,6 +3,46 @@
   "locale": "pt-BR",
   "version": "1.0.0",
   "lastReviewedAt": "2026-08-02T12:00:00.000Z",
+  "about": {
+    "routeId": "public-about",
+    "metadata": {
+      "title": "Sobre o Liiiraa Boost",
+      "description": "A motivação, os princípios de confiança e a ambição que orientam o Liiiraa Boost."
+    },
+    "title": "Por que o Liiiraa Boost existe",
+    "lead": "Desempenho em jogos não deveria exigir mudanças opacas nem uma escolha entre velocidade e estabilidade. O produto nasce dessa convicção.",
+    "chapters": [
+      {
+        "id": "motivation",
+        "title": "O problema que decidimos enfrentar",
+        "body": "Cada PC reage de forma diferente. Ajustes genéricos podem consumir tempo, esconder riscos e deixar o jogador sem uma forma clara de avaliar o que realmente mudou. O Liiiraa Boost existe para preparar o Windows com contexto sobre o hardware e sobre a sessão de jogo."
+      },
+      {
+        "id": "principles",
+        "title": "Melhorar sem desestabilizar",
+        "body": "Uma otimização só tem valor quando o resultado pode ser observado e quando a estabilidade permanece protegida. Por isso, ganhos devem ser tratados como hipóteses a medir no próprio PC, com limites e incertezas apresentados de forma direta."
+      },
+      {
+        "id": "trust",
+        "title": "Confiança começa no próprio computador",
+        "body": "O trabalho é local por padrão. Dados técnicos permanecem no PC, e qualquer compartilhamento deve ter finalidade clara, consentimento explícito e escopo mínimo. A experiência deve explicar o que pretende fazer antes de pedir uma decisão."
+      },
+      {
+        "id": "reversibility",
+        "title": "Controle inclui poder voltar",
+        "body": "Toda alteração deve ser explicável, auditável e reversível. O estado anterior, o motivo da mudança e o caminho de restauração fazem parte da otimização; não são recursos secundários."
+      },
+      {
+        "id": "ambition",
+        "title": "A ambição de longo prazo",
+        "body": "Construir o otimizador definitivo para jogos no Windows: profundo o bastante para respeitar cada máquina, claro o bastante para orientar decisões e leve o bastante para não competir com o jogo pelos recursos que promete preservar."
+      }
+    ],
+    "cta": {
+      "label": "Ver como funciona",
+      "routeId": "public-product"
+    }
+  },
   "supportStates": {
     "available": {
       "label": "Disponível",

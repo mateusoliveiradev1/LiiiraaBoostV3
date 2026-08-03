@@ -87,6 +87,7 @@ const adminRoute = <const Id extends string>(
 
 const rawWebRoutes = [
   publicRoute('public-home', '/[locale]'),
+  publicRoute('public-about', '/[locale]/about'),
   publicRoute('public-product', '/[locale]/product', { owner: 'public-navigation' }),
   publicRoute('public-results', '/[locale]/results', { owner: 'public-navigation' }),
   publicRoute('public-evidence', '/[locale]/evidence', { owner: 'public-content' }),
@@ -485,8 +486,7 @@ export const resolveLocalizedCurrentRoute = (
   });
 };
 
-export const createDesktopAnalyzeLink = (): 'liiiraaboost://analyze' =>
-  'liiiraaboost://analyze';
+export const createDesktopAnalyzeLink = (): 'liiiraaboost://analyze' => 'liiiraaboost://analyze';
 
 export type RouteProjection = Readonly<{
   from?: string;

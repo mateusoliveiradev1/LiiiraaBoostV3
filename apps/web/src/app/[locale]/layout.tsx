@@ -9,8 +9,13 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { accountBoundaryHref, publicBoundaryHref, routing } from '../../public-boundary';
-import { PublicNavigation, type PublicNavigationCopy } from '../../public-navigation';
+import { publicBoundaryHref, routing } from '../../public-boundary';
+import {
+  PublicFooter,
+  type PublicFooterCopy,
+  PublicNavigation,
+  type PublicNavigationCopy,
+} from '../../public-navigation';
 import { ProductLockup } from '../../public-product-lockup';
 
 type PublicLocaleLayoutProps = Readonly<{
@@ -18,21 +23,46 @@ type PublicLocaleLayoutProps = Readonly<{
   params: Promise<{ locale: string }>;
 }>;
 
-type PublicCopy = PublicNavigationCopy &
+type PublicCopy = PublicFooterCopy &
+  PublicNavigationCopy &
   Readonly<{
-    account: string;
     brandDescription: string;
-    footerNavigation: string;
     skip: string;
   }>;
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    account: 'Conta',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
+    copyright: '© Liiiraa Boost · Web v1.0.0',
     current: 'página atual',
+    cta: 'Baixar grátis',
     download: 'Baixar grátis',
-    footerNavigation: 'Navegação complementar',
+    footerNavigation: 'Navegação de produto, recursos, empresa e confiança',
+    groupLabels: Object.freeze({
+      company: 'Empresa',
+      legal: 'Legal',
+      product: 'Produto',
+      resources: 'Recursos',
+    }),
+    linkLabels: Object.freeze({
+      about: 'Nossa história',
+      contact: 'Contato',
+      documentation: 'Documentação',
+      download: 'Download',
+      'essential-storage': 'Armazenamento essencial',
+      help: 'Ajuda',
+      'how-it-works': 'Como funciona',
+      plans: 'Planos',
+      principles: 'Princípios',
+      privacy: 'Privacidade',
+      releases: 'Versões',
+      'responsible-disclosure': 'Divulgação responsável',
+      results: 'Resultados',
+      security: 'Segurança',
+      status: 'Status',
+      terms: 'Termos',
+      'your-pc': 'Seu PC',
+    }),
     menu: 'Menu',
     navigation: Object.freeze({
       'public-compatibility': 'Seu PC',
@@ -43,15 +73,42 @@ const COPY = Object.freeze({
       'public-support': 'Ajuda',
     }),
     primaryNavigation: 'Navegação principal',
+    promise: 'Prepare seu PC. Prove o resultado. Restaure com controle.',
     search: 'Pesquisar',
     skip: 'Ir para o conteúdo principal',
   }),
   en: Object.freeze({
-    account: 'Account',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
+    copyright: '© Liiiraa Boost · Web v1.0.0',
     current: 'current page',
+    cta: 'Download free',
     download: 'Download free',
-    footerNavigation: 'Supplementary navigation',
+    footerNavigation: 'Product, resources, company, and trust navigation',
+    groupLabels: Object.freeze({
+      company: 'Company',
+      legal: 'Legal',
+      product: 'Product',
+      resources: 'Resources',
+    }),
+    linkLabels: Object.freeze({
+      about: 'Our story',
+      contact: 'Contact',
+      documentation: 'Documentation',
+      download: 'Download',
+      'essential-storage': 'Essential storage',
+      help: 'Help',
+      'how-it-works': 'How it works',
+      plans: 'Plans',
+      principles: 'Principles',
+      privacy: 'Privacy',
+      releases: 'Releases',
+      'responsible-disclosure': 'Responsible disclosure',
+      results: 'Results',
+      security: 'Security',
+      status: 'Status',
+      terms: 'Terms',
+      'your-pc': 'Your PC',
+    }),
     menu: 'Menu',
     navigation: Object.freeze({
       'public-compatibility': 'Your PC',
@@ -62,6 +119,7 @@ const COPY = Object.freeze({
       'public-support': 'Help',
     }),
     primaryNavigation: 'Primary navigation',
+    promise: 'Prepare your PC. Prove the result. Restore with control.',
     search: 'Search',
     skip: 'Skip to main content',
   }),
@@ -142,30 +200,7 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
           {children}
         </main>
 
-        <footer className="public-footer">
-          <div>
-            <Brand locale={locale} />
-            <p>{copy.brandDescription}</p>
-          </div>
-          <nav aria-label={copy.footerNavigation}>
-            <a href={publicBoundaryHref('public-support', locale)}>
-              {locale === 'pt-BR' ? 'Suporte' : 'Support'}
-            </a>
-            <a href={publicBoundaryHref('public-status', locale)}>
-              {locale === 'pt-BR' ? 'Status' : 'Status'}
-            </a>
-            <a href={publicBoundaryHref('public-privacy-policy', locale)}>
-              {locale === 'pt-BR' ? 'Privacidade' : 'Privacy'}
-            </a>
-            <a href={publicBoundaryHref('public-responsible-disclosure', locale)}>
-              {locale === 'pt-BR' ? 'Divulgação responsável' : 'Responsible disclosure'}
-            </a>
-          </nav>
-          <a className="public-account-link" href={accountBoundaryHref(locale)}>
-            {copy.account}
-            <span aria-hidden="true">↗</span>
-          </a>
-        </footer>
+        <PublicFooter copy={copy} locale={locale} />
       </body>
     </html>
   );

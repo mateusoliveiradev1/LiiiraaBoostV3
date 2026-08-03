@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import * as publicConfig from '../next.config';
+import catalogEnJson from './content/public/catalog.en.json';
+import catalogPtBrJson from './content/public/catalog.pt-BR.json';
 import { publicBoundaryHref, publicNavigation, routing } from './public-boundary';
 import {
   CLIENT_WEB_LOCALES,
@@ -23,10 +25,7 @@ const publicCatchAllSource = readFileSync(
   new URL('./app/[locale]/(public)/[[...slug]]/page.tsx', import.meta.url),
   'utf8',
 );
-const aboutCatalogs = [
-  JSON.parse(readFileSync(new URL('./content/public/catalog.pt-BR.json', import.meta.url), 'utf8')),
-  JSON.parse(readFileSync(new URL('./content/public/catalog.en.json', import.meta.url), 'utf8')),
-] as const;
+const aboutCatalogs = [catalogPtBrJson, catalogEnJson] as const;
 const routeOwnedSources = [
   './app/[locale]/(public)/[[...slug]]/page.tsx',
   './app/[locale]/download/[channel]/[version]/page.tsx',
@@ -93,7 +92,7 @@ describe('public shell', () => {
     });
   });
 
-  it('uses visitor task language and renders one route-preserving graphical locale control', () => {
+  it('uses visitor task language and renders route-preserving header and footer locale controls', () => {
     expect(layoutSource).toContain("'public-product': 'Como funciona'");
     expect(layoutSource).toContain("'public-results': 'Resultados'");
     expect(layoutSource).toContain("'public-compatibility': 'Seu PC'");
@@ -103,7 +102,7 @@ describe('public shell', () => {
     expect(layoutSource).toContain("'public-product': 'How it works'");
     expect(layoutSource).toContain("'public-results': 'Results'");
     expect(layoutSource).toContain("'public-compatibility': 'Your PC'");
-    expect(navigationSource.match(/<LocaleSwitcher/gu)).toHaveLength(1);
+    expect(navigationSource.match(/<LocaleSwitcher/gu)).toHaveLength(2);
     expect(navigationSource).toContain('className="public-header__locale"');
     expect(navigationSource).not.toContain('public-mobile-locale');
   });
@@ -198,10 +197,8 @@ describe('public shell', () => {
     expect(publicCatchAllSource).toContain('className="public-about"');
 
     for (const catalog of aboutCatalogs) {
-      expect(catalog.about).toMatchObject({
-        routeId: 'public-about',
-        chapters: expect.any(Array),
-      });
+      expect(catalog.about.routeId).toBe('public-about');
+      expect(Array.isArray(catalog.about.chapters)).toBe(true);
       expect(catalog.about.chapters.map(({ id }: { id: string }) => id)).toEqual([
         'motivation',
         'principles',
@@ -220,7 +217,7 @@ describe('public shell', () => {
     expect(layoutSource).toContain('<PublicFooter');
 
     const expectedGroups = {
-      company: ['about', 'contact'],
+      company: ['about', 'principles', 'contact'],
       legal: ['terms', 'privacy', 'security', 'essential-storage', 'responsible-disclosure'],
       product: ['how-it-works', 'your-pc', 'results', 'plans', 'download'],
       resources: ['documentation', 'help', 'releases', 'status'],
@@ -256,9 +253,7 @@ describe('public shell', () => {
     expect(shellStyles).toMatch(
       /@media \(width < 480px\)[\s\S]*\.public-footer__groups\s*\{[\s\S]*grid-template-columns:\s*1fr/u,
     );
-    expect(shellStyles).toMatch(
-      /\.public-footer__link\s*\{[\s\S]*min-block-size:\s*44px/u,
-    );
+    expect(shellStyles).toMatch(/\.public-footer__link\s*\{[\s\S]*min-block-size:\s*44px/u);
   });
 
   it('keeps the client recovery subset byte-equal to canonical server routes', () => {

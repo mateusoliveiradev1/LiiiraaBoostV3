@@ -1,10 +1,16 @@
 'use client';
 
-import { resolveLocalizedCurrentRoute, matchWebRoute, type WebLocale } from '@liiiraa/web-core';
+import {
+  resolveLocalizedCurrentRoute,
+  matchWebRoute,
+  type WebLocale,
+  type WebRouteId,
+} from '@liiiraa/web-core';
 import { LocaleSwitcher } from '@liiiraa/web-features';
 import { usePathname } from 'next/navigation';
 
 import { localizedPublicHref, publicBoundaryHref, publicNavigation } from './public-boundary';
+import { ProductLockup } from './public-product-lockup';
 
 export type PublicPillarId = (typeof publicNavigation)[number]['id'];
 
@@ -16,6 +22,103 @@ export type PublicNavigationCopy = Readonly<{
   primaryNavigation: string;
   search: string;
 }>;
+
+export type PublicFooterGroupId = 'product' | 'resources' | 'company' | 'legal';
+
+export type PublicFooterLinkId =
+  | 'how-it-works'
+  | 'your-pc'
+  | 'results'
+  | 'plans'
+  | 'download'
+  | 'documentation'
+  | 'help'
+  | 'releases'
+  | 'status'
+  | 'about'
+  | 'principles'
+  | 'contact'
+  | 'terms'
+  | 'privacy'
+  | 'security'
+  | 'essential-storage'
+  | 'responsible-disclosure';
+
+export type PublicFooterCopy = Readonly<{
+  copyright: string;
+  cta: string;
+  footerNavigation: string;
+  groupLabels: Readonly<Record<PublicFooterGroupId, string>>;
+  linkLabels: Readonly<Record<PublicFooterLinkId, string>>;
+  promise: string;
+}>;
+
+type PublicFooterLink = Readonly<{
+  href: string;
+  id: PublicFooterLinkId;
+}>;
+
+type PublicFooterGroup = Readonly<{
+  id: PublicFooterGroupId;
+  links: readonly PublicFooterLink[];
+}>;
+
+export type PublicFooterState = Readonly<{
+  ctaHref: string;
+  groups: readonly PublicFooterGroup[];
+  localeHref: string;
+  targetLocale: WebLocale;
+}>;
+
+const FOOTER_GROUPS = Object.freeze([
+  Object.freeze({
+    id: 'product',
+    links: Object.freeze([
+      Object.freeze({ id: 'how-it-works', routeId: 'public-product' }),
+      Object.freeze({ id: 'your-pc', routeId: 'public-compatibility' }),
+      Object.freeze({ id: 'results', routeId: 'public-results' }),
+      Object.freeze({ id: 'plans', routeId: 'public-plans' }),
+      Object.freeze({ id: 'download', routeId: 'public-download' }),
+    ]),
+  }),
+  Object.freeze({
+    id: 'resources',
+    links: Object.freeze([
+      Object.freeze({ id: 'documentation', routeId: 'docs-index' }),
+      Object.freeze({ id: 'help', routeId: 'public-support' }),
+      Object.freeze({ id: 'releases', routeId: 'releases-index' }),
+      Object.freeze({ id: 'status', routeId: 'public-status' }),
+    ]),
+  }),
+  Object.freeze({
+    id: 'company',
+    links: Object.freeze([
+      Object.freeze({ id: 'about', routeId: 'public-about' }),
+      Object.freeze({ id: 'principles', routeId: 'public-about', fragment: 'principles' }),
+      Object.freeze({ id: 'contact', routeId: 'public-support' }),
+    ]),
+  }),
+  Object.freeze({
+    id: 'legal',
+    links: Object.freeze([
+      Object.freeze({ id: 'terms', routeId: 'public-terms' }),
+      Object.freeze({ id: 'privacy', routeId: 'public-privacy-policy' }),
+      Object.freeze({ id: 'security', routeId: 'public-policies' }),
+      Object.freeze({ id: 'essential-storage', routeId: 'public-privacy-policy' }),
+      Object.freeze({
+        id: 'responsible-disclosure',
+        routeId: 'public-responsible-disclosure',
+      }),
+    ]),
+  }),
+] as const satisfies readonly Readonly<{
+  id: PublicFooterGroupId;
+  links: readonly Readonly<{
+    fragment?: 'principles';
+    id: PublicFooterLinkId;
+    routeId: WebRouteId;
+  }>[];
+}>[]);
 
 type PublicNavigationItem = Readonly<{
   current: boolean;
@@ -37,7 +140,7 @@ export type PublicNavigationState = Readonly<{
 const TASK_PILLARS = new Set<string>(publicNavigation.map(({ id }) => id));
 
 const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
-  if (TASK_PILLARS.has(routeId)) return routeId as PublicPillarId;
+  if (TASK_PILLARS.has(routeId)) return routeId;
   if (routeId === 'public-home') return 'public-product';
   if (routeId === 'public-evidence') return 'public-results';
   if (routeId.startsWith('releases-')) return 'public-download';
@@ -96,6 +199,23 @@ export const getPublicNavigationState = (
     localeLabel,
     mobileItems: items.map((item) => ({ ...item })),
     targetLocale,
+  };
+};
+
+export const getPublicFooterState = (pathname: string, locale: WebLocale): PublicFooterState => {
+  const navigationState = getPublicNavigationState(pathname, locale);
+
+  return {
+    ctaHref: publicBoundaryHref('public-download', locale),
+    groups: FOOTER_GROUPS.map((group) => ({
+      id: group.id,
+      links: group.links.map((link) => ({
+        href: `${publicBoundaryHref(link.routeId, locale)}${'fragment' in link ? `#${link.fragment}` : ''}`,
+        id: link.id,
+      })),
+    })),
+    localeHref: navigationState.localeHref,
+    targetLocale: navigationState.targetLocale,
   };
 };
 
@@ -177,5 +297,62 @@ export const PublicNavigation = ({
         </div>
       </details>
     </>
+  );
+};
+
+export const PublicFooter = ({
+  copy,
+  locale,
+}: Readonly<{ copy: PublicFooterCopy; locale: WebLocale }>) => {
+  const pathname = usePathname();
+  const state = getPublicFooterState(pathname, locale);
+
+  return (
+    <footer aria-label={copy.footerNavigation} className="public-footer">
+      <div className="public-footer__inner">
+        <div className="public-footer__identity">
+          <a
+            aria-label="Liiiraa Boost"
+            className="public-brand"
+            href={publicBoundaryHref('public-home', locale)}
+          >
+            <ProductLockup />
+          </a>
+          <p>{copy.promise}</p>
+        </div>
+
+        <div className="public-footer__groups">
+          {state.groups.map((group) => (
+            <nav aria-label={copy.groupLabels[group.id]} key={group.id}>
+              <h2>{copy.groupLabels[group.id]}</h2>
+              <ul>
+                {group.links.map((link) => (
+                  <li key={link.id}>
+                    <a className="public-footer__link" href={link.href}>
+                      {copy.linkLabels[link.id]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        <div className="public-footer__closing">
+          <p>{copy.copyright}</p>
+          <div className="public-footer__actions">
+            <LocaleSwitcher
+              href={state.localeHref}
+              sourceLocale={locale}
+              targetLocale={state.targetLocale}
+            />
+            <a className="public-footer__cta" href={state.ctaHref}>
+              {copy.cta}
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 };

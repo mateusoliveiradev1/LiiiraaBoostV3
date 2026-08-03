@@ -3,6 +3,46 @@
   "locale": "en",
   "version": "1.0.0",
   "lastReviewedAt": "2026-08-02T12:00:00.000Z",
+  "about": {
+    "routeId": "public-about",
+    "metadata": {
+      "title": "About Liiiraa Boost",
+      "description": "The motivation, trust principles, and ambition that guide Liiiraa Boost."
+    },
+    "title": "Why Liiiraa Boost exists",
+    "lead": "Gaming performance should not require opaque changes or a choice between speed and stability. The product begins with that conviction.",
+    "chapters": [
+      {
+        "id": "motivation",
+        "title": "The problem we chose to address",
+        "body": "Every PC responds differently. Generic adjustments can consume time, hide risk, and leave the player without a clear way to judge what actually changed. Liiiraa Boost exists to prepare Windows with context about the hardware and the gaming session."
+      },
+      {
+        "id": "principles",
+        "title": "Improve without destabilizing",
+        "body": "An optimization has value only when its result can be observed and stability remains protected. Gains must therefore be treated as hypotheses to measure on the PC itself, with limits and uncertainty stated directly."
+      },
+      {
+        "id": "trust",
+        "title": "Trust starts on the computer",
+        "body": "The work is local by default. Technical data stays on the PC, and any sharing must have a clear purpose, explicit consent, and minimum scope. The experience should explain what it intends to do before asking for a decision."
+      },
+      {
+        "id": "reversibility",
+        "title": "Control includes a way back",
+        "body": "Every change should be explainable, auditable, and reversible. The previous state, the reason for the change, and the restoration path are part of optimization; they are not secondary features."
+      },
+      {
+        "id": "ambition",
+        "title": "The long-term ambition",
+        "body": "Build the definitive Windows gaming optimizer: deep enough to respect each machine, clear enough to guide decisions, and light enough not to compete with the game for the resources it promises to preserve."
+      }
+    ],
+    "cta": {
+      "label": "See how it works",
+      "routeId": "public-product"
+    }
+  },
   "supportStates": {
     "available": {
       "label": "Available",
