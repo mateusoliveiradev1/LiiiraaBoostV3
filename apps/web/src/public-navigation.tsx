@@ -37,7 +37,25 @@ export type PublicNavigationState = Readonly<{
 const TASK_PILLARS = new Set<string>(publicNavigation.map(({ id }) => id));
 
 const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
-  return TASK_PILLARS.has(routeId) ? routeId : undefined;
+  if (TASK_PILLARS.has(routeId)) return routeId as PublicPillarId;
+  if (routeId === 'public-home') return 'public-product';
+  if (routeId === 'public-evidence') return 'public-results';
+  if (routeId.startsWith('releases-')) return 'public-download';
+  if (
+    routeId.startsWith('docs-') ||
+    routeId.startsWith('public-error-') ||
+    [
+      'public-search',
+      'public-status',
+      'public-policies',
+      'public-privacy-policy',
+      'public-terms',
+      'public-responsible-disclosure',
+    ].includes(routeId)
+  ) {
+    return 'public-support';
+  }
+  return undefined;
 };
 
 export const getPublicNavigationState = (

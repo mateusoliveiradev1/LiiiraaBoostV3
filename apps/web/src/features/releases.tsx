@@ -29,6 +29,7 @@ import releaseEnJson from '../content/releases/releases.en.json';
 import releaseMetadataJson from '../content/releases/releases.metadata.json';
 import releasePtBrJson from '../content/releases/releases.pt-BR.json';
 import { publicBoundaryHref } from '../public-boundary';
+import { PublicProductIcon } from '../public-product-icon';
 
 type ReleaseContent = typeof releaseEnJson;
 type ReleaseMetadata = typeof releaseMetadataJson;
@@ -384,6 +385,43 @@ const RELEASE_CONTENT = Object.freeze({
   'pt-BR': admitReleaseContent(releasePtBrJson, 'pt-BR'),
 });
 
+const PUBLIC_DOWNLOAD_COPY = Object.freeze({
+  en: Object.freeze({
+    description:
+      'Get the official Liiiraa Boost Windows release only after its signature, compatibility, and recovery path are verified.',
+    eyebrow: 'Windows 10 and 11 · Stable channel',
+    facts: Object.freeze([
+      Object.freeze({ body: 'Only the supported Stable channel is offered here.', title: 'Stable release' }),
+      Object.freeze({ body: 'Authenticode, publisher, and SHA-256 must agree.', title: 'Verified signature' }),
+      Object.freeze({ body: 'Every update preserves a safe path back.', title: 'Recovery ready' }),
+    ]),
+    primary: 'Check availability',
+    releases: 'View release details',
+    secondary: 'Check my PC',
+    summary:
+      'The public installer is still being prepared. It will appear here only when the release is signed, compatible, and ready to recover safely.',
+    title: 'Safe download for Windows.',
+    trustTitle: 'No mirror. No unsigned shortcut.',
+  }),
+  'pt-BR': Object.freeze({
+    description:
+      'Baixe a versão oficial do Liiiraa Boost para Windows somente depois que assinatura, compatibilidade e recuperação forem verificadas.',
+    eyebrow: 'Windows 10 e 11 · canal Estável',
+    facts: Object.freeze([
+      Object.freeze({ body: 'Somente o canal Estável e suportado aparece aqui.', title: 'Versão estável' }),
+      Object.freeze({ body: 'Authenticode, publicador e SHA-256 precisam concordar.', title: 'Assinatura verificada' }),
+      Object.freeze({ body: 'Toda atualização preserva um caminho seguro de volta.', title: 'Recuperação pronta' }),
+    ]),
+    primary: 'Ver disponibilidade',
+    releases: 'Ver detalhes da versão',
+    secondary: 'Checar meu PC',
+    summary:
+      'O instalador público ainda está em preparação. Ele só aparecerá aqui quando a versão estiver assinada, compatível e pronta para recuperação segura.',
+    title: 'Download seguro para Windows.',
+    trustTitle: 'Sem espelho. Sem atalho não assinado.',
+  }),
+});
+
 const localeParity = (content: ReleaseContent): string =>
   JSON.stringify({
     channels: content.channels.map(({ id }) => id),
@@ -464,6 +502,11 @@ export const resolveDownloadPage = (
 export const getReleasePageMetadata = (locale: WebLocale) => {
   const content = getReleaseContent(locale);
   return content.metadata;
+};
+
+export const getPublicDownloadPageMetadata = (locale: WebLocale) => {
+  const copy = PUBLIC_DOWNLOAD_COPY[locale];
+  return { description: copy.description, title: copy.title };
 };
 
 const assertNever = (value: never): never => {
@@ -1169,6 +1212,76 @@ export const ReleaseExperience = ({
             ]}
           />
         </details>
+      </article>
+    </div>
+  );
+};
+
+export const PublicDownloadExperience = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+  const resolution = resolveDownloadPage({ channel: 'stable', locale, version: 'current' });
+  if (resolution === undefined) {
+    throw new Error(`PUBLIC_DOWNLOAD_ROUTE_INVALID:${locale}`);
+  }
+
+  const content = getReleaseContent(locale);
+  const copy = PUBLIC_DOWNLOAD_COPY[locale];
+  const decision = decisionFor(resolution);
+  const releasesHref = requiredHref('releases-index', { locale });
+  const compatibilityHref = publicBoundaryHref('public-compatibility', locale);
+
+  return (
+    <div className="public-download-experience" data-route-id="public-download">
+      <article className="public-catalog">
+        <header className="public-download-hero">
+          <div className="public-download-hero__copy">
+            <StatusSignal
+              detail={copy.eyebrow}
+              label={locale === 'pt-BR' ? 'Em preparação' : 'Coming soon'}
+              state="unavailable"
+            />
+            <h1 tabIndex={-1}>{copy.title}</h1>
+            <p>{copy.summary}</p>
+            <nav
+              aria-label={locale === 'pt-BR' ? 'Ações de download' : 'Download actions'}
+              className="public-download-hero__actions"
+            >
+              <a className="public-action public-action--primary" href="#download-status">
+                {copy.primary}
+              </a>
+              <a className="public-action" href={compatibilityHref}>
+                {copy.secondary}
+              </a>
+            </nav>
+          </div>
+          <div className="public-download-hero__trust">
+            <strong>{copy.trustTitle}</strong>
+            <ul>
+              {copy.facts.map((fact) => (
+                <li key={fact.title}>
+                  <PublicProductIcon name="check" size={18} weight="bold" />
+                  <span>
+                    <strong>{fact.title}</strong>
+                    {fact.body}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </header>
+
+        <section aria-label={content.downloadGate.title} id="download-status">
+          <DownloadDecisionView content={content} decision={decision} locale={locale} />
+        </section>
+        <ReleaseFacts content={content} locale={locale} resolution={resolution} />
+        <UpdateLifecycle content={content} locale={locale} />
+        <nav
+          aria-label={locale === 'pt-BR' ? 'Informações da versão' : 'Release information'}
+          className="public-download-release-link"
+        >
+          <a className="public-action" href={releasesHref}>
+            {copy.releases}
+          </a>
+        </nav>
       </article>
     </div>
   );

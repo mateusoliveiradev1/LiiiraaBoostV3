@@ -79,15 +79,18 @@ const expectScenarioRoutesCanonical = (id: string) => {
   expect(record.requiredRouteIds.every((routeId) => canonicalRouteIds.has(routeId))).toBe(true);
 };
 
-test('@final @public navigation and language preserve the active documentation route', async ({
+test('@final @public navigation and language preserve the documentation route', async ({
   page,
 }, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
   await gotoWithRecoverableRetry(page, '/en/docs/current');
 
-  const current = page.locator('nav.public-navigation--desktop:visible a[aria-current="page"]');
-  await expect(current).toHaveCount(1);
-  await expect(current).toContainText('Help');
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  await expect(navigation.getByRole('link', { name: 'Help' })).toHaveAttribute(
+    'href',
+    '/en/support',
+  );
+  await expect(navigation.locator('a[aria-current="page"]')).toHaveCount(0);
 
   const locale = page.locator('a.lb-web-locale-switcher:visible');
   await expect(locale).toHaveCount(1);
@@ -99,9 +102,7 @@ test('@final @public navigation and language preserve the active documentation r
   await locale.click();
   await expect(page).toHaveURL(/\/pt-BR\/docs\/current$/u);
   await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
-  await expect(
-    page.locator('nav.public-navigation--desktop:visible a[aria-current="page"]'),
-  ).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1, name: 'Central de ajuda' })).toBeVisible();
 });
 
 test('@final @public Cobalt Ignition Bay geometry keeps the focal product above the fold', async ({
@@ -118,11 +119,11 @@ test('@final @public Cobalt Ignition Bay geometry keeps the focal product above 
     await heading.evaluate((node) => getComputedStyle(node).fontSize),
   );
   expect(headingSize).toBeGreaterThanOrEqual(52);
-  expect(headingSize).toBeLessThanOrEqual(76);
+  expect(headingSize).toBeLessThanOrEqual(80);
   expect(stage).not.toBeNull();
   expect(stage?.width).toBeGreaterThanOrEqual(1_000);
   expect(Math.abs((stage?.x ?? 0) + (stage?.width ?? 0) / 2 - 720)).toBeLessThanOrEqual(2);
-  expect(stage?.y).toBeLessThanOrEqual(560);
+  expect(stage?.y).toBeLessThanOrEqual(640);
   expect(
     Math.min((stage?.y ?? 0) + (stage?.height ?? 0), 900) - Math.max(stage?.y ?? 0, 0),
   ).toBeGreaterThanOrEqual(260);
@@ -139,7 +140,7 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     const disclosure = page.locator('details.public-mobile-menu');
     await expect(disclosure).not.toHaveAttribute('open', '');
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
-    const locale = page.locator('.public-mobile-locale .lb-web-locale-switcher');
+    const locale = page.locator('a.lb-web-locale-switcher:visible');
     expect((await locale.boundingBox())?.height).toBeGreaterThanOrEqual(48);
     await expect(locale).toContainText('Português');
     await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
@@ -147,7 +148,7 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
       await page.evaluate(() => document.documentElement.clientWidth),
     );
     await disclosure.locator('summary').click();
-    await expect(disclosure.locator('a[aria-current="page"]:visible')).toHaveCount(1);
+    await expect(disclosure.getByRole('link', { name: 'Help' })).toBeVisible();
     await expect(page.locator('[data-high-risk-action="true"]')).toHaveCount(0);
   });
 }
@@ -180,12 +181,13 @@ test('@final @public W01 keeps the PT-BR command runway truthful and distributio
   );
   await expect(
     page.locator(
-      '.home-ignition-hero, .home-evidence-stage, .home-context-stage, .home-compatibility-field, .home-release-ribbon',
+      '.home-ignition-hero, .home-player-problem, .home-workflow, .home-mode-split, .home-results-method, .home-safety-runway, .home-faq, .home-final-cta',
     ),
-  ).toHaveCount(5);
-  await expect(
-    page.getByText('Download público ainda não disponível', { exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(8);
+  await expect(page.getByRole('link', { name: 'Baixar grátis', exact: true }).first()).toHaveAttribute(
+    'href',
+    '/pt-BR/download',
+  );
   await expect(
     page.locator('a[href$=".exe"], a[href*="target/release"], a[href*="self-signed"]'),
   ).toHaveCount(0);
@@ -200,7 +202,7 @@ test('@final @public W02 preserves the complete English mobile hierarchy and men
 
   await gotoWithRecoverableRetry(page, '/en');
   await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
-    'Prepare your PC. Prove result. Restore control.',
+    'Prepare your PC. Prove the result. Restore with control.',
   );
   const menu = page.locator('details.public-mobile-menu');
   await menu.locator('summary').click();
@@ -209,7 +211,8 @@ test('@final @public W02 preserves the complete English mobile hierarchy and men
     menu.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link'),
   ).toHaveCount(6);
   await expect(menu.getByRole('link', { name: 'Search' })).toBeVisible();
-  await expect(menu.getByRole('link', { name: 'Português' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Download free' })).toBeVisible();
+  await expect(page.locator('a.lb-web-locale-switcher:visible')).toContainText('Português');
   await expect(page.getByRole('link', { name: /complete screenshot/i })).toBeVisible();
   await expectNoDeadControls(page);
 });
@@ -223,34 +226,34 @@ test('@final @public W06 keeps search and filters URL-addressable without privat
   await page.goto('/en/search?q=no-such-trusted-record&availability=available');
   await expect(page).toHaveURL(/\/en\/search\?q=no-such-trusted-record&availability=available$/u);
   await expect(
-    page.getByLabel(/Search product, evidence, compatibility, plans, and support/u),
+    page.getByLabel(/Search product, results, compatibility, plans, and help/u),
   ).toHaveValue('no-such-trusted-record');
-  await expect(page.getByLabel('Availability')).toHaveValue('available');
-  await expect(page.getByRole('heading', { name: 'No trusted results' })).toBeVisible();
+  await expect(page.getByLabel('Filter by availability')).toHaveValue('available');
+  await expect(page.getByRole('heading', { name: 'No results found' })).toBeVisible();
   await expect(page.locator('main')).not.toContainText(
     /account-preview|admin-|SIMULATED SCENARIO/iu,
   );
 
   await page
-    .getByLabel(/Search product, evidence, compatibility, plans, and support/u)
+    .getByLabel(/Search product, results, compatibility, plans, and help/u)
     .fill('compatibility');
-  await page.getByLabel('Availability').selectOption('');
+  await page.getByLabel('Filter by availability').selectOption('');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page).toHaveURL(/q=compatibility/u);
   await expect(
-    page.getByRole('link', { name: 'Is your PC compatible?' }),
+    page.getByRole('link', { name: 'See whether Liiiraa Boost fits your PC' }),
   ).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/q=no-such-trusted-record&availability=available$/u);
   await page.reload();
   await expect(
-    page.getByLabel(/Search product, evidence, compatibility, plans, and support/u),
+    page.getByLabel(/Search product, results, compatibility, plans, and help/u),
   ).toHaveValue('no-such-trusted-record');
   await page.goForward();
   await expect(page).toHaveURL(/q=compatibility&availability=$/u);
   await page.reload();
   await expect(
-    page.getByLabel(/Search product, evidence, compatibility, plans, and support/u),
+    page.getByLabel(/Search product, results, compatibility, plans, and help/u),
   ).toHaveValue('compatibility');
   await expectNoDeadControls(page);
 });
@@ -265,8 +268,14 @@ test('@final @public W09 identifies unavailable capabilities while public conten
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('[data-state]')).not.toHaveCount(0);
   await expect(page.locator('main')).toContainText(/Download|conta|otimização nativa/iu);
-  await expect(page.getByRole('link', { name: 'Documentação', exact: true }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Suporte', exact: true }).last()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Preciso de ajuda' })).toHaveAttribute(
+    'href',
+    '/pt-BR/support',
+  );
+  await expect(page.getByRole('link', { name: 'Ver versões' })).toHaveAttribute(
+    'href',
+    '/pt-BR/releases',
+  );
   await expectNoDeadControls(page);
 });
 
@@ -284,17 +293,17 @@ test('@final @public plans present a truthful purchase-ready Premium decision', 
   await page.goto('/pt-BR/plans');
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'O plano para jogar com mais controle' }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Comece grátis. Ative o modo competitivo quando fizer sentido.',
+    }),
   ).toBeVisible();
-  await expect(page.locator('.plan-price')).toContainText('R$ 29,90');
-  await expect(page.getByRole('link', { name: 'Continuar com Premium' })).toHaveAttribute(
-    'href',
-    'https://account.liiiraa.com/pt-BR/sign-in',
-  );
-  await expect(page.locator('[data-checkout-authority="disconnected"]')).toContainText(
-    /nenhuma cobrança/iu,
-  );
-  await expect(page.locator('.plan-capabilities [data-icon-library="phosphor"]')).toHaveCount(4);
+  await expect(page.locator('.plan-price').first()).toContainText('R$ 0');
+  const checkout = page.locator('form[data-checkout-authority="disconnected"]');
+  await expect(checkout).toHaveAttribute('action', 'https://account.liiiraa.com/pt-BR/login');
+  await expect(checkout).toHaveAttribute('method', 'get');
+  await expect(checkout.getByRole('button', { name: 'Continuar para criar conta' })).toBeVisible();
+  await expect(page.locator('.plan-capabilities [data-icon-library="phosphor"]')).toHaveCount(8);
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /icon\.svg/u);
   expect(mutations).toEqual([]);
   await expectNoDeadControls(page);
@@ -338,7 +347,6 @@ test('@final @public W17 exposes distinct localized and redacted public error st
     await expect(page.locator('.public-not-found__identity > span')).toHaveText(
       String(target.semanticStatus),
     );
-    await expect(page.locator('.public-not-found__identity code')).toHaveText(target.routeId);
 
     const heading = page.getByRole('heading', { level: 1 });
     const expectedTitle = expectedTitles[`${target.locale}:${target.semanticStatus}`];

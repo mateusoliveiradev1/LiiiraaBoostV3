@@ -46,24 +46,20 @@ test('@final @public W07 renders a complete demonstrative manifest and a termina
 
   await page.goto('/pt-BR/download/stable/current');
   await expect(page.locator('[data-release-route="releases-download"]')).toBeVisible();
-  await expect(page.getByRole('heading', { name: /download público|download.*bloqueado/iu })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ainda não há um instalador público' })).toBeVisible();
   await expect(page.locator('.lb-web-manifest')).toContainText(/SHA-256|Authenticode|publisher|publicDistributionApproved/iu);
-  await expect(page.locator('p[aria-live="assertive"]')).toContainText(/bloqueado|continuar/iu);
-  const compatibilityLinks = page.getByRole('link', {
-    name: 'Verificar compatibilidade',
-    exact: true,
-  });
-  await expect(compatibilityLinks).toHaveCount(2);
-
+  await expect(page.locator('p[aria-live="assertive"]')).toContainText(
+    /Não use espelhos|instaladores de desenvolvimento|terceiros/iu,
+  );
   const terminalGate = page.getByRole('alert').filter({
-    has: page.getByRole('heading', { name: 'O download público está bloqueado', exact: true }),
+    has: page.getByRole('heading', { name: 'Ainda não há um instalador público', exact: true }),
   });
   const terminalActions = terminalGate.getByRole('navigation', {
-    name: 'O download público está bloqueado',
+    name: 'Ainda não há um instalador público',
     exact: true,
   });
   await expect(
-    terminalActions.getByRole('link', { name: 'Verificar compatibilidade', exact: true }),
+    terminalActions.getByRole('link', { name: 'Checar meu PC', exact: true }),
   ).toBeVisible();
   const terminalActionHrefs = await terminalActions.getByRole('link').evaluateAll((links) =>
     links.map((link) => link.getAttribute('href')),

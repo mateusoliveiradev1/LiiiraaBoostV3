@@ -10,7 +10,7 @@ import {
 export const PHASE_3_REQUIREMENTS = ['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const;
 export const PHASE_3_SUCCESS_CRITERIA = ['SC-01', 'SC-02', 'SC-03', 'SC-04'] as const;
 export const PHASE_3_DECISIONS = Array.from(
-  { length: 86 },
+  { length: 101 },
   (_, index) => `D-${String(index + 1).padStart(2, '0')}`,
 );
 export const PHASE_3_SCENARIOS = Array.from(
@@ -21,9 +21,11 @@ export const PHASE_3_LOCALES = ['pt-BR', 'en'] as const;
 export const PHASE_3_ROUTES = [
   'public-home',
   'public-product',
+  'public-results',
   'public-evidence',
   'public-compatibility',
   'public-plans',
+  'public-download',
   'public-search',
   'public-support',
   'public-status',
@@ -45,6 +47,7 @@ export const PHASE_3_ROUTES = [
   'releases-install',
   'account-sign-in',
   'account-sign-up',
+  'account-onboarding',
   'account-overview',
   'account-profile',
   'account-security',
@@ -746,7 +749,7 @@ export const createRepositoryPhase3Input = (
         scenarioId: capture.scenarioId,
         sidecarPath: capture.sidecarPath,
       })),
-      decisions: [...context.matchAll(/- \*\*(D-\d{2}):/gu)].map((match) => match[1] ?? ''),
+      decisions: [...context.matchAll(/- \*\*(D-\d{2,3}):/gu)].map((match) => match[1] ?? ''),
       evidence,
       locales: [...PHASE_3_LOCALES],
       proofs,

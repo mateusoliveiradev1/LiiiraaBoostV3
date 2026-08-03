@@ -254,7 +254,7 @@
       "captureId": "W10",
       "scenarioId": "W10",
       "surface": "account",
-      "route": "/en/sign-in",
+      "route": "/en/login",
       "state": "sign-in-preview",
       "reviewPurpose": "Review English desktop premium shell and current context, useful density, compact mobile navigation, route-preserving locale control, deterministic no-authority, and sign-in validation.",
       "localeReview": "en-parity",
@@ -275,7 +275,7 @@
       "textScale": 100,
       "zoom": 100,
       "snapshotPath": "tests/__screenshots__/accessibility-responsive.spec.ts/W10-account-final-desktop-960.png",
-      "sourceHash": "51582a2cc7e9c896201d96480c033304064ece6cbc51becc387d6dfcfad11365"
+      "sourceHash": "1f0771e95ab7f2e2b4171c2395c9523392e4b323eed0e5117f9151ffc88ead1a"
     },
     {
       "captureId": "W11",

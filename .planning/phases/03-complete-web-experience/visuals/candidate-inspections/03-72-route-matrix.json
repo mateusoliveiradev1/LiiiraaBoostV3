@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "plan": "03-72",
+  "inspectedAt": "2026-08-03T02:15:54.0884986-03:00",
+  "inspectionMode": "original-resolution",
+  "candidateCount": 25,
+  "verdict": "pass",
+  "humanApproved": false,
+  "publicationApproved": false,
+  "summary": {
+    "public": "Acquisition, documentation, download, release, status, search, and error candidates present one customer-facing brand system with route-preserving locale controls, deliberate responsive order, and no unexplained page bands.",
+    "account": "Authentication and signed-in candidates use distinct shells, compact mobile navigation, useful responsibility density, and customer-facing disconnected-authority recovery copy.",
+    "admin": "Role-scoped candidates preserve operational hierarchy, redaction, immutable review evidence, and explicit unavailable-authority states across wide and mobile layouts.",
+    "approvalBoundary": "This is a bounded non-human polish inspection only. Plan 03-45 explicit human review remains required."
+  },
+  "records": [
+    { "captureId": "W01", "register": "brand", "route": "/pt-BR", "locale": "pt-BR", "viewport": "1440x900", "state": "distribution-gated-home", "sha256": "8177df101d98a648f5d1390a0cb475add43fa6683794b516da77db588bd8b7a8", "bytes": 817635, "dimensions": "1440x5817", "verdict": "pass" },
+    { "captureId": "W02", "register": "brand", "route": "/en", "locale": "en", "viewport": "390x844", "state": "distribution-gated-home", "sha256": "0e0c1dc3dae3cbead9dd3a0e064475fe1fb75b579cea2a92beff1109fbcf7bb2", "bytes": 473335, "dimensions": "390x6563", "verdict": "pass" },
+    { "captureId": "W03", "register": "brand", "route": "/pt-BR/docs/current", "locale": "pt-BR", "viewport": "1280x800", "state": "current-documentation", "sha256": "ad7767e98af22c5c5c7a30b9c4b09f269bfccfa87e4552357f7074588dd7e888", "bytes": 225616, "dimensions": "1280x1901", "verdict": "pass" },
+    { "captureId": "W04", "register": "brand", "route": "/en/docs/history/1.0.0/legacy-capture", "locale": "en", "viewport": "1280x800", "state": "historical-documentation", "sha256": "53efd22eb11d8a96a39a1f9b6d9e52606356e1684e9f9e38a168272af477476b", "bytes": 177863, "dimensions": "1280x2336", "verdict": "pass" },
+    { "captureId": "W05", "register": "brand", "route": "/pt-BR/docs/current/troubleshooting/lb-err-0x80070005", "locale": "pt-BR", "viewport": "1280x800", "state": "troubleshooting-evidence", "sha256": "7440ec4fdc648f466334c7cbd8ecb1676d14e19f060873206f3bad04b64045e4", "bytes": 275661, "dimensions": "1280x3215", "verdict": "pass" },
+    { "captureId": "W06", "register": "brand", "route": "/en/search?q=no-such-trusted-record&availability=available", "locale": "en", "viewport": "960x900", "state": "search-empty-filtered", "sha256": "8d4c12fa8c8e55ad3e05a7ab3da147fde178531274472bb15f24d90980dadb2a", "bytes": 83458, "dimensions": "960x1164", "verdict": "pass" },
+    { "captureId": "W07", "register": "brand", "route": "/pt-BR/download/stable/current", "locale": "pt-BR", "viewport": "1440x900", "state": "artifact-unavailable", "sha256": "8e42c7c563b949965a45691826474f77ff48e9e9df3842c84a948967f8abcbbb", "bytes": 487534, "dimensions": "1440x4111", "verdict": "pass" },
+    { "captureId": "W08", "register": "brand", "route": "/en/releases/stable/current/integrity", "locale": "en", "viewport": "1440x900", "state": "integrity-mismatch", "sha256": "e82ec248ba6787b24fc80c99e68dbe9dda76b9da02160ae1dfa583deba0a67da", "bytes": 295242, "dimensions": "1440x3010", "verdict": "pass" },
+    { "captureId": "W09", "register": "brand", "route": "/pt-BR/status", "locale": "pt-BR", "viewport": "1280x800", "state": "partial-outage", "sha256": "db6c415afd12fb7d4f094fd507907f362612d038204292d61fcee4478ef1a793", "bytes": 132682, "dimensions": "1280x1347", "verdict": "pass" },
+    { "captureId": "W10", "register": "product", "route": "/en/login", "locale": "en", "viewport": "960x900", "state": "sign-in-preview", "sha256": "98eaf7e8112d1fd40dcf7a5755b6e2a7b7e544fffbe55fdca3729cb6886eed0c", "bytes": 62204, "dimensions": "960x900", "verdict": "pass" },
+    { "captureId": "W11", "register": "product", "route": "/pt-BR/account", "locale": "pt-BR", "viewport": "1440x900", "state": "account-ready-preview", "sha256": "3580fbf82a09a2100d2f99658c3e30bbf05597c1b9d441713c6a118651a4b7f9", "bytes": 119338, "dimensions": "1440x944", "verdict": "pass" },
+    { "captureId": "W12", "register": "product", "route": "/en/account", "locale": "en", "viewport": "1280x800", "state": "account-offline-stale", "sha256": "27377b899831c375408e4ce7a6483fa655e886e6ec264095cbe2d0391da69b60", "bytes": 114363, "dimensions": "1280x1046", "verdict": "pass" },
+    { "captureId": "W13", "register": "product", "route": "/pt-BR/account/privacy", "locale": "pt-BR", "viewport": "1280x800", "state": "sensitive-review", "sha256": "3439c52fa710b89e95d95bef8b03d5ad259c25111b5a42a2b0501e2dd4e1d933", "bytes": 118922, "dimensions": "1280x1134", "verdict": "pass" },
+    { "captureId": "W14", "register": "product", "route": "/en/admin/support/case-preview?role=support", "locale": "en", "viewport": "1440x900", "state": "support-role-preview", "sha256": "d7739b46292bd411baea76e8a1d3f72777b391a1c42f249006e4fd5b95bd3b44", "bytes": 159294, "dimensions": "1440x2205", "verdict": "pass" },
+    { "captureId": "W15", "register": "product", "route": "/pt-BR/admin/security/review-preview?role=security", "locale": "pt-BR", "viewport": "1440x900", "state": "diagnostic-consent-blocked", "sha256": "b31af393fa2a762f524cfc4aef649aed09b4281b8f44597382089286eb2b83f5", "bytes": 163975, "dimensions": "1440x2155", "verdict": "pass" },
+    { "captureId": "W16", "register": "product", "route": "/en/admin/operations/review-preview?role=operations", "locale": "en", "viewport": "390x844", "state": "mobile-high-risk-blocked", "sha256": "9b3526d2ea3969a3e1b347136886391b850f1f310ef5c26bb9bf9d7be30ed740", "bytes": 121534, "dimensions": "390x3224", "verdict": "pass" },
+    { "captureId": "W17", "register": "brand", "route": "/pt-BR/errors/404", "locale": "pt-BR", "viewport": "960x900", "state": "authored-not-found", "sha256": "a9ffb396f5581ff0c0a65234f945ed9527c0d88df009da5ad1703e3ee0766725", "bytes": 56426, "dimensions": "960x932", "verdict": "pass" },
+    { "captureId": "W18", "register": "product", "route": "/en/account/privacy", "locale": "en", "viewport": "320x800", "state": "forced-colors-reflow", "sha256": "48f3d63f28a98ae3cf76a24595791bbe6412e43d3dcbcc006883d956d3c63786", "bytes": 57330, "dimensions": "339x1596", "verdict": "pass" },
+    { "captureId": "G01", "register": "brand", "route": "/pt-BR", "locale": "pt-BR", "viewport": "1440x900", "state": "artifact-led-home", "sha256": "8177df101d98a648f5d1390a0cb475add43fa6683794b516da77db588bd8b7a8", "bytes": 817635, "dimensions": "1440x5817", "verdict": "pass" },
+    { "captureId": "G02", "register": "brand", "route": "/en", "locale": "en", "viewport": "390x844", "state": "artifact-led-home", "sha256": "0e0c1dc3dae3cbead9dd3a0e064475fe1fb75b579cea2a92beff1109fbcf7bb2", "bytes": 473335, "dimensions": "390x6563", "verdict": "pass" },
+    { "captureId": "G03", "register": "product", "route": "/pt-BR/account", "locale": "pt-BR", "viewport": "390x844", "state": "account-ready-preview", "sha256": "88ba7abf6a66f65c567df3818e68172226e3d2a3617735aad40c72a88d82a6f9", "bytes": 64081, "dimensions": "390x1663", "verdict": "pass" },
+    { "captureId": "G04", "register": "product", "route": "/en/account/profile", "locale": "en", "viewport": "1440x900", "state": "profile-preview", "sha256": "30404edd5d0e2305dce2a553adf4cb2199fc87c1a85fef83c68291abe88e4c7e", "bytes": 93138, "dimensions": "1440x900", "verdict": "pass" },
+    { "captureId": "G05", "register": "product", "route": "/pt-BR/account/profile", "locale": "pt-BR", "viewport": "390x844", "state": "profile-preview", "sha256": "4f0d04a3b1fc8b49ac485e0672b00b78c55eeb34bece36983d0193ca7c6823dc", "bytes": 43150, "dimensions": "390x1325", "verdict": "pass" },
+    { "captureId": "G06", "register": "product", "route": "/pt-BR/admin", "locale": "pt-BR", "viewport": "1440x900", "state": "role-landing-preview", "sha256": "b5e1fca57c475d1351c7c42271f467073720127a4b5ad837488f039e82b57120", "bytes": 72139, "dimensions": "1440x992", "verdict": "pass" },
+    { "captureId": "G07", "register": "product", "route": "/en/admin/support/case-preview?role=support", "locale": "en", "viewport": "390x844", "state": "support-role-preview", "sha256": "ae58cda06073937e52c34cf5e188153ee91f3222baaededa009af2b1c339dda9", "bytes": 138952, "dimensions": "390x3804", "verdict": "pass" }
+  ]
+}

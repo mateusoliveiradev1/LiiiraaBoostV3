@@ -40,10 +40,10 @@ const expectNoDeadControls = async (page: Page) => {
 };
 
 const advanceButtonWorkflow = async (page: Page) => {
-  await page.getByRole('button', { name: 'Validate reviewed fields' }).click();
-  await page.getByRole('button', { name: 'Validate reviewed fields' }).click();
-  await page.getByRole('button', { name: 'Review action boundary' }).click();
-  await page.getByRole('button', { name: 'Complete reauthentication simulation' }).click();
+  await page.getByRole('button', { name: 'Check details' }).click();
+  await page.getByRole('button', { name: 'Check details' }).click();
+  await page.getByRole('button', { name: 'Continue to confirmation' }).click();
+  await page.getByRole('button', { name: 'Continue without verifying a credential' }).click();
 };
 
 test('@final @admin navigation and language preserve the active audit role', async ({
@@ -59,7 +59,7 @@ test('@final @admin navigation and language preserve the active audit role', asy
   const locale = page.locator('a.lb-web-locale-switcher:visible');
   await expect(locale).toHaveCount(1);
   await expect(locale).toHaveAccessibleName('Switch language to Português');
-  await expect(locale).toContainText('🇧🇷');
+  await expect(locale.locator('[data-locale-flag="br"]')).toHaveCount(1);
   await expect(locale).toContainText('Português');
   await expect(locale).toHaveAttribute('href', '/pt-BR/admin/audit?role=audit');
 
@@ -69,7 +69,7 @@ test('@final @admin navigation and language preserve the active audit role', asy
   await expect(page.locator('a[aria-current="page"]:visible')).toHaveCount(1);
 });
 
-test('@final @admin geometry preserves the 72 280 40 focal queue workspace', async ({
+test('@final @admin geometry preserves the 72 280 focal queue workspace', async ({
   page,
 }, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
@@ -77,7 +77,7 @@ test('@final @admin geometry preserves the 72 280 40 focal queue workspace', asy
 
   expect((await page.locator('.admin-header__bar').boundingBox())?.height).toBe(72);
   expect((await page.locator('.admin-nav__desktop').boundingBox())?.width).toBe(280);
-  expect((await page.locator('.admin-preview-band').boundingBox())?.height).toBe(40);
+  await expect(page.locator('.admin-preview-band')).toHaveCount(0);
   expect(
     Number.parseFloat(
       await page.locator('main h1').evaluate((node) => getComputedStyle(node).fontSize),
@@ -145,7 +145,7 @@ test('@final @admin W14 keeps support role-scoped, redacted, cancellable, and im
     .fill('Reviewed synthetic guidance only.');
   await page.getByRole('button', { name: 'Review support response' }).click();
   await advanceButtonWorkflow(page);
-  await page.getByRole('button', { name: 'Cancel preview' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.locator('[data-preview-region="receipt"]')).toHaveAttribute(
     'data-remote-state-changed',
     'false',
@@ -164,7 +164,7 @@ test('@final @admin W15 blocks diagnostics without exact consent and explains ev
     page.getByRole('heading', { name: 'Acesso ao diagnóstico bloqueado' }),
   ).toBeVisible();
   await expect(page.locator('main')).toContainText('startup-state, application-version');
-  await expect(page.locator('main')).toContainText('security.preview');
+  await expect(page.locator('main')).toContainText('security.operator');
   await expect(page.locator('main')).toContainText('audit-consent-015');
   await expect(page.locator('main')).not.toContainText('synthetic-ready');
   await expect(page.locator('[data-high-risk-action="true"]')).toHaveCount(0);
@@ -191,11 +191,11 @@ test('@final @admin W17 keeps admin errors distinct, localized, and redacted', a
     'en:403': 'Administrative access is not permitted',
     'en:404': 'Administrative area not found',
     'en:410': 'The administrative reference is no longer available',
-    'en:500': 'The administrative preview encountered a failure',
+    'en:500': 'The administrative area encountered a failure',
     'pt-BR:403': 'Acesso administrativo não permitido',
     'pt-BR:404': 'Área administrativa não encontrada',
     'pt-BR:410': 'A referência administrativa não está mais disponível',
-    'pt-BR:500': 'A prévia administrativa encontrou uma falha',
+    'pt-BR:500': 'A área administrativa encontrou uma falha',
   } as const;
   const sensitiveDiagnostic =
     /(?:node_modules|at\s+[A-Za-z_$][\w$]*\s*\(|[A-Za-z]:\\(?:Users|src)\\|\/(?:Users|home)\/|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|Bearer\s+[A-Za-z0-9._~-]+|"(?:password|authorization|cookie)"\s*:)/iu;

@@ -5,7 +5,9 @@ import { matchWebRoute, type WebLocale, type WebRouteId } from '@liiiraa/web-cor
 
 import {
   getPublicCatalogMetadata,
+  getPublicEvidenceLegacyMetadata,
   PublicCatalogPage,
+  PublicEvidenceLegacyPage,
   type CatalogSearchParameters,
 } from '../../../../features/public-catalog';
 import { DocumentationExperience } from '../../../../features/documentation';
@@ -25,6 +27,7 @@ const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-home',
   'public-product',
   'public-results',
+  'public-evidence',
   'public-compatibility',
   'public-plans',
   'public-search',
@@ -75,6 +78,8 @@ export const generateMetadata = async ({ params }: PublicCatchAllPageProps): Pro
   const resolvedMetadata =
     resolution.routeId === 'public-home'
       ? getHomeContent(resolution.locale).metadata
+      : resolution.routeId === 'public-evidence'
+        ? getPublicEvidenceLegacyMetadata(resolution.locale)
       : resolution.routeId === 'docs-index' || resolution.routeId === 'docs-task'
         ? {
             title:
@@ -117,6 +122,10 @@ export default async function PublicCatchAllPage({
 
   if (resolution.routeId === 'public-home') {
     return <CommandRunwayHome locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-evidence') {
+    return <PublicEvidenceLegacyPage locale={resolution.locale} />;
   }
 
   if (resolution.routeId === 'docs-index') {

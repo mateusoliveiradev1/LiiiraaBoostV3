@@ -79,7 +79,7 @@ describe('Home layout and screenshot evidence gate', () => {
     });
 
     const homeSource = await readSource('./features/home.tsx');
-    expect(homeSource).toContain('data-hero-layout="asymmetric-product-stage"');
+    expect(homeSource).toContain('data-hero-layout="centered-product-stage"');
     expect(homeSource).toContain('className="home-ignition-hero__promise"');
     expect(homeSource).toContain("publicBoundaryHref('public-download', locale)");
     expect(homeSource).toContain("? 'Liiiraa Boost para Windows 10 e 11'");
@@ -89,7 +89,7 @@ describe('Home layout and screenshot evidence gate', () => {
     );
   });
 
-  it('stages the real desktop capture as the largest asymmetric proof object', async () => {
+  it('stages the real desktop capture as the dominant centered proof object', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
@@ -107,10 +107,10 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('data-stage-max-top="560"');
     expect(homeSource).toContain('data-stage-min-visible="260"');
     expect(homeStyles).toMatch(
-      /\.home-ignition-hero__stage\s*\{[\s\S]*grid-column:\s*6 \/ 13;[\s\S]*inline-size:\s*min\(58vw, 820px\);/u,
+      /\.home-ignition-hero__stage\s*\{[\s\S]*grid-column:\s*2 \/ 12;[\s\S]*inline-size:\s*min\(calc\(100vw - 64px\), 1120px\);/u,
     );
     expect(homeStyles).toMatch(
-      /\.home-ignition-hero__stage \.lb-web-product-stage img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
+      /\.home-ignition-hero__stage \.lb-web-product-stage img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 9/u,
     );
   });
 
@@ -124,7 +124,7 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('splitHeroPromise');
     expect(homeSource).toContain('primary>');
     expect(homeStyles).toMatch(
-      /\.home-ignition-hero__promise\s*\{[\s\S]*font-size:\s*clamp\(48px, 5\.2vw, 76px\);[\s\S]*line-height:\s*0\.94/u,
+      /\.home-ignition-hero__promise\s*\{[\s\S]*font-size:\s*clamp\(48px, 5\.4vw, 80px\);[\s\S]*line-height:\s*0\.96/u,
     );
     expect(tokenStyles).toMatch(/--lb-public-hero-display-size:\s*clamp\(52px, 6vw, 76px\);/u);
     const shellStyles = await readSource('./app/public-shell.css');

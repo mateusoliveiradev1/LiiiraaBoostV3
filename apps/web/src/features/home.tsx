@@ -471,7 +471,7 @@ const IgnitionHero = ({
   proofNote: string;
   resultsHref: string;
 }>) => (
-  <section className="home-ignition-hero" data-hero-layout="asymmetric-product-stage">
+  <section className="home-ignition-hero" data-hero-layout="centered-product-stage">
     <div className="home-ignition-hero__copy">
       <p className="home-ignition-hero__eyebrow">
         {locale === 'pt-BR'

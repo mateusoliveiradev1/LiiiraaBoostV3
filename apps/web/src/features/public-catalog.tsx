@@ -1619,6 +1619,60 @@ export const PublicCatalogPage = ({ locale, routeId, searchParams }: PublicCatal
   );
 };
 
+const PUBLIC_EVIDENCE_LEGACY_COPY = Object.freeze({
+  en: Object.freeze({
+    body: 'Liiiraa Boost compares the same PC, game, and visible conditions before presenting a result. Estimates, measurements, and unavailable data are always identified separately.',
+    docs: 'Read the measurement guide',
+    eyebrow: 'Evidence you can inspect',
+    results: 'See how results are proven',
+    summary: 'This address remains available for old links. The complete, current explanation now lives in Results.',
+    title: 'How proof is built.',
+  }),
+  'pt-BR': Object.freeze({
+    body: 'O Liiiraa Boost compara o mesmo PC, o mesmo jogo e condições visíveis antes de apresentar um resultado. Estimativa, medição e dado indisponível aparecem sempre separados.',
+    docs: 'Ler o guia de medição',
+    eyebrow: 'Evidência que você pode conferir',
+    results: 'Ver como comprovamos resultados',
+    summary: 'Este endereço continua disponível para links antigos. A explicação completa e atual agora está em Resultados.',
+    title: 'Como a prova é construída.',
+  }),
+});
+
+export const PublicEvidenceLegacyPage = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+  const catalog = CATALOGS[locale];
+  const results = catalog.records.find(({ routeId }) => routeId === 'public-results');
+  if (results === undefined) throw new Error('PUBLIC_EVIDENCE_RESULTS_MISSING');
+  const copy = PUBLIC_EVIDENCE_LEGACY_COPY[locale];
+
+  return (
+    <PublicCatalogComposition routeId="public-evidence">
+      <section className="public-evidence-legacy">
+        <p>{copy.eyebrow}</p>
+        <h1 tabIndex={-1}>{copy.title}</h1>
+        <p>{copy.body}</p>
+        <p>{copy.summary}</p>
+        <nav aria-label={copy.title}>
+          <a
+            className="public-action public-action--primary"
+            href={publicBoundaryHref('public-results', locale)}
+          >
+            {copy.results}
+          </a>
+          <a className="public-action" href={publicBoundaryHref('docs-index', locale)}>
+            {copy.docs}
+          </a>
+        </nav>
+      </section>
+      <ResultsExperience catalog={catalog} record={results} />
+    </PublicCatalogComposition>
+  );
+};
+
+export const getPublicEvidenceLegacyMetadata = (locale: WebLocale) => {
+  const copy = PUBLIC_EVIDENCE_LEGACY_COPY[locale];
+  return { description: copy.body, title: copy.title };
+};
+
 export const getPublicCatalogMetadata = (
   locale: WebLocale,
   routeId: WebRouteId,

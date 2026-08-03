@@ -3,14 +3,14 @@ status: testing
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-02T15:10:09-03:00
+updated: 2026-08-03T02:56:04-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[awaiting human review — route language, navigation, documentation hierarchy, and graphical locale flags were remediated; Plan 03-46 remains blocked]
+[awaiting renewed human review — Plan 03-72 completed the full route/state/locale/breakpoint replay; all 25 candidates remain unapproved and Plan 03-46 remains blocked]
 
 ## Plan 03-45 Preflight
 
@@ -132,6 +132,36 @@ result: passed — automated and non-human visual inspection only. Human approva
 - Product, proof, compatibility, plans, documentation, and releases lead with plain visitor outcomes and next actions; advanced provenance, integrity, and error-code material is subordinate or disclosed contextually.
 - Documentation search leads with `Como podemos ajudar?`, groups primary goals under `Escolha o que você quer fazer`, and keeps technical/error-code navigation secondary.
 - Account and admin retain their task-first shells and graphical route-preserving locale controls; publication and remote authority remain unavailable in preview.
+
+## Plan 03-72 Complete Route Matrix Preflight
+
+date: 2026-08-03T02:56:04-03:00
+result: passed — automated stability and bounded non-human visual inspection only. Human approval remains false, the prior review issues remain open for renewed review, and Plan 03-46 remains blocked.
+
+| Command or gate | Result |
+| --- | --- |
+| `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/final-route-experience.spec.ts` | PASS — 18 applicable route-matrix cases passed, 144 project-axis skips were expected, and every canonical public, account, and admin destination was observed in PT-BR/English at its required width/state. |
+| Original-resolution candidate inspection | PASS — 25/25 W01-W18 and G01-G07 records match their current PNG hashes, dimensions, locale, route, viewport, state, and brand/product register; `humanApproved: false` and `publicationApproved: false`. |
+| `rtk pnpm --filter @liiiraa/web-evidence exec playwright test` | PASS — 272 applicable tests passed and 665 project-axis skips were expected across 937 matrix cases; CSP, accessibility, navigation, locale, motion, forced colors, reflow, screenshots, and isolated origins closed with zero failures. |
+| Canonical route reachability replay | PASS — 24/24 localized public/account/admin 403/404/410/500 outcomes were regenerated through the allowlisted writer with current source hashes and `status: passed`. |
+| `rtk pnpm test` | PASS — Turbo completed 49/49 workspace tasks; web 108/108, account 59/59, admin 60/60, web-core 110/110, and web-evidence 142 passed with one intentionally skipped CLI capture test. |
+| `rtk pnpm web:verify:phase -- --mode planned` | PASS — Phase 3 planned-mode verification closed 101 decisions, 57 routes, 24 observed route outcomes, and 18 scenarios. |
+| Production builds and `/download` route | PASS — web/account/admin production builds completed; Next generated `/pt-BR/download` and `/en/download` as localized SSG routes, while executable distribution remained gated. |
+| Impeccable detector | PASS — zero banned visual-pattern findings across the changed UI sources. |
+
+### Exact renewed review index
+
+| Review group | Candidate identities |
+| --- | --- |
+| Public acquisition | W01, W02, G01, G02 |
+| Documentation, search, download, releases, and service | W03, W04, W05, W06, W07, W08, W09 |
+| Authentication and first account entry | W10 |
+| Signed-in account and profile/privacy | W11, W12, W13, W18, G03, G04, G05 |
+| Administration and role-scoped workflows | W14, W15, W16, G06, G07 |
+| Error and degraded-state emphasis | W04, W05, W06, W07, W08, W09, W12, W15, W16, W17, W18 |
+| Mobile and 320px reflow emphasis | W02, W16, W18, G02, G03, G05, G07 |
+
+Approval boundary: this preflight does not approve pixels, publish candidates, create a publication bundle, execute Plan 03-46, or change any prior human verdict. Plan 03-45 must still receive an explicit human decision over the exact current 25-candidate packet.
 
 ## Tests
 

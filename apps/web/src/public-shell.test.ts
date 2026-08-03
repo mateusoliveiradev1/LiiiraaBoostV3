@@ -108,7 +108,7 @@ describe('public shell', () => {
   });
 
   it('builds a substantial 72px branded desktop topbar with six intent pillars', () => {
-    expect(publicNavigation).toHaveLength(5);
+    expect(publicNavigation).toHaveLength(6);
     expect(shellStyles).toMatch(
       /\.public-header__bar\s*\{[\s\S]*max-inline-size:\s*1280px;[\s\S]*min-block-size:\s*72px;[\s\S]*margin-inline:\s*auto;/u,
     );
@@ -174,6 +174,7 @@ describe('public shell', () => {
       'public-compatibility',
       'public-plans',
       'public-download',
+      'public-support',
     ]);
     expect(publicBoundaryHref('docs-index', 'pt-BR')).toBe('/pt-BR/docs');
     expect(publicBoundaryHref('releases-index', 'en')).toBe('/en/releases');

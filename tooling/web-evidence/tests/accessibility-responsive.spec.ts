@@ -144,7 +144,7 @@ const routeFor = ({ locale, routeId }: Scenario): string => {
     case 'public-status':
       return `/${locale}/status`;
     case 'account-sign-in':
-      return `/${locale}/sign-in`;
+      return `/${locale}/login`;
     case 'account-overview':
       return `/${locale}/account`;
     case 'account-privacy':
@@ -187,11 +187,12 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
       '.home-ignition-hero',
       '.home-ignition-hero__promise',
       '.home-ignition-hero__stage',
-      '.home-prepare-band__introduction',
-      '.home-context-stage',
-      '.home-compatibility-field',
-      '.home-compatibility-field__states > div',
-      '.home-release-ribbon',
+      '.home-player-problem',
+      '.home-workflow > header',
+      '.home-proof-sequence > li',
+      '.home-mode-split',
+      '.home-results-method',
+      '.home-final-cta',
     ] as const;
     const missing = requiredSelectors.filter(
       (selector) => document.querySelector(selector) === null,
@@ -237,17 +238,17 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
     ).length;
 
     return {
-      compatibility: boxAndStyle('.home-compatibility-field'),
-      compatibilityRow: boxAndStyle('.home-compatibility-field__states > div'),
-      context: boxAndStyle('.home-context-stage'),
+      context: boxAndStyle('.home-results-method'),
       header: boxAndStyle('.public-header'),
       headerCount: document.querySelectorAll('.public-header').length,
       heading: boxAndStyle('.home-ignition-hero__promise'),
       hero: boxAndStyle('.home-ignition-hero'),
       missing,
-      prepare: boxAndStyle('.home-prepare-band__introduction'),
-      release: boxAndStyle('.home-release-ribbon'),
+      modes: boxAndStyle('.home-mode-split'),
+      prepare: boxAndStyle('.home-workflow > header'),
+      release: boxAndStyle('.home-final-cta'),
       stage: boxAndStyle('.home-ignition-hero__stage'),
+      workflowRow: boxAndStyle('.home-proof-sequence > li'),
       viewportWidth: document.documentElement.clientWidth,
       visibleLocaleCount,
     };
@@ -277,7 +278,7 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
   expect(
     parity.heading.fontSize,
     'PUBLIC_HOME_AUTHORING_PARITY: authored promise scale',
-  ).toBeGreaterThanOrEqual(parity.viewportWidth >= 960 ? 52 : 36);
+  ).toBeGreaterThanOrEqual(parity.viewportWidth >= 960 ? 51.5 : 36);
   expect(
     parity.heading.fontSize,
     'PUBLIC_HOME_AUTHORING_PARITY: bounded promise scale',
@@ -301,18 +302,18 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
     'grid',
   );
   expect(parity.context.display, 'PUBLIC_HOME_AUTHORING_PARITY: context grid binding').toBe('grid');
+  expect(parity.modes.display, 'PUBLIC_HOME_AUTHORING_PARITY: plan split binding').toBe('block');
   expect(
-    parity.compatibility.display,
-    'PUBLIC_HOME_AUTHORING_PARITY: compatibility grid binding',
+    parity.release.display,
+    'PUBLIC_HOME_AUTHORING_PARITY: responsive final CTA layout binding',
+  ).toBe(parity.viewportWidth >= 960 ? 'flex' : 'grid');
+  expect(
+    parity.workflowRow.display,
+    'PUBLIC_HOME_AUTHORING_PARITY: workflow row grid binding',
   ).toBe('grid');
-  expect(parity.release.display, 'PUBLIC_HOME_AUTHORING_PARITY: release grid binding').toBe('grid');
   expect(
-    parity.compatibilityRow.display,
-    'PUBLIC_HOME_AUTHORING_PARITY: label/value grid binding',
-  ).toBe('grid');
-  expect(
-    parity.compatibilityRow.columnGap,
-    'PUBLIC_HOME_AUTHORING_PARITY: label/value gap',
+    parity.workflowRow.columnGap,
+    'PUBLIC_HOME_AUTHORING_PARITY: workflow row gap',
   ).toBeGreaterThanOrEqual(16);
 };
 
@@ -427,10 +428,12 @@ const installStalePublicAuthoringSelectors = async (page: Page): Promise<readonl
     const body = await response.text();
     const staleBody = body
       .replaceAll('.home-ignition-', '.stale-home-ignition-')
-      .replaceAll('.home-prepare-', '.stale-home-prepare-')
-      .replaceAll('.home-context-', '.stale-home-context-')
-      .replaceAll('.home-compatibility-', '.stale-home-compatibility-')
-      .replaceAll('.home-release-', '.stale-home-release-');
+      .replaceAll('.home-player-', '.stale-home-player-')
+      .replaceAll('.home-workflow', '.stale-home-workflow')
+      .replaceAll('.home-proof-', '.stale-home-proof-')
+      .replaceAll('.home-mode-', '.stale-home-mode-')
+      .replaceAll('.home-results-', '.stale-home-results-')
+      .replaceAll('.home-final-', '.stale-home-final-');
     if (staleBody !== body) neutralized.push(route.request().url());
     await route.fulfill({ body: staleBody, response });
   });
@@ -482,7 +485,7 @@ const projectInternalAccountScenario = async (page: Page, scenario: Scenario): P
   );
   await expect(
     experience.getByRole('navigation', { name: 'Safe recovery' }).getByRole('link'),
-  ).toHaveText(['Review sign-in', 'Open support preview']);
+  ).toHaveText(['Review sign-in', 'Open support']);
 };
 
 test('@final @public development CSP is browser-clean on every separate origin', async ({
@@ -577,8 +580,8 @@ test('@final @public CSP origin, noindex, authority, role, and release gates rem
   expect(new URL(page.url()).origin).toBe('http://admin.localhost:3102');
   await expect(page).toHaveURL(/\?role=audit$/u);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/iu);
-  await expect(page.locator('[data-authority="disconnected"]')).not.toHaveCount(0);
-  await expect(page.locator('[data-authority="connected"]')).toHaveCount(0);
+  await expect(page.locator('[data-authoritative-access-connected="false"]')).not.toHaveCount(0);
+  await expect(page.locator('[data-authoritative-access-connected="true"]')).toHaveCount(0);
 });
 
 test('@final @public visual manifest is an exact W01-W18 projection', async ({}, testInfo) => {

@@ -8,6 +8,7 @@ import {
   DownloadDecisionView,
   getReleaseContent,
   getReleaseMetadata,
+  PublicDownloadExperience,
   ReleaseExperience,
   releaseBlockedReasonCopy,
   resolveDownloadPage,
@@ -34,6 +35,26 @@ const blockedReasons = [
 ] as const satisfies readonly DownloadBlockedReason[];
 
 describe('release content and routes', () => {
+  it('renders the canonical public Download route as a customer-facing fail-closed experience', async () => {
+    const ptMarkup = renderToStaticMarkup(<PublicDownloadExperience locale="pt-BR" />);
+    const enMarkup = renderToStaticMarkup(<PublicDownloadExperience locale="en" />);
+    const pageSource = await import('node:fs/promises').then(({ readFile }) =>
+      readFile(new URL('./app/[locale]/download/page.tsx', import.meta.url), 'utf8'),
+    );
+
+    expect(ptMarkup).toContain('data-route-id="public-download"');
+    expect(ptMarkup).toContain('Download seguro para Windows.');
+    expect(ptMarkup).toContain('Ainda não há um instalador público');
+    expect(ptMarkup).toContain('Atualizações automáticas sem interromper sua partida');
+    expect(enMarkup).toContain('Safe download for Windows.');
+    expect(enMarkup).toContain('There is no public installer yet');
+    expect(pageSource).toContain('<PublicDownloadExperience locale={locale} />');
+    for (const markup of [ptMarkup, enMarkup]) {
+      expect(markup).not.toMatch(/<a[^>]+download(?:=|\s|>)/iu);
+      expect(markup).not.toMatch(/https?:\/\/[^"<]*\.(?:exe|msi|msix)/iu);
+    }
+  });
+
   it('explains download availability in plain language before release mechanics', () => {
     const pt = resolveReleasePage({ locale: 'pt-BR' });
     const en = resolveReleasePage({ locale: 'en' });

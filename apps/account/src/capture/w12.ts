@@ -90,13 +90,13 @@ export const createW12AccountCaptureProjection = () => {
     },
     {
       copy: content.states.failure,
-      label: 'Retryable failure',
+      label: 'Retry available',
       pattern: 'double',
       state: 'error',
       tone: 'critical',
     },
   ] as const;
-  const markup = `<div data-account-preview="deterministic" data-authority-connected="false" data-route-id="${routeId}" data-scenario-id="${scenarioId}"><article data-account-state="offline stale expired-session partial-failure"><header class="lb-web-route-header"><div><h1 tabindex="-1">${escapeCaptureText(content.recovery.title)}</h1><p>${escapeCaptureText(content.states.failure)}</p></div></header><aside class="lb-web-boundary" role="note"><strong>Preview boundary</strong><p>Account information cannot be refreshed right now. Retrying only checks availability; it does not submit an account change.</p>${statusSignal({ label: 'Deterministic preview', pattern: 'diagonal-stripe', state: 'preview', tone: 'experimental' })}</aside><ol class="lb-web-timeline">${degradedStates.map((state) => `<li>${statusSignal(state)}<p>${escapeCaptureText(state.copy)}</p></li>`).join('')}</ol><p role="status"><strong>${escapeCaptureText(content.recovery.safeWork)}:</strong> Display name, language, and support subject remain available; message details are cleared.</p><nav aria-label="Safe recovery"><a href="${hrefFor('account-sign-in')}">${escapeCaptureText(content.recovery.signIn)}</a> <a href="${hrefFor('account-support')}">${escapeCaptureText(content.recovery.support)}</a></nav></article></div>`;
+  const markup = `<div data-account-preview="deterministic" data-authority-connected="false" data-route-id="${routeId}" data-scenario-id="${scenarioId}"><article data-account-state="offline stale expired-session partial-failure"><header class="lb-web-route-header"><div><h1 tabindex="-1">${escapeCaptureText(content.recovery.title)}</h1><p>${escapeCaptureText(content.states.failure)}</p></div></header><aside class="lb-web-boundary" role="note"><strong>Safe recovery boundary</strong><p>Account information cannot be refreshed right now. Retrying only checks availability; it does not submit an account change.</p>${statusSignal({ label: 'No account changes submitted', pattern: 'diagonal-stripe', state: 'preview', tone: 'experimental' })}</aside><ol class="lb-web-timeline">${degradedStates.map((state) => `<li>${statusSignal(state)}<p>${escapeCaptureText(state.copy)}</p></li>`).join('')}</ol><p role="status"><strong>${escapeCaptureText(content.recovery.safeWork)}:</strong> Display name, language, and support subject remain available; message details are cleared.</p><nav aria-label="Safe recovery"><a href="${hrefFor('account-sign-in')}">${escapeCaptureText(content.recovery.signIn)}</a> <a href="${hrefFor('account-support')}">${escapeCaptureText(content.recovery.support)}</a></nav></article></div>`;
   return Object.freeze({
     locale,
     markup,

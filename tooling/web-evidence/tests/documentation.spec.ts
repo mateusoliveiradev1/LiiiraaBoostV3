@@ -46,9 +46,14 @@ test('@final @public W03 exposes current task-led documentation, metadata, and e
   assertScenarioParity('W03');
 
   await page.goto('/pt-BR/docs/current');
-  await expect(page.getByRole('heading', { level: 1, name: 'Documentação técnica' })).toBeVisible();
-  await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText('current');
-  await expect(page.getByRole('navigation', { name: 'Índice da documentação' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Central de ajuda' })).toBeVisible();
+  await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText(
+    'Guias atuais',
+  );
+  await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText(
+    'Recomendado para uso agora',
+  );
+  await expect(page.getByRole('navigation', { name: 'Guias rápidos' })).toBeVisible();
   await expect(page.locator('#documentation-task-index-title')).toBeVisible();
   const article = page
     .locator('#documentation-task-index-title')

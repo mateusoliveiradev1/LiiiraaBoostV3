@@ -96,7 +96,7 @@ const rawWebRoutes = [
   publicRoute('public-plans', '/[locale]/plans', { owner: 'public-navigation' }),
   publicRoute('public-download', '/[locale]/download', { owner: 'public-navigation' }),
   publicRoute('public-search', '/[locale]/search', { indexing: 'noindex' }),
-  publicRoute('public-support', '/[locale]/support'),
+  publicRoute('public-support', '/[locale]/support', { owner: 'public-navigation' }),
   publicRoute('public-status', '/[locale]/status'),
   publicRoute('public-policies', '/[locale]/policies'),
   publicRoute('public-privacy-policy', '/[locale]/policies/privacy'),

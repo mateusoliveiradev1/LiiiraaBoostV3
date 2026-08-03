@@ -10,20 +10,20 @@
 .home-ignition-hero {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 32px;
-  align-items: center;
-  inline-size: min(100%, 1360px);
-  min-block-size: min(828px, calc(100svh - 72px));
+  gap: 20px 32px;
+  align-content: start;
+  inline-size: min(100%, 1280px);
+  min-block-size: min(980px, calc(100svh - 72px));
   margin-inline: auto;
-  padding: clamp(48px, 6vw, 88px) 32px 48px;
+  padding: clamp(32px, 4vw, 56px) 32px 40px;
 }
 
 .home-ignition-hero__copy {
-  grid-column: 1 / 6;
-  justify-items: start;
-  max-inline-size: 620px;
-  margin: 0;
-  text-align: start;
+  grid-column: 2 / 12;
+  justify-items: center;
+  max-inline-size: 1020px;
+  margin-inline: auto;
+  text-align: center;
 }
 
 .home-ignition-hero__eyebrow {
@@ -48,32 +48,36 @@
 }
 
 .home-ignition-hero__promise {
-  max-inline-size: 11ch;
-  font-size: clamp(48px, 5.2vw, 76px);
-  line-height: 0.94;
+  max-inline-size: 18ch;
+  font-size: clamp(48px, 5.4vw, 80px);
+  line-height: 0.96;
 }
 
 .home-ignition-hero__promise > span {
-  inline-size: auto;
-  margin: 0;
-  white-space: normal;
+  inline-size: max-content;
+  margin-inline: auto;
+  white-space: nowrap;
+}
+
+.home-ignition-hero__promise > span:nth-child(2) {
+  color: var(--lb-accent-electric);
 }
 
 .home-ignition-hero__lead {
-  max-inline-size: 52ch;
-  font-size: clamp(18px, 1.5vw, 21px);
+  max-inline-size: 60ch;
+  font-size: clamp(17px, 1.4vw, 20px);
   line-height: 1.55;
 }
 
 .home-ignition-hero__actions {
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .home-ignition-hero__stage {
-  grid-column: 6 / 13;
-  justify-self: end;
-  inline-size: min(58vw, 820px);
-  margin: 0;
+  grid-column: 2 / 12;
+  justify-self: center;
+  inline-size: min(calc(100vw - 64px), 1120px);
+  margin-block-start: 4px;
 }
 
 .home-ignition-hero__stage::before {
@@ -83,9 +87,8 @@
 }
 
 .home-ignition-hero__stage .lb-web-product-stage img {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   object-position: top center;
-  box-shadow: 0 32px 90px color-mix(in srgb, #000 58%, transparent);
 }
 
 .home-ignition-hero__stage .lb-web-product-stage figcaption {
@@ -94,7 +97,7 @@
 
 .home-next-movement {
   grid-column: 1 / -1;
-  justify-self: start;
+  justify-self: center;
   margin-block-start: 8px;
 }
 
@@ -384,6 +387,11 @@
 
   .home-ignition-hero__copy {
     max-inline-size: 720px;
+  }
+
+  .home-ignition-hero__promise > span {
+    inline-size: auto;
+    white-space: normal;
   }
 
   .home-ignition-hero__stage {

@@ -156,11 +156,11 @@ describe('Phase 3 final source coverage', () => {
     expect(result.diagnostics).toEqual([]);
     if (result.ok) {
       expect(result.counts).toEqual({
-        decisions: 86,
+        decisions: 101,
         evidenceDimensions: 20,
         requirements: 4,
         routeOutcomes: 24,
-        routes: 54,
+        routes: 57,
         scenarios: 18,
         successCriteria: 4,
       });

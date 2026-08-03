@@ -613,6 +613,7 @@ button:focus-visible,
   padding-inline: var(--lb-space-3);
   border: 1px solid var(--lb-cobalt-action);
   border-radius: var(--lb-radius-default);
+  color: var(--lb-primary-label);
   background: var(--lb-cobalt-action);
   font-size: var(--lb-text-label-size);
   font-weight: var(--lb-weight-semibold);
@@ -1260,7 +1261,7 @@ button:focus-visible,
 .account-onboarding__steps button[aria-current='step'] .account-onboarding__step-index,
 .account-onboarding__steps button[data-complete='true'] .account-onboarding__step-index {
   border-color: var(--lb-cobalt-action);
-  color: var(--lb-text-on-action);
+  color: var(--lb-primary-label);
   background: var(--lb-cobalt-action);
 }
 
@@ -1344,7 +1345,7 @@ button:focus-visible,
 .account-onboarding__manage-links a[data-action='primary'],
 .account-onboarding__handoff-actions a[data-action='primary'] {
   border-color: var(--lb-cobalt-action);
-  color: var(--lb-text-on-action);
+  color: var(--lb-primary-label);
   background: var(--lb-cobalt-action);
 }
 
@@ -2376,13 +2377,13 @@ button:focus-visible,
   }
 
   .account-onboarding__steps ol {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
   }
 
   .account-onboarding__steps button {
     grid-template-columns: minmax(0, 1fr);
     place-items: center;
-    min-inline-size: 0;
+    min-inline-size: 44px;
     padding: var(--lb-space-1);
   }
 

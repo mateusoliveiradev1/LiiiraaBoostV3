@@ -105,7 +105,6 @@ export function AdminNavigation({
   const pathname = usePathname();
   const searchParameters = useSearchParams();
   const roleParameter = searchParameters.get('role');
-  const validatedRole = roleParameter === role ? role : role === 'support' ? role : undefined;
   const localizedCurrentRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'admin-origin',
@@ -127,9 +126,7 @@ export function AdminNavigation({
     ? localizedAlternateRoute.value
     : fallbackLocaleHref;
   const localeHref =
-    validatedRole === undefined || validatedRole === 'support'
-      ? alternatePath
-      : `${alternatePath}?role=${validatedRole}`;
+    roleParameter === role ? `${alternatePath}?role=${role}` : alternatePath;
 
   return (
     <>

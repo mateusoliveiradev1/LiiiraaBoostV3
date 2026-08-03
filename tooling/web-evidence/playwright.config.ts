@@ -155,7 +155,9 @@ export const selectWebTestSurfaces = (
     selector.length === 0 ||
     isCrossSurfaceSecurityRun ||
     (!hasExplicitProject &&
-      /accessibility-responsive|motion-contract|matrix\.config/u.test(selector));
+      /accessibility-responsive|motion-contract|matrix\.config|final-route-experience/u.test(
+        selector,
+      ));
   return surfaces.filter(({ surface }) =>
     startsEverySurface
       ? true

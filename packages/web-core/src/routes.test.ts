@@ -306,6 +306,7 @@ describe('canonical web route manifest', () => {
       'public-compatibility',
       'public-plans',
       'public-download',
+      'public-support',
     ]);
     expect(projectNavigation('account').map(({ id }) => id)).toEqual([
       'account-overview',

@@ -48,7 +48,7 @@ test('@final @public WEB-08 compares three independently running policy boundari
 }, testInfo) => {
   onlyProject(testInfo, 'public', 'wide-1440');
   await expectSecurityHeaders(request, 'http://public.localhost:3100/pt-BR', 'strict-origin-when-cross-origin');
-  await expectSecurityHeaders(request, 'http://account.localhost:3101/pt-BR/sign-in', 'no-referrer');
+  await expectSecurityHeaders(request, 'http://account.localhost:3101/pt-BR/login', 'no-referrer');
   await expectSecurityHeaders(request, 'http://admin.localhost:3102/pt-BR/admin', 'no-referrer');
 
   const rejected = await request.get('http://admin.localhost:3102/pt-BR/admin', {
