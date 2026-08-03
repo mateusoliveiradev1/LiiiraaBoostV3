@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 70/76 plans executed
+**Plans**: 70/82 plans executed
 
 Plans:
 **Wave 1**
@@ -466,23 +466,38 @@ Plans:
 
 - [x] 03-72-PLAN.md — Consolidate every canonical route, state, locale, breakpoint, and final evidence candidate
 
-**Wave 42** *(additive launch-readiness work; each plan independently blocked on Plan 03-72)*
+**Wave 42** *(parallel additive launch-readiness slices; each blocked on Plan 03-72)*
 
-- [ ] 03-73-PLAN.md — Strengthen public conversion, About, footer, and launch-ready trust/legal surfaces
-- [ ] 03-74-PLAN.md — Redesign account around customer goals and complete the LGPD privacy center
-- [ ] 03-75-PLAN.md — Redesign admin around search, operational queues, evidence, and zoom-safe high-risk work
+- [ ] 03-73-PLAN.md — Recompose the flagship Home around conversion, real product proof, and non-fabrication
+- [ ] 03-74-PLAN.md — Redesign account navigation and Home around coherent customer goals
+- [ ] 03-75-PLAN.md — Center Admin on role-scoped global search and one operational queue
+- [ ] 03-77-PLAN.md — Add the truthful About route and complete utility/trust footer
+- [ ] 03-78-PLAN.md — Complete bilingual public legal, privacy, security, storage, and disclosure content
 
-**Wave 43** *(blocked on Plans 03-73 through 03-75)*
+**Wave 43** *(dependency-ordered account/admin completion)*
 
-- [ ] 03-76-PLAN.md — Re-run full bilingual route/state/breakpoint QA, recapture evidence, and prepare the human-review handoff
+- [ ] 03-79-PLAN.md — Deliver authenticated privacy consent and data-rights workflows
+- [ ] 03-80-PLAN.md — Add contextual admin evidence and zoom-safe high-risk review
 
-**Wave 44** *(blocked on Plan 03-76)*
+**Wave 44** *(blocked on Plans 03-73 through 03-80)*
 
-- [ ] 03-45-PLAN.md — Run complete route-matrix preflight and blocking human visual review
+- [ ] 03-76-PLAN.md — Harden the D-87–D-110 matrix and deterministic all-route candidate identities
 
-**Wave 45** *(blocked on approved Plan 03-45)*
+**Wave 45** *(blocked on Plan 03-76)*
 
-- [ ] 03-46-PLAN.md — Regenerate reports, promote current evidence, and pass final recursive verification
+- [ ] 03-81-PLAN.md — Recapture and inspect every canonical route in both locales and all required widths
+
+**Wave 46** *(blocked on Plan 03-81)*
+
+- [ ] 03-82-PLAN.md — Pass clean builds/regressions and bind the pending-human-review handoff
+
+**Wave 47** *(blocked on Plan 03-82)*
+
+- [ ] 03-45-PLAN.md — Run complete route-matrix preflight and blocking literal human visual review
+
+**Wave 48** *(blocked on approved Plan 03-45)*
+
+- [ ] 03-46-PLAN.md — Promote the complete approved route evidence contract and pass final recursive verification
 
 **UI hint**: yes
 
