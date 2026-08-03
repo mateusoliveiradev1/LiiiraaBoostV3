@@ -98,6 +98,7 @@ const COPY = Object.freeze({
     inspectorLabel: 'Resumo contextual da conta',
     mfa: 'MFA — revisar',
     navigation: 'Responsabilidades da conta',
+    onboarding: 'Primeiros passos',
     passkey: 'Chave de acesso — revisar',
     planAction: 'Ver assinatura',
     planDetail: 'R$ 29,90/mês · R$ 249,90/ano',
@@ -133,6 +134,7 @@ const COPY = Object.freeze({
     inspectorLabel: 'Contextual account summary',
     mfa: 'MFA — review',
     navigation: 'Account responsibilities',
+    onboarding: 'Getting started',
     passkey: 'Passkey — review',
     planAction: 'View subscription',
     planDetail: 'US$ 6.99/month · US$ 59.99/year',
@@ -166,7 +168,7 @@ const localizedHref = (routeId: WebRouteId, locale: WebLocale): string => {
 };
 
 const localizedAuthHref = (
-  routeId: 'account-sign-in' | 'account-sign-up',
+  routeId: 'account-onboarding' | 'account-sign-in' | 'account-sign-up',
   locale: WebLocale,
 ): string => {
   const result = routeHref(routeId, { locale });
@@ -246,6 +248,11 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
       href: localizedAuthHref('account-sign-up', locale),
       icon: 'userAdd',
       label: copy.signUp,
+    },
+    {
+      href: localizedAuthHref('account-onboarding', locale),
+      icon: 'rocket',
+      label: copy.onboarding,
     },
   ];
   const authenticatedAction: AccountNavigationItem = {

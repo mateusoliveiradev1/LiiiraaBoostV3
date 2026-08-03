@@ -7,6 +7,7 @@ import type { AccountFailureKind } from './account-errors';
 export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
   'account-sign-in',
   'account-sign-up',
+  'account-onboarding',
   'account-overview',
   'account-profile',
   'account-security',
@@ -57,6 +58,8 @@ export const getAccountPreviewMetadata = (locale: WebLocale, routeId: AccountPre
       return { title: content.signIn.title, summary: content.signIn.summary };
     case 'account-sign-up':
       return { title: content.signUp.title, summary: content.signUp.summary };
+    case 'account-onboarding':
+      return { title: content.onboarding.title, summary: content.onboarding.summary };
     case 'account-overview':
       return { title: content.overview.title, summary: content.overview.summary };
     case 'account-profile':

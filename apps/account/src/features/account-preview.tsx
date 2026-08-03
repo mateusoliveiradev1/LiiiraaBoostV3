@@ -21,7 +21,13 @@ import {
   type PreviewWorkflowOutput,
   type PreviewWorkflowInput,
 } from '@liiiraa/web-features';
-import { routeHref, WEB_ORIGINS, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
+import {
+  createDesktopAnalyzeLink,
+  routeHref,
+  WEB_ORIGINS,
+  type WebLocale,
+  type WebRouteId,
+} from '@liiiraa/web-core';
 import {
   createWebPreviewAuthority,
   getWebScenario,
@@ -77,6 +83,39 @@ type AccountContent = Readonly<{
     invalidPassword: string;
     invalidConfirmation: string;
     invalidConsent: string;
+  }>;
+  onboarding: Readonly<{
+    title: string;
+    summary: string;
+    progressLabel: string;
+    nextAction: string;
+    backAction: string;
+    completeAction: string;
+    identityTitle: string;
+    identityBody: string;
+    verifyTitle: string;
+    verifyBody: string;
+    planTitle: string;
+    planBody: string;
+    essentialPlan: string;
+    essentialDetail: string;
+    premiumPlan: string;
+    premiumDetail: string;
+    paymentTitle: string;
+    premiumPayment: string;
+    essentialPayment: string;
+    downloadTitle: string;
+    downloadBody: string;
+    activateTitle: string;
+    activateBody: string;
+    manageTitle: string;
+    manageBody: string;
+    browserBoundary: string;
+    localPrivacy: string;
+    openAppAction: string;
+    downloadAction: string;
+    installedPrompt: string;
+    notInstalledPrompt: string;
   }>;
   overview: Readonly<{
     title: string;
@@ -201,6 +240,7 @@ const admitAccountContent = (candidate: unknown, locale: WebLocale): AccountCont
     !isRecord(candidate['states']) ||
     !isRecord(candidate['signIn']) ||
     !isRecord(candidate['signUp']) ||
+    !isRecord(candidate['onboarding']) ||
     !isRecord(candidate['overview']) ||
     !isRecord(candidate['profile']) ||
     !isRecord(candidate['security']) ||
@@ -576,6 +616,256 @@ export const SignUpPreview = ({
       <p className="account-auth-security" role="note">
         <ProductIcon name="lock" size={16} />
         <span>{content.signUp.security}</span>
+      </p>
+    </article>
+  );
+};
+
+type OnboardingPlan = 'essential' | 'premium';
+
+export const OnboardingPreview = ({ content }: Readonly<{ content: AccountContent }>) => {
+  const [activeStep, setActiveStep] = useState(0);
+  const [plan, setPlan] = useState<OnboardingPlan>('essential');
+  const publicDownload = routeHref('public-download', { locale: content.locale });
+  if (!publicDownload.ok) throw new Error('ACCOUNT_PUBLIC_DOWNLOAD_ROUTE_UNAVAILABLE');
+
+  const steps: readonly Readonly<{
+    body: string;
+    icon: ProductIconName;
+    title: string;
+  }>[] = [
+    {
+      body: content.onboarding.identityBody,
+      icon: 'profile',
+      title: content.onboarding.identityTitle,
+    },
+    {
+      body: content.onboarding.verifyBody,
+      icon: 'shield',
+      title: content.onboarding.verifyTitle,
+    },
+    {
+      body: content.onboarding.planBody,
+      icon: 'crown',
+      title: content.onboarding.planTitle,
+    },
+    {
+      body:
+        plan === 'premium'
+          ? content.onboarding.premiumPayment
+          : content.onboarding.essentialPayment,
+      icon: 'receipt',
+      title: content.onboarding.paymentTitle,
+    },
+    {
+      body: content.onboarding.downloadBody,
+      icon: 'download',
+      title: content.onboarding.downloadTitle,
+    },
+    {
+      body: content.onboarding.activateBody,
+      icon: 'device',
+      title: content.onboarding.activateTitle,
+    },
+    {
+      body: content.onboarding.manageBody,
+      icon: 'gauge',
+      title: content.onboarding.manageTitle,
+    },
+  ];
+  const step = steps[activeStep] ?? steps[0];
+  if (step === undefined) throw new Error('ACCOUNT_ONBOARDING_STEP_UNAVAILABLE');
+  const isFirst = activeStep === 0;
+  const isLast = activeStep === steps.length - 1;
+
+  return (
+    <article
+      className="account-onboarding"
+      data-account-state="onboarding"
+      data-authority-connected="false"
+      data-session-created="false"
+    >
+      <FixtureHeader summary={content.onboarding.summary} title={content.onboarding.title} />
+
+      <div className="account-onboarding__workspace">
+        <nav aria-label={content.onboarding.progressLabel} className="account-onboarding__steps">
+          <ol>
+            {steps.map((item, index) => (
+              <li key={item.title}>
+                <button
+                  aria-current={index === activeStep ? 'step' : undefined}
+                  data-complete={index < activeStep || undefined}
+                  onClick={() => setActiveStep(index)}
+                  type="button"
+                >
+                  <span className="account-onboarding__step-index">
+                    {index < activeStep ? (
+                      <ProductIcon name="check" size={17} />
+                    ) : (
+                      String(index + 1).padStart(2, '0')
+                    )}
+                  </span>
+                  <span>{item.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <section
+          aria-labelledby="account-onboarding-step-title"
+          className="account-onboarding__focus"
+        >
+          <div className="account-onboarding__step-heading">
+            <ProductIcon name={step.icon} size={24} />
+            <div>
+              <span>
+                {content.onboarding.progressLabel} {activeStep + 1}/{steps.length}
+              </span>
+              <h2 id="account-onboarding-step-title">{step.title}</h2>
+            </div>
+          </div>
+          <p className="account-onboarding__body">{step.body}</p>
+
+          {activeStep === 0 ? (
+            <nav
+              aria-label={content.onboarding.identityTitle}
+              className="account-onboarding__inline-actions"
+            >
+              <a data-action="primary" href={hrefFor('account-sign-in', content.locale)}>
+                {content.signUp.signInAction}
+              </a>
+              <a href={hrefFor('account-sign-up', content.locale)}>{content.signUp.entryAction}</a>
+            </nav>
+          ) : null}
+
+          {activeStep === 1 ? (
+            <ul className="account-onboarding__security-list">
+              <li>
+                <ProductIcon name="check" size={18} /> {content.security.verifiedEmail}
+              </li>
+              <li>
+                <ProductIcon name="key" size={18} /> {content.security.passkey}
+              </li>
+              <li>
+                <ProductIcon name="shield" size={18} /> {content.security.mfa}
+              </li>
+            </ul>
+          ) : null}
+
+          {activeStep === 2 ? (
+            <div aria-label={content.onboarding.planTitle} className="account-onboarding__plans">
+              <button
+                aria-pressed={plan === 'essential'}
+                onClick={() => setPlan('essential')}
+                type="button"
+              >
+                <span>
+                  <strong>{content.onboarding.essentialPlan}</strong>
+                  <ProductIcon name="check" size={18} />
+                </span>
+                <span>{content.onboarding.essentialDetail}</span>
+              </button>
+              <button
+                aria-pressed={plan === 'premium'}
+                onClick={() => setPlan('premium')}
+                type="button"
+              >
+                <span>
+                  <strong>{content.onboarding.premiumPlan}</strong>
+                  <ProductIcon name="crown" size={18} />
+                </span>
+                <span>{content.onboarding.premiumDetail}</span>
+              </button>
+            </div>
+          ) : null}
+
+          {activeStep === 3 ? (
+            <div
+              className="account-onboarding__payment"
+              data-payment-review={plan === 'premium' ? 'required' : 'not-required'}
+              role="note"
+            >
+              <ProductIcon name={plan === 'premium' ? 'receipt' : 'check'} size={20} />
+              <span>
+                <strong>
+                  {plan === 'premium'
+                    ? content.onboarding.premiumPlan
+                    : content.onboarding.essentialPlan}
+                </strong>
+                {plan === 'premium'
+                  ? content.onboarding.premiumPayment
+                  : content.onboarding.essentialPayment}
+              </span>
+            </div>
+          ) : null}
+
+          {activeStep === 4 || activeStep === 5 ? (
+            <div className="account-onboarding__desktop-handoff">
+              <div role="note">
+                <ProductIcon name="lock" size={20} />
+                <span>
+                  <strong>{content.onboarding.browserBoundary}</strong>
+                  {content.onboarding.localPrivacy}
+                </span>
+              </div>
+              <div className="account-onboarding__handoff-actions">
+                <span>{content.onboarding.installedPrompt}</span>
+                <a data-action="primary" href={createDesktopAnalyzeLink()}>
+                  <ProductIcon name="windows" size={18} />
+                  {content.onboarding.openAppAction}
+                </a>
+                <span>{content.onboarding.notInstalledPrompt}</span>
+                <a
+                  href={`${WEB_ORIGINS['public-origin']}${publicDownload.value}`}
+                  rel="noreferrer"
+                >
+                  <ProductIcon name="download" size={18} />
+                  {content.onboarding.downloadAction}
+                </a>
+              </div>
+            </div>
+          ) : null}
+
+          {isLast ? (
+            <nav
+              aria-label={content.onboarding.manageTitle}
+              className="account-onboarding__manage-links"
+            >
+              <a data-action="primary" href={hrefFor('account-overview', content.locale)}>
+                {content.onboarding.completeAction}
+              </a>
+              <a href={hrefFor('account-device', content.locale)}>{content.device.title}</a>
+              <a href={hrefFor('account-support', content.locale)}>{content.support.title}</a>
+            </nav>
+          ) : null}
+
+          <div className="account-onboarding__controls">
+            <LbButton
+              isDisabled={isFirst}
+              onPress={() => setActiveStep((current) => Math.max(0, current - 1))}
+              variant="quiet"
+            >
+              {content.onboarding.backAction}
+            </LbButton>
+            {isLast ? null : (
+              <LbButton
+                onPress={() =>
+                  setActiveStep((current) => Math.min(steps.length - 1, current + 1))
+                }
+                variant="primary"
+              >
+                {content.onboarding.nextAction}
+              </LbButton>
+            )}
+          </div>
+        </section>
+      </div>
+      <p className="account-onboarding__truth" role="status">
+        <ProductIcon name="info" size={17} />
+        {content.locale === 'pt-BR'
+          ? 'Este guia não cria conta, sessão, cobrança ou vínculo de dispositivo.'
+          : 'This guide does not create an account, session, charge, or device binding.'}
       </p>
     </article>
   );
@@ -1450,6 +1740,9 @@ export const AccountPreviewExperience = ({
       break;
     case 'account-sign-up':
       view = <SignUpPreview content={content} scenarioId={activeScenarioId} />;
+      break;
+    case 'account-onboarding':
+      view = <OnboardingPreview content={content} />;
       break;
     case 'account-overview':
       view = <OverviewPreview content={content} />;

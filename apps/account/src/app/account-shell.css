@@ -1168,6 +1168,288 @@ button:focus-visible,
   padding-inline-start: var(--lb-space-4);
 }
 
+.account-auth-shell__stage:has(.account-onboarding) {
+  grid-template-columns: minmax(260px, 0.7fr) minmax(620px, 1.4fr);
+  inline-size: min(100%, 1280px);
+  gap: clamp(var(--lb-space-6), 6vw, calc(var(--lb-space-7) * 1.5));
+}
+
+.account-onboarding {
+  display: grid;
+  gap: var(--lb-space-4);
+}
+
+.account-onboarding > .lb-web-route-header {
+  padding-block-end: var(--lb-space-3);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.account-onboarding__workspace {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.5fr);
+  min-inline-size: 0;
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-canvas);
+}
+
+.account-onboarding__steps {
+  min-inline-size: 0;
+  padding: var(--lb-space-2);
+  border-inline-end: 1px solid var(--lb-line-subtle);
+  background: var(--lb-surface-inset);
+}
+
+.account-onboarding__steps ol {
+  display: grid;
+  gap: var(--lb-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-onboarding__steps button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--lb-space-2);
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding: var(--lb-space-2);
+  border: 0;
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: var(--lb-text-label-size);
+  text-align: start;
+  cursor: pointer;
+}
+
+.account-onboarding__steps button:hover,
+.account-onboarding__steps button:focus-visible {
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-work);
+}
+
+.account-onboarding__steps button:focus-visible,
+.account-onboarding__plans button:focus-visible {
+  outline: 2px solid var(--lb-focus-ring);
+  outline-offset: 2px;
+}
+
+.account-onboarding__steps button[aria-current='step'] {
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-raised);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-onboarding__step-index {
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 1px solid var(--lb-line-strong);
+  border-radius: 50%;
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+  font-size: 0.75rem;
+}
+
+.account-onboarding__steps button[aria-current='step'] .account-onboarding__step-index,
+.account-onboarding__steps button[data-complete='true'] .account-onboarding__step-index {
+  border-color: var(--lb-cobalt-action);
+  color: var(--lb-text-on-action);
+  background: var(--lb-cobalt-action);
+}
+
+.account-onboarding__focus {
+  display: grid;
+  align-content: start;
+  gap: var(--lb-space-4);
+  min-inline-size: 0;
+  min-block-size: 430px;
+  padding: var(--lb-space-5);
+}
+
+.account-onboarding__step-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  align-items: start;
+}
+
+.account-onboarding__step-heading > svg {
+  margin-block-start: var(--lb-space-1);
+  color: var(--lb-cobalt-signal);
+}
+
+.account-onboarding__step-heading > div {
+  display: grid;
+  gap: var(--lb-space-1);
+}
+
+.account-onboarding__step-heading span {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.account-onboarding__step-heading h2,
+.account-onboarding__body,
+.account-onboarding__truth {
+  margin: 0;
+}
+
+.account-onboarding__step-heading h2 {
+  font-size: 1.3rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.account-onboarding__body {
+  max-inline-size: 64ch;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.account-onboarding__inline-actions,
+.account-onboarding__manage-links,
+.account-onboarding__handoff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lb-space-2);
+  align-items: center;
+}
+
+.account-onboarding__inline-actions a,
+.account-onboarding__manage-links a,
+.account-onboarding__handoff-actions a {
+  display: inline-flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-inline: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-onboarding__inline-actions a[data-action='primary'],
+.account-onboarding__manage-links a[data-action='primary'],
+.account-onboarding__handoff-actions a[data-action='primary'] {
+  border-color: var(--lb-cobalt-action);
+  color: var(--lb-text-on-action);
+  background: var(--lb-cobalt-action);
+}
+
+.account-onboarding__security-list {
+  display: grid;
+  gap: var(--lb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-onboarding__security-list li {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  min-block-size: 44px;
+  padding-block: var(--lb-space-2);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.account-onboarding__plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lb-space-3);
+}
+
+.account-onboarding__plans button {
+  display: grid;
+  gap: var(--lb-space-3);
+  min-inline-size: 0;
+  min-block-size: 150px;
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-panel);
+  color: var(--lb-text-secondary);
+  background: var(--lb-surface-inset);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.account-onboarding__plans button[aria-pressed='true'] {
+  border-color: var(--lb-cobalt-action);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-raised);
+}
+
+.account-onboarding__plans button > span:first-child {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.account-onboarding__payment,
+.account-onboarding__desktop-handoff > div:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  align-items: start;
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  background: var(--lb-surface-inset);
+}
+
+.account-onboarding__payment > span,
+.account-onboarding__desktop-handoff > div:first-child > span {
+  display: grid;
+  gap: var(--lb-space-1);
+  color: var(--lb-text-secondary);
+}
+
+.account-onboarding__payment strong,
+.account-onboarding__desktop-handoff strong {
+  color: var(--lb-text-primary);
+}
+
+.account-onboarding__desktop-handoff {
+  display: grid;
+  gap: var(--lb-space-3);
+}
+
+.account-onboarding__handoff-actions > span {
+  inline-size: 100%;
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.account-onboarding__controls {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--lb-space-3);
+  margin-block-start: auto;
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.account-onboarding__truth {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
 .account-app-shell {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr) 320px;
@@ -1764,6 +2046,10 @@ button:focus-visible,
     margin-inline: auto;
   }
 
+  #account-main.account-auth-shell__main:has(.account-onboarding) {
+    inline-size: min(100%, 760px);
+  }
+
   .account-auth-shell__panel {
     align-items: start;
   }
@@ -1997,6 +2283,45 @@ button:focus-visible,
   }
 
   .account-auth-passwords {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-onboarding__workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-onboarding__steps {
+    padding: var(--lb-space-2);
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--lb-line-subtle);
+  }
+
+  .account-onboarding__steps ol {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .account-onboarding__steps button {
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    min-inline-size: 0;
+    padding: var(--lb-space-1);
+  }
+
+  .account-onboarding__steps button > span:last-child {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .account-onboarding__focus {
+    min-block-size: 460px;
+    padding: var(--lb-space-4);
+  }
+
+  .account-onboarding__plans {
     grid-template-columns: minmax(0, 1fr);
   }
 

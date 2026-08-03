@@ -30,6 +30,7 @@ const accountStyles = readFileSync(new URL('../app/account-shell.css', import.me
 const ACCOUNT_ENTRY_ROUTE_IDS = [
   'account-sign-in',
   'account-sign-up',
+  'account-onboarding',
   'account-overview',
   'account-profile',
   'account-security',
@@ -63,7 +64,7 @@ const sourceBetween = (start: string, end: string): string => {
 
 describe('account responsibility routes and locales', () => {
   it('covers sign-in, account creation, and every canonical responsibility in both locales', () => {
-    expect(ACCOUNT_ENTRY_ROUTE_IDS.slice(2)).toEqual(
+    expect(ACCOUNT_ENTRY_ROUTE_IDS.slice(3)).toEqual(
       projectNavigation('account').map(({ id }) => id),
     );
     for (const locale of ['pt-BR', 'en'] as const satisfies readonly WebLocale[]) {
@@ -88,12 +89,32 @@ describe('account responsibility routes and locales', () => {
     expect(accountPtBr.signUp.title).toBe('Criar sua conta');
     expect(accountEn.signUp.title).toBe('Create your account');
   });
+
+  it('renders bilingual onboarding and hands deep analysis to the Windows app', () => {
+    const onboardingSource = sourceBetween('export const OnboardingPreview', 'const OverviewPreview');
+
+    expect(onboardingSource).toContain('data-session-created="false"');
+    expect(onboardingSource).toContain('data-authority-connected="false"');
+    expect(onboardingSource).toContain("createDesktopAnalyzeLink()");
+    expect(onboardingSource).toContain("routeHref('public-download'");
+    expect(onboardingSource).toContain("plan === 'premium'");
+    expect(onboardingSource).toContain("data-payment-review={plan === 'premium'");
+    expect(accountPtBr.onboarding.browserBoundary).toMatch(
+      /não examina hardware, drivers, processos ou jogos/iu,
+    );
+    expect(accountEn.onboarding.browserBoundary).toMatch(
+      /does not inspect hardware, drivers, processes, or games/iu,
+    );
+    expect(accountPtBr.onboarding.localPrivacy).toMatch(/locais por padrão/iu);
+    expect(accountEn.onboarding.localPrivacy).toMatch(/local by default/iu);
+    expect(layoutSource).toContain("localizedAuthHref('account-onboarding', locale)");
+  });
 });
 
 describe('W11 and W12 complete account states', () => {
   it('renders ready responsibility data and degraded recovery without hiding preview provenance', () => {
-    expect(getWebScenario('W10').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(0, 2));
-    expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(2));
+    expect(getWebScenario('W10').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(0, 3));
+    expect(getWebScenario('W11').requiredRouteIds).toEqual(ACCOUNT_ENTRY_ROUTE_IDS.slice(3));
     expect(getWebScenario('W12')).toMatchObject({ terminalState: 'authority-unavailable' });
     expect(featureSource).toContain('data-authority-connected="false"');
     expect(degradedSource).toContain(

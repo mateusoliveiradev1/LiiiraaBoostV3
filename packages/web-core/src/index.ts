@@ -8,6 +8,7 @@ export {
   WEB_VERSIONS,
   auditRouteProjection,
   createBoundaryLink,
+  createDesktopAnalyzeLink,
   isWebRouteId,
   matchWebRoute,
   projectBreadcrumbs,

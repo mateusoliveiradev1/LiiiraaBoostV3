@@ -239,7 +239,7 @@
       "clock": "2026-01-15T12:00:00.000Z",
       "locale": "en",
       "routeId": "account-sign-in",
-      "requiredRouteIds": ["account-sign-in", "account-sign-up"],
+      "requiredRouteIds": ["account-sign-in", "account-sign-up", "account-onboarding"],
       "latencyMs": 240,
       "provenance": {
         "kind": "fixture",
