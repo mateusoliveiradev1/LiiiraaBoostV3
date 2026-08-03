@@ -31,11 +31,11 @@ describe('public catalog content', () => {
     ['pt-BR', 'public-product', 'Ver como funciona'],
     ['pt-BR', 'public-evidence', 'Ver como medimos'],
     ['pt-BR', 'public-compatibility', 'Checar meu PC'],
-    ['pt-BR', 'public-plans', 'Conhecer o produto'],
+    ['pt-BR', 'public-plans', 'Ver plano Premium'],
     ['en', 'public-product', 'See how it works'],
     ['en', 'public-evidence', 'See how we measure'],
     ['en', 'public-compatibility', 'Check my PC'],
-    ['en', 'public-plans', 'Explore the product'],
+    ['en', 'public-plans', 'View Premium plan'],
   ] as const)(
     'leads %s %s with a route-specific visitor outcome and next action',
     (locale, routeId, action) => {
@@ -63,11 +63,11 @@ describe('public catalog content', () => {
       ['pt-BR', 'public-product', 'Mais desempenho para jogar, sem perder o controle'],
       ['pt-BR', 'public-evidence', 'Resultados que você consegue conferir'],
       ['pt-BR', 'public-compatibility', 'Seu PC é compatível?'],
-      ['pt-BR', 'public-plans', 'Os planos ainda não estão à venda'],
+      ['pt-BR', 'public-plans', 'O plano para jogar com mais controle'],
       ['en', 'public-product', 'More gaming performance without giving up control'],
       ['en', 'public-evidence', 'Results you can verify'],
       ['en', 'public-compatibility', 'Is your PC compatible?'],
-      ['en', 'public-plans', 'Plans are not on sale yet'],
+      ['en', 'public-plans', 'The plan for gaming with more control'],
     ] as const;
 
     for (const [locale, routeId, heading] of expected) {
@@ -140,6 +140,31 @@ describe('public catalog content', () => {
     }
   });
 
+  it('renders a purchase-ready Premium offer without pretending checkout authority exists', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId="public-plans" />,
+      );
+
+      expect(markup).toContain('class="plan-purchase-stage"');
+      expect(markup).toContain('class="plan-offer"');
+      expect(markup).toContain('class="plan-price"');
+      expect(markup).toContain('data-checkout-authority="disconnected"');
+      expect(markup).toContain('data-icon-library="phosphor"');
+      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 29,90' : 'R$29.90');
+      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'por mês' : 'per month');
+      expect(visibleText(markup)).toContain(
+        locale === 'pt-BR' ? 'Continuar com Premium' : 'Continue with Premium',
+      );
+      expect(markup).toContain(
+        `href="https://account.liiiraa.com/${locale}/sign-in"`,
+      );
+      expect(visibleText(markup)).not.toContain(
+        locale === 'pt-BR' ? 'Não está à venda' : 'Not for sale',
+      );
+    }
+  });
+
   it('renders URL-backed explicit-submit public search with bounded metadata', () => {
     const page = (
       <PublicCatalogPage
@@ -175,6 +200,8 @@ describe('public catalog content', () => {
 
     expect(source).toContain('className="catalog-decision-field"');
     expect(source).toContain('className="plan-comparison-ledger"');
+    expect(source).toContain('className="plan-purchase-stage"');
+    expect(source).toContain('<PublicProductIcon');
     expect(source).toContain('<table className="catalog-table"');
     expect(source).toContain('<details className="plan-terms"');
     expect(source).not.toContain('plan-card');
@@ -183,6 +210,9 @@ describe('public catalog content', () => {
     );
     expect(styles).not.toMatch(
       /\.plan-comparison-ledger\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/u,
+    );
+    expect(styles).toMatch(
+      /\.plan-purchase-stage\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.15fr\) minmax\(280px, 0\.85fr\)/u,
     );
   });
 

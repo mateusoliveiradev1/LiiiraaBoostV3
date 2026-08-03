@@ -268,6 +268,36 @@ test('@final @public W09 identifies unavailable capabilities while public conten
   await expectNoDeadControls(page);
 });
 
+test('@final @public plans present a truthful purchase-ready Premium decision', async ({
+  page,
+}, testInfo) => {
+  onlyAxis(testInfo, 'wide-1440');
+  const mutations: string[] = [];
+  page.on('request', (request) => {
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) {
+      mutations.push(`${request.method()} ${request.url()}`);
+    }
+  });
+
+  await page.goto('/pt-BR/plans');
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'O plano para jogar com mais controle' }),
+  ).toBeVisible();
+  await expect(page.locator('.plan-price')).toContainText('R$ 29,90');
+  await expect(page.getByRole('link', { name: 'Continuar com Premium' })).toHaveAttribute(
+    'href',
+    'https://account.liiiraa.com/pt-BR/sign-in',
+  );
+  await expect(page.locator('[data-checkout-authority="disconnected"]')).toContainText(
+    'nenhuma cobrança',
+  );
+  await expect(page.locator('.plan-capabilities [data-icon-library="phosphor"]')).toHaveCount(4);
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /icon\.svg/u);
+  expect(mutations).toEqual([]);
+  await expectNoDeadControls(page);
+});
+
 test('@final @public W17 exposes distinct localized and redacted public error states', async ({
   page,
 }, testInfo) => {
