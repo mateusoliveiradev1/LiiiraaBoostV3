@@ -28,11 +28,22 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     accountLabel: 'Menu do operador',
     accountName: 'Operador seguro',
+    alerts: 'Alertas de SLA',
     boundary: 'Origem administrativa dedicada. Cookies públicos e da conta não são aceitos.',
+    currentQueue: 'Fila atual',
     isolated: 'Origem isolada e sem cookies públicos',
     navigation: 'Escopo da função',
     currentTask: 'Tarefa atual',
     roleHome: 'Área da função',
+    savedViews: Object.freeze({
+      assigned: 'Trabalho atribuído',
+      'sla-risk': 'SLA em risco',
+      unowned: 'Sem responsável',
+      'all-permitted': 'Todos permitidos',
+    }),
+    searchAction: 'Buscar',
+    searchLabel: 'Buscar casos, eventos e alvos permitidos',
+    searchPlaceholder: 'Caso, evento ou alvo redigido',
     security: 'Sessão administrativa protegida',
     surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
@@ -40,11 +51,22 @@ const COPY = Object.freeze({
   en: Object.freeze({
     accountLabel: 'Operator menu',
     accountName: 'Secure operator',
+    alerts: 'SLA alerts',
     boundary: 'Dedicated administrative origin. Public and account cookies are not accepted.',
+    currentQueue: 'Current queue',
     isolated: 'Isolated origin with no public cookies',
     navigation: 'Role scope',
     currentTask: 'Current task',
     roleHome: 'Role workspace',
+    savedViews: Object.freeze({
+      assigned: 'Assigned work',
+      'sla-risk': 'SLA at risk',
+      unowned: 'Unassigned',
+      'all-permitted': 'All permitted',
+    }),
+    searchAction: 'Search',
+    searchLabel: 'Search permitted cases, events, and targets',
+    searchPlaceholder: 'Case, event, or redacted target',
     security: 'Protected administrative session',
     surface: 'Operations',
     skip: 'Skip to administrative content',
@@ -109,7 +131,9 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         <AdminNavigation
           accountLabel={copy.accountLabel}
           accountName={copy.accountName}
+          alertsLabel={copy.alerts}
           alternateLocale={alternateLocale}
+          currentQueueLabel={copy.currentQueue}
           currentTaskLabel={copy.currentTask}
           fallbackLocaleHref={localizedRoleHref(alternateLocale, role)}
           header={
@@ -128,6 +152,10 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           roleHomeLabel={copy.roleHome}
           role={role}
           roleLabel={ADMIN_ROLE_COPY[role][locale]}
+          savedViewLabels={copy.savedViews}
+          searchAction={copy.searchAction}
+          searchLabel={copy.searchLabel}
+          searchPlaceholder={copy.searchPlaceholder}
           securityLabel={copy.security}
         >
           <main id="admin-main" tabIndex={-1}>

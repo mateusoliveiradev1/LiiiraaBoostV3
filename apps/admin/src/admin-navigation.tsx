@@ -7,6 +7,13 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import type { AdminPreviewRole } from '../proxy';
+import {
+  createAdminQueueHref,
+  parseAdminQueueUrlState,
+  projectAdminQueue,
+  type AdminQueueSavedView,
+  type AdminQueueUrlState,
+} from './admin-preview-model';
 
 export type AdminNavigationItem = Readonly<{
   href: string;
@@ -17,8 +24,10 @@ export type AdminNavigationItem = Readonly<{
 type AdminNavigationProps = Readonly<{
   accountLabel: string;
   accountName: string;
+  alertsLabel: string;
   alternateLocale: WebLocale;
   children: ReactNode;
+  currentQueueLabel: string;
   currentTaskLabel: string;
   fallbackLocaleHref: string;
   header: ReactNode;
@@ -30,6 +39,10 @@ type AdminNavigationProps = Readonly<{
   roleHomeLabel: string;
   role: AdminPreviewRole;
   roleLabel: string;
+  savedViewLabels: Readonly<Record<AdminQueueSavedView, string>>;
+  searchAction: string;
+  searchLabel: string;
+  searchPlaceholder: string;
   securityLabel: string;
 }>;
 
@@ -50,10 +63,14 @@ function NavigationItems({
   currentHref,
   items,
   markCurrent,
+  queueState,
+  role,
 }: Readonly<{
   currentHref: string | undefined;
   items: readonly AdminNavigationItem[];
   markCurrent: boolean;
+  queueState: AdminQueueUrlState;
+  role: AdminPreviewRole;
 }>) {
   return (
     <ol className="admin-nav__list">
@@ -68,7 +85,7 @@ function NavigationItems({
             <a
               aria-current={isCurrent ? 'page' : undefined}
               data-current={isCurrent ? 'page' : undefined}
-              href={item.href}
+              href={createAdminQueueHref(item.href, role, queueState, { selectedId: undefined })}
             >
               <ProductIcon
                 className="admin-nav__icon"
@@ -87,8 +104,10 @@ function NavigationItems({
 export function AdminNavigation({
   accountLabel,
   accountName,
+  alertsLabel,
   alternateLocale,
   children,
+  currentQueueLabel,
   currentTaskLabel,
   fallbackLocaleHref,
   header,
@@ -100,11 +119,15 @@ export function AdminNavigation({
   roleHomeLabel,
   role,
   roleLabel,
+  savedViewLabels,
+  searchAction,
+  searchLabel,
+  searchPlaceholder,
   securityLabel,
 }: AdminNavigationProps) {
   const pathname = usePathname();
   const searchParameters = useSearchParams();
-  const roleParameter = searchParameters.get('role');
+  const queueState = parseAdminQueueUrlState(searchParameters);
   const localizedCurrentRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'admin-origin',
@@ -125,19 +148,62 @@ export function AdminNavigation({
   const alternatePath = localizedAlternateRoute.ok
     ? localizedAlternateRoute.value
     : fallbackLocaleHref;
-  const localeHref =
-    roleParameter === role ? `${alternatePath}?role=${role}` : alternatePath;
+  const localeHref = createAdminQueueHref(alternatePath, role, queueState);
+  const alertCount = projectAdminQueue({ locale, role, savedView: 'sla-risk' }).length;
+  const searchActionHref = roleHomeHref.split('?')[0] ?? roleHomeHref;
 
   return (
     <>
       <header className="admin-header">
         <div className="admin-header__bar">
           {header}
+          <form action={searchActionHref} className="admin-header__search" method="get" role="search">
+            <ProductIcon name="search" size={17} />
+            <label className="lb-visually-hidden" htmlFor="admin-global-search">
+              {searchLabel}
+            </label>
+            <input
+              defaultValue={queueState.query}
+              id="admin-global-search"
+              maxLength={64}
+              name="q"
+              placeholder={searchPlaceholder}
+              type="search"
+            />
+            {role !== 'support' ? <input name="role" type="hidden" value={role} /> : null}
+            {queueState.savedView !== 'assigned' ? (
+              <input name="view" type="hidden" value={queueState.savedView} />
+            ) : null}
+            {queueState.priority !== 'all' ? (
+              <input name="priority" type="hidden" value={queueState.priority} />
+            ) : null}
+            {queueState.status !== 'all' ? (
+              <input name="status" type="hidden" value={queueState.status} />
+            ) : null}
+            {queueState.owner !== 'all' ? (
+              <input name="owner" type="hidden" value={queueState.owner} />
+            ) : null}
+            <button type="submit">
+              <ProductIcon name="search" size={16} />
+              <span>{searchAction}</span>
+            </button>
+          </form>
           <div className="admin-header__task">
-            <span>{currentTaskLabel}</span>
-            <strong>{currentLabel}</strong>
+            <span aria-label={currentTaskLabel}>{currentQueueLabel}</span>
+            <strong>{savedViewLabels[queueState.savedView]}</strong>
           </div>
           <div className="admin-header__tools">
+            <a
+              aria-label={`${alertsLabel}: ${alertCount}`}
+              className="admin-header__alerts"
+              href={createAdminQueueHref(roleHomeHref, role, queueState, {
+                savedView: 'sla-risk',
+                selectedId: undefined,
+              })}
+            >
+              <ProductIcon name="bell" size={18} />
+              <span aria-live="polite">{alertCount}</span>
+            </a>
             <LocaleSwitcher
               href={localeHref}
               sourceLocale={locale}
@@ -166,7 +232,7 @@ export function AdminNavigation({
                     <small>{isolatedLabel}</small>
                   </span>
                 </p>
-                <a href={roleHomeHref}>
+                <a href={createAdminQueueHref(roleHomeHref, role, queueState)}>
                   <ProductIcon name="toolbox" size={17} />
                   {roleHomeLabel}
                 </a>
@@ -182,7 +248,13 @@ export function AdminNavigation({
             <span>{label}</span>
             <strong>{roleLabel}</strong>
           </div>
-          <NavigationItems currentHref={currentHref} items={items} markCurrent />
+          <NavigationItems
+            currentHref={currentHref}
+            items={items}
+            markCurrent
+            queueState={queueState}
+            role={role}
+          />
         </nav>
 
         <details className="admin-nav admin-nav__mobile">
@@ -193,7 +265,13 @@ export function AdminNavigation({
             <ProductIcon className="admin-nav__disclosure-icon" name="chevronRight" size={18} />
           </summary>
           <nav aria-label={label}>
-            <NavigationItems currentHref={currentHref} items={items} markCurrent={false} />
+            <NavigationItems
+              currentHref={currentHref}
+              items={items}
+              markCurrent={false}
+              queueState={queueState}
+              role={role}
+            />
           </nav>
         </details>
 

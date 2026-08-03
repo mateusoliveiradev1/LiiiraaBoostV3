@@ -153,11 +153,11 @@ describe('admin shell', () => {
     expect(navigation).toContain('useSearchParams');
     expect(navigation).toContain('resolveLocalizedCurrentRoute');
     expect(navigation).toContain("securityBoundary: 'admin-origin'");
-    expect(navigation).toContain('roleParameter === role');
+    expect(navigation).toContain('createAdminQueueHref(alternatePath, role, queueState)');
     expect(navigation).toContain('currentItems.length === 1');
     expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigation).toContain('<LocaleSwitcher');
-    expect(navigation).toContain("searchParameters.get('role')");
+    expect(navigation).toContain('parseAdminQueueUrlState(searchParameters)');
   });
 
   it('collapses narrow role navigation into a compact current-task disclosure', () => {
