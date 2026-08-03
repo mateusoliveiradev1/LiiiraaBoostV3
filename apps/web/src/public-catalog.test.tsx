@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { matchWebRoute, type WebRouteId } from '@liiiraa/web-core';
 
 import {
+  admitPolicyPair,
   admitPolicies,
   getPublicCatalog,
   getPublicCatalogMetadata,
@@ -427,6 +428,31 @@ describe('public policies and operational trust', () => {
     ).toThrow(/PUBLIC_POLICIES_INVALID/u);
   });
 
+  it('fails closed for valid kinds paired to the wrong routes, section drift, and locale drift', () => {
+    const english = structuredClone(getPublicPolicies('en'));
+    const portuguese = structuredClone(getPublicPolicies('pt-BR'));
+
+    const swappedRoutes = structuredClone(english);
+    const firstRoute = swappedRoutes.documents[0]!.routeId;
+    swappedRoutes.documents[0]!.routeId = swappedRoutes.documents[1]!.routeId;
+    swappedRoutes.documents[1]!.routeId = firstRoute;
+    expect(() => admitPolicies(swappedRoutes, 'en')).toThrow(/kind-route/u);
+
+    const missingSection = structuredClone(english);
+    missingSection.documents[0]!.sections = missingSection.documents[0]!.sections.slice(1);
+    expect(() => admitPolicies(missingSection, 'en')).toThrow(/section-contract/u);
+
+    const reorderedSections = structuredClone(english);
+    reorderedSections.documents[0]!.sections = [
+      ...reorderedSections.documents[0]!.sections,
+    ].reverse();
+    expect(() => admitPolicies(reorderedSections, 'en')).toThrow(/section-contract/u);
+
+    const localeDrift = structuredClone(portuguese);
+    localeDrift.documents[0]!.sections[0]!.id = 'localized-only-id';
+    expect(() => admitPolicyPair(english, localeDrift)).toThrow(/locale-parity/u);
+  });
+
   it('separates every D-106 privacy purpose, consent, retention, and rights topic', () => {
     const expectedPracticeIds = [
       'public-site-delivery',
@@ -554,6 +580,66 @@ describe('public policies and operational trust', () => {
         /checkout (?:est[aá] ativo|is available)|telemetria (?:est[aá] ativa|is active)|cloud AI is active/iu,
       );
     }
+  });
+
+  it('binds every narrative assertion to traceable evidence and rejects unreviewed claims', async () => {
+    const { access, readFile } = await import('node:fs/promises');
+    const { fileURLToPath } = await import('node:url');
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const policies = getPublicPolicies(locale);
+      const evidenceIds = new Set(policies.evidenceSources.map(({ id }) => id));
+
+      expect(policies.claims.length).toBeGreaterThan(100);
+      expect(new Set(policies.claims.map(({ id }) => id)).size).toBe(policies.claims.length);
+      expect(
+        policies.claims.every(
+          ({ evidenceIds: claimEvidence, id, location, statement }) =>
+            id.length > 0 &&
+            location.length > 0 &&
+            statement.length > 0 &&
+            claimEvidence.length > 0 &&
+            claimEvidence.every((evidenceId) => evidenceIds.has(evidenceId)),
+        ),
+      ).toBe(true);
+
+      for (const source of policies.evidenceSources) {
+        if (source.reference.startsWith('https://')) continue;
+        const [relativePath, anchor] = source.reference.split('#');
+        const target = new URL(`../../../${relativePath}`, import.meta.url);
+        await access(target);
+        if (anchor !== undefined) {
+          expect(await readFile(fileURLToPath(target), 'utf8')).toContain(anchor);
+        }
+      }
+
+      const unreviewed = JSON.parse(JSON.stringify(policies)) as {
+        documents: Array<{ sections: Array<{ body: string }> }>;
+      };
+      unreviewed.documents[0]!.sections[0]!.body += ' An unreviewed current assertion exists.';
+      expect(() => admitPolicies(unreviewed, locale)).toThrow(/claim-coverage/u);
+
+      const futureAsCurrent = JSON.parse(JSON.stringify(policies)) as {
+        claims: Array<{ temporal: string }>;
+      };
+      const futureClaim = futureAsCurrent.claims.find(({ temporal }) => temporal === 'future');
+      expect(futureClaim).toBeDefined();
+      if (futureClaim !== undefined) futureClaim.temporal = 'current';
+      expect(() => admitPolicies(futureAsCurrent, locale)).toThrow(/claim-temporal/u);
+
+      const evidenceRemoved = JSON.parse(JSON.stringify(policies)) as {
+        claims: Array<{ evidenceIds: string[] }>;
+      };
+      evidenceRemoved.claims[0]!.evidenceIds = [];
+      expect(() => admitPolicies(evidenceRemoved, locale)).toThrow(/claim-evidence/u);
+    }
+
+    const english = getPublicPolicies('en');
+    const portuguese = getPublicPolicies('pt-BR');
+    expect(english.claims.map(({ id }) => id)).toEqual(portuguese.claims.map(({ id }) => id));
+    expect(english.claims.map(({ location }) => location)).toEqual(
+      portuguese.claims.map(({ location }) => location),
+    );
   });
 
   it('renders complete versioned policy, disclosure, and status families in both locales', () => {
