@@ -36,7 +36,10 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
-import type { AccountPreviewRoute } from '../account-preview-model';
+import {
+  getAccountHomeScenario,
+  type AccountPreviewRoute,
+} from '../account-preview-model';
 import { DegradedAccountPreview, FixtureHeader } from './account-degraded-preview';
 import { resolveAccountScenarioId } from './account-scenario';
 
@@ -140,6 +143,22 @@ type AccountContent = Readonly<{
     openAction: string;
     emptyTitle: string;
     emptyBody: string;
+    planTitle: string;
+    planValue: string;
+    billingValue: string;
+    pcTitle: string;
+    pcValue: string;
+    securityTitle: string;
+    passkeyValue: string;
+    mfaValue: string;
+    recommendedTitle: string;
+    recommendedBody: string;
+    recommendedAction: string;
+    continuityTitle: string;
+    continuityBody: string;
+    degradedTitle: string;
+    degradedBody: string;
+    recoveryAction: string;
   }>;
   profile: Readonly<{
     title: string;
@@ -898,116 +917,100 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
 };
 
 const OverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => {
-  const readinessItems: readonly Readonly<{
-    action: string;
-    href: string;
-    icon: ProductIconName;
-    state: string;
-    title: string;
-    tone: 'pending' | 'unavailable';
-  }>[] = [
-    {
-      action: content.overview.nextAction,
-      href: hrefFor('account-profile', content.locale),
-      icon: 'profile',
-      state: content.overview.pendingState,
-      title: content.profile.title,
-      tone: 'pending',
-    },
-    {
-      action: content.overview.securityAction,
-      href: hrefFor('account-security', content.locale),
-      icon: 'shield',
-      state: content.overview.pendingState,
-      title: content.security.title,
-      tone: 'pending',
-    },
-    {
-      action: content.overview.subscriptionAction,
-      href: hrefFor('account-subscription', content.locale),
-      icon: 'crown',
-      state: content.overview.noBillingState,
-      title: content.subscription.title,
-      tone: 'unavailable',
-    },
-    {
-      action: content.overview.deviceAction,
-      href: hrefFor('account-device', content.locale),
-      icon: 'device',
-      state: content.overview.notLinkedState,
-      title: content.device.title,
-      tone: 'unavailable',
-    },
-  ];
-
+  const scenario = getAccountHomeScenario('premium-active');
   return (
-    <article className="account-responsibility account-overview" data-account-state="ready">
+    <article
+      className="account-responsibility account-overview"
+      data-account-scenario={scenario.id}
+      data-account-state="ready"
+    >
       <FixtureHeader summary={content.overview.summary} title={content.overview.title} />
 
-      <section aria-labelledby="account-next-title" className="account-overview__priority">
-        <div className="account-overview__priority-copy">
-          <span className="account-overview__responsibility">
-            {content.overview.responsibilityLabel}
-          </span>
-          <h2 id="account-next-title">{content.overview.nextTitle}</h2>
-          <p>{content.overview.nextBody}</p>
-        </div>
-        <nav aria-label={content.overview.nextTitle} className="account-overview__actions">
-          <a href={hrefFor('account-profile', content.locale)}>{content.overview.nextAction}</a>
-          <a href={hrefFor('account-security', content.locale)}>
-            {content.overview.securityAction}
+      <section
+        aria-labelledby="account-recommendation-title"
+        className="account-overview__command"
+        data-account-home-region="primary"
+      >
+        <div className="account-overview__recommendation">
+          <ProductIcon name="shield" size={24} />
+          <div>
+            <h2 id="account-recommendation-title">{content.overview.recommendedTitle}</h2>
+            <p>{content.overview.recommendedBody}</p>
+          </div>
+          <a
+            data-recommended-action={scenario.recommendedAction.kind}
+            href={hrefFor(scenario.recommendedAction.routeId, content.locale)}
+          >
+            {content.overview.recommendedAction}
+            <ProductIcon name="arrowRight" size={16} />
           </a>
-        </nav>
+        </div>
+        <dl className="account-overview__facts">
+          <div data-account-home-fact="plan">
+            <dt>{content.overview.planTitle}</dt>
+            <dd>
+              <strong>{content.overview.planValue}</strong>
+              <span>{content.overview.billingValue}</span>
+            </dd>
+          </div>
+          <div data-account-home-fact="pc">
+            <dt>{content.overview.pcTitle}</dt>
+            <dd>
+              <strong>{scenario.pc.label}</strong>
+              <span>{content.overview.pcValue}</span>
+            </dd>
+          </div>
+          <div data-account-home-fact="security">
+            <dt>{content.overview.securityTitle}</dt>
+            <dd>
+              <strong>{content.overview.mfaValue}</strong>
+              <span>{content.overview.passkeyValue}</span>
+            </dd>
+          </div>
+        </dl>
       </section>
 
-      <section aria-labelledby="account-readiness-title" className="account-overview__readiness">
-        <div className="account-overview__section-heading">
-          <h2 id="account-readiness-title">{content.overview.checklistTitle}</h2>
-          <StatusSignal label={content.overview.reviewState} state="preview" />
+      <section aria-labelledby="account-continuity-title" className="account-overview__continuity">
+        <ProductIcon name="history" size={20} />
+        <div>
+          <h2 id="account-continuity-title">{content.overview.continuityTitle}</h2>
+          <p>{content.overview.continuityBody}</p>
         </div>
-        <div className="account-overview__readiness-head" aria-hidden="true">
-          <span>{content.locale === 'pt-BR' ? 'Etapa' : 'Step'}</span>
-          <span>{content.locale === 'pt-BR' ? 'Estado' : 'State'}</span>
-          <span>{content.locale === 'pt-BR' ? 'Próxima ação' : 'Next action'}</span>
-        </div>
-        <ul>
-          {readinessItems.map((item) => (
-            <li key={item.href}>
-              <span className="account-overview__readiness-title">
-                <ProductIcon name={item.icon} size={18} />
-                <strong>{item.title}</strong>
-              </span>
-              <span className="account-overview__readiness-state" data-readiness-tone={item.tone}>
-                <span aria-hidden="true" className="account-overview__state-dot" />
-                {item.state}
-              </span>
-              <a href={item.href}>
-                {item.action} <ProductIcon name="chevronRight" size={16} />
-              </a>
-            </li>
-          ))}
-        </ul>
       </section>
+    </article>
+  );
+};
 
-      <section aria-labelledby="account-activity-title" className="account-overview__activity">
-        <h2 id="account-activity-title">{content.overview.recentTitle}</h2>
-        <ul>
-          <li>
-            <ProductIcon name="browser" size={19} />
-            <span>
-              <strong>{content.overview.localPreviewTitle}</strong>
-              <span>{content.overview.localPreviewBody}</span>
-            </span>
-          </li>
-          <li>
-            <ProductIcon name="info" size={19} />
-            <span>
-              <strong>{content.overview.noAuthorityTitle}</strong>
-              <span>{content.overview.noAuthorityBody}</span>
-            </span>
-          </li>
-        </ul>
-      </section>
+const DegradedOverviewPreview = ({ content }: Readonly<{ content: AccountContent }>) => {
+  const lastTrustworthyScenario = getAccountHomeScenario('premium-active');
+  return (
+    <article
+      className="account-responsibility account-overview account-overview--degraded"
+      data-account-home-state="degraded"
+    >
+      <FixtureHeader summary={content.overview.degradedBody} title={content.overview.degradedTitle} />
+      <dl className="account-overview__facts" aria-label={content.overview.summary}>
+        <div>
+          <dt>{content.overview.planTitle}</dt>
+          <dd>{content.overview.planValue}</dd>
+        </div>
+        <div>
+          <dt>{content.overview.pcTitle}</dt>
+          <dd>{lastTrustworthyScenario.pc.label}</dd>
+        </div>
+        <div>
+          <dt>{content.overview.securityTitle}</dt>
+          <dd>{content.overview.mfaValue}</dd>
+        </div>
+      </dl>
+      <a
+        className="account-overview__recovery"
+        data-overview-recovery-action
+        href={hrefFor('account-support', content.locale)}
+      >
+        {content.overview.recoveryAction}
+        <ProductIcon name="arrowRight" size={16} />
+      </a>
     </article>
   );
 };
@@ -1857,8 +1860,24 @@ export const AccountPreviewExperience = ({
   );
   if (state === 'loading') return frame(<LoadingAccountPreview content={content} />);
   if (state === 'empty') return frame(<EmptyAccountPreview content={content} />);
-  if (state !== 'ready') return frame(<DegradedAccountPreview content={content} state={state} />);
-  if (activeScenarioId === 'W12') return frame(<DegradedAccountPreview content={content} />);
+  if (state !== 'ready') {
+    return frame(
+      routeId === 'account-overview' ? (
+        <DegradedOverviewPreview content={content} />
+      ) : (
+        <DegradedAccountPreview content={content} state={state} />
+      ),
+    );
+  }
+  if (activeScenarioId === 'W12') {
+    return frame(
+      routeId === 'account-overview' ? (
+        <DegradedOverviewPreview content={content} />
+      ) : (
+        <DegradedAccountPreview content={content} />
+      ),
+    );
+  }
   let view: ReactNode;
   switch (routeId) {
     case 'account-sign-in':

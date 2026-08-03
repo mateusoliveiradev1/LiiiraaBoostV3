@@ -300,7 +300,7 @@ describe('account shell', () => {
     );
   });
 
-  it('opens the native disclosure to every responsibility while retaining one current page', () => {
+  it('opens the native disclosure to every customer goal while retaining one current page', () => {
     const navigationSource = readFileSync(
       new URL('./account-navigation.tsx', import.meta.url),
       'utf8',
@@ -308,7 +308,7 @@ describe('account shell', () => {
 
     expect(navigationSource).toContain('<details className="account-nav account-nav__mobile">');
     expect(navigationSource).toContain('<nav aria-label={label}>');
-    expect(navigationSource).toContain('groups={groups}');
+    expect(navigationSource).toContain('groups={goalGroups}');
     expect(navigationSource).toContain('markCurrent={false}');
     expect(navigationSource.match(/aria-current=/gu) ?? []).toHaveLength(1);
     expect(navigationSource).not.toMatch(/onKeyDown|onClick|role="button"/u);

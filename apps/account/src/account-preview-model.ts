@@ -79,6 +79,121 @@ export const accountGoalForRoute = (
   return routeId;
 };
 
+export type AccountHomeScenarioId = 'essential' | 'premium-active' | 'premium-pending';
+
+export type AccountHomeScenario = Readonly<{
+  billing: Readonly<{ state: 'active' | 'none' | 'pending' }>;
+  id: AccountHomeScenarioId;
+  pc: Readonly<{ label?: string; state: 'linked' | 'unlinked' }>;
+  plan: Readonly<{ kind: 'essential' | 'premium'; state: 'active' | 'pending' }>;
+  recommendedAction: Readonly<{
+    kind: 'complete-payment' | 'configure-passkey' | 'link-pc';
+    routeId: AccountGoalRoute;
+  }>;
+  remoteStateChanged: false;
+  security: Readonly<{
+    mfa: 'configured' | 'not-configured';
+    passkey: 'configured' | 'not-configured';
+  }>;
+}>;
+
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const ACCOUNT_HOME_SCENARIOS = Object.freeze({
+  essential: Object.freeze({
+    billing: Object.freeze({ state: 'none' }),
+    id: 'essential',
+    pc: Object.freeze({ state: 'unlinked' }),
+    plan: Object.freeze({ kind: 'essential', state: 'active' }),
+    recommendedAction: Object.freeze({ kind: 'link-pc', routeId: 'account-device' }),
+    remoteStateChanged: false,
+    security: Object.freeze({ mfa: 'not-configured', passkey: 'not-configured' }),
+  }),
+  'premium-active': Object.freeze({
+    billing: Object.freeze({ state: 'active' }),
+    id: 'premium-active',
+    pc: Object.freeze({ label: 'Astra-PC', state: 'linked' }),
+    plan: Object.freeze({ kind: 'premium', state: 'active' }),
+    recommendedAction: Object.freeze({
+      kind: 'configure-passkey',
+      routeId: 'account-security',
+    }),
+    remoteStateChanged: false,
+    security: Object.freeze({ mfa: 'configured', passkey: 'not-configured' }),
+  }),
+  'premium-pending': Object.freeze({
+    billing: Object.freeze({ state: 'pending' }),
+    id: 'premium-pending',
+    pc: Object.freeze({ state: 'unlinked' }),
+    plan: Object.freeze({ kind: 'premium', state: 'pending' }),
+    recommendedAction: Object.freeze({
+      kind: 'complete-payment',
+      routeId: 'account-subscription',
+    }),
+    remoteStateChanged: false,
+    security: Object.freeze({ mfa: 'configured', passkey: 'configured' }),
+  }),
+} as const satisfies Readonly<Record<AccountHomeScenarioId, AccountHomeScenario>>);
+
+const contradiction = (reason: string): never => {
+  throw new Error(`ACCOUNT_HOME_SCENARIO_CONTRADICTION:${reason}`);
+};
+
+export const admitAccountHomeScenario = (candidate: unknown): AccountHomeScenario => {
+  if (
+    !isRecord(candidate) ||
+    !isRecord(candidate['billing']) ||
+    !isRecord(candidate['pc']) ||
+    !isRecord(candidate['plan']) ||
+    !isRecord(candidate['recommendedAction']) ||
+    !isRecord(candidate['security']) ||
+    candidate['remoteStateChanged'] !== false
+  ) {
+    throw new Error('ACCOUNT_HOME_SCENARIO_INVALID:shape');
+  }
+  const id = candidate['id'];
+  if (id !== 'essential' && id !== 'premium-active' && id !== 'premium-pending') {
+    throw new Error('ACCOUNT_HOME_SCENARIO_INVALID:id');
+  }
+  const billingState = candidate['billing']['state'];
+  const pcState = candidate['pc']['state'];
+  const planKind = candidate['plan']['kind'];
+  const planState = candidate['plan']['state'];
+  const actionKind = candidate['recommendedAction']['kind'];
+  const passkeyState = candidate['security']['passkey'];
+
+  if (id === 'essential' && (planKind !== 'essential' || planState !== 'active')) {
+    return contradiction('essential:plan');
+  }
+  if (id === 'essential' && billingState !== 'none') return contradiction('essential:billing');
+  if (id === 'premium-active' && (planKind !== 'premium' || planState !== 'active')) {
+    return contradiction('premium-active:plan');
+  }
+  if (id === 'premium-active' && billingState !== 'active') {
+    return contradiction('premium-active:billing');
+  }
+  if (id === 'premium-pending' && (planKind !== 'premium' || planState !== 'pending')) {
+    return contradiction('premium-pending:plan');
+  }
+  if (id === 'premium-pending' && billingState !== 'pending') {
+    return contradiction('premium-pending:billing');
+  }
+  if (pcState === 'linked' && actionKind === 'link-pc') {
+    return contradiction('linked-pc:link-action');
+  }
+  if (passkeyState === 'configured' && actionKind === 'configure-passkey') {
+    return contradiction('configured-passkey:configure-action');
+  }
+  if (actionKind === 'complete-payment' && billingState !== 'pending') {
+    return contradiction('payment-action:billing');
+  }
+  return candidate as AccountHomeScenario;
+};
+
+export const getAccountHomeScenario = (id: AccountHomeScenarioId): AccountHomeScenario =>
+  admitAccountHomeScenario(ACCOUNT_HOME_SCENARIOS[id]);
+
 export const ACCOUNT_ERROR_ROUTE_IDS = Object.freeze([
   'account-error-404',
   'account-error-403',

@@ -230,21 +230,19 @@ describe('authored overview and Profile workspaces', () => {
     }
   });
 
-  it('centers the overview on priority, truthful readiness, and recent activity', () => {
+  it('centers the overview on one recommendation and three authoritative facts', () => {
     const overviewSource = sourceBetween('const OverviewPreview', 'const ProfilePreview');
 
-    expect(overviewSource).toContain('account-overview__priority');
-    expect(overviewSource).toContain('account-overview__readiness');
-    expect(overviewSource).toContain('account-overview__activity');
+    expect(overviewSource).toContain('account-overview__command');
+    expect(overviewSource).toContain('account-overview__recommendation');
+    expect(overviewSource).toContain('account-overview__facts');
+    expect(overviewSource).toContain('account-overview__continuity');
     expect(overviewSource).not.toContain('account-workspace-split');
     expect(overviewSource).not.toContain('data-workspace-layout="7/5"');
     expect(overviewSource).not.toContain('account-overview__limitations');
-    expect(overviewSource).toContain("hrefFor('account-profile', content.locale)");
-    expect(overviewSource).toContain("hrefFor('account-security', content.locale)");
-    expect(overviewSource).toContain("hrefFor('account-subscription', content.locale)");
-    expect(overviewSource).toContain("hrefFor('account-device', content.locale)");
-    expect(overviewSource).toContain('readinessItems.map');
-    expect(overviewSource).toContain('content.overview.noAuthorityTitle');
+    expect(overviewSource).toContain('hrefFor(scenario.recommendedAction.routeId, content.locale)');
+    expect(overviewSource).not.toContain('readinessItems.map');
+    expect(overviewSource).not.toContain('content.overview.noAuthorityTitle');
     expect(overviewSource).not.toContain('ResponsiveDataTable');
     expect(overviewSource).not.toContain('EmptyComposition');
   });

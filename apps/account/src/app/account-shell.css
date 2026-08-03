@@ -926,6 +926,163 @@ button:focus-visible,
   }
 }
 
+/* Goal-led Account Home: one coherent status surface and one recommended action. */
+.account-overview__command {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--lb-space-5);
+  align-items: stretch;
+  padding: var(--lb-space-5);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-raised);
+}
+
+.account-overview__recommendation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.account-overview__recommendation > svg {
+  color: var(--lb-cobalt-signal);
+}
+
+.account-overview__recommendation h2,
+.account-overview__recommendation p,
+.account-overview__continuity h2,
+.account-overview__continuity p {
+  margin: 0;
+}
+
+.account-overview__recommendation p,
+.account-overview__continuity p {
+  max-inline-size: 68ch;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.account-overview__recommendation > a,
+.account-overview__recovery {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-2);
+  inline-size: fit-content;
+  min-block-size: 48px;
+  padding-inline: var(--lb-space-3);
+  border: 1px solid var(--lb-cobalt-action);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-primary-label);
+  background: var(--lb-cobalt-action);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-overview__recommendation > a:hover,
+.account-overview__recommendation > a:focus-visible,
+.account-overview__recovery:hover,
+.account-overview__recovery:focus-visible {
+  border-color: var(--lb-cobalt-signal);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-inset);
+}
+
+.account-overview__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--lb-space-4);
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.account-overview__facts > div {
+  display: grid;
+  gap: var(--lb-space-2);
+  align-content: start;
+  min-inline-size: 0;
+  padding-block: var(--lb-space-3);
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.account-overview__facts dt {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-overview__facts dd {
+  display: grid;
+  gap: var(--lb-space-1);
+  min-inline-size: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-overview__facts dd span {
+  color: var(--lb-text-secondary);
+}
+
+.account-overview__continuity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+  padding-block: var(--lb-space-4);
+  border-block: 1px solid var(--lb-line-subtle);
+}
+
+.account-overview__continuity > svg {
+  flex: 0 0 auto;
+  color: var(--lb-cobalt-signal);
+}
+
+.account-overview--degraded .account-overview__facts {
+  padding: var(--lb-space-4);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-raised);
+}
+
+@media (width < 1180px) {
+  .account-overview__command {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width < 760px) {
+  .account-overview__command {
+    gap: var(--lb-space-4);
+    padding: var(--lb-space-4);
+  }
+
+  .account-overview__facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-overview__recommendation > a,
+  .account-overview__recovery {
+    inline-size: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .account-overview__command,
+  .account-overview--degraded .account-overview__facts {
+    border-color: CanvasText;
+  }
+
+  .account-overview__recommendation > a,
+  .account-overview__recovery {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+}
+
 /* Approved account direction: task workspace with persistent contextual inspector. */
 .account-auth-shell {
   min-block-size: 100dvh;
