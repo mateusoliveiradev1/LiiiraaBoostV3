@@ -111,7 +111,7 @@ export const PREVIEW_ACTION_POLICIES = Object.freeze({
     phraseConfirmation('REVISAR ACESSO DE DIAGNÓSTICO', 'REVIEW DIAGNOSTIC ACCESS'),
     {
       requiresConsent: true,
-      requiresDesktopViewport: true,
+      requiresDesktopViewport: false,
       requiresImpact: true,
       requiresPurpose: true,
       requiresRole: true,
@@ -124,7 +124,7 @@ export const PREVIEW_ACTION_POLICIES = Object.freeze({
   }),
   admin: policy(buttonConfirmation('Revisar ação administrativa', 'Review admin action'), {
     requiresConsent: true,
-    requiresDesktopViewport: true,
+    requiresDesktopViewport: false,
     requiresImpact: true,
     requiresPurpose: true,
     requiresRole: true,

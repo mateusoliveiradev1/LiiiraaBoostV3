@@ -190,10 +190,47 @@ describe('preview workflow machine', () => {
   });
 
   it.each([
+    ['admin', 320],
+    ['admin', 390],
+    ['admin', 960],
+    ['diagnostic', 320],
+    ['diagnostic', 390],
+    ['diagnostic', 960],
+  ] as const)(
+    'keeps permitted %s review reachable at %ipx and equivalent zoom reflow',
+    (family, width) => {
+      const execute = vi.fn<FutureAuthorityPort['execute']>();
+      const actor = createActor(machineWith({ execute }), {
+        input: adminInput({
+          action: {
+            family,
+            id: `${family}.review`,
+            objectLabel: 'redacted target',
+            surface: 'admin',
+          },
+          viewport: { width },
+        }),
+      }).start();
+
+      sendToConfirmation(actor);
+      expect(actor.getSnapshot().context.viewport.width).toBe(width);
+      expect(actor.getSnapshot().context.validationErrors).toEqual([]);
+      expect(PREVIEW_ACTION_POLICIES[family]).toMatchObject({
+        requiresConsent: true,
+        requiresDesktopViewport: false,
+        requiresImpact: true,
+        requiresPurpose: true,
+        requiresReauthentication: true,
+        requiresRole: true,
+      });
+      expect(execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
     ['purpose', { purpose: '' }],
     ['consent', { consent: null }],
     ['role', { role: null }],
-    ['desktop viewport', { viewport: { width: 959 } }],
     ['stale input', { freshness: 'stale' }],
     ['required field', { fields: { target: '' } }],
   ] satisfies readonly (readonly [string, Partial<PreviewWorkflowInput>])[])(
@@ -405,37 +442,34 @@ describe('preview workflow accessibility', () => {
   it.each([
     ['en', 'Review recorded — no operation was performed'],
     ['pt-BR', 'Revisão registrada — nenhuma operação foi realizada'],
-  ] as const)(
-    'renders a polite admin-specific no-change receipt in %s',
-    (locale, heading) => {
-      const receipt = PreviewReceipt({
-        actionLabel: 'redacted support case',
-        locale,
-        output: {
-          kind: 'no-change',
-          receipt: completeReceipt,
-          remoteStateChanged: false,
-        },
-      });
-      const serialized = JSON.stringify(receipt);
-      const ledger = intrinsic(receipt, 'ol')[0];
+  ] as const)('renders a polite admin-specific no-change receipt in %s', (locale, heading) => {
+    const receipt = PreviewReceipt({
+      actionLabel: 'redacted support case',
+      locale,
+      output: {
+        kind: 'no-change',
+        receipt: completeReceipt,
+        remoteStateChanged: false,
+      },
+    });
+    const serialized = JSON.stringify(receipt);
+    const ledger = intrinsic(receipt, 'ol')[0];
 
-      expect(elementProps(receipt)).toMatchObject({
-        'aria-live': 'polite',
-        'data-remote-state-changed': 'false',
-        tabIndex: -1,
-      });
-      expect(ledger).toBeDefined();
-      if (ledger === undefined) {
-        throw new Error('No-change receipt must render an immutable ledger');
-      }
-      expect(elementProps(ledger)['data-immutable']).toBe('true');
-      expect(serialized).toContain(heading);
-      expect(serialized).not.toContain('Phase 4');
-      expect(serialized).not.toMatch(/authority|autoridade|fixture|adapter/iu);
-      expect(serialized).not.toMatch(/\b(?:submitted|success|mutated)\b/iu);
-    },
-  );
+    expect(elementProps(receipt)).toMatchObject({
+      'aria-live': 'polite',
+      'data-remote-state-changed': 'false',
+      tabIndex: -1,
+    });
+    expect(ledger).toBeDefined();
+    if (ledger === undefined) {
+      throw new Error('No-change receipt must render an immutable ledger');
+    }
+    expect(elementProps(ledger)['data-immutable']).toBe('true');
+    expect(serialized).toContain(heading);
+    expect(serialized).not.toContain('Phase 4');
+    expect(serialized).not.toMatch(/authority|autoridade|fixture|adapter/iu);
+    expect(serialized).not.toMatch(/\b(?:submitted|success|mutated)\b/iu);
+  });
 
   it('renders cancellation as an admin-specific no-change terminal state', () => {
     const context = contextForAccessibility();

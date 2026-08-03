@@ -107,7 +107,7 @@ describe('role-scoped admin', () => {
     );
     expect(landingSource).toContain('createAdminQueueHref');
     expect(landingSource).toContain('selectAdminQueueItem');
-    expect(landingSource).toContain('aria-current={isSelected ? \'true\' : undefined}');
+    expect(landingSource).toContain("aria-current={isSelected ? 'true' : undefined}");
     expect(landingSource).toContain('admin-queue__selection');
   });
 
@@ -119,7 +119,7 @@ describe('role-scoped admin', () => {
     for (const state of ['loading', 'empty', 'stale', 'offline', 'partial-failure']) {
       expect(landingSource).toContain(`'${state}'`);
     }
-    expect(landingSource).toContain('aria-busy={state === \'loading\'}');
+    expect(landingSource).toContain("aria-busy={state === 'loading'}");
     expect(landingSource).toContain('role="status"');
     expect(adminEn.queue.emptyBody).toContain('saved view');
     expect(adminPtBr.queue.emptyBody).toContain('visão salva');
@@ -537,7 +537,9 @@ describe('D-105 contextual evidence and zoom-safe high-risk review', () => {
     );
     expect(diagnosticSource).toContain("decision === 'allowed' && consent != null");
     expect(diagnosticSource).toContain('admittedConsent !== null');
-    expect(adminEn.diagnostics.blockedBody).toContain('without revealing diagnostic or customer data');
+    expect(adminEn.diagnostics.blockedBody).toContain(
+      'without revealing diagnostic or customer data',
+    );
     expect(adminPtBr.diagnostics.denial).toContain('não revela nenhum campo de diagnóstico');
     expect(featureSource).not.toMatch(/viewportWidth\s*>=\s*960/u);
     expect(stylesSource).not.toMatch(
@@ -580,7 +582,7 @@ describe('admin no-change authority', () => {
 
     for (const policySource of [adminPolicy, diagnosticPolicy]) {
       expect(policySource).toContain('requiresConsent: true');
-      expect(policySource).toContain('requiresDesktopViewport: true');
+      expect(policySource).toContain('requiresDesktopViewport: false');
       expect(policySource).toContain('requiresImpact: true');
       expect(policySource).toContain('requiresPurpose: true');
       expect(policySource).toContain('requiresRole: true');

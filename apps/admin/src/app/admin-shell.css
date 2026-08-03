@@ -427,10 +427,6 @@ button:focus-visible,
   min-inline-size: 0;
 }
 
-.admin-viewport-gate__mobile {
-  display: none;
-}
-
 #admin-main {
   padding: var(--lb-space-5) 32px var(--lb-space-7);
   scroll-margin-block-start: calc(var(--lb-space-7) * 2 + var(--lb-space-4));
@@ -881,7 +877,8 @@ button:focus-visible,
   grid-column: 9 / -1;
 }
 
-.admin-decision > :where(
+.admin-decision
+  > :where(
     .admin-decision__workbench,
     .admin-decision__constraints,
     .admin-disconnected-authority,
@@ -889,6 +886,36 @@ button:focus-visible,
     .admin-diagnostic__scope
   ) {
   grid-column: 1 / -1;
+}
+
+.admin-decision--critical {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-decision--critical
+  > :where(
+    .lb-web-route-header,
+    .admin-decision__context,
+    .admin-decision__evidence,
+    .admin-decision__constraints,
+    .admin-disconnected-authority,
+    .admin-decision__audit
+  ) {
+  grid-column: 1;
+}
+
+.admin-high-risk-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  min-inline-size: 0;
+}
+
+.admin-high-risk-flow__availability {
+  max-inline-size: 68ch;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
 }
 
 .admin-decision > .admin-decision__evidence dl {
@@ -1175,7 +1202,9 @@ button:focus-visible,
 
 .admin-shell [data-preview-region='review'] table {
   inline-size: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
+  overflow-wrap: anywhere;
 }
 
 .admin-shell [data-preview-region='review'] :where(caption, th, td) {
@@ -1470,14 +1499,6 @@ button:focus-visible,
   .admin-degraded__facts {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-  }
-
-  [data-high-risk-action='true'] {
-    display: none !important;
-  }
-
-  .admin-viewport-gate__mobile {
-    display: block;
   }
 }
 

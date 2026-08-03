@@ -530,21 +530,6 @@ const DisconnectedAuthority = ({
   </section>
 );
 
-const MobileAuthorityNotice = ({ body, title }: Readonly<{ body: string; title: string }>) => (
-  <section
-    aria-labelledby="admin-mobile-authority-title"
-    className="admin-disconnected-authority"
-    data-authority-action="omitted"
-    data-authority-state="disconnected"
-  >
-    <div>
-      <StatusSignal label={title} state="unavailable" />
-      <h2 id="admin-mobile-authority-title">{title}</h2>
-      <p>{body}</p>
-    </div>
-  </section>
-);
-
 export const SupportCaseWorkspace = ({
   content,
   viewportWidth,
@@ -777,7 +762,11 @@ const CriticalReview = ({
 }>) => {
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   return (
-    <>
+    <div
+      className="admin-high-risk-flow"
+      data-high-risk-action="true"
+      data-high-risk-sequence="evidence-impact-reauth-confirm-receipt"
+    >
       <PurposeAndImpactReview
         action={action}
         content={content}
@@ -785,54 +774,46 @@ const CriticalReview = ({
         purpose={purpose}
         target={target}
       />
-      <p className="admin-viewport-gate__mobile" id="admin-mobile-high-risk-block" role="status">
+      <p className="admin-high-risk-flow__availability" role="status">
         {content.operations.mobile}
       </p>
-      {viewportWidth >= 960 ? (
-        <div aria-describedby="admin-mobile-high-risk-block" data-high-risk-action="true">
-          {workflow === null ? (
-            <LbButton
-              onPress={() => {
-                setWorkflow(
-                  workflowInput({
-                    consent: {
-                      expiresAt: '2026-01-15T13:00:00.000Z',
-                      granted: true,
-                      permittedFields: ['target'],
-                      purpose,
-                      requestingActor: `${role}.operator`,
-                    },
-                    family: 'admin',
-                    fields: { target: `${role}-target-preview` },
-                    impact,
-                    label: action,
-                    purpose,
-                    review: [
-                      {
-                        field: 'target',
-                        label: content.audit.target,
-                        before: target,
-                        after: content.locale === 'pt-BR' ? 'Somente revisão' : 'Review only',
-                      },
-                    ],
-                    role,
-                    viewportWidth,
-                  }),
-                );
-              }}
-            >
-              {action}
-            </LbButton>
-          ) : (
-            <PreviewWorkflowRunner
-              input={workflow}
-              locale={content.locale}
-              scenarioId={scenarioId}
-            />
-          )}
-        </div>
-      ) : null}
-    </>
+      {workflow === null ? (
+        <LbButton
+          onPress={() => {
+            setWorkflow(
+              workflowInput({
+                consent: {
+                  expiresAt: '2026-01-15T13:00:00.000Z',
+                  granted: true,
+                  permittedFields: ['target'],
+                  purpose,
+                  requestingActor: `${role}.operator`,
+                },
+                family: 'admin',
+                fields: { target: `${role}-target-preview` },
+                impact,
+                label: action,
+                purpose,
+                review: [
+                  {
+                    field: 'target',
+                    label: content.audit.target,
+                    before: target,
+                    after: content.locale === 'pt-BR' ? 'Somente revisão' : 'Review only',
+                  },
+                ],
+                role,
+                viewportWidth,
+              }),
+            );
+          }}
+        >
+          {action}
+        </LbButton>
+      ) : (
+        <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
+      )}
+    </div>
   );
 };
 
@@ -891,18 +872,11 @@ export const OperationsReview = ({
         viewportWidth={viewportWidth}
       />
     </section>
-    {viewportWidth >= 960 ? (
-      <DisconnectedAuthority
-        action={content.operations.authorityAction}
-        body={content.operations.authorityBody}
-        title={content.operations.authorityTitle}
-      />
-    ) : (
-      <MobileAuthorityNotice
-        body={content.operations.authorityBody}
-        title={content.operations.authorityTitle}
-      />
-    )}
+    <DisconnectedAuthority
+      action={content.operations.authorityAction}
+      body={content.operations.authorityBody}
+      title={content.operations.authorityTitle}
+    />
     <section aria-labelledby="operations-audit-title" className="admin-decision__audit">
       <h2 id="operations-audit-title">{content.operations.auditTitle}</h2>
       <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[2]} />
@@ -965,18 +939,11 @@ export const SecurityReview = ({
         viewportWidth={viewportWidth}
       />
     </section>
-    {viewportWidth >= 960 ? (
-      <DisconnectedAuthority
-        action={content.security.authorityAction}
-        body={content.security.authorityBody}
-        title={content.security.authorityTitle}
-      />
-    ) : (
-      <MobileAuthorityNotice
-        body={content.security.authorityBody}
-        title={content.security.authorityTitle}
-      />
-    )}
+    <DisconnectedAuthority
+      action={content.security.authorityAction}
+      body={content.security.authorityBody}
+      title={content.security.authorityTitle}
+    />
     <section aria-labelledby="security-audit-title" className="admin-decision__audit">
       <h2 id="security-audit-title">{content.security.auditTitle}</h2>
       <CorrelatedEventDetail content={content} event={ADMIN_AUDIT_EVENTS[3]} />
@@ -1112,63 +1079,52 @@ export const DiagnosticFieldDisclosure = ({
                 </dd>
               </div>
             </dl>
-            <p
-              className="admin-viewport-gate__mobile"
-              id="diagnostic-mobile-high-risk-block"
-              role="status"
+            <div
+              className="admin-high-risk-flow"
+              data-high-risk-action="true"
+              data-high-risk-sequence="evidence-impact-reauth-confirm-receipt"
             >
-              {content.operations.mobile}
-            </p>
-            {viewportWidth >= 960 ? (
-              <div
-                aria-describedby="diagnostic-mobile-high-risk-block"
-                data-high-risk-action="true"
-              >
-                {workflow === null ? (
-                  <LbButton
-                    onPress={() => {
-                      setWorkflow(
-                        workflowInput({
-                          consent: {
-                            expiresAt: admittedConsent.expiresAt,
-                            granted: admittedConsent.granted,
-                            permittedFields: admittedConsent.permittedFields,
-                            purpose: admittedConsent.purpose,
-                            requestingActor: admittedConsent.actor,
-                          },
-                          family: 'diagnostic',
-                          fields: { diagnostic: 'diagnostic-preview' },
-                          impact: content.diagnostics.denial,
-                          label: content.diagnostics.allowedTitle,
+              <p className="admin-high-risk-flow__availability" role="status">
+                {content.diagnostics.reflow}
+              </p>
+              {workflow === null ? (
+                <LbButton
+                  onPress={() => {
+                    setWorkflow(
+                      workflowInput({
+                        consent: {
+                          expiresAt: admittedConsent.expiresAt,
+                          granted: admittedConsent.granted,
+                          permittedFields: admittedConsent.permittedFields,
                           purpose: admittedConsent.purpose,
-                          review: [
-                            {
-                              field: 'diagnostic',
-                              label: content.diagnostics.title,
-                              before: content.locale === 'pt-BR' ? 'Bloqueado' : 'Blocked',
-                              after:
-                                content.locale === 'pt-BR'
-                                  ? 'Revisão delimitada'
-                                  : 'Scoped review',
-                            },
-                          ],
-                          role: 'security',
-                          viewportWidth,
-                        }),
-                      );
-                    }}
-                  >
-                    {content.diagnostics.allowedTitle}
-                  </LbButton>
-                ) : (
-                  <PreviewWorkflowRunner
-                    input={workflow}
-                    locale={content.locale}
-                    scenarioId="W15"
-                  />
-                )}
-              </div>
-            ) : null}
+                          requestingActor: admittedConsent.actor,
+                        },
+                        family: 'diagnostic',
+                        fields: { diagnostic: 'diagnostic-preview' },
+                        impact: content.diagnostics.impact,
+                        label: content.diagnostics.allowedTitle,
+                        purpose: admittedConsent.purpose,
+                        review: [
+                          {
+                            field: 'diagnostic',
+                            label: content.diagnostics.title,
+                            before: content.locale === 'pt-BR' ? 'Bloqueado' : 'Blocked',
+                            after:
+                              content.locale === 'pt-BR' ? 'Revisão delimitada' : 'Scoped review',
+                          },
+                        ],
+                        role: 'security',
+                        viewportWidth,
+                      }),
+                    );
+                  }}
+                >
+                  {content.diagnostics.allowedTitle}
+                </LbButton>
+              ) : (
+                <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId="W15" />
+              )}
+            </div>
           </section>
         ) : (
           <p role="status">{content.diagnostics.denial}</p>
@@ -1287,7 +1243,13 @@ const RoleLanding = ({
         </label>
         <div className="admin-queue__filter-actions">
           <button type="submit">{content.queue.applyFilters}</button>
-          <a href={createAdminQueueHref(roleHomeHref, role, parseAdminQueueUrlState(new URLSearchParams()))}>
+          <a
+            href={createAdminQueueHref(
+              roleHomeHref,
+              role,
+              parseAdminQueueUrlState(new URLSearchParams()),
+            )}
+          >
             {content.queue.clearFilters}
           </a>
         </div>
@@ -1321,73 +1283,73 @@ const RoleLanding = ({
               <p>{content.queue.emptyBody}</p>
             </div>
           ) : (
-          <ResponsiveDataTable
-            caption={content.queue.caption}
-            columns={[
-              { id: 'case', label: content.queue.case },
-              { id: 'priority', label: content.queue.priority },
-              { id: 'sla', label: content.queue.sla },
-              { id: 'age', label: content.queue.age, essential: false },
-              { id: 'owner', label: content.queue.owner, essential: false },
-              { id: 'lastEvent', label: content.queue.lastEvent, essential: false },
-              { id: 'status', label: content.queue.status, essential: false },
-            ]}
-            rows={queue.map((item) => {
-              const isSelected = selectedItem?.id === item.id;
-              const selectionHref = createAdminQueueHref(roleHomeHref, role, queueState, {
-                selectedId: item.id,
-              });
-              return {
-                id: item.id,
-                cells: {
-                  case: (
-                    <a aria-current={isSelected ? 'true' : undefined} href={selectionHref}>
-                      <strong>{item.id}</strong>
-                      <span>{item.summary}</span>
-                    </a>
+            <ResponsiveDataTable
+              caption={content.queue.caption}
+              columns={[
+                { id: 'case', label: content.queue.case },
+                { id: 'priority', label: content.queue.priority },
+                { id: 'sla', label: content.queue.sla },
+                { id: 'age', label: content.queue.age, essential: false },
+                { id: 'owner', label: content.queue.owner, essential: false },
+                { id: 'lastEvent', label: content.queue.lastEvent, essential: false },
+                { id: 'status', label: content.queue.status, essential: false },
+              ]}
+              rows={queue.map((item) => {
+                const isSelected = selectedItem?.id === item.id;
+                const selectionHref = createAdminQueueHref(roleHomeHref, role, queueState, {
+                  selectedId: item.id,
+                });
+                return {
+                  id: item.id,
+                  cells: {
+                    case: (
+                      <a aria-current={isSelected ? 'true' : undefined} href={selectionHref}>
+                        <strong>{item.id}</strong>
+                        <span>{item.summary}</span>
+                      </a>
+                    ),
+                    priority: content.queue.priorityLabels[item.priority],
+                    sla: item.sla,
+                    age: item.age,
+                    owner: item.owner,
+                    lastEvent: item.lastEvent,
+                    status: content.queue.statusLabels[item.status],
+                  },
+                  detail: (
+                    <dl className="admin-landing__queue-detail">
+                      <div>
+                        <dt>{content.queue.case}</dt>
+                        <dd>{item.id}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.priority}</dt>
+                        <dd>{content.queue.priorityLabels[item.priority]}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.sla}</dt>
+                        <dd>{item.sla}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.age}</dt>
+                        <dd>{item.age}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.owner}</dt>
+                        <dd>{item.owner}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.lastEvent}</dt>
+                        <dd>{item.lastEvent}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.queue.status}</dt>
+                        <dd>{content.queue.statusLabels[item.status]}</dd>
+                      </div>
+                    </dl>
                   ),
-                  priority: content.queue.priorityLabels[item.priority],
-                  sla: item.sla,
-                  age: item.age,
-                  owner: item.owner,
-                  lastEvent: item.lastEvent,
-                  status: content.queue.statusLabels[item.status],
-                },
-                detail: (
-                  <dl className="admin-landing__queue-detail">
-                    <div>
-                      <dt>{content.queue.case}</dt>
-                      <dd>{item.id}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.priority}</dt>
-                      <dd>{content.queue.priorityLabels[item.priority]}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.sla}</dt>
-                      <dd>{item.sla}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.age}</dt>
-                      <dd>{item.age}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.owner}</dt>
-                      <dd>{item.owner}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.lastEvent}</dt>
-                      <dd>{item.lastEvent}</dd>
-                    </div>
-                    <div>
-                      <dt>{content.queue.status}</dt>
-                      <dd>{content.queue.statusLabels[item.status]}</dd>
-                    </div>
-                  </dl>
-                ),
-              };
-            })}
-          />
+                };
+              })}
+            />
           )}
         </section>
 
@@ -1397,7 +1359,7 @@ const RoleLanding = ({
             <>
               <h2 id="admin-queue-selection-title">{selectedItem.id}</h2>
               <p>{selectedItem.summary}</p>
-              <dl>
+              <dl className="admin-queue__selection-evidence">
                 <div>
                   <dt>{content.queue.owner}</dt>
                   <dd>{selectedItem.owner}</dd>
@@ -1409,6 +1371,22 @@ const RoleLanding = ({
                 <div>
                   <dt>{content.audit.target}</dt>
                   <dd>{selectedItem.redactedTarget}</dd>
+                </div>
+                <div>
+                  <dt>{content.queue.history}</dt>
+                  <dd>{selectedItem.lastEvent}</dd>
+                </div>
+                <div>
+                  <dt>{content.queue.consent}</dt>
+                  <dd>{content.queue.consentGuarded}</dd>
+                </div>
+                <div>
+                  <dt>{content.queue.impact}</dt>
+                  <dd>{selectedItem.summary}</dd>
+                </div>
+                <div>
+                  <dt>{content.queue.permittedAction}</dt>
+                  <dd>{content.queue.permittedReview}</dd>
                 </div>
               </dl>
               <p>{content.queue.selectionHint}</p>
@@ -1453,14 +1431,14 @@ const DegradedAdminPreview = ({
           ? 'Não há itens atribuídos para revisar agora.'
           : 'There are no assigned items to review right now.'
         : state === 'offline'
-      ? content.recovery.offline
-      : state === 'stale'
-        ? content.recovery.stale
-        : state === 'expired-session'
-          ? content.recovery.expired
-          : state === 'permission-denied'
-            ? content.recovery.permission
-            : content.recovery.failure;
+          ? content.recovery.offline
+          : state === 'stale'
+            ? content.recovery.stale
+            : state === 'expired-session'
+              ? content.recovery.expired
+              : state === 'permission-denied'
+                ? content.recovery.permission
+                : content.recovery.failure;
   const copy =
     content.locale === 'pt-BR'
       ? {
@@ -1548,7 +1526,8 @@ export const AdminPreviewExperience = ({
     }
     return <RoleLanding content={content} role={role} state={state} />;
   }
-  if (state !== 'ready') return <DegradedAdminPreview content={content} role={role} state={state} />;
+  if (state !== 'ready')
+    return <DegradedAdminPreview content={content} role={role} state={state} />;
   switch (routeId) {
     case 'admin-support':
       return <SupportCaseWorkspace content={content} viewportWidth={viewportWidth} />;

@@ -47,6 +47,12 @@
     "open": "Abrir item de trabalho",
     "selectionTitle": "Trabalho selecionado",
     "selectionHint": "A fila e os filtros permanecem no lugar enquanto você inspeciona este resumo redigido.",
+    "history": "Histórico recente",
+    "consent": "Limite de consentimento",
+    "consentGuarded": "Validado novamente dentro do fluxo selecionado e permitido para a função.",
+    "impact": "Impacto operacional",
+    "permittedAction": "Ação permitida",
+    "permittedReview": "Revisar evidências e preparar um comprovante sem alteração. A autoridade remota permanece indisponível.",
     "loading": "Carregando a fila permitida para a função.",
     "emptyTitle": "Nenhum trabalho corresponde a esta visão",
     "emptyBody": "Altere um filtro ou uma visão salva. Nenhum trabalho fora da sua função foi pesquisado.",
@@ -108,7 +114,7 @@
     "action": "Revisar retenção da publicação",
     "purpose": "Manter a versão retida enquanto as evidências são revisadas.",
     "impact": "A publicação permanece retida para esta versão; nenhuma mudança foi aplicada.",
-    "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px.",
+    "mobile": "Esta revisão permitida para a função permanece alcançável quando a interface reflui ou o texto é ampliado.",
     "constraintsTitle": "Restrições da decisão",
     "authorityTitle": "Autoridade de publicação indisponível",
     "authorityBody": "A credencial de versão e o canal de promoção estão desconectados. A retenção permanece inalterada.",
@@ -149,7 +155,9 @@
     "actor": "security.operator",
     "auditReference": "audit-consent-015",
     "expiration": "2026-01-15T12:30:00.000Z",
-    "denial": "Consentimento ausente, expirado ou fora do escopo não revela nenhum campo de diagnóstico nem cria autoridade."
+    "denial": "Consentimento ausente, expirado ou fora do escopo não revela nenhum campo de diagnóstico nem cria autoridade.",
+    "impact": "Somente os campos admitidos entram na revisão. Nenhum valor de diagnóstico é alterado ou compartilhado remotamente.",
+    "reflow": "Consentimento, revisão, confirmação, cancelamento e o comprovante sem alteração permanecem alcançáveis quando a interface reflui."
   },
   "audit": {
     "title": "Linha do tempo de auditoria imutável",

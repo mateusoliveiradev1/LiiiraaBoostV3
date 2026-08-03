@@ -196,7 +196,7 @@ describe('admin shell', () => {
     );
   });
 
-  it('keeps safe mobile review while removing high-risk semantics with a contextual reason', () => {
+  it('keeps high-risk review reachable through zoom-safe vertical semantics', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
@@ -204,12 +204,12 @@ describe('admin shell', () => {
 
     expect(layout).not.toContain('viewportPolicy=');
     expect(navigation).not.toContain('viewportPolicy');
-    expect(feature).toContain('id="admin-mobile-high-risk-block"');
-    expect(feature).toContain('aria-describedby="admin-mobile-high-risk-block"');
-    expect(feature).toContain('viewportWidth');
+    expect(feature).toContain('data-high-risk-sequence="evidence-impact-reauth-confirm-receipt"');
+    expect(feature).not.toMatch(/viewportWidth\s*>=\s*960/u);
     expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\[data-high-risk-action='true'\]\s*\{[\s\S]*display:\s*none !important/u,
+      /\.admin-high-risk-flow\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/u,
     );
+    expect(styles).not.toMatch(/\[data-high-risk-action='true'\][\s\S]{0,120}display:\s*none/u);
   });
 
   it('renders a premium task and operator topbar with accessible flag language switching', () => {
@@ -225,9 +225,7 @@ describe('admin shell', () => {
     expect(navigation).toContain('resolveLocalizedCurrentRoute({');
     expect(navigation).toContain('<LocaleSwitcher');
     expect(navigation).not.toContain('aria-label={`${locale');
-    expect(styles).toContain(
-      ".admin-header__account:not([open]) > .admin-header__account-panel",
-    );
+    expect(styles).toContain('.admin-header__account:not([open]) > .admin-header__account-panel');
     expect(styles).toMatch(
       /@media \(width < 400px\)[\s\S]*\.admin-brand \.lb-product-wordmark\s*\{[\s\S]*display:\s*none/u,
     );
@@ -262,7 +260,7 @@ describe('admin shell', () => {
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
   });
 
-  it('provides skip, focus, protected operator menu, and semantic viewport gate contracts', () => {
+  it('provides skip, focus, protected operator menu, and role-guarded reflow contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
@@ -273,9 +271,8 @@ describe('admin shell', () => {
     expect(layout).not.toContain('data-viewport-gate="960"');
     expect(layout).toContain('<main id="admin-main" tabIndex={-1}>');
     expect(focus).toContain('#admin-main > h1');
-    expect(styles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\[data-high-risk-action='true'\][\s\S]*display: none !important/u,
-    );
+    expect(styles).toContain('.admin-high-risk-flow');
+    expect(styles).not.toContain("[data-high-risk-action='true'] {");
     expect(styles).toContain('@media (forced-colors: active)');
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
   });

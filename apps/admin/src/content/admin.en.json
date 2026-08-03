@@ -47,6 +47,12 @@
     "open": "Open work item",
     "selectionTitle": "Selected work",
     "selectionHint": "The queue and filters remain in place while you inspect this redacted summary.",
+    "history": "Recent history",
+    "consent": "Consent boundary",
+    "consentGuarded": "Validated again inside the selected role-permitted workflow.",
+    "impact": "Operational impact",
+    "permittedAction": "Permitted action",
+    "permittedReview": "Review evidence and prepare a no-change receipt. Remote authority remains unavailable.",
     "loading": "Loading the role-permitted queue.",
     "emptyTitle": "No work matches this view",
     "emptyBody": "Change a filter or saved view. No work outside your role was searched.",
@@ -108,7 +114,7 @@
     "action": "Review publication hold",
     "purpose": "Keep the release held while evidence is reviewed.",
     "impact": "Publication remains held for this release; no change was applied.",
-    "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px.",
+    "mobile": "This role-permitted review remains reachable when the interface reflows or text is enlarged.",
     "constraintsTitle": "Decision constraints",
     "authorityTitle": "Publication authority unavailable",
     "authorityBody": "The release credential and promotion channel are disconnected. The hold remains unchanged.",
@@ -149,7 +155,9 @@
     "actor": "security.operator",
     "auditReference": "audit-consent-015",
     "expiration": "2026-01-15T12:30:00.000Z",
-    "denial": "Absent, expired, or wrong-scope consent reveals no diagnostic field and creates no authority."
+    "denial": "Absent, expired, or wrong-scope consent reveals no diagnostic field and creates no authority.",
+    "impact": "Only the admitted fields enter review. No diagnostic value is changed or shared remotely.",
+    "reflow": "Consent, review, confirmation, cancellation, and the no-change receipt remain reachable when the interface reflows."
   },
   "audit": {
     "title": "Immutable audit timeline",
