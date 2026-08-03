@@ -273,7 +273,7 @@ const presentAuditEvent = (content: AdminContent, event: AdminAuditEvent) => {
   return Object.freeze({
     action,
     reason: eventCopy.reason,
-    result: content.locale === 'pt-BR' ? 'Nenhuma alteração remota' : 'No remote change',
+    result: content.locale === 'pt-BR' ? 'Sem alteração aplicada' : 'No change applied',
     role: Object.hasOwn(content.roles, event.role)
       ? content.roles[event.role as AdminPreviewRole]
       : content.locale === 'pt-BR'

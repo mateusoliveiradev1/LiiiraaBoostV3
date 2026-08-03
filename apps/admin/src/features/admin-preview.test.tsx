@@ -324,6 +324,52 @@ describe('role-scoped admin', () => {
     expect(featureSource).toContain('<ResponsiveDataTable');
   });
 
+  it.each([1440, 960, 390, 320])(
+    'keeps the operational decision hierarchy coherent at %ipx without implicit grid columns',
+    () => {
+      const operationsSource = featureSource.slice(
+        featureSource.indexOf('export const OperationsReview'),
+        featureSource.indexOf('export const SecurityReview'),
+      );
+      const sequence = [
+        'admin-decision__context',
+        'admin-decision__evidence',
+        'admin-decision__constraints',
+        '<DisconnectedAuthority',
+        'admin-decision__audit',
+      ].map((marker) => operationsSource.indexOf(marker));
+
+      expect(sequence.every((position) => position >= 0)).toBe(true);
+      expect(sequence).toEqual([...sequence].sort((left, right) => left - right));
+      expect(stylesSource).toMatch(
+        /\.admin-decision\.admin-decision--critical[\s\S]*> :where\([\s\S]*\.admin-decision__context,[\s\S]*\.admin-decision__evidence,[\s\S]*grid-column:\s*1 \/ -1/u,
+      );
+      expect(stylesSource).toMatch(
+        /@media \(width > 960px\)[\s\S]*\.admin-decision\.admin-decision--critical > \.admin-decision__context\s*\{[\s\S]*grid-column:\s*1 \/ span 8[\s\S]*\.admin-decision\.admin-decision--critical > \.admin-decision__evidence\s*\{[\s\S]*grid-column:\s*9 \/ -1/u,
+      );
+      expect(stylesSource).toMatch(
+        /@media \(width <= 960px\)[\s\S]*\.admin-decision > \.admin-decision__context,[\s\S]*\.admin-decision > \.admin-decision__evidence,[\s\S]*grid-column:\s*1 \/ -1/u,
+      );
+    },
+  );
+
+  it('uses task language while retaining the explicit no-change receipt', () => {
+    expect(adminPtBr.operations).toMatchObject({
+      title: 'Publicação retida',
+      constraintsTitle: 'Confirme o escopo',
+      authorityTitle: 'Canal de publicação indisponível',
+      auditTitle: 'Registro de auditoria',
+    });
+    expect(adminEn.operations).toMatchObject({
+      title: 'Publication held',
+      constraintsTitle: 'Confirm the scope',
+      authorityTitle: 'Publication channel unavailable',
+      auditTitle: 'Audit record',
+    });
+    expect(featureSource).toContain("'Sem alteração aplicada' : 'No change applied'");
+    expect(featureSource).toContain('data-remote-state-changed="false"');
+  });
+
   it('keeps consent scope adjacent to redacted immutable diagnostic correlation', () => {
     const diagnosticsSource = featureSource.slice(
       featureSource.indexOf('export const DiagnosticFieldDisclosure'),

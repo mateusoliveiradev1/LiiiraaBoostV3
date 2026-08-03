@@ -892,7 +892,7 @@ button:focus-visible,
   grid-template-columns: minmax(0, 1fr);
 }
 
-.admin-decision--critical
+.admin-decision.admin-decision--critical
   > :where(
     .lb-web-route-header,
     .admin-decision__context,
@@ -901,7 +901,28 @@ button:focus-visible,
     .admin-disconnected-authority,
     .admin-decision__audit
   ) {
-  grid-column: 1;
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+}
+
+.admin-decision--critical
+  :where(dl, dl > div, dt, dd, .lb-button, .lb-web-status, .lb-web-receipt) {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (width > 960px) {
+  .admin-decision.admin-decision--critical {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .admin-decision.admin-decision--critical > .admin-decision__context {
+    grid-column: 1 / span 8;
+  }
+
+  .admin-decision.admin-decision--critical > .admin-decision__evidence {
+    grid-column: 9 / -1;
+  }
 }
 
 .admin-high-risk-flow {

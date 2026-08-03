@@ -103,8 +103,8 @@
     "auditTitle": "Immutable review trail"
   },
   "operations": {
-    "title": "Operations review",
-    "summary": "Triage the release alert and review safeguards before any operational decision.",
+    "title": "Publication held",
+    "summary": "Review the evidence before deciding whether this release can move forward.",
     "decisionTitle": "Keep publication held while evidence is incomplete",
     "evidenceTitle": "Release-control evidence",
     "reviewLabel": "Review OPS-117",
@@ -114,12 +114,12 @@
     "action": "Review publication hold",
     "purpose": "Keep the release held while evidence is reviewed.",
     "impact": "Publication remains held for this release; no change was applied.",
-    "mobile": "This role-permitted review remains reachable when the interface reflows or text is enlarged.",
-    "constraintsTitle": "Decision constraints",
-    "authorityTitle": "Publication authority unavailable",
+    "mobile": "Check the impact and confirm the review when you are ready.",
+    "constraintsTitle": "Confirm the scope",
+    "authorityTitle": "Publication channel unavailable",
     "authorityBody": "The release credential and promotion channel are disconnected. The hold remains unchanged.",
     "authorityAction": "Retain publication hold — unavailable",
-    "auditTitle": "Immutable decision trail"
+    "auditTitle": "Audit record"
   },
   "security": {
     "title": "Security review",

@@ -103,8 +103,8 @@
     "auditTitle": "Trilha imutável da revisão"
   },
   "operations": {
-    "title": "Revisão operacional",
-    "summary": "Faça a triagem do alerta de versão e revise as salvaguardas antes de qualquer decisão operacional.",
+    "title": "Publicação retida",
+    "summary": "Revise as evidências antes de decidir se esta versão pode avançar.",
     "decisionTitle": "Mantenha a publicação retida enquanto as evidências estiverem incompletas",
     "evidenceTitle": "Evidências de controle da versão",
     "reviewLabel": "Revisão OPS-117",
@@ -114,12 +114,12 @@
     "action": "Revisar retenção da publicação",
     "purpose": "Manter a versão retida enquanto as evidências são revisadas.",
     "impact": "A publicação permanece retida para esta versão; nenhuma mudança foi aplicada.",
-    "mobile": "Esta revisão permitida para a função permanece alcançável quando a interface reflui ou o texto é ampliado.",
-    "constraintsTitle": "Restrições da decisão",
-    "authorityTitle": "Autoridade de publicação indisponível",
+    "mobile": "Confira o impacto e confirme a revisão quando estiver pronto.",
+    "constraintsTitle": "Confirme o escopo",
+    "authorityTitle": "Canal de publicação indisponível",
     "authorityBody": "A credencial de versão e o canal de promoção estão desconectados. A retenção permanece inalterada.",
     "authorityAction": "Manter retenção da publicação — indisponível",
-    "auditTitle": "Trilha imutável da decisão"
+    "auditTitle": "Registro de auditoria"
   },
   "security": {
     "title": "Revisão de segurança",
