@@ -107,7 +107,7 @@ export const PHASE_3_PROOFS = [
   {
     file: 'quality/evidence/phase-03/web/visual-report.json',
     id: 'visual-report',
-    owner: 'plan-03-32',
+    owner: 'plan-03-46',
   },
   {
     file: 'quality/evidence/phase-03/web/docs-routes.json',
@@ -142,12 +142,12 @@ export const PHASE_3_PROOFS = [
   {
     file: 'quality/evidence/phase-03/web/accessibility-report.json',
     id: 'accessibility-report',
-    owner: 'plan-03-32',
+    owner: 'plan-03-46',
   },
   {
     file: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
     id: 'approved-publication-bundle',
-    owner: 'plan-03-32',
+    owner: 'plan-03-46',
   },
   {
     file: 'quality/evidence/phase-03/web/route-reachability.json',
@@ -241,6 +241,7 @@ export interface Phase3VerificationArtifacts {
     bundleFile: string;
     developmentArtifactDetected: boolean;
     downloadAvailable: boolean;
+    evidenceBindings?: Phase3PublicationEvidenceBindings;
     officialArtifact: 'available' | 'unavailable';
     publicDistributionApproved: boolean;
   };
@@ -250,6 +251,26 @@ export interface Phase3VerificationArtifacts {
   scenarios: string[];
   sourceHashes: { file: string; sha256: string }[];
   successCriteria: string[];
+}
+
+interface Phase3PublicationFileBinding {
+  candidateCount?: number;
+  path: string;
+  sha256: string;
+}
+
+interface Phase3PublicationEvidenceBindings {
+  approval: Phase3PublicationFileBinding & {
+    candidateCount: number;
+    fingerprint: string;
+    reviewerSignal: string;
+    routeCount: number;
+  };
+  detectorResults: Record<string, string>;
+  launchReadiness: Phase3PublicationFileBinding & { candidateCount: number };
+  routeMatrix: Phase3PublicationFileBinding;
+  routeReachability: Phase3PublicationFileBinding;
+  visualManifest: Phase3PublicationFileBinding & { candidateCount: number };
 }
 
 export interface Phase3VerificationInput {
@@ -495,6 +516,106 @@ const validateTruth = (input: Phase3VerificationInput, diagnostics: Phase3Diagno
   }
 };
 
+const PUBLICATION_BINDING_PATHS = Object.freeze({
+  approval: '.planning/phases/03-complete-web-experience/03-UAT.md',
+  launchReadiness:
+    '.planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json',
+  routeMatrix: '.planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md',
+  routeReachability: 'quality/evidence/phase-03/web/route-reachability.json',
+  visualManifest: 'tooling/web-evidence/visual-manifest.json',
+} as const);
+const APPROVED_PACKET_FINGERPRINT =
+  '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e';
+const FINAL_DETECTOR_DECISIONS = Array.from(
+  { length: 9 },
+  (_, index) => `D-${String(index + 102)}`,
+);
+
+const validatePublicationBindings = (
+  input: Phase3VerificationInput,
+  diagnostics: Phase3Diagnostic[],
+  repositoryRoot: string,
+): void => {
+  const bindings = input.artifacts.publication.evidenceBindings;
+  const rootPath = '$.publication.evidenceBindings';
+  if (bindings === undefined || bindings === null || typeof bindings !== 'object') {
+    diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', rootPath));
+    return;
+  }
+
+  for (const [identity, expectedPath] of Object.entries(PUBLICATION_BINDING_PATHS)) {
+    const binding = bindings[identity as keyof typeof PUBLICATION_BINDING_PATHS] as
+      Phase3PublicationFileBinding | undefined;
+    const path = `${rootPath}.${identity}`;
+    if (binding === undefined || binding === null || typeof binding !== 'object') {
+      diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', path));
+      continue;
+    }
+    if (binding.path !== expectedPath) {
+      diagnostics.push(diagnostic('PUBLICATION_BINDING_PATH_MISMATCH', `${path}.path`));
+      continue;
+    }
+    if (!existsSync(join(repositoryRoot, expectedPath))) {
+      diagnostics.push(diagnostic('PUBLICATION_BINDING_FILE_MISSING', `${path}.path`));
+      continue;
+    }
+    if (!SHA256.test(binding.sha256) || binding.sha256 !== fileHash(repositoryRoot, expectedPath)) {
+      diagnostics.push(diagnostic('PUBLICATION_BINDING_HASH_MISMATCH', `${path}.sha256`));
+    }
+  }
+
+  const approval = bindings.approval;
+  if (
+    approval !== undefined &&
+    (approval.reviewerSignal !== 'aprovado' ||
+      approval.fingerprint !== APPROVED_PACKET_FINGERPRINT ||
+      approval.routeCount !== 60 ||
+      approval.candidateCount !== 480)
+  ) {
+    diagnostics.push(diagnostic('PUBLICATION_APPROVAL_MISMATCH', `${rootPath}.approval`));
+  }
+  for (const identity of ['launchReadiness', 'visualManifest'] as const) {
+    if (bindings[identity] !== undefined && bindings[identity].candidateCount !== 480) {
+      diagnostics.push(
+        diagnostic(
+          'PUBLICATION_CANDIDATE_COUNT_MISMATCH',
+          `${rootPath}.${identity}.candidateCount`,
+        ),
+      );
+    }
+  }
+
+  const detectorResults = bindings.detectorResults;
+  if (
+    detectorResults === undefined ||
+    detectorResults === null ||
+    typeof detectorResults !== 'object'
+  ) {
+    diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', `${rootPath}.detectorResults`));
+    return;
+  }
+  for (const decision of FINAL_DETECTOR_DECISIONS) {
+    if (detectorResults[decision] !== 'passed') {
+      diagnostics.push(
+        diagnostic(
+          'PUBLICATION_DETECTOR_RESULT_MISMATCH',
+          `${rootPath}.detectorResults.${decision}`,
+        ),
+      );
+    }
+  }
+  for (const decision of Object.keys(detectorResults)) {
+    if (!FINAL_DETECTOR_DECISIONS.includes(decision)) {
+      diagnostics.push(
+        diagnostic(
+          'PUBLICATION_DETECTOR_RESULT_MISMATCH',
+          `${rootPath}.detectorResults.${decision}`,
+        ),
+      );
+    }
+  }
+};
+
 export const verifyPhase3 = (
   input: Phase3VerificationInput,
   repositoryRoot = resolve(import.meta.dirname, '../../..'),
@@ -522,6 +643,7 @@ export const verifyPhase3 = (
   validateProofs(input, diagnostics);
   validateSources(input, diagnostics);
   validateTruth(input, diagnostics);
+  validatePublicationBindings(input, diagnostics, resolve(repositoryRoot));
 
   if (input.mode === 'final') {
     for (const command of ROOT_COMMANDS) {
@@ -589,6 +711,7 @@ interface ApprovedBundleShape extends ProofShape {
     surface: WebSurface;
   }>[];
   readonly finalApproved: boolean;
+  readonly evidenceBindings?: Phase3PublicationEvidenceBindings;
   readonly releaseTruth: Readonly<{
     developmentArtifactDetected: boolean;
     downloadAvailable: boolean;
@@ -759,6 +882,7 @@ export const createRepositoryPhase3Input = (
       publication: {
         approved: approvedBundle.finalApproved && approvedBundle.status === 'passed',
         bundleFile: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
+        evidenceBindings: approvedBundle.evidenceBindings,
         ...approvedBundle.releaseTruth,
       },
       requirements: [...PHASE_3_REQUIREMENTS],

@@ -38,7 +38,9 @@ const publicationBindingFiles = Object.freeze({
 } as const);
 
 const fileSha = (file: string): string =>
-  createHash('sha256').update(readFileSync(join(repositoryRoot, file))).digest('hex');
+  createHash('sha256')
+    .update(readFileSync(join(repositoryRoot, file)))
+    .digest('hex');
 
 const currentPublicationBindings = () => ({
   approval: {
@@ -241,9 +243,7 @@ describe('Phase 3 proof owner and approved publication binding', () => {
   } as const);
 
   it('requires plan-03-46 proof ownership for exactly the three regenerated artifacts', () => {
-    expect(
-      Object.fromEntries(PHASE_3_PROOFS.map(({ id, owner }) => [id, owner])),
-    ).toEqual({
+    expect(Object.fromEntries(PHASE_3_PROOFS.map(({ id, owner }) => [id, owner]))).toEqual({
       ...unchangedProofOwners,
       'accessibility-report': 'plan-03-46',
       'approved-publication-bundle': 'plan-03-46',
