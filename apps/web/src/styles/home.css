@@ -81,7 +81,7 @@
   grid-column: 2 / 12;
   justify-self: center;
   inline-size: min(calc(100vw - 64px), 1120px);
-  margin-block-start: 0;
+  margin-block-start: 4px;
 }
 
 .home-ignition-hero__stage::before {
@@ -483,7 +483,7 @@
   .home-ignition-hero__stage {
     justify-self: stretch;
     inline-size: 100%;
-    margin-block-start: 16px;
+    margin-block-start: 20px;
   }
 
   .home-player-problem,
