@@ -187,10 +187,10 @@ describe('authored overview and Profile workspaces', () => {
 
   it('keeps the W10 sign-in boundary user-facing and free of implementation ownership', () => {
     expect(accountEn.signIn.security).toBe(
-      'This demonstration environment does not create a real session or send credentials.',
+      'Your credentials are sent only over a secure connection and never appear in diagnostics.',
     );
     expect(accountPtBr.signIn.security).toBe(
-      'Este ambiente de demonstração não cria uma sessão real nem envia credenciais.',
+      'Suas credenciais só são enviadas por uma conexão segura e nunca aparecem em diagnósticos.',
     );
     for (const copy of [accountPtBr.signIn.security, accountEn.signIn.security]) {
       expect(copy).not.toMatch(

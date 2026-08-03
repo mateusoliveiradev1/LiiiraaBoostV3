@@ -10,7 +10,7 @@
     "validationState": "validated",
     "evidence": [
       {
-        "source": "https://liiiraa.com/en/evidence",
+        "source": "https://liiiraa.com/en/results",
         "provenance": {
           "kind": "observed",
           "value": "desktop-plan-review",
@@ -23,7 +23,7 @@
         "unproven": false
       },
       {
-        "source": "https://liiiraa.com/en/evidence",
+        "source": "https://liiiraa.com/en/results",
         "provenance": {
           "kind": "observed",
           "value": "desktop-evidence-review",
@@ -36,7 +36,7 @@
         "unproven": false
       },
       {
-        "source": "https://liiiraa.com/en/evidence",
+        "source": "https://liiiraa.com/en/results",
         "provenance": {
           "kind": "observed",
           "value": "desktop-recovery-review",
@@ -95,68 +95,68 @@
   "contentType": "product",
   "source": "repository",
   "title": "Prepare your PC. Prove the result. Restore with control.",
-  "summary": "A technical journey for preparing a session, verifying what evidence supports, and preserving a path back.",
-  "body": "Liiiraa Boost organizes preparation, proof, and restoration without promising gains before hardware is observed. Compatibility, validation, and distribution remain explicit.",
+  "summary": "Your PC can deliver a more stable experience when every adjustment respects the hardware, Windows, and the game.",
+  "body": "Liiiraa Boost analyzes the machine, prepares a clear plan, measures before and after, and keeps a safe path to undo changes.",
   "metadata": {
     "title": "Liiiraa Boost | Evidence-led performance and control",
-    "description": "Explore the Liiiraa Boost approach to preparation, evidence, compatibility, and restoration.",
+    "description": "Analyze, optimize, and compare your gaming PC with safe, explainable, and reversible adjustments.",
     "socialImageId": "desktop-home-en-social"
   },
   "warnings": [
     "Compatibility and results depend on hardware, Windows version, the game, and measurement quality.",
-    "Public download remains blocked until a publicly trusted installer is approved."
+    "Download availability and compatibility are verified before installation."
   ],
   "screenshotAssetIds": ["desktop-home-en"],
   "actionableClaims": [
-    "Check compatibility before considering any plan.",
-    "Review the source and boundary of every material claim."
+    "Start free with Essential Mode, with no card or trial.",
+    "Unlock Competitive Mode when you want per-game calibration and automation."
   ],
   "identifiers": ["LB-HOME", "WEB-01", "1.0.0"],
   "errorCodes": [],
-  "suggestions": ["Check compatibility", "Read the methodology", "Review releases"],
+  "suggestions": ["Download free", "View results", "Compare plans"],
   "domain": "product",
   "risk": "low",
   "availability": "under-validation",
   "hero": {
     "promise": "Prepare your PC. Prove the result. Restore with control.",
-    "summary": "Enter the next session with a readable plan, identified evidence, and recovery treated as part of performance — never a footnote.",
+    "summary": "Analyze your PC, apply only what makes sense, and compare the session knowing that every change can be restored.",
     "primaryAction": {
       "label": "Check compatibility",
       "routeId": "public-compatibility"
     },
     "secondaryAction": {
-      "label": "Explore the methodology",
-      "routeId": "public-evidence"
+      "label": "See the product in action",
+      "routeId": "public-results"
     },
     "trustBoundary": {
-      "title": "What this capture proves",
-      "body": "The interface shown is a real, approved product capture. Its data and operations are deterministic scenarios; gains and compatibility depend on observed hardware."
+      "title": "The product you will use",
+      "body": "This is a real capture of the desktop application. Performance results appear only after analysis and measurement on your own PC."
     }
   },
   "chapters": [
     {
       "id": "prepare",
       "title": "Prepare with a plan you can review",
-      "summary": "The desktop experience models recommendations, dependencies, risk, and consequence before any future native authority.",
-      "claim": "The product presents preparation as an explicit review, not a generic unchecked action.",
+      "summary": "The app considers hardware, Windows, drivers, processes, and games before recommending any adjustment.",
+      "claim": "You receive a reviewable plan with impact, risk, and dependencies visible before application.",
       "evidenceIndex": 0,
-      "unprovenBoundary": "This proves the implemented review experience; it does not prove a performance gain or privileged application."
+      "unprovenBoundary": "The review experience is available; performance gains depend on measurement on your own PC."
     },
     {
       "id": "prove",
       "title": "Prove without turning a hypothesis into a result",
-      "summary": "Source, validation state, version, and unavailability accompany what the interface presents as evidence.",
-      "claim": "The interface distinguishes observed facts, simulated previews, and unavailable data with persistent provenance.",
+      "summary": "Before and after use the same PC and keep the game, version, conditions, and data source visible.",
+      "claim": "Measurements, estimates, and unavailable data are separated to prevent misleading conclusions.",
       "evidenceIndex": 1,
-      "unprovenBoundary": "The evidence structure is validated; real per-machine measurements still depend on the future native engine."
+      "unprovenBoundary": "No performance number is claimed before local analysis and benchmarking."
     },
     {
       "id": "restore",
       "title": "Restore with the same rigor used to prepare",
-      "summary": "History, consequence, and recovery are visible journey responsibilities, including when an action cannot proceed.",
-      "claim": "The desktop experience includes deterministic history and restoration journeys with an explanation of the safe state.",
+      "summary": "History, consequences, and recovery remain visible on every plan.",
+      "claim": "You can identify what changed and start restoration without depending on an active subscription.",
       "evidenceIndex": 2,
-      "unprovenBoundary": "The visual journey is implemented; real Windows restoration remains outside this phase's authority."
+      "unprovenBoundary": "Restoration depends on a valid recovery point and never bypasses a safety failure."
     },
     {
       "id": "compatibility",
@@ -169,10 +169,10 @@
     {
       "id": "decisions",
       "title": "Control begins with decisions that can be audited",
-      "summary": "The interface does not receive administrative power for convenience. Contracts, validation, and recovery bound every future operation.",
-      "claim": "The product separates the unprivileged interface from future native operations and refuses arbitrary remote execution.",
+      "summary": "Every change has a purpose, consequence, validation, and a path back.",
+      "claim": "Liiiraa Boost runs only known operations and refuses arbitrary remote commands.",
       "evidenceIndex": 4,
-      "unprovenBoundary": "The architecture and boundaries are documented; secure native authority still needs implementation and verification."
+      "unprovenBoundary": "An operation is offered only when compatibility, permission, and recovery can be verified."
     },
     {
       "id": "releases",
@@ -192,14 +192,14 @@
     "fullScreenshotLabel": "View complete screenshot",
     "provenanceSummary": "Real capture details",
     "provenanceLabel": "Review the scenario, viewport, and commit for this approved capture.",
-    "unavailableTitle": "Real product capture is not admitted yet",
-    "unavailableBody": "This stage accepts only a capture from the executable desktop application with an approved sidecar and matching checksum. No mockup or visual substitute will be shown."
+    "unavailableTitle": "The application showcase could not be loaded",
+    "unavailableBody": "You can still explore the product, check compatibility, compare plans, and continue to download."
   },
   "finalJourney": {
     "title": "Start with what your PC actually supports",
-    "body": "The next step does not promise a result. It organizes the Windows and hardware context needed to say what is available, under validation, or unavailable.",
+    "body": "The check starts with Windows and continues in the desktop app, where hardware and games can be analyzed safely.",
     "actionLabel": "Check compatibility",
     "routeId": "public-compatibility",
-    "distributionNote": "Public download remains unavailable until a publicly trusted artifact is approved."
+    "distributionNote": "Download is released only after version, signature, integrity, and compatibility are approved."
   }
 }

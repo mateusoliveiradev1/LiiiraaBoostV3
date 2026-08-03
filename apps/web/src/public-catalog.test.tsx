@@ -19,7 +19,7 @@ const visibleText = (markup: string): string =>
 
 const CATALOG_ROUTES = [
   'public-product',
-  'public-evidence',
+  'public-results',
   'public-compatibility',
   'public-plans',
   'public-search',
@@ -29,13 +29,13 @@ const CATALOG_ROUTES = [
 describe('public catalog content', () => {
   it.each([
     ['pt-BR', 'public-product', 'Ver como funciona'],
-    ['pt-BR', 'public-evidence', 'Ver como medimos'],
+    ['pt-BR', 'public-results', 'Ver como medimos'],
     ['pt-BR', 'public-compatibility', 'Checar meu PC'],
-    ['pt-BR', 'public-plans', 'Continuar com Premium'],
+    ['pt-BR', 'public-plans', 'Escolher Premium'],
     ['en', 'public-product', 'See how it works'],
-    ['en', 'public-evidence', 'See how we measure'],
+    ['en', 'public-results', 'See how we measure'],
     ['en', 'public-compatibility', 'Check my PC'],
-    ['en', 'public-plans', 'Continue with Premium'],
+    ['en', 'public-plans', 'Choose Premium'],
   ] as const)(
     'leads %s %s with a route-specific visitor outcome and next action',
     (locale, routeId, action) => {
@@ -60,14 +60,14 @@ describe('public catalog content', () => {
 
   it('frames the four discovery routes in player language before technical detail', () => {
     const expected = [
-      ['pt-BR', 'public-product', 'Mais desempenho para jogar, sem perder o controle'],
-      ['pt-BR', 'public-evidence', 'Resultados que você consegue conferir'],
-      ['pt-BR', 'public-compatibility', 'Seu PC é compatível?'],
-      ['pt-BR', 'public-plans', 'O plano para jogar com mais controle'],
-      ['en', 'public-product', 'More gaming performance without giving up control'],
-      ['en', 'public-evidence', 'Results you can verify'],
-      ['en', 'public-compatibility', 'Is your PC compatible?'],
-      ['en', 'public-plans', 'The plan for gaming with more control'],
+      ['pt-BR', 'public-product', 'Mais estabilidade para jogar. Controle para voltar atrás.'],
+      ['pt-BR', 'public-results', 'Resultados que você consegue conferir'],
+      ['pt-BR', 'public-compatibility', 'Veja se o Liiiraa Boost combina com o seu PC'],
+      ['pt-BR', 'public-plans', 'Comece grátis. Ative o modo competitivo quando fizer sentido.'],
+      ['en', 'public-product', 'More stability for gaming. Control when you need to go back.'],
+      ['en', 'public-results', 'Results you can verify'],
+      ['en', 'public-compatibility', 'See whether Liiiraa Boost fits your PC'],
+      ['en', 'public-plans', 'Start free. Unlock competitive mode when it makes sense.'],
     ] as const;
 
     for (const [locale, routeId, heading] of expected) {
@@ -116,24 +116,68 @@ describe('public catalog content', () => {
     }
   });
 
-  it('discloses every commercial consequence before the simulated checkout boundary', () => {
+  it('discloses every commercial consequence before the checkout boundary', () => {
     for (const locale of ['pt-BR', 'en'] as const) {
       const record = getPublicCatalog(locale).records.find(
         ({ routeId }) => routeId === 'public-plans',
       );
-      const plan = record?.plans?.[0];
+      const plans = record?.plans;
 
-      expect(plan?.checkoutBoundary).toMatch(/compra|purchase/iu);
-      expect(plan?.price.length).toBeGreaterThan(0);
-      expect(plan?.billingPeriod.length).toBeGreaterThan(0);
-      expect(plan?.renewal.length).toBeGreaterThan(0);
-      expect(plan?.taxes.length).toBeGreaterThan(0);
-      expect(plan?.cancellation.length).toBeGreaterThan(0);
-      expect(plan?.refunds.length).toBeGreaterThan(0);
-      expect(plan?.deviceRules.length).toBeGreaterThan(0);
-      expect(plan?.expirationEffects.length).toBeGreaterThan(0);
+      expect(plans).toHaveLength(2);
+      for (const plan of plans ?? []) {
+        expect(plan.checkoutBoundary.length).toBeGreaterThan(0);
+        expect(plan.price.length).toBeGreaterThan(0);
+        expect(plan.billingPeriod.length).toBeGreaterThan(0);
+        expect(plan.renewal.length).toBeGreaterThan(0);
+        expect(plan.taxes.length).toBeGreaterThan(0);
+        expect(plan.cancellation.length).toBeGreaterThan(0);
+        expect(plan.refunds.length).toBeGreaterThan(0);
+        expect(plan.deviceRules.length).toBeGreaterThan(0);
+        expect(plan.expirationEffects.length).toBeGreaterThan(0);
+      }
       expect(JSON.stringify(record)).not.toMatch(
         /countdown|contagem regressiva de \d|limited offer|oferta limitada/iu,
+      );
+    }
+  });
+
+  it('locks the final Free and Premium commercial contract in both locales', () => {
+    const portuguese = getPublicCatalog('pt-BR').records.find(
+      ({ routeId }) => routeId === 'public-plans',
+    )?.plans;
+    const english = getPublicCatalog('en').records.find(
+      ({ routeId }) => routeId === 'public-plans',
+    )?.plans;
+
+    expect(portuguese?.map(({ id }) => id)).toEqual(['essential-free', 'competitive-premium']);
+    expect(english?.map(({ id }) => id)).toEqual(['essential-free', 'competitive-premium']);
+    expect(portuguese?.[0]).toMatchObject({ billingPeriod: 'grátis para sempre', price: 'R$ 0' });
+    expect(english?.[0]).toMatchObject({ billingPeriod: 'free forever', price: 'US$ 0' });
+    expect(portuguese?.[1]).toMatchObject({
+      billingPeriod: 'ou R$ 249,90/ano',
+      price: 'R$ 29,90/mês',
+    });
+    expect(english?.[1]).toMatchObject({
+      billingPeriod: 'or US$ 59.99/year',
+      price: 'US$ 6.99/month',
+    });
+
+    for (const plan of [portuguese?.[1], english?.[1]]) {
+      expect(plan?.renewal).toMatch(/card|cartão/iu);
+      expect(plan?.renewal).toMatch(/Pix/iu);
+      expect(plan?.renewal).toMatch(/boleto/iu);
+      expect(plan?.cancellation).toMatch(/fim do ciclo|through the paid cycle/iu);
+      expect(plan?.refunds).toMatch(/sete dias|seven days/iu);
+      expect(plan?.deviceRules).toMatch(/um PC|one active PC/iu);
+      expect(plan?.deviceRules).toMatch(/30 days|30 dias/iu);
+      expect(plan?.expirationEffects).toMatch(/offline.*30|30 dias|30 days/iu);
+      expect(plan?.expirationEffects).toMatch(/histórico|history/iu);
+      expect(plan?.expirationEffects).toMatch(/restauração|restoration/iu);
+    }
+
+    for (const catalog of [getPublicCatalog('pt-BR'), getPublicCatalog('en')]) {
+      expect(JSON.stringify(catalog)).not.toMatch(
+        /preço ilustrativo|illustrative price|preview demonstrativa|Phase 4|Fase 4|fixture|adapter/iu,
       );
     }
   });
@@ -149,12 +193,12 @@ describe('public catalog content', () => {
       expect(markup).toContain('class="plan-price"');
       expect(markup).toContain('data-checkout-authority="disconnected"');
       expect(markup).toContain('data-icon-library="phosphor"');
-      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 29,90' : 'R$29.90');
-      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'por mês' : 'per month');
+      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 29,90' : 'US$ 6.99');
+      expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 249,90' : 'US$ 59.99');
       expect(visibleText(markup)).toContain(
-        locale === 'pt-BR' ? 'Continuar com Premium' : 'Continue with Premium',
+        locale === 'pt-BR' ? 'Escolher Premium' : 'Choose Premium',
       );
-      expect(markup).toContain(`href="https://account.liiiraa.com/${locale}/sign-in"`);
+      expect(markup).toContain(`href="https://account.liiiraa.com/${locale}/login"`);
       expect(visibleText(markup)).not.toContain(
         locale === 'pt-BR' ? 'Não está à venda' : 'Not for sale',
       );
@@ -257,7 +301,7 @@ describe('public policies and operational trust', () => {
       <PublicCatalogPage locale="pt-BR" routeId="public-status" />,
     );
 
-    expect(markup).toContain('Prévia demonstrativa');
+    expect(markup).toContain('Revisão disponível');
     expect(markup).toContain('sem alterar dados ou ações remotas');
     expect(markup).not.toContain('As prévias da Fase 3');
     expect(markup).not.toMatch(/>demonstrative-preview</u);

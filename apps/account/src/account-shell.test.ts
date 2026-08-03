@@ -60,8 +60,8 @@ describe('account shell', () => {
     expect(layoutSource).toContain(
       '<span className="account-brand__surface">{copy.surface}</span>',
     );
-    expect(layoutSource).toContain("accountState: 'Sessão de demonstração ativa'");
-    expect(layoutSource).toContain("accountState: 'Demo session active'");
+    expect(layoutSource).toContain("accountState: 'Acesso protegido'");
+    expect(layoutSource).toContain("accountState: 'Protected access'");
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('account-header__support');
     expect(navigationSource).toContain('href={supportHref}');
@@ -98,10 +98,10 @@ describe('account shell', () => {
     expect(layoutSource).toContain("previewLabel: 'Alterações remotas desconectadas'");
     expect(layoutSource).toContain("previewLabel: 'Remote changes disconnected'");
     expect(layoutSource).toContain(
-      'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
+      'Revise tudo com segurança. Ações indisponíveis terminam sem alterar sua conta.',
     );
     expect(layoutSource).toContain(
-      'You can review the flow with synthetic data; nothing changes outside this preview.',
+      'Review everything safely. Unavailable actions finish without changing your account.',
     );
     expect(layoutSource).not.toMatch(/phase|fixture|adapter|manifest/iu);
   });
@@ -157,8 +157,8 @@ describe('account shell', () => {
     expect(styles).toMatch(
       /\.account-auth-shell\s*\{[\s\S]*min-block-size:\s*100dvh[\s\S]*inline-size:\s*100%/u,
     );
-    expect(layoutSource).toContain("accountState: 'Sessão de demonstração ativa'");
-    expect(layoutSource).toContain("accountState: 'Demo session active'");
+    expect(layoutSource).toContain("accountState: 'Acesso protegido'");
+    expect(layoutSource).toContain("accountState: 'Protected access'");
   });
 
   it('uses explicit Phosphor semantics for every authenticated responsibility', () => {

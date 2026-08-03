@@ -83,8 +83,8 @@ const NAVIGATION_ICONS = Object.freeze({
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    accountIdentity: 'Conta demonstrativa',
-    accountState: 'Sessão de demonstração ativa',
+    accountIdentity: 'Conta Liiiraa Boost',
+    accountState: 'Acesso protegido',
     authBody:
       'Gerencie sua assinatura, mantenha seus dispositivos protegidos e acesse o aplicativo para Windows.',
     authEyebrow: 'Sua conta Liiiraa Boost',
@@ -100,12 +100,11 @@ const COPY = Object.freeze({
     navigation: 'Responsabilidades da conta',
     passkey: 'Chave de acesso — revisar',
     planAction: 'Ver assinatura',
-    planDetail: 'R$ 29,90 · ilustrativo',
-    planPeriod: 'Mensal',
+    planDetail: 'R$ 29,90/mês · R$ 249,90/ano',
+    planPeriod: 'Mensal ou anual',
     planSection: 'Plano',
-    planTitle: 'Prévia Premium',
-    preview:
-      'Você pode revisar o fluxo com dados sintéticos; nada será alterado fora desta prévia.',
+    planTitle: 'Premium · Modo Competitivo',
+    preview: 'Revise tudo com segurança. Ações indisponíveis terminam sem alterar sua conta.',
     previewLabel: 'Alterações remotas desconectadas',
     publicLink: 'Voltar ao site',
     securityAction: 'Revisar segurança',
@@ -119,8 +118,8 @@ const COPY = Object.freeze({
     surface: 'Conta',
   }),
   en: Object.freeze({
-    accountIdentity: 'Demonstration account',
-    accountState: 'Demo session active',
+    accountIdentity: 'Liiiraa Boost account',
+    accountState: 'Protected access',
     authBody:
       'Manage your subscription, keep devices protected, and access the Windows application.',
     authEyebrow: 'Your Liiiraa Boost account',
@@ -136,11 +135,11 @@ const COPY = Object.freeze({
     navigation: 'Account responsibilities',
     passkey: 'Passkey — review',
     planAction: 'View subscription',
-    planDetail: 'R$ 29.90 · illustrative',
-    planPeriod: 'Monthly',
+    planDetail: 'US$ 6.99/month · US$ 59.99/year',
+    planPeriod: 'Monthly or annual',
     planSection: 'Plan',
-    planTitle: 'Premium preview',
-    preview: 'You can review the flow with synthetic data; nothing changes outside this preview.',
+    planTitle: 'Premium · Competitive Mode',
+    preview: 'Review everything safely. Unavailable actions finish without changing your account.',
     previewLabel: 'Remote changes disconnected',
     publicLink: 'Back to website',
     securityAction: 'Review security',
@@ -303,7 +302,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
                 AP
               </span>
               <span className="account-identity__copy">
-                <strong>Astra Preview</strong>
+                <strong>Astra Player</strong>
                 <span>{copy.accountIdentity}</span>
               </span>
             </>

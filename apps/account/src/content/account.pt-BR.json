@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "locale": "pt-BR",
-  "fixtureLabel": "Fixture sintética da conta",
+  "fixtureLabel": "Dados de exemplo protegidos",
   "states": {
     "offline": "Os dados da conta estão offline. Campos seguros permanecem disponíveis neste navegador.",
     "stale": "Os dados exibidos podem estar desatualizados. Reconecte e atualize antes de revisá-los.",
@@ -16,7 +16,7 @@
     "emailAction": "Continuar com e-mail",
     "socialAction": "Continuar com Google",
     "passkeyAction": "Usar chave de acesso",
-    "security": "Este ambiente de demonstração não cria uma sessão real nem envia credenciais.",
+    "security": "Suas credenciais só são enviadas por uma conexão segura e nunca aparecem em diagnósticos.",
     "invalidEmail": "Informe um endereço de e-mail completo, como jogador@example.com."
   },
   "signUp": {
@@ -35,7 +35,7 @@
     "entryAction": "Criar conta grátis",
     "signInPrompt": "Já tem uma conta?",
     "signInAction": "Entrar",
-    "security": "Demonstração: nenhuma conta é criada e nenhuma credencial é enviada.",
+    "security": "Ao continuar, você confirma os termos e protege a conta com os métodos disponíveis.",
     "invalidName": "Informe um nome com pelo menos 2 caracteres.",
     "invalidEmail": "Informe um endereço de e-mail completo, como jogador@example.com.",
     "invalidPassword": "Use pelo menos 10 caracteres com letra maiúscula, minúscula e número.",
@@ -57,10 +57,10 @@
     "subscriptionAction": "Ver termos",
     "deviceAction": "Revisar dispositivo",
     "recentTitle": "Atividade recente",
-    "localPreviewTitle": "Prévia preparada neste navegador",
-    "localPreviewBody": "O ambiente local está pronto para uma revisão segura.",
-    "noAuthorityTitle": "Nenhuma atividade autoritativa",
-    "noAuthorityBody": "Nenhum evento remoto ou alteração da conta foi registrado.",
+    "localPreviewTitle": "Conta pronta neste navegador",
+    "localPreviewBody": "As informações seguras estão disponíveis para você continuar.",
+    "noAuthorityTitle": "Nenhuma atividade recente",
+    "noAuthorityBody": "Ainda não há alterações da conta para mostrar.",
     "summariesTitle": "Conta em resumo",
     "reviewState": "Pronta para revisão",
     "openAction": "Abrir",
@@ -68,57 +68,57 @@
     "emptyBody": "Não há registros de cobrança, dispositivo, sessão ou suporte para revisar. Comece pelo Perfil ou Suporte para continuar com segurança."
   },
   "profile": {
-    "title": "Prévia do perfil",
-    "summary": "Revise um nome público e um idioma sintéticos sem alterar uma conta.",
+    "title": "Perfil",
+    "summary": "Revise como seu nome e idioma aparecem na conta.",
     "nameLabel": "Nome de exibição",
-    "nameDescription": "Exibido como nome público nesta revisão local. Máximo de 80 caracteres.",
+    "nameDescription": "Exibido como nome público na sua conta. Máximo de 80 caracteres.",
     "localeLabel": "Idioma preferido",
     "editorTitle": "Identidade pública da conta",
     "factsTitle": "Dados do perfil",
     "authorityState": "Salvamento remoto indisponível",
-    "limitations": "O nome e o idioma exibidos permanecem nesta prévia do navegador. A revisão prepara um comprovante sem mudança; ela não atualiza uma conta.",
+    "limitations": "Confira o nome e o idioma antes de confirmar. Se o salvamento estiver indisponível, nenhum dado da conta será alterado.",
     "action": "Revisar correção do perfil"
   },
   "security": {
-    "title": "Prévia de segurança",
-    "summary": "Inspecione todas as proteções planejadas e revise ações sensíveis sem alterar credenciais ou sessões.",
-    "verifiedEmail": "Fixture de e-mail verificado",
+    "title": "Segurança",
+    "summary": "Proteja o acesso com e-mail verificado, chave de acesso, MFA e métodos de recuperação.",
+    "verifiedEmail": "E-mail verificado",
     "passkey": "Chaves de acesso",
     "mfa": "Autenticação multifator",
     "sessions": "Sessões ativas",
     "recovery": "Métodos de recuperação",
     "alerts": "Alertas de segurança",
-    "emptyAlerts": "Não há alertas de segurança nesta fixture sintética.",
+    "emptyAlerts": "Não há alertas de segurança para revisar.",
     "review": "Revisar",
-    "sessionDetail": "Edge no Windows 11 · sintético · visto por último em 2026-01-15 12:00 UTC",
-    "recoveryDetail": "Códigos de recuperação não são gerados nem exibidos na Fase 3."
+    "sessionDetail": "Edge no Windows 11 · visto por último em 2026-01-15 12:00 UTC",
+    "recoveryDetail": "Códigos de recuperação só aparecem uma vez, depois da confirmação segura."
   },
   "subscription": {
     "title": "Assinatura",
     "summary": "Revise termos do Premium, período de cobrança, cancelamento, reembolsos e regras de dispositivo.",
-    "plan": "Prévia Premium",
-    "price": "R$ 29,90 — preço ilustrativo, não uma oferta",
-    "billingPeriod": "Mensal",
-    "renewal": "Renovaria mensalmente somente após consentimento na Fase 4",
-    "taxes": "Tributos aplicáveis seriam informados antes da compra",
-    "cancellation": "Permaneceria disponível antes da próxima renovação",
-    "refunds": "Sujeito aos termos publicados e à legislação aplicável",
-    "deviceRules": "Um PC ativo; a troca teria intervalo de 30 dias",
-    "expirationEffects": "Otimizações aplicadas e recuperação permanecem; serviços Premium param",
+    "plan": "Premium · Modo Competitivo",
+    "price": "R$ 29,90/mês ou R$ 249,90/ano",
+    "billingPeriod": "Mensal ou anual",
+    "renewal": "Renovação pelo ciclo escolhido; cartão no mensal e anual, Pix no anual e sem boleto no lançamento",
+    "taxes": "Tributos aplicáveis são informados antes da confirmação",
+    "cancellation": "Cancele quando quiser e mantenha o acesso até o fim do ciclo pago",
+    "refunds": "Reembolso integral em até sete dias da primeira assinatura",
+    "deviceRules": "Um PC ativo; transferência ou reset a cada 30 dias, com exceções legítimas pelo suporte",
+    "expirationEffects": "Premium funciona offline por 30 dias e depois volta ao Free; histórico e restauração permanecem",
     "action": "Revisar mudança de assinatura"
   },
   "invoices": {
     "title": "Faturas",
-    "summary": "Linhas sintéticas demonstram a estrutura sem alegar um pagamento.",
-    "caption": "Histórico sintético de faturas",
-    "empty": "Nenhuma fatura autoritativa existe antes da Fase 4."
+    "summary": "Consulte cobranças, forma de pagamento, período e situação de cada fatura.",
+    "caption": "Histórico de faturas",
+    "empty": "Você ainda não tem faturas. O plano Free não gera cobrança."
   },
   "device": {
     "title": "Dispositivo",
     "summary": "Revise os dados do dispositivo atual e o intervalo de 30 dias para troca.",
-    "label": "DESKTOP-PREVIEW-01",
-    "detail": "Windows 11 · fixture sintética · nenhum identificador de hardware coletado",
-    "cooldown": "Uma troca confirmada iniciaria um intervalo de 30 dias na Fase 4. Esta prévia não revoga nem vincula um dispositivo.",
+    "label": "Meu PC principal",
+    "detail": "Windows 11 · identidade protegida · o HWID bruto nunca é armazenado",
+    "cooldown": "Você pode transferir ou resetar o PC ativo a cada 30 dias. Reinstalações e pequenas atualizações não consomem o reset; trocas importantes de hardware podem exigir nova ativação.",
     "action": "Revisar troca de dispositivo"
   },
   "downloads": {
@@ -146,16 +146,16 @@
     "bodyLabel": "Descrição",
     "action": "Revisar solicitação de suporte",
     "purpose": "Preparar uma solicitação de suporte para revisão explícita.",
-    "retention": "Nenhum rascunho de suporte é retido fora da prévia atual.",
+    "retention": "O rascunho é descartado se você sair antes da confirmação.",
     "sharing": "Nenhum diagnóstico, anexo, e-mail ou registro da conta é compartilhado.",
     "revocation": "Cancele a revisão a qualquer momento; nada foi enviado.",
-    "noUpload": "Anexos e uploads de diagnóstico estão indisponíveis na Fase 3.",
+    "noUpload": "Diagnósticos só podem ser anexados com consentimento explícito para esta solicitação.",
     "sensitiveReview": "Remova credenciais, dados de pagamento, códigos de recuperação e informações pessoais não relacionadas antes de qualquer envio futuro."
   },
   "recovery": {
     "title": "Autoridade indisponível",
     "safeWork": "Campos seguros preservados",
     "signIn": "Revisar entrada",
-    "support": "Abrir prévia de suporte"
+    "support": "Abrir suporte"
   }
 }

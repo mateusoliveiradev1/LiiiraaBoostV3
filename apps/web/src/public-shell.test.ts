@@ -36,11 +36,10 @@ describe('public shell', () => {
 
   it.each([
     ['/en/product', 'public-product'],
-    ['/en/evidence', 'public-evidence'],
+    ['/en/results', 'public-results'],
     ['/en/compatibility', 'public-compatibility'],
     ['/en/plans', 'public-plans'],
-    ['/en/docs/current/articles/measurement-basics', 'docs-index'],
-    ['/en/releases/stable/1.0.0', 'releases-index'],
+    ['/en/download', 'public-download'],
   ] as const)(
     'projects %s to one current task pillar on desktop and mobile',
     (pathname, activeId) => {
@@ -83,12 +82,11 @@ describe('public shell', () => {
 
   it('uses visitor task language and renders one route-preserving graphical locale control', () => {
     expect(layoutSource).toContain("'public-product': 'Como funciona'");
-    expect(layoutSource).toContain("'public-evidence': 'Como comprovamos'");
+    expect(layoutSource).toContain("'public-results': 'Resultados'");
     expect(layoutSource).toContain("'public-compatibility': 'Seu PC'");
-    expect(layoutSource).toContain("'docs-index': 'Ajuda'");
-    expect(layoutSource).toContain("'releases-index': 'Baixar'");
+    expect(layoutSource).toContain("'public-download': 'Download'");
     expect(layoutSource).toContain("'public-product': 'How it works'");
-    expect(layoutSource).toContain("'public-evidence': 'How we verify'");
+    expect(layoutSource).toContain("'public-results': 'Results'");
     expect(layoutSource).toContain("'public-compatibility': 'Your PC'");
     expect(navigationSource.match(/<LocaleSwitcher/gu)).toHaveLength(1);
     expect(navigationSource).toContain('className="public-header__locale"');
@@ -108,12 +106,12 @@ describe('public shell', () => {
   });
 
   it('builds a substantial 72px branded desktop topbar with six intent pillars', () => {
-    expect(publicNavigation).toHaveLength(6);
+    expect(publicNavigation).toHaveLength(5);
     expect(shellStyles).toMatch(
       /\.public-header__bar\s*\{[\s\S]*max-inline-size:\s*1280px;[\s\S]*min-block-size:\s*72px;[\s\S]*margin-inline:\s*auto;/u,
     );
     expect(layoutSource).toContain('<ProductLockup />');
-    expect(navigationSource).toContain("publicBoundaryHref('public-compatibility', locale)");
+    expect(navigationSource).toContain("publicBoundaryHref('public-download', locale)");
     expect(navigationSource).toContain('public-action--primary');
   });
 
@@ -168,11 +166,10 @@ describe('public shell', () => {
     expect(routing.locales).toEqual(['pt-BR', 'en']);
     expect(publicNavigation.map(({ id }) => id)).toEqual([
       'public-product',
-      'public-evidence',
+      'public-results',
       'public-compatibility',
       'public-plans',
-      'docs-index',
-      'releases-index',
+      'public-download',
     ]);
     expect(publicBoundaryHref('docs-index', 'pt-BR')).toBe('/pt-BR/docs');
     expect(publicBoundaryHref('releases-index', 'en')).toBe('/en/releases');
@@ -192,9 +189,7 @@ describe('public shell', () => {
       for (const routeId of recoveryRoutes) {
         expect(clientPublicBoundaryHref(routeId, locale)).toBe(publicBoundaryHref(routeId, locale));
       }
-      expect(clientAccountBoundaryHref(locale)).toBe(
-        `https://account.liiiraa.com/${locale}/sign-in`,
-      );
+      expect(clientAccountBoundaryHref(locale)).toBe(`https://account.liiiraa.com/${locale}/login`);
     }
   });
 });

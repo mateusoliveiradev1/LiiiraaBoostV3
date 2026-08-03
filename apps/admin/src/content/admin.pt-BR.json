@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "locale": "pt-BR",
-  "fixtureLabel": "Fixture administrativa sintética",
+  "fixtureLabel": "Dados operacionais protegidos",
   "roles": {
     "support": "Suporte",
     "operations": "Operações",
@@ -10,74 +10,74 @@
   },
   "landing": {
     "title": "Área da função",
-    "summary": "Priorize a próxima revisão segura e avance somente pelas responsabilidades atribuídas a esta função de prévia.",
+    "summary": "Priorize a próxima decisão segura e avance somente pelas responsabilidades atribuídas à sua função.",
     "scopeTitle": "Responsabilidades disponíveis",
-    "scopeBody": "Sua navegação contém somente áreas atribuídas a esta função de prévia; responsabilidades de outras funções permanecem inacessíveis."
+    "scopeBody": "Sua navegação contém somente as áreas atribuídas à sua função; responsabilidades de outras equipes permanecem inacessíveis."
   },
   "support": {
     "title": "Revisão de caso de suporte",
-    "summary": "Leia e prepare uma resposta para um caso sintético sem expor a identidade do cliente nem enviar uma mensagem.",
+    "summary": "Leia o caso, confira o consentimento e prepare uma resposta sem expor a identidade do cliente.",
     "decisionTitle": "Decida se esta resposta está pronta para revisão",
-    "decisionBody": "O caso aguarda uma revisão delimitada da resposta. Você pode refinar o rascunho e inspecionar as evidências, mas esta prévia não pode enviá-lo.",
+    "decisionBody": "O caso aguarda uma revisão delimitada da resposta. Você pode refinar o rascunho e conferir as evidências antes da confirmação.",
     "evidenceTitle": "Evidências do caso",
     "caseLabel": "Caso SUP-2048",
     "target": "Alvo de cliente ••••-042",
     "status": "Aguardando revisão",
     "subject": "Orientação de inicialização após uma atualização do Windows",
-    "detail": "O relato sintético contém um estado de inicialização e nenhum diagnóstico enviado.",
+    "detail": "O relato contém o estado de inicialização e nenhum diagnóstico foi enviado.",
     "responseLabel": "Rascunho de resposta do suporte",
-    "draftValue": "Revisei as evidências sintéticas de inicialização.",
+    "draftValue": "Revisei as informações de inicialização disponíveis.",
     "responseHint": "O assunto é o único campo seguro do rascunho. O texto da resposta é apagado quando a revisão é cancelada.",
     "reviewAction": "Revisar resposta do suporte",
     "cancelAction": "Cancelar rascunho da resposta",
     "cancelled": "Rascunho da resposta cancelado. Nenhuma mensagem foi enviada e nenhum evento remoto mudou.",
-    "purpose": "Preparar uma resposta delimitada para o caso sintético de suporte.",
-    "impact": "Um envio futuro mandaria somente a resposta revisada para o caso. Esta prévia não envia nada.",
+    "purpose": "Preparar uma resposta delimitada para este caso de suporte.",
+    "impact": "A confirmação inclui somente a resposta revisada para este caso.",
     "constraintsTitle": "Escopo de consentimento e tratamento",
-    "constraintsBody": "A revisão é limitada aos campos sintéticos de caso e resposta para este ator de prévia do suporte.",
+    "constraintsBody": "A revisão é limitada aos campos de caso e resposta permitidos para a equipe de suporte.",
     "permittedFields": "case, response",
     "consentExpires": "2026-01-15T13:00:00.000Z",
-    "consentActor": "support.preview",
+    "consentActor": "support.operator",
     "consentAudit": "audit-consent-014",
     "authorityTitle": "Ação administrativa indisponível",
-    "authorityBody": "Nenhuma identidade, permissão ou canal remoto de mensagens está conectado. Somente a revisão determinística sem alteração pode ser executada.",
+    "authorityBody": "O envio remoto está indisponível. A resposta pode ser revisada com segurança e nenhuma mensagem será enviada.",
     "authorityAction": "Enviar resposta — indisponível",
     "auditTitle": "Trilha imutável da revisão"
   },
   "operations": {
     "title": "Revisão operacional",
-    "summary": "Faça a triagem de um alerta sintético de controle de versão e revise salvaguardas proporcionais sem alterar um sistema operacional.",
+    "summary": "Faça a triagem do alerta de versão e revise as salvaguardas antes de qualquer decisão operacional.",
     "decisionTitle": "Mantenha a publicação retida enquanto as evidências estiverem incompletas",
     "evidenceTitle": "Evidências de controle da versão",
     "reviewLabel": "Revisão OPS-117",
     "target": "Alvo de implantação ••••-017",
     "state": "Publicação retida",
-    "detail": "A revisão sintética indica divergência no manifesto. A publicação permanece bloqueada e nenhum artefato é promovido.",
+    "detail": "A revisão indica divergência no manifesto. A publicação permanece bloqueada e nenhum artefato é promovido.",
     "action": "Revisar retenção da publicação",
-    "purpose": "Manter a versão sintética retida enquanto as evidências são revisadas.",
-    "impact": "A publicação permanece retida para este objeto de versão; esta prévia não pode alterar esse estado.",
+    "purpose": "Manter a versão retida enquanto as evidências são revisadas.",
+    "impact": "A publicação permanece retida para esta versão; nenhuma mudança foi aplicada.",
     "mobile": "A triagem do alerta e a revisão das evidências permanecem disponíveis no celular. A confirmação exige pelo menos 960 px.",
     "constraintsTitle": "Restrições da decisão",
     "authorityTitle": "Autoridade de publicação indisponível",
-    "authorityBody": "Esta prévia não possui credencial de versão nem canal de promoção. A retenção permanece inalterada após a revisão.",
+    "authorityBody": "A credencial de versão e o canal de promoção estão desconectados. A retenção permanece inalterada.",
     "authorityAction": "Manter retenção da publicação — indisponível",
     "auditTitle": "Trilha imutável da decisão"
   },
   "security": {
     "title": "Revisão de segurança",
-    "summary": "Inspecione um alerta sintético de risco e prepare uma resposta específica sem aceitar uma credencial de segurança.",
+    "summary": "Inspecione o alerta de risco e prepare uma resposta específica sem expor credenciais ou dados sensíveis.",
     "decisionTitle": "Mantenha a contenção pendente até revisar as evidências de repetição",
     "evidenceTitle": "Evidências de contenção",
     "reviewLabel": "Revisão SEC-083",
     "target": "Alvo de segurança ••••-083",
     "state": "Revisão de contenção necessária",
-    "detail": "Uma solicitação sintética excedeu a janela esperada de repetição. Nenhuma conta, token, endereço ou valor de diagnóstico está presente.",
+    "detail": "Uma solicitação excedeu a janela esperada de repetição. Nenhuma conta, token, endereço ou valor de diagnóstico está presente.",
     "action": "Revisar ação de contenção",
-    "purpose": "Preparar a revisão de contenção para o alerta sintético de segurança.",
-    "impact": "Uma autoridade futura poderia limitar uma sessão identificada. Esta prévia não pode revogar, bloquear nem alterá-la.",
+    "purpose": "Preparar a revisão de contenção para este alerta de segurança.",
+    "impact": "A contenção afetaria somente a sessão identificada. Nenhuma revogação ou bloqueio foi aplicado.",
     "constraintsTitle": "Restrições da decisão de segurança",
     "authorityTitle": "Autoridade de contenção indisponível",
-    "authorityBody": "Nenhuma credencial de segurança, canal de sessão ou autoridade de revogação está conectada. O alvo sintético permanece inalterado após a revisão.",
+    "authorityBody": "Credenciais de segurança, canal de sessão e revogação estão desconectados. O alvo permanece inalterado.",
     "authorityAction": "Aplicar contenção — indisponível",
     "auditTitle": "Trilha imutável da contenção"
   },
@@ -86,7 +86,7 @@
     "summary": "O detalhe de diagnóstico permanece fechado até que finalidade, campos permitidos, expiração, ator e referência de auditoria imutável correspondam ao objeto.",
     "blockedTitle": "Acesso ao diagnóstico bloqueado",
     "blockedBody": "Nenhum consentimento válido cobre este objeto de diagnóstico. Os metadados abaixo explicam o escopo exigido sem revelar dados de diagnóstico ou do cliente.",
-    "allowedTitle": "Campos sintéticos permitidos",
+    "allowedTitle": "Campos permitidos",
     "purposeLabel": "Finalidade",
     "fieldsLabel": "Campos permitidos",
     "expirationLabel": "Expiração",
@@ -94,15 +94,15 @@
     "auditLabel": "Evento de auditoria imutável",
     "requiredPurpose": "Revisar evidências de inicialização do caso SUP-2048",
     "requiredFields": ["startup-state", "application-version"],
-    "actor": "security.preview",
+    "actor": "security.operator",
     "auditReference": "audit-consent-015",
     "expiration": "2026-01-15T12:30:00.000Z",
     "denial": "Consentimento ausente, expirado ou fora do escopo não revela nenhum campo de diagnóstico nem cria autoridade."
   },
   "audit": {
     "title": "Linha do tempo de auditoria imutável",
-    "summary": "Correlacione eventos sintéticos completos. Os registros são congelados após a validação do contrato gerado e todo alvo permanece redigido.",
-    "caption": "Eventos administrativos sintéticos e imutáveis",
+    "summary": "Correlacione eventos completos em registros imutáveis, com alvos protegidos e acesso delimitado.",
+    "caption": "Eventos administrativos imutáveis",
     "actor": "Ator",
     "role": "Função",
     "action": "Ação",
@@ -118,7 +118,7 @@
     "events": {
       "admin-event-001": {
         "target": "Alvo de cliente ••••-042",
-        "reason": "Revisar uma resposta sintética de suporte"
+        "reason": "Revisar uma resposta de suporte"
       },
       "admin-event-002": {
         "target": "Alvo de diagnóstico ••••-015",
@@ -126,25 +126,25 @@
       },
       "admin-event-003": {
         "target": "Alvo de implantação ••••-017",
-        "reason": "Revisar uma retenção sintética de publicação"
+        "reason": "Revisar uma retenção de publicação"
       },
       "admin-event-004": {
         "target": "Alvo de segurança ••••-083",
-        "reason": "Revisar uma ação sintética de contenção"
+        "reason": "Revisar uma ação de contenção"
       }
     }
   },
   "receipt": {
-    "title": "Prévia concluída — nenhuma alteração foi feita",
-    "body": "Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis."
+    "title": "Revisão concluída — nenhuma alteração foi feita",
+    "body": "Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem imutáveis."
   },
   "recovery": {
     "title": "Capacidade administrativa indisponível",
     "offline": "A autoridade desconectada está offline. A revisão segura permanece disponível e nenhuma solicitação entrou em fila.",
-    "stale": "O registro sintético está desatualizado. Atualize-o antes de qualquer confirmação futura.",
-    "expired": "A sessão de prévia expirou. Nenhuma credencial ou rascunho sensível foi mantido.",
+    "stale": "O registro está desatualizado. Atualize-o antes de qualquer confirmação.",
+    "expired": "A sessão expirou. Nenhuma credencial ou rascunho sensível foi mantido.",
     "permission": "Esta função não inclui a responsabilidade solicitada. Nenhum dado foi revelado.",
-    "failure": "O limite da prévia não respondeu. Nenhum estado remoto mudou.",
-    "safeDraft": "Somente o assunto sintético do caso pode ser recuperado localmente. Resposta e campos de diagnóstico são descartados."
+    "failure": "A capacidade remota não respondeu. Nenhum estado remoto mudou.",
+    "safeDraft": "Somente o assunto do caso pode ser recuperado localmente. Resposta e campos de diagnóstico são descartados."
   }
 }

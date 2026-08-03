@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "locale": "en",
-  "fixtureLabel": "Synthetic administrative fixture",
+  "fixtureLabel": "Protected operational data",
   "roles": {
     "support": "Support",
     "operations": "Operations",
@@ -10,74 +10,74 @@
   },
   "landing": {
     "title": "Role workspace",
-    "summary": "Prioritize the next safe review and move only through the responsibilities assigned to this preview role.",
+    "summary": "Prioritize the next safe decision and move only through responsibilities assigned to your role.",
     "scopeTitle": "Available responsibilities",
-    "scopeBody": "Your navigation contains only workspaces assigned to this preview role; responsibilities owned by other roles remain inaccessible."
+    "scopeBody": "Your navigation contains only workspaces assigned to your role; responsibilities owned by other teams remain inaccessible."
   },
   "support": {
     "title": "Support case review",
-    "summary": "Read and prepare a response for a synthetic case without exposing a customer identity or sending a message.",
+    "summary": "Read the case, check consent, and prepare a response without exposing the customer identity.",
     "decisionTitle": "Decide whether this response is ready for review",
-    "decisionBody": "The case is waiting for a scoped response review. You can refine the draft and inspect its evidence, but this preview cannot send it.",
+    "decisionBody": "The case is waiting for a scoped response review. You can refine the draft and inspect its evidence before confirmation.",
     "evidenceTitle": "Case evidence",
     "caseLabel": "Case SUP-2048",
     "target": "Customer target ••••-042",
     "status": "Awaiting review",
     "subject": "Startup guidance after a Windows update",
-    "detail": "The synthetic report contains a startup state and no uploaded diagnostic payload.",
+    "detail": "The report contains a startup state and no diagnostic payload was uploaded.",
     "responseLabel": "Support response draft",
-    "draftValue": "I reviewed the synthetic startup evidence.",
+    "draftValue": "I reviewed the available startup information.",
     "responseHint": "The subject is the only safe draft field. Response text is cleared when the review is cancelled.",
     "reviewAction": "Review support response",
     "cancelAction": "Cancel response draft",
     "cancelled": "Response draft cancelled. No message was sent and no remote event changed.",
-    "purpose": "Prepare a scoped response for the synthetic support case.",
-    "impact": "A future submission would send only the reviewed response to the case. This preview sends nothing.",
+    "purpose": "Prepare a scoped response for this support case.",
+    "impact": "Confirmation includes only the reviewed response for this case.",
     "constraintsTitle": "Consent and handling scope",
-    "constraintsBody": "Review is limited to the synthetic case and response fields for this support preview actor.",
+    "constraintsBody": "Review is limited to the case and response fields permitted for the support team.",
     "permittedFields": "case, response",
     "consentExpires": "2026-01-15T13:00:00.000Z",
-    "consentActor": "support.preview",
+    "consentActor": "support.operator",
     "consentAudit": "audit-consent-014",
     "authorityTitle": "Administrative action unavailable",
-    "authorityBody": "No identity, permission, or remote message channel is connected. Only the deterministic no-change review can run.",
+    "authorityBody": "Remote sending is unavailable. The response can be reviewed safely and no message will be sent.",
     "authorityAction": "Send response — Unavailable",
     "auditTitle": "Immutable review trail"
   },
   "operations": {
     "title": "Operations review",
-    "summary": "Triage a synthetic release-control alert and review proportional action safeguards without changing an operational system.",
+    "summary": "Triage the release alert and review safeguards before any operational decision.",
     "decisionTitle": "Keep publication held while evidence is incomplete",
     "evidenceTitle": "Release-control evidence",
     "reviewLabel": "Review OPS-117",
     "target": "Deployment target ••••-017",
     "state": "Publication held",
-    "detail": "The synthetic review reports a manifest mismatch. Publication remains blocked and no artifact is promoted.",
+    "detail": "The review reports a manifest mismatch. Publication remains blocked and no artifact is promoted.",
     "action": "Review publication hold",
-    "purpose": "Keep the synthetic release held while evidence is reviewed.",
-    "impact": "Publication remains held for this release object; this preview cannot change that state.",
+    "purpose": "Keep the release held while evidence is reviewed.",
+    "impact": "Publication remains held for this release; no change was applied.",
     "mobile": "Alert triage and evidence review remain available on mobile. Confirmation requires at least 960px.",
     "constraintsTitle": "Decision constraints",
     "authorityTitle": "Publication authority unavailable",
-    "authorityBody": "This preview has no release credential or promotion channel. The hold remains unchanged after review.",
+    "authorityBody": "The release credential and promotion channel are disconnected. The hold remains unchanged.",
     "authorityAction": "Retain publication hold — unavailable",
     "auditTitle": "Immutable decision trail"
   },
   "security": {
     "title": "Security review",
-    "summary": "Inspect a synthetic risk alert and prepare an object-specific response without accepting a security credential.",
+    "summary": "Inspect the risk alert and prepare a specific response without exposing credentials or sensitive data.",
     "decisionTitle": "Keep containment pending until the retry evidence is reviewed",
     "evidenceTitle": "Containment evidence",
     "reviewLabel": "Review SEC-083",
     "target": "Security target ••••-083",
     "state": "Containment review required",
-    "detail": "A synthetic request exceeded the expected retry window. No account, token, address, or diagnostic value is present.",
+    "detail": "A request exceeded the expected retry window. No account, token, address, or diagnostic value is present.",
     "action": "Review containment action",
-    "purpose": "Prepare containment review for the synthetic security alert.",
-    "impact": "A future authority could limit one identified session. This preview cannot revoke, block, or mutate it.",
+    "purpose": "Prepare containment review for this security alert.",
+    "impact": "Containment would affect only the identified session. No revocation or block was applied.",
     "constraintsTitle": "Security decision constraints",
     "authorityTitle": "Containment authority unavailable",
-    "authorityBody": "No security credential, session channel, or revocation authority is connected. The synthetic target remains unchanged after review.",
+    "authorityBody": "Security credentials, the session channel, and revocation are disconnected. The target remains unchanged.",
     "authorityAction": "Apply containment — unavailable",
     "auditTitle": "Immutable containment trail"
   },
@@ -86,7 +86,7 @@
     "summary": "Diagnostic detail stays closed unless purpose, permitted fields, expiration, actor, and immutable audit reference all match this object.",
     "blockedTitle": "Diagnostic access blocked",
     "blockedBody": "No valid consent covers this diagnostic object. Metadata below explains the required scope without revealing diagnostic or customer data.",
-    "allowedTitle": "Permitted synthetic fields",
+    "allowedTitle": "Permitted fields",
     "purposeLabel": "Purpose",
     "fieldsLabel": "Permitted fields",
     "expirationLabel": "Expiration",
@@ -94,15 +94,15 @@
     "auditLabel": "Immutable audit event",
     "requiredPurpose": "Review startup evidence for case SUP-2048",
     "requiredFields": ["startup-state", "application-version"],
-    "actor": "security.preview",
+    "actor": "security.operator",
     "auditReference": "audit-consent-015",
     "expiration": "2026-01-15T12:30:00.000Z",
     "denial": "Absent, expired, or wrong-scope consent reveals no diagnostic field and creates no authority."
   },
   "audit": {
     "title": "Immutable audit timeline",
-    "summary": "Correlate complete synthetic events. Records are frozen after generated-contract validation and every target remains redacted.",
-    "caption": "Synthetic immutable administrative events",
+    "summary": "Correlate complete events in immutable records with protected targets and scoped access.",
+    "caption": "Immutable administrative events",
     "actor": "Actor",
     "role": "Role",
     "action": "Action",
@@ -118,7 +118,7 @@
     "events": {
       "admin-event-001": {
         "target": "Customer target ••••-042",
-        "reason": "Review a synthetic support response"
+        "reason": "Review a support response"
       },
       "admin-event-002": {
         "target": "Diagnostic target ••••-015",
@@ -126,25 +126,25 @@
       },
       "admin-event-003": {
         "target": "Deployment target ••••-017",
-        "reason": "Review a synthetic publication hold"
+        "reason": "Review a publication hold"
       },
       "admin-event-004": {
         "target": "Security target ••••-083",
-        "reason": "Review a synthetic containment action"
+        "reason": "Review a containment action"
       }
     }
   },
   "receipt": {
-    "title": "Preview complete — no change was made",
-    "body": "Review complete. No remote state changed; the receipt and correlated audit record remain synthetic and immutable."
+    "title": "Review complete — no change was made",
+    "body": "Review complete. No remote state changed; the receipt and correlated audit record remain immutable."
   },
   "recovery": {
     "title": "Administrative capability unavailable",
     "offline": "The disconnected authority is offline. Safe review remains available and no request is queued.",
-    "stale": "The synthetic record is stale. Refresh it before any future confirmation.",
-    "expired": "The preview session expired. No credential or sensitive draft was retained.",
+    "stale": "The record is stale. Refresh it before any confirmation.",
+    "expired": "The session expired. No credential or sensitive draft was retained.",
     "permission": "This role does not include the requested responsibility. No data was disclosed.",
-    "failure": "The preview boundary did not respond. No remote state changed.",
-    "safeDraft": "Only the synthetic case subject is eligible for local recovery. Response and diagnostic fields are discarded."
+    "failure": "The remote capability did not respond. No remote state changed.",
+    "safeDraft": "Only the case subject is eligible for local recovery. Response and diagnostic fields are discarded."
   }
 }

@@ -37,12 +37,6 @@ export type PublicNavigationState = Readonly<{
 const TASK_PILLARS = new Set<string>(publicNavigation.map(({ id }) => id));
 
 const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
-  if (routeId.startsWith('docs-')) {
-    return 'docs-index';
-  }
-  if (routeId.startsWith('releases-')) {
-    return 'releases-index';
-  }
   return TASK_PILLARS.has(routeId) ? (routeId as PublicPillarId) : undefined;
 };
 
@@ -54,11 +48,7 @@ export const getPublicNavigationState = (
   const normalizedPathname = pathname.replace(/\/+$/u, '') || '/';
   const isCurrentDocsIndex = normalizedPathname === `/${sourceLocale}/docs/current`;
   const match = matchWebRoute({ pathname, securityBoundary: 'public-origin' });
-  const activeId = isCurrentDocsIndex
-    ? 'docs-index'
-    : match.ok
-      ? projectActivePillar(match.value.route.id)
-      : undefined;
+  const activeId = match.ok ? projectActivePillar(match.value.route.id) : undefined;
   const localized = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'public-origin',
@@ -147,7 +137,7 @@ export const PublicNavigation = ({
         </a>
         <a
           className="public-action public-action--primary"
-          href={publicBoundaryHref('public-compatibility', locale)}
+          href={publicBoundaryHref('public-download', locale)}
         >
           {copy.compatibility}
         </a>
@@ -163,7 +153,7 @@ export const PublicNavigation = ({
           </nav>
           <div className="public-mobile-menu__actions">
             <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
-            <a href={publicBoundaryHref('public-compatibility', locale)}>{copy.compatibility}</a>
+            <a href={publicBoundaryHref('public-download', locale)}>{copy.compatibility}</a>
           </div>
         </div>
       </details>

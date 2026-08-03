@@ -24,7 +24,7 @@ type PublicCatchAllPageProps = Readonly<{
 const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-home',
   'public-product',
-  'public-evidence',
+  'public-results',
   'public-compatibility',
   'public-plans',
   'public-search',

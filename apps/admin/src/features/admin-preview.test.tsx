@@ -85,22 +85,22 @@ describe('role-scoped admin', () => {
     expect(featureSource).not.toContain('<StatusSignal label={event.result}');
     expect(featureSource).not.toContain('action: event.action,');
     expect(featureSource).not.toContain('<code>synthetic-ready</code>');
-    expect(adminEn.receipt.title).toBe('Preview complete — no change was made');
-    expect(adminPtBr.receipt.title).toBe('Prévia concluída — nenhuma alteração foi feita');
+    expect(adminEn.receipt.title).toBe('Review complete — no change was made');
+    expect(adminPtBr.receipt.title).toBe('Revisão concluída — nenhuma alteração foi feita');
   });
 
   it('uses direct localized outcomes without exposing internal delivery prose', () => {
     expect(adminEn.operations.impact).toBe(
-      'Publication remains held for this release object; this preview cannot change that state.',
+      'Publication remains held for this release; no change was applied.',
     );
     expect(adminPtBr.operations.impact).toBe(
-      'A publicação permanece retida para este objeto de versão; esta prévia não pode alterar esse estado.',
+      'A publicação permanece retida para esta versão; nenhuma mudança foi aplicada.',
     );
     expect(adminEn.receipt.body).toBe(
-      'Review complete. No remote state changed; the receipt and correlated audit record remain synthetic and immutable.',
+      'Review complete. No remote state changed; the receipt and correlated audit record remain immutable.',
     );
     expect(adminPtBr.receipt.body).toBe(
-      'Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem sintéticos e imutáveis.',
+      'Revisão concluída. Nenhum estado remoto mudou; o comprovante e o registro correlacionado permanecem imutáveis.',
     );
 
     for (const copy of [
@@ -119,11 +119,11 @@ describe('role-scoped admin', () => {
 
   it('localizes W15 audit target and reason without mutating validated transport records', () => {
     expect(adminEn.audit.events['admin-event-004']).toEqual({
-      reason: 'Review a synthetic containment action',
+      reason: 'Review a containment action',
       target: 'Security target ••••-083',
     });
     expect(adminPtBr.audit.events['admin-event-004']).toEqual({
-      reason: 'Revisar uma ação sintética de contenção',
+      reason: 'Revisar uma ação de contenção',
       target: 'Alvo de segurança ••••-083',
     });
     expect(featureSource).toContain('const eventCopy = content.audit.events[event.eventId]');

@@ -32,8 +32,8 @@ const COPY = Object.freeze({
     currentTask: 'Tarefa atual',
     preview: 'Alterações remotas desconectadas',
     previewDetail:
-      'Dados sintéticos sustentam esta revisão; esta prévia não pode alterar sistemas remotos.',
-    previewLabel: 'Prévia administrativa',
+      'Revise a decisão com segurança. Uma capacidade desconectada termina sem alterar sistemas remotos.',
+    previewLabel: 'Revisão administrativa',
     surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
   }),
@@ -43,8 +43,8 @@ const COPY = Object.freeze({
     currentTask: 'Current task',
     preview: 'Remote changes disconnected',
     previewDetail:
-      'Synthetic data supports this review; this preview cannot change remote systems.',
-    previewLabel: 'Administrative preview',
+      'Review the decision safely. A disconnected capability finishes without changing remote systems.',
+    previewLabel: 'Administrative review',
     surface: 'Operations',
     skip: 'Skip to administrative content',
   }),
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     noarchive: true,
   },
   title: {
-    default: 'Admin preview · Liiiraa Boost',
+    default: 'Admin · Liiiraa Boost',
     template: '%s · Admin · Liiiraa Boost',
   },
 };

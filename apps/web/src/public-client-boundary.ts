@@ -33,4 +33,4 @@ export const clientPublicBoundaryHref = (
 };
 
 export const clientAccountBoundaryHref = (locale: WebLocale): string =>
-  `https://account.liiiraa.com/${locale}/sign-in`;
+  `https://account.liiiraa.com/${locale}/login`;

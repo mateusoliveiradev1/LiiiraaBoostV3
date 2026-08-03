@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "locale": "en",
-  "fixtureLabel": "Synthetic account fixture",
+  "fixtureLabel": "Protected sample data",
   "states": {
     "offline": "Account information is offline. Safe draft fields remain available in this browser.",
     "stale": "The displayed account information may be out of date. Reconnect and refresh before reviewing it.",
@@ -16,7 +16,7 @@
     "emailAction": "Continue with email",
     "socialAction": "Continue with Google",
     "passkeyAction": "Use a passkey",
-    "security": "This demonstration environment does not create a real session or send credentials.",
+    "security": "Your credentials are sent only over a secure connection and never appear in diagnostics.",
     "invalidEmail": "Enter a complete email address, such as player@example.com."
   },
   "signUp": {
@@ -35,7 +35,7 @@
     "entryAction": "Create a free account",
     "signInPrompt": "Already have an account?",
     "signInAction": "Sign in",
-    "security": "Demo only: no account is created and no credentials are sent.",
+    "security": "By continuing, you accept the terms and protect the account with the available methods.",
     "invalidName": "Enter a name with at least 2 characters.",
     "invalidEmail": "Enter a complete email address, such as player@example.com.",
     "invalidPassword": "Use at least 10 characters with an uppercase letter, lowercase letter, and number.",
@@ -57,10 +57,10 @@
     "subscriptionAction": "View terms",
     "deviceAction": "Review device",
     "recentTitle": "Recent activity",
-    "localPreviewTitle": "Preview prepared in this browser",
-    "localPreviewBody": "The local environment is ready for a safe review.",
-    "noAuthorityTitle": "No authoritative activity",
-    "noAuthorityBody": "No remote event or account change has been recorded.",
+    "localPreviewTitle": "Account ready in this browser",
+    "localPreviewBody": "Safe information is available for you to continue.",
+    "noAuthorityTitle": "No recent activity",
+    "noAuthorityBody": "There are no account changes to show yet.",
     "summariesTitle": "Account at a glance",
     "reviewState": "Ready for review",
     "openAction": "Open",
@@ -68,57 +68,57 @@
     "emptyBody": "There are no billing, device, session, or support records to review. Start with Profile or Support to continue safely."
   },
   "profile": {
-    "title": "Profile preview",
-    "summary": "Review a synthetic public name and locale without changing an account.",
+    "title": "Profile",
+    "summary": "Review how your name and language appear on the account.",
     "nameLabel": "Display name",
-    "nameDescription": "Shown as the public name in this local review. Maximum 80 characters.",
+    "nameDescription": "Shown as the public name on your account. Maximum 80 characters.",
     "localeLabel": "Preferred locale",
     "editorTitle": "Public account identity",
     "factsTitle": "Profile facts",
     "authorityState": "Remote save unavailable",
-    "limitations": "The displayed name and locale remain in this browser preview. Reviewing prepares a no-change receipt; it does not update an account.",
+    "limitations": "Check the name and language before confirming. If saving is unavailable, no account data is changed.",
     "action": "Review profile correction"
   },
   "security": {
-    "title": "Security preview",
-    "summary": "Inspect every planned protection and review sensitive actions without changing a credential or session.",
-    "verifiedEmail": "Verified email fixture",
+    "title": "Security",
+    "summary": "Protect access with verified email, a passkey, MFA, and recovery methods.",
+    "verifiedEmail": "Verified email",
     "passkey": "Passkeys",
     "mfa": "Multi-factor authentication",
     "sessions": "Active sessions",
     "recovery": "Recovery methods",
     "alerts": "Security alerts",
-    "emptyAlerts": "No security alerts exist in this synthetic fixture.",
+    "emptyAlerts": "There are no security alerts to review.",
     "review": "Review",
-    "sessionDetail": "Edge on Windows 11 · synthetic · last seen 2026-01-15 12:00 UTC",
-    "recoveryDetail": "Recovery codes are not generated or displayed in Phase 3."
+    "sessionDetail": "Edge on Windows 11 · last seen 2026-01-15 12:00 UTC",
+    "recoveryDetail": "Recovery codes are shown once, after secure confirmation."
   },
   "subscription": {
     "title": "Subscription",
     "summary": "Review Premium terms, billing timing, cancellation, refunds, and device rules.",
-    "plan": "Premium preview",
-    "price": "R$ 29.90 — illustrative price, not an offer",
-    "billingPeriod": "Monthly",
-    "renewal": "Would renew monthly only after Phase 4 consent",
-    "taxes": "Applicable taxes would be disclosed before purchase",
-    "cancellation": "Would remain available before the next renewal",
-    "refunds": "Subject to the published terms and applicable law",
-    "deviceRules": "One active PC; replacement would have a 30-day cooldown",
-    "expirationEffects": "Applied optimizations and recovery remain available; Premium services stop",
+    "plan": "Premium · Competitive Mode",
+    "price": "US$ 6.99/month or US$ 59.99/year",
+    "billingPeriod": "Monthly or annual",
+    "renewal": "Renews on the selected cycle; card supports monthly and annual billing, Pix supports annual billing in Brazil, and boleto is unavailable at launch",
+    "taxes": "Applicable taxes are shown before confirmation",
+    "cancellation": "Cancel at any time and keep access through the paid cycle",
+    "refunds": "Full refund within seven days of the first subscription",
+    "deviceRules": "One active PC; transfer or reset every 30 days, with legitimate exceptions through support",
+    "expirationEffects": "Premium works offline for 30 days and then returns to Free; history and restoration remain available",
     "action": "Review subscription change"
   },
   "invoices": {
     "title": "Invoices",
-    "summary": "Synthetic invoice rows demonstrate structure without claiming a payment.",
-    "caption": "Synthetic invoice history",
-    "empty": "No authoritative invoices exist before Phase 4."
+    "summary": "Review charges, payment method, billing period, and the status of each invoice.",
+    "caption": "Invoice history",
+    "empty": "You do not have any invoices yet. The Free plan never creates a charge."
   },
   "device": {
     "title": "Device",
     "summary": "Review the current device details and the 30-day replacement cooldown.",
-    "label": "DESKTOP-PREVIEW-01",
-    "detail": "Windows 11 · synthetic fixture · no hardware identifier collected",
-    "cooldown": "A confirmed replacement would start a 30-day cooldown in Phase 4. This preview does not revoke or bind a device.",
+    "label": "My primary PC",
+    "detail": "Windows 11 · protected identity · raw HWID is never stored",
+    "cooldown": "You can transfer or reset the active PC every 30 days. Reinstalls and minor upgrades do not consume a reset; major hardware changes may require a new activation.",
     "action": "Review device replacement"
   },
   "downloads": {
@@ -146,16 +146,16 @@
     "bodyLabel": "Description",
     "action": "Review support request",
     "purpose": "Prepare a support request for explicit review.",
-    "retention": "No support draft is retained outside the current preview.",
+    "retention": "The draft is discarded if you leave before confirmation.",
     "sharing": "No diagnostic, attachment, email, or account record is shared.",
     "revocation": "Cancel the review at any point; nothing has been submitted.",
-    "noUpload": "Attachments and diagnostic uploads are unavailable in Phase 3.",
+    "noUpload": "Diagnostics can be attached only with explicit consent for this request.",
     "sensitiveReview": "Remove credentials, payment data, recovery codes, and unrelated personal information before any future submission."
   },
   "recovery": {
     "title": "Authority unavailable",
     "safeWork": "Safe draft fields preserved",
     "signIn": "Review sign-in",
-    "support": "Open support preview"
+    "support": "Open support"
   }
 }

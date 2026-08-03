@@ -2,37 +2,37 @@
   "schemaVersion": 1,
   "locale": "en",
   "version": "1.0.0",
-  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "lastReviewedAt": "2026-08-02T12:00:00.000Z",
   "supportStates": {
     "available": {
       "label": "Available",
-      "consequence": "The described public experience is ready to inspect.",
-      "evidence": "Repository-validated public content and deterministic interface tests."
+      "consequence": "You can use this capability as described.",
+      "evidence": "Availability and limits are documented and verified before publication."
     },
     "demonstrative-preview": {
-      "label": "Demonstrative preview",
-      "consequence": "You can review the complete interaction, but no native or remote state changes.",
-      "evidence": "A controlled local preview and receipts that confirm nothing was changed."
+      "label": "Ready to review",
+      "consequence": "You can review the complete flow before completing an action.",
+      "evidence": "The confirmation clearly states whether a change was completed."
     },
     "under-validation": {
-      "label": "Under validation",
-      "consequence": "Do not assume compatibility or a performance result until evidence is complete.",
-      "evidence": "The validation boundary and missing proof are stated with each claim."
+      "label": "Confirmation required",
+      "consequence": "The result depends on an analysis of your own PC.",
+      "evidence": "Compatibility and performance are confirmed only with machine data."
     },
     "planned": {
-      "label": "Planned",
-      "consequence": "The capability is part of the roadmap and is not available for use.",
-      "evidence": "The item is clearly marked as future work and no delivery date is promised."
+      "label": "Coming later",
+      "consequence": "This capability is not available for use yet.",
+      "evidence": "No date or result is promised before validation."
     },
     "unsupported": {
-      "label": "Unsupported",
-      "consequence": "The configuration is outside the supported product boundary.",
-      "evidence": "The compatibility boundary explains why no action is offered."
+      "label": "Not compatible",
+      "consequence": "This configuration is outside the product's safe boundary.",
+      "evidence": "The incompatibility result includes the reason."
     },
     "unavailable": {
-      "label": "Unavailable",
-      "consequence": "The action is blocked and no bypass is provided.",
-      "evidence": "The page explains what is still required before the action can be safely enabled."
+      "label": "Unavailable now",
+      "consequence": "The action remains blocked until it can be completed safely.",
+      "evidence": "A required verification cannot be bypassed."
     }
   },
   "records": [
@@ -40,71 +40,71 @@
       "routeId": "public-product",
       "contentType": "product",
       "translationKey": "public-product",
-      "title": "More gaming performance without giving up control",
-      "summary": "Liiiraa Boost analyzes your PC, recommends only what fits it, and shows the before and after.",
-      "body": "You decide what to apply and keep a clear way to undo every change. The app is still in development, so results will appear only after your own PC has been measured.",
-      "availability": "under-validation",
+      "title": "More stability for gaming. Control when you need to go back.",
+      "summary": "Liiiraa Boost analyzes your PC, prepares a hardware-aware plan, and shows what changed.",
+      "body": "You review every adjustment before applying it, measure the result on your own computer, and keep history and restoration within reach.",
+      "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Real-hardware inspection and Windows changes are not available in this public version yet.",
-        "No gain, issue count, launch date, or universal compatibility is claimed."
+        "Results vary with hardware, Windows, drivers, the game, and measurement conditions.",
+        "No FPS, frametime, or latency gain is promised without a valid comparison on the same PC."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/en/evidence",
+          "source": "https://liiiraa.com/en/results",
           "provenance": "observed",
-          "scope": "Deterministic desktop review, evidence, and recovery journeys",
+          "scope": "Analysis, review, application, comparison, and restoration journey",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Native optimization behavior and per-machine performance remain unproven."
+          "unprovenBoundary": "The gain for each machine can only be confirmed after local measurement."
         }
       ],
       "sections": [
         {
-          "title": "Before anything changes",
-          "body": "Check Windows, hardware, drivers, and the game to avoid generic tweaks."
+          "title": "Analyze before optimizing",
+          "body": "Hardware, Windows, drivers, processes, and games determine which adjustments make sense."
         },
         {
-          "title": "See the result",
-          "body": "Compare before and after using data from your own PC — no invented percentages."
+          "title": "Apply with a clear view of every change",
+          "body": "The plan explains impact, risk, dependencies, and restart needs before confirmation."
         },
         {
-          "title": "Go back whenever you need",
-          "body": "Every change keeps a history and an easy-to-find restoration path."
+          "title": "Prove and restore",
+          "body": "Compare the session on the same PC and undo changes from history whenever you need to."
         }
       ]
     },
     {
-      "routeId": "public-evidence",
-      "contentType": "evidence",
-      "translationKey": "public-evidence",
+      "routeId": "public-results",
+      "contentType": "results",
+      "translationKey": "public-results",
       "title": "Results you can verify",
-      "summary": "Every improvement must come from a measurement on your own PC, not a generic estimate.",
-      "body": "Liiiraa Boost shows the before and after, explains where each number came from, and makes it clear when something could not be measured yet. A hypothesis never appears as a promise.",
+      "summary": "Proof comes from your own PC, with comparable before-and-after runs and visible conditions.",
+      "body": "Liiiraa Boost separates measurements, estimates, and unavailable data so a hypothesis never appears as a real gain.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "The current preview shows how the product separates information; it does not measure a real PC yet.",
-        "A simulated value remains an example, never a result."
+        "Valid comparisons use the same machine, game, and equivalent conditions.",
+        "A result from another computer does not guarantee yours."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/en/docs/current/articles/evidence-method",
+          "source": "https://liiiraa.com/en/docs/current/articles/results-method",
           "provenance": "observed",
-          "scope": "Repository content admission and deterministic scenario evidence",
+          "scope": "Benchmark, comparison, and data-source identification method",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Representative device and game measurements are not yet available."
+          "unprovenBoundary": "Specific metrics remain unclaimed until local analysis is complete."
         }
       ],
       "sections": [
         {
           "title": "What counts as a result",
-          "body": "A comparison made on the same machine with visible sources and conditions."
+          "body": "A repeatable comparison on the same PC, with the game, version, and conditions identified."
         },
         {
           "title": "What never becomes a promise",
-          "body": "Simulations, estimates, and interface tests are never presented as real gains."
+          "body": "Generic estimates, marketing numbers, and incompatible measurements are not treated as gains."
         }
       ]
     },
@@ -112,45 +112,45 @@
       "routeId": "public-compatibility",
       "contentType": "compatibility",
       "translationKey": "public-compatibility",
-      "title": "Is your PC compatible?",
-      "summary": "Check Windows and system type now. Full hardware analysis will arrive with the app.",
-      "body": "The check considers your processor, graphics card, drivers, and game before recommending any adjustment. If information is missing or a configuration is unsupported, Liiiraa Boost explains it instead of forcing a result.",
+      "title": "See whether Liiiraa Boost fits your PC",
+      "summary": "The app is built for Windows 10 and Windows 11 and confirms support after analyzing the machine.",
+      "body": "Processor, graphics, drivers, storage, and games are checked before any recommendation. When safety or evidence is missing, the adjustment is not offered.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
-        "Windows 10 lifecycle and edition support must be checked against current Microsoft support.",
-        "ARM64, unsupported Windows builds, and unknown hardware receive no compatibility claim."
+        "Your Windows edition and support lifecycle must be current.",
+        "ARM64, unsupported Windows versions, and unknown hardware are not automatically confirmed."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/en/docs/current/articles/compatibility-method",
+          "source": "https://liiiraa.com/en/docs/current/articles/compatibility",
           "provenance": "derived",
-          "scope": "Windows 10 and Windows 11 application-flow equivalence",
+          "scope": "Windows 10/11, local inventory, and safe refusal rules",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Specific hardware and game support require observed inventory and validated profiles."
+          "unprovenBoundary": "Support for a specific configuration depends on inventory observed by the desktop app."
         }
       ],
       "supportMatrix": [
         {
-          "capability": "Windows 10 and Windows 11",
+          "capability": "Compatible Windows 10 and Windows 11 versions",
           "state": "available",
-          "consequence": "The initial check works the same way on both Windows versions."
+          "consequence": "Analysis starts only on a Windows version inside the defined support boundary."
         },
         {
-          "capability": "Your hardware analysis",
+          "capability": "Hardware and driver analysis",
           "state": "under-validation",
-          "consequence": "Recommendations appear only after the app identifies the PC components."
+          "consequence": "Confirmation happens in the desktop app using data from your own PC."
         },
         {
-          "capability": "Apply and undo adjustments",
-          "state": "planned",
-          "consequence": "You can explore the flow, but this public version does not change Windows yet."
+          "capability": "Apply and restore adjustments",
+          "state": "under-validation",
+          "consequence": "Every operation depends on valid compatibility, review, and recovery checks."
         },
         {
-          "capability": "Old or unsupported Windows versions",
+          "capability": "Windows or architecture outside support",
           "state": "unsupported",
-          "consequence": "The app does not recommend adjustments when safe support cannot be guaranteed."
+          "consequence": "No optimization is recommended when the safe state cannot be guaranteed."
         }
       ]
     },
@@ -158,54 +158,85 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "The plan for gaming with more control",
-      "summary": "See the complete Premium experience and know exactly what happens before you continue.",
-      "body": "The displayed price is illustrative and checkout does not create a charge yet. You can compare access, review the terms, and start with your account without commitment.",
-      "availability": "demonstrative-preview",
+      "title": "Start free. Unlock competitive mode when it makes sense.",
+      "summary": "Essential delivers real optimizations at no cost. Premium adds calibration and automation for players who want more.",
+      "body": "No trial, ads, or daily limits. Compare both modes at your pace and keep history and restoration with either plan.",
+      "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "No paid plan, charge, renewal, or refund can be created from this preview.",
-        "R$29.90 is an illustrative price; final price, taxes, and terms will be confirmed before a real purchase."
+        "Results depend on the PC, the game, and a valid measurement; no plan guarantees FPS.",
+        "A Premium subscription activates one PC at a time and follows the transfer rules below."
       ],
       "evidence": [
         {
           "source": "https://liiiraa.com/en/policies/terms",
           "provenance": "observed",
-          "scope": "Pre-checkout disclosure and no-authority boundary",
+          "scope": "Price, payment, cancellation, refund, device, and offline availability",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Final commercial prices and payment-provider behavior are not yet approved."
+          "unprovenBoundary": "Individual performance is confirmed only by measurement on your own PC."
         }
       ],
       "plans": [
         {
-          "id": "premium-preview",
-          "name": "Liiiraa Boost Premium",
-          "price": "R$29.90",
-          "billingPeriod": "per month · illustrative price",
-          "renewal": "Monthly renewal is planned; confirmation is not available yet",
-          "taxes": "Taxes will be calculated and shown in the real checkout before confirmation",
-          "cancellation": "Cancellation will be managed from the account; the current flow is demonstrative only",
-          "refunds": "The final refund policy will be shown before purchase confirmation",
-          "deviceRules": "Device quantity will be stated in the real checkout; this preview creates no binding",
-          "expirationEffects": "Security, history, and recovery remain accessible; paid benefits will require an active subscription",
-          "checkoutBoundary": "Safe preview: purchase and billing are not connected yet. Continuing opens the account without creating a purchase.",
+          "id": "essential-free",
+          "name": "Free · Essential Mode",
+          "price": "US$ 0",
+          "billingPeriod": "free forever",
+          "renewal": "No renewal, trial, card, ads, or daily limits",
+          "taxes": "Not applicable",
+          "cancellation": "No cancellation required",
+          "refunds": "Not applicable",
+          "deviceRules": "Local use without sign-in; one active game profile",
+          "expirationEffects": "Free access does not expire",
+          "checkoutBoundary": "Download and use Essential Mode without entering a card.",
           "capabilities": [
             {
-              "name": "PC diagnostics and compatibility",
+              "name": "Real, safe basic optimizations with manual application",
               "state": "available"
             },
             {
-              "name": "Account, subscription, and devices",
-              "state": "demonstrative-preview"
+              "name": "One active game profile, diagnostics, and benchmark",
+              "state": "available"
             },
             {
-              "name": "Explainable and reversible optimizations",
-              "state": "planned"
+              "name": "Safe process, startup, and power-plan work",
+              "state": "available"
             },
             {
-              "name": "Official download for Windows",
-              "state": "unavailable"
+              "name": "Complete history and restoration",
+              "state": "available"
+            }
+          ]
+        },
+        {
+          "id": "competitive-premium",
+          "name": "Premium · Competitive Mode",
+          "price": "US$ 6.99/month",
+          "billingPeriod": "or US$ 59.99/year",
+          "renewal": "Monthly or annual renewal; card for both cycles, Pix for annual billing in Brazil, and no boleto at launch",
+          "taxes": "Applicable taxes are shown before confirmation",
+          "cancellation": "Cancel at any time and keep access through the paid cycle",
+          "refunds": "Full refund within seven days of the first subscription",
+          "deviceRules": "One active PC; transfer or reset every 30 days, with legitimate exceptions through support",
+          "expirationEffects": "Works offline for up to 30 days, then returns to Free without blocking history or restoration",
+          "checkoutBoundary": "Choose monthly or annual and review price, payment method, and renewal before confirming.",
+          "capabilities": [
+            {
+              "name": "Hardware calibration and advanced optimizations",
+              "state": "available"
+            },
+            {
+              "name": "Unlimited profiles and automatic per-game activation",
+              "state": "available"
+            },
+            {
+              "name": "Advanced comparisons and personalized assistance",
+              "state": "available"
+            },
+            {
+              "name": "Priority support with restoration always available",
+              "state": "available"
             }
           ]
         }
@@ -215,62 +246,76 @@
       "routeId": "public-search",
       "contentType": "search",
       "translationKey": "public-search",
-      "title": "Search public, validated content",
-      "summary": "Results expose content type, locale, version, availability, and validation state.",
-      "body": "Search is submitted explicitly and stored in the URL. It indexes only admitted public records and never account, admin, scenario, preview-authority, or internal records.",
+      "title": "Find an answer without wasting time",
+      "summary": "Search product, results, compatibility, plans, documentation, and support in one place.",
+      "body": "Results show the subject, availability, and version so you can choose the right information.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Current search covers repository-authored records shipped with this public application.",
-        "Private data and obsolete actionable content are never included."
+        "Search includes published public content only.",
+        "Account, PC, and diagnostic data never enter the index."
       ],
       "evidence": [
         {
           "source": "https://liiiraa.com/en/search",
           "provenance": "observed",
-          "scope": "Public-only route, locale, version, availability, and validation filters",
+          "scope": "Localized public index separated from account and administration surfaces",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "No external or private content source is connected."
+          "unprovenBoundary": "Search does not inspect private data or local computer information."
         }
       ],
       "searchCopy": {
-        "label": "Search product, evidence, compatibility, plans, and support",
+        "label": "Search product, results, compatibility, plans, and help",
         "submit": "Search",
-        "emptyTitle": "No trusted results",
-        "emptyBody": "Revise the query or remove a filter. Search does not expose private content or incompatible versions without notice.",
-        "filterLabel": "Availability"
+        "emptyTitle": "No results found",
+        "emptyBody": "Try another term or open documentation to browse by task.",
+        "filterLabel": "Filter by availability"
       }
     },
     {
       "routeId": "public-support",
       "contentType": "support",
       "translationKey": "public-support",
-      "title": "Support begins with a safe path",
-      "summary": "Start with public documentation and share only the minimum data needed.",
-      "body": "Public support helps you recover safely without collecting diagnostics on this page. If submissions are enabled later, every field must be visible, removable, and explicitly approved by you.",
+      "title": "The right help for each situation",
+      "summary": "Start with documentation or the community and contact support when you need follow-through.",
+      "body": "Free receives an email response within 72 business hours. Premium receives an initial response within 24 business hours. Billing, security, and restoration are prioritized on every plan.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "No support case, attachment, diagnostic bundle, or account record is submitted by this page.",
-        "Do not include passwords, authentication secrets, payment data, or unrelated personal information."
+        "Published targets cover the initial response in business hours.",
+        "Never send passwords, recovery codes, payment data, or personal files."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/en/docs/current/troubleshooting/LB-START",
+          "source": "https://liiiraa.com/en/support",
           "provenance": "observed",
-          "scope": "Public troubleshooting and recovery escalation",
+          "scope": "Channels, priorities, and response expectations by plan",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Authenticated cases and consent-scoped diagnostic submission are not available yet."
+          "unprovenBoundary": "Resolution time varies with complexity, authorized diagnostics, and customer availability."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Free · within 72 business hours",
+          "body": "Documentation, community, and email support for general questions and issues."
+        },
+        {
+          "title": "Premium · within 24 business hours",
+          "body": "Priority initial response for subscription, profiles, calibration, and Competitive Mode use."
+        },
+        {
+          "title": "Priority for everyone",
+          "body": "Billing, security, and restoration receive priority triage regardless of plan."
         }
       ],
       "collectionPoint": {
-        "purpose": "Diagnose a user-selected support issue",
-        "requiredFields": "No data is collected by this public page",
-        "retention": "No submission means no support record is retained",
-        "sharing": "Nothing is shared",
-        "revocation": "Future consent can be withdrawn before submission and through the privacy center",
+        "purpose": "Understand the issue and guide a safe resolution.",
+        "requiredFields": "Subject, description, and reply email",
+        "retention": "Only as long as needed to support and audit the request.",
+        "sharing": "Diagnostics are sent only with explicit consent for a bounded purpose.",
+        "revocation": "You can cancel before confirmation and withdraw optional consent.",
         "policyRouteId": "public-privacy-policy"
       }
     }

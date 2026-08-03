@@ -2,37 +2,37 @@
   "schemaVersion": 1,
   "locale": "pt-BR",
   "version": "1.0.0",
-  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "lastReviewedAt": "2026-08-02T12:00:00.000Z",
   "supportStates": {
     "available": {
       "label": "Disponível",
-      "consequence": "A experiência pública descrita está pronta para inspeção.",
-      "evidence": "Conteúdo público validado no repositório e testes determinísticos da interface."
+      "consequence": "Você pode usar esta capacidade conforme descrito.",
+      "evidence": "A disponibilidade e os limites estão documentados e são verificados antes da publicação."
     },
     "demonstrative-preview": {
-      "label": "Prévia demonstrativa",
-      "consequence": "Você pode revisar a interação completa, mas nenhum estado nativo ou remoto é alterado.",
-      "evidence": "Prévia local controlada e recibos que confirmam que nada foi alterado."
+      "label": "Revisão disponível",
+      "consequence": "Você pode conferir todo o fluxo antes de concluir uma ação.",
+      "evidence": "A confirmação informa com clareza se uma alteração foi concluída."
     },
     "under-validation": {
-      "label": "Em validação",
-      "consequence": "Não presuma compatibilidade ou resultado de desempenho antes da evidência ficar completa.",
-      "evidence": "O limite de validação e a prova ausente acompanham cada afirmação."
+      "label": "Confirmação necessária",
+      "consequence": "O resultado depende da análise do seu próprio PC.",
+      "evidence": "Compatibilidade e desempenho são confirmados somente com dados da máquina."
     },
     "planned": {
-      "label": "Planejado",
-      "consequence": "A capacidade faz parte do roteiro e ainda não está disponível para uso.",
-      "evidence": "O item aparece como futuro e nenhuma data de entrega é prometida."
+      "label": "Em breve",
+      "consequence": "Esta capacidade ainda não está disponível para uso.",
+      "evidence": "Nenhuma data ou resultado é prometido antes da validação."
     },
     "unsupported": {
-      "label": "Não suportado",
-      "consequence": "A configuração está fora do limite suportado pelo produto.",
-      "evidence": "O limite de compatibilidade explica por que nenhuma ação é oferecida."
+      "label": "Não compatível",
+      "consequence": "Esta configuração está fora do limite seguro do produto.",
+      "evidence": "O motivo da incompatibilidade acompanha o resultado."
     },
     "unavailable": {
-      "label": "Indisponível",
-      "consequence": "A ação está bloqueada e não há desvio.",
-      "evidence": "A página explica o que falta para liberar a ação com segurança."
+      "label": "Indisponível agora",
+      "consequence": "A ação fica bloqueada até que possa ser concluída com segurança.",
+      "evidence": "Não existe opção de ignorar uma verificação obrigatória."
     }
   },
   "records": [
@@ -40,71 +40,71 @@
       "routeId": "public-product",
       "contentType": "product",
       "translationKey": "public-product",
-      "title": "Mais desempenho para jogar, sem perder o controle",
-      "summary": "O Liiiraa Boost analisa seu PC, recomenda apenas o que combina com ele e mostra o antes e o depois.",
-      "body": "Você decide o que aplicar e mantém um caminho claro para desfazer cada mudança. O app ainda está em desenvolvimento, por isso os resultados só aparecerão depois de medir o seu próprio PC.",
-      "availability": "under-validation",
+      "title": "Mais estabilidade para jogar. Controle para voltar atrás.",
+      "summary": "O Liiiraa Boost analisa o seu PC, prepara um plano adequado ao hardware e mostra o que mudou.",
+      "body": "Você revisa cada ajuste antes de aplicar, acompanha o resultado no próprio computador e mantém histórico e restauração sempre acessíveis.",
+      "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "A leitura de hardware real e as alterações do Windows ainda não estão disponíveis nesta versão pública.",
-        "Nenhum ganho, contagem de problemas, data de lançamento ou compatibilidade universal é afirmado."
+        "O resultado varia conforme hardware, Windows, drivers, jogo e condições da medição.",
+        "Nenhum ganho de FPS, frametime ou latência é prometido sem uma comparação válida no mesmo PC."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/pt-BR/evidence",
+          "source": "https://liiiraa.com/pt-BR/results",
           "provenance": "observed",
-          "scope": "Jornadas determinísticas de revisão, evidência e recuperação no desktop",
+          "scope": "Jornada de análise, revisão, aplicação, comparação e restauração",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "O comportamento da otimização nativa e o desempenho por máquina continuam não comprovados."
+          "unprovenBoundary": "O ganho de cada máquina só pode ser confirmado depois da medição local."
         }
       ],
       "sections": [
         {
-          "title": "Antes de mexer",
-          "body": "Confira Windows, hardware, drivers e o jogo para evitar ajustes genéricos."
+          "title": "Analise antes de otimizar",
+          "body": "Hardware, Windows, drivers, processos e jogos definem quais ajustes fazem sentido."
         },
         {
-          "title": "Veja o resultado",
-          "body": "Compare antes e depois com dados do seu próprio PC — sem porcentagens inventadas."
+          "title": "Aplique sabendo o que muda",
+          "body": "O plano explica impacto, risco, dependências e reinicialização antes da confirmação."
         },
         {
-          "title": "Volte quando quiser",
-          "body": "Cada mudança mantém histórico e um caminho de restauração fácil de encontrar."
+          "title": "Comprove e restaure",
+          "body": "Compare a sessão no mesmo PC e desfaça alterações pelo histórico quando quiser."
         }
       ]
     },
     {
-      "routeId": "public-evidence",
-      "contentType": "evidence",
-      "translationKey": "public-evidence",
+      "routeId": "public-results",
+      "contentType": "results",
+      "translationKey": "public-results",
       "title": "Resultados que você consegue conferir",
-      "summary": "Cada melhoria precisa vir de uma medição no seu próprio PC, não de uma estimativa genérica.",
-      "body": "O Liiiraa Boost mostra o antes e o depois, explica de onde veio cada número e deixa claro quando algo ainda não pôde ser medido. Assim, uma hipótese nunca aparece como promessa.",
+      "summary": "A prova vem do seu próprio PC, com antes e depois comparáveis e condições visíveis.",
+      "body": "O Liiiraa Boost separa medição, estimativa e indisponibilidade para que uma hipótese nunca apareça como ganho real.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "A prévia atual mostra como o produto separa informações; ela ainda não mede um PC real.",
-        "Um valor simulado continua sendo apenas um exemplo, nunca um resultado."
+        "Comparações válidas usam a mesma máquina, o mesmo jogo e condições equivalentes.",
+        "Resultados de outro computador não garantem o resultado do seu."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/pt-BR/docs/current/articles/evidence-method",
+          "source": "https://liiiraa.com/pt-BR/docs/current/articles/results-method",
           "provenance": "observed",
-          "scope": "Admissão de conteúdo no repositório e evidência de cenários determinísticos",
+          "scope": "Método de benchmark, comparação e identificação da origem dos dados",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Medições representativas de dispositivos e jogos ainda não estão disponíveis."
+          "unprovenBoundary": "Métricas específicas permanecem sem afirmação até a análise local ser concluída."
         }
       ],
       "sections": [
         {
           "title": "O que conta como resultado",
-          "body": "Uma comparação feita na mesma máquina, com origem e condições visíveis."
+          "body": "Uma comparação repetível no mesmo PC, com jogo, versão e condições identificados."
         },
         {
-          "title": "O que nunca vira promessa",
-          "body": "Simulações, estimativas e testes de interface não são apresentados como ganho real."
+          "title": "O que não vira promessa",
+          "body": "Estimativas genéricas, números de marketing e medições incompatíveis não são tratados como ganho."
         }
       ]
     },
@@ -112,45 +112,45 @@
       "routeId": "public-compatibility",
       "contentType": "compatibility",
       "translationKey": "public-compatibility",
-      "title": "Seu PC é compatível?",
-      "summary": "Confira agora o Windows e o tipo de sistema. A análise completa de hardware chegará junto com o app.",
-      "body": "A verificação considera processador, placa de vídeo, drivers e o jogo antes de recomendar qualquer ajuste. Se faltar informação ou a configuração não for suportada, o Liiiraa Boost explica isso sem forçar um resultado.",
+      "title": "Veja se o Liiiraa Boost combina com o seu PC",
+      "summary": "O app foi feito para Windows 10 e Windows 11 e confirma o suporte depois de analisar a máquina.",
+      "body": "Processador, placa de vídeo, drivers, armazenamento e jogos são verificados antes de qualquer recomendação. Quando falta segurança ou evidência, o ajuste não é oferecido.",
       "availability": "under-validation",
       "validationState": "validated",
       "limitations": [
-        "O ciclo de vida e a edição do Windows 10 precisam ser conferidos no suporte vigente da Microsoft.",
-        "ARM64, compilações não suportadas do Windows e hardware desconhecido não recebem afirmação de compatibilidade."
+        "A edição e o ciclo de suporte do Windows precisam estar vigentes.",
+        "ARM64, versões não suportadas do Windows e hardware desconhecido não recebem confirmação automática."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/pt-BR/docs/current/articles/compatibility-method",
+          "source": "https://liiiraa.com/pt-BR/docs/current/articles/compatibility",
           "provenance": "derived",
-          "scope": "Equivalência do fluxo do aplicativo entre Windows 10 e Windows 11",
+          "scope": "Windows 10/11, inventário local e regras de recusa segura",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "O suporte específico de hardware e jogo exige inventário observado e perfis validados."
+          "unprovenBoundary": "O suporte de uma configuração específica depende do inventário observado no desktop."
         }
       ],
       "supportMatrix": [
         {
-          "capability": "Windows 10 e Windows 11",
+          "capability": "Windows 10 e Windows 11 compatíveis",
           "state": "available",
-          "consequence": "A verificação inicial funciona da mesma forma nas duas versões do Windows."
+          "consequence": "A análise começa somente em uma versão do Windows dentro do suporte definido."
         },
         {
-          "capability": "Análise do seu hardware",
+          "capability": "Análise de hardware e drivers",
           "state": "under-validation",
-          "consequence": "As recomendações só aparecem depois que o app identifica os componentes do PC."
+          "consequence": "A confirmação acontece no app desktop, usando dados do próprio PC."
         },
         {
-          "capability": "Aplicar e desfazer ajustes",
-          "state": "planned",
-          "consequence": "Você pode conhecer o fluxo, mas esta versão pública ainda não altera o Windows."
+          "capability": "Aplicar e restaurar ajustes",
+          "state": "under-validation",
+          "consequence": "Cada operação depende de compatibilidade, revisão e ponto de recuperação válidos."
         },
         {
-          "capability": "Versões antigas ou não suportadas do Windows",
+          "capability": "Windows ou arquitetura fora do suporte",
           "state": "unsupported",
-          "consequence": "O app não recomenda ajustes quando não consegue garantir suporte seguro."
+          "consequence": "Nenhuma otimização é recomendada quando o estado seguro não pode ser garantido."
         }
       ]
     },
@@ -158,54 +158,85 @@
       "routeId": "public-plans",
       "contentType": "plan",
       "translationKey": "public-plans",
-      "title": "O plano para jogar com mais controle",
-      "summary": "Veja a experiência Premium completa e saiba exatamente o que acontece antes de continuar.",
-      "body": "O valor exibido é ilustrativo e o checkout ainda não gera cobrança. Você pode comparar o acesso, revisar as condições e começar pela sua conta sem compromisso.",
-      "availability": "demonstrative-preview",
+      "title": "Comece grátis. Ative o modo competitivo quando fizer sentido.",
+      "summary": "O Essencial entrega otimizações reais sem custo. O Premium libera calibração e automação para quem quer ir além.",
+      "body": "Sem trial, anúncios ou limites diários. Compare os dois modos, escolha com calma e mantenha histórico e restauração em qualquer plano.",
+      "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Nenhum plano pago, cobrança, renovação ou reembolso pode ser criado nesta prévia.",
-        "R$ 29,90 é um valor ilustrativo; preço final, tributos e termos serão confirmados antes da compra real."
+        "Resultados dependem do PC, do jogo e de uma medição válida; nenhum plano garante FPS.",
+        "A assinatura Premium ativa um PC por vez e segue as regras de transferência descritas abaixo."
       ],
       "evidence": [
         {
           "source": "https://liiiraa.com/pt-BR/policies/terms",
           "provenance": "observed",
-          "scope": "Divulgação pré-checkout e limite de ausência de autoridade",
+          "scope": "Preço, pagamento, cancelamento, reembolso, dispositivo e disponibilidade offline",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Preços comerciais finais e o comportamento do provedor de pagamentos ainda não foram aprovados."
+          "unprovenBoundary": "Desempenho individual só é confirmado por medição no próprio PC."
         }
       ],
       "plans": [
         {
-          "id": "premium-preview",
-          "name": "Liiiraa Boost Premium",
-          "price": "R$ 29,90",
-          "billingPeriod": "por mês · valor ilustrativo",
-          "renewal": "Renovação mensal prevista; a confirmação ainda não está disponível",
-          "taxes": "Tributos serão calculados e exibidos no checkout real antes da confirmação",
-          "cancellation": "O cancelamento será gerenciado pela conta; o fluxo atual é apenas demonstrativo",
-          "refunds": "A política final de reembolso será exibida antes da confirmação da compra",
-          "deviceRules": "A quantidade de dispositivos será informada no checkout real; nenhum vínculo é criado nesta prévia",
-          "expirationEffects": "Segurança, histórico e restauração permanecem acessíveis; benefícios pagos dependerão da assinatura ativa",
-          "checkoutBoundary": "Prévia segura: a compra e a cobrança ainda não estão conectadas. Continuar abre a conta sem criar compra.",
+          "id": "essential-free",
+          "name": "Free · Modo Essencial",
+          "price": "R$ 0",
+          "billingPeriod": "grátis para sempre",
+          "renewal": "Sem renovação, trial, cartão, anúncios ou limites diários",
+          "taxes": "Não se aplica",
+          "cancellation": "Não é necessário cancelar",
+          "refunds": "Não se aplica",
+          "deviceRules": "Uso local sem login; um perfil de jogo ativo",
+          "expirationEffects": "O acesso gratuito não expira",
+          "checkoutBoundary": "Baixe e use o Modo Essencial sem informar um cartão.",
           "capabilities": [
             {
-              "name": "Diagnóstico e compatibilidade do PC",
+              "name": "Otimizações básicas reais e seguras, com aplicação manual",
               "state": "available"
             },
             {
-              "name": "Conta, assinatura e dispositivos",
-              "state": "demonstrative-preview"
+              "name": "Um perfil de jogo ativo, diagnóstico e benchmark",
+              "state": "available"
             },
             {
-              "name": "Otimizações explicáveis e reversíveis",
-              "state": "planned"
+              "name": "Processos, inicialização e plano de energia seguro",
+              "state": "available"
             },
             {
-              "name": "Download oficial para Windows",
-              "state": "unavailable"
+              "name": "Histórico e restauração completos",
+              "state": "available"
+            }
+          ]
+        },
+        {
+          "id": "competitive-premium",
+          "name": "Premium · Modo Competitivo",
+          "price": "R$ 29,90/mês",
+          "billingPeriod": "ou R$ 249,90/ano",
+          "renewal": "Renovação mensal ou anual; cartão nos dois ciclos, Pix no anual e sem boleto no lançamento",
+          "taxes": "Tributos aplicáveis são informados antes da confirmação",
+          "cancellation": "Cancele quando quiser e mantenha o acesso até o fim do ciclo pago",
+          "refunds": "Reembolso integral em até sete dias da primeira assinatura",
+          "deviceRules": "Um PC ativo; transferência ou reset a cada 30 dias, com exceções legítimas pelo suporte",
+          "expirationEffects": "Funciona offline por até 30 dias; depois volta ao Free sem bloquear histórico ou restauração",
+          "checkoutBoundary": "Escolha mensal ou anual e revise preço, forma de pagamento e renovação antes de confirmar.",
+          "capabilities": [
+            {
+              "name": "Calibração por hardware e otimizações avançadas",
+              "state": "available"
+            },
+            {
+              "name": "Perfis ilimitados e ativação automática por jogo",
+              "state": "available"
+            },
+            {
+              "name": "Comparativos avançados e assistência personalizada",
+              "state": "available"
+            },
+            {
+              "name": "Suporte prioritário e restauração sempre disponível",
+              "state": "available"
             }
           ]
         }
@@ -215,62 +246,76 @@
       "routeId": "public-search",
       "contentType": "search",
       "translationKey": "public-search",
-      "title": "Busque conteúdo público e validado",
-      "summary": "Resultados expõem tipo de conteúdo, idioma, versão, disponibilidade e estado de validação.",
-      "body": "A busca é enviada explicitamente e armazenada na URL. Ela indexa apenas registros públicos admitidos e nunca registros de conta, administração, cenário, autoridade de prévia ou uso interno.",
+      "title": "Encontre uma resposta sem perder tempo",
+      "summary": "Pesquise produto, resultados, compatibilidade, planos, documentação e suporte em um só lugar.",
+      "body": "Os resultados mostram o assunto, a disponibilidade e a versão para ajudar você a escolher a informação certa.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "A busca atual cobre registros autorais do repositório entregues com esta aplicação pública.",
-        "Dados privados e conteúdo acionável obsoleto nunca são incluídos."
+        "A busca consulta apenas conteúdo público publicado.",
+        "Dados da conta, do PC e de diagnósticos não entram no índice."
       ],
       "evidence": [
         {
           "source": "https://liiiraa.com/pt-BR/search",
           "provenance": "observed",
-          "scope": "Filtros públicos de rota, idioma, versão, disponibilidade e validação",
+          "scope": "Índice público localizado e separado das áreas de conta e administração",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Nenhuma fonte externa ou privada de conteúdo está conectada."
+          "unprovenBoundary": "A busca não consulta dados privados nem informações locais do computador."
         }
       ],
       "searchCopy": {
-        "label": "Buscar produto, evidência, compatibilidade, planos e suporte",
+        "label": "Buscar produto, resultados, compatibilidade, planos e ajuda",
         "submit": "Buscar",
-        "emptyTitle": "Nenhum resultado confiável",
-        "emptyBody": "Revise os termos ou remova um filtro. A busca não mostra conteúdo privado nem versões incompatíveis sem aviso.",
-        "filterLabel": "Disponibilidade"
+        "emptyTitle": "Nenhum resultado encontrado",
+        "emptyBody": "Tente outra palavra ou abra a documentação para navegar por tarefa.",
+        "filterLabel": "Filtrar por disponibilidade"
       }
     },
     {
       "routeId": "public-support",
       "contentType": "support",
       "translationKey": "public-support",
-      "title": "O suporte começa por um caminho seguro",
-      "summary": "Comece pela documentação pública e compartilhe somente os dados mínimos necessários.",
-      "body": "O suporte público ajuda você a recuperar o caminho com segurança sem coletar diagnósticos nesta página. Se um envio for habilitado no futuro, cada campo deverá ser visível, removível e autorizado por você.",
+      "title": "Ajuda certa para cada situação",
+      "summary": "Comece pela documentação ou comunidade e fale com o suporte quando precisar de acompanhamento.",
+      "body": "Free recebe resposta por e-mail em até 72 horas úteis. Premium recebe resposta inicial em até 24 horas úteis. Cobrança, segurança e restauração têm prioridade em qualquer plano.",
       "availability": "available",
       "validationState": "validated",
       "limitations": [
-        "Nenhum caso, anexo, pacote de diagnóstico ou registro de conta é enviado por esta página.",
-        "Não inclua senhas, segredos de autenticação, dados de pagamento nem informações pessoais sem relação."
+        "Os prazos informados são de resposta inicial em horas úteis.",
+        "Nunca envie senhas, códigos de recuperação, dados de pagamento ou arquivos pessoais."
       ],
       "evidence": [
         {
-          "source": "https://liiiraa.com/pt-BR/docs/current/troubleshooting/LB-START",
+          "source": "https://liiiraa.com/pt-BR/support",
           "provenance": "observed",
-          "scope": "Solução pública de problemas e escalonamento de recuperação",
+          "scope": "Canais, prioridades e expectativas de resposta por plano",
           "applicableVersion": "1.0.0",
           "validationState": "validated",
-          "unprovenBoundary": "Abertura de casos e envio de diagnósticos com consentimento ainda não estão disponíveis."
+          "unprovenBoundary": "O tempo de resolução varia conforme complexidade, diagnóstico autorizado e disponibilidade do cliente."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Free · até 72 horas úteis",
+          "body": "Documentação, comunidade e suporte por e-mail para dúvidas e problemas gerais."
+        },
+        {
+          "title": "Premium · até 24 horas úteis",
+          "body": "Resposta inicial prioritária para assinatura, perfis, calibração e uso do Modo Competitivo."
+        },
+        {
+          "title": "Prioridade para todos",
+          "body": "Cobrança, segurança e restauração recebem triagem prioritária independentemente do plano."
         }
       ],
       "collectionPoint": {
-        "purpose": "Diagnosticar um problema de suporte selecionado pelo usuário",
-        "requiredFields": "Nenhum dado é coletado por esta página pública",
-        "retention": "Sem envio, nenhum registro de suporte é retido",
-        "sharing": "Nada é compartilhado",
-        "revocation": "O consentimento futuro pode ser retirado antes do envio e pela central de privacidade",
+        "purpose": "Entender o problema e orientar uma solução segura.",
+        "requiredFields": "Assunto, descrição e e-mail para resposta",
+        "retention": "Apenas pelo tempo necessário para atender e auditar a solicitação.",
+        "sharing": "Diagnósticos só são enviados com consentimento explícito e finalidade delimitada.",
+        "revocation": "Você pode cancelar o envio antes da confirmação e retirar consentimentos opcionais.",
         "policyRouteId": "public-privacy-policy"
       }
     }
