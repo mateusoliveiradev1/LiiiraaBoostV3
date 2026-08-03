@@ -2230,6 +2230,86 @@ ol.lb-web-documentation-index li {
   margin-block: 0 var(--lb-space-4);
 }
 
+.documentation-help-paths {
+  display: grid;
+  border-block: 1px solid var(--lb-line-strong);
+}
+
+.documentation-help-paths > section {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.28fr) minmax(0, 1fr);
+  gap: var(--lb-space-5);
+  padding-block: var(--lb-space-4);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.documentation-help-paths > section:first-child {
+  border-block-start: 0;
+}
+
+.documentation-help-paths h3 {
+  margin: 0;
+  color: var(--lb-text-secondary);
+  font-size: var(--lb-text-label-size);
+  line-height: 1.5;
+}
+
+.documentation-help-paths ul {
+  display: grid;
+  gap: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.documentation-help-paths li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--lb-space-3);
+  align-items: center;
+  min-inline-size: 0;
+  padding-block: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.documentation-help-paths li:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.documentation-help-paths li:last-child {
+  padding-block-end: 0;
+}
+
+.documentation-help-paths li > div {
+  display: grid;
+  gap: var(--lb-space-1);
+  min-inline-size: 0;
+}
+
+.documentation-help-paths a {
+  color: var(--lb-text-primary);
+  font-size: 20px;
+  font-weight: var(--lb-weight-semibold);
+  text-decoration-color: var(--lb-accent-cyan);
+  text-underline-offset: 4px;
+}
+
+.documentation-help-paths p {
+  max-inline-size: 66ch;
+  margin: 0;
+  color: var(--lb-text-secondary);
+  line-height: 1.6;
+}
+
+.documentation-help-paths li > span {
+  max-inline-size: 20ch;
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+  text-align: end;
+}
+
 .lb-web-filter-bar.documentation-help-search {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2434,6 +2514,7 @@ ol.lb-web-documentation-index li {
   .documentation-article-flow > section,
   .documentation-index-workspace > ol,
   .documentation-help-search__filter-grid,
+  .documentation-help-paths > section,
   .release-state-header,
   .release-channel-ledger > section,
   .release-movement {
@@ -2471,6 +2552,18 @@ ol.lb-web-documentation-index li {
   .documentation-help-search > button,
   .documentation-help-search__filters {
     grid-column: 1;
+  }
+
+  .documentation-help-paths li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .documentation-help-paths li > span {
+    max-inline-size: none;
+    min-block-size: 44px;
+    padding-block: var(--lb-space-2);
+    color: var(--lb-text-primary);
+    text-align: start;
   }
 
   .release-state-header,

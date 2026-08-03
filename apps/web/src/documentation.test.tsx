@@ -107,21 +107,39 @@ describe('authored documentation rhythm', () => {
     expect(text).toContain('Guias atuais');
     expect(text).toContain('Como podemos ajudar?');
     expect(text).toContain('Escolha o que você quer fazer');
+    expect(text).toContain('Instalar o Liiiraa Boost');
+    expect(text).toContain('Usar o Modo Competitivo');
+    expect(text).toContain('Medir e comparar desempenho');
+    expect(text).toContain('Restaurar alterações');
+    expect(text).toContain('Verificar PC e dispositivo');
+    expect(text).toContain('Controlar dados e privacidade');
+    expect(text).toContain('Atualizar o aplicativo');
+    expect(text).toContain('Resolver um código de erro');
     expect(text).not.toContain('Índice da documentação');
     expect(text).not.toMatch(
       /\b(?:current|stable|getting-started|preparing|measuring|optimizing|restoring)\b/u,
     );
-    expect(markup).toContain('documentation-task-card');
+    expect(markup).toContain('documentation-help-paths');
     expect(markup).toContain('documentation-technical-links');
     const taskWorkspace = markup.slice(markup.indexOf('documentation-index-workspace'));
     expect(visibleText(taskWorkspace)).not.toContain('LB-ERR:0x80070005');
     expect(visibleText(taskWorkspace)).not.toContain('identificadores de evidência');
-    expect(markup).toContain(
-      'class="lb-web-route-header lb-web-route-header--documentation"',
-    );
+    expect(markup).toContain('class="lb-web-route-header lb-web-route-header--documentation"');
     expect(styles).toMatch(
       /\.lb-web-route-header\.lb-web-route-header--documentation\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/u,
     );
+  });
+
+  it('finds customer tasks beyond the admitted article corpus', () => {
+    const markup = renderToStaticMarkup(
+      <DocumentationExperience
+        request={{ locale: 'pt-BR', searchParams: { q: 'modo competitivo' }, version: 'current' }}
+      />,
+    );
+
+    expect(markup).toContain('data-result-kind="help-path"');
+    expect(visibleText(markup)).toContain('Usar o Modo Competitivo');
+    expect(markup).toContain('href="/pt-BR/product#competitive-mode"');
   });
 
   it('keeps historical guidance explicit and canonical instead of redirecting it away', () => {

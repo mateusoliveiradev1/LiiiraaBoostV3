@@ -78,6 +78,16 @@ const isOneOf = <Value extends string>(values: readonly Value[], value: unknown)
 
 type LinkItem = Readonly<{ href: string; id: string; label: string }>;
 
+type HelpPath = Readonly<{
+  action: string;
+  group: string;
+  href: string;
+  id: string;
+  keywords: string;
+  summary: string;
+  title: string;
+}>;
+
 const DocumentationIndex = ({
   items,
   label,
@@ -381,6 +391,193 @@ const copyFor = (locale: WebLocale) =>
         validation: 'Validation',
         version: 'Version',
       };
+
+const helpPathsFor = (locale: WebLocale): readonly HelpPath[] =>
+  locale === 'pt-BR'
+    ? [
+        {
+          action: 'Começar com segurança',
+          group: 'Comece por aqui',
+          href: `/${locale}/docs/current/articles/getting-started`,
+          id: 'install',
+          keywords: 'instalar instalação download windows começar primeiros passos',
+          summary: 'Confira o Windows, baixe pela origem oficial e prepare a primeira abertura.',
+          title: 'Instalar o Liiiraa Boost',
+        },
+        {
+          action: 'Preparar uma partida',
+          group: 'Comece por aqui',
+          href: `/${locale}/docs/current/articles/prepare-session`,
+          id: 'prepare',
+          keywords: 'preparar partida jogo sessão preflight',
+          summary: 'Organize jogo, dependências e recuperação antes de qualquer ajuste.',
+          title: 'Preparar uma sessão de jogo',
+        },
+        {
+          action: 'Entender o modo',
+          group: 'Melhore com evidência',
+          href: `/${locale}/product#competitive-mode`,
+          id: 'competitive',
+          keywords: 'modo competitivo competitive mode premium jogo automático perfil',
+          summary: 'Veja o que o modo pago faz antes, durante e depois de uma partida.',
+          title: 'Usar o Modo Competitivo',
+        },
+        {
+          action: 'Medir uma linha de base',
+          group: 'Melhore com evidência',
+          href: `/${locale}/docs/current/articles/measure-baseline`,
+          id: 'benchmark',
+          keywords: 'benchmark medir medição fps frametime linha de base comparar resultado',
+          summary: 'Crie uma comparação válida antes de concluir que houve ganho.',
+          title: 'Medir e comparar desempenho',
+        },
+        {
+          action: 'Revisar o plano',
+          group: 'Melhore com evidência',
+          href: `/${locale}/docs/current/articles/review-optimization`,
+          id: 'optimize',
+          keywords: 'otimizar otimização plano risco evidência compatibilidade',
+          summary: 'Entenda impacto, compatibilidade e reversão antes de aplicar.',
+          title: 'Revisar uma otimização',
+        },
+        {
+          action: 'Abrir recuperação',
+          group: 'Mantenha o controle',
+          href: `/${locale}/docs/current/articles/restore-plan`,
+          id: 'restore',
+          keywords: 'restaurar desfazer rollback snapshot recuperação plano',
+          summary: 'Volte ao último estado verificado usando recibo e snapshot corretos.',
+          title: 'Restaurar alterações',
+        },
+        {
+          action: 'Ver requisitos',
+          group: 'Mantenha o controle',
+          href: `/${locale}/compatibility`,
+          id: 'device',
+          keywords: 'dispositivo pc hwid windows compatibilidade requisitos hardware',
+          summary: 'Confirme Windows, arquitetura e limites do PC antes de instalar.',
+          title: 'Verificar PC e dispositivo',
+        },
+        {
+          action: 'Revisar privacidade',
+          group: 'Mantenha o controle',
+          href: `/${locale}/policies/privacy`,
+          id: 'privacy',
+          keywords: 'privacidade dados telemetria consentimento excluir exportar',
+          summary: 'Entenda o modelo local-first e quais escolhas permanecem suas.',
+          title: 'Controlar dados e privacidade',
+        },
+        {
+          action: 'Ver canais e updates',
+          group: 'Mantenha o controle',
+          href: `/${locale}/releases`,
+          id: 'updates',
+          keywords: 'atualizar atualização update stable beta canal release versão',
+          summary: 'Conheça Stable, Beta, validação e como as atualizações serão instaladas.',
+          title: 'Atualizar o aplicativo',
+        },
+        {
+          action: 'Diagnosticar com segurança',
+          group: 'Resolva um problema',
+          href: `/${locale}/docs/current/troubleshooting/lb-err-0x80070005`,
+          id: 'errors',
+          keywords: 'erro código lb-err 0x80070005 suporte diagnosticar acesso negado',
+          summary: 'Use o código observado para seguir apenas etapas seguras e reversíveis.',
+          title: 'Resolver um código de erro',
+        },
+      ]
+    : [
+        {
+          action: 'Start safely',
+          group: 'Start here',
+          href: `/${locale}/docs/current/articles/getting-started`,
+          id: 'install',
+          keywords: 'install download windows start getting started',
+          summary: 'Check Windows, use the official source, and prepare the first launch.',
+          title: 'Install Liiiraa Boost',
+        },
+        {
+          action: 'Prepare a game',
+          group: 'Start here',
+          href: `/${locale}/docs/current/articles/prepare-session`,
+          id: 'prepare',
+          keywords: 'prepare game session preflight',
+          summary: 'Set up the game, dependencies, and recovery before any change.',
+          title: 'Prepare a gaming session',
+        },
+        {
+          action: 'Understand the mode',
+          group: 'Improve with evidence',
+          href: `/${locale}/product#competitive-mode`,
+          id: 'competitive',
+          keywords: 'competitive mode premium game automatic profile',
+          summary: 'See what the paid mode does before, during, and after a game.',
+          title: 'Use Competitive Mode',
+        },
+        {
+          action: 'Measure a baseline',
+          group: 'Improve with evidence',
+          href: `/${locale}/docs/current/articles/measure-baseline`,
+          id: 'benchmark',
+          keywords: 'benchmark measure fps frametime baseline compare results',
+          summary: 'Build a valid comparison before concluding that performance improved.',
+          title: 'Measure and compare performance',
+        },
+        {
+          action: 'Review the plan',
+          group: 'Improve with evidence',
+          href: `/${locale}/docs/current/articles/review-optimization`,
+          id: 'optimize',
+          keywords: 'optimize optimization plan risk evidence compatibility',
+          summary: 'Understand impact, compatibility, and rollback before applying.',
+          title: 'Review an optimization',
+        },
+        {
+          action: 'Open recovery',
+          group: 'Stay in control',
+          href: `/${locale}/docs/current/articles/restore-plan`,
+          id: 'restore',
+          keywords: 'restore undo rollback snapshot recovery plan',
+          summary: 'Return to the last verified state with the correct receipt and snapshot.',
+          title: 'Restore changes',
+        },
+        {
+          action: 'View requirements',
+          group: 'Stay in control',
+          href: `/${locale}/compatibility`,
+          id: 'device',
+          keywords: 'device pc hwid windows compatibility requirements hardware',
+          summary: 'Confirm Windows, architecture, and PC limits before installing.',
+          title: 'Check PC and device support',
+        },
+        {
+          action: 'Review privacy',
+          group: 'Stay in control',
+          href: `/${locale}/policies/privacy`,
+          id: 'privacy',
+          keywords: 'privacy data telemetry consent delete export',
+          summary: 'Understand the local-first model and which choices remain yours.',
+          title: 'Control data and privacy',
+        },
+        {
+          action: 'View channels and updates',
+          group: 'Stay in control',
+          href: `/${locale}/releases`,
+          id: 'updates',
+          keywords: 'update stable beta channel release version',
+          summary: 'Learn about Stable, Beta, validation, and how updates will install.',
+          title: 'Update the application',
+        },
+        {
+          action: 'Diagnose safely',
+          group: 'Solve a problem',
+          href: `/${locale}/docs/current/troubleshooting/lb-err-0x80070005`,
+          id: 'errors',
+          keywords: 'error code lb-err 0x80070005 support diagnose access denied',
+          summary: 'Use the observed code to follow only safe, reversible steps.',
+          title: 'Resolve an error code',
+        },
+      ];
 
 const firstSearchValue = (value: SearchValue): string =>
   (typeof value === 'string' ? value : (value?.[0] ?? '')).trim();
@@ -726,15 +923,29 @@ const SearchResults = ({
     query,
     filters: searchFilters(locale, version, channel, searchParams),
   });
+  const normalizedQuery = query.toLocaleLowerCase(locale);
+  const pathResults = helpPathsFor(locale).filter((path) =>
+    `${path.title} ${path.summary} ${path.keywords}`
+      .toLocaleLowerCase(locale)
+      .includes(normalizedQuery),
+  );
+  const resultCount = response.results.length + pathResults.length;
   return (
     <section aria-labelledby="documentation-results-title" aria-live="polite">
       <h2 id="documentation-results-title">
-        {copy.results}: {response.results.length}
+        {copy.results}: {resultCount}
       </h2>
-      {response.state === 'no-results' ? (
+      {response.state === 'no-results' && pathResults.length === 0 ? (
         <EmptyComposition description={copy.empty} />
       ) : (
         <ol className="lb-web-documentation-index">
+          {pathResults.map((result) => (
+            <li data-result-kind="help-path" key={result.id}>
+              <a href={result.href}>{result.title}</a>
+              <p>{result.summary}</p>
+              <small>{result.group}</small>
+            </li>
+          ))}
           {response.results.map((result) => (
             <li key={`${result.document.identity.version}:${result.document.identity.slug}`}>
               <a href={relativeHref(result.href)}>{result.document.title}</a>
@@ -954,6 +1165,8 @@ const DocumentationIndexView = ({
     domain === undefined ? true : item.domain === domain,
   );
   const taskItems = domain === undefined ? items.slice(0, 5) : items;
+  const helpPaths = helpPathsFor(locale);
+  const helpGroups = [...new Set(helpPaths.map((path) => path.group))];
   return (
     <div className="lb-web-product-frame">
       <DocumentationNavigation locale={locale} version={version} />
@@ -974,15 +1187,38 @@ const DocumentationIndexView = ({
           <h2 id="documentation-task-index-title">
             {domain === undefined ? copy.chooseTask : domainLabel(locale, domain)}
           </h2>
-          <ol className="lb-web-documentation-index">
-            {taskItems.map((item) => (
-              <li className="documentation-task-card" key={item.id}>
-                <a href={item.href}>{item.label}</a>
-                <p>{item.summary}</p>
-                <small>{domainLabel(locale, item.domain)}</small>
-              </li>
-            ))}
-          </ol>
+          {domain === undefined ? (
+            <div className="documentation-help-paths">
+              {helpGroups.map((group, groupIndex) => (
+                <section aria-labelledby={`help-group-${String(groupIndex)}`} key={group}>
+                  <h3 id={`help-group-${String(groupIndex)}`}>{group}</h3>
+                  <ul>
+                    {helpPaths
+                      .filter((path) => path.group === group)
+                      .map((path) => (
+                        <li key={path.id}>
+                          <div>
+                            <a href={path.href}>{path.title}</a>
+                            <p>{path.summary}</p>
+                          </div>
+                          <span aria-hidden="true">{path.action} →</span>
+                        </li>
+                      ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <ol className="lb-web-documentation-index">
+              {taskItems.map((item) => (
+                <li className="documentation-task-card" key={item.id}>
+                  <a href={item.href}>{item.label}</a>
+                  <p>{item.summary}</p>
+                  <small>{domainLabel(locale, item.domain)}</small>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
       </article>
     </div>
