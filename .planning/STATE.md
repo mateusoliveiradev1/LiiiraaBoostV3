@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
 status: executing
-stopped_at: Completed 03-70-PLAN.md
-last_updated: "2026-08-03T03:44:10.353Z"
+stopped_at: Completed 03-71-PLAN.md
+last_updated: "2026-08-03T04:09:43.715Z"
 last_activity: 2026-08-03
 last_activity_desc: Public documentation, distribution guidance, service routes, policies, and recovery completed
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 130
-  completed_plans: 126
+  completed_plans: 127
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 70 of 72
+Plan: 71 of 72
 Status: 03-69 complete; ready for Plan 03-70 authentication, onboarding, and account experience
 Last activity: 2026-08-03 — Public documentation, distribution guidance, service routes, policies, and recovery completed
 
@@ -174,6 +174,7 @@ _Updated after plan completion_
 | Phase 03 P68 | 31min | 3 tasks | 10 files |
 | Phase 03 P69 | 31min | 3 tasks | 19 files |
 | Phase 03 P70 | 28min | 3 tasks | 19 files |
+| Phase 03 P71 | 38min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -517,6 +518,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Accept all five admin candidates after correction-cycle original-resolution inspection. — Fresh W14, W15, W16, and G07 close internal Phase copy, PT-BR localization, and mobile high-risk control blockers; unchanged G06 retains its passing integrity.
 - [Phase 03]: Accept the 03-66 aggregate only after both repaired owner gates pass in the full workspace replay. — The final replay passed 49 workspace tasks and 46 architecture tests without weakening either gate.
 - [Phase 03]: Preserve all 25 candidates as unapproved and unpublished. — Plan 03-45 retains human review authority and Plan 03-46 retains publication authority.
+- [Phase 03]: Keep isolated-origin and protected-session detail inside the operator menu instead of a permanent preview warning band. — Security context remains discoverable without displacing the operator's current task or making the application look like an internal preview.
 
 ### Pending Todos
 
@@ -559,6 +561,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-03T03:44:10.347Z
-Stopped at: Completed 03-70-PLAN.md
+Last session: 2026-08-03T04:09:43.708Z
+Stopped at: Completed 03-71-PLAN.md
 Resume file: None
