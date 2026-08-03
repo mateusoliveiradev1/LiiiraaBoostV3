@@ -3,14 +3,14 @@ status: testing
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-03T15:30:00-03:00
+updated: 2026-08-03T18:56:26-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[awaiting renewed human review — Plan 03-82 completed final QA over the 464-route candidate matrix and refreshed the 25 legacy continuity candidates; all candidates remain unapproved and Plan 03-46 remains blocked]
+[awaiting renewed human review — quick 260803-n0d completed the final bilingual legal/trust experience, split Essential Storage and Principles into canonical routes, and rebound the complete 480-candidate matrix; all candidates remain unapproved and Plan 03-46 remains blocked]
 
 ## Plan 03-45 Preflight
 
@@ -213,6 +213,56 @@ The original-resolution launch-readiness inspection at `visuals/candidate-inspec
 - Preserve all earlier issue reports until the reviewer explicitly accepts the renewed result. No automated pass rewrites or erases those historical verdicts.
 
 Approval boundary: Plan 03-82 does not create `03-45-SUMMARY.md`, approve any candidate, mutate publication artifacts, promote a bundle, or execute Plan 03-46. A later literal human verdict must decide the current packet.
+
+## Quick 260803-n0d Legal, Trust, Documentation, and Principles Remediation
+
+date: 2026-08-03T18:56:26-03:00
+reviewer verdict: rejected then remediated — the reviewer reported generic draft-like legal copy, duplicate Storage/Privacy destinations, a broken Quick Guides label, and a Principles destination that still behaved like Our Story. During live review, the first independent Principles route rendered with catastrophic column overlap. None of those reports grants visual or publication approval.
+
+reported:
+
+- "os termos ainda muito generico ... para deixaar claro eu autorizo a vc a fazer os textos finais use um agente de direito"
+- "a rota de principios mostra a rota de nossa historia ainda ?"
+- Screenshot evidence showed `/pt-BR/principles` with four compressed, overlapping columns.
+
+### Remediation delivered
+
+- A dedicated legal research/writing agent produced complete PT-BR and English pre-launch Terms, Privacy, Security, Essential Storage, and Responsible Disclosure documents from official LGPD/ANPD, Marco Civil, consumer, GDPR/EDPB, CISA/CERT, and ISO disclosure sources.
+- Every draft/review banner was removed. No entity, CNPJ/registration, address, forum, processor, certification, audit, bounty, security guarantee, or SLA was invented.
+- Essential Storage now owns `/[locale]/policies/essential-storage`; it no longer aliases Privacy.
+- Principles now owns `/[locale]/principles`; Our Story remains `/[locale]/about`.
+- The broken Principles grid received a dedicated two-column wide composition and one-column reflow below 960px, with overlap sentinels at 1440, 960, 390, and 320.
+- Quick Guides wrapping, focus, and 44px target geometry were corrected.
+- The fail-closed admission contract now fixes `kind -> routeId`, section order/IDs, PT-BR/English parity, temporal status, and evidence provenance for all 488 legal claims.
+
+### Renewed canonical packet
+
+| Dimension | Bound result |
+| --- | --- |
+| Canonical routes | 60 |
+| Total candidates | 480 original-resolution PNGs |
+| Locales | 240 PT-BR and 240 English candidates |
+| Widths | 120 each at 1440, 960, 390, and 320 CSS pixels |
+| Surfaces | 264 public, 128 account, and 88 admin candidates |
+| States | 384 ready and 96 error-state candidates |
+| Legal provenance | 244 claims per locale, 488/488 covered |
+| Candidate integrity | 480 manifest records and 480 inspections; zero hash, byte, dimension, route, locale, width, state, or approval divergence |
+| Evidence fingerprint | `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e` |
+| Approval boundary | `status: pending-human-approval`, `humanApproved: false`, `publicationApproved: false` |
+
+### Independent verification
+
+- Quick verifier: PASS, 6/6 must-haves.
+- Controlled public candidate recapture: 264/264 passed.
+- Exact no-update public replay: 264/264 passed.
+- Integrated route/browser matrix: 268 passed, 20 non-applicable skips, zero failures.
+- `@liiiraa/web-core`: 112/112; `@liiiraa/web`: 125/125; web-evidence: 151/151 plus one intentional skip.
+- Documentation Playwright: 3/3; Principles geometry/reflow: 4/4 widths.
+- Planned phase verifier: 110 decisions, 60 routes, 24 observed route outcomes, 18 scenarios.
+
+### Publication boundary
+
+The documents are final public-facing pre-launch copy, but are not approved as policies currently in force. Plan 03-46 must still verify the formal supplier/controller identity, required registration/address details, real processors/transfers/retention, affirmative acceptance and commercial conditions, and provisioned/authenticated/monitored contact channels. This remediation does not create checkout, data collection, backend authority, email delivery, legal approval, candidate approval, or publication authority.
 
 ## Tests
 
