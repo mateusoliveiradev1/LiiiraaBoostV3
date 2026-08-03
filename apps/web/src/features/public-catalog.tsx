@@ -3,6 +3,8 @@ import type { WebLocale, WebRouteId } from '@liiiraa/web-core';
 
 import catalogEnJson from '../content/public/catalog.en.json';
 import catalogPtBrJson from '../content/public/catalog.pt-BR.json';
+import policyClaimsEnJson from '../content/public/policy-claims.en.json';
+import policyClaimsPtBrJson from '../content/public/policy-claims.pt-BR.json';
 import policiesEnJson from '../content/public/policies.en.json';
 import policiesPtBrJson from '../content/public/policies.pt-BR.json';
 import { accountBoundaryHref, publicBoundaryHref } from '../public-boundary';
@@ -160,6 +162,20 @@ export type PublicPolicies = Readonly<{
   schemaVersion: 1;
   locale: WebLocale;
   lastReviewedAt: string;
+  reviewedAt: string;
+  reviewScope: string;
+  evidenceSources: readonly Readonly<{
+    id: string;
+    reference: string;
+    scope: string;
+  }>[];
+  claims: readonly Readonly<{
+    id: string;
+    location: string;
+    statement: string;
+    temporal: 'current' | 'future';
+    evidenceIds: readonly string[];
+  }>[];
   documents: readonly PolicyVersion[];
   disclosure: Readonly<{
     routeId: WebRouteId;
@@ -232,6 +248,75 @@ const POLICY_ROUTE_IDS = Object.freeze([
 
 const POLICY_KINDS = Object.freeze(['privacy', 'terms', 'storage', 'security'] as const);
 
+const POLICY_DOCUMENT_CONTRACT = Object.freeze({
+  privacy: Object.freeze({
+    routeId: 'public-privacy-policy',
+    sectionIds: Object.freeze([
+      'scope-and-local-first',
+      'roles-and-contact',
+      'consent-controls',
+      'retention-and-deletion',
+      'security-and-incidents',
+      'children',
+      'rights-and-complaints',
+      'changes',
+    ]),
+  }),
+  terms: Object.freeze({
+    routeId: 'public-terms',
+    sectionIds: Object.freeze([
+      'acceptance-and-provider',
+      'eligibility-and-authority',
+      'license-and-ownership',
+      'free-and-premium',
+      'device-license',
+      'optimization-and-recovery',
+      'compatibility-and-results',
+      'prohibited-use',
+      'downloads-and-updates',
+      'prices-and-payment',
+      'cancellation-and-refund',
+      'offline-and-availability',
+      'third-parties',
+      'liability-and-consumer-rights',
+      'contact-and-disputes',
+    ]),
+  }),
+  storage: Object.freeze({
+    routeId: 'public-essential-storage',
+    sectionIds: Object.freeze([
+      'what-storage-means',
+      'current-essential-items',
+      'purpose-and-basis',
+      'duration-and-access',
+      'optional-storage',
+      'browser-controls',
+      'no-performative-banner',
+      'updates-and-contact',
+    ]),
+  }),
+  security: Object.freeze({
+    routeId: 'public-policies',
+    sectionIds: Object.freeze([
+      'trust-model',
+      'privilege-boundary',
+      'change-safety',
+      'artifact-chain',
+      'account-device-admin',
+      'data-and-secrets',
+      'secure-development',
+      'user-responsibility',
+      'disclosure-and-incidents',
+      'assurance-boundary',
+    ]),
+  }),
+} as const satisfies Readonly<
+  Record<
+    (typeof POLICY_KINDS)[number],
+    Readonly<{ routeId: WebRouteId; sectionIds: readonly string[] }>
+  >
+>);
+
 const PRIVACY_PRACTICE_IDS = Object.freeze([
   'public-site-delivery',
   'account-and-subscription',
@@ -259,7 +344,69 @@ const hasExactStrings = (candidate: readonly string[], expected: readonly string
   candidate.length === expected.length && expected.every((value) => candidate.includes(value));
 
 const hasUniqueNonEmptyStrings = (candidate: readonly string[]): boolean =>
-  candidate.every((value) => value.trim().length > 0) && new Set(candidate).size === candidate.length;
+  candidate.every((value) => value.trim().length > 0) &&
+  new Set(candidate).size === candidate.length;
+
+const FUTURE_CLAIM_PATTERN =
+  /\b(?:before|if|may|shall|will|would|when|after preflight|antes|ap[oó]s o preflight|caso|dever[aá]|dever[aã]o|estar[aá]|estar[aã]o|exigir[aá]|exigir[aã]o|far[aá]|far[aã]o|haver[aá]|poder[aá]|poder[aã]o|receber[aá]|receber[aã]o|ser[aá]|ser[aã]o|ter[aá]|ter[aã]o)\b/iu;
+
+const splitPolicySentences = (value: string): readonly string[] =>
+  value
+    .trim()
+    .split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ])/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+
+const collectPolicyNarratives = (
+  policies: Pick<PublicPolicies, 'documents' | 'disclosure'>,
+): readonly Readonly<{ id: string; location: string; statement: string }>[] => {
+  const narratives: Array<readonly [string, string]> = [];
+  for (const document of policies.documents) {
+    narratives.push([`document:${document.kind}:summary`, document.summary]);
+    for (const section of document.sections) {
+      narratives.push([`document:${document.kind}:section:${section.id}`, section.body]);
+    }
+    if (document.kind !== 'privacy' || document.privacyDetails === undefined) continue;
+    const details = document.privacyDetails;
+    narratives.push([
+      'document:privacy:controller:formal-identity',
+      details.controller.formalIdentityStatus,
+    ]);
+    for (const practice of details.practices) {
+      for (const field of [
+        'purpose',
+        'data',
+        'legalBasis',
+        'retention',
+        'sharing',
+        'revocation',
+      ] as const) {
+        narratives.push([`document:privacy:practice:${practice.id}:${field}`, practice[field]]);
+      }
+    }
+    narratives.push(['document:privacy:processors', details.processors]);
+    narratives.push(['document:privacy:international-transfers', details.internationalTransfers]);
+    details.rights.forEach((right, index) => {
+      narratives.push([`document:privacy:right:${String(index + 1)}`, right]);
+    });
+  }
+  narratives.push(['disclosure:summary', policies.disclosure.summary]);
+  narratives.push(['disclosure:response', policies.disclosure.response]);
+  policies.disclosure.scope.forEach((entry, index) => {
+    narratives.push([`disclosure:scope:${String(index + 1)}`, entry]);
+  });
+  policies.disclosure.prohibitedContent.forEach((entry, index) => {
+    narratives.push([`disclosure:prohibited:${String(index + 1)}`, entry]);
+  });
+
+  return narratives.flatMap(([location, value]) =>
+    splitPolicySentences(value).map((statement, index) => ({
+      location,
+      statement,
+      id: `${location}:${String(index + 1)}`,
+    })),
+  );
+};
 
 const admitCatalog = (candidate: unknown, locale: WebLocale): PublicCatalog => {
   if (
@@ -342,6 +489,10 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
     candidate['schemaVersion'] !== 1 ||
     candidate['locale'] !== locale ||
     !isNonEmptyString(candidate['lastReviewedAt']) ||
+    !isNonEmptyString(candidate['reviewedAt']) ||
+    !isNonEmptyString(candidate['reviewScope']) ||
+    !Array.isArray(candidate['evidenceSources']) ||
+    !Array.isArray(candidate['claims']) ||
     !Array.isArray(candidate['documents']) ||
     !isRecord(candidate['disclosure']) ||
     !isRecord(candidate['status'])
@@ -387,6 +538,19 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
     const sectionIds = value['sections'].map((section) =>
       isRecord(section) && isNonEmptyString(section['id']) ? section['id'] : '',
     );
+    const documentContract =
+      POLICY_DOCUMENT_CONTRACT[value['kind'] as (typeof POLICY_KINDS)[number]];
+    if (
+      value['routeId'] !== documentContract.routeId ||
+      sectionIds.length !== documentContract.sectionIds.length ||
+      !sectionIds.every(
+        (sectionId, sectionIndex) => sectionId === documentContract.sectionIds[sectionIndex],
+      )
+    ) {
+      const reason =
+        value['routeId'] !== documentContract.routeId ? 'kind-route' : 'section-contract';
+      throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:${reason}:${String(value['kind'])}`);
+    }
     const latestHistory = value['history'].at(-1);
     if (
       !hasUniqueNonEmptyStrings(sectionIds) ||
@@ -454,12 +618,16 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
     !hasExactStrings(routeIds, POLICY_ROUTE_IDS) ||
     !hasExactStrings(kinds, POLICY_KINDS) ||
     candidate['disclosure']['routeId'] !== 'public-responsible-disclosure' ||
+    !isNonEmptyString(candidate['disclosure']['title']) ||
+    !isNonEmptyString(candidate['disclosure']['summary']) ||
     !isNonEmptyString(candidate['disclosure']['coordinationContact']) ||
     candidate['disclosure']['coordinationStatus'] !== 'preflight-required' ||
     !isNonEmptyString(candidate['disclosure']['version']) ||
     !isNonEmptyString(candidate['disclosure']['effectiveDate']) ||
     !Array.isArray(candidate['disclosure']['scope']) ||
+    !candidate['disclosure']['scope'].every(isNonEmptyString) ||
     !Array.isArray(candidate['disclosure']['prohibitedContent']) ||
+    !candidate['disclosure']['prohibitedContent'].every(isNonEmptyString) ||
     !isNonEmptyString(candidate['disclosure']['response']) ||
     !Array.isArray(candidate['disclosure']['history']) ||
     candidate['status']['routeId'] !== 'public-status' ||
@@ -469,7 +637,83 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
     throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:route-parity`);
   }
 
-  return candidate as unknown as PublicPolicies;
+  const admitted = candidate as unknown as PublicPolicies;
+  const evidenceSourceIds = admitted.evidenceSources.map(({ id }) => id);
+  if (
+    !hasUniqueNonEmptyStrings(evidenceSourceIds) ||
+    !admitted.evidenceSources.every(
+      ({ reference, scope }) => isNonEmptyString(reference) && isNonEmptyString(scope),
+    )
+  ) {
+    throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-evidence-sources`);
+  }
+
+  const expectedClaims = collectPolicyNarratives(admitted);
+  if (
+    admitted.claims.length !== expectedClaims.length ||
+    !admitted.claims.every(
+      (claim, index) =>
+        claim.id === expectedClaims[index]?.id &&
+        claim.location === expectedClaims[index]?.location &&
+        claim.statement === expectedClaims[index]?.statement,
+    )
+  ) {
+    throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-coverage`);
+  }
+
+  const evidenceSourceIdSet = new Set(evidenceSourceIds);
+  for (const claim of admitted.claims) {
+    const hasFutureGate = claim.evidenceIds.includes('TEMPORAL-FUTURE-GATE');
+    if (
+      claim.evidenceIds.length === 0 ||
+      !hasUniqueNonEmptyStrings(claim.evidenceIds) ||
+      !claim.evidenceIds.every((evidenceId) => evidenceSourceIdSet.has(evidenceId))
+    ) {
+      throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-evidence:${claim.id}`);
+    }
+    if (
+      (claim.temporal !== 'current' && claim.temporal !== 'future') ||
+      (claim.temporal === 'future') !== hasFutureGate ||
+      (claim.temporal === 'current' && FUTURE_CLAIM_PATTERN.test(claim.statement))
+    ) {
+      throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-temporal:${claim.id}`);
+    }
+  }
+
+  return admitted;
+};
+
+export const admitPolicyPair = (
+  englishCandidate: unknown,
+  portugueseCandidate: unknown,
+): Readonly<{ en: PublicPolicies; 'pt-BR': PublicPolicies }> => {
+  const en = admitPolicies(englishCandidate, 'en');
+  const ptBr = admitPolicies(portugueseCandidate, 'pt-BR');
+  const documentStructure = (policies: PublicPolicies) =>
+    policies.documents.map((document) => ({
+      kind: document.kind,
+      routeId: document.routeId,
+      sectionIds: document.sections.map(({ id }) => id),
+      practiceIds: document.privacyDetails?.practices.map(({ id }) => id) ?? [],
+    }));
+  const claimStructure = (policies: PublicPolicies) =>
+    policies.claims.map(({ evidenceIds, id, location, temporal }) => ({
+      id,
+      location,
+      temporal,
+      evidenceIds,
+    }));
+
+  if (
+    JSON.stringify(documentStructure(en)) !== JSON.stringify(documentStructure(ptBr)) ||
+    JSON.stringify(claimStructure(en)) !== JSON.stringify(claimStructure(ptBr)) ||
+    JSON.stringify(en.evidenceSources.map(({ id }) => id)) !==
+      JSON.stringify(ptBr.evidenceSources.map(({ id }) => id))
+  ) {
+    throw new Error('PUBLIC_POLICIES_INVALID:locale-parity');
+  }
+
+  return Object.freeze({ en, 'pt-BR': ptBr });
 };
 
 const CATALOGS = Object.freeze({
@@ -477,10 +721,10 @@ const CATALOGS = Object.freeze({
   'pt-BR': admitCatalog(catalogPtBrJson, 'pt-BR'),
 });
 
-const POLICIES = Object.freeze({
-  en: admitPolicies(policiesEnJson, 'en'),
-  'pt-BR': admitPolicies(policiesPtBrJson, 'pt-BR'),
-});
+const POLICIES = admitPolicyPair(
+  { ...policiesEnJson, ...policyClaimsEnJson },
+  { ...policiesPtBrJson, ...policyClaimsPtBrJson },
+);
 
 const statusStateLabel = (
   locale: WebLocale,

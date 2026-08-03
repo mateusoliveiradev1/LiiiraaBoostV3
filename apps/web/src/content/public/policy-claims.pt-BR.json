@@ -1,0 +1,2022 @@
+{
+  "schemaVersion": 1,
+  "locale": "pt-BR",
+  "reviewedAt": "2026-08-03",
+  "reviewScope": "Every narrative sentence in Privacy, Terms, Essential Storage, Security, and Responsible Disclosure",
+  "evidenceSources": [
+    {
+      "id": "PHASE3-D90",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-90",
+      "scope": "Free Essential Mode, local operation, history, and restoration"
+    },
+    {
+      "id": "PHASE3-D92",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-92",
+      "scope": "launch pricing, payment methods, cancellation, and refund decision"
+    },
+    {
+      "id": "PHASE3-D93",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-93",
+      "scope": "device identity, reset window, offline period, and Premium fallback"
+    },
+    {
+      "id": "PHASE3-D94",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-94",
+      "scope": "support priority and response expectations"
+    },
+    {
+      "id": "PHASE3-D95",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-95",
+      "scope": "local-first data, optional telemetry, diagnostics, and cloud AI"
+    },
+    {
+      "id": "PHASE3-D96",
+      "reference": ".planning/phases/03-complete-web-experience/03-CONTEXT.md#D-96",
+      "scope": "web and desktop responsibility boundary"
+    },
+    {
+      "id": "PROJECT-CONSTRAINTS",
+      "reference": ".planning/PROJECT.md",
+      "scope": "product, platform, security, privacy, accessibility, and commercial constraints"
+    },
+    {
+      "id": "STACK-SECURITY",
+      "reference": ".planning/research/STACK.md",
+      "scope": "approved security, signing, update, isolation, and local-first architecture"
+    },
+    {
+      "id": "PLAN-03-46-PREFLIGHT",
+      "reference": ".planning/phases/03-complete-web-experience/03-46-PLAN.md",
+      "scope": "publication, provider identity, contact, artifact, and evidence preflight"
+    },
+    {
+      "id": "TEMPORAL-FUTURE-GATE",
+      "reference": ".planning/ROADMAP.md",
+      "scope": "explicit marker that the linked assertion describes a gated future capability"
+    },
+    {
+      "id": "LAW-LGPD",
+      "reference": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm",
+      "scope": "Brazilian data protection principles, transparency, rights, security, and transfers"
+    },
+    {
+      "id": "LAW-CDC",
+      "reference": "https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm",
+      "scope": "consumer information, offers, withdrawal, warranties, and mandatory remedies"
+    },
+    {
+      "id": "LAW-ECOMMERCE-BR",
+      "reference": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7962.htm",
+      "scope": "supplier identification, checkout information, support, and withdrawal"
+    },
+    {
+      "id": "GUIDE-ANPD-COOKIES",
+      "reference": "https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/guia-orientativo-cookies-e-protecao-de-dados-pessoais.pdf/view",
+      "scope": "necessary storage, optional cookies, consent, rejection, and withdrawal"
+    },
+    {
+      "id": "LAW-GDPR",
+      "reference": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+      "scope": "international privacy transparency, rights, security, and transfers"
+    },
+    {
+      "id": "GUIDE-CISA-VDP",
+      "reference": "https://www.cisa.gov/resources-tools/resources/vulnerability-disclosure-policy-template",
+      "scope": "responsible disclosure scope, safe testing, reporting, and coordination"
+    }
+  ],
+  "claims": [
+    {
+      "id": "document:privacy:summary:1",
+      "location": "document:privacy:summary",
+      "statement": "Esta política explica como o Liiiraa Boost trata dados no site, na conta e no aplicativo para Windows, o que permanece somente no PC e quais recursos dependem da sua escolha.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:scope-and-local-first:1",
+      "location": "document:privacy:section:scope-and-local-first",
+      "statement": "Esta política cobre o site, a futura conta, a licença de dispositivo e o aplicativo Liiiraa Boost para Windows 10/11.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:scope-and-local-first:2",
+      "location": "document:privacy:section:scope-and-local-first",
+      "statement": "A web não faz análise profunda do PC.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:scope-and-local-first:3",
+      "location": "document:privacy:section:scope-and-local-first",
+      "statement": "Diagnósticos, planos, medições, histórico e restauração permanecem locais por padrão; saída do dispositivo exige finalidade informada e, quando opcional, consentimento separado.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:roles-and-contact:1",
+      "location": "document:privacy:section:roles-and-contact",
+      "statement": "Liiiraa Boost é a identidade pública do produto.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:roles-and-contact:2",
+      "location": "document:privacy:section:roles-and-contact",
+      "statement": "A identificação legal completa do controlador será exibida antes de conta, assinatura ou coleta em produção.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:roles-and-contact:3",
+      "location": "document:privacy:section:roles-and-contact",
+      "statement": "Operadores tratam dados apenas conforme instruções e contrato.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:roles-and-contact:4",
+      "location": "document:privacy:section:roles-and-contact",
+      "statement": "Solicitações e dúvidas usam privacy@liiiraa.com; a identidade do solicitante é verificada de modo proporcional antes da entrega de dados.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:consent-controls:1",
+      "location": "document:privacy:section:consent-controls",
+      "statement": "Telemetria, envio de diagnóstico e IA em nuvem permanecem desativados.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:consent-controls:2",
+      "location": "document:privacy:section:consent-controls",
+      "statement": "Se forem ativados, terão escolhas próprias, sem caixas pré-marcadas; recusar ou retirar não removerá o Free, a segurança, a documentação, o histórico ou a restauração.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:consent-controls:3",
+      "location": "document:privacy:section:consent-controls",
+      "statement": "Armazenamento indispensável à página, futura sessão ou segurança é explicado separadamente e não é apresentado como publicidade opcional.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:retention-and-deletion:1",
+      "location": "document:privacy:section:retention-and-deletion",
+      "statement": "O Liiiraa Boost conserva dados apenas enquanto a finalidade, uma obrigação legal, prevenção de fraude, exercício de direitos ou ordem válida justificar.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:retention-and-deletion:2",
+      "location": "document:privacy:section:retention-and-deletion",
+      "statement": "Depois, exclui ou anonimiza com segurança.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:retention-and-deletion:3",
+      "location": "document:privacy:section:retention-and-deletion",
+      "statement": "Backups seguem ciclo limitado e não voltam ao uso comum após pedido de exclusão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:retention-and-deletion:4",
+      "location": "document:privacy:section:retention-and-deletion",
+      "statement": "Dados locais obedecem aos controles do aplicativo e permanecem acessíveis para restauração mesmo após o fim do Premium.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:security-and-incidents:1",
+      "location": "document:privacy:section:security-and-incidents",
+      "statement": "São aplicados minimização, separação de origens, menor privilégio, proteção de credenciais, registro de acesso administrativo, validação de artefatos e redução de segredos em logs.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:security-and-incidents:2",
+      "location": "document:privacy:section:security-and-incidents",
+      "statement": "Nenhum sistema é infalível.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:security-and-incidents:3",
+      "location": "document:privacy:section:security-and-incidents",
+      "statement": "Um incidente relevante será contido, avaliado e comunicado aos titulares e à autoridade quando a lei exigir, com orientação clara de proteção e recuperação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:children:1",
+      "location": "document:privacy:section:children",
+      "statement": "O serviço não é dirigido a crianças ou adolescentes e não busca conscientemente seus dados.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:children:2",
+      "location": "document:privacy:section:children",
+      "statement": "Quem não tiver capacidade legal para contratar ou consentir deve usar o serviço somente com participação do responsável, quando permitido.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:children:3",
+      "location": "document:privacy:section:children",
+      "statement": "Um responsável pode pedir verificação e exclusão pelo canal de privacidade, sempre considerando o melhor interesse do menor.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:rights-and-complaints:1",
+      "location": "document:privacy:section:rights-and-complaints",
+      "statement": "Envie o pedido a privacy@liiiraa.com, descreva o direito e a conta ou contexto relacionado sem incluir senha.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:rights-and-complaints:2",
+      "location": "document:privacy:section:rights-and-complaints",
+      "statement": "O atendimento confirma recebimento, verifica identidade, responde no prazo aplicável e explica eventual limitação legal.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:rights-and-complaints:3",
+      "location": "document:privacy:section:rights-and-complaints",
+      "statement": "Você também pode procurar a ANPD, órgãos de defesa do consumidor ou a autoridade de proteção de dados competente em sua jurisdição.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:changes:1",
+      "location": "document:privacy:section:changes",
+      "statement": "Alterações materiais recebem nova versão, data de vigência, resumo e histórico.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:section:changes:2",
+      "location": "document:privacy:section:changes",
+      "statement": "Se uma mudança criar finalidade opcional, novo destinatário ou condição que dependa de consentimento, ela será apresentada antes da coleta e exigirá nova escolha quando necessário.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:section:changes:3",
+      "location": "document:privacy:section:changes",
+      "statement": "Uma versão antiga nunca autoriza silenciosamente uso incompatível.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:controller:formal-identity:1",
+      "location": "document:privacy:controller:formal-identity",
+      "statement": "Liiiraa Boost é a identidade comercial e de produto responsável por este serviço.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:controller:formal-identity:2",
+      "location": "document:privacy:controller:formal-identity",
+      "statement": "Antes da abertura de contas, assinatura ou outra coleta em produção, esta política e a interface identificarão a pessoa física ou jurídica controladora, seu registro e endereço quando exigidos pela legislação aplicável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:purpose:1",
+      "location": "document:privacy:practice:public-site-delivery:purpose",
+      "statement": "Entregar a página solicitada, manter o idioma escolhido, prevenir abuso e preservar disponibilidade, integridade e segurança do serviço público.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:data:1",
+      "location": "document:privacy:practice:public-site-delivery:data",
+      "statement": "Endereço IP e metadados técnicos que acompanham a solicitação, como data, horário, rota, navegador e sinais de segurança; a preferência de idioma fica no navegador quando armazenada.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:legalBasis:1",
+      "location": "document:privacy:practice:public-site-delivery:legalBasis",
+      "statement": "Execução da solicitação do usuário e legítimo interesse em operar e proteger o serviço, após avaliação de necessidade e equilíbrio; obrigações legais podem exigir registros específicos.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:retention:1",
+      "location": "document:privacy:practice:public-site-delivery:retention",
+      "statement": "A preferência local permanece até ser removida.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:retention:2",
+      "location": "document:privacy:practice:public-site-delivery:retention",
+      "statement": "Registros de acesso à aplicação são mantidos por seis meses quando o art. 15 do Marco Civil se aplicar; fora dessa hipótese, apenas pelo período necessário à segurança, defesa de direitos ou ordem válida.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:sharing:1",
+      "location": "document:privacy:practice:public-site-delivery:sharing",
+      "statement": "Somente com operadores de hospedagem, entrega e proteção efetivamente contratados e identificados antes da produção, limitados por finalidade e confidencialidade; a preferência local não é enviada ao Liiiraa Boost.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:revocation:1",
+      "location": "document:privacy:practice:public-site-delivery:revocation",
+      "statement": "Você pode apagar a preferência no navegador.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:public-site-delivery:revocation:2",
+      "location": "document:privacy:practice:public-site-delivery:revocation",
+      "statement": "O tratamento indispensável à entrega e à segurança não depende de consentimento, mas você pode se opor ao uso baseado em legítimo interesse pelo canal de privacidade.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:purpose:1",
+      "location": "document:privacy:practice:account-and-subscription:purpose",
+      "statement": "Quando conta e cobrança forem ativadas, criar e proteger a conta solicitada, verificar contato, administrar o plano Free ou Premium, registrar escolhas, processar contratação e atender cancelamento, reembolso e suporte financeiro.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:data:1",
+      "location": "document:privacy:practice:account-and-subscription:data",
+      "statement": "Nome exibido, e-mail, credenciais protegidas ou chave pública de passkey, estado da conta, plano, ciclo, moeda, consentimentos e referências da transação; o Liiiraa Boost não precisa armazenar o número completo do cartão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:legalBasis:1",
+      "location": "document:privacy:practice:account-and-subscription:legalBasis",
+      "statement": "Procedimentos a pedido do usuário, execução do contrato, cumprimento de obrigações legais e exercício de direitos; prevenção de fraude e segurança podem usar legítimo interesse com salvaguardas.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:retention:1",
+      "location": "document:privacy:practice:account-and-subscription:retention",
+      "statement": "Enquanto a conta ou assinatura estiver ativa e, depois, somente durante os prazos legais, fiscais, de chargeback, prevenção de fraude e defesa de direitos aplicáveis.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:retention:2",
+      "location": "document:privacy:practice:account-and-subscription:retention",
+      "statement": "Dados sem obrigação de retenção são excluídos ou anonimizados após o encerramento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:sharing:1",
+      "location": "document:privacy:practice:account-and-subscription:sharing",
+      "statement": "Com os operadores de identidade, pagamento, faturamento e atendimento que forem identificados antes da ativação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:sharing:2",
+      "location": "document:privacy:practice:account-and-subscription:sharing",
+      "statement": "Cada um recebe apenas o necessário para sua função e atua sob contrato e controles de acesso.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:revocation:1",
+      "location": "document:privacy:practice:account-and-subscription:revocation",
+      "statement": "Quando a contratação estiver disponível, você poderá cancelar a assinatura, encerrar a conta e exercer os direitos desta política.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:account-and-subscription:revocation:2",
+      "location": "document:privacy:practice:account-and-subscription:revocation",
+      "statement": "Dados necessários ao contrato ou exigidos por lei não dependerão de consentimento e poderão permanecer somente pelo prazo justificável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:purpose:1",
+      "location": "document:privacy:practice:essential-authentication-storage:purpose",
+      "statement": "Quando a autenticação for ativada, manter a sessão solicitada, prevenir falsificação de requisições, aplicar preferências de segurança e permitir encerramento ou revogação confiável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:data:1",
+      "location": "document:privacy:practice:essential-authentication-storage:data",
+      "statement": "A autenticação poderá usar identificadores aleatórios de sessão, proteção anti-CSRF, prazo de expiração e preferências estritamente necessárias; esse armazenamento não deverá guardar senhas, diagnósticos do PC, telemetria opcional ou conteúdo de IA.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:legalBasis:1",
+      "location": "document:privacy:practice:essential-authentication-storage:legalBasis",
+      "statement": "Execução do serviço de conta solicitado e legítimo interesse em proteger usuário e serviço, com minimização e expiração compatíveis com o risco.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:retention:1",
+      "location": "document:privacy:practice:essential-authentication-storage:retention",
+      "statement": "Quando houver sessão, ela terminará na expiração configurada, saída, revogação ou limpeza pelo navegador, prevalecendo o primeiro evento; registros de revogação poderão permanecer pelo período necessário para impedir reutilização ou cumprir obrigação aplicável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:sharing:1",
+      "location": "document:privacy:practice:essential-authentication-storage:sharing",
+      "statement": "O acesso ficará restrito ao serviço de identidade e à origem que precisarem validar a sessão.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:sharing:2",
+      "location": "document:privacy:practice:essential-authentication-storage:sharing",
+      "statement": "Não será usado para publicidade, perfil comportamental ou rastreamento entre sites.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:revocation:1",
+      "location": "document:privacy:practice:essential-authentication-storage:revocation",
+      "statement": "Sair ou limpar o armazenamento encerrará a sessão e poderá exigir nova autenticação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:essential-authentication-storage:revocation:2",
+      "location": "document:privacy:practice:essential-authentication-storage:revocation",
+      "statement": "Como ele será necessário à função solicitada, bloqueá-lo impedirá recursos de conta, mas não o conteúdo público.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:purpose:1",
+      "location": "document:privacy:practice:device-licensing:purpose",
+      "statement": "Vincular uma assinatura Premium a um PC, validar o período offline, aplicar a janela de transferência ou reset e investigar fraude ou exceções legítimas solicitadas ao suporte.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:data:1",
+      "location": "document:privacy:practice:device-licensing:data",
+      "statement": "Quando a licença for ativada, serão usados identificador derivado e protegido do dispositivo, versão do aplicativo, estado e datas da ativação, última validação, janela de reset e histórico auditável da decisão.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:data:2",
+      "location": "document:privacy:practice:device-licensing:data",
+      "statement": "O HWID bruto não é armazenado.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:legalBasis:1",
+      "location": "document:privacy:practice:device-licensing:legalBasis",
+      "statement": "Execução da licença solicitada, prevenção de fraude e segurança do serviço, com necessidade, proporcionalidade e canal de contestação.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:retention:1",
+      "location": "document:privacy:practice:device-licensing:retention",
+      "statement": "Durante a assinatura e pelo período necessário à validação offline, à janela de reset, a contestações e à defesa de direitos; depois disso, o vínculo é eliminado ou convertido em registro não identificável quando permitido.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:sharing:1",
+      "location": "document:privacy:practice:device-licensing:sharing",
+      "statement": "Limitado aos serviços de conta, licença e suporte que precisam confirmar a ativação.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:sharing:2",
+      "location": "document:privacy:practice:device-licensing:sharing",
+      "statement": "O identificador não é vendido, usado para publicidade ou combinado com navegação para criar perfil.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:revocation:1",
+      "location": "document:privacy:practice:device-licensing:revocation",
+      "statement": "Quando conta e licença estiverem ativas, o painel permitirá solicitar transferência ou reset conforme a regra comercial e pedir revisão de exceção legítima.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:device-licensing:revocation:2",
+      "location": "document:privacy:practice:device-licensing:revocation",
+      "statement": "Excluir a conta encerrará futuras validações, respeitados os registros que a lei ou uma disputa exigirem.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:purpose:1",
+      "location": "document:privacy:practice:local-performance-data:purpose",
+      "statement": "Analisar compatibilidade, preparar planos revisáveis, medir resultados, registrar mudanças e permitir restauração no próprio PC, inclusive quando o usuário utiliza o Free.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:data:1",
+      "location": "document:privacy:practice:local-performance-data:data",
+      "statement": "Hardware, Windows, drivers, processos relevantes, jogos selecionados, medições, alterações aplicadas, histórico e pontos de restauração.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:data:2",
+      "location": "document:privacy:practice:local-performance-data:data",
+      "statement": "Arquivos pessoais, senhas e histórico de navegação ficam fora do escopo por padrão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:legalBasis:1",
+      "location": "document:privacy:practice:local-performance-data:legalBasis",
+      "statement": "O processamento ocorre localmente para executar a função expressamente solicitada no dispositivo; o envio à nuvem exige finalidade e condição separadas descritas abaixo.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:retention:1",
+      "location": "document:privacy:practice:local-performance-data:retention",
+      "statement": "Permanece no PC até o usuário apagar o item, limpar o histórico ou desinstalar os dados correspondentes.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:retention:2",
+      "location": "document:privacy:practice:local-performance-data:retention",
+      "statement": "O fim do Premium não bloqueia histórico ou restauração e não transforma esses dados em coleta remota.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:sharing:1",
+      "location": "document:privacy:practice:local-performance-data:sharing",
+      "statement": "Nenhum compartilhamento por padrão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:sharing:2",
+      "location": "document:privacy:practice:local-performance-data:sharing",
+      "statement": "Um resumo só pode chegar à conta ou ao suporte após seleção e autorização explícitas na tela correspondente.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:revocation:1",
+      "location": "document:privacy:practice:local-performance-data:revocation",
+      "statement": "Você controla exclusão, exportação disponível e envio opcional no aplicativo.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:local-performance-data:revocation:2",
+      "location": "document:privacy:practice:local-performance-data:revocation",
+      "statement": "Apagar um ponto de restauração pode retirar a capacidade de reverter aquela mudança, consequência que deve ser mostrada antes da confirmação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:purpose:1",
+      "location": "document:privacy:practice:optional-telemetry:purpose",
+      "statement": "Entender estabilidade, falhas e uso de recursos por métricas proporcionais, vinculadas a uma finalidade mostrada antes da coleta.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:data:1",
+      "location": "document:privacy:practice:optional-telemetry:data",
+      "statement": "Somente eventos e campos listados na tela de consentimento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:data:2",
+      "location": "document:privacy:practice:optional-telemetry:data",
+      "statement": "Arquivos pessoais, senhas, histórico de navegação, conteúdo de suporte e telemetria de alta frequência durante partidas são excluídos por padrão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:legalBasis:1",
+      "location": "document:privacy:practice:optional-telemetry:legalBasis",
+      "statement": "Consentimento prévio, específico, granular e livre.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:legalBasis:2",
+      "location": "document:privacy:practice:optional-telemetry:legalBasis",
+      "statement": "Silêncio, navegação, instalação ou uso de uma função essencial não constituem consentimento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:retention:1",
+      "location": "document:privacy:practice:optional-telemetry:retention",
+      "statement": "Desativada até o lançamento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:retention:2",
+      "location": "document:privacy:practice:optional-telemetry:retention",
+      "statement": "Antes de ativar, a escolha informará o período ou critério de retenção; ao fim da finalidade, os dados serão excluídos ou anonimizados, salvo obrigação legal demonstrável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:sharing:1",
+      "location": "document:privacy:practice:optional-telemetry:sharing",
+      "statement": "Nenhum dado opcional é enviado enquanto a telemetria estiver desativada.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:sharing:2",
+      "location": "document:privacy:practice:optional-telemetry:sharing",
+      "statement": "Operadores, destinos e subprocessadores serão informados antes do consentimento.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:revocation:1",
+      "location": "document:privacy:practice:optional-telemetry:revocation",
+      "statement": "Pode ser recusada ou retirada a qualquer momento sem perder o Free, segurança, histórico, restauração ou documentação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:optional-telemetry:revocation:2",
+      "location": "document:privacy:practice:optional-telemetry:revocation",
+      "statement": "A retirada interrompe novas coletas e abre o caminho de exclusão dos dados identificáveis anteriores.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:purpose:1",
+      "location": "document:privacy:practice:support-diagnostics:purpose",
+      "statement": "Investigar um chamado específico usando apenas o pacote técnico que você revisar e autorizar para aquele atendimento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:data:1",
+      "location": "document:privacy:practice:support-diagnostics:data",
+      "statement": "Versão, ambiente e campos técnicos visíveis na revisão do pacote.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:data:2",
+      "location": "document:privacy:practice:support-diagnostics:data",
+      "statement": "Segredos, credenciais, dados de pagamento, arquivos pessoais e informações sem relação devem ser removidos antes do envio.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:legalBasis:1",
+      "location": "document:privacy:practice:support-diagnostics:legalBasis",
+      "statement": "Consentimento explícito e separado para o pacote escolhido, somado à execução do atendimento solicitado quando aplicável.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:retention:1",
+      "location": "document:privacy:practice:support-diagnostics:retention",
+      "statement": "Pelo período informado no chamado e necessário à investigação, segurança e defesa de direitos; encerrada a finalidade, o pacote é excluído ou anonimizado conforme o cronograma publicado para o suporte.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:sharing:1",
+      "location": "document:privacy:practice:support-diagnostics:sharing",
+      "statement": "Somente com a equipe e os operadores necessários ao chamado, identificados antes do envio e sujeitos a acesso restrito e confidencialidade.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:revocation:1",
+      "location": "document:privacy:practice:support-diagnostics:revocation",
+      "statement": "Cancelar antes do envio descarta o pacote.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:support-diagnostics:revocation:2",
+      "location": "document:privacy:practice:support-diagnostics:revocation",
+      "statement": "Depois do envio, a retirada interrompe novos usos baseados em consentimento e permite pedir exclusão, salvo retenção obrigatória ou necessária à defesa de direitos.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:purpose:1",
+      "location": "document:privacy:practice:personalized-ai:purpose",
+      "statement": "Produzir orientação personalizada com a pergunta e o contexto que o usuário escolher, sem transformar diagnóstico local em treinamento ou processamento oculto.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:data:1",
+      "location": "document:privacy:practice:personalized-ai:data",
+      "statement": "Pergunta, respostas e somente o contexto selecionado na tela.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:data:2",
+      "location": "document:privacy:practice:personalized-ai:data",
+      "statement": "Identidade, diagnóstico completo, histórico e arquivos permanecem excluídos até escolha expressa e específica.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:legalBasis:1",
+      "location": "document:privacy:practice:personalized-ai:legalBasis",
+      "statement": "Consentimento prévio, granular e reversível para a finalidade exibida; o Free, a segurança e a restauração não dependem dessa escolha.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:retention:1",
+      "location": "document:privacy:practice:personalized-ai:retention",
+      "statement": "Desativada até o lançamento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:retention:2",
+      "location": "document:privacy:practice:personalized-ai:retention",
+      "statement": "A tela informará se a solicitação é temporária ou salva no histórico e o prazo aplicável; dados são excluídos ou anonimizados quando a finalidade terminar.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:sharing:1",
+      "location": "document:privacy:practice:personalized-ai:sharing",
+      "statement": "Nenhum provedor recebe dados enquanto a IA em nuvem estiver desativada.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:sharing:2",
+      "location": "document:privacy:practice:personalized-ai:sharing",
+      "statement": "Provedor, localização, finalidade, retenção e uso ou não uso para treinamento serão informados antes do envio.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:revocation:1",
+      "location": "document:privacy:practice:personalized-ai:revocation",
+      "statement": "A retirada interrompe novos envios e personalização futura.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:practice:personalized-ai:revocation:2",
+      "location": "document:privacy:practice:personalized-ai:revocation",
+      "statement": "O usuário poderá excluir conversas e contexto identificável, respeitadas obrigações legais específicas.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:processors:1",
+      "location": "document:privacy:processors",
+      "statement": "Cada operador de hospedagem, identidade, pagamento, suporte, telemetria ou IA será identificado nesta política ou na tela da finalidade antes de receber dados.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:processors:2",
+      "location": "document:privacy:processors",
+      "statement": "Contratos devem limitar instruções, confidencialidade, segurança, retenção, subprocessadores, incidentes e exclusão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:processors:3",
+      "location": "document:privacy:processors",
+      "statement": "Dados estritamente locais não são recebidos por esses operadores.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:international-transfers:1",
+      "location": "document:privacy:international-transfers",
+      "statement": "Dados mantidos somente no PC não são transferidos pelo Liiiraa Boost.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:international-transfers:2",
+      "location": "document:privacy:international-transfers",
+      "statement": "Antes de qualquer processamento internacional, serão informados o destino, o operador, a finalidade e a salvaguarda aplicável, de acordo com os arts. 33 a 36 da LGPD e, quando aplicável, o Capítulo V do GDPR.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:international-transfers:3",
+      "location": "document:privacy:international-transfers",
+      "statement": "O usuário poderá exercer os mesmos direitos pelo canal de privacidade.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:privacy:right:1:1",
+      "location": "document:privacy:right:1",
+      "statement": "Confirmar a existência de tratamento e acessar os dados relacionados a você",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:2:1",
+      "location": "document:privacy:right:2",
+      "statement": "Corrigir dados incompletos, inexatos ou desatualizados",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:3:1",
+      "location": "document:privacy:right:3",
+      "statement": "Pedir anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:4:1",
+      "location": "document:privacy:right:4",
+      "statement": "Solicitar portabilidade quando aplicável e regulamentada, preservados segredos comercial e industrial",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:5:1",
+      "location": "document:privacy:right:5",
+      "statement": "Receber informação sobre compartilhamentos e sobre a possibilidade e as consequências de negar consentimento",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:6:1",
+      "location": "document:privacy:right:6",
+      "statement": "Retirar consentimento com facilidade e solicitar eliminação dos dados tratados nessa base, ressalvadas hipóteses legais de conservação",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:7:1",
+      "location": "document:privacy:right:7",
+      "statement": "Opor-se ao tratamento irregular ou baseado em legítimo interesse e pedir revisão de decisão automatizada que afete seus interesses",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:privacy:right:8:1",
+      "location": "document:privacy:right:8",
+      "statement": "Apresentar reclamação à ANPD, a órgão de defesa do consumidor ou à autoridade competente da sua jurisdição",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "PHASE3-D96", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:terms:summary:1",
+      "location": "document:terms:summary",
+      "statement": "Estes termos regulam o site, a conta e o aplicativo Liiiraa Boost para Windows, incluindo Free e Premium, licença por PC, otimizações, cobrança, atualizações e uso seguro.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:acceptance-and-provider:1",
+      "location": "document:terms:section:acceptance-and-provider",
+      "statement": "Ao navegar, você aceita as regras aplicáveis ao conteúdo público.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:acceptance-and-provider:2",
+      "location": "document:terms:section:acceptance-and-provider",
+      "statement": "Criar conta, instalar o aplicativo ou contratar Premium exigirá aceite específico da versão vigente.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:acceptance-and-provider:3",
+      "location": "document:terms:section:acceptance-and-provider",
+      "statement": "Liiiraa Boost é a identidade comercial do produto; enquanto a pessoa física ou jurídica fornecedora, registro e endereço não estiverem exibidos, não haverá checkout, cobrança nem contrato Premium.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:eligibility-and-authority:1",
+      "location": "document:terms:section:eligibility-and-authority",
+      "statement": "Você deve ter capacidade legal para aceitar estes termos ou participação válida de responsável.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:eligibility-and-authority:2",
+      "location": "document:terms:section:eligibility-and-authority",
+      "statement": "Use o aplicativo apenas em computadores, contas do Windows e jogos que você esteja autorizado a administrar.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:eligibility-and-authority:3",
+      "location": "document:terms:section:eligibility-and-authority",
+      "statement": "Em equipamento de empresa, escola, lan house ou terceiro, obtenha a permissão do responsável e respeite políticas locais antes de analisar ou aplicar mudanças.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:license-and-ownership:1",
+      "location": "document:terms:section:license-and-ownership",
+      "statement": "Enquanto cumprir estes termos, você recebe licença pessoal, limitada, não exclusiva, revogável e intransferível para usar a versão disponibilizada do Liiiraa Boost.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:license-and-ownership:2",
+      "location": "document:terms:section:license-and-ownership",
+      "statement": "O software, marca, interface, documentação e perfis oficiais permanecem protegidos.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:license-and-ownership:3",
+      "location": "document:terms:section:license-and-ownership",
+      "statement": "Não é permitido vender acesso, sublicenciar, remover avisos, copiar elementos protegidos ou fazer engenharia reversa além do que a lei obrigatoriamente autorizar.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:free-and-premium:1",
+      "location": "document:terms:section:free-and-premium",
+      "statement": "O Free é o Modo Essencial, grátis para sempre, sem trial, cartão, anúncios ou limites diários artificiais.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D90"]
+    },
+    {
+      "id": "document:terms:section:free-and-premium:2",
+      "location": "document:terms:section:free-and-premium",
+      "statement": "Inclui diagnóstico e benchmark, otimizações básicas seguras com aplicação manual, um perfil ativo, histórico e restauração.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D90"]
+    },
+    {
+      "id": "document:terms:section:free-and-premium:3",
+      "location": "document:terms:section:free-and-premium",
+      "statement": "O Premium libera Modo Competitivo, calibração por hardware, otimizações avançadas, perfis ilimitados, ativação automática por jogo, comparações avançadas, assistência personalizada e suporte prioritário.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D90"]
+    },
+    {
+      "id": "document:terms:section:free-and-premium:4",
+      "location": "document:terms:section:free-and-premium",
+      "statement": "A comparação completa aparece antes da contratação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D90", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:device-license:1",
+      "location": "document:terms:section:device-license",
+      "statement": "Uma assinatura Premium mantém um PC ativo por vez, vinculado pela conta sem chave digitada.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:device-license:2",
+      "location": "document:terms:section:device-license",
+      "statement": "O identificador é derivado e protegido; o HWID bruto não é armazenado.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:device-license:3",
+      "location": "document:terms:section:device-license",
+      "statement": "Transferência ou reset é normalmente permitido uma vez a cada 30 dias.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:device-license:4",
+      "location": "document:terms:section:device-license",
+      "statement": "Reinstalação e pequenas atualizações não consomem reset; mudança relevante, como placa-mãe, normalmente cria novo dispositivo.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:device-license:5",
+      "location": "document:terms:section:device-license",
+      "statement": "Exceções legítimas podem ser revisadas pelo suporte com confirmação de segurança e registro auditável.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:optimization-and-recovery:1",
+      "location": "document:terms:section:optimization-and-recovery",
+      "statement": "O aplicativo apresenta o plano, impacto, risco e dependências antes de uma mudança persistente.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:optimization-and-recovery:2",
+      "location": "document:terms:section:optimization-and-recovery",
+      "statement": "Você decide o que aplicar, salvo ações temporárias já autorizadas para um perfil automático.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:optimization-and-recovery:3",
+      "location": "document:terms:section:optimization-and-recovery",
+      "statement": "Operações devem ser específicas e reversíveis quando tecnicamente possível; scripts remotos arbitrários não fazem parte do produto.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:optimization-and-recovery:4",
+      "location": "document:terms:section:optimization-and-recovery",
+      "statement": "Histórico e restauração permanecem acessíveis no Free e depois do fim do Premium.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:optimization-and-recovery:5",
+      "location": "document:terms:section:optimization-and-recovery",
+      "statement": "Interromper uma operação, apagar um ponto de restauração ou alterar o Windows por fora pode limitar a reversão.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:compatibility-and-results:1",
+      "location": "document:terms:section:compatibility-and-results",
+      "statement": "O aplicativo é destinado a versões compatíveis do Windows 10/11.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:compatibility-and-results:2",
+      "location": "document:terms:section:compatibility-and-results",
+      "statement": "Hardware, firmware, drivers, antivírus, anti-cheat, jogo e estado do sistema podem limitar uma recomendação.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:compatibility-and-results:3",
+      "location": "document:terms:section:compatibility-and-results",
+      "statement": "Medições e estimativas são identificadas separadamente.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:compatibility-and-results:4",
+      "location": "document:terms:section:compatibility-and-results",
+      "statement": "O Liiiraa Boost não promete FPS, latência, frametime, estabilidade ou economia específicos antes de medir o mesmo PC em condições comparáveis, nem substitui manutenção, backup ou diagnóstico profissional.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:prohibited-use:1",
+      "location": "document:terms:section:prohibited-use",
+      "statement": "Não use o serviço para invadir, fraudar, burlar licença, anti-cheat ou controles de segurança; distribuir malware; executar negação de serviço; interferir em partidas ou terceiros; coletar dados sem autorização; explorar o serviço fora da política de divulgação responsável; ou fornecer acesso à conta.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:prohibited-use:2",
+      "location": "document:terms:section:prohibited-use",
+      "statement": "Podemos bloquear uma ação ou suspender acesso quando houver risco concreto, obrigação legal ou violação, com informação e canal de contestação quando cabíveis.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:downloads-and-updates:1",
+      "location": "document:terms:section:downloads-and-updates",
+      "statement": "Baixe apenas de rota oficial.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:downloads-and-updates:2",
+      "location": "document:terms:section:downloads-and-updates",
+      "statement": "Publicador, assinatura, versão, SHA-256, manifesto, canal e compatibilidade devem corresponder; divergência bloqueia instalação.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:downloads-and-updates:3",
+      "location": "document:terms:section:downloads-and-updates",
+      "statement": "Atualizações podem corrigir falhas, compatibilidade e segurança e devem usar manifesto assinado.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:downloads-and-updates:4",
+      "location": "document:terms:section:downloads-and-updates",
+      "statement": "Canais beta ou experimental, se oferecidos, terão riscos visíveis.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:downloads-and-updates:5",
+      "location": "document:terms:section:downloads-and-updates",
+      "statement": "Uma versão antiga pode perder suporte após aviso razoável, mas restauração local nunca será intencionalmente bloqueada por assinatura expirada.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:prices-and-payment:1",
+      "location": "document:terms:section:prices-and-payment",
+      "statement": "O preço anunciado é R$ 29,90 por mês ou R$ 249,90 por ano no Brasil; em inglês, US$ 6.99 por mês ou US$ 59.99 por ano.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR"]
+    },
+    {
+      "id": "document:terms:section:prices-and-payment:2",
+      "location": "document:terms:section:prices-and-payment",
+      "statement": "Cartão atende os dois ciclos; Pix, o anual no Brasil; boleto não estará disponível no lançamento.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:prices-and-payment:3",
+      "location": "document:terms:section:prices-and-payment",
+      "statement": "Preço final, moeda, tributos, operador, data e renovação aparecem no resumo antes da confirmação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:prices-and-payment:4",
+      "location": "document:terms:section:prices-and-payment",
+      "statement": "A assinatura renova no ciclo escolhido até cancelamento, e qualquer mudança de preço exige aviso prévio e novo aceite quando a lei exigir.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR"]
+    },
+    {
+      "id": "document:terms:section:cancellation-and-refund:1",
+      "location": "document:terms:section:cancellation-and-refund",
+      "statement": "Você poderá cancelar a qualquer momento na conta e manter Premium até o fim do período pago, sem nova renovação.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:cancellation-and-refund:2",
+      "location": "document:terms:section:cancellation-and-refund",
+      "statement": "A primeira assinatura terá reembolso integral se solicitado em até sete dias, sem reduzir direito de arrependimento ou garantia mais favorável previsto em lei.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:cancellation-and-refund:3",
+      "location": "document:terms:section:cancellation-and-refund",
+      "statement": "O caminho, prazo de estorno e efeito sobre acesso serão mostrados antes da compra; cobrança não reconhecida ou falha de restauração recebe atendimento prioritário.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D92", "LAW-CDC", "LAW-ECOMMERCE-BR", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:offline-and-availability:1",
+      "location": "document:terms:section:offline-and-availability",
+      "statement": "Premium pode operar offline por até 30 dias após validação; depois retorna ao Free até reconectar, sem apagar histórico ou restauração.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:offline-and-availability:2",
+      "location": "document:terms:section:offline-and-availability",
+      "statement": "Recursos online podem ficar indisponíveis por manutenção, segurança, força maior ou encerramento comunicado.",
+      "temporal": "future",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "document:terms:section:offline-and-availability:3",
+      "location": "document:terms:section:offline-and-availability",
+      "statement": "Mudança material de preço, licença, dispositivo ou tratamento recebe aviso e nova versão; se prejudicar contrato vigente, aplicam-se a oferta aceita e as proteções obrigatórias.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D93", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:third-parties:1",
+      "location": "document:terms:section:third-parties",
+      "statement": "Microsoft, fabricantes, lojas, jogos, anti-cheats e serviços de pagamento ou identidade mantêm termos próprios e não são controlados pelo Liiiraa Boost.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:third-parties:2",
+      "location": "document:terms:section:third-parties",
+      "statement": "Compatibilidade não significa parceria ou endosso.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:third-parties:3",
+      "location": "document:terms:section:third-parties",
+      "statement": "O produto não autoriza violar esses termos.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:third-parties:4",
+      "location": "document:terms:section:third-parties",
+      "statement": "Uma alteração de terceiro pode bloquear um perfil até nova validação; links externos devem ser avaliados antes do uso.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:liability-and-consumer-rights:1",
+      "location": "document:terms:section:liability-and-consumer-rights",
+      "statement": "Nada nestes termos exclui garantia, reparação, responsabilidade ou foro que não possam ser afastados pela lei aplicável.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:liability-and-consumer-rights:2",
+      "location": "document:terms:section:liability-and-consumer-rights",
+      "statement": "Na extensão permitida, não respondemos por resultado não prometido, incompatibilidade informada, alteração feita fora do plano, uso sem autorização ou dano indireto imprevisível.",
+      "temporal": "current",
+      "evidenceIds": ["PROJECT-CONSTRAINTS", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT", "LAW-CDC"]
+    },
+    {
+      "id": "document:terms:section:liability-and-consumer-rights:3",
+      "location": "document:terms:section:liability-and-consumer-rights",
+      "statement": "Havendo defeito atribuível ao serviço, serão oferecidos os remédios previstos em lei e no contrato.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:contact-and-disputes:1",
+      "location": "document:terms:section:contact-and-disputes",
+      "statement": "Dúvidas contratuais usam legal@liiiraa.com; suporte financeiro e cancelamento terão caminho na conta antes da venda.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:contact-and-disputes:2",
+      "location": "document:terms:section:contact-and-disputes",
+      "statement": "Tentaremos resolver o problema de forma direta, sem impedir acesso à ANPD, órgãos de defesa do consumidor, plataformas oficiais ou Judiciário.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:terms:section:contact-and-disputes:3",
+      "location": "document:terms:section:contact-and-disputes",
+      "statement": "Lei e foro seguem as regras obrigatórias aplicáveis ao usuário e ao fornecedor identificado no momento da contratação; estes termos não escolhem antecipadamente um foro desfavorável.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PROJECT-CONSTRAINTS",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "LAW-CDC",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:summary:1",
+      "location": "document:storage:summary",
+      "statement": "Esta política explica quais cookies ou dados locais são indispensáveis ao site e à conta, por que não servem para publicidade e o que mudará se algum uso opcional for ativado.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:what-storage-means:1",
+      "location": "document:storage:section:what-storage-means",
+      "statement": "Cookies são pequenos valores enviados pelo site; localStorage, sessionStorage e mecanismos equivalentes ficam no navegador ou aplicativo.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:what-storage-means:2",
+      "location": "document:storage:section:what-storage-means",
+      "statement": "Eles podem guardar uma escolha ou identificador, mas não concedem acesso geral ao seu PC.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:what-storage-means:3",
+      "location": "document:storage:section:what-storage-means",
+      "statement": "O site não usa esse mecanismo para analisar hardware, jogos ou arquivos; a análise profunda acontece somente no aplicativo Windows.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:current-essential-items:1",
+      "location": "document:storage:section:current-essential-items",
+      "statement": "O site pode manter a preferência de idioma para abrir páginas no idioma escolhido.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:current-essential-items:2",
+      "location": "document:storage:section:current-essential-items",
+      "statement": "Quando conta e autenticação forem ativadas, poderá usar identificador aleatório de sessão, proteção anti-CSRF, prazo de expiração, retorno seguro após login e preferências de segurança.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:current-essential-items:3",
+      "location": "document:storage:section:current-essential-items",
+      "statement": "Esses itens atendem à solicitação do usuário, não formam perfil publicitário e não guardam senha, número completo de cartão ou diagnóstico do PC.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:purpose-and-basis:1",
+      "location": "document:storage:section:purpose-and-basis",
+      "statement": "O armazenamento essencial existe para entregar a página, lembrar uma escolha solicitada, manter uma sessão, impedir falsificação, limitar abuso e encerrar acesso com segurança.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:purpose-and-basis:2",
+      "location": "document:storage:section:purpose-and-basis",
+      "statement": "Ele se apoia na execução da função pedida e na proteção legítima do serviço, com necessidade e minimização; não usamos consentimento como justificativa artificial para algo sem o qual a função não opera.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:duration-and-access:1",
+      "location": "document:storage:section:duration-and-access",
+      "statement": "A preferência de idioma permanece até você removê-la.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:duration-and-access:2",
+      "location": "document:storage:section:duration-and-access",
+      "statement": "Itens de sessão terminam na expiração, saída, revogação ou limpeza, prevalecendo o primeiro evento.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:duration-and-access:3",
+      "location": "document:storage:section:duration-and-access",
+      "statement": "Somente a origem e o serviço de identidade necessários podem ler o identificador correspondente; atributos de segurança devem restringir transporte, script e envio entre sites conforme a função permitir.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:optional-storage:1",
+      "location": "document:storage:section:optional-storage",
+      "statement": "Não há autorização para analytics opcional, publicidade comportamental, pixels de marketing, venda de audiência ou acompanhamento entre sites.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:optional-storage:2",
+      "location": "document:storage:section:optional-storage",
+      "statement": "Se algum uso opcional for proposto, esta rota identificará nome, fornecedor, dados, finalidade e duração, e a interface permitirá aceitar ou rejeitar por categoria com a mesma facilidade, sem caixas pré-marcadas.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:optional-storage:3",
+      "location": "document:storage:section:optional-storage",
+      "statement": "A recusa não pode retirar conteúdo público ou funções essenciais.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:browser-controls:1",
+      "location": "document:storage:section:browser-controls",
+      "statement": "Você pode limpar ou bloquear cookies e dados do site nas configurações do navegador.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:browser-controls:2",
+      "location": "document:storage:section:browser-controls",
+      "statement": "Apagar o idioma apenas restaura a escolha padrão; apagar sessão ou proteção de conta encerra o acesso e exige nova autenticação.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:browser-controls:3",
+      "location": "document:storage:section:browser-controls",
+      "statement": "Bloquear todo armazenamento pode impedir login e preferências, mas não autoriza o Liiiraa Boost a contornar sua decisão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:browser-controls:4",
+      "location": "document:storage:section:browser-controls",
+      "statement": "Usos opcionais, quando existirem, também terão controle próprio no produto.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:no-performative-banner:1",
+      "location": "document:storage:section:no-performative-banner",
+      "statement": "Enquanto só houver armazenamento estritamente necessário, o site informa seu uso nesta política e não apresenta um botão de aceitar tudo sem escolha real.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:no-performative-banner:2",
+      "location": "document:storage:section:no-performative-banner",
+      "statement": "Um banner ou centro de preferências só será exibido quando houver categoria opcional a aceitar, rejeitar ou retirar.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:no-performative-banner:3",
+      "location": "document:storage:section:no-performative-banner",
+      "statement": "Continuar navegando, rolar a página ou fechar um aviso nunca contará como consentimento para uso opcional.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:updates-and-contact:1",
+      "location": "document:storage:section:updates-and-contact",
+      "statement": "Mudanças recebem versão, data e histórico.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:storage:section:updates-and-contact:2",
+      "location": "document:storage:section:updates-and-contact",
+      "statement": "Uma nova categoria opcional não será ativada com base em aceite antigo: ela será informada antes do armazenamento e, quando consentimento for a base, exigirá escolha específica.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D96",
+        "GUIDE-ANPD-COOKIES",
+        "LAW-LGPD",
+        "LAW-GDPR",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:storage:section:updates-and-contact:3",
+      "location": "document:storage:section:updates-and-contact",
+      "statement": "Dúvidas, oposição a uso baseado em legítimo interesse ou pedidos de privacidade usam privacy@liiiraa.com.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D96", "GUIDE-ANPD-COOKIES", "LAW-LGPD", "LAW-GDPR"]
+    },
+    {
+      "id": "document:security:summary:1",
+      "location": "document:security:summary",
+      "statement": "Conheça os limites técnicos previstos para proteger o site, a futura conta, os artefatos e as mudanças no Windows, além das regras para coordenar um relato de vulnerabilidade após o preflight.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:trust-model:1",
+      "location": "document:security:section:trust-model",
+      "statement": "Diagnósticos, planos, medições, histórico e restauração ficam no PC por padrão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:trust-model:2",
+      "location": "document:security:section:trust-model",
+      "statement": "A web não recebe autoridade para analisar profundamente a máquina nem executar otimizações.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:trust-model:3",
+      "location": "document:security:section:trust-model",
+      "statement": "Qualquer saída de diagnóstico exige revisão e autorização específicas; IA em nuvem e telemetria opcional permanecem separadas das funções essenciais.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:privilege-boundary:1",
+      "location": "document:security:section:privilege-boundary",
+      "statement": "A interface desktop opera sem privilégio administrativo permanente.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:privilege-boundary:2",
+      "location": "document:security:section:privilege-boundary",
+      "statement": "Ações elevadas devem passar por componente isolado, autenticado e limitado a operações específicas, com parâmetros validados, consequência conhecida e registro.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:privilege-boundary:3",
+      "location": "document:security:section:privilege-boundary",
+      "statement": "Não aceitamos scripts remotos arbitrários nem comandos genéricos para registro, arquivos ou serviços.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:privilege-boundary:4",
+      "location": "document:security:section:privilege-boundary",
+      "statement": "Ausência de compatibilidade ou recuperação segura bloqueia a ação.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:change-safety:1",
+      "location": "document:security:section:change-safety",
+      "statement": "Mudanças persistentes devem mostrar escopo, risco, dependências e necessidade de reinício antes da confirmação.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:change-safety:2",
+      "location": "document:security:section:change-safety",
+      "statement": "A execução registra o que foi solicitado, aplicado, ignorado ou revertido.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:change-safety:3",
+      "location": "document:security:section:change-safety",
+      "statement": "Ações temporárias do Modo Competitivo preservam o estado anterior e buscam restaurá-lo ao final da sessão.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:change-safety:4",
+      "location": "document:security:section:change-safety",
+      "statement": "Histórico e restauração continuam disponíveis no Free e após expiração da assinatura.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:artifact-chain:1",
+      "location": "document:security:section:artifact-chain",
+      "statement": "Distribuição pública só ocorre quando publicador, assinatura, hash SHA-256, versão, canal, compatibilidade, artefato e manifesto concordarem.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:artifact-chain:2",
+      "location": "document:security:section:artifact-chain",
+      "statement": "Divergência ou assinatura inválida bloqueia instalação e atualização; não há opção de continuar mesmo assim.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:artifact-chain:3",
+      "location": "document:security:section:artifact-chain",
+      "statement": "Manifestos e pacotes são imutáveis por versão, canais têm política própria e um rollback de segurança não pode instalar artefato não confiável.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:account-device-admin:1",
+      "location": "document:security:section:account-device-admin",
+      "statement": "Quando conta e autenticação forem ativadas, sessões usarão armazenamento mínimo, proteção contra falsificação, expiração e revogação; passkeys e MFA poderão elevar proteção sem expor segredo reutilizável.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:account-device-admin:2",
+      "location": "document:security:section:account-device-admin",
+      "statement": "O desenho aprovado usa identificador de dispositivo derivado e protegido, não HWID bruto.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:account-device-admin:3",
+      "location": "document:security:section:account-device-admin",
+      "statement": "A administração permanecerá em origem, sessão, funções e política separadas, com menor privilégio, confirmação de ações sensíveis e trilha de auditoria.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:data-and-secrets:1",
+      "location": "document:security:section:data-and-secrets",
+      "statement": "Credenciais, tokens, chaves e dados de pagamento não deverão aparecer em URL, telemetria, log ou pacote de suporte.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:data-and-secrets:2",
+      "location": "document:security:section:data-and-secrets",
+      "statement": "Se o envio de diagnóstico for ativado, o pacote será revisável, minimizado e ligado a um chamado.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:data-and-secrets:3",
+      "location": "document:security:section:data-and-secrets",
+      "statement": "Acesso interno deverá ser justificado, autenticado e registrado; retenção terminará com a finalidade ou obrigação aplicável.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:data-and-secrets:4",
+      "location": "document:security:section:data-and-secrets",
+      "statement": "Operadores e transferências serão identificados antes de receber dados.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:secure-development:1",
+      "location": "document:security:section:secure-development",
+      "statement": "Contratos de entrada são validados nos limites já implementados; dependências, permissões e alterações de infraestrutura passam por revisão e testes proporcionais ao risco.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:secure-development:2",
+      "location": "document:security:section:secure-development",
+      "statement": "Quando a operação de resposta for ativada, uma falha confirmada será triada por impacto e explorabilidade, corrigida com recuperação segura e comunicada sem expor detalhes que aumentem o risco.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:secure-development:3",
+      "location": "document:security:section:secure-development",
+      "statement": "Incidentes de dados seguirão as obrigações de avaliação e notificação aplicáveis.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:user-responsibility:1",
+      "location": "document:security:section:user-responsibility",
+      "statement": "Use instaladores oficiais, confira avisos de integridade, mantenha Windows e aplicativo suportados, proteja e-mail e fatores de autenticação e não compartilhe sessão.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:user-responsibility:2",
+      "location": "document:security:section:user-responsibility",
+      "statement": "Revise o plano antes de aplicar e não ignore incompatibilidade, anti-cheat ou reinício.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:user-responsibility:3",
+      "location": "document:security:section:user-responsibility",
+      "statement": "Se suspeitar de conta comprometida, artefato divergente ou mudança inesperada, interrompa a ação, preserve a evidência mínima e contate o suporte ou security@liiiraa.com.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:disclosure-and-incidents:1",
+      "location": "document:security:section:disclosure-and-incidents",
+      "statement": "A política de Divulgação Responsável define ativos, testes permitidos, condutas proibidas e um contato designado cuja operação depende do preflight.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:disclosure-and-incidents:2",
+      "location": "document:security:section:disclosure-and-incidents",
+      "statement": "Relatos deverão evitar dados pessoais e acesso além do mínimo.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:disclosure-and-incidents:3",
+      "location": "document:security:section:disclosure-and-incidents",
+      "statement": "Não há recompensa automática.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:disclosure-and-incidents:4",
+      "location": "document:security:section:disclosure-and-incidents",
+      "statement": "Se um incidente afetar usuários, a comunicação priorizará o que aconteceu, impacto conhecido, medidas de proteção e recuperação, sem afirmar certeza antes da investigação.",
+      "temporal": "future",
+      "evidenceIds": [
+        "PHASE3-D95",
+        "STACK-SECURITY",
+        "PLAN-03-46-PREFLIGHT",
+        "TEMPORAL-FUTURE-GATE"
+      ]
+    },
+    {
+      "id": "document:security:section:assurance-boundary:1",
+      "location": "document:security:section:assurance-boundary",
+      "statement": "Nenhum sistema é infalível.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:assurance-boundary:2",
+      "location": "document:security:section:assurance-boundary",
+      "statement": "O Liiiraa Boost não alega ISO 27001, SOC 2, certificação, auditoria independente, percentual de proteção, aprovação de fabricante ou ausência absoluta de vulnerabilidades.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:assurance-boundary:3",
+      "location": "document:security:section:assurance-boundary",
+      "statement": "Referências a boas práticas orientam o desenho, mas somente implementação e evidência verificável demonstram um controle.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "document:security:section:assurance-boundary:4",
+      "location": "document:security:section:assurance-boundary",
+      "statement": "Direitos e garantias legais do consumidor permanecem preservados.",
+      "temporal": "current",
+      "evidenceIds": ["PHASE3-D95", "STACK-SECURITY", "PLAN-03-46-PREFLIGHT"]
+    },
+    {
+      "id": "disclosure:summary:1",
+      "location": "disclosure:summary",
+      "statement": "Esta política define como pesquisadores poderão coordenar relatos de boa-fé sobre ativos oficiais do Liiiraa Boost depois que o contato designado concluir o preflight operacional.",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "disclosure:response:1",
+      "location": "disclosure:response",
+      "statement": "Após o preflight confirmar existência, autenticação e monitoramento de security@liiiraa.com, o contato designado poderá receber ativo e versão, pré-condições, passos reproduzíveis, impacto, prova mínima sem segredos e um endereço de retorno escolhido pelo pesquisador.",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "disclosure:response:2",
+      "location": "disclosure:response",
+      "statement": "O fluxo então confirmará relatos utilizáveis, fará triagem de escopo e risco e enviará atualizações quando houver mudança material.",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "disclosure:response:3",
+      "location": "disclosure:response",
+      "statement": "Complexidade, impacto e segurança de implantação determinarão o prazo; não há promessa de data fixa e nenhuma recompensa, bounty ou pagamento é oferecido.",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "disclosure:response:4",
+      "location": "disclosure:response",
+      "statement": "Pesquisa de boa-fé permanecerá autorizada somente dentro deste escopo e não vinculará terceiros nem cobrirá conduta ilegal independente.",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    },
+    {
+      "id": "disclosure:response:5",
+      "location": "disclosure:response",
+      "statement": "A divulgação deverá ser coordenada até existir correção ou janela responsável acordada.",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:scope:1:1",
+      "location": "disclosure:scope:1",
+      "statement": "Domínios e subdomínios controlados pelo Liiiraa Boost que exibam link direto para esta política no rodapé",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:scope:2:1",
+      "location": "disclosure:scope:2",
+      "statement": "Aplicativo Windows, instalador, atualizador, manifestos e artefatos oficiais que tenham sido efetivamente publicados pelo canal de download",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:scope:3:1",
+      "location": "disclosure:scope:3",
+      "statement": "Falhas reproduzíveis de autenticação, autorização, privacidade, integridade, atualização, licença ou restauração nesses ativos, demonstradas com a prova mínima necessária",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:prohibited:1:1",
+      "location": "disclosure:prohibited:1",
+      "statement": "Negação de serviço, teste destrutivo ou automatizado em volume, malware, ransomware, persistência, engenharia social, phishing, spam, interferência em partidas ou alteração e exclusão de dados",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:prohibited:2:1",
+      "location": "disclosure:prohibited:2",
+      "statement": "Acesso além do mínimo para comprovar a falha, movimentação lateral, tentativa contra conta de terceiro ou envio de senha, token, dado de pagamento, arquivo pessoal ou diagnóstico sem relação",
+      "temporal": "current",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD"]
+    },
+    {
+      "id": "disclosure:prohibited:3:1",
+      "location": "disclosure:prohibited:3",
+      "statement": "Teste de serviços de terceiros, fornecedores, usuários ou ativos não identificados no escopo; exploração para benefício próprio; extorsão; ou divulgação pública antes de coordenação responsável",
+      "temporal": "future",
+      "evidenceIds": ["PLAN-03-46-PREFLIGHT", "GUIDE-CISA-VDP", "LAW-LGPD", "TEMPORAL-FUTURE-GATE"]
+    }
+  ]
+}

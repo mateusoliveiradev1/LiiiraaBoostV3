@@ -401,14 +401,23 @@ describe('public policies and operational trust', () => {
       return candidate;
     };
 
-    expect(() => admitPolicies(mutate((value) => (value.locale = 'es')), 'en')).toThrow(
-      /PUBLIC_POLICIES_INVALID:en:root/u,
-    );
     expect(() =>
-      admitPolicies(mutate((value) => (value.documents[0]!.kind = 'cookies')), 'en'),
+      admitPolicies(
+        mutate((value) => (value.locale = 'es')),
+        'en',
+      ),
+    ).toThrow(/PUBLIC_POLICIES_INVALID:en:root/u);
+    expect(() =>
+      admitPolicies(
+        mutate((value) => (value.documents[0]!.kind = 'cookies')),
+        'en',
+      ),
     ).toThrow(/PUBLIC_POLICIES_INVALID/u);
     expect(() =>
-      admitPolicies(mutate((value) => (value.documents[0]!.routeId = 'public-home')), 'en'),
+      admitPolicies(
+        mutate((value) => (value.documents[0]!.routeId = 'public-home')),
+        'en',
+      ),
     ).toThrow(/PUBLIC_POLICIES_INVALID/u);
     expect(() =>
       admitPolicies(
@@ -429,27 +438,35 @@ describe('public policies and operational trust', () => {
   });
 
   it('fails closed for valid kinds paired to the wrong routes, section drift, and locale drift', () => {
-    const english = structuredClone(getPublicPolicies('en'));
-    const portuguese = structuredClone(getPublicPolicies('pt-BR'));
+    type MutablePolicyCandidate = {
+      documents: Array<{
+        routeId: WebRouteId;
+        sections: Array<{ id: string }>;
+      }>;
+      claims: Array<{ evidenceIds: string[] }>;
+    };
+    const clone = (locale: 'en' | 'pt-BR') =>
+      JSON.parse(JSON.stringify(getPublicPolicies(locale))) as MutablePolicyCandidate;
+    const english = clone('en');
 
-    const swappedRoutes = structuredClone(english);
+    const swappedRoutes = clone('en');
     const firstRoute = swappedRoutes.documents[0]!.routeId;
     swappedRoutes.documents[0]!.routeId = swappedRoutes.documents[1]!.routeId;
     swappedRoutes.documents[1]!.routeId = firstRoute;
     expect(() => admitPolicies(swappedRoutes, 'en')).toThrow(/kind-route/u);
 
-    const missingSection = structuredClone(english);
+    const missingSection = clone('en');
     missingSection.documents[0]!.sections = missingSection.documents[0]!.sections.slice(1);
     expect(() => admitPolicies(missingSection, 'en')).toThrow(/section-contract/u);
 
-    const reorderedSections = structuredClone(english);
+    const reorderedSections = clone('en');
     reorderedSections.documents[0]!.sections = [
       ...reorderedSections.documents[0]!.sections,
     ].reverse();
     expect(() => admitPolicies(reorderedSections, 'en')).toThrow(/section-contract/u);
 
-    const localeDrift = structuredClone(portuguese);
-    localeDrift.documents[0]!.sections[0]!.id = 'localized-only-id';
+    const localeDrift = clone('pt-BR');
+    localeDrift.claims[0]!.evidenceIds = ['LAW-LGPD'];
     expect(() => admitPolicyPair(english, localeDrift)).toThrow(/locale-parity/u);
   });
 
