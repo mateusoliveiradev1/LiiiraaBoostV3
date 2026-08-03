@@ -88,6 +88,7 @@ const adminRoute = <const Id extends string>(
 const rawWebRoutes = [
   publicRoute('public-home', '/[locale]'),
   publicRoute('public-about', '/[locale]/about'),
+  publicRoute('public-principles', '/[locale]/principles'),
   publicRoute('public-product', '/[locale]/product', { owner: 'public-navigation' }),
   publicRoute('public-results', '/[locale]/results', { owner: 'public-navigation' }),
   publicRoute('public-evidence', '/[locale]/evidence', { owner: 'public-content' }),

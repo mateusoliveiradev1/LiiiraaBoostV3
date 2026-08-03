@@ -21,6 +21,7 @@ import { createContentIdentity } from './content.ts';
 const REQUIRED_ROUTE_IDS = Object.freeze([
   'public-home',
   'public-about',
+  'public-principles',
   'public-product',
   'public-results',
   'public-evidence',
@@ -360,6 +361,48 @@ describe('canonical web route manifest', () => {
       expect.objectContaining({
         from: '/[locale]/about/',
         id: 'public-about',
+      }),
+    );
+  });
+
+  it('keeps Principles independent from About in both locales and every public projection', () => {
+    expect(routeHref('public-principles', { locale: 'pt-BR' })).toEqual({
+      ok: true,
+      value: '/pt-BR/principles',
+    });
+    expect(routeHref('public-principles', { locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/principles',
+    });
+    expect(
+      matchWebRoute({
+        pathname: '/pt-BR/principles',
+        securityBoundary: 'public-origin',
+      }),
+    ).toMatchObject({ ok: true, value: { route: { id: 'public-principles' } } });
+    expect(
+      resolveLocalizedCurrentRoute({
+        pathname: '/pt-BR/principles',
+        securityBoundary: 'public-origin',
+        targetLocale: 'en',
+      }),
+    ).toEqual({ ok: true, value: '/en/principles' });
+
+    const principles = projectIndexing().find(({ id }) => id === 'public-principles');
+    expect(principles).toMatchObject({
+      href: '/[locale]/principles',
+      indexing: 'index',
+      owner: 'public-content',
+      scenarioRequirement: 'available',
+      securityBoundary: 'public-origin',
+      shell: 'public',
+      surface: 'public',
+    });
+    expect(projectSitemap().map(({ id }) => id)).toContain('public-principles');
+    expect(projectRedirects()).toContainEqual(
+      expect.objectContaining({
+        from: '/[locale]/principles/',
+        id: 'public-principles',
       }),
     );
   });

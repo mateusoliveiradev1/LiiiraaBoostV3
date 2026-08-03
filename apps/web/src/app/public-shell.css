@@ -481,6 +481,16 @@ main {
   border-block-end: 1px solid var(--lb-line-strong);
 }
 
+.public-principles .public-about__chapters {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--lb-space-5);
+}
+
+.public-principles .public-about__chapter {
+  grid-column: auto;
+  min-inline-size: 0;
+}
+
 .public-footer {
   border-block-start: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-canvas);
@@ -839,6 +849,10 @@ main {
   .public-about__chapters {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--lb-space-6);
+  }
+
+  .public-principles .public-about__chapters {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .public-about__chapter,

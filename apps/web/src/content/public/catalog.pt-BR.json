@@ -6,10 +6,10 @@
   "about": {
     "routeId": "public-about",
     "metadata": {
-      "title": "Sobre o Liiiraa Boost",
-      "description": "A motivação, os princípios de confiança e a ambição que orientam o Liiiraa Boost."
+      "title": "Nossa história | Liiiraa Boost",
+      "description": "A história, a motivação e a ambição que deram origem ao Liiiraa Boost."
     },
-    "title": "Por que o Liiiraa Boost existe",
+    "title": "Nossa história: por que o Liiiraa Boost existe",
     "lead": "Desempenho em jogos não deveria exigir mudanças opacas nem uma escolha entre velocidade e estabilidade. O produto nasce dessa convicção.",
     "chapters": [
       {
@@ -36,6 +36,41 @@
         "id": "ambition",
         "title": "A ambição de longo prazo",
         "body": "Construir o otimizador definitivo para jogos no Windows: profundo o bastante para respeitar cada máquina, claro o bastante para orientar decisões e leve o bastante para não competir com o jogo pelos recursos que promete preservar."
+      }
+    ],
+    "cta": {
+      "label": "Ver como funciona",
+      "routeId": "public-product"
+    }
+  },
+  "principles": {
+    "routeId": "public-principles",
+    "metadata": {
+      "title": "Princípios | Liiiraa Boost",
+      "description": "Os compromissos de evidência, estabilidade, privacidade e reversibilidade que orientam o Liiiraa Boost."
+    },
+    "title": "Princípios que orientam cada otimização",
+    "lead": "Desempenho só tem valor quando pode ser compreendido, medido no próprio PC e alcançado sem esconder riscos ou retirar o controle do jogador.",
+    "chapters": [
+      {
+        "id": "evidence",
+        "title": "Evidência antes de promessa",
+        "body": "Ganhos variam conforme hardware, Windows, drivers, jogo e condições da medição. O produto deve separar o que foi observado, estimado ou ainda não comprovado, sem transformar hipóteses em resultados garantidos."
+      },
+      {
+        "id": "stability",
+        "title": "Estabilidade faz parte do desempenho",
+        "body": "Uma recomendação precisa respeitar compatibilidade, risco, dependências e limites da máquina. Quando não houver evidência suficiente para agir com segurança, a escolha correta é não oferecer o ajuste."
+      },
+      {
+        "id": "local-first",
+        "title": "Privacidade começa no PC",
+        "body": "O tratamento local é o padrão. Qualquer compartilhamento futuro de dados técnicos deve ter finalidade clara, escopo mínimo e consentimento específico quando aplicável."
+      },
+      {
+        "id": "reversibility",
+        "title": "Controle inclui poder voltar",
+        "body": "Cada alteração deve ser explicável, registrável e reversível. Revisão antes de aplicar, histórico e restauração pertencem ao caminho principal da experiência."
       }
     ],
     "cta": {

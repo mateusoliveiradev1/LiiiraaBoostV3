@@ -5,7 +5,10 @@ import { expect, test, type Page, type TestInfo } from '@playwright/test';
 type Scenario = Readonly<{ id: string; requiredRouteIds: readonly string[]; routeId: string }>;
 const scenarios = (
   JSON.parse(
-    readFileSync(new URL('../../../contracts/scenarios/web-scenarios.json', import.meta.url), 'utf8'),
+    readFileSync(
+      new URL('../../../contracts/scenarios/web-scenarios.json', import.meta.url),
+      'utf8',
+    ),
   ) as Readonly<{ scenarios: readonly Scenario[] }>
 ).scenarios;
 const canonicalRouteSource = readFileSync(
@@ -30,11 +33,14 @@ const assertScenarioParity = (id: string) => {
 };
 
 const assertNoDeadLinks = async (page: Page) => {
-  const invalid = await page.locator('a').evaluateAll((links) =>
-    links.filter((link) => {
-      const href = link.getAttribute('href');
-      return href === null || href.trim() === '' || href === '#' || href.startsWith('javascript:');
-    }).length,
+  const invalid = await page.locator('a').evaluateAll(
+    (links) =>
+      links.filter((link) => {
+        const href = link.getAttribute('href');
+        return (
+          href === null || href.trim() === '' || href === '#' || href.startsWith('javascript:')
+        );
+      }).length,
   );
   expect(invalid).toBe(0);
 };
@@ -47,13 +53,29 @@ test('@final @public W03 exposes current task-led documentation, metadata, and e
 
   await page.goto('/pt-BR/docs/current');
   await expect(page.getByRole('heading', { level: 1, name: 'Central de ajuda' })).toBeVisible();
-  await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText(
-    'Guias atuais',
-  );
+  await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText('Guias atuais');
   await expect(page.getByRole('group', { name: /Versão · Canal/u })).toContainText(
     'Recomendado para uso agora',
   );
   await expect(page.getByRole('navigation', { name: 'Guias rápidos' })).toBeVisible();
+  const quickGuides = page.locator('.documentation-quick-guides');
+  await expect(quickGuides).toBeVisible();
+  const guideLinks = quickGuides.getByRole('link');
+  expect(await guideLinks.count()).toBeGreaterThan(0);
+  const undersizedGuides = await guideLinks.evaluateAll((links) =>
+    links
+      .map((link) => ({
+        height: link.getBoundingClientRect().height,
+        width: link.getBoundingClientRect().width,
+      }))
+      .filter(({ height, width }) => height < 44 || width < 44),
+  );
+  expect(undersizedGuides).toEqual([]);
+  const overflow = await page.locator('html').evaluate((node) => ({
+    client: node.clientWidth,
+    scroll: node.scrollWidth,
+  }));
+  expect(overflow.scroll).toBeLessThanOrEqual(overflow.client);
   await expect(page.locator('#documentation-task-index-title')).toBeVisible();
   const article = page
     .locator('#documentation-task-index-title')
@@ -62,7 +84,9 @@ test('@final @public W03 exposes current task-led documentation, metadata, and e
     .first();
   await expect(article).toHaveAttribute('href', /^\/pt-BR\/docs\/current\//u);
   await article.click();
-  await expect(page.locator('.lb-web-article-metadata')).toContainText(/Última revisão|Responsável/u);
+  await expect(page.locator('.lb-web-article-metadata')).toContainText(
+    /Última revisão|Responsável/u,
+  );
   await expect(page.locator('article')).toContainText(/Evidência|Compatibilidade|Recuperação/u);
   await page.goBack();
   await expect(page).toHaveURL(/\/pt-BR\/docs\/current$/u);
@@ -78,13 +102,14 @@ test('@final @public W04 keeps historical unsupported guidance visible without r
   const historical = '/en/docs/history/1.0.0/legacy-capture';
   await page.goto(historical);
   await expect(page).toHaveURL(new RegExp(`${historical}$`, 'u'));
-  const staleNotice = page.locator('.lb-web-boundary').filter({ hasText: 'Historical documentation' });
+  const staleNotice = page
+    .locator('.lb-web-boundary')
+    .filter({ hasText: 'Historical documentation' });
   await expect(staleNotice).toContainText('Historical documentation');
   await expect(staleNotice).toContainText('has not been redirected');
-  await expect(page.getByRole('link', { name: 'Open the current canonical version' })).toHaveAttribute(
-    'href',
-    /^\/en\/docs\/current\//u,
-  );
+  await expect(
+    page.getByRole('link', { name: 'Open the current canonical version' }),
+  ).toHaveAttribute('href', /^\/en\/docs\/current\//u);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/iu);
   await assertNoDeadLinks(page);
 });

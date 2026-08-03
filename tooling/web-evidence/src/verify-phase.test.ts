@@ -160,7 +160,7 @@ describe('Phase 3 final source coverage', () => {
         evidenceDimensions: 20,
         requirements: 4,
         routeOutcomes: 24,
-        routes: 58,
+        routes: 60,
         scenarios: 18,
         successCriteria: 4,
       });

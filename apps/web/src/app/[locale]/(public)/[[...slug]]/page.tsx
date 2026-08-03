@@ -29,6 +29,7 @@ type PublicCatchAllPageProps = Readonly<{
 const CATALOG_ROUTES = new Set<WebRouteId>([
   'public-home',
   'public-about',
+  'public-principles',
   'public-product',
   'public-results',
   'public-evidence',
@@ -112,6 +113,61 @@ const ABOUT_CONTENT = Object.freeze({
   'pt-BR': admitAboutContent(catalogPtBrJson.about, 'pt-BR'),
 });
 
+const PRINCIPLE_CHAPTER_IDS = Object.freeze([
+  'evidence',
+  'stability',
+  'local-first',
+  'reversibility',
+] as const);
+
+type PrincipleChapterId = (typeof PRINCIPLE_CHAPTER_IDS)[number];
+
+type PrinciplesContent = Readonly<{
+  routeId: 'public-principles';
+  metadata: Readonly<{ title: string; description: string }>;
+  title: string;
+  lead: string;
+  chapters: readonly Readonly<{ id: PrincipleChapterId; title: string; body: string }>[];
+  cta: Readonly<{ label: string; routeId: 'public-product' }>;
+}>;
+
+const admitPrinciplesContent = (candidate: unknown, locale: WebLocale): PrinciplesContent => {
+  if (
+    !isRecord(candidate) ||
+    candidate['routeId'] !== 'public-principles' ||
+    !isRecord(candidate['metadata']) ||
+    !isNonEmptyString(candidate['metadata']['title']) ||
+    !isNonEmptyString(candidate['metadata']['description']) ||
+    !isNonEmptyString(candidate['title']) ||
+    !isNonEmptyString(candidate['lead']) ||
+    !Array.isArray(candidate['chapters']) ||
+    candidate['chapters'].length !== PRINCIPLE_CHAPTER_IDS.length ||
+    !isRecord(candidate['cta']) ||
+    !isNonEmptyString(candidate['cta']['label']) ||
+    candidate['cta']['routeId'] !== 'public-product'
+  ) {
+    throw new Error(`PUBLIC_PRINCIPLES_INVALID:${locale}:root`);
+  }
+
+  for (const [index, chapter] of candidate['chapters'].entries()) {
+    if (
+      !isRecord(chapter) ||
+      chapter['id'] !== PRINCIPLE_CHAPTER_IDS[index] ||
+      !isNonEmptyString(chapter['title']) ||
+      !isNonEmptyString(chapter['body'])
+    ) {
+      throw new Error(`PUBLIC_PRINCIPLES_INVALID:${locale}:chapter:${String(index)}`);
+    }
+  }
+
+  return candidate as unknown as PrinciplesContent;
+};
+
+const PRINCIPLES_CONTENT = Object.freeze({
+  en: admitPrinciplesContent(catalogEnJson.principles, 'en'),
+  'pt-BR': admitPrinciplesContent(catalogPtBrJson.principles, 'pt-BR'),
+});
+
 const PublicAboutPage = ({ locale }: Readonly<{ locale: WebLocale }>) => {
   const content = ABOUT_CONTENT[locale];
 
@@ -137,10 +193,45 @@ const PublicAboutPage = ({ locale }: Readonly<{ locale: WebLocale }>) => {
             aria-labelledby={`about-${chapter.id}`}
             className="public-about__chapter"
             data-chapter={chapter.id}
-            id={chapter.id === 'principles' ? 'principles' : undefined}
             key={chapter.id}
           >
             <h2 id={`about-${chapter.id}`}>{chapter.title}</h2>
+            <p>{chapter.body}</p>
+          </section>
+        ))}
+      </div>
+    </article>
+  );
+};
+
+const PublicPrinciplesPage = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+  const content = PRINCIPLES_CONTENT[locale];
+
+  return (
+    <article className="public-about public-principles">
+      <header className="public-about__hero">
+        <div className="public-about__introduction">
+          <h1>{content.title}</h1>
+          <p>{content.lead}</p>
+        </div>
+        <a
+          className="public-action public-action--quiet public-about__action"
+          href={publicBoundaryHref(content.cta.routeId, locale)}
+        >
+          {content.cta.label}
+          <span aria-hidden="true">→</span>
+        </a>
+      </header>
+
+      <div className="public-about__chapters">
+        {content.chapters.map((chapter) => (
+          <section
+            aria-labelledby={`principle-${chapter.id}`}
+            className="public-about__chapter"
+            data-principle={chapter.id}
+            key={chapter.id}
+          >
+            <h2 id={`principle-${chapter.id}`}>{chapter.title}</h2>
             <p>{chapter.body}</p>
           </section>
         ))}
@@ -192,20 +283,22 @@ export const generateMetadata = async ({ params }: PublicCatchAllPageProps): Pro
       ? getHomeContent(resolution.locale).metadata
       : resolution.routeId === 'public-about'
         ? ABOUT_CONTENT[resolution.locale].metadata
-        : resolution.routeId === 'public-evidence'
-          ? getPublicEvidenceLegacyMetadata(resolution.locale)
-          : resolution.routeId === 'docs-index' || resolution.routeId === 'docs-task'
-            ? {
-                title:
-                  resolution.locale === 'pt-BR'
-                    ? 'Documentação técnica'
-                    : 'Technical documentation',
-                description:
-                  resolution.locale === 'pt-BR'
-                    ? 'Orientação versionada por tarefa, evidência, risco, compatibilidade e recuperação.'
-                    : 'Versioned task guidance with evidence, risk, compatibility, and recovery.',
-              }
-            : metadata;
+        : resolution.routeId === 'public-principles'
+          ? PRINCIPLES_CONTENT[resolution.locale].metadata
+          : resolution.routeId === 'public-evidence'
+            ? getPublicEvidenceLegacyMetadata(resolution.locale)
+            : resolution.routeId === 'docs-index' || resolution.routeId === 'docs-task'
+              ? {
+                  title:
+                    resolution.locale === 'pt-BR'
+                      ? 'Documentação técnica'
+                      : 'Technical documentation',
+                  description:
+                    resolution.locale === 'pt-BR'
+                      ? 'Orientação versionada por tarefa, evidência, risco, compatibilidade e recuperação.'
+                      : 'Versioned task guidance with evidence, risk, compatibility, and recovery.',
+                }
+              : metadata;
 
   const indexingMetadata =
     resolution.indexing === 'noindex' ? ({ robots: { follow: false, index: false } } as const) : {};
@@ -246,6 +339,10 @@ export default async function PublicCatchAllPage({
 
   if (resolution.routeId === 'public-about') {
     return <PublicAboutPage locale={resolution.locale} />;
+  }
+
+  if (resolution.routeId === 'public-principles') {
+    return <PublicPrinciplesPage locale={resolution.locale} />;
   }
 
   if (resolution.routeId === 'public-evidence') {

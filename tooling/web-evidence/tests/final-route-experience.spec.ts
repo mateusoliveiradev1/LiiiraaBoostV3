@@ -22,6 +22,13 @@ const MATRIX_SOURCE = readFileSync(
 
 const COVERED_AXES = ['wide-1440', 'desktop-960', 'mobile-390', 'reflow-320'] as const;
 const ERROR_ROUTE = /-error-(?:403|404|410|500)$/u;
+const LEGAL_ROUTE_IDS = new Set([
+  'public-terms',
+  'public-privacy-policy',
+  'public-policies',
+  'public-essential-storage',
+  'public-responsible-disclosure',
+]);
 const FORBIDDEN_ORDINARY_COPY =
   /\b(?:phase|fase|fixture|adapter|illustrative|ilustrativo|raw[- ]?enum|enum(?:eração)? bruta)\b/iu;
 // D-110 proof classes: testimonial, benchmark gain, customer count, review score,
@@ -263,6 +270,71 @@ const expectAboutTruthBoundary = async (page: Page): Promise<void> => {
   );
 };
 
+const expectPrinciplesDestination = async (page: Page): Promise<void> => {
+  const locale = await page.locator('html').getAttribute('lang');
+  const heading = page.locator('.public-principles h1');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(
+    locale === 'pt-BR'
+      ? 'Princípios que orientam cada otimização'
+      : 'Principles behind every optimization',
+  );
+  const hero = page.locator('.public-principles .public-about__hero');
+  await expect(hero).toBeVisible();
+  const principleIds = await page
+    .locator('.public-principles [data-principle]')
+    .evaluateAll((principles) =>
+      principles.map((principle) => principle.getAttribute('data-principle')),
+    );
+  expect(principleIds).toEqual(['evidence', 'stability', 'local-first', 'reversibility']);
+
+  const geometry = await page.locator('.public-principles').evaluate((article) => {
+    const articleRect = article.getBoundingClientRect();
+    const heroRect = article.querySelector('.public-about__hero')?.getBoundingClientRect();
+    const principleRects = [...article.querySelectorAll<HTMLElement>('[data-principle]')].map(
+      (principle) => {
+        const rect = principle.getBoundingClientRect();
+        return {
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          width: rect.width,
+        };
+      },
+    );
+    const overlaps = principleRects.flatMap((left, leftIndex) =>
+      principleRects
+        .slice(leftIndex + 1)
+        .filter(
+          (right) =>
+            left.left < right.right &&
+            left.right > right.left &&
+            left.top < right.bottom &&
+            left.bottom > right.top,
+        ),
+    ).length;
+
+    return {
+      articleWidth: articleRect.width,
+      heroHeight: heroRect?.height ?? 0,
+      heroWidth: heroRect?.width ?? 0,
+      minimumPrincipleWidth: Math.min(...principleRects.map(({ width }) => width)),
+      overlaps,
+      viewportWidth: innerWidth,
+    };
+  });
+  expect(geometry.articleWidth).toBeGreaterThanOrEqual(geometry.viewportWidth * 0.8);
+  expect(geometry.heroWidth).toBeGreaterThanOrEqual(
+    Math.min(geometry.articleWidth * 0.95, geometry.articleWidth - 32),
+  );
+  expect(geometry.heroHeight).toBeGreaterThanOrEqual(240);
+  expect(geometry.minimumPrincipleWidth).toBeGreaterThanOrEqual(
+    Math.min(300, geometry.viewportWidth - 48),
+  );
+  expect(geometry.overlaps).toBe(0);
+};
+
 const expectFooterTrustLayer = async (page: Page): Promise<void> => {
   const footer = page.locator('footer.public-footer');
   await expect(footer).toHaveCount(1);
@@ -270,22 +342,76 @@ const expectFooterTrustLayer = async (page: Page): Promise<void> => {
   await expect(footer.locator('a.lb-web-locale-switcher')).toHaveCount(1);
   await expect(footer.locator('.public-footer__cta')).toHaveCount(1);
   await expect(footer.locator('.public-footer__closing')).toContainText(/Liiiraa Boost/iu);
+  const legalHrefs = await footer
+    .locator('.public-footer__groups > nav')
+    .filter({ hasText: /Legal/u })
+    .locator('a')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  expect(legalHrefs).toHaveLength(5);
+  expect(new Set(legalHrefs).size).toBe(5);
+  const companyHrefs = await footer
+    .locator('.public-footer__groups > nav')
+    .filter({ hasText: /Empresa|Company/iu })
+    .locator('a')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  expect(companyHrefs.some((href) => href?.endsWith('/about'))).toBe(true);
+  expect(companyHrefs.some((href) => href?.endsWith('/principles'))).toBe(true);
+  expect(companyHrefs.some((href) => href?.includes('/about#'))).toBe(false);
 };
 
 const expectPublicOutcomes = async (page: Page, route: WebRoute): Promise<void> => {
   await expectFooterTrustLayer(page);
   if (route.id === 'public-home') await expectHomeCommercialSequence(page);
   if (route.id === 'public-about') await expectAboutTruthBoundary(page);
-  if (['public-privacy-policy', 'public-terms'].includes(route.id)) {
+  if (route.id === 'public-principles') await expectPrinciplesDestination(page);
+  if (
+    [
+      'public-privacy-policy',
+      'public-terms',
+      'public-policies',
+      'public-essential-storage',
+    ].includes(route.id)
+  ) {
     await expect(page.locator('.policy-document__header')).toHaveCount(1);
-    await expect(page.locator('.policy-review-notice')).toHaveCount(1);
+    await expect(page.locator('.policy-review-notice')).toHaveCount(0);
     await expect(page.locator('.policy-history')).toHaveCount(1);
   }
   if (route.id === 'public-privacy-policy') {
-    await expect(page.locator('.privacy-practice-ledger article')).toHaveCount(5);
+    await expect(page.locator('.privacy-practice-ledger article')).toHaveCount(8);
   }
   if (route.id === 'public-responsible-disclosure') {
     await expect(page.locator('.policy-document')).toHaveCount(1);
+    await expect(page.locator('.policy-coordination-boundary')).toContainText(/preflight/iu);
+    await expect(page.locator('a[href="mailto:security@liiiraa.com"]')).toHaveCount(0);
+  }
+  if (LEGAL_ROUTE_IDS.has(route.id)) {
+    const locale = (await page.locator('html').getAttribute('lang')) as WebLocale;
+    const expectedHeadings = {
+      en: {
+        'public-essential-storage': 'Essential Storage',
+        'public-policies': 'Security and Trust',
+        'public-privacy-policy': 'Privacy Policy',
+        'public-responsible-disclosure': 'Responsible Disclosure',
+        'public-terms': 'Terms of Use',
+      },
+      'pt-BR': {
+        'public-essential-storage': 'Armazenamento Essencial',
+        'public-policies': 'Segurança e Confiança',
+        'public-privacy-policy': 'Política de Privacidade',
+        'public-responsible-disclosure': 'Divulgação Responsável',
+        'public-terms': 'Termos de Uso',
+      },
+    } as const;
+    await expect(page.locator('main h1')).toHaveText(
+      expectedHeadings[locale][route.id as keyof (typeof expectedHeadings)[WebLocale]],
+    );
+    const legalCopy = await page.locator('main').innerText();
+    expect(legalCopy).not.toMatch(
+      /revis[aã]o necess[aá]ria|review required|professional legal review|canal seguro|secure channel/iu,
+    );
+    expect(legalCopy).not.toMatch(
+      /checkout (?:est[aá] ativo|is available)|telemetria (?:est[aá] ativa|is active)|cloud AI is active/iu,
+    );
   }
 };
 
@@ -437,19 +563,21 @@ for (const surface of ['public', 'account', 'admin'] as const) {
 }
 
 // canonical-candidate:start
-const CANONICAL_CANDIDATES = webRoutes.flatMap((route) =>
-  WEB_LOCALES.flatMap((locale) =>
-    COVERED_AXES.map((axis) => {
-      const surface = surfaceFor(route);
-      const state = ERROR_ROUTE.test(route.id)
-        ? route.id.slice(route.id.lastIndexOf('error-'))
-        : 'ready';
-      const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
+const CANONICAL_CANDIDATES = webRoutes
+  .filter((route) => route.id !== 'public-essential-storage')
+  .flatMap((route) =>
+    WEB_LOCALES.flatMap((locale) =>
+      COVERED_AXES.map((axis) => {
+        const surface = surfaceFor(route);
+        const state = ERROR_ROUTE.test(route.id)
+          ? route.id.slice(route.id.lastIndexOf('error-'))
+          : 'ready';
+        const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
 
-      return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
-    }),
-  ),
-);
+        return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
+      }),
+    ),
+  );
 
 const canonicalCandidateIdentities = new Set(
   CANONICAL_CANDIDATES.map(({ snapshotIdentity }) => snapshotIdentity),

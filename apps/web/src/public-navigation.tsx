@@ -94,7 +94,7 @@ const FOOTER_GROUPS = Object.freeze([
     id: 'company',
     links: Object.freeze([
       Object.freeze({ id: 'about', routeId: 'public-about' }),
-      Object.freeze({ id: 'principles', routeId: 'public-about', fragment: 'principles' }),
+      Object.freeze({ id: 'principles', routeId: 'public-principles' }),
       Object.freeze({ id: 'contact', routeId: 'public-support' }),
     ]),
   }),
@@ -114,7 +114,6 @@ const FOOTER_GROUPS = Object.freeze([
 ] as const satisfies readonly Readonly<{
   id: PublicFooterGroupId;
   links: readonly Readonly<{
-    fragment?: 'principles';
     id: PublicFooterLinkId;
     routeId: WebRouteId;
   }>[];
@@ -143,6 +142,7 @@ const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
   if (TASK_PILLARS.has(routeId)) return routeId;
   if (routeId === 'public-home') return 'public-product';
   if (routeId === 'public-about') return 'public-product';
+  if (routeId === 'public-principles') return 'public-product';
   if (routeId === 'public-evidence') return 'public-results';
   if (routeId.startsWith('releases-')) return 'public-download';
   if (
@@ -154,6 +154,7 @@ const projectActivePillar = (routeId: string): PublicPillarId | undefined => {
       'public-policies',
       'public-privacy-policy',
       'public-terms',
+      'public-essential-storage',
       'public-responsible-disclosure',
     ].includes(routeId)
   ) {
@@ -211,7 +212,7 @@ export const getPublicFooterState = (pathname: string, locale: WebLocale): Publi
     groups: FOOTER_GROUPS.map((group) => ({
       id: group.id,
       links: group.links.map((link) => ({
-        href: `${publicBoundaryHref(link.routeId, locale)}${'fragment' in link ? `#${link.fragment}` : ''}`,
+        href: publicBoundaryHref(link.routeId, locale),
         id: link.id,
       })),
     })),

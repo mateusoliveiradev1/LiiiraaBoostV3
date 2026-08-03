@@ -87,11 +87,22 @@ describe('authored documentation rhythm', () => {
 
     expect(markup).toContain('documentation-index-workspace');
     expect(markup).toContain('lb-web-version-selector');
+    expect(markup).toContain('class="documentation-navigation"');
+    expect(markup).toContain('class="documentation-quick-guides" open=""');
     expect(markup).toContain('role="search"');
+    expect(markup).toMatch(/<nav aria-label="Guias rápidos"/u);
+    expect(markup).toMatch(/<a href="\/pt-BR\/docs\/current\//u);
     expect(styles).toMatch(
       /@media \(width < 640px\)[\s\S]*\.documentation-index-workspace[\s\S]*min-inline-size:\s*0/u,
     );
     expect(styles).not.toMatch(/\.documentation-article-flow\s*\{[\s\S]*overflow-x:\s*auto/u);
+    expect(styles).toMatch(
+      /\.documentation-navigation[\s\S]*min-inline-size:\s*0[\s\S]*overflow-wrap:\s*anywhere/u,
+    );
+    expect(styles).toMatch(
+      /\.documentation-navigation a[\s\S]*min-block-size:\s*44px[\s\S]*text-underline-offset/u,
+    );
+    expect(styles).toMatch(/\.documentation-navigation a:focus-visible/u);
   });
 
   it('presents the documentation index as visitor tasks without raw route identifiers', async () => {

@@ -238,6 +238,39 @@ describe('public shell', () => {
     expect(getPublicNavigationState('/en/about', 'en').activeId).toBe('public-product');
   });
 
+  it('publishes Principles as a bilingual canonical destination independent from Our Story', async () => {
+    expect(publicCatchAllSource).toContain("'public-principles'");
+    expect(publicCatchAllSource).toContain('className="public-about public-principles"');
+
+    for (const catalog of aboutCatalogs) {
+      expect(catalog.principles.routeId).toBe('public-principles');
+      expect(catalog.principles.chapters.map(({ id }: { id: string }) => id)).toEqual([
+        'evidence',
+        'stability',
+        'local-first',
+        'reversibility',
+      ]);
+      expect(catalog.principles.metadata.title).not.toBe(catalog.about.metadata.title);
+    }
+
+    for (const [locale, expectedTitle] of [
+      ['pt-BR', 'Princípios | Liiiraa Boost'],
+      ['en', 'Principles | Liiiraa Boost'],
+    ] as const) {
+      const metadata = await generatePublicCatchAllMetadata({
+        params: Promise.resolve({ locale, slug: ['principles'] }),
+        searchParams: Promise.resolve({}),
+      });
+      expect(metadata.title).toBe(expectedTitle);
+      expect(metadata.alternates?.canonical).toBe(`/${locale}/principles`);
+    }
+
+    expect(getPublicNavigationState('/pt-BR/principles', 'pt-BR').localeHref).toBe(
+      '/en/principles',
+    );
+    expect(getPublicNavigationState('/en/principles', 'en').localeHref).toBe('/pt-BR/principles');
+  });
+
   it('projects the complete localized footer from canonical destinations on every public shell', () => {
     expect(layoutSource).toContain('<PublicFooter');
 
@@ -254,6 +287,7 @@ describe('public shell', () => {
     ] as const) {
       const footer = getPublicFooterState(pathname, locale);
       const legalLinks = footer.groups.find(({ id }) => id === 'legal')?.links;
+      const companyLinks = footer.groups.find(({ id }) => id === 'company')?.links;
       expect(
         Object.fromEntries(
           footer.groups.map((group) => [group.id, group.links.map(({ id }) => id)]),
@@ -273,14 +307,21 @@ describe('public shell', () => {
       });
       expect(new Set((legalLinks ?? []).map(({ href }) => href)).size).toBe(5);
       expect((legalLinks ?? []).every(({ href }) => href.length > 0)).toBe(true);
+      expect(Object.fromEntries((companyLinks ?? []).map(({ href, id }) => [id, href]))).toEqual({
+        about: `/${locale}/about`,
+        contact: `/${locale}/support`,
+        principles: `/${locale}/principles`,
+      });
+      expect(new Set((companyLinks ?? []).map(({ href }) => href).slice(0, 2)).size).toBe(2);
       expect(footer.localeHref).toBe(targetPathname);
       expect(footer.ctaHref).toBe(`/${locale}/download`);
     }
   });
 
   it('admits Essential Storage through the public catch-all allowlist', () => {
-    expect(publicCatchAllSource).toMatch(
-      /CATALOG_ROUTES[\s\S]*'public-essential-storage'/u,
+    expect(publicCatchAllSource).toMatch(/CATALOG_ROUTES[\s\S]*'public-essential-storage'/u);
+    expect(getPublicNavigationState('/pt-BR/policies/essential-storage', 'pt-BR').activeId).toBe(
+      'public-support',
     );
   });
 

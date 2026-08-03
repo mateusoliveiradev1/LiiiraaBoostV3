@@ -1667,7 +1667,20 @@
 }
 
 .policy-document {
-  max-inline-size: 980px;
+  max-inline-size: 1120px;
+}
+
+.policy-document__header {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-3);
+  max-inline-size: 80ch;
+}
+
+.policy-document__header > span,
+.policy-document__header > h1,
+.policy-document__header > p,
+.policy-document__header > dl {
+  grid-column: 1;
 }
 
 .policy-document__header dl {
@@ -1675,28 +1688,18 @@
   border-block: var(--lb-line-strong);
 }
 
-.policy-review-notice {
-  display: grid;
-  grid-template-columns: minmax(150px, 0.32fr) minmax(0, 1fr);
-  gap: var(--lb-space-3);
+.policy-coordination-boundary {
+  max-inline-size: 70ch;
   margin-block-start: var(--lb-space-4);
   padding: var(--lb-space-3) var(--lb-space-4);
+  border-inline-start: 2px solid var(--lb-accent-cyan);
   background: var(--lb-surface-inset);
-}
-
-.policy-review-notice strong,
-.policy-review-notice p {
-  margin: 0;
-}
-
-.policy-review-notice strong {
-  color: var(--lb-text-primary);
-}
-
-.policy-review-notice p {
-  max-inline-size: 70ch;
   color: var(--lb-text-secondary);
   line-height: 1.6;
+}
+
+.policy-coordination-boundary strong {
+  color: var(--lb-text-primary);
 }
 
 .privacy-governance {
@@ -1853,11 +1856,13 @@
 }
 
 @media (width < 640px) {
-  .policy-review-notice,
   .privacy-governance > header,
   .privacy-controller,
   .privacy-practice-ledger article,
-  .privacy-accountability {
+  .privacy-accountability,
+  .policy-document__body section,
+  .policy-history li,
+  .disclosure-columns {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -2279,6 +2284,44 @@
   padding: var(--lb-space-5) var(--lb-space-3);
   border-inline-end: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-inset);
+}
+
+.documentation-navigation,
+.documentation-navigation details,
+.documentation-navigation summary,
+.documentation-navigation nav,
+.documentation-navigation ul,
+.documentation-navigation li,
+.documentation-navigation a {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.documentation-navigation details + details {
+  margin-block-start: var(--lb-space-3);
+}
+
+.documentation-navigation summary {
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.documentation-navigation a {
+  display: flex;
+  align-items: center;
+  min-block-size: 44px;
+  padding-block: var(--lb-space-2);
+  line-height: 1.45;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.documentation-navigation a:focus-visible {
+  border-radius: var(--lb-radius-control);
+  outline: 2px solid var(--lb-focus-ring);
+  outline-offset: 2px;
 }
 
 .lb-web-product-frame > aside > details {

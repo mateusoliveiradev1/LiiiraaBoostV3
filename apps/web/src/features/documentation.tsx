@@ -751,8 +751,8 @@ const DocumentationNavigation = ({
   const copy = copyFor(locale);
   const items = indexItems(locale, version).map(({ id, label, href }) => ({ id, label, href }));
   return (
-    <aside aria-label={copy.index}>
-      <details open>
+    <aside aria-label={copy.index} className="documentation-navigation">
+      <details className="documentation-quick-guides" open>
         <summary>{copy.index}</summary>
         <DocumentationIndex items={items.slice(0, 5)} label={copy.index} />
       </details>

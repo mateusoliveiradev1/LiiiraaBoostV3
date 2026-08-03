@@ -6,10 +6,10 @@
   "about": {
     "routeId": "public-about",
     "metadata": {
-      "title": "About Liiiraa Boost",
-      "description": "The motivation, trust principles, and ambition that guide Liiiraa Boost."
+      "title": "Our story | Liiiraa Boost",
+      "description": "The story, motivation, and ambition that gave rise to Liiiraa Boost."
     },
-    "title": "Why Liiiraa Boost exists",
+    "title": "Our story: why Liiiraa Boost exists",
     "lead": "Gaming performance should not require opaque changes or a choice between speed and stability. The product begins with that conviction.",
     "chapters": [
       {
@@ -36,6 +36,41 @@
         "id": "ambition",
         "title": "The long-term ambition",
         "body": "Build the definitive Windows gaming optimizer: deep enough to respect each machine, clear enough to guide decisions, and light enough not to compete with the game for the resources it promises to preserve."
+      }
+    ],
+    "cta": {
+      "label": "See how it works",
+      "routeId": "public-product"
+    }
+  },
+  "principles": {
+    "routeId": "public-principles",
+    "metadata": {
+      "title": "Principles | Liiiraa Boost",
+      "description": "The evidence, stability, privacy, and reversibility commitments that guide Liiiraa Boost."
+    },
+    "title": "Principles behind every optimization",
+    "lead": "Performance matters only when it can be understood, measured on the PC itself, and pursued without hiding risk or taking control away from the player.",
+    "chapters": [
+      {
+        "id": "evidence",
+        "title": "Evidence before promises",
+        "body": "Gains vary with hardware, Windows, drivers, the game, and measurement conditions. The product must distinguish what was observed, estimated, or remains unproven instead of presenting hypotheses as guaranteed outcomes."
+      },
+      {
+        "id": "stability",
+        "title": "Stability is part of performance",
+        "body": "A recommendation must respect compatibility, risk, dependencies, and the machine's limits. When evidence is not sufficient to act safely, the right choice is not to offer the adjustment."
+      },
+      {
+        "id": "local-first",
+        "title": "Privacy starts on the PC",
+        "body": "Local processing is the default. Any future sharing of technical data must have a clear purpose, minimum scope, and specific consent where applicable."
+      },
+      {
+        "id": "reversibility",
+        "title": "Control includes a way back",
+        "body": "Each change must be explainable, recordable, and reversible. Review before applying, history, and restoration belong to the main experience rather than a secondary path."
       }
     ],
     "cta": {

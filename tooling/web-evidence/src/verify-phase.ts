@@ -21,6 +21,7 @@ export const PHASE_3_LOCALES = ['pt-BR', 'en'] as const;
 export const PHASE_3_ROUTES = [
   'public-home',
   'public-about',
+  'public-principles',
   'public-product',
   'public-results',
   'public-evidence',
@@ -32,6 +33,7 @@ export const PHASE_3_ROUTES = [
   'public-status',
   'public-policies',
   'public-privacy-policy',
+  'public-essential-storage',
   'public-terms',
   'public-responsible-disclosure',
   'docs-index',
