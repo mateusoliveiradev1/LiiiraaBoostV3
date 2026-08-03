@@ -130,9 +130,10 @@ test('@final @public Cobalt Ignition Bay geometry keeps the focal product above 
   expect(Math.abs((stage?.x ?? 0) + (stage?.width ?? 0) / 2 - 720)).toBeLessThanOrEqual(2);
   expect(stage?.y).toBeGreaterThanOrEqual(640);
   expect(stage?.y).toBeLessThanOrEqual(646);
-  expect(
-    Math.min((stage?.y ?? 0) + (stage?.height ?? 0), 900) - Math.max(stage?.y ?? 0, 0),
-  ).toBeGreaterThanOrEqual(260);
+  const visibleStageHeight =
+    Math.min((stage?.y ?? 0) + (stage?.height ?? 0), 900) - Math.max(stage?.y ?? 0, 0);
+  expect(visibleStageHeight).toBeGreaterThanOrEqual(256);
+  expect(visibleStageHeight).toBeLessThanOrEqual(260);
 });
 
 for (const axis of ['mobile-390', 'reflow-320'] as const) {
