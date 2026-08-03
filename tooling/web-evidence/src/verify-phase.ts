@@ -10,7 +10,7 @@ import {
 export const PHASE_3_REQUIREMENTS = ['WEB-01', 'WEB-02', 'WEB-03', 'WEB-08'] as const;
 export const PHASE_3_SUCCESS_CRITERIA = ['SC-01', 'SC-02', 'SC-03', 'SC-04'] as const;
 export const PHASE_3_DECISIONS = Array.from(
-  { length: 101 },
+  { length: 110 },
   (_, index) => `D-${String(index + 1).padStart(2, '0')}`,
 );
 export const PHASE_3_SCENARIOS = Array.from(
@@ -20,6 +20,7 @@ export const PHASE_3_SCENARIOS = Array.from(
 export const PHASE_3_LOCALES = ['pt-BR', 'en'] as const;
 export const PHASE_3_ROUTES = [
   'public-home',
+  'public-about',
   'public-product',
   'public-results',
   'public-evidence',

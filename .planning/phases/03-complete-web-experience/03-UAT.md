@@ -3,14 +3,14 @@ status: testing
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-03T02:56:04-03:00
+updated: 2026-08-03T15:30:00-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[awaiting renewed human review — Plan 03-72 completed the full route/state/locale/breakpoint replay; all 25 candidates remain unapproved and Plan 03-46 remains blocked]
+[awaiting renewed human review — Plan 03-82 completed final QA over the 464-route candidate matrix and refreshed the 25 legacy continuity candidates; all candidates remain unapproved and Plan 03-46 remains blocked]
 
 ## Plan 03-45 Preflight
 
@@ -162,6 +162,57 @@ result: passed — automated stability and bounded non-human visual inspection o
 | Mobile and 320px reflow emphasis | W02, W16, W18, G02, G03, G05, G07 |
 
 Approval boundary: this preflight does not approve pixels, publish candidates, create a publication bundle, execute Plan 03-46, or change any prior human verdict. Plan 03-45 must still receive an explicit human decision over the exact current 25-candidate packet.
+
+## Plan 03-82 Final QA and Complete Pending-Review Packet
+
+date: 2026-08-03T15:30:00-03:00
+result: passed — clean builds, complete automated regressions, current route evidence, and exact candidate bindings passed. This is an automated stability result only: every prior human rejection is preserved, `humanApproved` and `publicationApproved` remain false, and Plan 03-46 remains blocked.
+
+### Canonical candidate matrix
+
+| Dimension | Bound result |
+| --- | --- |
+| Total candidates | 464 original-resolution PNGs |
+| Canonical routes | 58 |
+| Locales | 232 PT-BR and 232 English candidates |
+| Widths | 1440, 960, 390, and 320 CSS pixels for every route/locale identity |
+| Surfaces | 248 public, 128 account, and 88 admin candidates |
+| States | 368 ready and 96 error-state candidates |
+| Candidate binding | `401369ededbe239dc526f2776bac5172507b352a2dfa2288bacee31fbbc4131f` |
+| Inspection | 464/464 records match route, locale, width, state, dimensions, byte length, and SHA-256 |
+| Approval boundary | `status: pending-human-approval`, `humanApproved: false`, `publicationApproved: false` |
+
+The original-resolution launch-readiness inspection at `visuals/candidate-inspections/03-76-launch-readiness.json` records D-102 through D-110 as `pass`. Those detector verdicts prove the authored contract and candidate integrity; they do not substitute for the reviewer's visual judgment.
+
+### Legacy W01-W18/G01-G07 continuity
+
+| Gate | Result |
+| --- | --- |
+| Controlled refresh | PASS — 23 screenshots refreshed and W10/G05 remained byte-stable |
+| Aggregate 25-image binding | `68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd` |
+| Controlled update replay | PASS — 45 applicable tests passed and 160 project-matrix skips were expected |
+| Exact no-update replay | PASS — 44 applicable tests passed and 161 project-matrix skips were expected |
+
+### Final verification
+
+| Command or gate | Result |
+| --- | --- |
+| Public, account, and admin production builds | PASS — all three independent Next.js builds and strict TypeScript gates completed. |
+| Complete canonical Playwright matrix | PASS — all 464 current route/locale/width/state screenshots matched without update mode. |
+| Legacy accessibility/responsive Playwright suite | PASS — 44 applicable tests passed and 161 expected project-matrix skips remained. |
+| React/Turbopack development CSP gate | PASS — development permits the required eval-based React debugging path; production remains strict and excludes `unsafe-eval`. |
+| Workspace regression | PASS — Turbo completed 49/49 tasks. Web: 119 passed; account: 68; admin: 76; web-core: 111; web-evidence: 151 passed with one intentional skip; web-features: 41. |
+| Planned phase verification | PASS — 110 decisions, 58 routes, 24 observed route outcomes, 18 scenarios; hash `9ae46bffb42c9083fb900b064539ea00780f8dda54cc8d83837aa6395b412370`. |
+| Route reachability | PASS — all 24 localized 403/404/410/500 outcomes remain current and writer-owned. |
+
+### Exact current human-review scope
+
+- Review the complete 464-candidate route matrix as the canonical launch-readiness packet.
+- Use W01-W18 and G01-G07 only as named continuity shortcuts into representative public, account, admin, authentication, degraded-state, and responsive compositions.
+- Review the public Home as the primary commercial experience: product desire, real desktop proof, Free/Premium clarity, safety/recovery, competitive-mode explanation, FAQ, conversion action, and launch-grade footer.
+- Preserve all earlier issue reports until the reviewer explicitly accepts the renewed result. No automated pass rewrites or erases those historical verdicts.
+
+Approval boundary: Plan 03-82 does not create `03-45-SUMMARY.md`, approve any candidate, mutate publication artifacts, promote a bundle, or execute Plan 03-46. A later literal human verdict must decide the current packet.
 
 ## Tests
 

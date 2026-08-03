@@ -845,7 +845,7 @@ describe('visual contract and story axes', () => {
       ...Array.from({ length: 7 }, (_, index) => `G${String(index + 1).padStart(2, '0')}`),
     ];
 
-    expect(visualManifest.schemaVersion).toBe(2);
+    expect(visualManifest.schemaVersion).toBe(3);
     expect(visualManifest.entries.map(({ captureId }) => captureId)).toEqual(expectedCaptureIds);
     expect(visualManifest.entries).toHaveLength(25);
     expect(visualManifest.origins).toEqual({

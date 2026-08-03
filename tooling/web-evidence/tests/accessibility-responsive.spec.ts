@@ -222,20 +222,20 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
         width: box.width,
       };
     };
-    const visibleLocaleCount = [...document.querySelectorAll('.lb-web-locale-switcher')].filter(
-      (node) => {
-        if (!(node instanceof HTMLElement)) return false;
-        if (node.closest('details:not([open])') !== null) return false;
-        const box = node.getBoundingClientRect();
-        const style = getComputedStyle(node);
-        return (
-          box.width > 0 &&
-          box.height > 0 &&
-          style.display !== 'none' &&
-          style.visibility !== 'hidden'
-        );
-      },
-    ).length;
+    const visibleLocaleCount = [
+      ...document.querySelectorAll('.public-header .lb-web-locale-switcher'),
+    ].filter((node) => {
+      if (!(node instanceof HTMLElement)) return false;
+      if (node.closest('details:not([open])') !== null) return false;
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return (
+        box.width > 0 &&
+        box.height > 0 &&
+        style.display !== 'none' &&
+        style.visibility !== 'hidden'
+      );
+    }).length;
 
     return {
       context: boxAndStyle('.home-results-method'),
@@ -274,7 +274,9 @@ const expectPublicHomeAuthoringParity = async (page: Page): Promise<void> => {
   expect(parity.hero.position, 'PUBLIC_HOME_AUTHORING_PARITY: hero positioning binding').toBe(
     'relative',
   );
-  expect(parity.heading.textAlign, 'PUBLIC_HOME_AUTHORING_PARITY: centered promise').toBe('center');
+  expect(parity.heading.textAlign, 'PUBLIC_HOME_AUTHORING_PARITY: responsive promise alignment').toBe(
+    parity.viewportWidth < 640 ? 'start' : 'center',
+  );
   expect(
     parity.heading.fontSize,
     'PUBLIC_HOME_AUTHORING_PARITY: authored promise scale',
@@ -586,7 +588,7 @@ test('@final @public CSP origin, noindex, authority, role, and release gates rem
 
 test('@final @public visual manifest is an exact W01-W18 projection', async ({}, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
-  expect(visualManifest.schemaVersion).toBe(2);
+  expect(visualManifest.schemaVersion).toBe(3);
   expect(visualManifest.source).toBe('../../contracts/scenarios/web-scenarios.json');
   const scenarioEntries = visualManifest.entries.filter(
     (entry): entry is VisualEntry & Readonly<{ scenarioId: string; sourceHash: string }> =>
