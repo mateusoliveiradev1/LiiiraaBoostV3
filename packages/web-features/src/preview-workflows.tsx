@@ -71,6 +71,45 @@ const COPY = Object.freeze({
   }),
 });
 
+const ADMIN_COPY = Object.freeze({
+  en: Object.freeze({
+    ...COPY.en,
+    boundary:
+      'Administrative connectivity remains closed. You can review or cancel without changing the system.',
+    cancelledBody: 'The review was cancelled. No administrative operation was performed.',
+    cancelledTitle: 'Cancelled — no operation was performed',
+    failure:
+      'Administrative services are temporarily unavailable. Safe review fields remain available.',
+    offline: 'You are offline. Safe review remains available and no operation is queued.',
+    progress: 'Recording the review without performing an administrative operation.',
+    reauthenticate:
+      'Operator verification is unavailable right now. No credential was verified or stored.',
+    receiptBody: 'The review is complete. No administrative operation was performed.',
+    receiptTitle: 'Review recorded — no operation was performed',
+  }),
+  'pt-BR': Object.freeze({
+    ...COPY['pt-BR'],
+    boundary:
+      'A conexão administrativa permanece fechada. Você pode revisar ou cancelar sem alterar o sistema.',
+    cancelledBody: 'A revisão foi cancelada. Nenhuma operação administrativa foi realizada.',
+    cancelledTitle: 'Cancelado — nenhuma operação foi realizada',
+    failure:
+      'Os serviços administrativos estão temporariamente indisponíveis. Os campos seguros de revisão permanecem disponíveis.',
+    offline:
+      'Você está sem conexão. A revisão segura permanece disponível e nenhuma operação entrou na fila.',
+    progress: 'Registrando a revisão sem realizar uma operação administrativa.',
+    reauthenticate:
+      'A verificação do operador está indisponível agora. Nenhuma credencial foi verificada ou armazenada.',
+    receiptBody: 'A revisão foi concluída. Nenhuma operação administrativa foi realizada.',
+    receiptTitle: 'Revisão registrada — nenhuma operação foi realizada',
+  }),
+});
+
+const workflowCopy = (
+  locale: PreviewWorkflowLocale,
+  surface: string,
+) => (surface === 'admin' ? ADMIN_COPY[locale] : COPY[locale]);
+
 const ERROR_COPY: Readonly<Record<string, Readonly<Record<PreviewWorkflowLocale, string>>>> =
   Object.freeze({
     'preview.validation.consent-required': Object.freeze({
@@ -212,6 +251,7 @@ export const PreviewConfirmation = ({
   onChangeConfirmation,
   onConfirm,
 }: PreviewConfirmationProps) => {
+  const copy = workflowCopy(locale, context.action.surface);
   const expected = context.confirmation.value[locale];
   const requiresPhrase = context.confirmation.kind === 'phrase';
   const confirmValue = requiresPhrase ? confirmationValue : expected;
@@ -222,7 +262,7 @@ export const PreviewConfirmation = ({
         {locale === 'pt-BR' ? 'Confirme esta ação' : 'Confirm this action'}
       </h2>
       <PreviewBoundary
-        description={COPY[locale].boundary}
+        description={copy.boundary}
         title={locale === 'pt-BR' ? 'Salvamento indisponível' : 'Saving unavailable'}
       />
       <p>{context.confirmation.label[locale]}</p>
@@ -238,7 +278,7 @@ export const PreviewConfirmation = ({
       ) : null}
       <div aria-label={locale === 'pt-BR' ? 'Ações de confirmação' : 'Confirmation actions'} role="group">
         <LbButton onPress={onCancel} variant="quiet">
-          {COPY[locale].cancel}
+          {copy.cancel}
         </LbButton>
         <LbButton
           isDisabled={confirmValue !== expected}
@@ -269,20 +309,21 @@ export const PreviewFailure = ({
   onRecover,
   projection,
 }: PreviewFailureProps) => {
+  const copy = workflowCopy(locale, context.action.surface);
   const detail =
     projection.state === 'offline'
-      ? COPY[locale].offline
+      ? copy.offline
       : projection.state === 'stale'
-        ? COPY[locale].stale
+        ? copy.stale
         : projection.state === 'expired-session'
-          ? COPY[locale].expired
-          : COPY[locale].failure;
+          ? copy.expired
+          : copy.failure;
   const recoveryLabel =
     projection.state === 'stale'
-      ? COPY[locale].refresh
+      ? copy.refresh
       : projection.state === 'expired-session'
-        ? COPY[locale].resume
-        : COPY[locale].retry;
+        ? copy.resume
+        : copy.retry;
 
   return (
     <section
@@ -305,7 +346,7 @@ export const PreviewFailure = ({
       <div role="group" aria-label={locale === 'pt-BR' ? 'Recuperação' : 'Recovery'}>
         <LbButton onPress={onRecover}>{recoveryLabel}</LbButton>
         <LbButton onPress={onCancel} variant="quiet">
-          {COPY[locale].cancel}
+          {copy.cancel}
         </LbButton>
       </div>
     </section>
@@ -325,6 +366,15 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
   const cancelled = output.kind === 'cancelled';
   const receipt = output.receipt;
   const correlationId = correlationFor(output);
+  const copy = workflowCopy(locale, receipt.authority.surface);
+  const changedLabel =
+    receipt.authority.surface === 'admin'
+      ? locale === 'pt-BR'
+        ? 'Operação realizada'
+        : 'Operation performed'
+      : locale === 'pt-BR'
+        ? 'Conta alterada'
+        : 'Account changed';
 
   return (
     <section
@@ -335,16 +385,16 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
       tabIndex={-1}
     >
       <h2 id="preview-receipt-title">
-        {cancelled ? COPY[locale].cancelledTitle : COPY[locale].receiptTitle}
+        {cancelled ? copy.cancelledTitle : copy.receiptTitle}
       </h2>
-      <p>{cancelled ? COPY[locale].cancelledBody : COPY[locale].receiptBody}</p>
+      <p>{cancelled ? copy.cancelledBody : copy.receiptBody}</p>
       <dl>
         <div>
           <dt>{locale === 'pt-BR' ? 'Ação revisada' : 'Reviewed action'}</dt>
           <dd>{actionLabel}</dd>
         </div>
         <div>
-          <dt>{locale === 'pt-BR' ? 'Conta alterada' : 'Account changed'}</dt>
+          <dt>{changedLabel}</dt>
           <dd>{locale === 'pt-BR' ? 'Não' : 'No'}</dd>
         </div>
         <div>
@@ -364,11 +414,19 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
           <time dateTime={receipt.reviewedAt}>{receipt.reviewedAt}</time>{' '}
           {cancelled
             ? locale === 'pt-BR'
-              ? 'Revisão cancelada; sua conta não mudou.'
-              : 'Review cancelled; your account is unchanged.'
+              ? receipt.authority.surface === 'admin'
+                ? 'Revisão cancelada; nenhuma operação foi realizada.'
+                : 'Revisão cancelada; sua conta não mudou.'
+              : receipt.authority.surface === 'admin'
+                ? 'Review cancelled; no operation was performed.'
+                : 'Review cancelled; your account is unchanged.'
             : locale === 'pt-BR'
-              ? 'Revisão concluída; sua conta não mudou.'
-              : 'Review complete; your account is unchanged.'}
+              ? receipt.authority.surface === 'admin'
+                ? 'Revisão concluída; nenhuma operação foi realizada.'
+                : 'Revisão concluída; sua conta não mudou.'
+              : receipt.authority.surface === 'admin'
+                ? 'Review complete; no operation was performed.'
+                : 'Review complete; your account is unchanged.'}
         </li>
       </ol>
     </section>
@@ -540,17 +598,18 @@ export const PreviewWorkflow = ({
   const [confirmationValue, setConfirmationValue] = useState('');
   const focusTarget = useRef<HTMLDivElement | null>(null);
   const actionPolicy = PREVIEW_ACTION_POLICIES[snapshot.context.action.family];
+  const copy = workflowCopy(locale, snapshot.context.action.surface);
   const output = snapshot.status === 'done' ? snapshot.output : null;
   const statusCopy = useMemo(
     () => {
-      if (projection.state === 'issuing') return COPY[locale].progress;
+      if (projection.state === 'issuing') return copy.progress;
       const labels: Readonly<Record<PreviewStateProjection['state'], Readonly<Record<PreviewWorkflowLocale, string>>>> = {
         cancelled: { en: 'Review cancelled', 'pt-BR': 'Revisão cancelada' },
         complete: { en: 'Review complete', 'pt-BR': 'Revisão concluída' },
         confirming: { en: 'Confirmation required', 'pt-BR': 'Confirmação necessária' },
         editing: { en: 'Check the details below', 'pt-BR': 'Confira os detalhes abaixo' },
         'expired-session': { en: 'Secure session expired', 'pt-BR': 'Sessão segura expirada' },
-        issuing: { en: COPY.en.progress, 'pt-BR': COPY['pt-BR'].progress },
+        issuing: { en: copy.progress, 'pt-BR': copy.progress },
         offline: { en: 'You are offline', 'pt-BR': 'Você está sem conexão' },
         'partial-failure': {
           en: 'Account services are unavailable',
@@ -567,7 +626,7 @@ export const PreviewWorkflow = ({
       };
       return labels[projection.state][locale];
     },
-    [locale, projection.state],
+    [copy.progress, locale, projection.state],
   );
 
   useEffect(() => {
@@ -628,7 +687,7 @@ export const PreviewWorkflow = ({
         </h1>
       </header>
       <PreviewBoundary
-        description={COPY[locale].boundary}
+        description={copy.boundary}
         title={locale === 'pt-BR' ? 'Salvamento indisponível' : 'Saving unavailable'}
       />
       <p aria-live="polite" role="status">
@@ -644,7 +703,7 @@ export const PreviewWorkflow = ({
                 send({ type: 'SUBMIT' });
               }}
             >
-              {COPY[locale].finishValidation}
+              {copy.finishValidation}
             </LbButton>
           </>
         ) : null}
@@ -655,7 +714,7 @@ export const PreviewWorkflow = ({
               send({ type: 'VALIDATION_PASSED' });
             }}
           >
-            {COPY[locale].finishValidation}
+            {copy.finishValidation}
           </LbButton>
         ) : null}
 
@@ -672,7 +731,7 @@ export const PreviewWorkflow = ({
                 send({ type: 'SUBMIT' });
               }}
             >
-              {COPY[locale].finishValidation}
+              {copy.finishValidation}
             </LbButton>
           </>
         ) : null}
@@ -687,14 +746,14 @@ export const PreviewWorkflow = ({
                 }}
                 variant="quiet"
               >
-                {COPY[locale].edit}
+                {copy.edit}
               </LbButton>
               <LbButton
                 onPress={() => {
                   send({ type: 'REVIEW' });
                 }}
               >
-                {COPY[locale].review}
+                {copy.review}
               </LbButton>
             </div>
           </>
@@ -705,9 +764,9 @@ export const PreviewWorkflow = ({
             <h2 id="preview-reauth-title" tabIndex={-1}>
               {locale === 'pt-BR' ? 'Confirme seu acesso' : 'Confirm your access'}
             </h2>
-            <p>{COPY[locale].reauthenticate}</p>
+            <p>{copy.reauthenticate}</p>
             <PreviewBoundary
-              description={COPY[locale].boundary}
+              description={copy.boundary}
               title={locale === 'pt-BR' ? 'Verificação indisponível' : 'Verification unavailable'}
             />
             <div
@@ -715,7 +774,7 @@ export const PreviewWorkflow = ({
               aria-label={locale === 'pt-BR' ? 'Reautenticação' : 'Reauthentication'}
             >
               <LbButton onPress={cancel} variant="quiet">
-                {COPY[locale].cancel}
+                {copy.cancel}
               </LbButton>
               <LbButton
                 onPress={() => {

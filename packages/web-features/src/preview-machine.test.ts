@@ -403,10 +403,10 @@ describe('preview workflow accessibility', () => {
   });
 
   it.each([
-    ['en', 'Review complete — your account is unchanged'],
-    ['pt-BR', 'Revisão concluída — sua conta não mudou'],
+    ['en', 'Review recorded — no operation was performed'],
+    ['pt-BR', 'Revisão registrada — nenhuma operação foi realizada'],
   ] as const)(
-    'renders a polite customer-facing no-change receipt in %s',
+    'renders a polite admin-specific no-change receipt in %s',
     (locale, heading) => {
       const receipt = PreviewReceipt({
         actionLabel: 'redacted support case',
@@ -437,7 +437,7 @@ describe('preview workflow accessibility', () => {
     },
   );
 
-  it('renders cancellation as a customer-facing no-change terminal state', () => {
+  it('renders cancellation as an admin-specific no-change terminal state', () => {
     const context = contextForAccessibility();
     const receipt = PreviewReceipt({
       actionLabel: context.action.objectLabel,
@@ -460,7 +460,7 @@ describe('preview workflow accessibility', () => {
     });
     const serialized = JSON.stringify(receipt);
 
-    expect(serialized).toContain('Cancelled — your account is unchanged');
+    expect(serialized).toContain('Cancelled — no operation was performed');
     expect(serialized).not.toContain('Phase 4');
     expect(serialized).not.toMatch(/authority|fixture|adapter/iu);
     expect(elementProps(receipt)['data-remote-state-changed']).toBe('false');

@@ -12,7 +12,6 @@ import type { ReactNode } from 'react';
 import { AdminFocusHandoff } from '../../admin-focus-handoff';
 import { AdminNavigation } from '../../admin-navigation';
 import { ProductLockup } from '../../admin-product-lockup';
-import { AdminPreviewProvenance } from '../../admin-preview-provenance';
 import {
   ADMIN_ROLE_COPY,
   adminRoleFromHeader,
@@ -27,24 +26,26 @@ type AdminLocaleLayoutProps = Readonly<{
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
+    accountLabel: 'Menu do operador',
+    accountName: 'Operador seguro',
     boundary: 'Origem administrativa dedicada. Cookies públicos e da conta não são aceitos.',
+    isolated: 'Origem isolada e sem cookies públicos',
     navigation: 'Escopo da função',
     currentTask: 'Tarefa atual',
-    preview: 'Alterações remotas desconectadas',
-    previewDetail:
-      'Revise a decisão com segurança. Uma capacidade desconectada termina sem alterar sistemas remotos.',
-    previewLabel: 'Revisão administrativa',
+    roleHome: 'Área da função',
+    security: 'Sessão administrativa protegida',
     surface: 'Operações',
     skip: 'Ir para o conteúdo administrativo',
   }),
   en: Object.freeze({
+    accountLabel: 'Operator menu',
+    accountName: 'Secure operator',
     boundary: 'Dedicated administrative origin. Public and account cookies are not accepted.',
+    isolated: 'Isolated origin with no public cookies',
     navigation: 'Role scope',
     currentTask: 'Current task',
-    preview: 'Remote changes disconnected',
-    previewDetail:
-      'Review the decision safely. A disconnected capability finishes without changing remote systems.',
-    previewLabel: 'Administrative review',
+    roleHome: 'Role workspace',
+    security: 'Protected administrative session',
     surface: 'Operations',
     skip: 'Skip to administrative content',
   }),
@@ -106,6 +107,8 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         </a>
 
         <AdminNavigation
+          accountLabel={copy.accountLabel}
+          accountName={copy.accountName}
           alternateLocale={alternateLocale}
           currentTaskLabel={copy.currentTask}
           fallbackLocaleHref={localizedRoleHref(alternateLocale, role)}
@@ -115,33 +118,17 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
                 <ProductLockup />
                 <span className="admin-brand__surface">{copy.surface}</span>
               </a>
-              <div className="admin-header__role">
-                <span>{locale === 'pt-BR' ? 'Função ativa' : 'Active role'}</span>
-                <strong>{ADMIN_ROLE_COPY[role][locale]}</strong>
-              </div>
-              <p className="admin-header__origin" role="note">
-                {copy.boundary}
-              </p>
             </>
           }
+          isolatedLabel={copy.isolated}
           items={navigation}
           label={copy.navigation}
           locale={locale}
-          preview={
-            <aside
-              aria-label={copy.previewLabel}
-              className="admin-preview-band"
-              data-authority="disconnected"
-              data-preview-role={role}
-              role="status"
-            >
-              <AdminPreviewProvenance detail={copy.previewLabel} locale={locale} />
-              <strong>{copy.preview}</strong>
-              <span className="admin-preview-band__detail">{copy.previewDetail}</span>
-            </aside>
-          }
+          roleHomeHref={localizedRoleHref(locale, role)}
+          roleHomeLabel={copy.roleHome}
           role={role}
           roleLabel={ADMIN_ROLE_COPY[role][locale]}
+          securityLabel={copy.security}
         >
           <main id="admin-main" tabIndex={-1}>
             <AdminFocusHandoff />

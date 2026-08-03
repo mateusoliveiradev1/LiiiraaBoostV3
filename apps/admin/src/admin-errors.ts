@@ -14,15 +14,15 @@ const COPY = Object.freeze({
   'pt-BR': Object.freeze({
     '403': Object.freeze({
       action: 'Voltar à área da função',
-      affected: 'A função demonstrativa atual não inclui esta responsabilidade.',
-      detail: 'O acesso foi bloqueado antes de qualquer dado ou autoridade administrativa.',
+      affected: 'A função atual não inclui esta responsabilidade.',
+      detail: 'O acesso foi bloqueado antes que qualquer dado operacional fosse revelado.',
       safeState:
         'Nenhuma credencial foi aceita, nenhuma sessão foi criada e nenhum evento remoto foi alterado.',
       title: 'Acesso administrativo não permitido',
     }),
     '404': Object.freeze({
       action: 'Voltar à área da função',
-      affected: 'O endereço não corresponde a uma área conhecida da prévia administrativa.',
+      affected: 'O endereço não corresponde a uma área administrativa disponível.',
       detail: 'A falha permanece visível; não redirecionamos para ocultar o endereço inválido.',
       safeState: 'Nenhum identificador de cliente ou detalhe operacional foi exposto.',
       title: 'Área administrativa não encontrada',
@@ -38,24 +38,24 @@ const COPY = Object.freeze({
     }),
     '500': Object.freeze({
       action: 'Tentar novamente',
-      affected: 'A área administrativa de prévia não pôde ser renderizada.',
+      affected: 'A área administrativa não pôde ser carregada.',
       detail:
         'A parte afetada está indisponível. A navegação segura da função permanece disponível.',
       safeState: 'Nenhuma ação remota foi executada e os detalhes técnicos permanecem redigidos.',
-      title: 'A prévia administrativa encontrou uma falha',
+      title: 'A área administrativa encontrou uma falha',
     }),
   }),
   en: Object.freeze({
     '403': Object.freeze({
       action: 'Return to role workspace',
-      affected: 'The current demonstrative role does not include this responsibility.',
-      detail: 'Access was blocked before any administrative data or authority was reached.',
+      affected: 'The current role does not include this responsibility.',
+      detail: 'Access was blocked before any operational data was disclosed.',
       safeState: 'No credential was accepted, no session was created, and no remote event changed.',
       title: 'Administrative access is not permitted',
     }),
     '404': Object.freeze({
       action: 'Return to role workspace',
-      affected: 'This address does not match a known area in the administrative preview.',
+      affected: 'This address does not match an available administrative area.',
       detail: 'The failure remains visible; we do not redirect to hide the invalid address.',
       safeState: 'No customer identifier or operational detail was exposed.',
       title: 'Administrative area not found',
@@ -70,10 +70,10 @@ const COPY = Object.freeze({
     }),
     '500': Object.freeze({
       action: 'Try again',
-      affected: 'The administrative preview area could not render.',
+      affected: 'The administrative area could not load.',
       detail: 'The affected part is unavailable. Safe role navigation remains available.',
       safeState: 'No remote action ran and technical details remain redacted.',
-      title: 'The administrative preview encountered a failure',
+      title: 'The administrative area encountered a failure',
     }),
   }),
 } satisfies Readonly<Record<WebLocale, Readonly<Record<AdminFailureKind, AdminFailureCopy>>>>);

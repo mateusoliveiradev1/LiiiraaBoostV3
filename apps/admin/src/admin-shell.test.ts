@@ -38,7 +38,7 @@ describe('admin shell', () => {
     );
 
     expect(styles).toMatch(/\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*72px/u);
-    expect(styles).toMatch(/\.admin-preview-band\s*\{[\s\S]*block-size:\s*40px/u);
+    expect(styles).not.toContain('.admin-preview-band');
     expect(styles).toMatch(
       /\.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*280px minmax\(0, 1fr\)/u,
     );
@@ -51,7 +51,7 @@ describe('admin shell', () => {
     );
   });
 
-  it('keeps operational identity, task, origin, role, and locale legible without raw fixture chrome', () => {
+  it('keeps operational identity, task, isolated session, role, and locale legible without preview chrome', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const productLockupUrl = new URL('./admin-product-lockup.tsx', import.meta.url);
@@ -67,11 +67,12 @@ describe('admin shell', () => {
     expect(productLockupSource).toContain("from '@liiiraa/design-system'");
     expect(productLockupSource).toContain('<DesignSystemProductLockup />');
     expect(layout).toContain('admin-brand__surface');
-    expect(layout).toContain('admin-header__role');
-    expect(layout).toContain('admin-header__origin');
     expect(navigation).toContain('admin-header__task');
+    expect(navigation).toContain('admin-header__account');
+    expect(navigation).toContain('<ProductIcon');
     expect(navigation).toContain('<LocaleSwitcher');
-    expect(layout).toContain('data-authority="disconnected"');
+    expect(layout).toContain('isolatedLabel={copy.isolated}');
+    expect(layout).not.toContain('AdminPreviewProvenance');
     expect(layout).not.toMatch(/>\s*(fixture|simulated-no-change)\s*</iu);
   });
 
@@ -142,18 +143,25 @@ describe('admin shell', () => {
     );
   });
 
-  it('renders a premium role and task topbar with accessible flag language switching', () => {
-    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+  it('renders a premium task and operator topbar with accessible flag language switching', () => {
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
-    expect(layout).toContain('admin-header__role');
     expect(navigation).toContain('admin-header__task');
+    expect(navigation).toContain('admin-header__account');
+    expect(navigation).toContain('admin-header__account-panel');
     expect(navigation).toContain('sourceLocale={locale}');
     expect(navigation).toContain('targetLocale={alternateLocale}');
     expect(navigation).toContain('fallbackLocaleHref');
     expect(navigation).toContain('resolveLocalizedCurrentRoute({');
     expect(navigation).toContain('<LocaleSwitcher');
     expect(navigation).not.toContain('aria-label={`${locale');
+    expect(styles).toContain(
+      ".admin-header__account:not([open]) > .admin-header__account-panel",
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-brand \.lb-product-wordmark\s*\{[\s\S]*display:\s*none/u,
+    );
   });
 
   it('persists disconnected fixture provenance and scopes every role', () => {
@@ -185,14 +193,14 @@ describe('admin shell', () => {
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
   });
 
-  it('provides skip, focus, preview, and semantic viewport gate contracts', () => {
+  it('provides skip, focus, protected operator menu, and semantic viewport gate contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
     expect(layout).toContain('href="#admin-main"');
-    expect(layout).toContain('className="admin-preview-band"');
-    expect(layout).toContain('data-authority="disconnected"');
+    expect(layout).toContain('securityLabel={copy.security}');
+    expect(layout).not.toContain('className="admin-preview-band"');
     expect(layout).not.toContain('data-viewport-gate="960"');
     expect(layout).toContain('<main id="admin-main" tabIndex={-1}>');
     expect(focus).toContain('#admin-main > h1');
@@ -309,5 +317,7 @@ describe('admin 500', () => {
     expect(errorSource).toContain('onClick={reset}');
     expect(errorSource).not.toMatch(/error\.(message|stack|name)/u);
     expect(errorSource).not.toMatch(/redirect\(|window\.location|http-equiv=.refresh/iu);
+    expect(createAdminFailureModel('500', 'en').copy.title).not.toMatch(/preview/iu);
+    expect(createAdminFailureModel('500', 'pt-BR').copy.title).not.toMatch(/prévia/iu);
   });
 });

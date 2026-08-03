@@ -42,7 +42,8 @@ describe('role-scoped admin', () => {
     expect(layoutSource).not.toContain('admin-brand__mark');
     expect(navigationSource).toContain('aria-current');
     expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
-    expect(layoutSource.match(/AdminPreviewProvenance/gu)).toHaveLength(2);
+    expect(layoutSource).not.toContain('AdminPreviewProvenance');
+    expect(navigationSource).toContain('<ProductIcon');
   });
 
   it('composes the role landing around next work, recent activity, scope, and workspaces', () => {
@@ -144,6 +145,17 @@ describe('role-scoped admin', () => {
       /@media \(width < 640px\)[\s\S]*\.admin-landing__layout[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
     );
     expect(stylesSource).toMatch(/@media \(width < 960px\)[\s\S]*\.admin-nav__mobile/u);
+    expect(stylesSource).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
+    );
+  });
+
+  it('composes the complete admin review workflow without duplicated titles or preview actors', () => {
+    expect(featureSource).toContain('title={input.action.objectLabel}');
+    expect(featureSource).toContain('`${role}.operator`');
+    expect(featureSource).not.toContain('`${role}.preview`');
+    expect(stylesSource).toContain("[data-remote-authority='unavailable']");
+    expect(stylesSource).toContain("[data-preview-region='review'] table");
   });
 
   it('projects four distinct closed workspaces and renders a redacted support case', () => {
@@ -175,7 +187,8 @@ describe('role-scoped admin', () => {
     expect(adminEn.support.title).toBe('Support case review');
     expect(adminEn.support.target).toBe('Customer target ••••-042');
     expect(featureSource).toContain('data-remote-state-changed="false"');
-    expect(featureSource).toContain('ProvenanceLabel');
+    expect(featureSource).toContain('admin-protected-data');
+    expect(featureSource).toContain('<ProductIcon name="lock"');
     expect(adminEn.support.detail).not.toMatch(/@[a-z0-9.-]+\.[a-z]{2,}/iu);
   });
 
@@ -442,6 +455,8 @@ describe('W16 viewport guard and recovery states', () => {
 
   it('authors offline, stale, expired, permission, and partial-failure recovery safely', () => {
     for (const state of [
+      'loading',
+      'empty',
       'offline',
       'stale',
       'expired-session',
@@ -455,6 +470,8 @@ describe('W16 viewport guard and recovery states', () => {
     expect(adminPtBr.recovery.safeDraft).toContain(
       'Resposta e campos de diagnóstico são descartados',
     );
+    expect(featureSource).toContain('admin-degraded__facts');
+    expect(featureSource).toContain('Queue, target, consent, and audit details remain hidden');
   });
 });
 

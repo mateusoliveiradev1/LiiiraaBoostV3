@@ -1,10 +1,8 @@
 'use client';
 
-import { LbButton, LbTextArea } from '@liiiraa/design-system';
+import { LbButton, LbTextArea, ProductIcon } from '@liiiraa/design-system';
 import {
-  PreviewBoundary,
   PreviewWorkflow,
-  ProvenanceLabel,
   ResponsiveDataTable,
   RouteHeader,
   StatusSignal,
@@ -36,7 +34,14 @@ import {
   type AdminPreviewRoute,
 } from '../admin-preview-model';
 export type AdminPreviewState =
-  'ready' | 'offline' | 'stale' | 'expired-session' | 'permission-denied' | 'partial-failure';
+  | 'ready'
+  | 'loading'
+  | 'empty'
+  | 'offline'
+  | 'stale'
+  | 'expired-session'
+  | 'permission-denied'
+  | 'partial-failure';
 
 type AdminContent = Readonly<
   Omit<typeof adminEnJson, 'audit' | 'locale'> & {
@@ -147,7 +152,10 @@ const FixtureHeader = ({
   <RouteHeader
     actions={
       showProvenance ? (
-        <ProvenanceLabel detail={content.fixtureLabel} kind="simulated" locale={content.locale} />
+        <span className="admin-protected-data">
+          <ProductIcon name="lock" size={16} />
+          {content.fixtureLabel}
+        </span>
       ) : undefined
     }
     description={summary}
@@ -191,7 +199,7 @@ const createImmutableAuditEvent = (event: AdminAuditEvent): AdminAuditEvent => {
 export const ADMIN_AUDIT_EVENTS = deepFreeze([
   createImmutableAuditEvent({
     eventId: 'admin-event-001',
-    actor: 'support.preview',
+    actor: 'support.operator',
     role: 'support',
     action: 'support.review',
     redactedTarget: 'Customer target ••••-042',
@@ -204,7 +212,7 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
   }),
   createImmutableAuditEvent({
     eventId: 'admin-event-002',
-    actor: 'security.preview',
+    actor: 'security.operator',
     role: 'security',
     action: 'diagnostic.review',
     redactedTarget: 'Diagnostic target ••••-015',
@@ -217,7 +225,7 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
   }),
   createImmutableAuditEvent({
     eventId: 'admin-event-003',
-    actor: 'operations.preview',
+    actor: 'operations.operator',
     role: 'operations',
     action: 'admin.review',
     redactedTarget: 'Deployment target ••••-017',
@@ -229,7 +237,7 @@ export const ADMIN_AUDIT_EVENTS = deepFreeze([
   }),
   createImmutableAuditEvent({
     eventId: 'admin-event-004',
-    actor: 'security.preview',
+    actor: 'security.operator',
     role: 'security',
     action: 'admin.review',
     redactedTarget: 'Security target ••••-083',
@@ -364,7 +372,14 @@ const PreviewWorkflowRunner = ({
       },
     });
   }, [input.action.family, scenarioId]);
-  return <PreviewWorkflow input={input} locale={locale} machine={machine} />;
+  return (
+    <PreviewWorkflow
+      input={input}
+      locale={locale}
+      machine={machine}
+      title={input.action.objectLabel}
+    />
+  );
 };
 
 const useViewportWidth = (fixedWidth?: number): number => {
@@ -540,6 +555,7 @@ export const SupportCaseWorkspace = ({
   return (
     <article
       className="admin-decision"
+      data-admin-grid="8-4"
       data-admin-workspace="role-scoped admin support"
       data-authority-state="disconnected"
     >
@@ -623,13 +639,13 @@ export const SupportCaseWorkspace = ({
                       {
                         field: 'case',
                         label: content.support.caseLabel,
-                        before: 'Unreviewed',
-                        after: 'Scoped review',
+                        before: content.locale === 'pt-BR' ? 'Não revisado' : 'Unreviewed',
+                        after: content.locale === 'pt-BR' ? 'Revisão delimitada' : 'Scoped review',
                       },
                       {
                         field: 'response',
                         label: content.support.responseLabel,
-                        before: 'Not sent',
+                        before: content.locale === 'pt-BR' ? 'Não enviada' : 'Not sent',
                         after: response,
                       },
                     ],
@@ -781,7 +797,7 @@ const CriticalReview = ({
                       granted: true,
                       permittedFields: ['target'],
                       purpose,
-                      requestingActor: `${role}.preview`,
+                      requestingActor: `${role}.operator`,
                     },
                     family: 'admin',
                     fields: { target: `${role}-target-preview` },
@@ -793,7 +809,7 @@ const CriticalReview = ({
                         field: 'target',
                         label: content.audit.target,
                         before: target,
-                        after: 'Review only',
+                        after: content.locale === 'pt-BR' ? 'Somente revisão' : 'Review only',
                       },
                     ],
                     role,
@@ -823,6 +839,7 @@ export const OperationsReview = ({
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
   <article
     className="admin-decision admin-decision--critical"
+    data-admin-grid="8-4"
     data-admin-workspace="operations"
     data-authority-state="disconnected"
   >
@@ -896,6 +913,7 @@ export const SecurityReview = ({
 }: Readonly<{ content: AdminContent; viewportWidth: number }>) => (
   <article
     className="admin-decision admin-decision--critical"
+    data-admin-grid="8-4"
     data-admin-workspace="security"
     data-authority-state="disconnected"
   >
@@ -1038,6 +1056,7 @@ export const DiagnosticFieldDisclosure = ({
   return (
     <article
       className="admin-decision admin-decision--diagnostic"
+      data-admin-grid="8-4"
       data-admin-workspace="consent-scoped diagnostics"
       data-consent-decision={decision}
     >
@@ -1079,14 +1098,14 @@ export const DiagnosticFieldDisclosure = ({
                 <dt>startup-state</dt>
                 <dd>
                   {content.locale === 'pt-BR'
-                    ? 'Inicialização pronta nesta prévia'
-                    : 'Startup ready in this preview'}
+                    ? 'Estado de inicialização disponível'
+                    : 'Startup state available'}
                 </dd>
               </div>
               <div>
                 <dt>application-version</dt>
                 <dd>
-                  <code>1.0.0-preview</code>
+                  <code>1.0.0</code>
                 </dd>
               </div>
             </dl>
@@ -1123,8 +1142,11 @@ export const DiagnosticFieldDisclosure = ({
                             {
                               field: 'diagnostic',
                               label: content.diagnostics.title,
-                              before: 'Blocked',
-                              after: 'Scoped synthetic review',
+                              before: content.locale === 'pt-BR' ? 'Bloqueado' : 'Blocked',
+                              after:
+                                content.locale === 'pt-BR'
+                                  ? 'Revisão delimitada'
+                                  : 'Scoped review',
                             },
                           ],
                           role: 'security',
@@ -1246,12 +1268,6 @@ const RoleLanding = ({
                 <StatusSignal label={activityPresentation.result} state="preview" />
               </dd>
             </div>
-            <div>
-              <dt>{content.audit.timestamp}</dt>
-              <dd>
-                <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
-              </dd>
-            </div>
           </dl>
         </aside>
 
@@ -1307,10 +1323,23 @@ const RoleLanding = ({
 
 const DegradedAdminPreview = ({
   content,
+  role,
   state,
-}: Readonly<{ content: AdminContent; state: Exclude<AdminPreviewState, 'ready'> }>) => {
+}: Readonly<{
+  content: AdminContent;
+  role: AdminPreviewRole;
+  state: Exclude<AdminPreviewState, 'ready'>;
+}>) => {
   const message =
-    state === 'offline'
+    state === 'loading'
+      ? content.locale === 'pt-BR'
+        ? 'Preparando a área segura da sua função.'
+        : 'Preparing your secure role workspace.'
+      : state === 'empty'
+        ? content.locale === 'pt-BR'
+          ? 'Não há itens atribuídos para revisar agora.'
+          : 'There are no assigned items to review right now.'
+        : state === 'offline'
       ? content.recovery.offline
       : state === 'stale'
         ? content.recovery.stale
@@ -1319,12 +1348,61 @@ const DegradedAdminPreview = ({
           : state === 'permission-denied'
             ? content.recovery.permission
             : content.recovery.failure;
+  const copy =
+    content.locale === 'pt-BR'
+      ? {
+          affected: 'Capacidade afetada',
+          blocked: 'Ação bloqueada',
+          blockedBody:
+            state === 'permission-denied'
+              ? 'Fila, alvo, consentimento e auditoria permanecem ocultos para esta função.'
+              : 'Confirmações administrativas permanecem bloqueadas até a recuperação.',
+          preserved: 'Trabalho preservado',
+          preservedBody:
+            state === 'expired-session'
+              ? 'A navegação da função permanece disponível; credenciais e rascunhos sensíveis foram descartados.'
+              : 'A navegação da função e o contexto seguro continuam disponíveis.',
+          recovery: 'Voltar à área da função',
+        }
+      : {
+          affected: 'Affected capability',
+          blocked: 'Blocked action',
+          blockedBody:
+            state === 'permission-denied'
+              ? 'Queue, target, consent, and audit details remain hidden from this role.'
+              : 'Administrative confirmations remain blocked until recovery.',
+          preserved: 'Preserved work',
+          preservedBody:
+            state === 'expired-session'
+              ? 'Role navigation remains available; credentials and sensitive drafts were discarded.'
+              : 'Role navigation and safe context remain available.',
+          recovery: 'Return to role workspace',
+        };
   return (
-    <article data-admin-state={state}>
+    <article className="admin-degraded" data-admin-state={state}>
       <FixtureHeader content={content} summary={message} title={content.recovery.title} />
-      <StatusSignal label={message} state={state === 'permission-denied' ? 'error' : 'warning'} />
-      <p role="status">{content.recovery.safeDraft}</p>
-      <PreviewBoundary description={content.receipt.body} />
+      <section className="admin-degraded__status" role="status">
+        <StatusSignal label={message} state={state === 'permission-denied' ? 'error' : 'warning'} />
+        <p>{message}</p>
+      </section>
+      <dl className="admin-degraded__facts">
+        <div>
+          <dt>{copy.affected}</dt>
+          <dd>{message}</dd>
+        </div>
+        <div>
+          <dt>{copy.preserved}</dt>
+          <dd>{copy.preservedBody}</dd>
+        </div>
+        <div>
+          <dt>{copy.blocked}</dt>
+          <dd>{copy.blockedBody}</dd>
+        </div>
+      </dl>
+      <a className="admin-degraded__recovery" href={hrefFor('admin-role', content.locale, role)}>
+        <ProductIcon name="recovery" size={17} />
+        {copy.recovery}
+      </a>
     </article>
   );
 };
@@ -1349,9 +1427,9 @@ export const AdminPreviewExperience = ({
   const content = getAdminContent(locale);
   const viewportWidth = useViewportWidth(fixedViewportWidth);
   if (!adminRoleCanAccess(role, routeId)) {
-    return <DegradedAdminPreview content={content} state="permission-denied" />;
+    return <DegradedAdminPreview content={content} role={role} state="permission-denied" />;
   }
-  if (state !== 'ready') return <DegradedAdminPreview content={content} state={state} />;
+  if (state !== 'ready') return <DegradedAdminPreview content={content} role={role} state={state} />;
   switch (routeId) {
     case 'admin-role':
       return <RoleLanding content={content} role={role} />;
