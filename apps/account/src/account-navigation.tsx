@@ -33,7 +33,6 @@ type AccountNavigationProps = Readonly<{
   inspectorLabel: string;
   label: string;
   locale: WebLocale;
-  preview: ReactNode;
   publicLink: ReactNode;
   supportHref: string;
   supportLabel: string;
@@ -104,7 +103,6 @@ export function AccountNavigation({
   inspectorLabel,
   label,
   locale,
-  preview,
   publicLink,
   supportHref,
   supportLabel,
@@ -139,6 +137,9 @@ export function AccountNavigation({
   );
   const currentItem = currentItems.length === 1 ? currentItems[0] : undefined;
   const currentLabel = currentItem?.label ?? label;
+  const accountMenuItems = responsibilityItems.filter(
+    ({ icon }) => icon === 'profile' || icon === 'shield',
+  );
   const currentAuthRouteItems = authRouteItems.filter(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
@@ -215,6 +216,23 @@ export function AccountNavigation({
               sourceLocale={locale}
               targetLocale={alternateLocale}
             />
+            <details className="account-header__account">
+              <summary aria-label={surfaceLabel}>
+                {identity}
+                <ProductIcon
+                  className="account-header__account-chevron"
+                  name="chevronRight"
+                  size={16}
+                />
+              </summary>
+              <nav aria-label={surfaceLabel}>
+                <NavigationGroups
+                  currentHref={currentHref}
+                  groups={[{ items: [...accountMenuItems, authenticatedAction] }]}
+                  markCurrent={false}
+                />
+              </nav>
+            </details>
           </div>
         </div>
       </header>
@@ -230,7 +248,6 @@ export function AccountNavigation({
             <NavigationGroups currentHref={currentHref} groups={groups} markCurrent={false} />
           </nav>
         </details>
-        <div className="account-preview-slot">{preview}</div>
         <main id="account-main" tabIndex={-1}>
           {children}
         </main>

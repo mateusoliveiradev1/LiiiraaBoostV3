@@ -43,7 +43,7 @@ export function AccountInspector({
           AP
         </span>
         <span className="account-identity__copy">
-          <strong>Astra Preview</strong>
+          <strong>Astra Player</strong>
           <span>{copy.accountIdentity}</span>
           <span>{copy.accountState}</span>
         </span>
@@ -64,7 +64,7 @@ export function AccountInspector({
         <div className="account-inspector__fact">
           <ProductIcon name="device" size={20} />
           <span>
-            <strong className="account-inspector__machine">DESKTOP-PREVIEW-01</strong>
+            <strong className="account-inspector__machine">ASTRA-PC-01</strong>
             <span>{copy.deviceDetail}</span>
           </span>
         </div>

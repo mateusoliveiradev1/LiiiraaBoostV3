@@ -26,6 +26,7 @@ const pageSource = readFileSync(
   'utf8',
 );
 const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const navigationSource = readFileSync(new URL('../account-navigation.tsx', import.meta.url), 'utf8');
 const accountStyles = readFileSync(new URL('../app/account-shell.css', import.meta.url), 'utf8');
 const ACCOUNT_ENTRY_ROUTE_IDS = [
   'account-sign-in',
@@ -199,9 +200,13 @@ describe('authored overview and Profile workspaces', () => {
     expect(accountStyles).toMatch(/\.account-profile__control\s*\{[\s\S]*max-inline-size:/u);
   });
 
-  it('keeps global preview truth once and reserves route copy for distinct context', () => {
-    expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
-    expect(layoutSource.match(/className="account-preview-rail"/gu) ?? []).toHaveLength(1);
+  it('keeps disconnected behavior quiet and presents a real signed-in account menu', () => {
+    expect(layoutSource).not.toContain('<AccountPreviewProvenance');
+    expect(layoutSource).not.toContain('className="account-preview-rail"');
+    expect(navigationSource).not.toContain('account-preview-slot');
+    expect(navigationSource).toContain('className="account-header__account"');
+    expect(navigationSource).toContain('{identity}');
+    expect(navigationSource).toContain('accountMenuItems');
     expect(featureSource).not.toContain('<ProvenanceLabel');
     expect(featureSource).toContain('<PreviewBoundary');
   });

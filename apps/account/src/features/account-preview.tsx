@@ -990,7 +990,7 @@ const ProfilePreview = ({
   content,
   scenarioId,
 }: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
-  const [displayName, setDisplayName] = useState('Astra Preview');
+  const [displayName, setDisplayName] = useState('Astra Player');
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   if (workflow !== null) {
     return (
@@ -1041,7 +1041,7 @@ const ProfilePreview = ({
                       {
                         field: 'displayName',
                         label: content.profile.nameLabel,
-                        before: 'Astra Preview',
+                        before: 'Astra Player',
                         after: displayName,
                       },
                       {
@@ -1097,7 +1097,18 @@ export const SecurityMethodList = ({
       {(['passkey', 'mfa'] as const).map((family) => (
         <li key={family}>
           <strong>{family === 'passkey' ? content.security.passkey : content.security.mfa}</strong>{' '}
-          <StatusSignal label="Fixture" state="preview" />{' '}
+          <StatusSignal
+            label={
+              family === 'passkey'
+                ? content.locale === 'pt-BR'
+                  ? 'Nenhuma cadastrada'
+                  : 'None added'
+                : content.locale === 'pt-BR'
+                  ? 'Não configurado'
+                  : 'Not configured'
+            }
+            state="preview"
+          />{' '}
           <LbButton onPress={() => onReview(family)} variant="quiet">
             {content.security.review}
           </LbButton>
@@ -1142,9 +1153,17 @@ const SecurityPreview = ({
     setWorkflow(
       actionInput({
         family,
-        fields: { target: `${family}-fixture` },
+        fields: { target: `${family}-method` },
         label,
-        review: [{ field: 'target', label, before: 'Fixture unchanged', after: 'Reviewed only' }],
+        review: [
+          {
+            field: 'target',
+            label,
+            before: content.locale === 'pt-BR' ? 'Nenhuma configuração ativa' : 'No active setup',
+            after:
+              content.locale === 'pt-BR' ? 'Pronto para confirmação' : 'Ready for confirmation',
+          },
+        ],
       }),
     );
   };
@@ -1172,10 +1191,8 @@ const SecurityPreview = ({
           <h2 id="recovery-title">{content.security.recovery}</h2>
           <p>{content.security.recoveryDetail}</p>
           <StatusSignal
-            label={
-              content.locale === 'pt-BR' ? 'Indisponível nesta fase' : 'Unavailable in this phase'
-            }
-            state="unavailable"
+            label={content.locale === 'pt-BR' ? 'Configuração disponível' : 'Setup available'}
+            state="preview"
           />
         </aside>
       </div>
@@ -1316,8 +1333,11 @@ export const SubscriptionSummary = ({
                       {
                         field: 'plan',
                         label: content.subscription.plan,
-                        before: 'No authoritative plan',
-                        after: 'Premium review only',
+                        before: 'Essential',
+                        after:
+                          content.locale === 'pt-BR'
+                            ? 'Premium selecionado para confirmação'
+                            : 'Premium selected for confirmation',
                       },
                     ],
                   }),
@@ -1433,15 +1453,21 @@ export const DeviceBindingReview = ({
                 setWorkflow(
                   actionInput({
                     family: 'device',
-                    fields: { device: 'desktop-preview-01' },
+                    fields: { device: 'protected-device-01' },
                     impact: content.device.cooldown,
                     label: content.device.action,
                     review: [
                       {
                         field: 'device',
                         label: content.device.label,
-                        before: 'Synthetic binding retained',
-                        after: 'Replacement reviewed only',
+                        before:
+                          content.locale === 'pt-BR'
+                            ? 'PC atual permanece ativo'
+                            : 'Current PC remains active',
+                        after:
+                          content.locale === 'pt-BR'
+                            ? 'Transferência preparada para confirmação'
+                            : 'Transfer prepared for confirmation',
                       },
                     ],
                   }),
@@ -1568,8 +1594,12 @@ export const PrivacyCenter = ({
           {
             field: 'requestType',
             label: labels[request],
-            before: 'No request',
-            after: 'Review prepared',
+            before:
+              content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
+            after:
+              content.locale === 'pt-BR'
+                ? 'Solicitação preparada para confirmação'
+                : 'Request prepared for confirmation',
           },
         ],
       }),
@@ -1618,8 +1648,14 @@ export const SupportRequestComposer = ({
   content,
   scenarioId,
 }: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
-  const [subject, setSubject] = useState('Synthetic startup question');
-  const [description, setDescription] = useState('The fixture shows a startup state for review.');
+  const [subject, setSubject] = useState(
+    content.locale === 'pt-BR' ? 'Ajuda com o primeiro acesso' : 'Help with first access',
+  );
+  const [description, setDescription] = useState(
+    content.locale === 'pt-BR'
+      ? 'Preciso de ajuda para concluir a ativação do meu primeiro PC.'
+      : 'I need help completing activation for my first PC.',
+  );
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
   if (workflow !== null) {
     return (
@@ -1670,13 +1706,15 @@ export const SupportRequestComposer = ({
                       {
                         field: 'subject',
                         label: content.support.subjectLabel,
-                        before: 'No request',
+                        before:
+                          content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
                         after: subject,
                       },
                       {
                         field: 'description',
                         label: content.support.bodyLabel,
-                        before: 'No request',
+                        before:
+                          content.locale === 'pt-BR' ? 'Nenhuma solicitação iniciada' : 'No request started',
                         after: description,
                       },
                     ],

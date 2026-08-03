@@ -1598,6 +1598,73 @@ button:focus-visible,
   margin-inline-start: auto;
 }
 
+.account-header__account {
+  position: relative;
+}
+
+.account-header__account > summary {
+  display: flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  min-block-size: 44px;
+  padding: var(--lb-space-1) var(--lb-space-2);
+  border-radius: var(--lb-radius-default);
+  cursor: pointer;
+  list-style: none;
+}
+
+.account-header__account > summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-header__account > summary:hover,
+.account-header__account > summary:focus-visible,
+.account-header__account[open] > summary {
+  background: var(--lb-surface-work);
+}
+
+.account-header__account > summary:focus-visible {
+  outline: 2px solid var(--lb-focus-ring);
+  outline-offset: 2px;
+}
+
+.account-header__account > summary .account-identity__avatar {
+  inline-size: 34px;
+  block-size: 34px;
+}
+
+.account-header__account > summary .account-identity__copy {
+  max-inline-size: 132px;
+}
+
+.account-header__account-chevron {
+  transition: transform var(--lb-motion-control-duration) var(--lb-motion-easing-standard);
+}
+
+.account-header__account[open] .account-header__account-chevron {
+  transform: rotate(90deg);
+}
+
+.account-header__account > nav {
+  position: absolute;
+  z-index: var(--lb-z-dropdown, 20);
+  inset-block-start: calc(100% + var(--lb-space-2));
+  inset-inline-end: 0;
+  inline-size: 240px;
+  padding: var(--lb-space-2);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-panel);
+  background: var(--lb-surface-raised);
+}
+
+.account-header__account:not([open]) > nav {
+  display: none;
+}
+
+.account-header__account .account-nav__list a {
+  min-block-size: 44px;
+}
+
 .account-header__support {
   gap: var(--lb-space-2);
   min-block-size: 44px;
@@ -2212,6 +2279,17 @@ button:focus-visible,
   .account-header__route,
   .account-header__support span {
     display: none;
+  }
+
+  .account-header__account > summary .account-identity__copy,
+  .account-header__account-chevron {
+    display: none;
+  }
+
+  .account-header__account > summary {
+    inline-size: 44px;
+    justify-content: center;
+    padding: 0;
   }
 
   .account-header__support {

@@ -23,7 +23,6 @@ import {
 import { AccountInspector } from '../../account-inspector';
 import { createAccountFailureModel } from '../../account-errors';
 import { ProductLockup } from '../../account-product-lockup';
-import { AccountPreviewProvenance } from '../../account-preview-provenance';
 import { ACCOUNT_WEB_COMPOSITION } from '../../index';
 
 type AccountLocaleLayoutProps = Readonly<{
@@ -83,8 +82,8 @@ const NAVIGATION_ICONS = Object.freeze({
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    accountIdentity: 'Conta Liiiraa Boost',
-    accountState: 'Acesso protegido',
+    accountIdentity: 'astra.player@example.com',
+    accountState: 'Conta protegida',
     authBody:
       'Gerencie sua assinatura, mantenha seus dispositivos protegidos e acesse o aplicativo para Windows.',
     authEyebrow: 'Sua conta Liiiraa Boost',
@@ -92,21 +91,20 @@ const COPY = Object.freeze({
     authTitle: 'Seu desempenho começa com uma conta confiável.',
     currentTask: 'Responsabilidade atual',
     deviceAction: 'Revisar dispositivo',
-    deviceDetail: 'Windows 11 · não vinculado',
+    deviceDetail: 'Windows 11 · identidade protegida',
     deviceTitle: 'Dispositivo',
     help: 'Ajuda',
     inspectorLabel: 'Resumo contextual da conta',
-    mfa: 'MFA — revisar',
+    mfa: 'MFA — recomendado',
     navigation: 'Responsabilidades da conta',
     onboarding: 'Primeiros passos',
-    passkey: 'Chave de acesso — revisar',
+    passkey: 'Chave de acesso — não configurada',
     planAction: 'Ver assinatura',
     planDetail: 'R$ 29,90/mês · R$ 249,90/ano',
     planPeriod: 'Mensal ou anual',
     planSection: 'Plano',
     planTitle: 'Premium · Modo Competitivo',
-    preview: 'Revise tudo com segurança. Ações indisponíveis terminam sem alterar sua conta.',
-    previewLabel: 'Alterações remotas desconectadas',
+    preview: 'Sua conta reúne plano, segurança, dispositivo, downloads e suporte.',
     publicLink: 'Voltar ao site',
     securityAction: 'Revisar segurança',
     securityTitle: 'Segurança',
@@ -119,8 +117,8 @@ const COPY = Object.freeze({
     surface: 'Conta',
   }),
   en: Object.freeze({
-    accountIdentity: 'Liiiraa Boost account',
-    accountState: 'Protected access',
+    accountIdentity: 'astra.player@example.com',
+    accountState: 'Protected account',
     authBody:
       'Manage your subscription, keep devices protected, and access the Windows application.',
     authEyebrow: 'Your Liiiraa Boost account',
@@ -128,21 +126,20 @@ const COPY = Object.freeze({
     authTitle: 'Your performance starts with an account you can trust.',
     currentTask: 'Current responsibility',
     deviceAction: 'Review device',
-    deviceDetail: 'Windows 11 · not linked',
+    deviceDetail: 'Windows 11 · protected identity',
     deviceTitle: 'Device',
     help: 'Help',
     inspectorLabel: 'Contextual account summary',
-    mfa: 'MFA — review',
+    mfa: 'MFA — recommended',
     navigation: 'Account responsibilities',
     onboarding: 'Getting started',
-    passkey: 'Passkey — review',
+    passkey: 'Passkey — not configured',
     planAction: 'View subscription',
     planDetail: 'US$ 6.99/month · US$ 59.99/year',
     planPeriod: 'Monthly or annual',
     planSection: 'Plan',
     planTitle: 'Premium · Competitive Mode',
-    preview: 'Review everything safely. Unavailable actions finish without changing your account.',
-    previewLabel: 'Remote changes disconnected',
+    preview: 'Your account brings plan, security, device, downloads, and support together.',
     publicLink: 'Back to website',
     securityAction: 'Review security',
     securityTitle: 'Security',
@@ -326,17 +323,6 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           inspectorLabel={copy.inspectorLabel}
           label={copy.navigation}
           locale={locale}
-          preview={
-            <aside
-              aria-label={copy.previewLabel}
-              className="account-preview-rail"
-              data-authority="disconnected"
-              role="note"
-            >
-              <AccountPreviewProvenance detail={copy.previewLabel} locale={locale} />
-              <p>{copy.preview}</p>
-            </aside>
-          }
           publicLink={
             <a href={publicHomeHref(locale)}>
               {copy.publicLink} <span aria-hidden="true">↗</span>
