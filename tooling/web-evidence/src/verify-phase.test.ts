@@ -26,6 +26,51 @@ import type {
 const sha = (value: string): string => createHash('sha256').update(value).digest('hex');
 const repositoryRoot = join(import.meta.dirname, '../../..');
 const routeReachabilityFile = 'quality/evidence/phase-03/web/route-reachability.json';
+const approvedPacketFingerprint =
+  '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e';
+const publicationBindingFiles = Object.freeze({
+  launchReadiness:
+    '.planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json',
+  routeMatrix: '.planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md',
+  routeReachability: routeReachabilityFile,
+  uat: '.planning/phases/03-complete-web-experience/03-UAT.md',
+  visualManifest: 'tooling/web-evidence/visual-manifest.json',
+} as const);
+
+const fileSha = (file: string): string =>
+  createHash('sha256').update(readFileSync(join(repositoryRoot, file))).digest('hex');
+
+const currentPublicationBindings = () => ({
+  approval: {
+    candidateCount: 480,
+    fingerprint: approvedPacketFingerprint,
+    reviewerSignal: 'aprovado',
+    routeCount: 60,
+    sha256: fileSha(publicationBindingFiles.uat),
+    path: publicationBindingFiles.uat,
+  },
+  detectorResults: Object.fromEntries(
+    Array.from({ length: 9 }, (_, index) => [`D-${String(index + 102)}`, 'passed']),
+  ),
+  launchReadiness: {
+    candidateCount: 480,
+    path: publicationBindingFiles.launchReadiness,
+    sha256: fileSha(publicationBindingFiles.launchReadiness),
+  },
+  routeMatrix: {
+    path: publicationBindingFiles.routeMatrix,
+    sha256: fileSha(publicationBindingFiles.routeMatrix),
+  },
+  routeReachability: {
+    path: publicationBindingFiles.routeReachability,
+    sha256: fileSha(publicationBindingFiles.routeReachability),
+  },
+  visualManifest: {
+    candidateCount: 480,
+    path: publicationBindingFiles.visualManifest,
+    sha256: fileSha(publicationBindingFiles.visualManifest),
+  },
+});
 
 type Phase3InputWithReachability = Phase3VerificationInput;
 
@@ -112,9 +157,10 @@ const completeInput = (): Phase3InputWithReachability => ({
       bundleFile: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
       developmentArtifactDetected: false,
       downloadAvailable: false,
+      evidenceBindings: currentPublicationBindings(),
       officialArtifact: 'unavailable',
       publicDistributionApproved: false,
-    },
+    } as Phase3VerificationInput['artifacts']['publication'],
     requirements: [...PHASE_3_REQUIREMENTS],
     routeReachability: currentRouteReachability(),
     routes: [...PHASE_3_ROUTES],
@@ -174,6 +220,110 @@ describe('Phase 3 final source coverage', () => {
 
     expect(verifyPhase3(input, repositoryRoot)).toMatchObject({ ok: true });
   });
+});
+
+describe('Phase 3 proof owner and approved publication binding', () => {
+  const regeneratedProofs = [
+    'visual-report',
+    'accessibility-report',
+    'approved-publication-bundle',
+  ] as const;
+  const unchangedProofOwners = Object.freeze({
+    'content-publication': 'plan-03-32',
+    'docs-publication': 'plan-03-32',
+    'docs-routes': 'plan-03-32',
+    'preview-boundaries': 'plan-03-32',
+    'public-routes': 'plan-03-32',
+    'release-artifact': 'plan-03-32',
+    'release-gate': 'plan-03-32',
+    'route-reachability': 'plan-03-35',
+    'security-boundaries': 'plan-03-32',
+  } as const);
+
+  it('requires plan-03-46 proof ownership for exactly the three regenerated artifacts', () => {
+    expect(
+      Object.fromEntries(PHASE_3_PROOFS.map(({ id, owner }) => [id, owner])),
+    ).toEqual({
+      ...unchangedProofOwners,
+      'accessibility-report': 'plan-03-46',
+      'approved-publication-bundle': 'plan-03-46',
+      'visual-report': 'plan-03-46',
+    });
+  });
+
+  it.each(regeneratedProofs)(
+    'reports a stable proof owner diagnostic when %s drifts back to plan-03-32',
+    (proofId) => {
+      const input = cloneInput(completeInput());
+      const proof = input.artifacts.proofs.find(({ id }) => id === proofId);
+      if (proof !== undefined) proof.owner = 'plan-03-32';
+
+      expect(verifyPhase3(input).diagnostics).toContainEqual({
+        code: 'PROOF_OWNER_MISMATCH',
+        path: `$.proofs.${proofId}.owner`,
+      });
+    },
+  );
+
+  it.each(Object.entries(unchangedProofOwners))(
+    'preserves the current owner for unaffected proof %s and rejects drift',
+    (proofId, expectedOwner) => {
+      expect(PHASE_3_PROOFS.find(({ id }) => id === proofId)?.owner).toBe(expectedOwner);
+      const input = cloneInput(completeInput());
+      const proof = input.artifacts.proofs.find(({ id }) => id === proofId);
+      if (proof !== undefined) proof.owner = 'plan-03-46';
+
+      expect(verifyPhase3(input).diagnostics).toContainEqual({
+        code: 'PROOF_OWNER_MISMATCH',
+        path: `$.proofs.${proofId}.owner`,
+      });
+    },
+  );
+
+  it.each(['routeMatrix', 'launchReadiness', 'visualManifest', 'routeReachability'] as const)(
+    'rejects a stale approved-publication-bundle %s hash binding',
+    (binding) => {
+      const input = cloneInput(completeInput());
+      const publication = input.artifacts.publication as typeof input.artifacts.publication & {
+        evidenceBindings: ReturnType<typeof currentPublicationBindings>;
+      };
+      publication.evidenceBindings[binding].sha256 = '0'.repeat(64);
+
+      expect(verifyPhase3(input).diagnostics).toContainEqual({
+        code: 'PUBLICATION_BINDING_HASH_MISMATCH',
+        path: `$.publication.evidenceBindings.${binding}.sha256`,
+      });
+    },
+  );
+
+  it('rejects a missing approved-publication-bundle evidence binding', () => {
+    const input = cloneInput(completeInput());
+    const publication = input.artifacts.publication as typeof input.artifacts.publication & {
+      evidenceBindings: Partial<ReturnType<typeof currentPublicationBindings>>;
+    };
+    delete publication.evidenceBindings.routeMatrix;
+
+    expect(verifyPhase3(input).diagnostics).toContainEqual({
+      code: 'PUBLICATION_BINDING_MISSING',
+      path: '$.publication.evidenceBindings.routeMatrix',
+    });
+  });
+
+  it.each(Array.from({ length: 9 }, (_, index) => `D-${String(index + 102)}`))(
+    'rejects a non-passing %s detector result in the approved publication binding',
+    (decision) => {
+      const input = cloneInput(completeInput());
+      const publication = input.artifacts.publication as typeof input.artifacts.publication & {
+        evidenceBindings: ReturnType<typeof currentPublicationBindings>;
+      };
+      publication.evidenceBindings.detectorResults[decision] = 'failed';
+
+      expect(verifyPhase3(input).diagnostics).toContainEqual({
+        code: 'PUBLICATION_DETECTOR_RESULT_MISMATCH',
+        path: `$.publication.evidenceBindings.detectorResults.${decision}`,
+      });
+    },
+  );
 });
 
 describe('Phase 3 route reachability', () => {
