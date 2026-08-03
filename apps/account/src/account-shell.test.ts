@@ -10,11 +10,69 @@ import {
 import {
   ACCOUNT_ENTRY_ROUTE_IDS,
   ACCOUNT_ERROR_ROUTE_IDS,
+  ACCOUNT_GOAL_ROUTE_IDS,
+  accountGoalForRoute,
   accountFailureKindForRoute,
+  getAccountGoalNavigation,
   isAccountErrorRoute,
 } from './account-preview-model';
 
 describe('account shell', () => {
+  it('projects exactly five bilingual customer goals while legacy routes stay contextual', () => {
+    expect(ACCOUNT_GOAL_ROUTE_IDS).toEqual([
+      'account-overview',
+      'account-device',
+      'account-subscription',
+      'account-security',
+      'account-support',
+    ]);
+    expect(getAccountGoalNavigation('pt-BR').map(({ label }) => label)).toEqual([
+      'Início',
+      'PCs e licenças',
+      'Plano e pagamentos',
+      'Segurança e privacidade',
+      'Ajuda',
+    ]);
+    expect(getAccountGoalNavigation('en').map(({ label }) => label)).toEqual([
+      'Home',
+      'PCs and licenses',
+      'Plan and payments',
+      'Security and privacy',
+      'Help',
+    ]);
+    expect(accountGoalForRoute('account-profile')).toBe('account-overview');
+    expect(accountGoalForRoute('account-invoices')).toBe('account-subscription');
+    expect(accountGoalForRoute('account-downloads')).toBe('account-device');
+    expect(accountGoalForRoute('account-privacy')).toBe('account-security');
+    expect(ACCOUNT_ENTRY_ROUTE_IDS).toEqual(
+      expect.arrayContaining([
+        'account-profile',
+        'account-invoices',
+        'account-downloads',
+        'account-privacy',
+      ]),
+    );
+  });
+
+  it('uses the goal projection for desktop and compact navigation without public auth prompts', () => {
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+    const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
+
+    expect(navigationSource).toContain('getAccountGoalNavigation(locale)');
+    expect(navigationSource).toContain('accountGoalForRoute');
+    expect(navigationSource).toContain('goalGroups');
+    expect(navigationSource).toContain("icon === 'profile'");
+    expect(navigationSource).not.toContain("icon === 'profile' || icon === 'shield'");
+    expect(navigationSource).toContain('className="account-nav account-nav__mobile"');
+    expect(navigationSource).toContain('markCurrent={false}');
+    expect(navigationSource).not.toMatch(/create account|sign up|criar conta/iu);
+    expect(styles).toContain('overflow-x: clip');
+    expect(styles).not.toContain('100vw');
+  });
+
   it('uses the approved workspace, persistent sidebar, and inspector geometry', () => {
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
