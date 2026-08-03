@@ -22,15 +22,18 @@ import {
   getWebScenario,
   type WebScenarioId,
 } from '@liiiraa/web-preview';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { AdminPreviewRole } from '../../proxy';
 import adminEnJson from '../content/admin.en.json';
 import adminPtBrJson from '../content/admin.pt-BR.json';
 import {
-  ADMIN_ROLE_ROUTE_ACCESS,
   adminRoleCanAccess,
-  getAdminPreviewMetadata,
+  createAdminQueueHref,
+  parseAdminQueueUrlState,
+  projectAdminQueue,
+  selectAdminQueueItem,
   type AdminPreviewRoute,
 } from '../admin-preview-model';
 export type AdminPreviewState =
@@ -1179,143 +1182,253 @@ export const DiagnosticFieldDisclosure = ({
   );
 };
 
-const ADMIN_ROLE_FOCAL_ROUTE = Object.freeze({
-  support: 'admin-support',
-  operations: 'admin-operations',
-  security: 'admin-security',
-  audit: 'admin-audit',
-} satisfies Readonly<Record<AdminPreviewRole, AdminPreviewRoute>>);
-
 const RoleLanding = ({
   content,
   role,
-}: Readonly<{ content: AdminContent; role: AdminPreviewRole }>) => {
-  const routes = ADMIN_ROLE_ROUTE_ACCESS[role];
-  const nextRoute = ADMIN_ROLE_FOCAL_ROUTE[role];
-  const nextMetadata = getAdminPreviewMetadata(content.locale, nextRoute);
-  const activity = ADMIN_AUDIT_EVENTS.find((event) => event.role === role) ?? ADMIN_AUDIT_EVENTS[0];
-  const activityPresentation = presentAuditEvent(content, activity);
-  const copy =
-    content.locale === 'pt-BR'
-      ? {
-          attention: 'Atenção',
-          available: 'Revisão segura disponível',
-          currentRole: 'Função atual',
-          latest: 'Último evento',
-          nextAction: 'Próxima decisão segura',
-          nextSafeReview: 'Próxima revisão segura',
-          open: 'Abrir área de trabalho',
-          queue: 'Fila atribuída',
-          result: 'Resultado imutável',
-          task: 'Tarefa',
-          workspaces: 'Áreas disponíveis',
-        }
-      : {
-          attention: 'Attention',
-          available: 'Safe review available',
-          currentRole: 'Current role',
-          latest: 'Latest event',
-          nextAction: 'Next safe decision',
-          nextSafeReview: 'Next safe review',
-          open: 'Open workspace',
-          queue: 'Assigned queue',
-          result: 'Immutable result',
-          task: 'Task',
-          workspaces: 'Available workspaces',
-        };
-  const queueRoutes = routes.filter((routeId) => routeId !== 'admin-role');
+  state,
+}: Readonly<{
+  content: AdminContent;
+  role: AdminPreviewRole;
+  state: Extract<
+    AdminPreviewState,
+    'ready' | 'loading' | 'empty' | 'offline' | 'stale' | 'partial-failure'
+  >;
+}>) => {
+  const searchParameters = useSearchParams();
+  const queueState = parseAdminQueueUrlState(searchParameters);
+  const roleHomeHref = hrefFor('admin-role', content.locale, role);
+  const projectedQueue = projectAdminQueue({
+    locale: content.locale,
+    owner: queueState.owner,
+    priority: queueState.priority,
+    query: queueState.query,
+    role,
+    savedView: queueState.savedView,
+    status: queueState.status,
+  });
+  const queue = state === 'empty' || state === 'loading' ? [] : projectedQueue;
+  const selectedItem = selectAdminQueueItem(queue, queueState.selectedId);
+  const stateMessage =
+    state === 'loading'
+      ? content.queue.loading
+      : state === 'empty'
+        ? content.queue.emptyBody
+        : state === 'offline'
+          ? content.queue.offline
+          : state === 'stale'
+            ? content.queue.stale
+            : state === 'partial-failure'
+              ? content.queue.partial
+              : undefined;
+  const savedViewLabels = {
+    assigned: content.queue.savedViews.assigned,
+    'sla-risk': content.queue.savedViews.slaRisk,
+    unowned: content.queue.savedViews.unowned,
+    'all-permitted': content.queue.savedViews.allPermitted,
+  } as const;
 
   return (
     <article
       className="admin-landing"
       data-admin-role={role}
-      data-admin-workspace="role landing"
-      data-focal-route={nextRoute}
+      data-admin-workspace="operational queue"
+      data-focal-route="admin-role"
     >
       <header className="admin-landing__header">
-        <p>{copy.currentRole}</p>
-        <h1>{content.roles[role]}</h1>
-        <span data-state="current">{content.landing.title}</span>
+        <div>
+          <p>{content.roles[role]}</p>
+          <h1>{content.queue.title}</h1>
+          <p>{content.landing.summary}</p>
+        </div>
+        <span data-state="current">
+          {savedViewLabels[queueState.savedView]} · {projectedQueue.length}
+        </span>
       </header>
+
+      <form action={roleHomeHref.split('?')[0]} className="admin-queue__filters" method="get">
+        {role !== 'support' ? <input name="role" type="hidden" value={role} /> : null}
+        {queueState.query ? <input name="q" type="hidden" value={queueState.query} /> : null}
+        <label>
+          <span>{content.queue.savedView}</span>
+          <select defaultValue={queueState.savedView} name="view">
+            <option value="assigned">{savedViewLabels.assigned}</option>
+            <option value="sla-risk">{savedViewLabels['sla-risk']}</option>
+            <option value="unowned">{savedViewLabels.unowned}</option>
+            <option value="all-permitted">{savedViewLabels['all-permitted']}</option>
+          </select>
+        </label>
+        <label>
+          <span>{content.queue.priorityFilter}</span>
+          <select defaultValue={queueState.priority} name="priority">
+            <option value="all">{content.queue.all}</option>
+            <option value="critical">{content.queue.priorityLabels.critical}</option>
+            <option value="high">{content.queue.priorityLabels.high}</option>
+            <option value="normal">{content.queue.priorityLabels.normal}</option>
+            <option value="low">{content.queue.priorityLabels.low}</option>
+          </select>
+        </label>
+        <label>
+          <span>{content.queue.statusFilter}</span>
+          <select defaultValue={queueState.status} name="status">
+            <option value="all">{content.queue.all}</option>
+            <option value="attention">{content.queue.statusLabels.attention}</option>
+            <option value="waiting">{content.queue.statusLabels.waiting}</option>
+            <option value="blocked">{content.queue.statusLabels.blocked}</option>
+            <option value="stable">{content.queue.statusLabels.stable}</option>
+          </select>
+        </label>
+        <label>
+          <span>{content.queue.ownerFilter}</span>
+          <select defaultValue={queueState.owner} name="owner">
+            <option value="all">{content.queue.all}</option>
+            <option value="mine">{content.queue.mine}</option>
+            <option value="unassigned">{content.queue.unassigned}</option>
+          </select>
+        </label>
+        <div className="admin-queue__filter-actions">
+          <button type="submit">{content.queue.applyFilters}</button>
+          <a href={createAdminQueueHref(roleHomeHref, role, parseAdminQueueUrlState(new URLSearchParams()))}>
+            {content.queue.clearFilters}
+          </a>
+        </div>
+      </form>
 
       <div className="admin-landing__layout" data-admin-grid="8-4">
         <section
-          aria-labelledby="admin-next-work-title"
-          className="admin-landing__focus"
-          data-decision-priority="next-safe-review"
+          aria-busy={state === 'loading'}
+          aria-labelledby="admin-queue-title"
+          className="admin-landing__queue"
         >
-          <p>{copy.nextAction}</p>
-          <h2 id="admin-next-work-title">{nextMetadata.title}</h2>
-          <p>{nextMetadata.summary}</p>
-          <a href={hrefFor(nextRoute, content.locale, role)}>{copy.open}</a>
-        </section>
-
-        <aside aria-labelledby="admin-role-scope-title" className="admin-landing__scope">
-          <h2 id="admin-role-scope-title">{content.landing.scopeTitle}</h2>
-          <p>{content.landing.summary}</p>
-          <dl>
-            <div>
-              <dt>{copy.currentRole}</dt>
-              <dd>{content.roles[role]}</dd>
+          <div className="admin-queue__heading">
+            <h2 id="admin-queue-title">{content.queue.title}</h2>
+            <span>{savedViewLabels[queueState.savedView]}</span>
+          </div>
+          {stateMessage ? (
+            <div className="admin-queue__state" data-state={state} role="status">
+              <ProductIcon name={state === 'loading' ? 'loading' : 'info'} size={18} />
+              <span>{stateMessage}</span>
             </div>
-            <div>
-              <dt>{copy.workspaces}</dt>
-              <dd>{queueRoutes.length}</dd>
+          ) : null}
+          {state === 'loading' ? (
+            <div aria-hidden="true" className="admin-queue__skeleton">
+              <span />
+              <span />
+              <span />
             </div>
-            <div>
-              <dt>{copy.result}</dt>
-              <dd>
-                <StatusSignal label={activityPresentation.result} state="preview" />
-              </dd>
+          ) : queue.length === 0 ? (
+            <div className="admin-queue__empty">
+              <h3>{content.queue.emptyTitle}</h3>
+              <p>{content.queue.emptyBody}</p>
             </div>
-          </dl>
-        </aside>
-
-        <section aria-labelledby="admin-queue-title" className="admin-landing__queue">
-          <h2 id="admin-queue-title">{copy.queue}</h2>
+          ) : (
           <ResponsiveDataTable
-            caption={content.landing.scopeBody}
+            caption={content.queue.caption}
             columns={[
-              { id: 'task', label: copy.task },
-              { id: 'attention', label: copy.attention, essential: false },
-              { id: 'latest', label: copy.latest, essential: false },
+              { id: 'case', label: content.queue.case },
+              { id: 'priority', label: content.queue.priority },
+              { id: 'sla', label: content.queue.sla },
+              { id: 'age', label: content.queue.age, essential: false },
+              { id: 'owner', label: content.queue.owner, essential: false },
+              { id: 'lastEvent', label: content.queue.lastEvent, essential: false },
+              { id: 'status', label: content.queue.status, essential: false },
             ]}
-            rows={queueRoutes.map((routeId, index) => {
-              const metadata = getAdminPreviewMetadata(content.locale, routeId);
-              const attention = index === 0 ? copy.nextSafeReview : copy.available;
-              const latest =
-                index === 0 ? (
-                  <time dateTime={activity.occurredAt}>{activity.occurredAt}</time>
-                ) : (
-                  <span aria-label={content.locale === 'pt-BR' ? 'Sem evento' : 'No event'}>—</span>
-                );
+            rows={queue.map((item) => {
+              const isSelected = selectedItem?.id === item.id;
+              const selectionHref = createAdminQueueHref(roleHomeHref, role, queueState, {
+                selectedId: item.id,
+              });
               return {
-                id: routeId,
+                id: item.id,
                 cells: {
-                  task: <a href={hrefFor(routeId, content.locale, role)}>{metadata.title}</a>,
-                  attention,
-                  latest,
+                  case: (
+                    <a aria-current={isSelected ? 'true' : undefined} href={selectionHref}>
+                      <strong>{item.id}</strong>
+                      <span>{item.summary}</span>
+                    </a>
+                  ),
+                  priority: content.queue.priorityLabels[item.priority],
+                  sla: item.sla,
+                  age: item.age,
+                  owner: item.owner,
+                  lastEvent: item.lastEvent,
+                  status: content.queue.statusLabels[item.status],
                 },
                 detail: (
                   <dl className="admin-landing__queue-detail">
                     <div>
-                      <dt>{copy.task}</dt>
-                      <dd>{metadata.title}</dd>
+                      <dt>{content.queue.case}</dt>
+                      <dd>{item.id}</dd>
                     </div>
                     <div>
-                      <dt>{copy.attention}</dt>
-                      <dd>{attention}</dd>
+                      <dt>{content.queue.priority}</dt>
+                      <dd>{content.queue.priorityLabels[item.priority]}</dd>
                     </div>
                     <div>
-                      <dt>{copy.latest}</dt>
-                      <dd>{latest}</dd>
+                      <dt>{content.queue.sla}</dt>
+                      <dd>{item.sla}</dd>
+                    </div>
+                    <div>
+                      <dt>{content.queue.age}</dt>
+                      <dd>{item.age}</dd>
+                    </div>
+                    <div>
+                      <dt>{content.queue.owner}</dt>
+                      <dd>{item.owner}</dd>
+                    </div>
+                    <div>
+                      <dt>{content.queue.lastEvent}</dt>
+                      <dd>{item.lastEvent}</dd>
+                    </div>
+                    <div>
+                      <dt>{content.queue.status}</dt>
+                      <dd>{content.queue.statusLabels[item.status]}</dd>
                     </div>
                   </dl>
                 ),
               };
             })}
           />
+          )}
         </section>
+
+        <aside aria-labelledby="admin-queue-selection-title" className="admin-queue__selection">
+          <p>{content.queue.selectionTitle}</p>
+          {selectedItem ? (
+            <>
+              <h2 id="admin-queue-selection-title">{selectedItem.id}</h2>
+              <p>{selectedItem.summary}</p>
+              <dl>
+                <div>
+                  <dt>{content.queue.owner}</dt>
+                  <dd>{selectedItem.owner}</dd>
+                </div>
+                <div>
+                  <dt>{content.queue.status}</dt>
+                  <dd>{content.queue.statusLabels[selectedItem.status]}</dd>
+                </div>
+                <div>
+                  <dt>{content.audit.target}</dt>
+                  <dd>{selectedItem.redactedTarget}</dd>
+                </div>
+              </dl>
+              <p>{content.queue.selectionHint}</p>
+              <a
+                href={createAdminQueueHref(
+                  hrefFor(selectedItem.hrefRouteId, content.locale, role),
+                  role,
+                  queueState,
+                )}
+              >
+                {content.queue.open}
+              </a>
+            </>
+          ) : (
+            <>
+              <h2 id="admin-queue-selection-title">{content.landing.scopeTitle}</h2>
+              <p>{content.queue.selectionHint}</p>
+            </>
+          )}
+        </aside>
       </div>
     </article>
   );
@@ -1429,10 +1542,14 @@ export const AdminPreviewExperience = ({
   if (!adminRoleCanAccess(role, routeId)) {
     return <DegradedAdminPreview content={content} role={role} state="permission-denied" />;
   }
+  if (routeId === 'admin-role') {
+    if (state === 'expired-session' || state === 'permission-denied') {
+      return <DegradedAdminPreview content={content} role={role} state={state} />;
+    }
+    return <RoleLanding content={content} role={role} state={state} />;
+  }
   if (state !== 'ready') return <DegradedAdminPreview content={content} role={role} state={state} />;
   switch (routeId) {
-    case 'admin-role':
-      return <RoleLanding content={content} role={role} />;
     case 'admin-support':
       return <SupportCaseWorkspace content={content} viewportWidth={viewportWidth} />;
     case 'admin-operations':

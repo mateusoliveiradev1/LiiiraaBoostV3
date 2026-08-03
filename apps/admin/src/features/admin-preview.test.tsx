@@ -135,26 +135,25 @@ describe('role-scoped admin', () => {
     expect(navigationSource).toContain('<ProductIcon');
   });
 
-  it('composes the role landing around next work, recent activity, scope, and workspaces', () => {
+  it('composes the role landing around one searched queue and contextual selection', () => {
     const landingSource = featureSource.slice(
-      featureSource.indexOf('const ADMIN_ROLE_FOCAL_ROUTE'),
+      featureSource.indexOf('const RoleLanding'),
       featureSource.indexOf('const DegradedAdminPreview'),
     );
 
-    expect(landingSource).toContain("support: 'admin-support'");
-    expect(landingSource).toContain("operations: 'admin-operations'");
-    expect(landingSource).toContain("security: 'admin-security'");
-    expect(landingSource).toContain("audit: 'admin-audit'");
-    expect(featureSource).toContain('admin-landing__focus');
-    expect(featureSource).toContain('admin-landing__scope');
+    expect(landingSource).toContain('parseAdminQueueUrlState(searchParameters)');
+    expect(landingSource).toContain('projectAdminQueue({');
+    expect(landingSource).toContain('selectAdminQueueItem(queue, queueState.selectedId)');
+    expect(featureSource).toContain('admin-queue__filters');
+    expect(featureSource).toContain('admin-queue__selection');
     expect(featureSource).toContain('admin-landing__queue');
-    expect(featureSource).toContain('data-decision-priority="next-safe-review"');
     expect(landingSource).toContain('data-admin-grid="8-4"');
     expect(landingSource).toContain('data-admin-role={role}');
-    expect(landingSource).toContain('data-focal-route={nextRoute}');
+    expect(landingSource).toContain('data-focal-route="admin-role"');
     expect(landingSource).toContain('<ResponsiveDataTable');
     expect(landingSource).toContain('detail:');
     expect(featureSource).not.toContain('admin-landing__workspaces');
+    expect(landingSource).not.toContain('activity.occurredAt');
     expect(featureSource).not.toContain('canonical route manifest');
   });
 
@@ -163,7 +162,7 @@ describe('role-scoped admin', () => {
       /\.admin-landing__layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*2fr\)\s+minmax\(0,\s*1fr\)/u,
     );
     expect(stylesSource).toMatch(
-      /\.admin-landing__queue\s*\{[\s\S]*min-block-size:\s*calc\(var\(--lb-space-7\)\s*\*\s*4\)/u,
+      /\.admin-landing \.admin-landing__queue\s*\{[\s\S]*min-block-size:\s*calc\(var\(--lb-space-7\)\s*\*\s*6\)/u,
     );
     expect(stylesSource).toMatch(/\.admin-landing__queue[\s\S]*\.lb-web-table-region/u);
   });

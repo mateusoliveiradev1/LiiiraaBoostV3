@@ -9,10 +9,62 @@
     "audit": "Auditoria"
   },
   "landing": {
-    "title": "Área da função",
-    "summary": "Priorize a próxima decisão segura e avance somente pelas responsabilidades atribuídas à sua função.",
-    "scopeTitle": "Responsabilidades disponíveis",
-    "scopeBody": "Sua navegação contém somente as áreas atribuídas à sua função; responsabilidades de outras equipes permanecem inacessíveis."
+    "title": "Fila operacional",
+    "summary": "Faça a triagem do trabalho admitido para sua função. A busca e o detalhe permanecem redigidos até selecionar um item permitido.",
+    "scopeTitle": "Contexto da fila",
+    "scopeBody": "Trabalho operacional permitido para a função, ordenado por prioridade, SLA e idade."
+  },
+  "queue": {
+    "title": "Fila operacional",
+    "caption": "Trabalho permitido para a função, ordenado por prioridade, SLA e idade",
+    "searchLabel": "Buscar casos, eventos e alvos permitidos",
+    "searchPlaceholder": "Caso, evento ou alvo redigido",
+    "searchAction": "Buscar",
+    "currentQueue": "Fila atual",
+    "alerts": "Alertas de SLA",
+    "savedView": "Visão salva",
+    "savedViews": {
+      "assigned": "Trabalho atribuído",
+      "slaRisk": "SLA em risco",
+      "unowned": "Sem responsável",
+      "allPermitted": "Todos permitidos"
+    },
+    "priorityFilter": "Prioridade",
+    "statusFilter": "Estado",
+    "ownerFilter": "Responsável",
+    "all": "Todos",
+    "mine": "Meus",
+    "unassigned": "Sem responsável",
+    "applyFilters": "Aplicar filtros",
+    "clearFilters": "Limpar filtros",
+    "case": "Caso",
+    "priority": "Prioridade",
+    "sla": "SLA",
+    "age": "Idade",
+    "owner": "Responsável",
+    "lastEvent": "Último evento",
+    "status": "Estado",
+    "open": "Abrir item de trabalho",
+    "selectionTitle": "Trabalho selecionado",
+    "selectionHint": "A fila e os filtros permanecem no lugar enquanto você inspeciona este resumo redigido.",
+    "loading": "Carregando a fila permitida para a função.",
+    "emptyTitle": "Nenhum trabalho corresponde a esta visão",
+    "emptyBody": "Altere um filtro ou uma visão salva. Nenhum trabalho fora da sua função foi pesquisado.",
+    "offline": "A fila está offline. As últimas linhas admitidas permanecem visíveis e nenhuma ação entrou na fila.",
+    "stale": "Os dados da fila podem estar desatualizados. Atualize antes de confirmar qualquer revisão.",
+    "partial": "Parte das evidências da fila está indisponível. As linhas admitidas permanecem visíveis; ações afetadas continuam bloqueadas.",
+    "priorityLabels": {
+      "critical": "Crítica",
+      "high": "Alta",
+      "normal": "Normal",
+      "low": "Baixa"
+    },
+    "statusLabels": {
+      "attention": "Requer atenção",
+      "waiting": "Aguardando",
+      "blocked": "Bloqueado",
+      "stable": "Estável"
+    }
   },
   "support": {
     "title": "Revisão de caso de suporte",

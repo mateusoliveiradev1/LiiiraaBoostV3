@@ -9,10 +9,62 @@
     "audit": "Audit"
   },
   "landing": {
-    "title": "Role workspace",
-    "summary": "Prioritize the next safe decision and move only through responsibilities assigned to your role.",
-    "scopeTitle": "Available responsibilities",
-    "scopeBody": "Your navigation contains only workspaces assigned to your role; responsibilities owned by other teams remain inaccessible."
+    "title": "Operational queue",
+    "summary": "Triage the work admitted for your role. Search results and row detail stay redacted until a permitted item is selected.",
+    "scopeTitle": "Queue context",
+    "scopeBody": "Role-permitted operational work, ordered by priority, SLA, and age."
+  },
+  "queue": {
+    "title": "Operational queue",
+    "caption": "Role-permitted work ordered by priority, SLA, and age",
+    "searchLabel": "Search permitted cases, events, and targets",
+    "searchPlaceholder": "Case, event, or redacted target",
+    "searchAction": "Search",
+    "currentQueue": "Current queue",
+    "alerts": "SLA alerts",
+    "savedView": "Saved view",
+    "savedViews": {
+      "assigned": "Assigned work",
+      "slaRisk": "SLA at risk",
+      "unowned": "Unassigned",
+      "allPermitted": "All permitted"
+    },
+    "priorityFilter": "Priority",
+    "statusFilter": "Status",
+    "ownerFilter": "Owner",
+    "all": "All",
+    "mine": "Mine",
+    "unassigned": "Unassigned",
+    "applyFilters": "Apply filters",
+    "clearFilters": "Clear filters",
+    "case": "Case",
+    "priority": "Priority",
+    "sla": "SLA",
+    "age": "Age",
+    "owner": "Owner",
+    "lastEvent": "Last event",
+    "status": "Status",
+    "open": "Open work item",
+    "selectionTitle": "Selected work",
+    "selectionHint": "The queue and filters remain in place while you inspect this redacted summary.",
+    "loading": "Loading the role-permitted queue.",
+    "emptyTitle": "No work matches this view",
+    "emptyBody": "Change a filter or saved view. No work outside your role was searched.",
+    "offline": "The queue is offline. The last admitted rows remain visible and no action is queued.",
+    "stale": "Queue data may be stale. Refresh before confirming any review.",
+    "partial": "Some queue evidence is unavailable. Admitted rows remain visible; affected actions stay blocked.",
+    "priorityLabels": {
+      "critical": "Critical",
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    },
+    "statusLabels": {
+      "attention": "Needs attention",
+      "waiting": "Waiting",
+      "blocked": "Blocked",
+      "stable": "Stable"
+    }
   },
   "support": {
     "title": "Support case review",
