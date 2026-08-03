@@ -7,6 +7,7 @@ import { matchWebRoute, type WebRouteId } from '@liiiraa/web-core';
 import {
   getPublicCatalog,
   getPublicCatalogMetadata,
+  getPublicPolicies,
   PublicCatalogPage,
 } from './features/public-catalog';
 
@@ -348,6 +349,120 @@ describe('public catalog content', () => {
 });
 
 describe('public policies and operational trust', () => {
+  it('publishes review-safe Terms, Privacy, and Security records with complete version context', () => {
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const policies = getPublicPolicies(locale);
+
+      expect(policies.documents.map(({ kind }) => kind).sort()).toEqual([
+        'privacy',
+        'security',
+        'terms',
+      ]);
+
+      for (const policy of policies.documents) {
+        expect(policy.summary.length).toBeGreaterThan(60);
+        expect(policy.sections.length).toBeGreaterThanOrEqual(5);
+        expect(policy.sections.every(({ body, heading }) => body.length > 80 && heading.length > 0)).toBe(
+          true,
+        );
+        expect(policy.version).toMatch(/^\d+\.\d+\.\d+$/u);
+        expect(policy.effectiveDate).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
+        expect(policy.history.at(-1)).toMatchObject({
+          effectiveDate: policy.effectiveDate,
+          version: policy.version,
+        });
+        expect(policy.contact).toMatch(/^[^@\s]+@liiiraa\.com$/u);
+        expect(policy.reviewNotice).toMatch(/revis[aã]o jur[ií]dica profissional|professional legal review/iu);
+
+        const markup = renderToStaticMarkup(
+          <PublicCatalogPage locale={locale} routeId={policy.routeId} />,
+        );
+        expect(markup).toContain('class="policy-review-notice"');
+        expect(visibleText(markup)).toContain(policy.reviewNotice);
+      }
+    }
+  });
+
+  it('separates every D-106 privacy purpose, consent, retention, and rights topic', () => {
+    const expectedPracticeIds = [
+      'public-site-delivery',
+      'essential-authentication-storage',
+      'optional-telemetry',
+      'support-diagnostics',
+      'personalized-ai',
+    ];
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const privacy = getPublicPolicies(locale).documents.find(({ kind }) => kind === 'privacy');
+      expect(privacy?.privacyDetails).toBeDefined();
+      if (privacy?.privacyDetails === undefined) continue;
+
+      expect(privacy.privacyDetails.controller.productIdentity).toBe('Liiiraa Boost');
+      expect(privacy.privacyDetails.controller.formalIdentityStatus).toMatch(
+        /antes da publica[cç][aã]o|before publication/iu,
+      );
+      expect(privacy.privacyDetails.controller.contact).toBe('privacy@liiiraa.com');
+      expect(privacy.privacyDetails.practices.map(({ id }) => id)).toEqual(expectedPracticeIds);
+      expect(
+        privacy.privacyDetails.practices.every(
+          ({ data, legalBasis, purpose, retention, revocation, sharing }) =>
+            [data, legalBasis, purpose, retention, revocation, sharing].every(
+              (value) => value.length > 30,
+            ),
+        ),
+      ).toBe(true);
+      expect(privacy.privacyDetails.practices.find(({ id }) => id === 'essential-authentication-storage'))
+        .toMatchObject({ status: 'necessary-only' });
+      for (const id of ['optional-telemetry', 'support-diagnostics', 'personalized-ai']) {
+        expect(privacy.privacyDetails.practices.find((practice) => practice.id === id)).toMatchObject(
+          { status: 'consent-required' },
+        );
+      }
+      expect(privacy.privacyDetails.rights.length).toBeGreaterThanOrEqual(7);
+      expect(privacy.privacyDetails.processors).toMatch(/n[aã]o recebe|does not receive/iu);
+      expect(privacy.privacyDetails.internationalTransfers).toMatch(
+        /n[aã]o.*transfer|not.*transfer/iu,
+      );
+
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId="public-privacy-policy" />,
+      );
+      expect(markup).toContain('class="privacy-practice-ledger"');
+      expect(markup).toContain('id="essential-storage"');
+    }
+  });
+
+  it('defines responsible disclosure expectations without a bounty or invented authority', async () => {
+    const source = await import('node:fs/promises').then(({ readFile }) =>
+      readFile(new URL('./features/public-catalog.tsx', import.meta.url), 'utf8'),
+    );
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const policies = getPublicPolicies(locale);
+      const disclosure = policies.disclosure;
+      const serialized = JSON.stringify(policies);
+
+      expect(disclosure.secureChannel).toBe('security@liiiraa.com');
+      expect(disclosure.scope.length).toBeGreaterThanOrEqual(3);
+      expect(disclosure.prohibitedContent.length).toBeGreaterThanOrEqual(3);
+      expect(disclosure.response).toMatch(/confirma|acknowledge/iu);
+      expect(disclosure.response).toMatch(/atualiza|update/iu);
+      expect(disclosure.response).toMatch(/nenhuma recompensa|no bounty/iu);
+      expect(disclosure.reviewNotice).toMatch(
+        /revis[aã]o jur[ií]dica profissional|professional legal review/iu,
+      );
+      expect(disclosure.history.at(-1)).toMatchObject({
+        effectiveDate: disclosure.effectiveDate,
+        version: disclosure.version,
+      });
+      expect(serialized).not.toMatch(
+        /ISO\s*27001|SOC\s*2|certificad[oa]|certified|registered office|CNPJ|processor:\s*(?:AWS|Cloudflare|Neon)/iu,
+      );
+    }
+
+    expect(source).not.toMatch(/cookie-banner|CookieBanner/u);
+  });
+
   it('renders complete versioned policy, disclosure, and status families in both locales', () => {
     const routeIds = [
       'public-policies',
