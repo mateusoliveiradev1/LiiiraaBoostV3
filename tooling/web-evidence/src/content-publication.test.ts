@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -5,6 +7,11 @@ import {
   inspectWorkspaceReadiness,
   type ContentPublicationEvidence,
 } from './web-evidence-harness.js';
+
+const finalRouteExperienceSource = readFileSync(
+  new URL('../tests/final-route-experience.spec.ts', import.meta.url),
+  'utf8',
+);
 
 const completeContentEvidence = (): ContentPublicationEvidence => ({
   asOf: '2026-07-31',
@@ -104,5 +111,38 @@ describe('workspace readiness: content publication', () => {
 
     expect(result.ok).toBe(false);
     expect(result.diagnostics.map(({ code }) => code)).toContain('MISSING_BUILD_ROOT');
+  });
+});
+
+describe('D-102 through D-110 browser publication detectors', () => {
+  it('keeps additive public, account, and admin outcome detectors executable', () => {
+    for (const detector of [
+      'expectPublicOutcomes',
+      'expectAccountOutcomes',
+      'expectAdminOutcomes',
+      'expectHomeCommercialSequence',
+      'expectAboutTruthBoundary',
+      'expectFooterTrustLayer',
+      'expectPrivacyConsentLedger',
+      'expectZoomSafeAdminActions',
+    ]) {
+      expect(finalRouteExperienceSource).toContain(detector);
+    }
+  });
+
+  it('rejects every D-110 fabricated commercial proof class', () => {
+    expect(finalRouteExperienceSource).toContain('FORBIDDEN_FABRICATED_PROOF');
+    for (const proofClass of [
+      'testimonial',
+      'benchmark gain',
+      'customer count',
+      'review score',
+      'hardware result',
+      'company milestone',
+      'security certification',
+      'operational metric',
+    ]) {
+      expect(finalRouteExperienceSource).toContain(proofClass);
+    }
   });
 });

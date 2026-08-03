@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+
+import { WEB_LOCALES, webRoutes } from '@liiiraa/web-core';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -5,6 +8,19 @@ import {
   inspectWorkspaceReadiness,
   type RouteEvidence,
 } from './web-evidence-harness.js';
+
+const routeMatrixSource = readFileSync(
+  new URL(
+    '../../../.planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md',
+    import.meta.url,
+  ),
+  'utf8',
+);
+
+const finalRouteExperienceSource = readFileSync(
+  new URL('../tests/final-route-experience.spec.ts', import.meta.url),
+  'utf8',
+);
 
 const completeRouteEvidence = (): RouteEvidence => ({
   routes: [
@@ -108,5 +124,42 @@ describe('workspace readiness: route manifest', () => {
 
     expect(result.ok).toBe(false);
     expect(result.diagnostics[0]?.code).toBe('SOURCE_TREE_EVIDENCE_REJECTED');
+  });
+});
+
+describe('D-100 complete canonical route experience contract', () => {
+  it('binds every canonical route to both locales and all four required widths', () => {
+    expect(routeMatrixSource).toContain('D-87 through D-110');
+    expect(routeMatrixSource).toContain('`public-about`');
+    expect(routeMatrixSource).toContain('1440');
+    expect(routeMatrixSource).toContain('960');
+    expect(routeMatrixSource).toContain('390');
+    expect(routeMatrixSource).toContain('320');
+
+    for (const route of webRoutes) {
+      const familyMarker = `\`${route.surface}-error-403/404/410/500\``;
+      expect(routeMatrixSource).toContain(
+        /-error-(?:403|404|410|500)$/u.test(route.id) ? familyMarker : `\`${route.id}\``,
+      );
+    }
+
+    expect(WEB_LOCALES).toEqual(['pt-BR', 'en']);
+    expect(finalRouteExperienceSource).toContain('for (const route of webRoutes)');
+    expect(finalRouteExperienceSource).toContain('for (const locale of WEB_LOCALES)');
+    expect(finalRouteExperienceSource).not.toContain('isHighRisk');
+  });
+
+  it('keeps existing truth, origin, CSP, indexing, locale, accessibility, and fail-closed gates explicit', () => {
+    for (const detector of [
+      'expectNoBlockingAxeViolations',
+      'expectRoutePreservingLocale',
+      'expectSurfaceAuthority',
+      'expectTargetsAndFocus',
+      'FORBIDDEN_ORDINARY_COPY',
+      'meta[name="robots"]',
+      'a[href$=".exe"]',
+    ]) {
+      expect(finalRouteExperienceSource).toContain(detector);
+    }
   });
 });
