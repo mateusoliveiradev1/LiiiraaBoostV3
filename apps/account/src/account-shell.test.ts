@@ -330,6 +330,9 @@ describe('account shell', () => {
     expect(styles).toMatch(
       /@media \(width < 960px\)[\s\S]*\.account-nav__mobile\s*\{[\s\S]*min-inline-size:\s*0/u,
     );
+    expect(styles).toMatch(
+      /@media \(width < 360px\)[\s\S]*\.account-header__mobile-brand \.lb-product-wordmark\s*\{[\s\S]*display:\s*none/u,
+    );
     expect(styles).not.toContain('100vw');
   });
 

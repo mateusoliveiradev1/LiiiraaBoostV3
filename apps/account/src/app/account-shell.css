@@ -2702,6 +2702,12 @@ button:focus-visible,
   }
 }
 
+@media (width < 360px) {
+  .account-header__mobile-brand .lb-product-wordmark {
+    display: none;
+  }
+}
+
 @media (forced-colors: active) {
   .account-identity__avatar {
     border: 1px solid ButtonText;

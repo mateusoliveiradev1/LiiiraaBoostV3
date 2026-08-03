@@ -271,6 +271,28 @@ describe('authored overview and Profile workspaces', () => {
     expect(overviewSource).not.toContain('account-overview__activity');
   });
 
+  it('uses customer language and keeps the signed-in security summary coherent', () => {
+    expect(accountPtBr.overview).toMatchObject({
+      title: 'Sua conta Liiiraa Boost',
+      summary: 'Acompanhe seu plano, o PC vinculado e a proteção da conta em um só lugar.',
+      responsibilityLabel: 'Próximo passo',
+      recommendedTitle: 'Proteja seu acesso com Windows Hello',
+      continuityTitle: 'Seu histórico e sua restauração continuam com você',
+    });
+    expect(accountEn.overview).toMatchObject({
+      title: 'Your Liiiraa Boost account',
+      summary: 'See your plan, linked PC, and account protection in one place.',
+      responsibilityLabel: 'Next step',
+      recommendedTitle: 'Protect access with Windows Hello',
+      continuityTitle: 'Your history and restore access stay with you',
+    });
+    expect(layoutSource).toContain("navigation: 'Sua conta'");
+    expect(layoutSource).toContain("navigation: 'Your account'");
+    expect(layoutSource).toContain("mfa: 'MFA — configurada'");
+    expect(layoutSource).toContain("mfa: 'MFA — configured'");
+    expect(layoutSource).not.toMatch(/Account responsibilities|Responsabilidades da conta/u);
+  });
+
   it('keeps the last coherent overview summary and one recovery action when degraded', () => {
     expect(featureSource).toContain('const DegradedOverviewPreview');
     expect(featureSource).toContain('data-account-home-state="degraded"');
