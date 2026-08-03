@@ -1,16 +1,16 @@
 ---
-status: testing
+status: passed
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-03T18:56:26-03:00
+updated: 2026-08-03T19:47:00-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[awaiting renewed human review — quick 260803-n0d completed the final bilingual legal/trust experience, split Essential Storage and Principles into canonical routes, and rebound the complete 480-candidate matrix; all candidates remain unapproved and Plan 03-46 remains blocked]
+[approved — the reviewer supplied the literal signal `aprovado` for the exact 60-route, 480-candidate packet bound to fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e`; historical W01-W18/G01-G07 rejections remain audit history, and publication remains blocked by the legal/operational boundary below]
 
 ## Plan 03-45 Preflight
 
@@ -263,6 +263,33 @@ reported:
 ### Publication boundary
 
 The documents are final public-facing pre-launch copy, but are not approved as policies currently in force. Plan 03-46 must still verify the formal supplier/controller identity, required registration/address details, real processors/transfers/retention, affirmative acceptance and commercial conditions, and provisioned/authenticated/monitored contact channels. This remediation does not create checkout, data collection, backend authority, email delivery, legal approval, candidate approval, or publication authority.
+
+## Plan 03-45 Human Approval — Exact Post-Remediation Packet
+
+date: 2026-08-03T19:47:00-03:00
+reviewer_signal: `aprovado`
+verdict: approved — the human visual checkpoint is satisfied only for the exact canonical packet identified below.
+
+| Approval dimension | Exact bound value |
+| --- | --- |
+| Canonical routes | 60 |
+| Candidates | 480 original-resolution PNGs |
+| Locales | 240 PT-BR and 240 English candidates |
+| Widths | 1440, 960, 390, and 320 CSS pixels for every route/locale identity |
+| Surfaces | 264 public, 128 account, and 88 admin candidates |
+| States | 384 ready and 96 error-state candidates |
+| Evidence fingerprint | `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e` |
+| Exact reviewer signal | `aprovado` |
+
+### Approval boundary
+
+- This approval applies only to the 60-route/480-candidate canonical packet with the exact fingerprint above. It does not approve a later recapture, changed hash, additional route, different locale/width/state, or any unbound artifact.
+- W01-W18/G01-G07 remain legacy continuity evidence. Every earlier human rejection and its reported defect remains preserved below as historical audit evidence; the current signal does not retroactively approve those old packet identities or erase their diagnoses.
+- No canonical 480-candidate manifest, candidate JSON, canonical screenshot byte, `humanApproved` field, `publicationApproved` field, publication report, rollback bundle, or deployment artifact is mutated by this checkpoint record.
+- The visual human gate for Plan 03-45 is complete, but publication is not authorized. Plan 03-46 remains legally and operationally blocked from promotion until it verifies the formal supplier/controller identity, registration and address details, real processors/transfers/retention, affirmative acceptance and commercial conditions, and provisioned/authenticated/monitored contact channels.
+- The bilingual consent-copy adjustments and synchronized W03-W05 legacy continuity PNGs committed with this record do not enlarge the approved canonical fingerprint or confer legal, commercial, backend, checkout, data-collection, email-delivery, or publication authority.
+
+The `Tests`, `Summary`, and `Gaps` sections below are retained as the immutable history of the previously rejected packets. They are not the verdict for the exact post-remediation packet approved in this section.
 
 ## Tests
 

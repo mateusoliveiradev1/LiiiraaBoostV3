@@ -211,12 +211,12 @@
         "id": "optional-telemetry",
         "title": "Telemetria opcional",
         "state": "Desativada",
-        "purpose": "Entender estabilidade e uso do produto por métricas proporcionais, agregadas e vinculadas a uma finalidade explicada antes da coleta.",
-        "dataClasses": "Somente as classes exibidas na escolha de consentimento; nunca conteúdo pessoal, diagnóstico de suporte ou atividade entre sites por padrão.",
-        "retention": "Desativada agora. Antes da ativação, a interface informará um prazo limitado e a política registrará o período aplicável.",
-        "sharing": "Nenhum dado opcional é compartilhado enquanto a telemetria está desativada; futuros operadores precisam ser identificados antes do consentimento.",
+        "purpose": "Entender estabilidade, falhas e uso de recursos por métricas proporcionais, vinculadas a uma finalidade mostrada antes da coleta.",
+        "dataClasses": "Somente eventos e campos listados na tela de consentimento. Arquivos pessoais, senhas, histórico de navegação, conteúdo de suporte e telemetria de alta frequência durante partidas são excluídos por padrão.",
+        "retention": "Desativada até o lançamento. Antes de ativar, a escolha informará o período ou critério de retenção; ao fim da finalidade, os dados serão excluídos ou anonimizados, salvo obrigação legal demonstrável.",
+        "sharing": "Nenhum dado opcional é enviado enquanto a telemetria estiver desativada. Operadores, destinos e subprocessadores serão informados antes do consentimento.",
         "history": ["2026-08-03 — Desativada por padrão; nenhuma telemetria opcional foi enviada."],
-        "revocationEffect": "Pode ser recusada ou revogada sem perder segurança, restauração ou documentação. A revogação interrompe novas coletas e explica o destino de dados anteriores.",
+        "revocationEffect": "Pode ser recusada ou retirada a qualquer momento sem perder o Free, segurança, histórico, restauração ou documentação. A retirada interrompe novas coletas e abre o caminho de exclusão dos dados identificáveis anteriores.",
         "actionLabel": "Revisar escolha de telemetria",
         "noChangeReceipt": {
           "receiptKind": "no-change",
@@ -225,16 +225,16 @@
       },
       {
         "id": "support-diagnostics",
-        "title": "Diagnósticos enviados ao suporte",
+        "title": "Diagnóstico enviado ao suporte",
         "state": "Desativados",
-        "purpose": "Investigar um pedido de suporte específico usando apenas o pacote que você revisar e autorizar para aquele atendimento.",
-        "dataClasses": "Campos técnicos visíveis na revisão do pacote, com segredos, credenciais e informações sem relação excluídos antes do envio.",
-        "retention": "Nenhum diagnóstico é enviado agora. O prazo do atendimento e a exclusão correspondente serão mostrados antes de qualquer envio real.",
-        "sharing": "Somente pessoas e operadores necessários ao atendimento autorizado, todos ainda sujeitos a identificação antes do lançamento do suporte remoto.",
+        "purpose": "Investigar um chamado específico usando apenas o pacote técnico que você revisar e autorizar para aquele atendimento.",
+        "dataClasses": "Versão, ambiente e campos técnicos visíveis na revisão do pacote. Segredos, credenciais, dados de pagamento, arquivos pessoais e informações sem relação devem ser removidos antes do envio.",
+        "retention": "Pelo período informado no chamado e necessário à investigação, segurança e defesa de direitos; encerrada a finalidade, o pacote é excluído ou anonimizado conforme o cronograma publicado para o suporte.",
+        "sharing": "Somente com a equipe e os operadores necessários ao chamado, identificados antes do envio e sujeitos a acesso restrito e confidencialidade.",
         "history": [
           "2026-08-03 — Desativados por padrão; nenhum pacote de diagnóstico foi autorizado."
         ],
-        "revocationEffect": "Cancelar antes do envio descarta o pacote. Depois do envio, a revogação interrompe novos acessos e oferece o caminho de exclusão aplicável.",
+        "revocationEffect": "Cancelar antes do envio descarta o pacote. Depois do envio, a retirada interrompe novos usos baseados em consentimento e permite pedir exclusão, salvo retenção obrigatória ou necessária à defesa de direitos.",
         "actionLabel": "Revisar consentimento de diagnóstico",
         "noChangeReceipt": {
           "receiptKind": "no-change",
@@ -243,16 +243,16 @@
       },
       {
         "id": "personalized-ai",
-        "title": "IA personalizada",
+        "title": "Assistência personalizada por IA",
         "state": "Desativada",
-        "purpose": "Usar contexto que você escolher para produzir orientação personalizada sem transformar diagnósticos locais em treinamento ou processamento oculto.",
-        "dataClasses": "Somente perguntas e contexto apresentados na tela de consentimento; diagnóstico, histórico e identidade ficam excluídos até seleção explícita.",
-        "retention": "Desativada agora. Prazos para solicitações, respostas e contexto serão informados antes de qualquer processamento em nuvem.",
-        "sharing": "Nenhum provedor recebe dados enquanto a IA personalizada está desativada; qualquer futuro operador e finalidade serão informados antes do envio.",
+        "purpose": "Produzir orientação personalizada com a pergunta e o contexto que o usuário escolher, sem transformar diagnóstico local em treinamento ou processamento oculto.",
+        "dataClasses": "Pergunta, respostas e somente o contexto selecionado na tela. Identidade, diagnóstico completo, histórico e arquivos permanecem excluídos até escolha expressa e específica.",
+        "retention": "Desativada até o lançamento. A tela informará se a solicitação é temporária ou salva no histórico e o prazo aplicável; dados são excluídos ou anonimizados quando a finalidade terminar.",
+        "sharing": "Nenhum provedor recebe dados enquanto a IA em nuvem estiver desativada. Provedor, localização, finalidade, retenção e uso ou não uso para treinamento serão informados antes do envio.",
         "history": [
           "2026-08-03 — Desativada por padrão; nenhuma pergunta ou contexto da conta foi enviado."
         ],
-        "revocationEffect": "Revogar interrompe novos envios e a personalização futura. A interface explicará como excluir o contexto anterior sujeito a obrigações aplicáveis.",
+        "revocationEffect": "A retirada interrompe novos envios e personalização futura. O usuário poderá excluir conversas e contexto identificável, respeitadas obrigações legais específicas.",
         "actionLabel": "Revisar escolha de IA personalizada",
         "noChangeReceipt": {
           "receiptKind": "no-change",
