@@ -7,7 +7,7 @@
   },
   "identity": {
     "label": "Informação demonstrativa de versão",
-    "detail": "Este registro do repositório explica o caminho de aceitação. Ele não é manifesto oficial assinado, instalador, espelho nem autorização de distribuição.",
+    "detail": "Esta página explica as verificações obrigatórias antes de uma distribuição pública. Nenhum manifesto oficial assinado ou instalador foi publicado.",
     "reviewed": "Revisão do conteúdo",
     "validation": "Registro gerado de versão validado"
   },
@@ -51,16 +51,16 @@
       "name": "Experimental",
       "default": false,
       "requiresOptIn": true,
-      "audience": "Entusiastas de hardware capazes de avaliar mudanças intensas e recuperar com segurança.",
-      "risk": "Comportamento de alta mudança e validação limitada; nunca apresentado ao lado da Estável como escolha equivalente.",
-      "support": "Suporte limitado e expectativas explícitas de recuperação.",
-      "updates": "Política apenas manual com novo reconhecimento a cada mudança material de risco.",
-      "account": "O reconhecimento Experimental não pode ser inferido de sessão, URL ou cookie."
+      "audience": "Uso interno de validação; indisponível como canal público no lançamento.",
+      "risk": "Mudanças intensas e validação limitada; nunca é apresentado ao lado da Estável como escolha pública equivalente.",
+      "support": "Sem suporte público enquanto o canal permanecer interno.",
+      "updates": "Distribuição interna e manual, com novo reconhecimento a cada mudança material de risco.",
+      "account": "Uma conta pública não libera o canal Experimental."
     }
   ],
   "releaseNotes": {
     "title": "Notas da versão antes da promoção",
-    "summary": "Estas notas descrevem o registro demonstrativo 1.0.0. Elas não anunciam uma compilação disponível para download.",
+    "summary": "Estas notas descrevem a versão 1.0.0 planejada. Elas não anunciam uma compilação disponível para download.",
     "sections": [
       {
         "id": "changes",
@@ -75,7 +75,7 @@
       {
         "id": "corrections",
         "title": "Correções",
-        "body": "A linguagem pública agora separa exemplos do repositório, evidência de desenvolvimento e futura distribuição com confiança pública."
+        "body": "A comunicação pública separa exemplos do produto, evidência de desenvolvimento e uma futura distribuição com confiança pública."
       },
       {
         "id": "compatibility",
@@ -96,7 +96,7 @@
   },
   "manifest": {
     "title": "Campos demonstrativos do manifesto",
-    "notice": "Fora do caminho oficial de confiança. Valores não emitidos ou não aprovados são fatos bloqueantes, não ausência de interface.",
+    "notice": "Fora do caminho oficial de confiança. Valores não emitidos ou não aprovados mantêm o download indisponível.",
     "fields": {
       "manifestId": "Identidade do manifesto canônico legível por máquina",
       "artifactId": "Identidade exata do artefato vinculada ao manifesto",
@@ -204,6 +204,56 @@
     ],
     "cancel": "Cancele sem abrir o artefato, não enfraqueça a segurança do Windows e remova a cópia não confiável.",
     "support": "Use o suporte público apenas com a versão e a categoria da divergência. Não envie credenciais, segredos do dispositivo ou diagnósticos não relacionados."
+  },
+  "updater": {
+    "title": "Atualizações automáticas sem interromper sua partida",
+    "summary": "O aplicativo usará o atualizador assinado do Tauri em segundo plano. Ele procura uma versão compatível somente quando o PC está ocioso e nunca inicia verificação ou instalação durante uma sessão de jogo.",
+    "behavior": [
+      {
+        "id": "idle-checks",
+        "title": "Verificação em segundo plano",
+        "body": "A consulta é leve, respeita o canal escolhido e acontece apenas fora de jogos, benchmarks e trabalhos críticos."
+      },
+      {
+        "id": "game-session-exclusion",
+        "title": "Partida protegida",
+        "body": "Se um jogo estiver ativo, download, validação e instalação aguardam. Nenhuma atualização compete por disco, rede ou atenção durante a partida."
+      },
+      {
+        "id": "validation",
+        "title": "Validação antes de instalar",
+        "body": "Assinatura, SHA-256, canal, versão, arquitetura, compatibilidade e manifesto precisam concordar. Qualquer divergência cancela a atualização sem opção de ignorar."
+      },
+      {
+        "id": "recovery",
+        "title": "Instalação com recuperação",
+        "body": "A versão anterior e o estado do update permanecem disponíveis para diagnóstico e recuperação quando a verificação pós-instalação falhar."
+      }
+    ],
+    "choices": [
+      "Instalar agora, quando nenhum jogo estiver aberto",
+      "Lembrar mais tarde",
+      "Instalar ao fechar o aplicativo",
+      "Agendar para um horário ocioso"
+    ],
+    "rollout": [
+      {
+        "stage": "5%",
+        "label": "Primeira observação",
+        "body": "Uma pequena parcela recebe a versão para validar instalação, inicialização e recuperação."
+      },
+      {
+        "stage": "25%",
+        "label": "Expansão controlada",
+        "body": "A distribuição cresce somente quando os sinais de saúde permanecem dentro dos limites aprovados."
+      },
+      {
+        "stage": "100%",
+        "label": "Disponibilidade geral",
+        "body": "A versão chega a todo o canal apenas depois das duas etapas anteriores; sinais ruins pausam ou revertem a liberação."
+      }
+    ],
+    "recovery": "Cada etapa pode ser pausada. Falha de instalação, inicialização ou saúde interrompe a expansão e preserva um caminho de retorno."
   },
   "analytics": {
     "title": "Medição de download limitada à finalidade",

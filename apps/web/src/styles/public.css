@@ -2420,6 +2420,156 @@ ol.lb-web-documentation-index li {
   line-height: 1.7;
 }
 
+.release-facts {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.32fr) minmax(0, 1fr);
+  gap: var(--lb-space-5);
+  padding-block: var(--lb-space-5);
+  border-block: 1px solid var(--lb-line-strong);
+}
+
+.release-facts h2 {
+  max-inline-size: 18ch;
+  margin: 0;
+  font-size: var(--lb-text-heading-size);
+  line-height: var(--lb-text-heading-line);
+  text-wrap: balance;
+}
+
+.release-facts dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.release-facts dl > div {
+  min-inline-size: 0;
+  padding: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.release-facts dt {
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+.release-facts dd {
+  margin: var(--lb-space-1) 0 0;
+  overflow-wrap: anywhere;
+  color: var(--lb-text-primary);
+}
+
+.release-updater {
+  display: grid;
+  gap: var(--lb-space-5);
+  padding-block: var(--lb-space-6);
+  border-block-start: 1px solid var(--lb-line-strong);
+}
+
+.release-updater > header {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.4fr) minmax(0, 1fr);
+  gap: var(--lb-space-5);
+}
+
+.release-updater > header h2,
+.release-updater > header p,
+.release-updater h3,
+.release-updater p {
+  margin: 0;
+}
+
+.release-updater > header h2 {
+  max-inline-size: 20ch;
+  font-size: var(--lb-text-heading-size);
+  line-height: var(--lb-text-heading-line);
+  text-wrap: balance;
+}
+
+.release-updater > header p,
+.release-updater__behavior p,
+.release-updater__rollout p {
+  max-inline-size: 68ch;
+  color: var(--lb-text-secondary);
+  line-height: 1.65;
+}
+
+.release-updater__behavior {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-block: 1px solid var(--lb-line-strong);
+}
+
+.release-updater__behavior > section {
+  display: grid;
+  gap: var(--lb-space-2);
+  padding: var(--lb-space-4);
+  border-block-start: 1px solid var(--lb-line-subtle);
+}
+
+.release-updater__choices {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.32fr) minmax(0, 1fr);
+  gap: var(--lb-space-5);
+}
+
+.release-updater__choices ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lb-space-2) var(--lb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.release-updater__choices li {
+  min-block-size: 44px;
+  padding-block: var(--lb-space-2);
+  border-block-start: 1px solid var(--lb-line-subtle);
+  color: var(--lb-text-primary);
+}
+
+.release-updater__rollout {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.32fr) minmax(0, 1fr);
+  gap: var(--lb-space-5);
+  padding: var(--lb-space-4);
+  background: var(--lb-panel-raised);
+}
+
+.release-updater__rollout > div {
+  display: grid;
+  gap: var(--lb-space-2);
+  align-content: start;
+}
+
+.release-updater__rollout ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--lb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.release-updater__rollout li {
+  display: grid;
+  gap: var(--lb-space-2);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.release-updater__rollout li strong {
+  color: var(--lb-accent-cyan);
+  font-family: var(--lb-font-data);
+  font-size: var(--lb-text-heading-size);
+}
+
+.release-updater__rollout li span {
+  color: var(--lb-text-primary);
+  font-weight: var(--lb-weight-semibold);
+}
+
 .release-channel-ledger {
   border-block: 1px solid var(--lb-line-strong);
 }
@@ -2515,6 +2665,10 @@ ol.lb-web-documentation-index li {
   .documentation-index-workspace > ol,
   .documentation-help-search__filter-grid,
   .documentation-help-paths > section,
+  .release-facts,
+  .release-updater > header,
+  .release-updater__choices,
+  .release-updater__rollout,
   .release-state-header,
   .release-channel-ledger > section,
   .release-movement {
@@ -2533,6 +2687,13 @@ ol.lb-web-documentation-index li {
   .release-channel-ledger .catalog-disclosure-list {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .release-facts dl,
+  .release-updater__behavior,
+  .release-updater__choices ul,
+  .release-updater__rollout ol {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

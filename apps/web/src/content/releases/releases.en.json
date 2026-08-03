@@ -7,7 +7,7 @@
   },
   "identity": {
     "label": "Demonstrative release information",
-    "detail": "This repository record explains the acceptance path. It is not an official signed manifest, installer, mirror, or distribution authorization.",
+    "detail": "This page explains the checks required before public distribution. No official signed manifest or installer has been published.",
     "reviewed": "Content review",
     "validation": "Generated release record validated"
   },
@@ -51,16 +51,16 @@
       "name": "Experimental",
       "default": false,
       "requiresOptIn": true,
-      "audience": "Hardware enthusiasts who can evaluate high-change behavior and recover safely.",
-      "risk": "High-change, limited-validation behavior; never presented beside Stable as an equivalent choice.",
-      "support": "Limited support and explicit recovery expectations.",
-      "updates": "Manual-only policy with a new acknowledgement for each material risk change.",
-      "account": "The Experimental acknowledgement cannot be inferred from a session, URL, or cookie."
+      "audience": "Internal validation use; unavailable as a public launch channel.",
+      "risk": "High-change, limited-validation behavior; never presented beside Stable as an equivalent public choice.",
+      "support": "No public support while the channel remains internal.",
+      "updates": "Internal, manual distribution with a new acknowledgement for each material risk change.",
+      "account": "A public account does not unlock the Experimental channel."
     }
   ],
   "releaseNotes": {
     "title": "Release notes before promotion",
-    "summary": "These notes describe the demonstrative 1.0.0 release record. They do not announce a downloadable build.",
+    "summary": "These notes describe the planned 1.0.0 release. They do not announce a downloadable build.",
     "sections": [
       {
         "id": "changes",
@@ -75,7 +75,7 @@
       {
         "id": "corrections",
         "title": "Corrections",
-        "body": "Public release language now separates repository examples, development evidence, and future publicly trusted distribution."
+        "body": "Public release language separates product examples, development evidence, and future publicly trusted distribution."
       },
       {
         "id": "compatibility",
@@ -96,7 +96,7 @@
   },
   "manifest": {
     "title": "Demonstrative manifest fields",
-    "notice": "Outside the official trust path. Values marked not issued or not approved are blocking facts, not missing UI.",
+    "notice": "Outside the official trust path. Values that are not issued or approved keep download unavailable.",
     "fields": {
       "manifestId": "Canonical machine-readable manifest identity",
       "artifactId": "Exact artifact identity bound to that manifest",
@@ -204,6 +204,56 @@
     ],
     "cancel": "Cancel without running the artifact, do not weaken Windows security, and remove the untrusted copy.",
     "support": "Use public support with the release version and categorical disagreement only. Do not send credentials, device secrets, or unrelated diagnostic data."
+  },
+  "updater": {
+    "title": "Automatic updates that never interrupt your game",
+    "summary": "The application will use Tauri's signed updater in the background. It checks for a compatible release only while the PC is idle and never starts a check or installation during a gaming session.",
+    "behavior": [
+      {
+        "id": "idle-checks",
+        "title": "Background checks",
+        "body": "The request is lightweight, respects the selected channel, and runs only outside games, benchmarks, and critical work."
+      },
+      {
+        "id": "game-session-exclusion",
+        "title": "Protected gameplay",
+        "body": "If a game is active, download, validation, and installation wait. An update never competes for disk, network, or attention during play."
+      },
+      {
+        "id": "validation",
+        "title": "Validation before installation",
+        "body": "Signature, SHA-256, channel, version, architecture, compatibility, and manifest must agree. Any mismatch cancels the update with no override."
+      },
+      {
+        "id": "recovery",
+        "title": "Installation with recovery",
+        "body": "The previous version and update state remain available for diagnosis and recovery when post-install verification fails."
+      }
+    ],
+    "choices": [
+      "Install now when no game is open",
+      "Remind me later",
+      "Install when the application closes",
+      "Schedule for an idle period"
+    ],
+    "rollout": [
+      {
+        "stage": "5%",
+        "label": "First observation",
+        "body": "A small cohort receives the release to validate installation, startup, and recovery."
+      },
+      {
+        "stage": "25%",
+        "label": "Controlled expansion",
+        "body": "Distribution grows only while health signals remain inside the approved limits."
+      },
+      {
+        "stage": "100%",
+        "label": "General availability",
+        "body": "The release reaches the entire channel only after both earlier stages; unhealthy signals pause or reverse rollout."
+      }
+    ],
+    "recovery": "Every stage can be paused. Installation, startup, or health failure stops expansion and preserves a return path."
   },
   "analytics": {
     "title": "Purpose-bound download measurement",

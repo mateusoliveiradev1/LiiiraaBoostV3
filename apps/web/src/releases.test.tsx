@@ -188,6 +188,52 @@ describe('release content and routes', () => {
     expect(source).not.toMatch(/<a[^>]+download(?:=|\s|>)/iu);
   });
 
+  it('explains signed idle updates, game exclusion, user timing, recovery, and staged rollout', () => {
+    const pt = resolveReleasePage({ locale: 'pt-BR' });
+    const en = resolveReleasePage({ locale: 'en' });
+    if (pt === undefined || en === undefined) throw new Error('release index route missing');
+
+    const ptMarkup = renderToStaticMarkup(<ReleaseExperience resolution={pt} />);
+    const enMarkup = renderToStaticMarkup(<ReleaseExperience resolution={en} />);
+    const ptText = visibleText(ptMarkup);
+    const enText = visibleText(enMarkup);
+
+    expect(ptText).toContain('Atualizações automáticas sem interromper sua partida');
+    expect(ptText).toContain('atualizador assinado do Tauri');
+    expect(ptText).toContain('nunca inicia verificação ou instalação durante uma sessão de jogo');
+    expect(ptText).toContain('Instalar ao fechar o aplicativo');
+    expect(ptText).toContain('Agendar para um horário ocioso');
+    expect(ptText).toContain('5%');
+    expect(ptText).toContain('25%');
+    expect(ptText).toContain('100%');
+    expect(enText).toContain('Automatic updates that never interrupt your game');
+    expect(enText).toContain('Any mismatch cancels the update with no override');
+    expect(enText).toContain('preserves a return path');
+  });
+
+  it('shows the complete pre-download fact set without pretending unavailable fields exist', () => {
+    const resolution = resolveReleasePage({ locale: 'pt-BR' });
+    if (resolution === undefined) throw new Error('release index route missing');
+    const markup = renderToStaticMarkup(<ReleaseExperience resolution={resolution} />);
+    const text = visibleText(markup);
+
+    for (const label of [
+      'Canal escolhido',
+      'Versão planejada',
+      'Última revisão',
+      'Windows compatível',
+      'Arquitetura',
+      'Tamanho do instalador',
+      'Publicador e assinatura',
+      'SHA-256',
+      'Manifesto oficial',
+    ]) {
+      expect(text).toContain(label);
+    }
+    expect(text).toContain('Ainda não publicado');
+    expect(markup).not.toMatch(/<a[^>]+download(?:=|\s|>)/iu);
+  });
+
   it('subordinates dense release metadata to an invoked technical disclosure', () => {
     const resolution = resolveReleasePage({ locale: 'pt-BR' });
     if (resolution === undefined) throw new Error('release index route missing');

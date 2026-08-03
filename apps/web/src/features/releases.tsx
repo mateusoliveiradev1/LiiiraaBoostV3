@@ -77,6 +77,13 @@ const VERIFICATION_IDS = Object.freeze([
   'manifest',
 ] as const);
 
+const UPDATE_BEHAVIOR_IDS = Object.freeze([
+  'idle-checks',
+  'game-session-exclusion',
+  'validation',
+  'recovery',
+] as const);
+
 const BLOCKED_REASONS = Object.freeze([
   'artifact-unavailable',
   'channel-selection-blocked',
@@ -222,6 +229,7 @@ const admitReleaseContent = (candidate: unknown, locale: WebLocale): ReleaseCont
     !isRecord(candidate['history']) ||
     !isRecord(candidate['downloadGate']) ||
     !isRecord(candidate['installation']) ||
+    !isRecord(candidate['updater']) ||
     !isRecord(candidate['analytics'])
   ) {
     throw new Error(`RELEASE_CONTENT_INVALID:${locale}:root`);
@@ -325,6 +333,43 @@ const admitReleaseContent = (candidate: unknown, locale: WebLocale): ReleaseCont
     throw new Error(`RELEASE_CONTENT_INVALID:${locale}:download-gate`);
   }
 
+  const updater = candidate['updater'];
+  const updaterBehavior = updater['behavior'];
+  const updaterChoices = updater['choices'];
+  const updaterRollout = updater['rollout'];
+  if (
+    !isNonEmptyString(updater['title']) ||
+    !isNonEmptyString(updater['summary']) ||
+    !isNonEmptyString(updater['recovery']) ||
+    !Array.isArray(updaterBehavior) ||
+    !hasExactIdentity(
+      updaterBehavior.flatMap((item) =>
+        isRecord(item) && isNonEmptyString(item['id']) ? [item['id']] : [],
+      ),
+      UPDATE_BEHAVIOR_IDS,
+    ) ||
+    updaterBehavior.some(
+      (item) =>
+        !isRecord(item) || !isNonEmptyString(item['title']) || !isNonEmptyString(item['body']),
+    ) ||
+    !Array.isArray(updaterChoices) ||
+    updaterChoices.length !== 4 ||
+    updaterChoices.some((choice) => !isNonEmptyString(choice)) ||
+    !Array.isArray(updaterRollout) ||
+    !hasExactIdentity(
+      updaterRollout.flatMap((stage) =>
+        isRecord(stage) && isNonEmptyString(stage['stage']) ? [stage['stage']] : [],
+      ),
+      ['5%', '25%', '100%'],
+    ) ||
+    updaterRollout.some(
+      (stage) =>
+        !isRecord(stage) || !isNonEmptyString(stage['label']) || !isNonEmptyString(stage['body']),
+    )
+  ) {
+    throw new Error(`RELEASE_CONTENT_INVALID:${locale}:updater`);
+  }
+
   const serialized = JSON.stringify(candidate).replaceAll('\\', '/');
   if (FORBIDDEN_ARTIFACT_IDENTITIES.some((identity) => identity.test(serialized))) {
     throw new Error(`RELEASE_CONTENT_INVALID:${locale}:development-artifact-identity`);
@@ -346,6 +391,8 @@ const localeParity = (content: ReleaseContent): string =>
     verification: content.verification.steps.map(({ id }) => id),
     history: Object.keys(content.history.records),
     reasons: Object.keys(content.downloadGate.reasons),
+    updater: content.updater.behavior.map(({ id }) => id),
+    rollout: content.updater.rollout.map(({ stage }) => stage),
   });
 
 if (localeParity(RELEASE_CONTENT.en) !== localeParity(RELEASE_CONTENT['pt-BR'])) {
@@ -577,6 +624,123 @@ const ChannelPolicies = ({
       ))}
     </div>
   </ReleaseChannelSelector>
+);
+
+const ReleaseFacts = ({
+  content,
+  locale,
+  resolution,
+}: Readonly<{
+  content: ReleaseContent;
+  locale: WebLocale;
+  resolution: ReleasePageResolution;
+}>) => {
+  const manifest = RELEASE_METADATA.demonstrativeManifest;
+  const labels =
+    locale === 'pt-BR'
+      ? {
+          architecture: 'Arquitetura',
+          channel: 'Canal escolhido',
+          date: 'Última revisão',
+          manifest: 'Manifesto oficial',
+          publisher: 'Publicador e assinatura',
+          sha256: 'SHA-256',
+          size: 'Tamanho do instalador',
+          support: 'Windows compatível',
+          title: 'O que você poderá confirmar antes de baixar',
+          unavailable: 'Ainda não publicado',
+          version: 'Versão planejada',
+        }
+      : {
+          architecture: 'Architecture',
+          channel: 'Selected channel',
+          date: 'Last reviewed',
+          manifest: 'Official manifest',
+          publisher: 'Publisher and signature',
+          sha256: 'SHA-256',
+          size: 'Installer size',
+          support: 'Supported Windows',
+          title: 'What you will be able to confirm before download',
+          unavailable: 'Not published yet',
+          version: 'Planned version',
+        };
+  const entries = [
+    {
+      label: labels.channel,
+      value:
+        content.channels.find(({ id }) => id === resolution.channel)?.name ?? resolution.channel,
+    },
+    { label: labels.version, value: manifest.version },
+    { label: labels.date, value: RELEASE_METADATA.lastReviewedAt.slice(0, 10) },
+    {
+      label: labels.support,
+      value:
+        locale === 'pt-BR'
+          ? 'Windows 10 e Windows 11 · validação pendente'
+          : 'Windows 10 and Windows 11 · validation pending',
+    },
+    { label: labels.architecture, value: 'Windows x64' },
+    { label: labels.size, value: labels.unavailable },
+    { label: labels.publisher, value: labels.unavailable },
+    { label: labels.sha256, value: labels.unavailable },
+    { label: labels.manifest, value: labels.unavailable },
+  ];
+  return (
+    <section aria-labelledby="release-facts-title" className="release-facts">
+      <h2 id="release-facts-title">{labels.title}</h2>
+      <dl>
+        {entries.map((entry) => (
+          <div key={entry.label}>
+            <dt>{entry.label}</dt>
+            <dd>{entry.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+};
+
+const UpdateLifecycle = ({
+  content,
+  locale,
+}: Readonly<{ content: ReleaseContent; locale: WebLocale }>) => (
+  <section aria-labelledby="release-updater-title" className="release-updater">
+    <header>
+      <h2 id="release-updater-title">{content.updater.title}</h2>
+      <p>{content.updater.summary}</p>
+    </header>
+    <div className="release-updater__behavior">
+      {content.updater.behavior.map((item) => (
+        <section key={item.id}>
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </section>
+      ))}
+    </div>
+    <section className="release-updater__choices">
+      <h3>{locale === 'pt-BR' ? 'Você escolhe quando instalar' : 'You choose when to install'}</h3>
+      <ul>
+        {content.updater.choices.map((choice) => (
+          <li key={choice}>{choice}</li>
+        ))}
+      </ul>
+    </section>
+    <section className="release-updater__rollout">
+      <div>
+        <h3>{locale === 'pt-BR' ? 'Liberação gradual' : 'Staged rollout'}</h3>
+        <p>{content.updater.recovery}</p>
+      </div>
+      <ol>
+        {content.updater.rollout.map((stage) => (
+          <li key={stage.stage}>
+            <strong>{stage.stage}</strong>
+            <span>{stage.label}</span>
+            <p>{stage.body}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </section>
 );
 
 const RELEASE_MOVEMENT_ORDER = Object.freeze([
@@ -893,6 +1057,7 @@ const RouteComposition = ({
             locale={resolution.locale}
             selectedChannel={resolution.channel}
           />
+          <UpdateLifecycle content={content} locale={resolution.locale} />
           <ReleaseNotes content={content} resolution={resolution} />
           <ReleaseHistory content={content} />
           <AnalyticsDisclosure content={content} />
@@ -906,6 +1071,7 @@ const RouteComposition = ({
             locale={resolution.locale}
             selectedChannel={resolution.channel}
           />
+          <UpdateLifecycle content={content} locale={resolution.locale} />
           <ReleaseNotes content={content} resolution={resolution} />
         </>
       );
@@ -913,6 +1079,7 @@ const RouteComposition = ({
       return (
         <>
           <ReleaseNotes content={content} resolution={resolution} />
+          <UpdateLifecycle content={content} locale={resolution.locale} />
           <ReleaseHistory content={content} />
         </>
       );
@@ -928,6 +1095,7 @@ const RouteComposition = ({
         <>
           <IntegrityReview content={content} locale={resolution.locale} />
           <VerificationGuide content={content} />
+          <UpdateLifecycle content={content} locale={resolution.locale} />
           <AnalyticsDisclosure content={content} />
         </>
       );
@@ -935,6 +1103,7 @@ const RouteComposition = ({
       return (
         <>
           <VerificationGuide content={content} />
+          <UpdateLifecycle content={content} locale={resolution.locale} />
           <InstallationGuide content={content} />
         </>
       );
@@ -969,6 +1138,7 @@ export const ReleaseExperience = ({
           <p>{content.metadata.description}</p>
         </header>
         <DownloadDecisionView content={content} decision={decision} locale={resolution.locale} />
+        <ReleaseFacts content={content} locale={resolution.locale} resolution={resolution} />
         <RouteComposition content={content} resolution={resolution} />
         <details className="release-technical-context">
           <summary>
