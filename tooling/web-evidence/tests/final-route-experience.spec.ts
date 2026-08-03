@@ -563,21 +563,19 @@ for (const surface of ['public', 'account', 'admin'] as const) {
 }
 
 // canonical-candidate:start
-const CANONICAL_CANDIDATES = webRoutes
-  .filter((route) => route.id !== 'public-essential-storage')
-  .flatMap((route) =>
-    WEB_LOCALES.flatMap((locale) =>
-      COVERED_AXES.map((axis) => {
-        const surface = surfaceFor(route);
-        const state = ERROR_ROUTE.test(route.id)
-          ? route.id.slice(route.id.lastIndexOf('error-'))
-          : 'ready';
-        const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
+const CANONICAL_CANDIDATES = webRoutes.flatMap((route) =>
+  WEB_LOCALES.flatMap((locale) =>
+    COVERED_AXES.map((axis) => {
+      const surface = surfaceFor(route);
+      const state = ERROR_ROUTE.test(route.id)
+        ? route.id.slice(route.id.lastIndexOf('error-'))
+        : 'ready';
+      const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
 
-        return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
-      }),
-    ),
-  );
+      return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
+    }),
+  ),
+);
 
 const canonicalCandidateIdentities = new Set(
   CANONICAL_CANDIDATES.map(({ snapshotIdentity }) => snapshotIdentity),
