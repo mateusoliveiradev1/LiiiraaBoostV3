@@ -111,7 +111,34 @@ export type PolicyVersion = Readonly<{
   version: string;
   effectiveDate: string;
   contact: string;
-  sections: readonly Readonly<{ heading: string; body: string }>[];
+  reviewNotice: string;
+  sections: readonly Readonly<{ id: string; heading: string; body: string }>[];
+  privacyDetails?: Readonly<{
+    controller: Readonly<{
+      productIdentity: string;
+      formalIdentityStatus: string;
+      contact: string;
+    }>;
+    practices: readonly Readonly<{
+      id:
+        | 'public-site-delivery'
+        | 'essential-authentication-storage'
+        | 'optional-telemetry'
+        | 'support-diagnostics'
+        | 'personalized-ai';
+      title: string;
+      status: 'necessary-only' | 'consent-required';
+      purpose: string;
+      data: string;
+      legalBasis: string;
+      retention: string;
+      sharing: string;
+      revocation: string;
+    }>[];
+    processors: string;
+    internationalTransfers: string;
+    rights: readonly string[];
+  }>;
   history: readonly Readonly<{
     version: string;
     effectiveDate: string;
@@ -127,7 +154,7 @@ export type IncidentRecord = Readonly<{
   resolution: string;
 }>;
 
-type Policies = Readonly<{
+export type PublicPolicies = Readonly<{
   schemaVersion: 1;
   locale: WebLocale;
   lastReviewedAt: string;
@@ -137,6 +164,10 @@ type Policies = Readonly<{
     title: string;
     summary: string;
     secureChannel: string;
+    contact: string;
+    version: string;
+    effectiveDate: string;
+    reviewNotice: string;
     scope: readonly string[];
     prohibitedContent: readonly string[];
     response: string;
@@ -281,7 +312,7 @@ const admitCatalog = (candidate: unknown, locale: WebLocale): PublicCatalog => {
   return candidate as unknown as PublicCatalog;
 };
 
-const admitPolicies = (candidate: unknown, locale: WebLocale): Policies => {
+const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies => {
   if (
     !isRecord(candidate) ||
     candidate['schemaVersion'] !== 1 ||
@@ -295,6 +326,7 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): Policies => {
   }
 
   const routeIds: string[] = [];
+  const kinds: string[] = [];
   for (const [index, value] of candidate['documents'].entries()) {
     if (
       !isRecord(value) ||
@@ -304,19 +336,81 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): Policies => {
       !isNonEmptyString(value['version']) ||
       !isNonEmptyString(value['effectiveDate']) ||
       !isNonEmptyString(value['contact']) ||
+      !isNonEmptyString(value['reviewNotice']) ||
       !Array.isArray(value['sections']) ||
       value['sections'].length === 0 ||
+      !value['sections'].every(
+        (section) =>
+          isRecord(section) &&
+          isNonEmptyString(section['id']) &&
+          isNonEmptyString(section['heading']) &&
+          isNonEmptyString(section['body']),
+      ) ||
       !Array.isArray(value['history']) ||
-      value['history'].length === 0
+      value['history'].length === 0 ||
+      !value['history'].every(
+        (entry) =>
+          isRecord(entry) &&
+          isNonEmptyString(entry['version']) &&
+          isNonEmptyString(entry['effectiveDate']) &&
+          isNonEmptyString(entry['summary']),
+      )
     ) {
       throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:document:${String(index)}`);
     }
+
+    if (value['kind'] === 'privacy') {
+      const details = value['privacyDetails'];
+      if (
+        !isRecord(details) ||
+        !isRecord(details['controller']) ||
+        !isNonEmptyString(details['controller']['productIdentity']) ||
+        !isNonEmptyString(details['controller']['formalIdentityStatus']) ||
+        !isNonEmptyString(details['controller']['contact']) ||
+        !Array.isArray(details['practices']) ||
+        details['practices'].length !== 5 ||
+        !details['practices'].every(
+          (practice) =>
+            isRecord(practice) &&
+            [
+              'id',
+              'title',
+              'status',
+              'purpose',
+              'data',
+              'legalBasis',
+              'retention',
+              'sharing',
+              'revocation',
+            ].every((key) => isNonEmptyString(practice[key])),
+        ) ||
+        !isNonEmptyString(details['processors']) ||
+        !isNonEmptyString(details['internationalTransfers']) ||
+        !Array.isArray(details['rights']) ||
+        details['rights'].length < 7 ||
+        !details['rights'].every(isNonEmptyString)
+      ) {
+        throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:privacy-details`);
+      }
+    }
+
     routeIds.push(value['routeId']);
+    kinds.push(String(value['kind']));
   }
 
   if (
     !hasExactStrings(routeIds, POLICY_ROUTE_IDS) ||
+    !hasExactStrings(kinds, ['privacy', 'terms', 'security']) ||
     candidate['disclosure']['routeId'] !== 'public-responsible-disclosure' ||
+    !isNonEmptyString(candidate['disclosure']['secureChannel']) ||
+    !isNonEmptyString(candidate['disclosure']['contact']) ||
+    !isNonEmptyString(candidate['disclosure']['version']) ||
+    !isNonEmptyString(candidate['disclosure']['effectiveDate']) ||
+    !isNonEmptyString(candidate['disclosure']['reviewNotice']) ||
+    !Array.isArray(candidate['disclosure']['scope']) ||
+    !Array.isArray(candidate['disclosure']['prohibitedContent']) ||
+    !isNonEmptyString(candidate['disclosure']['response']) ||
+    !Array.isArray(candidate['disclosure']['history']) ||
     candidate['status']['routeId'] !== 'public-status' ||
     !Array.isArray(candidate['status']['components']) ||
     !Array.isArray(candidate['status']['incidentHistory'])
@@ -324,7 +418,7 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): Policies => {
     throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:route-parity`);
   }
 
-  return candidate as unknown as Policies;
+  return candidate as unknown as PublicPolicies;
 };
 
 const CATALOGS = Object.freeze({
@@ -350,7 +444,7 @@ const statusStateLabel = (
 const assertLocaleParity = (): void => {
   const recordIdentity = (catalog: PublicCatalog): string =>
     catalog.records.map(({ routeId, translationKey }) => `${routeId}:${translationKey}`).join('|');
-  const policyIdentity = (policies: Policies): string =>
+  const policyIdentity = (policies: PublicPolicies): string =>
     policies.documents.map(({ kind, routeId }) => `${kind}:${routeId}`).join('|');
 
   if (
@@ -364,6 +458,7 @@ const assertLocaleParity = (): void => {
 assertLocaleParity();
 
 export const getPublicCatalog = (locale: WebLocale): PublicCatalog => CATALOGS[locale];
+export const getPublicPolicies = (locale: WebLocale): PublicPolicies => POLICIES[locale];
 
 const copyFor = (locale: WebLocale) =>
   locale === 'pt-BR'
@@ -872,7 +967,7 @@ type SearchEntry = Readonly<{
 
 const createSearchEntries = (
   catalog: PublicCatalog,
-  policies: Policies,
+  policies: PublicPolicies,
 ): readonly SearchEntry[] => [
   ...catalog.records.map((record) => ({
     id: record.translationKey,
@@ -926,7 +1021,7 @@ export const GlobalSearch = ({
   searchParams,
 }: Readonly<{
   catalog: PublicCatalog;
-  policies: Policies;
+  policies: PublicPolicies;
   searchParams: CatalogSearchParameters | undefined;
 }>) => {
   const searchRecord = catalog.records.find(({ routeId }) => routeId === 'public-search');
@@ -1039,6 +1134,10 @@ export const PolicyDocument = ({
         <span>{policyLabel}</span>
         <h1>{policy.title}</h1>
         <p>{policy.summary}</p>
+        <aside className="policy-review-notice" role="note">
+          <strong>{locale === 'pt-BR' ? 'Revisão necessária' : 'Review required'}</strong>
+          <p>{policy.reviewNotice}</p>
+        </aside>
         <dl>
           <div>
             <dt>{copy.current}</dt>
@@ -1060,9 +1159,12 @@ export const PolicyDocument = ({
           </div>
         </dl>
       </header>
+      {policy.privacyDetails !== undefined && (
+        <PrivacyDetails details={policy.privacyDetails} locale={locale} />
+      )}
       <section aria-label={copy.fullText} className="policy-document__body">
         {policy.sections.map((section) => (
-          <section key={section.heading}>
+          <section id={section.id} key={section.id}>
             <h2>{section.heading}</h2>
             <p>{section.body}</p>
           </section>
@@ -1084,10 +1186,125 @@ export const PolicyDocument = ({
   );
 };
 
+const PrivacyDetails = ({
+  details,
+  locale,
+}: Readonly<{
+  details: NonNullable<PolicyVersion['privacyDetails']>;
+  locale: WebLocale;
+}>) => {
+  const portuguese = locale === 'pt-BR';
+  const labels = portuguese
+    ? {
+        controller: 'Quem responde pelo tratamento',
+        data: 'Dados',
+        legalBasis: 'Base legal',
+        purpose: 'Finalidade',
+        retention: 'Retenção',
+        revocation: 'Escolha e revogação',
+        sharing: 'Compartilhamento',
+        status: 'Condição',
+      }
+    : {
+        controller: 'Who is accountable for processing',
+        data: 'Data',
+        legalBasis: 'Legal basis',
+        purpose: 'Purpose',
+        retention: 'Retention',
+        revocation: 'Choice and withdrawal',
+        sharing: 'Sharing',
+        status: 'Condition',
+      };
+
+  return (
+    <section aria-labelledby="privacy-practices-title" className="privacy-governance">
+      <header id="essential-storage">
+        <h2 id="privacy-practices-title">
+          {portuguese ? 'Como cada finalidade é tratada' : 'How each purpose is handled'}
+        </h2>
+        <p>
+          {portuguese
+            ? 'Armazenamento necessário e usos opcionais têm condições diferentes. O site não transforma silêncio em consentimento.'
+            : 'Necessary storage and optional uses have different conditions. The site never treats silence as consent.'}
+        </p>
+      </header>
+      <section aria-labelledby="privacy-controller-title" className="privacy-controller">
+        <h3 id="privacy-controller-title">{labels.controller}</h3>
+        <dl>
+          <div>
+            <dt>{portuguese ? 'Produto' : 'Product'}</dt>
+            <dd>{details.controller.productIdentity}</dd>
+          </div>
+          <div>
+            <dt>{portuguese ? 'Identificação formal' : 'Formal identification'}</dt>
+            <dd>{details.controller.formalIdentityStatus}</dd>
+          </div>
+          <div>
+            <dt>{portuguese ? 'Contato' : 'Contact'}</dt>
+            <dd>
+              <a href={`mailto:${details.controller.contact}`}>{details.controller.contact}</a>
+            </dd>
+          </div>
+        </dl>
+      </section>
+      <div className="privacy-practice-ledger">
+        {details.practices.map((practice) => (
+          <article id={practice.id} key={practice.id}>
+            <header>
+              <h3>{practice.title}</h3>
+              <span data-practice-status={practice.status}>
+                {practice.status === 'necessary-only'
+                  ? portuguese
+                    ? 'Estritamente necessário'
+                    : 'Strictly necessary'
+                  : portuguese
+                    ? 'Consentimento prévio'
+                    : 'Prior consent'}
+              </span>
+            </header>
+            <dl>
+              {(
+                [
+                  ['purpose', labels.purpose],
+                  ['data', labels.data],
+                  ['legalBasis', labels.legalBasis],
+                  ['retention', labels.retention],
+                  ['sharing', labels.sharing],
+                  ['revocation', labels.revocation],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key}>
+                  <dt>{label}</dt>
+                  <dd>{practice[key]}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
+      <div className="privacy-accountability">
+        <section>
+          <h3>{portuguese ? 'Operadores e transferências' : 'Processors and transfers'}</h3>
+          <p>{details.processors}</p>
+          <p>{details.internationalTransfers}</p>
+        </section>
+        <section>
+          <h3>{portuguese ? 'Seus direitos' : 'Your rights'}</h3>
+          <ul>
+            {details.rights.map((right) => (
+              <li key={right}>{right}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </section>
+  );
+};
+
 const ResponsibleDisclosure = ({
   locale,
   policies,
-}: Readonly<{ locale: WebLocale; policies: Policies }>) => {
+}: Readonly<{ locale: WebLocale; policies: PublicPolicies }>) => {
   const disclosure = policies.disclosure;
   return (
     <article className="policy-document">
@@ -1095,6 +1312,30 @@ const ResponsibleDisclosure = ({
         <span>{locale === 'pt-BR' ? 'Segurança' : 'Security'}</span>
         <h1>{disclosure.title}</h1>
         <p>{disclosure.summary}</p>
+        <aside className="policy-review-notice" role="note">
+          <strong>{locale === 'pt-BR' ? 'Revisão necessária' : 'Review required'}</strong>
+          <p>{disclosure.reviewNotice}</p>
+        </aside>
+        <dl>
+          <div>
+            <dt>{copyFor(locale).current}</dt>
+            <dd>
+              <code>{disclosure.version}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>{locale === 'pt-BR' ? 'Vigência' : 'Effective date'}</dt>
+            <dd>
+              <time dateTime={disclosure.effectiveDate}>{disclosure.effectiveDate}</time>
+            </dd>
+          </div>
+          <div>
+            <dt>{copyFor(locale).contact}</dt>
+            <dd>
+              <a href={`mailto:${disclosure.contact}`}>{disclosure.contact}</a>
+            </dd>
+          </div>
+        </dl>
         <a
           className="public-action public-action--primary"
           href={`mailto:${disclosure.secureChannel}`}
@@ -1174,7 +1415,7 @@ export const IncidentTimeline = ({
 export const StatusSummary = ({
   locale,
   policies,
-}: Readonly<{ locale: WebLocale; policies: Policies }>) => {
+}: Readonly<{ locale: WebLocale; policies: PublicPolicies }>) => {
   const status = policies.status;
   const updatedAt = new Intl.DateTimeFormat(locale, {
     dateStyle: 'long',
@@ -1625,7 +1866,8 @@ const PUBLIC_EVIDENCE_LEGACY_COPY = Object.freeze({
     docs: 'Read the measurement guide',
     eyebrow: 'Evidence you can inspect',
     results: 'See how results are proven',
-    summary: 'This address remains available for old links. The complete, current explanation now lives in Results.',
+    summary:
+      'This address remains available for old links. The complete, current explanation now lives in Results.',
     title: 'How proof is built.',
   }),
   'pt-BR': Object.freeze({
@@ -1633,7 +1875,8 @@ const PUBLIC_EVIDENCE_LEGACY_COPY = Object.freeze({
     docs: 'Ler o guia de medição',
     eyebrow: 'Evidência que você pode conferir',
     results: 'Ver como comprovamos resultados',
-    summary: 'Este endereço continua disponível para links antigos. A explicação completa e atual agora está em Resultados.',
+    summary:
+      'Este endereço continua disponível para links antigos. A explicação completa e atual agora está em Resultados.',
     title: 'Como a prova é construída.',
   }),
 });

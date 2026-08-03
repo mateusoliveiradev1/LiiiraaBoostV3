@@ -362,9 +362,9 @@ describe('public policies and operational trust', () => {
       for (const policy of policies.documents) {
         expect(policy.summary.length).toBeGreaterThan(60);
         expect(policy.sections.length).toBeGreaterThanOrEqual(5);
-        expect(policy.sections.every(({ body, heading }) => body.length > 80 && heading.length > 0)).toBe(
-          true,
-        );
+        expect(
+          policy.sections.every(({ body, heading }) => body.length > 80 && heading.length > 0),
+        ).toBe(true);
         expect(policy.version).toMatch(/^\d+\.\d+\.\d+$/u);
         expect(policy.effectiveDate).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
         expect(policy.history.at(-1)).toMatchObject({
@@ -372,7 +372,9 @@ describe('public policies and operational trust', () => {
           version: policy.version,
         });
         expect(policy.contact).toMatch(/^[^@\s]+@liiiraa\.com$/u);
-        expect(policy.reviewNotice).toMatch(/revis[aã]o jur[ií]dica profissional|professional legal review/iu);
+        expect(policy.reviewNotice).toMatch(
+          /revis[aã]o jur[ií]dica profissional|professional legal review/iu,
+        );
 
         const markup = renderToStaticMarkup(
           <PublicCatalogPage locale={locale} routeId={policy.routeId} />,
@@ -411,12 +413,15 @@ describe('public policies and operational trust', () => {
             ),
         ),
       ).toBe(true);
-      expect(privacy.privacyDetails.practices.find(({ id }) => id === 'essential-authentication-storage'))
-        .toMatchObject({ status: 'necessary-only' });
+      expect(
+        privacy.privacyDetails.practices.find(
+          ({ id }) => id === 'essential-authentication-storage',
+        ),
+      ).toMatchObject({ status: 'necessary-only' });
       for (const id of ['optional-telemetry', 'support-diagnostics', 'personalized-ai']) {
-        expect(privacy.privacyDetails.practices.find((practice) => practice.id === id)).toMatchObject(
-          { status: 'consent-required' },
-        );
+        expect(
+          privacy.privacyDetails.practices.find((practice) => practice.id === id),
+        ).toMatchObject({ status: 'consent-required' });
       }
       expect(privacy.privacyDetails.rights.length).toBeGreaterThanOrEqual(7);
       expect(privacy.privacyDetails.processors).toMatch(/n[aã]o recebe|does not receive/iu);

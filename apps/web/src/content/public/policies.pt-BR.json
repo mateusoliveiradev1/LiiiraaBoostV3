@@ -1,36 +1,128 @@
 {
   "schemaVersion": 1,
   "locale": "pt-BR",
-  "lastReviewedAt": "2026-07-31T12:00:00.000Z",
+  "lastReviewedAt": "2026-08-03T06:00:00.000Z",
   "documents": [
     {
       "kind": "privacy",
       "routeId": "public-privacy-policy",
       "title": "Política de privacidade",
-      "summary": "Local por padrão, coleta mínima por finalidade e consentimento explícito antes de diagnóstico ou medição opcional.",
-      "version": "1.0.0",
-      "effectiveDate": "2026-07-31",
+      "summary": "Esta política explica, em linguagem direta, quais dados cada recurso pode usar, por qual motivo, por quanto tempo e quais escolhas permanecem com você.",
+      "version": "1.1.0",
+      "effectiveDate": "2026-08-03",
       "contact": "privacy@liiiraa.com",
+      "reviewNotice": "Este texto está completo para revisão, mas exige revisão jurídica profissional antes da publicação. A data de vigência registrada não representa aprovação jurídica nem identifica uma entidade legal ainda não documentada.",
+      "privacyDetails": {
+        "controller": {
+          "productIdentity": "Liiiraa Boost",
+          "formalIdentityStatus": "A pessoa física ou jurídica controladora, seu registro e endereço serão identificados após revisão jurídica profissional e antes da publicação; o repositório ainda não autoriza afirmar esses dados.",
+          "contact": "privacy@liiiraa.com"
+        },
+        "practices": [
+          {
+            "id": "public-site-delivery",
+            "title": "Entrega e proteção do site público",
+            "status": "necessary-only",
+            "purpose": "Entregar a página solicitada, manter a escolha de idioma e proteger a disponibilidade e a integridade do serviço público.",
+            "data": "Solicitação de rede e metadados técnicos estritamente necessários à entrega; a preferência de idioma permanece no navegador quando armazenada.",
+            "legalBasis": "Prestação do serviço solicitado e interesse legítimo em operar um site seguro, conforme a base aplicável à jurisdição confirmada na revisão jurídica.",
+            "retention": "A preferência local dura até você removê-la. Prazos de registros técnicos de hospedagem precisam ser confirmados com o operador real antes da publicação.",
+            "sharing": "A preferência local não sai do navegador. Qualquer operador técnico realmente contratado deve ser identificado e limitado à entrega ou proteção do site.",
+            "revocation": "Você pode apagar a preferência no navegador. O processamento estritamente necessário termina quando a solicitação de página é concluída, sujeito a registros de segurança legalmente necessários."
+          },
+          {
+            "id": "essential-authentication-storage",
+            "title": "Armazenamento essencial de autenticação",
+            "status": "necessary-only",
+            "purpose": "Manter uma sessão solicitada, prevenir falsificação e encerrar a sessão com segurança quando a autenticação real estiver disponível.",
+            "data": "Identificadores de sessão e proteção contra falsificação; nunca senha, diagnóstico do PC, telemetria opcional ou conteúdo de IA no armazenamento de autenticação.",
+            "legalBasis": "Execução do serviço de conta solicitado e interesse legítimo em proteger a sessão, conforme a base aplicável confirmada antes do lançamento da autenticação.",
+            "retention": "Somente durante a sessão e pelo menor período de segurança necessário; o prazo exato será publicado antes de a autenticação real ser ativada.",
+            "sharing": "Restrito ao serviço de identidade necessário para a sessão. Nenhum fornecedor é nomeado porque a autoridade de autenticação ainda não foi escolhida.",
+            "revocation": "Sair ou remover o armazenamento encerra a sessão. Como ele é necessário, desativá-lo impede somente recursos que exigem conta, não o conteúdo público."
+          },
+          {
+            "id": "optional-telemetry",
+            "title": "Telemetria opcional",
+            "status": "consent-required",
+            "purpose": "Entender estabilidade e uso do produto por métricas proporcionais, agregadas e vinculadas a uma finalidade explicada antes da coleta.",
+            "data": "Somente as classes exibidas na escolha de consentimento; nunca conteúdo pessoal, diagnóstico de suporte ou atividade entre sites por padrão.",
+            "legalBasis": "Consentimento prévio, granular e específico; silêncio, navegação ou uso de um recurso essencial não contam como consentimento.",
+            "retention": "Desativada agora. Antes da ativação, a interface informará um prazo limitado e a política registrará o período aplicável.",
+            "sharing": "Nenhum dado opcional é compartilhado enquanto a telemetria está desativada; futuros operadores precisam ser identificados antes do consentimento.",
+            "revocation": "Pode ser recusada ou revogada sem perder segurança, restauração ou documentação. A revogação interrompe novas coletas e explica o destino de dados anteriores."
+          },
+          {
+            "id": "support-diagnostics",
+            "title": "Diagnósticos enviados ao suporte",
+            "status": "consent-required",
+            "purpose": "Investigar um pedido de suporte específico usando apenas o pacote que você revisar e autorizar para aquele atendimento.",
+            "data": "Campos técnicos visíveis na revisão do pacote, com segredos, credenciais e informações sem relação excluídos antes do envio.",
+            "legalBasis": "Consentimento explícito e separado para o pacote revisado, além da execução do atendimento solicitado quando aplicável.",
+            "retention": "Nenhum diagnóstico é enviado agora. O prazo do atendimento e a exclusão correspondente serão mostrados antes de qualquer envio real.",
+            "sharing": "Somente pessoas e operadores necessários ao atendimento autorizado, todos ainda sujeitos a identificação antes do lançamento do suporte remoto.",
+            "revocation": "Cancelar antes do envio descarta o pacote. Depois do envio, a revogação interrompe novos acessos e oferece o caminho de exclusão aplicável."
+          },
+          {
+            "id": "personalized-ai",
+            "title": "IA personalizada",
+            "status": "consent-required",
+            "purpose": "Usar contexto que você escolher para produzir orientação personalizada sem transformar diagnósticos locais em treinamento ou processamento oculto.",
+            "data": "Somente perguntas e contexto apresentados na tela de consentimento; diagnóstico, histórico e identidade ficam excluídos até seleção explícita.",
+            "legalBasis": "Consentimento prévio, granular e reversível para cada finalidade apresentada; a experiência essencial não depende dessa escolha.",
+            "retention": "Desativada agora. Prazos para solicitações, respostas e contexto serão informados antes de qualquer processamento em nuvem.",
+            "sharing": "Nenhum provedor recebe dados enquanto a IA personalizada está desativada; qualquer futuro operador e finalidade serão informados antes do envio.",
+            "revocation": "Revogar interrompe novos envios e a personalização futura. A interface explicará como excluir o contexto anterior sujeito a obrigações aplicáveis."
+          }
+        ],
+        "processors": "O armazenamento local estritamente necessário não recebe serviços de operadores nem suboperadores. O repositório ainda não identifica provedores contratados para hospedagem, identidade, suporte ou IA; cada operador e suboperador real deve ser verificado, nomeado e limitado antes da publicação ou da ativação da respectiva coleta.",
+        "internationalTransfers": "A preferência mantida localmente não é transferida internacionalmente. Tráfego de entrega do site e qualquer futuro serviço de conta, suporte, telemetria ou IA só poderão envolver transferência após a revisão identificar destinos, garantias e direitos aplicáveis; nenhum país ou mecanismo é presumido aqui.",
+        "rights": [
+          "Confirmar se existe tratamento de dados pessoais relacionado a você",
+          "Acessar os dados pessoais tratados e receber informação clara sobre o uso",
+          "Corrigir dados incompletos, inexatos ou desatualizados",
+          "Solicitar anonimização, bloqueio ou exclusão quando a lei aplicável permitir",
+          "Solicitar portabilidade quando ela for aplicável e tecnicamente disponível",
+          "Retirar consentimento com a mesma clareza usada para concedê-lo",
+          "Opor-se ou pedir revisão de um tratamento conforme a base e a lei aplicáveis",
+          "Apresentar uma reclamação à autoridade competente da sua jurisdição"
+        ]
+      },
       "sections": [
         {
-          "heading": "O que este site público armazena",
-          "body": "Este site usa apenas o estado estritamente necessário de idioma e navegação. Não usamos análise opcional, publicidade, rastreamento entre sites nem banner de cookies porque não há cookies opcionais ativos."
+          "id": "scope",
+          "heading": "Escopo e princípio local",
+          "body": "Esta política cobre o site público e descreve as condições planejadas para conta, telemetria, suporte e IA. Navegar não cria conta, cobrança, dispositivo ou caso de suporte. O aplicativo preserva dados do PC localmente por padrão; qualquer saída do dispositivo exige finalidade e condição próprias."
         },
         {
-          "heading": "Pontos de coleta",
-          "body": "As páginas públicas de suporte e compatibilidade não enviam dados pessoais nem diagnósticos. Um ponto de coleta futuro precisa declarar finalidade, campos obrigatórios, retenção, compartilhamento e revogação antes do consentimento."
+          "id": "controller-and-contact",
+          "heading": "Responsável e contato",
+          "body": "Liiiraa Boost é a identidade de produto autorizada pelo repositório. A identificação formal da pessoa física ou jurídica controladora, incluindo registro e endereço, ainda depende de revisão profissional e deve ser inserida antes da publicação. Até lá, dúvidas sobre privacidade usam privacy@liiiraa.com."
         },
         {
-          "heading": "Retenção e compartilhamento",
-          "body": "Navegar pelas páginas públicas não cria caso de suporte, conta, dispositivo, cobrança ou diagnóstico. Portanto, nenhum desses registros é retido ou compartilhado por esta navegação."
+          "id": "consent-and-withdrawal",
+          "heading": "Consentimento e retirada",
+          "body": "Telemetria, diagnóstico de suporte e IA personalizada são escolhas separadas, desativadas por padrão e proibidas sem consentimento anterior. Recusar ou retirar uma escolha não remove acesso a segurança, recuperação ou conteúdo público. Armazenamento essencial não é apresentado como opcional porque sustenta a função solicitada."
         },
         {
-          "heading": "Suas escolhas",
-          "body": "A medição opcional permanecerá desativada até existir consentimento granular. O consentimento futuro deve ser reversível sem remover acesso à segurança, recuperação ou documentação pública."
+          "id": "processors-and-transfers",
+          "heading": "Operadores e transferências internacionais",
+          "body": "Nenhum fornecedor, suboperador, país ou mecanismo de transferência é inventado nesta versão. Antes de qualquer publicação ou coleta real, a revisão deve confirmar a infraestrutura efetivamente contratada, sua finalidade, localização, retenção, salvaguardas e cadeia de subcontratação."
         },
         {
-          "heading": "Responsabilidade",
-          "body": "Dúvidas e correções usam o contato de privacidade responsável acima. Pedidos que envolvam dados de conta exigirão autenticação antes de serem apresentados como enviados."
+          "id": "rights-and-requests",
+          "heading": "Direitos e solicitações",
+          "body": "Você pode pedir confirmação, acesso, correção, exclusão ou anonimização quando aplicáveis, portabilidade, retirada de consentimento, oposição e revisão. O atendimento verifica identidade de forma proporcional antes de expor dados e informa resultado, prazo ou motivo legal de uma limitação."
+        },
+        {
+          "id": "security-and-minors",
+          "heading": "Segurança, crianças e adolescentes",
+          "body": "O produto reduz coleta, separa origens e limita permissões, mas nenhum sistema é infalível. O serviço não é dirigido a crianças e não procura coletar conscientemente dados de menores; um responsável pode contatar o canal de privacidade para revisão e exclusão aplicável."
+        },
+        {
+          "id": "policy-changes",
+          "heading": "Mudanças desta política",
+          "body": "Uma mudança material recebe nova versão, data de vigência, resumo simples e histórico preservado. Quando a mudança alterar uma escolha baseada em consentimento, ela será apresentada antes de novas coletas; uma versão antiga nunca autoriza silenciosamente uma finalidade nova."
         }
       ],
       "history": [
@@ -38,6 +130,11 @@
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
           "summary": "Política pública inicial para navegação sem coleta opcional."
+        },
+        {
+          "version": "1.1.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Detalha responsável, bases por finalidade, retenção, operadores, transferências, direitos e consentimentos separados, mantendo a revisão jurídica como condição de publicação."
         }
       ]
     },
@@ -45,30 +142,46 @@
       "kind": "terms",
       "routeId": "public-terms",
       "title": "Termos de uso",
-      "summary": "Estes termos explicam o uso do site, as condições comerciais publicadas e os limites entre a web e o aplicativo Windows.",
-      "version": "1.0.0",
-      "effectiveDate": "2026-07-31",
+      "summary": "Estes termos explicam o uso responsável do site e do aplicativo, o alcance das informações publicadas e as condições que precisam ser aceitas antes de uma compra.",
+      "version": "1.1.0",
+      "effectiveDate": "2026-08-03",
       "contact": "legal@liiiraa.com",
+      "reviewNotice": "Este texto está completo para revisão, mas exige revisão jurídica profissional antes da publicação. Ele não inventa entidade legal, endereço, foro, garantia ou autoridade comercial ainda não confirmados.",
       "sections": [
         {
-          "heading": "Limite atual do serviço",
-          "body": "As páginas públicas oferecem informações de produto, compatibilidade, evidência, documentação, versões, planos e suporte. Alterações no Windows acontecem somente no aplicativo desktop depois de revisão e confirmação."
+          "id": "service-scope",
+          "heading": "Serviço e aceitação",
+          "body": "As páginas públicas oferecem informações sobre produto, compatibilidade, evidência, documentação, versões, planos e suporte. O uso futuro de conta, assinatura ou aplicativo poderá exigir aceite específico. Nenhuma navegação pública representa compra, licença ativa ou autorização para alterar o Windows."
         },
         {
-          "heading": "Termos comerciais",
-          "body": "Os preços, períodos de cobrança, renovação, formas de pagamento, cancelamento, reembolso, regra de um PC e efeito de expiração exibidos em Planos devem ser revisados novamente antes da confirmação da compra."
+          "id": "safe-use",
+          "heading": "Uso permitido e seguro",
+          "body": "Use o produto somente em PCs e contas que você tenha autorização para administrar. Não interfira em segurança, integridade, anti-cheat, disponibilidade ou direitos de terceiros. Scripts remotos arbitrários, contorno de bloqueios e exploração destrutiva não fazem parte do serviço permitido."
         },
         {
-          "heading": "Compatibilidade e evidência",
-          "body": "A compatibilidade depende do ciclo de vida do Windows, da arquitetura, do hardware, do jogo, dos drivers e da evidência de validação disponível. O material público nunca garante ganho em uma máquina não observada."
+          "id": "compatibility",
+          "heading": "Compatibilidade, recomendações e resultados",
+          "body": "Compatibilidade e efeito variam com Windows, arquitetura, hardware, drivers, jogo e condições medidas. O produto deve mostrar fonte, escopo e limitações; uma estimativa não é promessa. Você revisa o plano antes da aplicação e mantém um caminho de recuperação quando a operação o exigir."
         },
         {
-          "heading": "Uso seguro",
-          "body": "Não execute scripts recebidos de terceiros nem faça alterações sem um caminho de recuperação. Use a documentação oficial e nunca contorne um bloqueio de integridade ou disponibilidade."
+          "id": "commercial-terms",
+          "heading": "Planos, cobrança e cancelamento",
+          "body": "Preço, moeda, período, renovação, tributos, formas de pagamento, cancelamento, reembolso, regra de PCs e efeitos da expiração devem aparecer antes da confirmação. Enquanto cobrança real não existir, nenhuma tela pode fingir compra concluída, renovação ou direito adquirido."
         },
         {
-          "heading": "Alterações",
-          "body": "Mudanças materiais recebem nova versão, data de vigência, resumo em linguagem simples e histórico preservado. Um termo obsoleto não pode continuar acionável silenciosamente."
+          "id": "software-and-updates",
+          "heading": "Software, atualizações e integridade",
+          "body": "Instale somente um artefato oficial cuja assinatura, publicador, SHA-256, versão, compatibilidade e manifesto concordem. Divergência bloqueia a instalação. Canais de atualização possuem riscos e suporte próprios, e uma versão antiga pode perder suporte quando isso for comunicado com clareza."
+        },
+        {
+          "id": "availability-and-liability",
+          "heading": "Disponibilidade e limites",
+          "body": "O serviço pode ser corrigido, suspenso ou retirado para preservar segurança, cumprir obrigação aplicável ou encerrar suporte. Limitações de responsabilidade, garantias obrigatórias e direitos do consumidor dependem da jurisdição e precisam ser definidos pela revisão jurídica sem retirar proteções irrenunciáveis."
+        },
+        {
+          "id": "changes-and-contact",
+          "heading": "Mudanças e contato",
+          "body": "Uma mudança material recebe versão, vigência, resumo e histórico. Se novo aceite for necessário, ele será solicitado antes do uso afetado. Dúvidas usam legal@liiiraa.com; identificação formal, lei aplicável e foro só serão publicados depois de confirmação profissional."
         }
       ],
       "history": [
@@ -76,6 +189,11 @@
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
           "summary": "Versão inicial dos termos públicos, comerciais e de uso seguro."
+        },
+        {
+          "version": "1.1.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Amplia uso permitido, integridade, condições comerciais, disponibilidade e limites sem presumir entidade, jurisdição ou aprovação."
         }
       ]
     },
@@ -83,26 +201,46 @@
       "kind": "security",
       "routeId": "public-policies",
       "title": "Segurança e confiança",
-      "summary": "Permissões limitadas, downloads assinados, verificações antes de cada ação e caminhos de recuperação protegem o produto.",
-      "version": "1.0.0",
-      "effectiveDate": "2026-07-31",
+      "summary": "Esta página descreve os limites de segurança que orientam o site e o aplicativo, o que já é verificável e como relatar uma possível vulnerabilidade.",
+      "version": "1.1.0",
+      "effectiveDate": "2026-08-03",
       "contact": "security@liiiraa.com",
+      "reviewNotice": "Este texto está completo para revisão e exige revisão jurídica profissional antes da publicação. Ele descreve controles e compromissos do produto sem alegar certificação, auditoria externa ou aprovação que não existam.",
       "sections": [
         {
+          "id": "authority-boundaries",
           "heading": "Limites de autoridade",
-          "body": "O site público não possui autoridade de conta, administração, pagamento, dispositivo ou otimização nativa. Aplicações pública, de conta e administrativa permanecem em origens e shells separados."
+          "body": "O site público não possui autoridade de conta, pagamento, dispositivo, administração ou otimização nativa. Aplicações pública, de conta e administrativa usam limites separados. A interface do desktop permanece sem privilégio e solicita somente operações específicas ao componente autorizado."
         },
         {
-          "heading": "Direção de segurança no desktop",
-          "body": "O renderizador permanece sem privilégios. Operações privilegiadas futuras devem ser específicas, autenticadas, permitidas, auditadas e acompanhadas de recuperação exata; scripts remotos arbitrários são proibidos."
+          "id": "operation-safety",
+          "heading": "Operações permitidas e recuperação",
+          "body": "A direção técnica proíbe execução remota arbitrária. Operações privilegiadas precisam ser específicas, autenticadas, permitidas, validadas e auditáveis, com consequência e recuperação conhecidas. Ausência de compatibilidade, evidência ou caminho seguro bloqueia a ação em vez de oferecer um desvio."
         },
         {
-          "heading": "Confiança no artefato",
-          "body": "Um download público permanece bloqueado até que publicador, assinatura, SHA-256, artefato, manifesto, compatibilidade e política da versão concordem. Não existe caminho para continuar mesmo assim."
+          "id": "artifact-integrity",
+          "heading": "Integridade de download e atualização",
+          "body": "Um download público permanece bloqueado até publicador, assinatura, SHA-256, artefato, manifesto, canal, compatibilidade e estado da versão concordarem. Não existe continuar mesmo assim. Artefatos provisórios ou de desenvolvimento ficam fora da distribuição pública."
         },
         {
-          "heading": "Relato",
-          "body": "Vulnerabilidades potenciais devem usar o processo de divulgação responsável. O status público explica o impacto ao usuário sem expor detalhes internos sensíveis."
+          "id": "data-and-secrets",
+          "heading": "Dados, segredos e registros",
+          "body": "Dados ficam locais por padrão e segredos não devem aparecer em registros, URLs ou pacotes de suporte. Qualquer diagnóstico precisa de revisão e consentimento delimitado. Registros de segurança usam o mínimo necessário, com correlação e redução de informações pessoais."
+        },
+        {
+          "id": "account-and-admin",
+          "heading": "Conta e administração",
+          "body": "Sessões futuras devem usar armazenamento estritamente necessário, proteção contra falsificação, revogação e autenticação proporcional ao risco. Administração usa origem e política isoladas, funções limitadas e histórico imutável; uma visualização pública nunca concede essas permissões."
+        },
+        {
+          "id": "reporting-and-response",
+          "heading": "Relato e resposta",
+          "body": "Possíveis vulnerabilidades usam security@liiiraa.com e a política de divulgação responsável. O relato deve conter prova mínima sem dados pessoais desnecessários. Atualizações públicas priorizam impacto e recuperação sem expor detalhes que aumentem o risco durante a correção."
+        },
+        {
+          "id": "assurance-boundary",
+          "heading": "O que não alegamos",
+          "body": "Nenhuma certificação, selo, auditoria independente, percentual de proteção ou ausência absoluta de falhas é alegado. Controles futuros precisam ser demonstrados por implementação e evidência verificável; esta página não substitui avaliação profissional nem garantia legal."
         }
       ],
       "history": [
@@ -110,6 +248,11 @@
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
           "summary": "Declaração pública inicial dos limites de segurança e requisitos para operações no Windows."
+        },
+        {
+          "version": "1.1.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Explicita autoridade, recuperação, integridade, dados, administração, resposta e o limite de garantias sem alegações fabricadas."
         }
       ]
     }
@@ -117,24 +260,33 @@
   "disclosure": {
     "routeId": "public-responsible-disclosure",
     "title": "Divulgação responsável",
-    "summary": "Relate uma vulnerabilidade potencial por um canal seguro e delimitado.",
+    "summary": "Relate uma possível vulnerabilidade pelo canal seguro, envie somente a prova mínima necessária e aguarde coordenação antes de divulgar detalhes.",
     "secureChannel": "security@liiiraa.com",
+    "contact": "security@liiiraa.com",
+    "version": "1.1.0",
+    "effectiveDate": "2026-08-03",
+    "reviewNotice": "Esta política exige revisão jurídica profissional antes da publicação. Ela não cria contrato de recompensa, autorização ampla de teste nem garantia de prazo de correção.",
     "scope": [
-      "Origens web públicas pertencentes à Liiiraa e artefatos publicados do Liiiraa Boost",
-      "Comportamento de segurança reproduzível que possa ser descrito sem dados pessoais",
-      "Falhas de integridade, autorização, privacidade ou recuperação"
+      "Origens web públicas controladas para o Liiiraa Boost e artefatos oficiais efetivamente publicados",
+      "Comportamento de segurança reproduzível descrito com prova mínima e sem dados pessoais desnecessários",
+      "Falhas de integridade, autenticação, autorização, privacidade, atualização ou recuperação dentro desses ativos"
     ],
     "prohibitedContent": [
-      "Senhas, tokens de acesso, dados de pagamento ou informações pessoais sem relação",
-      "Teste destrutivo, negação de serviço, persistência ou acesso além da prova mínima",
-      "Divulgação pública antes da coordenação de uma janela segura de resposta"
+      "Senhas, tokens, dados de pagamento, dados de terceiros ou diagnósticos sem relação com a prova",
+      "Negação de serviço, teste destrutivo, persistência, engenharia social ou acesso além do mínimo necessário",
+      "Alteração ou exclusão de dados, interrupção de partidas ou serviços e divulgação pública antes de uma janela segura coordenada"
     ],
-    "response": "Confirmaremos um relato utilizável, validaremos o escopo e enviaremos atualização pelo canal de relato. O prazo depende da severidade e da reprodutibilidade; nenhuma recompensa ou pagamento é prometido.",
+    "response": "Confirmaremos o recebimento de um relato utilizável pelo mesmo canal, verificaremos se ele está no escopo e enviaremos uma atualização de triagem. Severidade, reprodutibilidade e segurança da correção determinam os próximos prazos; não prometemos prazo fixo de resolução nem nenhuma recompensa, bounty ou pagamento.",
     "history": [
       {
         "version": "1.0.0",
         "effectiveDate": "2026-07-31",
         "summary": "Escopo inicial de relato e política de canal seguro."
+      },
+      {
+        "version": "1.1.0",
+        "effectiveDate": "2026-08-03",
+        "summary": "Esclarece ativos no escopo, prova mínima, condutas proibidas, etapas de resposta e ausência de promessa de recompensa."
       }
     ]
   },
