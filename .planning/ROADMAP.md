@@ -270,7 +270,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 3. User can inspect release channel, version, integrity, and compatibility and complete the fail-closed download-eligibility journey; no installer is exposed until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled.
 4. Public, account, and administrative Next.js applications run as separate deployable surfaces with distinct security policies; scenario-backed account and admin previews are explicitly labeled until Phase 4 connects authoritative state.
 
-**Plans**: 69/72 plans executed
+**Plans**: 70/76 plans executed
 
 Plans:
 **Wave 1**
@@ -464,9 +464,19 @@ Plans:
 
 **Wave 41** *(blocked on Plans 03-68 through 03-71)*
 
-- [ ] 03-72-PLAN.md — Consolidate every canonical route, state, locale, breakpoint, and final evidence candidate
+- [x] 03-72-PLAN.md — Consolidate every canonical route, state, locale, breakpoint, and final evidence candidate
 
-**Wave 44** *(blocked on Plan 03-72)*
+**Wave 42** *(additive launch-readiness work; each plan independently blocked on Plan 03-72)*
+
+- [ ] 03-73-PLAN.md — Strengthen public conversion, About, footer, and launch-ready trust/legal surfaces
+- [ ] 03-74-PLAN.md — Redesign account around customer goals and complete the LGPD privacy center
+- [ ] 03-75-PLAN.md — Redesign admin around search, operational queues, evidence, and zoom-safe high-risk work
+
+**Wave 43** *(blocked on Plans 03-73 through 03-75)*
+
+- [ ] 03-76-PLAN.md — Re-run full bilingual route/state/breakpoint QA, recapture evidence, and prepare the human-review handoff
+
+**Wave 44** *(blocked on Plan 03-76)*
 
 - [ ] 03-45-PLAN.md — Run complete route-matrix preflight and blocking human visual review
 
