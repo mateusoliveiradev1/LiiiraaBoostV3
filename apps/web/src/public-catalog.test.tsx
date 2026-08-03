@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { matchWebRoute, type WebRouteId } from '@liiiraa/web-core';
 
 import {
+  admitPolicies,
   getPublicCatalog,
   getPublicCatalogMetadata,
   getPublicPolicies,
@@ -349,13 +350,14 @@ describe('public catalog content', () => {
 });
 
 describe('public policies and operational trust', () => {
-  it('publishes review-safe Terms, Privacy, and Security records with complete version context', () => {
+  it('publishes final Terms, Privacy, Essential Storage, and Security records without editorial review banners', () => {
     for (const locale of ['pt-BR', 'en'] as const) {
       const policies = getPublicPolicies(locale);
 
       expect(policies.documents.map(({ kind }) => kind).sort()).toEqual([
         'privacy',
         'security',
+        'storage',
         'terms',
       ]);
 
@@ -372,23 +374,66 @@ describe('public policies and operational trust', () => {
           version: policy.version,
         });
         expect(policy.contact).toMatch(/^[^@\s]+@liiiraa\.com$/u);
-        expect(policy.reviewNotice).toMatch(
-          /revis[aã]o jur[ií]dica profissional|professional legal review/iu,
-        );
-
         const markup = renderToStaticMarkup(
           <PublicCatalogPage locale={locale} routeId={policy.routeId} />,
         );
-        expect(markup).toContain('class="policy-review-notice"');
-        expect(visibleText(markup)).toContain(policy.reviewNotice);
+        expect(markup).not.toContain('policy-review-notice');
+        expect(visibleText(markup)).not.toMatch(
+          /revis[aã]o necess[aá]ria|review required|professional legal review/iu,
+        );
       }
     }
+  });
+
+  it('fails closed for unknown locale, kind, route, practice, and consent status', () => {
+    const source = JSON.parse(JSON.stringify(getPublicPolicies('en'))) as {
+      documents: Array<{
+        kind: string;
+        privacyDetails?: { practices: Array<{ id: string; status: string }> };
+        routeId: string;
+      }>;
+      locale: string;
+    };
+    const mutate = (apply: (candidate: typeof source) => void) => {
+      const candidate = JSON.parse(JSON.stringify(source)) as typeof source;
+      apply(candidate);
+      return candidate;
+    };
+
+    expect(() => admitPolicies(mutate((value) => (value.locale = 'es')), 'en')).toThrow(
+      /PUBLIC_POLICIES_INVALID:en:root/u,
+    );
+    expect(() =>
+      admitPolicies(mutate((value) => (value.documents[0]!.kind = 'cookies')), 'en'),
+    ).toThrow(/PUBLIC_POLICIES_INVALID/u);
+    expect(() =>
+      admitPolicies(mutate((value) => (value.documents[0]!.routeId = 'public-home')), 'en'),
+    ).toThrow(/PUBLIC_POLICIES_INVALID/u);
+    expect(() =>
+      admitPolicies(
+        mutate((value) => {
+          value.documents[0]!.privacyDetails!.practices[0]!.id = 'unknown-practice';
+        }),
+        'en',
+      ),
+    ).toThrow(/PUBLIC_POLICIES_INVALID/u);
+    expect(() =>
+      admitPolicies(
+        mutate((value) => {
+          value.documents[0]!.privacyDetails!.practices[0]!.status = 'optional';
+        }),
+        'en',
+      ),
+    ).toThrow(/PUBLIC_POLICIES_INVALID/u);
   });
 
   it('separates every D-106 privacy purpose, consent, retention, and rights topic', () => {
     const expectedPracticeIds = [
       'public-site-delivery',
+      'account-and-subscription',
       'essential-authentication-storage',
+      'device-licensing',
+      'local-performance-data',
       'optional-telemetry',
       'support-diagnostics',
       'personalized-ai',
@@ -401,7 +446,7 @@ describe('public policies and operational trust', () => {
 
       expect(privacy.privacyDetails.controller.productIdentity).toBe('Liiiraa Boost');
       expect(privacy.privacyDetails.controller.formalIdentityStatus).toMatch(
-        /antes da publica[cç][aã]o|before publication/iu,
+        /antes da abertura|before production accounts/iu,
       );
       expect(privacy.privacyDetails.controller.contact).toBe('privacy@liiiraa.com');
       expect(privacy.privacyDetails.practices.map(({ id }) => id)).toEqual(expectedPracticeIds);
@@ -424,7 +469,7 @@ describe('public policies and operational trust', () => {
         ).toMatchObject({ status: 'consent-required' });
       }
       expect(privacy.privacyDetails.rights.length).toBeGreaterThanOrEqual(7);
-      expect(privacy.privacyDetails.processors).toMatch(/n[aã]o recebe|does not receive/iu);
+      expect(privacy.privacyDetails.processors).toMatch(/ser[aã] identificad|will be identified/iu);
       expect(privacy.privacyDetails.internationalTransfers).toMatch(
         /n[aã]o.*transfer|not.*transfer/iu,
       );
@@ -447,15 +492,12 @@ describe('public policies and operational trust', () => {
       const disclosure = policies.disclosure;
       const serialized = JSON.stringify(policies);
 
-      expect(disclosure.secureChannel).toBe('security@liiiraa.com');
+      expect(disclosure.coordinationContact).toBe('security@liiiraa.com');
+      expect(disclosure.coordinationStatus).toBe('preflight-required');
       expect(disclosure.scope.length).toBeGreaterThanOrEqual(3);
       expect(disclosure.prohibitedContent.length).toBeGreaterThanOrEqual(3);
-      expect(disclosure.response).toMatch(/confirma|acknowledge/iu);
-      expect(disclosure.response).toMatch(/atualiza|update/iu);
+      expect(disclosure.response).toMatch(/ap[oó]s o preflight|after preflight/iu);
       expect(disclosure.response).toMatch(/nenhuma recompensa|no bounty/iu);
-      expect(disclosure.reviewNotice).toMatch(
-        /revis[aã]o jur[ií]dica profissional|professional legal review/iu,
-      );
       expect(disclosure.history.at(-1)).toMatchObject({
         effectiveDate: disclosure.effectiveDate,
         version: disclosure.version,
@@ -463,9 +505,55 @@ describe('public policies and operational trust', () => {
       expect(serialized).not.toMatch(
         /ISO\s*27001|SOC\s*2|certificad[oa]|certified|registered office|CNPJ|processor:\s*(?:AWS|Cloudflare|Neon)/iu,
       );
+      expect(serialized).not.toMatch(/secureChannel|canal seguro|secure channel/iu);
+
+      const markup = renderToStaticMarkup(
+        <PublicCatalogPage locale={locale} routeId="public-responsible-disclosure" />,
+      );
+      expect(markup).not.toContain('mailto:security@liiiraa.com');
+      expect(visibleText(markup)).toMatch(/contato designado|designated contact/iu);
+      expect(visibleText(markup)).toMatch(/preflight/iu);
     }
 
     expect(source).not.toMatch(/cookie-banner|CookieBanner/u);
+  });
+
+  it('binds present-tense product facts to existing repository evidence and keeps future services conditional', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const evidence = new URL(
+      '../../../.planning/phases/03-complete-web-experience/03-CONTEXT.md',
+      import.meta.url,
+    );
+    const matrix = [
+      { claim: 'O Free é o Modo Essencial', evidenceId: 'D-90', locale: 'pt-BR' },
+      { claim: 'Free is Essential Mode', evidenceId: 'D-90', locale: 'en' },
+      { claim: 'R$ 29,90 por mês', evidenceId: 'D-92', locale: 'pt-BR' },
+      { claim: 'US$6.99 monthly', evidenceId: 'D-92', locale: 'en' },
+      { claim: 'O HWID bruto não é armazenado', evidenceId: 'D-93', locale: 'pt-BR' },
+      { claim: 'raw HWID is not stored', evidenceId: 'D-93', locale: 'en' },
+    ] as const;
+    const source = await readFile(evidence, 'utf8');
+
+    for (const entry of matrix) {
+      expect(source).toContain(entry.evidenceId);
+      expect(JSON.stringify(getPublicPolicies(entry.locale))).toContain(entry.claim);
+    }
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const policies = getPublicPolicies(locale);
+      const privacy = policies.documents.find(({ kind }) => kind === 'privacy');
+      const account = privacy?.privacyDetails?.practices.find(
+        ({ id }) => id === 'account-and-subscription',
+      );
+      const authentication = privacy?.privacyDetails?.practices.find(
+        ({ id }) => id === 'essential-authentication-storage',
+      );
+      expect(JSON.stringify(account)).toMatch(/quando|ser[aã]o|will|before activation/iu);
+      expect(JSON.stringify(authentication)).toMatch(/quando|poder[aá]|when|may/iu);
+      expect(JSON.stringify(policies)).not.toMatch(
+        /checkout (?:est[aá] ativo|is available)|telemetria (?:est[aá] ativa|is active)|cloud AI is active/iu,
+      );
+    }
   });
 
   it('renders complete versioned policy, disclosure, and status families in both locales', () => {
@@ -473,6 +561,7 @@ describe('public policies and operational trust', () => {
       'public-policies',
       'public-privacy-policy',
       'public-terms',
+      'public-essential-storage',
       'public-responsible-disclosure',
       'public-status',
     ] as const satisfies readonly WebRouteId[];
@@ -510,6 +599,7 @@ describe('public policies and operational trust', () => {
     const policyRoutes = [
       'public-privacy-policy',
       'public-terms',
+      'public-essential-storage',
       'public-responsible-disclosure',
     ] as const satisfies readonly WebRouteId[];
 
