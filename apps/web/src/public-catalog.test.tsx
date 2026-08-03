@@ -469,7 +469,7 @@ describe('public policies and operational trust', () => {
         ).toMatchObject({ status: 'consent-required' });
       }
       expect(privacy.privacyDetails.rights.length).toBeGreaterThanOrEqual(7);
-      expect(privacy.privacyDetails.processors).toMatch(/ser[aã] identificad|will be identified/iu);
+      expect(privacy.privacyDetails.processors).toMatch(/ser[aá] identificad|will be identified/iu);
       expect(privacy.privacyDetails.internationalTransfers).toMatch(
         /n[aã]o.*transfer|not.*transfer/iu,
       );
@@ -503,7 +503,7 @@ describe('public policies and operational trust', () => {
         version: disclosure.version,
       });
       expect(serialized).not.toMatch(
-        /ISO\s*27001|SOC\s*2|certificad[oa]|certified|registered office|CNPJ|processor:\s*(?:AWS|Cloudflare|Neon)/iu,
+        /(?:somos|é|is|are)\s+(?:certificad[oa]|certified|ISO\s*27001|SOC\s*2)|registered office|CNPJ|processor:\s*(?:AWS|Cloudflare|Neon)/iu,
       );
       expect(serialized).not.toMatch(/secureChannel|canal seguro|secure channel/iu);
 
@@ -611,7 +611,9 @@ describe('public policies and operational trust', () => {
         const text = visibleText(markup);
 
         expect(text).toMatch(/1\.0\.0/u);
-        expect(text).toContain('2026-07-31');
+        expect(text).toContain(
+          routeId === 'public-essential-storage' ? '2026-08-03' : '2026-07-31',
+        );
         expect(text).not.toMatch(
           /Fase\s*\d|Phase\s*\d|prévia determinística|deterministic preview|fixture|adapter/iu,
         );

@@ -1,292 +1,459 @@
 {
   "schemaVersion": 1,
   "locale": "en",
-  "lastReviewedAt": "2026-08-03T06:00:00.000Z",
+  "lastReviewedAt": "2026-08-03T18:00:00.000Z",
   "documents": [
     {
       "kind": "privacy",
       "routeId": "public-privacy-policy",
-      "title": "Privacy policy",
-      "summary": "This policy explains in direct language which data each feature may use, why it may be used, how long it may be kept, and which choices remain yours.",
-      "version": "1.1.0",
+      "title": "Privacy Policy",
+      "summary": "This policy explains how Liiiraa Boost handles data on the website, in your account, and in the Windows application, what stays only on your PC, and which features depend on your choice.",
+      "version": "2.0.0",
       "effectiveDate": "2026-08-03",
       "contact": "privacy@liiiraa.com",
-      "reviewNotice": "This text is complete for review, but it requires professional legal review before publication. The recorded effective date does not represent legal approval or identify a legal entity that the repository has not documented.",
       "privacyDetails": {
         "controller": {
           "productIdentity": "Liiiraa Boost",
-          "formalIdentityStatus": "The individual or legal entity acting as controller, its registration, and its address will be identified after professional legal review and before publication; the repository does not yet authorize those claims.",
+          "formalIdentityStatus": "Liiiraa Boost is the trade and product identity accountable for this service. Before production accounts, subscriptions, or other collection open, this policy and the interface will identify the individual or legal entity acting as controller, its registration, and address where applicable law requires them.",
           "contact": "privacy@liiiraa.com"
         },
         "practices": [
           {
             "id": "public-site-delivery",
-            "title": "Public site delivery and protection",
+            "title": "Website delivery and protection",
             "status": "necessary-only",
-            "purpose": "Deliver the page you request, preserve your locale choice, and protect the availability and integrity of the public service.",
-            "data": "The network request and technical metadata strictly needed for delivery; a locale preference stays in the browser when it is stored.",
-            "legalBasis": "Providing the requested service and legitimate interests in operating a secure site, subject to the basis applicable in the jurisdiction confirmed by legal review.",
-            "retention": "The local preference remains until you remove it. Hosting security-log periods must be confirmed with the actual operator before publication.",
-            "sharing": "The local preference does not leave the browser. Any actual technical operator must be identified and limited to delivering or protecting the site.",
-            "revocation": "You can clear the preference in your browser. Strictly necessary processing ends when the page request is complete, subject to security records that lawfully need to remain."
+            "purpose": "Deliver the requested page, preserve your locale choice, prevent abuse, and protect the availability, integrity, and security of the public service.",
+            "data": "The IP address and technical metadata accompanying the request, such as date, time, route, browser, and security signals; the locale preference stays in the browser when stored.",
+            "legalBasis": "Performing the user's request and legitimate interests in operating and protecting the service after necessity and balancing assessments; legal duties may require specific records.",
+            "retention": "The local preference remains until removed. Application access logs are kept for six months where Article 15 of Brazil's Internet Civil Framework applies; otherwise, only as long as security, legal claims, or a valid order requires.",
+            "sharing": "Only with hosting, delivery, and protection processors actually contracted and identified before production, purpose-limited and bound by confidentiality; the local preference is not sent to Liiiraa Boost.",
+            "revocation": "You can clear the preference in your browser. Processing indispensable to delivery and security does not rely on consent, but you may object to legitimate-interest processing through the privacy channel."
+          },
+          {
+            "id": "account-and-subscription",
+            "title": "Account, subscription, and billing support",
+            "status": "necessary-only",
+            "purpose": "When accounts and billing are activated, create and protect the account requested, verify contact details, administer Free or Premium, record choices, process contracting, and handle cancellation, refunds, and billing support.",
+            "data": "Display name, email, protected credentials or a passkey public key, account state, plan, billing cycle, currency, choices, and transaction references; Liiiraa Boost does not need to store a complete card number.",
+            "legalBasis": "Steps at the user's request, performance of a contract, compliance with legal duties, and legal claims; fraud prevention and security may use legitimate interests with safeguards.",
+            "retention": "While the account or subscription is active and then only for applicable legal, tax, chargeback, fraud-prevention, and claims periods. Data without a retention duty is deleted or anonymized after closure.",
+            "sharing": "With identity, payment, billing, and support processors identified before activation. Each receives only what its function requires and acts under contract and access controls.",
+            "revocation": "When contracting is available, you will be able to cancel the subscription, close the account, and exercise the rights in this policy. Data necessary for the contract or required by law will not rely on consent and may remain only for a justifiable period."
           },
           {
             "id": "essential-authentication-storage",
-            "title": "Essential authentication storage",
+            "title": "Session and essential storage",
             "status": "necessary-only",
-            "purpose": "Maintain a session you request, prevent forgery, and end that session safely when real authentication becomes available.",
-            "data": "Session and anti-forgery identifiers; never a password, PC diagnostics, optional telemetry, or AI content in authentication storage.",
-            "legalBasis": "Performing the requested account service and legitimate interests in protecting the session, subject to confirmation before authentication launches.",
-            "retention": "Only for the session and the shortest security period needed; the exact period will be published before real authentication is enabled.",
-            "sharing": "Restricted to the identity service necessary for the session. No provider is named because authentication authority has not been selected.",
-            "revocation": "Signing out or clearing storage ends the session. Because this storage is necessary, disabling it prevents only account features, not public content."
+            "purpose": "When authentication is activated, maintain the requested session, prevent request forgery, apply security preferences, and support reliable sign-out or revocation.",
+            "data": "Authentication may use random session identifiers, anti-CSRF protection, expiration, and strictly necessary preferences; this storage must not hold passwords, PC diagnostics, optional telemetry, or AI content.",
+            "legalBasis": "Performing the requested account service and legitimate interests in protecting the user and service, with minimization and risk-appropriate expiration.",
+            "retention": "When a session exists, it will end on configured expiration, sign-out, revocation, or browser clearing, whichever occurs first; revocation records may remain as needed to prevent reuse or comply with an applicable duty.",
+            "sharing": "Access will be restricted to the identity service and origin that need to validate the session. It will not be used for advertising, behavioral profiling, or cross-site tracking.",
+            "revocation": "Signing out or clearing storage will end the session and may require authentication again. Because it will be necessary to the requested function, blocking it will prevent account features but not public content."
+          },
+          {
+            "id": "device-licensing",
+            "title": "Premium license and device identity",
+            "status": "necessary-only",
+            "purpose": "Bind a Premium subscription to one PC, validate the offline period, apply the transfer or reset window, and investigate fraud or legitimate exceptions requested from support.",
+            "data": "When licensing is activated, it will use a protected, derived device identifier, application version, activation state and dates, last validation, reset window, and an auditable decision history. Raw HWID is not stored.",
+            "legalBasis": "Performance of the requested license, fraud prevention, and service security, with necessity, proportionality, and a challenge channel.",
+            "retention": "During the subscription and as needed for offline validation, the reset window, disputes, and legal claims; the link is then deleted or converted to a non-identifying record where permitted.",
+            "sharing": "Limited to account, licensing, and support services that need to confirm activation. The identifier is not sold, used for advertising, or combined with browsing to build a profile.",
+            "revocation": "When accounts and licensing are active, the dashboard will let you request transfer or reset under the commercial rule and request review of a legitimate exception. Account deletion will stop future validation, subject to records required by law or a dispute."
+          },
+          {
+            "id": "local-performance-data",
+            "title": "Local diagnostics, plans, measurements, and restoration",
+            "status": "necessary-only",
+            "purpose": "Analyze compatibility, prepare reviewable plans, measure results, record changes, and support restoration on the PC itself, including when the user is on Free.",
+            "data": "Hardware, Windows, drivers, relevant processes, selected games, measurements, applied changes, history, and restoration points. Personal files, passwords, and browsing history are outside scope by default.",
+            "legalBasis": "Processing occurs locally to perform the function expressly requested on the device; sending anything to the cloud requires a separate purpose and condition described below.",
+            "retention": "It stays on the PC until the user deletes the item, clears the history, or uninstalls the related data. Premium ending does not block history or restoration and does not turn this data into remote collection.",
+            "sharing": "No sharing by default. A summary may reach the account or support only after explicit selection and authorization in the corresponding screen.",
+            "revocation": "You control available deletion, export, and optional sending in the app. Deleting a restoration point may remove the ability to undo that change, a consequence shown before confirmation."
           },
           {
             "id": "optional-telemetry",
             "title": "Optional telemetry",
             "status": "consent-required",
-            "purpose": "Understand product stability and use through proportionate, aggregate measurements tied to a purpose explained before collection.",
-            "data": "Only the classes shown in the consent choice; never personal content, support diagnostics, or cross-site activity by default.",
-            "legalBasis": "Prior, granular, and specific consent; silence, browsing, or use of an essential feature does not count as consent.",
-            "retention": "Disabled now. Before activation, the interface will state a limited period and the policy will record the applicable duration.",
-            "sharing": "No optional data is shared while telemetry is disabled; future processors must be identified before consent is requested.",
-            "revocation": "You can refuse or withdraw without losing safety, restoration, or documentation. Withdrawal stops new collection and explains what happens to earlier data."
+            "purpose": "Understand stability, failures, and feature use through proportionate metrics tied to a purpose shown before collection.",
+            "data": "Only events and fields listed in the consent screen. Personal files, passwords, browsing history, support content, and high-frequency game-time telemetry are excluded by default.",
+            "legalBasis": "Prior, specific, granular, and freely given consent. Silence, browsing, installation, or use of an essential feature does not constitute consent.",
+            "retention": "Disabled until launch. Before activation, the choice will state the period or retention criteria; when the purpose ends, data is deleted or anonymized unless a demonstrable legal duty applies.",
+            "sharing": "No optional data is sent while telemetry is disabled. Processors, destinations, and subprocessors will be disclosed before consent.",
+            "revocation": "You may refuse or withdraw at any time without losing Free, safety, history, restoration, or documentation. Withdrawal stops new collection and opens the deletion path for earlier identifiable data."
           },
           {
             "id": "support-diagnostics",
             "title": "Diagnostics sent to support",
             "status": "consent-required",
-            "purpose": "Investigate one support request using only the package that you review and authorize for that specific case.",
-            "data": "Technical fields visible in the package review, with secrets, credentials, and unrelated information excluded before sending.",
-            "legalBasis": "Separate, explicit consent for the reviewed package, together with performance of the requested support service where applicable.",
-            "retention": "No diagnostics are sent now. The case period and related deletion timing will appear before any real submission.",
-            "sharing": "Only people and processors needed for the authorized case, all still subject to identification before remote support launches.",
-            "revocation": "Canceling before submission discards the package. After submission, withdrawal stops new access and provides the applicable deletion path."
+            "purpose": "Investigate one support case using only the technical package you review and authorize for that case.",
+            "data": "Version, environment, and technical fields visible in the package review. Secrets, credentials, payment data, personal files, and unrelated information must be removed before sending.",
+            "legalBasis": "Separate, explicit consent for the selected package, together with performance of the requested support service where applicable.",
+            "retention": "For the period stated in the case and necessary for investigation, security, and legal claims; after the purpose ends, the package is deleted or anonymized under the published support schedule.",
+            "sharing": "Only with the team and processors needed for the case, identified before submission and subject to restricted access and confidentiality.",
+            "revocation": "Canceling before submission discards the package. After submission, withdrawal stops new consent-based use and supports a deletion request, except for mandatory retention or legal claims."
           },
           {
             "id": "personalized-ai",
-            "title": "Personalized AI",
+            "title": "Personalized AI assistance",
             "status": "consent-required",
-            "purpose": "Use context you choose to provide personalized guidance without turning local diagnostics into hidden training or processing.",
-            "data": "Only questions and context shown in the consent screen; diagnostics, history, and identity stay excluded until explicitly selected.",
-            "legalBasis": "Prior, granular, and reversible consent for each stated purpose; the essential experience does not depend on this choice.",
-            "retention": "Disabled now. Periods for prompts, responses, and context will be stated before any cloud processing takes place.",
-            "sharing": "No provider receives data while personalized AI is disabled; every future processor and purpose will be disclosed before sending.",
-            "revocation": "Withdrawal stops new submissions and future personalization. The interface will explain how to delete earlier context subject to applicable duties."
+            "purpose": "Provide personalized guidance using the prompt and context the user chooses, without turning local diagnostics into hidden training or processing.",
+            "data": "The prompt, responses, and only context selected in the screen. Identity, full diagnostics, history, and files remain excluded until an express, specific choice.",
+            "legalBasis": "Prior, granular, and reversible consent for the displayed purpose; Free, safety, and restoration do not depend on this choice.",
+            "retention": "Disabled until launch. The screen will say whether the request is temporary or saved in history and state the applicable period; data is deleted or anonymized when the purpose ends.",
+            "sharing": "No provider receives data while cloud AI is disabled. The provider, location, purpose, retention, and whether data is or is not used for training will be disclosed before sending.",
+            "revocation": "Withdrawal stops new submissions and future personalization. The user can delete conversations and identifiable context, subject to specific legal duties."
           }
         ],
-        "processors": "Strictly necessary local storage does not receive processor or subprocessor services. The repository does not yet identify contracted hosting, identity, support, or AI providers; each actual processor and subprocessor must be verified, named, and purpose-limited before publication or activation of the related collection.",
-        "internationalTransfers": "The preference kept locally is not transferred internationally. Site-delivery traffic and any future account, support, telemetry, or AI service may involve a transfer only after review identifies destinations, safeguards, and applicable rights; this text presumes no country or mechanism.",
+        "processors": "Every hosting, identity, payment, support, telemetry, or AI processor will be identified in this policy or the purpose screen before it receives data. Contracts must limit instructions, confidentiality, security, retention, subprocessors, incidents, and deletion. These processors do not receive strictly local data.",
+        "internationalTransfers": "Data kept only on the PC is not transferred by Liiiraa Boost. Before international processing begins, the destination, processor, purpose, and applicable safeguard will be disclosed under LGPD Articles 33–36 and, where applicable, GDPR Chapter V. Users may exercise the same rights through the privacy channel.",
         "rights": [
-          "Confirm whether personal data related to you is being processed",
-          "Access processed personal data and receive clear information about its use",
-          "Correct incomplete, inaccurate, or outdated personal data",
-          "Request anonymization, restriction, or deletion where applicable law allows",
-          "Request portability where it applies and is technically available",
-          "Withdraw consent with the same clarity used to grant it",
-          "Object to or request review of processing according to its basis and applicable law",
-          "Complain to the competent authority in your jurisdiction"
+          "Confirm processing and access personal data related to you",
+          "Correct incomplete, inaccurate, or outdated data",
+          "Request anonymization, restriction, or deletion of unnecessary, excessive, or unlawfully processed data",
+          "Request portability where applicable and regulated, subject to trade and industrial secrets",
+          "Receive information about sharing and the possibility and consequences of refusing consent",
+          "Withdraw consent easily and request deletion of data processed on that basis, subject to lawful retention",
+          "Object to unlawful or legitimate-interest processing and request review of an automated decision affecting your interests",
+          "Complain to Brazil's ANPD, a consumer authority, or the competent data-protection authority in your jurisdiction"
         ]
       },
       "sections": [
         {
-          "id": "scope",
+          "id": "scope-and-local-first",
           "heading": "Scope and local-first principle",
-          "body": "This policy covers the public site and describes the conditions planned for account, telemetry, support, and AI features. Browsing does not create an account, charge, device, or support case. The application keeps PC data local by default; any data leaving the device needs its own purpose and condition."
+          "body": "This policy covers the website, future account, device license, and Liiiraa Boost Windows 10/11 application. The web does not deeply analyze the PC. Diagnostics, plans, measurements, history, and restoration stay local by default; data leaving the device needs an identified purpose and, when optional, separate consent."
         },
         {
-          "id": "controller-and-contact",
+          "id": "roles-and-contact",
           "heading": "Accountability and contact",
-          "body": "Liiiraa Boost is the product identity authorized by the repository. The formal identity of the individual or legal entity acting as controller, including registration and address, still depends on professional review and must be inserted before publication. Until then, privacy questions use privacy@liiiraa.com."
+          "body": "Liiiraa Boost is the product's public identity. The controller's complete legal identification will appear before production accounts, subscriptions, or collection open. Processors handle data only under instruction and contract. Requests use privacy@liiiraa.com; identity is verified proportionately before data is disclosed."
         },
         {
-          "id": "consent-and-withdrawal",
-          "heading": "Consent and withdrawal",
-          "body": "Telemetry, support diagnostics, and personalized AI are separate choices, off by default, and prohibited without prior consent. Refusing or withdrawing a choice does not remove safety, restoration, or public content. Essential storage is not presented as optional because it supports the feature you request."
+          "id": "consent-controls",
+          "heading": "Consent and controls",
+          "body": "Telemetry, diagnostic uploads, and cloud AI remain disabled. If activated, they will have separate choices without pre-ticked boxes; refusal or withdrawal will not remove Free, safety, documentation, history, or restoration. Storage indispensable to a page, future session, or security is explained separately and is not presented as optional advertising."
         },
         {
-          "id": "processors-and-transfers",
-          "heading": "Processors and international transfers",
-          "body": "This version invents no provider, subprocessor, country, or transfer mechanism. Before any publication or real collection, review must confirm the infrastructure actually contracted, its purpose, location, retention, safeguards, and subprocessor chain."
+          "id": "retention-and-deletion",
+          "heading": "Retention and disposal",
+          "body": "Liiiraa Boost keeps data only while the purpose, a legal duty, fraud prevention, legal claims, or a valid order justifies it. Data is then securely deleted or anonymized. Backups follow a limited cycle and do not return to ordinary use after deletion. Local data follows application controls and remains available for restoration after Premium ends."
         },
         {
-          "id": "rights-and-requests",
-          "heading": "Rights and requests",
-          "body": "You may request confirmation, access, correction, deletion or anonymization where applicable, portability, consent withdrawal, objection, and review. A response verifies identity proportionately before exposing data and explains the outcome, timeframe, or lawful reason for a limitation."
+          "id": "security-and-incidents",
+          "heading": "Security and incidents",
+          "body": "Controls include minimization, origin separation, least privilege, credential protection, administrative access records, artifact validation, and secret reduction in logs. No system is infallible. A relevant incident will be contained, assessed, and reported to users and authorities where law requires, with clear protection and recovery guidance."
         },
         {
-          "id": "security-and-minors",
-          "heading": "Security and young people",
-          "body": "The product reduces collection, separates origins, and limits permissions, but no system is infallible. The service is not directed to children and does not seek to knowingly collect a minor's data; a guardian can contact the privacy channel for applicable review and deletion."
+          "id": "children",
+          "heading": "Children and young people",
+          "body": "The service is not directed to children or young people and does not seek their data knowingly. Anyone without legal capacity to contract or consent should use the service only with a guardian's involvement where permitted. A guardian may request review and deletion through the privacy channel, always considering the child's best interests."
         },
         {
-          "id": "policy-changes",
+          "id": "rights-and-complaints",
+          "heading": "How to exercise your rights",
+          "body": "Email privacy@liiiraa.com, describe the right and related account or context, and never include a password. The team acknowledges the request, verifies identity, responds within the applicable period, and explains any lawful limitation. You may also contact Brazil's ANPD, consumer authorities, or the competent data-protection authority in your jurisdiction."
+        },
+        {
+          "id": "changes",
           "heading": "Changes to this policy",
-          "body": "A material change receives a new version, effective date, plain summary, and preserved history. When a change affects a consent-based choice, it will be presented before new collection; an older version never silently authorizes a new purpose."
+          "body": "Material changes receive a new version, effective date, summary, and history. If a change creates an optional purpose, new recipient, or consent-based condition, it will be shown before collection and require a new choice where necessary. An older version never silently authorizes incompatible use."
         }
       ],
       "history": [
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial public policy for navigation without optional collection."
+          "summary": "Initial public policy for browsing and disabled optional features."
         },
         {
           "version": "1.1.0",
           "effectiveDate": "2026-08-03",
-          "summary": "Details accountability, bases by purpose, retention, processors, transfers, rights, and separate consent while retaining legal review as a publication condition."
+          "summary": "First detailed description of purposes, rights, and pre-launch limits."
+        },
+        {
+          "version": "2.0.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Final pre-launch version covering site, account, subscription, per-PC license, local data, consent, retention, and rights."
         }
       ]
     },
     {
       "kind": "terms",
       "routeId": "public-terms",
-      "title": "Terms of use",
-      "summary": "These terms explain responsible use of the site and application, the reach of published information, and the conditions that must be accepted before a purchase.",
-      "version": "1.1.0",
+      "title": "Terms of Use",
+      "summary": "These terms govern the website, account, and Liiiraa Boost Windows application, including Free and Premium, the per-PC license, optimizations, billing, updates, and safe use.",
+      "version": "2.0.0",
       "effectiveDate": "2026-08-03",
       "contact": "legal@liiiraa.com",
-      "reviewNotice": "This text is complete for review, but it requires professional legal review before publication. It does not invent a legal entity, address, forum, warranty, or commercial authority that has not been confirmed.",
       "sections": [
         {
-          "id": "service-scope",
-          "heading": "Service and acceptance",
-          "body": "Public pages provide product, compatibility, evidence, documentation, release, plan, and support information. Future account, subscription, or application use may require specific acceptance. Public browsing alone is not a purchase, active license, or authority to change Windows."
+          "id": "acceptance-and-provider",
+          "heading": "Acceptance and provider identification",
+          "body": "By browsing, you accept the rules that apply to public content. Creating an account, installing the app, or subscribing to Premium will require specific acceptance of the current version. Liiiraa Boost is the product's trade identity; until the individual or legal entity providing it, registration, and address are displayed, there is no checkout, charge, or Premium contract."
         },
         {
-          "id": "safe-use",
-          "heading": "Permitted and safe use",
-          "body": "Use the product only on PCs and accounts you are authorized to manage. Do not interfere with security, integrity, anti-cheat systems, availability, or third-party rights. Arbitrary remote scripts, bypassing blocks, and destructive exploitation are not permitted product use."
+          "id": "eligibility-and-authority",
+          "heading": "Capacity and authority over the PC",
+          "body": "You must have legal capacity to accept these terms or valid guardian involvement. Use the application only on computers, Windows accounts, and games you are authorized to administer. On an employer, school, gaming venue, or third party's equipment, obtain the responsible party's permission and follow local policies before analysis or changes."
         },
         {
-          "id": "compatibility",
-          "heading": "Compatibility, recommendations, and results",
-          "body": "Compatibility and effects vary with Windows, architecture, hardware, drivers, games, and measured conditions. The product must show source, scope, and limits; an estimate is not a promise. You review a plan before application and retain a recovery path when an operation requires one."
+          "id": "license-and-ownership",
+          "heading": "Software license",
+          "body": "While you comply with these terms, you receive a personal, limited, non-exclusive, revocable, and non-transferable license to use the available Liiiraa Boost version. The software, brand, interface, documentation, and official profiles remain protected. You may not sell access, sublicense, remove notices, copy protected elements, or reverse engineer except where applicable law mandatorily permits it."
         },
         {
-          "id": "commercial-terms",
-          "heading": "Plans, billing, and cancellation",
-          "body": "Price, currency, period, renewal, taxes, payment methods, cancellation, refunds, PC rules, and expiration effects must appear before confirmation. While real billing is unavailable, no screen may pretend that a purchase, renewal, or entitlement has completed."
+          "id": "free-and-premium",
+          "heading": "Free and Premium",
+          "body": "Free is Essential Mode, free forever with no trial, card, ads, or artificial daily limits. It includes diagnostics and benchmark, safe basic optimizations with manual application, one active profile, history, and restoration. Premium unlocks Competitive Mode, hardware calibration, advanced optimizations, unlimited profiles, automatic per-game activation, advanced comparisons, personalized assistance, and priority support. The complete comparison appears before subscribing."
         },
         {
-          "id": "software-and-updates",
-          "heading": "Software, updates, and integrity",
-          "body": "Install only an official artifact whose signature, publisher, SHA-256, version, compatibility, and manifest agree. A mismatch blocks installation. Update channels carry their own risk and support terms, and an older version may lose support after clear notice."
+          "id": "device-license",
+          "heading": "One Premium license per PC",
+          "body": "One Premium subscription keeps one PC active at a time, linked through the account without a typed key. The identifier is derived and protected; raw HWID is not stored. Transfer or reset is normally available once every 30 days. Reinstallation and minor upgrades do not consume a reset; a material change such as a motherboard normally creates a new device. Support may review legitimate exceptions after security confirmation and with an auditable record."
         },
         {
-          "id": "availability-and-liability",
-          "heading": "Availability and limits",
-          "body": "The service may be corrected, suspended, or retired to preserve security, satisfy an applicable duty, or end support. Liability limits, mandatory warranties, and consumer rights depend on jurisdiction and require legal review without removing non-waivable protection."
+          "id": "optimization-and-recovery",
+          "heading": "Optimizations, consent, and restoration",
+          "body": "The app shows the plan, impact, risk, and dependencies before a persistent change. You decide what to apply, except temporary actions already authorized for an automatic profile. Operations must be specific and reversible where technically possible; arbitrary remote scripts are not part of the product. History and restoration remain available on Free and after Premium ends. Interrupting an operation, deleting a restoration point, or changing Windows outside the plan may limit reversal."
         },
         {
-          "id": "changes-and-contact",
-          "heading": "Changes and contact",
-          "body": "A material change receives a version, effective date, summary, and history. If new acceptance is required, it will be requested before affected use. Questions use legal@liiiraa.com; formal identity, governing law, and forum will be published only after professional confirmation."
+          "id": "compatibility-and-results",
+          "heading": "Compatibility and results",
+          "body": "The app targets compatible Windows 10/11 versions. Hardware, firmware, drivers, antivirus, anti-cheat, games, and system state may limit a recommendation. Measurements and estimates are labeled separately. Liiiraa Boost does not promise specific FPS, latency, frametime, stability, or savings before measuring the same PC under comparable conditions, and does not replace maintenance, backup, or professional diagnosis."
+        },
+        {
+          "id": "prohibited-use",
+          "heading": "Prohibited use",
+          "body": "Do not use the service to intrude, defraud, bypass licensing, anti-cheat, or security controls; distribute malware; perform denial of service; interfere with matches or third parties; collect data without authority; test outside the Responsible Disclosure Policy; or provide account access. We may block an action or suspend access for concrete risk, a legal duty, or violation, with notice and a challenge channel where applicable."
+        },
+        {
+          "id": "downloads-and-updates",
+          "heading": "Downloads and updates",
+          "body": "Download only from an official route. Publisher, signature, version, SHA-256, manifest, channel, and compatibility must match; a discrepancy blocks installation. Updates may address security, compatibility, and defects and must use a signed manifest. Beta or experimental channels, if offered, carry visible risks. An old version may lose support after reasonable notice, but local restoration will never be intentionally blocked by an expired subscription."
+        },
+        {
+          "id": "prices-and-payment",
+          "heading": "Price, payment, and renewal",
+          "body": "The announced price is R$29.90 monthly or R$249.90 annually in Brazil, and US$6.99 monthly or US$59.99 annually in English. Cards support both cycles; Pix supports annual billing in Brazil; boleto will not be available at launch. Final price, currency, taxes, operator, date, and renewal appear in the summary before confirmation. The subscription renews on the chosen cycle until canceled, and a price change requires advance notice and new acceptance where law requires."
+        },
+        {
+          "id": "cancellation-and-refund",
+          "heading": "Cancellation, withdrawal, and refund",
+          "body": "You may cancel at any time through the account and keep Premium until the paid period ends, with no further renewal. The first subscription has a full refund when requested within seven days, without reducing a more favorable mandatory withdrawal or warranty right. The method, refund timing, and access effect will appear before purchase; an unrecognized charge or restoration failure receives priority support."
+        },
+        {
+          "id": "offline-and-availability",
+          "heading": "Offline use, availability, and changes",
+          "body": "Premium may work offline for up to 30 days after validation, then returns to Free until reconnecting without deleting history or restoration. Online features may be unavailable for maintenance, security, force majeure, or a communicated retirement. A material price, license, device, or processing change receives notice and a new version; an accepted offer and mandatory protections apply to an existing contract."
+        },
+        {
+          "id": "third-parties",
+          "heading": "Games, Windows, and third-party services",
+          "body": "Microsoft, manufacturers, stores, games, anti-cheat systems, payment services, and identity providers maintain their own terms and are not controlled by Liiiraa Boost. Compatibility does not mean partnership or endorsement. The product does not authorize violation of those terms. A third-party change may block a profile until revalidation; review external links before use."
+        },
+        {
+          "id": "liability-and-consumer-rights",
+          "heading": "Liability and consumer rights",
+          "body": "Nothing in these terms excludes a warranty, remedy, liability, or forum that applicable law does not allow parties to waive. To the extent permitted, we are not responsible for an unpromised result, a disclosed incompatibility, a change made outside the plan, unauthorized use, or unforeseeable indirect loss. If the service has an attributable defect, remedies required by law and contract remain available."
+        },
+        {
+          "id": "contact-and-disputes",
+          "heading": "Contact and disputes",
+          "body": "Contract questions use legal@liiiraa.com; a billing and cancellation path will exist in the account before sale. We will seek direct resolution without preventing access to Brazil's ANPD, consumer bodies, official dispute platforms, or courts. Governing law and forum follow mandatory rules applicable to the user and the provider identified when contracting; these terms do not preselect a forum that unfairly disadvantages the user."
         }
       ],
       "history": [
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial public, commercial, and safe-use terms."
+          "summary": "Initial public and safe-use terms."
         },
         {
           "version": "1.1.0",
           "effectiveDate": "2026-08-03",
-          "summary": "Expands permitted use, integrity, commercial conditions, availability, and limits without presuming identity, jurisdiction, or approval."
+          "summary": "First detailed description of integrity, commercial conditions, and limits."
+        },
+        {
+          "version": "2.0.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Final pre-launch terms for Free, Premium, per-PC licensing, optimization, billing, cancellation, integrity, and consumer rights."
+        }
+      ]
+    },
+    {
+      "kind": "storage",
+      "routeId": "public-essential-storage",
+      "title": "Essential Storage",
+      "summary": "This policy explains which cookies or local data are indispensable to the website and account, why they are not used for advertising, and what changes if optional use is introduced.",
+      "version": "1.0.0",
+      "effectiveDate": "2026-08-03",
+      "contact": "privacy@liiiraa.com",
+      "sections": [
+        {
+          "id": "what-storage-means",
+          "heading": "What storage means",
+          "body": "Cookies are small values sent by a website; localStorage, sessionStorage, and equivalent mechanisms stay in the browser or application. They can preserve a choice or identifier but do not grant broad access to your PC. The website does not use them to inspect hardware, games, or files; deep analysis occurs only in the Windows app."
+        },
+        {
+          "id": "current-essential-items",
+          "heading": "Strictly necessary items",
+          "body": "The site may keep a locale preference to open pages in your chosen language. When account authentication launches, it may use a random session identifier, anti-CSRF protection, expiration, a safe post-login return, and security preferences. These items perform the user's request, do not build an advertising profile, and do not hold a password, complete card number, or PC diagnostics."
+        },
+        {
+          "id": "purpose-and-basis",
+          "heading": "Purpose and legal basis",
+          "body": "Essential storage delivers a page, remembers a requested choice, maintains a session, prevents forgery, limits abuse, and ends access safely. It relies on performing the requested feature and legitimately protecting the service with necessity and minimization; we do not use consent as an artificial justification for storage without which the feature cannot work."
+        },
+        {
+          "id": "duration-and-access",
+          "heading": "Duration and access",
+          "body": "The locale preference remains until you remove it. Session items end on expiration, sign-out, revocation, or clearing, whichever occurs first. Only the origin and identity service that need the identifier may read it; security attributes must restrict transport, script access, and cross-site sending as the feature allows."
+        },
+        {
+          "id": "optional-storage",
+          "heading": "What is not active",
+          "body": "There is no authorization for optional analytics, behavioral advertising, marketing pixels, audience sale, or cross-site tracking. If an optional use is proposed, this route will identify its name, provider, data, purpose, and duration, and the interface will make category acceptance and rejection equally easy with no pre-ticked boxes. Refusal cannot remove public content or essential features."
+        },
+        {
+          "id": "browser-controls",
+          "heading": "How to control or delete it",
+          "body": "You can clear or block cookies and site data in browser settings. Clearing the locale simply restores the default choice; clearing account session or protection ends access and requires authentication again. Blocking all storage can prevent sign-in and preferences but does not allow Liiiraa Boost to bypass your decision. Optional uses, if introduced, will also have an in-product control."
+        },
+        {
+          "id": "no-performative-banner",
+          "heading": "No performative banner",
+          "body": "While only strictly necessary storage exists, the site explains it in this policy and does not display an accept-all button without a real choice. A banner or preference center appears only when there is an optional category to accept, reject, or withdraw. Continuing to browse, scrolling, or closing a notice never counts as consent to optional use."
+        },
+        {
+          "id": "updates-and-contact",
+          "heading": "Updates and contact",
+          "body": "Changes receive a version, date, and history. A new optional category will not be activated under an old acceptance: it will be disclosed before storage and, when consent is the basis, require a specific choice. Questions, objections to legitimate-interest use, or privacy requests use privacy@liiiraa.com."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Dedicated policy for locale, session, anti-CSRF, and security storage with optional use disabled."
         }
       ]
     },
     {
       "kind": "security",
       "routeId": "public-policies",
-      "title": "Security and trust",
-      "summary": "This page describes the security boundaries guiding the site and application, what can already be verified, and how to report a potential vulnerability.",
-      "version": "1.1.0",
+      "title": "Security and Trust",
+      "summary": "Learn the technical boundaries planned to protect the site, future account, artifacts, and Windows changes, together with the rules for coordinating a vulnerability report after preflight.",
+      "version": "2.0.0",
       "effectiveDate": "2026-08-03",
       "contact": "security@liiiraa.com",
-      "reviewNotice": "This text is complete for review and requires professional legal review before publication. It describes product controls and commitments without claiming a certification, external audit, or approval that does not exist.",
       "sections": [
         {
-          "id": "authority-boundaries",
-          "heading": "Authority boundaries",
-          "body": "The public site has no account, payment, device, administrative, or native optimization authority. Public, account, and administrative applications use separate boundaries. The desktop interface remains unprivileged and requests only specific operations from the authorized component."
+          "id": "trust-model",
+          "heading": "Local-first trust model",
+          "body": "Diagnostics, plans, measurements, history, and restoration stay on the PC by default. The web receives no authority to deeply inspect the machine or execute optimizations. Any diagnostic leaving the device requires specific review and authorization; cloud AI and optional telemetry remain separate from essential features."
         },
         {
-          "id": "operation-safety",
-          "heading": "Allowlisted operations and recovery",
-          "body": "The technical direction prohibits arbitrary remote execution. Privileged operations must be specific, authenticated, allowlisted, validated, and auditable, with a known consequence and recovery path. Missing compatibility, evidence, or safe recovery blocks the action instead of offering a bypass."
+          "id": "privilege-boundary",
+          "heading": "Least privilege on Windows",
+          "body": "The desktop interface does not keep permanent administrator privilege. Elevated actions must pass through an isolated, authenticated component limited to specific operations with validated parameters, a known consequence, and a record. We do not accept arbitrary remote scripts or general-purpose registry, file, or service commands. Missing compatibility or safe recovery blocks the action."
         },
         {
-          "id": "artifact-integrity",
-          "heading": "Download and update integrity",
-          "body": "A public download remains blocked until publisher, signature, SHA-256, artifact, manifest, channel, compatibility, and release state agree. There is no continue-anyway path. Provisional or development artifacts remain outside public distribution."
+          "id": "change-safety",
+          "heading": "Plans, history, and restoration",
+          "body": "Persistent changes must show scope, risk, dependencies, and restart needs before confirmation. Execution records what was requested, applied, skipped, or reverted. Competitive Mode temporary actions preserve prior state and seek to restore it when the session ends. History and restoration remain available on Free and after subscription expiration."
+        },
+        {
+          "id": "artifact-chain",
+          "heading": "Verifiable installer and update chain",
+          "body": "Public distribution begins only when publisher, signature, SHA-256, version, channel, compatibility, artifact, and manifest agree. A discrepancy or invalid signature blocks installation and update; there is no continue-anyway option. Manifests and packages are immutable per version, channels have their own policy, and a security rollback cannot install an untrusted artifact."
+        },
+        {
+          "id": "account-device-admin",
+          "heading": "Account, device, and administration",
+          "body": "When accounts and authentication are activated, sessions will use minimum storage, anti-forgery protection, expiration, and revocation; passkeys and MFA may increase protection without exposing a reusable secret. The approved design uses derived, protected device identity rather than raw HWID. Administration will remain on a separate origin, session, roles, and policy with least privilege, sensitive-action confirmation, and an audit trail."
         },
         {
           "id": "data-and-secrets",
-          "heading": "Data, secrets, and records",
-          "body": "Data stays local by default, and secrets must not appear in logs, URLs, or support packages. Any diagnostic package needs bounded review and consent. Security records use the minimum necessary detail with correlation and personal-information reduction."
+          "heading": "Data, secrets, and support",
+          "body": "Credentials, tokens, keys, and payment data must not appear in URLs, telemetry, logs, or support packages. If diagnostic upload is activated, the package will be reviewable, minimized, and tied to a case. Internal access will need to be justified, authenticated, and recorded; retention will end with the purpose or applicable duty. Processors and transfers will be identified before they receive data."
         },
         {
-          "id": "account-and-admin",
-          "heading": "Account and administration",
-          "body": "Future sessions must use strictly necessary storage, anti-forgery protection, revocation, and authentication proportionate to risk. Administration uses an isolated origin and policy, constrained roles, and immutable history; a public view never grants those permissions."
+          "id": "secure-development",
+          "heading": "Development and vulnerability response",
+          "body": "Input contracts are validated at implemented boundaries; dependencies, permissions, and infrastructure changes receive risk-appropriate review and tests. When response operations are activated, a confirmed flaw will be triaged by impact and exploitability, remediated with safe recovery, and communicated without details that increase risk. Personal-data incidents will follow applicable assessment and notice duties."
         },
         {
-          "id": "reporting-and-response",
-          "heading": "Reporting and response",
-          "body": "Potential vulnerabilities use security@liiiraa.com and the responsible disclosure policy. A report should contain minimum proof without unnecessary personal data. Public updates prioritize user impact and recovery without exposing details that increase risk during remediation."
+          "id": "user-responsibility",
+          "heading": "How you help protect access",
+          "body": "Use official installers, check integrity warnings, keep supported Windows and application versions, protect email and authentication factors, and do not share a session. Review a plan before applying and do not ignore compatibility, anti-cheat, or restart warnings. If you suspect compromise, artifact mismatch, or an unexpected change, stop, preserve minimum evidence, and contact support or security@liiiraa.com."
+        },
+        {
+          "id": "disclosure-and-incidents",
+          "heading": "Vulnerabilities and incidents",
+          "body": "The Responsible Disclosure Policy defines assets, allowed testing, prohibited conduct, and a designated contact whose operation depends on preflight. Reports must avoid personal data and access beyond the minimum. There is no automatic reward. If an incident affects users, communication will prioritize what happened, known impact, protection, and recovery without claiming certainty before the investigation."
         },
         {
           "id": "assurance-boundary",
-          "heading": "What we do not claim",
-          "body": "No certification, seal, independent audit, protection percentage, or absolute absence of flaws is claimed. Future controls must be demonstrated through implementation and verifiable evidence; this page is not a professional assessment or legal warranty."
+          "heading": "Limits of this statement",
+          "body": "No system is infallible. Liiiraa Boost does not claim ISO 27001, SOC 2, certification, an independent audit, a protection percentage, manufacturer approval, or an absolute absence of vulnerabilities. Good-practice references guide design, but only implementation and verifiable evidence demonstrate a control. Mandatory consumer rights and warranties remain preserved."
         }
       ],
       "history": [
         {
           "version": "1.0.0",
           "effectiveDate": "2026-07-31",
-          "summary": "Initial public statement of security boundaries and Windows-operation requirements."
+          "summary": "Initial statement of security boundaries and Windows operations."
         },
         {
           "version": "1.1.0",
           "effectiveDate": "2026-08-03",
-          "summary": "Makes authority, recovery, integrity, data, administration, response, and assurance limits explicit without fabricated claims."
+          "summary": "First detailed description of authority, recovery, integrity, and response."
+        },
+        {
+          "version": "2.0.0",
+          "effectiveDate": "2026-08-03",
+          "summary": "Final pre-launch statement covering local-first, least privilege, update chain, accounts, data, response, and assurance boundaries."
         }
       ]
     }
   ],
   "disclosure": {
     "routeId": "public-responsible-disclosure",
-    "title": "Responsible disclosure",
-    "summary": "Report a potential vulnerability through the secure channel, send only the minimum proof needed, and wait for coordination before sharing details.",
-    "secureChannel": "security@liiiraa.com",
-    "contact": "security@liiiraa.com",
-    "version": "1.1.0",
+    "title": "Responsible Disclosure",
+    "summary": "This policy defines how researchers will be able to coordinate good-faith reports about official Liiiraa Boost assets after the designated contact completes operational preflight.",
+    "coordinationContact": "security@liiiraa.com",
+    "coordinationStatus": "preflight-required",
+    "version": "2.0.0",
     "effectiveDate": "2026-08-03",
-    "reviewNotice": "This policy requires professional legal review before publication. It creates no bounty contract, broad testing authorization, or guaranteed remediation deadline.",
     "scope": [
-      "Controlled public web origins for Liiiraa Boost and official artifacts that have actually been published",
-      "Reproducible security behavior described with minimum proof and without unnecessary personal data",
-      "Integrity, authentication, authorization, privacy, update, or recovery failures within those assets"
+      "Liiiraa Boost-controlled domains and subdomains that link directly to this policy from their footer",
+      "The Windows application, installer, updater, manifests, and official artifacts actually published through the download channel",
+      "Reproducible authentication, authorization, privacy, integrity, update, licensing, or restoration flaws in those assets, demonstrated with minimum necessary proof"
     ],
     "prohibitedContent": [
-      "Passwords, tokens, payment data, third-party data, or diagnostics unrelated to the proof",
-      "Denial of service, destructive testing, persistence, social engineering, or access beyond the minimum necessary",
-      "Changing or deleting data, interrupting games or services, or public disclosure before a safe response window is coordinated"
+      "Denial of service, destructive or high-volume automated testing, malware, ransomware, persistence, social engineering, phishing, spam, match interference, or changing and deleting data",
+      "Access beyond the minimum needed to prove the flaw, lateral movement, attempts against another person's account, or submission of passwords, tokens, payment data, personal files, or unrelated diagnostics",
+      "Testing third-party services, providers, users, or assets outside scope; exploitation for personal benefit; extortion; or public disclosure before responsible coordination"
     ],
-    "response": "We will acknowledge a usable report through the same channel, verify whether it is in scope, and provide a triage update. Severity, reproducibility, and remediation safety determine later timing; we promise no fixed resolution deadline and no bounty, reward, or payment.",
+    "response": "After preflight confirms that security@liiiraa.com exists, is authenticated, and is monitored, the designated contact may receive the asset and version, preconditions, reproducible steps, impact, minimum proof without secrets, and a return address chosen by the researcher. The process will then acknowledge usable reports, triage scope and risk, and provide updates when there is a material change. Complexity, impact, and deployment safety will determine timing; there is no promise of a fixed date and no bounty, reward, or payment is offered. Good-faith research will remain authorized only within this scope and will not bind third parties or cover independent unlawful conduct. Disclosure must be coordinated until a fix exists or a responsible window is agreed.",
     "history": [
       {
         "version": "1.0.0",
         "effectiveDate": "2026-07-31",
-        "summary": "Initial reporting scope and safe-channel policy."
+        "summary": "Initial reporting scope and coordination contact."
       },
       {
         "version": "1.1.0",
         "effectiveDate": "2026-08-03",
-        "summary": "Clarifies in-scope assets, minimum proof, prohibited conduct, response steps, and the absence of a bounty promise."
+        "summary": "First detailed description of minimum proof, prohibited conduct, and response steps."
+      },
+      {
+        "version": "2.0.0",
+        "effectiveDate": "2026-08-03",
+        "summary": "Final pre-launch policy with verifiable scope, limited good-faith authorization, coordination, data protection, and no bounty or SLA."
       }
     ]
   },

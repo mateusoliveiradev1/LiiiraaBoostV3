@@ -104,14 +104,13 @@ export type PublicCatalog = Readonly<{
 }>;
 
 export type PolicyVersion = Readonly<{
-  kind: 'privacy' | 'terms' | 'security';
+  kind: 'privacy' | 'terms' | 'storage' | 'security';
   routeId: WebRouteId;
   title: string;
   summary: string;
   version: string;
   effectiveDate: string;
   contact: string;
-  reviewNotice: string;
   sections: readonly Readonly<{ id: string; heading: string; body: string }>[];
   privacyDetails?: Readonly<{
     controller: Readonly<{
@@ -122,7 +121,10 @@ export type PolicyVersion = Readonly<{
     practices: readonly Readonly<{
       id:
         | 'public-site-delivery'
+        | 'account-and-subscription'
         | 'essential-authentication-storage'
+        | 'device-licensing'
+        | 'local-performance-data'
         | 'optional-telemetry'
         | 'support-diagnostics'
         | 'personalized-ai';
@@ -163,11 +165,10 @@ export type PublicPolicies = Readonly<{
     routeId: WebRouteId;
     title: string;
     summary: string;
-    secureChannel: string;
-    contact: string;
+    coordinationContact: string;
+    coordinationStatus: 'preflight-required';
     version: string;
     effectiveDate: string;
-    reviewNotice: string;
     scope: readonly string[];
     prohibitedContent: readonly string[];
     response: string;
@@ -225,8 +226,28 @@ const CATALOG_ROUTE_IDS = Object.freeze([
 const POLICY_ROUTE_IDS = Object.freeze([
   'public-privacy-policy',
   'public-terms',
+  'public-essential-storage',
   'public-policies',
 ] as const satisfies readonly WebRouteId[]);
+
+const POLICY_KINDS = Object.freeze(['privacy', 'terms', 'storage', 'security'] as const);
+
+const PRIVACY_PRACTICE_IDS = Object.freeze([
+  'public-site-delivery',
+  'account-and-subscription',
+  'essential-authentication-storage',
+  'device-licensing',
+  'local-performance-data',
+  'optional-telemetry',
+  'support-diagnostics',
+  'personalized-ai',
+] as const);
+
+const CONSENT_REQUIRED_PRACTICE_IDS = Object.freeze([
+  'optional-telemetry',
+  'support-diagnostics',
+  'personalized-ai',
+] as const);
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -236,6 +257,9 @@ const isNonEmptyString = (value: unknown): value is string =>
 
 const hasExactStrings = (candidate: readonly string[], expected: readonly string[]): boolean =>
   candidate.length === expected.length && expected.every((value) => candidate.includes(value));
+
+const hasUniqueNonEmptyStrings = (candidate: readonly string[]): boolean =>
+  candidate.every((value) => value.trim().length > 0) && new Set(candidate).size === candidate.length;
 
 const admitCatalog = (candidate: unknown, locale: WebLocale): PublicCatalog => {
   if (
@@ -312,7 +336,7 @@ const admitCatalog = (candidate: unknown, locale: WebLocale): PublicCatalog => {
   return candidate as unknown as PublicCatalog;
 };
 
-const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies => {
+export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies => {
   if (
     !isRecord(candidate) ||
     candidate['schemaVersion'] !== 1 ||
@@ -331,12 +355,13 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies =>
     if (
       !isRecord(value) ||
       !isNonEmptyString(value['routeId']) ||
+      !POLICY_ROUTE_IDS.includes(value['routeId'] as (typeof POLICY_ROUTE_IDS)[number]) ||
+      !POLICY_KINDS.includes(value['kind'] as (typeof POLICY_KINDS)[number]) ||
       !isNonEmptyString(value['title']) ||
       !isNonEmptyString(value['summary']) ||
       !isNonEmptyString(value['version']) ||
       !isNonEmptyString(value['effectiveDate']) ||
       !isNonEmptyString(value['contact']) ||
-      !isNonEmptyString(value['reviewNotice']) ||
       !Array.isArray(value['sections']) ||
       value['sections'].length === 0 ||
       !value['sections'].every(
@@ -359,6 +384,19 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies =>
       throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:document:${String(index)}`);
     }
 
+    const sectionIds = value['sections'].map((section) =>
+      isRecord(section) && isNonEmptyString(section['id']) ? section['id'] : '',
+    );
+    const latestHistory = value['history'].at(-1);
+    if (
+      !hasUniqueNonEmptyStrings(sectionIds) ||
+      !isRecord(latestHistory) ||
+      latestHistory['version'] !== value['version'] ||
+      latestHistory['effectiveDate'] !== value['effectiveDate']
+    ) {
+      throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:document-history:${String(index)}`);
+    }
+
     if (value['kind'] === 'privacy') {
       const details = value['privacyDetails'];
       if (
@@ -368,7 +406,7 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies =>
         !isNonEmptyString(details['controller']['formalIdentityStatus']) ||
         !isNonEmptyString(details['controller']['contact']) ||
         !Array.isArray(details['practices']) ||
-        details['practices'].length !== 5 ||
+        details['practices'].length !== PRIVACY_PRACTICE_IDS.length ||
         !details['practices'].every(
           (practice) =>
             isRecord(practice) &&
@@ -392,6 +430,20 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies =>
       ) {
         throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:privacy-details`);
       }
+
+      const practiceIds = details['practices'].map((practice) =>
+        isRecord(practice) && isNonEmptyString(practice['id']) ? practice['id'] : '',
+      );
+      const invalidConsentStatus = details['practices'].some((practice) => {
+        if (!isRecord(practice) || !isNonEmptyString(practice['id'])) return true;
+        const consentRequired = CONSENT_REQUIRED_PRACTICE_IDS.includes(
+          practice['id'] as (typeof CONSENT_REQUIRED_PRACTICE_IDS)[number],
+        );
+        return practice['status'] !== (consentRequired ? 'consent-required' : 'necessary-only');
+      });
+      if (!hasExactStrings(practiceIds, PRIVACY_PRACTICE_IDS) || invalidConsentStatus) {
+        throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:privacy-practice-parity`);
+      }
     }
 
     routeIds.push(value['routeId']);
@@ -400,13 +452,12 @@ const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPolicies =>
 
   if (
     !hasExactStrings(routeIds, POLICY_ROUTE_IDS) ||
-    !hasExactStrings(kinds, ['privacy', 'terms', 'security']) ||
+    !hasExactStrings(kinds, POLICY_KINDS) ||
     candidate['disclosure']['routeId'] !== 'public-responsible-disclosure' ||
-    !isNonEmptyString(candidate['disclosure']['secureChannel']) ||
-    !isNonEmptyString(candidate['disclosure']['contact']) ||
+    !isNonEmptyString(candidate['disclosure']['coordinationContact']) ||
+    candidate['disclosure']['coordinationStatus'] !== 'preflight-required' ||
     !isNonEmptyString(candidate['disclosure']['version']) ||
     !isNonEmptyString(candidate['disclosure']['effectiveDate']) ||
-    !isNonEmptyString(candidate['disclosure']['reviewNotice']) ||
     !Array.isArray(candidate['disclosure']['scope']) ||
     !Array.isArray(candidate['disclosure']['prohibitedContent']) ||
     !isNonEmptyString(candidate['disclosure']['response']) ||
@@ -445,7 +496,16 @@ const assertLocaleParity = (): void => {
   const recordIdentity = (catalog: PublicCatalog): string =>
     catalog.records.map(({ routeId, translationKey }) => `${routeId}:${translationKey}`).join('|');
   const policyIdentity = (policies: PublicPolicies): string =>
-    policies.documents.map(({ kind, routeId }) => `${kind}:${routeId}`).join('|');
+    policies.documents
+      .map(({ kind, privacyDetails, routeId, sections }) =>
+        [
+          kind,
+          routeId,
+          sections.map(({ id }) => id).join(','),
+          privacyDetails?.practices.map(({ id }) => id).join(',') ?? '',
+        ].join(':'),
+      )
+      .join('|');
 
   if (
     recordIdentity(CATALOGS.en) !== recordIdentity(CATALOGS['pt-BR']) ||
@@ -1126,18 +1186,21 @@ export const PolicyDocument = ({
   const copy = copyFor(locale);
   const policyLabel =
     locale === 'pt-BR'
-      ? { privacy: 'Privacidade', security: 'Segurança', terms: 'Termos' }[policy.kind]
-      : { privacy: 'Privacy', security: 'Security', terms: 'Terms' }[policy.kind];
+      ? {
+          privacy: 'Privacidade',
+          security: 'Segurança',
+          storage: 'Armazenamento essencial',
+          terms: 'Termos',
+        }[policy.kind]
+      : { privacy: 'Privacy', security: 'Security', storage: 'Essential storage', terms: 'Terms' }[
+          policy.kind
+        ];
   return (
     <article className="policy-document">
       <header className="policy-document__header">
         <span>{policyLabel}</span>
         <h1>{policy.title}</h1>
         <p>{policy.summary}</p>
-        <aside className="policy-review-notice" role="note">
-          <strong>{locale === 'pt-BR' ? 'Revisão necessária' : 'Review required'}</strong>
-          <p>{policy.reviewNotice}</p>
-        </aside>
         <dl>
           <div>
             <dt>{copy.current}</dt>
@@ -1312,10 +1375,13 @@ const ResponsibleDisclosure = ({
         <span>{locale === 'pt-BR' ? 'Segurança' : 'Security'}</span>
         <h1>{disclosure.title}</h1>
         <p>{disclosure.summary}</p>
-        <aside className="policy-review-notice" role="note">
-          <strong>{locale === 'pt-BR' ? 'Revisão necessária' : 'Review required'}</strong>
-          <p>{disclosure.reviewNotice}</p>
-        </aside>
+        <p className="policy-coordination-boundary">
+          <strong>{locale === 'pt-BR' ? 'Contato designado' : 'Designated contact'}:</strong>{' '}
+          {disclosure.coordinationContact}.{' '}
+          {locale === 'pt-BR'
+            ? 'O recebimento coordenado será aberto somente após o preflight confirmar existência, autenticação e monitoramento do endereço.'
+            : 'Coordinated intake will open only after preflight confirms that the address exists, is authenticated, and is monitored.'}
+        </p>
         <dl>
           <div>
             <dt>{copyFor(locale).current}</dt>
@@ -1330,18 +1396,10 @@ const ResponsibleDisclosure = ({
             </dd>
           </div>
           <div>
-            <dt>{copyFor(locale).contact}</dt>
-            <dd>
-              <a href={`mailto:${disclosure.contact}`}>{disclosure.contact}</a>
-            </dd>
+            <dt>{locale === 'pt-BR' ? 'Situação do contato' : 'Contact status'}</dt>
+            <dd>{locale === 'pt-BR' ? 'Preflight obrigatório' : 'Preflight required'}</dd>
           </div>
         </dl>
-        <a
-          className="public-action public-action--primary"
-          href={`mailto:${disclosure.secureChannel}`}
-        >
-          {locale === 'pt-BR' ? 'Usar canal seguro' : 'Use secure channel'}
-        </a>
       </header>
       <div className="disclosure-columns">
         <section>
@@ -1813,7 +1871,8 @@ export const PublicCatalogPage = ({ locale, routeId, searchParams }: PublicCatal
   if (
     routeId === 'public-policies' ||
     routeId === 'public-privacy-policy' ||
-    routeId === 'public-terms'
+    routeId === 'public-terms' ||
+    routeId === 'public-essential-storage'
   ) {
     const policy = policies.documents.find((candidate) => candidate.routeId === routeId);
     if (policy === undefined) throw new Error(`PUBLIC_POLICY_ROUTE_MISSING:${routeId}`);
