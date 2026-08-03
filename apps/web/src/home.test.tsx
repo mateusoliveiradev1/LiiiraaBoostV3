@@ -68,6 +68,43 @@ afterEach(async () => {
 });
 
 describe('Home layout and screenshot evidence gate', () => {
+  it('exposes the complete D-102 journey and equivalent acquisition intents in both locales', () => {
+    const expectedSequence = [
+      'problem',
+      'workflow',
+      'competitive',
+      'methodology',
+      'plans',
+      'safety',
+      'faq',
+      'acquisition',
+    ];
+
+    expect(getHomeContent('pt-BR')).toMatchObject({
+      conversionJourney: expectedSequence.map((id) => ({ id })),
+      hero: {
+        primaryAction: { label: 'Baixar e analisar meu PC', routeId: 'public-download' },
+        secondaryAction: { label: 'Ver resultados reais', routeId: 'public-results' },
+      },
+    });
+    expect(getHomeContent('en')).toMatchObject({
+      conversionJourney: expectedSequence.map((id) => ({ id })),
+      hero: {
+        primaryAction: { label: 'Download and analyze my PC', routeId: 'public-download' },
+        secondaryAction: { label: 'See real results', routeId: 'public-results' },
+      },
+    });
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const content = getHomeContent(locale);
+      expect(content.conversionJourney.map(({ id }) => id)).toEqual(expectedSequence);
+      expect(content.conversionJourney.every(({ body, title }) => body.length > 40 && title.length > 8)).toBe(
+        true,
+      );
+      expect(content.faq).toHaveLength(4);
+    }
+  });
+
   it('leads with the approved bilingual promise and a download action before heavy media', async () => {
     expect(getHomeContent('pt-BR').hero).toMatchObject({
       primaryAction: { label: 'Verificar compatibilidade' },
@@ -201,8 +238,9 @@ describe('Home layout and screenshot evidence gate', () => {
       'home-ignition-hero',
       'home-player-problem',
       'home-workflow',
-      'home-mode-split',
+      'home-competitive-mode',
       'home-results-method',
+      'home-mode-split',
       'home-safety-runway',
       'home-faq',
       'home-final-cta',
@@ -218,6 +256,35 @@ describe('Home layout and screenshot evidence gate', () => {
     }
     expect(homeSource).not.toContain('home-feature-card');
     expect(homeSource).not.toContain('home-chapter-card');
+  });
+
+  it('uses only product evidence and methodology, never fabricated commercial proof', async () => {
+    const homeSource = await readSource('./features/home.tsx');
+    const fabricatedProof =
+      /(?:\b\d+(?:[.,]\d+)?\s*%|\b\d+(?:[.,]\d+)?\s*(?:fps|ms)\b|\b\d+(?:[.,]\d+)?\/5\b|\b\d+[km]\+?\s+(?:customers|users|players|clientes|usuários|jogadores)|certified by|certificado por)/iu;
+
+    expect(JSON.stringify(getHomeContent('pt-BR'))).not.toMatch(fabricatedProof);
+    expect(JSON.stringify(getHomeContent('en'))).not.toMatch(fabricatedProof);
+    expect(homeSource).toContain('data-proof-policy="product-methodology-only"');
+    expect(homeSource).toContain('data-proof-object="checksum-admitted-desktop-capture"');
+    expect(homeSource).not.toMatch(/testimonial|review-score|customer-count|benchmark-gain/iu);
+  });
+
+  it('locks the 1440/960/390/320 reading order and horizontal containment contract', async () => {
+    const [homeSource, styles] = await Promise.all([
+      readSource('./features/home.tsx'),
+      readSource('./styles/home.css'),
+    ]);
+
+    expect(homeSource).toContain('data-responsive-widths="1440 960 390 320"');
+    expect(homeSource.indexOf('className="home-ignition-hero__copy"')).toBeLessThan(
+      homeSource.indexOf('data-proof-object="checksum-admitted-desktop-capture"'),
+    );
+    expect(styles).toMatch(/\.public-home\s*\{[\s\S]*overflow-x:\s*clip/u);
+    expect(styles).toMatch(/@media \(width < 960px\)/u);
+    expect(styles).toMatch(/@media \(width <= 390px\)/u);
+    expect(styles).toMatch(/@media \(width <= 320px\)/u);
+    expect(styles).toMatch(/\.home-action--primary\s*\{[\s\S]*min-inline-size:/u);
   });
 
   it('hints the next movement directly below the hero without an unexplained large gap', async () => {
