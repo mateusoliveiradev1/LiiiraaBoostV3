@@ -598,6 +598,28 @@ button:focus-visible,
   max-inline-size: 60ch;
 }
 
+.account-context-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-2);
+  min-block-size: 44px;
+  padding-inline: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-inset);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-context-link:hover,
+.account-context-link:focus-visible {
+  border-color: var(--lb-cobalt-signal);
+  background: var(--lb-surface-raised);
+}
+
 .account-device__focus,
 .account-downloads__focus {
   display: grid;

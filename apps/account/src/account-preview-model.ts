@@ -21,6 +21,64 @@ export const ACCOUNT_ENTRY_ROUTE_IDS = Object.freeze([
 
 export type AccountPreviewRoute = (typeof ACCOUNT_ENTRY_ROUTE_IDS)[number];
 
+export const ACCOUNT_GOAL_ROUTE_IDS = Object.freeze([
+  'account-overview',
+  'account-device',
+  'account-subscription',
+  'account-security',
+  'account-support',
+] as const satisfies readonly AccountPreviewRoute[]);
+
+export type AccountGoalRoute = (typeof ACCOUNT_GOAL_ROUTE_IDS)[number];
+
+type AccountGoalNavigationItem = Readonly<{
+  label: string;
+  relatedRouteIds: readonly AccountPreviewRoute[];
+  routeId: AccountGoalRoute;
+}>;
+
+const ACCOUNT_GOAL_LABELS = Object.freeze({
+  'account-device': { 'pt-BR': 'PCs e licenças', en: 'PCs and licenses' },
+  'account-overview': { 'pt-BR': 'Início', en: 'Home' },
+  'account-security': { 'pt-BR': 'Segurança e privacidade', en: 'Security and privacy' },
+  'account-subscription': { 'pt-BR': 'Plano e pagamentos', en: 'Plan and payments' },
+  'account-support': { 'pt-BR': 'Ajuda', en: 'Help' },
+} as const satisfies Readonly<Record<AccountGoalRoute, Readonly<Record<WebLocale, string>>>>);
+
+const ACCOUNT_GOAL_RELATED_ROUTES = Object.freeze({
+  'account-device': ['account-downloads'],
+  'account-overview': ['account-profile'],
+  'account-security': ['account-privacy'],
+  'account-subscription': ['account-invoices'],
+  'account-support': [],
+} as const satisfies Readonly<Record<AccountGoalRoute, readonly AccountPreviewRoute[]>>);
+
+export const getAccountGoalNavigation = (
+  locale: WebLocale,
+): readonly AccountGoalNavigationItem[] =>
+  ACCOUNT_GOAL_ROUTE_IDS.map((routeId) => ({
+    label: ACCOUNT_GOAL_LABELS[routeId][locale],
+    relatedRouteIds: ACCOUNT_GOAL_RELATED_ROUTES[routeId],
+    routeId,
+  }));
+
+export const accountGoalForRoute = (
+  routeId: AccountPreviewRoute,
+): AccountGoalRoute | undefined => {
+  if (
+    routeId === 'account-sign-in' ||
+    routeId === 'account-sign-up' ||
+    routeId === 'account-onboarding'
+  ) {
+    return undefined;
+  }
+  if (routeId === 'account-profile') return 'account-overview';
+  if (routeId === 'account-invoices') return 'account-subscription';
+  if (routeId === 'account-downloads') return 'account-device';
+  if (routeId === 'account-privacy') return 'account-security';
+  return routeId;
+};
+
 export const ACCOUNT_ERROR_ROUTE_IDS = Object.freeze([
   'account-error-404',
   'account-error-403',

@@ -6,6 +6,12 @@ import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, type ReactNode } from 'react';
 
+import {
+  accountGoalForRoute,
+  getAccountGoalNavigation,
+  type AccountPreviewRoute,
+} from './account-preview-model';
+
 export type AccountNavigationItem = Readonly<{
   href: string;
   icon: ProductIconName;
@@ -40,6 +46,31 @@ type AccountNavigationProps = Readonly<{
 }>;
 
 const normalizePathname = (pathname: string): string => pathname.replace(/\/+$/u, '') || '/';
+
+const routeIdForNavigationIcon = (icon: ProductIconName): AccountPreviewRoute | undefined => {
+  switch (icon) {
+    case 'gauge':
+      return 'account-overview';
+    case 'profile':
+      return 'account-profile';
+    case 'shield':
+      return 'account-security';
+    case 'crown':
+      return 'account-subscription';
+    case 'receipt':
+      return 'account-invoices';
+    case 'device':
+      return 'account-device';
+    case 'download':
+      return 'account-downloads';
+    case 'lock':
+      return 'account-privacy';
+    case 'lifebuoy':
+      return 'account-support';
+    default:
+      return undefined;
+  }
+};
 
 function ResponsibilityIcon({ name }: Readonly<{ name: ProductIconName }>) {
   return <ProductIcon className="account-nav__icon" name={name} size={18} />;
@@ -137,9 +168,22 @@ export function AccountNavigation({
   );
   const currentItem = currentItems.length === 1 ? currentItems[0] : undefined;
   const currentLabel = currentItem?.label ?? label;
-  const accountMenuItems = responsibilityItems.filter(
-    ({ icon }) => icon === 'profile' || icon === 'shield',
-  );
+  const accountMenuItems = responsibilityItems.filter(({ icon }) => icon === 'profile');
+  const goalNavigation = getAccountGoalNavigation(locale);
+  const goalItems = goalNavigation.flatMap(({ label: goalLabel, routeId }) => {
+    const sourceItem = responsibilityItems.find(
+      ({ icon }) => routeIdForNavigationIcon(icon) === routeId,
+    );
+    return sourceItem === undefined ? [] : [{ ...sourceItem, label: goalLabel }];
+  });
+  const currentRouteId =
+    currentItem === undefined ? undefined : routeIdForNavigationIcon(currentItem.icon);
+  const currentGoalRouteId =
+    currentRouteId === undefined ? undefined : accountGoalForRoute(currentRouteId);
+  const currentGoalHref = goalItems.find(
+    ({ icon }) => routeIdForNavigationIcon(icon) === currentGoalRouteId,
+  )?.href;
+  const goalGroups: readonly AccountNavigationGroup[] = [{ items: goalItems }];
   const currentAuthRouteItems = authRouteItems.filter(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
@@ -184,7 +228,7 @@ export function AccountNavigation({
         <div className="account-sidebar__brand">{brand}</div>
         <nav aria-label={label} className="account-nav account-nav__desktop">
           <p className="account-nav__label">{label}</p>
-          <NavigationGroups currentHref={currentHref} groups={groups} markCurrent />
+          <NavigationGroups currentHref={currentGoalHref} groups={goalGroups} markCurrent />
         </nav>
         <div className="account-sidebar__footer">
           <div className="account-sidebar__identity">{identity}</div>
@@ -245,7 +289,11 @@ export function AccountNavigation({
             <ProductIcon className="account-nav__disclosure-icon" name="chevronRight" size={18} />
           </summary>
           <nav aria-label={label}>
-            <NavigationGroups currentHref={currentHref} groups={groups} markCurrent={false} />
+            <NavigationGroups
+              currentHref={currentGoalHref}
+              groups={goalGroups}
+              markCurrent={false}
+            />
           </nav>
         </details>
         <main id="account-main" tabIndex={-1}>

@@ -1386,6 +1386,10 @@ export const SubscriptionSummary = ({
           <h2>
             {content.locale === 'pt-BR' ? 'Proteções da assinatura' : 'Subscription safeguards'}
           </h2>
+          <a className="account-context-link" href={hrefFor('account-invoices', content.locale)}>
+            {content.locale === 'pt-BR' ? 'Ver pagamentos e faturas' : 'View payments and invoices'}
+            <ProductIcon name="chevronRight" size={16} />
+          </a>
           <dl className="account-definition-list">
             {terms.slice(7).map(([label, value]) => (
               <div key={label}>
@@ -1525,6 +1529,10 @@ export const DeviceBindingReview = ({
         </section>
         <aside className="account-device__rules" data-workspace-region="context">
           <h2>{content.locale === 'pt-BR' ? 'Regras da licença' : 'License rules'}</h2>
+          <a className="account-context-link" href={hrefFor('account-downloads', content.locale)}>
+            {content.locale === 'pt-BR' ? 'Downloads e versões' : 'Downloads and releases'}
+            <ProductIcon name="chevronRight" size={16} />
+          </a>
           <dl className="account-definition-list">
             <div>
               <dt>{content.locale === 'pt-BR' ? 'Mudança de hardware' : 'Hardware change'}</dt>

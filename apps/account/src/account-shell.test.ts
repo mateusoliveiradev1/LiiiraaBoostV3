@@ -18,7 +18,7 @@ import {
 } from './account-preview-model';
 
 describe('account shell', () => {
-  it('projects exactly five bilingual customer goals while legacy routes stay contextual', () => {
+  it('projects navigation into five goals with profile, payments, and downloads contextual', () => {
     expect(ACCOUNT_GOAL_ROUTE_IDS).toEqual([
       'account-overview',
       'account-device',
