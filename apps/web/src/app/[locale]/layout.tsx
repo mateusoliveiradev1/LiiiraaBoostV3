@@ -1,6 +1,7 @@
 import '@liiiraa/design-tokens/tokens.css';
 import '../public-shell.css';
 import '../../styles/public.css';
+import '../../styles/home.css';
 
 import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';

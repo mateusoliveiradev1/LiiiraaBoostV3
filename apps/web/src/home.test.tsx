@@ -12,6 +12,7 @@ import {
   resolveHomeProductCapture,
   type HomeLocale,
 } from './features/home';
+import { getPublicCatalog } from './features/public-catalog';
 
 const temporaryDirectories: string[] = [];
 
@@ -67,7 +68,7 @@ afterEach(async () => {
 });
 
 describe('Home layout and screenshot evidence gate', () => {
-  it('leads with the approved bilingual promise and compatibility action before heavy media', async () => {
+  it('leads with the approved bilingual promise and a download action before heavy media', async () => {
     expect(getHomeContent('pt-BR').hero).toMatchObject({
       primaryAction: { label: 'Verificar compatibilidade' },
       promise: 'Prepare seu PC. Prove o resultado. Restaure com controle.',
@@ -78,14 +79,17 @@ describe('Home layout and screenshot evidence gate', () => {
     });
 
     const homeSource = await readSource('./features/home.tsx');
-    expect(homeSource).toContain('data-hero-layout="centered-12-column"');
+    expect(homeSource).toContain('data-hero-layout="asymmetric-product-stage"');
     expect(homeSource).toContain('className="home-ignition-hero__promise"');
+    expect(homeSource).toContain("publicBoundaryHref('public-download', locale)");
+    expect(homeSource).toContain("? 'Liiiraa Boost para Windows 10 e 11'");
+    expect(homeSource).toContain(": 'Liiiraa Boost for Windows 10 and 11'");
     expect(homeSource.indexOf('className="home-ignition-hero__copy"')).toBeLessThan(
       homeSource.indexOf('className="home-ignition-hero__stage"'),
     );
   });
 
-  it('stages a centered 1120px desktop artifact with explicit above-fold geometry hooks', async () => {
+  it('stages the real desktop capture as the largest asymmetric proof object', async () => {
     const home = await CommandRunwayHome({ locale: 'en' });
     if (!isValidElement(home)) {
       throw new Error('Home did not return a React element.');
@@ -94,52 +98,58 @@ describe('Home layout and screenshot evidence gate', () => {
     const props = home.props as Readonly<Record<string, ReactNode>>;
     expect(props['data-capture-state']).toBe('CAPTURE_ADMITTED');
 
-    const [shellStyles, homeSource] = await Promise.all([
-      readSource('./app/public-shell.css'),
+    const [homeStyles, homeSource] = await Promise.all([
+      readSource('./styles/home.css'),
       readSource('./features/home.tsx'),
     ]);
 
     expect(homeSource).toContain('data-stage-max-width="1120"');
     expect(homeSource).toContain('data-stage-max-top="560"');
     expect(homeSource).toContain('data-stage-min-visible="260"');
-    expect(shellStyles).toMatch(
-      /\.home-ignition-hero__stage\s*\{[\s\S]*inline-size:\s*min\(calc\(100vw - 48px\), 1120px\);/u,
+    expect(homeStyles).toMatch(
+      /\.home-ignition-hero__stage\s*\{[\s\S]*grid-column:\s*6 \/ 13;[\s\S]*inline-size:\s*min\(58vw, 820px\);/u,
     );
-    expect(shellStyles).toContain('aspect-ratio: 16 / 9');
+    expect(homeStyles).toMatch(
+      /\.home-ignition-hero__stage \.lb-web-product-stage img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
+    );
   });
 
-  it('uses a 52-76px three-line display promise and unequal compatibility actions', async () => {
-    const [homeSource, shellStyles, tokenStyles] = await Promise.all([
+  it('uses a bounded three-line display promise and one dominant free-download action', async () => {
+    const [homeSource, homeStyles, tokenStyles] = await Promise.all([
       readSource('./features/home.tsx'),
-      readSource('./app/public-shell.css'),
+      readSource('./styles/home.css'),
       readSource('../../../packages/design-tokens/src/tokens.css'),
     ]);
 
     expect(homeSource).toContain('splitHeroPromise');
     expect(homeSource).toContain('primary>');
-    expect(shellStyles).toMatch(
-      /\.home-ignition-hero__promise\s*\{[\s\S]*font-family:\s*var\(--lb-font-display\);[\s\S]*font-size:\s*var\(--lb-public-hero-display-size\);/u,
+    expect(homeStyles).toMatch(
+      /\.home-ignition-hero__promise\s*\{[\s\S]*font-size:\s*clamp\(48px, 5\.2vw, 76px\);[\s\S]*line-height:\s*0\.94/u,
     );
     expect(tokenStyles).toMatch(/--lb-public-hero-display-size:\s*clamp\(52px, 6vw, 76px\);/u);
+    const shellStyles = await readSource('./app/public-shell.css');
     expect(shellStyles).toMatch(
       /\.home-action--primary\s*\{[\s\S]*background:\s*var\(--lb-accent-electric\);/u,
     );
   });
 
-  it('keeps mobile copy first with a 16:10 crop, full-image action, and 48px controls', async () => {
-    const [homeSource, shellStyles, sharedSource] = await Promise.all([
+  it('keeps mobile copy first with 16px edges, a full capture, and 48px controls', async () => {
+    const [homeSource, homeStyles, sharedSource] = await Promise.all([
       readSource('./features/home.tsx'),
-      readSource('./app/public-shell.css'),
+      readSource('./styles/home.css'),
       readSource('../../../packages/web-features/src/components.tsx'),
     ]);
 
     expect(homeSource.indexOf('className="home-ignition-hero__copy"')).toBeLessThan(
       homeSource.indexOf('className="home-ignition-hero__stage"'),
     );
-    expect(shellStyles).toMatch(
-      /@media \(width < 960px\)[\s\S]*\.home-ignition-hero__stage[^\{]*img\s*\{[\s\S]*aspect-ratio:\s*16 \/ 10/u,
+    expect(homeStyles).toMatch(
+      /@media \(width < 960px\)[\s\S]*\.home-ignition-hero__stage\s*\{[\s\S]*inline-size:\s*100%/u,
     );
-    expect(shellStyles).toMatch(/\.home-action\s*\{[\s\S]*min-block-size:\s*48px/u);
+    expect(homeStyles).toMatch(
+      /@media \(width < 640px\)[\s\S]*\.home-ignition-hero\s*\{[\s\S]*padding-inline:\s*16px/u,
+    );
+    expect(homeStyles).toMatch(/\.home-action\s*\{[\s\S]*min-block-size:\s*48px/u);
     expect(sharedSource).toContain('completeScreenshotLabel');
   });
 
@@ -174,25 +184,28 @@ describe('Home layout and screenshot evidence gate', () => {
     );
   });
 
-  it('uses authored evidence stages and rows instead of a repeated card or chapter wall', async () => {
+  it('uses authored movements instead of a repeated card or chapter wall', async () => {
     const homeSource = await readSource('./features/home.tsx');
-    const styles = await readSource('./styles/public.css');
+    const styles = await readSource('./styles/home.css');
 
-    expect(homeSource).toContain('className="home-evidence-stage"');
+    expect(homeSource).toContain('className="home-workflow"');
     expect(homeSource).toContain('className="home-proof-sequence"');
     expect(homeSource).not.toContain('className="home-chapter"');
     expect(styles).not.toContain('.home-chapter');
     expect(styles).not.toMatch(/border-radius:\s*(?:2[4-9]|[3-9]\d)px/u);
   });
 
-  it('orders five distinct public movements from ignition through the release boundary', async () => {
+  it('orders the complete public sales journey from product proof to final CTA', async () => {
     const homeSource = await readSource('./features/home.tsx');
     const movementHooks = [
       'home-ignition-hero',
-      'home-prepare-band',
-      'home-context-stage',
-      'home-compatibility-field',
-      'home-release-ribbon',
+      'home-player-problem',
+      'home-workflow',
+      'home-mode-split',
+      'home-results-method',
+      'home-safety-runway',
+      'home-faq',
+      'home-final-cta',
     ];
 
     for (const [index, hook] of movementHooks.entries()) {
@@ -210,25 +223,59 @@ describe('Home layout and screenshot evidence gate', () => {
   it('hints the next movement directly below the hero without an unexplained large gap', async () => {
     const [homeSource, styles] = await Promise.all([
       readSource('./features/home.tsx'),
-      readSource('./styles/public.css'),
+      readSource('./styles/home.css'),
     ]);
 
-    expect(homeSource).toContain('href="#prepare-prove-restore"');
+    expect(homeSource).toContain('href="#player-problem"');
     expect(homeSource).toContain('className="home-next-movement"');
-    expect(styles).toMatch(
-      /\.home-next-movement\s*\{[\s\S]*min-block-size:\s*44px[\s\S]*margin-block-start:\s*var\(--lb-space-4\)/u,
-    );
+    expect(styles).toMatch(/\.home-next-movement\s*\{[\s\S]*margin-block-start:\s*8px/u);
     expect(styles).not.toMatch(
       /\.home-next-movement\s*\{[\s\S]*margin-block-start:\s*(?:[7-9]\d|\d{3,})px/u,
     );
   });
 
-  it('keeps evidence metadata in contextual disclosures while visitor headings stay human', async () => {
+  it('keeps evidence contextual while plans, pricing, and objections stay customer-facing', async () => {
     const homeSource = await readSource('./features/home.tsx');
+    const ptBrPlans = getPublicCatalog('pt-BR').records.find(
+      ({ routeId }) => routeId === 'public-plans',
+    )?.plans;
+    const enPlans = getPublicCatalog('en').records.find(
+      ({ routeId }) => routeId === 'public-plans',
+    )?.plans;
 
     expect(homeSource).toContain('className="home-evidence-disclosure"');
-    expect(homeSource).toContain('className="home-context-stage__proof"');
-    expect(homeSource).toContain('className="home-compatibility-field__action"');
+    expect(homeSource).toContain('className="home-mode-split__plans"');
+    expect(homeSource).toContain('className="home-faq"');
+    expect(homeSource).toContain("'O app garante mais FPS?'");
+    expect(homeSource).toContain("'Onde o PC é analisado?'");
+    expect(ptBrPlans).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          billingPeriod: 'grátis para sempre',
+          name: 'Free · Modo Essencial',
+          price: 'R$ 0',
+        }),
+        expect.objectContaining({
+          billingPeriod: 'ou R$ 249,90/ano',
+          name: 'Premium · Modo Competitivo',
+          price: 'R$ 29,90/mês',
+        }),
+      ]),
+    );
+    expect(enPlans).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          billingPeriod: 'free forever',
+          name: 'Free · Essential Mode',
+          price: 'US$ 0',
+        }),
+        expect.objectContaining({
+          billingPeriod: 'or US$ 59.99/year',
+          name: 'Premium · Competitive Mode',
+          price: 'US$ 6.99/month',
+        }),
+      ]),
+    );
     expect(homeSource).not.toMatch(
       /<h[1-3][^>]*>[^<]*(?:fixture|adapter|manifest|route|Phase 4)/iu,
     );
@@ -237,11 +284,11 @@ describe('Home layout and screenshot evidence gate', () => {
     );
   });
 
-  it('keeps public distribution unavailable without exposing a development installer path', async () => {
+  it('routes both dominant entry points to canonical Download without exposing an installer path', async () => {
     const homeSource = await readSource('./features/home.tsx');
 
-    expect(homeSource).toContain("publicBoundaryHref('releases-index', locale)");
-    expect(homeSource).toContain('Distribution blocked');
+    expect(homeSource.match(/<HomeAction href=\{downloadHref\} primary>/gu)).toHaveLength(2);
+    expect(homeSource).toContain("publicBoundaryHref('public-download', locale)");
     expect(homeSource).not.toContain("publicBoundaryHref('releases-download'");
     expect(homeSource).not.toMatch(/['"`]\/[^'"`\s]+\.exe|development installer|self-signed/iu);
   });
