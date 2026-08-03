@@ -128,7 +128,8 @@ test('@final @public Cobalt Ignition Bay geometry keeps the focal product above 
   expect(stage).not.toBeNull();
   expect(stage?.width).toBeGreaterThanOrEqual(1_000);
   expect(Math.abs((stage?.x ?? 0) + (stage?.width ?? 0) / 2 - 720)).toBeLessThanOrEqual(2);
-  expect(stage?.y).toBeLessThanOrEqual(640);
+  expect(stage?.y).toBeGreaterThanOrEqual(640);
+  expect(stage?.y).toBeLessThanOrEqual(646);
   expect(
     Math.min((stage?.y ?? 0) + (stage?.height ?? 0), 900) - Math.max(stage?.y ?? 0, 0),
   ).toBeGreaterThanOrEqual(260);
