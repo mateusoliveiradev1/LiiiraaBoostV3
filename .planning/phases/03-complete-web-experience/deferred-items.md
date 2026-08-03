@@ -1,5 +1,9 @@
 # Deferred Items
 
+## 03-80 shared visual-token scan
+
+- The complete `@liiiraa/web-features` suite reaches an existing `gap: 1px` declaration in the admin queue skeleton and rejects it as off the canonical spacing scale. Plan 03-80 did not introduce or modify that queue-skeleton declaration; its focused shared workflow tests, shared strict TypeScript gate, complete admin suite, admin strict TypeScript gate, and admin production build pass. Tokenizing the pre-existing separator belongs to the queue/design-token owner.
+
 ## 03-58 rejected account-content correction
 
 - The targeted W11 browser replay reaches the current account shell but the pre-existing `account.spec.ts` assertion still requires the complementary accessible name `Prévia determinística`; Plan 03-57 now renders the current shell label as `Prévia`. The W13 browser journey passes, and the complete account unit/type/build gates pass. Updating the shell or cross-plan browser assertion is deferred to Plan 03-57 ownership; Plan 03-58 did not edit either surface.
