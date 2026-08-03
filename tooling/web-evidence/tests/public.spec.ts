@@ -92,14 +92,19 @@ test('@final @public navigation and language preserve the documentation route', 
   );
   await expect(navigation.locator('a[aria-current="page"]')).toHaveCount(0);
 
-  const locale = page.locator('a.lb-web-locale-switcher:visible');
-  await expect(locale).toHaveCount(1);
-  await expect(locale).toHaveAccessibleName('Switch language to Português');
-  await expect(locale.locator('[data-locale-flag="br"]')).toHaveCount(1);
-  await expect(locale).toContainText('Português');
-  await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
+  const localeSwitchers = page.locator('a.lb-web-locale-switcher:visible');
+  const headerLocale = page.locator('.public-header__locale a.lb-web-locale-switcher:visible');
+  const footerLocale = page.locator('.public-footer__actions a.lb-web-locale-switcher:visible');
+  await expect(localeSwitchers).toHaveCount(2);
+  for (const locale of [headerLocale, footerLocale]) {
+    await expect(locale).toHaveCount(1);
+    await expect(locale).toHaveAccessibleName('Switch language to Português');
+    await expect(locale.locator('[data-locale-flag="br"]')).toHaveCount(1);
+    await expect(locale).toContainText('Português');
+    await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
+  }
 
-  await locale.click();
+  await headerLocale.click();
   await expect(page).toHaveURL(/\/pt-BR\/docs\/current$/u);
   await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
   await expect(page.getByRole('heading', { level: 1, name: 'Central de ajuda' })).toBeVisible();
@@ -184,10 +189,9 @@ test('@final @public W01 keeps the PT-BR command runway truthful and distributio
       '.home-ignition-hero, .home-player-problem, .home-workflow, .home-mode-split, .home-results-method, .home-safety-runway, .home-faq, .home-final-cta',
     ),
   ).toHaveCount(8);
-  await expect(page.getByRole('link', { name: 'Baixar grátis', exact: true }).first()).toHaveAttribute(
-    'href',
-    '/pt-BR/download',
-  );
+  await expect(
+    page.getByRole('link', { name: 'Baixar grátis', exact: true }).first(),
+  ).toHaveAttribute('href', '/pt-BR/download');
   await expect(
     page.locator('a[href$=".exe"], a[href*="target/release"], a[href*="self-signed"]'),
   ).toHaveCount(0);
