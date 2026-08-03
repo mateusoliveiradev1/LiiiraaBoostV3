@@ -12,67 +12,59 @@ import {
   type PreviewWorkflowOutput,
   type createPreviewWorkflowMachine,
 } from './preview-machine.ts';
-import { PreviewBoundary, ProvenanceLabel } from './components.tsx';
+import { PreviewBoundary } from './components.tsx';
 
 export type PreviewWorkflowLocale = 'en' | 'pt-BR';
 
 const COPY = Object.freeze({
   en: Object.freeze({
-    boundary: 'Deterministic preview — no remote authority is connected.',
-    cancel: 'Cancel preview',
-    cancelledBody:
-      'The review was cancelled. Phase 4 authority was not contacted and no remote state changed.',
-    cancelledTitle: 'Preview cancelled — no change was made',
-    confirm: 'Confirm reviewed action',
-    edit: 'Edit reviewed fields',
+    boundary: 'Saving is temporarily unavailable. You can review or cancel without changing your account.',
+    cancel: 'Cancel',
+    cancelledBody: 'The review was cancelled. Your account remains exactly as it was.',
+    cancelledTitle: 'Cancelled — your account is unchanged',
+    confirm: 'Confirm this action',
+    edit: 'Edit details',
     expired:
-      'The session preview expired. Explicitly safe draft fields remain available; review sign-in before continuing.',
+      'Your secure session expired. Safe draft fields remain available; sign in again before continuing.',
     failure:
-      'The Phase 4 authority boundary is unavailable. Explicitly safe draft fields remain available.',
-    finishValidation: 'Validate reviewed fields',
-    offline:
-      'The authority boundary is offline. Explicitly safe draft fields remain available locally.',
-    phase4: 'Required authority arrives in Phase 4.',
-    progress: 'Preparing a deterministic no-change receipt.',
+      'Account services are temporarily unavailable. Safe draft fields remain available.',
+    finishValidation: 'Check details',
+    offline: 'You are offline. Safe draft fields remain available on this device.',
+    progress: 'Finishing the review without changing your account.',
     reauthenticate:
-      'Review simulated reauthentication. This preview does not verify a real credential.',
-    receiptBody:
-      'The review is complete. Required authority arrives in Phase 4; no remote state changed.',
-    receiptTitle: 'Preview complete — no change was made',
+      'Sign-in verification is unavailable right now. No credential was verified or stored.',
+    receiptBody: 'The review is complete. Your account remains unchanged.',
+    receiptTitle: 'Review complete — your account is unchanged',
     refresh: 'Refresh reviewed data',
-    resume: 'Review sign-in preview',
-    retry: 'Retry preview review',
-    review: 'Review action boundary',
+    resume: 'Sign in again',
+    retry: 'Try again',
+    review: 'Continue to confirmation',
     stale:
       'The reviewed input is stale. Refresh it before confirmation; no ambiguous action is available.',
     validationTitle: 'Correct the reviewed fields',
   }),
   'pt-BR': Object.freeze({
-    boundary: 'Prévia determinística — nenhuma autoridade remota está conectada.',
-    cancel: 'Cancelar prévia',
-    cancelledBody:
-      'A revisão foi cancelada. A autoridade da Fase 4 não foi acionada e nenhum estado remoto foi alterado.',
-    cancelledTitle: 'Prévia cancelada — nenhuma alteração foi feita',
-    confirm: 'Confirmar ação revisada',
-    edit: 'Editar campos revisados',
+    boundary: 'O salvamento está temporariamente indisponível. Você pode revisar ou cancelar sem alterar sua conta.',
+    cancel: 'Cancelar',
+    cancelledBody: 'A revisão foi cancelada. Sua conta permanece exatamente como estava.',
+    cancelledTitle: 'Cancelado — sua conta não mudou',
+    confirm: 'Confirmar esta ação',
+    edit: 'Editar detalhes',
     expired:
-      'A prévia da sessão expirou. Os campos explicitamente seguros permanecem disponíveis; revise a entrada antes de continuar.',
+      'Sua sessão segura expirou. Os campos seguros permanecem disponíveis; entre novamente antes de continuar.',
     failure:
-      'O limite da autoridade da Fase 4 está indisponível. Os campos explicitamente seguros permanecem disponíveis.',
-    finishValidation: 'Validar campos revisados',
-    offline:
-      'O limite da autoridade está offline. Os campos explicitamente seguros permanecem disponíveis localmente.',
-    phase4: 'A autoridade necessária chega na Fase 4.',
-    progress: 'Preparando um recibo determinístico sem alteração.',
+      'Os serviços da conta estão temporariamente indisponíveis. Os campos seguros permanecem disponíveis.',
+    finishValidation: 'Conferir dados',
+    offline: 'Você está sem conexão. Os campos seguros permanecem disponíveis neste dispositivo.',
+    progress: 'Concluindo a revisão sem alterar sua conta.',
     reauthenticate:
-      'Revise a reautenticação simulada. Esta prévia não verifica uma credencial real.',
-    receiptBody:
-      'A revisão foi concluída. A autoridade necessária chega na Fase 4; nenhum estado remoto foi alterado.',
-    receiptTitle: 'Prévia concluída — nenhuma alteração foi feita',
+      'A verificação de entrada está indisponível agora. Nenhuma credencial foi verificada ou armazenada.',
+    receiptBody: 'A revisão foi concluída. Sua conta permanece sem alterações.',
+    receiptTitle: 'Revisão concluída — sua conta não mudou',
     refresh: 'Atualizar dados revisados',
-    resume: 'Revisar prévia de entrada',
-    retry: 'Tentar revisão da prévia novamente',
-    review: 'Revisar limite da ação',
+    resume: 'Entrar novamente',
+    retry: 'Tentar novamente',
+    review: 'Continuar para confirmação',
     stale:
       'A entrada revisada está desatualizada. Atualize-a antes da confirmação; nenhuma ação ambígua está disponível.',
     validationTitle: 'Corrija os campos revisados',
@@ -130,7 +122,7 @@ export interface PreviewReviewProps {
 export const PreviewReview = ({ context, locale }: PreviewReviewProps) => (
   <section aria-labelledby="preview-review-title" data-preview-region="review">
     <h2 id="preview-review-title">
-      {locale === 'pt-BR' ? 'Revisão antes da autoridade' : 'Review before authority'}
+      {locale === 'pt-BR' ? 'Revise os detalhes' : 'Review your details'}
     </h2>
     <dl>
       <div>
@@ -227,11 +219,12 @@ export const PreviewConfirmation = ({
   return (
     <section aria-labelledby="preview-confirmation-title" data-preview-region="confirmation">
       <h2 id="preview-confirmation-title" tabIndex={-1}>
-        {locale === 'pt-BR' ? 'Confirmação proporcional' : 'Proportional confirmation'}
+        {locale === 'pt-BR' ? 'Confirme esta ação' : 'Confirm this action'}
       </h2>
-      <PreviewBoundary description={COPY[locale].boundary}>
-        <p>{COPY[locale].phase4}</p>
-      </PreviewBoundary>
+      <PreviewBoundary
+        description={COPY[locale].boundary}
+        title={locale === 'pt-BR' ? 'Salvamento indisponível' : 'Saving unavailable'}
+      />
       <p>{context.confirmation.label[locale]}</p>
       {requiresPhrase ? (
         <LbTextField
@@ -243,7 +236,7 @@ export const PreviewConfirmation = ({
           value={confirmationValue}
         />
       ) : null}
-      <div aria-label={locale === 'pt-BR' ? 'Ações da prévia' : 'Preview actions'} role="group">
+      <div aria-label={locale === 'pt-BR' ? 'Ações de confirmação' : 'Confirmation actions'} role="group">
         <LbButton onPress={onCancel} variant="quiet">
           {COPY[locale].cancel}
         </LbButton>
@@ -299,7 +292,9 @@ export const PreviewFailure = ({
       role="alert"
     >
       <h2 id="preview-failure-title" tabIndex={-1}>
-        {locale === 'pt-BR' ? 'A prévia foi bloqueada com segurança' : 'Preview safely blocked'}
+        {locale === 'pt-BR'
+          ? 'Esta ação está temporariamente indisponível'
+          : 'This action is temporarily unavailable'}
       </h2>
       <p>{detail}</p>
       <p>
@@ -339,7 +334,6 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
       data-remote-state-changed="false"
       tabIndex={-1}
     >
-      <ProvenanceLabel kind="simulated" locale={locale} />
       <h2 id="preview-receipt-title">
         {cancelled ? COPY[locale].cancelledTitle : COPY[locale].receiptTitle}
       </h2>
@@ -350,15 +344,11 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
           <dd>{actionLabel}</dd>
         </div>
         <div>
-          <dt>{locale === 'pt-BR' ? 'Autoridade futura' : 'Future authority'}</dt>
-          <dd>Phase 4</dd>
-        </div>
-        <div>
-          <dt>{locale === 'pt-BR' ? 'Estado remoto alterado' : 'Remote state changed'}</dt>
+          <dt>{locale === 'pt-BR' ? 'Conta alterada' : 'Account changed'}</dt>
           <dd>{locale === 'pt-BR' ? 'Não' : 'No'}</dd>
         </div>
         <div>
-          <dt>{locale === 'pt-BR' ? 'Correlação' : 'Correlation'}</dt>
+          <dt>{locale === 'pt-BR' ? 'Referência da confirmação' : 'Confirmation reference'}</dt>
           <dd>
             <code>{correlationId}</code>
           </dd>
@@ -366,7 +356,7 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
       </dl>
       <ol
         aria-label={
-          locale === 'pt-BR' ? 'Registro imutável sem alteração' : 'Immutable no-change ledger'
+          locale === 'pt-BR' ? 'Registro da confirmação' : 'Confirmation record'
         }
         data-immutable="true"
       >
@@ -374,11 +364,11 @@ export const PreviewReceipt = ({ actionLabel, locale, output }: PreviewReceiptPr
           <time dateTime={receipt.reviewedAt}>{receipt.reviewedAt}</time>{' '}
           {cancelled
             ? locale === 'pt-BR'
-              ? 'Prévia cancelada; nenhuma alteração remota.'
-              : 'Preview cancelled; no remote change.'
+              ? 'Revisão cancelada; sua conta não mudou.'
+              : 'Review cancelled; your account is unchanged.'
             : locale === 'pt-BR'
-              ? 'Revisão concluída; nenhuma alteração remota.'
-              : 'Review complete; no remote change.'}
+              ? 'Revisão concluída; sua conta não mudou.'
+              : 'Review complete; your account is unchanged.'}
         </li>
       </ol>
     </section>
@@ -552,12 +542,31 @@ export const PreviewWorkflow = ({
   const actionPolicy = PREVIEW_ACTION_POLICIES[snapshot.context.action.family];
   const output = snapshot.status === 'done' ? snapshot.output : null;
   const statusCopy = useMemo(
-    () =>
-      projection.state === 'issuing'
-        ? COPY[locale].progress
-        : locale === 'pt-BR'
-          ? `Estado da prévia: ${projection.state}`
-          : `Preview state: ${projection.state}`,
+    () => {
+      if (projection.state === 'issuing') return COPY[locale].progress;
+      const labels: Readonly<Record<PreviewStateProjection['state'], Readonly<Record<PreviewWorkflowLocale, string>>>> = {
+        cancelled: { en: 'Review cancelled', 'pt-BR': 'Revisão cancelada' },
+        complete: { en: 'Review complete', 'pt-BR': 'Revisão concluída' },
+        confirming: { en: 'Confirmation required', 'pt-BR': 'Confirmação necessária' },
+        editing: { en: 'Check the details below', 'pt-BR': 'Confira os detalhes abaixo' },
+        'expired-session': { en: 'Secure session expired', 'pt-BR': 'Sessão segura expirada' },
+        issuing: { en: COPY.en.progress, 'pt-BR': COPY['pt-BR'].progress },
+        offline: { en: 'You are offline', 'pt-BR': 'Você está sem conexão' },
+        'partial-failure': {
+          en: 'Account services are unavailable',
+          'pt-BR': 'Os serviços da conta estão indisponíveis',
+        },
+        'reauth-preview': {
+          en: 'Sign-in verification required',
+          'pt-BR': 'Verificação de entrada necessária',
+        },
+        reviewing: { en: 'Ready to review', 'pt-BR': 'Pronto para revisar' },
+        stale: { en: 'Details need to be refreshed', 'pt-BR': 'Os dados precisam ser atualizados' },
+        validating: { en: 'Checking details', 'pt-BR': 'Conferindo dados' },
+        'validation-error': { en: 'Some details need attention', 'pt-BR': 'Alguns dados precisam de atenção' },
+      };
+      return labels[projection.state][locale];
+    },
     [locale, projection.state],
   );
 
@@ -614,12 +623,14 @@ export const PreviewWorkflow = ({
         <h1 id="preview-workflow-title">
           {title ??
             (locale === 'pt-BR'
-              ? `Prévia de ${snapshot.context.action.objectLabel}`
-              : `${snapshot.context.action.objectLabel} preview`)}
+              ? `Revisar ${snapshot.context.action.objectLabel}`
+              : `Review ${snapshot.context.action.objectLabel}`)}
         </h1>
-        <ProvenanceLabel kind="simulated" locale={locale} />
       </header>
-      <PreviewBoundary description={COPY[locale].boundary} />
+      <PreviewBoundary
+        description={COPY[locale].boundary}
+        title={locale === 'pt-BR' ? 'Salvamento indisponível' : 'Saving unavailable'}
+      />
       <p aria-live="polite" role="status">
         {statusCopy}
       </p>
@@ -692,10 +703,13 @@ export const PreviewWorkflow = ({
         {projection.state === 'reauth-preview' ? (
           <section aria-labelledby="preview-reauth-title">
             <h2 id="preview-reauth-title" tabIndex={-1}>
-              {locale === 'pt-BR' ? 'Reautenticação simulada' : 'Simulated reauthentication'}
+              {locale === 'pt-BR' ? 'Confirme seu acesso' : 'Confirm your access'}
             </h2>
             <p>{COPY[locale].reauthenticate}</p>
-            <PreviewBoundary description={COPY[locale].boundary} />
+            <PreviewBoundary
+              description={COPY[locale].boundary}
+              title={locale === 'pt-BR' ? 'Verificação indisponível' : 'Verification unavailable'}
+            />
             <div
               role="group"
               aria-label={locale === 'pt-BR' ? 'Reautenticação' : 'Reauthentication'}
@@ -710,8 +724,8 @@ export const PreviewWorkflow = ({
               >
                 {actionPolicy.requiresReauthentication
                   ? locale === 'pt-BR'
-                    ? 'Concluir simulação de reautenticação'
-                    : 'Complete reauthentication simulation'
+                    ? 'Continuar sem verificar credencial'
+                    : 'Continue without verifying a credential'
                   : locale === 'pt-BR'
                     ? 'Continuar revisão'
                     : 'Continue review'}

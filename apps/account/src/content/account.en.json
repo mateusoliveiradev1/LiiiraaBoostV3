@@ -130,6 +130,8 @@
     "title": "Subscription",
     "summary": "Review Premium terms, billing timing, cancellation, refunds, and device rules.",
     "plan": "Premium · Competitive Mode",
+    "essentialPlan": "Essential free: PC analysis, recommendations, history, and restoration — without applying optimizations.",
+    "premiumBenefits": "Premium: applies compatible optimizations, unlocks Competitive Mode, and includes priority support.",
     "price": "US$ 6.99/month or US$ 59.99/year",
     "billingPeriod": "Monthly or annual",
     "renewal": "Renews on the selected cycle; card supports monthly and annual billing, Pix supports annual billing in Brazil, and boleto is unavailable at launch",
@@ -138,13 +140,16 @@
     "refunds": "Full refund within seven days of the first subscription",
     "deviceRules": "One active PC; transfer or reset every 30 days, with legitimate exceptions through support",
     "expirationEffects": "Premium works offline for 30 days and then returns to Free; history and restoration remain available",
+    "paymentMethods": "Card for monthly and annual billing; Pix for annual billing in Brazil. Boleto is unavailable at launch.",
     "action": "Review subscription change"
   },
   "invoices": {
     "title": "Invoices",
     "summary": "Review charges, payment method, billing period, and the status of each invoice.",
     "caption": "Invoice history",
-    "empty": "You do not have any invoices yet. The Free plan never creates a charge."
+    "empty": "You do not have any invoices yet. The Essential plan never creates a charge.",
+    "paymentMethods": "Accepted at launch: card for monthly or annual billing and Pix for annual billing in Brazil.",
+    "billingHelp": "Report an unrecognized charge to support before making another payment attempt."
   },
   "device": {
     "title": "Device",
@@ -152,12 +157,19 @@
     "label": "My primary PC",
     "detail": "Windows 11 · protected identity · raw HWID is never stored",
     "cooldown": "You can transfer or reset the active PC every 30 days. Reinstalls and minor upgrades do not consume a reset; major hardware changes may require a new activation.",
+    "motherboard": "A motherboard replacement or significant hardware change can create a new protected identity and require reactivation.",
+    "supportException": "For hardware failure, repair, or a legitimate replacement, support can review an exception before 30 days.",
+    "offlineGrace": "Premium remains validated offline for up to 30 days; the app then returns to Essential until it reconnects.",
+    "permanentAccess": "History, evidence, and restoration remain available on Essential, while offline, or after expiration.",
     "action": "Review device replacement"
   },
   "downloads": {
     "title": "Downloads",
     "summary": "Stable releases remain public and never require an account.",
     "boundary": "This link opens the public release surface. No session, account context, or form data crosses origins.",
+    "stableChannel": "Stable: recommended for everyone and updated automatically after validation and signing.",
+    "betaChannel": "Beta: optional early access with a straightforward return to the stable channel.",
+    "updates": "The app checks signed manifests and installs updates only after integrity is confirmed.",
     "action": "Review stable public releases"
   },
   "privacy": {
@@ -170,7 +182,9 @@
     "exportAction": "Review data export",
     "correctionAction": "Review data correction",
     "deletionAction": "Review account deletion",
-    "consentAction": "Review optional consent"
+    "consentAction": "Review optional consent",
+    "telemetryAction": "Review optional telemetry",
+    "telemetry": "Telemetry and diagnostic summaries are off by default and can be sent only with specific, revocable consent."
   },
   "support": {
     "title": "Support",
@@ -183,7 +197,10 @@
     "sharing": "No diagnostic, attachment, email, or account record is shared.",
     "revocation": "Cancel the review at any point; nothing has been submitted.",
     "noUpload": "Diagnostics can be attached only with explicit consent for this request.",
-    "sensitiveReview": "Remove credentials, payment data, recovery codes, and unrelated personal information before any future submission."
+    "sensitiveReview": "Remove credentials, payment data, recovery codes, and unrelated personal information before any future submission.",
+    "standardResponse": "Essential: first response within 72 business hours.",
+    "premiumResponse": "Premium: priority first response within 24 business hours.",
+    "exceptionPath": "Hardware failure or a legitimate device lockout can be reviewed by support, including during the 30-day interval."
   },
   "recovery": {
     "title": "Authority unavailable",

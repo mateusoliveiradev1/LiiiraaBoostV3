@@ -555,7 +555,7 @@
 }
 
 .public-catalog[data-route-id='public-plans'] {
-  padding-block: clamp(24px, 3vw, 40px) var(--lb-space-7);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) var(--lb-space-7);
 }
 
 .catalog-introduction,
@@ -935,7 +935,7 @@
 .plan-offer h1 {
   max-inline-size: 12ch;
   margin: 0;
-  font-size: clamp(42px, 4.7vw, 68px);
+  font-size: clamp(2.625rem, 4.7vw, 4.25rem);
   letter-spacing: -0.035em;
   line-height: 1.02;
   text-wrap: balance;
@@ -945,7 +945,7 @@
   max-inline-size: 48ch;
   margin: 0;
   color: var(--lb-text-secondary);
-  font-size: 19px;
+  font-size: 1.1875rem;
   line-height: 1.5;
 }
 
@@ -959,7 +959,7 @@
 
 .plan-price strong {
   color: var(--lb-text-primary);
-  font-size: clamp(48px, 4.6vw, 64px);
+  font-size: clamp(3rem, 4.6vw, 4rem);
   font-weight: var(--lb-weight-semibold);
   letter-spacing: -0.035em;
   line-height: 1;
@@ -1013,7 +1013,7 @@
 .plan-checkout h2 {
   max-inline-size: 12ch;
   margin: var(--lb-space-2) 0 0;
-  font-size: clamp(28px, 3vw, 38px);
+  font-size: clamp(1.75rem, 3vw, 2.375rem);
   letter-spacing: -0.025em;
   line-height: 1.08;
   text-wrap: balance;
@@ -1077,7 +1077,7 @@
 .catalog-product-flow,
 .results-method,
 .competitive-session {
-  padding-block: clamp(48px, 7vw, 88px);
+  padding-block: clamp(3rem, 7vw, 5.5rem);
   border-block-start: 1px solid var(--lb-line-subtle);
 }
 
@@ -1094,7 +1094,7 @@
 .competitive-session h2,
 .results-guardrails h2 {
   margin: 0;
-  font-size: clamp(30px, 4vw, 52px);
+  font-size: clamp(1.875rem, 4vw, 3.25rem);
   line-height: 1.04;
   letter-spacing: -0.035em;
   text-wrap: balance;
@@ -1107,7 +1107,7 @@
   max-inline-size: 62ch;
   margin: 0;
   color: var(--lb-text-secondary);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.65;
 }
 
@@ -1144,7 +1144,7 @@
 
 .catalog-product-flow .catalog-story-sequence h3 {
   margin: 0 0 var(--lb-space-3);
-  font-size: 24px;
+  font-size: 1.5rem;
 }
 
 .catalog-product-flow .catalog-story-sequence p {
@@ -1158,7 +1158,7 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: var(--lb-space-6);
   align-items: center;
-  padding-inline: clamp(28px, 4vw, 56px);
+  padding-inline: clamp(1.75rem, 4vw, 3.5rem);
   border: 1px solid var(--lb-line-strong);
   border-radius: 14px;
   background: color-mix(in srgb, var(--lb-accent-electric) 5%, var(--lb-surface-inset));
@@ -1231,7 +1231,7 @@
 }
 
 .results-method li strong {
-  font-size: 22px;
+  font-size: 1.375rem;
 }
 
 .results-method li span {
@@ -1246,7 +1246,7 @@
 }
 
 .results-guardrails section {
-  padding: clamp(40px, 6vw, 72px);
+  padding: clamp(2.5rem, 6vw, 4.5rem);
   border-inline-end: 1px solid var(--lb-line-subtle);
 }
 
@@ -1255,7 +1255,7 @@
 }
 
 .results-guardrails h2 {
-  font-size: clamp(26px, 3vw, 38px);
+  font-size: clamp(1.625rem, 3vw, 2.375rem);
 }
 
 .compatibility-boundary {
@@ -1272,7 +1272,7 @@
 }
 
 .compatibility-boundary strong {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .compatibility-boundary p {
@@ -1286,7 +1286,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: var(--lb-space-4) var(--lb-space-7);
-  padding-block: clamp(40px, 6vw, 80px);
+  padding-block: clamp(2.5rem, 6vw, 5rem);
 }
 
 .plan-comparison-introduction > p,
@@ -1304,7 +1304,7 @@
 .plan-comparison-introduction h1 {
   max-inline-size: 14ch;
   margin: 0;
-  font-size: clamp(42px, 5.4vw, 76px);
+  font-size: clamp(2.625rem, 5.4vw, 4.75rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
   text-wrap: balance;
@@ -1321,14 +1321,14 @@
   display: block;
   margin: 0;
   color: var(--lb-text-secondary);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.6;
 }
 
 .plan-comparison-introduction > div p {
   margin-block-end: var(--lb-space-3);
   color: var(--lb-text-primary);
-  font-size: 21px;
+  font-size: 1.3125rem;
 }
 
 .plan-comparison-introduction nav {
@@ -1348,7 +1348,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--lb-space-4);
-  padding: clamp(28px, 3.5vw, 44px);
+  padding: clamp(1.75rem, 3.5vw, 2.75rem);
   border: 1px solid var(--lb-line-strong);
   border-radius: 14px;
   background: var(--lb-surface-inset);
@@ -1363,7 +1363,7 @@
   display: flex;
   gap: var(--lb-space-2);
   align-items: center;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: var(--lb-weight-semibold);
 }
 
@@ -1373,7 +1373,7 @@
 }
 
 .plan-choice .plan-price strong {
-  font-size: clamp(38px, 4vw, 52px);
+  font-size: clamp(2.375rem, 4vw, 3.25rem);
 }
 
 .plan-choice .plan-capabilities {
@@ -1401,7 +1401,7 @@
 .plan-offer h2 {
   max-inline-size: 13ch;
   margin: 0;
-  font-size: clamp(34px, 4vw, 54px);
+  font-size: clamp(2.125rem, 4vw, 3.375rem);
   line-height: 1.04;
   letter-spacing: -0.035em;
   text-wrap: balance;
@@ -1474,7 +1474,7 @@
   display: grid;
   grid-template-columns: minmax(280px, 0.7fr) minmax(0, 1.3fr);
   gap: var(--lb-space-6);
-  padding-block: clamp(48px, 7vw, 88px);
+  padding-block: clamp(3rem, 7vw, 5.5rem);
   border-block: 1px solid var(--lb-line-subtle);
 }
 
@@ -1495,7 +1495,7 @@
 }
 
 .plan-terms > header h2 {
-  font-size: clamp(28px, 3vw, 40px);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
   line-height: 1.08;
 }
 
@@ -1889,7 +1889,7 @@
   }
 
   .plan-terms .catalog-disclosure-list dd {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.55;
   }
 
@@ -1961,17 +1961,17 @@
   }
 
   .plan-offer h1 {
-    font-size: clamp(38px, 11vw, 44px);
+    font-size: clamp(2.375rem, 11vw, 2.75rem);
     line-height: 1.04;
   }
 
   .plan-offer__summary {
-    font-size: 17px;
+    font-size: 1.0625rem;
     line-height: 1.45;
   }
 
   .plan-price strong {
-    font-size: 44px;
+    font-size: 2.75rem;
   }
 
   .plan-price {

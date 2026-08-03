@@ -130,6 +130,8 @@
     "title": "Assinatura",
     "summary": "Revise termos do Premium, período de cobrança, cancelamento, reembolsos e regras de dispositivo.",
     "plan": "Premium · Modo Competitivo",
+    "essentialPlan": "Essential gratuito: análise do PC, recomendações, histórico e restauração — sem aplicar otimizações.",
+    "premiumBenefits": "Premium: aplica otimizações compatíveis, libera Modo Competitivo e inclui suporte prioritário.",
     "price": "R$ 29,90/mês ou R$ 249,90/ano",
     "billingPeriod": "Mensal ou anual",
     "renewal": "Renovação pelo ciclo escolhido; cartão no mensal e anual, Pix no anual e sem boleto no lançamento",
@@ -138,13 +140,16 @@
     "refunds": "Reembolso integral em até sete dias da primeira assinatura",
     "deviceRules": "Um PC ativo; transferência ou reset a cada 30 dias, com exceções legítimas pelo suporte",
     "expirationEffects": "Premium funciona offline por 30 dias e depois volta ao Free; histórico e restauração permanecem",
+    "paymentMethods": "Cartão no mensal e anual; Pix no anual. Boleto não estará disponível no lançamento.",
     "action": "Revisar mudança de assinatura"
   },
   "invoices": {
     "title": "Faturas",
     "summary": "Consulte cobranças, forma de pagamento, período e situação de cada fatura.",
     "caption": "Histórico de faturas",
-    "empty": "Você ainda não tem faturas. O plano Free não gera cobrança."
+    "empty": "Você ainda não tem faturas. O plano Essential não gera cobrança.",
+    "paymentMethods": "Formas aceitas no lançamento: cartão no plano mensal ou anual e Pix no plano anual.",
+    "billingHelp": "Uma cobrança que você não reconhece deve ser informada ao suporte antes de qualquer nova tentativa de pagamento."
   },
   "device": {
     "title": "Dispositivo",
@@ -152,12 +157,19 @@
     "label": "Meu PC principal",
     "detail": "Windows 11 · identidade protegida · o HWID bruto nunca é armazenado",
     "cooldown": "Você pode transferir ou resetar o PC ativo a cada 30 dias. Reinstalações e pequenas atualizações não consomem o reset; trocas importantes de hardware podem exigir nova ativação.",
+    "motherboard": "Troca de placa-mãe ou mudança significativa de hardware pode gerar uma nova identidade protegida e exigir reativação.",
+    "supportException": "Em falha de hardware, reparo ou troca legítima, o suporte pode revisar uma exceção antes dos 30 dias.",
+    "offlineGrace": "O Premium continua validado offline por até 30 dias; depois o app retorna ao Essential até reconectar.",
+    "permanentAccess": "Histórico, evidências e restauração continuam disponíveis mesmo no Essential, offline ou após expiração.",
     "action": "Revisar troca de dispositivo"
   },
   "downloads": {
     "title": "Downloads",
     "summary": "Versões estáveis permanecem públicas e nunca exigem uma conta.",
     "boundary": "Este link abre a superfície pública de versões. Nenhuma sessão, contexto da conta ou dado de formulário cruza as origens.",
+    "stableChannel": "Estável: recomendado para todos e atualizado automaticamente após validação e assinatura.",
+    "betaChannel": "Beta: acesso antecipado opcional, com retorno simples ao canal estável.",
+    "updates": "O aplicativo verifica manifestos assinados e instala atualizações apenas com integridade confirmada.",
     "action": "Revisar versões estáveis públicas"
   },
   "privacy": {
@@ -170,7 +182,9 @@
     "exportAction": "Revisar exportação de dados",
     "correctionAction": "Revisar correção de dados",
     "deletionAction": "Revisar exclusão da conta",
-    "consentAction": "Revisar consentimento opcional"
+    "consentAction": "Revisar consentimento opcional",
+    "telemetryAction": "Revisar telemetria opcional",
+    "telemetry": "Telemetria e resumos de diagnóstico ficam desativados por padrão e só podem ser enviados com consentimento específico e revogável."
   },
   "support": {
     "title": "Suporte",
@@ -183,7 +197,10 @@
     "sharing": "Nenhum diagnóstico, anexo, e-mail ou registro da conta é compartilhado.",
     "revocation": "Cancele a revisão a qualquer momento; nada foi enviado.",
     "noUpload": "Diagnósticos só podem ser anexados com consentimento explícito para esta solicitação.",
-    "sensitiveReview": "Remova credenciais, dados de pagamento, códigos de recuperação e informações pessoais não relacionadas antes de qualquer envio futuro."
+    "sensitiveReview": "Remova credenciais, dados de pagamento, códigos de recuperação e informações pessoais não relacionadas antes de qualquer envio futuro.",
+    "standardResponse": "Essential: primeira resposta em até 72 horas úteis.",
+    "premiumResponse": "Premium: primeira resposta prioritária em até 24 horas úteis.",
+    "exceptionPath": "Falha de hardware ou bloqueio legítimo de dispositivo pode ser revisado pelo suporte, inclusive durante o intervalo de 30 dias."
   },
   "recovery": {
     "title": "Autoridade indisponível",

@@ -421,11 +421,10 @@ export const BoundaryTransitionNotice = ({ children, description, title }: Bound
 
 export const PreviewBoundary = ({
   children,
-  description = 'Deterministic preview — no remote authority is connected.',
-  title = 'Preview boundary',
+  description = 'Saving is temporarily unavailable. Review remains available and nothing changes until service is restored.',
+  title = 'Saving unavailable',
 }: Partial<BoundaryNoticeProps>) => (
   <BoundaryTransitionNotice description={description} title={title}>
-    <StatusSignal state="preview" />
     {children}
   </BoundaryTransitionNotice>
 );
@@ -440,11 +439,11 @@ export const NoChangeReceipt = ({ authority, receiptId, reviewedObject }: NoChan
   <VerificationReceipt
     changed={false}
     receiptId={receiptId}
-    title="Preview complete — no change was made"
+    title="Review complete — nothing changed"
   >
     <p>
-      Review of <strong>{reviewedObject}</strong> is complete. {authority} is not connected; no
-      remote state was changed.
+      Review of <strong>{reviewedObject}</strong> is complete. Saving through {authority} is
+      unavailable, so the account remains unchanged.
     </p>
   </VerificationReceipt>
 );

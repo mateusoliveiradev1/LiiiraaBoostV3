@@ -11,7 +11,6 @@ import {
 } from '@liiiraa/design-system';
 import {
   EmptyComposition,
-  PreviewBoundary,
   PreviewReceipt,
   PreviewWorkflow,
   ResponsiveDataTable,
@@ -172,6 +171,8 @@ type AccountContent = Readonly<{
     title: string;
     summary: string;
     plan: string;
+    essentialPlan: string;
+    premiumBenefits: string;
     price: string;
     billingPeriod: string;
     renewal: string;
@@ -180,18 +181,38 @@ type AccountContent = Readonly<{
     refunds: string;
     deviceRules: string;
     expirationEffects: string;
+    paymentMethods: string;
     action: string;
   }>;
-  invoices: Readonly<{ title: string; summary: string; caption: string; empty: string }>;
+  invoices: Readonly<{
+    title: string;
+    summary: string;
+    caption: string;
+    empty: string;
+    paymentMethods: string;
+    billingHelp: string;
+  }>;
   device: Readonly<{
     title: string;
     summary: string;
     label: string;
     detail: string;
     cooldown: string;
+    motherboard: string;
+    supportException: string;
+    offlineGrace: string;
+    permanentAccess: string;
     action: string;
   }>;
-  downloads: Readonly<{ title: string; summary: string; boundary: string; action: string }>;
+  downloads: Readonly<{
+    title: string;
+    summary: string;
+    boundary: string;
+    stableChannel: string;
+    betaChannel: string;
+    updates: string;
+    action: string;
+  }>;
   privacy: Readonly<{
     title: string;
     summary: string;
@@ -203,6 +224,8 @@ type AccountContent = Readonly<{
     correctionAction: string;
     deletionAction: string;
     consentAction: string;
+    telemetryAction: string;
+    telemetry: string;
   }>;
   support: Readonly<{
     title: string;
@@ -216,6 +239,9 @@ type AccountContent = Readonly<{
     revocation: string;
     noUpload: string;
     sensitiveReview: string;
+    standardResponse: string;
+    premiumResponse: string;
+    exceptionPath: string;
   }>;
   recovery: Readonly<{
     title: string;
@@ -1143,16 +1169,18 @@ const SecurityPreview = ({
   scenarioId,
 }: Readonly<{ content: AccountContent; scenarioId: WebScenarioId }>) => {
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
-  const reviewSecurity = (family: 'passkey' | 'mfa' | 'session') => {
+  const reviewSecurity = (family: 'passkey' | 'mfa' | 'recovery' | 'session') => {
     const label =
       family === 'passkey'
         ? content.security.passkey
         : family === 'mfa'
           ? content.security.mfa
-          : content.security.sessions;
+          : family === 'recovery'
+            ? content.security.recovery
+            : content.security.sessions;
     setWorkflow(
       actionInput({
-        family,
+        family: family === 'recovery' ? 'auth' : family,
         fields: { target: `${family}-method` },
         label,
         review: [
@@ -1194,6 +1222,9 @@ const SecurityPreview = ({
             label={content.locale === 'pt-BR' ? 'Configuração disponível' : 'Setup available'}
             state="preview"
           />
+          <LbButton onPress={() => reviewSecurity('recovery')} variant="quiet">
+            {content.security.review}
+          </LbButton>
         </aside>
       </div>
       <section aria-labelledby="security-alerts-title" className="account-security__alerts">
@@ -1268,6 +1299,8 @@ export const SubscriptionSummary = ({
     );
   }
   const terms = [
+    [content.locale === 'pt-BR' ? 'Plano Essential' : 'Essential plan', content.subscription.essentialPlan],
+    [content.locale === 'pt-BR' ? 'Benefícios Premium' : 'Premium benefits', content.subscription.premiumBenefits],
     [content.locale === 'pt-BR' ? 'Preço' : 'Price', content.subscription.price],
     [
       content.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
@@ -1275,6 +1308,7 @@ export const SubscriptionSummary = ({
     ],
     [content.locale === 'pt-BR' ? 'Renovação' : 'Renewal', content.subscription.renewal],
     [content.locale === 'pt-BR' ? 'Tributos' : 'Taxes', content.subscription.taxes],
+    [content.locale === 'pt-BR' ? 'Formas de pagamento' : 'Payment methods', content.subscription.paymentMethods],
     [
       content.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
       content.subscription.cancellation,
@@ -1308,7 +1342,7 @@ export const SubscriptionSummary = ({
             />
           </div>
           <dl className="account-definition-list">
-            {terms.slice(0, 4).map(([label, value]) => (
+            {terms.slice(0, 7).map(([label, value]) => (
               <div key={label}>
                 <dt>{label}</dt>
                 <dd>{value}</dd>
@@ -1353,7 +1387,7 @@ export const SubscriptionSummary = ({
             {content.locale === 'pt-BR' ? 'Proteções da assinatura' : 'Subscription safeguards'}
           </h2>
           <dl className="account-definition-list">
-            {terms.slice(4).map(([label, value]) => (
+            {terms.slice(7).map(([label, value]) => (
               <div key={label}>
                 <dt>{label}</dt>
                 <dd>{value}</dd>
@@ -1408,6 +1442,16 @@ export const InvoiceTable = ({ content }: Readonly<{ content: AccountContent }>)
       <aside className="account-invoices__context" data-workspace-region="context">
         <h2>{content.locale === 'pt-BR' ? 'Histórico de cobrança' : 'Billing history'}</h2>
         <EmptyComposition description={content.invoices.empty} />
+        <dl className="account-definition-list">
+          <div>
+            <dt>{content.locale === 'pt-BR' ? 'Formas de pagamento' : 'Payment methods'}</dt>
+            <dd>{content.invoices.paymentMethods}</dd>
+          </div>
+          <div>
+            <dt>{content.locale === 'pt-BR' ? 'Precisa de ajuda?' : 'Need help?'}</dt>
+            <dd>{content.invoices.billingHelp}</dd>
+          </div>
+        </dl>
       </aside>
     </div>
   </article>
@@ -1479,8 +1523,26 @@ export const DeviceBindingReview = ({
             </LbButton>
           </div>
         </section>
-        <aside data-workspace-region="context">
-          <PreviewBoundary description={content.device.cooldown} />
+        <aside className="account-device__rules" data-workspace-region="context">
+          <h2>{content.locale === 'pt-BR' ? 'Regras da licença' : 'License rules'}</h2>
+          <dl className="account-definition-list">
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Mudança de hardware' : 'Hardware change'}</dt>
+              <dd>{content.device.motherboard}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Exceção pelo suporte' : 'Support exception'}</dt>
+              <dd>{content.device.supportException}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Uso offline' : 'Offline use'}</dt>
+              <dd>{content.device.offlineGrace}</dd>
+            </div>
+            <div>
+              <dt>{content.locale === 'pt-BR' ? 'Acesso permanente' : 'Permanent access'}</dt>
+              <dd>{content.device.permanentAccess}</dd>
+            </div>
+          </dl>
         </aside>
       </div>
     </article>
@@ -1502,15 +1564,16 @@ export const DownloadsPreview = ({ content }: Readonly<{ content: AccountContent
       >
         <section className="account-downloads__focus" data-workspace-region="focal">
           <h2>{content.locale === 'pt-BR' ? 'Canal público estável' : 'Public stable channel'}</h2>
+          <p>{content.downloads.stableChannel}</p>
           <a href={`${WEB_ORIGINS['public-origin']}${releaseHref.value}`}>
             {content.downloads.action}
           </a>
         </section>
         <aside data-workspace-region="context">
-          <PreviewBoundary
-            description={content.downloads.boundary}
-            title={content.locale === 'pt-BR' ? 'Mudança de origem' : 'Origin change'}
-          />
+          <h2>{content.locale === 'pt-BR' ? 'Canais e atualizações' : 'Channels and updates'}</h2>
+          <p>{content.downloads.betaChannel}</p>
+          <p>{content.downloads.updates}</p>
+          <p>{content.downloads.boundary}</p>
         </aside>
       </div>
     </article>
@@ -1532,7 +1595,7 @@ export const DataRequestReview = ({
   onSelect,
 }: Readonly<{
   content: AccountContent;
-  onSelect: (request: 'consent' | 'correction' | 'deletion' | 'export') => void;
+  onSelect: (request: 'consent' | 'correction' | 'deletion' | 'export' | 'telemetry') => void;
 }>) => (
   <section aria-labelledby="data-request-title" className="lb-web-data-request">
     <h2 id="data-request-title">
@@ -1551,6 +1614,9 @@ export const DataRequestReview = ({
       <LbButton onPress={() => onSelect('consent')} variant="secondary">
         {content.privacy.consentAction}
       </LbButton>
+      <LbButton onPress={() => onSelect('telemetry')} variant="secondary">
+        {content.privacy.telemetryAction}
+      </LbButton>
       <LbButton onPress={() => onSelect('deletion')} variant="destructive">
         {content.privacy.deletionAction}
       </LbButton>
@@ -1568,13 +1634,16 @@ export const PrivacyCenter = ({
       <PreviewWorkflowRunner input={workflow} locale={content.locale} scenarioId={scenarioId} />
     );
   }
-  const selectRequest = (request: 'consent' | 'correction' | 'deletion' | 'export') => {
-    const family = request === 'consent' ? 'consent' : 'privacy';
+  const selectRequest = (
+    request: 'consent' | 'correction' | 'deletion' | 'export' | 'telemetry',
+  ) => {
+    const family = request === 'consent' || request === 'telemetry' ? 'consent' : 'privacy';
     const labels = {
       consent: content.privacy.consentAction,
       correction: content.privacy.correctionAction,
       deletion: content.privacy.deletionAction,
       export: content.privacy.exportAction,
+      telemetry: content.privacy.telemetryAction,
     } as const;
     setWorkflow(
       actionInput({
@@ -1620,6 +1689,9 @@ export const PrivacyCenter = ({
         </div>
         <aside className="account-privacy__context" data-workspace-region="context">
           <ConsentReview content={content} />
+          <p className="account-privacy__telemetry" role="note">
+            {content.privacy.telemetry}
+          </p>
         </aside>
       </div>
     </article>
@@ -1728,6 +1800,14 @@ export const SupportRequestComposer = ({
           </div>
         </div>
         <aside className="account-support__guidance" data-workspace-region="context">
+          <section className="account-support__service-level" aria-labelledby="support-service-title">
+            <h2 id="support-service-title">
+              {content.locale === 'pt-BR' ? 'Prazo de atendimento' : 'Response time'}
+            </h2>
+            <p>{content.support.standardResponse}</p>
+            <p>{content.support.premiumResponse}</p>
+            <p>{content.support.exceptionPath}</p>
+          </section>
           <CollectionDisclosure
             content={content}
             purpose={content.support.purpose}

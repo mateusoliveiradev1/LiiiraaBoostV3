@@ -208,7 +208,7 @@ describe('authored overview and Profile workspaces', () => {
     expect(navigationSource).toContain('{identity}');
     expect(navigationSource).toContain('accountMenuItems');
     expect(featureSource).not.toContain('<ProvenanceLabel');
-    expect(featureSource).toContain('<PreviewBoundary');
+    expect(featureSource).toContain('<PreviewWorkflow');
   });
 
   it('keeps the W10 sign-in boundary user-facing and free of implementation ownership', () => {
@@ -255,6 +255,36 @@ describe('authored overview and Profile workspaces', () => {
       expect(content.privacy.revocation).toMatch(/no .*change|nenhum.*muda/iu);
       expect(privacyCopy).not.toMatch(/Phase\s*[34]|Fase\s*[34]/iu);
     }
+  });
+
+  it('publishes final plan, one-PC, privacy, download, and support rules in both locales', () => {
+    for (const content of [accountPtBr, accountEn]) {
+      const subscription = JSON.stringify(content.subscription);
+      const device = JSON.stringify(content.device);
+      const support = JSON.stringify(content.support);
+
+      expect(subscription).toMatch(/Essential/iu);
+      expect(subscription).toMatch(/Premium/iu);
+      expect(subscription).toMatch(/29,90|6\.99/iu);
+      expect(subscription).toMatch(/seven days|sete dias/iu);
+      expect(subscription).toMatch(/through the paid cycle|fim do ciclo pago/iu);
+      expect(subscription).toMatch(/30 days|30 dias/iu);
+      expect(subscription).toMatch(/history|histórico/iu);
+      expect(subscription).toMatch(/restoration|restauração/iu);
+      expect(content.subscription.deviceRules).toMatch(/one active PC|um PC ativo/iu);
+      expect(device).toMatch(/motherboard|placa-mãe/iu);
+      expect(device).toMatch(/support|suporte/iu);
+      expect(device).toMatch(/reinstall|reinstalaç/iu);
+      expect(content.privacy.telemetry).toMatch(/off by default|desativados por padrão/iu);
+      expect(content.downloads.updates).toMatch(/signed|assinados/iu);
+      expect(support).toMatch(/72/iu);
+      expect(support).toMatch(/24/iu);
+      expect(content.invoices.paymentMethods.length).toBeGreaterThan(0);
+      expect(content.invoices.billingHelp.length).toBeGreaterThan(0);
+    }
+    expect(featureSource).not.toMatch(/licenseKey|license-key|input[^\n]+hwid/iu);
+    expect(featureSource).toContain("fields: { device: 'protected-device-01' }");
+    expect(featureSource).toContain("request === 'telemetry'");
   });
 
   it('uses the exact 7/5 profile geometry with a field measure no wider than 560px', () => {

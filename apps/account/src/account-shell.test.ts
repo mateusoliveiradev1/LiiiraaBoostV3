@@ -60,8 +60,8 @@ describe('account shell', () => {
     expect(layoutSource).toContain(
       '<span className="account-brand__surface">{copy.surface}</span>',
     );
-    expect(layoutSource).toContain("accountState: 'Acesso protegido'");
-    expect(layoutSource).toContain("accountState: 'Protected access'");
+    expect(layoutSource).toContain("accountState: 'Conta protegida'");
+    expect(layoutSource).toContain("accountState: 'Protected account'");
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('account-header__support');
     expect(navigationSource).toContain('href={supportHref}');
@@ -89,19 +89,19 @@ describe('account shell', () => {
     );
   });
 
-  it('uses the locked quiet preview message without implementation vocabulary', () => {
+  it('uses customer account metadata without implementation vocabulary or a preview rail', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
     );
 
-    expect(layoutSource).toContain("previewLabel: 'Alterações remotas desconectadas'");
-    expect(layoutSource).toContain("previewLabel: 'Remote changes disconnected'");
+    expect(layoutSource).not.toContain('previewLabel:');
+    expect(layoutSource).not.toContain('account-preview-rail');
     expect(layoutSource).toContain(
-      'Revise tudo com segurança. Ações indisponíveis terminam sem alterar sua conta.',
+      'Sua conta reúne plano, segurança, dispositivo, downloads e suporte.',
     );
     expect(layoutSource).toContain(
-      'Review everything safely. Unavailable actions finish without changing your account.',
+      'Your account brings plan, security, device, downloads, and support together.',
     );
     expect(layoutSource).not.toMatch(/phase|fixture|adapter|manifest/iu);
   });
@@ -157,8 +157,8 @@ describe('account shell', () => {
     expect(styles).toMatch(
       /\.account-auth-shell\s*\{[\s\S]*min-block-size:\s*100dvh[\s\S]*inline-size:\s*100%/u,
     );
-    expect(layoutSource).toContain("accountState: 'Acesso protegido'");
-    expect(layoutSource).toContain("accountState: 'Protected access'");
+    expect(layoutSource).toContain("accountState: 'Conta protegida'");
+    expect(layoutSource).toContain("accountState: 'Protected account'");
   });
 
   it('uses explicit Phosphor semantics for every authenticated responsibility', () => {
@@ -230,7 +230,8 @@ describe('account shell', () => {
     );
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
-    expect(navigationSource.match(/<details\b/gu) ?? []).toHaveLength(2);
+    expect(navigationSource.match(/<details\b/gu) ?? []).toHaveLength(3);
+    expect(navigationSource).toContain('className="account-header__account"');
     expect(navigationSource).toContain("window.matchMedia('(min-width: 1180px)')");
     expect(navigationSource).toContain('inspectorDisclosureRef.current.open = wideShell.matches');
     expect(navigationSource).toContain('<strong>{currentLabel}</strong>');
@@ -327,7 +328,7 @@ describe('account shell', () => {
     expect(navigationSource).toContain(': fallbackLocaleHref');
   });
 
-  it('keeps the topbar contextual, bilingual, and the inspector truthfully disconnected', () => {
+  it('keeps the topbar contextual, bilingual, and signed in without a public auth prompt', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
@@ -347,15 +348,16 @@ describe('account shell', () => {
     expect(inspectorSource).toContain('account-inspector__machine');
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('aria-label={inspectorLabel}');
-    expect(layoutSource).toContain('data-authority="disconnected"');
-    expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
+    expect(layoutSource).not.toContain('data-authority="disconnected"');
+    expect(layoutSource).not.toContain('<AccountPreviewProvenance');
+    expect(navigationSource).toContain('className="account-header__account"');
     expect(navigationSource).toContain('sourceLocale={locale}');
     expect(navigationSource).toContain('targetLocale={alternateLocale}');
     expect(navigationSource).toContain('resolveLocalizedCurrentRoute({');
     expect(navigationSource).toContain('fallbackLocaleHref');
   });
 
-  it('projects every canonical account responsibility and keeps preview authority visible', () => {
+  it('projects every canonical account responsibility without persistent preview chrome', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
       'utf8',
@@ -387,14 +389,14 @@ describe('account shell', () => {
     expect(navigationSource.match(/<main\b/gu) ?? []).toHaveLength(2);
     expect(navigationSource).toContain('if (isAuthRoute)');
     expect(layoutSource).toContain('href="#account-main"');
-    expect(layoutSource).toContain('account-preview-rail');
-    expect(layoutSource).toContain('data-authority="disconnected"');
+    expect(layoutSource).not.toContain('account-preview-rail');
+    expect(layoutSource).not.toContain('data-authority="disconnected"');
     expect(layoutSource).toContain('ACCOUNT_WEB_COMPOSITION');
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).toContain('<AccountNavigation');
     expect(layoutSource).not.toContain('account-header__origin');
     expect(layoutSource).not.toContain('copy.footer');
-    expect(layoutSource.match(/<AccountPreviewProvenance\b/gu) ?? []).toHaveLength(1);
+    expect(layoutSource).not.toContain('<AccountPreviewProvenance');
     for (const routeId of routeIds) {
       expect(layoutSource).toContain(routeId);
     }
@@ -434,6 +436,7 @@ describe('account errors', () => {
     expect(ACCOUNT_ENTRY_ROUTE_IDS).toEqual([
       'account-sign-in',
       'account-sign-up',
+      'account-onboarding',
       'account-overview',
       'account-profile',
       'account-security',
