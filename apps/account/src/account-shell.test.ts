@@ -344,7 +344,7 @@ describe('account shell', () => {
 
     expect(layoutSource).toContain('inspectorLabel={copy.inspectorLabel}');
     expect(layoutSource).toContain('<AccountInspector');
-    expect(inspectorSource).toContain('account-inspector__account');
+    expect(inspectorSource).not.toContain('account-inspector__account');
     expect(inspectorSource).toContain('account-inspector__machine');
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('aria-label={inspectorLabel}');

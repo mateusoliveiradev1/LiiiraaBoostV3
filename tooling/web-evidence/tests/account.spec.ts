@@ -41,19 +41,19 @@ const mutationRequests = (page: Page): string[] => {
 };
 
 const advanceToConfirmation = async (page: Page, locale: 'en' | 'pt-BR') => {
-  const validate = locale === 'en' ? 'Validate reviewed fields' : 'Validar campos revisados';
+  const validate = locale === 'en' ? 'Check details' : 'Conferir dados';
   await page.getByRole('button', { name: validate }).click();
   await page.getByRole('button', { name: validate }).click();
   await page
     .getByRole('button', {
-      name: locale === 'en' ? 'Review action boundary' : 'Revisar limite da ação',
+      name: locale === 'en' ? 'Continue to confirmation' : 'Continuar para confirmação',
     })
     .click();
   const reauthentication = page.getByRole('button', {
     name:
       locale === 'en'
-        ? 'Complete reauthentication simulation'
-        : 'Concluir simulação de reautenticação',
+        ? 'Continue without verifying a credential'
+        : 'Continuar sem verificar credencial',
   });
   if ((await reauthentication.count()) > 0) {
     await reauthentication.click();
@@ -105,7 +105,8 @@ test('@final @account geometry preserves the 248 workspace 320 inspector shell a
   expect((await page.locator('.account-header__bar').boundingBox())?.height).toBe(64);
   expect((await page.locator('.account-sidebar').boundingBox())?.width).toBe(248);
   expect((await page.locator('.account-inspector').boundingBox())?.width).toBe(320);
-  await expect(page.locator('.account-preview-slot .account-preview-rail')).toBeVisible();
+  await expect(page.locator('.account-preview-slot, .account-preview-rail')).toHaveCount(0);
+  await expect(page.locator('.account-header__account')).toBeVisible();
   const main = await page.locator('#account-main').boundingBox();
   expect((main?.width ?? 0) / 1440).toBeGreaterThanOrEqual(0.55);
   expect((main?.width ?? 0) / 1440).toBeLessThanOrEqual(0.65);
@@ -141,7 +142,7 @@ test('@final @account geometry preserves the 248 workspace 320 inspector shell a
   await expect(page.locator('.account-footer')).toHaveCount(0);
   await expect(page.locator('.account-inspector__public')).toBeVisible();
 
-  await page.goto('/en/sign-in');
+  await page.goto('/en/login');
   expect((await page.locator('main form').boundingBox())?.width).toBeLessThanOrEqual(560);
 });
 
@@ -210,7 +211,7 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   onlyAxis(testInfo, 'desktop-960');
   const mutations = mutationRequests(page);
 
-  await page.goto('/en/sign-in');
+  await page.goto('/en/login');
   await expect(
     page.getByRole('heading', { level: 1, name: 'Sign in to your account' }),
   ).toBeVisible();
@@ -220,7 +221,7 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   await expect(page.locator('.account-inspector')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Create a free account' })).toHaveAttribute(
     'href',
-    '/en/sign-up',
+    '/en/register',
   );
   await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
   await page.getByRole('textbox', { name: 'Email address' }).fill('invalid-address');
@@ -235,8 +236,8 @@ test('@final @account W10 validates sign-in and completes without creating a ses
   await page.getByRole('button', { name: 'Review sign in' }).click();
 
   const receipt = page.locator('[data-preview-region="receipt"]');
-  await expect(receipt).toContainText('Preview complete — no change was made');
-  await expect(receipt).toContainText('Remote state changed');
+  await expect(receipt).toContainText('Review complete — your account is unchanged');
+  await expect(receipt).toContainText('Account changed');
   await expect(receipt).toContainText('No');
   await expect(receipt).toHaveAttribute('data-remote-state-changed', 'false');
   expect(mutations).toEqual([]);
@@ -249,7 +250,7 @@ test('@final @account sign-up is standalone, validates locally, and preserves lo
   onlyAxis(testInfo, 'desktop-960');
   const mutations = mutationRequests(page);
 
-  await page.goto('/pt-BR/sign-up');
+  await page.goto('/pt-BR/register');
   await expect(page.getByRole('heading', { level: 1, name: 'Criar sua conta' })).toBeVisible();
   await expect(page.locator('.account-auth-shell')).toBeVisible();
   await expect(page.locator('.account-app-shell')).toHaveCount(0);
@@ -257,7 +258,7 @@ test('@final @account sign-up is standalone, validates locally, and preserves lo
   await expect(page.locator('.account-inspector')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Entrar', exact: true })).toHaveAttribute(
     'href',
-    '/pt-BR/sign-in',
+    '/pt-BR/login',
   );
 
   await page.getByRole('button', { name: 'Criar conta', exact: true }).click();
@@ -276,7 +277,7 @@ test('@final @account sign-up is standalone, validates locally, and preserves lo
   expect(mutations).toEqual([]);
 });
 
-test('@final @account W11 exposes every responsibility with persistent preview provenance', async ({
+test('@final @account W11 exposes every responsibility without persistent preview chrome', async ({
   page,
 }, testInfo) => {
   onlyAxis(testInfo, 'wide-1440');
@@ -300,12 +301,10 @@ test('@final @account W11 exposes every responsibility with persistent preview p
       'data-route-id',
       routeId,
     );
-    const previewStatus = page.getByRole('note', {
-      name: 'Alterações remotas desconectadas',
-      exact: true,
-    });
-    await expect(previewStatus).toBeVisible();
-    await expect(previewStatus.getByText('Prévia', { exact: true })).toBeVisible();
+    await expect(page.locator('.account-preview-rail')).toHaveCount(0);
+    await expect(page.locator('.account-header__account')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Entrar', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Criar conta', exact: true })).toHaveCount(0);
     await expectNoDeadControls(page);
   }
 });
@@ -316,8 +315,8 @@ test('@final @account W12 keeps degraded recovery authored and authority disconn
   onlyAxis(testInfo, 'wide-1280');
   await page.goto('/en/account');
   await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
-  await expect(page.getByText('No authoritative activity', { exact: true })).toBeVisible();
-  await expect(page.locator('body')).toContainText(/No remote event or account change/iu);
+  await expect(page.getByText('No recent activity', { exact: true })).toBeVisible();
+  await expect(page.locator('body')).toContainText(/There are no account changes to show yet/iu);
 
   const degradedSource = readFileSync(
     new URL('../../../apps/account/src/features/account-degraded-preview.tsx', import.meta.url),
@@ -340,9 +339,9 @@ test('@final @account W13 proves cancellation and a phrase-confirmed no-change p
   await page.goto('/pt-BR/account/privacy');
   await page.getByRole('button', { name: 'Revisar exclusão da conta' }).click();
   await advanceToConfirmation(page, 'pt-BR');
-  await page.getByRole('button', { name: 'Cancelar prévia' }).click();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.locator('[data-preview-region="receipt"]')).toContainText(
-    'Prévia cancelada — nenhuma alteração foi feita',
+    'Cancelado — sua conta não mudou',
   );
 
   await page.reload();
@@ -351,7 +350,7 @@ test('@final @account W13 proves cancellation and a phrase-confirmed no-change p
   await page.getByLabel('Frase de confirmação').fill('ENVIAR SOLICITAÇÃO DE PRIVACIDADE');
   await page.getByRole('button', { name: 'ENVIAR SOLICITAÇÃO DE PRIVACIDADE' }).click();
   const receipt = page.locator('[data-preview-region="receipt"]');
-  await expect(receipt).toContainText('Prévia concluída — nenhuma alteração foi feita');
+  await expect(receipt).toContainText('Revisão concluída — sua conta não mudou');
   await expect(receipt).toHaveAttribute('data-remote-state-changed', 'false');
   expect(mutations).toEqual([]);
 });

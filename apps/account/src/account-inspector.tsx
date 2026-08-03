@@ -38,17 +38,6 @@ export function AccountInspector({
 }: AccountInspectorProps) {
   return (
     <div className="account-inspector__content">
-      <div className="account-inspector__account">
-        <span aria-hidden="true" className="account-identity__avatar">
-          AP
-        </span>
-        <span className="account-identity__copy">
-          <strong>Astra Player</strong>
-          <span>{copy.accountIdentity}</span>
-          <span>{copy.accountState}</span>
-        </span>
-      </div>
-
       <section className="account-inspector__section">
         <span className="account-inspector__label">{copy.planSection}</span>
         <h2>{copy.planTitle}</h2>

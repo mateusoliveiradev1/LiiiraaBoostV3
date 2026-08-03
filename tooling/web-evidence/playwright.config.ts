@@ -22,7 +22,7 @@ const surfaces = [
     app: '@liiiraa/account',
     baseURL: 'http://account.localhost:3101',
     port: 3101,
-    readinessPath: '/pt-BR/sign-in',
+    readinessPath: '/pt-BR/login',
     surface: 'account',
   },
   {

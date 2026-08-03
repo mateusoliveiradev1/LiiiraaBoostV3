@@ -1180,6 +1180,7 @@ button:focus-visible,
 }
 
 .account-onboarding > .lb-web-route-header {
+  order: 0;
   padding-block-end: var(--lb-space-3);
   border-block-end: 1px solid var(--lb-line-subtle);
 }
