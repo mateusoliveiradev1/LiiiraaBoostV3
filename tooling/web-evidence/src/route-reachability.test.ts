@@ -219,6 +219,7 @@ describe('deterministic atomic evidence writing', () => {
       repositoryRoot,
       surface: 'public',
     });
+    expect(publicEvidence.owner).toBe('plan-03-35');
     expect(publicEvidence.status).toBe('planned');
     expect(publicEvidence.observations).toHaveLength(8);
 
@@ -228,6 +229,7 @@ describe('deterministic atomic evidence writing', () => {
       repositoryRoot,
       surface: 'account',
     });
+    expect(accountEvidence.owner).toBe('plan-03-35');
     expect(accountEvidence.status).toBe('planned');
     expect(accountEvidence.observations).toHaveLength(16);
 
@@ -237,6 +239,7 @@ describe('deterministic atomic evidence writing', () => {
       repositoryRoot,
       surface: 'admin',
     });
+    expect(adminEvidence.owner).toBe('plan-03-35');
     expect(adminEvidence.status).toBe('passed');
     expect(adminEvidence.observations).toHaveLength(24);
     expect(
