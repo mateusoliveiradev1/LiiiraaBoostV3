@@ -95,7 +95,7 @@
   "contentType": "product",
   "source": "repository",
   "title": "Prepare seu PC. Prove o resultado. Restaure com controle.",
-  "summary": "Seu PC pode entregar uma experiência mais estável quando cada ajuste respeita o hardware, o Windows e o jogo.",
+  "summary": "Seu PC pode entregar uma experiência mais estável. Analise o hardware, aplique otimizações seguras e entre no jogo com menos processos, menos interrupções e controle total para desfazer.",
   "body": "O Liiiraa Boost analisa a máquina, prepara um plano claro, mede o antes e o depois e mantém um caminho seguro para desfazer mudanças.",
   "metadata": {
     "title": "Liiiraa Boost | Desempenho com evidência e controle",
@@ -113,10 +113,96 @@
   ],
   "identifiers": ["LB-HOME", "WEB-01", "1.0.0"],
   "errorCodes": [],
-  "suggestions": ["Baixar grátis", "Ver resultados", "Comparar os planos"],
+  "suggestions": ["Baixar e analisar meu PC", "Ver resultados reais", "Comparar os planos"],
   "domain": "product",
   "risk": "low",
   "availability": "under-validation",
+  "acquisition": {
+    "primaryAction": {
+      "label": "Baixar e analisar meu PC",
+      "routeId": "public-download"
+    },
+    "secondaryAction": {
+      "label": "Ver resultados reais",
+      "routeId": "public-results"
+    },
+    "trustLine": "Comece grátis · Windows 10 e 11 · Mudanças reversíveis"
+  },
+  "conversionJourney": [
+    {
+      "id": "problem",
+      "label": "Antes de otimizar",
+      "title": "Seu jogo não deveria disputar recursos com tudo o que o Windows resolveu executar.",
+      "body": "Processos em segundo plano, inicialização pesada, energia e ajustes genéricos podem competir com a partida. O Liiiraa Boost identifica o que merece atenção antes de mudar qualquer coisa."
+    },
+    {
+      "id": "workflow",
+      "label": "Como funciona",
+      "title": "Analise. Otimize. Comprove.",
+      "body": "O app observa a máquina, prepara um plano que você pode revisar e mantém a comparação ligada às condições reais da sua própria sessão."
+    },
+    {
+      "id": "competitive",
+      "label": "Modo Competitivo",
+      "title": "Prepare o Windows para a partida — e traga tudo de volta quando ela terminar.",
+      "body": "O Modo Competitivo calibra a preparação para o seu hardware e para cada jogo. Ele concentra a sessão no que importa, reduz interferências conhecidas e preserva o estado anterior para restauração.",
+      "points": [
+        "Antes da partida, revise a calibração e as mudanças propostas para aquele jogo.",
+        "Durante a sessão, o perfil concentra recursos sem prometer um resultado que ainda não foi medido.",
+        "Ao encerrar, o app restaura as ações temporárias e mantém o histórico disponível."
+      ],
+      "actionLabel": "Comparar os modos"
+    },
+    {
+      "id": "methodology",
+      "label": "Resultados que você pode conferir",
+      "title": "A evidência começa no mesmo PC, no mesmo jogo e em condições visíveis.",
+      "body": "Medições ficam separadas de estimativas e dados indisponíveis. Versão, cenário e qualidade da coleta acompanham a comparação para deixar claro o que foi observado e o que ainda não foi comprovado."
+    },
+    {
+      "id": "plans",
+      "label": "Free ou Premium",
+      "title": "Comece pelo essencial. Avance quando a automação por jogo fizer sentido.",
+      "body": "O Modo Essencial é grátis para sempre e mantém diagnóstico, aplicação manual, um perfil ativo, histórico e restauração. O Premium adiciona calibração, perfis ilimitados, ativação automática e comparações avançadas.",
+      "actionLabel": "Ver todos os detalhes dos planos"
+    },
+    {
+      "id": "safety",
+      "label": "Segurança e restauração",
+      "title": "Desempenho também é ter um caminho claro de volta.",
+      "body": "Toda mudança revisada deixa um registro. Histórico e restauração continuam disponíveis no Free e no Premium, inclusive depois do fim de uma assinatura."
+    },
+    {
+      "id": "faq",
+      "label": "Antes de instalar",
+      "title": "Respostas diretas para decidir com tranquilidade.",
+      "body": "Confira como o Free funciona, onde a análise acontece, o que pode ser desfeito e por que nenhum resultado é prometido antes da medição local."
+    },
+    {
+      "id": "acquisition",
+      "label": "Free · Modo Essencial",
+      "title": "Seu primeiro resultado começa no seu próprio PC.",
+      "body": "Baixe o aplicativo, confirme a compatibilidade e comece pelo Modo Essencial. A distribuição continua bloqueada até que versão, assinatura, integridade e compatibilidade estejam aprovadas."
+    }
+  ],
+  "faq": [
+    {
+      "question": "O Free é um trial?",
+      "answer": "Não. O Modo Essencial é grátis para sempre, sem cartão, anúncios ou limites diários."
+    },
+    {
+      "question": "O app garante mais FPS?",
+      "answer": "Não. O Liiiraa Boost mede o seu PC e mostra somente resultados comparáveis nas condições registradas."
+    },
+    {
+      "question": "Posso desfazer um ajuste?",
+      "answer": "Sim. Histórico e restauração permanecem disponíveis no Free e no Premium."
+    },
+    {
+      "question": "Onde o PC é analisado?",
+      "answer": "No aplicativo desktop para Windows. A web nunca faz análise profunda da máquina."
+    }
+  ],
   "hero": {
     "promise": "Prepare seu PC. Prove o resultado. Restaure com controle.",
     "summary": "Analise o seu PC, aplique somente o que faz sentido e compare a sessão com a tranquilidade de poder restaurar cada mudança.",

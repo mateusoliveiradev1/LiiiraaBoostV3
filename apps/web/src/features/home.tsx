@@ -42,6 +42,25 @@ export type HomeClaimRecord = Readonly<{
   evidence: HomeEvidence;
 }>;
 
+type HomeJourneyId =
+  | 'problem'
+  | 'workflow'
+  | 'competitive'
+  | 'methodology'
+  | 'plans'
+  | 'safety'
+  | 'faq'
+  | 'acquisition';
+
+type HomeJourneyMovement = Readonly<{
+  actionLabel?: string;
+  body: string;
+  id: HomeJourneyId;
+  label: string;
+  points?: readonly string[];
+  title: string;
+}>;
+
 type HomeProductStage = Readonly<{
   alt: string;
   assetId: string;
@@ -56,9 +75,15 @@ type HomeProductStage = Readonly<{
 }>;
 
 export type HomeLocaleRecord = Readonly<{
+  acquisition: Readonly<{
+    primaryAction: Readonly<{ label: string; routeId: string }>;
+    secondaryAction: Readonly<{ label: string; routeId: string }>;
+    trustLine: string;
+  }>;
   availability: string;
   body: string;
   chapters: readonly HomeChapter[];
+  conversionJourney: readonly HomeJourneyMovement[];
   document: Readonly<{
     channel: string;
     evidence: readonly HomeEvidence[];
@@ -76,6 +101,7 @@ export type HomeLocaleRecord = Readonly<{
     routeId: string;
     title: string;
   }>;
+  faq: readonly Readonly<{ answer: string; question: string }>[];
   hero: Readonly<{
     primaryAction: Readonly<{ label: string; routeId: string }>;
     promise: string;
@@ -115,6 +141,17 @@ export type HomeCaptureAdmission =
 
 const PRODUCT_CAPTURE_DIRECTORY = join(process.cwd(), 'public', 'product');
 
+const HOME_JOURNEY_IDS = Object.freeze([
+  'problem',
+  'workflow',
+  'competitive',
+  'methodology',
+  'plans',
+  'safety',
+  'faq',
+  'acquisition',
+] as const satisfies readonly HomeJourneyId[]);
+
 const isObject = (value: unknown): value is Readonly<Record<string, unknown>> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
@@ -138,7 +175,11 @@ const admitHomeRecord = (candidate: unknown, locale: HomeLocale): HomeLocaleReco
     throw new Error(`HOME_CONTENT_INVALID:${locale}:authority`);
   }
 
-  if (!Array.isArray(candidate['chapters'])) {
+  if (
+    !Array.isArray(candidate['chapters']) ||
+    !Array.isArray(candidate['conversionJourney']) ||
+    !Array.isArray(candidate['faq'])
+  ) {
     throw new Error(`HOME_CONTENT_INVALID:${locale}:chapters`);
   }
 
@@ -147,6 +188,10 @@ const admitHomeRecord = (candidate: unknown, locale: HomeLocale): HomeLocaleReco
     record.translationKey !== 'public-home' ||
     record.chapters.length !== record.document.evidence.length ||
     record.hero.primaryAction.routeId !== 'public-compatibility' ||
+    record.acquisition.primaryAction.routeId !== 'public-download' ||
+    record.acquisition.secondaryAction.routeId !== 'public-results' ||
+    record.conversionJourney.map(({ id }) => id).join('|') !== HOME_JOURNEY_IDS.join('|') ||
+    record.faq.length !== 4 ||
     record.finalJourney.routeId !== 'public-compatibility'
   ) {
     throw new Error(`HOME_CONTENT_INVALID:${locale}:contract`);
@@ -183,6 +228,14 @@ export const getHomeClaims = (locale: HomeLocale): readonly HomeClaimRecord[] =>
     }
     return { chapter, evidence };
   });
+};
+
+const getHomeMovement = (content: HomeLocaleRecord, id: HomeJourneyId): HomeJourneyMovement => {
+  const movement = content.conversionJourney.find((candidate) => candidate.id === id);
+  if (movement === undefined) {
+    throw new Error(`HOME_CONTENT_INVALID:${content.document.locale}:movement:${id}`);
+  }
+  return movement;
 };
 
 const viewportDimensions = (
@@ -375,101 +428,26 @@ const splitHeroPromise = (promise: string): readonly string[] => {
   return lines;
 };
 
-const HOME_SALES_COPY = Object.freeze({
-  en: Object.freeze({
-    download: 'Download free',
-    faq: [
-      [
-        'Is Free a trial?',
-        'No. Essential Mode is free forever, with no card, ads, or daily limits.',
-      ],
-      [
-        'Does it guarantee more FPS?',
-        'No. Liiiraa Boost measures your PC and reports only comparable results.',
-      ],
-      [
-        'Can I undo an adjustment?',
-        'Yes. History and restoration remain available on Free and Premium.',
-      ],
-      [
-        'Where is PC analysis performed?',
-        'In the Windows desktop app. The website never performs deep machine analysis.',
-      ],
-    ],
-    faqTitle: 'Questions worth answering before you install',
-    finalBody:
-      'Start with Essential Mode. Analyze the PC, review the plan, and decide from your own results.',
-    finalTitle: 'Your first result starts free',
-    modesLead:
-      'Use the essentials manually or let Competitive Mode prepare each game session around your hardware.',
-    modesTitle: 'One safe foundation. Two ways to use it.',
-    painBody:
-      'Background processes, startup weight, power behavior, and generic settings can compete with the game. Liiiraa Boost identifies what matters before changing anything.',
-    painTitle: 'Your game should not compete with everything Windows happens to be running.',
-    resultsBody:
-      'Same PC, same game, visible conditions. Measurements stay separate from estimates and unavailable data.',
-    resultsTitle: 'A result is useful only when you can verify it',
-    safetyBody:
-      'Every reviewed change keeps a trace. Session-specific Competitive actions end with the game and restore the previous state automatically.',
-    safetyTitle: 'Performance includes the path back',
-    workflowTitle: 'Analyze. Optimize. Prove.',
-  }),
-  'pt-BR': Object.freeze({
-    download: 'Baixar grátis',
-    faq: [
-      [
-        'O Free é um trial?',
-        'Não. O Modo Essencial é grátis para sempre, sem cartão, anúncios ou limites diários.',
-      ],
-      [
-        'O app garante mais FPS?',
-        'Não. O Liiiraa Boost mede o seu PC e mostra somente resultados comparáveis.',
-      ],
-      [
-        'Posso desfazer um ajuste?',
-        'Sim. Histórico e restauração permanecem disponíveis no Free e no Premium.',
-      ],
-      [
-        'Onde o PC é analisado?',
-        'No aplicativo desktop para Windows. A web nunca faz análise profunda da máquina.',
-      ],
-    ],
-    faqTitle: 'Perguntas que merecem resposta antes de instalar',
-    finalBody:
-      'Comece pelo Modo Essencial. Analise o PC, revise o plano e decida usando os seus próprios resultados.',
-    finalTitle: 'Seu primeiro resultado começa grátis',
-    modesLead:
-      'Use o essencial manualmente ou deixe o Modo Competitivo preparar cada sessão de acordo com o seu hardware.',
-    modesTitle: 'Uma base segura. Duas formas de usar.',
-    painBody:
-      'Processos em segundo plano, inicialização pesada, energia e ajustes genéricos podem disputar recursos com o jogo. O Liiiraa Boost identifica o que importa antes de mudar qualquer coisa.',
-    painTitle: 'Seu jogo não deveria disputar recursos com tudo o que o Windows resolveu executar.',
-    resultsBody:
-      'Mesmo PC, mesmo jogo e condições visíveis. Medições ficam separadas de estimativas e dados indisponíveis.',
-    resultsTitle: 'Um resultado só vale quando você consegue conferir',
-    safetyBody:
-      'Toda mudança revisada deixa um registro. Ações temporárias do Modo Competitivo terminam junto com o jogo e restauram o estado anterior automaticamente.',
-    safetyTitle: 'Desempenho também é ter um caminho de volta',
-    workflowTitle: 'Analise. Otimize. Comprove.',
-  }),
-});
-
 const IgnitionHero = ({
   artifact,
   downloadHref,
   lead,
   locale,
+  primaryActionLabel,
   promise,
-  proofNote,
   resultsHref,
+  secondaryActionLabel,
+  trustLine,
 }: Readonly<{
   artifact: ReactNode;
   downloadHref: string;
   lead: string;
   locale: HomeLocale;
+  primaryActionLabel: string;
   promise: string;
-  proofNote: string;
   resultsHref: string;
+  secondaryActionLabel: string;
+  trustLine: string;
 }>) => (
   <section className="home-ignition-hero" data-hero-layout="centered-product-stage">
     <div className="home-ignition-hero__copy">
@@ -488,14 +466,12 @@ const IgnitionHero = ({
       <p className="home-ignition-hero__lead">{lead}</p>
       <div className="home-ignition-hero__actions">
         <HomeAction href={downloadHref} primary>
-          {HOME_SALES_COPY[locale].download}
+          {primaryActionLabel}
         </HomeAction>
-        <HomeAction href={resultsHref}>
-          {locale === 'pt-BR' ? 'Ver resultados' : 'View results'}
-        </HomeAction>
+        <HomeAction href={resultsHref}>{secondaryActionLabel}</HomeAction>
       </div>
       <aside className="home-trust-boundary" role="note">
-        <p>{proofNote}</p>
+        <p>{trustLine}</p>
       </aside>
     </div>
     <div
@@ -503,6 +479,7 @@ const IgnitionHero = ({
       data-stage-max-top="640"
       data-stage-max-width="1120"
       data-stage-min-visible="260"
+      data-proof-object="checksum-admitted-desktop-capture"
       id="product-stage"
     >
       {artifact}
@@ -529,28 +506,43 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
   const proofClaims = claims.slice(0, 3);
   const proofClaim = proofClaims[1];
   const restoreClaim = claims.find(({ chapter }) => chapter.id === 'restore');
-  const heroProofNote = content.warnings[0];
+  const problem = getHomeMovement(content, 'problem');
+  const workflow = getHomeMovement(content, 'workflow');
+  const competitiveMode = getHomeMovement(content, 'competitive');
+  const methodology = getHomeMovement(content, 'methodology');
+  const plans = getHomeMovement(content, 'plans');
+  const safety = getHomeMovement(content, 'safety');
+  const faq = getHomeMovement(content, 'faq');
+  const acquisition = getHomeMovement(content, 'acquisition');
   if (
     proofClaims.length !== 3 ||
     proofClaim === undefined ||
     restoreClaim === undefined ||
     essential === undefined ||
     competitive === undefined ||
-    heroProofNote === undefined
+    competitiveMode.points?.length !== 3 ||
+    competitiveMode.actionLabel === undefined ||
+    plans.actionLabel === undefined
   ) {
     throw new Error(`HOME_CONTENT_INVALID:${locale}:hero`);
   }
 
   return (
-    <div className="public-home" data-capture-state={capture.code}>
+    <div
+      className="public-home"
+      data-capture-state={capture.code}
+      data-responsive-widths="1440 960 390 320"
+    >
       <IgnitionHero
         artifact={<ProductStageGate admission={capture} locale={locale} />}
         downloadHref={downloadHref}
         lead={content.summary}
         locale={locale}
+        primaryActionLabel={content.acquisition.primaryAction.label}
         promise={content.hero.promise}
-        proofNote={heroProofNote}
         resultsHref={resultsHref}
+        secondaryActionLabel={content.acquisition.secondaryAction.label}
+        trustLine={content.acquisition.trustLine}
       />
 
       <section
@@ -558,9 +550,9 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         className="home-player-problem"
         id="player-problem"
       >
-        <p>{locale === 'pt-BR' ? 'O problema' : 'The problem'}</p>
-        <h2 id="home-problem-title">{HOME_SALES_COPY[locale].painTitle}</h2>
-        <p>{HOME_SALES_COPY[locale].painBody}</p>
+        <p>{problem.label}</p>
+        <h2 id="home-problem-title">{problem.title}</h2>
+        <p>{problem.body}</p>
       </section>
 
       <section
@@ -569,9 +561,9 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         id="prepare-prove-restore"
       >
         <header>
-          <p>{locale === 'pt-BR' ? 'Como funciona' : 'How it works'}</p>
-          <h2 id="home-workflow-title">{HOME_SALES_COPY[locale].workflowTitle}</h2>
-          <span>{content.body}</span>
+          <p>{workflow.label}</p>
+          <h2 id="home-workflow-title">{workflow.title}</h2>
+          <span>{workflow.body}</span>
         </header>
         <ol className="home-proof-sequence">
           {proofClaims.map((claim, index) => (
@@ -586,11 +578,44 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
         </ol>
       </section>
 
-      <section aria-labelledby="home-modes-title" className="home-mode-split">
+      <section aria-labelledby="home-competitive-title" className="home-competitive-mode">
+        <div className="home-competitive-mode__inner">
+          <div className="home-competitive-mode__copy">
+            <p>{competitiveMode.label}</p>
+            <h2 id="home-competitive-title">{competitiveMode.title}</h2>
+            <span>{competitiveMode.body}</span>
+            <HomeAction href="#plans">{competitiveMode.actionLabel}</HomeAction>
+          </div>
+          <ol className="home-competitive-mode__sequence">
+            {competitiveMode.points.map((point, index) => (
+              <li key={point}>
+                <span aria-hidden="true">0{String(index + 1)}</span>
+                <p>{point}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="home-results-title"
+        className="home-results-method"
+        data-proof-policy="product-methodology-only"
+      >
+        <div>
+          <p>{methodology.label}</p>
+          <h2 id="home-results-title">{methodology.title}</h2>
+          <span>{methodology.body}</span>
+          <HomeAction href={resultsHref}>{content.acquisition.secondaryAction.label}</HomeAction>
+        </div>
+        <EvidenceDisclosure claim={proofClaim} locale={locale} />
+      </section>
+
+      <section aria-labelledby="home-modes-title" className="home-mode-split" id="plans">
         <header>
-          <p>{locale === 'pt-BR' ? 'Escolha seu ritmo' : 'Choose your pace'}</p>
-          <h2 id="home-modes-title">{HOME_SALES_COPY[locale].modesTitle}</h2>
-          <span>{HOME_SALES_COPY[locale].modesLead}</span>
+          <p>{plans.label}</p>
+          <h2 id="home-modes-title">{plans.title}</h2>
+          <span>{plans.body}</span>
         </header>
         <div className="home-mode-split__plans">
           {[essential, competitive].map((plan) => (
@@ -618,37 +643,27 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
             </article>
           ))}
         </div>
-        <HomeAction href={plansHref}>
-          {locale === 'pt-BR' ? 'Comparar planos' : 'Compare plans'}
-        </HomeAction>
-      </section>
-
-      <section aria-labelledby="home-results-title" className="home-results-method">
-        <div>
-          <p>{locale === 'pt-BR' ? 'Sem números inventados' : 'No invented numbers'}</p>
-          <h2 id="home-results-title">{HOME_SALES_COPY[locale].resultsTitle}</h2>
-          <span>{HOME_SALES_COPY[locale].resultsBody}</span>
-          <HomeAction href={resultsHref}>
-            {locale === 'pt-BR' ? 'Entender os resultados' : 'Understand results'}
-          </HomeAction>
-        </div>
-        <EvidenceDisclosure claim={proofClaim} locale={locale} />
+        <HomeAction href={plansHref}>{plans.actionLabel}</HomeAction>
       </section>
 
       <section aria-labelledby="home-safety-title" className="home-safety-runway">
         <PublicProductIcon name="recovery" size={32} weight="duotone" />
         <div>
-          <p>{locale === 'pt-BR' ? 'Segurança e restauração' : 'Safety and restoration'}</p>
-          <h2 id="home-safety-title">{HOME_SALES_COPY[locale].safetyTitle}</h2>
-          <span>{HOME_SALES_COPY[locale].safetyBody}</span>
+          <p>{safety.label}</p>
+          <h2 id="home-safety-title">{safety.title}</h2>
+          <span>{safety.body}</span>
         </div>
         <EvidenceDisclosure claim={restoreClaim} locale={locale} />
       </section>
 
       <section aria-labelledby="home-faq-title" className="home-faq">
-        <h2 id="home-faq-title">{HOME_SALES_COPY[locale].faqTitle}</h2>
         <div>
-          {HOME_SALES_COPY[locale].faq.map(([question, answer]) => (
+          <p>{faq.label}</p>
+          <h2 id="home-faq-title">{faq.title}</h2>
+          <span>{faq.body}</span>
+        </div>
+        <div>
+          {content.faq.map(({ answer, question }) => (
             <details key={question}>
               <summary>{question}</summary>
               <p>{answer}</p>
@@ -659,13 +674,13 @@ export const CommandRunwayHome = async ({ locale }: Readonly<{ locale: HomeLocal
 
       <section aria-labelledby="home-final-title" className="home-final-cta">
         <div>
-          <p>Free · {locale === 'pt-BR' ? 'Modo Essencial' : 'Essential Mode'}</p>
-          <h2 id="home-final-title">{HOME_SALES_COPY[locale].finalTitle}</h2>
-          <span>{HOME_SALES_COPY[locale].finalBody}</span>
+          <p>{acquisition.label}</p>
+          <h2 id="home-final-title">{acquisition.title}</h2>
+          <span>{acquisition.body}</span>
         </div>
         <div>
           <HomeAction href={downloadHref} primary>
-            {HOME_SALES_COPY[locale].download}
+            {content.acquisition.primaryAction.label}
           </HomeAction>
           <HomeAction href={compatibilityHref}>{content.finalJourney.actionLabel}</HomeAction>
         </div>

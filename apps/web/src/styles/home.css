@@ -1,5 +1,5 @@
 .public-home {
-  overflow: clip;
+  overflow-x: clip;
   background: var(--lb-surface-canvas);
 }
 
@@ -29,17 +29,17 @@
 .home-ignition-hero__eyebrow {
   margin: 0 0 14px;
   color: var(--lb-accent-cyan);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: var(--lb-weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .home-player-problem > p:first-child,
 .home-workflow > header > p,
+.home-competitive-mode__copy > p,
 .home-mode-split > header > p,
 .home-results-method > div > p,
 .home-safety-runway > div > p,
+.home-faq > div:first-child > p,
 .home-final-cta > div > p {
   margin: 0 0 14px;
   color: var(--lb-accent-cyan);
@@ -49,7 +49,7 @@
 
 .home-ignition-hero__promise {
   max-inline-size: 18ch;
-  font-size: clamp(48px, 5.4vw, 80px);
+  font-size: clamp(48px, 5.4vw, 76px);
   line-height: 0.96;
 }
 
@@ -71,6 +71,10 @@
 
 .home-ignition-hero__actions {
   justify-content: center;
+}
+
+.home-action--primary {
+  min-inline-size: 252px;
 }
 
 .home-ignition-hero__stage {
@@ -103,6 +107,7 @@
 
 .home-player-problem,
 .home-workflow,
+.home-competitive-mode__inner,
 .home-mode-split,
 .home-results-method,
 .home-safety-runway,
@@ -142,6 +147,7 @@
 
 .home-player-problem h2,
 .home-workflow h2,
+.home-competitive-mode h2,
 .home-mode-split h2,
 .home-results-method h2,
 .home-safety-runway h2,
@@ -158,9 +164,11 @@
 
 .home-player-problem > p:last-child,
 .home-workflow > header > span,
+.home-competitive-mode__copy > span,
 .home-mode-split > header > span,
 .home-results-method > div > span,
 .home-safety-runway > div > span,
+.home-faq > div:first-child > span,
 .home-final-cta > div > span {
   color: var(--lb-text-secondary);
   font-size: 18px;
@@ -218,6 +226,84 @@
 .home-proof-sequence p {
   margin: 0;
   color: var(--lb-text-secondary);
+  line-height: 1.6;
+}
+
+.home-competitive-mode {
+  position: relative;
+  isolation: isolate;
+  background: var(--lb-surface-inset);
+}
+
+.home-competitive-mode::before {
+  position: absolute;
+  z-index: -1;
+  inset: 18% 8% auto auto;
+  inline-size: min(42vw, 520px);
+  block-size: min(30vw, 360px);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lb-accent-electric) 14%, transparent);
+  filter: blur(64px);
+  content: '';
+}
+
+.home-competitive-mode__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+  gap: clamp(48px, 8vw, 112px);
+  align-items: center;
+  min-block-size: 680px;
+}
+
+.home-competitive-mode__copy {
+  max-inline-size: 780px;
+}
+
+.home-competitive-mode h2 {
+  max-inline-size: 15ch;
+  margin-block: 0 24px;
+  font-size: clamp(42px, 5vw, 68px);
+}
+
+.home-competitive-mode__copy > span {
+  display: block;
+  max-inline-size: 62ch;
+}
+
+.home-competitive-mode .home-action {
+  margin-block-start: 32px;
+}
+
+.home-competitive-mode__sequence {
+  margin: 0;
+  padding: 0;
+  border-block: 1px solid var(--lb-line-strong);
+  list-style: none;
+}
+
+.home-competitive-mode__sequence li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+  padding-block: 24px;
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.home-competitive-mode__sequence li:last-child {
+  border-block-end: 0;
+}
+
+.home-competitive-mode__sequence span {
+  color: var(--lb-accent-cyan);
+  font-family: var(--lb-font-data);
+  font-size: 14px;
+}
+
+.home-competitive-mode__sequence p {
+  margin: 0;
+  color: var(--lb-text-primary);
+  font-size: 17px;
   line-height: 1.6;
 }
 
@@ -401,6 +487,7 @@
   }
 
   .home-player-problem,
+  .home-competitive-mode__inner,
   .home-results-method,
   .home-faq,
   .home-safety-runway {
@@ -438,6 +525,10 @@
     grid-template-columns: 1fr;
   }
 
+  .home-competitive-mode__inner {
+    min-block-size: auto;
+  }
+
   .home-final-cta {
     display: grid;
   }
@@ -446,6 +537,11 @@
 @media (width < 640px) {
   .home-ignition-hero {
     padding-inline: 16px;
+  }
+
+  .home-ignition-hero__copy {
+    justify-items: start;
+    text-align: start;
   }
 
   .home-ignition-hero__promise {
@@ -465,6 +561,7 @@
 
   .home-player-problem,
   .home-workflow,
+  .home-competitive-mode__inner,
   .home-mode-split,
   .home-results-method,
   .home-safety-runway,
@@ -489,9 +586,65 @@
   }
 }
 
+@media (width <= 390px) {
+  .home-ignition-hero__lead,
+  .home-player-problem > p:last-child,
+  .home-workflow > header > span,
+  .home-competitive-mode__copy > span,
+  .home-mode-split > header > span,
+  .home-results-method > div > span,
+  .home-safety-runway > div > span,
+  .home-faq > div:first-child > span,
+  .home-final-cta > div > span {
+    font-size: 17px;
+  }
+
+  .home-competitive-mode::before {
+    inset: 24% -12% auto auto;
+    inline-size: 320px;
+    block-size: 240px;
+    opacity: 0.72;
+  }
+}
+
+@media (width <= 320px) {
+  .home-ignition-hero__promise {
+    font-size: 40px;
+  }
+
+  .home-player-problem h2,
+  .home-workflow h2,
+  .home-competitive-mode h2,
+  .home-mode-split h2,
+  .home-results-method h2,
+  .home-safety-runway h2,
+  .home-faq h2,
+  .home-final-cta h2 {
+    font-size: 34px;
+  }
+
+  .home-mode-split__price {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-ignition-hero__promise,
   .home-ignition-hero__stage {
     animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .home-competitive-mode::before {
+    display: none;
+  }
+
+  .home-competitive-mode,
+  .home-mode-split__plans article,
+  .home-final-cta {
+    border-color: CanvasText;
+    background: Canvas;
   }
 }

@@ -81,26 +81,26 @@ describe('Home layout and screenshot evidence gate', () => {
     ];
 
     expect(getHomeContent('pt-BR')).toMatchObject({
-      conversionJourney: expectedSequence.map((id) => ({ id })),
-      hero: {
+      acquisition: {
         primaryAction: { label: 'Baixar e analisar meu PC', routeId: 'public-download' },
         secondaryAction: { label: 'Ver resultados reais', routeId: 'public-results' },
       },
+      conversionJourney: expectedSequence.map((id) => ({ id })),
     });
     expect(getHomeContent('en')).toMatchObject({
-      conversionJourney: expectedSequence.map((id) => ({ id })),
-      hero: {
+      acquisition: {
         primaryAction: { label: 'Download and analyze my PC', routeId: 'public-download' },
         secondaryAction: { label: 'See real results', routeId: 'public-results' },
       },
+      conversionJourney: expectedSequence.map((id) => ({ id })),
     });
 
     for (const locale of ['pt-BR', 'en'] as const) {
       const content = getHomeContent(locale);
       expect(content.conversionJourney.map(({ id }) => id)).toEqual(expectedSequence);
-      expect(content.conversionJourney.every(({ body, title }) => body.length > 40 && title.length > 8)).toBe(
-        true,
-      );
+      expect(
+        content.conversionJourney.every(({ body, title }) => body.length > 40 && title.length > 8),
+      ).toBe(true);
       expect(content.faq).toHaveLength(4);
     }
   });
@@ -161,7 +161,7 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('splitHeroPromise');
     expect(homeSource).toContain('primary>');
     expect(homeStyles).toMatch(
-      /\.home-ignition-hero__promise\s*\{[\s\S]*font-size:\s*clamp\(48px, 5\.4vw, 80px\);[\s\S]*line-height:\s*0\.96/u,
+      /\.home-ignition-hero__promise\s*\{[\s\S]*font-size:\s*clamp\(48px, 5\.4vw, 76px\);[\s\S]*line-height:\s*0\.96/u,
     );
     expect(tokenStyles).toMatch(/--lb-public-hero-display-size:\s*clamp\(52px, 6vw, 76px\);/u);
     const shellStyles = await readSource('./app/public-shell.css');
@@ -313,8 +313,9 @@ describe('Home layout and screenshot evidence gate', () => {
     expect(homeSource).toContain('className="home-evidence-disclosure"');
     expect(homeSource).toContain('className="home-mode-split__plans"');
     expect(homeSource).toContain('className="home-faq"');
-    expect(homeSource).toContain("'O app garante mais FPS?'");
-    expect(homeSource).toContain("'Onde o PC é analisado?'");
+    expect(getHomeContent('pt-BR').faq.map(({ question }) => question)).toEqual(
+      expect.arrayContaining(['O app garante mais FPS?', 'Onde o PC é analisado?']),
+    );
     expect(ptBrPlans).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
