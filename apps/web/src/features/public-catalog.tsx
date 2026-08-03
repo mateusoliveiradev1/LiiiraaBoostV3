@@ -495,24 +495,24 @@ const routePresentation = (
       return {
         kicker: portuguese ? 'Comece pelo seu PC' : 'Start with your PC',
         primary: {
-          href: '#catalog-route-body',
-          label: portuguese ? 'Checar meu PC' : 'Check my PC',
+          href: href('public-download'),
+          label: portuguese ? 'Baixar app grátis' : 'Download the app free',
         },
         secondary: {
-          href: href('public-support'),
-          label: portuguese ? 'Preciso de ajuda' : 'I need help',
+          href: '#catalog-route-body',
+          label: portuguese ? 'Ver requisitos' : 'View requirements',
         },
       };
     case 'public-plans':
       return {
         kicker: portuguese ? 'Premium com transparência' : 'Premium with transparency',
         primary: {
-          href: accountBoundaryHref(locale),
-          label: portuguese ? 'Continuar com Premium' : 'Continue with Premium',
+          href: '#premium-checkout',
+          label: portuguese ? 'Escolher Premium' : 'Choose Premium',
         },
         secondary: {
-          href: href('public-compatibility'),
-          label: portuguese ? 'Checar meu PC' : 'Check my PC',
+          href: href('public-download'),
+          label: portuguese ? 'Começar grátis' : 'Start free',
         },
       };
     case 'public-search':
@@ -669,157 +669,182 @@ export const PlanComparison = ({
   record: PublicCatalogRecord;
 }>) => {
   const presentation = routePresentation(catalog.locale, record.routeId);
+  const free = plans.find(({ id }) => id === 'essential-free');
+  const premium = plans.find(({ id }) => id === 'competitive-premium');
+  const support = catalog.records.find(({ routeId }) => routeId === 'public-support');
+
+  if (free === undefined || premium === undefined || support === undefined) {
+    throw new Error(`PUBLIC_CATALOG_INVALID:${catalog.locale}:plan-comparison`);
+  }
+
+  const portuguese = catalog.locale === 'pt-BR';
+  const downloadHref = publicBoundaryHref('public-download', catalog.locale);
+  const accountHref = accountBoundaryHref(catalog.locale);
+  const visibleTerms = [
+    { label: portuguese ? 'Pagamento e renovação' : 'Payment and renewal', value: premium.renewal },
+    { label: portuguese ? 'Tributos' : 'Taxes', value: premium.taxes },
+    { label: portuguese ? 'Cancelamento' : 'Cancellation', value: premium.cancellation },
+    { label: portuguese ? 'Reembolso' : 'Refund', value: premium.refunds },
+    { label: portuguese ? 'PC e reset de HWID' : 'PC and HWID reset', value: premium.deviceRules },
+    {
+      label: portuguese ? 'Uso offline e expiração' : 'Offline use and expiration',
+      value: premium.expirationEffects,
+    },
+    { label: portuguese ? 'Suporte' : 'Support', value: support.body },
+  ] as const;
 
   return (
     <section aria-labelledby="plan-comparison-title" className="plan-comparison-ledger">
-      {plans.map((plan) => {
-        const isFree = plan.id === 'essential-free';
-        const primaryHref = isFree
-          ? publicBoundaryHref('public-download', catalog.locale)
-          : presentation.primary.href;
-        const primaryLabel = isFree
-          ? catalog.locale === 'pt-BR'
-            ? 'Baixar grátis'
-            : 'Download free'
-          : catalog.locale === 'pt-BR'
-            ? 'Escolher Premium'
-            : 'Choose Premium';
+      <header className="plan-comparison-introduction" data-route-purpose={record.routeId}>
+        <p>{presentation.kicker}</p>
+        <h1 id="plan-comparison-title">{record.title}</h1>
+        <div>
+          <p>{record.summary}</p>
+          <span>{record.body}</span>
+        </div>
+        <nav aria-label={portuguese ? 'Escolher como começar' : 'Choose how to start'}>
+          <a className="public-action public-action--primary" href={downloadHref}>
+            {portuguese ? 'Baixar grátis' : 'Download free'}
+          </a>
+          <a className="public-action" href="#premium-checkout">
+            {portuguese ? 'Ver Premium' : 'See Premium'}
+          </a>
+        </nav>
+      </header>
 
-        return (
-          <article className="plan-record" id={plan.id} key={plan.id}>
-            <div className="plan-purchase-stage">
-              <header
-                className="catalog-introduction plan-offer"
-                data-route-purpose={record.routeId}
-              >
-                <span className="plan-offer__label">
-                  <PublicProductIcon name="crown" size={18} weight="bold" />
-                  {plan.name}
-                </span>
-                <h1 id="plan-comparison-title">{record.title}</h1>
-                <p className="plan-offer__summary">{record.summary}</p>
-                <p aria-label={`${plan.price} ${plan.billingPeriod}`} className="plan-price">
-                  <strong>{plan.price}</strong>
-                  <span>{plan.billingPeriod}</span>
-                </p>
-              </header>
-
-              <aside className="plan-checkout" data-checkout-authority="disconnected">
-                <span className="plan-checkout__status">
-                  <PublicProductIcon name="shield" size={18} />
-                  {isFree
-                    ? catalog.locale === 'pt-BR'
-                      ? 'Grátis para sempre'
-                      : 'Free forever'
-                    : catalog.locale === 'pt-BR'
-                      ? 'Um PC ativo'
-                      : 'One active PC'}
-                </span>
-                <h2>
-                  {isFree
-                    ? catalog.locale === 'pt-BR'
-                      ? 'Comece sem cartão'
-                      : 'Start without a card'
-                    : catalog.locale === 'pt-BR'
-                      ? 'Escolha o seu ciclo'
-                      : 'Choose your billing cycle'}
-                </h2>
-                <p>{plan.checkoutBoundary}</p>
-                <a
-                  className="public-action public-action--primary catalog-primary-action plan-checkout__action"
-                  href={primaryHref}
-                >
-                  {primaryLabel}
-                </a>
-                <a
-                  className="public-action plan-checkout__secondary"
-                  href={presentation.secondary.href}
-                >
-                  {presentation.secondary.label}
-                </a>
-                <small>
-                  {catalog.locale === 'pt-BR'
-                    ? isFree
-                      ? 'Sem trial, anúncios, cartão ou limites diários.'
-                      : 'Preço, renovação e forma de pagamento aparecem antes da confirmação.'
-                    : isFree
-                      ? 'No trial, ads, card, or daily limits.'
-                      : 'Price, renewal, and payment method appear before confirmation.'}
-                </small>
-              </aside>
-            </div>
-
-            <section className="plan-inclusions">
-              <h2>{catalog.locale === 'pt-BR' ? 'O que você recebe' : 'What you get'}</h2>
-              <ul
-                aria-label={catalog.locale === 'pt-BR' ? 'Recursos do plano' : 'Plan features'}
-                className="plan-capabilities"
-              >
-                {plan.capabilities.map((capability, index) => {
-                  const icons = ['gauge', 'profile', 'recovery', 'download'] as const;
-                  return (
-                    <li key={capability.name}>
-                      <PublicProductIcon name={icons[index] ?? 'check'} size={20} />
-                      <span>{capability.name}</span>
-                      <SupportState catalog={catalog} state={capability.state} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-
-            <div className="plan-record__disclosures">
-              <details className="plan-terms">
-                <summary>
-                  {catalog.locale === 'pt-BR'
-                    ? 'Conferir renovação, cancelamento, dispositivos e reembolso'
-                    : 'Review renewal, cancellation, devices, and refunds'}
-                </summary>
-                <DisclosureList
-                  items={[
-                    { label: catalog.locale === 'pt-BR' ? 'Preço' : 'Price', value: plan.price },
-                    {
-                      label: catalog.locale === 'pt-BR' ? 'Período de cobrança' : 'Billing period',
-                      value: plan.billingPeriod,
-                    },
-                    {
-                      label: catalog.locale === 'pt-BR' ? 'Renovação' : 'Renewal',
-                      value: plan.renewal,
-                    },
-                    { label: catalog.locale === 'pt-BR' ? 'Tributos' : 'Taxes', value: plan.taxes },
-                    {
-                      label: catalog.locale === 'pt-BR' ? 'Cancelamento' : 'Cancellation',
-                      value: plan.cancellation,
-                    },
-                    {
-                      label: catalog.locale === 'pt-BR' ? 'Reembolsos' : 'Refunds',
-                      value: plan.refunds,
-                    },
-                    {
-                      label: catalog.locale === 'pt-BR' ? 'Regras de dispositivo' : 'Device rules',
-                      value: plan.deviceRules,
-                    },
-                    {
-                      label:
-                        catalog.locale === 'pt-BR' ? 'Efeito da expiração' : 'Expiration effects',
-                      value: plan.expirationEffects,
-                    },
-                  ]}
+      <div className="plan-choice-grid">
+        {[free, premium].map((plan) => (
+          <article className="plan-choice" data-plan={plan.id} id={plan.id} key={plan.id}>
+            <header>
+              <span>
+                <PublicProductIcon
+                  name={plan.id === 'essential-free' ? 'gauge' : 'crown'}
+                  size={22}
+                  weight="duotone"
                 />
-              </details>
-              <details className="catalog-introduction__provenance plan-provenance">
-                <summary>{localeSummary(catalog.locale)}</summary>
-                <div className="catalog-introduction__identity">
-                  <SupportState catalog={catalog} state={record.availability} />
-                </div>
-                <p>
-                  {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
-                </p>
-              </details>
-            </div>
+                {plan.name}
+              </span>
+              <p aria-label={`${plan.price} ${plan.billingPeriod}`} className="plan-price">
+                <strong>{plan.price}</strong>
+                <small>{plan.billingPeriod}</small>
+              </p>
+            </header>
+            <ul className="plan-capabilities">
+              {plan.capabilities.map((capability) => (
+                <li key={capability.name}>
+                  <PublicProductIcon name="check" size={18} weight="bold" />
+                  <span>{capability.name}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              className={
+                plan.id === 'competitive-premium'
+                  ? 'public-action public-action--primary'
+                  : 'public-action'
+              }
+              href={plan.id === 'competitive-premium' ? '#premium-checkout' : downloadHref}
+            >
+              {plan.id === 'competitive-premium'
+                ? portuguese
+                  ? 'Escolher Premium'
+                  : 'Choose Premium'
+                : portuguese
+                  ? 'Começar grátis'
+                  : 'Start free'}
+            </a>
           </article>
-        );
-      })}
+        ))}
+      </div>
+
+      <div className="plan-purchase-stage" id="premium-checkout">
+        <header className="plan-offer">
+          <span className="plan-offer__label">
+            <PublicProductIcon name="competitive" size={20} weight="bold" />
+            {portuguese ? 'Premium · Modo Competitivo' : 'Premium · Competitive Mode'}
+          </span>
+          <h2>
+            {portuguese ? 'Prepare cada partida com contexto' : 'Prepare every match with context'}
+          </h2>
+          <p className="plan-offer__summary">{premium.checkoutBoundary}</p>
+          <p className="plan-price">
+            <strong>{premium.price}</strong>
+            <small>{premium.billingPeriod}</small>
+          </p>
+        </header>
+
+        <form
+          action={accountHref}
+          className="plan-checkout"
+          data-checkout-authority="disconnected"
+          method="get"
+        >
+          <fieldset>
+            <legend>{portuguese ? 'Escolha o ciclo' : 'Choose a billing cycle'}</legend>
+            <label>
+              <input
+                defaultChecked
+                name="billing"
+                suppressHydrationWarning
+                type="radio"
+                value="monthly"
+              />
+              <span>
+                <strong>{portuguese ? 'Mensal' : 'Monthly'}</strong>
+                <small>{premium.price}</small>
+              </span>
+            </label>
+            <label>
+              <input name="billing" suppressHydrationWarning type="radio" value="annual" />
+              <span>
+                <strong>{portuguese ? 'Anual' : 'Annual'}</strong>
+                <small>{premium.billingPeriod.replace(/^(?:ou|or)\s+/iu, '')}</small>
+              </span>
+            </label>
+          </fieldset>
+          <p className="plan-checkout__payment">
+            <PublicProductIcon name="receipt" size={18} />
+            {portuguese
+              ? 'Cartão no mensal ou anual. Pix no anual. Sem boleto no lançamento.'
+              : 'Card for monthly or annual billing. Pix for annual billing in Brazil. No boleto at launch.'}
+          </p>
+          <button className="public-action public-action--primary" type="submit">
+            {portuguese ? 'Continuar para criar conta' : 'Continue to create account'}
+          </button>
+          <small>
+            {portuguese
+              ? 'Você revisa preço, pagamento e renovação antes de confirmar.'
+              : 'You review price, payment, and renewal before confirming.'}
+          </small>
+        </form>
+      </div>
+
+      <section aria-labelledby="plan-terms-title" className="plan-terms">
+        <header>
+          <PublicProductIcon name="shield" size={26} weight="duotone" />
+          <div>
+            <h2 id="plan-terms-title">
+              {portuguese ? 'Tudo claro antes de assinar' : 'Everything clear before subscribing'}
+            </h2>
+            <p>
+              {portuguese
+                ? 'Histórico e restauração nunca ficam presos ao pagamento.'
+                : 'History and restoration are never locked behind payment.'}
+            </p>
+          </div>
+        </header>
+        <DisclosureList items={visibleTerms} />
+      </section>
+
+      <details className="catalog-introduction__provenance plan-provenance">
+        <summary>{localeSummary(catalog.locale)}</summary>
+        <div className="catalog-introduction__identity">
+          <SupportState catalog={catalog} state={record.availability} />
+        </div>
+        <p>
+          {record.contentType} · {catalog.locale} · <code>{catalog.version}</code>
+        </p>
+      </details>
     </section>
   );
 };
@@ -1238,6 +1263,180 @@ const CollectionPoint = ({
   );
 };
 
+const ProductExperience = ({
+  catalog,
+  record,
+}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
+  const portuguese = catalog.locale === 'pt-BR';
+  return (
+    <div className="catalog-product-experience">
+      <section aria-labelledby="product-flow-title" className="catalog-product-flow">
+        <header>
+          <h2 id="product-flow-title">
+            {portuguese
+              ? 'Do diagnóstico à restauração, sem pular etapas'
+              : 'From diagnosis to restoration, without skipping steps'}
+          </h2>
+          <p>
+            {portuguese
+              ? 'Você entende o plano antes de aplicar e confere o resultado no mesmo PC.'
+              : 'You understand the plan before applying it and verify the result on the same PC.'}
+          </p>
+        </header>
+        <ol className="catalog-story-sequence">
+          {(record.sections ?? []).map((section) => (
+            <li key={section.title}>
+              <h3>{section.title}</h3>
+              <p>{section.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-labelledby="competitive-session-title" className="competitive-session">
+        <div className="competitive-session__introduction">
+          <PublicProductIcon name="competitive" size={34} weight="duotone" />
+          <div>
+            <h2 id="competitive-session-title">
+              {portuguese
+                ? 'Modo Competitivo prepara a sessão — e termina junto com ela'
+                : 'Competitive Mode prepares the session — and ends with it'}
+            </h2>
+            <p>
+              {portuguese
+                ? 'O jogo escolhido recebe um plano temporário, revisado e limitado ao que pode ser restaurado com segurança.'
+                : 'The selected game receives a temporary, reviewed plan limited to what can be restored safely.'}
+            </p>
+          </div>
+        </div>
+        <ul>
+          {(portuguese
+            ? [
+                'Jogo e perfil selecionados antes do início',
+                'Ações temporárias revisadas antes de ativar',
+                'Prioridade, CPU, serviços e rede dentro de limites seguros',
+                'Fim da sessão visível com restauração automática',
+              ]
+            : [
+                'Game and profile selected before the session starts',
+                'Temporary actions reviewed before activation',
+                'Priority, CPU, services, and network kept within safe limits',
+                'Visible session end with automatic restoration',
+              ]
+          ).map((item) => (
+            <li key={item}>
+              <PublicProductIcon name="check" size={18} weight="bold" />
+              {item}
+            </li>
+          ))}
+        </ul>
+        <a className="public-action" href={publicBoundaryHref('public-plans', catalog.locale)}>
+          {portuguese ? 'Comparar Essencial e Competitivo' : 'Compare Essential and Competitive'}
+        </a>
+      </section>
+    </div>
+  );
+};
+
+const ResultsExperience = ({
+  catalog,
+  record,
+}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
+  const portuguese = catalog.locale === 'pt-BR';
+  const conditions = portuguese
+    ? [
+        ['Mesmo PC', 'O hardware não muda entre a referência e a comparação.'],
+        ['Mesmo jogo', 'Versão, cenário e perfil ficam identificados.'],
+        ['Condições visíveis', 'Medição, estimativa e dado indisponível nunca se misturam.'],
+      ]
+    : [
+        ['Same PC', 'Hardware stays unchanged between the baseline and comparison.'],
+        ['Same game', 'Version, scenario, and profile remain identified.'],
+        ['Visible conditions', 'Measurement, estimate, and unavailable data never blur together.'],
+      ];
+
+  return (
+    <div className="catalog-results-experience">
+      <section aria-labelledby="results-method-title" className="results-method">
+        <header>
+          <PublicProductIcon name="chart" size={30} weight="duotone" />
+          <div>
+            <h2 id="results-method-title">
+              {portuguese ? 'Uma comparação que merece confiança' : 'A comparison worth trusting'}
+            </h2>
+            <p>
+              {portuguese
+                ? 'O resultado nasce de uma referência repetível — não de uma porcentagem de marketing.'
+                : 'The result starts with a repeatable baseline — not a marketing percentage.'}
+            </p>
+          </div>
+        </header>
+        <ul>
+          {conditions.map(([title, body]) => (
+            <li key={title}>
+              <strong>{title}</strong>
+              <span>{body}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <div className="results-guardrails">
+        {(record.sections ?? []).map((section) => (
+          <section key={section.title}>
+            <h2>{section.title}</h2>
+            <p>{section.body}</p>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CompatibilityExperience = ({
+  catalog,
+  record,
+}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
+  const portuguese = catalog.locale === 'pt-BR';
+  return (
+    <div className="catalog-compatibility-experience">
+      <aside className="compatibility-boundary" role="note">
+        <PublicProductIcon name="windows" size={28} weight="duotone" />
+        <div>
+          <strong>
+            {portuguese ? 'A análise acontece no desktop' : 'Analysis happens on the desktop'}
+          </strong>
+          <p>
+            {portuguese
+              ? 'A web não examina a sua máquina. O aplicativo desktop verifica hardware, drivers e limites seguros localmente antes de recomendar qualquer ajuste.'
+              : 'The website does not inspect your machine. The desktop app checks hardware, drivers, and safe limits locally before recommending any adjustment.'}
+          </p>
+        </div>
+      </aside>
+      {record.supportMatrix !== undefined && (
+        <CapabilitySupportMatrix catalog={catalog} rows={record.supportMatrix} />
+      )}
+    </div>
+  );
+};
+
+const CatalogAcquisitionExperience = ({
+  catalog,
+  record,
+}: Readonly<{ catalog: PublicCatalog; record: PublicCatalogRecord }>) => {
+  switch (record.routeId) {
+    case 'public-product':
+      return <ProductExperience catalog={catalog} record={record} />;
+    case 'public-results':
+      return <ResultsExperience catalog={catalog} record={record} />;
+    case 'public-compatibility':
+      return <CompatibilityExperience catalog={catalog} record={record} />;
+    case 'public-plans':
+    case 'public-search':
+    case 'public-support':
+      return null;
+  }
+};
+
 const CatalogBody = ({
   catalog,
   includePlans = true,
@@ -1248,17 +1447,19 @@ const CatalogBody = ({
   record: PublicCatalogRecord;
 }>) => (
   <div id="catalog-route-body">
-    {record.sections !== undefined && (
-      <div className="catalog-story-sequence">
-        {record.sections.map((section) => (
-          <section key={section.title}>
-            <h2>{section.title}</h2>
-            <p>{section.body}</p>
-          </section>
-        ))}
-      </div>
-    )}
-    {record.supportMatrix !== undefined && (
+    <CatalogAcquisitionExperience catalog={catalog} record={record} />
+    {record.sections !== undefined &&
+      !['public-product', 'public-results'].includes(record.routeId) && (
+        <div className="catalog-story-sequence">
+          {record.sections.map((section) => (
+            <section key={section.title}>
+              <h2>{section.title}</h2>
+              <p>{section.body}</p>
+            </section>
+          ))}
+        </div>
+      )}
+    {record.supportMatrix !== undefined && record.routeId !== 'public-compatibility' && (
       <CapabilitySupportMatrix catalog={catalog} rows={record.supportMatrix} />
     )}
     {includePlans && record.plans !== undefined && (

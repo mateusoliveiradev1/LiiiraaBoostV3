@@ -30,12 +30,12 @@ describe('public catalog content', () => {
   it.each([
     ['pt-BR', 'public-product', 'Ver como funciona'],
     ['pt-BR', 'public-results', 'Ver como medimos'],
-    ['pt-BR', 'public-compatibility', 'Checar meu PC'],
-    ['pt-BR', 'public-plans', 'Escolher Premium'],
+    ['pt-BR', 'public-compatibility', 'Baixar app grátis'],
+    ['pt-BR', 'public-plans', 'Baixar grátis'],
     ['en', 'public-product', 'See how it works'],
     ['en', 'public-results', 'See how we measure'],
-    ['en', 'public-compatibility', 'Check my PC'],
-    ['en', 'public-plans', 'Choose Premium'],
+    ['en', 'public-compatibility', 'Download the app free'],
+    ['en', 'public-plans', 'Download free'],
   ] as const)(
     'leads %s %s with a route-specific visitor outcome and next action',
     (locale, routeId, action) => {
@@ -43,7 +43,7 @@ describe('public catalog content', () => {
       const introduction = markup.slice(0, markup.indexOf('catalog-introduction__provenance'));
 
       expect(markup).toContain(`data-route-purpose="${routeId}"`);
-      expect(markup).toContain('catalog-primary-action');
+      expect(markup).toContain('public-action--primary');
       expect(visibleText(markup)).toContain(action);
       expect(visibleText(introduction)).not.toMatch(
         /\b(?:Fase|Phase|authority|autoridade|manifest|manifesto|validation state|estado de validação|implementation|implementação)\b/iu,
@@ -81,6 +81,30 @@ describe('public catalog content', () => {
     expect(visibleText(compatibility)).toContain('O que já podemos verificar');
     expect(visibleText(compatibility)).toContain('O que isso significa');
     expect(visibleText(compatibility)).not.toContain('Matriz de suporte e consequência');
+  });
+
+  it('gives Product, Results, and Compatibility distinct customer decisions', () => {
+    const product = visibleText(
+      renderToStaticMarkup(<PublicCatalogPage locale="pt-BR" routeId="public-product" />),
+    );
+    const results = visibleText(
+      renderToStaticMarkup(<PublicCatalogPage locale="pt-BR" routeId="public-results" />),
+    );
+    const compatibility = visibleText(
+      renderToStaticMarkup(<PublicCatalogPage locale="pt-BR" routeId="public-compatibility" />),
+    );
+
+    expect(product).toContain('Do diagnóstico à restauração, sem pular etapas');
+    expect(product).toContain('Modo Competitivo prepara a sessão — e termina junto com ela');
+    expect(product).toContain('Prioridade, CPU, serviços e rede dentro de limites seguros');
+    expect(product).toContain('Fim da sessão visível com restauração automática');
+    expect(results).toContain('Uma comparação que merece confiança');
+    expect(results).toContain('Mesmo PC');
+    expect(results).toContain('Mesmo jogo');
+    expect(results).toContain('Condições visíveis');
+    expect(compatibility).toContain('A análise acontece no desktop');
+    expect(compatibility).toContain('A web não examina a sua máquina');
+    expect(compatibility).toContain('Baixar app grátis');
   });
 
   it('resolves every catalog path through canonical manifest authority', () => {
@@ -192,16 +216,25 @@ describe('public catalog content', () => {
       expect(markup).toMatch(/class="[^"]*\bplan-offer\b/u);
       expect(markup).toContain('class="plan-price"');
       expect(markup).toContain('data-checkout-authority="disconnected"');
+      expect(markup).toContain('class="plan-choice-grid"');
+      expect(markup).toContain('name="billing"');
+      expect(markup).toContain('value="monthly"');
+      expect(markup).toContain('value="annual"');
+      expect(markup).toContain('method="get"');
       expect(markup).toContain('data-icon-library="phosphor"');
       expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 29,90' : 'US$ 6.99');
       expect(visibleText(markup)).toContain(locale === 'pt-BR' ? 'R$ 249,90' : 'US$ 59.99');
       expect(visibleText(markup)).toContain(
         locale === 'pt-BR' ? 'Escolher Premium' : 'Choose Premium',
       );
-      expect(markup).toContain(`href="https://account.liiiraa.com/${locale}/login"`);
+      expect(markup).toContain(`action="https://account.liiiraa.com/${locale}/login"`);
+      expect(visibleText(markup)).toMatch(/30 dias|30 days/iu);
+      expect(visibleText(markup)).toMatch(/sete dias|seven days/iu);
+      expect(visibleText(markup)).toMatch(/24 horas úteis|24 business hours/iu);
       expect(visibleText(markup)).not.toContain(
         locale === 'pt-BR' ? 'Não está à venda' : 'Not for sale',
       );
+      expect(visibleText(markup)).not.toContain('disconnected');
     }
   });
 
@@ -243,7 +276,8 @@ describe('public catalog content', () => {
     expect(source).toContain('className="plan-purchase-stage"');
     expect(source).toContain('<PublicProductIcon');
     expect(source).toContain('<table className="catalog-table"');
-    expect(source).toContain('<details className="plan-terms"');
+    expect(source).toContain('className="plan-terms"');
+    expect(source).toContain('className="plan-checkout"');
     expect(source).not.toContain('plan-card');
     expect(styles).toMatch(
       /@media \(width < 640px\)[\s\S]*\.catalog-table,[\s\S]*display:\s*block/u,
