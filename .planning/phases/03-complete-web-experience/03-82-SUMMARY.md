@@ -73,7 +73,7 @@ status: complete
 
 1. **Task 1: Pass clean builds and bind the exact pending-review packet** — `3c11c91` (`test`)
 
-## Verification
+## Automated Gate Results
 
 - Public, account, and admin independent production builds: passed.
 - Canonical Playwright route matrix: 464/464 passed without update mode.
