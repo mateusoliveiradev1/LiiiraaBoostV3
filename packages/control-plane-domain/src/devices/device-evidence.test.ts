@@ -7,14 +7,6 @@ import {
   type ProtectedDeviceEvidence,
 } from './device-evidence.js';
 
-const RAW_SENTINELS = {
-  platform: 'SMBIOS-BOARD-SERIAL-RAW-9001',
-  cpu: 'PROCESSOR-ID-RAW-9002',
-  storage: 'NVME-SERIAL-RAW-9003',
-  gpu: 'GPU-PNP-ID-RAW-9004',
-  memory: 'DIMM-SERIAL-RAW-9005',
-} as const;
-
 const localDigest = (byte: string): string => byte.repeat(64);
 
 const canonicalLocalEvidence = (): LocalDeviceEvidence => ({
@@ -35,7 +27,7 @@ const derive = (
     serverWrappingKey: string;
     keyVersion: number;
   }> = {},
-): ProtectedDeviceEvidence =>
+): Promise<ProtectedDeviceEvidence> =>
   deriveProtectedDeviceEvidence({
     evidence,
     accountSalt: overrides.accountSalt ?? 'synthetic-account-salt-alpha',
@@ -57,10 +49,10 @@ const replaceComponent = (
 });
 
 describe('protected device evidence tolerance policy', () => {
-  it('keeps reinstall and one ordinary minor component change on the same PC', () => {
-    const before = derive();
-    const afterReinstall = derive();
-    const afterGpuChange = derive(replaceComponent(canonicalLocalEvidence(), 'gpu', 'a'));
+  it('keeps reinstall and one ordinary minor component change on the same PC', async () => {
+    const before = await derive();
+    const afterReinstall = await derive();
+    const afterGpuChange = await derive(replaceComponent(canonicalLocalEvidence(), 'gpu', 'a'));
 
     expect(compareDeviceEvidence(before, afterReinstall)).toMatchObject({
       outcome: 'same-pc',
@@ -74,12 +66,12 @@ describe('protected device evidence tolerance policy', () => {
     });
   });
 
-  it('explains threshold-crossing revalidation and replacement by component class', () => {
-    const before = derive();
-    const revalidation = derive(
+  it('explains threshold-crossing revalidation and replacement by component class', async () => {
+    const before = await derive();
+    const revalidation = await derive(
       replaceComponent(canonicalLocalEvidence(), 'platform-trust', 'a'),
     );
-    const replacement = derive(
+    const replacement = await derive(
       replaceComponent(
         replaceComponent(canonicalLocalEvidence(), 'platform-trust', 'a'),
         'cpu',
@@ -106,9 +98,9 @@ describe('protected device evidence tolerance policy', () => {
     });
   });
 
-  it('fails closed for empty, insufficient, contradictory, or VM-crossing evidence', () => {
-    const valid = derive();
-    const insufficient = deriveProtectedDeviceEvidence({
+  it('fails closed for empty, insufficient, contradictory, or VM-crossing evidence', async () => {
+    const valid = await derive();
+    const insufficient = await deriveProtectedDeviceEvidence({
       evidence: {
         deviceClass: 'physical',
         components: [
@@ -120,11 +112,15 @@ describe('protected device evidence tolerance policy', () => {
       serverWrappingKey: 'synthetic-server-wrapping-key-alpha',
       keyVersion: 1,
     });
+    const firstComponent = valid.components[0];
+    if (firstComponent === undefined) {
+      throw new Error('canonical evidence must contain a platform component');
+    }
     const contradictory = {
       ...valid,
-      components: [valid.components[0], { ...valid.components[0], protectedDigest: localDigest('f') }],
+      components: [firstComponent, { ...firstComponent, protectedDigest: localDigest('f') }],
     } satisfies ProtectedDeviceEvidence;
-    const virtual = derive({
+    const virtual = await derive({
       deviceClass: 'virtual',
       components: [
         { componentClass: 'virtual-platform', localDigest: localDigest('6') },
@@ -133,7 +129,9 @@ describe('protected device evidence tolerance policy', () => {
       ],
     });
 
-    expect(compareDeviceEvidence(valid, derive({ deviceClass: 'physical', components: [] }))).toMatchObject({
+    expect(
+      compareDeviceEvidence(valid, await derive({ deviceClass: 'physical', components: [] })),
+    ).toMatchObject({
       outcome: 'rejected',
       reasons: ['evidence-empty'],
     });
@@ -153,9 +151,9 @@ describe('protected device evidence tolerance policy', () => {
 });
 
 describe('protected device evidence privacy', () => {
-  it('never returns raw hardware sentinels in transport, comparison, log, or snapshot values', () => {
-    const protectedEvidence = derive();
-    const comparison = compareDeviceEvidence(protectedEvidence, derive());
+  it('never returns raw hardware sentinels in transport, comparison, log, or snapshot values', async () => {
+    const protectedEvidence = await derive();
+    const comparison = compareDeviceEvidence(protectedEvidence, await derive());
     const observableValues = JSON.stringify({
       transport: protectedEvidence,
       comparison,
@@ -163,21 +161,20 @@ describe('protected device evidence privacy', () => {
       snapshot: protectedEvidence.components,
     });
 
-    for (const sentinel of Object.values(RAW_SENTINELS)) {
-      expect(observableValues).not.toContain(sentinel);
-    }
+    expect(observableValues).not.toContain('localDigest');
+    expect(observableValues).not.toContain('rawValue');
     for (const component of protectedEvidence.components) {
       expect(component.protectedDigest).toMatch(/^[0-9a-f]{64}$/u);
       expect(component).not.toHaveProperty('localDigest');
     }
   });
 
-  it('makes account salt and key-version rotations unlinkable', () => {
-    const baseline = derive();
-    const otherAccount = derive(canonicalLocalEvidence(), {
+  it('makes account salt and key-version rotations unlinkable', async () => {
+    const baseline = await derive();
+    const otherAccount = await derive(canonicalLocalEvidence(), {
       accountSalt: 'synthetic-account-salt-beta',
     });
-    const rotatedKeyVersion = derive(canonicalLocalEvidence(), { keyVersion: 2 });
+    const rotatedKeyVersion = await derive(canonicalLocalEvidence(), { keyVersion: 2 });
 
     expect(otherAccount.components.map(({ protectedDigest }) => protectedDigest)).not.toEqual(
       baseline.components.map(({ protectedDigest }) => protectedDigest),

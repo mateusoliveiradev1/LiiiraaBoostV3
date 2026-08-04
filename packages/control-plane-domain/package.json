@@ -3,6 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run src/devices/device-evidence.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@liiiraa/contracts-ts": "workspace:*"
   }
