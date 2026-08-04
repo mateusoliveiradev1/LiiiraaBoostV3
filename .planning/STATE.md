@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: complete-web-experience
-status: executing
-stopped_at: Completed quick 260803-n0d; awaiting renewed Plan 03-45 human review
-last_updated: "2026-08-03T21:56:26.621Z"
+status: ready_for_verification
+stopped_at: Completed 03-46-PLAN.md
+last_updated: "2026-08-04T01:42:13.546Z"
 last_activity: 2026-08-03
-last_activity_desc: Final bilingual legal, storage, documentation, and Principles experience verified
+last_activity_desc: Approved current visual and accessibility evidence and completed final recursive verification
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 140
-  completed_plans: 138
-  percent: 20
+  completed_plans: 140
+  percent: 30
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 
 ## Current Position
 
-Phase: 03 (complete-web-experience) — EXECUTING
-Plan: 72 of 72
-Status: Plan 03-72 complete; automated gates pass, Plan 03-45 explicit human review is pending, and Plan 03-46 remains blocked
-Last activity: 2026-08-03 — Complete final web route matrix, download route, visual candidates, and automated preflight completed
+Phase: 03 (complete-web-experience) — READY FOR VERIFICATION
+Plan: 82 of 82
+Status: Phase 03 complete; all plan summaries and final recursive gates pass, while public distribution remains fail-closed pending a signed artifact and legal/operational verification
+Last activity: 2026-08-03 — Approved current visual and accessibility evidence and completed final recursive verification
 
-Progress: [██████████] 98%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -177,6 +177,7 @@ _Updated after plan completion_
 | Phase 03 P71 | 38min | 3 tasks | 9 files |
 | Phase 03 P72 | 1h48 | 3 tasks | 59 files |
 | Phase 03 P82 | 72 min | 1 tasks | 30 files |
+| Phase 03 P46 | 160min | 3 tasks | 24 files |
 
 ## Accumulated Context
 
@@ -521,6 +522,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 03]: Accept the 03-66 aggregate only after both repaired owner gates pass in the full workspace replay. — The final replay passed 49 workspace tasks and 46 architecture tests without weakening either gate.
 - [Phase 03]: Preserve all 25 candidates as unapproved and unpublished. — Plan 03-45 retains human review authority and Plan 03-46 retains publication authority.
 - [Phase 03]: Keep isolated-origin and protected-session detail inside the operator menu instead of a permanent preview warning band. — Security context remains discoverable without displacing the operator's current task or making the application look like an internal preview.
+- [Phase 03]: Advance only visual-report, accessibility-report, and approved-publication-bundle to plan-03-46; route reachability remains owned by plan-03-35.
+- [Phase 03]: Accept only the current canonical and legacy approval digests; prior approval records remain audit history and cannot authorize promotion.
+- [Phase 03]: Treat finalApproved as internal evidence approval only; public distribution, official artifact availability, and download availability remain false.
+- [Phase 03]: Keep the legal and operational boundary blocked until supplier identity, commercial acceptance, processors/transfers/retention, monitored contacts, and registration/address are verified.
 
 ### Pending Todos
 
@@ -533,7 +538,7 @@ None yet.
 - [Phase 4]: Better Auth, device binding, billing provider, and administrative access must pass explicit security gates.
 - [Phase 5]: Windows support matrix and measurement methodology must be proven before compatibility or gain claims.
 - [Phase 6]: Privileged IPC identity, replay resistance, journal durability, reboot recovery, and disk-full behavior are high-risk research areas.
-- Phase 03 Plan 03-45 human review rejected all W01-W18/G01-G07 after five screenshots exposed collapsed public landing composition and a systemic runtime/capture qualitative-gate false negative; Plan 03-46 is blocked pending apps/web root-cause isolation, gate hardening, full replay/recapture/reinspection, and renewed human approval.
+- Phase 03 public distribution remains blocked: no signed official artifact is available, and supplier/controller identity, commercial acceptance, processors/transfers/retention, monitored contacts, and registration/address remain unverified.
 
 ## Deferred Items
 
@@ -564,6 +569,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-03T12:40:47.333Z
-Stopped at: Completed 03-82-PLAN.md; awaiting Plan 03-45 explicit human review
+Last session: 2026-08-04T01:41:13.982Z
+Stopped at: Completed 03-46-PLAN.md
 Resume file: None
