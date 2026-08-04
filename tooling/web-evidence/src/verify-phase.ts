@@ -531,8 +531,7 @@ const PUBLICATION_BINDING_PATHS = Object.freeze({
 } as const);
 const APPROVED_CANONICAL_DIGEST =
   'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
-const APPROVED_LEGACY_DIGEST =
-  '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
+const APPROVED_LEGACY_DIGEST = '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
 const FINAL_DETECTOR_DECISIONS = Array.from(
   { length: 9 },
   (_, index) => `D-${String(index + 102)}`,
@@ -890,7 +889,9 @@ export const createRepositoryPhase3Input = (
       publication: {
         approved: approvedBundle.finalApproved && approvedBundle.status === 'passed',
         bundleFile: 'quality/evidence/phase-03/web/approved-publication-bundle.json',
-        evidenceBindings: approvedBundle.evidenceBindings,
+        ...(approvedBundle.evidenceBindings === undefined
+          ? {}
+          : { evidenceBindings: approvedBundle.evidenceBindings }),
         ...approvedBundle.releaseTruth,
       },
       requirements: [...PHASE_3_REQUIREMENTS],

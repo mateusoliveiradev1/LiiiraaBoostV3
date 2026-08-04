@@ -26,10 +26,8 @@ import type {
 const sha = (value: string): string => createHash('sha256').update(value).digest('hex');
 const repositoryRoot = join(import.meta.dirname, '../../..');
 const routeReachabilityFile = 'quality/evidence/phase-03/web/route-reachability.json';
-const approvedCanonicalDigest =
-  'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
-const approvedLegacyDigest =
-  '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
+const approvedCanonicalDigest = 'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
+const approvedLegacyDigest = '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
 const publicationBindingFiles = Object.freeze({
   accessibilityReport: 'quality/evidence/phase-03/web/accessibility-report.json',
   launchReadiness:
@@ -299,28 +297,28 @@ describe('Phase 3 proof owner and approved publication binding', () => {
     'visualManifest',
     'visualReport',
     'routeReachability',
-  ] as const)(
-    'rejects a stale approved-publication-bundle %s hash binding',
-    (binding) => {
-      const input = cloneInput(completeInput());
-      const publication = input.artifacts.publication as typeof input.artifacts.publication & {
-        evidenceBindings: ReturnType<typeof currentPublicationBindings>;
-      };
-      publication.evidenceBindings[binding].sha256 = '0'.repeat(64);
+  ] as const)('rejects a stale approved-publication-bundle %s hash binding', (binding) => {
+    const input = cloneInput(completeInput());
+    const publication = input.artifacts.publication as typeof input.artifacts.publication & {
+      evidenceBindings: ReturnType<typeof currentPublicationBindings>;
+    };
+    publication.evidenceBindings[binding].sha256 = '0'.repeat(64);
 
-      expect(verifyPhase3(input).diagnostics).toContainEqual({
-        code: 'PUBLICATION_BINDING_HASH_MISMATCH',
-        path: `$.publication.evidenceBindings.${binding}.sha256`,
-      });
-    },
-  );
+    expect(verifyPhase3(input).diagnostics).toContainEqual({
+      code: 'PUBLICATION_BINDING_HASH_MISMATCH',
+      path: `$.publication.evidenceBindings.${binding}.sha256`,
+    });
+  });
 
   it('rejects a missing approved-publication-bundle evidence binding', () => {
     const input = cloneInput(completeInput());
     const publication = input.artifacts.publication as typeof input.artifacts.publication & {
       evidenceBindings: Partial<ReturnType<typeof currentPublicationBindings>>;
     };
-    delete publication.evidenceBindings.routeMatrix;
+    const evidenceBindings = publication.evidenceBindings as Partial<
+      ReturnType<typeof currentPublicationBindings>
+    >;
+    delete evidenceBindings.routeMatrix;
 
     expect(verifyPhase3(input).diagnostics).toContainEqual({
       code: 'PUBLICATION_BINDING_MISSING',
