@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-08-04T20:19:31.210Z"
+stopped_at: Completed 04-34-PLAN.md
+last_updated: "2026-08-04T20:29:55.097Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 142
+  completed_plans: 143
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 3 of 35
+Plan: 4 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -181,6 +181,7 @@ _Updated after plan completion_
 | Phase 03 P46 | 160min | 3 tasks | 24 files |
 | Phase 04 P01 | 20 min | 1 tasks | 1 files |
 | Phase 04 P02 | 20 min | 2 tasks | 11 files |
+| Phase 04 P34 | 6 min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -534,6 +535,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Keep account/admin previews fixture-only while new control-plane roots remain production-class behind canonical fixture denial. — Preserves deterministic visual evidence without allowing fixture authority into API or desktop production composition.
 - [Phase 04]: Use daemon-free unit mode locally, Testcontainers strategy in CI, and explicitly synthetic TEST_DATABASE_URL identities. — Exercises real PostgreSQL semantics when requested while failing closed against production-like data and keeping ordinary development Docker-optional.
 - [Phase 04]: Keep Phase 4 database dependencies uninstalled in Wave 0. — The approved dependency and identity gates retain installation authority; Plan 04-02 exposes typed strategy seams only.
+- [Phase 04]: Keep every pre-implementation browser witness RED through an explicit owner-bound production-authority sentinel.
+- [Phase 04]: Execute browser authority witnesses on one canonical axis while retaining normal Playwright project collection.
 
 ### Pending Todos
 
@@ -577,6 +580,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:19:31.202Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-08-04T20:29:55.092Z
+Stopped at: Completed 04-34-PLAN.md
 Resume file: None
