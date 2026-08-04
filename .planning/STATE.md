@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-33-PLAN.md
-last_updated: "2026-08-04T21:36:47.673Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-08-04T22:49:11.341Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 147
+  completed_plans: 148
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 8 of 35
+Plan: 9 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -186,6 +186,7 @@ _Updated after plan completion_
 | Phase 04 P31 | 6 min | 1 tasks | 5 files |
 | Phase 04 P32 | 8min | 1 tasks | 5 files |
 | Phase 04 P33 | 5 min | 1 tasks | 3 files |
+| Phase 04 P05 | 31 min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -552,6 +553,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Bind every intentional external-boundary failure to its downstream owner task and stable case identity. — Collection, type, and harness failures cannot masquerade as absent provider behavior.
 - [Phase 04]: Keep provider behavior absent while type-binding RED matrices to generated control-plane contracts. — Plans 04-05, 04-08, and 04-09 retain implementation authority.
 - [Phase 04]: Use the Vitest 4.1.10 list subcommand for Plan 04-33 collection. — The planned --list option is unsupported while the list subcommand preserves exact filters.
+- [Phase 04]: Approve Better Auth 1.6.25 behind IdentityProviderPort only within the executable D-01 through D-10 evidence and conditions recorded by Plan 04-05.
+- [Phase 04]: Do not extend the user's pass verdict to credentials, provider accounts, commercial terms, substitutions, future upgrades, or untested behaviors.
+- [Phase 04]: Keep Better Auth packages and runtime objects isolated in spike tooling until downstream production plans adopt the approved port boundary.
 
 ### Pending Todos
 
@@ -595,6 +599,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T21:36:47.666Z
-Stopped at: Completed 04-33-PLAN.md
+Last session: 2026-08-04T22:49:11.334Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None
