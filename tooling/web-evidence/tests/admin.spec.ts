@@ -91,11 +91,15 @@ test('@final @admin geometry preserves the 72 280 focal queue workspace', async 
     );
   expect(gridColumns[0] / gridColumns[1]).toBeGreaterThanOrEqual(1.95);
   await expect(page.locator('.admin-landing__queue')).toBeVisible();
-  await expect(page.locator('.admin-landing__queue table')).toBeVisible();
+  const queueTable = page.getByRole('table', {
+    name: 'Role-permitted work ordered by priority, SLA, and age',
+  });
+  await expect(queueTable).toBeVisible();
+  await expect(queueTable.getByRole('columnheader', { name: 'Status' })).toBeVisible();
+  await expect(queueTable.getByRole('cell', { name: 'Blocked', exact: true })).toBeVisible();
   await expect(page.locator('.admin-nav__desktop a[aria-current="page"]')).toContainText(
     'Role workspace',
   );
-  await expect(page.locator('.lb-web-status')).not.toHaveCount(0);
 });
 
 for (const axis of ['mobile-390', 'reflow-320'] as const) {
@@ -175,11 +179,21 @@ test('@final @admin W16 preserves safe mobile review while hiding high-risk auth
 }, testInfo) => {
   onlyAxis(testInfo, 'mobile-390');
   await page.goto('/en/admin/operations/review-preview?role=operations');
-  await expect(page.getByRole('heading', { level: 1, name: 'Operations review' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Publication held' })).toBeVisible();
   await expect(
-    page.getByText(/Alert triage and evidence review remain available on mobile/iu),
+    page.getByText(/Check the impact and confirm the review when you are ready/iu),
   ).toBeVisible();
-  await expect(page.locator('[data-high-risk-action="true"]')).toBeHidden();
+  const safeReview = page.locator('[data-high-risk-action="true"]');
+  await expect(safeReview).toBeVisible();
+  await expect(safeReview.getByRole('button', { name: 'Review publication hold' })).toBeVisible();
+  const unavailableAuthority = page.getByRole('region', {
+    name: 'Publication channel unavailable',
+  });
+  await expect(unavailableAuthority).toHaveAttribute('data-authority-state', 'disconnected');
+  await expect(unavailableAuthority).toHaveAttribute('data-authority-action', 'unavailable');
+  await expect(
+    unavailableAuthority.getByRole('button', { name: 'Retain publication hold — unavailable' }),
+  ).toBeDisabled();
   await expect(page.locator('main')).toContainText('Deployment target ••••-017');
 });
 
