@@ -2284,14 +2284,14 @@
       "route": "/en/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--en--desktop-960--ready-account-final-desktop-960.png",
-      "sourceHash": "9d0f15ce2ac8fd968cfd98578e93330474bc1ecacc48b4875dd41a0bb75eceaf",
+      "sourceHash": "62458caf66c38862805433ec50ebea8879f70dd0dd951e7981183155136bf241",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "960x900",
       "width": 960,
       "widthFamily": "desktop-960",
-      "bytes": 203872,
+      "bytes": 220501,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2302,8 +2302,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "960x3219",
-      "sha256": "9d0f15ce2ac8fd968cfd98578e93330474bc1ecacc48b4875dd41a0bb75eceaf",
+      "dimensions": "960x3315",
+      "sha256": "62458caf66c38862805433ec50ebea8879f70dd0dd951e7981183155136bf241",
       "verdict": "pass"
     },
     {
@@ -2315,14 +2315,14 @@
       "route": "/en/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--en--mobile-390--ready-account-final-mobile-390.png",
-      "sourceHash": "72c9c0990f55775dc6e616b77d1d40b7b2a52595796166ad1f87179fbfa6d3a4",
+      "sourceHash": "a5344eb8160b6abb18d329a4d16a99e9e680eadbf919e2589f035933edcb21ba",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "390x844",
       "width": 390,
       "widthFamily": "mobile-390",
-      "bytes": 191522,
+      "bytes": 210031,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2333,8 +2333,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "390x4831",
-      "sha256": "72c9c0990f55775dc6e616b77d1d40b7b2a52595796166ad1f87179fbfa6d3a4",
+      "dimensions": "390x5143",
+      "sha256": "a5344eb8160b6abb18d329a4d16a99e9e680eadbf919e2589f035933edcb21ba",
       "verdict": "pass"
     },
     {
@@ -2346,14 +2346,14 @@
       "route": "/en/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--en--reflow-320--ready-account-final-reflow-320.png",
-      "sourceHash": "d2f1688485a418eba392e9750693eed777d77c080752cdb0e5092de03811139b",
+      "sourceHash": "ebb07a13d4bfd2921d13fe0fcaee13e910e34ff06eef10a0d512cd894d538083",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "320x800",
       "width": 320,
       "widthFamily": "reflow-320",
-      "bytes": 192982,
+      "bytes": 210265,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2364,8 +2364,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "320x5251",
-      "sha256": "d2f1688485a418eba392e9750693eed777d77c080752cdb0e5092de03811139b",
+      "dimensions": "320x5563",
+      "sha256": "ebb07a13d4bfd2921d13fe0fcaee13e910e34ff06eef10a0d512cd894d538083",
       "verdict": "pass"
     },
     {
@@ -2377,14 +2377,14 @@
       "route": "/en/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--en--wide-1440--ready-account-final-wide-1440.png",
-      "sourceHash": "05243923c0ff786bdafeeb3c985932920bced3b2f1e1588efe4070cc6800e72d",
+      "sourceHash": "af343d8ecf5e764bc214e2a538cafd2a553a896293c29dbe22c53dc25d9b0b64",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "1440x900",
       "width": 1440,
       "widthFamily": "wide-1440",
-      "bytes": 251052,
+      "bytes": 270921,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2395,8 +2395,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "1440x3153",
-      "sha256": "05243923c0ff786bdafeeb3c985932920bced3b2f1e1588efe4070cc6800e72d",
+      "dimensions": "1440x3297",
+      "sha256": "af343d8ecf5e764bc214e2a538cafd2a553a896293c29dbe22c53dc25d9b0b64",
       "verdict": "pass"
     },
     {
@@ -2408,14 +2408,14 @@
       "route": "/pt-BR/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--pt-BR--desktop-960--ready-account-final-desktop-960.png",
-      "sourceHash": "4d97f7604c64d12bbab95ec187b824119c73b9621b2e9164aff5093db3372a49",
+      "sourceHash": "1c1d4ee6ab31d9804b098525b692b51aeb9962c49529058ca40a6d3a92bb29c1",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "960x900",
       "width": 960,
       "widthFamily": "desktop-960",
-      "bytes": 218443,
+      "bytes": 239216,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2426,8 +2426,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "960x3243",
-      "sha256": "4d97f7604c64d12bbab95ec187b824119c73b9621b2e9164aff5093db3372a49",
+      "dimensions": "960x3387",
+      "sha256": "1c1d4ee6ab31d9804b098525b692b51aeb9962c49529058ca40a6d3a92bb29c1",
       "verdict": "pass"
     },
     {
@@ -2439,14 +2439,14 @@
       "route": "/pt-BR/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--pt-BR--mobile-390--ready-account-final-mobile-390.png",
-      "sourceHash": "1ee14d2b20e471d52cac3ed9e248ec0ff8b8cb5ec05764a2f23423892b330426",
+      "sourceHash": "22bbad4722b1751852d3e350319998e147298c17bbe00e54bd3820a8dc047bea",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "390x844",
       "width": 390,
       "widthFamily": "mobile-390",
-      "bytes": 208741,
+      "bytes": 227607,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2457,8 +2457,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "390x5023",
-      "sha256": "1ee14d2b20e471d52cac3ed9e248ec0ff8b8cb5ec05764a2f23423892b330426",
+      "dimensions": "390x5311",
+      "sha256": "22bbad4722b1751852d3e350319998e147298c17bbe00e54bd3820a8dc047bea",
       "verdict": "pass"
     },
     {
@@ -2470,14 +2470,14 @@
       "route": "/pt-BR/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--pt-BR--reflow-320--ready-account-final-reflow-320.png",
-      "sourceHash": "15b9f67ccc830de4a21dbd787d7ac63a0b6b17aaab974bc54c312a85e8afae0d",
+      "sourceHash": "29f8f81a83a7ac6117a508efc676ba75fd94cea52e328acd62a7a5f9627fa591",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "320x800",
       "width": 320,
       "widthFamily": "reflow-320",
-      "bytes": 210186,
+      "bytes": 231432,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2488,8 +2488,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "320x5467",
-      "sha256": "15b9f67ccc830de4a21dbd787d7ac63a0b6b17aaab974bc54c312a85e8afae0d",
+      "dimensions": "320x5947",
+      "sha256": "29f8f81a83a7ac6117a508efc676ba75fd94cea52e328acd62a7a5f9627fa591",
       "verdict": "pass"
     },
     {
@@ -2501,14 +2501,14 @@
       "route": "/pt-BR/account/privacy",
       "routeId": "account-privacy",
       "snapshotPath": "tests/__screenshots__/final-route-experience.spec.ts/account--account-privacy--pt-BR--wide-1440--ready-account-final-wide-1440.png",
-      "sourceHash": "ccbc3c3c1e2826fed5b6abb941b1b353d15563df126f8f0860f0413154c90ed2",
+      "sourceHash": "f56d8191cc620929c30655312e17073b6059dcc6524cc9bd8d401f531a005d0a",
       "state": "ready",
       "status": "pending-human-approval",
       "surface": "account",
       "viewport": "1440x900",
       "width": 1440,
       "widthFamily": "wide-1440",
-      "bytes": 267678,
+      "bytes": 290946,
       "checks": {
         "accessibility": "pass",
         "customerLanguage": "pass",
@@ -2519,8 +2519,8 @@
         "reflow": "pass",
         "routePurpose": "pass"
       },
-      "dimensions": "1440x3153",
-      "sha256": "ccbc3c3c1e2826fed5b6abb941b1b353d15563df126f8f0860f0413154c90ed2",
+      "dimensions": "1440x3345",
+      "sha256": "f56d8191cc620929c30655312e17073b6059dcc6524cc9bd8d401f531a005d0a",
       "verdict": "pass"
     },
     {

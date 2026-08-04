@@ -1,16 +1,16 @@
 ---
-status: passed
+status: pending-human-approval
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-03T19:47:00-03:00
+updated: 2026-08-03T21:36:43-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[approved — the reviewer supplied the literal signal `aprovado` for the exact 60-route, 480-candidate packet bound to fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e`; historical W01-W18/G01-G07 rejections remain audit history, and publication remains blocked by the legal/operational boundary below]
+[pending-human-approval — the prior literal signal `aprovado` remains valid audit history only for fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e`. A controlled consent-copy recapture changed eight canonical `account-privacy` candidates plus W13/W18, so those ten current byte identities require a renewed literal `aprovado`; Plan 03-46 and publication remain blocked.]
 
 ## Plan 03-45 Preflight
 
@@ -290,6 +290,44 @@ verdict: approved — the human visual checkpoint is satisfied only for the exac
 - The bilingual consent-copy adjustments and synchronized W03-W05 legacy continuity PNGs committed with this record do not enlarge the approved canonical fingerprint or confer legal, commercial, backend, checkout, data-collection, email-delivery, or publication authority.
 
 The `Tests`, `Summary`, and `Gaps` sections below are retained as the immutable history of the previously rejected packets. They are not the verdict for the exact post-remediation packet approved in this section.
+
+## Plan 03-46 Approval-Renewal Amendment
+
+date: 2026-08-03T21:36:43-03:00
+verdict: pending-human-approval — the previous literal `aprovado` does not cover ten screenshot byte identities changed by the later controlled consent-copy recapture. Plan 03-46 remains blocked and no report or publication bundle may be promoted.
+
+### Scope of the changed evidence
+
+- The canonical route matrix remains exactly 60 routes and 480 candidates with the same route, locale, width, surface, and state cardinalities.
+- Eight canonical `account-privacy` PNGs changed: PT-BR and English at 1440, 960, 390, and 320 CSS pixels.
+- Two legacy continuity PNGs changed: `W13-account-final-wide-1280.png` and `W18-account-final-reflow-320.png`.
+- The canonical writer changed only `sourceHash` in those eight manifest records. The launch-readiness inspection changed only `sourceHash`, `bytes`, `dimensions`, and `sha256` in the corresponding eight records.
+- The bounded no-update replay of the ten recaptured identities passed 10/10. That automated result proves deterministic replay only; it does not grant human or publication approval.
+- The exact ten current identities, paths, hashes, byte counts, and dimensions are recorded in `visuals/candidate-inspections/03-46-renewed-approval-scope.json`.
+
+### Renewal verification
+
+| Gate | Result |
+| --- | --- |
+| `rtk pnpm --filter @liiiraa/web-evidence exec vitest run src/candidate-capture-selection.test.ts src/launch-readiness.test.ts` | PASS — 2 files and 5 tests; canonical selection, cardinality, current hashes, and launch-readiness inspection remain aligned. |
+| `rtk pnpm --filter @liiiraa/web-evidence exec playwright test tests/final-route-experience.spec.ts tests/accessibility-responsive.spec.ts --grep "account--account-privacy--\|W13 canonical accessible visual\|W18 canonical accessible visual"` | PASS — exactly 10/10 current screenshot identities replayed without update mode. |
+| Independent byte/cardinality replay of the schema-versioned wrappers and ten-record index | PASS — 60 routes, 480 canonical records, 25 legacy records, and 10 indexed changed identities matched the files on disk. |
+
+### Reproducible current canonicalization
+
+Both current digests use SHA-256 over the UTF-8 bytes of compact `JSON.stringify` output. The wrapper property order is exactly `algorithm`, `schemaVersion`, `records`, with `algorithm: "sha256"` and `schemaVersion: 1`. Sorting uses ascending UTF-16 code-unit order.
+
+| Set | Record contract | Count | Current digest |
+| --- | --- | ---: | --- |
+| Canonical candidates | Sorted by `candidateId`; exactly `candidateId`, `snapshotPath`, `sha256` (equal to current `sourceHash`), `bytes`, `dimensions` in that property order | 480 | `fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55` |
+| Legacy continuity | Sorted by `filename`; exactly `filename`, `sha256`, `bytes` in that property order | 25 | `5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6` |
+
+### Historical binding preserved
+
+- The previously approved canonical fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e` remains the immutable identity of the earlier approved packet.
+- The historical W01-W18/G01-G07 aggregate `68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd` remains immutable audit history.
+- The historical digest formulas are not reproducible from the current recorded contract, so neither historical value is claimed as reproduced or replaced by the current schema-versioned digests.
+- A new literal reviewer signal `aprovado` is required for the ten current byte identities before this UAT may return to `passed`. Even after renewed visual approval, the legal and operational publication boundary above remains independently applicable.
 
 ## Tests
 
