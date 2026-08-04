@@ -3,9 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "db:migrate:test": "pnpm run test:postgres -- --testNamePattern migration",
+    "test": "vitest --config vitest.config.ts --run",
+    "test:postgres": "vitest --config vitest.config.ts --run --mode postgres"
+  },
   "dependencies": {
     "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/control-plane-adapters": "workspace:*",
     "@liiiraa/control-plane-application": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
   }
 }

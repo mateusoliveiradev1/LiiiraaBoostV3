@@ -62,7 +62,10 @@ describe('PostgreSQL test harness admission', () => {
     const database = { transaction: vi.fn(() => builder) };
 
     await expect(
-      withSerializableTransactions(database, async (value) => value.marker),
+      withSerializableTransactions<typeof transaction, string>(
+        database,
+        async (value) => value.marker,
+      ),
     ).resolves.toBe('synthetic-transaction');
     expect(setIsolationLevel).toHaveBeenCalledWith('serializable');
   });
