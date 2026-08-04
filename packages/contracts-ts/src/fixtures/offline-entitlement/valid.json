@@ -1,0 +1,27 @@
+{
+  "id": "canonical exact bytes through issuedAt plus seven days",
+  "expectedVerdict": "verified",
+  "signedBy": "development-current-0001",
+  "signaturePayload": "self",
+  "now": "2026-08-11T12:00:00.000Z",
+  "lastTrustedTime": "2026-08-10T12:00:00.000Z",
+  "context": {
+    "accountId": "synthetic-account-0001",
+    "deviceBinding": "synthetic-device-binding",
+    "audience": "liiiraa-desktop",
+    "entitlementVersion": 7
+  },
+  "envelope": {
+    "schemaVersion": "1.0",
+    "kind": "offline-entitlement-envelope",
+    "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+    "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+    "algorithm": "Ed25519",
+    "keyId": "development-current-0001",
+    "audience": "liiiraa-desktop",
+    "deviceBinding": "synthetic-device-binding",
+    "issuedAt": "2026-08-04T12:00:00.000Z",
+    "expiresAt": "2026-08-11T12:00:00.000Z",
+    "validitySeconds": 604800
+  }
+}

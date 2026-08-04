@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "algorithm": "Ed25519",
+  "hashAlgorithm": "SHA-256",
+  "validitySeconds": 604800,
+  "totalCases": 14,
+  "files": {
+    "valid.json": "782dcd38120f2d6ac711c2025ed42f2c4fdfde56d272f4bc8911aee670e82de0",
+    "invalid.json": "be0e72af361be3e2c93a13ed7f810d3f175fb0d94cef1f0916333a37b2eecd95"
+  },
+  "keyRing": [
+    {
+      "keyId": "development-current-0001",
+      "publicKeyBytes": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+      "status": "current",
+      "notBefore": "2026-07-01T00:00:00.000Z",
+      "notAfter": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "keyId": "development-previous-0001",
+      "publicKeyBytes": "PUAXw-hDiVqStwqnTRt-vJyYLM8uxJaMwM1V8Sr0Zgw",
+      "status": "previous",
+      "notBefore": "2026-08-01T00:00:00.000Z",
+      "notAfter": "2026-08-06T12:00:00.000Z"
+    },
+    {
+      "keyId": "development-retired-0001",
+      "publicKeyBytes": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "status": "retired",
+      "notBefore": "2025-01-01T00:00:00.000Z",
+      "notAfter": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

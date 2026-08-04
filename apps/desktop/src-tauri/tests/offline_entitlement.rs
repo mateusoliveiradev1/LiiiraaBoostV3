@@ -1,24 +1,54 @@
 use liiiraa_contracts_rust::validate_control_plane_document;
-use serde_json::json;
+use serde_json::Value;
+use sha2::{Digest, Sha256};
 
 const OFFLINE_ENTITLEMENT_RED_OWNER: &str = "04-07-01";
 
-fn assert_canonical_envelope_is_admissible() {
-    let envelope = json!({
-        "schemaVersion": "1.0",
-        "kind": "offline-entitlement-envelope",
-        "payloadBytes": "eyJhY2NvdW50SWQiOiJzeW50aGV0aWMtYWNjb3VudC0wMDAxIn0=",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "algorithm": "Ed25519",
-        "keyId": "development-key-0001",
-        "audience": "liiiraa-desktop",
-        "deviceBinding": "synthetic-device-binding",
-        "issuedAt": "2026-08-04T12:00:00.000Z",
-        "expiresAt": "2026-08-11T12:00:00.000Z",
-        "validitySeconds": 604800
-    });
+const MANIFEST_BYTES: &[u8] = include_bytes!(
+    "../../../../packages/contracts-ts/src/fixtures/offline-entitlement/manifest.json"
+);
+const VALID_BYTES: &[u8] =
+    include_bytes!("../../../../packages/contracts-ts/src/fixtures/offline-entitlement/valid.json");
+const INVALID_BYTES: &[u8] = include_bytes!(
+    "../../../../packages/contracts-ts/src/fixtures/offline-entitlement/invalid.json"
+);
 
-    validate_control_plane_document(&envelope)
+fn fixture_json(bytes: &[u8]) -> Value {
+    serde_json::from_slice(bytes).expect("offline entitlement fixture must be valid JSON")
+}
+
+fn assert_corpus_integrity() {
+    let manifest = fixture_json(MANIFEST_BYTES);
+    let valid = fixture_json(VALID_BYTES);
+    let invalid = fixture_json(INVALID_BYTES);
+
+    assert_eq!(manifest["totalCases"], 14);
+    assert_eq!(invalid.as_array().expect("invalid fixture array").len(), 13);
+    assert_eq!(
+        manifest["files"]["valid.json"],
+        format!("{:x}", Sha256::digest(VALID_BYTES))
+    );
+    assert_eq!(
+        manifest["files"]["invalid.json"],
+        format!("{:x}", Sha256::digest(INVALID_BYTES))
+    );
+
+    let mut ids = invalid
+        .as_array()
+        .expect("invalid fixture array")
+        .iter()
+        .map(|fixture| fixture["id"].as_str().expect("fixture id"))
+        .collect::<Vec<_>>();
+    ids.push(valid["id"].as_str().expect("valid fixture id"));
+    ids.sort_unstable();
+    ids.dedup();
+    assert_eq!(ids.len(), 14);
+}
+
+fn assert_canonical_envelope_is_admissible() {
+    let fixture = fixture_json(VALID_BYTES);
+
+    validate_control_plane_document(&fixture["envelope"])
         .expect("canonical RED envelope must pass generated schema admission");
 }
 
@@ -32,6 +62,7 @@ macro_rules! offline_entitlement_red_witness {
     ($name:ident, $case_id:literal, $expected_verdict:literal) => {
         #[test]
         fn $name() {
+            assert_corpus_integrity();
             assert_canonical_envelope_is_admissible();
             expected_offline_entitlement_red($case_id, $expected_verdict);
         }

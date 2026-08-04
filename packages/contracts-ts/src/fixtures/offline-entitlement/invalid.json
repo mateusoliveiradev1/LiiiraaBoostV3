@@ -1,0 +1,353 @@
+[
+  {
+    "id": "one-byte payload tamper",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMiIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "whitespace or JSON reserialization changes signed bytes",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "ewogICJzY2hlbWFWZXJzaW9uIjogIjEuMCIsCiAgImFjY291bnRJZCI6ICJzeW50aGV0aWMtYWNjb3VudC0wMDAxIiwKICAiZGV2aWNlQmluZGluZyI6ICJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLAogICJhdWRpZW5jZSI6ICJsaWlpcmFhLWRlc2t0b3AiLAogICJlbnRpdGxlbWVudFZlcnNpb24iOiA3LAogICJpc3N1ZWRBdCI6ICIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLAogICJleHBpcmVzQXQiOiAiMjAyNi0wOC0xMVQxMjowMDowMC4wMDBaIiwKICAidmFsaWRpdHlTZWNvbmRzIjogNjA0ODAwCn0K",
+      "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "unknown signing key",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+      "algorithm": "Ed25519",
+      "keyId": "development-unknown-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "wrong signing key",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-previous-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-05T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-05T11:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "sYfCr8Gr2xS2R-2fPmv0S6ol-LnLIecLgai1WJrriQPDd8g_rgcHlzyXyDkkIR2hRicszS8a1DkfVCLcVxKhDA",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "retired signing key",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-retired-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-05T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-05T11:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "y0vrUGkimLzJ7xfw0E4L84OR4kumACsDteRpRrbreUWecnZ1ZIC78C401xD53DA1aVPKpYqzIvaSbU7WK2DMAQ",
+      "algorithm": "Ed25519",
+      "keyId": "development-retired-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "previous key outside declared rotation window",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-previous-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-07T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-06T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTAxVDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTA4VDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "GbsCUCP0I0cpzPmOurydQoBHROGbDKWu1rdb9kGyuH-Boh2QMN9OUlkhKEGXry3D9okX2l8BO_W2GF5sbDj9DA",
+      "algorithm": "Ed25519",
+      "keyId": "development-previous-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-01T12:00:00.000Z",
+      "expiresAt": "2026-08-08T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "wrong account binding",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtb3RoZXIiLCJkZXZpY2VCaW5kaW5nIjoic3ludGhldGljLWRldmljZS1iaW5kaW5nIiwiYXVkaWVuY2UiOiJsaWlpcmFhLWRlc2t0b3AiLCJlbnRpdGxlbWVudFZlcnNpb24iOjcsImlzc3VlZEF0IjoiMjAyNi0wOC0wNFQxMjowMDowMC4wMDBaIiwiZXhwaXJlc0F0IjoiMjAyNi0wOC0xMVQxMjowMDowMC4wMDBaIiwidmFsaWRpdHlTZWNvbmRzIjo2MDQ4MDB9",
+      "signature": "_N43iCUNJLn3-2F-z3Jq60f86ti0LGsBq81p_Reo8wN3qTjNQLtUBk5F7Lxq2zzodkVmSFPTekOxiimaqD4yDw",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "wrong device binding",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLW90aGVyIiwiYXVkaWVuY2UiOiJsaWlpcmFhLWRlc2t0b3AiLCJlbnRpdGxlbWVudFZlcnNpb24iOjcsImlzc3VlZEF0IjoiMjAyNi0wOC0wNFQxMjowMDowMC4wMDBaIiwiZXhwaXJlc0F0IjoiMjAyNi0wOC0xMVQxMjowMDowMC4wMDBaIiwidmFsaWRpdHlTZWNvbmRzIjo2MDQ4MDB9",
+      "signature": "Nl1owgcl4LFLaM5M7NSdrx5nYnNYHwKTFw8e4ENV0OWOKd34Be0m0GSfze4JNNWd2dRgMzavnzICS0_GWaarCg",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-other",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "wrong audience",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtYWRtaW4iLCJlbnRpdGxlbWVudFZlcnNpb24iOjcsImlzc3VlZEF0IjoiMjAyNi0wOC0wNFQxMjowMDowMC4wMDBaIiwiZXhwaXJlc0F0IjoiMjAyNi0wOC0xMVQxMjowMDowMC4wMDBaIiwidmFsaWRpdHlTZWNvbmRzIjo2MDQ4MDB9",
+      "signature": "QMUgQj7nfbwWZMALDuHUDVRxgK0UQqetg2sYvIdP_pqPrve3az5X3KQUo2OGjqDMcfNC9RJs0izBhBkRBI20Bg",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-admin",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "wrong schema version",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-09T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "2.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMi4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "C4kpGfC__m88_wmMAvDeCzWU49_1mWaW_PcPscxPiqwOiya_uFzwNsOVDH7pTATo39VXvSS_8qrOxcAGJCxrDg",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "expired seven-day envelope",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-11T12:00:01.000Z",
+    "lastTrustedTime": "2026-08-11T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "future issuedAt",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "self",
+    "now": "2026-08-11T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-10T12:00:00.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTEyVDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTE5VDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "1tTkdZXRLyA7oUCRtp2WrxcD_8mst3c4fO-txKxPqE_-02BMhMhQH-yKEX_j8pg_UbFxzi8Xk6EYhzdEf-0ZBw",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-12T12:00:00.000Z",
+      "expiresAt": "2026-08-19T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  },
+  {
+    "id": "trusted-clock rollback",
+    "expectedVerdict": "online-verification-required",
+    "signedBy": "development-current-0001",
+    "signaturePayload": "canonical",
+    "now": "2026-08-10T12:00:00.000Z",
+    "lastTrustedTime": "2026-08-10T12:00:01.000Z",
+    "context": {
+      "accountId": "synthetic-account-0001",
+      "deviceBinding": "synthetic-device-binding",
+      "audience": "liiiraa-desktop",
+      "entitlementVersion": 7
+    },
+    "envelope": {
+      "schemaVersion": "1.0",
+      "kind": "offline-entitlement-envelope",
+      "payloadBytes": "eyJzY2hlbWFWZXJzaW9uIjoiMS4wIiwiYWNjb3VudElkIjoic3ludGhldGljLWFjY291bnQtMDAwMSIsImRldmljZUJpbmRpbmciOiJzeW50aGV0aWMtZGV2aWNlLWJpbmRpbmciLCJhdWRpZW5jZSI6ImxpaWlyYWEtZGVza3RvcCIsImVudGl0bGVtZW50VmVyc2lvbiI6NywiaXNzdWVkQXQiOiIyMDI2LTA4LTA0VDEyOjAwOjAwLjAwMFoiLCJleHBpcmVzQXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwLjAwMFoiLCJ2YWxpZGl0eVNlY29uZHMiOjYwNDgwMH0",
+      "signature": "ne1eor4fv6LTFHzo-WXLi1nzFm7ugVthn5IlB3v1OIM-JwQqkalArAkSBv5qJp2ZjYfRG2-NL5nNCs5CThO3AA",
+      "algorithm": "Ed25519",
+      "keyId": "development-current-0001",
+      "audience": "liiiraa-desktop",
+      "deviceBinding": "synthetic-device-binding",
+      "issuedAt": "2026-08-04T12:00:00.000Z",
+      "expiresAt": "2026-08-11T12:00:00.000Z",
+      "validitySeconds": 604800
+    }
+  }
+]
