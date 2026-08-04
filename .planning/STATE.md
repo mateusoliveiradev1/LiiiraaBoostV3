@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-08-04T22:49:11.341Z"
+stopped_at: Completed 04-06-PLAN.md
+last_updated: "2026-08-04T23:16:15.967Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 148
-  percent: 30
+  completed_plans: 149
+  percent: 85
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 9 of 35
+Plan: 10 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
-Progress: [████████░░] 81%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -187,6 +187,7 @@ _Updated after plan completion_
 | Phase 04 P32 | 8min | 1 tasks | 5 files |
 | Phase 04 P33 | 5 min | 1 tasks | 3 files |
 | Phase 04 P05 | 31 min | 2 tasks | 13 files |
+| Phase 04 P06 | 20 min | 1 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -556,6 +557,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Approve Better Auth 1.6.25 behind IdentityProviderPort only within the executable D-01 through D-10 evidence and conditions recorded by Plan 04-05.
 - [Phase 04]: Do not extend the user's pass verdict to credentials, provider accounts, commercial terms, substitutions, future upgrades, or untested behaviors.
 - [Phase 04]: Keep Better Auth packages and runtime objects isolated in spike tooling until downstream production plans adopt the approved port boundary.
+- [Phase 04]: Use 40/25/15/10/10 device component scoring with 65 same-PC and 40 online-revalidation thresholds. — Keeps reinstall and one ordinary minor component change tolerant while substantial change remains explainable.
+- [Phase 04]: Use account-salted local SHA-256 and Web Crypto HMAC-SHA-256 server wrapping for protected device evidence. — Preserves the approved exact pins and privacy properties without composing incompatible RustCrypto digest generations.
+- [Phase 04]: Reject invalid device evidence before wrapping and again during comparison. — Malformed evidence cannot enter protected server values or exploit a downstream caller that skips one validation stage.
 
 ### Pending Todos
 
@@ -599,6 +603,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T22:49:11.334Z
-Stopped at: Completed 04-05-PLAN.md
+Last session: 2026-08-04T23:16:15.959Z
+Stopped at: Completed 04-06-PLAN.md
 Resume file: None
