@@ -2,12 +2,13 @@
 
 - **Candidate:** Better Auth 1.6.25 behind `IdentityProviderPort`
 - **Automated verdict:** PASS
-- **Human adoption decision:** Pending the blocking Plan 04-05 checkpoint
+- **Human adoption decision:** PASS — approved at the blocking Plan 04-05 checkpoint only within the D-01 through D-10 evidence and conditions recorded here
+- **Human response recorded:** `pass`
 - **Evidence date:** 2026-08-04
 - **Focused command:** `rtk pnpm --filter @liiiraa/control-plane-adapters test -- --run better-auth.spike`
 - **Result:** 13/13 tests passed, including every locked D-01 through D-10 row
 
-The automated PASS means the exact candidate versions and the Liiiraa Boost adapter satisfy the complete executable matrix. It does not approve production adoption by itself. Plan 04-04 and downstream identity plans remain blocked until the user explicitly replies `approve PASS` at Task 04-05-02.
+The automated PASS means the exact candidate versions and the Liiiraa Boost adapter satisfy the complete executable matrix. The user's `pass` response approves production adoption of Better Auth 1.6.25 behind `IdentityProviderPort` only within the evidence and conditions proven by D-01 through D-10. It does not approve credentials, provider accounts, commercial terms, future upgrades, substitutions, or untested behavior.
 
 ## Binary evidence matrix
 
@@ -49,4 +50,13 @@ The focused suite also proves generic recovery responses for known and unknown a
 
 ## Verdict boundary
 
-Every D-01 through D-10 row is executable and green, so the automated candidate verdict is PASS with no untested method-wide MFA or native-client caveat. The human checkpoint still owns production adoption. If the human review finds any row mislabeled or insufficient, the result becomes REJECT and `04-IDENTITY-REPLAN-REQUIRED.md` must be created before replacement research/planning.
+Every D-01 through D-10 row is executable and green, so the automated candidate verdict is PASS with no untested method-wide MFA or native-client caveat. The user recorded `pass` at Task 04-05-02, approving production adoption only for the exact candidate, adapter boundary, executable behaviors, and conditions described in this evidence file. Any later credential, provider-account, commercial, upgrade, substitution, or previously untested decision requires its own evidence and authority; this checkpoint does not grant it.
+
+## Human checkpoint record
+
+- **Task:** 04-05-02 — Accept PASS or stop for replacement identity planning
+- **Response:** `pass`
+- **Recorded verdict:** PASS
+- **Scope:** Better Auth 1.6.25 behind `IdentityProviderPort`, limited to the executable D-01 through D-10 evidence and conditions in this document.
+- **Explicit exclusions:** credentials, provider accounts, commercial terms, future upgrades, substitutions, and untested behaviors.
+- **Replacement artifact:** Not created because every locked row passed and the human verdict is PASS.
