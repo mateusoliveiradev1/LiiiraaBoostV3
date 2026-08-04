@@ -520,41 +520,76 @@ Plans:
 **Plans**: 35 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 04-01-PLAN.md — Approve exact suspicious dependency identities.
 - [ ] 04-02-PLAN.md — Establish control-plane boundaries and deterministic harnesses.
 - [ ] 04-03-PLAN.md — Generate closed Phase 4 contracts and compatibility gates.
-- [ ] 04-04-PLAN.md — Install approved production dependencies and migrate PostgreSQL.
-- [ ] 04-05-PLAN.md — Terminate Better Auth uncertainty before production adoption.
-- [ ] 04-06-PLAN.md — Prove privacy-preserving tolerant device evidence.
-- [ ] 04-07-PLAN.md — Prove exact-byte seven-day entitlement verification.
-- [ ] 04-08-PLAN.md — Reconcile adversarial Stripe webhook delivery.
-- [ ] 04-09-PLAN.md — Enforce consent-bound diagnostic streaming.
-- [ ] 04-10-PLAN.md — Build tamper-evident audit chains and anchor adapter.
-- [ ] 04-11-PLAN.md — Implement invited identity and backend-owned desktop exchange.
-- [ ] 04-12-PLAN.md — Implement MFA and reviewed recovery holds.
-- [ ] 04-13-PLAN.md — Implement reconciled subscription authority.
-- [ ] 04-14-PLAN.md — Enforce one-PC binding and transfer transactions.
-- [ ] 04-15-PLAN.md — Implement support, consent, retention, and deletion commands.
-- [ ] 04-16-PLAN.md — Enforce isolated role-specific administration.
-- [ ] 04-17-PLAN.md — Project version-aware shared account truth.
-- [ ] 04-18-PLAN.md — Activate the real account application.
-- [ ] 04-19-PLAN.md — Activate the isolated real admin application.
-- [ ] 04-20-PLAN.md — Activate native desktop identity and credential custody.
-- [ ] 04-21-PLAN.md — Enforce start/continue/safety Premium boundaries.
-- [ ] 04-22-PLAN.md — Deploy the invitation-only staging control plane.
-- [ ] 04-23-PLAN.md — Deploy isolated surfaces and Internal desktop channel.
-- [ ] 04-24-PLAN.md — Evaluate immutable build-bound evidence.
-- [ ] 04-25-PLAN.md — Perform clean-Windows, consent, and rollback UAT.
-- [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence.
-- [ ] 04-27-PLAN.md — Issue, renew, rotate, and revoke signed entitlements.
-- [ ] 04-28-PLAN.md — Deliver required notifications through SES sandbox.
-- [ ] 04-29-PLAN.md — Execute attachment and account-deletion lifecycle jobs.
-- [ ] 04-30-PLAN.md — Schedule and verify immutable audit anchors.
 - [ ] 04-31-PLAN.md — Create domain and crypto Wave 1 RED witnesses after scaffold.
 - [ ] 04-32-PLAN.md — Create API/PostgreSQL Wave 1 RED witnesses after scaffold.
 - [ ] 04-33-PLAN.md — Create provider-boundary Wave 1 RED witnesses after scaffold.
 - [ ] 04-34-PLAN.md — Create browser Wave 0 RED witnesses.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-05-PLAN.md — Terminate Better Auth uncertainty before production adoption.
+- [ ] 04-06-PLAN.md — Prove privacy-preserving tolerant device evidence.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-04-PLAN.md — Install approved production dependencies and migrate PostgreSQL.
+- [ ] 04-07-PLAN.md — Prove exact-byte seven-day entitlement verification.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 04-08-PLAN.md — Reconcile adversarial Stripe webhook delivery.
+- [ ] 04-09-PLAN.md — Enforce consent-bound diagnostic streaming.
+- [ ] 04-10-PLAN.md — Build tamper-evident audit chains and anchor adapter.
+- [ ] 04-11-PLAN.md — Implement invited identity and backend-owned desktop exchange.
+- [ ] 04-14-PLAN.md — Enforce one-PC binding and transfer transactions.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 04-12-PLAN.md — Implement MFA and reviewed recovery holds.
+- [ ] 04-13-PLAN.md — Implement reconciled subscription authority.
+- [ ] 04-15-PLAN.md — Implement support, consent, retention, and deletion commands.
+- [ ] 04-30-PLAN.md — Schedule and verify immutable audit anchors.
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 04-16-PLAN.md — Enforce isolated role-specific administration.
+- [ ] 04-17-PLAN.md — Project version-aware shared account truth.
+- [ ] 04-27-PLAN.md — Issue, renew, rotate, and revoke signed entitlements.
+- [ ] 04-28-PLAN.md — Deliver required notifications through SES sandbox.
+- [ ] 04-29-PLAN.md — Execute attachment and account-deletion lifecycle jobs.
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 04-18-PLAN.md — Activate the real account application.
+- [ ] 04-19-PLAN.md — Activate the isolated real admin application.
+- [ ] 04-20-PLAN.md — Activate native desktop identity and credential custody.
+- [ ] 04-22-PLAN.md — Deploy the invitation-only staging control plane.
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 04-21-PLAN.md — Enforce start/continue/safety Premium boundaries.
 - [ ] 04-35-PLAN.md — Activate desktop account synchronization and real account UI.
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 04-23-PLAN.md — Deploy isolated surfaces and Internal desktop channel.
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 04-24-PLAN.md — Evaluate immutable build-bound evidence.
+
+**Wave 11** *(blocked on Wave 10 completion)*
+
+- [ ] 04-25-PLAN.md — Perform clean-Windows, consent, and rollback UAT.
+
+**Wave 12** *(blocked on Wave 11 completion)*
+
+- [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence.
 
 **UI hint**: yes
 
