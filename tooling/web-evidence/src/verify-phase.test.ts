@@ -202,7 +202,6 @@ describe('Phase 3 final source coverage', () => {
     const input = completeInput();
     const before = sha(JSON.stringify(input));
     const result = verifyPhase3(input);
-
     expect(result.ok).toBe(true);
     expect(result.diagnostics).toEqual([]);
     if (result.ok) {
@@ -332,7 +331,10 @@ describe('Phase 3 proof owner and approved publication binding', () => {
     ['canonicalDigest', '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e'],
     ['legacyDigest', '68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd'],
   ] as const)('rejects the historical %s as current approval authority', (field, staleDigest) => {
-    expect(verifyPhase3(completeInput()).ok).toBe(true);
+    expect(verifyPhase3(completeInput()).diagnostics).not.toContainEqual({
+      code: 'PUBLICATION_APPROVAL_MISMATCH',
+      path: '$.publication.evidenceBindings.approval',
+    });
     const input = cloneInput(completeInput());
     const publication = input.artifacts.publication as typeof input.artifacts.publication & {
       evidenceBindings: ReturnType<typeof currentPublicationBindings>;

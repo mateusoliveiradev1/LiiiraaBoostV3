@@ -262,7 +262,8 @@ interface Phase3PublicationFileBinding {
 interface Phase3PublicationEvidenceBindings {
   approval: Phase3PublicationFileBinding & {
     candidateCount: number;
-    fingerprint: string;
+    canonicalDigest: string;
+    legacyDigest: string;
     reviewerSignal: string;
     routeCount: number;
   };
@@ -524,8 +525,10 @@ const PUBLICATION_BINDING_PATHS = Object.freeze({
   routeReachability: 'quality/evidence/phase-03/web/route-reachability.json',
   visualManifest: 'tooling/web-evidence/visual-manifest.json',
 } as const);
-const APPROVED_PACKET_FINGERPRINT =
-  '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e';
+const APPROVED_CANONICAL_DIGEST =
+  'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
+const APPROVED_LEGACY_DIGEST =
+  '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
 const FINAL_DETECTOR_DECISIONS = Array.from(
   { length: 9 },
   (_, index) => `D-${String(index + 102)}`,
@@ -568,7 +571,8 @@ const validatePublicationBindings = (
   if (
     approval !== undefined &&
     (approval.reviewerSignal !== 'aprovado' ||
-      approval.fingerprint !== APPROVED_PACKET_FINGERPRINT ||
+      approval.canonicalDigest !== APPROVED_CANONICAL_DIGEST ||
+      approval.legacyDigest !== APPROVED_LEGACY_DIGEST ||
       approval.routeCount !== 60 ||
       approval.candidateCount !== 480)
   ) {
