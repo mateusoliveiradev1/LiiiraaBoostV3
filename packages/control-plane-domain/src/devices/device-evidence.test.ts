@@ -100,18 +100,12 @@ describe('protected device evidence tolerance policy', () => {
 
   it('fails closed for empty, insufficient, contradictory, or VM-crossing evidence', async () => {
     const valid = await derive();
-    const insufficient = await deriveProtectedDeviceEvidence({
-      evidence: {
-        deviceClass: 'physical',
-        components: [
-          { componentClass: 'gpu', localDigest: localDigest('4') },
-          { componentClass: 'memory-topology', localDigest: localDigest('5') },
-        ],
-      },
-      accountSalt: 'synthetic-account-salt-alpha',
-      serverWrappingKey: 'synthetic-server-wrapping-key-alpha',
-      keyVersion: 1,
-    });
+    const insufficient: ProtectedDeviceEvidence = {
+      ...valid,
+      components: valid.components.filter(({ componentClass }) =>
+        ['gpu', 'memory-topology'].includes(componentClass),
+      ),
+    };
     const firstComponent = valid.components[0];
     if (firstComponent === undefined) {
       throw new Error('canonical evidence must contain a platform component');
@@ -129,9 +123,7 @@ describe('protected device evidence tolerance policy', () => {
       ],
     });
 
-    expect(
-      compareDeviceEvidence(valid, await derive({ deviceClass: 'physical', components: [] })),
-    ).toMatchObject({
+    expect(compareDeviceEvidence(valid, { ...valid, components: [] })).toMatchObject({
       outcome: 'rejected',
       reasons: ['evidence-empty'],
     });
@@ -147,6 +139,19 @@ describe('protected device evidence tolerance policy', () => {
       outcome: 'rejected',
       reasons: ['physical-virtual-evidence-mismatch'],
     });
+    await expect(derive({ deviceClass: 'physical', components: [] })).rejects.toThrow(
+      'evidence-empty',
+    );
+    await expect(
+      derive({
+        deviceClass: 'physical',
+        components: [
+          { componentClass: 'cpu', localDigest: localDigest('1') },
+          { componentClass: 'cpu', localDigest: localDigest('2') },
+          { componentClass: 'gpu', localDigest: localDigest('3') },
+        ],
+      }),
+    ).rejects.toThrow('evidence-contradictory:cpu');
   });
 });
 

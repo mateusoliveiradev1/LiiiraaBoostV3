@@ -77,6 +77,34 @@ const rejected = (reason: string): DeviceEvidenceComparison => ({
   reasons: [reason],
 });
 
+const validateLocalEvidence = (evidence: LocalDeviceEvidence): string | undefined => {
+  if (evidence.components.length === 0) return 'evidence-empty';
+  const seen = new Set<DeviceComponentClass>();
+  for (const component of evidence.components) {
+    if (seen.has(component.componentClass)) {
+      return `evidence-contradictory:${component.componentClass}`;
+    }
+    if (!SHA256_HEX.test(component.localDigest)) {
+      return `evidence-invalid-digest:${component.componentClass}`;
+    }
+    seen.add(component.componentClass);
+  }
+  if (seen.size < MINIMUM_COMPONENT_CLASSES) return 'evidence-below-minimum';
+  if (!seen.has('platform-trust') && !seen.has('virtual-platform') && !seen.has('cpu')) {
+    return 'evidence-missing-anchor';
+  }
+  if (evidence.deviceClass === 'physical' && seen.has('virtual-platform')) {
+    return 'evidence-device-class-contradiction';
+  }
+  if (
+    evidence.deviceClass === 'virtual' &&
+    (!seen.has('virtual-platform') || seen.has('platform-trust'))
+  ) {
+    return 'evidence-device-class-contradiction';
+  }
+  return undefined;
+};
+
 const validateEvidence = (evidence: ProtectedDeviceEvidence): string | undefined => {
   if (evidence.components.length === 0) return 'evidence-empty';
   if (!Number.isSafeInteger(evidence.keyVersion) || evidence.keyVersion < 1) {
@@ -124,6 +152,10 @@ export const deriveProtectedDeviceEvidence = async ({
   if (!Number.isSafeInteger(keyVersion) || keyVersion < 1) {
     throw new Error('device evidence key version must be a positive safe integer');
   }
+  const evidenceProblem = validateLocalEvidence(evidence);
+  if (evidenceProblem !== undefined) {
+    throw new Error(`device evidence rejected: ${evidenceProblem}`);
+  }
 
   const wrappingKey = await globalThis.crypto.subtle.importKey(
     'raw',
@@ -135,9 +167,6 @@ export const deriveProtectedDeviceEvidence = async ({
   const components = (
     await Promise.all(
       evidence.components.map(async ({ componentClass, localDigest }) => {
-        if (!SHA256_HEX.test(localDigest)) {
-          throw new Error(`invalid local device digest for ${componentClass}`);
-        }
         const message = [
           'liiiraa-device-evidence-server-wrap-v1',
           String(keyVersion),
