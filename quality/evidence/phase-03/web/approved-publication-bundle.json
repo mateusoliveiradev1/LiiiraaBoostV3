@@ -1,48 +1,110 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "approved-publication-bundle",
-  "owner": "plan-03-32",
+  "owner": "plan-03-46",
   "status": "passed",
   "finalApproved": true,
-  "sourceCommit": "b145e913e01a4f0493ab83595539effb9659d5f7",
+  "sourceCommit": "ca76eeb943bb97eb8184cc3d358f20f94202db81",
   "requirements": ["WEB-01", "WEB-02", "WEB-03", "WEB-08"],
+  "commands": [
+    "pnpm --filter @liiiraa/web-evidence exec playwright test",
+    "pnpm web:verify",
+    "pnpm web:verify:phase -- --mode final",
+    "pnpm test"
+  ],
   "appArtifacts": [
     {
       "surface": "public",
-      "buildId": "pqhJWgqD_G6IOq42DJsUw",
+      "buildId": "ojhxdaT88TQKbZS5ZHEaZ",
       "path": "apps/web/.next/standalone",
-      "hash": "c6cf3e8db6b1716f542a80bf709d2390d771ca9995b453649f60d077d9dac33c"
+      "hash": "ce465df98766ab6625314bf63436c77cf4f6ac8233d307debe7456bd70bb3f4a"
     },
     {
       "surface": "account",
       "buildId": "account-preview-isolated",
       "path": "apps/account/.next/standalone",
-      "hash": "12c93bde729298f895f81b897bec377008e511e3d03bd6b01135ff12d081767d"
+      "hash": "a670584bef1d9dd5f504f3c3c75cb44988db727ec16a881b3f5a1ffa0513ea0a"
     },
     {
       "surface": "admin",
       "buildId": "admin-preview-scaffold",
       "path": "apps/admin/.next/standalone",
-      "hash": "2f32c8e4340d62e60e60e3800f4f3eb712c9b74b68025ec0b3e8db0488cd8edd"
+      "hash": "7eaef0638825df43869fbf22641d236daa80ef465859c7374dcbfa8338b12e23"
     }
   ],
   "manifestHashes": {
-    "routes": "e584d4e77e659adc6109bd31f1809236f241ca139031a528ad9dc633e44674e0",
-    "contentPtBr": "38daecd6dc34b0e9896b2ddf55922faebe6c6cae5e5b1a784758813e2d0f4887",
-    "contentEn": "54140bb04a20ddf337779987faae2884fd52ec1fb71dc639f077f503a0eb1a05",
+    "routes": "55868199b8433a5c1a1dc0f8ea02a67a60730d63e9f0f4fb09e8d3abbc390fae",
+    "contentPtBr": "af0867b6a2e1a073db87328da4e7477c115a909643af4f3742fc95f4f6213142",
+    "contentEn": "1c24e504c88a83a078dd6a2fa134ed0847c19a9362b0ea543219e34ce3757c21",
     "release": "eef56fe96f706d6b8a902989a18672cd890b0a6e21006abd928083828fcdd856",
-    "visual": "2d5a8d1b64cd4e697c3f0aca82f1f2d32b8d7aed5ebe75836137d9b26bdb7664",
+    "visual": "02339c3db9825ce275609128a82580bbad6feb5c29ba8b09c72bb7f0a29bc829",
     "capture": "508b588b3d0eb892d2765a1f562b02f7fd7c3a19cb96d1421d518f8bd905eeaf",
     "web01": "8e567dc723c2d70e2bc0864bce1d687c1cb3dce59d85dc86f77b2590eee29feb",
     "web02": "46ac0ebb827bb6c88f9c9ba56edabd3b94b817f935fab0563cdb08f57edd53ea",
     "web03": "a08e22d206f63c258440e3fa01b987c39caced2efc7a8cb840a5a62ab246b4dc",
     "web08": "f84bff4c7bce3b2a1fcab7bdb3f3abc94ca1d1a3702b7c90223681fd069bc682"
   },
+  "evidenceBindings": {
+    "approval": {
+      "path": ".planning/phases/03-complete-web-experience/03-UAT.md",
+      "sha256": "89e39ebee71565ad25bfcaeb1ed73c4dbda43f2630d7695a1f9ba2e920a77a33",
+      "reviewerSignal": "aprovado",
+      "routeCount": 60,
+      "candidateCount": 480,
+      "canonicalDigest": "fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55",
+      "legacyDigest": "5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6"
+    },
+    "accessibilityReport": {
+      "path": "quality/evidence/phase-03/web/accessibility-report.json",
+      "sha256": "a67d4a01ed0c157fee4592b5dee5d0deb751b71c23cdfb431c854e2e194d5290"
+    },
+    "launchReadiness": {
+      "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json",
+      "sha256": "a2cd8e916490ffbc0e4b7a3ceb76a7642fc5f284b6976f6cbb74af2577daa4fe",
+      "candidateCount": 480
+    },
+    "routeMatrix": {
+      "path": ".planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md",
+      "sha256": "b7b44fbdeebeb080c888899727c31396a121565449ac8406ee894ecf8f0a5669"
+    },
+    "routeReachability": {
+      "path": "quality/evidence/phase-03/web/route-reachability.json",
+      "sha256": "ed64d0c3bb1ee189de3e6bbdac2fad75982d950280ec08e773bdf3516e304be9"
+    },
+    "visualManifest": {
+      "path": "tooling/web-evidence/visual-manifest.json",
+      "sha256": "02339c3db9825ce275609128a82580bbad6feb5c29ba8b09c72bb7f0a29bc829",
+      "candidateCount": 480
+    },
+    "visualReport": {
+      "path": "quality/evidence/phase-03/web/visual-report.json",
+      "sha256": "89975b7b5abb14a8285703c3138ec2a65d2072cb56c6dd3d30ce89a0a0b69e54"
+    },
+    "detectorResults": {
+      "D-102": "passed",
+      "D-103": "passed",
+      "D-104": "passed",
+      "D-105": "passed",
+      "D-106": "passed",
+      "D-107": "passed",
+      "D-108": "passed",
+      "D-109": "passed",
+      "D-110": "passed"
+    }
+  },
   "releaseTruth": {
     "downloadAvailable": false,
     "publicDistributionApproved": false,
     "officialArtifact": "unavailable",
     "developmentArtifactDetected": false
+  },
+  "legalOperationalBoundary": {
+    "status": "blocked",
+    "supplierControllerIdentityVerified": false,
+    "registrationAndAddressVerified": false,
+    "processorsTransfersRetentionVerified": false,
+    "affirmativeAcceptanceAndCommercialConditionsVerified": false,
+    "monitoredContactChannelsVerified": false
   },
   "rollbackPolicy": {
     "operation": "redeploy-approved-web-bundle",
