@@ -31,12 +31,14 @@ const approvedCanonicalDigest =
 const approvedLegacyDigest =
   '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
 const publicationBindingFiles = Object.freeze({
+  accessibilityReport: 'quality/evidence/phase-03/web/accessibility-report.json',
   launchReadiness:
     '.planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json',
   routeMatrix: '.planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md',
   routeReachability: routeReachabilityFile,
   uat: '.planning/phases/03-complete-web-experience/03-UAT.md',
   visualManifest: 'tooling/web-evidence/visual-manifest.json',
+  visualReport: 'quality/evidence/phase-03/web/visual-report.json',
 } as const);
 
 const fileSha = (file: string): string =>
@@ -45,6 +47,10 @@ const fileSha = (file: string): string =>
     .digest('hex');
 
 const currentPublicationBindings = () => ({
+  accessibilityReport: {
+    path: publicationBindingFiles.accessibilityReport,
+    sha256: fileSha(publicationBindingFiles.accessibilityReport),
+  },
   approval: {
     candidateCount: 480,
     canonicalDigest: approvedCanonicalDigest,
@@ -74,6 +80,10 @@ const currentPublicationBindings = () => ({
     candidateCount: 480,
     path: publicationBindingFiles.visualManifest,
     sha256: fileSha(publicationBindingFiles.visualManifest),
+  },
+  visualReport: {
+    path: publicationBindingFiles.visualReport,
+    sha256: fileSha(publicationBindingFiles.visualReport),
   },
 });
 
@@ -282,7 +292,14 @@ describe('Phase 3 proof owner and approved publication binding', () => {
     },
   );
 
-  it.each(['routeMatrix', 'launchReadiness', 'visualManifest', 'routeReachability'] as const)(
+  it.each([
+    'accessibilityReport',
+    'routeMatrix',
+    'launchReadiness',
+    'visualManifest',
+    'visualReport',
+    'routeReachability',
+  ] as const)(
     'rejects a stale approved-publication-bundle %s hash binding',
     (binding) => {
       const input = cloneInput(completeInput());
