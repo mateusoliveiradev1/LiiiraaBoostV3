@@ -201,7 +201,9 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     await expect(disclosure.locator('summary')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(disclosure).toHaveAttribute('open', '');
-    await expect(disclosure.getByRole('link', { name: 'Security', exact: true })).toBeVisible();
+    await expect(
+      disclosure.getByRole('link', { name: 'Security and privacy', exact: true }),
+    ).toBeVisible();
   });
 }
 
@@ -315,8 +317,15 @@ test('@final @account W12 keeps degraded recovery authored and authority disconn
   onlyAxis(testInfo, 'wide-1280');
   await page.goto('/en/account');
   await expect(page.locator('[data-authority-connected="false"]')).not.toHaveCount(0);
-  await expect(page.getByText('No recent activity', { exact: true })).toBeVisible();
-  await expect(page.locator('body')).toContainText(/There are no account changes to show yet/iu);
+  const protection = page.getByRole('region', { name: 'Protect access with Windows Hello' });
+  await expect(protection).toBeVisible();
+  await expect(protection.getByRole('link', { name: 'Set up a passkey' })).toHaveAttribute(
+    'href',
+    '/en/account/security',
+  );
+  await expect(
+    page.getByRole('region', { name: 'Your history and restore access stay with you' }),
+  ).toContainText(/Optimization history and restoration remain accessible/iu);
 
   const degradedSource = readFileSync(
     new URL('../../../apps/account/src/features/account-degraded-preview.tsx', import.meta.url),
@@ -337,7 +346,19 @@ test('@final @account W13 proves cancellation and a phrase-confirmed no-change p
   const mutations = mutationRequests(page);
 
   await page.goto('/pt-BR/account/privacy');
-  await page.getByRole('button', { name: 'Revisar exclusão da conta' }).click();
+  let deletionJourney = page.locator('[data-rights-request="deletion"]');
+  await expect(deletionJourney).toHaveCount(1);
+  await deletionJourney.locator('summary').click();
+  await expect(deletionJourney).toHaveAttribute('open', '');
+  await expect(deletionJourney.getByText('Excluir dados da conta', { exact: true })).toBeVisible();
+  await expect(deletionJourney.getByText('Escopo', { exact: true })).toBeVisible();
+  await expect(deletionJourney.getByText('Consequências', { exact: true })).toBeVisible();
+  await expect(deletionJourney.getByText('Exceções de retenção', { exact: true })).toBeVisible();
+  await expect(deletionJourney.getByText('Cancelamento', { exact: true })).toBeVisible();
+  await expect(deletionJourney).toContainText('Nenhuma alteração remota');
+  await deletionJourney
+    .getByRole('button', { name: 'Revisar exclusão da conta', exact: true })
+    .click();
   await advanceToConfirmation(page, 'pt-BR');
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.locator('[data-preview-region="receipt"]')).toContainText(
@@ -345,7 +366,12 @@ test('@final @account W13 proves cancellation and a phrase-confirmed no-change p
   );
 
   await page.reload();
-  await page.getByRole('button', { name: 'Revisar exclusão da conta' }).click();
+  deletionJourney = page.locator('[data-rights-request="deletion"]');
+  await deletionJourney.locator('summary').click();
+  await expect(deletionJourney).toHaveAttribute('open', '');
+  await deletionJourney
+    .getByRole('button', { name: 'Revisar exclusão da conta', exact: true })
+    .click();
   await advanceToConfirmation(page, 'pt-BR');
   await page.getByLabel('Frase de confirmação').fill('ENVIAR SOLICITAÇÃO DE PRIVACIDADE');
   await page.getByRole('button', { name: 'ENVIAR SOLICITAÇÃO DE PRIVACIDADE' }).click();
