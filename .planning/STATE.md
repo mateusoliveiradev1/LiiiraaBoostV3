@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-31-PLAN.md
-last_updated: "2026-08-04T21:14:47.203Z"
+stopped_at: Completed 04-32-PLAN.md
+last_updated: "2026-08-04T21:25:16.270Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 145
+  completed_plans: 146
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 6 of 35
+Plan: 7 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -184,6 +184,7 @@ _Updated after plan completion_
 | Phase 04 P34 | 6 min | 1 tasks | 5 files |
 | Phase 04 P03 | 26 min | 2 tasks | 16 files |
 | Phase 04 P31 | 6 min | 1 tasks | 5 files |
+| Phase 04 P32 | 8min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -544,6 +545,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Pin oasdiff as an ephemeral checksummed release binary — Compatibility now fails closed unless the official 1.26.0 archive hash and executable version match the lock.
 - [Phase 04]: Bind intentional RED failures to downstream owner tasks with stable case identities. — Collection and harness failures cannot masquerade as missing owner behavior.
 - [Phase 04]: Mirror offline entitlement case identities in TypeScript and Rust until Plan 04-07 promotes the shared corpus. — Cross-runtime coverage remains reviewable before cryptographic implementation.
+- [Phase 04]: Bind API RED failures to downstream owner tasks — EXPECTED_RED owner and case markers keep collection, type, database-admission, and harness failures distinguishable from missing behavior.
+- [Phase 04]: Enumerate the complete launch identity and rejection matrix before implementation — Invitation, origin, replay, desktop PKCE, and independent session authority remain visible obligations for Plan 04-11.
+- [Phase 04]: Use the Vitest 4.1.10 list subcommand for collection — The planned --list option is unsupported by the installed CLI, while the list subcommand preserves the same five file filters.
 
 ### Pending Todos
 
@@ -587,6 +591,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T21:14:47.197Z
-Stopped at: Completed 04-31-PLAN.md
+Last session: 2026-08-04T21:25:16.263Z
+Stopped at: Completed 04-32-PLAN.md
 Resume file: None
