@@ -109,7 +109,6 @@ export interface IdentityProviderPort {
     readonly state?: string;
     readonly issuer?: string;
     readonly redirectUri?: string;
-    readonly codeVerifier?: string;
   }): Promise<IdentityProviderResult<IdentitySession>>;
 
   verifyEmail(input: {

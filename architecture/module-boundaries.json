@@ -315,6 +315,15 @@
       "status": "active"
     },
     {
+      "id": "identity-adapter-spike",
+      "owner": "control-plane",
+      "layer": "tooling",
+      "roots": ["tooling/identity-adapter-spike"],
+      "publicRoots": ["tooling/identity-adapter-spike/runtime-evidence.mjs"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
       "id": "contract-generation-rust",
       "owner": "contracts",
       "layer": "tooling",

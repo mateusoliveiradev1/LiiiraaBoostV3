@@ -4,12 +4,46 @@ import type {
   IdentitySecondFactor,
   IdentitySignInMethod,
 } from '@liiiraa/control-plane-application';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
+import { fileURLToPath } from 'node:url';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { createBetterAuthSpikeAdapter } from './better-auth-spike.js';
+import {
+  createBetterAuthSpikeAdapter,
+  type BetterAuthRuntimeEvidence,
+} from './better-auth-spike.js';
 
 const ISSUER = 'https://identity.test.liiiraa.dev';
 const REDIRECT_URI = 'http://127.0.0.1:49152/oauth/callback';
+
+const openOneShotLoopback = async () => {
+  let receiveCallback: (value: URL) => void = () => undefined;
+  const callback = new Promise<URL>((resolve) => {
+    receiveCallback = resolve;
+  });
+  const server = createServer((request, response) => {
+    const callbackUrl = new URL(request.url ?? '/', 'http://127.0.0.1');
+    response.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
+    response.end('Authentication callback received. You may close this window.');
+    receiveCallback(callbackUrl);
+    server.close();
+  });
+  const closed = once(server, 'close');
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('Loopback listener unavailable');
+  return {
+    callback,
+    close: async () => {
+      if (server.listening) server.close();
+      await closed;
+    },
+    redirectUri: `http://127.0.0.1:${address.port}/oauth/callback`,
+  };
+};
 
 const expectSuccess = <T>(result: Awaited<ReturnType<() => Promise<T>>>) => {
   expect(result).toMatchObject({ ok: true });
@@ -42,9 +76,27 @@ const completeDirectSignIn = async (
 
 describe('Better Auth terminating identity adapter matrix', () => {
   let provider: IdentityProviderPort;
+  let runtimeEvidence: BetterAuthRuntimeEvidence;
+
+  beforeAll(() => {
+    const evidenceScript = fileURLToPath(
+      new URL('../../../../tooling/identity-adapter-spike/runtime-evidence.mjs', import.meta.url),
+    );
+    const output = execFileSync(process.execPath, [evidenceScript], {
+      encoding: 'utf8',
+      timeout: 10_000,
+    });
+    const evidenceLine = output
+      .split(/\r?\n/u)
+      .find((line) => line.startsWith('BETTER_AUTH_EVIDENCE='));
+    if (!evidenceLine) throw new Error('Better Auth runtime evidence was not emitted');
+    runtimeEvidence = JSON.parse(
+      evidenceLine.slice('BETTER_AUTH_EVIDENCE='.length),
+    ) as BetterAuthRuntimeEvidence;
+  });
 
   beforeEach(() => {
-    provider = createBetterAuthSpikeAdapter();
+    provider = createBetterAuthSpikeAdapter(runtimeEvidence);
   });
 
   it('D-01 admits only verified password, Google, Discord, and passkey launch methods', async () => {
@@ -170,6 +222,15 @@ describe('Better Auth terminating identity adapter matrix', () => {
       await provider.stepUp({
         sessionId: session.id,
         actionScope: 'security-methods',
+        factor: 'recovery-code',
+        proof: 'recovery-code:valid',
+      }),
+      'INVALID_FACTOR',
+    );
+    expectFailure(
+      await provider.stepUp({
+        sessionId: session.id,
+        actionScope: 'security-methods',
         factor: 'email' as IdentitySecondFactor,
         proof: 'email:123456',
       }),
@@ -249,7 +310,6 @@ describe('Better Auth terminating identity adapter matrix', () => {
       state: desktopChallenge.value.state,
       issuer: ISSUER,
       redirectUri: REDIRECT_URI,
-      codeVerifier: 'v'.repeat(64),
     });
     expectSuccess(desktop);
     if (!desktop.ok) return;
@@ -318,19 +378,37 @@ describe('Better Auth terminating identity adapter matrix', () => {
       expect(security.value.auditReceiptId).not.toBe(support.value.auditReceiptId);
       expect(security.value.assumedRole).toBe('security');
     }
+    expectFailure(
+      await provider.stepUp({
+        sessionId: session.id,
+        actionScope: 'admin-action:support:diagnostic-read',
+        factor: 'passkey',
+        proof: 'role:support',
+      }),
+      'STEP_UP_REQUIRED',
+    );
+    expectSuccess(
+      await provider.stepUp({
+        sessionId: session.id,
+        actionScope: 'admin-action:security:diagnostic-read',
+        factor: 'passkey',
+        proof: 'role:security',
+      }),
+    );
   });
 
   it('D-10 uses one-shot external-browser S256 PKCE with backend code exchange', async () => {
+    const loopback = await openOneShotLoopback();
     const challenge = await provider.beginSignIn({
       method: 'discord',
-      desktop: { issuer: ISSUER, redirectUri: REDIRECT_URI },
+      desktop: { issuer: ISSUER, redirectUri: loopback.redirectUri },
     });
     expectSuccess(challenge);
     if (!challenge.ok) return;
     expect(challenge.value).toMatchObject({
       transport: 'external-browser',
       codeChallengeMethod: 'S256',
-      redirectUri: REDIRECT_URI,
+      redirectUri: loopback.redirectUri,
       issuer: ISSUER,
     });
     expect(challenge.value.authorizationUrl).toMatch(/^https:\/\//);
@@ -338,13 +416,24 @@ describe('Better Auth terminating identity adapter matrix', () => {
     expect(challenge.value.state).toMatch(/^[A-Za-z0-9_-]{32,}$/);
     expect(challenge.value.codeChallenge).toMatch(/^[A-Za-z0-9_-]{43}$/);
 
+    const callbackUrl = new URL(loopback.redirectUri);
+    callbackUrl.searchParams.set('code', 'backend-exchanged-code');
+    callbackUrl.searchParams.set('state', challenge.value.state ?? '');
+    callbackUrl.searchParams.set('iss', ISSUER);
+    const callbackResponse = await fetch(callbackUrl);
+    expect(callbackResponse.status).toBe(200);
+    const received = await loopback.callback;
+    await loopback.close();
+    expect(received.searchParams.has('access_token')).toBe(false);
+    expect(received.searchParams.has('refresh_token')).toBe(false);
+    await expect(fetch(callbackUrl)).rejects.toThrow();
+
     const input = {
       challengeId: challenge.value.id,
-      authorizationCode: 'backend-exchanged-code',
-      state: challenge.value.state,
-      issuer: ISSUER,
-      redirectUri: REDIRECT_URI,
-      codeVerifier: 'v'.repeat(64),
+      authorizationCode: received.searchParams.get('code') ?? undefined,
+      state: received.searchParams.get('state') ?? undefined,
+      issuer: received.searchParams.get('iss') ?? undefined,
+      redirectUri: loopback.redirectUri,
     } as const;
     const completed = await provider.completeSignIn(input);
     expectSuccess(completed);
@@ -378,7 +467,6 @@ describe('Better Auth terminating identity adapter matrix', () => {
       state: challenge.value.state,
       issuer: ISSUER,
       redirectUri: REDIRECT_URI,
-      codeVerifier: 'v'.repeat(64),
     } as const;
     expectFailure(
       await provider.completeSignIn({ ...common, redirectUri: 'http://127.0.0.1:9/callback' }),
