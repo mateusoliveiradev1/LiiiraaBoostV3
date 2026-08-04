@@ -26,8 +26,10 @@ import type {
 const sha = (value: string): string => createHash('sha256').update(value).digest('hex');
 const repositoryRoot = join(import.meta.dirname, '../../..');
 const routeReachabilityFile = 'quality/evidence/phase-03/web/route-reachability.json';
-const approvedPacketFingerprint =
-  '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e';
+const approvedCanonicalDigest =
+  'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
+const approvedLegacyDigest =
+  '5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6';
 const publicationBindingFiles = Object.freeze({
   launchReadiness:
     '.planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json',
@@ -45,7 +47,8 @@ const fileSha = (file: string): string =>
 const currentPublicationBindings = () => ({
   approval: {
     candidateCount: 480,
-    fingerprint: approvedPacketFingerprint,
+    canonicalDigest: approvedCanonicalDigest,
+    legacyDigest: approvedLegacyDigest,
     reviewerSignal: 'aprovado',
     routeCount: 60,
     sha256: fileSha(publicationBindingFiles.uat),
@@ -324,6 +327,23 @@ describe('Phase 3 proof owner and approved publication binding', () => {
       });
     },
   );
+
+  it.each([
+    ['canonicalDigest', '2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e'],
+    ['legacyDigest', '68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd'],
+  ] as const)('rejects the historical %s as current approval authority', (field, staleDigest) => {
+    expect(verifyPhase3(completeInput()).ok).toBe(true);
+    const input = cloneInput(completeInput());
+    const publication = input.artifacts.publication as typeof input.artifacts.publication & {
+      evidenceBindings: ReturnType<typeof currentPublicationBindings>;
+    };
+    publication.evidenceBindings.approval[field] = staleDigest;
+
+    expect(verifyPhase3(input).diagnostics).toContainEqual({
+      code: 'PUBLICATION_APPROVAL_MISMATCH',
+      path: '$.publication.evidenceBindings.approval',
+    });
+  });
 });
 
 describe('Phase 3 route reachability', () => {
