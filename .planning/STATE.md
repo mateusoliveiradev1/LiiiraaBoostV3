@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-34-PLAN.md
-last_updated: "2026-08-04T20:29:55.097Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-08-04T21:04:33.334Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 143
+  completed_plans: 144
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 4 of 35
+Plan: 5 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -182,6 +182,7 @@ _Updated after plan completion_
 | Phase 04 P01 | 20 min | 1 tasks | 1 files |
 | Phase 04 P02 | 20 min | 2 tasks | 11 files |
 | Phase 04 P34 | 6 min | 1 tasks | 5 files |
+| Phase 04 P03 | 26 min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -537,6 +538,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Keep Phase 4 database dependencies uninstalled in Wave 0. — The approved dependency and identity gates retain installation authority; Plan 04-02 exposes typed strategy seams only.
 - [Phase 04]: Keep every pre-implementation browser witness RED through an explicit owner-bound production-authority sentinel.
 - [Phase 04]: Execute browser authority witnesses on one canonical axis while retaining normal Playwright project collection.
+- [Phase 04]: Isolate control-plane documents from Phase 3 fixture schemas — Separate generated roots preserve byte-stable visual fixtures while production validators exclude fixture authority.
+- [Phase 04]: Keep offline entitlement payloads opaque until verification — The transport exposes signed bytes, key, audience, device binding, timestamps, and a seven-day marker without authorizing parsed claims.
+- [Phase 04]: Pin oasdiff as an ephemeral checksummed release binary — Compatibility now fails closed unless the official 1.26.0 archive hash and executable version match the lock.
 
 ### Pending Todos
 
@@ -580,6 +584,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:29:55.092Z
-Stopped at: Completed 04-34-PLAN.md
+Last session: 2026-08-04T21:04:33.328Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
