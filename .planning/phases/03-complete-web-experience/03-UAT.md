@@ -1,16 +1,16 @@
 ---
-status: pending-human-approval
+status: passed
 phase: 03-complete-web-experience
 source: [03-VERIFICATION.md]
 started: 2026-07-31T15:22:13-03:00
-updated: 2026-08-03T21:36:43-03:00
+updated: 2026-08-03T21:45:31-03:00
 ---
 
 # Phase 03 UAT
 
 ## Current Test
 
-[pending-human-approval — the prior literal signal `aprovado` remains valid audit history only for fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e`. A controlled consent-copy recapture changed eight canonical `account-privacy` candidates plus W13/W18, so those ten current byte identities require a renewed literal `aprovado`; Plan 03-46 and publication remain blocked.]
+[approved — the reviewer supplied a renewed literal signal `aprovado` for the current 60-route/480-candidate canonical digest `fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55` and 25-record legacy digest `5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6`. Prior approvals, fingerprints, and rejections remain audit history; public distribution remains blocked by the unchanged legal and operational boundary.]
 
 ## Plan 03-45 Preflight
 
@@ -328,6 +328,28 @@ Both current digests use SHA-256 over the UTF-8 bytes of compact `JSON.stringify
 - The historical W01-W18/G01-G07 aggregate `68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd` remains immutable audit history.
 - The historical digest formulas are not reproducible from the current recorded contract, so neither historical value is claimed as reproduced or replaced by the current schema-versioned digests.
 - A new literal reviewer signal `aprovado` is required for the ten current byte identities before this UAT may return to `passed`. Even after renewed visual approval, the legal and operational publication boundary above remains independently applicable.
+
+## Plan 03-46 Renewed Human Approval
+
+date: 2026-08-03T21:45:31-03:00
+reviewer_signal: `aprovado`
+verdict: approved — the renewed human visual checkpoint covers only the schema-versioned current evidence identities below.
+
+| Approval dimension | Exact bound value |
+| --- | --- |
+| Canonical routes | 60 |
+| Canonical candidates | 480 original-resolution PNG records |
+| Canonical digest | `fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55` |
+| Legacy continuity | 25 W01-W18/G01-G07 records |
+| Legacy digest | `5c589ac20992b698a1e097ab92f15a7bd9072c8e99a8d01993709b354df341d6` |
+| Exact reviewer signal | `aprovado` |
+
+### Renewed approval boundary
+
+- This approval covers exactly the current canonical and legacy digests above. It does not approve a later recapture, changed byte, changed record, added route, or different serialization contract.
+- The earlier approved fingerprint `2685ff26f5e65a89269a730e2257ab7ed149f1f8fad9d3e0d0f59f6f2445d42e`, historical legacy aggregate `68620cf4259a074bc0feaba10dc777ffdf58a2700023ddf2b984d80e0d80ccfd`, every earlier rejection, and every reported defect remain immutable audit history.
+- The visual approval allows Plan 03-46 to regenerate evidence reports and an evidence publication bundle. It does not make a download available, approve public distribution, create an official artifact, connect authority, or satisfy the independent supplier/controller, processor, retention, acceptance, commercial-condition, and monitored-contact requirements.
+- The legal and operational public-distribution boundary therefore remains blocked even when the evidence bundle is internally marked final and passed.
 
 ## Tests
 
