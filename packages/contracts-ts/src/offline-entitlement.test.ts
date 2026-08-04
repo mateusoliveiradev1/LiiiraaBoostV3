@@ -1,6 +1,9 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import type { OfflineEntitlementEnvelopeJson } from './generated/index.js';
+import {
+  controlPlaneDocumentValidator,
+  type OfflineEntitlementEnvelopeJson,
+} from './generated/index.js';
 
 const OFFLINE_ENTITLEMENT_RED_OWNER = '04-07-01';
 
@@ -8,7 +11,8 @@ const canonicalEnvelope = {
   schemaVersion: '1.0',
   kind: 'offline-entitlement-envelope',
   payloadBytes: 'eyJhY2NvdW50SWQiOiJzeW50aGV0aWMtYWNjb3VudC0wMDAxIn0=',
-  signature: 'c3ludGhldGljLWRldGFjaGVkLXNpZ25hdHVyZS1ieXRlcw==',
+  signature:
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   algorithm: 'Ed25519',
   keyId: 'development-key-0001',
   audience: 'liiiraa-desktop',
@@ -60,7 +64,7 @@ const expectedOfflineEntitlementRed = (
 
 describe('offline-entitlement exact-byte pre-implementation corpus', () => {
   it.each(offlineEntitlementCorpus)('$id', ({ id, expectedVerdict }) => {
-    void canonicalEnvelope;
+    expect(controlPlaneDocumentValidator(canonicalEnvelope)).toBe(true);
     expectedOfflineEntitlementRed(id, expectedVerdict);
   });
 });
