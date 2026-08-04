@@ -34,15 +34,15 @@
 - [x] **WEB-01**: Visitor can understand the product, its evidence policy, supported capabilities, plans, and limitations on the public site
 - [x] **WEB-02**: Visitor can read versioned technical documentation linked from relevant desktop features
 - [x] **WEB-03**: User can inspect release channel, version, integrity, and compatibility and complete a fail-closed download-eligibility journey; Phase 3 exposes no installer until a publicly trusted artifact is approved, and any future approved record must pass every trust and integrity check before download is enabled
-- [ ] **WEB-04**: User can manage profile, security methods, subscription, invoices, active device, and support requests
+- [x] **WEB-04**: User can manage profile, security methods, subscription, invoices, active device, and support requests
 - [ ] **WEB-05**: User can revoke the active PC and bind a replacement subject to the 30-day reset cooldown
-- [ ] **WEB-06**: Authorized staff can use an isolated administrative application with role-specific access
+- [x] **WEB-06**: Authorized staff can use an isolated administrative application with role-specific access
 - [ ] **WEB-07**: Administrative access to user-provided diagnostics requires explicit, time-limited consent and creates an immutable audit event
 - [x] **WEB-08**: Public, account, and administrative surfaces have separate deployment and security policies
 
 ### Identity, Subscription, and Devices
 
-- [ ] **IDEN-01**: User can authenticate through verified email, supported social providers, or passkeys
+- [x] **IDEN-01**: User can authenticate through verified email, supported social providers, or passkeys
 - [ ] **IDEN-02**: User can enable MFA and recover an account through a security-reviewed flow
 - [ ] **IDEN-03**: Administrative users must use MFA and stronger authentication for critical actions
 - [ ] **IDEN-04**: Premium subscription permits exactly one active PC at a time
@@ -50,7 +50,7 @@
 - [ ] **IDEN-06**: Premium remains available for a cryptographically verifiable seven-day offline window
 - [ ] **IDEN-07**: Expired Premium blocks new paid actions without automatically reverting existing system changes
 - [ ] **IDEN-08**: Diagnostic history, security warnings, and restoration remain available after Premium expires
-- [ ] **IDEN-09**: Payment-provider events are idempotently reconciled so delayed or duplicated webhooks cannot corrupt entitlement state
+- [x] **IDEN-09**: Payment-provider events are idempotently reconciled so delayed or duplicated webhooks cannot corrupt entitlement state
 
 ### Diagnostics and Capability Detection
 
@@ -181,12 +181,12 @@ A v1 requirement is complete only when:
 | WEB-01      | Phase 3  | Complete |
 | WEB-02      | Phase 3  | Complete |
 | WEB-03      | Phase 3  | Complete |
-| WEB-04      | Phase 4  | Pending  |
+| WEB-04      | Phase 4  | Complete |
 | WEB-05      | Phase 4  | Pending  |
-| WEB-06      | Phase 4  | Pending  |
+| WEB-06      | Phase 4  | Complete |
 | WEB-07      | Phase 4  | Pending  |
 | WEB-08      | Phase 3  | Complete |
-| IDEN-01     | Phase 4  | Pending  |
+| IDEN-01     | Phase 4  | Complete |
 | IDEN-02     | Phase 4  | Pending  |
 | IDEN-03     | Phase 4  | Pending  |
 | IDEN-04     | Phase 4  | Pending  |
@@ -194,7 +194,7 @@ A v1 requirement is complete only when:
 | IDEN-06     | Phase 4  | Pending  |
 | IDEN-07     | Phase 4  | Pending  |
 | IDEN-08     | Phase 4  | Pending  |
-| IDEN-09     | Phase 4  | Pending  |
+| IDEN-09     | Phase 4  | Complete |
 | DIAG-01     | Phase 5  | Pending  |
 | DIAG-02     | Phase 5  | Pending  |
 | DIAG-03     | Phase 5  | Pending  |
