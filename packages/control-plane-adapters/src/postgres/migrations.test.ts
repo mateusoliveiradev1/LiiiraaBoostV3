@@ -5,24 +5,65 @@ import { GenericContainer, Wait, type StartedTestContainer } from 'testcontainer
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
-  createPostgresHarness,
-  requireSyntheticDatabase,
-} from '../../../../apps/api/src/testing/postgres.ts';
-import {
   createControlPlaneDatabase,
   type ControlPlaneDatabase,
+  type ControlPlaneMigrationDatabase,
   type ControlPlaneQueryResult,
+  type ControlPlaneTransaction,
 } from './database.ts';
-import {
-  inspectControlPlaneSchema,
-  migrateControlPlane,
-  schemaHash,
-} from './migrate.ts';
+import { inspectControlPlaneSchema, migrateControlPlane, schemaHash } from './migrate.ts';
 
 const migrationUrl = new URL('./migrations/0001_control_plane.sql', import.meta.url);
-const harness = createPostgresHarness();
+const syntheticIdentity = /(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu;
+const productionIdentity = /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu;
+const unsafeDatabaseMessage =
+  'Migration proof requires an explicitly synthetic PostgreSQL database identity.';
 
-class MemoryMigrationDatabase implements ControlPlaneDatabase {
+const requireSyntheticDatabase = (databaseUrl: string): string => {
+  try {
+    const parsed = new URL(databaseUrl);
+    const databaseName = decodeURIComponent(parsed.pathname.replace(/^\//u, ''));
+    const identity = [parsed.hostname, parsed.username, databaseName].join('-');
+    if (
+      (parsed.protocol !== 'postgres:' && parsed.protocol !== 'postgresql:') ||
+      databaseName.length === 0 ||
+      productionIdentity.test(identity) ||
+      !syntheticIdentity.test(identity)
+    ) {
+      throw new Error(unsafeDatabaseMessage);
+    }
+    return databaseUrl;
+  } catch {
+    throw new Error(unsafeDatabaseMessage);
+  }
+};
+
+const environment = (
+  globalThis as unknown as {
+    readonly process?: {
+      readonly env?: {
+        readonly CI?: string;
+        readonly POSTGRES_TEST_STRATEGY?: string;
+        readonly TEST_DATABASE_URL?: string;
+      };
+    };
+  }
+).process?.env;
+const configuredDatabaseUrl = environment?.TEST_DATABASE_URL?.trim();
+const harness = Object.freeze(
+  configuredDatabaseUrl !== undefined && configuredDatabaseUrl.length > 0
+    ? {
+        databaseUrl: requireSyntheticDatabase(configuredDatabaseUrl),
+        strategy: 'synthetic-url' as const,
+      }
+    : environment?.POSTGRES_TEST_STRATEGY === 'testcontainers' ||
+        environment?.CI === '1' ||
+        environment?.CI === 'true'
+      ? { databaseUrl: undefined, strategy: 'testcontainers' as const }
+      : { databaseUrl: undefined, strategy: 'unit' as const },
+);
+
+class MemoryMigrationDatabase implements ControlPlaneMigrationDatabase {
   checksum: string | undefined;
   migrationApplications = 0;
   failNextApplication = false;
@@ -35,21 +76,24 @@ class MemoryMigrationDatabase implements ControlPlaneDatabase {
   }
 
   async transaction<TResult>(
-    operation: (transaction: ControlPlaneDatabase) => Promise<TResult>,
+    operation: (transaction: ControlPlaneTransaction) => Promise<TResult>,
   ): Promise<TResult> {
     const staged = new MemoryMigrationDatabase();
     staged.checksum = this.checksum;
     staged.migrationApplications = this.migrationApplications;
     staged.failNextApplication = this.failNextApplication;
 
-    const result = await operation(staged);
-    this.checksum = staged.checksum;
-    this.migrationApplications = staged.migrationApplications;
-    this.failNextApplication = staged.failNextApplication;
-    return result;
+    try {
+      const result = await operation(staged);
+      this.checksum = staged.checksum;
+      this.migrationApplications = staged.migrationApplications;
+      this.failNextApplication = staged.failNextApplication;
+      return result;
+    } catch (error) {
+      this.failNextApplication = staged.failNextApplication;
+      throw error;
+    }
   }
-
-  async close(): Promise<void> {}
 
   private async executeAgainst(
     state: MemoryMigrationDatabase,
@@ -57,7 +101,10 @@ class MemoryMigrationDatabase implements ControlPlaneDatabase {
     values: readonly unknown[],
   ): Promise<ControlPlaneQueryResult<Record<string, unknown>>> {
     const normalized = statement.replace(/\s+/gu, ' ').trim().toLowerCase();
-    if (normalized.includes('select checksum') && normalized.includes('schema_migrations')) {
+    if (
+      normalized.includes('select version, checksum') &&
+      normalized.includes('schema_migrations')
+    ) {
       const rows =
         state.checksum === undefined
           ? []
@@ -165,10 +212,9 @@ describe('control-plane migration deterministic proof', () => {
     expect(migrationSql).toMatch(/consent_scope TEXT/iu);
     expect(migrationSql).toMatch(/scheduled_for TIMESTAMPTZ/iu);
     expect(migrationSql).toMatch(/retain_until TIMESTAMPTZ/iu);
-    expect(migrationSql).toMatch(
-      /REVOKE UPDATE, DELETE, TRUNCATE ON audit_events FROM PUBLIC/iu,
-    );
+    expect(migrationSql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON audit_events FROM PUBLIC/iu);
     expect(migrationSql).toMatch(/CREATE TRIGGER audit_events_insert_only/iu);
+    expect(migrationSql).toMatch(/CREATE TRIGGER audit_events_reject_truncate/iu);
 
     for (const forbiddenColumn of [
       'raw_serial',
@@ -272,11 +318,7 @@ describe.sequential.skipIf(harness.strategy === 'unit')(
         `INSERT INTO audit_events
            (id, stream_id, sequence_number, event_type, actor_kind, previous_hash, event_hash, occurred_at)
          VALUES ($1, 'synthetic-stream', 1, 'synthetic-created', 'system', $2, $3, CURRENT_TIMESTAMP)`,
-        [
-          '00000000-0000-4000-8000-000000000005',
-          '0'.repeat(64),
-          '1'.repeat(64),
-        ],
+        ['00000000-0000-4000-8000-000000000005', '0'.repeat(64), '1'.repeat(64)],
       );
       await expect(
         database.query(`UPDATE audit_events SET event_type = 'tampered'`),
