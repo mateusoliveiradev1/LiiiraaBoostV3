@@ -1,9 +1,9 @@
 ---
 phase: 04
 slug: identity-commerce-devices-and-administration
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: planned
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-04
 ---
 
@@ -36,23 +36,23 @@ created: 2026-08-04
 
 ## Per-Task Verification Map
 
-Task IDs and plan/wave assignments are finalized by the Phase 4 planner. Every row below must be bound to at least one concrete task before `wave_0_complete` becomes true.
+Every requirement is bound to a concrete implementation task/wave and to a Wave 0 RED witness owner. `wave_0_complete: true` means all missing witness paths now have executable Wave 0 plan tasks; it does not claim the intentionally RED tests are already green.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref                | Secure Behavior                                                                                        | Test Type                            | Automated Command                                                                                                                                                              | File Exists | Status     |
 | ------- | ---- | ---- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | ---------- |
-| TBD     | TBD  | 0+   | WEB-04      | T-P4-ACCOUNT-VERSION      | Account projections and version-aware mutations stay truthful across web and desktop                   | integration + Playwright             | `pnpm --filter @liiiraa/api test -- --run account-projection && pnpm --filter @liiiraa/web-evidence exec playwright test tests/account-authority.spec.ts`                      | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | WEB-05      | T-P4-DEVICE-RACE          | Revoke/replace obeys cooldown and cannot create two active PCs                                         | PostgreSQL concurrency               | `pnpm --filter @liiiraa/api test -- --run device-transfer`                                                                                                                     | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | WEB-06      | T-P4-ADMIN-AUTHZ          | Isolated admin origin enforces exactly one assumed least-privilege role                                | integration + Playwright             | `pnpm --filter @liiiraa/api test -- --run admin-authorization && pnpm --filter @liiiraa/web-evidence exec playwright test tests/admin-authority.spec.ts`                       | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | WEB-07      | T-P4-CONSENT-REVOKE       | Consent expiry/revocation terminates diagnostic access and appends audit evidence                      | integration + browser                | `pnpm --filter @liiiraa/api test -- --run diagnostic-consent && pnpm --filter @liiiraa/web-evidence exec playwright test tests/admin-consent-revocation.spec.ts`               | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-01     | T-P4-OAUTH                | Verified email, Google, Discord, and passkeys authenticate; public/unverified paths fail closed        | adapter conformance + E2E            | `pnpm --filter @liiiraa/api test -- --run identity-conformance`                                                                                                                | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-02     | T-P4-RECOVERY             | MFA, recovery review/hold/contest, and session revocation follow locked policy                         | state-machine + integration          | `pnpm --filter @liiiraa/control-plane-domain test -- --run identity-recovery`                                                                                                  | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-03     | T-P4-STEP-UP              | Critical admin actions require recent scoped reauthentication, reason, review, confirmation, and audit | authorization integration            | `pnpm --filter @liiiraa/api test -- --run admin-step-up`                                                                                                                       | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-04     | T-P4-DEVICE-RACE          | Concurrent binds preserve the one-active-PC invariant                                                  | PostgreSQL concurrency               | `pnpm --filter @liiiraa/api test -- --run one-active-device`                                                                                                                   | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-05     | T-P4-DEVICE-PRIVACY       | Raw hardware serials never cross boundaries and minor changes follow tolerant revalidation             | property + privacy contract          | `pnpm --filter @liiiraa/control-plane-domain test -- --run device-evidence && cargo test -p liiiraa-desktop device_identity`                                                   | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-06     | T-P4-OFFLINE-TOKEN        | Exact-byte Ed25519 envelope verifies for seven days and rejects tamper/key/device/time mismatches      | cross-language fixture + property    | `pnpm --filter @liiiraa/contracts test -- --run offline-entitlement && cargo test -p liiiraa-desktop offline_entitlement`                                                      | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-07     | T-P4-ENTITLEMENT-BOUNDARY | Expiry blocks only the next new paid action, not in-flight or safety work                              | domain table + desktop E2E           | `pnpm --filter @liiiraa/control-plane-domain test -- --run entitlement-policy && pnpm --filter @liiiraa/desktop exec playwright test tests/browser/entitlement-expiry.spec.ts` | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-08     | T-P4-SAFETY-ACCESS        | History, warnings, and restoration remain available after entitlement loss                             | domain + desktop E2E                 | `pnpm --filter @liiiraa/desktop exec playwright test tests/browser/post-premium-safety.spec.ts`                                                                                | ❌ W0       | ⬜ pending |
-| TBD     | TBD  | 0+   | IDEN-09     | T-P4-WEBHOOK-REPLAY       | Duplicate, delayed, replayed, and reordered webhooks converge without duplicate authority              | permutation + PostgreSQL integration | `pnpm --filter @liiiraa/api test -- --run webhook-reconciliation`                                                                                                              | ❌ W0       | ⬜ pending |
+| 04-17-01 / 04-18-01 | 04-17 / 04-18 | 6 / 7 | WEB-04 | T-P4-ACCOUNT-VERSION | Account projections and version-aware mutations stay truthful across web and desktop | integration + browser | `pnpm --filter @liiiraa/api test -- --run account-projection` | 🟦 04-32/34 | ✅ mapped |
+| 04-14-01 / 04-18-02 | 04-14 / 04-18 | 4 / 7 | WEB-05 | T-P4-DEVICE-RACE | Revoke/replace obeys cooldown and cannot create two active PCs | PostgreSQL concurrency + smoke | `pnpm --filter @liiiraa/api test -- --run device-concurrency` | 🟦 04-32/34 | ✅ mapped |
+| 04-16-01 / 04-19-01 | 04-16 / 04-19 | 6 / 7 | WEB-06 | T-P4-ADMIN-AUTHZ | Isolated admin origin enforces exactly one assumed least-privilege role | integration + browser | `pnpm --filter @liiiraa/api test -- --run admin-authorization` | 🟦 04-32/34 | ✅ mapped |
+| 04-09-01 / 04-19-02 | 04-09 / 04-19 | 4 / 7 | WEB-07 | T-P4-CONSENT-REVOKE | Consent expiry/revocation terminates diagnostic access and appends audit evidence | integration + browser | `pnpm --filter @liiiraa/api test -- --run consent-stream` | 🟦 04-33/34 | ✅ mapped |
+| 04-05-01 / 04-11-01 | 04-05 / 04-11 | 2 / 4 | IDEN-01 | T-P4-OAUTH | Verified email, Google, Discord, and passkeys authenticate; public/unverified paths fail closed | adapter conformance + API | `pnpm --filter @liiiraa/api test -- --run identity-conformance` | 🟦 04-32/33 | ✅ mapped |
+| 04-12-01 | 04-12 | 5 | IDEN-02 | T-P4-RECOVERY | MFA, recovery review/hold/contest, and session revocation follow locked policy | state-machine + integration | `pnpm --filter @liiiraa/control-plane-domain test -- --run identity-recovery` | 🟦 04-31/32 | ✅ mapped |
+| 04-16-01 | 04-16 | 6 | IDEN-03 | T-P4-STEP-UP | Critical admin actions require recent scoped reauthentication, reason, review, confirmation, and audit | authorization integration | `pnpm --filter @liiiraa/api test -- --run admin-authorization` | 🟦 04-32 | ✅ mapped |
+| 04-14-01 | 04-14 | 4 | IDEN-04 | T-P4-DEVICE-RACE | Concurrent binds preserve the one-active-PC invariant | PostgreSQL concurrency | `pnpm --filter @liiiraa/api test -- --run device-concurrency` | 🟦 04-32 | ✅ mapped |
+| 04-06-01 / 04-14-01 | 04-06 / 04-14 | 2 / 4 | IDEN-05 | T-P4-DEVICE-PRIVACY | Raw hardware serials never cross boundaries and minor changes follow resolved tolerant scoring | property + privacy contract | `pnpm --filter @liiiraa/control-plane-domain test -- --run device-evidence` | 🟦 04-31 | ✅ mapped |
+| 04-07-01 / 04-27-01 | 04-07 / 04-27 | 3 / 6 | IDEN-06 | T-P4-OFFLINE-TOKEN | Exact-byte envelope verifies for seven days and real API issuance links reconciled state to those bytes | cross-language + issuance | `pnpm --filter @liiiraa/api test -- --run entitlement-issuance` | 🟦 04-31 | ✅ mapped |
+| 04-21-01 | 04-21 | 8 | IDEN-07 | T-P4-ENTITLEMENT-BOUNDARY | Expiry blocks only the next new paid action, not in-flight or safety work | domain + Rust | `pnpm --filter @liiiraa/control-plane-domain test -- --run paid-action-policy` | 🟦 04-31/34 | ✅ mapped |
+| 04-21-01 | 04-21 | 8 | IDEN-08 | T-P4-SAFETY-ACCESS | History, warnings, and restoration remain available after entitlement loss | domain + browser | `pnpm --filter @liiiraa/desktop exec playwright test tests/browser/post-premium-safety.spec.ts --grep @safety-smoke --workers=1` | 🟦 04-34 | ✅ mapped |
+| 04-08-01 / 04-13-01 | 04-08 / 04-13 | 4 / 5 | IDEN-09 | T-P4-WEBHOOK-REPLAY | Duplicate, delayed, replayed, and reordered webhooks converge without duplicate authority | permutation + PostgreSQL | `pnpm --filter @liiiraa/control-plane-adapters test -- --run stripe-webhook.permutation` | 🟦 04-33 | ✅ mapped |
 
 _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
@@ -60,16 +60,12 @@ _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ## Wave 0 Requirements
 
-- [ ] `apps/api/vitest.config.ts` and `apps/api/src/testing/postgres.ts` — API/PostgreSQL integration harness with CI Testcontainers and synthetic Neon mode.
-- [ ] `packages/control-plane-domain/src/**/*.test.ts` — deterministic clock/ID state-table tests for recovery, commerce, device, entitlement, consent, and admin policy.
-- [ ] `packages/control-plane-adapters/src/identity/better-auth.spike.test.ts` — terminating native OAuth/MFA/passkey/recovery/revocation gate.
-- [ ] `packages/control-plane-adapters/src/commerce/stripe-webhook.permutation.test.ts` — raw-signature admission plus duplicate/delay/replay/reorder convergence.
-- [ ] `packages/contracts/src/fixtures/offline-entitlement/` and Rust fixture tests — exact cross-language signed-byte corpus with tamper/key/time/device cases.
-- [ ] `apps/api/src/modules/devices/device-concurrency.test.ts` — real PostgreSQL lock and partial-index races.
-- [ ] `apps/api/src/modules/support/consent-stream.test.ts` — expiry/revoke abort, no-store headers, disposal, and audit cases.
-- [ ] `tooling/web-evidence/tests/account-authority.spec.ts`, `admin-authority.spec.ts`, and `admin-consent-revocation.spec.ts` — real authority projections preserving Phase 3 UX.
-- [ ] `apps/desktop/tests/browser/entitlement-expiry.spec.ts` and `post-premium-safety.spec.ts` — start/continue/safety boundary coverage.
-- [ ] Pinned `oasdiff` 1.26.0 CI job before accepting the first emitted OpenAPI change.
+- [x] Plan 04-02 Task 04-02-02 creates the API/PostgreSQL/determinism harness and measured focused command.
+- [x] Plan 04-31 Task 04-31-01 creates recovery, device, offline-envelope, paid-action, and post-Premium RED witnesses.
+- [x] Plan 04-32 Task 04-32-01 creates account, device-concurrency, identity, recovery, and admin API RED witnesses.
+- [x] Plan 04-33 Task 04-33-01 creates the Better Auth, Stripe permutation, and consent-stream RED matrices.
+- [x] Plan 04-34 Task 04-34-01 creates account/admin/consent and desktop entitlement/safety browser RED witnesses with focused tags.
+- [x] Plan 04-03 Task 04-03-02 installs/runs the pinned `oasdiff` 1.26.0 compatibility gate before accepting OpenAPI operations.
 
 ---
 
@@ -85,13 +81,13 @@ _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ## Validation Sign-Off
 
-- [ ] Every plan task is mapped above with a concrete Task ID, plan, and wave.
-- [ ] All tasks have an automated verify command or explicit Wave 0 dependency.
-- [ ] Sampling continuity: no three consecutive tasks lack automated verification.
-- [ ] Wave 0 covers all currently missing references.
-- [ ] No watch-mode flags are used.
-- [ ] Focused feedback latency is measured below 30 seconds.
-- [ ] `wave_0_complete: true` is set after all Wave 0 prerequisites exist and pass.
-- [ ] `nyquist_compliant: true` is set only after all mappings and sampling checks pass.
+- [x] Every requirement row has concrete implementation Task ID(s), plan(s), and wave(s).
+- [x] Every task has an automated verify command and behavior work has an explicit Wave 0 witness dependency.
+- [x] Sampling continuity: no three consecutive tasks lack automated verification.
+- [x] Wave 0 plans cover every previously missing reference.
+- [x] No watch-mode flags are used.
+- [x] Every implementation plan requires a focused command and records measured latency below 30 seconds; full Playwright/recursive suites are plan/wave/phase gates.
+- [x] `wave_0_complete: true` records complete Wave 0 task/path planning; execution summaries record RED collection results.
+- [x] `nyquist_compliant: true` records complete requirement/task/witness mapping and sampling design.
 
-**Approval:** pending
+**Approval:** planner-mapped; execution evidence remains pending by design

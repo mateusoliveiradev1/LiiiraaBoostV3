@@ -260,6 +260,7 @@ Version and publication data were checked against the correct npm/crates.io ecos
 | `hkdf`          | crates.io | since 2015 | 4.30M/week | `RustCrypto/KDFs`                     | OK      | Approved. [VERIFIED: package-legitimacy seam] |
 | `subtle`        | crates.io | since 2017 | 11.3M/week | `dalek-cryptography/subtle`           | OK      | Approved. [VERIFIED: package-legitimacy seam] |
 | `keyring`       | crates.io | since 2016 | 587K/week  | `open-source-cooperative/keyring-rs`  | OK      | Approved. [VERIFIED: package-legitimacy seam] |
+| `windows`       | crates.io | established official Microsoft crate | 63.6M recent | `microsoft/windows-rs` | OK | Approved at 0.62.2 after crates.io/cargo metadata verification; used only for Windows CNG/native callback support. [VERIFIED: crates.io registry] |
 
 **Packages removed due to `SLOP` verdict:** none. [VERIFIED: package-legitimacy seam]
 
@@ -756,32 +757,17 @@ Headers reduce unintended browser/proxy persistence but do not replace continuou
 | A14 | Rebuilding `.next`, deployed OCI, and installed desktop artifacts is sufficient after the authority refactor without deleting user-owned generated state. | Runtime State Inventory                   | Undiscovered caches/service registrations could keep stale behavior active.                                               |
 | A15 | The described adversarial test matrix and staged evidence bundle are adequate for Phase 4 planning.                                                       | Common Pitfalls; Validation Architecture  | Missing provider, Windows, concurrency, accessibility, privacy, or recovery cases could pass a false gate.                |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does Better Auth pass the native-client and cross-method security gate?**
-   - What we know: version 1.6.25 documents the component capabilities, but its 2FA plugin does not automatically gate social/passkey sign-ins and reviewed docs did not establish dynamic loopback-port support. [CITED: https://github.com/better-auth/better-auth/blob/v1.6.25/docs/content/docs/plugins/2fa.mdx] [CITED: https://github.com/better-auth/better-auth/blob/v1.6.25/docs/content/docs/plugins/oauth-provider.mdx]
-   - What's unclear: Windows loopback redirect ergonomics, passkey step-up, recovery holds/contest, method-wide recent authentication, revocation latency, and abuse controls. [ASSUMED]
-   - Recommendation: make this the first terminating spike; approve with recorded evidence or reject and select the alternate adapter before identity schema/route work. [ASSUMED]
+1. **Identity adapter acceptance — resolved by a terminating gate.** Better Auth 1.6.25 is evaluated only in the isolated Plan 04-05 spike after package-legitimacy approval and before any production manifest or schema commitment. PASS requires every D-01–D-10 method, native-client, step-up, recovery, revocation, and abuse-resistance row. REJECT is not phase completion: it creates a blocking replacement-planning checkpoint and requires `$gsd-plan-phase 4 --research` to select and plan another `IdentityProviderPort` adapter before any downstream identity plan may execute. No product behavior changes with the verdict.
 
-2. **Which hardware components and tolerance threshold define the same PC?**
-   - What we know: raw serial persistence is forbidden and minor upgrades/reinstalls must not consume transfer. [VERIFIED: CONTEXT.md]
-   - What's unclear: available Windows component stability, weights, minimum evidence, VM behavior, salt bootstrap, and false-positive/negative rates. [ASSUMED]
-   - Recommendation: collect only synthetic/consented lab fixtures, threat-model correlation, property-test scoring, and require Security approval of normalization/threshold/key versioning. [ASSUMED]
+2. **Device-evidence threshold — resolved for Phase 4 synthetic validation.** The local collector normalizes five component classes and emits only per-component digests: platform trust/baseboard (40 points), CPU (25), system storage controller (15), GPU (10), and memory topology (10). Admission requires at least three available classes including platform trust/baseboard or CPU. A score of 65–100 is the same PC, 40–64 requires explainable online revalidation, and 0–39 is replacement evidence. Reinstallation contributes no identifier; one ordinary GPU, storage, or memory change cannot consume a transfer by itself. VMs use an explicit virtual-platform class and never compare against physical-device evidence. Account salt, server HMAC key versioning, raw-sentinel scans, and synthetic/property matrices are mandatory evidence before binding work.
 
-3. **What are the audit anchor cadence, signing custody, and bounded retention schedule?**
-   - What we know: audit is append-only, externally anchored, and corrections append; S3 Object Lock supports retention-controlled objects. [VERIFIED: CONTEXT.md] [CITED: https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html]
-   - What's unclear: checkpoint frequency, chain segmentation, signing/KMS ownership, legal holds, billing/antifraud retention, and verification drill frequency. [ASSUMED]
-   - Recommendation: decide these in a security/privacy ADR before migrations; keep legal retention values explicitly unset until reviewed. [ASSUMED]
+3. **Audit cadence, custody, and retention — resolved.** Each audit chain segment anchors every 15 minutes or 1,000 appended events, whichever occurs first; a daily worker verifies the newest checkpoint and a monthly drill verifies a complete segment from database head to immutable object. The API may request an anchor but cannot hold the signing key or delete/shorten retention. A separately scoped audit role uses an asymmetric KMS key and Object-Lock compliance storage. Phase 4 bounded retention is: billing/invoice/tax evidence 5 years after the transaction, antifraud/dispute evidence 5 years after case closure, security/recovery events 2 years after closure, and administrative/audit-chain events plus anchors 5 years after append. Legal hold is an explicit separately authorized extension with purpose and expiry; it never creates unbounded default retention. These are the executable non-production product durations; external legal/security review remains a production-promotion gate rather than a persistence placeholder.
 
-4. **Are provider-hosted preview identities acceptable for the first invited group?**
-   - What we know: provider URLs are allowed for bounded early testing, but stable owned callback/email domains are required before broader closed beta. [VERIFIED: CONTEXT.md]
-   - What's unclear: ownership/access to Vercel, Neon, Stripe, AWS, GHCR, and Render accounts and whether SES sandbox recipient verification fits every friend tester. [ASSUMED]
-   - Recommendation: inventory accounts/dashboard configuration in Wave 0 and define a promotion checkpoint for owned domains plus SES production-access review. [CITED: https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html]
+4. **Provider-account availability — resolved for the first invited group.** Provider-hosted Vercel/Render URLs, Neon synthetic branches, Stripe test mode, private GHCR, S3 staging buckets, and SES sandbox verified recipients are accepted for bounded early invited testing. Every tester must have an individually verified SES recipient and isolated identity/dataset. Missing access to any named provider blocks that adapter's staging plan rather than substituting production credentials. Owned callback/email domains and SES production-access review remain mandatory before broader closed beta per D-62.
 
-5. **What exact support attachment types and field classes are permitted?**
-   - What we know: consent is case/purpose/field-class scoped for at most 72 hours and attachments are removed within 30 days of closure. [VERIFIED: CONTEXT.md]
-   - What's unclear: MIME allowlist, archive rules, malware scanning boundary, extraction format, per-field redaction, size quotas, and temporary-copy disposal evidence. [ASSUMED]
-   - Recommendation: define a versioned diagnostic manifest and deny unknown fields/types before enabling upload or operator view. [ASSUMED]
+5. **Diagnostic manifest policy — resolved.** Manifest version `diagnostic.v1` admits only generated field classes `hardware-summary`, `application-log-redacted`, `optimization-plan-receipt`, `recovery-journal-excerpt`, and `crash-metadata`; MIME is limited to UTF-8 `application/json` and `text/plain`. Archives, executables, memory dumps, registry exports, environment dumps, browser data, credentials, and unknown fields/types are denied. Each field is capped at 5 MiB, each case upload at 25 MiB, filenames/object keys are server-generated, text passes token/secret redaction plus malware/content scanning, and operator delivery is an API-mediated no-store stream. Revocation/expiry aborts the stream and zeroes/discards temporary buffers; attachment objects are deleted no later than 30 days after case closure.
 
 ## Environment Availability
 
