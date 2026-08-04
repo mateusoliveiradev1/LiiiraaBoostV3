@@ -209,6 +209,30 @@
       "allowedLifecycleScripts": {}
     },
     {
+      "name": "@aws-sdk/client-s3",
+      "version": "3.1102.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/aws/aws-sdk-js-v3",
+      "license": "Apache-2.0",
+      "purpose": "Support object and audit-anchor storage adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@aws-sdk/client-sesv2",
+      "version": "3.1102.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/aws/aws-sdk-js-v3",
+      "license": "Apache-2.0",
+      "purpose": "Transactional identity and support email adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {}
+    },
+    {
       "name": "@axe-core/playwright",
       "version": "4.12.1",
       "ecosystem": "npm",
@@ -223,6 +247,54 @@
       },
       "scope": "phase-02",
       "verdict": "OK"
+    },
+    {
+      "name": "@better-auth/oauth-provider",
+      "version": "1.6.25",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/better-auth/better-auth",
+      "license": "MIT",
+      "purpose": "Approved OAuth 2.1 and native PKCE identity adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed.",
+      "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@better-auth/passkey",
+      "version": "1.6.25",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/better-auth/better-auth",
+      "license": "MIT",
+      "purpose": "Approved passkey identity adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed.",
+      "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@fastify/cors",
+      "version": "11.3.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/fastify/fastify-cors",
+      "license": "MIT",
+      "purpose": "Explicit API origin allowlists",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {}
+    },
+    {
+      "name": "@fastify/helmet",
+      "version": "13.1.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/fastify/fastify-helmet",
+      "license": "MIT",
+      "purpose": "Baseline API response security headers",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {}
     },
     {
       "name": "@formatjs/cli",
@@ -512,6 +584,18 @@
       }
     },
     {
+      "name": "better-auth",
+      "version": "1.6.25",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/better-auth/better-auth",
+      "license": "MIT",
+      "purpose": "Approved identity and session adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed.",
+      "allowedLifecycleScripts": {}
+    },
+    {
       "name": "dependency-cruiser",
       "version": "18.1.0",
       "ecosystem": "npm",
@@ -540,6 +624,20 @@
       "allowedLifecycleScripts": {}
     },
     {
+      "name": "fastify",
+      "version": "5.10.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/fastify/fastify",
+      "license": "MIT",
+      "purpose": "Control-plane API HTTP boundary",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {
+        "prepublishOnly": "cross-env PREPUBLISH=true borp --reporter=@jsumners/line-reporter && npm run test:validator:integrity && npm run build:sync-version"
+      }
+    },
+    {
       "name": "json-schema-to-typescript",
       "version": "15.0.4",
       "ecosystem": "npm",
@@ -552,6 +650,18 @@
       "allowedLifecycleScripts": {
         "prepublishOnly": "npm test"
       }
+    },
+    {
+      "name": "kysely",
+      "version": "0.29.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/kysely-org/kysely",
+      "license": "MIT",
+      "purpose": "Typed PostgreSQL query and transaction boundary",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {}
     },
     {
       "name": "lucide-react",
@@ -583,6 +693,18 @@
       },
       "scope": "phase-02",
       "verdict": "SUS: too-new"
+    },
+    {
+      "name": "pg",
+      "version": "8.22.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/brianc/node-postgres",
+      "license": "MIT",
+      "purpose": "PostgreSQL pool and driver",
+      "disposition": "OK",
+      "reviewReason": "",
+      "allowedLifecycleScripts": {}
     },
     {
       "name": "pnpm",
@@ -696,6 +818,20 @@
       "verdict": "SUS: too-new"
     },
     {
+      "name": "stripe",
+      "version": "22.4.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/stripe/stripe-node",
+      "license": "MIT",
+      "purpose": "Signed payment event and commerce provider adapter",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {
+        "prepack": "just install && just build"
+      }
+    },
+    {
       "name": "tailwindcss",
       "version": "4.3.3",
       "ecosystem": "npm",
@@ -708,6 +844,20 @@
       "allowedLifecycleScripts": {},
       "scope": "phase-02",
       "verdict": "SUS: too-new"
+    },
+    {
+      "name": "testcontainers",
+      "version": "12.0.4",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/testcontainers/testcontainers-node",
+      "license": "MIT",
+      "purpose": "Isolated PostgreSQL integration test harness",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04.",
+      "allowedLifecycleScripts": {
+        "prepack": "shx cp ../../README.md . && shx cp ../../LICENSE ."
+      }
     },
     {
       "name": "turbo",

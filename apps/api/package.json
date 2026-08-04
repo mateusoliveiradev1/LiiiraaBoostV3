@@ -9,11 +9,15 @@
     "test:postgres": "vitest --config vitest.config.ts --run --mode postgres"
   },
   "dependencies": {
+    "@fastify/cors": "11.3.0",
+    "@fastify/helmet": "13.1.0",
     "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/control-plane-adapters": "workspace:*",
-    "@liiiraa/control-plane-application": "workspace:*"
+    "@liiiraa/control-plane-application": "workspace:*",
+    "fastify": "5.10.0"
   },
   "devDependencies": {
+    "testcontainers": "12.0.4",
     "vitest": "4.1.10"
   }
 }

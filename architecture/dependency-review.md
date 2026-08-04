@@ -6,21 +6,32 @@
 
 No dependency package has been installed. The verifier fetched public registry endpoints without registry credentials, confirmed every exact identity and version, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
 
-The 12 entries under **Review required before installation** need explicit human approval because the research legitimacy audit classified their recent official releases as `SUS: too-new`. That classification is a review trigger, not evidence of a malicious package.
+The 23 entries under **Review required before installation** need explicit human approval because the research legitimacy audit classified their recent official releases as `SUS: too-new`. That classification is a review trigger, not evidence of a malicious package.
 
 ## Review required before installation
 
 | Identity | Ecosystem | Registry evidence | Official repository | License | Lifecycle scripts | Review rationale |
 | --- | --- | --- | --- | --- | --- | --- |
+| `@aws-sdk/client-s3@3.1102.0` | npm | [verified exact version](https://registry.npmjs.org/%40aws-sdk%2Fclient-s3/3.1102.0) | [https://github.com/aws/aws-sdk-js-v3](https://github.com/aws/aws-sdk-js-v3) | `Apache-2.0` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `@aws-sdk/client-sesv2@3.1102.0` | npm | [verified exact version](https://registry.npmjs.org/%40aws-sdk%2Fclient-sesv2/3.1102.0) | [https://github.com/aws/aws-sdk-js-v3](https://github.com/aws/aws-sdk-js-v3) | `Apache-2.0` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `@better-auth/oauth-provider@1.6.25` | npm | [verified exact version](https://registry.npmjs.org/%40better-auth%2Foauth-provider/1.6.25) | [https://github.com/better-auth/better-auth](https://github.com/better-auth/better-auth) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed. |
+| `@better-auth/passkey@1.6.25` | npm | [verified exact version](https://registry.npmjs.org/%40better-auth%2Fpasskey/1.6.25) | [https://github.com/better-auth/better-auth](https://github.com/better-auth/better-auth) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed. |
+| `@fastify/cors@11.3.0` | npm | [verified exact version](https://registry.npmjs.org/%40fastify%2Fcors/11.3.0) | [https://github.com/fastify/fastify-cors](https://github.com/fastify/fastify-cors) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `@fastify/helmet@13.1.0` | npm | [verified exact version](https://registry.npmjs.org/%40fastify%2Fhelmet/13.1.0) | [https://github.com/fastify/fastify-helmet](https://github.com/fastify/fastify-helmet) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
 | `@typescript-eslint/eslint-plugin@8.65.0` | npm | [verified exact version](https://registry.npmjs.org/%40typescript-eslint%2Feslint-plugin/8.65.0) | [https://github.com/typescript-eslint/typescript-eslint](https://github.com/typescript-eslint/typescript-eslint) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typescript-eslint/parser@8.65.0` | npm | [verified exact version](https://registry.npmjs.org/%40typescript-eslint%2Fparser/8.65.0) | [https://github.com/typescript-eslint/typescript-eslint](https://github.com/typescript-eslint/typescript-eslint) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/compiler@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fcompiler/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/http@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fhttp/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/json-schema@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fjson-schema/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/openapi3@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fopenapi3/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
+| `better-auth@1.6.25` | npm | [verified exact version](https://registry.npmjs.org/better-auth/1.6.25) | [https://github.com/better-auth/better-auth](https://github.com/better-auth/better-auth) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed. |
 | `dependency-cruiser@18.1.0` | npm | [verified exact version](https://registry.npmjs.org/dependency-cruiser/18.1.0) | [https://github.com/sverweij/dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | `MIT` | `postpack`: `git restore package.json bin src types configs`<br>`prepack`: `npm-run-all --node-run prepack:format-src-with-tabs prepack:clean-pkg-json`<br>`prepare`: `husky` | Research legitimacy audit flagged the recent official release as too new; published metadata also declares packaging lifecycle scripts. |
 | `eslint@10.8.0` | npm | [verified exact version](https://registry.npmjs.org/eslint/10.8.0) | [https://github.com/eslint/eslint](https://github.com/eslint/eslint) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
+| `fastify@5.10.0` | npm | [verified exact version](https://registry.npmjs.org/fastify/5.10.0) | [https://github.com/fastify/fastify](https://github.com/fastify/fastify) | `MIT` | `prepublishOnly`: `cross-env PREPUBLISH=true borp --reporter=@jsumners/line-reporter && npm run test:validator:integrity && npm run build:sync-version` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `kysely@0.29.4` | npm | [verified exact version](https://registry.npmjs.org/kysely/0.29.4) | [https://github.com/kysely-org/kysely](https://github.com/kysely-org/kysely) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
 | `prettier@3.9.6` | npm | [verified exact version](https://registry.npmjs.org/prettier/3.9.6) | [https://github.com/prettier/prettier](https://github.com/prettier/prettier) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
+| `stripe@22.4.0` | npm | [verified exact version](https://registry.npmjs.org/stripe/22.4.0) | [https://github.com/stripe/stripe-node](https://github.com/stripe/stripe-node) | `MIT` | `prepack`: `just install && just build` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `testcontainers@12.0.4` | npm | [verified exact version](https://registry.npmjs.org/testcontainers/12.0.4) | [https://github.com/testcontainers/testcontainers-node](https://github.com/testcontainers/testcontainers-node) | `MIT` | `prepack`: `shx cp ../../README.md . && shx cp ../../LICENSE .` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
 | `turbo@2.10.7` | npm | [verified exact version](https://registry.npmjs.org/turbo/2.10.7) | [https://github.com/vercel/turborepo](https://github.com/vercel/turborepo) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `typescript@6.0.3` | npm | [verified exact version](https://registry.npmjs.org/typescript/6.0.3) | [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) | `Apache-2.0` | None | Research legitimacy audit flagged the recent official release as too new; this compatibility pin intentionally remains below TypeScript 7. |
 | `vitest@4.1.10` | npm | [verified exact version](https://registry.npmjs.org/vitest/4.1.10) | [https://github.com/vitest-dev/vitest](https://github.com/vitest-dev/vitest) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
@@ -40,6 +51,7 @@ The 12 entries under **Review required before installation** need explicit human
 | `typify@0.7.0` | cargo | [verified exact version](https://crates.io/api/v1/crates/typify/0.7.0) | [https://github.com/oxidecomputer/typify](https://github.com/oxidecomputer/typify) | `Apache-2.0` | None | Registry and repository evidence matched the researched pin. |
 | `ajv@8.20.0` | npm | [verified exact version](https://registry.npmjs.org/ajv/8.20.0) | [https://github.com/ajv-validator/ajv](https://github.com/ajv-validator/ajv) | `MIT` | `prepublish`: `npm run build` | Registry and repository evidence matched the researched pin. |
 | `json-schema-to-typescript@15.0.4` | npm | [verified exact version](https://registry.npmjs.org/json-schema-to-typescript/15.0.4) | [https://github.com/bcherny/json-schema-to-typescript](https://github.com/bcherny/json-schema-to-typescript) | `MIT` | `prepublishOnly`: `npm test` | Registry and repository evidence matched the researched pin. |
+| `pg@8.22.0` | npm | [verified exact version](https://registry.npmjs.org/pg/8.22.0) | [https://github.com/brianc/node-postgres](https://github.com/brianc/node-postgres) | `MIT` | None | Registry and repository evidence matched the researched pin. |
 | `pnpm@11.17.0` | npm | [verified exact version](https://registry.npmjs.org/pnpm/11.17.0) | [https://github.com/pnpm/pnpm](https://github.com/pnpm/pnpm) | `MIT` | None | Registry and repository evidence matched the researched pin. |
 | `node@24.18.0` | toolchain | [verified exact version](https://nodejs.org/dist/index.json) | [https://github.com/nodejs/node](https://github.com/nodejs/node) | `MIT` | None | Registry and repository evidence matched the researched pin. |
 | `rust@1.97.1` | toolchain | [verified exact version](https://static.rust-lang.org/dist/channel-rust-1.97.1.toml) | [https://github.com/rust-lang/rust](https://github.com/rust-lang/rust) | `Apache-2.0 OR MIT` | None | Registry and repository evidence matched the researched pin. |
@@ -50,7 +62,10 @@ The 12 entries under **Review required before installation** need explicit human
 | --- | --- | --- | --- | --- | --- | --- |
 | `ajv@8.20.0` | npm | [verified exact version](https://registry.npmjs.org/ajv/8.20.0) | [https://github.com/ajv-validator/ajv](https://github.com/ajv-validator/ajv) | `MIT` | `prepublish`: `npm run build` | Registry and repository evidence matched the researched pin. |
 | `dependency-cruiser@18.1.0` | npm | [verified exact version](https://registry.npmjs.org/dependency-cruiser/18.1.0) | [https://github.com/sverweij/dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | `MIT` | `postpack`: `git restore package.json bin src types configs`<br>`prepack`: `npm-run-all --node-run prepack:format-src-with-tabs prepack:clean-pkg-json`<br>`prepare`: `husky` | Research legitimacy audit flagged the recent official release as too new; published metadata also declares packaging lifecycle scripts. |
+| `fastify@5.10.0` | npm | [verified exact version](https://registry.npmjs.org/fastify/5.10.0) | [https://github.com/fastify/fastify](https://github.com/fastify/fastify) | `MIT` | `prepublishOnly`: `cross-env PREPUBLISH=true borp --reporter=@jsumners/line-reporter && npm run test:validator:integrity && npm run build:sync-version` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
 | `json-schema-to-typescript@15.0.4` | npm | [verified exact version](https://registry.npmjs.org/json-schema-to-typescript/15.0.4) | [https://github.com/bcherny/json-schema-to-typescript](https://github.com/bcherny/json-schema-to-typescript) | `MIT` | `prepublishOnly`: `npm test` | Registry and repository evidence matched the researched pin. |
+| `stripe@22.4.0` | npm | [verified exact version](https://registry.npmjs.org/stripe/22.4.0) | [https://github.com/stripe/stripe-node](https://github.com/stripe/stripe-node) | `MIT` | `prepack`: `just install && just build` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
+| `testcontainers@12.0.4` | npm | [verified exact version](https://registry.npmjs.org/testcontainers/12.0.4) | [https://github.com/testcontainers/testcontainers-node](https://github.com/testcontainers/testcontainers-node) | `MIT` | `prepack`: `shx cp ../../README.md . && shx cp ../../LICENSE .` | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04. |
 
 Only `preinstall`, `install`, and `postinstall` execute during a normal registry package installation. None of the reviewed npm packages declares those consumer-install hooks. The packaging and publication hooks shown above are still exact-allowlisted so metadata drift fails verification.
 
@@ -76,6 +91,12 @@ cargo:proptest@1.11.0
 cargo:serde@1.0.229
 cargo:serde_json@1.0.151
 cargo:typify@0.7.0
+npm:@aws-sdk/client-s3@3.1102.0
+npm:@aws-sdk/client-sesv2@3.1102.0
+npm:@better-auth/oauth-provider@1.6.25
+npm:@better-auth/passkey@1.6.25
+npm:@fastify/cors@11.3.0
+npm:@fastify/helmet@13.1.0
 npm:@typescript-eslint/eslint-plugin@8.65.0
 npm:@typescript-eslint/parser@8.65.0
 npm:@typespec/compiler@1.14.0
@@ -83,11 +104,17 @@ npm:@typespec/http@1.14.0
 npm:@typespec/json-schema@1.14.0
 npm:@typespec/openapi3@1.14.0
 npm:ajv@8.20.0
+npm:better-auth@1.6.25
 npm:dependency-cruiser@18.1.0
 npm:eslint@10.8.0
+npm:fastify@5.10.0
 npm:json-schema-to-typescript@15.0.4
+npm:kysely@0.29.4
+npm:pg@8.22.0
 npm:pnpm@11.17.0
 npm:prettier@3.9.6
+npm:stripe@22.4.0
+npm:testcontainers@12.0.4
 npm:turbo@2.10.7
 npm:typescript@6.0.3
 npm:vitest@4.1.10
