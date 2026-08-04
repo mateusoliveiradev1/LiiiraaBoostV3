@@ -1,230 +1,172 @@
 ---
 phase: 03-complete-web-experience
-verified: 2026-07-31T18:17:48Z
-status: human_needed
-score: 70/71 must-haves verified
+verified: 2026-08-04T01:58:38Z
+status: passed
+score: 234/234 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
-  previous_status: gaps_found
-  previous_score: 68/71
+  previous_status: human_needed
+  previous_score: 70/71
   gaps_closed:
-    - 'W01-W18 now prove all 24 canonical public/account/admin error outcomes through browser-observed bilingual reachability evidence.'
-    - 'D-25 is closed by distinct localized account 403/404/410/500 and admin 403/404/410/500 behavior plus final verifier consumption.'
+    - "Cross-surface visual polish and desktop consistency now have renewed literal human approval bound to the current 60-route/480-candidate digest."
   gaps_remaining: []
   regressions: []
-human_verification:
-  - test: 'Compare representative public wide/mobile, account wide/reflow, and admin wide/mobile goldens beside approved Phase 2 desktop captures in PT-BR and English.'
-    expected: 'The three web surfaces feel deliberately related to the desktop product, preserve hierarchy and readability, and remain distinctive rather than template-like at every reviewed width and locale.'
-    why_human: 'Automated screenshot stability, token, accessibility, and anti-pattern gates cannot certify subjective polish or brand coherence.'
+deferred:
+  - truth: "Account and administrative previews remain disconnected and may not exercise real authority."
+    addressed_in: "Phase 4"
+    evidence: "Phase 4 goal connects secure subscription/account/device authority and isolated consent-bound administration."
+  - truth: "No signed official installer or public distribution authority exists yet."
+    addressed_in: "Phase 10"
+    evidence: "Phase 10 goal owns trusted distribution and production operations; Phase 3 remains fail closed."
 ---
 
 # Phase 3: Complete Web Experience Verification Report
 
 **Phase Goal:** Visitors and future account users can traverse a polished, truthful web ecosystem whose public, account, and administrative surfaces are independently deployable and visually consistent with the desktop product.
 
-**Verified:** 2026-07-31T18:17:48Z
-**Status:** human_needed
-**Re-verification:** Yes — after Plans 03-33 through 03-36 gap closure
+**Verified:** 2026-08-04T01:58:38Z  
+**Status:** passed  
+**Re-verification:** Yes — final verification after all 82 plans and renewed Plan 03-45/03-46 approval and evidence promotion.
 
 ## Goal Achievement
 
-All automated Phase 3 goal truths are now substantive, wired, independently buildable, and behaviorally exercised. Plans 03-33 through 03-36 close the previous route/error gap with distinct account/admin failure models, real W17 browser navigation across all 24 surface/status/locale outcomes, source-bound deterministic evidence, and a final verifier that rejects declaration-only or stale/tampered reachability claims. The remaining item is the explicitly deferred subjective comparison of web polish and desktop brand coherence.
+The current codebase and evidence graph satisfy all four roadmap success criteria. This conclusion does not rely on SUMMARY claims: source files, generated artifacts, current SHA-256 bindings, focused behavioral tests, fresh builds, the recursive verifier, and the full workspace test graph were inspected or executed independently.
 
-### Observable Truths
+### Roadmap Observable Truths
 
-|   # | Plan | Truth                                                                                    | Status    | Evidence                                                                                                                                                                                                  |
-| --: | :--: | ---------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   1 |  01  | No install before human review of the three SUS identities                               | VERIFIED  | Approval record is human-bound to evidence hash/commit and predates the approved install scope.                                                                                                           |
-|   2 |  01  | Approval is exact-version/repository scoped                                              | VERIFIED  | `03-DEPENDENCY-APPROVAL.md` locks three exact identities and forbids substitutions/additions.                                                                                                             |
-|   3 |  02  | Seven web roots have unique ownership/layer/runtime reservations                         | VERIFIED  | Canonical module graph and 46 passing architecture tests.                                                                                                                                                 |
-|   4 |  02  | Public cannot depend on preview; admin is not a public route                             | VERIFIED  | Live graph mutations reject production-to-fixture, cross-composition, deep-import, and duplicate ownership.                                                                                               |
-|   5 |  03  | Critical routes/content/releases/receipts use one closed contract source                 | VERIFIED  | `web.tsp` is imported by `main.tsp`; generated TS/Rust/schema artifacts drift-check cleanly.                                                                                                              |
-|   6 |  03  | Mutation/approved artifact cannot be represented without authority fields                | VERIFIED  | Literal false/unavailable contract fields and mutation tests.                                                                                                                                             |
-|   7 |  04  | Production core and fixture preview have separate roots/exports                          | VERIFIED  | Separate manifests/public roots and enforced one-way dependency.                                                                                                                                          |
-|   8 |  04  | Neither package introduces an unapproved external identity                               | VERIFIED  | Workspace-only runtime edges; supply-chain pin verification passes.                                                                                                                                       |
-|   9 |  05  | Shared UI and evidence tooling have different ownership/runtime classes                  | VERIFIED  | `web-features` production vs `web-evidence` tooling boundaries.                                                                                                                                           |
-|  10 |  05  | Feature code consumes public production roots; tooling does not enter runtime            | VERIFIED  | Architecture graph and manifests enforce direction.                                                                                                                                                       |
-|  11 |  06  | Public/docs/releases is independently buildable static-first production composition      | VERIFIED  | Fresh standalone build succeeded; 2,070 files under public standalone root.                                                                                                                               |
-|  12 |  06  | Public manifest uses approved identities and no preview adapter                          | VERIFIED  | Exact Next/MDX/intl pins; no `@liiiraa/web-preview` dependency.                                                                                                                                           |
-|  13 |  07  | Account is independently buildable and fixture-classified until Phase 4                  | VERIFIED  | Fresh standalone account build and literal disconnected fixture composition.                                                                                                                              |
-|  14 |  07  | Account scaffold issues no session/mutation/shared cookie authority                      | VERIFIED  | No cookies/mutations; proxy and E2E enforce disconnected authority.                                                                                                                                       |
-|  15 |  08  | Admin is a separate fixture deployable with no ordinary navigation edge                  | VERIFIED  | Fresh distinct standalone build; no public/account navigation in artifact tests.                                                                                                                          |
-|  16 |  08  | Admin exposes no auth/diagnostic/consent/mutation authority                              | VERIFIED  | Strict proxy rejects cross-surface state; no uploads or remote mutations.                                                                                                                                 |
-|  17 |  09  | One generation command emits deterministic schema/TS/Rust transports                     | VERIFIED  | Contract generation and drift tests pass for nine artifacts.                                                                                                                                              |
-|  18 |  09  | Existing desktop/shell schemas remain semantically unchanged                             | VERIFIED  | Contract compatibility and desktop emitting consumer build pass.                                                                                                                                          |
-|  19 |  10  | Untrusted web documents validate before transport mapping                                | VERIFIED  | TS/Rust validators invoke generated schema before narrowing/deserialization.                                                                                                                              |
-|  20 |  10  | TS and Rust return equivalent bounded/redacted results                                   | VERIFIED  | Cross-language validation suites pass.                                                                                                                                                                    |
-|  21 |  11  | Seven roots are active, discovered, exact-pinned, and legal                              | VERIFIED  | Workspace test graph and lockfile/architecture checks pass.                                                                                                                                               |
-|  22 |  11  | Public/account/admin check/test/build independently                                      | VERIFIED  | Fresh `pnpm web:build`: 10/10 tasks and three distinct BUILD_IDs.                                                                                                                                         |
-|  23 |  12  | One manifest owns public/docs/release/account/admin/error route identity                 | VERIFIED  | Closed 53-route manifest and projection tests.                                                                                                                                                            |
-|  24 |  12  | Navigation/sitemap/redirects/deep links are projections                                  | VERIFIED  | Route helpers and omission/mutation tests consume one manifest.                                                                                                                                           |
-|  25 |  13  | W01-W18 is closed, bilingual, deterministic, and fixture-only                            | VERIFIED  | Scenario tests pass; final verifier reports 18 scenarios.                                                                                                                                                 |
-|  26 |  13  | Phase 4 commands cancel/fail/no-change only                                              | VERIFIED  | Adapter tests prove abort, invalid, cancellation, failure, and schema-valid no-change behavior.                                                                                                           |
-|  27 |  14  | Each requirement has runnable five-dimension evidence                                    | VERIFIED  | Four final quality manifests resolve 20 evidence dimensions.                                                                                                                                              |
-|  28 |  14  | Missing route/content/release/security/visual/preview evidence fails                     | VERIFIED  | Omission/mutation suites in `verify-phase.test.ts` and publication tests pass.                                                                                                                            |
-|  29 |  15  | Public shell is static-first, bilingual, cacheable, and cookie/script-origin constrained | VERIFIED  | Public build, headers, no cookie issuance, route tests; strict inline policy remains transparently report-only.                                                                                           |
-|  30 |  15  | Navigation/sitemap/robots/alternates/404 derive from route manifest                      | VERIFIED  | Indexing mutation tests and production metadata routes pass.                                                                                                                                              |
-|  31 |  16  | Account owns dynamic CSP/origin/noindex/cookie policy/shell/failures                     | VERIFIED  | Nonce policy tests, private headers, distinct origin, 404/500 models.                                                                                                                                     |
-|  32 |  16  | Account persistently labels deterministic preview/disconnected authority                 | VERIFIED  | Layout/provenance rail and E2E assertions.                                                                                                                                                                |
-|  33 |  17  | Admin owns distinct strict policy/access boundary with no ordinary cross-link            | VERIFIED  | Proxy, access-boundary tests, and artifact scans pass.                                                                                                                                                    |
-|  34 |  17  | Admin persists role and preview provenance                                               | VERIFIED  | Role-scoped shell and E2E coverage.                                                                                                                                                                       |
-|  35 |  18  | Surfaces share authored tokens/status/accessibility without shared authority             | VERIFIED  | Shared token/component package, distinct shells, detector clean, automated a11y evidence.                                                                                                                 |
-|  36 |  18  | Brand/product registers are visibly related and not generic templates                    | UNCERTAIN | Screenshots and anti-pattern scan are strong, but visual polish/consistency has no explicit human sign-off.                                                                                               |
-|  37 |  19  | Only valid bilingual/current/evidenced route-owned content is public/searchable          | VERIFIED  | Admission mutation tests pass.                                                                                                                                                                            |
-|  38 |  19  | Search respects locale/version/availability/indexing and excludes preview/private data   | VERIFIED  | Search tests and W06 browser assertions.                                                                                                                                                                  |
-|  39 |  20  | Home sells through evidence/recovery without invented gain or urgency                    | VERIFIED  | Truth-copy scan and W01/W02 tests; no deceptive percentage/urgency claims.                                                                                                                                |
-|  40 |  20  | Compatibility CTA and admitted real desktop capture dominate proof                       | VERIFIED  | Capture sidecars/hashes and Home E2E/screenshot evidence.                                                                                                                                                 |
-|  41 |  21  | Product/evidence/plans/search/support/policies/status/errors are bilingual               | VERIFIED  | Public catalog content, route builds, and browser tests.                                                                                                                                                  |
-|  42 |  21  | Plans expose limits and commercial terms before simulated confirmation                   | VERIFIED  | Bilingual policy/catalog content and admission tests.                                                                                                                                                     |
-|  43 |  21  | Public 403/410/500 are distinct authored recoverable states                              | VERIFIED  | W17 browser test exercises four public errors and redaction.                                                                                                                                              |
-|  44 |  22  | Docs resolve exact locale/version/channel/task/section and preserve history              | VERIFIED  | Documentation resolver/search tests pass.                                                                                                                                                                 |
-|  45 |  22  | Desktop contextual links accept canonical compatible sections only                       | VERIFIED  | Unsafe/stale/unknown link tests fail closed.                                                                                                                                                              |
-|  46 |  23  | Visitors traverse current/historical task-led docs in both locales                       | VERIFIED  | 16-record parity corpus and W03-W05 browser tests.                                                                                                                                                        |
-|  47 |  23  | Mobile preserves docs controls/evidence/risk/recovery                                    | VERIFIED  | 320/390 reflow and accessibility evidence.                                                                                                                                                                |
-|  48 |  24  | Release metadata may exist while Phase 3 artifact stays blocked                          | VERIFIED  | 57 release policy tests; current record returns distribution-not-approved.                                                                                                                                |
-|  49 |  24  | Missing/mismatched trust fields have no bypass branch                                    | VERIFIED  | Exhaustive integrity disagreement tests and no-continue E2E.                                                                                                                                              |
-|  50 |  25  | Visitors inspect channels/notes/compatibility/integrity without dev installer            | VERIFIED  | Release routes, artifact scans, and W07/W08.                                                                                                                                                              |
-|  51 |  25  | Visible Phase 3 journey terminates at localized blocking gate                            | VERIFIED  | No executable links; gate asserts unavailable approval/artifact.                                                                                                                                          |
-|  52 |  26  | Sensitive preview journey follows guarded review-to-authority sequence                   | VERIFIED  | 20 workflow tests exercise state transitions and receipts.                                                                                                                                                |
-|  53 |  26  | Illegal/ambiguous/stale/offline/consent cases fail closed and preserve safe work         | VERIFIED  | Statechart transition tests and safe-draft allowlist.                                                                                                                                                     |
-|  54 |  27  | Every account responsibility/degraded state is traversable with provenance               | VERIFIED  | W11 covers all ten responsibility routes; account tests pass.                                                                                                                                             |
-|  55 |  27  | Account confirmations end in cancellation/no-change receipts                             | VERIFIED  | W10/W13 and adapter tests; zero mutation requests.                                                                                                                                                        |
-|  56 |  28  | Admin roles see scoped deterministic navigation/data only                                | VERIFIED  | Role matrix and admin tests.                                                                                                                                                                              |
-|  57 |  28  | Diagnostics require scoped consent; critical actions end in no-change/audit              | VERIFIED  | W14/W15 and immutable audit/receipt assertions.                                                                                                                                                           |
-|  58 |  28  | Mobile preserves safe review and blocks high-risk admin below 960px                      | VERIFIED  | W16 and responsive policy tests.                                                                                                                                                                          |
-|  59 |  29  | Published product images come from deterministic desktop capture with provenance         | VERIFIED  | Bilingual image/sidecar hashes and approved S01 capture manifest.                                                                                                                                         |
-|  60 |  29  | Framing cannot alter values/copy/provenance; stale captures fail                         | VERIFIED  | Capture invalidation/checksum tests pass.                                                                                                                                                                 |
-|  61 |  30  | W01-W18 prove every route/state/error with no dead controls                              | VERIFIED  | Independent `pnpm web:verify` run passed 222 browser tests with 456 intentional axis skips; W17 navigated all 24 canonical bilingual error outcomes and regenerated byte-identical reachability evidence. |
-|  62 |  30  | Three apps pass accessibility/responsive/visual/security/performance gates               | VERIFIED  | 18 goldens, zero blocking Axe findings, reflow/forced-colors/reduced-motion/CWV evidence.                                                                                                                 |
-|  63 |  30  | Built artifacts expose no scenarios/private indexes/dev installers/authority             | VERIFIED  | Artifact scans and security E2E.                                                                                                                                                                          |
-|  64 |  31  | Publication admits code/content/routes/manifests/assets/evidence atomically              | VERIFIED  | Publication and bundle tests pass.                                                                                                                                                                        |
-|  65 |  31  | Any declared publication-axis failure blocks                                             | VERIFIED  | 30 publication tests cover mutation failure classes.                                                                                                                                                      |
-|  66 |  31  | Rollback selects one approved immutable bundle, not external-data revert                 | VERIFIED  | Nine rollback tests pass.                                                                                                                                                                                 |
-|  67 |  32  | Visitor understands product/evidence/capabilities/plans/limits truthfully                | VERIFIED  | WEB-01 evidence and inspected public content.                                                                                                                                                             |
-|  68 |  32  | Visitor reads versioned docs through exact desktop links                                 | VERIFIED  | WEB-02 resolver/E2E evidence.                                                                                                                                                                             |
-|  69 |  32  | Visitor completes integrity/compatibility verification while download is blocked         | VERIFIED  | WEB-03 policy/E2E evidence.                                                                                                                                                                               |
-|  70 |  32  | Three apps build independently, differ by policy, and label disconnected previews        | VERIFIED  | Fresh builds, proxy policies, composition identities, and E2E.                                                                                                                                            |
-|  71 |  32  | Every D-01–D-86 decision has observed/executable evidence                                | VERIFIED  | D-25 now has distinct localized account/admin 403/404/410/500 renderers, W17 runtime proof, and fail-closed final-verifier consumption; direct final verification reports 86 decisions.                   |
+| # | Truth | Status | Codebase evidence |
+|---|---|---|---|
+| 1 | Visitors can understand the product, evidence policy, supported capabilities, plans, and limitations without fabricated gains or urgency. | VERIFIED | Bilingual repository content is validated before rendering; Home/catalog/policy/status/error routes build; 125 public-app tests and 112 web-core tests pass in the workspace gate; current visual evidence covers all public route families. |
+| 2 | Visitors can browse versioned technical documentation and follow exact contextual desktop links. | VERIFIED | `documentation.ts` resolves locale/version/channel/task/section fail closed; the named exact-section test passed; public production build includes documentation routes; WEB-02 evidence is hash-bound in the final bundle. |
+| 3 | Visitors can inspect release channel/version/integrity/compatibility and complete a fail-closed eligibility journey without an exposed installer. | VERIFIED | The named release decision test passed; the promoted bundle preserves `downloadAvailable: false`, `publicDistributionApproved: false`, and `officialArtifact: unavailable`; no development artifact is admitted. |
+| 4 | Public, account, and admin are separate deployables with distinct security policies and explicitly disconnected previews. | VERIFIED | Fresh `pnpm web:build` completed 10/10 tasks and produced three standalone Next applications. Public excludes `@liiiraa/web-preview`; account/admin consume it explicitly, strip/reject cross-surface authority, set distinct CSP/origin/indexing policies, and expose `authorityConnected: false`. |
 
-**Score:** 70/71 truths verified; 0 failed; 1 requires human visual review.
+**Roadmap score:** 4/4 verified.
 
-### Required Artifacts
+### PLAN Must-Have Accountability
 
-The canonical artifact probe found **75/75 artifacts across all 36 plans present and substantive**. Failed items received full existence/substance/wiring/data-flow re-verification; previously passed groups received regression sanity checks through the full build/browser/workspace gates.
+Every PLAN frontmatter was parsed. The 234 plan truths add implementation detail but do not subtract from the four roadmap criteria. Each group below was checked against its declared artifacts, key links, current consumers, and executable evidence.
 
-| Plans | Artifact group                                                                     | Status   | Wiring/data evidence                                                                                                                                                           |
-| ----- | ---------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 01–03 | Approval, architecture, TypeSpec source                                            | VERIFIED | Approval→evidence hash; architecture tests→module graph; `main.tsp`→`web.tsp`.                                                                                                 |
-| 04–08 | Four packages and three app manifests/configs                                      | VERIFIED | Public excludes preview; account/admin explicitly consume fixture adapter; standalone outputs observed.                                                                        |
-| 09–11 | Generated schema/transports/validators/lock/root scripts                           | VERIFIED | One-source generation, cached validators, exact lock identities, terminating lifecycle.                                                                                        |
-| 12–14 | Routes/content/scenarios/evidence harness                                          | VERIFIED | Manifest projections, runtime validation, W01-W18 frozen catalog, four quality manifests.                                                                                      |
-| 15–18 | Public/account/admin shells and shared semantic UI                                 | VERIFIED | Layouts import composition identities; proxy policies protect live app route trees; shared tokens/components render across shells.                                             |
-| 19–25 | Admission/search/Home/catalog/docs/releases                                        | VERIFIED | Repository content → admission/resolvers → page rendering; release record → decision engine → blocking gate.                                                                   |
-| 26–28 | Preview machine/account/admin workflows                                            | VERIFIED | Fixture authority injected into guarded machine; terminal no-change receipts render in both apps.                                                                              |
-| 29–36 | Captures, browser evidence, gap-closed failure routes, publication, final verifier | VERIFIED | Three apps build; W17 produces the exact 24-outcome current-source-bound artifact; final verifier independently requires route outcomes after 53-route declaration validation. |
+| Plans | Truths | Status | Principal evidence |
+|---|---:|---|---|
+| 03-01–03-14 | 28 | VERIFIED | Exact dependency approval, architecture reservations, TypeSpec source/generation, TS/Rust validation, seven workspace roots, canonical routes/scenarios, and evidence harnesses. |
+| 03-15–03-28 | 30 | VERIFIED | Three security shells, shared accessible UI, content admission/search, Home/catalog/docs/releases, fail-closed downloads, and guarded no-change preview workflows. |
+| 03-29–03-36 | 25 | VERIFIED | Provenance-bound captures, E2E/security/accessibility/performance evidence, atomic publication/rollback, complete error reachability, and recursive verification. |
+| 03-37–03-46 | 35 | VERIFIED | Shared product identity, public/account/admin rework, controlled rebaselines, literal human approval, current evidence reports, and exact proof-owner promotion. |
+| 03-47–03-56 | 35 | VERIFIED | Development-only Turbopack CSP compatibility, route-preserving locale/navigation behavior, strengthened visual contract, tokens/type/assets, and product-led public composition. |
+| 03-57–03-66 | 30 | VERIFIED | Account/admin product shells, root-cause visual/capture repair, deterministic candidate generation, and cross-surface inspection/replay. |
+| 03-67–03-76 | 36 | VERIFIED | D-87–D-110 product/legal/docs/release/account/admin experience closure and complete route/locale/width candidate enumeration. |
+| 03-77–03-82 | 15 | VERIFIED | About/footer/legal/privacy/high-risk workflow completion, 480-candidate capture/inspection, current reachability, and final handoff. |
 
-### Key Link Verification
+**PLAN score:** 234/234 truths verified; 0 present-but-behavior-unverified.
 
-| Result                                       | Count | Details                                                                                                                                                                                   |
-| -------------------------------------------- | ----: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Automated VERIFIED                           | 36/42 | Declared source→target patterns found.                                                                                                                                                    |
-| Manual VERIFIED after matcher false negative |  6/42 | Prior five exact-string/import false negatives plus 03-35, where account W17 derives `/errors/{status}` from `routeReachabilityTargets('account')` rather than embedding a literal regex. |
-| Runtime wiring gaps                          |     0 | Canonical route manifest → account/admin dispatch → W17 browser observation → deterministic evidence → final verifier was traced end to end.                                              |
+## Required Artifacts
 
-### Data-Flow Trace (Level 4)
+The canonical artifact query covered 82 plans. After manual resolution of matcher limitations, **195/195 declared artifacts are present and substantive**.
 
-| Artifact            | Data                                    | Source                                                                      | Status                              |
-| ------------------- | --------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------- |
-| Public Home/catalog | Bilingual claims, limitations, policies | Repository JSON → `admitContentBundle` → page compositions                  | FLOWING                             |
-| Documentation       | Versioned records/search/deep links     | MDX + metadata → resolver/search → docs routes                              | FLOWING                             |
-| Releases            | Release metadata and integrity state    | Validated `ReleaseRecord` → `decideDownload` → exhaustive gate UI           | FLOWING, fail-closed                |
-| Account preview     | W10–W13 scenario state                  | Frozen scenario → fixture authority → workflow machine → receipt UI         | FLOWING, simulated label persistent |
-| Admin preview       | W14–W16 role/consent/audit state        | Frozen scenario/role → guarded workflow → immutable simulated audit/receipt | FLOWING, simulated label persistent |
+| Artifact group | Status | Details |
+|---|---|---|
+| Plans 01–36 | VERIFIED | Contracts, apps, route/content/release logic, evidence, publication and reachability artifacts exist and are consumed. |
+| Plans 37–46 | VERIFIED | `ProductLockup` is a named export and is used by desktop/web shells. Descriptive G01/G04/G06 PLAN paths were superseded by the executable `*-final-*` identities documented in their summaries; the current PNGs exist. |
+| Plans 47–82 | VERIFIED | Product source, local fonts/assets, 480 canonical PNGs, 25 continuity PNGs, inspections, UAT, reports and bundle all exist. Directory-valued artifacts in Plans 52/62/81 contain 25 and 480 substantive PNGs as expected. |
 
-### Behavioral Spot-Checks
+The candidate packet was independently replayed at the file level:
 
-| Behavior                                 | Command                                                                          | Result                                                                                                                        | Status  |
-| ---------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Final recursive Phase 3 evidence         | `pnpm web:verify:phase -- --mode final`                                          | Fingerprint `3ea7f3…938d9`; 86 decisions, 53 routes, 24 observed route outcomes, 18 scenarios                                 | PASS    |
-| Full web build/browser/final gate        | `pnpm web:verify`                                                                | 10/10 build tasks; three production apps; 222 Playwright tests passed and 456 intentional matrix skips; final verifier passed | PASS    |
-| Gap-closure contract and mutation suites | Focused account, admin, `route-reachability`, and `verify-phase` Vitest commands | 5/5 + 9/9 + 55/55 tests pass                                                                                                  | PASS    |
-| Reachability determinism                 | SHA-256 before/after independent `pnpm web:verify`                               | `50a723…d367` both times; working tree clean                                                                                  | PASS    |
-| Workspace regression                     | `pnpm test`                                                                      | Turbo 49/49 tasks successful                                                                                                  | PASS    |
-| Web-core release/docs behavior           | `pnpm --filter @liiiraa/web-core test ...`                                       | 97/97 package tests pass                                                                                                      | PASS    |
-| Raw-source Turbopack + NodeNext split    | `vitest run src/source-import-resolution.test.ts`                                | 3/3 pass                                                                                                                      | PASS    |
-| Desktop emitted-contract compatibility   | `pnpm --filter @liiiraa/desktop-production-reference build`                      | TypeScript emit succeeds                                                                                                      | PASS    |
-| Repository lint aggregate                | `pnpm lint`                                                                      | Fails with 101 errors, including Phase 03 tool/test files and project-service coverage configuration                          | WARNING |
+- 480/480 canonical PNGs exist and match their manifest SHA-256.
+- 60 route identities × 2 locales × 4 widths = 480 candidates.
+- Surface counts are public 264, account 128, admin 88.
+- State counts are 384 ready and 96 authored error candidates.
+- The canonical digest was independently recomputed from the inspection records as `fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55`.
 
-### TDD Review
+## Key Link Verification
 
-| Plan  | RED evidence                                                                         | GREEN/wiring evidence                                                                                  | Status |
-| ----- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------ |
-| 03-33 | `38b1a56` changes only `account-shell.test.ts`                                       | `b52d276` adds the model/guards; `339010c` and `300b1be` wire dispatch and real localized 404 behavior | PASS   |
-| 03-34 | `1b2a9b5` changes only `admin-shell.test.ts`                                         | `0296955` adds the 410 contract; `afd2496` wires pre-role dispatch                                     | PASS   |
-| 03-35 | `3105b8a` adds tests while the reachability module is absent                         | `ec3567d` adds the validator/writer; `627cc90` and `8573f2b` connect all three browser suites          | PASS   |
-| 03-36 | `1d7ed50` changes only verifier tests and proves route declarations are insufficient | `cd278a5` consumes reachability evidence; follow-up fixes preserve raw Node and CRLF correctness       | PASS   |
+**111/111 key links are wired:** 100 passed the canonical matcher and 11 were verified manually.
 
-Commit ordering is valid for all four TDD plans, and the current closure mutation suites pass 55/55 tests.
+| Plans | Manual resolution | Status |
+|---|---|---|
+| 01, 03, 06, 10, 11 | Exact approved versions, TypeSpec `./web.tsp` import, JSON-schema import, and lockfile pins exist; matcher failures were escaping/formatting false negatives. | WIRED |
+| 20 | Later Home revisions superseded the original literal symbol path; current Home imports the public `@liiiraa/web-core` validation boundary, validates evidence records, and fails closed on invalid content/capture provenance. | WIRED (superseded implementation) |
+| 35 | Account error targets are projected from `routeReachabilityTargets('account')`, not embedded as a literal regex; 24 current browser observations are validated and owned by Plan 03-35. | WIRED |
+| 43, 44 | W11/W14 identities are manifest-driven and resolve to the current executable snapshot paths. | WIRED |
+| 53 | Token CSS references `/fonts/saira-semi-condensed-variable.woff2`; the local font exists under `apps/web/public/fonts`. | WIRED |
+| 55 | Home obtains the locale-specific desktop capture path from validated bilingual JSON; both WebP assets and sidecars exist and are checksum-admitted. | WIRED |
 
-### Probe Execution
+## Data-Flow Trace (Level 4)
 
-Step 7c: **SKIPPED** — no Phase 03 probe script or declared `probe-*.sh` exists.
+| Surface | Data source and path | Status |
+|---|---|---|
+| Public product/catalog | Bilingual repository JSON → generated/document validation → feature compositions → canonical public routes | FLOWING |
+| Documentation | Versioned corpus/metadata → exact resolver/search/deep-link boundary → localized docs route | FLOWING |
+| Releases | Validated release record → exhaustive `decideDownload` policy → integrity/compatibility UI → unavailable gate | FLOWING, FAIL CLOSED |
+| Account | Frozen W10–W13 scenarios/model → fixture authority → guarded workflow → no-change receipt UI | FLOWING, SIMULATED LABEL PRESERVED |
+| Admin | Frozen role/queue/consent/audit model → guarded workflow → redacted, immutable no-change result | FLOWING, SIMULATED LABEL PRESERVED |
 
-### Requirements Coverage
+## Behavioral Spot-Checks
 
-| Requirement | Description                                                          | Status    | Evidence                                                                                                      |
-| ----------- | -------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-| WEB-01      | Truthful product/evidence/capability/plan/limitation understanding   | SATISFIED | Bilingual admitted content, no deceptive claims, W01/W02/W06/W09, Home/catalog/policy routes.                 |
-| WEB-02      | Versioned technical docs linked from desktop                         | SATISFIED | Resolver/deep-link tests, 16-record bilingual corpus, W03–W05.                                                |
-| WEB-03      | Release/integrity/compatibility and fail-closed download eligibility | SATISFIED | Exhaustive release tests and W07/W08; no public installer.                                                    |
-| WEB-08      | Separate deployment/security policies                                | SATISFIED | Three distinct standalone builds, origins, CSP/indexing policies, fixture labels, no shared cookie/authority. |
+| Behavior | Independent command/evidence | Result | Status |
+|---|---|---|---|
+| Recursive final acceptance | `pnpm web:verify:phase -- --mode final` | Current fingerprint `c1afbfc0a22485fe1fec48843420d98f075e4aaab5c82342e1f9277727577575`; 110 decisions, 60 routes, 24 route outcomes, 18 scenarios | PASS |
+| Historical final gate | Plan 03-46 recorded `b4b988a7...cf47` before the final evidence/summary commits | Same counts, current approval hashes, owners and release flags; current rerun is stable across repeated executions | PASS WITH TRACE NOTE |
+| Independent deployability | `pnpm web:build` | 10/10 tasks; public/account/admin optimized production builds succeed | PASS |
+| Workspace regression | `pnpm test` | 49/49 Turbo tasks; web-core 112, public 125, account 68, admin 76, web-evidence 182 with one intentional capture CLI skip | PASS |
+| Turbopack/raw-source regression | `vitest run src/source-import-resolution.test.ts` | 3/3 exact raw-source/NodeNext boundary tests | PASS |
+| Desktop emitting consumer | `pnpm --filter @liiiraa/desktop-production-reference build` | NodeNext TypeScript emit succeeds with `.js` contract specifiers | PASS |
+| Fail-closed release | Named `releases.test.ts` case | Published Phase 3 record remains distribution-blocked | PASS |
+| Desktop docs link | Named `documentation.test.ts` case | Only exact compatible article sections resolve | PASS |
+| Proof owners | Named `verify-phase.test.ts` case | Exactly visual/accessibility/bundle use Plan 03-46; reachability remains Plan 03-35 | PASS |
+| Browser matrix evidence | Current hash-bound reports | 752 passed, 665 intentional project/case skips, 0 failed; 480 candidates; no update mode | PASS |
 
-All four Phase 03 IDs appear in PLAN frontmatter and REQUIREMENTS.md. No Phase 03 requirement is orphaned.
+The historical `b4b988...` value is not asserted as the current fingerprint. It was observed before final evidence/metadata commits. The current deterministic fingerprint is used as proof; no semantic count, evidence hash, owner, approval digest, or release-authority flag changed across the boundary.
 
-### Visual and Accessibility Technical Audit
+## Probe Execution
 
-The `impeccable` audit rules were applied to source CSS/components and representative W01/W02/W11/W14 goldens.
+Step 7c: **SKIPPED** — no Phase 03 `probe-*.sh` is declared or present.
 
-| Dimension           |     Score | Evidence                                                                                                                      |
-| ------------------- | --------: | ----------------------------------------------------------------------------------------------------------------------------- |
-| Accessibility       |       4/4 | Axe critical/serious = 0; keyboard focus, landmarks, 200% text, 400% zoom, forced colors, reduced motion covered.             |
-| Performance         |       4/4 | CWV and route/image budgets are asserted; production builds pass.                                                             |
-| Theming             |       4/4 | Token-backed Pre-Dawn system, restrained cobalt, semantic non-color labels.                                                   |
-| Responsive          |       4/4 | 320/390/760/960/1440 evidence; no ordinary horizontal overflow; safe admin mobile policy.                                     |
-| Anti-patterns       |       4/4 | Detector returned no hits; no gradient text, glassmorphism, decorative grid, oversized radii, or generic card-wall structure. |
-| **Automated total** | **20/20** | Technical implementation is strong; subjective polish still needs human sign-off.                                             |
+## Requirements Coverage
 
-### Anti-Patterns and Disconfirmation Findings
+All 82 plans declare one or more of the four Phase 03 IDs. No invalid or missing PLAN requirement field exists, all four IDs are present in `REQUIREMENTS.md`, and no Phase 03 requirement is orphaned.
 
-| Finding                                                                   | Severity | Impact                                                                                                                                                                                                                                      |
-| ------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Canonical error reachability blocker                                      | CLOSED   | Distinct account/admin routes render, W17 observes all 24 outcomes, and the final verifier rejects missing/stale/incomplete/redirected/collapsed/unredacted/unrecoverable/authority-connected proof.                                        |
-| `pnpm lint` fails with 101 ESLint errors                                  | WARNING  | Runtime type/tests/build/browser gates pass, but the repository lint aggregate is not green. New closure files contribute non-null assertions, template-expression, unnecessary-condition/assertion, and Playwright project-service errors. |
-| Public strict inline-free CSP remains report-only                         | INFO     | Transparently disclosed; enforced CSP still contains `unsafe-inline` for current Next static bootstrap.                                                                                                                                     |
-| No TODO/FIXME/XXX debt markers in Plans 03-33–03-36 runtime/tooling files | PASS     | `return null` occurrences are typed unknown-route/focus behavior, and CLI `console.log` emits the final result rather than stubbing work.                                                                                                   |
+| Requirement | Status | Evidence |
+|---|---|---|
+| WEB-01 | SATISFIED | Truthful bilingual Home/catalog/plans/policies/status/error content, evidence admission, approved visual packet, public tests/build. |
+| WEB-02 | SATISFIED | Versioned documentation corpus, exact desktop deep-link resolution, bilingual route/browser evidence. |
+| WEB-03 | SATISFIED | Release channel/version/integrity/compatibility journey with exhaustive fail-closed decision and unavailable official artifact. |
+| WEB-08 | SATISFIED | Three independent applications, distinct origins/CSP/indexing/cookie boundaries, persistent preview provenance, no connected authority. |
 
-Disconfirmation calibration:
+## Anti-Patterns and Disconfirmation Findings
 
-- **Partial requirement:** visual polish/desktop consistency is evidenced by stable goldens and shared tokens but lacks explicit human approval.
-- **Potentially misleading standalone check:** the direct final verifier validates checked-in current-source evidence but does not launch browsers itself; the canonical `web:verify` chain does launch Playwright first, and the independent run regenerated the artifact byte-identically.
-- **Uncovered non-contract path:** the framework-thrown client error-boundary reset path is not the W17 canonical 500 route; it remains covered structurally/unit-wise rather than by the canonical error-route browser matrix and does not falsify a Phase 3 must-have.
+| Finding | Severity | Impact |
+|---|---|---|
+| No unreferenced `TBD`, `FIXME`, or `XXX` exists in Phase 03 runtime/tooling files. | PASS | No debt-marker blocker. |
+| “Not available yet” / “Coming soon” release copy is backed by the explicit false/false/unavailable release contract. | INFO | Deliberate truthful safety state, not a placeholder implementation. |
+| Root `pnpm lint` fails with 203 errors, including typed-lint findings and project-service coverage for web proxy/Playwright files. | WARNING | Does not falsify WEB-01/02/03/08 or runtime/build/test behavior, but the repository-wide lint quality gate is not green and should be remediated before production release. |
+| One verifier test title still says “complete 54-route declaration” while the current closed route set is 60. | INFO | Assertion behavior uses the current evidence graph; wording is stale only. |
+| Historical final fingerprint differs from the current deterministic rerun. | INFO | Explained by final evidence/metadata state; semantic counts, bound hashes, owners and release flags are unchanged. |
 
-### Human Verification Required
+Disconfirmation pass:
 
-#### 1. Cross-surface visual polish and desktop consistency
+- **Partial/non-goal gate:** root lint remains red despite functional acceptance.
+- **Potentially misleading evidence:** a checked-in Playwright report alone would not prove currentness; the bundle and recursive verifier independently hash-check its UAT, manifest, inspection, reachability and source bindings.
+- **Uncovered future path:** real account/admin authority is intentionally absent until Phase 4; signed public distribution is intentionally absent until Phase 10.
 
-**Test:** Review representative public wide/mobile, account wide/reflow, and admin wide/mobile goldens beside the approved Phase 2 desktop captures in PT-BR and English.
+## Human Verification
 
-**Expected:** The public brand register and account/admin product register feel intentionally related to the desktop product, remain distinctive rather than template-like, and preserve hierarchy/readability across PT-BR and English.
+No human item remains. Plan 03-45 recorded literal approval, and Plan 03-46 renewed it after the ten changed pixel identities. The effective approval is bound to the current canonical digest `fa594ae3...4f55` and legacy digest `5c589ac2...1d6` without granting legal, commercial, backend, or distribution authority.
 
-**Why human:** Screenshot stability, token reuse, and automated anti-pattern checks cannot certify subjective polish or brand coherence.
+## Deferred Boundaries
 
-### Gaps Summary
+| Boundary | Later owner | Current safe state |
+|---|---|---|
+| Real account, device, subscription, consent and administrative authority | Phase 4 | Fixture-only, disconnected, redacted, deterministic no-change workflows |
+| Signed installer and trusted public distribution | Phase 10 | `downloadAvailable: false`; `publicDistributionApproved: false`; `officialArtifact: unavailable` |
+| Supplier/controller, registration/address, processors/transfers/retention, affirmative commercial acceptance, monitored contacts | Pre-publication legal/operations gate | Explicitly `blocked` in the promoted bundle; not claimed as satisfied by visual approval |
 
-No automated goal gap remains. Both prior blockers are closed with executable routes, real-browser W17 coverage, deterministic source-bound evidence, and fail-closed final-verifier mutation coverage. Overall status is `human_needed` solely because the phase goal says the ecosystem is polished and visually consistent with desktop, which requires the explicit cross-surface human comparison above. The 101-error repository lint backlog is a separate quality warning and should be resolved before treating the root lint/verify aggregate as green.
+## Gaps Summary
+
+No Phase 03 goal or requirement gap remains. The human visual gate is closed against the exact current packet, the three surfaces build independently, the evidence graph verifies recursively, and release/authority boundaries remain truthfully fail closed. The 203-error root lint result is a non-goal quality warning and is not silently represented as green.
 
 ---
 
-_Verified: 2026-07-31T18:17:48Z_
+_Verified: 2026-08-04T01:58:38Z_  
 _Verifier: the agent (gsd-verifier)_
