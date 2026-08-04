@@ -260,6 +260,7 @@ interface Phase3PublicationFileBinding {
 }
 
 interface Phase3PublicationEvidenceBindings {
+  accessibilityReport: Phase3PublicationFileBinding;
   approval: Phase3PublicationFileBinding & {
     candidateCount: number;
     canonicalDigest: string;
@@ -272,6 +273,7 @@ interface Phase3PublicationEvidenceBindings {
   routeMatrix: Phase3PublicationFileBinding;
   routeReachability: Phase3PublicationFileBinding;
   visualManifest: Phase3PublicationFileBinding & { candidateCount: number };
+  visualReport: Phase3PublicationFileBinding;
 }
 
 export interface Phase3VerificationInput {
@@ -518,12 +520,14 @@ const validateTruth = (input: Phase3VerificationInput, diagnostics: Phase3Diagno
 };
 
 const PUBLICATION_BINDING_PATHS = Object.freeze({
+  accessibilityReport: 'quality/evidence/phase-03/web/accessibility-report.json',
   approval: '.planning/phases/03-complete-web-experience/03-UAT.md',
   launchReadiness:
     '.planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json',
   routeMatrix: '.planning/phases/03-complete-web-experience/03-ROUTE-EXPERIENCE-MATRIX.md',
   routeReachability: 'quality/evidence/phase-03/web/route-reachability.json',
   visualManifest: 'tooling/web-evidence/visual-manifest.json',
+  visualReport: 'quality/evidence/phase-03/web/visual-report.json',
 } as const);
 const APPROVED_CANONICAL_DIGEST =
   'fa594ae3b2bda7ab2d7bea8e475d45e52ee5e350362c6c9315a62c7199ad4f55';
