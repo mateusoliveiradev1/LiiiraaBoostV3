@@ -147,7 +147,10 @@ for (const axis of ['mobile-390', 'reflow-320'] as const) {
     const disclosure = page.locator('details.public-mobile-menu');
     await expect(disclosure).not.toHaveAttribute('open', '');
     expect((await disclosure.locator('summary').boundingBox())?.height).toBeGreaterThanOrEqual(48);
-    const locale = page.locator('a.lb-web-locale-switcher:visible');
+    const locale = page.locator(
+      '.public-header__locale a.lb-web-locale-switcher:visible',
+    );
+    await expect(locale).toHaveCount(1);
     expect((await locale.boundingBox())?.height).toBeGreaterThanOrEqual(48);
     await expect(locale).toContainText('Português');
     await expect(locale).toHaveAttribute('href', '/pt-BR/docs/current');
@@ -218,7 +221,11 @@ test('@final @public W02 preserves the complete English mobile hierarchy and men
   ).toHaveCount(6);
   await expect(menu.getByRole('link', { name: 'Search' })).toBeVisible();
   await expect(menu.getByRole('link', { name: 'Download free' })).toBeVisible();
-  await expect(page.locator('a.lb-web-locale-switcher:visible')).toContainText('Português');
+  const headerLocale = page.locator(
+    '.public-header__locale a.lb-web-locale-switcher:visible',
+  );
+  await expect(headerLocale).toHaveCount(1);
+  await expect(headerLocale).toContainText('Português');
   await expect(page.getByRole('link', { name: /complete screenshot/i })).toBeVisible();
   await expectNoDeadControls(page);
 });
