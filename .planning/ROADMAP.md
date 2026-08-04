@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 34 plans
+**Plans**: 35 plans
 
 Plans:
 - [ ] 04-01-PLAN.md — Approve exact suspicious dependency identities.
@@ -539,7 +539,7 @@ Plans:
 - [ ] 04-17-PLAN.md — Project version-aware shared account truth.
 - [ ] 04-18-PLAN.md — Activate the real account application.
 - [ ] 04-19-PLAN.md — Activate the isolated real admin application.
-- [ ] 04-20-PLAN.md — Activate desktop identity, credential custody, and sync.
+- [ ] 04-20-PLAN.md — Activate native desktop identity and credential custody.
 - [ ] 04-21-PLAN.md — Enforce start/continue/safety Premium boundaries.
 - [ ] 04-22-PLAN.md — Deploy the invitation-only staging control plane.
 - [ ] 04-23-PLAN.md — Deploy isolated surfaces and Internal desktop channel.
@@ -550,10 +550,11 @@ Plans:
 - [ ] 04-28-PLAN.md — Deliver required notifications through SES sandbox.
 - [ ] 04-29-PLAN.md — Execute attachment and account-deletion lifecycle jobs.
 - [ ] 04-30-PLAN.md — Schedule and verify immutable audit anchors.
-- [ ] 04-31-PLAN.md — Create domain and crypto Wave 0 RED witnesses.
-- [ ] 04-32-PLAN.md — Create API/PostgreSQL Wave 0 RED witnesses.
-- [ ] 04-33-PLAN.md — Create provider-boundary Wave 0 RED witnesses.
+- [ ] 04-31-PLAN.md — Create domain and crypto Wave 1 RED witnesses after scaffold.
+- [ ] 04-32-PLAN.md — Create API/PostgreSQL Wave 1 RED witnesses after scaffold.
+- [ ] 04-33-PLAN.md — Create provider-boundary Wave 1 RED witnesses after scaffold.
 - [ ] 04-34-PLAN.md — Create browser Wave 0 RED witnesses.
+- [ ] 04-35-PLAN.md — Activate desktop account synchronization and real account UI.
 
 **UI hint**: yes
 

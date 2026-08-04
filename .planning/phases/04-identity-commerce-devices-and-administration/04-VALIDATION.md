@@ -3,7 +3,8 @@ phase: 04
 slug: identity-commerce-devices-and-administration
 status: planned
 nyquist_compliant: true
-wave_0_complete: true
+wave_0_complete: false
+validation_scaffolding_complete: true
 created: 2026-08-04
 ---
 
@@ -21,7 +22,7 @@ created: 2026-08-04
 | **Config file**        | Existing distributed Vitest configs and `tooling/web-evidence/playwright.config.ts`; `apps/api/vitest.config.ts` is created in Wave 0                                |
 | **Quick run command**  | `pnpm --filter @liiiraa/control-plane-domain test -- --run`                                                                                                          |
 | **Full suite command** | `pnpm verify:foundation && pnpm web:verify && pnpm --filter @liiiraa/desktop verify` plus Phase 4 API/PostgreSQL/security/evidence jobs                              |
-| **Estimated runtime**  | Target: focused task checks under 30 seconds; full suite measured during Wave 0                                                                                      |
+| **Estimated runtime**  | Target: each focused task check is measured under 30 seconds; cross-runtime/build/full-suite gates are measured separately during plan and wave execution          |
 
 ---
 
@@ -36,15 +37,15 @@ created: 2026-08-04
 
 ## Per-Task Verification Map
 
-Every requirement is bound to a concrete implementation task/wave and to a Wave 0 RED witness owner. `wave_0_complete: true` means all missing witness paths now have executable Wave 0 plan tasks; it does not claim the intentionally RED tests are already green.
+Every requirement is bound to a concrete implementation task/wave and to a prerequisite-aware RED witness owner. Wave 0 creates the required manifests/configuration in Plan 04-02 (plus independent browser witnesses in 04-34); Plans 04-31/32/33 run in Wave 1 with `depends_on: ["04-02"]`. `validation_scaffolding_complete: true` records complete witness planning, while `wave_0_complete: false` prevents claiming the dependent Wave 1 witnesses execute before their scaffold.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref                | Secure Behavior                                                                                        | Test Type                            | Automated Command                                                                                                                                                              | File Exists | Status     |
 | ------- | ---- | ---- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | ---------- |
-| 04-17-01 / 04-18-01 | 04-17 / 04-18 | 6 / 7 | WEB-04 | T-P4-ACCOUNT-VERSION | Account projections and version-aware mutations stay truthful across web and desktop | integration + browser | `pnpm --filter @liiiraa/api test -- --run account-projection` | 🟦 04-32/34 | ✅ mapped |
+| 04-17-01 / 04-18-01 / 04-35-01 | 04-17 / 04-18 / 04-35 | 6 / 7 / 8 | WEB-04 | T-P4-ACCOUNT-VERSION | Account projections and version-aware mutations stay truthful across web and desktop | integration + browser | `pnpm --filter @liiiraa/api test -- --run account-projection` | 🟦 04-32/34 | ✅ mapped |
 | 04-14-01 / 04-18-02 | 04-14 / 04-18 | 4 / 7 | WEB-05 | T-P4-DEVICE-RACE | Revoke/replace obeys cooldown and cannot create two active PCs | PostgreSQL concurrency + smoke | `pnpm --filter @liiiraa/api test -- --run device-concurrency` | 🟦 04-32/34 | ✅ mapped |
 | 04-16-01 / 04-19-01 | 04-16 / 04-19 | 6 / 7 | WEB-06 | T-P4-ADMIN-AUTHZ | Isolated admin origin enforces exactly one assumed least-privilege role | integration + browser | `pnpm --filter @liiiraa/api test -- --run admin-authorization` | 🟦 04-32/34 | ✅ mapped |
 | 04-09-01 / 04-19-02 | 04-09 / 04-19 | 4 / 7 | WEB-07 | T-P4-CONSENT-REVOKE | Consent expiry/revocation terminates diagnostic access and appends audit evidence | integration + browser | `pnpm --filter @liiiraa/api test -- --run consent-stream` | 🟦 04-33/34 | ✅ mapped |
-| 04-05-01 / 04-11-01 | 04-05 / 04-11 | 2 / 4 | IDEN-01 | T-P4-OAUTH | Verified email, Google, Discord, and passkeys authenticate; public/unverified paths fail closed | adapter conformance + API | `pnpm --filter @liiiraa/api test -- --run identity-conformance` | 🟦 04-32/33 | ✅ mapped |
+| 04-05-01 / 04-11-01 / 04-20-01 / 04-35-01 | 04-05 / 04-11 / 04-20 / 04-35 | 2 / 4 / 7 / 8 | IDEN-01 | T-P4-OAUTH | Verified email, Google, Discord, and passkeys authenticate; desktop completes system-browser PKCE and renders the authenticated projection | adapter conformance + API + native/browser | `pnpm --filter @liiiraa/api test -- --run identity-conformance` | 🟦 04-32/33 | ✅ mapped |
 | 04-12-01 | 04-12 | 5 | IDEN-02 | T-P4-RECOVERY | MFA, recovery review/hold/contest, and session revocation follow locked policy | state-machine + integration | `pnpm --filter @liiiraa/control-plane-domain test -- --run identity-recovery` | 🟦 04-31/32 | ✅ mapped |
 | 04-16-01 | 04-16 | 6 | IDEN-03 | T-P4-STEP-UP | Critical admin actions require recent scoped reauthentication, reason, review, confirmation, and audit | authorization integration | `pnpm --filter @liiiraa/api test -- --run admin-authorization` | 🟦 04-32 | ✅ mapped |
 | 04-14-01 | 04-14 | 4 | IDEN-04 | T-P4-DEVICE-RACE | Concurrent binds preserve the one-active-PC invariant | PostgreSQL concurrency | `pnpm --filter @liiiraa/api test -- --run device-concurrency` | 🟦 04-32 | ✅ mapped |
@@ -58,13 +59,13 @@ _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
-## Wave 0 Requirements
+## Validation Scaffolding Requirements
 
 - [x] Plan 04-02 Task 04-02-02 creates the API/PostgreSQL/determinism harness and measured focused command.
-- [x] Plan 04-31 Task 04-31-01 creates recovery, device, offline-envelope, paid-action, and post-Premium RED witnesses.
-- [x] Plan 04-32 Task 04-32-01 creates account, device-concurrency, identity, recovery, and admin API RED witnesses.
-- [x] Plan 04-33 Task 04-33-01 creates the Better Auth, Stripe permutation, and consent-stream RED matrices.
-- [x] Plan 04-34 Task 04-34-01 creates account/admin/consent and desktop entitlement/safety browser RED witnesses with focused tags.
+- [x] Plan 04-31 Task 04-31-01 runs in Wave 1 after 04-02 and creates recovery, device, offline-envelope, paid-action, and post-Premium RED witnesses.
+- [x] Plan 04-32 Task 04-32-01 runs in Wave 1 after 04-02 and creates account, device-concurrency, identity, recovery, and admin API RED witnesses.
+- [x] Plan 04-33 Task 04-33-01 runs in Wave 1 after 04-02 and creates the Better Auth, Stripe permutation, and consent-stream RED matrices.
+- [x] Plan 04-34 Task 04-34-01 remains an independent Wave 0 plan because it uses existing Playwright manifests/configuration and creates account/admin/consent and desktop entitlement/safety browser RED witnesses with focused tags.
 - [x] Plan 04-03 Task 04-03-02 installs/runs the pinned `oasdiff` 1.26.0 compatibility gate before accepting OpenAPI operations.
 
 ---
@@ -82,12 +83,12 @@ _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 ## Validation Sign-Off
 
 - [x] Every requirement row has concrete implementation Task ID(s), plan(s), and wave(s).
-- [x] Every task has an automated verify command and behavior work has an explicit Wave 0 witness dependency.
+- [x] Every task has an automated verify command and behavior work has an explicit prerequisite-aware Wave 0 or Wave 1 witness dependency.
 - [x] Sampling continuity: no three consecutive tasks lack automated verification.
-- [x] Wave 0 plans cover every previously missing reference.
+- [x] Wave 0 scaffold plus Wave 1 dependent witness plans cover every previously missing reference without same-wave prerequisites.
 - [x] No watch-mode flags are used.
 - [x] Every implementation plan requires a focused command and records measured latency below 30 seconds; full Playwright/recursive suites are plan/wave/phase gates.
-- [x] `wave_0_complete: true` records complete Wave 0 task/path planning; execution summaries record RED collection results.
+- [x] `validation_scaffolding_complete: true` records complete prerequisite-aware task/path planning; `wave_0_complete: false` remains honest until dependent Wave 1 RED collection executes.
 - [x] `nyquist_compliant: true` records complete requirement/task/witness mapping and sampling design.
 
 **Approval:** planner-mapped; execution evidence remains pending by design

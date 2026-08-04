@@ -202,7 +202,7 @@ Better Auth 1.6.25 remains conditional. Its official documentation covers the la
 | `testcontainers` [WARNING: flagged as suspicious — verify before using.]              | 12.0.4 project compatibility pin; registry latest 12.1.0 published 2026-08-04 | PostgreSQL integration tests                                       | Use in CI and on machines with a daemon; ordinary local development may target synthetic Neon. [VERIFIED: AGENTS.md] [VERIFIED: npm registry]                                                                                     |
 | `ed25519-dalek`                                                                       | 3.0.0 (MSRV 1.85)                                                             | Verify offline entitlement signatures in Rust                      | Verify exact payload bytes before parsing or applying authority. [CITED: https://docs.rs/ed25519-dalek/3.0.0]                                                                                                                     |
 | `base64` / `sha2` / `hmac` / `hkdf` / `subtle`                                        | 0.22.1 / 0.10.9 / 0.13.0 / 0.13.0 / 2.6.1                                     | Encoding, hashing, HMAC/HKDF, constant-time comparison             | Use the approved stable compatibility line for device evidence and envelope handling; do not implement primitives. [VERIFIED: crates.io registry]                                                                                 |
-| `keyring`                                                                             | 4.1.6 (MSRV 1.88)                                                             | Windows Credential Manager access                                  | Persist desktop refresh/account credentials; never put them in localStorage or SQLite. [CITED: https://docs.rs/keyring/4.1.6]                                                                                                     |
+| `keyring`                                                                             | 4.1.5 (MSRV 1.88)                                                             | Windows Credential Manager access                                  | Persist desktop refresh/account credentials; never put them in localStorage or SQLite. [CITED: https://docs.rs/keyring/4.1.5]                                                                                                     |
 | Node built-in `crypto`                                                                | Node 24 LTS                                                                   | Server-side Ed25519 and HMAC operations                            | Avoid another JavaScript crypto dependency for supported primitives. [CITED: https://nodejs.org/api/crypto.html]                                                                                                                  |
 
 ### Alternatives Considered
@@ -222,7 +222,7 @@ Better Auth 1.6.25 remains conditional. Its official documentation covers the la
 pnpm --filter @liiiraa/api add fastify@5.10.0 @fastify/cors@11.3.0 @fastify/helmet@13.1.0 kysely@0.29.4 pg@8.22.0 better-auth@1.6.25 @better-auth/passkey@1.6.25 @better-auth/oauth-provider@1.6.25 stripe@22.4.0 @aws-sdk/client-s3@3.1102.0 @aws-sdk/client-sesv2@3.1102.0
 pnpm --filter @liiiraa/contracts add -D @hey-api/openapi-ts@0.99.0
 pnpm --filter @liiiraa/api add -D testcontainers@12.0.4
-cargo add -p liiiraa-desktop ed25519-dalek@3.0.0 base64@0.22.1 sha2@0.10.9 hmac@0.13.0 hkdf@0.13.0 subtle@2.6.1 keyring@4.1.6
+cargo add -p liiiraa-desktop ed25519-dalek@3.0.0 base64@0.22.1 sha2@0.10.9 hmac@0.13.0 hkdf@0.13.0 subtle@2.6.1 keyring@4.1.5
 ```
 
 Version and publication data were checked against the correct npm/crates.io ecosystems on 2026-08-04; no recommended npm package reported a postinstall script. [VERIFIED: npm registry] [VERIFIED: crates.io registry]
@@ -784,11 +784,11 @@ Headers reduce unintended browser/proxy persistence but do not replace continuou
 | AWS CLI           | SES/S3 provisioning/inspection           | ✗                         | —                                           | SDK plus AWS console for bounded staging; IaC remains the later production authority. [ASSUMED]                                                                                          |
 | Neon CLI          | Branch/database lifecycle                | ✗                         | —                                           | Neon dashboard/API and connection strings. [CITED: https://neon.com/docs/introduction/branching]                                                                                         |
 | `psql`            | Direct PostgreSQL diagnostics/migrations | ✗                         | —                                           | Node `pg`/Kysely migration and verification scripts. [ASSUMED]                                                                                                                           |
-| `oasdiff`         | First OpenAPI compatibility gate         | ✗                         | —                                           | No acceptable bypass once Phase 4 introduces operations; install approved 1.26.0 or run the pinned CI tool. [VERIFIED: architecture/decisions/0002-contract-authority-and-generation.md] |
+| `oasdiff`         | First OpenAPI compatibility gate         | ✗                         | —                                           | No acceptable bypass once Phase 4 introduces operations; install approved 1.26.0 or run the pinned CI tool. [VERIFIED: architecture/decisions/0002-contract-versioning-and-compatibility.md] |
 
 **Missing dependencies with no fallback:**
 
-- `oasdiff` is blocking at the first OpenAPI compatibility gate; ADR 0002 requires the generated contract compatibility check rather than an informal review. [VERIFIED: architecture/decisions/0002-contract-authority-and-generation.md]
+- `oasdiff` is blocking at the first OpenAPI compatibility gate; ADR 0002 explicitly requires `oasdiff` 1.26.0 when the OpenAPI document first differs from the approved baseline, and an unavailable executable fails closed. [VERIFIED: architecture/decisions/0002-contract-versioning-and-compatibility.md]
 - The active Node runtime must resolve to the repository’s 24.18.0 pin before installing or verifying packages; the current 24.16.0 causes repository `npm view` execution to fail through `devEngines`. [VERIFIED: environment query]
 
 **Missing dependencies with fallback:**
@@ -844,7 +844,7 @@ All proposed commands are target shapes; exact workspace package names and scrip
 - [ ] `apps/api/src/modules/support/consent-stream.test.ts` — active expiry/revoke abort, cache header, disposal, and audit cases. [ASSUMED]
 - [ ] `tooling/web-evidence/tests/account-authority.spec.ts`, `admin-authority.spec.ts`, and `admin-consent-revocation.spec.ts` — preserve Phase 3 UX against real projections. [ASSUMED]
 - [ ] `apps/desktop/tests/browser/entitlement-expiry.spec.ts` and `post-premium-safety.spec.ts` — enforce start/continue/safety distinctions. [ASSUMED]
-- [ ] Pinned `oasdiff` 1.26.0 installation/CI job — required before accepting the first emitted OpenAPI change. [VERIFIED: architecture/decisions/0002-contract-authority-and-generation.md]
+- [ ] Pinned `oasdiff` 1.26.0 installation/CI job — required before accepting the first emitted OpenAPI change. [VERIFIED: architecture/decisions/0002-contract-versioning-and-compatibility.md]
 
 ## Security Domain
 
