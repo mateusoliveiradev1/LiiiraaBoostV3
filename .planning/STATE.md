@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-06-PLAN.md
-last_updated: "2026-08-04T23:16:15.967Z"
+stopped_at: Completed 04-04-PLAN.md
+last_updated: "2026-08-04T23:45:05.892Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 149
-  percent: 85
+  completed_plans: 150
+  percent: 86
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 10 of 35
+Plan: 11 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -188,6 +188,7 @@ _Updated after plan completion_
 | Phase 04 P33 | 5 min | 1 tasks | 3 files |
 | Phase 04 P05 | 31 min | 2 tasks | 13 files |
 | Phase 04 P06 | 20 min | 1 tasks | 11 files |
+| Phase 04 P04 | 22min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -560,6 +561,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Use 40/25/15/10/10 device component scoring with 65 same-PC and 40 online-revalidation thresholds. — Keeps reinstall and one ordinary minor component change tolerant while substantial change remains explainable.
 - [Phase 04]: Use account-salted local SHA-256 and Web Crypto HMAC-SHA-256 server wrapping for protected device evidence. — Preserves the approved exact pins and privacy properties without composing incompatible RustCrypto digest generations.
 - [Phase 04]: Reject invalid device evidence before wrapping and again during comparison. — Malformed evidence cannot enter protected server values or exploit a downstream caller that skips one validation stage.
+- [Phase 04]: Keep Fastify/CORS/helmet at the API boundary while database, identity, commerce, object-storage, and email SDKs remain in control-plane-adapters.
+- [Phase 04]: Use a serializable pg migration transaction with a PostgreSQL advisory lock and SHA-256 migration record; expose Kysely through the database adapter for typed repositories.
+- [Phase 04]: Enforce audit append-only behavior with chain-head locking, contiguous sequence/hash checks, mutation/truncate triggers, and public privilege revocation.
+- [Phase 04]: Run live database probes only for explicit synthetic URLs or isolated Testcontainers; use the daemon-free checksum/DDL/transaction fallback when no PostgreSQL daemon exists.
 
 ### Pending Todos
 
@@ -603,6 +608,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T23:16:15.959Z
-Stopped at: Completed 04-06-PLAN.md
+Last session: 2026-08-04T23:44:57.298Z
+Stopped at: Completed 04-04-PLAN.md
 Resume file: None
