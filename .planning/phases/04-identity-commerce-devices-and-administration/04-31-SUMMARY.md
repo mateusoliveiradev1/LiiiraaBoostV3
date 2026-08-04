@@ -57,11 +57,13 @@ status: complete
 - Collected 12 domain witnesses covering D-03–D-06 recovery, resolved device scoring and privacy, and the exact new-paid-action versus in-flight/safety boundary.
 - Collected a 14-case TypeScript exact-byte entitlement matrix for valid seven-day bytes plus tamper, reserialization, key, binding, audience, version, expiry, future-time, and rollback rejection.
 - Collected the same 14 case identities as Rust integration tests so cross-runtime parity is visible before the verifier implementation exists.
+- Required the canonical envelope to pass the generated control-plane runtime schema in both TypeScript and Rust before reaching any cryptographic RED sentinel.
 - Proved every executable witness fails only through a stable `EXPECTED_RED` message naming its downstream owner task, with no collection, transform, type, compile, or harness error.
 
 ## Task Commits
 
 1. **Task 04-31-01: Collect domain and crypto RED witnesses** — `d1b120b` (`test`)
+2. **Task 04-31-01 audit correction: Prove canonical envelope schema admission** — `22331a7` (`fix`)
 
 ## Files Created/Modified
 
@@ -85,6 +87,7 @@ status: complete
 - Domain witness execution: **EXPECTED RED** — 12/12 failed only with `EXPECTED_RED[04-06-01]`, `EXPECTED_RED[04-12-01]`, or `EXPECTED_RED[04-21-01]`.
 - TypeScript offline entitlement execution: **EXPECTED RED** — 14/14 failed only with `EXPECTED_RED[04-07-01]`.
 - Rust offline entitlement execution: **EXPECTED RED** — 14/14 panicked only with `EXPECTED_RED[04-07-01]`.
+- Generated schema precondition: **PASS** — the canonical envelope is admitted before every TypeScript and Rust cryptographic sentinel.
 - `pnpm --filter @liiiraa/contracts-ts check`: **PASS**.
 - Focused strict TypeScript compile for the three domain files, Prettier check for all TypeScript witnesses, and `rustfmt --check` for the Rust witness: **PASS**.
 
@@ -100,10 +103,18 @@ status: complete
 - **Verification:** Both focused TypeScript collection commands exited 0 and listed all 26 TypeScript witness cases.
 - **Committed in:** Not applicable — command-only correction.
 
+**2. [Rule 1 - Bug] Proved the canonical envelope is structurally admissible before crypto RED**
+- **Found during:** Post-commit witness-quality audit
+- **Issue:** The value labeled canonical was type-shaped but its original synthetic signature was shorter than the generated runtime schema minimum, and neither runtime proved schema admission before the intentional cryptographic failure.
+- **Fix:** Replaced the signature with a structurally valid synthetic Ed25519-sized encoding and added generated control-plane validator preconditions in both TypeScript and Rust.
+- **Files modified:** `packages/contracts-ts/src/offline-entitlement.test.ts`, `apps/desktop/src-tauri/tests/offline_entitlement.rs`
+- **Verification:** Both runtimes admit the canonical envelope, then all 28 offline entitlement cases still fail only at `EXPECTED_RED[04-07-01]`.
+- **Committed in:** `22331a7`
+
 ---
 
-**Total deviations:** 1 auto-fixed blocking verification mismatch.
-**Impact on plan:** None. The intended collection gate ran against the same files with the installed Vitest CLI's supported syntax.
+**Total deviations:** 2 auto-fixed (1 blocking verification mismatch, 1 witness fixture bug).
+**Impact on plan:** The supported CLI syntax preserves the intended collection gate, and the schema precondition makes the exact-byte RED evidence stricter without adding production behavior.
 
 ## Known Stubs
 
@@ -126,5 +137,5 @@ None - these deterministic RED witnesses require no credentials, provider accoun
 ## Self-Check: PASSED
 
 - All five declared witness files exist on disk.
-- Task commit `d1b120b` exists in repository history and contains only the five plan-owned files.
+- Task commits `d1b120b` and `22331a7` exist in repository history and contain only the five plan-owned files.
 - All 40 witnesses collect without syntax, configuration, type, compile, or harness errors and fail only at their named owner-bound behavior sentinel.
