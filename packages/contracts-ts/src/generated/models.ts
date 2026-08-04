@@ -245,6 +245,218 @@ export type SignatureStateJson = 'verified' | 'mismatch' | 'unavailable';
  * via the `definition` "OfficialReleaseOrigin".
  */
 export type OfficialReleaseOriginJson = 'liiiraa-download-origin' | 'liiiraa-release-origin';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ControlPlaneDocument".
+ */
+export type ControlPlaneDocumentJson =
+  | AccountProjectionJson
+  | SessionProjectionJson
+  | SubscriptionProjectionJson
+  | InvoiceProjectionJson
+  | DeviceBindingProjectionJson
+  | SupportCaseProjectionJson
+  | DiagnosticConsentJson
+  | AuthorityCommandJson
+  | AuthorityReceiptJson
+  | AuthorityErrorJson
+  | ProviderEventJson
+  | AuditEventJson
+  | OfflineEntitlementEnvelopeJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityEtag".
+ */
+export type AuthorityEtagJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityProvenance".
+ */
+export type AuthorityProvenanceJson = 'postgres-authority' | 'provider-verified' | 'device-verified';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ControlPlaneIdentifier".
+ */
+export type ControlPlaneIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AccountState".
+ */
+export type AccountStateJson = 'active' | 'locked' | 'pending-deletion' | 'disabled';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ControlPlaneShortText".
+ */
+export type ControlPlaneShortTextJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RedactedAuthorityText".
+ */
+export type RedactedAuthorityTextJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SessionState".
+ */
+export type SessionStateJson = 'active' | 'challenge-required' | 'revoked' | 'expired';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthenticationStrength".
+ */
+export type AuthenticationStrengthJson = 'password' | 'mfa' | 'passkey';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SubscriptionState".
+ */
+export type SubscriptionStateJson = 'none' | 'trialing' | 'active' | 'past-due' | 'canceled' | 'expired';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SubscriptionPlan".
+ */
+export type SubscriptionPlanJson = 'free' | 'premium';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InvoiceState".
+ */
+export type InvoiceStateJson = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CurrencyCode".
+ */
+export type CurrencyCodeJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MoneyMinorUnits".
+ */
+export type MoneyMinorUnitsJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceBindingState".
+ */
+export type DeviceBindingStateJson = 'unbound' | 'active' | 'replacement-cooldown' | 'revoked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ContractSchemaVersion".
+ */
+export type ContractSchemaVersionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SupportCaseState".
+ */
+export type SupportCaseStateJson = 'open' | 'waiting-customer' | 'waiting-support' | 'resolved' | 'closed';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ConsentState".
+ */
+export type ConsentStateJson = 'active' | 'revoked' | 'expired';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ConsentScope".
+ */
+export type ConsentScopeJson = 'support-diagnostics' | 'cloud-ai' | 'account-security';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityCommand".
+ */
+export type AuthorityCommandJson =
+  | AccountCommandJson
+  | SessionCommandJson
+  | CommerceCommandJson
+  | DeviceCommandJson
+  | SupportCommandJson
+  | ConsentCommandJson
+  | AdminCommandJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AccountCommandAction".
+ */
+export type AccountCommandActionJson = 'update-profile' | 'request-deletion' | 'cancel-deletion';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SessionCommandAction".
+ */
+export type SessionCommandActionJson = 'revoke' | 'revoke-others';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CommerceCommandAction".
+ */
+export type CommerceCommandActionJson = 'start-checkout' | 'reconcile-subscription' | 'cancel-subscription';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceCommandAction".
+ */
+export type DeviceCommandActionJson = 'bind' | 'replace' | 'revoke';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SupportCommandAction".
+ */
+export type SupportCommandActionJson = 'create' | 'reply' | 'close';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ConsentCommandAction".
+ */
+export type ConsentCommandActionJson = 'grant' | 'revoke';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminRole".
+ */
+export type AdminRoleJson = 'support' | 'operations' | 'security' | 'audit';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAction".
+ */
+export type AdminActionJson =
+  | 'assume-role'
+  | 'view-support-diagnostics'
+  | 'revoke-session'
+  | 'revoke-device'
+  | 'correct-entitlement'
+  | 'export-audit-reference';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityReceiptOutcome".
+ */
+export type AuthorityReceiptOutcomeJson = 'applied' | 'accepted' | 'no-op';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityErrorCode".
+ */
+export type AuthorityErrorCodeJson =
+  | 'unauthenticated'
+  | 'unauthorized'
+  | 'step-up-required'
+  | 'conflict'
+  | 'stale'
+  | 'consent-expired'
+  | 'offline'
+  | 'provider-unavailable'
+  | 'invalid-request'
+  | 'internal';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProviderIdentity".
+ */
+export type ProviderIdentityJson = 'identity' | 'commerce' | 'email' | 'object-storage';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProviderEventType".
+ */
+export type ProviderEventTypeJson =
+  'session-revoked' | 'checkout-completed' | 'subscription-updated' | 'invoice-updated' | 'delivery-updated';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuditResult".
+ */
+export type AuditResultJson = 'succeeded' | 'denied' | 'failed';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OpaquePayloadBytes".
+ */
+export type OpaquePayloadBytesJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DetachedSignature".
+ */
+export type DetachedSignatureJson = string;
 
 export interface GeneratedContractRoots {
   messageEnvelope:
@@ -259,6 +471,7 @@ export interface GeneratedContractRoots {
     | FutureAuthorityCommandJson
     | NoChangeReceiptJson
     | AdminAuditEventJson;
+  controlPlaneDocument: ControlPlaneDocumentJson;
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -1405,6 +1618,664 @@ export interface AdminAuditEventJson {
   correlationId: CorrelationIdJson;
   receipt: NoChangeReceiptJson;
 }
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AccountProjection".
+ */
+export interface AccountProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'account-projection';
+  accountId: ControlPlaneIdentifierJson;
+  state: AccountStateJson;
+  displayName: ControlPlaneShortTextJson;
+  emailRedacted: RedactedAuthorityTextJson;
+  locale: ShellLocaleJson;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SessionProjection".
+ */
+export interface SessionProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'session-projection';
+  sessionId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  state: SessionStateJson;
+  authenticationStrength: AuthenticationStrengthJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  scopes:
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  authenticatedAt: string;
+  expiresAt: string;
+  lastSeenAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SubscriptionProjection".
+ */
+export interface SubscriptionProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'subscription-projection';
+  subscriptionId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  state: SubscriptionStateJson;
+  plan: SubscriptionPlanJson;
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  entitlements:
+    | []
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  currentPeriodEndsAt?: string;
+  cancelAtPeriodEnd: boolean;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InvoiceProjection".
+ */
+export interface InvoiceProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'invoice-projection';
+  invoiceId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  subscriptionId?: ControlPlaneIdentifierJson;
+  state: InvoiceStateJson;
+  currency: CurrencyCodeJson;
+  amountDueMinor: MoneyMinorUnitsJson;
+  amountPaidMinor: MoneyMinorUnitsJson;
+  issuedAt: string;
+  settledAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceBindingProjection".
+ */
+export interface DeviceBindingProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'device-binding-projection';
+  deviceBindingId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  state: DeviceBindingStateJson;
+  deviceLabel: RedactedAuthorityTextJson;
+  evidenceVersion: ContractSchemaVersionJson;
+  boundAt?: string;
+  replacementEligibleAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SupportCaseProjection".
+ */
+export interface SupportCaseProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'support-case-projection';
+  supportCaseId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  state: SupportCaseStateJson;
+  subjectRedacted: RedactedAuthorityTextJson;
+  consentId?: ControlPlaneIdentifierJson;
+  auditReference: ControlPlaneIdentifierJson;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DiagnosticConsent".
+ */
+export interface DiagnosticConsentJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  kind: 'diagnostic-consent';
+  consentId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  state: ConsentStateJson;
+  /**
+   * @minItems 1
+   * @maxItems 3
+   */
+  scopes:
+    [ConsentScopeJson] | [ConsentScopeJson, ConsentScopeJson] | [ConsentScopeJson, ConsentScopeJson, ConsentScopeJson];
+  purpose: RedactedAuthorityTextJson;
+  grantedAt: string;
+  expiresAt: string;
+  revokedAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AccountCommand".
+ */
+export interface AccountCommandJson {
+  schemaVersion: '1.0';
+  kind: 'account-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  action: AccountCommandActionJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SessionCommand".
+ */
+export interface SessionCommandJson {
+  schemaVersion: '1.0';
+  kind: 'session-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  sessionId: ControlPlaneIdentifierJson;
+  action: SessionCommandActionJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CommerceCommand".
+ */
+export interface CommerceCommandJson {
+  schemaVersion: '1.0';
+  kind: 'commerce-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  action: CommerceCommandActionJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceCommand".
+ */
+export interface DeviceCommandJson {
+  schemaVersion: '1.0';
+  kind: 'device-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  deviceBindingId: ControlPlaneIdentifierJson;
+  action: DeviceCommandActionJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SupportCommand".
+ */
+export interface SupportCommandJson {
+  schemaVersion: '1.0';
+  kind: 'support-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  supportCaseId: ControlPlaneIdentifierJson;
+  action: SupportCommandActionJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ConsentCommand".
+ */
+export interface ConsentCommandJson {
+  schemaVersion: '1.0';
+  kind: 'consent-command';
+  commandId: ControlPlaneIdentifierJson;
+  accountId: ControlPlaneIdentifierJson;
+  consentId: ControlPlaneIdentifierJson;
+  action: ConsentCommandActionJson;
+  /**
+   * @minItems 1
+   * @maxItems 3
+   */
+  scopes:
+    [ConsentScopeJson] | [ConsentScopeJson, ConsentScopeJson] | [ConsentScopeJson, ConsentScopeJson, ConsentScopeJson];
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminCommand".
+ */
+export interface AdminCommandJson {
+  schemaVersion: '1.0';
+  kind: 'admin-command';
+  commandId: ControlPlaneIdentifierJson;
+  actorId: ControlPlaneIdentifierJson;
+  assumedRole: AdminRoleJson;
+  action: AdminActionJson;
+  redactedTarget: RedactedAuthorityTextJson;
+  reason: RedactedAuthorityTextJson;
+  authorizationContextId: ControlPlaneIdentifierJson;
+  expectedVersion: string;
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityReceipt".
+ */
+export interface AuthorityReceiptJson {
+  schemaVersion: '1.0';
+  kind: 'authority-receipt';
+  receiptId: ControlPlaneIdentifierJson;
+  commandId: ControlPlaneIdentifierJson;
+  aggregateId: ControlPlaneIdentifierJson;
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  auditReference: ControlPlaneIdentifierJson;
+  outcome: AuthorityReceiptOutcomeJson;
+  provenance: AuthorityProvenanceJson;
+  recordedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuthorityError".
+ */
+export interface AuthorityErrorJson {
+  schemaVersion: '1.0';
+  kind: 'authority-error';
+  code: AuthorityErrorCodeJson;
+  message: RedactedAuthorityTextJson;
+  correlationId: CorrelationIdJson;
+  retryable: boolean;
+  currentVersion?: string;
+  currentEtag?: AuthorityEtagJson;
+  auditReference?: ControlPlaneIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProviderEvent".
+ */
+export interface ProviderEventJson {
+  schemaVersion: '1.0';
+  kind: 'provider-event';
+  provider: ProviderIdentityJson;
+  providerEventId: ControlPlaneIdentifierJson;
+  eventType: ProviderEventTypeJson;
+  aggregateReference?: ControlPlaneIdentifierJson;
+  payloadDigest: Sha256DigestJson;
+  correlationId: CorrelationIdJson;
+  receivedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuditEvent".
+ */
+export interface AuditEventJson {
+  schemaVersion: '1.0';
+  kind: 'audit-event';
+  auditEventId: ControlPlaneIdentifierJson;
+  actorReference: ControlPlaneIdentifierJson;
+  assumedRole?: AdminRoleJson;
+  action: ControlPlaneIdentifierJson;
+  redactedTarget: RedactedAuthorityTextJson;
+  reason: RedactedAuthorityTextJson;
+  result: AuditResultJson;
+  aggregateVersion: string;
+  correlationId: CorrelationIdJson;
+  previousEventHash?: Sha256DigestJson;
+  eventHash: Sha256DigestJson;
+  occurredAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OfflineEntitlementEnvelope".
+ */
+export interface OfflineEntitlementEnvelopeJson {
+  schemaVersion: '1.0';
+  kind: 'offline-entitlement-envelope';
+  payloadBytes: OpaquePayloadBytesJson;
+  signature: DetachedSignatureJson;
+  algorithm: 'Ed25519';
+  keyId: ControlPlaneIdentifierJson;
+  audience: ControlPlaneIdentifierJson;
+  deviceBinding: ControlPlaneIdentifierJson;
+  issuedAt: string;
+  expiresAt: string;
+  validitySeconds: 604800;
+}
 
 export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];
 export type WebDocument = GeneratedContractRoots['webDocument'];
+export type ControlPlaneDocument = GeneratedContractRoots['controlPlaneDocument'];

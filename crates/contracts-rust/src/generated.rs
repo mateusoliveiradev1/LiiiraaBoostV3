@@ -28,6 +28,704 @@ pub mod error {
         }
     }
 }
+#[doc = "`AccountCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AccountCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AccountCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"account-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AccountCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: AccountCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: AccountCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AccountCommandSchemaVersion,
+}
+#[doc = "`AccountCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AccountCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"update-profile\","]
+#[doc = "    \"request-deletion\","]
+#[doc = "    \"cancel-deletion\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountCommandAction {
+    #[serde(rename = "update-profile")]
+    UpdateProfile,
+    #[serde(rename = "request-deletion")]
+    RequestDeletion,
+    #[serde(rename = "cancel-deletion")]
+    CancelDeletion,
+}
+impl ::std::fmt::Display for AccountCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::UpdateProfile => f.write_str("update-profile"),
+            Self::RequestDeletion => f.write_str("request-deletion"),
+            Self::CancelDeletion => f.write_str("cancel-deletion"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "update-profile" => Ok(Self::UpdateProfile),
+            "request-deletion" => Ok(Self::RequestDeletion),
+            "cancel-deletion" => Ok(Self::CancelDeletion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AccountCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"account-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountCommandKind {
+    #[serde(rename = "account-command")]
+    AccountCommand,
+}
+impl ::std::fmt::Display for AccountCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AccountCommand => f.write_str("account-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "account-command" => Ok(Self::AccountCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AccountCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AccountCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AccountProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AccountProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"displayName\","]
+#[doc = "    \"emailRedacted\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"locale\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\","]
+#[doc = "    \"updatedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"displayName\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneShortText\""]
+#[doc = "    },"]
+#[doc = "    \"emailRedacted\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"account-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"locale\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ShellLocale\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AccountState\""]
+#[doc = "    },"]
+#[doc = "    \"updatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AccountProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    #[serde(rename = "displayName")]
+    pub display_name: ControlPlaneShortText,
+    #[serde(rename = "emailRedacted")]
+    pub email_redacted: RedactedAuthorityText,
+    pub etag: AuthorityEtag,
+    pub kind: AccountProjectionKind,
+    pub locale: ShellLocale,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AccountProjectionSchemaVersion,
+    pub state: AccountState,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: ::std::string::String,
+}
+#[doc = "`AccountProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"account-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountProjectionKind {
+    #[serde(rename = "account-projection")]
+    AccountProjection,
+}
+impl ::std::fmt::Display for AccountProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AccountProjection => f.write_str("account-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "account-projection" => Ok(Self::AccountProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AccountProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AccountProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AccountState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AccountState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"active\","]
+#[doc = "    \"locked\","]
+#[doc = "    \"pending-deletion\","]
+#[doc = "    \"disabled\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AccountState {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "locked")]
+    Locked,
+    #[serde(rename = "pending-deletion")]
+    PendingDeletion,
+    #[serde(rename = "disabled")]
+    Disabled,
+}
+impl ::std::fmt::Display for AccountState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Active => f.write_str("active"),
+            Self::Locked => f.write_str("locked"),
+            Self::PendingDeletion => f.write_str("pending-deletion"),
+            Self::Disabled => f.write_str("disabled"),
+        }
+    }
+}
+impl ::std::str::FromStr for AccountState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "active" => Ok(Self::Active),
+            "locked" => Ok(Self::Locked),
+            "pending-deletion" => Ok(Self::PendingDeletion),
+            "disabled" => Ok(Self::Disabled),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AccountState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AccountState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AccountState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"assume-role\","]
+#[doc = "    \"view-support-diagnostics\","]
+#[doc = "    \"revoke-session\","]
+#[doc = "    \"revoke-device\","]
+#[doc = "    \"correct-entitlement\","]
+#[doc = "    \"export-audit-reference\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAction {
+    #[serde(rename = "assume-role")]
+    AssumeRole,
+    #[serde(rename = "view-support-diagnostics")]
+    ViewSupportDiagnostics,
+    #[serde(rename = "revoke-session")]
+    RevokeSession,
+    #[serde(rename = "revoke-device")]
+    RevokeDevice,
+    #[serde(rename = "correct-entitlement")]
+    CorrectEntitlement,
+    #[serde(rename = "export-audit-reference")]
+    ExportAuditReference,
+}
+impl ::std::fmt::Display for AdminAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AssumeRole => f.write_str("assume-role"),
+            Self::ViewSupportDiagnostics => f.write_str("view-support-diagnostics"),
+            Self::RevokeSession => f.write_str("revoke-session"),
+            Self::RevokeDevice => f.write_str("revoke-device"),
+            Self::CorrectEntitlement => f.write_str("correct-entitlement"),
+            Self::ExportAuditReference => f.write_str("export-audit-reference"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "assume-role" => Ok(Self::AssumeRole),
+            "view-support-diagnostics" => Ok(Self::ViewSupportDiagnostics),
+            "revoke-session" => Ok(Self::RevokeSession),
+            "revoke-device" => Ok(Self::RevokeDevice),
+            "correct-entitlement" => Ok(Self::CorrectEntitlement),
+            "export-audit-reference" => Ok(Self::ExportAuditReference),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminAuditEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -182,6 +880,1600 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminAuditEventResult {
         value.parse()
     }
 }
+#[doc = "`AdminCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"action\","]
+#[doc = "    \"actorId\","]
+#[doc = "    \"assumedRole\","]
+#[doc = "    \"authorizationContextId\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"redactedTarget\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminAction\""]
+#[doc = "    },"]
+#[doc = "    \"actorId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"assumedRole\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminRole\""]
+#[doc = "    },"]
+#[doc = "    \"authorizationContextId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"redactedTarget\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminCommand {
+    pub action: AdminAction,
+    #[serde(rename = "actorId")]
+    pub actor_id: ControlPlaneIdentifier,
+    #[serde(rename = "assumedRole")]
+    pub assumed_role: AdminRole,
+    #[serde(rename = "authorizationContextId")]
+    pub authorization_context_id: ControlPlaneIdentifier,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: AdminCommandKind,
+    pub reason: RedactedAuthorityText,
+    #[serde(rename = "redactedTarget")]
+    pub redacted_target: RedactedAuthorityText,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminCommandSchemaVersion,
+}
+#[doc = "`AdminCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminCommandKind {
+    #[serde(rename = "admin-command")]
+    AdminCommand,
+}
+impl ::std::fmt::Display for AdminCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminCommand => f.write_str("admin-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-command" => Ok(Self::AdminCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminRole.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"support\","]
+#[doc = "    \"operations\","]
+#[doc = "    \"security\","]
+#[doc = "    \"audit\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminRole {
+    #[serde(rename = "support")]
+    Support,
+    #[serde(rename = "operations")]
+    Operations,
+    #[serde(rename = "security")]
+    Security,
+    #[serde(rename = "audit")]
+    Audit,
+}
+impl ::std::fmt::Display for AdminRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Support => f.write_str("support"),
+            Self::Operations => f.write_str("operations"),
+            Self::Security => f.write_str("security"),
+            Self::Audit => f.write_str("audit"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "support" => Ok(Self::Support),
+            "operations" => Ok(Self::Operations),
+            "security" => Ok(Self::Security),
+            "audit" => Ok(Self::Audit),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuditEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuditEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"action\","]
+#[doc = "    \"actorReference\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"auditEventId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"redactedTarget\","]
+#[doc = "    \"result\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"actorReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"assumedRole\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminRole\""]
+#[doc = "    },"]
+#[doc = "    \"auditEventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Sha256Digest\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"audit-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Sha256Digest\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"redactedTarget\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"result\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditResult\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AuditEvent {
+    pub action: ControlPlaneIdentifier,
+    #[serde(rename = "actorReference")]
+    pub actor_reference: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(
+        rename = "assumedRole",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub assumed_role: ::std::option::Option<AdminRole>,
+    #[serde(rename = "auditEventId")]
+    pub audit_event_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "eventHash")]
+    pub event_hash: Sha256Digest,
+    pub kind: AuditEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(
+        rename = "previousEventHash",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub previous_event_hash: ::std::option::Option<Sha256Digest>,
+    pub reason: RedactedAuthorityText,
+    #[serde(rename = "redactedTarget")]
+    pub redacted_target: RedactedAuthorityText,
+    pub result: AuditResult,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AuditEventSchemaVersion,
+}
+#[doc = "`AuditEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"audit-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuditEventKind {
+    #[serde(rename = "audit-event")]
+    AuditEvent,
+}
+impl ::std::fmt::Display for AuditEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AuditEvent => f.write_str("audit-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuditEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "audit-event" => Ok(Self::AuditEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuditEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuditEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuditEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuditEventSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuditEventSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AuditEventSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuditEventSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuditEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuditEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuditEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuditResult`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuditResult.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"succeeded\","]
+#[doc = "    \"denied\","]
+#[doc = "    \"failed\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuditResult {
+    #[serde(rename = "succeeded")]
+    Succeeded,
+    #[serde(rename = "denied")]
+    Denied,
+    #[serde(rename = "failed")]
+    Failed,
+}
+impl ::std::fmt::Display for AuditResult {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Succeeded => f.write_str("succeeded"),
+            Self::Denied => f.write_str("denied"),
+            Self::Failed => f.write_str("failed"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuditResult {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "succeeded" => Ok(Self::Succeeded),
+            "denied" => Ok(Self::Denied),
+            "failed" => Ok(Self::Failed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuditResult {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuditResult {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuditResult {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthenticationStrength`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthenticationStrength.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"password\","]
+#[doc = "    \"mfa\","]
+#[doc = "    \"passkey\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthenticationStrength {
+    #[serde(rename = "password")]
+    Password,
+    #[serde(rename = "mfa")]
+    Mfa,
+    #[serde(rename = "passkey")]
+    Passkey,
+}
+impl ::std::fmt::Display for AuthenticationStrength {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Password => f.write_str("password"),
+            Self::Mfa => f.write_str("mfa"),
+            Self::Passkey => f.write_str("passkey"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthenticationStrength {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "password" => Ok(Self::Password),
+            "mfa" => Ok(Self::Mfa),
+            "passkey" => Ok(Self::Passkey),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthenticationStrength {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthenticationStrength {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthenticationStrength {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityCommand.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AccountCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SessionCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/CommerceCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SupportCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ConsentCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminCommand\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum AuthorityCommand {
+    AccountCommand(AccountCommand),
+    SessionCommand(SessionCommand),
+    CommerceCommand(CommerceCommand),
+    DeviceCommand(DeviceCommand),
+    SupportCommand(SupportCommand),
+    ConsentCommand(ConsentCommand),
+    AdminCommand(AdminCommand),
+}
+impl ::std::convert::From<AccountCommand> for AuthorityCommand {
+    fn from(value: AccountCommand) -> Self {
+        Self::AccountCommand(value)
+    }
+}
+impl ::std::convert::From<SessionCommand> for AuthorityCommand {
+    fn from(value: SessionCommand) -> Self {
+        Self::SessionCommand(value)
+    }
+}
+impl ::std::convert::From<CommerceCommand> for AuthorityCommand {
+    fn from(value: CommerceCommand) -> Self {
+        Self::CommerceCommand(value)
+    }
+}
+impl ::std::convert::From<DeviceCommand> for AuthorityCommand {
+    fn from(value: DeviceCommand) -> Self {
+        Self::DeviceCommand(value)
+    }
+}
+impl ::std::convert::From<SupportCommand> for AuthorityCommand {
+    fn from(value: SupportCommand) -> Self {
+        Self::SupportCommand(value)
+    }
+}
+impl ::std::convert::From<ConsentCommand> for AuthorityCommand {
+    fn from(value: ConsentCommand) -> Self {
+        Self::ConsentCommand(value)
+    }
+}
+impl ::std::convert::From<AdminCommand> for AuthorityCommand {
+    fn from(value: AdminCommand) -> Self {
+        Self::AdminCommand(value)
+    }
+}
+#[doc = "`AuthorityError`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityError.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"code\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"message\","]
+#[doc = "    \"retryable\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"auditReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"code\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityErrorCode\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"currentEtag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"currentVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"authority-error\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"message\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"retryable\": {"]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AuthorityError {
+    #[serde(
+        rename = "auditReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub audit_reference: ::std::option::Option<ControlPlaneIdentifier>,
+    pub code: AuthorityErrorCode,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(
+        rename = "currentEtag",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub current_etag: ::std::option::Option<AuthorityEtag>,
+    #[serde(
+        rename = "currentVersion",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub current_version: ::std::option::Option<::std::string::String>,
+    pub kind: AuthorityErrorKind,
+    pub message: RedactedAuthorityText,
+    pub retryable: bool,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AuthorityErrorSchemaVersion,
+}
+#[doc = "`AuthorityErrorCode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityErrorCode.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unauthenticated\","]
+#[doc = "    \"unauthorized\","]
+#[doc = "    \"step-up-required\","]
+#[doc = "    \"conflict\","]
+#[doc = "    \"stale\","]
+#[doc = "    \"consent-expired\","]
+#[doc = "    \"offline\","]
+#[doc = "    \"provider-unavailable\","]
+#[doc = "    \"invalid-request\","]
+#[doc = "    \"internal\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityErrorCode {
+    #[serde(rename = "unauthenticated")]
+    Unauthenticated,
+    #[serde(rename = "unauthorized")]
+    Unauthorized,
+    #[serde(rename = "step-up-required")]
+    StepUpRequired,
+    #[serde(rename = "conflict")]
+    Conflict,
+    #[serde(rename = "stale")]
+    Stale,
+    #[serde(rename = "consent-expired")]
+    ConsentExpired,
+    #[serde(rename = "offline")]
+    Offline,
+    #[serde(rename = "provider-unavailable")]
+    ProviderUnavailable,
+    #[serde(rename = "invalid-request")]
+    InvalidRequest,
+    #[serde(rename = "internal")]
+    Internal,
+}
+impl ::std::fmt::Display for AuthorityErrorCode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unauthenticated => f.write_str("unauthenticated"),
+            Self::Unauthorized => f.write_str("unauthorized"),
+            Self::StepUpRequired => f.write_str("step-up-required"),
+            Self::Conflict => f.write_str("conflict"),
+            Self::Stale => f.write_str("stale"),
+            Self::ConsentExpired => f.write_str("consent-expired"),
+            Self::Offline => f.write_str("offline"),
+            Self::ProviderUnavailable => f.write_str("provider-unavailable"),
+            Self::InvalidRequest => f.write_str("invalid-request"),
+            Self::Internal => f.write_str("internal"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityErrorCode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unauthenticated" => Ok(Self::Unauthenticated),
+            "unauthorized" => Ok(Self::Unauthorized),
+            "step-up-required" => Ok(Self::StepUpRequired),
+            "conflict" => Ok(Self::Conflict),
+            "stale" => Ok(Self::Stale),
+            "consent-expired" => Ok(Self::ConsentExpired),
+            "offline" => Ok(Self::Offline),
+            "provider-unavailable" => Ok(Self::ProviderUnavailable),
+            "invalid-request" => Ok(Self::InvalidRequest),
+            "internal" => Ok(Self::Internal),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityErrorCode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityErrorCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityErrorCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityErrorKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"authority-error\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityErrorKind {
+    #[serde(rename = "authority-error")]
+    AuthorityError,
+}
+impl ::std::fmt::Display for AuthorityErrorKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AuthorityError => f.write_str("authority-error"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityErrorKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "authority-error" => Ok(Self::AuthorityError),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityErrorKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityErrorKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityErrorKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityErrorSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityErrorSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AuthorityErrorSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityErrorSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityErrorSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityErrorSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityErrorSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityEtag`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityEtag.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct AuthorityEtag(::std::string::String);
+impl ::std::ops::Deref for AuthorityEtag {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<AuthorityEtag> for ::std::string::String {
+    fn from(value: AuthorityEtag) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for AuthorityEtag {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityEtag {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityEtag {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityEtag {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for AuthorityEtag {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`AuthorityProvenance`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityProvenance.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"postgres-authority\","]
+#[doc = "    \"provider-verified\","]
+#[doc = "    \"device-verified\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityProvenance {
+    #[serde(rename = "postgres-authority")]
+    PostgresAuthority,
+    #[serde(rename = "provider-verified")]
+    ProviderVerified,
+    #[serde(rename = "device-verified")]
+    DeviceVerified,
+}
+impl ::std::fmt::Display for AuthorityProvenance {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PostgresAuthority => f.write_str("postgres-authority"),
+            Self::ProviderVerified => f.write_str("provider-verified"),
+            Self::DeviceVerified => f.write_str("device-verified"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityProvenance {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "postgres-authority" => Ok(Self::PostgresAuthority),
+            "provider-verified" => Ok(Self::ProviderVerified),
+            "device-verified" => Ok(Self::DeviceVerified),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityProvenance {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityProvenance {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityProvenance {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityReceipt`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityReceipt.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"aggregateId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"auditReference\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"receiptId\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"aggregateId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"auditReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"authority-receipt\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityReceiptOutcome\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"receiptId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AuthorityReceipt {
+    #[serde(rename = "aggregateId")]
+    pub aggregate_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "auditReference")]
+    pub audit_reference: ControlPlaneIdentifier,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub etag: AuthorityEtag,
+    pub kind: AuthorityReceiptKind,
+    pub outcome: AuthorityReceiptOutcome,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "receiptId")]
+    pub receipt_id: ControlPlaneIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AuthorityReceiptSchemaVersion,
+}
+#[doc = "`AuthorityReceiptKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"authority-receipt\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityReceiptKind {
+    #[serde(rename = "authority-receipt")]
+    AuthorityReceipt,
+}
+impl ::std::fmt::Display for AuthorityReceiptKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AuthorityReceipt => f.write_str("authority-receipt"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityReceiptKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "authority-receipt" => Ok(Self::AuthorityReceipt),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityReceiptKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityReceiptKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityReceiptKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityReceiptOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuthorityReceiptOutcome.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"applied\","]
+#[doc = "    \"accepted\","]
+#[doc = "    \"no-op\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityReceiptOutcome {
+    #[serde(rename = "applied")]
+    Applied,
+    #[serde(rename = "accepted")]
+    Accepted,
+    #[serde(rename = "no-op")]
+    NoOp,
+}
+impl ::std::fmt::Display for AuthorityReceiptOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Applied => f.write_str("applied"),
+            Self::Accepted => f.write_str("accepted"),
+            Self::NoOp => f.write_str("no-op"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityReceiptOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "applied" => Ok(Self::Applied),
+            "accepted" => Ok(Self::Accepted),
+            "no-op" => Ok(Self::NoOp),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityReceiptOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityReceiptOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityReceiptOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AuthorityReceiptSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AuthorityReceiptSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AuthorityReceiptSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AuthorityReceiptSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AuthorityReceiptSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AuthorityReceiptSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AuthorityReceiptSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`CapabilityAvailability`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -329,6 +2621,747 @@ pub struct ClaimEvidence {
     #[serde(rename = "validationState")]
     pub validation_state: ValidationState,
 }
+#[doc = "`CommerceCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CommerceCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CommerceCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"commerce-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CommerceCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: CommerceCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: CommerceCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: CommerceCommandSchemaVersion,
+}
+#[doc = "`CommerceCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CommerceCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"start-checkout\","]
+#[doc = "    \"reconcile-subscription\","]
+#[doc = "    \"cancel-subscription\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CommerceCommandAction {
+    #[serde(rename = "start-checkout")]
+    StartCheckout,
+    #[serde(rename = "reconcile-subscription")]
+    ReconcileSubscription,
+    #[serde(rename = "cancel-subscription")]
+    CancelSubscription,
+}
+impl ::std::fmt::Display for CommerceCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StartCheckout => f.write_str("start-checkout"),
+            Self::ReconcileSubscription => f.write_str("reconcile-subscription"),
+            Self::CancelSubscription => f.write_str("cancel-subscription"),
+        }
+    }
+}
+impl ::std::str::FromStr for CommerceCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "start-checkout" => Ok(Self::StartCheckout),
+            "reconcile-subscription" => Ok(Self::ReconcileSubscription),
+            "cancel-subscription" => Ok(Self::CancelSubscription),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CommerceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CommerceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CommerceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CommerceCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"commerce-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CommerceCommandKind {
+    #[serde(rename = "commerce-command")]
+    CommerceCommand,
+}
+impl ::std::fmt::Display for CommerceCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CommerceCommand => f.write_str("commerce-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for CommerceCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "commerce-command" => Ok(Self::CommerceCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CommerceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CommerceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CommerceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CommerceCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CommerceCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for CommerceCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for CommerceCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CommerceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CommerceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CommerceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConsentCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ConsentCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"consentId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"scopes\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ConsentCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"consentId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"consent-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"scopes\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ConsentScope\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 3,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ConsentCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: ConsentCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "consentId")]
+    pub consent_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: ConsentCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: ConsentCommandSchemaVersion,
+    pub scopes: ::std::vec::Vec<ConsentScope>,
+}
+#[doc = "`ConsentCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ConsentCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"grant\","]
+#[doc = "    \"revoke\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConsentCommandAction {
+    #[serde(rename = "grant")]
+    Grant,
+    #[serde(rename = "revoke")]
+    Revoke,
+}
+impl ::std::fmt::Display for ConsentCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Grant => f.write_str("grant"),
+            Self::Revoke => f.write_str("revoke"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConsentCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "grant" => Ok(Self::Grant),
+            "revoke" => Ok(Self::Revoke),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConsentCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConsentCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConsentCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConsentCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"consent-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConsentCommandKind {
+    #[serde(rename = "consent-command")]
+    ConsentCommand,
+}
+impl ::std::fmt::Display for ConsentCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConsentCommand => f.write_str("consent-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConsentCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "consent-command" => Ok(Self::ConsentCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConsentCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConsentCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConsentCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConsentCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConsentCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for ConsentCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConsentCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConsentCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConsentCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConsentCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConsentScope`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ConsentScope.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"support-diagnostics\","]
+#[doc = "    \"cloud-ai\","]
+#[doc = "    \"account-security\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConsentScope {
+    #[serde(rename = "support-diagnostics")]
+    SupportDiagnostics,
+    #[serde(rename = "cloud-ai")]
+    CloudAi,
+    #[serde(rename = "account-security")]
+    AccountSecurity,
+}
+impl ::std::fmt::Display for ConsentScope {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SupportDiagnostics => f.write_str("support-diagnostics"),
+            Self::CloudAi => f.write_str("cloud-ai"),
+            Self::AccountSecurity => f.write_str("account-security"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConsentScope {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "support-diagnostics" => Ok(Self::SupportDiagnostics),
+            "cloud-ai" => Ok(Self::CloudAi),
+            "account-security" => Ok(Self::AccountSecurity),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConsentScope {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConsentScope {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConsentScope {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConsentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ConsentState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"active\","]
+#[doc = "    \"revoked\","]
+#[doc = "    \"expired\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConsentState {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "revoked")]
+    Revoked,
+    #[serde(rename = "expired")]
+    Expired,
+}
+impl ::std::fmt::Display for ConsentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Active => f.write_str("active"),
+            Self::Revoked => f.write_str("revoked"),
+            Self::Expired => f.write_str("expired"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConsentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "active" => Ok(Self::Active),
+            "revoked" => Ok(Self::Revoked),
+            "expired" => Ok(Self::Expired),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConsentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConsentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConsentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ContentRecord`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -414,6 +3447,362 @@ pub struct ContentRecord {
     pub validation_state: ValidationState,
     pub version: ShellVersion,
 }
+#[doc = "`ContractSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ContractSchemaVersion.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 32,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct ContractSchemaVersion(::std::string::String);
+impl ::std::ops::Deref for ContractSchemaVersion {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<ContractSchemaVersion> for ::std::string::String {
+    fn from(value: ContractSchemaVersion) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for ContractSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 32usize {
+            return Err("longer than 32 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for ContractSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ContractSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ContractSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for ContractSchemaVersion {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`ControlPlaneDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ControlPlaneDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AccountProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SessionProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SubscriptionProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/InvoiceProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceBindingProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SupportCaseProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DiagnosticConsent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityCommand\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityReceipt\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityError\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ProviderEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/OfflineEntitlementEnvelope\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum ControlPlaneDocument {
+    AccountProjection(AccountProjection),
+    SessionProjection(SessionProjection),
+    SubscriptionProjection(SubscriptionProjection),
+    InvoiceProjection(InvoiceProjection),
+    DeviceBindingProjection(DeviceBindingProjection),
+    SupportCaseProjection(SupportCaseProjection),
+    DiagnosticConsent(DiagnosticConsent),
+    AuthorityCommand(AuthorityCommand),
+    AuthorityReceipt(AuthorityReceipt),
+    AuthorityError(AuthorityError),
+    ProviderEvent(ProviderEvent),
+    AuditEvent(AuditEvent),
+    OfflineEntitlementEnvelope(OfflineEntitlementEnvelope),
+}
+impl ::std::convert::From<AccountProjection> for ControlPlaneDocument {
+    fn from(value: AccountProjection) -> Self {
+        Self::AccountProjection(value)
+    }
+}
+impl ::std::convert::From<SessionProjection> for ControlPlaneDocument {
+    fn from(value: SessionProjection) -> Self {
+        Self::SessionProjection(value)
+    }
+}
+impl ::std::convert::From<SubscriptionProjection> for ControlPlaneDocument {
+    fn from(value: SubscriptionProjection) -> Self {
+        Self::SubscriptionProjection(value)
+    }
+}
+impl ::std::convert::From<InvoiceProjection> for ControlPlaneDocument {
+    fn from(value: InvoiceProjection) -> Self {
+        Self::InvoiceProjection(value)
+    }
+}
+impl ::std::convert::From<DeviceBindingProjection> for ControlPlaneDocument {
+    fn from(value: DeviceBindingProjection) -> Self {
+        Self::DeviceBindingProjection(value)
+    }
+}
+impl ::std::convert::From<SupportCaseProjection> for ControlPlaneDocument {
+    fn from(value: SupportCaseProjection) -> Self {
+        Self::SupportCaseProjection(value)
+    }
+}
+impl ::std::convert::From<DiagnosticConsent> for ControlPlaneDocument {
+    fn from(value: DiagnosticConsent) -> Self {
+        Self::DiagnosticConsent(value)
+    }
+}
+impl ::std::convert::From<AuthorityCommand> for ControlPlaneDocument {
+    fn from(value: AuthorityCommand) -> Self {
+        Self::AuthorityCommand(value)
+    }
+}
+impl ::std::convert::From<AuthorityReceipt> for ControlPlaneDocument {
+    fn from(value: AuthorityReceipt) -> Self {
+        Self::AuthorityReceipt(value)
+    }
+}
+impl ::std::convert::From<AuthorityError> for ControlPlaneDocument {
+    fn from(value: AuthorityError) -> Self {
+        Self::AuthorityError(value)
+    }
+}
+impl ::std::convert::From<ProviderEvent> for ControlPlaneDocument {
+    fn from(value: ProviderEvent) -> Self {
+        Self::ProviderEvent(value)
+    }
+}
+impl ::std::convert::From<AuditEvent> for ControlPlaneDocument {
+    fn from(value: AuditEvent) -> Self {
+        Self::AuditEvent(value)
+    }
+}
+impl ::std::convert::From<OfflineEntitlementEnvelope> for ControlPlaneDocument {
+    fn from(value: OfflineEntitlementEnvelope) -> Self {
+        Self::OfflineEntitlementEnvelope(value)
+    }
+}
+#[doc = "`ControlPlaneIdentifier`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ControlPlaneIdentifier.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct ControlPlaneIdentifier(::std::string::String);
+impl ::std::ops::Deref for ControlPlaneIdentifier {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<ControlPlaneIdentifier> for ::std::string::String {
+    fn from(value: ControlPlaneIdentifier) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for ControlPlaneIdentifier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for ControlPlaneIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ControlPlaneIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ControlPlaneIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for ControlPlaneIdentifier {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`ControlPlaneShortText`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ControlPlaneShortText.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct ControlPlaneShortText(::std::string::String);
+impl ::std::ops::Deref for ControlPlaneShortText {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<ControlPlaneShortText> for ::std::string::String {
+    fn from(value: ControlPlaneShortText) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for ControlPlaneShortText {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for ControlPlaneShortText {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ControlPlaneShortText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ControlPlaneShortText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for ControlPlaneShortText {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "`CorrelationId`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -486,6 +3875,1018 @@ impl<'de> ::serde::Deserialize<'de> for CorrelationId {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`CurrencyCode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CurrencyCode.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 3,"]
+#[doc = "  \"minLength\": 3,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct CurrencyCode(::std::string::String);
+impl ::std::ops::Deref for CurrencyCode {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<CurrencyCode> for ::std::string::String {
+    fn from(value: CurrencyCode) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for CurrencyCode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 3usize {
+            return Err("longer than 3 characters".into());
+        }
+        if value.chars().count() < 3usize {
+            return Err("shorter than 3 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for CurrencyCode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CurrencyCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CurrencyCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for CurrencyCode {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`DetachedSignature`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DetachedSignature.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 64,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct DetachedSignature(::std::string::String);
+impl ::std::ops::Deref for DetachedSignature {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<DetachedSignature> for ::std::string::String {
+    fn from(value: DetachedSignature) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for DetachedSignature {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 64usize {
+            return Err("shorter than 64 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for DetachedSignature {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DetachedSignature {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DetachedSignature {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for DetachedSignature {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`DeviceBindingProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceBindingProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"deviceLabel\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"boundAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"deviceLabel\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ContractSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"device-binding-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"replacementEligibleAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceBindingState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceBindingProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(
+        rename = "boundAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub bound_at: ::std::option::Option<::std::string::String>,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: ControlPlaneIdentifier,
+    #[serde(rename = "deviceLabel")]
+    pub device_label: RedactedAuthorityText,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ContractSchemaVersion,
+    pub kind: DeviceBindingProjectionKind,
+    pub provenance: AuthorityProvenance,
+    #[serde(
+        rename = "replacementEligibleAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub replacement_eligible_at: ::std::option::Option<::std::string::String>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: DeviceBindingProjectionSchemaVersion,
+    pub state: DeviceBindingState,
+}
+#[doc = "`DeviceBindingProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"device-binding-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceBindingProjectionKind {
+    #[serde(rename = "device-binding-projection")]
+    DeviceBindingProjection,
+}
+impl ::std::fmt::Display for DeviceBindingProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeviceBindingProjection => f.write_str("device-binding-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceBindingProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "device-binding-projection" => Ok(Self::DeviceBindingProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceBindingProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceBindingProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceBindingProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceBindingProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceBindingProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for DeviceBindingProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceBindingProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceBindingProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceBindingProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceBindingProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceBindingState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceBindingState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unbound\","]
+#[doc = "    \"active\","]
+#[doc = "    \"replacement-cooldown\","]
+#[doc = "    \"revoked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceBindingState {
+    #[serde(rename = "unbound")]
+    Unbound,
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "replacement-cooldown")]
+    ReplacementCooldown,
+    #[serde(rename = "revoked")]
+    Revoked,
+}
+impl ::std::fmt::Display for DeviceBindingState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unbound => f.write_str("unbound"),
+            Self::Active => f.write_str("active"),
+            Self::ReplacementCooldown => f.write_str("replacement-cooldown"),
+            Self::Revoked => f.write_str("revoked"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceBindingState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unbound" => Ok(Self::Unbound),
+            "active" => Ok(Self::Active),
+            "replacement-cooldown" => Ok(Self::ReplacementCooldown),
+            "revoked" => Ok(Self::Revoked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceBindingState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceBindingState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceBindingState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"device-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: DeviceCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: ControlPlaneIdentifier,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: DeviceCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: DeviceCommandSchemaVersion,
+}
+#[doc = "`DeviceCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"bind\","]
+#[doc = "    \"replace\","]
+#[doc = "    \"revoke\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceCommandAction {
+    #[serde(rename = "bind")]
+    Bind,
+    #[serde(rename = "replace")]
+    Replace,
+    #[serde(rename = "revoke")]
+    Revoke,
+}
+impl ::std::fmt::Display for DeviceCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Bind => f.write_str("bind"),
+            Self::Replace => f.write_str("replace"),
+            Self::Revoke => f.write_str("revoke"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "bind" => Ok(Self::Bind),
+            "replace" => Ok(Self::Replace),
+            "revoke" => Ok(Self::Revoke),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"device-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceCommandKind {
+    #[serde(rename = "device-command")]
+    DeviceCommand,
+}
+impl ::std::fmt::Display for DeviceCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeviceCommand => f.write_str("device-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "device-command" => Ok(Self::DeviceCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for DeviceCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DiagnosticConsent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DiagnosticConsent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"consentId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"grantedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"purpose\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"scopes\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"consentId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"grantedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"diagnostic-consent\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"purpose\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"revokedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"scopes\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ConsentScope\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 3,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ConsentState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DiagnosticConsent {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "consentId")]
+    pub consent_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    #[serde(rename = "grantedAt")]
+    pub granted_at: ::std::string::String,
+    pub kind: DiagnosticConsentKind,
+    pub provenance: AuthorityProvenance,
+    pub purpose: RedactedAuthorityText,
+    #[serde(
+        rename = "revokedAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub revoked_at: ::std::option::Option<::std::string::String>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: DiagnosticConsentSchemaVersion,
+    pub scopes: ::std::vec::Vec<ConsentScope>,
+    pub state: ConsentState,
+}
+#[doc = "`DiagnosticConsentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"diagnostic-consent\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DiagnosticConsentKind {
+    #[serde(rename = "diagnostic-consent")]
+    DiagnosticConsent,
+}
+impl ::std::fmt::Display for DiagnosticConsentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DiagnosticConsent => f.write_str("diagnostic-consent"),
+        }
+    }
+}
+impl ::std::str::FromStr for DiagnosticConsentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "diagnostic-consent" => Ok(Self::DiagnosticConsent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DiagnosticConsentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DiagnosticConsentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DiagnosticConsentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DiagnosticConsentSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DiagnosticConsentSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for DiagnosticConsentSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for DiagnosticConsentSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DiagnosticConsentSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DiagnosticConsentSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DiagnosticConsentSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`DiagnosticPrimitive`"]
@@ -1616,6 +6017,347 @@ impl<'de> ::serde::Deserialize<'de> for InspectionId {
             })
     }
 }
+#[doc = "`InvoiceProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InvoiceProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"amountDueMinor\","]
+#[doc = "    \"amountPaidMinor\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"currency\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"invoiceId\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"amountDueMinor\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MoneyMinorUnits\""]
+#[doc = "    },"]
+#[doc = "    \"amountPaidMinor\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MoneyMinorUnits\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"currency\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CurrencyCode\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"invoiceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"invoice-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"settledAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/InvoiceState\""]
+#[doc = "    },"]
+#[doc = "    \"subscriptionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InvoiceProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "amountDueMinor")]
+    pub amount_due_minor: MoneyMinorUnits,
+    #[serde(rename = "amountPaidMinor")]
+    pub amount_paid_minor: MoneyMinorUnits,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub currency: CurrencyCode,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "invoiceId")]
+    pub invoice_id: ControlPlaneIdentifier,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: InvoiceProjectionKind,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: InvoiceProjectionSchemaVersion,
+    #[serde(
+        rename = "settledAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub settled_at: ::std::option::Option<::std::string::String>,
+    pub state: InvoiceState,
+    #[serde(
+        rename = "subscriptionId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub subscription_id: ::std::option::Option<ControlPlaneIdentifier>,
+}
+#[doc = "`InvoiceProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"invoice-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InvoiceProjectionKind {
+    #[serde(rename = "invoice-projection")]
+    InvoiceProjection,
+}
+impl ::std::fmt::Display for InvoiceProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InvoiceProjection => f.write_str("invoice-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for InvoiceProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "invoice-projection" => Ok(Self::InvoiceProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InvoiceProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InvoiceProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InvoiceProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InvoiceProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InvoiceProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for InvoiceProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for InvoiceProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InvoiceProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InvoiceProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InvoiceProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InvoiceState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InvoiceState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"draft\","]
+#[doc = "    \"open\","]
+#[doc = "    \"paid\","]
+#[doc = "    \"void\","]
+#[doc = "    \"uncollectible\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InvoiceState {
+    #[serde(rename = "draft")]
+    Draft,
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "paid")]
+    Paid,
+    #[serde(rename = "void")]
+    Void,
+    #[serde(rename = "uncollectible")]
+    Uncollectible,
+}
+impl ::std::fmt::Display for InvoiceState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Draft => f.write_str("draft"),
+            Self::Open => f.write_str("open"),
+            Self::Paid => f.write_str("paid"),
+            Self::Void => f.write_str("void"),
+            Self::Uncollectible => f.write_str("uncollectible"),
+        }
+    }
+}
+impl ::std::str::FromStr for InvoiceState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "draft" => Ok(Self::Draft),
+            "open" => Ok(Self::Open),
+            "paid" => Ok(Self::Paid),
+            "void" => Ok(Self::Void),
+            "uncollectible" => Ok(Self::Uncollectible),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InvoiceState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InvoiceState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InvoiceState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`LocalePolicy`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -2018,6 +6760,60 @@ impl ::std::convert::TryFrom<::std::string::String> for ModeledDiagnosticValueKi
         value.parse()
     }
 }
+#[doc = "`MoneyMinorUnits`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MoneyMinorUnits.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maximum\": 9007199254740991.0,"]
+#[doc = "  \"minimum\": 0.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+#[serde(transparent)]
+pub struct MoneyMinorUnits(pub ::std::string::String);
+impl ::std::ops::Deref for MoneyMinorUnits {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<MoneyMinorUnits> for ::std::string::String {
+    fn from(value: MoneyMinorUnits) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<::std::string::String> for MoneyMinorUnits {
+    fn from(value: ::std::string::String) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for MoneyMinorUnits {
+    type Err = ::std::convert::Infallible;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::fmt::Display for MoneyMinorUnits {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 #[doc = "`NoChangeReceipt`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -2355,6 +7151,421 @@ impl ::std::convert::TryFrom<::std::string::String> for OfficialReleaseOrigin {
         value.parse()
     }
 }
+#[doc = "`OfflineEntitlementEnvelope`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OfflineEntitlementEnvelope.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"algorithm\","]
+#[doc = "    \"audience\","]
+#[doc = "    \"deviceBinding\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"keyId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"payloadBytes\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"signature\","]
+#[doc = "    \"validitySeconds\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"algorithm\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Ed25519\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"audience\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"deviceBinding\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"keyId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"offline-entitlement-envelope\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"payloadBytes\": {"]
+#[doc = "      \"$ref\": \"#/definitions/OpaquePayloadBytes\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"signature\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DetachedSignature\""]
+#[doc = "    },"]
+#[doc = "    \"validitySeconds\": {"]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        604800"]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OfflineEntitlementEnvelope {
+    pub algorithm: OfflineEntitlementEnvelopeAlgorithm,
+    pub audience: ControlPlaneIdentifier,
+    #[serde(rename = "deviceBinding")]
+    pub device_binding: ControlPlaneIdentifier,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    #[serde(rename = "keyId")]
+    pub key_id: ControlPlaneIdentifier,
+    pub kind: OfflineEntitlementEnvelopeKind,
+    #[serde(rename = "payloadBytes")]
+    pub payload_bytes: OpaquePayloadBytes,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: OfflineEntitlementEnvelopeSchemaVersion,
+    pub signature: DetachedSignature,
+    #[serde(rename = "validitySeconds")]
+    pub validity_seconds: OfflineEntitlementEnvelopeValiditySeconds,
+}
+#[doc = "`OfflineEntitlementEnvelopeAlgorithm`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Ed25519\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OfflineEntitlementEnvelopeAlgorithm {
+    Ed25519,
+}
+impl ::std::fmt::Display for OfflineEntitlementEnvelopeAlgorithm {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Ed25519 => f.write_str("Ed25519"),
+        }
+    }
+}
+impl ::std::str::FromStr for OfflineEntitlementEnvelopeAlgorithm {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Ed25519" => Ok(Self::Ed25519),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OfflineEntitlementEnvelopeAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OfflineEntitlementEnvelopeAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OfflineEntitlementEnvelopeAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OfflineEntitlementEnvelopeKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"offline-entitlement-envelope\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OfflineEntitlementEnvelopeKind {
+    #[serde(rename = "offline-entitlement-envelope")]
+    OfflineEntitlementEnvelope,
+}
+impl ::std::fmt::Display for OfflineEntitlementEnvelopeKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OfflineEntitlementEnvelope => f.write_str("offline-entitlement-envelope"),
+        }
+    }
+}
+impl ::std::str::FromStr for OfflineEntitlementEnvelopeKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "offline-entitlement-envelope" => Ok(Self::OfflineEntitlementEnvelope),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OfflineEntitlementEnvelopeKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OfflineEntitlementEnvelopeKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OfflineEntitlementEnvelopeKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OfflineEntitlementEnvelopeSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OfflineEntitlementEnvelopeSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for OfflineEntitlementEnvelopeSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for OfflineEntitlementEnvelopeSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OfflineEntitlementEnvelopeSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OfflineEntitlementEnvelopeSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OfflineEntitlementEnvelopeSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OfflineEntitlementEnvelopeValiditySeconds`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"number\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    604800"]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct OfflineEntitlementEnvelopeValiditySeconds(f64);
+impl ::std::ops::Deref for OfflineEntitlementEnvelopeValiditySeconds {
+    type Target = f64;
+    fn deref(&self) -> &f64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<OfflineEntitlementEnvelopeValiditySeconds> for f64 {
+    fn from(value: OfflineEntitlementEnvelopeValiditySeconds) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::TryFrom<f64> for OfflineEntitlementEnvelopeValiditySeconds {
+    type Error = self::error::ConversionError;
+    fn try_from(value: f64) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if ![604800_f64].contains(&value) {
+            Err("invalid value".into())
+        } else {
+            Ok(Self(value))
+        }
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for OfflineEntitlementEnvelopeValiditySeconds {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        Self::try_from(<f64>::deserialize(deserializer)?)
+            .map_err(|e| <D::Error as ::serde::de::Error>::custom(e.to_string()))
+    }
+}
+#[doc = "`OpaquePayloadBytes`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OpaquePayloadBytes.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 16384,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct OpaquePayloadBytes(::std::string::String);
+impl ::std::ops::Deref for OpaquePayloadBytes {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<OpaquePayloadBytes> for ::std::string::String {
+    fn from(value: OpaquePayloadBytes) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for OpaquePayloadBytes {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 16384usize {
+            return Err("longer than 16384 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for OpaquePayloadBytes {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OpaquePayloadBytes {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OpaquePayloadBytes {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "`ProvenanceDescription`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -2492,6 +7703,469 @@ impl ::std::convert::TryFrom<::std::string::String> for ProvenanceIdentifier {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for ProvenanceIdentifier {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`ProviderEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProviderEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"eventType\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"payloadDigest\","]
+#[doc = "    \"provider\","]
+#[doc = "    \"providerEventId\","]
+#[doc = "    \"receivedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"aggregateReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"eventType\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProviderEventType\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"provider-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"payloadDigest\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Sha256Digest\""]
+#[doc = "    },"]
+#[doc = "    \"provider\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProviderIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"providerEventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"receivedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ProviderEvent {
+    #[serde(
+        rename = "aggregateReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub aggregate_reference: ::std::option::Option<ControlPlaneIdentifier>,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "eventType")]
+    pub event_type: ProviderEventType,
+    pub kind: ProviderEventKind,
+    #[serde(rename = "payloadDigest")]
+    pub payload_digest: Sha256Digest,
+    pub provider: ProviderIdentity,
+    #[serde(rename = "providerEventId")]
+    pub provider_event_id: ControlPlaneIdentifier,
+    #[serde(rename = "receivedAt")]
+    pub received_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: ProviderEventSchemaVersion,
+}
+#[doc = "`ProviderEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"provider-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProviderEventKind {
+    #[serde(rename = "provider-event")]
+    ProviderEvent,
+}
+impl ::std::fmt::Display for ProviderEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ProviderEvent => f.write_str("provider-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProviderEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "provider-event" => Ok(Self::ProviderEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProviderEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProviderEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProviderEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ProviderEventSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProviderEventSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for ProviderEventSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProviderEventSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProviderEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProviderEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProviderEventSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ProviderEventType`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProviderEventType.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"session-revoked\","]
+#[doc = "    \"checkout-completed\","]
+#[doc = "    \"subscription-updated\","]
+#[doc = "    \"invoice-updated\","]
+#[doc = "    \"delivery-updated\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProviderEventType {
+    #[serde(rename = "session-revoked")]
+    SessionRevoked,
+    #[serde(rename = "checkout-completed")]
+    CheckoutCompleted,
+    #[serde(rename = "subscription-updated")]
+    SubscriptionUpdated,
+    #[serde(rename = "invoice-updated")]
+    InvoiceUpdated,
+    #[serde(rename = "delivery-updated")]
+    DeliveryUpdated,
+}
+impl ::std::fmt::Display for ProviderEventType {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SessionRevoked => f.write_str("session-revoked"),
+            Self::CheckoutCompleted => f.write_str("checkout-completed"),
+            Self::SubscriptionUpdated => f.write_str("subscription-updated"),
+            Self::InvoiceUpdated => f.write_str("invoice-updated"),
+            Self::DeliveryUpdated => f.write_str("delivery-updated"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProviderEventType {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "session-revoked" => Ok(Self::SessionRevoked),
+            "checkout-completed" => Ok(Self::CheckoutCompleted),
+            "subscription-updated" => Ok(Self::SubscriptionUpdated),
+            "invoice-updated" => Ok(Self::InvoiceUpdated),
+            "delivery-updated" => Ok(Self::DeliveryUpdated),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProviderEventType {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProviderEventType {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProviderEventType {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ProviderIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProviderIdentity.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"identity\","]
+#[doc = "    \"commerce\","]
+#[doc = "    \"email\","]
+#[doc = "    \"object-storage\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProviderIdentity {
+    #[serde(rename = "identity")]
+    Identity,
+    #[serde(rename = "commerce")]
+    Commerce,
+    #[serde(rename = "email")]
+    Email,
+    #[serde(rename = "object-storage")]
+    ObjectStorage,
+}
+impl ::std::fmt::Display for ProviderIdentity {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Identity => f.write_str("identity"),
+            Self::Commerce => f.write_str("commerce"),
+            Self::Email => f.write_str("email"),
+            Self::ObjectStorage => f.write_str("object-storage"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProviderIdentity {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "identity" => Ok(Self::Identity),
+            "commerce" => Ok(Self::Commerce),
+            "email" => Ok(Self::Email),
+            "object-storage" => Ok(Self::ObjectStorage),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProviderIdentity {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProviderIdentity {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProviderIdentity {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RedactedAuthorityText`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RedactedAuthorityText.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct RedactedAuthorityText(::std::string::String);
+impl ::std::ops::Deref for RedactedAuthorityText {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<RedactedAuthorityText> for ::std::string::String {
+    fn from(value: RedactedAuthorityText) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for RedactedAuthorityText {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for RedactedAuthorityText {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RedactedAuthorityText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RedactedAuthorityText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for RedactedAuthorityText {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -3083,6 +8757,622 @@ impl ::std::convert::TryFrom<&::std::string::String> for ScreenshotReviewState {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ScreenshotReviewState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SessionCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SessionCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"session-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SessionCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: SessionCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: SessionCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: SessionCommandSchemaVersion,
+    #[serde(rename = "sessionId")]
+    pub session_id: ControlPlaneIdentifier,
+}
+#[doc = "`SessionCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SessionCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"revoke\","]
+#[doc = "    \"revoke-others\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionCommandAction {
+    #[serde(rename = "revoke")]
+    Revoke,
+    #[serde(rename = "revoke-others")]
+    RevokeOthers,
+}
+impl ::std::fmt::Display for SessionCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Revoke => f.write_str("revoke"),
+            Self::RevokeOthers => f.write_str("revoke-others"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "revoke" => Ok(Self::Revoke),
+            "revoke-others" => Ok(Self::RevokeOthers),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"session-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionCommandKind {
+    #[serde(rename = "session-command")]
+    SessionCommand,
+}
+impl ::std::fmt::Display for SessionCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SessionCommand => f.write_str("session-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "session-command" => Ok(Self::SessionCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for SessionCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SessionProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"authenticatedAt\","]
+#[doc = "    \"authenticationStrength\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"lastSeenAt\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"scopes\","]
+#[doc = "    \"sessionId\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"authenticatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"authenticationStrength\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthenticationStrength\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"session-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"lastSeenAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"scopes\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SessionState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SessionProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "authenticatedAt")]
+    pub authenticated_at: ::std::string::String,
+    #[serde(rename = "authenticationStrength")]
+    pub authentication_strength: AuthenticationStrength,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    pub kind: SessionProjectionKind,
+    #[serde(rename = "lastSeenAt")]
+    pub last_seen_at: ::std::string::String,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: SessionProjectionSchemaVersion,
+    pub scopes: ::std::vec::Vec<ControlPlaneIdentifier>,
+    #[serde(rename = "sessionId")]
+    pub session_id: ControlPlaneIdentifier,
+    pub state: SessionState,
+}
+#[doc = "`SessionProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"session-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionProjectionKind {
+    #[serde(rename = "session-projection")]
+    SessionProjection,
+}
+impl ::std::fmt::Display for SessionProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SessionProjection => f.write_str("session-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "session-projection" => Ok(Self::SessionProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for SessionProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SessionState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SessionState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"active\","]
+#[doc = "    \"challenge-required\","]
+#[doc = "    \"revoked\","]
+#[doc = "    \"expired\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SessionState {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "challenge-required")]
+    ChallengeRequired,
+    #[serde(rename = "revoked")]
+    Revoked,
+    #[serde(rename = "expired")]
+    Expired,
+}
+impl ::std::fmt::Display for SessionState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Active => f.write_str("active"),
+            Self::ChallengeRequired => f.write_str("challenge-required"),
+            Self::Revoked => f.write_str("revoked"),
+            Self::Expired => f.write_str("expired"),
+        }
+    }
+}
+impl ::std::str::FromStr for SessionState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "active" => Ok(Self::Active),
+            "challenge-required" => Ok(Self::ChallengeRequired),
+            "revoked" => Ok(Self::Revoked),
+            "expired" => Ok(Self::Expired),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SessionState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SessionState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SessionState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -10746,6 +17036,1040 @@ impl ::std::convert::TryFrom<&::std::string::String> for SignatureState {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for SignatureState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SubscriptionPlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SubscriptionPlan.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"free\","]
+#[doc = "    \"premium\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SubscriptionPlan {
+    #[serde(rename = "free")]
+    Free,
+    #[serde(rename = "premium")]
+    Premium,
+}
+impl ::std::fmt::Display for SubscriptionPlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Free => f.write_str("free"),
+            Self::Premium => f.write_str("premium"),
+        }
+    }
+}
+impl ::std::str::FromStr for SubscriptionPlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "free" => Ok(Self::Free),
+            "premium" => Ok(Self::Premium),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SubscriptionPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SubscriptionPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SubscriptionPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SubscriptionProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SubscriptionProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"cancelAtPeriodEnd\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"entitlements\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"plan\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\","]
+#[doc = "    \"subscriptionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"cancelAtPeriodEnd\": {"]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"currentPeriodEndsAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"entitlements\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 0"]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"subscription-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"plan\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SubscriptionPlan\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SubscriptionState\""]
+#[doc = "    },"]
+#[doc = "    \"subscriptionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SubscriptionProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "cancelAtPeriodEnd")]
+    pub cancel_at_period_end: bool,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(
+        rename = "currentPeriodEndsAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub current_period_ends_at: ::std::option::Option<::std::string::String>,
+    pub entitlements: ::std::vec::Vec<ControlPlaneIdentifier>,
+    pub etag: AuthorityEtag,
+    pub kind: SubscriptionProjectionKind,
+    pub plan: SubscriptionPlan,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: SubscriptionProjectionSchemaVersion,
+    pub state: SubscriptionState,
+    #[serde(rename = "subscriptionId")]
+    pub subscription_id: ControlPlaneIdentifier,
+}
+#[doc = "`SubscriptionProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"subscription-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SubscriptionProjectionKind {
+    #[serde(rename = "subscription-projection")]
+    SubscriptionProjection,
+}
+impl ::std::fmt::Display for SubscriptionProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SubscriptionProjection => f.write_str("subscription-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for SubscriptionProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "subscription-projection" => Ok(Self::SubscriptionProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SubscriptionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SubscriptionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SubscriptionProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SubscriptionProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SubscriptionProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for SubscriptionProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for SubscriptionProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SubscriptionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SubscriptionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SubscriptionProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SubscriptionState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SubscriptionState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"none\","]
+#[doc = "    \"trialing\","]
+#[doc = "    \"active\","]
+#[doc = "    \"past-due\","]
+#[doc = "    \"canceled\","]
+#[doc = "    \"expired\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SubscriptionState {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "trialing")]
+    Trialing,
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "past-due")]
+    PastDue,
+    #[serde(rename = "canceled")]
+    Canceled,
+    #[serde(rename = "expired")]
+    Expired,
+}
+impl ::std::fmt::Display for SubscriptionState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::None => f.write_str("none"),
+            Self::Trialing => f.write_str("trialing"),
+            Self::Active => f.write_str("active"),
+            Self::PastDue => f.write_str("past-due"),
+            Self::Canceled => f.write_str("canceled"),
+            Self::Expired => f.write_str("expired"),
+        }
+    }
+}
+impl ::std::str::FromStr for SubscriptionState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "none" => Ok(Self::None),
+            "trialing" => Ok(Self::Trialing),
+            "active" => Ok(Self::Active),
+            "past-due" => Ok(Self::PastDue),
+            "canceled" => Ok(Self::Canceled),
+            "expired" => Ok(Self::Expired),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SubscriptionState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SubscriptionState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SubscriptionState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCaseProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SupportCaseProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"auditReference\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\","]
+#[doc = "    \"subjectRedacted\","]
+#[doc = "    \"supportCaseId\","]
+#[doc = "    \"updatedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"auditReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"consentId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"support-case-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SupportCaseState\""]
+#[doc = "    },"]
+#[doc = "    \"subjectRedacted\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"supportCaseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"updatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SupportCaseProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "auditReference")]
+    pub audit_reference: ControlPlaneIdentifier,
+    #[serde(
+        rename = "consentId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub consent_id: ::std::option::Option<ControlPlaneIdentifier>,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    pub etag: AuthorityEtag,
+    pub kind: SupportCaseProjectionKind,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: SupportCaseProjectionSchemaVersion,
+    pub state: SupportCaseState,
+    #[serde(rename = "subjectRedacted")]
+    pub subject_redacted: RedactedAuthorityText,
+    #[serde(rename = "supportCaseId")]
+    pub support_case_id: ControlPlaneIdentifier,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: ::std::string::String,
+}
+#[doc = "`SupportCaseProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"support-case-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCaseProjectionKind {
+    #[serde(rename = "support-case-projection")]
+    SupportCaseProjection,
+}
+impl ::std::fmt::Display for SupportCaseProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SupportCaseProjection => f.write_str("support-case-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCaseProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "support-case-projection" => Ok(Self::SupportCaseProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCaseProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCaseProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCaseProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCaseProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCaseProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for SupportCaseProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCaseProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCaseProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCaseProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCaseProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCaseState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SupportCaseState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"open\","]
+#[doc = "    \"waiting-customer\","]
+#[doc = "    \"waiting-support\","]
+#[doc = "    \"resolved\","]
+#[doc = "    \"closed\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCaseState {
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "waiting-customer")]
+    WaitingCustomer,
+    #[serde(rename = "waiting-support")]
+    WaitingSupport,
+    #[serde(rename = "resolved")]
+    Resolved,
+    #[serde(rename = "closed")]
+    Closed,
+}
+impl ::std::fmt::Display for SupportCaseState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Open => f.write_str("open"),
+            Self::WaitingCustomer => f.write_str("waiting-customer"),
+            Self::WaitingSupport => f.write_str("waiting-support"),
+            Self::Resolved => f.write_str("resolved"),
+            Self::Closed => f.write_str("closed"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCaseState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "open" => Ok(Self::Open),
+            "waiting-customer" => Ok(Self::WaitingCustomer),
+            "waiting-support" => Ok(Self::WaitingSupport),
+            "resolved" => Ok(Self::Resolved),
+            "closed" => Ok(Self::Closed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCaseState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCaseState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCaseState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCommand`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SupportCommand.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"action\","]
+#[doc = "    \"commandId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"expectedVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"supportCaseId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SupportCommandAction\""]
+#[doc = "    },"]
+#[doc = "    \"commandId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"expectedVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"support-command\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"supportCaseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SupportCommand {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub action: SupportCommandAction,
+    #[serde(rename = "commandId")]
+    pub command_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "expectedVersion")]
+    pub expected_version: ::std::string::String,
+    pub kind: SupportCommandKind,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: SupportCommandSchemaVersion,
+    #[serde(rename = "supportCaseId")]
+    pub support_case_id: ControlPlaneIdentifier,
+}
+#[doc = "`SupportCommandAction`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SupportCommandAction.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"create\","]
+#[doc = "    \"reply\","]
+#[doc = "    \"close\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCommandAction {
+    #[serde(rename = "create")]
+    Create,
+    #[serde(rename = "reply")]
+    Reply,
+    #[serde(rename = "close")]
+    Close,
+}
+impl ::std::fmt::Display for SupportCommandAction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Create => f.write_str("create"),
+            Self::Reply => f.write_str("reply"),
+            Self::Close => f.write_str("close"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCommandAction {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "create" => Ok(Self::Create),
+            "reply" => Ok(Self::Reply),
+            "close" => Ok(Self::Close),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCommandAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCommandKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"support-command\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCommandKind {
+    #[serde(rename = "support-command")]
+    SupportCommand,
+}
+impl ::std::fmt::Display for SupportCommandKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SupportCommand => f.write_str("support-command"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCommandKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "support-command" => Ok(Self::SupportCommand),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCommandKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SupportCommandSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SupportCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for SupportCommandSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for SupportCommandSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SupportCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SupportCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SupportCommandSchemaVersion {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

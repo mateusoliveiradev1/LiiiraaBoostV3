@@ -4,11 +4,14 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::{
-    AdminAuditEvent, ClaimEvidence, ContentRecord, DiagnosticValue, FutureAuthorityCommand,
-    HostToRendererShellEvent, NoChangeReceipt, ReleaseArtifactEvidence, ReleaseRecord,
-    RendererToHostShellCommand, ScreenshotProvenance, ShellNavigationIntent, WebRouteRecord,
+    AdminAuditEvent, ClaimEvidence, ContentRecord, ControlPlaneDocument, DiagnosticValue,
+    FutureAuthorityCommand, HostToRendererShellEvent, NoChangeReceipt, ReleaseArtifactEvidence,
+    ReleaseRecord, RendererToHostShellCommand, ScreenshotProvenance, ShellNavigationIntent,
+    WebRouteRecord,
 };
 
+pub const CONTROL_PLANE_DOCUMENT_SCHEMA_ID: &str =
+    "https://schemas.liiiraa.dev/control-plane/v1/control-plane-document.schema.json";
 pub const DIAGNOSTIC_VALUE_SCHEMA_ID: &str = "desktop.diagnostic-value.v1";
 pub const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID: &str = "desktop.shell.host-to-renderer.v1";
 pub const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID: &str = "desktop.shell.renderer-to-host.v1";
@@ -21,6 +24,9 @@ const MAX_KEYWORD_LENGTH: usize = 64;
 
 const DIAGNOSTIC_VALUE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/diagnostic-value.schema.json");
+const CONTROL_PLANE_DOCUMENT_SCHEMA: &str = include_str!(
+    "../../../contracts/generated/control-plane/v1/control-plane-document.schema.json"
+);
 const SHELL_MESSAGE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/shell-message.schema.json");
 const WEB_DOCUMENT_SCHEMA: &str =
@@ -30,6 +36,11 @@ static DIAGNOSTIC_VALUE_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::n
     let schema: Value =
         serde_json::from_str(DIAGNOSTIC_VALUE_SCHEMA).expect("generated diagnostic JSON schema");
     jsonschema::validator_for(&schema).expect("valid generated diagnostic JSON schema")
+});
+static CONTROL_PLANE_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
+    let schema: Value = serde_json::from_str(CONTROL_PLANE_DOCUMENT_SCHEMA)
+        .expect("generated control-plane JSON schema");
+    jsonschema::validator_for(&schema).expect("valid generated control-plane JSON schema")
 });
 
 static SHELL_MESSAGE_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
@@ -286,6 +297,17 @@ pub fn validate_diagnostic_value(
     )
 }
 
+pub fn validate_control_plane_document(
+    input: &Value,
+) -> Result<ControlPlaneDocument, ContractValidationError> {
+    validate_and_deserialize(
+        CONTROL_PLANE_DOCUMENT_SCHEMA_ID,
+        CONTROL_PLANE_DOCUMENT_SCHEMA_ID,
+        input,
+        &CONTROL_PLANE_DOCUMENT_VALIDATOR,
+    )
+}
+
 pub fn validate_host_to_renderer_shell_event(
     schema_id: &str,
     input: &Value,
@@ -357,7 +379,75 @@ pub fn validate_web_document(
 mod tests {
     use serde_json::{Value, json};
 
-    use super::{ContractValidationCode, WEB_DOCUMENT_SCHEMA_ID, validate_web_document};
+    use super::{
+        ContractValidationCode, WEB_DOCUMENT_SCHEMA_ID, validate_control_plane_document,
+        validate_web_document,
+    };
+
+    fn account_projection() -> Value {
+        json!({
+            "schemaVersion": "1.0",
+            "kind": "account-projection",
+            "aggregateVersion": "7",
+            "etag": "account-etag-7",
+            "correlationId": "control-plane-correlation",
+            "provenance": "postgres-authority",
+            "accountId": "account-0001",
+            "state": "active",
+            "displayName": "Synthetic account",
+            "emailRedacted": "s***@example.invalid",
+            "locale": "pt-BR",
+            "createdAt": "2026-08-04T00:00:00Z",
+            "updatedAt": "2026-08-04T00:00:00Z"
+        })
+    }
+
+    fn account_command() -> Value {
+        json!({
+            "schemaVersion": "1.0",
+            "kind": "account-command",
+            "commandId": "command-0001",
+            "accountId": "account-0001",
+            "action": "update-profile",
+            "expectedVersion": "7",
+            "correlationId": "control-plane-correlation",
+            "requestedAt": "2026-08-04T00:00:00Z"
+        })
+    }
+
+    fn diagnostic_consent() -> Value {
+        json!({
+            "schemaVersion": "1.0",
+            "kind": "diagnostic-consent",
+            "aggregateVersion": "2",
+            "etag": "consent-etag-2",
+            "correlationId": "control-plane-correlation",
+            "provenance": "postgres-authority",
+            "consentId": "consent-0001",
+            "accountId": "account-0001",
+            "state": "active",
+            "scopes": ["support-diagnostics"],
+            "purpose": "Synthetic support diagnosis",
+            "grantedAt": "2026-08-04T00:00:00Z",
+            "expiresAt": "2026-08-04T01:00:00Z"
+        })
+    }
+
+    fn offline_entitlement() -> Value {
+        json!({
+            "schemaVersion": "1.0",
+            "kind": "offline-entitlement-envelope",
+            "payloadBytes": "c3ludGhldGljLW9wYXF1ZS1ieXRlcw==",
+            "signature": "a".repeat(64),
+            "algorithm": "Ed25519",
+            "keyId": "development-key-0001",
+            "audience": "liiiraa-desktop",
+            "deviceBinding": "synthetic-device-binding",
+            "issuedAt": "2026-08-04T00:00:00Z",
+            "expiresAt": "2026-08-11T00:00:00Z",
+            "validitySeconds": 604800
+        })
+    }
 
     fn fixture_provenance() -> Value {
         json!({
@@ -563,5 +653,49 @@ mod tests {
             issue.path.starts_with('$') && issue.path.len() <= 256 && issue.keyword.len() <= 64
         }));
         assert!(!format!("{first:?}").contains(secret));
+    }
+
+    #[test]
+    fn control_plane_validator_enforces_closed_authority_boundaries() {
+        for input in [
+            account_projection(),
+            account_command(),
+            diagnostic_consent(),
+            offline_entitlement(),
+        ] {
+            validate_control_plane_document(&input).expect("valid control-plane document");
+        }
+
+        let mut unknown_state = account_projection();
+        unknown_state["state"] = json!("SENSITIVE_UNKNOWN_STATE");
+
+        let mut fixture_provenance = account_projection();
+        fixture_provenance["provenance"] = json!("fixture");
+
+        let mut overlong_identifier = account_projection();
+        overlong_identifier["accountId"] = json!("x".repeat(129));
+
+        let mut missing_expected_version = account_command();
+        missing_expected_version
+            .as_object_mut()
+            .expect("command object")
+            .remove("expectedVersion");
+
+        let mut duplicate_scopes = diagnostic_consent();
+        duplicate_scopes["scopes"] = json!(["support-diagnostics", "support-diagnostics"]);
+
+        let mut invalid_validity = offline_entitlement();
+        invalid_validity["validitySeconds"] = json!(604799);
+
+        for input in [
+            unknown_state,
+            fixture_provenance,
+            overlong_identifier,
+            missing_expected_version,
+            duplicate_scopes,
+            invalid_validity,
+        ] {
+            validate_control_plane_document(&input).expect_err("invalid control-plane document");
+        }
     }
 }

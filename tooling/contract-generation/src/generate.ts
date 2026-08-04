@@ -4,7 +4,14 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { NodeHost, compile, formatDiagnostic, type CompilerOptions } from '@typespec/compiler';
+import {
+  NodeHost,
+  compile,
+  formatDiagnostic,
+  type CompilerOptions,
+  type Namespace,
+  type Program,
+} from '@typespec/compiler';
 import { compile as compileTypeScript } from 'json-schema-to-typescript';
 
 type JsonObject = Record<string, unknown>;
@@ -27,12 +34,20 @@ export interface GenerationStage {
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const SOURCE_ENTRY = join(REPOSITORY_ROOT, 'packages', 'contracts-source', 'src', 'main.tsp');
+const STANDALONE_VALIDATOR_GENERATOR = join(
+  REPOSITORY_ROOT,
+  'packages',
+  'contracts-ts',
+  'scripts',
+  'generate-standalone.mjs',
+);
 const STAGING_ROOT = process.env['LIIIRAA_GENERATION_STAGING_ROOT'];
 const OUTPUT_ROOT =
   STAGING_ROOT === undefined
     ? join(REPOSITORY_ROOT, 'contracts', 'generated')
     : join(STAGING_ROOT, 'contracts', 'generated');
 const DESKTOP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'desktop', 'v1');
+const CONTROL_PLANE_OUTPUT_ROOT = join(OUTPUT_ROOT, 'control-plane', 'v1');
 const HTTP_OUTPUT_ROOT = join(OUTPUT_ROOT, 'http');
 const WEB_OUTPUT_ROOT = join(OUTPUT_ROOT, 'web', 'v1');
 const TYPESCRIPT_OUTPUT_ROOT = join(
@@ -49,6 +64,7 @@ export const OUTPUT_PATHS = Object.freeze({
   diagnosticValue: join(DESKTOP_OUTPUT_ROOT, 'diagnostic-value.schema.json'),
   inspectSystem: join(DESKTOP_OUTPUT_ROOT, 'inspect-system.schema.json'),
   shellMessage: join(DESKTOP_OUTPUT_ROOT, 'shell-message.schema.json'),
+  controlPlaneDocument: join(CONTROL_PLANE_OUTPUT_ROOT, 'control-plane-document.schema.json'),
   webDocument: join(WEB_OUTPUT_ROOT, 'web-document.schema.json'),
   openApi: join(HTTP_OUTPUT_ROOT, 'openapi.json'),
   typescriptModels: join(TYPESCRIPT_OUTPUT_ROOT, 'models.ts'),
@@ -107,6 +123,65 @@ const REQUIRED_DEFINITIONS = Object.freeze([
   'FutureAuthorityCommand',
   'NoChangeReceipt',
   'AdminAuditEvent',
+  'ControlPlaneDocument',
+]);
+
+const CONTROL_PLANE_DEFINITION_NAMES = Object.freeze([
+  'ControlPlaneIdentifier',
+  'ControlPlaneShortText',
+  'RedactedAuthorityText',
+  'AuthorityEtag',
+  'ContractSchemaVersion',
+  'OpaquePayloadBytes',
+  'DetachedSignature',
+  'CurrencyCode',
+  'MoneyMinorUnits',
+  'AuthorityProvenance',
+  'AccountState',
+  'SessionState',
+  'AuthenticationStrength',
+  'SubscriptionState',
+  'SubscriptionPlan',
+  'InvoiceState',
+  'DeviceBindingState',
+  'SupportCaseState',
+  'ConsentState',
+  'ConsentScope',
+  'AdminRole',
+  'AdminAction',
+  'AccountCommandAction',
+  'SessionCommandAction',
+  'CommerceCommandAction',
+  'DeviceCommandAction',
+  'SupportCommandAction',
+  'ConsentCommandAction',
+  'AuthorityReceiptOutcome',
+  'AuthorityErrorCode',
+  'ProviderIdentity',
+  'ProviderEventType',
+  'AuditResult',
+  'AuthorityProjectionMetadata',
+  'AccountProjection',
+  'SessionProjection',
+  'SubscriptionProjection',
+  'InvoiceProjection',
+  'DeviceBindingProjection',
+  'SupportCaseProjection',
+  'DiagnosticConsent',
+  'AccountCommand',
+  'SessionCommand',
+  'CommerceCommand',
+  'DeviceCommand',
+  'SupportCommand',
+  'ConsentCommand',
+  'AdminCommand',
+  'AuthorityCommand',
+  'AuthorityReceipt',
+  'AuthorityError',
+  'ProviderEvent',
+  'AuditEvent',
+  'OfflineEntitlementEnvelope',
+  'ControlPlaneDocument',
 ]);
 
 const WEB_DEFINITION_NAMES = Object.freeze([
@@ -150,6 +225,7 @@ const WEB_DOCUMENT_ROOTS = Object.freeze([
 ]);
 
 const WEB_DEFINITION_NAME_SET = new Set<string>(WEB_DEFINITION_NAMES);
+const CONTROL_PLANE_DEFINITION_NAME_SET = new Set<string>(CONTROL_PLANE_DEFINITION_NAMES);
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -173,6 +249,23 @@ function canonicalize(value: unknown): unknown {
 
 function stableJson(value: unknown): string {
   return `${JSON.stringify(canonicalize(value), null, 2)}\n`;
+}
+
+function requireControlPlaneOperations(program: Program): void {
+  let namespace: Namespace = program.getGlobalNamespaceType();
+  for (const segment of ['Liiiraa', 'Contracts', 'Desktop', 'V1']) {
+    const nested = namespace.namespaces.get(segment);
+    if (nested === undefined) {
+      throw new Error(`Canonical TypeSpec namespace is missing ${segment}.`);
+    }
+    namespace = nested;
+  }
+
+  for (const operation of ['getAccount', 'issueAdminCommand']) {
+    if (!namespace.operations.has(operation)) {
+      throw new Error(`Canonical TypeSpec control-plane operation is missing ${operation}.`);
+    }
+  }
 }
 
 export function assertKnownOutputPath(path: string): void {
@@ -230,7 +323,10 @@ function inspectionDefinitions(definitions: JsonObject): JsonObject {
 
 function desktopDefinitions(definitions: JsonObject): JsonObject {
   return Object.fromEntries(
-    Object.entries(definitions).filter(([name]) => !WEB_DEFINITION_NAME_SET.has(name)),
+    Object.entries(definitions).filter(
+      ([name]) =>
+        !WEB_DEFINITION_NAME_SET.has(name) && !CONTROL_PLANE_DEFINITION_NAME_SET.has(name),
+    ),
   );
 }
 
@@ -292,6 +388,36 @@ function webDefinitions(definitions: JsonObject): JsonObject {
   );
 }
 
+function controlPlaneDefinitions(definitions: JsonObject): JsonObject {
+  const selectedNames = new Set<string>(['ControlPlaneDocument']);
+  const pendingNames = [...selectedNames];
+
+  while (pendingNames.length > 0) {
+    const name = pendingNames.pop();
+    if (name === undefined) {
+      continue;
+    }
+
+    const definition = definitions[name];
+    if (!isJsonObject(definition)) {
+      throw new Error(`TypeSpec JSON Schema bundle missing control-plane dependency ${name}.`);
+    }
+
+    const referencedNames = new Set<string>();
+    collectReferencedDefinitionNames(definition, referencedNames);
+    for (const referencedName of referencedNames) {
+      if (!selectedNames.has(referencedName)) {
+        selectedNames.add(referencedName);
+        pendingNames.push(referencedName);
+      }
+    }
+  }
+
+  return Object.fromEntries(
+    Object.entries(definitions).filter(([name]) => selectedNames.has(name)),
+  );
+}
+
 function createRuntimeSchema(
   schemaId: string,
   definitions: JsonObject,
@@ -335,6 +461,12 @@ function webDocumentRoot(): JsonObject {
   };
 }
 
+function controlPlaneDocumentRoot(): JsonObject {
+  return {
+    $ref: 'ControlPlaneDocument.json',
+  };
+}
+
 function toOpenApiSchema(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((entry) => toOpenApiSchema(entry));
@@ -370,9 +502,64 @@ function createOpenApiDocument(definitions: JsonObject): JsonObject {
     openapi: '3.1.0',
     info: {
       title: 'Liiiraa Boost Contracts',
-      version: '1.1.0',
+      version: '1.2.0',
     },
-    paths: {},
+    paths: {
+      '/v1/account': {
+        get: {
+          operationId: 'getAccount',
+          responses: {
+            '200': {
+              description: 'Authoritative account projection.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/AccountProjection' },
+                },
+              },
+            },
+            default: {
+              description: 'Bounded redacted authority error.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/AuthorityError' },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/v1/admin/commands': {
+        post: {
+          operationId: 'issueAdminCommand',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/AdminCommand' },
+              },
+            },
+          },
+          responses: {
+            '202': {
+              description: 'Versioned authoritative receipt.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/AuthorityReceipt' },
+                },
+              },
+            },
+            default: {
+              description: 'Bounded redacted authority error.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/AuthorityError' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     components: {
       schemas,
     },
@@ -405,6 +592,7 @@ async function compileCanonicalSchema(): Promise<JsonObject> {
       const diagnostics = program.diagnostics.map((diagnostic) => formatDiagnostic(diagnostic));
       throw new Error(`Canonical TypeSpec compilation failed:\n${diagnostics.join('\n')}`);
     }
+    requireControlPlaneOperations(program);
 
     const emitted = JSON.parse(await readFile(bundlePath, 'utf8')) as unknown;
     if (!isJsonObject(emitted)) {
@@ -435,6 +623,7 @@ const schemaStage: GenerationStage = {
     const definitions = requireDefinitions(bundle);
     const legacyDesktopDefinitions = desktopDefinitions(definitions);
     const legacyInspectionDefinitions = inspectionDefinitions(legacyDesktopDefinitions);
+    const standaloneControlPlaneDefinitions = controlPlaneDefinitions(definitions);
     const standaloneWebDefinitions = webDefinitions(definitions);
 
     return [
@@ -471,6 +660,14 @@ const schemaStage: GenerationStage = {
         ),
       },
       {
+        path: OUTPUT_PATHS.controlPlaneDocument,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/control-plane/v1/control-plane-document.schema.json',
+          standaloneControlPlaneDefinitions,
+          controlPlaneDocumentRoot(),
+        ),
+      },
+      {
         path: OUTPUT_PATHS.webDocument,
         value: createRuntimeSchema(
           'https://schemas.liiiraa.dev/web/v1/web-document.schema.json',
@@ -483,6 +680,7 @@ const schemaStage: GenerationStage = {
         value: createOpenApiDocument({
           ...legacyInspectionDefinitions,
           ...standaloneWebDefinitions,
+          ...standaloneControlPlaneDefinitions,
         }),
       },
     ];
@@ -526,6 +724,22 @@ function normalizeGeneratedText(value: string): string {
   return `${value.replaceAll('\r\n', '\n').trimEnd()}\n`;
 }
 
+function normalizeForRustTransport(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => normalizeForRustTransport(entry));
+  }
+
+  if (!isJsonObject(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => key !== 'uniqueItems' && key !== 'pattern')
+      .map(([key, entry]) => [key, normalizeForRustTransport(entry)]),
+  );
+}
+
 const typescriptStage: GenerationStage = {
   name: 'typescript-transports',
   async generate(): Promise<readonly GeneratedArtifact[]> {
@@ -536,8 +750,9 @@ const typescriptStage: GenerationStage = {
       properties: {
         messageEnvelope: transportMessageRoot(),
         webDocument: webDocumentRoot(),
+        controlPlaneDocument: controlPlaneDocumentRoot(),
       },
-      required: ['messageEnvelope', 'webDocument'],
+      required: ['messageEnvelope', 'webDocument', 'controlPlaneDocument'],
       $defs: definitions,
     });
 
@@ -557,6 +772,7 @@ const typescriptStage: GenerationStage = {
     const transportAliases = [
       "export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];",
       "export type WebDocument = GeneratedContractRoots['webDocument'];",
+      "export type ControlPlaneDocument = GeneratedContractRoots['controlPlaneDocument'];",
     ].join('\n');
 
     return [
@@ -567,7 +783,7 @@ const typescriptStage: GenerationStage = {
       {
         path: OUTPUT_PATHS.typescriptIndex,
         value: normalizeGeneratedText(
-          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.js';`,
+          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.js';\nexport { controlPlaneDocumentValidator } from './standalone-validators.js';`,
         ),
       },
     ];
@@ -616,10 +832,12 @@ const rustStage: GenerationStage = {
       await writeFile(
         schemaPath,
         stableJson(
-          createRuntimeSchema(
-            'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
-            definitions,
-            transportMessageRoot(),
+          normalizeForRustTransport(
+            createRuntimeSchema(
+              'https://schemas.liiiraa.dev/desktop/v1/message-envelope.schema.json',
+              definitions,
+              transportMessageRoot(),
+            ),
           ),
         ),
         'utf8',
@@ -690,6 +908,8 @@ export async function generateContracts(): Promise<void> {
       typeof artifact.value === 'string' ? artifact.value : stableJson(artifact.value),
     );
   }
+
+  await executeFile(process.execPath, [STANDALONE_VALIDATOR_GENERATOR], REPOSITORY_ROOT);
 }
 
 const isDirectExecution =

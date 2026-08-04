@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { runOasdiffBreaking } from './check-openapi.ts';
+
 type JsonObject = Record<string, unknown>;
 
 interface MajorTransitionApproval {
@@ -373,36 +375,6 @@ export function evaluateCompatibilityFixture(value: unknown): readonly Compatibi
   });
 }
 
-function executeOasdiff(arguments_: string[]): Promise<string> {
-  return new Promise((resolvePromise, rejectPromise) => {
-    execFile(
-      'oasdiff',
-      arguments_,
-      {
-        cwd: REPOSITORY_ROOT,
-        encoding: 'utf8',
-        maxBuffer: 16 * 1024 * 1024,
-        windowsHide: true,
-      },
-      (error, stdout, stderr) => {
-        if (error === null) {
-          resolvePromise('');
-          return;
-        }
-
-        if (error.code === 'ENOENT') {
-          rejectPromise(
-            new Error('oasdiff 1.26.0 is required when the approved HTTP baseline changes.'),
-          );
-          return;
-        }
-
-        resolvePromise((stdout.trim() || stderr.trim() || error.message).trim());
-      },
-    );
-  });
-}
-
 function executeGit(arguments_: string[]): Promise<string> {
   return new Promise((resolvePromise, rejectPromise) => {
     execFile(
@@ -448,13 +420,7 @@ async function compareHttpWithOasdiff(
   try {
     await writeFile(baselinePath, `${JSON.stringify(baseline, null, 2)}\n`, 'utf8');
     await writeFile(candidatePath, `${JSON.stringify(candidate, null, 2)}\n`, 'utf8');
-    const report = await executeOasdiff([
-      'breaking',
-      baselinePath,
-      candidatePath,
-      '--format',
-      'json',
-    ]);
+    const report = await runOasdiffBreaking(baselinePath, candidatePath, '1.26.0');
 
     return report.length === 0 ? [] : [`HTTP oasdiff: ${report}`];
   } finally {

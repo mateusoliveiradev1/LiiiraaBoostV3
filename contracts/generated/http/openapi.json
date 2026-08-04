@@ -1,6 +1,181 @@
 {
   "components": {
     "schemas": {
+      "AccountCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/AccountCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "account-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "action",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AccountCommandAction": {
+        "anyOf": [
+          {
+            "const": "update-profile",
+            "type": "string"
+          },
+          {
+            "const": "request-deletion",
+            "type": "string"
+          },
+          {
+            "const": "cancel-deletion",
+            "type": "string"
+          }
+        ]
+      },
+      "AccountProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "displayName": {
+            "$ref": "#/components/schemas/ControlPlaneShortText"
+          },
+          "emailRedacted": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "kind": {
+            "const": "account-projection",
+            "type": "string"
+          },
+          "locale": {
+            "$ref": "#/components/schemas/ShellLocale"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AccountState"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "accountId",
+          "state",
+          "displayName",
+          "emailRedacted",
+          "locale",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AccountState": {
+        "anyOf": [
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "locked",
+            "type": "string"
+          },
+          {
+            "const": "pending-deletion",
+            "type": "string"
+          },
+          {
+            "const": "disabled",
+            "type": "string"
+          }
+        ]
+      },
+      "AdminAction": {
+        "anyOf": [
+          {
+            "const": "assume-role",
+            "type": "string"
+          },
+          {
+            "const": "view-support-diagnostics",
+            "type": "string"
+          },
+          {
+            "const": "revoke-session",
+            "type": "string"
+          },
+          {
+            "const": "revoke-device",
+            "type": "string"
+          },
+          {
+            "const": "correct-entitlement",
+            "type": "string"
+          },
+          {
+            "const": "export-audit-reference",
+            "type": "string"
+          }
+        ]
+      },
       "AdminAuditEvent": {
         "properties": {
           "action": {
@@ -55,6 +230,398 @@
         "unevaluatedProperties": {
           "not": {}
         }
+      },
+      "AdminCommand": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/AdminAction"
+          },
+          "actorId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "assumedRole": {
+            "$ref": "#/components/schemas/AdminRole"
+          },
+          "authorizationContextId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "admin-command",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "redactedTarget": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "actorId",
+          "assumedRole",
+          "action",
+          "redactedTarget",
+          "reason",
+          "authorizationContextId",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminRole": {
+        "anyOf": [
+          {
+            "const": "support",
+            "type": "string"
+          },
+          {
+            "const": "operations",
+            "type": "string"
+          },
+          {
+            "const": "security",
+            "type": "string"
+          },
+          {
+            "const": "audit",
+            "type": "string"
+          }
+        ]
+      },
+      "AuditEvent": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "actorReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "assumedRole": {
+            "$ref": "#/components/schemas/AdminRole"
+          },
+          "auditEventId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/Sha256Digest"
+          },
+          "kind": {
+            "const": "audit-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/Sha256Digest"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "redactedTarget": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AuditResult"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "auditEventId",
+          "actorReference",
+          "action",
+          "redactedTarget",
+          "reason",
+          "result",
+          "aggregateVersion",
+          "correlationId",
+          "eventHash",
+          "occurredAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AuditResult": {
+        "anyOf": [
+          {
+            "const": "succeeded",
+            "type": "string"
+          },
+          {
+            "const": "denied",
+            "type": "string"
+          },
+          {
+            "const": "failed",
+            "type": "string"
+          }
+        ]
+      },
+      "AuthenticationStrength": {
+        "anyOf": [
+          {
+            "const": "password",
+            "type": "string"
+          },
+          {
+            "const": "mfa",
+            "type": "string"
+          },
+          {
+            "const": "passkey",
+            "type": "string"
+          }
+        ]
+      },
+      "AuthorityCommand": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AccountCommand"
+          },
+          {
+            "$ref": "#/components/schemas/SessionCommand"
+          },
+          {
+            "$ref": "#/components/schemas/CommerceCommand"
+          },
+          {
+            "$ref": "#/components/schemas/DeviceCommand"
+          },
+          {
+            "$ref": "#/components/schemas/SupportCommand"
+          },
+          {
+            "$ref": "#/components/schemas/ConsentCommand"
+          },
+          {
+            "$ref": "#/components/schemas/AdminCommand"
+          }
+        ]
+      },
+      "AuthorityError": {
+        "properties": {
+          "auditReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "code": {
+            "$ref": "#/components/schemas/AuthorityErrorCode"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "currentEtag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "currentVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "authority-error",
+            "type": "string"
+          },
+          "message": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "code",
+          "message",
+          "correlationId",
+          "retryable"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AuthorityErrorCode": {
+        "anyOf": [
+          {
+            "const": "unauthenticated",
+            "type": "string"
+          },
+          {
+            "const": "unauthorized",
+            "type": "string"
+          },
+          {
+            "const": "step-up-required",
+            "type": "string"
+          },
+          {
+            "const": "conflict",
+            "type": "string"
+          },
+          {
+            "const": "stale",
+            "type": "string"
+          },
+          {
+            "const": "consent-expired",
+            "type": "string"
+          },
+          {
+            "const": "offline",
+            "type": "string"
+          },
+          {
+            "const": "provider-unavailable",
+            "type": "string"
+          },
+          {
+            "const": "invalid-request",
+            "type": "string"
+          },
+          {
+            "const": "internal",
+            "type": "string"
+          }
+        ]
+      },
+      "AuthorityEtag": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "AuthorityProvenance": {
+        "anyOf": [
+          {
+            "const": "postgres-authority",
+            "type": "string"
+          },
+          {
+            "const": "provider-verified",
+            "type": "string"
+          },
+          {
+            "const": "device-verified",
+            "type": "string"
+          }
+        ]
+      },
+      "AuthorityReceipt": {
+        "properties": {
+          "aggregateId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "auditReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "kind": {
+            "const": "authority-receipt",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/AuthorityReceiptOutcome"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "receiptId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "receiptId",
+          "commandId",
+          "aggregateId",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "auditReference",
+          "outcome",
+          "provenance",
+          "recordedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AuthorityReceiptOutcome": {
+        "anyOf": [
+          {
+            "const": "applied",
+            "type": "string"
+          },
+          {
+            "const": "accepted",
+            "type": "string"
+          },
+          {
+            "const": "no-op",
+            "type": "string"
+          }
+        ]
       },
       "CapabilityAvailability": {
         "anyOf": [
@@ -118,6 +685,170 @@
           "not": {}
         }
       },
+      "CommerceCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/CommerceCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "commerce-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "action",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CommerceCommandAction": {
+        "anyOf": [
+          {
+            "const": "start-checkout",
+            "type": "string"
+          },
+          {
+            "const": "reconcile-subscription",
+            "type": "string"
+          },
+          {
+            "const": "cancel-subscription",
+            "type": "string"
+          }
+        ]
+      },
+      "ConsentCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/ConsentCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "consentId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "consent-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentScope"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "consentId",
+          "action",
+          "scopes",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ConsentCommandAction": {
+        "anyOf": [
+          {
+            "const": "grant",
+            "type": "string"
+          },
+          {
+            "const": "revoke",
+            "type": "string"
+          }
+        ]
+      },
+      "ConsentScope": {
+        "anyOf": [
+          {
+            "const": "support-diagnostics",
+            "type": "string"
+          },
+          {
+            "const": "cloud-ai",
+            "type": "string"
+          },
+          {
+            "const": "account-security",
+            "type": "string"
+          }
+        ]
+      },
+      "ConsentState": {
+        "anyOf": [
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
+            "type": "string"
+          },
+          {
+            "const": "expired",
+            "type": "string"
+          }
+        ]
+      },
       "ContentRecord": {
         "properties": {
           "channel": {
@@ -178,10 +909,305 @@
           "not": {}
         }
       },
+      "ContractSchemaVersion": {
+        "maxLength": 32,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ControlPlaneDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AccountProjection"
+          },
+          {
+            "$ref": "#/components/schemas/SessionProjection"
+          },
+          {
+            "$ref": "#/components/schemas/SubscriptionProjection"
+          },
+          {
+            "$ref": "#/components/schemas/InvoiceProjection"
+          },
+          {
+            "$ref": "#/components/schemas/DeviceBindingProjection"
+          },
+          {
+            "$ref": "#/components/schemas/SupportCaseProjection"
+          },
+          {
+            "$ref": "#/components/schemas/DiagnosticConsent"
+          },
+          {
+            "$ref": "#/components/schemas/AuthorityCommand"
+          },
+          {
+            "$ref": "#/components/schemas/AuthorityReceipt"
+          },
+          {
+            "$ref": "#/components/schemas/AuthorityError"
+          },
+          {
+            "$ref": "#/components/schemas/ProviderEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AuditEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OfflineEntitlementEnvelope"
+          }
+        ]
+      },
+      "ControlPlaneIdentifier": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ControlPlaneShortText": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
       "CorrelationId": {
         "maxLength": 128,
         "minLength": 1,
         "type": "string"
+      },
+      "CurrencyCode": {
+        "maxLength": 3,
+        "minLength": 3,
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+      },
+      "DetachedSignature": {
+        "maxLength": 512,
+        "minLength": 64,
+        "pattern": "^[A-Za-z0-9_-]+={0,2}$",
+        "type": "string"
+      },
+      "DeviceBindingProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "boundAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "deviceLabel": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "evidenceVersion": {
+            "$ref": "#/components/schemas/ContractSchemaVersion"
+          },
+          "kind": {
+            "const": "device-binding-projection",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "replacementEligibleAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/DeviceBindingState"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "deviceBindingId",
+          "accountId",
+          "state",
+          "deviceLabel",
+          "evidenceVersion"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DeviceBindingState": {
+        "anyOf": [
+          {
+            "const": "unbound",
+            "type": "string"
+          },
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "replacement-cooldown",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
+            "type": "string"
+          }
+        ]
+      },
+      "DeviceCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/DeviceCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "device-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "deviceBindingId",
+          "action",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DeviceCommandAction": {
+        "anyOf": [
+          {
+            "const": "bind",
+            "type": "string"
+          },
+          {
+            "const": "replace",
+            "type": "string"
+          },
+          {
+            "const": "revoke",
+            "type": "string"
+          }
+        ]
+      },
+      "DiagnosticConsent": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "consentId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "diagnostic-consent",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentScope"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "state": {
+            "$ref": "#/components/schemas/ConsentState"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "consentId",
+          "accountId",
+          "state",
+          "scopes",
+          "purpose",
+          "grantedAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "DiagnosticPrimitive": {
         "anyOf": [
@@ -409,6 +1435,102 @@
           "not": {}
         }
       },
+      "InvoiceProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "amountDueMinor": {
+            "$ref": "#/components/schemas/MoneyMinorUnits"
+          },
+          "amountPaidMinor": {
+            "$ref": "#/components/schemas/MoneyMinorUnits"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "invoiceId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "invoice-projection",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "settledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/InvoiceState"
+          },
+          "subscriptionId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "invoiceId",
+          "accountId",
+          "state",
+          "currency",
+          "amountDueMinor",
+          "amountPaidMinor",
+          "issuedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InvoiceState": {
+        "anyOf": [
+          {
+            "const": "draft",
+            "type": "string"
+          },
+          {
+            "const": "open",
+            "type": "string"
+          },
+          {
+            "const": "paid",
+            "type": "string"
+          },
+          {
+            "const": "void",
+            "type": "string"
+          },
+          {
+            "const": "uncollectible",
+            "type": "string"
+          }
+        ]
+      },
       "LocalePolicy": {
         "anyOf": [
           {
@@ -508,6 +1630,11 @@
           "not": {}
         }
       },
+      "MoneyMinorUnits": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "string"
+      },
       "NoChangeReceipt": {
         "properties": {
           "authority": {
@@ -602,6 +1729,72 @@
           }
         ]
       },
+      "OfflineEntitlementEnvelope": {
+        "properties": {
+          "algorithm": {
+            "const": "Ed25519",
+            "type": "string"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "deviceBinding": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "keyId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "kind": {
+            "const": "offline-entitlement-envelope",
+            "type": "string"
+          },
+          "payloadBytes": {
+            "$ref": "#/components/schemas/OpaquePayloadBytes"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/DetachedSignature"
+          },
+          "validitySeconds": {
+            "const": 604800,
+            "type": "number"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "payloadBytes",
+          "signature",
+          "algorithm",
+          "keyId",
+          "audience",
+          "deviceBinding",
+          "issuedAt",
+          "expiresAt",
+          "validitySeconds"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "OpaquePayloadBytes": {
+        "maxLength": 16384,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9_-]+={0,2}$",
+        "type": "string"
+      },
       "ProvenanceDescription": {
         "maxLength": 512,
         "minLength": 1,
@@ -609,6 +1802,103 @@
       },
       "ProvenanceIdentifier": {
         "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ProviderEvent": {
+        "properties": {
+          "aggregateReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/ProviderEventType"
+          },
+          "kind": {
+            "const": "provider-event",
+            "type": "string"
+          },
+          "payloadDigest": {
+            "$ref": "#/components/schemas/Sha256Digest"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderIdentity"
+          },
+          "providerEventId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "provider",
+          "providerEventId",
+          "eventType",
+          "payloadDigest",
+          "correlationId",
+          "receivedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ProviderEventType": {
+        "anyOf": [
+          {
+            "const": "session-revoked",
+            "type": "string"
+          },
+          {
+            "const": "checkout-completed",
+            "type": "string"
+          },
+          {
+            "const": "subscription-updated",
+            "type": "string"
+          },
+          {
+            "const": "invoice-updated",
+            "type": "string"
+          },
+          {
+            "const": "delivery-updated",
+            "type": "string"
+          }
+        ]
+      },
+      "ProviderIdentity": {
+        "anyOf": [
+          {
+            "const": "identity",
+            "type": "string"
+          },
+          {
+            "const": "commerce",
+            "type": "string"
+          },
+          {
+            "const": "email",
+            "type": "string"
+          },
+          {
+            "const": "object-storage",
+            "type": "string"
+          }
+        ]
+      },
+      "RedactedAuthorityText": {
+        "maxLength": 512,
         "minLength": 1,
         "type": "string"
       },
@@ -783,6 +2073,164 @@
           }
         ]
       },
+      "SessionCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/SessionCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "session-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "sessionId",
+          "action",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SessionCommandAction": {
+        "anyOf": [
+          {
+            "const": "revoke",
+            "type": "string"
+          },
+          {
+            "const": "revoke-others",
+            "type": "string"
+          }
+        ]
+      },
+      "SessionProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "authenticatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "authenticationStrength": {
+            "$ref": "#/components/schemas/AuthenticationStrength"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "session-projection",
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SessionState"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "sessionId",
+          "accountId",
+          "state",
+          "authenticationStrength",
+          "scopes",
+          "authenticatedAt",
+          "expiresAt",
+          "lastSeenAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SessionState": {
+        "anyOf": [
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "challenge-required",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
+            "type": "string"
+          },
+          {
+            "const": "expired",
+            "type": "string"
+          }
+        ]
+      },
       "Sha256Digest": {
         "maxLength": 64,
         "minLength": 64,
@@ -837,6 +2285,274 @@
           },
           {
             "const": "unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "SubscriptionPlan": {
+        "anyOf": [
+          {
+            "const": "free",
+            "type": "string"
+          },
+          {
+            "const": "premium",
+            "type": "string"
+          }
+        ]
+      },
+      "SubscriptionProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "cancelAtPeriodEnd": {
+            "type": "boolean"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "currentPeriodEndsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entitlements": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "kind": {
+            "const": "subscription-projection",
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SubscriptionState"
+          },
+          "subscriptionId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "subscriptionId",
+          "accountId",
+          "state",
+          "plan",
+          "entitlements",
+          "cancelAtPeriodEnd"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SubscriptionState": {
+        "anyOf": [
+          {
+            "const": "none",
+            "type": "string"
+          },
+          {
+            "const": "trialing",
+            "type": "string"
+          },
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "past-due",
+            "type": "string"
+          },
+          {
+            "const": "canceled",
+            "type": "string"
+          },
+          {
+            "const": "expired",
+            "type": "string"
+          }
+        ]
+      },
+      "SupportCaseProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "auditReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "consentId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "kind": {
+            "const": "support-case-projection",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SupportCaseState"
+          },
+          "subjectRedacted": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "supportCaseId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "kind",
+          "supportCaseId",
+          "accountId",
+          "state",
+          "subjectRedacted",
+          "auditReference",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SupportCaseState": {
+        "anyOf": [
+          {
+            "const": "open",
+            "type": "string"
+          },
+          {
+            "const": "waiting-customer",
+            "type": "string"
+          },
+          {
+            "const": "waiting-support",
+            "type": "string"
+          },
+          {
+            "const": "resolved",
+            "type": "string"
+          },
+          {
+            "const": "closed",
+            "type": "string"
+          }
+        ]
+      },
+      "SupportCommand": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/SupportCommandAction"
+          },
+          "commandId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "expectedVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "support-command",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "supportCaseId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "commandId",
+          "accountId",
+          "supportCaseId",
+          "action",
+          "expectedVersion",
+          "correlationId",
+          "requestedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SupportCommandAction": {
+        "anyOf": [
+          {
+            "const": "create",
+            "type": "string"
+          },
+          {
+            "const": "reply",
+            "type": "string"
+          },
+          {
+            "const": "close",
             "type": "string"
           }
         ]
@@ -1007,10 +2723,75 @@
   },
   "info": {
     "title": "Liiiraa Boost Contracts",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "openapi": "3.1.0",
-  "paths": {},
+  "paths": {
+    "/v1/account": {
+      "get": {
+        "operationId": "getAccount",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountProjection"
+                }
+              }
+            },
+            "description": "Authoritative account projection."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorityError"
+                }
+              }
+            },
+            "description": "Bounded redacted authority error."
+          }
+        }
+      }
+    },
+    "/v1/admin/commands": {
+      "post": {
+        "operationId": "issueAdminCommand",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorityReceipt"
+                }
+              }
+            },
+            "description": "Versioned authoritative receipt."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorityError"
+                }
+              }
+            },
+            "description": "Bounded redacted authority error."
+          }
+        }
+      }
+    }
+  },
   "x-liiiraa-generated": {
     "generator": "@liiiraa/contract-generation",
     "notice": "GENERATED FILE - DO NOT EDIT",

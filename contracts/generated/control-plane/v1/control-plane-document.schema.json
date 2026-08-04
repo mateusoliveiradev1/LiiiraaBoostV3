@@ -1,0 +1,1864 @@
+{
+  "$defs": {
+    "AccountCommand": {
+      "$id": "AccountCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "AccountCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "account-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "action",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AccountCommandAction": {
+      "$id": "AccountCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "update-profile",
+          "type": "string"
+        },
+        {
+          "const": "request-deletion",
+          "type": "string"
+        },
+        {
+          "const": "cancel-deletion",
+          "type": "string"
+        }
+      ]
+    },
+    "AccountProjection": {
+      "$id": "AccountProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "displayName": {
+          "$ref": "ControlPlaneShortText.json"
+        },
+        "emailRedacted": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "kind": {
+          "const": "account-projection",
+          "type": "string"
+        },
+        "locale": {
+          "$ref": "ShellLocale.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AccountState.json"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "accountId",
+        "state",
+        "displayName",
+        "emailRedacted",
+        "locale",
+        "createdAt",
+        "updatedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AccountState": {
+      "$id": "AccountState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "locked",
+          "type": "string"
+        },
+        {
+          "const": "pending-deletion",
+          "type": "string"
+        },
+        {
+          "const": "disabled",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminAction": {
+      "$id": "AdminAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "assume-role",
+          "type": "string"
+        },
+        {
+          "const": "view-support-diagnostics",
+          "type": "string"
+        },
+        {
+          "const": "revoke-session",
+          "type": "string"
+        },
+        {
+          "const": "revoke-device",
+          "type": "string"
+        },
+        {
+          "const": "correct-entitlement",
+          "type": "string"
+        },
+        {
+          "const": "export-audit-reference",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminCommand": {
+      "$id": "AdminCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "AdminAction.json"
+        },
+        "actorId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "assumedRole": {
+          "$ref": "AdminRole.json"
+        },
+        "authorizationContextId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "admin-command",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "redactedTarget": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "actorId",
+        "assumedRole",
+        "action",
+        "redactedTarget",
+        "reason",
+        "authorizationContextId",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminRole": {
+      "$id": "AdminRole.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "support",
+          "type": "string"
+        },
+        {
+          "const": "operations",
+          "type": "string"
+        },
+        {
+          "const": "security",
+          "type": "string"
+        },
+        {
+          "const": "audit",
+          "type": "string"
+        }
+      ]
+    },
+    "AuditEvent": {
+      "$id": "AuditEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "actorReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "assumedRole": {
+          "$ref": "AdminRole.json"
+        },
+        "auditEventId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "eventHash": {
+          "$ref": "Sha256Digest.json"
+        },
+        "kind": {
+          "const": "audit-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "previousEventHash": {
+          "$ref": "Sha256Digest.json"
+        },
+        "reason": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "redactedTarget": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "result": {
+          "$ref": "AuditResult.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "auditEventId",
+        "actorReference",
+        "action",
+        "redactedTarget",
+        "reason",
+        "result",
+        "aggregateVersion",
+        "correlationId",
+        "eventHash",
+        "occurredAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AuditResult": {
+      "$id": "AuditResult.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "succeeded",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        }
+      ]
+    },
+    "AuthenticationStrength": {
+      "$id": "AuthenticationStrength.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "password",
+          "type": "string"
+        },
+        {
+          "const": "mfa",
+          "type": "string"
+        },
+        {
+          "const": "passkey",
+          "type": "string"
+        }
+      ]
+    },
+    "AuthorityCommand": {
+      "$id": "AuthorityCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "AccountCommand.json"
+        },
+        {
+          "$ref": "SessionCommand.json"
+        },
+        {
+          "$ref": "CommerceCommand.json"
+        },
+        {
+          "$ref": "DeviceCommand.json"
+        },
+        {
+          "$ref": "SupportCommand.json"
+        },
+        {
+          "$ref": "ConsentCommand.json"
+        },
+        {
+          "$ref": "AdminCommand.json"
+        }
+      ]
+    },
+    "AuthorityError": {
+      "$id": "AuthorityError.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "auditReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "code": {
+          "$ref": "AuthorityErrorCode.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "currentEtag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "currentVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "authority-error",
+          "type": "string"
+        },
+        "message": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code",
+        "message",
+        "correlationId",
+        "retryable"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AuthorityErrorCode": {
+      "$id": "AuthorityErrorCode.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "unauthenticated",
+          "type": "string"
+        },
+        {
+          "const": "unauthorized",
+          "type": "string"
+        },
+        {
+          "const": "step-up-required",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "type": "string"
+        },
+        {
+          "const": "stale",
+          "type": "string"
+        },
+        {
+          "const": "consent-expired",
+          "type": "string"
+        },
+        {
+          "const": "offline",
+          "type": "string"
+        },
+        {
+          "const": "provider-unavailable",
+          "type": "string"
+        },
+        {
+          "const": "invalid-request",
+          "type": "string"
+        },
+        {
+          "const": "internal",
+          "type": "string"
+        }
+      ]
+    },
+    "AuthorityEtag": {
+      "$id": "AuthorityEtag.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "AuthorityProvenance": {
+      "$id": "AuthorityProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "postgres-authority",
+          "type": "string"
+        },
+        {
+          "const": "provider-verified",
+          "type": "string"
+        },
+        {
+          "const": "device-verified",
+          "type": "string"
+        }
+      ]
+    },
+    "AuthorityReceipt": {
+      "$id": "AuthorityReceipt.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "auditReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "kind": {
+          "const": "authority-receipt",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "AuthorityReceiptOutcome.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "receiptId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "receiptId",
+        "commandId",
+        "aggregateId",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "auditReference",
+        "outcome",
+        "provenance",
+        "recordedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AuthorityReceiptOutcome": {
+      "$id": "AuthorityReceiptOutcome.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "applied",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "type": "string"
+        },
+        {
+          "const": "no-op",
+          "type": "string"
+        }
+      ]
+    },
+    "CommerceCommand": {
+      "$id": "CommerceCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "CommerceCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "commerce-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "action",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CommerceCommandAction": {
+      "$id": "CommerceCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "start-checkout",
+          "type": "string"
+        },
+        {
+          "const": "reconcile-subscription",
+          "type": "string"
+        },
+        {
+          "const": "cancel-subscription",
+          "type": "string"
+        }
+      ]
+    },
+    "ConsentCommand": {
+      "$id": "ConsentCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "ConsentCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "consentId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "consent-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "$ref": "ConsentScope.json"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "consentId",
+        "action",
+        "scopes",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ConsentCommandAction": {
+      "$id": "ConsentCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "grant",
+          "type": "string"
+        },
+        {
+          "const": "revoke",
+          "type": "string"
+        }
+      ]
+    },
+    "ConsentScope": {
+      "$id": "ConsentScope.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "support-diagnostics",
+          "type": "string"
+        },
+        {
+          "const": "cloud-ai",
+          "type": "string"
+        },
+        {
+          "const": "account-security",
+          "type": "string"
+        }
+      ]
+    },
+    "ConsentState": {
+      "$id": "ConsentState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "type": "string"
+        }
+      ]
+    },
+    "ContractSchemaVersion": {
+      "$id": "ContractSchemaVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ControlPlaneDocument": {
+      "$id": "ControlPlaneDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "AccountProjection.json"
+        },
+        {
+          "$ref": "SessionProjection.json"
+        },
+        {
+          "$ref": "SubscriptionProjection.json"
+        },
+        {
+          "$ref": "InvoiceProjection.json"
+        },
+        {
+          "$ref": "DeviceBindingProjection.json"
+        },
+        {
+          "$ref": "SupportCaseProjection.json"
+        },
+        {
+          "$ref": "DiagnosticConsent.json"
+        },
+        {
+          "$ref": "AuthorityCommand.json"
+        },
+        {
+          "$ref": "AuthorityReceipt.json"
+        },
+        {
+          "$ref": "AuthorityError.json"
+        },
+        {
+          "$ref": "ProviderEvent.json"
+        },
+        {
+          "$ref": "AuditEvent.json"
+        },
+        {
+          "$ref": "OfflineEntitlementEnvelope.json"
+        }
+      ]
+    },
+    "ControlPlaneIdentifier": {
+      "$id": "ControlPlaneIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "ControlPlaneShortText": {
+      "$id": "ControlPlaneShortText.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+    },
+    "CorrelationId": {
+      "$id": "CorrelationId.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "CurrencyCode": {
+      "$id": "CurrencyCode.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 3,
+      "minLength": 3,
+      "pattern": "^[A-Z]{3}$",
+      "type": "string"
+    },
+    "DetachedSignature": {
+      "$id": "DetachedSignature.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 64,
+      "pattern": "^[A-Za-z0-9_-]+={0,2}$",
+      "type": "string"
+    },
+    "DeviceBindingProjection": {
+      "$id": "DeviceBindingProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "boundAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "deviceBindingId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "deviceLabel": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "evidenceVersion": {
+          "$ref": "ContractSchemaVersion.json"
+        },
+        "kind": {
+          "const": "device-binding-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "replacementEligibleAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "DeviceBindingState.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "deviceBindingId",
+        "accountId",
+        "state",
+        "deviceLabel",
+        "evidenceVersion"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeviceBindingState": {
+      "$id": "DeviceBindingState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "unbound",
+          "type": "string"
+        },
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "replacement-cooldown",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        }
+      ]
+    },
+    "DeviceCommand": {
+      "$id": "DeviceCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "DeviceCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "deviceBindingId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "device-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "deviceBindingId",
+        "action",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeviceCommandAction": {
+      "$id": "DeviceCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "bind",
+          "type": "string"
+        },
+        {
+          "const": "replace",
+          "type": "string"
+        },
+        {
+          "const": "revoke",
+          "type": "string"
+        }
+      ]
+    },
+    "DiagnosticConsent": {
+      "$id": "DiagnosticConsent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "consentId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "grantedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "diagnostic-consent",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "purpose": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "revokedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "$ref": "ConsentScope.json"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "state": {
+          "$ref": "ConsentState.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "consentId",
+        "accountId",
+        "state",
+        "scopes",
+        "purpose",
+        "grantedAt",
+        "expiresAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InvoiceProjection": {
+      "$id": "InvoiceProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "amountDueMinor": {
+          "$ref": "MoneyMinorUnits.json"
+        },
+        "amountPaidMinor": {
+          "$ref": "MoneyMinorUnits.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "currency": {
+          "$ref": "CurrencyCode.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "invoiceId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "invoice-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "settledAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "InvoiceState.json"
+        },
+        "subscriptionId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "invoiceId",
+        "accountId",
+        "state",
+        "currency",
+        "amountDueMinor",
+        "amountPaidMinor",
+        "issuedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InvoiceState": {
+      "$id": "InvoiceState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "draft",
+          "type": "string"
+        },
+        {
+          "const": "open",
+          "type": "string"
+        },
+        {
+          "const": "paid",
+          "type": "string"
+        },
+        {
+          "const": "void",
+          "type": "string"
+        },
+        {
+          "const": "uncollectible",
+          "type": "string"
+        }
+      ]
+    },
+    "MoneyMinorUnits": {
+      "$id": "MoneyMinorUnits.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "string"
+    },
+    "OfflineEntitlementEnvelope": {
+      "$id": "OfflineEntitlementEnvelope.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519",
+          "type": "string"
+        },
+        "audience": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "deviceBinding": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "keyId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "kind": {
+          "const": "offline-entitlement-envelope",
+          "type": "string"
+        },
+        "payloadBytes": {
+          "$ref": "OpaquePayloadBytes.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "signature": {
+          "$ref": "DetachedSignature.json"
+        },
+        "validitySeconds": {
+          "const": 604800,
+          "type": "number"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "payloadBytes",
+        "signature",
+        "algorithm",
+        "keyId",
+        "audience",
+        "deviceBinding",
+        "issuedAt",
+        "expiresAt",
+        "validitySeconds"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "OpaquePayloadBytes": {
+      "$id": "OpaquePayloadBytes.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 16384,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+={0,2}$",
+      "type": "string"
+    },
+    "ProviderEvent": {
+      "$id": "ProviderEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "eventType": {
+          "$ref": "ProviderEventType.json"
+        },
+        "kind": {
+          "const": "provider-event",
+          "type": "string"
+        },
+        "payloadDigest": {
+          "$ref": "Sha256Digest.json"
+        },
+        "provider": {
+          "$ref": "ProviderIdentity.json"
+        },
+        "providerEventId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "receivedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "provider",
+        "providerEventId",
+        "eventType",
+        "payloadDigest",
+        "correlationId",
+        "receivedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProviderEventType": {
+      "$id": "ProviderEventType.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "session-revoked",
+          "type": "string"
+        },
+        {
+          "const": "checkout-completed",
+          "type": "string"
+        },
+        {
+          "const": "subscription-updated",
+          "type": "string"
+        },
+        {
+          "const": "invoice-updated",
+          "type": "string"
+        },
+        {
+          "const": "delivery-updated",
+          "type": "string"
+        }
+      ]
+    },
+    "ProviderIdentity": {
+      "$id": "ProviderIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "identity",
+          "type": "string"
+        },
+        {
+          "const": "commerce",
+          "type": "string"
+        },
+        {
+          "const": "email",
+          "type": "string"
+        },
+        {
+          "const": "object-storage",
+          "type": "string"
+        }
+      ]
+    },
+    "RedactedAuthorityText": {
+      "$id": "RedactedAuthorityText.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "SessionCommand": {
+      "$id": "SessionCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "SessionCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "session-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "sessionId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "sessionId",
+        "action",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SessionCommandAction": {
+      "$id": "SessionCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "revoke",
+          "type": "string"
+        },
+        {
+          "const": "revoke-others",
+          "type": "string"
+        }
+      ]
+    },
+    "SessionProjection": {
+      "$id": "SessionProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "authenticatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "authenticationStrength": {
+          "$ref": "AuthenticationStrength.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "session-projection",
+          "type": "string"
+        },
+        "lastSeenAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "sessionId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "state": {
+          "$ref": "SessionState.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "sessionId",
+        "accountId",
+        "state",
+        "authenticationStrength",
+        "scopes",
+        "authenticatedAt",
+        "expiresAt",
+        "lastSeenAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SessionState": {
+      "$id": "SessionState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "challenge-required",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "type": "string"
+        }
+      ]
+    },
+    "Sha256Digest": {
+      "$id": "Sha256Digest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 64,
+      "type": "string"
+    },
+    "ShellLocale": {
+      "$id": "ShellLocale.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pt-BR",
+          "type": "string"
+        },
+        {
+          "const": "en",
+          "type": "string"
+        }
+      ]
+    },
+    "SubscriptionPlan": {
+      "$id": "SubscriptionPlan.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "free",
+          "type": "string"
+        },
+        {
+          "const": "premium",
+          "type": "string"
+        }
+      ]
+    },
+    "SubscriptionProjection": {
+      "$id": "SubscriptionProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "cancelAtPeriodEnd": {
+          "type": "boolean"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "currentPeriodEndsAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "entitlements": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "kind": {
+          "const": "subscription-projection",
+          "type": "string"
+        },
+        "plan": {
+          "$ref": "SubscriptionPlan.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "SubscriptionState.json"
+        },
+        "subscriptionId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "subscriptionId",
+        "accountId",
+        "state",
+        "plan",
+        "entitlements",
+        "cancelAtPeriodEnd"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SubscriptionState": {
+      "$id": "SubscriptionState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "none",
+          "type": "string"
+        },
+        {
+          "const": "trialing",
+          "type": "string"
+        },
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "past-due",
+          "type": "string"
+        },
+        {
+          "const": "canceled",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "type": "string"
+        }
+      ]
+    },
+    "SupportCaseProjection": {
+      "$id": "SupportCaseProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "auditReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "consentId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "kind": {
+          "const": "support-case-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "SupportCaseState.json"
+        },
+        "subjectRedacted": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "supportCaseId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "kind",
+        "supportCaseId",
+        "accountId",
+        "state",
+        "subjectRedacted",
+        "auditReference",
+        "createdAt",
+        "updatedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SupportCaseState": {
+      "$id": "SupportCaseState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "open",
+          "type": "string"
+        },
+        {
+          "const": "waiting-customer",
+          "type": "string"
+        },
+        {
+          "const": "waiting-support",
+          "type": "string"
+        },
+        {
+          "const": "resolved",
+          "type": "string"
+        },
+        {
+          "const": "closed",
+          "type": "string"
+        }
+      ]
+    },
+    "SupportCommand": {
+      "$id": "SupportCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "action": {
+          "$ref": "SupportCommandAction.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "support-command",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "supportCaseId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "accountId",
+        "supportCaseId",
+        "action",
+        "expectedVersion",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SupportCommandAction": {
+      "$id": "SupportCommandAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "create",
+          "type": "string"
+        },
+        {
+          "const": "reply",
+          "type": "string"
+        },
+        {
+          "const": "close",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/control-plane/v1/control-plane-document.schema.json",
+  "$ref": "ControlPlaneDocument.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}

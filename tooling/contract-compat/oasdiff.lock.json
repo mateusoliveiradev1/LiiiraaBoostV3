@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "name": "oasdiff",
+  "version": "1.26.0",
+  "releaseBaseUrl": "https://github.com/oasdiff/oasdiff/releases/download/v1.26.0",
+  "checksumsSource": "https://github.com/oasdiff/oasdiff/releases/download/v1.26.0/checksums.txt",
+  "assets": {
+    "darwin-arm64": {
+      "file": "oasdiff_1.26.0_darwin_all.tar.gz",
+      "sha256": "bf6d54c06a94fe54fb4fd3f85a36456b5a580119e8d441fda1235a02f981dc93"
+    },
+    "darwin-x64": {
+      "file": "oasdiff_1.26.0_darwin_all.tar.gz",
+      "sha256": "bf6d54c06a94fe54fb4fd3f85a36456b5a580119e8d441fda1235a02f981dc93"
+    },
+    "linux-arm64": {
+      "file": "oasdiff_1.26.0_linux_arm64.tar.gz",
+      "sha256": "060fd143da799b6edbe8a3befb65fd45997e79864a0ad97e67f8e10b39980b75"
+    },
+    "linux-x64": {
+      "file": "oasdiff_1.26.0_linux_amd64.tar.gz",
+      "sha256": "06893108bdf5b7e310f39f0ce5aaff3151eae1ccade7ab457b16b16b6f95ae3e"
+    },
+    "win32-arm64": {
+      "file": "oasdiff_1.26.0_windows_arm64.tar.gz",
+      "sha256": "42d0a6a69feceb3583d9eb9ef30242ce3a6f26b17fdb3756e05d63702048ee47"
+    },
+    "win32-x64": {
+      "file": "oasdiff_1.26.0_windows_amd64.tar.gz",
+      "sha256": "fba28fd38d5c90e193234e306cf2e6a5eea0dd7a8cd1c57fd0dce3264797abf5"
+    }
+  }
+}

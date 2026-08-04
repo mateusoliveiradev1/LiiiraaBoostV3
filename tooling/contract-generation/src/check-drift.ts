@@ -22,10 +22,13 @@ const GENERATED_ARTIFACT_PATHS = Object.freeze([
   join('contracts', 'generated', 'desktop', 'v1', 'inspect-system.schema.json'),
   join('contracts', 'generated', 'desktop', 'v1', 'message-envelope.schema.json'),
   join('contracts', 'generated', 'desktop', 'v1', 'shell-message.schema.json'),
+  join('contracts', 'generated', 'control-plane', 'v1', 'control-plane-document.schema.json'),
   join('contracts', 'generated', 'http', 'openapi.json'),
   join('contracts', 'generated', 'web', 'v1', 'web-document.schema.json'),
   join('packages', 'contracts-ts', 'src', 'generated', 'index.ts'),
   join('packages', 'contracts-ts', 'src', 'generated', 'models.ts'),
+  join('packages', 'contracts-ts', 'src', 'generated', 'standalone-validators.d.ts'),
+  join('packages', 'contracts-ts', 'src', 'generated', 'standalone-validators.js'),
   join('crates', 'contracts-rust', 'src', 'generated.rs'),
 ]);
 const TRANSPORT_DECLARATION_NAMES = Object.freeze([
