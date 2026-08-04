@@ -1,0 +1,11 @@
+{
+  "name": "@liiiraa/control-plane-adapters",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
+    "@liiiraa/control-plane-application": "workspace:*",
+    "@liiiraa/control-plane-domain": "workspace:*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@liiiraa/control-plane-application",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
+    "@liiiraa/control-plane-domain": "workspace:*"
+  }
+}

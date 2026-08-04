@@ -168,6 +168,42 @@
       "status": "active"
     },
     {
+      "id": "control-plane-domain",
+      "owner": "control-plane",
+      "layer": "domain",
+      "roots": ["packages/control-plane-domain"],
+      "publicRoots": ["packages/control-plane-domain/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
+      "id": "control-plane-application",
+      "owner": "control-plane",
+      "layer": "application",
+      "roots": ["packages/control-plane-application"],
+      "publicRoots": ["packages/control-plane-application/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
+      "id": "control-plane-adapters",
+      "owner": "control-plane",
+      "layer": "adapter",
+      "roots": ["packages/control-plane-adapters"],
+      "publicRoots": ["packages/control-plane-adapters/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
+      "id": "api-app",
+      "owner": "control-plane",
+      "layer": "composition",
+      "roots": ["apps/api"],
+      "publicRoots": ["apps/api/src/index.ts"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
       "id": "web-preview",
       "owner": "web-platform",
       "layer": "adapter",
