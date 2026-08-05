@@ -10,6 +10,11 @@ import {
   StatusSignal,
   SystemStateLedger,
 } from '@liiiraa/design-system';
+import type {
+  AccountProjectionJson,
+  DeviceBindingProjectionJson,
+  SubscriptionProjectionJson,
+} from '@liiiraa/contracts-ts';
 import { useState, type ReactNode } from 'react';
 
 import {
@@ -159,6 +164,84 @@ export const AccountSurface = ({
     </main>
   );
 };
+
+export type AccountAuthorityObservation =
+  'online' | 'offline' | 'stale' | 'pending' | 'conflict' | 'revoked';
+
+export interface AccountAuthoritySummaryProps {
+  readonly account?: AccountProjectionJson;
+  readonly activeDevice?: DeviceBindingProjectionJson | null;
+  readonly locale: ShellLocale;
+  readonly state: AccountAuthorityObservation;
+  readonly subscription?: SubscriptionProjectionJson;
+}
+
+const authorityStateCopy = (locale: ShellLocale, state: AccountAuthorityObservation): string => {
+  const labels: Readonly<
+    Record<AccountAuthorityObservation, Readonly<{ en: string; 'pt-BR': string }>>
+  > = {
+    online: { en: 'Online', 'pt-BR': 'Online' },
+    offline: { en: 'Offline', 'pt-BR': 'Offline' },
+    stale: { en: 'Stale', 'pt-BR': 'Desatualizada' },
+    pending: { en: 'Pending confirmation', 'pt-BR': 'Aguardando confirmação' },
+    conflict: { en: 'Version conflict', 'pt-BR': 'Conflito de versão' },
+    revoked: { en: 'Session revoked', 'pt-BR': 'Sessão revogada' },
+  };
+  return labels[state][locale];
+};
+
+export const AccountAuthoritySummary = ({
+  account,
+  activeDevice,
+  locale,
+  state,
+  subscription,
+}: AccountAuthoritySummaryProps) => (
+  <section
+    aria-label={locale === 'pt-BR' ? 'Status da autoridade da conta' : 'Account authority status'}
+    data-account-authority-state={state}
+    data-lb-region
+  >
+    <StatusSignal
+      detail={authorityStateCopy(locale, state)}
+      locale={locale}
+      state={
+        state === 'revoked'
+          ? 'expired-entitlement'
+          : state === 'stale' || state === 'conflict'
+            ? 'stale-evidence'
+            : state === 'online'
+              ? 'success'
+              : 'unavailable'
+      }
+    />
+    {account ? (
+      <dl>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Identidade' : 'Identity'}</dt>
+          <dd>{account.displayName}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'E-mail da conta' : 'Account email'}</dt>
+          <dd>{account.emailRedacted}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Plano' : 'Plan'}</dt>
+          <dd>{subscription?.plan === 'premium' ? 'Premium' : 'Free'}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Dispositivo ativo' : 'Active device'}</dt>
+          <dd>{activeDevice?.deviceLabel ?? (locale === 'pt-BR' ? 'Nenhum' : 'None')}</dd>
+        </div>
+      </dl>
+    ) : null}
+    <p>
+      {locale === 'pt-BR'
+        ? 'Histórico técnico, diagnósticos não compartilhados e restauração permanecem somente neste PC.'
+        : 'Technical history, unshared diagnostics, and restoration remain only on this PC.'}
+    </p>
+  </section>
+);
 
 const ENTITLEMENT_COPY: Readonly<
   Record<EntitlementState, Readonly<{ en: string; 'pt-BR': string }>>

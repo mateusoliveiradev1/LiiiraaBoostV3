@@ -99,8 +99,9 @@ const installNativeAccountAuthority = async (
         configurable: false,
         value: Object.freeze({
           invoke: async (command: string, args?: Record<string, unknown>) => {
+            await Promise.resolve();
             if (command !== 'sync_account') throw new Error('unexpected native command');
-            const request = args?.['request'] as
+            const request = args?.request as
               | {
                   mutation?: { draft?: { displayName?: string; locale?: string } };
                   trigger?: string;
@@ -167,9 +168,9 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] renders generated native 
     .poll(() =>
       page.evaluate(() =>
         (
-          Reflect.get(globalThis, '__LIIIRAA_ACCOUNT_AUTHORITY_CALLS__') as Array<{
+          Reflect.get(globalThis, '__LIIIRAA_ACCOUNT_AUTHORITY_CALLS__') as {
             request?: { trigger?: string };
-          }>
+          }[]
         ).map((call) => call.request?.trigger),
       ),
     )

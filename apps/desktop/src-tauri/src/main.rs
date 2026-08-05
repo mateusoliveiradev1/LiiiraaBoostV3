@@ -1,6 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[allow(dead_code)]
+mod account_sync;
+#[allow(dead_code)]
 mod credential_store;
 #[allow(dead_code)]
 mod device_identity;
@@ -16,6 +18,8 @@ mod tray;
 mod window;
 
 use std::sync::Mutex;
+
+use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
 
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
@@ -457,6 +461,17 @@ fn get_shell_bootstrap() -> Result<Vec<HostToRendererShellEvent>, ShellDispatchE
     .collect()
 }
 
+#[tauri::command]
+fn sync_account(
+    state: State<'_, Mutex<AccountSyncState>>,
+    request: AccountSyncRequest,
+) -> AccountSyncResponse {
+    match state.lock() {
+        Ok(mut state) => account_sync::sync_account_from_native(&mut state, request),
+        Err(_) => account_sync::unavailable_account_response(),
+    }
+}
+
 fn run() -> Result<(), String> {
     let configured_adapter = std::env::var(ADAPTER_ENVIRONMENT_VARIABLE).ok();
     ShellContract::authorize_startup(build_profile(), configured_adapter.as_deref())
@@ -468,6 +483,7 @@ fn run() -> Result<(), String> {
             TrayLifecycle::with_locale(system_shell_locale()),
         ))
         .manage(Mutex::new(NotificationBridge::default()))
+        .manage(Mutex::new(AccountSyncState::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, arguments, _cwd| {
                 let _ = focus_main_window(app);
@@ -539,7 +555,8 @@ fn run() -> Result<(), String> {
         })
         .invoke_handler(tauri::generate_handler![
             dispatch_shell_command,
-            get_shell_bootstrap
+            get_shell_bootstrap,
+            sync_account
         ])
         .on_window_event(|window, event| {
             if window.label() != "main" {

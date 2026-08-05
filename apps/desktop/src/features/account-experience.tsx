@@ -1,6 +1,11 @@
 import { LbButton, LbSwitch, LbTextField, ProductIcon, RouteHeader } from '@liiiraa/design-system';
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
-import type { ShellLocale } from '@liiiraa/feature-shell';
+import { AccountAuthoritySummary, type ShellLocale } from '@liiiraa/feature-shell';
+import {
+  createDesktopAccountAuthority,
+  type DesktopAccountAuthority,
+  type DesktopAccountAuthoritySnapshot,
+} from '../account-authority.js';
 import {
   ACCOUNT_PROFILE_UPDATED_EVENT,
   DEFAULT_ACCOUNT_PROFILE,
@@ -1710,14 +1715,216 @@ const SecurityView = ({ locale }: Pick<AccountExperienceProps, 'locale'>) => {
   );
 };
 
+const LocalSafetyCapabilities = ({ locale }: { readonly locale: ShellLocale }) => (
+  <section
+    aria-label={
+      locale === 'pt-BR' ? 'Capacidades locais de segurança' : 'Local safety capabilities'
+    }
+    data-local-only="true"
+  >
+    <h2>
+      {copy(locale, {
+        en: 'Local safety remains available',
+        'pt-BR': 'A segurança local continua disponível',
+      })}
+    </h2>
+    <ul>
+      <li>{copy(locale, { en: 'Warnings', 'pt-BR': 'Alertas' })}</li>
+      <li>{copy(locale, { en: 'History', 'pt-BR': 'Histórico' })}</li>
+      <li>{copy(locale, { en: 'Diagnostics', 'pt-BR': 'Diagnósticos' })}</li>
+      <li>{copy(locale, { en: 'Restoration', 'pt-BR': 'Restauração' })}</li>
+    </ul>
+  </section>
+);
+
+const AuthoritativeProfile = ({
+  authority,
+  locale,
+  snapshot,
+}: {
+  readonly authority: DesktopAccountAuthority;
+  readonly locale: ShellLocale;
+  readonly snapshot: DesktopAccountAuthoritySnapshot;
+}) => {
+  const remoteName = snapshot.projection?.account.displayName ?? '';
+  const [editing, setEditing] = useState(false);
+  const [displayName, setDisplayName] = useState(remoteName);
+
+  useEffect(() => {
+    if (!editing && remoteName !== '') setDisplayName(remoteName);
+  }, [editing, remoteName]);
+
+  return (
+    <section
+      aria-label={copy(locale, { en: 'Authoritative profile', 'pt-BR': 'Perfil autoritativo' })}
+    >
+      {snapshot.state === 'conflict' && snapshot.projection && snapshot.localDraft ? (
+        <aside
+          aria-label={copy(locale, {
+            en: 'Account version conflict',
+            'pt-BR': 'Conflito de versão da conta',
+          })}
+          role="alert"
+        >
+          <strong>
+            {copy(locale, {
+              en: 'Review before resubmitting',
+              'pt-BR': 'Revise antes de reenviar',
+            })}
+          </strong>
+          <p>{`${copy(locale, { en: 'Remote', 'pt-BR': 'Remoto' })}: ${snapshot.projection.account.displayName}`}</p>
+          <p>{`${copy(locale, { en: 'Local draft', 'pt-BR': 'Rascunho local' })}: ${snapshot.localDraft.displayName}`}</p>
+        </aside>
+      ) : null}
+      {editing ? (
+        <div>
+          <LbTextField
+            label={copy(locale, { en: 'Display name', 'pt-BR': 'Nome de exibição' })}
+            maxLength={40}
+            onChange={setDisplayName}
+            value={displayName}
+          />
+          <LbButton
+            isDisabled={displayName.trim().length < 2 || snapshot.state === 'pending'}
+            isLoading={snapshot.state === 'pending'}
+            loadingLabel={copy(locale, {
+              en: 'Awaiting authority',
+              'pt-BR': 'Aguardando autoridade',
+            })}
+            onPress={() => {
+              void authority.updateProfile({ displayName, locale });
+            }}
+            variant="primary"
+          >
+            {copy(locale, { en: 'Save changes', 'pt-BR': 'Salvar alterações' })}
+          </LbButton>
+        </div>
+      ) : (
+        <LbButton
+          isDisabled={snapshot.projection === undefined}
+          onPress={() => {
+            setEditing(true);
+          }}
+          variant="secondary"
+        >
+          {copy(locale, { en: 'Edit profile', 'pt-BR': 'Editar perfil' })}
+        </LbButton>
+      )}
+    </section>
+  );
+};
+
+const AuthoritativeAccountContent = ({
+  authority,
+  locale,
+  snapshot,
+  view,
+}: {
+  readonly authority: DesktopAccountAuthority;
+  readonly locale: ShellLocale;
+  readonly snapshot: DesktopAccountAuthoritySnapshot;
+  readonly view: Exclude<AccountExperienceView, 'login'>;
+}) => (
+  <div data-account-runtime="production">
+    <AccountAuthoritySummary
+      locale={locale}
+      state={snapshot.state}
+      {...(snapshot.projection === undefined
+        ? {}
+        : {
+            account: snapshot.projection.account,
+            activeDevice: snapshot.projection.activeDevice,
+            subscription: snapshot.projection.subscription,
+          })}
+    />
+    {view === 'overview' ? (
+      <AuthoritativeProfile authority={authority} locale={locale} snapshot={snapshot} />
+    ) : null}
+    {view === 'subscription' ? (
+      <section
+        aria-label={copy(locale, {
+          en: 'Subscription authority',
+          'pt-BR': 'Autoridade da assinatura',
+        })}
+      >
+        <h2>{snapshot.projection?.subscription.plan === 'premium' ? 'Premium' : 'Free'}</h2>
+        <LbButton
+          isDisabled={snapshot.state !== 'online'}
+          onPress={() => undefined}
+          variant="primary"
+        >
+          {copy(locale, { en: 'Start new Premium work', 'pt-BR': 'Iniciar novo trabalho Premium' })}
+        </LbButton>
+      </section>
+    ) : null}
+    {view === 'device' && snapshot.projection?.activeDevice ? (
+      <section
+        aria-label={copy(locale, {
+          en: 'Active device authority',
+          'pt-BR': 'Autoridade do dispositivo ativo',
+        })}
+      >
+        <h2>{snapshot.projection.activeDevice.deviceLabel}</h2>
+        <p>{snapshot.projection.activeDevice.state}</p>
+      </section>
+    ) : null}
+    {view === 'security' ? (
+      <section
+        aria-label={copy(locale, { en: 'Security authority', 'pt-BR': 'Autoridade de segurança' })}
+      >
+        <h2>
+          {copy(locale, {
+            en: 'Verified security methods',
+            'pt-BR': 'Métodos de segurança verificados',
+          })}
+        </h2>
+        <ul>
+          {snapshot.projection?.securityMethods.map((method) => (
+            <li key={method.methodId}>{`${method.factor}: active`}</li>
+          ))}
+        </ul>
+      </section>
+    ) : null}
+    {snapshot.state === 'revoked' ? <LocalSafetyCapabilities locale={locale} /> : null}
+  </div>
+);
+
 export const AccountExperience = ({
   locale,
   navigate,
   scenarioId,
   view,
 }: AccountExperienceProps): ReactNode => {
+  const [authority] = useState(() => createDesktopAccountAuthority());
+  const [authoritySnapshot, setAuthoritySnapshot] = useState<
+    DesktopAccountAuthoritySnapshot | undefined
+  >(() => authority?.snapshot());
+
+  useEffect(() => {
+    if (authority === undefined) return undefined;
+    const unsubscribe = authority.subscribe(setAuthoritySnapshot);
+    authority.start();
+    return () => {
+      unsubscribe();
+      authority.dispose();
+    };
+  }, [authority]);
+
   if (view === 'login') {
     return <LoginSurface locale={locale} navigate={navigate} />;
+  }
+
+  if (authority !== undefined && authoritySnapshot !== undefined) {
+    return (
+      <AccountShell locale={locale} navigate={navigate} view={view}>
+        <AuthoritativeAccountContent
+          authority={authority}
+          locale={locale}
+          snapshot={authoritySnapshot}
+          view={view}
+        />
+      </AccountShell>
+    );
   }
 
   return (
