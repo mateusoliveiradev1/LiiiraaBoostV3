@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { buildApp, REQUIRED_API_MODULES, type ApiModuleRegistrar } from '../app.js';
 import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.js';
-import { issueInvitation, redeemInvitation } from './invitations.js';
+import {
+  issueInvitation,
+  redeemInvitation,
+  type StagingInvitation,
+} from './invitations.js';
 import { seedSyntheticStaging } from './seed.js';
 
 const baseEnvironment = (): ApiEnvironmentInput => ({
@@ -39,7 +43,7 @@ describe('staging environment admission', () => {
   });
 
   it.each([
-    ['missing origin', { ACCOUNT_STAGING_ORIGIN: undefined }],
+    ['missing origin', { ACCOUNT_STAGING_ORIGIN: '' }],
     ['wildcard origin', { PUBLIC_STAGING_ORIGIN: '*' }],
     [
       'production database',
@@ -57,7 +61,7 @@ describe('staging environment admission', () => {
     ['Stable channel', { STAGING_CHANNEL: 'stable' }],
     ['Beta channel', { STAGING_CHANNEL: 'beta' }],
   ])('rejects %s before app composition', (_caseName, override) => {
-    expect(() => admitApiEnvironment({ ...baseEnvironment(), ...override })).toThrowError(
+    expect(() => admitApiEnvironment({ ...baseEnvironment(), ...override })).toThrow(
       /STAGING_ENVIRONMENT_REJECTED/u,
     );
   });
@@ -86,7 +90,7 @@ describe('synthetic seed and invitation admission', () => {
   });
 
   it('redeems one unexpired invitation once into one isolated identity and dataset', () => {
-    const invitations = new Map();
+    const invitations = new Map<string, StagingInvitation>();
     const invitation = issueInvitation(invitations, {
       code: 'invite-tester-0001',
       email: 'invited-tester@example.test',
@@ -113,7 +117,7 @@ describe('synthetic seed and invitation admission', () => {
   });
 
   it('rejects expired invitations without creating authority', () => {
-    const invitations = new Map();
+    const invitations = new Map<string, StagingInvitation>();
     issueInvitation(invitations, {
       code: 'invite-expired-0001',
       email: 'expired-tester@example.test',
@@ -164,7 +168,7 @@ describe('Fastify staging composition', () => {
       register: () => Promise.resolve(),
     }));
 
-    await expect(buildApp({ environment: baseEnvironment(), modules })).rejects.toThrowError(
+    await expect(buildApp({ environment: baseEnvironment(), modules })).rejects.toThrow(
       /API_MODULE_COMPOSITION_REJECTED/u,
     );
   });
