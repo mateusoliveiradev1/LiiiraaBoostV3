@@ -1,0 +1,203 @@
+import { describe, expect, it } from 'vitest';
+
+import type { ProtectedDeviceEvidence } from './device-evidence.js';
+
+const OWNER = '04-14-01';
+const NOW = '2030-02-01T12:00:00.000Z';
+const ELIGIBLE_AT = '2030-03-03T12:00:00.000Z';
+
+const evidence = (platformByte = 'a'): ProtectedDeviceEvidence => ({
+  deviceClass: 'physical',
+  keyVersion: 1,
+  components: [
+    { componentClass: 'platform-trust', protectedDigest: platformByte.repeat(64) },
+    { componentClass: 'cpu', protectedDigest: 'b'.repeat(64) },
+    { componentClass: 'storage-controller', protectedDigest: 'c'.repeat(64) },
+    { componentClass: 'gpu', protectedDigest: 'd'.repeat(64) },
+    { componentClass: 'memory-topology', protectedDigest: 'e'.repeat(64) },
+  ],
+});
+
+type DecisionModule = Readonly<{
+  decideDeviceBinding?: (state: unknown, command: unknown) => unknown;
+}>;
+
+const loadDecision = async (): Promise<DecisionModule> =>
+  import('./device-binding.js').catch((): DecisionModule => ({}));
+
+const requireDecision = async () => {
+  const module = await loadDecision();
+  if (typeof module.decideDeviceBinding !== 'function') {
+    throw new Error(`EXPECTED_RED[${OWNER}]: device binding decision is not implemented`);
+  }
+  return module.decideDeviceBinding;
+};
+
+describe('D-23 through D-28 device binding decisions', () => {
+  it('requires active Premium and both first-bind confirmations', async () => {
+    const decide = await requireDecision();
+    const unbound = { accountId: 'account-player', version: 0n, premiumActive: true };
+    const command = {
+      kind: 'bind',
+      bindingId: 'binding-new',
+      deviceDigest: '1'.repeat(64),
+      deviceLabel: 'Liiiraa Rig',
+      evidence: evidence(),
+      confirmedFriendlyIdentity: true,
+      confirmedOnePcConsequences: true,
+      now: NOW,
+    };
+
+    expect(decide({ ...unbound, premiumActive: false }, command)).toMatchObject({
+      outcome: 'denied',
+      reason: 'premium-not-active',
+    });
+    expect(decide(unbound, { ...command, confirmedFriendlyIdentity: false })).toMatchObject({
+      outcome: 'denied',
+      reason: 'friendly-identity-not-confirmed',
+    });
+    expect(decide(unbound, { ...command, confirmedOnePcConsequences: false })).toMatchObject({
+      outcome: 'denied',
+      reason: 'one-pc-consequences-not-confirmed',
+    });
+    expect(decide(unbound, command)).toMatchObject({
+      outcome: 'bind',
+      replacementEligibleAt: ELIGIBLE_AT,
+    });
+  });
+
+  it('keeps the active PC during an ordinary pre-cooldown transfer', async () => {
+    const decide = await requireDecision();
+    const current = {
+      accountId: 'account-player',
+      version: 7n,
+      premiumActive: true,
+      activeBinding: {
+        bindingId: 'binding-current',
+        deviceDigest: '1'.repeat(64),
+        deviceLabel: 'Current PC',
+        evidence: evidence(),
+        boundAt: NOW,
+        replacementEligibleAt: ELIGIBLE_AT,
+      },
+    };
+
+    expect(
+      decide(current, {
+        kind: 'transfer',
+        reason: 'ordinary',
+        bindingId: 'binding-replacement',
+        deviceDigest: '2'.repeat(64),
+        deviceLabel: 'Replacement PC',
+        evidence: evidence('f'),
+        confirmedByCustomer: true,
+        now: '2030-02-15T12:00:00.000Z',
+      }),
+    ).toMatchObject({
+      outcome: 'cooldown',
+      activeBindingId: 'binding-current',
+      replacementEligibleAt: ELIGIBLE_AT,
+      reason: 'replacement-cooldown-active',
+    });
+  });
+
+  it('revokes theft immediately and permits replacement only with a valid customer-redeemed exception', async () => {
+    const decide = await requireDecision();
+    const state = {
+      accountId: 'account-player',
+      version: 3n,
+      premiumActive: true,
+      activeBinding: {
+        bindingId: 'binding-stolen',
+        deviceDigest: '1'.repeat(64),
+        deviceLabel: 'Stolen PC',
+        evidence: evidence(),
+        boundAt: NOW,
+        replacementEligibleAt: ELIGIBLE_AT,
+      },
+    };
+    const theft = decide(state, { kind: 'revoke', reason: 'theft', now: NOW });
+    expect(theft).toMatchObject({
+      outcome: 'revoke',
+      bindingId: 'binding-stolen',
+      replacementEligibleAt: ELIGIBLE_AT,
+      reason: 'theft-revoked-replacement-waits',
+    });
+
+    const replacement = {
+      kind: 'transfer',
+      reason: 'theft',
+      bindingId: 'binding-replacement',
+      deviceDigest: '2'.repeat(64),
+      deviceLabel: 'Replacement PC',
+      evidence: evidence('f'),
+      confirmedByCustomer: true,
+      now: '2030-02-02T11:00:00.000Z',
+      exception: {
+        exceptionId: 'exception-one',
+        accountId: 'account-player',
+        reviewed: true,
+        issuedAt: NOW,
+        expiresAt: '2030-02-02T12:00:00.000Z',
+        consumedAt: null,
+        strongAuthVerifiedAt: '2030-02-02T10:55:00.000Z',
+      },
+    };
+    expect(decide(state, replacement)).toMatchObject({
+      outcome: 'replace',
+      revokeBindingId: 'binding-stolen',
+      consumeExceptionId: 'exception-one',
+    });
+    expect(
+      decide(state, {
+        ...replacement,
+        exception: { ...replacement.exception, consumedAt: NOW },
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'exception-already-consumed' });
+    expect(
+      decide(state, {
+        ...replacement,
+        now: '2030-02-02T12:00:00.001Z',
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'exception-expired' });
+    expect(decide(state, { ...replacement, confirmedByCustomer: false })).toMatchObject({
+      outcome: 'denied',
+      reason: 'customer-confirmation-required',
+    });
+  });
+
+  it('retains minor evidence changes and opens explainable revalidation for substantial change', async () => {
+    const decide = await requireDecision();
+    const state = {
+      accountId: 'account-player',
+      version: 1n,
+      premiumActive: true,
+      activeBinding: {
+        bindingId: 'binding-current',
+        deviceDigest: '1'.repeat(64),
+        deviceLabel: 'Current PC',
+        evidence: evidence(),
+        boundAt: NOW,
+        replacementEligibleAt: ELIGIBLE_AT,
+      },
+    };
+    const minorEvidence = {
+      ...evidence(),
+      components: evidence().components.map((component) =>
+        component.componentClass === 'gpu'
+          ? { ...component, protectedDigest: '9'.repeat(64) }
+          : component,
+      ),
+    };
+
+    expect(
+      decide(state, { kind: 'revalidate', observedEvidence: minorEvidence, now: NOW }),
+    ).toMatchObject({ outcome: 'retain', score: 90 });
+    expect(
+      decide(state, { kind: 'revalidate', observedEvidence: evidence('f'), now: NOW }),
+    ).toMatchObject({
+      outcome: 'revalidation-required',
+      reasons: expect.arrayContaining(['component-changed:platform-trust']),
+    });
+  });
+});
