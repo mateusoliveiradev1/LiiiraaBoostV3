@@ -1,3 +1,5 @@
+import type { AdminRoleJson } from '@liiiraa/contracts-ts';
+
 export const ADMIN_LOCAL_ORIGIN = 'http://admin.localhost:3002';
 export const ADMIN_TEST_ORIGIN = ADMIN_LOCAL_ORIGIN;
 
@@ -7,6 +9,30 @@ export const ADMIN_CANONICAL_ENTRY = Object.freeze({
 } as const);
 
 export type AdminLocale = keyof typeof ADMIN_CANONICAL_ENTRY;
+
+export const ADMIN_AUTHORITY_ROUTE_IDS = Object.freeze([
+  'admin-role',
+  'admin-support',
+  'admin-operations',
+  'admin-security',
+  'admin-diagnostics',
+  'admin-audit',
+  'admin-audit-event',
+] as const);
+
+export type AdminAuthorityRoute = (typeof ADMIN_AUTHORITY_ROUTE_IDS)[number];
+
+export const ADMIN_ROLE_ROUTE_ACCESS = Object.freeze({
+  support: ['admin-role', 'admin-support'],
+  operations: ['admin-role', 'admin-operations', 'admin-audit'],
+  security: ['admin-role', 'admin-security', 'admin-diagnostics', 'admin-audit'],
+  audit: ['admin-role', 'admin-audit', 'admin-audit-event'],
+} as const satisfies Readonly<Record<AdminRoleJson, readonly AdminAuthorityRoute[]>>);
+
+export const adminRoleCanAccessRoute = (
+  role: AdminRoleJson,
+  routeId: AdminAuthorityRoute,
+): boolean => ADMIN_ROLE_ROUTE_ACCESS[role].includes(routeId as never);
 
 export type AdminRuntimeConfig =
   | Readonly<{ kind: 'preview' }>

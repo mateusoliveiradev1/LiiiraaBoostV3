@@ -14,6 +14,7 @@ import {
   type AdminStepUp,
 } from '../admin-authority';
 import type { AdminPreviewRoute } from '../admin-preview-model';
+import { adminRoleCanAccessRoute } from '../admin-runtime';
 
 type AdminAuthorityPageProps = Readonly<{
   authorityBaseUrl: string;
@@ -384,6 +385,14 @@ export const AdminAuthorityPage = ({
     );
   }
   if (session === null) {
+    return (
+      <article data-admin-runtime="production">
+        <h1>{copy[locale].denied}</h1>
+        <p role="alert">{copy[locale].denied}</p>
+      </article>
+    );
+  }
+  if (!adminRoleCanAccessRoute(session.role, routeId)) {
     return (
       <article data-admin-runtime="production">
         <h1>{copy[locale].denied}</h1>

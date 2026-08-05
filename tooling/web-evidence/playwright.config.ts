@@ -151,6 +151,7 @@ export const selectWebTestSurfaces = (
     .join(' ');
   const hasExplicitProject = selector.includes('--project=');
   const isCrossSurfaceSecurityRun = selector.includes('security-artifacts.spec.ts');
+  const isCrossSurfaceConsentRun = selector.includes('admin-consent-revocation.spec.ts');
   const startsEverySurface =
     selector.length === 0 ||
     isCrossSurfaceSecurityRun ||
@@ -159,7 +160,9 @@ export const selectWebTestSurfaces = (
         selector,
       ));
   return surfaces.filter(({ surface }) =>
-    startsEverySurface
+    isCrossSurfaceConsentRun
+      ? surface === 'account' || surface === 'admin'
+      : startsEverySurface
       ? true
       : surface === 'public'
         ? /public|documentation|releases/u.test(selector)
@@ -170,6 +173,11 @@ export const selectWebTestSurfaces = (
 const selectedSurfaces = selectWebTestSurfaces(process.argv.slice(2));
 const accountAuthorityRun = process.argv.some((argument) =>
   argument.includes('account-authority.spec.ts'),
+);
+const adminAuthorityRun = process.argv.some(
+  (argument) =>
+    argument.includes('admin-authority.spec.ts') ||
+    argument.includes('admin-consent-revocation.spec.ts'),
 );
 
 const quickProjects: Project[] = surfaces.map(({ baseURL, surface }) => ({
@@ -251,7 +259,10 @@ export default defineConfig({
     cwd: '../..',
     env:
       app === '@liiiraa/admin'
-        ? { LIIIRAA_ADMIN_ORIGIN: baseURL }
+        ? {
+            LIIIRAA_ADMIN_ORIGIN: baseURL,
+            LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
+          }
         : app === '@liiiraa/account'
           ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
           : {},

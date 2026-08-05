@@ -1,6 +1,10 @@
 import type { WebLocale, WebRouteId } from '@liiiraa/web-core';
 
 import type { AdminPreviewRole } from '../proxy';
+import {
+  ADMIN_ROLE_ROUTE_ACCESS as ADMIN_RUNTIME_ROLE_ROUTE_ACCESS,
+  adminRoleCanAccessRoute,
+} from './admin-runtime';
 import type { AdminFailureKind } from './admin-errors';
 import adminEn from './content/admin.en.json';
 import adminPtBr from './content/admin.pt-BR.json';
@@ -42,15 +46,10 @@ export const isAdminErrorRoute = (routeId: WebRouteId): routeId is AdminErrorRou
 export const adminFailureKindForRoute = (routeId: WebRouteId): AdminFailureKind | undefined =>
   isAdminErrorRoute(routeId) ? ADMIN_FAILURE_KIND_BY_ROUTE[routeId] : undefined;
 
-export const ADMIN_ROLE_ROUTE_ACCESS = Object.freeze({
-  support: ['admin-role', 'admin-support'],
-  operations: ['admin-role', 'admin-operations', 'admin-audit'],
-  security: ['admin-role', 'admin-security', 'admin-diagnostics', 'admin-audit'],
-  audit: ['admin-role', 'admin-audit', 'admin-audit-event'],
-} as const satisfies Readonly<Record<AdminPreviewRole, readonly AdminPreviewRoute[]>>);
+export const ADMIN_ROLE_ROUTE_ACCESS = ADMIN_RUNTIME_ROLE_ROUTE_ACCESS;
 
 export const adminRoleCanAccess = (role: AdminPreviewRole, routeId: AdminPreviewRoute): boolean =>
-  ADMIN_ROLE_ROUTE_ACCESS[role].includes(routeId as never);
+  adminRoleCanAccessRoute(role, routeId);
 
 export const ADMIN_QUEUE_SAVED_VIEWS = Object.freeze([
   'assigned',
