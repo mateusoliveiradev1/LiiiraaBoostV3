@@ -2,6 +2,7 @@ export type * from './ports/commerce.js';
 export type * from './ports/audit.js';
 export type * from './ports/diagnostics.js';
 export type * from './ports/identity.js';
+export type * from './ports/entitlement-signing.js';
 export {
   ADMIN_ROLES,
   authorizeAdminProjection,
@@ -24,3 +25,4 @@ export * from './use-cases/assume-admin-role.js';
 export * from './use-cases/execute-admin-command.js';
 export * from './use-cases/project-account.js';
 export * from './use-cases/update-account.js';
+export * from './use-cases/issue-offline-entitlement.js';

@@ -283,9 +283,15 @@ describe('entitlement-issuance exact-byte authority', () => {
     ['revalidating device', { device: { state: 'revalidating' } }],
   ] as const)('returns no authority for %s', async (_label, mutation) => {
     const repository = new MemoryEntitlementRepository();
-    if (mutation.subscription) repository.subscription = { ...repository.subscription, ...mutation.subscription };
-    if (mutation.entitlement) repository.entitlement = { ...repository.entitlement, ...mutation.entitlement };
-    if (mutation.device) repository.device = { ...repository.device, ...mutation.device };
+    if ('subscription' in mutation) {
+      repository.subscription = { ...repository.subscription, ...mutation.subscription };
+    }
+    if ('entitlement' in mutation) {
+      repository.entitlement = { ...repository.entitlement, ...mutation.entitlement };
+    }
+    if ('device' in mutation) {
+      repository.device = { ...repository.device, ...mutation.device };
+    }
 
     const result = await issueOfflineEntitlement(dependencies(repository), issueInput());
 
@@ -396,7 +402,10 @@ describe('entitlement-issuance exact-byte authority', () => {
     const signer = signingKey();
     const result = await issueOfflineEntitlement(dependencies(repository, ISSUED_AT, signer), issueInput());
     const publicData = await signer.publicVerificationData();
-    const serialized = JSON.stringify({ result, publicData, repository });
+    const serialized = JSON.stringify(
+      { result, publicData, repository },
+      (_key, value: unknown) => (typeof value === 'bigint' ? value.toString() : value),
+    );
 
     expect(publicData).toEqual([manifest.keyRing[0]]);
     expect(serialized).not.toContain(CURRENT_KEY_SEED);
