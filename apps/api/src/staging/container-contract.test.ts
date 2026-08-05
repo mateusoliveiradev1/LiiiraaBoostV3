@@ -59,6 +59,9 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('environment: staging-api');
     expect(workflow).toContain('autoDeploy: false');
     expect(workflow).toContain('run: pnpm --filter @liiiraa/api db:migrate');
+    expect(workflow).toContain('RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}');
+    expect(workflow).toContain('services/$RENDER_SERVICE_ID/deploys');
+    expect(workflow).toContain('for attempt in $(seq 1 30)');
     expect(workflow).toContain('POSTGRES_TEST_STRATEGY: unit');
     expect(workflow).toContain("hashFiles('trivy-results.sarif') != ''");
     expect(workflow).toContain('docker logout ghcr.io');
