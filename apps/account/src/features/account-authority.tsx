@@ -42,6 +42,9 @@ const copy = Object.freeze({
     save: 'Save changes',
     saved: 'Saved',
     security: 'Security authority',
+    consent: 'Consent authority',
+    cancellation: 'Cancellation scheduled',
+    recovery: 'Recovery methods',
     stale: 'Stale — refresh before relying on this account state',
     support: 'Support authority',
   }),
@@ -62,6 +65,9 @@ const copy = Object.freeze({
     save: 'Salvar alterações',
     saved: 'Salvo',
     security: 'Autoridade de segurança',
+    consent: 'Autoridade de consentimento',
+    cancellation: 'Cancelamento agendado',
+    recovery: 'Métodos de recuperação',
     stale: 'Desatualizado — atualize antes de confiar neste estado da conta',
     support: 'Autoridade de suporte',
   }),
@@ -190,7 +196,12 @@ const ProfileAuthority = ({
         </p>
       ) : null}
       {phase === 'conflict' && draft !== null ? (
-        <div role="alert">
+        <div
+          aria-label={
+            locale === 'pt-BR' ? 'Conflito na atualização do perfil' : 'Profile update conflict'
+          }
+          role="alert"
+        >
           <strong>{labels.conflict}</strong>
           <p>{projection.account.displayName}</p>
           <p>{draft.displayName}</p>
@@ -267,6 +278,14 @@ const ProjectionResponsibility = ({
         <p>{view.security.passkey ? 'Passkey: active' : 'Passkey: unavailable'}</p>
         <p>{view.security.mfa ? 'MFA: active' : 'MFA: unavailable'}</p>
         <p>
+          {labels.recovery}:{' '}
+          {projection.securityMethods.some(({ factor }) => factor === 'recovery-code')
+            ? labels.active
+            : locale === 'pt-BR'
+              ? 'Indisponível'
+              : 'Unavailable'}
+        </p>
+        <p>
           {locale === 'pt-BR' ? 'Sessões ativas' : 'Active sessions'}: {view.security.sessionCount}
         </p>
       </section>
@@ -281,6 +300,7 @@ const ProjectionResponsibility = ({
         <p role="status">
           {view.billing.checkout === 'pending' ? labels.pending : labels.connected}
         </p>
+        {projection.subscription.cancelAtPeriodEnd ? <p>{labels.cancellation}</p> : null}
       </section>
     );
   }
@@ -302,6 +322,17 @@ const ProjectionResponsibility = ({
       <section aria-label={labels.support}>
         <p>
           {locale === 'pt-BR' ? 'Casos abertos' : 'Open cases'}: {view.support.openCount}
+        </p>
+      </section>
+    );
+  }
+  if (routeId === 'account-privacy') {
+    return (
+      <section aria-label={labels.consent}>
+        <p>
+          {locale === 'pt-BR'
+            ? 'Escolhas de diagnóstico usam autoridade separada, versionada e revogável.'
+            : 'Diagnostic choices use separate versioned, revocable authority.'}
         </p>
       </section>
     );
