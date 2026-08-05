@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run src/devices src/identity",
+    "test": "vitest run src/devices src/identity src/entitlements",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
