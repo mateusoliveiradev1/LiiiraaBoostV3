@@ -25,3 +25,11 @@ export {
   type AuditVerificationCode,
   type AuditVerificationResult,
 } from './audit/audit-chain.js';
+export {
+  AUTHENTICATION_METHODS,
+  decideAuthenticationAdmission,
+  type AuthenticationAdmissionInput,
+  type AuthenticationDecision,
+  type AuthenticationIdentityState,
+  type AuthenticationMethod,
+} from './identity/authentication.js';

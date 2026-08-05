@@ -24,12 +24,14 @@ type AuthenticationDomain = Readonly<{
 const implementation = domain as AuthenticationDomain;
 
 const decide = (overrides: Partial<AdmissionInput> = {}) => {
-  expect(
-    implementation.decideAuthenticationAdmission,
-    'EXPECTED_RED[04-11-01][domain-admission]: authentication admission is not implemented',
-  ).toBeTypeOf('function');
+  const decideAuthenticationAdmission = implementation.decideAuthenticationAdmission;
+  if (typeof decideAuthenticationAdmission !== 'function') {
+    throw new Error(
+      'EXPECTED_RED[04-11-01][domain-admission]: authentication admission is not implemented',
+    );
+  }
 
-  return implementation.decideAuthenticationAdmission!({
+  return decideAuthenticationAdmission({
     method: 'password',
     invitationAccepted: true,
     emailVerified: true,

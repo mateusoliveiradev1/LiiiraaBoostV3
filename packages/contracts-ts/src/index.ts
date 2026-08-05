@@ -1,4 +1,5 @@
 export type * from './generated/index.js';
+export { controlPlaneDocumentValidator } from './generated/index.js';
 export {
   DIAGNOSTIC_VALUE_SCHEMA_ID,
   HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID,

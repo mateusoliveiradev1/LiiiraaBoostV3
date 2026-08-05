@@ -49,6 +49,7 @@ export type IdentityProviderResult<T> =
 
 export interface IdentitySession {
   readonly id: string;
+  readonly accountId: string;
   readonly method: IdentitySignInMethod;
   readonly strength: AuthenticationStrengthJson;
   readonly state: SessionStateJson;

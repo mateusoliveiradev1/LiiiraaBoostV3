@@ -173,6 +173,7 @@ export const createBetterAuthSpikeAdapter = (
 
   const createSession = (method: IdentitySignInMethod, holdUntil?: string): IdentitySession => ({
     id: id('session'),
+    accountId: 'account_player',
     method,
     strength: methodStrength(method),
     state: 'active',

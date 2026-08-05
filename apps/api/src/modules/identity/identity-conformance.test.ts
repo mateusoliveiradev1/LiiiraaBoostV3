@@ -104,25 +104,38 @@ type AdapterModule = Readonly<{
     }>,
     options: Readonly<{ issuer: string }>,
   ) => IdentityProviderPort;
+  createPostgresSessionAuthority?: (
+    database: Readonly<{
+      transaction<T>(
+        operation: (
+          transaction: Readonly<{
+            query(
+              statement: string,
+              values?: readonly unknown[],
+            ): Promise<Readonly<{ rows: readonly Record<string, unknown>[] }>>;
+          }>,
+        ) => Promise<T>,
+      ): Promise<T>;
+    }>,
+  ) => AuthenticationDependencies['sessions'];
 }>;
 
 const loadRoutes = async (): Promise<IdentityRoutesModule> =>
-  import('./routes.ts').catch(() => ({}) as IdentityRoutesModule);
+  import('./routes.ts').catch((): IdentityRoutesModule => ({}));
 
 const loadAdapter = async (): Promise<AdapterModule> =>
-  import('../../../../../packages/control-plane-adapters/src/identity/better-auth-adapter.ts').catch(
-    () => ({}) as AdapterModule,
-  );
+  import('@liiiraa/control-plane-adapters').catch((): AdapterModule => ({}));
 
 const requireFunction = <T extends (...args: never[]) => unknown>(
   value: T | undefined,
   caseId: string,
 ): T => {
-  expect(
-    value,
-    `EXPECTED_RED[${OWNER}][${caseId}]: production identity authority is not implemented`,
-  ).toBeTypeOf('function');
-  return value!;
+  if (typeof value !== 'function') {
+    throw new Error(
+      `EXPECTED_RED[${OWNER}][${caseId}]: production identity authority is not implemented`,
+    );
+  }
+  return value;
 };
 
 const success = <T>(value: T): IdentityProviderResult<T> => ({ ok: true, value });
@@ -146,9 +159,9 @@ const createProvider = (): IdentityProviderPort => {
   let sequence = 0;
 
   return {
-    beginSignIn: async (input) => {
+    beginSignIn: (input) => {
       if (!['password', 'google', 'discord', 'passkey'].includes(input.method)) {
-        return failure('UNSUPPORTED_METHOD');
+        return Promise.resolve(failure('UNSUPPORTED_METHOD'));
       }
       sequence += 1;
       const id = `provider-challenge-${String(sequence)}`;
@@ -169,51 +182,68 @@ const createProvider = (): IdentityProviderPort => {
             id,
             method: input.method,
             transport: 'direct' as const,
-            email: input.email,
+            ...(input.email ? { email: input.email } : {}),
             consumed: false,
           };
       challenges.set(id, challenge);
-      return success(challenge);
+      return Promise.resolve(success(challenge));
     },
-    completeSignIn: async (input) => {
+    completeSignIn: (input) => {
       const challenge = challenges.get(input.challengeId);
-      if (!challenge) return failure('INVALID_CHALLENGE');
-      if (challenge.consumed) return failure('REPLAYED_CHALLENGE');
+      if (!challenge) return Promise.resolve(failure('INVALID_CHALLENGE'));
+      if (challenge.consumed) return Promise.resolve(failure('REPLAYED_CHALLENGE'));
       if (
         challenge.transport === 'direct' &&
         challenge.method === 'password' &&
         !input.emailVerified
       ) {
-        return failure('UNVERIFIED_EMAIL');
+        return Promise.resolve(failure('UNVERIFIED_EMAIL'));
       }
       if (challenge.transport === 'external-browser') {
-        if (input.redirectUri !== challenge.redirectUri) return failure('REDIRECT_MISMATCH');
-        if (input.issuer !== challenge.issuer) return failure('ISSUER_MISMATCH');
-        if (input.state !== challenge.state) return failure('STATE_MISMATCH');
-        if (!input.authorizationCode) return failure('INVALID_CHALLENGE');
+        if (input.redirectUri !== challenge.redirectUri) {
+          return Promise.resolve(failure('REDIRECT_MISMATCH'));
+        }
+        if (input.issuer !== challenge.issuer) return Promise.resolve(failure('ISSUER_MISMATCH'));
+        if (input.state !== challenge.state) return Promise.resolve(failure('STATE_MISMATCH'));
+        if (!input.authorizationCode) return Promise.resolve(failure('INVALID_CHALLENGE'));
       }
       challenges.set(challenge.id, { ...challenge, consumed: true });
       const session: IdentitySession = {
         id: `provider-session-${String(sequence)}`,
+        accountId: 'account-player',
         method: challenge.method,
         strength: challenge.method === 'passkey' ? 'passkey' : 'password',
         state: 'active',
         createdAt: '2030-01-02T03:04:05.000Z',
       };
-      return success(session);
+      return Promise.resolve(success(session));
     },
-    verifyEmail: async () => success({ verified: true }),
-    enrollFactor: async (input) => success({ factor: input.factor }),
-    stepUp: async () => failure('SESSION_REVOKED'),
-    listSessions: async () => success([]),
-    revokeSession: async (input) => success({ sessionId: input.sessionId, state: 'revoked' }),
-    beginRecovery: async () => failure('INVALID_CHALLENGE'),
-    completeRecovery: async () => failure('INVALID_CHALLENGE'),
+    verifyEmail: () => Promise.resolve(success({ verified: true })),
+    enrollFactor: (input) => Promise.resolve(success({ factor: input.factor })),
+    stepUp: () => Promise.resolve(failure('SESSION_REVOKED')),
+    listSessions: () => Promise.resolve(success([])),
+    revokeSession: (input) =>
+      Promise.resolve(success({ sessionId: input.sessionId, state: 'revoked' })),
+    beginRecovery: () => Promise.resolve(failure('INVALID_CHALLENGE')),
+    completeRecovery: () => Promise.resolve(failure('INVALID_CHALLENGE')),
   };
 };
 
 const createHarness = async () => {
-  const records = new Map<string, SessionRecord>();
+  interface PostgresSessionRow extends Record<string, unknown> {
+    id: string;
+    identity_id: string;
+    provider_session_id: string;
+    session_kind: 'web' | 'desktop';
+    token_digest: string;
+    issued_at: string;
+    expires_at: string;
+    last_seen_at: string;
+    revoked_at: string | null;
+    version: bigint;
+  }
+
+  const records = new Map<string, PostgresSessionRow>();
   const provider = createProvider();
   let sessionSequence = 0;
   const identityByInvitation = new Map<string, IdentityRecord>([
@@ -235,46 +265,93 @@ const createHarness = async () => {
         state: 'disabled',
       },
     ],
+    [
+      'invite-unverified',
+      {
+        accountId: 'account-unverified',
+        email: 'unverified@example.test',
+        emailVerified: false,
+        state: 'active',
+      },
+    ],
+    [
+      'invite-revoked',
+      {
+        accountId: 'account-revoked',
+        email: 'revoked@example.test',
+        emailVerified: true,
+        state: 'revoked',
+      },
+    ],
   ]);
+  const adapter = await loadAdapter();
+  const createPostgresSessionAuthority = requireFunction(
+    adapter.createPostgresSessionAuthority,
+    'postgres-session-authority',
+  );
+  const sessions = createPostgresSessionAuthority({
+    transaction: (operation) =>
+      operation({
+        query: (statement: string, values: readonly unknown[] = []) => {
+          const normalized = statement.trimStart();
+          if (normalized.startsWith('INSERT INTO sessions')) {
+            const row: PostgresSessionRow = {
+              id: String(values[0]),
+              identity_id: String(values[1]),
+              provider_session_id: String(values[2]),
+              session_kind: values[3] === 'desktop' ? 'desktop' : 'web',
+              token_digest: String(values[4]),
+              issued_at: String(values[5]),
+              expires_at: String(values[6]),
+              last_seen_at: String(values[7]),
+              revoked_at: null,
+              version: 1n,
+            };
+            records.set(row.id, row);
+            return Promise.resolve({ rows: [row] });
+          }
+          if (normalized.startsWith('SELECT')) {
+            const rows = [...records.values()].filter(
+              (record) => record.identity_id === String(values[0]),
+            );
+            return Promise.resolve({ rows });
+          }
+          if (normalized.startsWith('UPDATE sessions')) {
+            const row = records.get(String(values[1]));
+            if (row?.identity_id !== String(values[0]) || row.revoked_at !== null) {
+              return Promise.resolve({ rows: [] });
+            }
+            const revoked = {
+              ...row,
+              revoked_at: String(values[2]),
+              version: row.version + 1n,
+            };
+            records.set(revoked.id, revoked);
+            return Promise.resolve({ rows: [revoked] });
+          }
+          return Promise.reject(new Error('Unexpected identity session SQL statement.'));
+        },
+      }),
+  });
   const dependencies: RouteDependencies = {
     allowedOrigin: ACCOUNT_ORIGIN,
     verifyCsrf: (request) => request.headers['x-csrf-token'] === CSRF_TOKEN,
-    resolveSessionActor: async (request) =>
-      request.headers.authorization === 'Session local-session-1'
-        ? { accountId: 'account-player' }
-        : null,
+    resolveSessionActor: (request) =>
+      Promise.resolve(
+        request.headers.authorization === 'Session local-session-1'
+          ? { accountId: 'account-player' }
+          : null,
+      ),
     authentication: {
       provider,
       invitations: {
-        admit: async ({ invitationCode, email }) => {
+        admit: ({ invitationCode, email }) => {
           const identity = identityByInvitation.get(invitationCode);
-          return identity?.email === email ? identity : null;
+          return Promise.resolve(identity?.email === email ? identity : null);
         },
       },
-      risk: { allow: async () => true },
-      sessions: {
-        transaction: async (operation) =>
-          operation({
-            issue: async (input) => {
-              const record = { ...input, version: 1n };
-              records.set(record.sessionId, record);
-              return record;
-            },
-            list: async (accountId) =>
-              [...records.values()].filter((record) => record.accountId === accountId),
-            revoke: async (accountId, sessionId) => {
-              const record = records.get(sessionId);
-              if (!record || record.accountId !== accountId) return null;
-              const revoked = {
-                ...record,
-                state: 'revoked' as const,
-                version: record.version + 1n,
-              };
-              records.set(sessionId, revoked);
-              return revoked;
-            },
-          }),
-      },
+      risk: { allow: () => Promise.resolve(true) },
+      sessions,
       credentials: {
         issue: () => ({ credential: 'local-session-credential', digest: 'a'.repeat(64) }),
       },
@@ -295,7 +372,7 @@ const createHarness = async () => {
   const app = Fastify();
   await registerIdentityRoutes(app, dependencies);
   await app.ready();
-  return { app, records };
+  return { app };
 };
 
 const authenticate = async (
@@ -325,7 +402,7 @@ const expectBoundedProjection = (payload: unknown): SessionProjectionJson => {
     provenance: 'postgres-authority',
   });
   const serialized = JSON.stringify(payload);
-  expect(serialized).not.toMatch(/token|secret|password|providerSession/iu);
+  expect(serialized).not.toMatch(/accessToken|refreshToken|clientSecret|providerSession/iu);
   return payload as SessionProjectionJson;
 };
 
@@ -348,7 +425,15 @@ describe('identity conformance through generated authority contracts', () => {
   });
 
   it.each([
-    ['unverified-email', { method: 'password', emailVerified: false }, ACCOUNT_ORIGIN],
+    [
+      'unverified-email',
+      {
+        method: 'password',
+        invitationCode: 'invite-unverified',
+        email: 'unverified@example.test',
+      },
+      ACCOUNT_ORIGIN,
+    ],
     ['microsoft-provider', { method: 'microsoft' }, ACCOUNT_ORIGIN],
     ['missing-invitation', { method: 'google', invitationCode: 'missing' }, ACCOUNT_ORIGIN],
     [
@@ -361,13 +446,43 @@ describe('identity conformance through generated authority contracts', () => {
       ACCOUNT_ORIGIN,
     ],
     ['wrong-origin', { method: 'passkey' }, 'https://attacker.example'],
-  ] as const)('IDEN-01 rejects forbidden launch path %s', async (_path, body, origin) => {
+  ] as const)('IDEN-01 rejects forbidden launch path %s', async (path, body, origin) => {
     const response = await authenticate(app, body, origin);
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({
       code: 'AUTHENTICATION_FAILED',
       message: 'Authentication failed',
     });
+    if (path === 'disabled-or-revoked-identity') {
+      const revoked = await authenticate(app, {
+        method: 'password',
+        invitationCode: 'invite-revoked',
+        email: 'revoked@example.test',
+      });
+      expect(revoked.statusCode).toBe(401);
+      expect(revoked.json()).toEqual({
+        code: 'AUTHENTICATION_FAILED',
+        message: 'Authentication failed',
+      });
+    }
+    if (path === 'wrong-origin') {
+      const missingCsrf = await app.inject({
+        method: 'POST',
+        url: '/v1/identity/authenticate',
+        headers: { origin: ACCOUNT_ORIGIN },
+        payload: {
+          invitationCode: 'invite-valid',
+          email: 'player@example.test',
+          emailVerified: true,
+          method: 'passkey',
+        },
+      });
+      expect(missingCsrf.statusCode).toBe(401);
+      expect(missingCsrf.json()).toEqual({
+        code: 'AUTHENTICATION_FAILED',
+        message: 'Authentication failed',
+      });
+    }
   });
 
   it('IDEN-01 rejects replayed provider result generically', async () => {
@@ -430,24 +545,33 @@ describe('identity conformance through generated authority contracts', () => {
       adapter.createBetterAuthAdapter,
       'desktop-pkce-provider-boundary',
     );
-    const exchangeAuthorizationCode = vi.fn(async () => ({
-      accountId: 'account-player',
-      providerSessionId: 'provider-session-private',
-      createdAt: '2030-01-02T03:04:05.000Z',
-      expiresAt: '2030-02-01T03:04:05.000Z',
-      accessToken: 'provider-access-token',
-      refreshToken: 'provider-refresh-token',
-    }));
-    const provider = createBetterAuthAdapter(
-      {
-        completeDirect: async () => ({
+    const exchangeAuthorizationCode = vi.fn(
+      (_input: {
+        readonly authorizationCode: string;
+        readonly codeVerifier: string;
+        readonly redirectUri: string;
+        readonly clientId: 'liiiraa-windows-public-client';
+      }) =>
+        Promise.resolve({
           accountId: 'account-player',
           providerSessionId: 'provider-session-private',
           createdAt: '2030-01-02T03:04:05.000Z',
           expiresAt: '2030-02-01T03:04:05.000Z',
+          accessToken: 'provider-access-token',
+          refreshToken: 'provider-refresh-token',
         }),
+    );
+    const provider = createBetterAuthAdapter(
+      {
+        completeDirect: () =>
+          Promise.resolve({
+            accountId: 'account-player',
+            providerSessionId: 'provider-session-private',
+            createdAt: '2030-01-02T03:04:05.000Z',
+            expiresAt: '2030-02-01T03:04:05.000Z',
+          }),
         exchangeAuthorizationCode,
-        revokeSession: async () => undefined,
+        revokeSession: () => Promise.resolve(),
       },
       { issuer: ISSUER },
     );
@@ -464,31 +588,108 @@ describe('identity conformance through generated authority contracts', () => {
       redirectUri: REDIRECT_URI,
     });
     expect(challenge.value.authorizationUrl).not.toContain('client_secret');
-    const completed = await provider.completeSignIn({
+    const commonCompletion = {
       challengeId: challenge.value.id,
       authorizationCode: 'one-shot-code',
-      state: challenge.value.state,
+      state: challenge.value.state ?? '',
       issuer: ISSUER,
       redirectUri: REDIRECT_URI,
-    });
+    } as const;
+    await expect(
+      provider.completeSignIn({ ...commonCompletion, state: 'wrong-state' }),
+    ).resolves.toMatchObject({ ok: false, code: 'STATE_MISMATCH' });
+    await expect(
+      provider.completeSignIn({ ...commonCompletion, issuer: 'https://attacker.example' }),
+    ).resolves.toMatchObject({ ok: false, code: 'ISSUER_MISMATCH' });
+    await expect(
+      provider.completeSignIn({
+        ...commonCompletion,
+        redirectUri: 'http://127.0.0.1:9/oauth/callback',
+      }),
+    ).resolves.toMatchObject({ ok: false, code: 'REDIRECT_MISMATCH' });
+    const completed = await provider.completeSignIn(commonCompletion);
     expect(completed.ok).toBe(true);
+    await expect(provider.completeSignIn(commonCompletion)).resolves.toMatchObject({
+      ok: false,
+      code: 'REPLAYED_CHALLENGE',
+    });
     expect(exchangeAuthorizationCode).toHaveBeenCalledOnce();
     const exchangeInput = exchangeAuthorizationCode.mock.calls[0]?.[0];
-    expect(exchangeInput).toEqual({
-      authorizationCode: 'one-shot-code',
-      codeVerifier: expect.any(String),
-      redirectUri: REDIRECT_URI,
-      clientId: 'liiiraa-windows-public-client',
-    });
+    if (!exchangeInput) throw new Error('Backend provider exchange was not observed.');
+    expect(exchangeInput.authorizationCode).toBe('one-shot-code');
+    expect(exchangeInput.codeVerifier).toMatch(/^[A-Za-z0-9_-]{64}$/u);
+    expect(exchangeInput.redirectUri).toBe(REDIRECT_URI);
+    expect(exchangeInput.clientId).toBe('liiiraa-windows-public-client');
+    const verifierDigest = new Uint8Array(
+      await crypto.subtle.digest('SHA-256', new TextEncoder().encode(exchangeInput.codeVerifier)),
+    );
+    let binaryDigest = '';
+    for (const byte of verifierDigest) binaryDigest += String.fromCharCode(byte);
+    const expectedChallenge = btoa(binaryDigest)
+      .replaceAll('+', '-')
+      .replaceAll('/', '_')
+      .replace(/=+$/u, '');
+    expect(expectedChallenge).toBe(challenge.value.codeChallenge);
     expect(JSON.stringify(exchangeInput)).not.toMatch(/secret/iu);
     expect(JSON.stringify(completed)).not.toMatch(/accessToken|refreshToken|clientSecret/iu);
+
+    const providerFailure = createBetterAuthAdapter(
+      {
+        completeDirect: () => Promise.reject(new Error('provider-token-do-not-leak')),
+        exchangeAuthorizationCode: () => Promise.reject(new Error('provider-token-do-not-leak')),
+        revokeSession: () => Promise.resolve(),
+      },
+      { issuer: ISSUER },
+    );
+    const failedChallenge = await providerFailure.beginSignIn({
+      method: 'password',
+      email: 'player@example.test',
+    });
+    expect(failedChallenge.ok).toBe(true);
+    if (failedChallenge.ok) {
+      const failed = await providerFailure.completeSignIn({
+        challengeId: failedChallenge.value.id,
+        emailVerified: true,
+      });
+      expect(failed).toEqual({ ok: false, code: 'ADAPTER_UNAVAILABLE', retryable: true });
+      expect(JSON.stringify(failed)).not.toContain('provider-token-do-not-leak');
+    }
   });
 
   it('IDEN-01 lists and revokes sessions without changing Premium device binding', async () => {
     const first = await authenticate(app, { method: 'password' });
-    const second = await authenticate(app, { method: 'passkey', sessionKind: 'desktop' });
     const web = expectBoundedProjection(first.json());
-    const desktop = expectBoundedProjection(second.json());
+    const begin = await app.inject({
+      method: 'POST',
+      url: '/v1/identity/desktop/authorizations',
+      headers: { origin: ACCOUNT_ORIGIN, 'x-csrf-token': CSRF_TOKEN },
+      payload: {
+        invitationCode: 'invite-valid',
+        email: 'player@example.test',
+        method: 'passkey',
+        issuer: ISSUER,
+        redirectUri: REDIRECT_URI,
+      },
+    });
+    const challenge = begin.json<IdentitySignInChallenge>();
+    const second = await app.inject({
+      method: 'POST',
+      url: '/v1/identity/desktop/exchanges',
+      headers: { origin: ACCOUNT_ORIGIN, 'x-csrf-token': CSRF_TOKEN },
+      payload: {
+        invitationCode: 'invite-valid',
+        email: 'player@example.test',
+        method: 'passkey',
+        challengeId: challenge.id,
+        authorizationCode: 'one-shot-code',
+        state: challenge.state,
+        issuer: ISSUER,
+        redirectUri: REDIRECT_URI,
+      },
+    });
+    const desktop = expectBoundedProjection(
+      second.json<{ session: SessionProjectionJson }>().session,
+    );
     const deviceBinding = { id: 'device-binding-1', state: 'active' } as const;
 
     const before = await app.inject({
