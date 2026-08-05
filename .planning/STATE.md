@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-16-PLAN.md
-last_updated: "2026-08-05T04:50:28.163Z"
+stopped_at: Completed 04-17-PLAN.md
+last_updated: "2026-08-05T05:07:25.267Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 161
+  completed_plans: 162
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 21 of 35
+Plan: 22 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -200,6 +200,7 @@ _Updated after plan completion_
 | Phase 04 P15 | 14 min | 1 tasks | 9 files |
 | Phase 04 P30 | 11 min | 1 tasks | 9 files |
 | Phase 04 P16 | 15 min | 1 tasks | 8 files |
+| Phase 04 P17 | 13min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -615,6 +616,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Bind trusted admin step-up to actor, context, action, resource, redacted target, and five-minute freshness. — Stale or repurposed strong authentication cannot authorize a critical command.
 - [Phase 04]: Limit break-glass to Security, fifteen minutes, prior alerting, immutable audit, and redacted metadata. — Emergency containment never exposes diagnostic content without consent.
 - [Phase 04]: Route admin policy through the application public root. — Preserves API layer direction without a direct domain dependency.
+- [Phase 04]: Authorize the owner before loading any account snapshot, then assemble shared account truth from one atomic repository view.
+- [Phase 04]: Represent client account observation as online, offline, stale, pending, or conflict while retaining generated authority provenance on canonical components.
+- [Phase 04]: Require If-Match and command expectedVersion to express the same optimistic-concurrency claim before account mutation.
 
 ### Pending Todos
 
@@ -658,6 +662,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T04:49:57.469Z
-Stopped at: Completed 04-16-PLAN.md
+Last session: 2026-08-05T05:07:25.260Z
+Stopped at: Completed 04-17-PLAN.md
 Resume file: None
