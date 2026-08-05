@@ -13,7 +13,9 @@ import {
   resolveAccountRuntimeConfig,
 } from '../account-runtime';
 
-const projection = (overrides: Partial<AccountAuthorityProjection> = {}): AccountAuthorityProjection => ({
+const projection = (
+  overrides: Partial<AccountAuthorityProjection> = {},
+): AccountAuthorityProjection => ({
   account: {
     schemaVersion: '1.0',
     aggregateVersion: '7',
@@ -129,9 +131,9 @@ const response = (body: unknown, status = 200, headers: Record<string, string> =
 
 describe('production account authority', () => {
   it('loads the generated account projection with an authenticated same-origin request', async () => {
-    const transport = vi.fn<AccountAuthorityTransport>().mockResolvedValue(
-      response(projection(), 200, { etag: '"account-account-01-v7"' }),
-    );
+    const transport = vi
+      .fn<AccountAuthorityTransport>()
+      .mockResolvedValue(response(projection(), 200, { etag: '"account-account-01-v7"' }));
     const authority = createAccountAuthority({
       correlationId: () => 'account-read-01',
       csrfToken: () => 'csrf-account-01',
@@ -155,7 +157,12 @@ describe('production account authority', () => {
 
   it('binds PATCH to the returned ETag and expected aggregate version', async () => {
     const updated = projection({
-      account: { ...projection().account, aggregateVersion: '8', displayName: 'Liiiraa Authority', etag: 'account-account-01-v8' },
+      account: {
+        ...projection().account,
+        aggregateVersion: '8',
+        displayName: 'Liiiraa Authority',
+        etag: 'account-account-01-v8',
+      },
     });
     const transport = vi.fn<AccountAuthorityTransport>().mockResolvedValue(response(updated));
     const authority = createAccountAuthority({
@@ -180,7 +187,10 @@ describe('production account authority', () => {
       'if-match': '"account-account-01-v7"',
       'x-csrf-token': 'csrf-account-01',
     });
-    expect(JSON.parse(String(request?.body))).toMatchObject({
+    expect(typeof request?.body).toBe('string');
+    const requestBody: unknown =
+      typeof request?.body === 'string' ? JSON.parse(request.body) : undefined;
+    expect(requestBody).toMatchObject({
       command: { action: 'update-profile', expectedVersion: '7' },
       localDraftToken: 'draft-profile-01',
       patch: { displayName: 'Liiiraa Authority', locale: 'en' },
@@ -189,12 +199,22 @@ describe('production account authority', () => {
 
   it('preserves server truth and a bounded safe draft on conflict', async () => {
     const remote = projection({
-      account: { ...projection().account, aggregateVersion: '8', displayName: 'Remote Player', etag: 'account-account-01-v8' },
+      account: {
+        ...projection().account,
+        aggregateVersion: '8',
+        displayName: 'Remote Player',
+        etag: 'account-account-01-v8',
+      },
       provenance: 'conflict',
     });
-    const transport = vi.fn<AccountAuthorityTransport>().mockResolvedValue(
-      response({ code: 'CONFLICT', localDraftToken: 'draft-profile-01', ok: false, projection: remote }, 409),
-    );
+    const transport = vi
+      .fn<AccountAuthorityTransport>()
+      .mockResolvedValue(
+        response(
+          { code: 'CONFLICT', localDraftToken: 'draft-profile-01', ok: false, projection: remote },
+          409,
+        ),
+      );
     const authority = createAccountAuthority({
       correlationId: () => 'account-conflict-01',
       csrfToken: () => 'csrf-account-01',
@@ -257,7 +277,10 @@ describe('account runtime composition', () => {
       security: { mfa: true, passkey: true, sessionCount: 1 },
       support: { openCount: 1 },
     });
-    expect(mapAccountAuthorityProjection(projection({ activeDevice: null }), '2026-01-15T12:00:00.000Z').device).toEqual({
+    expect(
+      mapAccountAuthorityProjection(projection({ activeDevice: null }), '2026-01-15T12:00:00.000Z')
+        .device,
+    ).toEqual({
       isCurrent: false,
       replacement: 'eligible',
     });
@@ -272,9 +295,15 @@ describe('account runtime composition', () => {
   });
 
   it('keeps preview authority isolated from production modules', () => {
-    const authoritySource = readFileSync(new URL('../account-authority.ts', import.meta.url), 'utf8');
+    const authoritySource = readFileSync(
+      new URL('../account-authority.ts', import.meta.url),
+      'utf8',
+    );
     const runtimeSource = readFileSync(new URL('../account-runtime.ts', import.meta.url), 'utf8');
-    const productionViewSource = readFileSync(new URL('./account-authority.tsx', import.meta.url), 'utf8');
+    const productionViewSource = readFileSync(
+      new URL('./account-authority.tsx', import.meta.url),
+      'utf8',
+    );
     const previewSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
 
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
@@ -284,6 +313,6 @@ describe('account runtime composition', () => {
     expect(productionViewSource).toContain('Profile update receipt');
     expect(productionViewSource).toContain('Device replacement unavailable');
     expect(previewSource).toContain('@liiiraa/web-preview');
-    expect(previewSource).toContain("remoteStateChanged: false");
+    expect(previewSource).toContain('remoteStateChanged: false');
   });
 });
