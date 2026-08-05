@@ -37,16 +37,15 @@ FROM node:24.18.0-bookworm-slim AS runtime
 LABEL org.opencontainers.image.title="Liiiraa Boost staging API"
 LABEL org.opencontainers.image.description="Invitation-only synthetic Fastify control plane"
 
-ENV PNPM_HOME=/pnpm
-ENV PATH=/pnpm:$PATH
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-RUN corepack enable && corepack prepare pnpm@11.17.0 --activate
-
 WORKDIR /workspace
-COPY --from=verified --chown=node:node /workspace /workspace
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+  && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
+COPY --from=verified --chown=node:node /workspace/apps/api/src/config/env.ts apps/api/src/config/env.ts
+COPY --from=verified --chown=node:node /workspace/apps/api/src/staging/main.mjs apps/api/src/staging/main.mjs
 
 USER node
 EXPOSE 3000
@@ -54,4 +53,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/health').then((response)=>{if(!response.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
-CMD ["node", "--experimental-strip-types", "apps/api/src/staging/main.ts"]
+CMD ["node", "--experimental-strip-types", "apps/api/src/staging/main.mjs"]

@@ -4,6 +4,7 @@ import workflow from '../../../../.github/workflows/phase-4-staging-api.yml?raw'
 import rootDockerIgnore from '../../../../.dockerignore?raw';
 import dockerIgnore from '../../.dockerignore?raw';
 import dockerfile from '../../Dockerfile?raw';
+import runtimeEntrypoint from './main.mjs?raw';
 import renderManifest from '../../staging.render.yaml?raw';
 
 describe('daemon-free OCI artifact contract', () => {
@@ -15,7 +16,11 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('USER node');
     expect(dockerfile).toContain('HEALTHCHECK');
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
-    expect(dockerfile).toContain('apps/api/src/staging/main.ts');
+    expect(dockerfile).toContain('apps/api/src/staging/main.mjs');
+    expect(dockerfile).not.toContain('/workspace /workspace');
+    expect(runtimeEntrypoint).toContain('createServer');
+    expect(runtimeEntrypoint).toContain('authorityConnected: false');
+    expect(runtimeEntrypoint).not.toContain("from 'fastify'");
   });
 
   it('excludes secrets, generated desktop artifacts, and unrelated build output', () => {
