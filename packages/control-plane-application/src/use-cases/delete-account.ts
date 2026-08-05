@@ -6,7 +6,7 @@ import {
   type LegalHold,
 } from '@liiiraa/control-plane-domain';
 
-import type { SupportLifecycleDependencies } from './manage-support-case.js';
+import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.js';
 
 export type { AccountDeletionState } from '@liiiraa/control-plane-domain';
 
@@ -62,8 +62,7 @@ export const deleteAccount = async (
           : effect.kind === 'cancel-account-finalization'
             ? 'account.deletion-cancel'
             : 'account.deletion-completed';
-      await transaction.enqueueOutbox({
-        jobId: dependencies.ids.next(),
+      await scheduleLifecycleJob(transaction, dependencies.ids, {
         topic,
         aggregateId: input.accountId,
         commandId: input.commandId,
@@ -76,8 +75,7 @@ export const deleteAccount = async (
         },
       });
     }
-    await transaction.enqueueOutbox({
-      jobId: dependencies.ids.next(),
+    await scheduleLifecycleJob(transaction, dependencies.ids, {
       topic: 'account.deletion-notice',
       aggregateId: input.accountId,
       commandId: input.commandId,

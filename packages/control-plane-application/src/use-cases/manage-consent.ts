@@ -5,7 +5,7 @@ import {
   type SupportDiagnosticFieldClass,
 } from '@liiiraa/control-plane-domain';
 
-import type { SupportLifecycleDependencies } from './manage-support-case.js';
+import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.js';
 
 export type { DiagnosticConsentState } from '@liiiraa/control-plane-domain';
 
@@ -74,8 +74,7 @@ export const manageConsent = async (
         redactedTarget: input.command.consentId,
       });
       if (input.action.kind !== 'expire') {
-        await transaction.enqueueOutbox({
-          jobId: dependencies.ids.next(),
+        await scheduleLifecycleJob(transaction, dependencies.ids, {
           topic: 'support.consent-receipt',
           aggregateId: input.command.consentId,
           commandId: input.command.commandId,

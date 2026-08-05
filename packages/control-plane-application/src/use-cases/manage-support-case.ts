@@ -80,6 +80,12 @@ export interface SupportLifecycleDependencies {
   readonly ids: Readonly<{ next(): string }>;
 }
 
+export const scheduleLifecycleJob = (
+  transaction: SupportLifecycleTransaction,
+  ids: SupportLifecycleDependencies['ids'],
+  job: Omit<SupportLifecycleOutboxJob, 'jobId'>,
+): Promise<void> => transaction.enqueueOutbox({ jobId: ids.next(), ...job });
+
 export type ManageSupportCaseDependencies = SupportLifecycleDependencies;
 
 export type ManageSupportCaseAction =
@@ -147,8 +153,7 @@ export const manageSupportCase = async (
     await transaction.saveCase(decision.state);
     for (const effect of decision.effects) {
       if (effect.kind === 'schedule-attachment-purge') {
-        await transaction.enqueueOutbox({
-          jobId: dependencies.ids.next(),
+        await scheduleLifecycleJob(transaction, dependencies.ids, {
           topic: 'support.attachment-purge',
           aggregateId: decision.state.caseId,
           commandId: input.command.commandId,
@@ -161,8 +166,7 @@ export const manageSupportCase = async (
         });
       } else {
         const expired = await transaction.expireCaseConsents(effect.caseId, now);
-        await transaction.enqueueOutbox({
-          jobId: dependencies.ids.next(),
+        await scheduleLifecycleJob(transaction, dependencies.ids, {
           topic: 'support.case-consent-expiry',
           aggregateId: decision.state.caseId,
           commandId: input.command.commandId,
@@ -179,8 +183,7 @@ export const manageSupportCase = async (
       occurredAt: now,
       redactedTarget: input.command.supportCaseId,
     });
-    await transaction.enqueueOutbox({
-      jobId: dependencies.ids.next(),
+    await scheduleLifecycleJob(transaction, dependencies.ids, {
       topic: 'support.case-notice',
       aggregateId: decision.state.caseId,
       commandId: input.command.commandId,
