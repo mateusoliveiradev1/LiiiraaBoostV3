@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-28-PLAN.md
-last_updated: "2026-08-05T05:44:58.666Z"
+stopped_at: Completed 04-29-PLAN.md
+last_updated: "2026-08-05T06:01:25.590Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 164
+  completed_plans: 165
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 24 of 35
+Plan: 25 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -203,6 +203,7 @@ _Updated after plan completion_
 | Phase 04 P17 | 13min | 1 tasks | 6 files |
 | Phase 04 P27 | 18min | 1 tasks | 11 files |
 | Phase 04 P28 | 12min | 1 tasks | 7 files |
+| Phase 04 P29 | 13 min | 1 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -627,6 +628,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Use the outbox job ID as both worker idempotency identity and SES message tag; completed jobs are never reclaimed. — One durable identity makes replay and delivery evidence auditable.
 - [Phase 04]: Admit SES sandbox recipients only from an injected verified-invitation allowlist and expose provider-neutral failures. — Request payloads cannot self-authorize delivery or leak provider details.
 - [Phase 04]: Keep email notification-only with bounded references while PostgreSQL domain and audit records remain authoritative. — Delivery success or failure cannot reconstruct or mutate account truth.
+- [Phase 04]: Use outbox job identity plus aggregate version for durable privacy lifecycle claims. — Retries remain idempotent and stale work cannot silently replace current aggregate authority.
+- [Phase 04]: Delete private objects before persisting checksum and provider receipt evidence. — Provider failure cannot be represented as completed metadata deletion.
+- [Phase 04]: Finalize deletion through the locked domain transaction and expire retained evidence through the same worker. — Cancellation wins under serialization and every purpose-bound record retains an executable bounded expiry.
 
 ### Pending Todos
 
@@ -670,6 +674,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T05:44:58.659Z
-Stopped at: Completed 04-28-PLAN.md
+Last session: 2026-08-05T06:01:25.584Z
+Stopped at: Completed 04-29-PLAN.md
 Resume file: None
