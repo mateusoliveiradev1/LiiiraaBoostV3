@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run src/devices/device-evidence.test.ts",
+    "test": "vitest run src/devices",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
