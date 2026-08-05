@@ -200,7 +200,7 @@ export const registerSecurityRoutes = (
     '/v1/identity/recoveries/:accountId/contest',
     async (request, reply) => {
       const actor = await dependencies.resolveSessionActor(request);
-      if (!actor || actor.accountId !== request.params.accountId || !isRecord(request.body)) {
+      if (actor?.accountId !== request.params.accountId || !isRecord(request.body)) {
         return reply.code(401).send({ code: 'AUTHORIZATION_FAILED' });
       }
       return sendRecovery(

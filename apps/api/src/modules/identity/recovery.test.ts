@@ -13,6 +13,7 @@ import type {
   IdentityStepUpReceipt,
 } from '@liiiraa/control-plane-application';
 import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { registerSecurityRoutes } from './security-routes.js';
@@ -56,7 +57,7 @@ interface RecoveryMemoryState {
   recoveryCodeDigests: Set<string>;
   activeSessions: Set<string>;
   audits: string[];
-  outbox: Array<{ topic: string; sessionId: string }>;
+  outbox: { topic: string; sessionId: string }[];
   operations: string[];
 }
 
@@ -170,7 +171,7 @@ const recoveryDependencies = (
   ids: ids(),
 });
 
-const apps: Array<ReturnType<typeof Fastify>> = [];
+const apps: FastifyInstance[] = [];
 
 const harness = async () => {
   const securityRepository = new MemorySecurityMethods();
@@ -189,7 +190,7 @@ const harness = async () => {
   return { app, securityRepository, recoveryRepository };
 };
 
-const requestTotalLoss = async (app: ReturnType<typeof Fastify>) =>
+const requestTotalLoss = (app: FastifyInstance) =>
   app.inject({
     method: 'POST',
     url: '/v1/identity/recoveries',
@@ -200,7 +201,7 @@ const requestTotalLoss = async (app: ReturnType<typeof Fastify>) =>
     },
   });
 
-const approveRecovery = async (app: ReturnType<typeof Fastify>) =>
+const approveRecovery = (app: FastifyInstance) =>
   app.inject({
     method: 'POST',
     url: `/v1/identity/recoveries/${ACCOUNT_ID}/review`,
