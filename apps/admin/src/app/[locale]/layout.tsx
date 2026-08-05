@@ -17,7 +17,8 @@ import {
   adminRoleFromHeader,
   projectAdminRoleNavigation,
 } from '../../admin-shell';
-import { ADMIN_WEB_COMPOSITION } from '../../index';
+import { adminWebComposition } from '../../index';
+import { resolveAdminServerRuntimeConfig } from '../../admin-runtime-server';
 
 type AdminLocaleLayoutProps = Readonly<{
   children: ReactNode;
@@ -114,13 +115,14 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
   const copy = COPY[locale];
   const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigation = projectAdminRoleNavigation(role, locale);
+  const composition = adminWebComposition(resolveAdminServerRuntimeConfig().kind);
 
   return (
     <html
-      data-authoritative-access-connected={String(ADMIN_WEB_COMPOSITION.authorityConnected)}
-      data-ordinary-navigation-linked={String(ADMIN_WEB_COMPOSITION.ordinaryNavigationLinked)}
-      data-runtime-class={ADMIN_WEB_COMPOSITION.runtimeClass}
-      data-surface={ADMIN_WEB_COMPOSITION.surface}
+      data-authoritative-access-connected={String(composition.authorityConnected)}
+      data-ordinary-navigation-linked={String(composition.ordinaryNavigationLinked)}
+      data-runtime-class={composition.runtimeClass}
+      data-surface={composition.surface}
       lang={locale}
     >
       <body>

@@ -8,6 +8,19 @@ export const ADMIN_CANONICAL_ENTRY = Object.freeze({
 
 export type AdminLocale = keyof typeof ADMIN_CANONICAL_ENTRY;
 
+export type AdminRuntimeConfig =
+  | Readonly<{ kind: 'preview' }>
+  | Readonly<{ authorityBaseUrl: string; kind: 'production' }>;
+
+export const resolveAdminRuntimeConfig = ({
+  authorityBaseUrl = '',
+  previewEnabled = false,
+}: Readonly<{
+  authorityBaseUrl?: string;
+  previewEnabled?: boolean;
+}>): AdminRuntimeConfig =>
+  previewEnabled ? { kind: 'preview' } : { authorityBaseUrl, kind: 'production' };
+
 export const ADMIN_DENIAL_COPY = Object.freeze({
   en: Object.freeze({
     body: 'This request did not match the isolated administrative origin. No session was created and no application data was loaded.',

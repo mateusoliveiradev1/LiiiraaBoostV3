@@ -73,7 +73,11 @@ const collectionResource = (request: FastifyRequest): AdminProjectionResource | 
     : null;
 };
 
-const hideDeniedProjection = (reply: FastifyReply) => reply.code(404).send({ records: [] });
+const noStore = (reply: FastifyReply): FastifyReply =>
+  reply.header('Cache-Control', 'no-store, private');
+
+const hideDeniedProjection = (reply: FastifyReply) =>
+  noStore(reply).code(404).send({ records: [] });
 
 const commandBody = (
   value: unknown,
@@ -118,6 +122,20 @@ export const registerAdminRoutes = (
   app: FastifyInstance,
   dependencies: AdminRouteDependencies,
 ): Promise<void> => {
+  app.get('/v1/admin/session', async (request, reply) => {
+    if (!isAdminOrigin(request, dependencies.allowedOrigin)) {
+      return noStore(reply).code(404).send({ code: 'NOT_FOUND' });
+    }
+    const session = await dependencies.resolveAdminSession(request);
+    return session === null
+      ? noStore(reply).code(401).send({ code: 'AUTHORIZATION_FAILED' })
+      : noStore(reply).code(200).send({
+          actorId: session.actorId,
+          expiresAt: session.expiresAt,
+          role: session.role,
+        });
+  });
+
   app.post('/v1/admin/roles/assume', (request, reply) =>
     roleMutation(request, reply, dependencies, false),
   );
@@ -152,7 +170,9 @@ export const registerAdminRoutes = (
     ) {
       return hideDeniedProjection(reply);
     }
-    return reply.code(200).send({ records: await dependencies.listProjection(resource) });
+    return noStore(reply)
+      .code(200)
+      .send({ records: await dependencies.listProjection(resource) });
   });
 
   app.get<{ Params: { collection: string; id: string } }>(
@@ -174,8 +194,8 @@ export const registerAdminRoutes = (
       }
       const projection = await dependencies.loadProjection(resource, request.params.id);
       return projection === null
-        ? reply.code(404).send({ code: 'NOT_FOUND' })
-        : reply.code(200).send(projection);
+        ? noStore(reply).code(404).send({ code: 'NOT_FOUND' })
+        : noStore(reply).code(200).send(projection);
     },
   );
 

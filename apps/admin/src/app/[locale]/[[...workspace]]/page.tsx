@@ -18,6 +18,8 @@ import {
   type AdminPreviewRoute,
 } from '../../../admin-preview-model';
 import { AdminPreviewPage } from '../../../features/admin-preview';
+import { AdminAuthorityPage } from '../../../features/admin-authority';
+import { resolveAdminServerRuntimeConfig } from '../../../admin-runtime-server';
 
 type AdminWorkspacePageProps = Readonly<{
   params: Promise<{
@@ -105,7 +107,8 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
 
   const requestHeaders = await headers();
   const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
-  if (!adminRoleCanAccess(role, resolution.routeId)) {
+  const runtime = resolveAdminServerRuntimeConfig();
+  if (runtime.kind === 'preview' && !adminRoleCanAccess(role, resolution.routeId)) {
     const model = createAdminFailureModel('403', locale);
     const roleHref =
       role === 'support' ? model.destinations.role : `${model.destinations.role}?role=${role}`;
@@ -123,5 +126,13 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
     );
   }
 
-  return <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />;
+  return runtime.kind === 'preview' ? (
+    <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />
+  ) : (
+    <AdminAuthorityPage
+      authorityBaseUrl={runtime.authorityBaseUrl}
+      locale={locale}
+      routeId={resolution.routeId}
+    />
+  );
 }

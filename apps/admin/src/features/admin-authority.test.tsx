@@ -179,6 +179,50 @@ describe('production admin authority', () => {
     });
     expect(lifecycle.signal.aborted).toBe(true);
   });
+
+  it('admits only the four redacted break-glass metadata fields', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({ accountReference: 'account-••••-015', rawDiagnostic: 'forbidden' }),
+      )
+      .mockResolvedValueOnce(
+        response({
+          accountReference: 'account-••••-015',
+          caseId: 'case-015',
+          riskClass: 'high',
+          sessionReference: 'session-••••-083',
+        }),
+      );
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-break-glass-test',
+      csrfToken: () => 'csrf-admin-test',
+      transport,
+    });
+    const input = {
+      expiresAt: '2026-01-15T12:10:00.000Z',
+      reason: 'Contain the reviewed security incident',
+      stepUp: {
+        authorizationContextId: 'step-up-break-glass',
+        verifiedAt: '2026-01-15T12:00:00.000Z',
+      },
+      targetReference: 'security-incident-083',
+    } as const;
+
+    await expect(authority.breakGlass(input)).resolves.toEqual({
+      code: 'invalid-authority',
+      status: 'error',
+    });
+    await expect(authority.breakGlass(input)).resolves.toEqual({
+      metadata: {
+        accountReference: 'account-••••-015',
+        caseId: 'case-015',
+        riskClass: 'high',
+        sessionReference: 'session-••••-083',
+      },
+      status: 'complete',
+    });
+  });
 });
 
 describe('admin production composition', () => {
