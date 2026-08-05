@@ -36,16 +36,42 @@ export const adminRoleCanAccessRoute = (
 
 export type AdminRuntimeConfig =
   | Readonly<{ kind: 'preview' }>
-  | Readonly<{ authorityBaseUrl: string; kind: 'production' }>;
+  | Readonly<{ accountOrigin: string; authorityBaseUrl: string; kind: 'production' }>;
+
+const exactHttpsOrigin = (value: string, label: string): string => {
+  try {
+    const url = new URL(value);
+    if (
+      url.protocol !== 'https:' ||
+      url.origin !== value ||
+      url.pathname !== '/' ||
+      url.username.length > 0 ||
+      url.password.length > 0
+    ) {
+      throw new Error('invalid');
+    }
+    return url.origin;
+  } catch {
+    throw new Error(`${label} must be an exact credential-free HTTPS origin.`);
+  }
+};
 
 export const resolveAdminRuntimeConfig = ({
+  accountOrigin = '',
   authorityBaseUrl = '',
   previewEnabled = false,
 }: Readonly<{
+  accountOrigin?: string;
   authorityBaseUrl?: string;
   previewEnabled?: boolean;
 }>): AdminRuntimeConfig =>
-  previewEnabled ? { kind: 'preview' } : { authorityBaseUrl, kind: 'production' };
+  previewEnabled
+    ? { kind: 'preview' }
+    : {
+        accountOrigin: exactHttpsOrigin(accountOrigin, 'Account origin'),
+        authorityBaseUrl: exactHttpsOrigin(authorityBaseUrl, 'Admin authority origin'),
+        kind: 'production',
+      };
 
 export const ADMIN_DENIAL_COPY = Object.freeze({
   en: Object.freeze({
@@ -72,15 +98,10 @@ export const ADMIN_DENIAL_COPY = Object.freeze({
   >
 >);
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      readonly LIIIRAA_ADMIN_ORIGIN?: string;
-    }
-  }
-}
+const configuredAdminOrigin = (): string | undefined =>
+  (process.env as Readonly<{ LIIIRAA_ADMIN_ORIGIN?: string }>).LIIIRAA_ADMIN_ORIGIN;
 
-export const resolveAdminOrigin = (value = process.env.LIIIRAA_ADMIN_ORIGIN): string => {
+export const resolveAdminOrigin = (value = configuredAdminOrigin()): string => {
   const candidate = value ?? ADMIN_LOCAL_ORIGIN;
   const url = new URL(candidate);
   const exactLocalHostname = url.hostname === 'admin.localhost';

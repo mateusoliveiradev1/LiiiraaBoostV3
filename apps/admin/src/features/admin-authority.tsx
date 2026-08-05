@@ -13,13 +13,13 @@ import {
   type AdminSessionProjection,
   type AdminStepUp,
 } from '../admin-authority';
-import type { AdminPreviewRoute } from '../admin-preview-model';
-import { adminRoleCanAccessRoute } from '../admin-runtime';
+import { adminRoleCanAccessRoute, type AdminAuthorityRoute } from '../admin-runtime';
 
 type AdminAuthorityPageProps = Readonly<{
+  accountOrigin: string;
   authorityBaseUrl: string;
   locale: WebLocale;
-  routeId: AdminPreviewRoute;
+  routeId: AdminAuthorityRoute;
 }>;
 
 const copy = Object.freeze({
@@ -33,11 +33,13 @@ const copy = Object.freeze({
     expired: 'Diagnostic access expired',
     impact: 'I reviewed the impact and affected authority',
     loading: 'Loading server-authorized administrative projection.',
+    noRecords: 'No authorized records are currently available.',
     operations: 'Operations queue',
     reason: 'Reason',
     receipt: 'Immutable authority receipt',
     revoked: 'Diagnostic access revoked',
     security: 'Security queue',
+    signIn: 'Sign in through the account portal',
     stepUp: 'Verify with a strong credential',
     stepUpDialog: 'Verify critical operation',
     support: 'Support case queue',
@@ -52,11 +54,13 @@ const copy = Object.freeze({
     expired: 'Acesso ao diagnóstico expirado',
     impact: 'Revisei o impacto e a autoridade afetada',
     loading: 'Carregando projeção administrativa autorizada pelo servidor.',
+    noRecords: 'Nenhum registro autorizado está disponível no momento.',
     operations: 'Fila de operações',
     reason: 'Motivo',
     receipt: 'Comprovante de autoridade imutável',
     revoked: 'Acesso ao diagnóstico revogado',
     security: 'Fila de segurança',
+    signIn: 'Entrar pelo portal da conta',
     stepUp: 'Verificar com credencial forte',
     stepUpDialog: 'Verificar operação crítica',
     support: 'Fila de casos de suporte',
@@ -89,7 +93,7 @@ const correlationId = (): string => {
   return `admin-browser-${String(sequence)}`;
 };
 
-const collectionFor = (routeId: AdminPreviewRoute): AdminProjectionCollection => {
+const collectionFor = (routeId: AdminAuthorityRoute): AdminProjectionCollection => {
   if (routeId === 'admin-support') return 'support-cases';
   if (routeId === 'admin-operations') return 'entitlements';
   if (routeId === 'admin-security') return 'sessions';
@@ -99,10 +103,7 @@ const collectionFor = (routeId: AdminPreviewRoute): AdminProjectionCollection =>
 
 const routeHref = (locale: WebLocale, suffix: string): string => `/${locale}/admin${suffix}`;
 
-const RoleNavigation = ({
-  locale,
-  role,
-}: Readonly<{ locale: WebLocale; role: AdminRoleJson }>) => {
+const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: AdminRoleJson }>) => {
   const labels = copy[locale];
   const links: readonly (readonly [string, string])[] =
     role === 'support'
@@ -159,7 +160,9 @@ const DiagnosticAuthority = ({
 }: Readonly<{ authority: AdminAuthority; locale: WebLocale }>) => {
   const [projection, setProjection] = useState<AdminDiagnosticProjection | null>(null);
   const [events, setEvents] = useState<readonly AuditEventJson[]>([]);
-  const [clearReason, setClearReason] = useState<'expired' | 'revoked' | 'unauthorized' | 'invalid'>();
+  const [clearReason, setClearReason] = useState<
+    'expired' | 'revoked' | 'unauthorized' | 'invalid'
+  >();
   useEffect(() => {
     const controller = new AbortController();
     let lifecycle: Awaited<ReturnType<AdminAuthority['openDiagnostic']>> | undefined;
@@ -240,7 +243,12 @@ const CriticalCommand = ({
   const ready = reason.trim().length >= 8 && impactReviewed && stepUp !== null;
   return (
     <section data-high-risk-action="true">
-      <button onClick={() => setOpen(true)} type="button">
+      <button
+        onClick={() => {
+          setOpen(true);
+        }}
+        type="button"
+      >
         Review publication hold
       </button>
       {open ? (
@@ -248,23 +256,30 @@ const CriticalCommand = ({
           <h2>{labels.stepUpDialog}</h2>
           <label>
             {labels.reason}
-            <input onChange={(event) => setReason(event.currentTarget.value)} value={reason} />
+            <input
+              onChange={(event) => {
+                setReason(event.currentTarget.value);
+              }}
+              value={reason}
+            />
           </label>
           <label>
             <input
               checked={impactReviewed}
-              onChange={(event) => setImpactReviewed(event.currentTarget.checked)}
+              onChange={(event) => {
+                setImpactReviewed(event.currentTarget.checked);
+              }}
               type="checkbox"
             />
             {labels.impact}
           </label>
           <button
-            onClick={() =>
+            onClick={() => {
               setStepUp({
                 authorizationContextId: correlationId(),
                 verifiedAt: new Date().toISOString(),
-              })
-            }
+              });
+            }}
             type="button"
           >
             {labels.stepUp}
@@ -343,6 +358,7 @@ const BreakGlassReview = ({
 };
 
 export const AdminAuthorityPage = ({
+  accountOrigin,
   authorityBaseUrl,
   locale,
   routeId,
@@ -357,22 +373,25 @@ export const AdminAuthorityPage = ({
         csrfToken,
         subscribeToConsent: (listener) => {
           const interval = window.setInterval(listener, 150);
-          return () => window.clearInterval(interval);
+          return () => {
+            window.clearInterval(interval);
+          };
         },
       }),
     [authorityBaseUrl],
   );
   useEffect(() => {
-    let active = true;
-    void authority.session().then(async (next) => {
-      if (!active) return;
+    const controller = new AbortController();
+    void authority.session().then((next) => {
+      if (controller.signal.aborted) return;
       setSession(next);
       if (next === null || routeId === 'admin-diagnostics') return;
-      const result = await authority.list(collectionFor(routeId));
-      if (active) setRecords(result.records);
+      void authority.list(collectionFor(routeId)).then((result) => {
+        if (!controller.signal.aborted) setRecords(result.records);
+      });
     });
     return () => {
-      active = false;
+      controller.abort();
     };
   }, [authority, routeId]);
 
@@ -389,6 +408,7 @@ export const AdminAuthorityPage = ({
       <article data-admin-runtime="production">
         <h1>{copy[locale].denied}</h1>
         <p role="alert">{copy[locale].denied}</p>
+        <a href={`${accountOrigin}/${locale}/account/sign-in`}>{copy[locale].signIn}</a>
       </article>
     );
   }
@@ -410,11 +430,7 @@ export const AdminAuthorityPage = ({
       </header>
       <RoleNavigation locale={locale} role={session.role} />
       {routeId === 'admin-diagnostics' ? (
-        session.role === 'security' ? (
-          <DiagnosticAuthority authority={authority} locale={locale} />
-        ) : (
-          <p role="alert">{copy[locale].denied}</p>
-        )
+        <DiagnosticAuthority authority={authority} locale={locale} />
       ) : null}
       {routeId === 'admin-operations' && session.role === 'operations' ? (
         <CriticalCommand authority={authority} locale={locale} session={session} />
@@ -424,14 +440,22 @@ export const AdminAuthorityPage = ({
       ) : null}
       {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
         <section aria-label={copy[locale].activeRole}>
-          <ul>
-            {records.map((record) => (
-              <li key={record.id}>
-                <strong>{record.id}</strong>{' '}
-                {typeof record.redactedTarget === 'string' ? record.redactedTarget : null}
-              </li>
-            ))}
-          </ul>
+          {records.length === 0 ? (
+            <p role="status">{copy[locale].noRecords}</p>
+          ) : (
+            <ul>
+              {records.map((record) => (
+                <li key={record.id}>
+                  <strong>{record.id}</strong>{' '}
+                  {typeof record.redactedTarget === 'string'
+                    ? record.redactedTarget
+                    : typeof record.summary === 'string'
+                      ? record.summary
+                      : null}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       ) : null}
     </article>

@@ -17,7 +17,6 @@ import {
   type AdminErrorRoute,
   type AdminPreviewRoute,
 } from '../../../admin-preview-model';
-import { AdminPreviewPage } from '../../../features/admin-preview';
 import { AdminAuthorityPage } from '../../../features/admin-authority';
 import { resolveAdminServerRuntimeConfig } from '../../../admin-runtime-server';
 
@@ -126,10 +125,14 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
     );
   }
 
-  return runtime.kind === 'preview' ? (
-    <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />
-  ) : (
+  if (runtime.kind === 'preview') {
+    const { AdminPreviewPage } = await import('../../../features/admin-preview');
+    return <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />;
+  }
+
+  return (
     <AdminAuthorityPage
+      accountOrigin={runtime.accountOrigin}
       authorityBaseUrl={runtime.authorityBaseUrl}
       locale={locale}
       routeId={resolution.routeId}

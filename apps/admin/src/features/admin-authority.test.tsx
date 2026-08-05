@@ -10,15 +10,14 @@ import {
 } from '../admin-authority';
 import { resolveAdminRuntimeConfig } from '../admin-runtime';
 
-const response = (
-  body: unknown,
-  status = 200,
-  headers: Record<string, string> = {},
-): Response =>
+const response = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
     headers: { 'cache-control': 'no-store', 'content-type': 'application/json', ...headers },
     status,
   });
+
+const requestUrl = (value: RequestInfo | URL): string =>
+  typeof value === 'string' ? value : value instanceof URL ? value.href : value.url;
 
 const consent = (state: 'active' | 'revoked' | 'expired' = 'active'): DiagnosticConsentJson => ({
   schemaVersion: '1.0',
@@ -79,9 +78,15 @@ describe('production admin authority', () => {
     const transport = vi
       .fn<AdminAuthorityTransport>()
       .mockResolvedValueOnce(
-        response({ actorId: 'developer-01', expiresAt: '2026-01-15T13:00:00.000Z', role: 'security' }),
+        response({
+          actorId: 'developer-01',
+          expiresAt: '2026-01-15T13:00:00.000Z',
+          role: 'security',
+        }),
       )
-      .mockResolvedValueOnce(response({ records: [{ id: 'DIA-015', redactedTarget: 'Diagnostic ••••-015' }] }));
+      .mockResolvedValueOnce(
+        response({ records: [{ id: 'DIA-015', redactedTarget: 'Diagnostic ••••-015' }] }),
+      );
     const authority = createAdminAuthority({
       correlationId: () => 'admin-read-test',
       csrfToken: () => 'csrf-admin-test',
@@ -94,11 +99,11 @@ describe('production admin authority', () => {
       role: 'security',
       status: 'online',
     });
-    expect(transport.mock.calls.map(([url]) => String(url))).toEqual([
+    expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
       '/v1/admin/session',
       '/v1/admin/diagnostic-metadata',
     ]);
-    expect(transport.mock.calls.map(([url]) => String(url)).join(' ')).not.toContain('role=');
+    expect(transport.mock.calls.map(([url]) => requestUrl(url)).join(' ')).not.toContain('role=');
   });
 
   it('fails closed before transport until step-up, reason, impact review, and confirmation exist', async () => {
@@ -130,12 +135,15 @@ describe('production admin authority', () => {
     await expect(
       authority.execute({
         ...base,
-        stepUp: { authorizationContextId: 'step-up-admin-01', verifiedAt: '2026-01-15T12:01:00.000Z' },
+        stepUp: {
+          authorizationContextId: 'step-up-admin-01',
+          verifiedAt: '2026-01-15T12:01:00.000Z',
+        },
       }),
     ).resolves.toEqual({ receipt, status: 'complete' });
     const [, request] = transport.mock.calls[0] ?? [];
     expect(request?.headers).toMatchObject({ 'cache-control': 'no-store' });
-    expect(JSON.parse(String(request?.body))).toMatchObject({
+    expect(JSON.parse(typeof request?.body === 'string' ? request.body : '')).toMatchObject({
       command: {
         action: 'correct-entitlement',
         authorizationContextId: 'step-up-admin-01',
@@ -227,15 +235,31 @@ describe('production admin authority', () => {
 
 describe('admin production composition', () => {
   it('defaults deployable runtime to production and isolates preview authority', () => {
-    expect(resolveAdminRuntimeConfig({ authorityBaseUrl: 'https://api.liiiraa.test' })).toEqual({
+    expect(
+      resolveAdminRuntimeConfig({
+        accountOrigin: 'https://account.liiiraa.test',
+        authorityBaseUrl: 'https://api.liiiraa.test',
+      }),
+    ).toEqual({
+      accountOrigin: 'https://account.liiiraa.test',
       authorityBaseUrl: 'https://api.liiiraa.test',
       kind: 'production',
     });
     expect(resolveAdminRuntimeConfig({ previewEnabled: true })).toEqual({ kind: 'preview' });
+    expect(() =>
+      resolveAdminRuntimeConfig({
+        accountOrigin: 'https://account.liiiraa.test',
+        authorityBaseUrl: 'http://api.liiiraa.test',
+      }),
+    ).toThrow('exact credential-free HTTPS origin');
 
     const authoritySource = readFileSync(new URL('../admin-authority.ts', import.meta.url), 'utf8');
     const runtimeSource = readFileSync(new URL('../admin-runtime.ts', import.meta.url), 'utf8');
     const productionView = readFileSync(new URL('./admin-authority.tsx', import.meta.url), 'utf8');
+    const routeSource = readFileSync(
+      new URL('../app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
+      'utf8',
+    );
     const previewView = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
@@ -243,6 +267,11 @@ describe('admin production composition', () => {
     expect(productionView).toContain('Active administrative role');
     expect(productionView).toContain('Verify critical operation');
     expect(productionView).toContain('Consented diagnostic view');
+    expect(productionView).toContain('accountOrigin');
+    expect(productionView).toContain('No authorized records are currently available.');
+    expect(productionView).not.toContain('AdminPreviewRoute');
+    expect(routeSource).toContain("await import('../../../features/admin-preview')");
+    expect(routeSource).not.toContain('import { AdminPreviewPage }');
     expect(previewView).toContain('@liiiraa/web-preview');
   });
 });
