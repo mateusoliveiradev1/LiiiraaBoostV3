@@ -405,6 +405,9 @@ importers:
       '@liiiraa/contracts-ts':
         specifier: workspace:*
         version: link:../../packages/contracts-ts
+      '@liiiraa/control-plane-domain':
+        specifier: workspace:*
+        version: link:../../packages/control-plane-domain
       '@liiiraa/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system

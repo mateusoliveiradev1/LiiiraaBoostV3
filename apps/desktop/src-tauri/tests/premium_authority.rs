@@ -177,6 +177,34 @@ fn premium_authority_denies_the_next_start_after_expiry() {
     assert!(!decision.allowed);
     assert_eq!(decision.reason, Some(PremiumAuthorityReason::Expired));
     assert!(decision.requires_online_verification);
+
+    let continuation = authorize_capability(
+        &mut authority,
+        PremiumCapabilityKind::ContinueInFlightOperation,
+        &key_ring(),
+        context_at(1_786_449_601),
+        &mut store,
+    );
+    assert!(continuation.allowed);
+    assert_eq!(continuation.code, PremiumCapabilityCode::Continued);
+}
+
+#[test]
+fn premium_authority_clock_rollback_blocks_only_the_next_start() {
+    let mut authority = PremiumAuthority::default();
+    let mut store = MemoryTrustedTimeStore(Some(1_785_931_200));
+    renew_valid(&mut authority, 1_785_931_200, &mut store);
+
+    let decision = authorize_capability(
+        &mut authority,
+        PremiumCapabilityKind::StartNewPaidAction,
+        &key_ring(),
+        context_at(1_785_844_800),
+        &mut store,
+    );
+    assert!(!decision.allowed);
+    assert_eq!(decision.reason, Some(PremiumAuthorityReason::Contradictory));
+    assert!(decision.requires_online_verification);
 }
 
 #[test]
@@ -255,6 +283,16 @@ fn premium_authority_unavailable_contact_retains_verified_offline_authority_with
 fn premium_authority_loss_never_interrupts_active_or_in_flight_work() {
     let mut authority = PremiumAuthority::default();
     let mut store = MemoryTrustedTimeStore(Some(1_785_931_200));
+    assert_eq!(
+        renew_offline_entitlement(
+            &mut authority,
+            PremiumAuthenticatedContact::Revoked,
+            &key_ring(),
+            context_at(1_785_931_200),
+            &mut store,
+        ),
+        PremiumRenewalDisposition::Revoked
+    );
     let capabilities = [
         PremiumCapabilityKind::ContinueActiveGame,
         PremiumCapabilityKind::ContinueInFlightOperation,
@@ -278,6 +316,16 @@ fn premium_authority_loss_never_interrupts_active_or_in_flight_work() {
 fn premium_authority_safety_and_local_evidence_survive_every_authority_failure() {
     let mut authority = PremiumAuthority::default();
     let mut store = MemoryTrustedTimeStore(Some(1_785_931_200));
+    assert_eq!(
+        renew_offline_entitlement(
+            &mut authority,
+            PremiumAuthenticatedContact::Revoked,
+            &key_ring(),
+            context_at(1_785_931_200),
+            &mut store,
+        ),
+        PremiumRenewalDisposition::Revoked
+    );
     let capabilities = [
         PremiumCapabilityKind::AccountAccess,
         PremiumCapabilityKind::DiagnosticHistory,

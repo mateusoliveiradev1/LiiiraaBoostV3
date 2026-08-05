@@ -109,6 +109,31 @@ textarea {
   min-inline-size: 0;
 }
 
+.premium-authority-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-3);
+  margin: var(--lb-space-3);
+  padding: var(--lb-space-3) var(--lb-space-4);
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: var(--lb-radius-lg);
+  background: var(--lb-surface-inset);
+}
+
+.premium-authority-boundary[role='alert'] {
+  border-color: var(--lb-warning);
+}
+
+.premium-authority-boundary p {
+  max-inline-size: 72ch;
+  margin: 0;
+}
+
+.premium-authority-protected-content {
+  display: contents;
+}
+
 .desktop-activity-overlay {
   position: fixed;
   z-index: 20;

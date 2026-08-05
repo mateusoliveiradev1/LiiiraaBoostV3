@@ -10,6 +10,8 @@ mod navigation;
 mod notifications;
 #[allow(dead_code)]
 mod offline_entitlement;
+#[allow(dead_code)]
+mod premium_authority;
 mod tray;
 mod window;
 

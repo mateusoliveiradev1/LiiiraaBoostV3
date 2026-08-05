@@ -85,6 +85,17 @@ export {
   type StepUpEvidence,
 } from './identity/recovery.js';
 export {
+  decidePaidAction,
+  getPaidActionNoticeCopy,
+  type PaidActionDecision,
+  type PaidActionDecisionCode,
+  type PaidActionKind,
+  type PaidActionNotice,
+  type PaidActionNoticeLocale,
+  type PaidActionPolicyInput,
+  type PremiumAuthorityState,
+} from './entitlements/paid-action-policy.js';
+export {
   COMMERCIAL_PRICE_CATALOG,
   PRICE_CHANGE_NOTICE_MS,
   SELF_SERVICE_REFUND_WINDOW_MS,

@@ -33,6 +33,13 @@ import type {
   ShellWindowStateJson,
 } from '@liiiraa/contracts-ts';
 import {
+  decidePaidAction,
+  getPaidActionNoticeCopy,
+  type PaidActionDecision,
+  type PaidActionKind,
+  type PremiumAuthorityState,
+} from '@liiiraa/control-plane-domain';
+import {
   ContextInspector,
   CriticalStateRail,
   GoalRail,
@@ -246,6 +253,174 @@ export const getOperationalPresentation = (
     action: OPERATIONAL_PRESENTATIONS[state].action[locale],
     reason: OPERATIONAL_PRESENTATIONS[state].reason[locale],
   });
+
+const NEW_PAID_WORK_ROUTES = new Set([
+  '/competitive',
+  '/downloads',
+  '/network',
+  '/power',
+  '/security',
+  '/services',
+  '/shortcuts',
+  '/toggles',
+  '/tweaks',
+]);
+
+const premiumAuthorityStateFor = (state: ShellOperationalState): PremiumAuthorityState => {
+  switch (state) {
+    case 'expired-entitlement':
+      return 'expired';
+    case 'contradictory-evidence':
+      return 'contradictory';
+    case 'stale-evidence':
+      return 'stale';
+    case 'offline':
+      return 'offline-valid';
+    default:
+      return 'verified';
+  }
+};
+
+const paidActionKindForRoute = (pathname: string): PaidActionKind | undefined => {
+  if (/^\/session\/[^/]+\/active$/u.test(pathname)) {
+    return 'continue-active-game';
+  }
+  if (/^\/session\/[^/]+\/restoring$/u.test(pathname) || pathname === '/restoration') {
+    return 'restoration';
+  }
+  if (pathname === '/measure/sessions') {
+    return 'diagnostic-history';
+  }
+  if (pathname.startsWith('/measure/')) {
+    return 'diagnostics';
+  }
+  if (pathname.startsWith('/account/')) {
+    return 'account-access';
+  }
+  if (
+    NEW_PAID_WORK_ROUTES.has(pathname) ||
+    pathname === '/prepare' ||
+    pathname === '/games' ||
+    pathname === '/improve' ||
+    pathname.startsWith('/games/') ||
+    pathname.startsWith('/goals/') ||
+    pathname.startsWith('/recommendations/') ||
+    pathname.startsWith('/plans/')
+  ) {
+    return 'start-new-paid-action';
+  }
+  return undefined;
+};
+
+const paidActionDecisionForRoute = (
+  pathname: string,
+  operationalState: ShellOperationalState,
+): PaidActionDecision | undefined => {
+  const action = paidActionKindForRoute(pathname);
+  return action === undefined
+    ? undefined
+    : decidePaidAction({ action, authority: premiumAuthorityStateFor(operationalState) });
+};
+
+interface PremiumBoundarySurfaceProps {
+  readonly decision: PaidActionDecision | undefined;
+  readonly locale: ShellLocale;
+  readonly navigate: (pathname: string) => void;
+  readonly operationalState: ShellOperationalState;
+  readonly pathname: string;
+}
+
+const PremiumBoundarySurface = ({
+  decision,
+  locale,
+  navigate,
+  operationalState,
+  pathname,
+}: PremiumBoundarySurfaceProps): ReactNode => {
+  if (decision === undefined || operationalState === 'offline' || decision.code === 'allowed') {
+    return null;
+  }
+  if (decision.code === 'continued') {
+    return (
+      <section
+        aria-label="Sessão Premium em andamento"
+        className="premium-authority-boundary"
+        data-lb-region
+        role="status"
+      >
+        <p>
+          A sessão Premium em andamento continua até o encerramento seguro; nenhuma mudança ativa é
+          interrompida.
+        </p>
+        <LbButton onPress={() => navigate('/session/demo-session/restoring')} variant="secondary">
+          Encerrar sessão com segurança
+        </LbButton>
+      </section>
+    );
+  }
+  if (decision.code === 'safety-preserved') {
+    if (pathname === '/measure/sessions') {
+      return (
+        <section
+          aria-label="Histórico de diagnóstico"
+          className="premium-authority-boundary"
+          data-lb-region
+        >
+          <p>O histórico local permanece disponível independentemente do acesso Premium.</p>
+        </section>
+      );
+    }
+    if (pathname === '/restoration') {
+      return (
+        <section
+          aria-label="Restauração segura"
+          className="premium-authority-boundary"
+          data-lb-region
+        >
+          <LbButton onPress={() => navigate('/session/demo-session/restoring')} variant="secondary">
+            Iniciar restauração segura
+          </LbButton>
+        </section>
+      );
+    }
+    return null;
+  }
+  if (pathname === '/security') {
+    return (
+      <section
+        aria-label="Alertas de segurança"
+        className="premium-authority-boundary"
+        data-lb-region
+      >
+        <p>
+          Alertas de segurança continuam disponíveis enquanto novas ações Premium aguardam
+          verificação.
+        </p>
+      </section>
+    );
+  }
+  if (!decision.allowed) {
+    return (
+      <section
+        aria-label="Premium authorization expired"
+        className="premium-authority-boundary"
+        data-lb-region
+        role="alert"
+      >
+        <p>{getPaidActionNoticeCopy(decision.notice, locale)}</p>
+        {pathname === '/competitive' ? (
+          <LbButton isDisabled variant="primary">
+            Ativar modo competitivo
+          </LbButton>
+        ) : null}
+        <LbButton onPress={() => navigate('/account/subscription')} variant="secondary">
+          Verificar Premium online
+        </LbButton>
+      </section>
+    );
+  }
+  return null;
+};
 
 const READY_CALIBRATION = Object.freeze({
   access: 'ready',
@@ -1549,6 +1724,10 @@ const DesktopAppContent = ({
   const responsiveWidth = measuredWidth / (effectiveScale / 100);
   const layout = getResponsiveShellLayout(responsiveWidth);
   const presentation = getOperationalPresentation(operationalState, locale);
+  const paidActionDecision = paidActionDecisionForRoute(route.pathname, operationalState);
+  const paidWorkBlocked =
+    paidActionKindForRoute(route.pathname) === 'start-new-paid-action' &&
+    paidActionDecision?.allowed === false;
   const criticalState = criticalStateFor(operationalState);
   const motion = reducedMotion ?? preferences.motion === 'reduced';
   const routeActivityEvents = useMemo(
@@ -1695,13 +1874,27 @@ const DesktopAppContent = ({
           ref={workCanvasRef}
           tabIndex={-1}
         >
-          <DesktopRouteOutlet
-            activityEvents={routeActivityEvents}
+          <PremiumBoundarySurface
+            decision={paidActionDecision}
             locale={locale}
             navigate={navigate}
-            route={route}
-            scenarioId={scenarioId}
+            operationalState={operationalState}
+            pathname={route.pathname}
           />
+          <div
+            aria-disabled={paidWorkBlocked || undefined}
+            className="premium-authority-protected-content"
+            data-premium-new-work-blocked={String(paidWorkBlocked)}
+            inert={paidWorkBlocked}
+          >
+            <DesktopRouteOutlet
+              activityEvents={routeActivityEvents}
+              locale={locale}
+              navigate={navigate}
+              route={route}
+              scenarioId={scenarioId}
+            />
+          </div>
         </div>
 
         <div

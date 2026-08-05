@@ -1,6 +1,13 @@
+use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
+use serde::Deserialize;
+use serde_json::Value;
+
 use crate::offline_entitlement::{
-    OfflineEntitlementSigningKey, OfflineEntitlementVerificationContext, TrustedTimeStore,
+    OfflineEntitlementSigningKey, OfflineEntitlementVerdict, OfflineEntitlementVerificationContext,
+    TrustedTimeStore, parse_canonical_utc_seconds, verify_offline_entitlement,
 };
+
+const APPROACHING_EXPIRY_SECONDS: i64 = 86_400;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PremiumCapabilityKind {
@@ -60,28 +67,150 @@ pub struct PremiumAuthority {
     reason: Option<PremiumAuthorityReason>,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SignedClaimsTime {
+    expires_at: String,
+}
+
 impl PremiumAuthority {
     pub fn envelope_bytes(&self) -> Option<&[u8]> {
         self.envelope_bytes.as_deref()
     }
 }
 
+fn capability_decision(
+    allowed: bool,
+    code: PremiumCapabilityCode,
+    reason: Option<PremiumAuthorityReason>,
+    requires_online_verification: bool,
+) -> PremiumCapabilityDecision {
+    PremiumCapabilityDecision {
+        allowed,
+        code,
+        reason,
+        requires_online_verification,
+    }
+}
+
+fn signed_expiry_unix_seconds(document: &Value) -> Option<i64> {
+    let payload_bytes = document
+        .as_object()?
+        .get("payloadBytes")?
+        .as_str()
+        .and_then(|encoded| URL_SAFE_NO_PAD.decode(encoded).ok())?;
+    let claims: SignedClaimsTime = serde_json::from_slice(&payload_bytes).ok()?;
+    parse_canonical_utc_seconds(&claims.expires_at)
+}
+
+fn deny_start(
+    authority: &mut PremiumAuthority,
+    reason: PremiumAuthorityReason,
+) -> PremiumCapabilityDecision {
+    authority.reason = Some(reason);
+    capability_decision(
+        false,
+        PremiumCapabilityCode::OnlineVerificationRequired,
+        Some(reason),
+        true,
+    )
+}
+
 pub fn renew_offline_entitlement(
-    _authority: &mut PremiumAuthority,
-    _contact: PremiumAuthenticatedContact<'_>,
-    _key_ring: &[OfflineEntitlementSigningKey],
-    _context: OfflineEntitlementVerificationContext<'_>,
-    _trusted_time_store: &mut impl TrustedTimeStore,
+    authority: &mut PremiumAuthority,
+    contact: PremiumAuthenticatedContact<'_>,
+    key_ring: &[OfflineEntitlementSigningKey],
+    context: OfflineEntitlementVerificationContext<'_>,
+    trusted_time_store: &mut impl TrustedTimeStore,
 ) -> PremiumRenewalDisposition {
-    panic!("EXPECTED_RED[04-21-01]: Premium renewal authority is not implemented")
+    match contact {
+        PremiumAuthenticatedContact::Unavailable => {
+            if authority.envelope_bytes.is_some() {
+                PremiumRenewalDisposition::RetainedOfflineAuthority
+            } else {
+                authority.reason = Some(PremiumAuthorityReason::Stale);
+                PremiumRenewalDisposition::VerificationRequired
+            }
+        }
+        PremiumAuthenticatedContact::Revoked => {
+            authority.envelope_bytes = None;
+            authority.reason = Some(PremiumAuthorityReason::Revoked);
+            PremiumRenewalDisposition::Revoked
+        }
+        PremiumAuthenticatedContact::Renewed { envelope_bytes } => {
+            let Ok(document) = serde_json::from_slice::<Value>(envelope_bytes) else {
+                authority.envelope_bytes = None;
+                authority.reason = Some(PremiumAuthorityReason::Contradictory);
+                return PremiumRenewalDisposition::VerificationRequired;
+            };
+            if verify_offline_entitlement(&document, key_ring, context, trusted_time_store)
+                != OfflineEntitlementVerdict::Verified
+            {
+                authority.envelope_bytes = None;
+                authority.reason = Some(PremiumAuthorityReason::Contradictory);
+                return PremiumRenewalDisposition::VerificationRequired;
+            }
+
+            authority.envelope_bytes = Some(envelope_bytes.to_vec());
+            authority.reason = None;
+            PremiumRenewalDisposition::RenewedSilently
+        }
+    }
 }
 
 pub fn authorize_capability(
-    _authority: &mut PremiumAuthority,
-    _capability: PremiumCapabilityKind,
-    _key_ring: &[OfflineEntitlementSigningKey],
-    _context: OfflineEntitlementVerificationContext<'_>,
-    _trusted_time_store: &mut impl TrustedTimeStore,
+    authority: &mut PremiumAuthority,
+    capability: PremiumCapabilityKind,
+    key_ring: &[OfflineEntitlementSigningKey],
+    context: OfflineEntitlementVerificationContext<'_>,
+    trusted_time_store: &mut impl TrustedTimeStore,
 ) -> PremiumCapabilityDecision {
-    panic!("EXPECTED_RED[04-21-01]: Premium capability authority is not implemented")
+    if matches!(
+        capability,
+        PremiumCapabilityKind::ContinueActiveGame
+            | PremiumCapabilityKind::ContinueInFlightOperation
+    ) {
+        return capability_decision(true, PremiumCapabilityCode::Continued, None, false);
+    }
+    if !matches!(capability, PremiumCapabilityKind::StartNewPaidAction) {
+        return capability_decision(true, PremiumCapabilityCode::SafetyPreserved, None, false);
+    }
+
+    if authority.reason == Some(PremiumAuthorityReason::Revoked) {
+        return deny_start(authority, PremiumAuthorityReason::Revoked);
+    }
+    let Some(envelope_bytes) = authority.envelope_bytes.as_deref() else {
+        return deny_start(
+            authority,
+            authority.reason.unwrap_or(PremiumAuthorityReason::Stale),
+        );
+    };
+    let Ok(document) = serde_json::from_slice::<Value>(envelope_bytes) else {
+        authority.envelope_bytes = None;
+        return deny_start(authority, PremiumAuthorityReason::Contradictory);
+    };
+    let expiry = signed_expiry_unix_seconds(&document);
+    if verify_offline_entitlement(&document, key_ring, context, trusted_time_store)
+        != OfflineEntitlementVerdict::Verified
+    {
+        authority.envelope_bytes = None;
+        let reason = if expiry.is_some_and(|value| context.now_unix_seconds > value) {
+            PremiumAuthorityReason::Expired
+        } else {
+            PremiumAuthorityReason::Contradictory
+        };
+        return deny_start(authority, reason);
+    }
+
+    authority.reason = None;
+    if expiry.is_some_and(|value| value - context.now_unix_seconds <= APPROACHING_EXPIRY_SECONDS) {
+        capability_decision(
+            true,
+            PremiumCapabilityCode::AllowedWithExpiryWarning,
+            None,
+            false,
+        )
+    } else {
+        capability_decision(true, PremiumCapabilityCode::Allowed, None, false)
+    }
 }

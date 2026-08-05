@@ -68,6 +68,7 @@ const phase2Packages = [
     packageName: '@liiiraa/desktop',
     workspaceDependencies: [
       '@liiiraa/contracts-ts',
+      '@liiiraa/control-plane-domain',
       '@liiiraa/design-system',
       '@liiiraa/design-tokens',
       '@liiiraa/desktop-production-reference',

@@ -128,7 +128,7 @@ fn decimal(input: &[u8]) -> Option<i64> {
     })
 }
 
-fn parse_canonical_utc_seconds(value: &str) -> Option<i64> {
+pub(crate) fn parse_canonical_utc_seconds(value: &str) -> Option<i64> {
     let bytes = value.as_bytes();
     if bytes.len() != 24
         || bytes[4] != b'-'

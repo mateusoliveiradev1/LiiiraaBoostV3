@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@liiiraa/contracts-ts": "workspace:*",
+    "@liiiraa/control-plane-domain": "workspace:*",
     "@liiiraa/design-system": "workspace:*",
     "@liiiraa/design-tokens": "workspace:*",
     "@liiiraa/desktop-production-reference": "workspace:*",
