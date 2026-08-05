@@ -2,17 +2,17 @@ services:
   - type: web
     name: liiiraa-api-staging
     runtime: image
-    plan: starter
+    plan: free
     region: ohio
     autoDeploy: false
     image:
-      url: ghcr.io/liiiraa/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}
+      url: ghcr.io/mateusoliveiradev1/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: "3000"
+        value: '3000'
       - key: STAGING_IMAGE_DIGEST
         sync: false
       - key: STAGING_DATABASE_URL
@@ -40,8 +40,8 @@ services:
       - key: STAGING_BUILD_ID
         sync: false
       - key: STAGING_INVITATION_ONLY
-        value: "true"
+        value: 'true'
       - key: STAGING_PUBLIC_SIGNUP
-        value: "false"
+        value: 'false'
       - key: STAGING_CHANNEL
         value: internal

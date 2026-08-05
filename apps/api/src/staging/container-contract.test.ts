@@ -27,7 +27,10 @@ describe('daemon-free OCI artifact contract', () => {
 
   it('keeps Render manual and requires the CI-supplied immutable digest', () => {
     expect(renderManifest).toContain('autoDeploy: false');
-    expect(renderManifest).toContain('ghcr.io/liiiraa/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}');
+    expect(renderManifest).toContain('plan: free');
+    expect(renderManifest).toContain(
+      'ghcr.io/mateusoliveiradev1/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}',
+    );
     expect(renderManifest).toContain('healthCheckPath: /health');
     expect(renderManifest).toContain('STAGING_DATA_CLASSIFICATION');
     expect(renderManifest).toContain('value: synthetic');
@@ -36,19 +39,21 @@ describe('daemon-free OCI artifact contract', () => {
   });
 
   it('builds once, attests and scans the digest, then deploys that same digest', () => {
-    expect(workflow).toContain('outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true');
+    expect(workflow).toContain(
+      'outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true',
+    );
     expect(workflow).toContain('digest: ${{ steps.build.outputs.digest }}');
     expect(workflow).toContain('subject-digest: ${{ steps.build.outputs.digest }}');
-    expect(workflow).toContain('ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ needs.build.outputs.digest }}');
+    expect(workflow).toContain(
+      'ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ needs.build.outputs.digest }}',
+    );
     expect(workflow).toContain('environment: staging-api');
     expect(workflow).toContain('autoDeploy: false');
     expect(workflow).not.toMatch(/liiiraa-boost-api:[a-z0-9._-]+/iu);
   });
 
   it('pins every GitHub Action reference to a full commit SHA', () => {
-    const actions = [...workflow.matchAll(/uses:\s*[^@\s]+@([^\s]+)/gu)].map(
-      (match) => match[1],
-    );
+    const actions = [...workflow.matchAll(/uses:\s*[^@\s]+@([^\s]+)/gu)].map((match) => match[1]);
     expect(actions.length).toBeGreaterThan(0);
     expect(actions.every((reference) => /^[0-9a-f]{40}$/u.test(reference ?? ''))).toBe(true);
   });
