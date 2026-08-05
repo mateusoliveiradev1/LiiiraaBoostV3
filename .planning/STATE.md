@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-15-PLAN.md
-last_updated: "2026-08-05T04:08:42.690Z"
+stopped_at: Completed 04-30-PLAN.md
+last_updated: "2026-08-05T04:24:35.747Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 159
+  completed_plans: 160
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 19 of 35
+Plan: 20 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -198,6 +198,7 @@ _Updated after plan completion_
 | Phase 04 P12 | 20 min | 1 tasks | 10 files |
 | Phase 04 P13 | 26 min | 1 tasks | 12 files |
 | Phase 04 P15 | 14 min | 1 tasks | 9 files |
+| Phase 04 P30 | 11 min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -606,6 +607,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Publish diagnostic consent changes only after transaction commit. — State, audit, receipt, and outbox remain atomic before active streams are notified.
 - [Phase 04]: Persist diagnostic metadata only. — Diagnostic content remains temporary and consent-bound while PostgreSQL stores object identity, checksum, field class, and lifecycle state.
 - [Phase 04]: Keep legal holds separate and bounded. — Every hold requires a distinct purpose, authorizer, and explicit future expiry.
+- [Phase 04]: Persist the provider-assigned audit anchor object version outside the signed body and pin every verification read to that exact immutable version.
+- [Phase 04]: Recover ambiguous anchor writes through the deterministic immutable object key only after full port verification succeeds.
+- [Phase 04]: Keep audit API composition limited to the anchor port and schedule repository; signing, storage, retention administration, deletion, and health override stay outside ordinary credentials.
 
 ### Pending Todos
 
@@ -649,6 +653,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T04:08:42.678Z
-Stopped at: Completed 04-15-PLAN.md
+Last session: 2026-08-05T04:24:35.735Z
+Stopped at: Completed 04-30-PLAN.md
 Resume file: None
