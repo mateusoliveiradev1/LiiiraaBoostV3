@@ -56,11 +56,13 @@ const harness = Object.freeze(
         databaseUrl: requireSyntheticDatabase(configuredDatabaseUrl),
         strategy: 'synthetic-url' as const,
       }
-    : environment?.POSTGRES_TEST_STRATEGY === 'testcontainers' ||
-        environment?.CI === '1' ||
-        environment?.CI === 'true'
-      ? { databaseUrl: undefined, strategy: 'testcontainers' as const }
-      : { databaseUrl: undefined, strategy: 'unit' as const },
+    : environment?.POSTGRES_TEST_STRATEGY === 'unit'
+      ? { databaseUrl: undefined, strategy: 'unit' as const }
+      : environment?.POSTGRES_TEST_STRATEGY === 'testcontainers' ||
+          environment?.CI === '1' ||
+          environment?.CI === 'true'
+        ? { databaseUrl: undefined, strategy: 'testcontainers' as const }
+        : { databaseUrl: undefined, strategy: 'unit' as const },
 );
 
 class MemoryMigrationDatabase implements ControlPlaneMigrationDatabase {

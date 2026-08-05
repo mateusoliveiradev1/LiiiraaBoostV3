@@ -35,6 +35,11 @@ describe('PostgreSQL test harness admission', () => {
       requiresDatabaseDaemon: true,
       strategy: 'testcontainers',
     });
+    expect(createPostgresHarness({ CI: 'true', POSTGRES_TEST_STRATEGY: 'unit' })).toEqual({
+      databaseUrl: undefined,
+      requiresDatabaseDaemon: false,
+      strategy: 'unit',
+    });
     expect(createPostgresHarness({ TEST_DATABASE_URL: syntheticUrl })).toEqual({
       databaseUrl: syntheticUrl,
       requiresDatabaseDaemon: false,

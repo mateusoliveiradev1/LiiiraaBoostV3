@@ -63,9 +63,11 @@ export const requireSyntheticDatabase = (databaseUrl: string): string => {
 };
 
 const wantsTestcontainers = (environment: PostgresHarnessEnvironment): boolean =>
-  environment.POSTGRES_TEST_STRATEGY === 'testcontainers' ||
-  environment.CI === '1' ||
-  environment.CI === 'true';
+  environment.POSTGRES_TEST_STRATEGY === 'unit'
+    ? false
+    : environment.POSTGRES_TEST_STRATEGY === 'testcontainers' ||
+      environment.CI === '1' ||
+      environment.CI === 'true';
 
 const readProcessEnvironment = (): PostgresHarnessEnvironment =>
   (globalThis as unknown as { readonly process?: { readonly env?: PostgresHarnessEnvironment } })
