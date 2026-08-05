@@ -45,12 +45,13 @@ describe('real account authentication client', () => {
       method: 'GET',
     });
     const signInRequest = transport.mock.calls[1]?.[1];
+    const signInBody = typeof signInRequest?.body === 'string' ? signInRequest.body : '';
     expect(signInRequest).toMatchObject({ credentials: 'include', method: 'POST' });
-    expect(JSON.parse(String(signInRequest?.body))).toEqual({
+    expect(JSON.parse(signInBody)).toEqual({
       email: 'tester@example.com',
       password: 'CorrectHorse1',
     });
-    expect(String(signInRequest?.body)).not.toMatch(/diagnostic|device|hardware|telemetry/iu);
+    expect(signInBody).not.toMatch(/diagnostic|device|hardware|telemetry/iu);
   });
 
   it('creates an invited account and restores the cookie session through a fresh client read', async () => {
@@ -72,7 +73,8 @@ describe('real account authentication client', () => {
         password: 'CorrectHorse1',
       }),
     ).resolves.toEqual({ actor, status: 'authenticated' });
-    expect(JSON.parse(String(signupTransport.mock.calls[1]?.[1]?.body))).toEqual({
+    const signupBody = signupTransport.mock.calls[1]?.[1]?.body;
+    expect(JSON.parse(typeof signupBody === 'string' ? signupBody : '')).toEqual({
       displayName: 'Real Tester',
       email: 'tester@example.com',
       invitationToken,
@@ -112,6 +114,25 @@ describe('real account authentication client', () => {
     ).resolves.toEqual({ code: 'authentication-failed', status: 'error' });
   });
 
+  it('revokes the cookie session and leaves the client signed out', async () => {
+    const transport = vi
+      .fn<AccountAuthTransport>()
+      .mockResolvedValueOnce(response({ token: 'csrf-token-abcdefghijklmnopqrstuvwxyz0123456789' }))
+      .mockResolvedValueOnce(response(undefined, 204))
+      .mockResolvedValueOnce(response({ code: 'AUTHENTICATION_REQUIRED' }, 401));
+    const auth = createAccountAuth({
+      correlationId: () => 'account-signout-01',
+      transport,
+    });
+
+    await expect(auth.signOut()).resolves.toEqual({ status: 'signed-out' });
+    await expect(auth.session()).resolves.toEqual({ status: 'unauthenticated' });
+    expect(transport.mock.calls[1]?.[1]).toMatchObject({
+      credentials: 'include',
+      method: 'POST',
+    });
+  });
+
   it('admits only bounded base64url invitation tokens', () => {
     expect(admitInvitationToken('i'.repeat(64))).toBe('i'.repeat(64));
     expect(admitInvitationToken('used invitation')).toBeNull();
@@ -125,11 +146,16 @@ describe('production account composition', () => {
       new URL('../app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
       'utf8',
     );
-    const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const layoutSource = readFileSync(
+      new URL('../app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
     const authSource = readFileSync(new URL('./account-auth.tsx', import.meta.url), 'utf8');
 
     expect(pageSource).toContain('AccountAuthPage');
     expect(pageSource).toContain('isAccountAuthRoute');
+    expect(pageSource).not.toContain('searchParams');
+    expect(authSource).toContain('useSearchParams');
     expect(authSource).not.toContain('@liiiraa/web-preview');
     expect(layoutSource).not.toContain('Astra Player');
     expect(layoutSource).not.toContain('astra.player@example.com');

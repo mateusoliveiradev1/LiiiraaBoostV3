@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { createAccountFailureModel, type AccountFailureKind } from '../../../account-errors';
 import { AccountFailureView } from '../../../account-failure-view';
@@ -15,6 +16,7 @@ import {
   type AccountPreviewRoute,
 } from '../../../account-preview-model';
 import { AccountPreviewPage } from '../../../features/account-preview';
+import { AccountAuthPage, type AccountAuthRoute } from '../../../features/account-auth';
 import { AccountAuthorityPage } from '../../../features/account-authority';
 import { resolveAccountServerRuntimeConfig } from '../../../account-runtime-server';
 
@@ -24,6 +26,9 @@ type AccountResponsibilityPageProps = Readonly<{
     responsibility?: readonly string[];
   }>;
 }>;
+
+const isAccountAuthRoute = (routeId: AccountPreviewRoute): routeId is AccountAuthRoute =>
+  routeId === 'account-sign-in' || routeId === 'account-sign-up';
 
 const pathnameFor = (locale: WebLocale, responsibility: readonly string[] | undefined): string =>
   `/${locale}/${responsibility?.join('/') ?? ''}`.replace(/\/$/u, '');
@@ -123,9 +128,21 @@ export default async function AccountResponsibilityPage({
     );
   }
   const runtime = resolveAccountServerRuntimeConfig();
-  return runtime.kind === 'preview' ? (
-    <AccountPreviewPage locale={locale} routeId={resolution.routeId} />
-  ) : (
+  if (runtime.kind === 'preview') {
+    return <AccountPreviewPage locale={locale} routeId={resolution.routeId} />;
+  }
+  if (isAccountAuthRoute(resolution.routeId)) {
+    return (
+      <Suspense fallback={null}>
+        <AccountAuthPage
+          authorityBaseUrl={runtime.authorityBaseUrl}
+          locale={locale}
+          routeId={resolution.routeId}
+        />
+      </Suspense>
+    );
+  }
+  return (
     <AccountAuthorityPage
       authorityBaseUrl={runtime.authorityBaseUrl}
       locale={locale}

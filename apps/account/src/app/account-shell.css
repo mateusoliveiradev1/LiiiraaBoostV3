@@ -1311,6 +1311,19 @@ button:focus-visible,
   margin-block-start: 0.15em;
 }
 
+.account-auth-invitation {
+  margin: 0;
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-critical);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-inset);
+}
+
+.account-auth-invitation[data-valid='true'] {
+  border-color: var(--lb-success);
+}
+
 .account-auth-passwords {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

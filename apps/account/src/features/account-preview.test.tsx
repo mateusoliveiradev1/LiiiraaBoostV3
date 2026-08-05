@@ -39,10 +39,10 @@ const publicPolicies = {
       'utf8',
     ),
   ) as {
-    documents: Array<{
+    documents: {
       kind: string;
       privacyDetails?: {
-        practices: Array<{
+        practices: {
           data: string;
           id: string;
           purpose: string;
@@ -50,9 +50,9 @@ const publicPolicies = {
           revocation: string;
           sharing: string;
           title: string;
-        }>;
+        }[];
       };
-    }>;
+    }[];
   },
   'pt-BR': JSON.parse(
     readFileSync(
@@ -60,10 +60,10 @@ const publicPolicies = {
       'utf8',
     ),
   ) as {
-    documents: Array<{
+    documents: {
       kind: string;
       privacyDetails?: {
-        practices: Array<{
+        practices: {
           data: string;
           id: string;
           purpose: string;
@@ -71,9 +71,9 @@ const publicPolicies = {
           revocation: string;
           sharing: string;
           title: string;
-        }>;
+        }[];
       };
-    }>;
+    }[];
   },
 } as const;
 const ACCOUNT_ENTRY_ROUTE_IDS = [
@@ -288,8 +288,9 @@ describe('authored overview and Profile workspaces', () => {
     });
     expect(layoutSource).toContain("navigation: 'Sua conta'");
     expect(layoutSource).toContain("navigation: 'Your account'");
-    expect(layoutSource).toContain("mfa: 'MFA — configurada'");
-    expect(layoutSource).toContain("mfa: 'MFA — configured'");
+    expect(layoutSource).toContain('<AccountAuthorityInspector');
+    expect(layoutSource).not.toContain("mfa: 'MFA — configurada'");
+    expect(layoutSource).not.toContain("mfa: 'MFA — configured'");
     expect(layoutSource).not.toMatch(/Account responsibilities|Responsabilidades da conta/u);
   });
 

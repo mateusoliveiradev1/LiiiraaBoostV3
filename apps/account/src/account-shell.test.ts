@@ -118,8 +118,8 @@ describe('account shell', () => {
     expect(layoutSource).toContain(
       '<span className="account-brand__surface">{copy.surface}</span>',
     );
-    expect(layoutSource).toContain("accountState: 'Conta protegida'");
-    expect(layoutSource).toContain("accountState: 'Protected account'");
+    expect(layoutSource).toContain('<AccountIdentityChrome');
+    expect(layoutSource).not.toContain('Astra Player');
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('account-header__support');
     expect(navigationSource).toContain('href={supportHref}');
@@ -221,8 +221,8 @@ describe('account shell', () => {
     expect(styles).toMatch(
       /\.account-auth-shell\s*\{[\s\S]*min-block-size:\s*100dvh[\s\S]*inline-size:\s*100%/u,
     );
-    expect(layoutSource).toContain("accountState: 'Conta protegida'");
-    expect(layoutSource).toContain("accountState: 'Protected account'");
+    expect(layoutSource).toContain('<AccountIdentityChrome');
+    expect(layoutSource).not.toContain('astra.player@example.com');
   });
 
   it('uses explicit Phosphor semantics for every authenticated responsibility', () => {
@@ -410,7 +410,7 @@ describe('account shell', () => {
     );
 
     expect(layoutSource).toContain('inspectorLabel={copy.inspectorLabel}');
-    expect(layoutSource).toContain('<AccountInspector');
+    expect(layoutSource).toContain('<AccountAuthorityInspector');
     expect(inspectorSource).not.toContain('account-inspector__account');
     expect(inspectorSource).toContain('account-inspector__machine');
     expect(navigationSource).toContain('account-header__route');

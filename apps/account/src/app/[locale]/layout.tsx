@@ -20,10 +20,11 @@ import {
   type AccountNavigationGroup,
   type AccountNavigationItem,
 } from '../../account-navigation';
-import { AccountInspector } from '../../account-inspector';
 import { createAccountFailureModel } from '../../account-errors';
 import { ProductLockup } from '../../account-product-lockup';
 import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
+import { AccountIdentityChrome } from '../../features/account-auth';
+import { AccountAuthorityInspector } from '../../features/account-authority';
 import { accountWebComposition } from '../../index';
 
 type AccountLocaleLayoutProps = Readonly<{
@@ -83,8 +84,6 @@ const NAVIGATION_ICONS = Object.freeze({
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
-    accountIdentity: 'astra.player@example.com',
-    accountState: 'Conta protegida',
     authBody:
       'Gerencie sua assinatura, mantenha seus dispositivos protegidos e acesse o aplicativo para Windows.',
     authEyebrow: 'Sua conta Liiiraa Boost',
@@ -92,19 +91,13 @@ const COPY = Object.freeze({
     authTitle: 'Seu desempenho começa com uma conta confiável.',
     currentTask: 'Seção atual',
     deviceAction: 'Gerenciar PC',
-    deviceDetail: 'Windows 11 · identidade protegida',
     deviceTitle: 'Dispositivo',
     help: 'Ajuda',
     inspectorLabel: 'Resumo contextual da conta',
-    mfa: 'MFA — configurada',
     navigation: 'Sua conta',
     onboarding: 'Primeiros passos',
-    passkey: 'Chave de acesso — não configurada',
     planAction: 'Gerenciar assinatura',
-    planDetail: 'R$ 29,90/mês · R$ 249,90/ano',
-    planPeriod: 'Mensal ou anual',
     planSection: 'Plano',
-    planTitle: 'Premium · Modo Competitivo',
     preview: 'Sua conta reúne plano, segurança, dispositivo, downloads e suporte.',
     publicLink: 'Voltar ao site',
     securityAction: 'Configurar segurança',
@@ -118,8 +111,6 @@ const COPY = Object.freeze({
     surface: 'Conta',
   }),
   en: Object.freeze({
-    accountIdentity: 'astra.player@example.com',
-    accountState: 'Protected account',
     authBody:
       'Manage your subscription, keep devices protected, and access the Windows application.',
     authEyebrow: 'Your Liiiraa Boost account',
@@ -127,19 +118,13 @@ const COPY = Object.freeze({
     authTitle: 'Your performance starts with an account you can trust.',
     currentTask: 'Current section',
     deviceAction: 'Manage PC',
-    deviceDetail: 'Windows 11 · protected identity',
     deviceTitle: 'Device',
     help: 'Help',
     inspectorLabel: 'Contextual account summary',
-    mfa: 'MFA — configured',
     navigation: 'Your account',
     onboarding: 'Getting started',
-    passkey: 'Passkey — not configured',
     planAction: 'Manage subscription',
-    planDetail: 'US$ 6.99/month · US$ 59.99/year',
-    planPeriod: 'Monthly or annual',
     planSection: 'Plan',
-    planTitle: 'Premium · Competitive Mode',
     preview: 'Your account brings plan, security, device, downloads, and support together.',
     publicLink: 'Back to website',
     securityAction: 'Set up security',
@@ -226,7 +211,9 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   }
 
   setRequestLocale(locale);
-  const webComposition = accountWebComposition(resolveAccountServerRuntimeConfig().kind);
+  const runtime = resolveAccountServerRuntimeConfig();
+  const webComposition = accountWebComposition(runtime.kind);
+  const authorityBaseUrl = runtime.kind === 'production' ? runtime.authorityBaseUrl : '';
   const copy = COPY[locale];
   const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigationGroups = NAVIGATION_GROUPS.map((group): AccountNavigationGroup => ({
@@ -255,7 +242,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
     },
   ];
   const authenticatedAction: AccountNavigationItem = {
-    href: localizedAuthHref('account-sign-in', locale),
+    href: `${localizedAuthHref('account-sign-in', locale)}?action=sign-out`,
     icon: 'logout',
     label: copy.signOut,
   };
@@ -302,21 +289,12 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           authRouteItems={authRouteItems}
           fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
           groups={navigationGroups}
-          identity={
-            <>
-              <span aria-hidden="true" className="account-identity__avatar">
-                AP
-              </span>
-              <span className="account-identity__copy">
-                <strong>Astra Player</strong>
-                <span>{copy.accountIdentity}</span>
-              </span>
-            </>
-          }
+          identity={<AccountIdentityChrome authorityBaseUrl={authorityBaseUrl} locale={locale} />}
           inspector={
-            <AccountInspector
-              copy={copy}
+            <AccountAuthorityInspector
+              authorityBaseUrl={authorityBaseUrl}
               deviceHref={localizedHref('account-device', locale)}
+              locale={locale}
               securityHref={localizedHref('account-security', locale)}
               subscriptionHref={localizedHref('account-subscription', locale)}
               supportHref={localizedHref('account-support', locale)}

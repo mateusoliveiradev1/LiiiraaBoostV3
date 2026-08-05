@@ -1,7 +1,7 @@
 'use client';
 
 import { LbButton, LbTextField, ProductIcon } from '@liiiraa/design-system';
-import type { WebLocale } from '@liiiraa/web-core';
+import { routeHref, type WebLocale } from '@liiiraa/web-core';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -10,6 +10,7 @@ import {
   type AccountAuthorityReadResult,
   type AccountProfileDraft,
 } from '../account-authority';
+import { primeAccountCsrfToken, readAccountCsrfToken } from '../account-auth';
 import {
   advanceAccountMutationPhase,
   getAccountPreviewMetadata,
@@ -73,15 +74,6 @@ const copy = Object.freeze({
   }),
 });
 
-const readCsrfToken = (): string => {
-  const token = document.cookie
-    .split(';')
-    .map((entry) => entry.trim())
-    .find((entry) => entry.startsWith('liiiraa-csrf='))
-    ?.slice('liiiraa-csrf='.length);
-  return token === undefined ? 'missing-csrf-token' : decodeURIComponent(token);
-};
-
 const correlationId = (): string => `account-web-${globalThis.crypto.randomUUID()}`;
 
 const AuthorityStatus = ({
@@ -127,7 +119,7 @@ const ProfileAuthority = ({
       createAccountAuthority({
         baseUrl: authorityBaseUrl,
         correlationId,
-        csrfToken: readCsrfToken,
+        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
       }),
     [authorityBaseUrl],
   );
@@ -137,6 +129,10 @@ const ProfileAuthority = ({
   };
   const save = async () => {
     setPhase(advanceAccountMutationPhase('reviewing', 'issue'));
+    if (!(await primeAccountCsrfToken(authorityBaseUrl))) {
+      setPhase(advanceAccountMutationPhase('issuing', 'error'));
+      return;
+    }
     const result = await authority.updateProfile({
       displayName,
       localDraftToken: `profile-${globalThis.crypto.randomUUID()}`,
@@ -359,7 +355,7 @@ export const AccountAuthorityPage = ({
       createAccountAuthority({
         baseUrl: authorityBaseUrl,
         correlationId,
-        csrfToken: readCsrfToken,
+        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
       }),
     [authorityBaseUrl],
   );
@@ -376,6 +372,8 @@ export const AccountAuthorityPage = ({
   }, [authority]);
 
   const metadata = getAccountPreviewMetadata(locale, routeId);
+  const signInRoute = routeHref('account-sign-in', { locale });
+  if (!signInRoute.ok) throw new Error('ACCOUNT_SIGN_IN_ROUTE_UNAVAILABLE');
   if (result === null) {
     return (
       <article aria-busy="true">
@@ -388,7 +386,18 @@ export const AccountAuthorityPage = ({
     return (
       <article>
         <h1>{metadata.title}</h1>
-        <p role="alert">{copy[locale].error}</p>
+        {'code' in result && result.code === 'unauthorized' ? (
+          <>
+            <p role="status">
+              {locale === 'pt-BR'
+                ? 'Entre para acessar esta área da conta.'
+                : 'Sign in to access this account area.'}
+            </p>
+            <a href={signInRoute.value}>{locale === 'pt-BR' ? 'Entrar' : 'Sign in'}</a>
+          </>
+        ) : (
+          <p role="alert">{copy[locale].error}</p>
+        )}
       </article>
     );
   }
@@ -417,5 +426,155 @@ export const AccountAuthorityPage = ({
         <ProjectionResponsibility locale={locale} projection={projection} routeId={routeId} />
       )}
     </article>
+  );
+};
+
+export const AccountAuthorityInspector = ({
+  authorityBaseUrl,
+  deviceHref,
+  locale,
+  securityHref,
+  subscriptionHref,
+  supportHref,
+}: Readonly<{
+  authorityBaseUrl: string;
+  deviceHref: string;
+  locale: WebLocale;
+  securityHref: string;
+  subscriptionHref: string;
+  supportHref: string;
+}>) => {
+  const [result, setResult] = useState<AccountAuthorityReadResult | null>(null);
+  const authority = useMemo(
+    () =>
+      createAccountAuthority({
+        baseUrl: authorityBaseUrl,
+        correlationId,
+        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
+      }),
+    [authorityBaseUrl],
+  );
+  useEffect(() => {
+    let active = true;
+    void authority.project().then((next) => {
+      if (active) setResult(next);
+    });
+    return () => {
+      active = false;
+    };
+  }, [authority]);
+
+  if (result === null) {
+    return <p role="status">{locale === 'pt-BR' ? 'Carregando resumo…' : 'Loading summary…'}</p>;
+  }
+  if (!('projection' in result)) {
+    return (
+      <section className="account-inspector__section">
+        <span className="account-inspector__label">{locale === 'pt-BR' ? 'Conta' : 'Account'}</span>
+        <h2>{locale === 'pt-BR' ? 'Sessão necessária' : 'Session required'}</h2>
+        <p>
+          {locale === 'pt-BR'
+            ? 'Entre para carregar plano, dispositivo e segurança.'
+            : 'Sign in to load plan, device, and security.'}
+        </p>
+      </section>
+    );
+  }
+  const projection = result.projection;
+  const view = mapAccountAuthorityProjection(projection, new Date().toISOString());
+  return (
+    <div className="account-inspector__content" data-authority-state={result.status}>
+      <section className="account-inspector__section">
+        <span className="account-inspector__label">{locale === 'pt-BR' ? 'Plano' : 'Plan'}</span>
+        <h2>{view.billing.plan === 'premium' ? 'Premium' : 'Free'}</h2>
+        <p>{projection.subscription.state}</p>
+        <p>
+          {projection.invoices.length === 0
+            ? locale === 'pt-BR'
+              ? 'Nenhuma cobrança ou fatura.'
+              : 'No charges or invoices.'
+            : `${String(projection.invoices.length)} ${locale === 'pt-BR' ? 'fatura(s)' : 'invoice(s)'}`}
+        </p>
+        <a href={subscriptionHref}>
+          {locale === 'pt-BR' ? 'Ver assinatura' : 'View subscription'}{' '}
+          <ProductIcon name="arrowRight" size={16} />
+        </a>
+      </section>
+      <section className="account-inspector__section">
+        <span className="account-inspector__label">
+          {locale === 'pt-BR' ? 'Dispositivo' : 'Device'}
+        </span>
+        <div className="account-inspector__fact">
+          <ProductIcon name="device" size={20} />
+          <span>
+            <strong className="account-inspector__machine">
+              {view.device.label ?? (locale === 'pt-BR' ? 'Nenhum PC ativo' : 'No active PC')}
+            </strong>
+            <span>
+              {view.device.isCurrent
+                ? locale === 'pt-BR'
+                  ? 'Vínculo ativo'
+                  : 'Active binding'
+                : locale === 'pt-BR'
+                  ? 'Ainda não configurado'
+                  : 'Not configured yet'}
+            </span>
+          </span>
+        </div>
+        <a href={deviceHref}>
+          {locale === 'pt-BR' ? 'Gerenciar PC' : 'Manage PC'}{' '}
+          <ProductIcon name="arrowRight" size={16} />
+        </a>
+      </section>
+      <section className="account-inspector__section">
+        <span className="account-inspector__label">
+          {locale === 'pt-BR' ? 'Segurança' : 'Security'}
+        </span>
+        <ul className="account-inspector__list">
+          <li>
+            <ProductIcon name="key" size={18} />
+            <span>
+              {view.security.passkey
+                ? locale === 'pt-BR'
+                  ? 'Chave de acesso configurada'
+                  : 'Passkey configured'
+                : locale === 'pt-BR'
+                  ? 'Chave de acesso não configurada'
+                  : 'Passkey not configured'}
+            </span>
+          </li>
+          <li>
+            <ProductIcon name="lock" size={18} />
+            <span>
+              {view.security.mfa
+                ? 'MFA'
+                : locale === 'pt-BR'
+                  ? 'MFA não configurada'
+                  : 'MFA not configured'}
+            </span>
+          </li>
+        </ul>
+        <a href={securityHref}>
+          {locale === 'pt-BR' ? 'Configurar segurança' : 'Configure security'}{' '}
+          <ProductIcon name="arrowRight" size={16} />
+        </a>
+      </section>
+      <section className="account-inspector__section account-inspector__support">
+        <span className="account-inspector__label">
+          {locale === 'pt-BR' ? 'Suporte' : 'Support'}
+        </span>
+        <p>
+          {view.support.openCount === 0
+            ? locale === 'pt-BR'
+              ? 'Nenhum caso aberto.'
+              : 'No open cases.'
+            : `${String(view.support.openCount)} ${locale === 'pt-BR' ? 'caso(s) aberto(s)' : 'open case(s)'}`}
+        </p>
+        <a href={supportHref}>
+          {locale === 'pt-BR' ? 'Abrir suporte' : 'Open support'}{' '}
+          <ProductIcon name="arrowRight" size={16} />
+        </a>
+      </section>
+    </div>
   );
 };

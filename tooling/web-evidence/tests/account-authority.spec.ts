@@ -165,6 +165,23 @@ const installAccountAuthority = async (
   let current = options.projection ?? accountProjection();
   const requests: Readonly<{ body: unknown; headers: Record<string, string>; method: string }>[] =
     [];
+  await page.route('**/v1/identity/csrf', (route) =>
+    fulfillJson(route, { token: 'csrf-browser-evidence-token-abcdefghijklmnopqrstuvwxyz' }),
+  );
+  await page.route('**/v1/identity/session', (route) =>
+    fulfillJson(route, {
+      actor: {
+        accountId: 'account-01',
+        displayName: current.account.displayName,
+        email: 'tester@example.com',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+        locale: current.account.locale,
+        role: 'tester',
+        sessionId: 'session-01',
+        sessionKind: 'web',
+      },
+    }),
+  );
   await page.context().addCookies([
     {
       name: 'liiiraa-csrf',
@@ -223,7 +240,9 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] projects account
 
   expect(authority.requests).toHaveLength(1);
   expect(authority.requests[0]?.headers['if-match']).toBe('"account-account-01-v7"');
-  expect(authority.requests[0]?.headers['x-csrf-token']).toBe('csrf-browser-evidence');
+  expect(authority.requests[0]?.headers['x-csrf-token']).toBe(
+    'csrf-browser-evidence-token-abcdefghijklmnopqrstuvwxyz',
+  );
   expect(authority.requests[0]?.body).toMatchObject({
     command: { action: 'update-profile', expectedVersion: '7' },
     patch: { displayName: 'Liiiraa Authority', locale: 'en' },
@@ -272,9 +291,13 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] exposes security
     );
 
     await page.goto(`/${locale}/account/subscription`);
-    await expect(page.getByRole('status')).toContainText(
-      locale === 'en' ? 'Pending reconciliation' : 'Reconciliação pendente',
-    );
+    await expect(
+      page
+        .getByRole('region', {
+          name: locale === 'en' ? 'Subscription authority' : 'Autoridade da assinatura',
+        })
+        .getByRole('status'),
+    ).toContainText(locale === 'en' ? 'Pending reconciliation' : 'Reconciliação pendente');
     await expect(page.getByRole('main')).toContainText(
       locale === 'en' ? 'Cancellation scheduled' : 'Cancelamento agendado',
     );
