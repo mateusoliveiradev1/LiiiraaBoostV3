@@ -22,3 +22,5 @@ export * from './use-cases/delete-account.js';
 export * from './use-cases/anchor-audit-chain.js';
 export * from './use-cases/assume-admin-role.js';
 export * from './use-cases/execute-admin-command.js';
+export * from './use-cases/project-account.js';
+export * from './use-cases/update-account.js';
