@@ -115,6 +115,11 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain('broader-beta-promotion');
   expect(workflow).toContain('OWNED_CALLBACK_ORIGINS');
   expect(workflow).toContain('OWNED_EMAIL_IDENTITY');
+  expect(workflow).toContain("LIIIRAA_ACCOUNT_PREVIEW: 'false'");
+  expect(workflow).toContain("LIIIRAA_ADMIN_PREVIEW: 'false'");
+  expect(workflow).toContain('LIIIRAA_ACCOUNT_ORIGIN: account.origin');
+  expect(workflow).toContain('needs: [verify-contracts, deploy-account]');
+  expect(workflow).toContain('src/staging/provision-invitations.test.ts');
   expect(workflow).not.toContain('DATABASE_URL');
   expect(workflow).not.toContain('STRIPE_SECRET_KEY');
 });

@@ -33,7 +33,6 @@ const actor: IdentityActor = {
 const authority = () => {
   let active = true;
   return {
-    issueInvitation: vi.fn(),
     signUp: vi.fn(() => Promise.resolve({ ok: true as const, actor, credential })),
     signIn: vi.fn(() => Promise.resolve({ ok: true as const, actor, credential })),
     resolveCredential: vi.fn((candidate: string) =>

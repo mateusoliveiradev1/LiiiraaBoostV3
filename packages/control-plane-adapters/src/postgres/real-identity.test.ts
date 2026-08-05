@@ -40,7 +40,7 @@ class MemoryIdentityPersistence implements IdentityPersistence {
       }
       if (
         Date.parse(invitation.expiresAt) <= Date.parse(input.now) ||
-        invitation.email !== input.identity.email
+        invitation.emailDigest !== digestOpaqueToken(input.identity.email)
       ) {
         return Promise.resolve(null);
       }
@@ -210,6 +210,12 @@ describe('real invitation-only identity authority', () => {
     expect(invitation.token).not.toBe(invitation.tokenDigest);
     expect(persistence.invitations.has(invitation.token)).toBe(false);
     expect(persistence.invitations.has(digestOpaqueToken(invitation.token))).toBe(true);
+    expect(persistence.invitations.get(digestOpaqueToken(invitation.token))?.emailDigest).toBe(
+      digestOpaqueToken('owner@example.com'),
+    );
+    expect(JSON.stringify([...persistence.invitations.values()])).not.toContain(
+      'owner@example.com',
+    );
 
     const attempts = await Promise.all([
       firstProcess.signUp({

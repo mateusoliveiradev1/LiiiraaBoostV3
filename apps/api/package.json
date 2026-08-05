@@ -6,6 +6,7 @@
   "scripts": {
     "db:migrate": "node --experimental-strip-types ../../packages/control-plane-adapters/src/postgres/staging-migration.ts",
     "db:migrate:test": "pnpm --dir ../../packages/control-plane-adapters exec vitest --run src/postgres/database.test.ts src/postgres/migrations.test.ts src/postgres/staging-migration.test.ts",
+    "staging:provision-invitations": "node --experimental-strip-types src/staging/provision-invitations.ts",
     "test": "node ./scripts/run-tests.mjs",
     "test:postgres": "vitest --config vitest.config.ts --run --mode postgres"
   },

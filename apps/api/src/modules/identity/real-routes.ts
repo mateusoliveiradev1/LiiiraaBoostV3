@@ -18,7 +18,6 @@ export type RealIdentityRouteAuthority = Pick<
   | 'approveDesktopAuthorization'
   | 'beginDesktopAuthorization'
   | 'exchangeDesktopAuthorization'
-  | 'issueInvitation'
   | 'resolveCredential'
   | 'signIn'
   | 'signOut'

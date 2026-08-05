@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 
 import { describe, expect, it, vi } from 'vitest';
 
@@ -20,15 +21,18 @@ const digest = (value: string): string => createHash('sha256').update(value).dig
 describe('secret-driven staging invitation provisioning', () => {
   it('creates exactly three single-use tester invitations and exposes raw URLs only to protected output', async () => {
     const committed: string[] = [];
+    const commit = vi.fn((payload: string): Promise<void> => {
+      committed.push(payload);
+      return Promise.resolve();
+    });
     const output: ProtectedInvitationOutput = {
       abort: vi.fn(() => Promise.resolve()),
-      commit: vi.fn((payload) => {
-        committed.push(payload);
-        return Promise.resolve();
-      }),
+      commit,
     };
     const database = {
-      query: vi.fn(() => Promise.resolve({ rowCount: 0, rows: [] })),
+      query: vi.fn((_statement: string, _values?: readonly unknown[]) =>
+        Promise.resolve({ rowCount: 0, rows: [] }),
+      ),
     };
     let tokenSequence = 0;
     const invitations = {
@@ -64,7 +68,7 @@ describe('secret-driven staging invitation provisioning', () => {
     const queryValues = database.query.mock.calls.map(([, values]) => values);
     expect(queryValues).toEqual(emails.map((email) => [digest(email), '2030-01-15T12:00:00.000Z']));
     expect(JSON.stringify(queryValues)).not.toContain('@');
-    expect(output.commit).toHaveBeenCalledTimes(1);
+    expect(commit).toHaveBeenCalledTimes(1);
     expect(committed).toHaveLength(1);
     const protectedPayload = JSON.parse(committed[0] ?? '{}') as {
       invitations?: readonly { email?: string; invitationUrl?: string }[];
@@ -81,7 +85,7 @@ describe('secret-driven staging invitation provisioning', () => {
 
   it('is idempotent and never reconstructs or reveals prior active invitation tokens', async () => {
     const database = {
-      query: vi.fn(() =>
+      query: vi.fn((_statement: string, _values?: readonly unknown[]) =>
         Promise.resolve({ rowCount: 1, rows: [{ token_digest: 'a'.repeat(64) }] }),
       ),
     };
@@ -104,7 +108,11 @@ describe('secret-driven staging invitation provisioning', () => {
   it('rejects anything other than three unique valid emails and a protected absolute output path', async () => {
     const dependencies = {
       clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
-      database: { query: vi.fn() },
+      database: {
+        query: vi.fn((_statement: string, _values?: readonly unknown[]) =>
+          Promise.resolve({ rowCount: 0, rows: [] }),
+        ),
+      },
       invitations: { issueInvitation: vi.fn() },
       openProtectedOutput: vi.fn(),
       repositoryRoot: 'C:\\workspace\\liiiraa-boost',
@@ -126,5 +134,14 @@ describe('secret-driven staging invitation provisioning', () => {
       );
     }
     expect(dependencies.database.query).not.toHaveBeenCalled();
+  });
+
+  it('keeps invitation issuance outside the ordinary HTTP route authority', async () => {
+    const routes = await readFile(
+      new URL('../modules/identity/real-routes.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(routes).not.toMatch(/\|\s*'issueInvitation'/u);
   });
 });

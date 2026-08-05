@@ -8,7 +8,7 @@ export type IdentityLocale = 'pt-BR' | 'en';
 
 export interface InvitationRecord {
   readonly id: string;
-  readonly email: string;
+  readonly emailDigest: string;
   readonly tokenDigest: string;
   readonly role: IdentityRole;
   readonly issuedAt: string;
@@ -329,7 +329,7 @@ export const createRealIdentityAuthority = (
       const token = randomToken(48);
       const record: InvitationRecord = {
         id: ids.next(),
-        email,
+        emailDigest: digestOpaqueToken(email),
         tokenDigest: digestOpaqueToken(token),
         role: input.role,
         issuedAt: now,
@@ -676,7 +676,14 @@ export const createPostgresIdentityPersistence = (
       `INSERT INTO identity_invitations
        (id, email, token_digest, role, issued_at, expires_at, redeemed_at, redeemed_by)
        VALUES ($1, $2, $3, $4, $5, $6, NULL, NULL)`,
-      [record.id, record.email, record.tokenDigest, record.role, record.issuedAt, record.expiresAt],
+      [
+        record.id,
+        record.emailDigest,
+        record.tokenDigest,
+        record.role,
+        record.issuedAt,
+        record.expiresAt,
+      ],
     );
   },
 
@@ -697,7 +704,7 @@ export const createPostgresIdentityPersistence = (
         return null;
       }
       if (
-        normalizeEmail(row.email) !== input.identity.email ||
+        row.email !== digestOpaqueToken(input.identity.email) ||
         Date.parse(iso(row.expires_at)) <= Date.parse(input.now)
       ) {
         return null;
