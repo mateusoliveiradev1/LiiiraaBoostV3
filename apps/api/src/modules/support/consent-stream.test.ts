@@ -1,4 +1,8 @@
 import type { DiagnosticConsentJson } from '@liiiraa/contracts-ts';
+import type {
+  DiagnosticConsentRecord,
+  DiagnosticFieldClass,
+} from '@liiiraa/control-plane-application';
 import { describe, expect, it } from 'vitest';
 
 const CONSENT_STREAM_RED_OWNER = '04-09-01';
@@ -22,19 +26,13 @@ const projection = Object.freeze({
   expiresAt: '2026-08-07T18:00:00.000Z',
 } as const satisfies DiagnosticConsentJson);
 
-type ConsentRecord = Readonly<{
-  caseId: string;
-  fieldClasses: readonly string[];
-  projection: DiagnosticConsentJson;
-}>;
-
-const activeConsent: ConsentRecord = Object.freeze({
+const activeConsent: DiagnosticConsentRecord = Object.freeze({
   caseId: 'case-synthetic-1',
   fieldClasses: Object.freeze([
     'hardware-summary',
     FIELD_CLASS,
     'optimization-plan-receipt',
-  ]),
+  ] satisfies readonly DiagnosticFieldClass[]),
   projection,
 });
 
@@ -44,32 +42,35 @@ const expectedConsentStreamRed = (id: string, behavior: string): never => {
 
 const loadAdapter = async () => {
   try {
-    const adapterPackage = '@liiiraa/control-plane-adapters';
-    return await import(adapterPackage);
-  } catch {
-    return expectedConsentStreamRed(
-      'adapter-absent',
-      'the owner must implement continuously revalidated consent-bound diagnostic streaming',
-    );
+    return await import('@liiiraa/control-plane-adapters');
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Cannot find')) {
+      return expectedConsentStreamRed(
+        'adapter-absent',
+        'the owner must implement continuously revalidated consent-bound diagnostic streaming',
+      );
+    }
+    throw error;
   }
 };
 
 class MemoryConsentAuthority {
-  private record: ConsentRecord | undefined;
+  private record: DiagnosticConsentRecord | undefined;
   private readonly listeners = new Set<() => void>();
 
-  constructor(record: ConsentRecord | undefined = activeConsent) {
+  constructor(record: DiagnosticConsentRecord | undefined = activeConsent) {
     this.record = record;
   }
 
-  readonly readConsent = async (): Promise<ConsentRecord | undefined> => this.record;
+  readonly readConsent = (): Promise<DiagnosticConsentRecord | undefined> =>
+    Promise.resolve(this.record);
 
   readonly subscribe = (_consentId: string, listener: () => void): (() => void) => {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   };
 
-  update(record: ConsentRecord | undefined): void {
+  update(record: DiagnosticConsentRecord | undefined): void {
     this.record = record;
     for (const listener of this.listeners) listener();
   }
@@ -113,14 +114,15 @@ class MemoryDiagnosticStorage {
     this.blockAfter = index;
   }
 
-  readonly openField = async () => {
+  openField = () => {
     this.openCount += 1;
     let index = 0;
-    return {
+    return Promise.resolve({
       descriptor: this.storedDescriptor,
-      dispose: async () => {
+      dispose: () => {
         this.disposed = true;
         for (const buffer of this.sourceBuffers) buffer.fill(0);
+        return Promise.resolve();
       },
       read: async (signal: AbortSignal): Promise<Uint8Array | null> => {
         this.openedSignals.push(signal);
@@ -137,32 +139,35 @@ class MemoryDiagnosticStorage {
         }
         const chunk = this.chunks[index];
         index += 1;
-        return chunk === undefined ? null : chunk;
+        return chunk ?? null;
       },
-    };
+    });
   };
 }
 
 class MemoryAudit {
   readonly receipts: unknown[] = [];
 
-  readonly appendAccessReceipt = async (receipt: unknown): Promise<void> => {
+  readonly appendAccessReceipt = (receipt: unknown): Promise<void> => {
     this.receipts.push(receipt);
+    return Promise.resolve();
   };
 }
 
 const contentInspector = Object.freeze({
-  inspectAndRedact: async (input: Readonly<{ bytes: Uint8Array }>) => {
+  inspectAndRedact: (input: Readonly<{ bytes: Uint8Array }>) => {
     const decoded = new TextDecoder('utf-8', { fatal: true }).decode(input.bytes);
     if (decoded.includes('malware-signature')) {
-      return Object.freeze({ code: 'CONTENT_REJECTED', ok: false as const });
+      return Promise.resolve(Object.freeze({ code: 'CONTENT_REJECTED', ok: false as const }));
     }
-    return Object.freeze({
-      bytes: new TextEncoder().encode(decoded.replace(/token=[^\s]+/gu, 'token=[redacted]')),
-      ok: true as const,
-      redactionCount: decoded.includes('token=') ? 1 : 0,
-      scanVerdict: 'clean' as const,
-    });
+    return Promise.resolve(
+      Object.freeze({
+        bytes: new TextEncoder().encode(decoded.replace(/token=[^\s]+/gu, 'token=[redacted]')),
+        ok: true as const,
+        redactionCount: decoded.includes('token=') ? 1 : 0,
+        scanVerdict: 'clean' as const,
+      }),
+    );
   },
 });
 
@@ -201,7 +206,7 @@ const openStream = async (
   return { audit, authority, result, storage };
 };
 
-const revokedConsent = (): ConsentRecord =>
+const revokedConsent = (): DiagnosticConsentRecord =>
   Object.freeze({
     ...activeConsent,
     projection: Object.freeze({
@@ -302,7 +307,9 @@ describe('continuous consent and temporary-data lifecycle', () => {
     authority.update(activeConsent);
 
     await expect(pending).resolves.toEqual({ kind: 'aborted', reason: 'expired' });
-    expect(first.kind === 'chunk' ? [...first.bytes].every((byte) => byte === 0) : false).toBe(true);
+    expect(first.kind === 'chunk' ? [...first.bytes].every((byte) => byte === 0) : false).toBe(
+      true,
+    );
     expect(cleared).toEqual(['expired']);
     expect(storage.disposed).toBe(true);
   });
@@ -395,24 +402,30 @@ describe('diagnostic.v1 manifest admission', () => {
       },
     ]) {
       const storage = new MemoryDiagnosticStorage(
-        Object.freeze({ ...descriptor, byteLength: fixture.bytes.byteLength, mimeType: fixture.mimeType }),
+        Object.freeze({
+          ...descriptor,
+          byteLength: fixture.bytes.byteLength,
+          mimeType: fixture.mimeType,
+        }),
         [],
       );
       storage.sourceBuffers.push(fixture.bytes);
       storage.blockAfterChunk(1);
       let read = false;
-      storage.openField = async () => ({
-        descriptor: storage.storedDescriptor,
-        dispose: async () => {
-          storage.disposed = true;
-          fixture.bytes.fill(0);
-        },
-        read: async () => {
-          if (read) return null;
-          read = true;
-          return fixture.bytes;
-        },
-      });
+      storage.openField = () =>
+        Promise.resolve({
+          descriptor: storage.storedDescriptor,
+          dispose: () => {
+            storage.disposed = true;
+            fixture.bytes.fill(0);
+            return Promise.resolve();
+          },
+          read: () => {
+            if (read) return Promise.resolve(null);
+            read = true;
+            return Promise.resolve(fixture.bytes);
+          },
+        });
       const result = await adapter.openConsentBoundDiagnosticStream({
         audit: new MemoryAudit(),
         consentAuthority: new MemoryConsentAuthority(),
