@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-29-PLAN.md
-last_updated: "2026-08-05T06:01:25.590Z"
+stopped_at: Completed 04-18-PLAN.md
+last_updated: "2026-08-05T07:06:48.457Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 165
+  completed_plans: 166
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 25 of 35
+Plan: 26 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -204,6 +204,7 @@ _Updated after plan completion_
 | Phase 04 P27 | 18min | 1 tasks | 11 files |
 | Phase 04 P28 | 12min | 1 tasks | 7 files |
 | Phase 04 P29 | 13 min | 1 tasks | 10 files |
+| Phase 04 P18 | 31min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -631,6 +632,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Use outbox job identity plus aggregate version for durable privacy lifecycle claims. — Retries remain idempotent and stale work cannot silently replace current aggregate authority.
 - [Phase 04]: Delete private objects before persisting checksum and provider receipt evidence. — Provider failure cannot be represented as completed metadata deletion.
 - [Phase 04]: Finalize deletion through the locked domain transaction and expire retained evidence through the same worker. — Cancellation wins under serialization and every purpose-bound record retains an executable bounded expiry.
+- [Phase 04]: Validate every generated account component and require one account owner before exposing a production projection. — Rejects mixed-owner or invalid authority before rendering.
+- [Phase 04]: Bind profile PATCH requests to the same optimistic-concurrency claim through If-Match and command expectedVersion. — Prevents header and command version claims from diverging.
+- [Phase 04]: Default deployable account composition to production while keeping preview authority explicit and absent from emitted production code. — Retains deterministic visual fixtures without granting them production authority.
 
 ### Pending Todos
 
@@ -674,6 +678,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T06:01:25.584Z
-Stopped at: Completed 04-29-PLAN.md
+Last session: 2026-08-05T07:06:48.451Z
+Stopped at: Completed 04-18-PLAN.md
 Resume file: None
