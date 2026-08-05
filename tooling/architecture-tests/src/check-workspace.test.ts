@@ -151,6 +151,7 @@ const phase3WebModules = [
     runtimeClass: 'fixture',
     packageName: '@liiiraa/account',
     workspaceDependencies: [
+      '@liiiraa/contracts-ts',
       '@liiiraa/design-system',
       '@liiiraa/design-tokens',
       '@liiiraa/web-core',
