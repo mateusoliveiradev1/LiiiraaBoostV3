@@ -8,7 +8,7 @@ status: executing
 stopped_at: Completed 04-24-PLAN.md
 last_updated: "2026-08-05T18:05:55.773Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-m3y: prepare free staging and align main"
+last_activity_desc: "Completed quick task 260805-maj: add real Neon staging migration executor"
 progress:
   total_phases: 10
   completed_phases: 3
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
 Plan: 25 of 35
 Status: Ready to execute
-Last activity: 2026-08-05 — Completed quick task 260805-m3y: prepare free staging and align main
+Last activity: 2026-08-05 — Completed quick task 260805-maj: add real Neon staging migration executor
 
 Progress: [██████████] 99%
 
@@ -705,6 +705,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260730-jb7 | Trocar o ícone incorreto de Configurações da sidebar por uma engrenagem premium e consistente | 2026-07-30 | 305432e | Needs Review | [260730-jb7-trocar-o-cone-incorreto-de-configura-es-](./quick/260730-jb7-trocar-o-cone-incorreto-de-configura-es-/) |
 | 260803-n0d | Finalizar textos jurídicos bilíngues, separar armazenamento e corrigir documentação | 2026-08-03 | bc3e05e | Verified | [260803-n0d-finalizar-textos-jur-dicos-bil-ngues-sep](./quick/260803-n0d-finalizar-textos-jur-dicos-bil-ngues-sep/) |
 | 260805-m3y | Preparar staging gratuito: corrigir Render e alinhar a branch main para os workflows | 2026-08-05 | a61b4a5 | Verified | [260805-m3y-preparar-staging-gratuito-corrigir-rende](./quick/260805-m3y-preparar-staging-gratuito-corrigir-rende/) |
+| 260805-maj | Adicionar executor real e seguro de migrations para o Neon staging | 2026-08-05 | 5cc6bb5 | Verified | [260805-maj-adicionar-executor-real-e-seguro-de-migr](./quick/260805-maj-adicionar-executor-real-e-seguro-de-migr/) |
 
 ## Session Continuity
 
