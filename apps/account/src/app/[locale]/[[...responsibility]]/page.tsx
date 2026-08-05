@@ -15,6 +15,8 @@ import {
   type AccountPreviewRoute,
 } from '../../../account-preview-model';
 import { AccountPreviewPage } from '../../../features/account-preview';
+import { AccountAuthorityPage } from '../../../features/account-authority';
+import { resolveAccountServerRuntimeConfig } from '../../../account-runtime-server';
 
 type AccountResponsibilityPageProps = Readonly<{
   params: Promise<{
@@ -120,5 +122,14 @@ export default async function AccountResponsibilityPage({
       />
     );
   }
-  return <AccountPreviewPage locale={locale} routeId={resolution.routeId} />;
+  const runtime = resolveAccountServerRuntimeConfig();
+  return runtime.kind === 'preview' ? (
+    <AccountPreviewPage locale={locale} routeId={resolution.routeId} />
+  ) : (
+    <AccountAuthorityPage
+      authorityBaseUrl={runtime.authorityBaseUrl}
+      locale={locale}
+      routeId={resolution.routeId}
+    />
+  );
 }

@@ -291,6 +291,9 @@ importers:
 
   apps/account:
     dependencies:
+      '@liiiraa/contracts-ts':
+        specifier: workspace:*
+        version: link:../../packages/contracts-ts
       '@liiiraa/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -303,9 +306,6 @@ importers:
       '@liiiraa/web-features':
         specifier: workspace:*
         version: link:../../packages/web-features
-      '@liiiraa/web-preview':
-        specifier: workspace:*
-        version: link:../../packages/web-preview
       next:
         specifier: 16.2.12
         version: 16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -319,6 +319,9 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@liiiraa/web-preview':
+        specifier: workspace:*
+        version: link:../../packages/web-preview
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3

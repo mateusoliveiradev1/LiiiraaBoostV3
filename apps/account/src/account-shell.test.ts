@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { projectNavigation } from '@liiiraa/web-core';
-import { ACCOUNT_WEB_COMPOSITION } from './index';
+import { ACCOUNT_WEB_COMPOSITION, accountWebComposition } from './index';
 import {
   accountFailureLocale,
   createAccountFailureModel,
@@ -444,6 +444,11 @@ describe('account shell', () => {
       'account-support',
     ]);
     expect(ACCOUNT_WEB_COMPOSITION).toMatchObject({
+      authorityConnected: true,
+      runtimeClass: 'server-authority',
+      surface: 'account',
+    });
+    expect(accountWebComposition('preview')).toMatchObject({
       authorityConnected: false,
       runtimeClass: 'fixture',
       surface: 'account',
@@ -458,7 +463,7 @@ describe('account shell', () => {
     expect(layoutSource).toContain('href="#account-main"');
     expect(layoutSource).not.toContain('account-preview-rail');
     expect(layoutSource).not.toContain('data-authority="disconnected"');
-    expect(layoutSource).toContain('ACCOUNT_WEB_COMPOSITION');
+    expect(layoutSource).toContain('accountWebComposition');
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).toContain('<AccountNavigation');
     expect(layoutSource).not.toContain('account-header__origin');

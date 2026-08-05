@@ -23,7 +23,8 @@ import {
 import { AccountInspector } from '../../account-inspector';
 import { createAccountFailureModel } from '../../account-errors';
 import { ProductLockup } from '../../account-product-lockup';
-import { ACCOUNT_WEB_COMPOSITION } from '../../index';
+import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
+import { accountWebComposition } from '../../index';
 
 type AccountLocaleLayoutProps = Readonly<{
   children: ReactNode;
@@ -225,6 +226,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   }
 
   setRequestLocale(locale);
+  const webComposition = accountWebComposition(resolveAccountServerRuntimeConfig().kind);
   const copy = COPY[locale];
   const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigationGroups = NAVIGATION_GROUPS.map((group): AccountNavigationGroup => ({
@@ -260,9 +262,9 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
 
   return (
     <html
-      data-authority-connected={String(ACCOUNT_WEB_COMPOSITION.authorityConnected)}
-      data-runtime-class={ACCOUNT_WEB_COMPOSITION.runtimeClass}
-      data-surface={ACCOUNT_WEB_COMPOSITION.surface}
+      data-authority-connected={String(webComposition.authorityConnected)}
+      data-runtime-class={webComposition.runtimeClass}
+      data-surface={webComposition.surface}
       lang={locale}
     >
       <body>

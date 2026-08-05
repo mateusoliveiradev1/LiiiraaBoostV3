@@ -150,7 +150,7 @@ export const selectWebTestSurfaces = (
     )
     .join(' ');
   const hasExplicitProject = selector.includes('--project=');
-  const isCrossSurfaceSecurityRun = /security-artifacts\.spec\.ts/u.test(selector);
+  const isCrossSurfaceSecurityRun = selector.includes('security-artifacts.spec.ts');
   const startsEverySurface =
     selector.length === 0 ||
     isCrossSurfaceSecurityRun ||
@@ -168,6 +168,9 @@ export const selectWebTestSurfaces = (
 };
 
 const selectedSurfaces = selectWebTestSurfaces(process.argv.slice(2));
+const accountAuthorityRun = process.argv.some((argument) =>
+  argument.includes('account-authority.spec.ts'),
+);
 
 const quickProjects: Project[] = surfaces.map(({ baseURL, surface }) => ({
   grep: new RegExp(`@quick @${surface}`, 'u'),
@@ -246,7 +249,12 @@ export default defineConfig({
   webServer: selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
     command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
     cwd: '../..',
-    env: app === '@liiiraa/admin' ? { LIIIRAA_ADMIN_ORIGIN: baseURL } : {},
+    env:
+      app === '@liiiraa/admin'
+        ? { LIIIRAA_ADMIN_ORIGIN: baseURL }
+        : app === '@liiiraa/account'
+          ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
+          : {},
     reuseExistingServer: false,
     stderr: 'pipe',
     stdout: 'pipe',
