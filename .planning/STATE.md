@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-17-PLAN.md
-last_updated: "2026-08-05T05:07:25.267Z"
+stopped_at: Completed 04-27-PLAN.md
+last_updated: "2026-08-05T05:28:38.251Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 162
+  completed_plans: 163
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 22 of 35
+Plan: 23 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -201,6 +201,7 @@ _Updated after plan completion_
 | Phase 04 P30 | 11 min | 1 tasks | 9 files |
 | Phase 04 P16 | 15 min | 1 tasks | 8 files |
 | Phase 04 P17 | 13min | 1 tasks | 6 files |
+| Phase 04 P27 | 18min | 1 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -619,6 +620,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Authorize the owner before loading any account snapshot, then assemble shared account truth from one atomic repository view.
 - [Phase 04]: Represent client account observation as online, offline, stale, pending, or conflict while retaining generated authority provenance on canonical components.
 - [Phase 04]: Require If-Match and command expectedVersion to express the same optimistic-concurrency claim before account mutation.
+- [Phase 04]: Advance the entitlement aggregate version before canonical encoding so stale retries cannot mint fresh authority.
+- [Phase 04]: Publish bounded previous entitlement public keys during rotation while requiring the signer to remain the singular current key.
+- [Phase 04]: Keep staging entitlement private material only in an injected non-exported KeyObject handle.
 
 ### Pending Todos
 
@@ -662,6 +666,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T05:07:25.260Z
-Stopped at: Completed 04-17-PLAN.md
+Last session: 2026-08-05T05:28:38.244Z
+Stopped at: Completed 04-27-PLAN.md
 Resume file: None
