@@ -51,30 +51,36 @@ interface PgQueryResult {
   readonly rows: readonly Record<string, unknown>[];
 }
 
+type PgQueryResponse = PgQueryResult | readonly PgQueryResult[];
+
 interface PgClient {
-  query(statement: string, values?: readonly unknown[]): Promise<PgQueryResult>;
+  query(statement: string, values?: readonly unknown[]): Promise<PgQueryResponse>;
   release(): void;
 }
 
 interface PgPool {
   connect(): Promise<PgClient>;
   end(): Promise<void>;
-  query(statement: string, values?: readonly unknown[]): Promise<PgQueryResult>;
+  query(statement: string, values?: readonly unknown[]): Promise<PgQueryResponse>;
 }
 
-const normalizeResult = <TRow extends Record<string, unknown>>(
-  result: PgQueryResult,
-): ControlPlaneQueryResult<TRow> => ({
-  rowCount: result.rowCount ?? result.rows.length,
-  rows: result.rows as readonly TRow[],
-});
+export const normalizePostgresResult = <TRow extends Record<string, unknown>>(
+  response: PgQueryResponse,
+): ControlPlaneQueryResult<TRow> => {
+  const results: readonly PgQueryResult[] = Array.isArray(response) ? response : [response];
+
+  return {
+    rowCount: results.reduce((total, result) => total + (result.rowCount ?? result.rows.length), 0),
+    rows: results.flatMap(({ rows }) => rows) as readonly TRow[],
+  };
+};
 
 const queryWith = async <TRow extends Record<string, unknown>>(
   executor: Pick<PgPool, 'query'>,
   statement: string,
   values: readonly unknown[] = [],
 ): Promise<ControlPlaneQueryResult<TRow>> =>
-  normalizeResult<TRow>(await executor.query(statement, values));
+  normalizePostgresResult<TRow>(await executor.query(statement, values));
 
 export const createControlPlaneDatabase = (databaseUrl: string): ControlPlaneDatabase => {
   if (databaseUrl.trim().length === 0) {
