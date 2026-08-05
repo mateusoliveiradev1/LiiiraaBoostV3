@@ -1,6 +1,21 @@
 export * from './storage/audit-anchor.js';
 export * from './storage/consent-stream.js';
 export * from './storage/s3-object-lifecycle.js';
+export {
+  createControlPlaneDatabase,
+  normalizePostgresResult,
+  type ControlPlaneDatabase,
+  type ControlPlaneMigrationDatabase,
+  type ControlPlaneQueryResult,
+  type ControlPlaneTransaction,
+} from './postgres/database.js';
+export {
+  inspectControlPlaneSchema,
+  migrateControlPlane,
+  schemaHash,
+  type ControlPlaneMigrationResult,
+  type ControlPlaneSchemaInspection,
+} from './postgres/migrate.js';
 export * from './crypto/staging-entitlement-signer.js';
 export * from './email/ses-email.js';
 export {
@@ -30,4 +45,5 @@ export {
   type IdentityRole,
   type InvitationRecord,
   type PersistedSessionRecord,
+  type RealIdentityAuthority,
 } from './postgres/real-identity.js';

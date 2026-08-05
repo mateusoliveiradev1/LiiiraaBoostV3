@@ -85,6 +85,27 @@ class MemoryIdentityPersistence implements IdentityPersistence {
     return Promise.resolve(true);
   }
 
+  updateIdentityProfile(input: {
+    accountId: string;
+    displayName?: string;
+    expectedVersion: bigint;
+    locale?: 'pt-BR' | 'en';
+    now: string;
+  }): Promise<IdentityRecord | 'conflict' | null> {
+    const identity = this.identities.get(input.accountId);
+    if (identity === undefined) return Promise.resolve(null);
+    if (identity.version !== input.expectedVersion) return Promise.resolve('conflict');
+    const updated: IdentityRecord = {
+      ...identity,
+      ...(input.displayName === undefined ? {} : { displayName: input.displayName }),
+      ...(input.locale === undefined ? {} : { locale: input.locale }),
+      updatedAt: input.now,
+      version: identity.version + 1n,
+    };
+    this.identities.set(identity.id, updated);
+    return Promise.resolve(updated);
+  }
+
   createDesktopChallenge(record: DesktopChallengeRecord): Promise<void> {
     this.challenges.set(record.id, record);
     return Promise.resolve();

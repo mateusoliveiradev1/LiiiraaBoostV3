@@ -14,6 +14,10 @@ export interface ApiEnvironmentInput {
   readonly STAGING_INVITATION_ONLY?: string;
   readonly STAGING_PUBLIC_SIGNUP?: string;
   readonly STAGING_CHANNEL?: string;
+  readonly STAGING_API_ORIGIN?: string;
+  readonly STAGING_AUTH_SECRET?: string;
+  readonly HOST?: string;
+  readonly PORT?: string;
 }
 
 export interface AdmittedApiEnvironment {

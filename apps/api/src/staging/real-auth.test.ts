@@ -3,7 +3,10 @@ import type { IdentityActor } from '@liiiraa/control-plane-adapters';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
-import { registerRealIdentityRoutes, type RealIdentityRouteAuthority } from '../modules/identity/real-routes.js';
+import {
+  registerRealIdentityRoutes,
+  type RealIdentityRouteAuthority,
+} from '../modules/identity/real-routes.js';
 
 const accountOrigin = 'https://account.staging.example';
 const adminOrigin = 'https://admin.staging.example';
@@ -17,7 +20,14 @@ const actor: IdentityActor = {
   role: 'tester',
   sessionId: '00000000-0000-4000-8000-000000000002',
   sessionKind: 'web',
+  authenticationMethod: 'password',
+  authenticatedAt: '2030-01-01T00:00:00.000Z',
   expiresAt: '2030-02-01T00:00:00.000Z',
+  lastSeenAt: '2030-01-01T00:00:00.000Z',
+  sessionVersion: 1n,
+  identityVersion: 1n,
+  createdAt: '2030-01-01T00:00:00.000Z',
+  updatedAt: '2030-01-01T00:00:00.000Z',
 };
 
 const authority = () => {
@@ -33,6 +43,7 @@ const authority = () => {
       active = false;
       return Promise.resolve(true);
     }),
+    updateProfile: vi.fn(),
     beginDesktopAuthorization: vi.fn(() =>
       Promise.resolve({
         ok: true as const,
@@ -56,7 +67,11 @@ const authority = () => {
       }),
     ),
     exchangeDesktopAuthorization: vi.fn(() =>
-      Promise.resolve({ ok: true as const, actor: { ...actor, sessionKind: 'desktop' as const }, credential }),
+      Promise.resolve({
+        ok: true as const,
+        actor: { ...actor, sessionKind: 'desktop' as const },
+        credential,
+      }),
     ),
   } satisfies RealIdentityRouteAuthority;
 };
@@ -82,7 +97,7 @@ const csrf = async (app: Awaited<ReturnType<typeof createApp>>['app']) => {
     url: '/v1/identity/csrf',
   });
   expect(response.statusCode).toBe(200);
-  return String(response.json<{ token: string }>().token);
+  return response.json<{ token: string }>().token;
 };
 
 describe('real staging authentication routes', () => {
@@ -116,12 +131,17 @@ describe('real staging authentication routes', () => {
     });
     expect(account.statusCode).toBe(200);
     expect(account.json()).toMatchObject({
-      account: { accountId: actor.accountId, displayName: 'Real Tester', provenance: 'postgres-authority' },
+      account: {
+        accountId: actor.accountId,
+        displayName: 'Real Tester',
+        provenance: 'postgres-authority',
+      },
       provenance: 'online',
       subscription: { plan: 'free', state: 'none' },
     });
-    expect(controlPlaneDocumentValidator(account.json().account)).toBe(true);
-    expect(controlPlaneDocumentValidator(account.json().subscription)).toBe(true);
+    const projection = account.json<{ account: unknown; subscription: unknown }>();
+    expect(controlPlaneDocumentValidator(projection.account)).toBe(true);
+    expect(controlPlaneDocumentValidator(projection.subscription)).toBe(true);
 
     const signout = await app.inject({
       headers: { cookie, origin: accountOrigin, 'x-csrf-token': csrfToken },
@@ -131,7 +151,9 @@ describe('real staging authentication routes', () => {
     expect(signout.statusCode).toBe(204);
     expect(signout.headers['set-cookie']).toContain('Max-Age=0');
     expect(identity.signOut).toHaveBeenCalledWith(credential);
-    expect((await app.inject({ headers: { cookie }, method: 'GET', url: '/v1/account' })).statusCode).toBe(401);
+    expect(
+      (await app.inject({ headers: { cookie }, method: 'GET', url: '/v1/account' })).statusCode,
+    ).toBe(401);
     await app.close();
   });
 

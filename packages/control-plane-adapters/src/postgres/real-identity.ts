@@ -72,6 +72,15 @@ export interface IdentityPersistence {
   createSession(record: PersistedSessionRecord): Promise<void>;
   findSessionByDigest(digest: string, now: string): Promise<PersistedSessionRecord | null>;
   revokeSessionByDigest(digest: string, now: string): Promise<boolean>;
+  updateIdentityProfile(
+    input: Readonly<{
+      accountId: string;
+      displayName?: string;
+      expectedVersion: bigint;
+      locale?: IdentityLocale;
+      now: string;
+    }>,
+  ): Promise<IdentityRecord | 'conflict' | null>;
   createDesktopChallenge(record: DesktopChallengeRecord): Promise<void>;
   approveDesktopChallenge(
     input: Readonly<{
@@ -101,7 +110,14 @@ export interface IdentityActor {
   readonly role: IdentityRole;
   readonly sessionId: string;
   readonly sessionKind: PersistedSessionRecord['kind'];
+  readonly authenticationMethod: PersistedSessionRecord['authenticationMethod'];
+  readonly authenticatedAt: string;
   readonly expiresAt: string;
+  readonly lastSeenAt: string;
+  readonly sessionVersion: bigint;
+  readonly identityVersion: bigint;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 type AuthenticationFailure = Readonly<{ ok: false; code: 'AUTHENTICATION_FAILED' }>;
@@ -265,7 +281,14 @@ export const createRealIdentityAuthority = (
     role: identity.role,
     sessionId: session.id,
     sessionKind: session.kind,
+    authenticationMethod: session.authenticationMethod,
+    authenticatedAt: session.issuedAt,
     expiresAt: session.expiresAt,
+    lastSeenAt: session.lastSeenAt,
+    sessionVersion: session.version,
+    identityVersion: identity.version,
+    createdAt: identity.createdAt,
+    updatedAt: identity.updatedAt,
   });
 
   const issueSession = async (
@@ -398,6 +421,44 @@ export const createRealIdentityAuthority = (
         digestOpaqueToken(credential),
         clock.now().toISOString(),
       );
+    },
+
+    async updateProfile(
+      input: Readonly<{
+        actor: IdentityActor;
+        displayName?: string;
+        expectedVersion: bigint;
+        locale?: IdentityLocale;
+      }>,
+    ): Promise<
+      | Readonly<{ ok: true; actor: IdentityActor }>
+      | Readonly<{ ok: false; code: 'CONFLICT' | 'INVALID_REQUEST' }>
+    > {
+      const displayName = input.displayName?.trim();
+      if (
+        (displayName === undefined && input.locale === undefined) ||
+        (displayName !== undefined && !validDisplayName(displayName))
+      ) {
+        return { ok: false, code: 'INVALID_REQUEST' };
+      }
+      const updated = await persistence.updateIdentityProfile({
+        accountId: input.actor.accountId,
+        expectedVersion: input.expectedVersion,
+        now: clock.now().toISOString(),
+        ...(displayName === undefined ? {} : { displayName }),
+        ...(input.locale === undefined ? {} : { locale: input.locale }),
+      });
+      if (updated === null || updated === 'conflict') return { ok: false, code: 'CONFLICT' };
+      return {
+        ok: true,
+        actor: {
+          ...input.actor,
+          displayName: updated.displayName,
+          locale: updated.locale,
+          identityVersion: updated.version,
+          updatedAt: updated.updatedAt,
+        },
+      };
     },
 
     async beginDesktopAuthorization(
@@ -719,6 +780,29 @@ export const createPostgresIdentityPersistence = (
     return result.rowCount === 1;
   },
 
+  updateIdentityProfile: (input) =>
+    database.transaction(async (transaction) => {
+      const result = await transaction.query(
+        `UPDATE identities
+         SET display_name = COALESCE($3, display_name), locale = COALESCE($4, locale),
+             version = version + 1, updated_at = $5
+         WHERE id = $1 AND version = $2 AND status = 'active'
+         RETURNING ${identityColumns}`,
+        [
+          input.accountId,
+          input.expectedVersion.toString(),
+          input.displayName ?? null,
+          input.locale ?? null,
+          input.now,
+        ],
+      );
+      if (result.rows[0]) return identityFromRow(result.rows[0]);
+      const exists = await transaction.query(`SELECT id FROM identities WHERE id = $1`, [
+        input.accountId,
+      ]);
+      return exists.rows[0] ? 'conflict' : null;
+    }),
+
   async createDesktopChallenge(record) {
     await database.query(
       `INSERT INTO desktop_authorization_challenges
@@ -816,3 +900,5 @@ export const migrateRealIdentity = async (
       version: realIdentityMigrationVersion,
     };
   });
+
+export type RealIdentityAuthority = ReturnType<typeof createRealIdentityAuthority>;
