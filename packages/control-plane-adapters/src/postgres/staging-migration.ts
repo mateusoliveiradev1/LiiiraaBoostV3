@@ -8,6 +8,7 @@ import {
   type ControlPlaneMigrationResult,
   type ControlPlaneSchemaInspection,
 } from './migrate.ts';
+import { migrateRealIdentity } from './real-identity.ts';
 
 const forbiddenAuthority = /(?:^|[._/-])(?:prod|production|customer|live)(?:$|[._/?-])/iu;
 const stagingAuthority = /(?:^|[._/-])(?:staging|synthetic)(?:$|[._/?-])/iu;
@@ -65,10 +66,38 @@ interface StagingMigrationDependencies {
   readonly migrate: (database: ControlPlaneDatabase) => Promise<ControlPlaneMigrationResult>;
 }
 
+const migrateStagingAuthority = async (
+  database: ControlPlaneDatabase,
+): Promise<ControlPlaneMigrationResult> => {
+  const controlPlane = await migrateControlPlane(database);
+  const identity = await migrateRealIdentity(database);
+  return Object.freeze({
+    applied: controlPlane.applied || identity.applied,
+    schemaHash: identity.schemaHash,
+    version: identity.version,
+  });
+};
+
+const inspectStagingAuthority = async (
+  database: ControlPlaneDatabase,
+): Promise<ControlPlaneSchemaInspection> => {
+  const inspection = await inspectControlPlaneSchema(database);
+  const identityMigration = await database.query<{ checksum: string }>(
+    `SELECT checksum
+     FROM control_plane_schema_migrations
+     WHERE version = $1`,
+    ['0002_real_identity'],
+  );
+  return Object.freeze({
+    ...inspection,
+    schemaHash: identityMigration.rows[0]?.checksum,
+  });
+};
+
 const defaultDependencies: StagingMigrationDependencies = Object.freeze({
   createDatabase: createControlPlaneDatabase,
-  inspect: inspectControlPlaneSchema,
-  migrate: migrateControlPlane,
+  inspect: inspectStagingAuthority,
+  migrate: migrateStagingAuthority,
 });
 
 export const runStagingMigration = async (

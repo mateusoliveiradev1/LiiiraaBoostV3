@@ -24,7 +24,6 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('/workspace/node_modules node_modules');
     expect(dockerfile).toContain('/workspace/apps/api apps/api');
     expect(dockerfile).toContain('/workspace/packages packages');
-    expect(dockerfile).toContain('0002_real_identity.sql');
   });
 
   it('excludes secrets, generated desktop artifacts, and unrelated build output', () => {

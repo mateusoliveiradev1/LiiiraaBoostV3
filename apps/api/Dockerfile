@@ -44,8 +44,9 @@ ENV PORT=3000
 WORKDIR /workspace
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
   && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
-COPY --from=verified --chown=node:node /workspace/apps/api/src/config/env.ts apps/api/src/config/env.ts
-COPY --from=verified --chown=node:node /workspace/apps/api/src/staging/main.mjs apps/api/src/staging/main.mjs
+COPY --from=verified --chown=node:node /workspace/node_modules node_modules
+COPY --from=verified --chown=node:node /workspace/apps/api apps/api
+COPY --from=verified --chown=node:node /workspace/packages packages
 
 USER node
 EXPOSE 3000
