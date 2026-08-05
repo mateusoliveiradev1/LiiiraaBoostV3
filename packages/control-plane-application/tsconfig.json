@@ -4,5 +4,5 @@
     "lib": ["ES2024", "DOM"],
     "types": []
   },
-  "include": ["src/index.ts", "src/ports/diagnostics.ts"]
+  "include": ["src/index.ts", "src/ports/audit.ts", "src/ports/diagnostics.ts"]
 }

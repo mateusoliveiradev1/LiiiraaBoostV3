@@ -22,11 +22,14 @@ class MemoryObjectLockClient {
   corruptRead = false;
   shortenRetention = false;
 
-  async send(command: unknown): Promise<unknown> {
+  send(command: unknown): Promise<unknown> {
     const request = (command as { readonly input: Readonly<Record<string, unknown>> }).input;
     const key = String(request['Key']);
-    if (command?.constructor.name === 'PutObjectCommand') {
-      if (this.failWrite) throw new Error('provider-write-secret');
+    if (
+      (command as { readonly constructor: { readonly name: string } }).constructor.name ===
+      'PutObjectCommand'
+    ) {
+      if (this.failWrite) return Promise.reject(new Error('provider-write-secret'));
       expect(request).toMatchObject({
         ChecksumAlgorithm: 'SHA256',
         ContentType: 'application/json',
@@ -38,24 +41,30 @@ class MemoryObjectLockClient {
       const retainUntil = request['ObjectLockRetainUntilDate'] as Date;
       if (this.objects.has(key)) throw new Error('immutable-object-exists');
       this.objects.set(key, { body, checksum, retainUntil });
-      return { ChecksumSHA256: checksum };
+      return Promise.resolve({ ChecksumSHA256: checksum });
     }
-    if (command?.constructor.name === 'GetObjectCommand') {
-      if (this.failRead) throw new Error('provider-read-secret');
+    if (
+      (command as { readonly constructor: { readonly name: string } }).constructor.name ===
+      'GetObjectCommand'
+    ) {
+      if (this.failRead) return Promise.reject(new Error('provider-read-secret'));
       const stored = this.objects.get(key);
-      if (stored === undefined) throw new Error('object-not-found');
+      if (stored === undefined) return Promise.reject(new Error('object-not-found'));
       const body = Uint8Array.from(stored.body);
-      if (this.corruptRead && body.length > 0) body[body.length - 1] ^= 1;
-      return {
+      if (this.corruptRead && body.length > 0) {
+        const lastIndex = body.length - 1;
+        body[lastIndex] = (body[lastIndex] ?? 0) ^ 1;
+      }
+      return Promise.resolve({
         Body: { transformToByteArray: () => Promise.resolve(body) },
         ChecksumSHA256: stored.checksum,
         ObjectLockMode: 'COMPLIANCE',
         ObjectLockRetainUntilDate: this.shortenRetention
           ? new Date('2027-01-01T00:00:00.000Z')
           : stored.retainUntil,
-      };
+      });
     }
-    throw new Error('unsupported command');
+    return Promise.reject(new Error('unsupported command'));
   }
 }
 
@@ -90,7 +99,9 @@ describe('audit database privileges', () => {
       /CREATE TRIGGER audit_events_reject_truncate[\s\S]*BEFORE TRUNCATE ON audit_events/iu,
     );
     expect(migrationSql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON audit_events FROM PUBLIC/iu);
-    expect(migrationSql).toMatch(/correction_of UUID REFERENCES audit_events\(id\) ON DELETE RESTRICT/iu);
+    expect(migrationSql).toMatch(
+      /correction_of UUID REFERENCES audit_events\(id\) ON DELETE RESTRICT/iu,
+    );
     expect(migrationSql).toMatch(/SELECT \* INTO head[\s\S]*FOR UPDATE/iu);
     expect(migrationSql).toMatch(/NEW\.sequence_number <> head\.last_sequence \+ 1/iu);
     expect(migrationSql).toMatch(/NEW\.previous_hash <> head\.last_hash/iu);
@@ -148,6 +159,19 @@ describe('immutable external audit anchors', () => {
       expect(result).toEqual({ code, ok: false, retryable: true });
       expect(JSON.stringify(result)).not.toMatch(/provider-(write|read)-secret|stripe|stack/iu);
     }
+
+    const signatureResult = await writeAuditAnchor({
+      bucket: 'synthetic-audit-object-lock',
+      checkpoint,
+      client: new MemoryObjectLockClient(),
+      signer: { ...signer, verify: () => Promise.resolve(false) },
+      storageKmsKeyId: 'kms-audit-storage-key',
+    });
+    expect(signatureResult).toEqual({
+      code: 'ANCHOR_SIGNATURE_MISMATCH',
+      ok: false,
+      retryable: true,
+    });
   });
 
   it('anchors at 15 minutes or 1,000 events and rejects indefinite legal holds', async () => {
@@ -166,7 +190,7 @@ describe('immutable external audit anchors', () => {
         bucket: 'synthetic-audit-object-lock',
         checkpoint,
         client: new MemoryObjectLockClient(),
-        legalHold: { authorizedBy: 'audit-role', purpose: 'dispute-review' },
+        legalHold: { authorizedBy: 'audit-role', purpose: 'dispute-review' } as never,
         signer,
         storageKmsKeyId: 'kms-audit-storage-key',
       }),

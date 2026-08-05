@@ -11,3 +11,17 @@ export {
   type ProtectedComponentEvidence,
   type ProtectedDeviceEvidence,
 } from './devices/device-evidence.js';
+export {
+  AUDIT_GENESIS_HASH,
+  appendAuditEvent,
+  encodeAuditEvent,
+  verifyAuditChain,
+  type AppendAuditEventInput,
+  type AuditAppendRepository,
+  type AuditAppendTransaction,
+  type AuditChainEvent,
+  type AuditChainHead,
+  type AuditEventInput,
+  type AuditVerificationCode,
+  type AuditVerificationResult,
+} from './audit/audit-chain.js';

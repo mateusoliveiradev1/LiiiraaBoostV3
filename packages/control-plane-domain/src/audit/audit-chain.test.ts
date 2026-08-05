@@ -10,6 +10,7 @@ import {
   type AuditAppendTransaction,
   type AuditChainEvent,
   type AuditChainHead,
+  type AuditVerificationCode,
 } from './audit-chain.js';
 
 const STREAM_ID = 'admin-security';
@@ -23,14 +24,14 @@ const auditInput = (
   event: {
     schemaVersion: '1.0',
     kind: 'audit-event',
-    auditEventId: `audit-${index}`,
+    auditEventId: `audit-${String(index)}`,
     actorReference: 'actor-redacted-001',
     assumedRole: 'security',
     action: 'revoke-session',
     redactedTarget: 'account:[redacted]',
     reason: 'verified-security-response',
     result: 'succeeded',
-    correlationId: `correlation-${index}`,
+    correlationId: `correlation-${String(index)}`,
     occurredAt: `2026-08-05T12:${String(index).padStart(2, '0')}:00.000Z`,
   },
   ...overrides,
@@ -86,6 +87,45 @@ class MemoryAuditRepository implements AuditAppendRepository {
   }
 }
 
+const requireTwoEvents = (
+  events: readonly AuditChainEvent[],
+): readonly [AuditChainEvent, AuditChainEvent] => {
+  const [first, second] = events;
+  if (first === undefined || second === undefined) throw new Error('two audit events required');
+  return [first, second];
+};
+
+const mutationCases: readonly Readonly<{
+  name: string;
+  code: AuditVerificationCode;
+  mutate(events: readonly AuditChainEvent[]): readonly AuditChainEvent[];
+}>[] = [
+  {
+    name: 'payload mutation',
+    mutate: (events) => {
+      const [first, second] = requireTwoEvents(events);
+      return [first, { ...second, event: { ...second.event, reason: 'rewritten' } }];
+    },
+    code: 'AUDIT_EVENT_HASH_MISMATCH',
+  },
+  {
+    name: 'sequence mutation',
+    mutate: (events) => {
+      const [first, second] = requireTwoEvents(events);
+      return [first, { ...second, sequenceNumber: 7 }];
+    },
+    code: 'AUDIT_SEQUENCE_GAP',
+  },
+  {
+    name: 'previous-hash mutation',
+    mutate: (events) => {
+      const [first, second] = requireTwoEvents(events);
+      return [first, { ...second, event: { ...second.event, previousEventHash: 'f'.repeat(64) } }];
+    },
+    code: 'AUDIT_PREVIOUS_HASH_MISMATCH',
+  },
+];
+
 describe('tamper-evident audit chain', () => {
   it('serializes concurrent appends into one contiguous sequence and head', async () => {
     const repository = new MemoryAuditRepository();
@@ -104,7 +144,9 @@ describe('tamper-evident audit chain', () => {
       lastSequence: 24,
       lastHash: repository.events.at(-1)?.event.eventHash,
     });
-    expect(verifyAuditChain(repository.events, { expectedHead: repository.currentHead() })).toEqual({
+    await expect(
+      verifyAuditChain(repository.events, { expectedHead: repository.currentHead() }),
+    ).resolves.toEqual({
       codes: [],
       healthy: true,
       verifiedSequence: 24,
@@ -133,43 +175,16 @@ describe('tamper-evident audit chain', () => {
       sequenceNumber: 2,
       event: { previousEventHash: original.event.eventHash },
     });
-    expect(verifyAuditChain(repository.events).healthy).toBe(true);
+    await expect(verifyAuditChain(repository.events)).resolves.toMatchObject({ healthy: true });
   });
 
-  it.each([
-    {
-      name: 'payload mutation',
-      mutate: (events: readonly AuditChainEvent[]) => [
-        events[0],
-        { ...events[1], event: { ...events[1]?.event, reason: 'rewritten' } },
-      ],
-      code: 'AUDIT_EVENT_HASH_MISMATCH',
-    },
-    {
-      name: 'sequence mutation',
-      mutate: (events: readonly AuditChainEvent[]) => [
-        events[0],
-        { ...events[1], sequenceNumber: 7 },
-      ],
-      code: 'AUDIT_SEQUENCE_GAP',
-    },
-    {
-      name: 'previous-hash mutation',
-      mutate: (events: readonly AuditChainEvent[]) => [
-        events[0],
-        {
-          ...events[1],
-          event: { ...events[1]?.event, previousEventHash: 'f'.repeat(64) },
-        },
-      ],
-      code: 'AUDIT_PREVIOUS_HASH_MISMATCH',
-    },
-  ] as const)('detects $name', async ({ mutate, code }) => {
+  it.each(mutationCases)('detects $name', async ({ mutate, code }) => {
     const repository = new MemoryAuditRepository();
     await appendAuditEvent(repository, auditInput(1));
     await appendAuditEvent(repository, auditInput(2));
 
-    expect(verifyAuditChain(mutate(repository.events)).codes).toContain(code);
+    const result = await verifyAuditChain(mutate(repository.events));
+    expect(result.codes).toContain(code);
   });
 
   it('detects forks and truncation against a separately retained head', async () => {
@@ -183,14 +198,12 @@ describe('tamper-evident audit chain', () => {
       auditInput(3, { event: { ...auditInput(3).event, action: 'alternate-fork' } }),
     );
 
-    expect(verifyAuditChain([first, second, alternateSecond]).codes).toContain(
-      'AUDIT_FORK_DETECTED',
-    );
-    expect(
-      verifyAuditChain([first], {
-        expectedHead: repository.currentHead(),
-      }).codes,
-    ).toContain('AUDIT_TRUNCATED');
+    const forkResult = await verifyAuditChain([first, second, alternateSecond]);
+    expect(forkResult.codes).toContain('AUDIT_FORK_DETECTED');
+    const truncationResult = await verifyAuditChain([first], {
+      expectedHead: repository.currentHead(),
+    });
+    expect(truncationResult.codes).toContain('AUDIT_TRUNCATED');
   });
 
   it('uses unambiguous length-prefixed canonical Unicode and boundary-length encoding', async () => {
@@ -223,7 +236,9 @@ describe('tamper-evident audit chain', () => {
     };
 
     expect(encodeAuditEvent(composed)).toEqual(encodeAuditEvent(decomposed));
-    expect(encodeAuditEvent(shiftedBoundary)).not.toEqual(encodeAuditEvent(ambiguousWithoutLengths));
+    expect(encodeAuditEvent(shiftedBoundary)).not.toEqual(
+      encodeAuditEvent(ambiguousWithoutLengths),
+    );
   });
 
   it('copies only generated redacted audit fields and excludes payloads and provider errors', async () => {

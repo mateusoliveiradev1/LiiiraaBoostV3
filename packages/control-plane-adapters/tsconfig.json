@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2024", "DOM"],
+    "skipLibCheck": true,
     "types": []
   },
-  "include": ["src/index.ts", "src/storage/consent-stream.ts"]
+  "include": ["src/index.ts", "src/storage/audit-anchor.ts", "src/storage/consent-stream.ts"]
 }
