@@ -159,16 +159,32 @@ jobs:
         run: pnpm --filter @liiiraa/api db:migrate
       - name: Update the bounded staging build identity
         env:
+          ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}
+          ADMIN_STAGING_ORIGIN: ${{ vars.ADMIN_STAGING_ORIGIN }}
+          AUDIT_ANCHOR_BUCKET: ${{ vars.AUDIT_ANCHOR_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          DESKTOP_STAGING_ORIGIN: ${{ vars.DESKTOP_STAGING_ORIGIN }}
+          PUBLIC_STAGING_ORIGIN: ${{ vars.PUBLIC_STAGING_ORIGIN }}
           RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          STAGING_API_ORIGIN: ${{ secrets.STAGING_API_ORIGIN }}
+          STAGING_AUTH_SECRET: ${{ secrets.STAGING_AUTH_SECRET }}
           STAGING_BUILD_ID: ${{ github.sha }}
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          SUPPORT_BUCKET: ${{ vars.SUPPORT_BUCKET }}
         run: >-
+          node --input-type=module --eval
+          "const required = ['ACCOUNT_STAGING_ORIGIN','ADMIN_STAGING_ORIGIN','AUDIT_ANCHOR_BUCKET','AWS_REGION','DESKTOP_STAGING_ORIGIN','PUBLIC_STAGING_ORIGIN','STAGING_API_ORIGIN','STAGING_AUTH_SECRET','STAGING_BUILD_ID','STAGING_DATABASE_URL','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','SUPPORT_BUCKET'];
+          if (required.some((key) => !process.env[key])) throw new Error('Render staging authority environment is incomplete');
+          const fixed = { NODE_ENV: 'production', PORT: '3000', STAGING_CHANNEL: 'internal', STAGING_DATA_CLASSIFICATION: 'synthetic', STAGING_INVITATION_ONLY: 'true', STAGING_PUBLIC_SIGNUP: 'false' };
+          process.stdout.write(JSON.stringify([...required.map((key) => ({ key, value: process.env[key] })), ...Object.entries(fixed).map(([key, value]) => ({ key, value }))]));" |
           curl --fail-with-body --silent --show-error
           --request PUT
           --header "Authorization: Bearer $RENDER_API_TOKEN"
           --header "Content-Type: application/json"
-          --data
-          "[{\"key\":\"PORT\",\"value\":\"3000\"},{\"key\":\"NODE_ENV\",\"value\":\"production\"},{\"key\":\"STAGING_BUILD_ID\",\"value\":\"$STAGING_BUILD_ID\"},{\"key\":\"STAGING_DATA_CLASSIFICATION\",\"value\":\"synthetic\"},{\"key\":\"STAGING_INVITATION_ONLY\",\"value\":\"true\"},{\"key\":\"STAGING_PUBLIC_SIGNUP\",\"value\":\"false\"},{\"key\":\"STAGING_CHANNEL\",\"value\":\"internal\"}]"
+          --data-binary @-
           "https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars"
       - name: Deploy the tested GHCR digest only
         env:

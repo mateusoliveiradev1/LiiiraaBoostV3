@@ -66,6 +66,11 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('Install frozen migration dependencies without lifecycle scripts');
     expect(workflow).toContain('services/$RENDER_SERVICE_ID/env-vars');
     expect(workflow).toContain('STAGING_BUILD_ID: ${{ github.sha }}');
+    expect(workflow).toContain('STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}');
+    expect(workflow).toContain('STAGING_AUTH_SECRET: ${{ secrets.STAGING_AUTH_SECRET }}');
+    expect(workflow).toContain('ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}');
+    expect(workflow).toContain('ADMIN_STAGING_ORIGIN: ${{ vars.ADMIN_STAGING_ORIGIN }}');
+    expect(workflow).toContain('--data-binary @-');
     expect(workflow).toContain('RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}');
     expect(workflow).toContain('services/$RENDER_SERVICE_ID/deploys');
     expect(workflow).toContain('for attempt in $(seq 1 30)');
