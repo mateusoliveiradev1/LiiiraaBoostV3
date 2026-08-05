@@ -21,7 +21,6 @@ use serde_json::{Value, json};
 const ISSUER: &str = "https://identity.liiiraa.test";
 const REDIRECT_URI: &str = "http://127.0.0.1:49152/oauth/callback";
 const STATE: &str = "state_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef";
-const CODE_CHALLENGE: &str = "challenge_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef";
 const CODE_VERIFIER: &str = "verifier_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij";
 const API_CREDENTIAL: &str = "api-issued-rotated-credential-do-not-render";
 
@@ -68,7 +67,8 @@ fn challenge() -> DesktopAuthorizationChallenge {
     DesktopAuthorizationChallenge {
         challenge_id: "challenge_desktop_0001".to_owned(),
         authorization_url: format!(
-            "{ISSUER}/api/auth/oauth2/authorize?response_type=code&client_id=liiiraa-windows-public-client&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Foauth%2Fcallback&state={STATE}&code_challenge={CODE_CHALLENGE}&code_challenge_method=S256"
+            "{ISSUER}/api/auth/oauth2/authorize?response_type=code&client_id=liiiraa-windows-public-client&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Foauth%2Fcallback&state={STATE}&code_challenge={}&code_challenge_method=S256",
+            proof.code_challenge()
         ),
         state: STATE.to_owned(),
         code_challenge: proof.code_challenge().to_owned(),
@@ -141,7 +141,7 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
     let exchange = complete_desktop_callback(&mut pending, callback(STATE))
         .expect("exact one-shot callback should be forwarded");
     assert_eq!(exchange.path(), DESKTOP_EXCHANGE_PATH);
-    let body = serde_json::to_value(exchange).expect("exchange request should serialize");
+    let body = serde_json::to_value(&exchange).expect("exchange request should serialize");
     assert_eq!(body["challengeId"], "challenge_desktop_0001");
     assert_eq!(body["authorizationCode"], "one-shot-authorization-code");
     assert_eq!(body["state"], STATE);
@@ -216,7 +216,9 @@ impl DesktopIdentityApi for RecordingIdentityApi {
         &self,
         request: &DesktopAuthorizationRequest,
     ) -> Result<DesktopAuthorizationChallenge, DesktopIdentityError> {
-        self.authorization_requests.borrow_mut().push(request.clone());
+        self.authorization_requests
+            .borrow_mut()
+            .push(request.clone());
         Ok(DesktopAuthorizationChallenge {
             challenge_id: "challenge_desktop_0001".to_owned(),
             authorization_url: format!(
@@ -275,28 +277,44 @@ fn native_flow_requests_authorization_after_loopback_binding_and_returns_only_se
 
     assert_eq!(session.state, SessionState::Active);
     assert_eq!(api.authorization_requests.borrow().len(), 1);
-    assert_eq!(api.exchange_requests.borrow()[0]["codeVerifier"], CODE_VERIFIER);
-    assert_eq!(store.read_credential().unwrap().as_deref(), Some(API_CREDENTIAL));
-    assert!(!serde_json::to_string(&session).unwrap().contains(API_CREDENTIAL));
+    assert_eq!(
+        api.exchange_requests.borrow()[0]["codeVerifier"],
+        CODE_VERIFIER
+    );
+    assert_eq!(
+        store.read_credential().unwrap().as_deref(),
+        Some(API_CREDENTIAL)
+    );
+    assert!(
+        !serde_json::to_string(&session)
+            .unwrap()
+            .contains(API_CREDENTIAL)
+    );
 }
 
 #[test]
 fn native_api_configuration_rejects_non_https_and_mismatched_origins() {
-    assert!(WindowsDesktopIdentityApi::from_origins(
-        "http://api.liiiraa.test",
-        "https://account.liiiraa.test"
-    )
-    .is_err());
-    assert!(WindowsDesktopIdentityApi::from_origins(
-        "https://api.liiiraa.test/path",
-        "https://account.liiiraa.test"
-    )
-    .is_err());
-    assert!(WindowsDesktopIdentityApi::from_origins(
-        "https://api.liiiraa.test",
-        "https://account.liiiraa.test"
-    )
-    .is_ok());
+    assert!(
+        WindowsDesktopIdentityApi::from_origins(
+            "http://api.liiiraa.test",
+            "https://account.liiiraa.test"
+        )
+        .is_err()
+    );
+    assert!(
+        WindowsDesktopIdentityApi::from_origins(
+            "https://api.liiiraa.test/path",
+            "https://account.liiiraa.test"
+        )
+        .is_err()
+    );
+    assert!(
+        WindowsDesktopIdentityApi::from_origins(
+            "https://api.liiiraa.test",
+            "https://account.liiiraa.test"
+        )
+        .is_ok()
+    );
 }
 
 #[test]

@@ -6,6 +6,7 @@ import {
   type DesktopAccountAuthority,
   type DesktopAccountAuthoritySnapshot,
 } from '../account-authority.js';
+import { createDesktopAuth, type DesktopAuth, type DesktopAuthPhase } from '../desktop-auth.js';
 import {
   ACCOUNT_PROFILE_UPDATED_EVENT,
   DEFAULT_ACCOUNT_PROFILE,
@@ -67,19 +68,34 @@ const BrandLockup = () => (
 );
 
 const LoginSurface = ({
+  desktopAuth,
   locale,
   navigate,
-}: Pick<AccountExperienceProps, 'locale' | 'navigate'>) => {
+}: Pick<AccountExperienceProps, 'locale' | 'navigate'> & {
+  readonly desktopAuth: DesktopAuth | undefined;
+}) => {
   const [email, setEmail] = useState('');
   const [attempted, setAttempted] = useState(false);
-  const [browserBoundary, setBrowserBoundary] = useState(false);
+  const [phase, setPhase] = useState<DesktopAuthPhase>('idle');
   const validEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email);
 
-  const continueToBrowserBoundary = (): void => {
+  const continueToBrowserBoundary = async (): Promise<void> => {
     setAttempted(true);
-    if (validEmail) {
-      setBrowserBoundary(true);
+    if (!validEmail) return;
+    if (desktopAuth === undefined) {
+      setPhase('error');
+      return;
     }
+    setPhase('opening-browser');
+    await Promise.resolve();
+    setPhase('waiting-browser');
+    const result = await desktopAuth.signIn(email.trim().toLowerCase());
+    if (result.status !== 'authenticated') {
+      setPhase('error');
+      return;
+    }
+    setPhase('authenticated');
+    navigate('/account/overview');
   };
 
   return (
@@ -176,7 +192,18 @@ const LoginSurface = ({
             onChange={setEmail}
             value={email}
           />
-          <LbButton onPress={continueToBrowserBoundary} variant="primary">
+          <LbButton
+            isDisabled={phase === 'opening-browser' || phase === 'waiting-browser'}
+            isLoading={phase === 'opening-browser' || phase === 'waiting-browser'}
+            loadingLabel={copy(locale, {
+              en: 'Finish sign-in in your browser',
+              'pt-BR': 'Conclua o login no navegador',
+            })}
+            onPress={() => {
+              void continueToBrowserBoundary();
+            }}
+            variant="primary"
+          >
             <ProductIcon name="arrowRight" size={17} />
             {copy(locale, {
               en: 'Continue securely',
@@ -192,6 +219,7 @@ const LoginSurface = ({
         </div>
 
         <LbButton
+          data-auth-action="offline-demo"
           onPress={() => {
             navigate('/home');
           }}
@@ -200,36 +228,35 @@ const LoginSurface = ({
           {copy(locale, { en: 'Explore demo mode', 'pt-BR': 'Explorar modo demonstração' })}
         </LbButton>
 
-        {browserBoundary ? (
-          <aside className="desktop-auth-boundary" aria-live="polite">
+        {phase === 'opening-browser' || phase === 'waiting-browser' ? (
+          <aside className="desktop-auth-boundary" aria-live="polite" role="status">
             <ProductIcon name="shield" size={20} />
             <div>
               <strong>
                 {copy(locale, {
-                  en: 'Secure browser sign-in is prepared',
-                  'pt-BR': 'O login seguro pelo navegador está preparado',
+                  en: 'Secure browser sign-in is in progress',
+                  'pt-BR': 'O login seguro pelo navegador está em andamento',
                 })}
               </strong>
               <p>
                 {copy(locale, {
-                  en: 'Real authentication arrives with the Phase 4 identity service. Continue with the deterministic local account for now.',
+                  en: 'Complete the account confirmation in your system browser. This app never receives or stores your password.',
                   'pt-BR':
-                    'A autenticação real chega com o serviço de identidade da Fase 4. Por enquanto, continue com a conta local determinística.',
+                    'Conclua a confirmação da conta no navegador do sistema. Este aplicativo nunca recebe nem armazena sua senha.',
                 })}
               </p>
-              <LbButton
-                onPress={() => {
-                  navigate('/account/overview');
-                }}
-                variant="primary"
-              >
-                {copy(locale, {
-                  en: 'Open local account preview',
-                  'pt-BR': 'Abrir prévia da conta local',
-                })}
-              </LbButton>
             </div>
           </aside>
+        ) : null}
+
+        {phase === 'error' ? (
+          <p role="alert">
+            {copy(locale, {
+              en: 'Sign-in could not complete. Confirm the browser window and try again.',
+              'pt-BR':
+                'Não foi possível concluir o login. Confirme a janela do navegador e tente novamente.',
+            })}
+          </p>
         ) : null}
 
         <p className="desktop-login-legal">
@@ -1816,78 +1843,115 @@ const AuthoritativeProfile = ({
 
 const AuthoritativeAccountContent = ({
   authority,
+  desktopAuth,
   locale,
+  navigate,
   snapshot,
   view,
 }: {
   readonly authority: DesktopAccountAuthority;
+  readonly desktopAuth: DesktopAuth | undefined;
   readonly locale: ShellLocale;
+  readonly navigate: (pathname: string) => void;
   readonly snapshot: DesktopAccountAuthoritySnapshot;
   readonly view: Exclude<AccountExperienceView, 'login'>;
-}) => (
-  <div data-account-runtime="production">
-    <AccountAuthoritySummary
-      locale={locale}
-      state={snapshot.state}
-      {...(snapshot.projection === undefined
-        ? {}
-        : {
-            account: snapshot.projection.account,
-            activeDevice: snapshot.projection.activeDevice,
-            subscription: snapshot.projection.subscription,
+}) => {
+  const [signOutFailed, setSignOutFailed] = useState(false);
+  return (
+    <div data-account-runtime="production">
+      <AccountAuthoritySummary
+        locale={locale}
+        state={snapshot.state}
+        {...(snapshot.projection === undefined
+          ? {}
+          : {
+              account: snapshot.projection.account,
+              activeDevice: snapshot.projection.activeDevice,
+              subscription: snapshot.projection.subscription,
+            })}
+      />
+      {view === 'overview' ? (
+        <AuthoritativeProfile authority={authority} locale={locale} snapshot={snapshot} />
+      ) : null}
+      {view === 'subscription' ? (
+        <section
+          aria-label={copy(locale, {
+            en: 'Subscription authority',
+            'pt-BR': 'Autoridade da assinatura',
           })}
-    />
-    {view === 'overview' ? (
-      <AuthoritativeProfile authority={authority} locale={locale} snapshot={snapshot} />
-    ) : null}
-    {view === 'subscription' ? (
-      <section
-        aria-label={copy(locale, {
-          en: 'Subscription authority',
-          'pt-BR': 'Autoridade da assinatura',
-        })}
-      >
-        <h2>{snapshot.projection?.subscription.plan === 'premium' ? 'Premium' : 'Free'}</h2>
-        <LbButton
-          isDisabled={snapshot.state !== 'online'}
-          onPress={() => undefined}
-          variant="primary"
         >
-          {copy(locale, { en: 'Start new Premium work', 'pt-BR': 'Iniciar novo trabalho Premium' })}
-        </LbButton>
-      </section>
-    ) : null}
-    {view === 'device' && snapshot.projection?.activeDevice ? (
-      <section
-        aria-label={copy(locale, {
-          en: 'Active device authority',
-          'pt-BR': 'Autoridade do dispositivo ativo',
-        })}
-      >
-        <h2>{snapshot.projection.activeDevice.deviceLabel}</h2>
-        <p>{snapshot.projection.activeDevice.state}</p>
-      </section>
-    ) : null}
-    {view === 'security' ? (
-      <section
-        aria-label={copy(locale, { en: 'Security authority', 'pt-BR': 'Autoridade de segurança' })}
-      >
-        <h2>
-          {copy(locale, {
-            en: 'Verified security methods',
-            'pt-BR': 'Métodos de segurança verificados',
+          <h2>{snapshot.projection?.subscription.plan === 'premium' ? 'Premium' : 'Free'}</h2>
+          <LbButton
+            isDisabled={snapshot.state !== 'online'}
+            onPress={() => undefined}
+            variant="primary"
+          >
+            {copy(locale, {
+              en: 'Start new Premium work',
+              'pt-BR': 'Iniciar novo trabalho Premium',
+            })}
+          </LbButton>
+        </section>
+      ) : null}
+      {view === 'device' && snapshot.projection?.activeDevice ? (
+        <section
+          aria-label={copy(locale, {
+            en: 'Active device authority',
+            'pt-BR': 'Autoridade do dispositivo ativo',
           })}
-        </h2>
-        <ul>
-          {snapshot.projection?.securityMethods.map((method) => (
-            <li key={method.methodId}>{`${method.factor}: active`}</li>
-          ))}
-        </ul>
-      </section>
-    ) : null}
-    {snapshot.state === 'revoked' ? <LocalSafetyCapabilities locale={locale} /> : null}
-  </div>
-);
+        >
+          <h2>{snapshot.projection.activeDevice.deviceLabel}</h2>
+          <p>{snapshot.projection.activeDevice.state}</p>
+        </section>
+      ) : null}
+      {view === 'security' ? (
+        <section
+          aria-label={copy(locale, {
+            en: 'Security authority',
+            'pt-BR': 'Autoridade de segurança',
+          })}
+        >
+          <h2>
+            {copy(locale, {
+              en: 'Verified security methods',
+              'pt-BR': 'Métodos de segurança verificados',
+            })}
+          </h2>
+          <ul>
+            {snapshot.projection?.securityMethods.map((method) => (
+              <li key={method.methodId}>{`${method.factor}: active`}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {snapshot.state === 'revoked' ? <LocalSafetyCapabilities locale={locale} /> : null}
+      {desktopAuth === undefined ? null : (
+        <LbButton
+          onPress={() => {
+            void desktopAuth.signOut().then((result) => {
+              if (result.status === 'signed-out') {
+                navigate('/login');
+              } else {
+                setSignOutFailed(true);
+              }
+            });
+          }}
+          variant="secondary"
+        >
+          {copy(locale, { en: 'Sign out securely', 'pt-BR': 'Sair com segurança' })}
+        </LbButton>
+      )}
+      {signOutFailed ? (
+        <p role="alert">
+          {copy(locale, {
+            en: 'Sign-out could not complete. Your secure session remains protected.',
+            'pt-BR': 'Não foi possível sair. Sua sessão segura continua protegida.',
+          })}
+        </p>
+      ) : null}
+    </div>
+  );
+};
 
 export const AccountExperience = ({
   locale,
@@ -1896,6 +1960,7 @@ export const AccountExperience = ({
   view,
 }: AccountExperienceProps): ReactNode => {
   const [authority] = useState(() => createDesktopAccountAuthority());
+  const [desktopAuth] = useState(() => createDesktopAuth());
   const [authoritySnapshot, setAuthoritySnapshot] = useState<
     DesktopAccountAuthoritySnapshot | undefined
   >(() => authority?.snapshot());
@@ -1911,7 +1976,7 @@ export const AccountExperience = ({
   }, [authority]);
 
   if (view === 'login') {
-    return <LoginSurface locale={locale} navigate={navigate} />;
+    return <LoginSurface desktopAuth={desktopAuth} locale={locale} navigate={navigate} />;
   }
 
   if (authority !== undefined && authoritySnapshot !== undefined) {
@@ -1919,7 +1984,9 @@ export const AccountExperience = ({
       <AccountShell locale={locale} navigate={navigate} view={view}>
         <AuthoritativeAccountContent
           authority={authority}
+          desktopAuth={desktopAuth}
           locale={locale}
+          navigate={navigate}
           snapshot={authoritySnapshot}
           view={view}
         />

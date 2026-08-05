@@ -20,11 +20,16 @@ mod window;
 use std::sync::Mutex;
 
 use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
+use credential_store::WindowsCredentialStore;
+use identity::{
+    DesktopIdentityError, DesktopPkceProof, LoopbackCallbackListener, WindowsDesktopIdentityApi,
+    WindowsSystemBrowser, perform_desktop_sign_in, sign_out_desktop,
+};
 
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
-    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, ShellLocale,
-    ShellWindowState, validate_host_to_renderer_shell_event,
+    RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, SessionProjection,
+    ShellLocale, ShellWindowState, validate_host_to_renderer_shell_event,
     validate_renderer_to_host_shell_command,
 };
 use navigation::{
@@ -472,6 +477,92 @@ fn sync_account(
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+enum DesktopAuthCommandError {
+    InvalidRequest,
+    Rejected,
+    Unavailable,
+}
+
+impl From<DesktopIdentityError> for DesktopAuthCommandError {
+    fn from(error: DesktopIdentityError) -> Self {
+        match error {
+            DesktopIdentityError::InvalidAuthorizationChallenge
+            | DesktopIdentityError::CallbackMismatch
+            | DesktopIdentityError::CallbackConsumed
+            | DesktopIdentityError::InvalidExchangeResponse => Self::Rejected,
+            DesktopIdentityError::CallbackTimeout => Self::Rejected,
+            DesktopIdentityError::AuthorizationUnavailable
+            | DesktopIdentityError::SystemBrowserUnavailable
+            | DesktopIdentityError::CallbackUnavailable
+            | DesktopIdentityError::CredentialCustody(_) => Self::Unavailable,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopSignInCommandResponse {
+    session: SessionProjection,
+    status: &'static str,
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopSignOutCommandResponse {
+    status: &'static str,
+}
+
+#[tauri::command]
+async fn desktop_sign_in(
+    email: String,
+) -> Result<DesktopSignInCommandResponse, DesktopAuthCommandError> {
+    tauri::async_runtime::spawn_blocking(move || {
+        if email.trim().is_empty() || email.len() > 254 {
+            return Err(DesktopAuthCommandError::InvalidRequest);
+        }
+        let mut callback =
+            LoopbackCallbackListener::bind().map_err(DesktopAuthCommandError::from)?;
+        let proof = DesktopPkceProof::generate().map_err(DesktopAuthCommandError::from)?;
+        let api =
+            WindowsDesktopIdentityApi::from_environment().map_err(DesktopAuthCommandError::from)?;
+        let store =
+            WindowsCredentialStore::for_account(account_sync::DESKTOP_ACCOUNT_CREDENTIAL_SLOT);
+        let session = perform_desktop_sign_in(
+            &api,
+            &WindowsSystemBrowser,
+            &store,
+            &mut callback,
+            &email,
+            proof,
+        )
+        .map_err(DesktopAuthCommandError::from)?;
+        Ok(DesktopSignInCommandResponse {
+            session,
+            status: "authenticated",
+        })
+    })
+    .await
+    .map_err(|_| DesktopAuthCommandError::Unavailable)?
+}
+
+#[tauri::command]
+async fn desktop_sign_out() -> Result<DesktopSignOutCommandResponse, DesktopAuthCommandError> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let api =
+            WindowsDesktopIdentityApi::from_environment().map_err(DesktopAuthCommandError::from)?;
+        let store =
+            WindowsCredentialStore::for_account(account_sync::DESKTOP_ACCOUNT_CREDENTIAL_SLOT);
+        sign_out_desktop(&api, &store).map_err(DesktopAuthCommandError::from)?;
+        Ok(DesktopSignOutCommandResponse {
+            status: "signed-out",
+        })
+    })
+    .await
+    .map_err(|_| DesktopAuthCommandError::Unavailable)?
+}
+
 fn run() -> Result<(), String> {
     let configured_adapter = std::env::var(ADAPTER_ENVIRONMENT_VARIABLE).ok();
     ShellContract::authorize_startup(build_profile(), configured_adapter.as_deref())
@@ -554,6 +645,8 @@ fn run() -> Result<(), String> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            desktop_sign_in,
+            desktop_sign_out,
             dispatch_shell_command,
             get_shell_bootstrap,
             sync_account

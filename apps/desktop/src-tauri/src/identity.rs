@@ -2,22 +2,133 @@ use std::{
     fmt,
     io::{Read, Write},
     net::{Ipv4Addr, SocketAddrV4, TcpListener},
+    thread,
     time::Duration,
+    time::Instant,
 };
 
+use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use liiiraa_contracts_rust::{SessionProjection, SessionState};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
 
 use crate::credential_store::{CredentialStore, CredentialStoreError};
 
 pub const DESKTOP_AUTHORIZATION_PATH: &str = "/v1/identity/desktop/authorizations";
 pub const DESKTOP_EXCHANGE_PATH: &str = "/v1/identity/desktop/exchanges";
+pub const DESKTOP_SIGN_OUT_PATH: &str = "/v1/identity/desktop/sign-out";
+pub const DESKTOP_API_ORIGIN_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_ACCOUNT_API_ORIGIN";
+pub const DESKTOP_ACCOUNT_ORIGIN_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_ACCOUNT_ORIGIN";
 
 const MINIMUM_PKCE_VALUE_LENGTH: usize = 43;
 const MAXIMUM_PKCE_VALUE_LENGTH: usize = 128;
 const MAXIMUM_AUTHORIZATION_CODE_LENGTH: usize = 2_048;
 const MAXIMUM_CALLBACK_REQUEST_BYTES: usize = 8_192;
+const MAXIMUM_IDENTITY_RESPONSE_BYTES: usize = 1_048_576;
+const DESKTOP_CALLBACK_TIMEOUT: Duration = Duration::from_secs(120);
+
+#[derive(Clone, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DesktopAuthorizationRequest {
+    pub email: String,
+    pub code_challenge: String,
+    pub issuer: String,
+    pub redirect_uri: String,
+}
+
+impl fmt::Debug for DesktopAuthorizationRequest {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("DesktopAuthorizationRequest")
+            .field("email", &"[redacted]")
+            .field("code_challenge", &"[redacted]")
+            .field("issuer", &self.issuer)
+            .field("redirect_uri", &self.redirect_uri)
+            .finish()
+    }
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub struct DesktopPkceProof {
+    verifier: String,
+    code_challenge: String,
+}
+
+impl DesktopPkceProof {
+    pub fn from_verifier(verifier: &str) -> Result<Self, DesktopIdentityError> {
+        if !is_base64url_value(verifier) {
+            return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+        }
+        let digest = Sha256::digest(verifier.as_bytes());
+        Ok(Self {
+            verifier: verifier.to_owned(),
+            code_challenge: URL_SAFE_NO_PAD.encode(digest),
+        })
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn generate() -> Result<Self, DesktopIdentityError> {
+        use windows::Win32::Security::Cryptography::{
+            BCRYPT_USE_SYSTEM_PREFERRED_RNG, BCryptGenRandom,
+        };
+
+        let mut random = [0_u8; 64];
+        // SAFETY: The system-preferred RNG does not require an algorithm handle, and the owned
+        // output buffer remains valid for the complete call.
+        let status = unsafe { BCryptGenRandom(None, &mut random, BCRYPT_USE_SYSTEM_PREFERRED_RNG) };
+        if !status.is_ok() {
+            return Err(DesktopIdentityError::AuthorizationUnavailable);
+        }
+        Self::from_verifier(&URL_SAFE_NO_PAD.encode(random))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    pub fn generate() -> Result<Self, DesktopIdentityError> {
+        Err(DesktopIdentityError::AuthorizationUnavailable)
+    }
+
+    pub fn code_challenge(&self) -> &str {
+        &self.code_challenge
+    }
+
+    fn verifier(&self) -> &str {
+        &self.verifier
+    }
+}
+
+impl fmt::Debug for DesktopPkceProof {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("DesktopPkceProof")
+            .field("verifier", &"[redacted]")
+            .field("code_challenge", &"[redacted]")
+            .finish()
+    }
+}
+
+pub trait DesktopIdentityApi {
+    fn account_origin(&self) -> &str;
+    fn issuer(&self) -> &str;
+    fn request_authorization(
+        &self,
+        request: &DesktopAuthorizationRequest,
+    ) -> Result<DesktopAuthorizationChallenge, DesktopIdentityError>;
+    fn exchange(
+        &self,
+        request: &DesktopExchangeRequest,
+    ) -> Result<DesktopExchangeResponse, DesktopIdentityError>;
+    fn revoke(&self, credential: &str) -> Result<(), DesktopIdentityError>;
+}
+
+pub trait DesktopCallbackReceiver {
+    fn redirect_uri(&self) -> &str;
+    fn receive(
+        &mut self,
+        expected_issuer: &str,
+        timeout: Duration,
+    ) -> Result<DesktopCallbackEvidence, DesktopIdentityError>;
+}
 
 pub trait SystemBrowserLauncher {
     fn open(&self, url: &str) -> Result<(), DesktopIdentityError>;
@@ -62,7 +173,8 @@ impl SystemBrowserLauncher for WindowsSystemBrowser {
     }
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DesktopAuthorizationChallenge {
     pub challenge_id: String,
     pub authorization_url: String,
@@ -91,6 +203,7 @@ impl fmt::Debug for DesktopAuthorizationChallenge {
 pub struct PendingDesktopSignIn {
     challenge: DesktopAuthorizationChallenge,
     callback_consumed: bool,
+    code_verifier: String,
 }
 
 impl PendingDesktopSignIn {
@@ -105,6 +218,7 @@ impl fmt::Debug for PendingDesktopSignIn {
             .debug_struct("PendingDesktopSignIn")
             .field("challenge", &"[redacted]")
             .field("callback_consumed", &self.callback_consumed)
+            .field("code_verifier", &"[redacted]")
             .finish()
     }
 }
@@ -144,13 +258,34 @@ impl LoopbackCallbackListener {
         &mut self,
         expected_issuer: &str,
     ) -> Result<DesktopCallbackEvidence, DesktopIdentityError> {
+        self.receive_with_timeout(expected_issuer, DESKTOP_CALLBACK_TIMEOUT)
+    }
+
+    pub fn receive_with_timeout(
+        &mut self,
+        expected_issuer: &str,
+        timeout: Duration,
+    ) -> Result<DesktopCallbackEvidence, DesktopIdentityError> {
         let listener = self
             .listener
             .take()
             .ok_or(DesktopIdentityError::CallbackConsumed)?;
-        let (mut stream, peer) = listener
-            .accept()
+        listener
+            .set_nonblocking(true)
             .map_err(|_| DesktopIdentityError::CallbackUnavailable)?;
+        let deadline = Instant::now() + timeout;
+        let (mut stream, peer) = loop {
+            match listener.accept() {
+                Ok(connection) => break connection,
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    if Instant::now() >= deadline {
+                        return Err(DesktopIdentityError::CallbackTimeout);
+                    }
+                    thread::sleep(Duration::from_millis(25));
+                }
+                Err(_) => return Err(DesktopIdentityError::CallbackUnavailable),
+            }
+        };
         if peer.ip() != Ipv4Addr::LOCALHOST {
             return Err(DesktopIdentityError::CallbackMismatch);
         }
@@ -168,6 +303,20 @@ impl LoopbackCallbackListener {
             b"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 48\r\nConnection: close\r\n\r\nAuthentication received. Return to Liiiraa Boost.",
         );
         Ok(evidence)
+    }
+}
+
+impl DesktopCallbackReceiver for LoopbackCallbackListener {
+    fn redirect_uri(&self) -> &str {
+        self.redirect_uri()
+    }
+
+    fn receive(
+        &mut self,
+        expected_issuer: &str,
+        timeout: Duration,
+    ) -> Result<DesktopCallbackEvidence, DesktopIdentityError> {
+        self.receive_with_timeout(expected_issuer, timeout)
     }
 }
 
@@ -199,6 +348,7 @@ impl fmt::Debug for DesktopCallbackEvidence {
 pub struct DesktopExchangeRequest {
     challenge_id: String,
     authorization_code: String,
+    code_verifier: String,
     state: String,
     issuer: String,
     redirect_uri: String,
@@ -217,6 +367,7 @@ impl fmt::Debug for DesktopExchangeRequest {
             .field("path", &DESKTOP_EXCHANGE_PATH)
             .field("challenge_id", &"[redacted]")
             .field("authorization_code", &"[redacted]")
+            .field("code_verifier", &"[redacted]")
             .field("state", &"[redacted]")
             .field("issuer", &self.issuer)
             .field("redirect_uri", &self.redirect_uri)
@@ -268,8 +419,10 @@ impl AuthenticatedContactDisposition {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DesktopIdentityError {
     InvalidAuthorizationChallenge,
+    AuthorizationUnavailable,
     SystemBrowserUnavailable,
     CallbackUnavailable,
+    CallbackTimeout,
     CallbackConsumed,
     CallbackMismatch,
     InvalidExchangeResponse,
@@ -280,8 +433,10 @@ impl fmt::Display for DesktopIdentityError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str(match self {
             Self::InvalidAuthorizationChallenge => "desktop authorization could not begin",
+            Self::AuthorizationUnavailable => "desktop authorization service is unavailable",
             Self::SystemBrowserUnavailable => "system browser could not open",
             Self::CallbackUnavailable => "desktop authorization callback is unavailable",
+            Self::CallbackTimeout => "desktop authorization callback timed out",
             Self::CallbackConsumed | Self::CallbackMismatch => {
                 "desktop authorization callback was rejected"
             }
@@ -422,28 +577,33 @@ fn exact_issuer(issuer: &str) -> bool {
 }
 
 fn valid_browser_authorization(challenge: &DesktopAuthorizationChallenge) -> bool {
-    challenge
-        .authorization_url
-        .starts_with(&format!("{}/", challenge.issuer))
-        && challenge.authorization_url.contains("response_type=code")
-        && challenge
-            .authorization_url
-            .contains("client_id=liiiraa-windows-public-client")
+    challenge.authorization_url.starts_with("https://")
+        && !challenge.authorization_url.contains(['\r', '\n', '#'])
+        && !challenge.authorization_url.contains('@')
         && challenge
             .authorization_url
             .contains(&format!("state={}", challenge.state))
-        && challenge
+        && (challenge
             .authorization_url
-            .contains(&format!("code_challenge={}", challenge.code_challenge))
-        && challenge
-            .authorization_url
-            .contains("code_challenge_method=S256")
+            .contains(&format!("desktop_challenge={}", challenge.challenge_id))
+            || (challenge.authorization_url.contains("response_type=code")
+                && challenge
+                    .authorization_url
+                    .contains("client_id=liiiraa-windows-public-client")
+                && challenge
+                    .authorization_url
+                    .contains(&format!("code_challenge={}", challenge.code_challenge))
+                && challenge
+                    .authorization_url
+                    .contains("code_challenge_method=S256")))
 }
 
 pub fn begin_desktop_sign_in(
     browser: &impl SystemBrowserLauncher,
     challenge: DesktopAuthorizationChallenge,
+    code_verifier: &str,
 ) -> Result<PendingDesktopSignIn, DesktopIdentityError> {
+    let proof = DesktopPkceProof::from_verifier(code_verifier)?;
     if challenge.challenge_id.is_empty()
         || challenge.challenge_id.len() > 128
         || !exact_issuer(&challenge.issuer)
@@ -451,6 +611,7 @@ pub fn begin_desktop_sign_in(
         || challenge.code_challenge_method != "S256"
         || !is_base64url_value(&challenge.state)
         || !is_base64url_value(&challenge.code_challenge)
+        || challenge.code_challenge != proof.code_challenge
         || !valid_browser_authorization(&challenge)
     {
         return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
@@ -460,6 +621,7 @@ pub fn begin_desktop_sign_in(
     Ok(PendingDesktopSignIn {
         challenge,
         callback_consumed: false,
+        code_verifier: proof.verifier,
     })
 }
 
@@ -490,10 +652,334 @@ pub fn complete_desktop_callback(
     Ok(DesktopExchangeRequest {
         challenge_id: pending.challenge.challenge_id.clone(),
         authorization_code: callback.authorization_code,
+        code_verifier: pending.code_verifier.clone(),
         state: callback.state,
         issuer: callback.issuer,
         redirect_uri: callback.redirect_uri,
     })
+}
+
+pub fn perform_desktop_sign_in(
+    api: &impl DesktopIdentityApi,
+    browser: &impl SystemBrowserLauncher,
+    store: &impl CredentialStore,
+    callback: &mut impl DesktopCallbackReceiver,
+    email: &str,
+    proof: DesktopPkceProof,
+) -> Result<SessionProjection, DesktopIdentityError> {
+    let email = email.trim().to_ascii_lowercase();
+    if email.len() > 254
+        || !email.contains('@')
+        || email.chars().any(char::is_whitespace)
+        || !exact_issuer(api.issuer())
+        || !exact_issuer(api.account_origin())
+        || !exact_loopback_redirect(callback.redirect_uri())
+    {
+        return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+    }
+    let request = DesktopAuthorizationRequest {
+        email,
+        code_challenge: proof.code_challenge().to_owned(),
+        issuer: api.issuer().to_owned(),
+        redirect_uri: callback.redirect_uri().to_owned(),
+    };
+    let challenge = api.request_authorization(&request)?;
+    if challenge.issuer != request.issuer
+        || challenge.redirect_uri != request.redirect_uri
+        || challenge.code_challenge != request.code_challenge
+        || !challenge
+            .authorization_url
+            .starts_with(&format!("{}/", api.account_origin()))
+    {
+        return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+    }
+    let mut pending = begin_desktop_sign_in(browser, challenge, proof.verifier())?;
+    let callback = callback.receive(api.issuer(), DESKTOP_CALLBACK_TIMEOUT)?;
+    let exchange = complete_desktop_callback(&mut pending, callback)?;
+    let response = api.exchange(&exchange)?;
+    accept_desktop_exchange(store, response)
+}
+
+pub fn sign_out_desktop(
+    api: &impl DesktopIdentityApi,
+    store: &impl CredentialStore,
+) -> Result<(), DesktopIdentityError> {
+    if let Some(credential) = store.read_credential()? {
+        api.revoke(&credential)?;
+    }
+    revoke_desktop_session(store)
+}
+
+#[derive(Clone, Debug)]
+struct HttpsOrigin {
+    host: String,
+    port: u16,
+    serialized: String,
+}
+
+impl HttpsOrigin {
+    fn parse(value: &str) -> Result<Self, DesktopIdentityError> {
+        let authority = value
+            .strip_prefix("https://")
+            .ok_or(DesktopIdentityError::InvalidAuthorizationChallenge)?;
+        if authority.is_empty()
+            || authority.contains(['/', '?', '#', '@'])
+            || authority.chars().any(char::is_whitespace)
+        {
+            return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+        }
+        let (host, port) = match authority.rsplit_once(':') {
+            Some((host, port)) => (
+                host,
+                port.parse::<u16>()
+                    .map_err(|_| DesktopIdentityError::InvalidAuthorizationChallenge)?,
+            ),
+            None => (authority, 443),
+        };
+        if host.is_empty()
+            || !host
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-'))
+        {
+            return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+        }
+        Ok(Self {
+            host: host.to_owned(),
+            port,
+            serialized: value.to_owned(),
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct WindowsDesktopIdentityApi {
+    account_origin: HttpsOrigin,
+    api_origin: HttpsOrigin,
+}
+
+impl WindowsDesktopIdentityApi {
+    pub fn from_environment() -> Result<Self, DesktopIdentityError> {
+        let api_origin = std::env::var(DESKTOP_API_ORIGIN_ENVIRONMENT_VARIABLE)
+            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+        let account_origin = std::env::var(DESKTOP_ACCOUNT_ORIGIN_ENVIRONMENT_VARIABLE)
+            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+        Self::from_origins(&api_origin, &account_origin)
+    }
+
+    pub fn from_origins(
+        api_origin: &str,
+        account_origin: &str,
+    ) -> Result<Self, DesktopIdentityError> {
+        Ok(Self {
+            account_origin: HttpsOrigin::parse(account_origin)?,
+            api_origin: HttpsOrigin::parse(api_origin)?,
+        })
+    }
+}
+
+impl DesktopIdentityApi for WindowsDesktopIdentityApi {
+    fn account_origin(&self) -> &str {
+        &self.account_origin.serialized
+    }
+
+    fn issuer(&self) -> &str {
+        &self.api_origin.serialized
+    }
+
+    fn request_authorization(
+        &self,
+        request: &DesktopAuthorizationRequest,
+    ) -> Result<DesktopAuthorizationChallenge, DesktopIdentityError> {
+        let body = serde_json::to_vec(request)
+            .map_err(|_| DesktopIdentityError::InvalidAuthorizationChallenge)?;
+        let response = winhttp_identity_request(
+            &self.api_origin,
+            "POST",
+            DESKTOP_AUTHORIZATION_PATH,
+            None,
+            Some(&body),
+        )?;
+        if response.status != 201 {
+            return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+        }
+        serde_json::from_slice(&response.body)
+            .map_err(|_| DesktopIdentityError::InvalidAuthorizationChallenge)
+    }
+
+    fn exchange(
+        &self,
+        request: &DesktopExchangeRequest,
+    ) -> Result<DesktopExchangeResponse, DesktopIdentityError> {
+        let body = serde_json::to_vec(request)
+            .map_err(|_| DesktopIdentityError::InvalidExchangeResponse)?;
+        let response = winhttp_identity_request(
+            &self.api_origin,
+            "POST",
+            DESKTOP_EXCHANGE_PATH,
+            None,
+            Some(&body),
+        )?;
+        if response.status != 201 {
+            return Err(DesktopIdentityError::InvalidExchangeResponse);
+        }
+        serde_json::from_slice(&response.body)
+            .map_err(|_| DesktopIdentityError::InvalidExchangeResponse)
+    }
+
+    fn revoke(&self, credential: &str) -> Result<(), DesktopIdentityError> {
+        let response = winhttp_identity_request(
+            &self.api_origin,
+            "POST",
+            DESKTOP_SIGN_OUT_PATH,
+            Some(credential),
+            None,
+        )?;
+        if matches!(response.status, 204 | 401 | 403) {
+            Ok(())
+        } else {
+            Err(DesktopIdentityError::AuthorizationUnavailable)
+        }
+    }
+}
+
+struct IdentityApiResponse {
+    status: u16,
+    body: Vec<u8>,
+}
+
+#[cfg(target_os = "windows")]
+fn winhttp_identity_request(
+    origin: &HttpsOrigin,
+    method: &str,
+    path: &str,
+    credential: Option<&str>,
+    body: Option<&[u8]>,
+) -> Result<IdentityApiResponse, DesktopIdentityError> {
+    use std::{ffi::c_void, ptr};
+    use windows::{
+        Win32::Networking::WinHttp::{
+            WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_FLAG_SECURE, WINHTTP_QUERY_FLAG_NUMBER,
+            WINHTTP_QUERY_STATUS_CODE, WinHttpCloseHandle, WinHttpConnect, WinHttpOpen,
+            WinHttpOpenRequest, WinHttpQueryHeaders, WinHttpReadData, WinHttpReceiveResponse,
+            WinHttpSendRequest, WinHttpSetTimeouts,
+        },
+        core::{HSTRING, PCWSTR},
+    };
+
+    struct InternetHandle(*mut c_void);
+    impl Drop for InternetHandle {
+        fn drop(&mut self) {
+            if !self.0.is_null() {
+                // SAFETY: The handle was returned by WinHTTP and is closed exactly once here.
+                let _ = unsafe { WinHttpCloseHandle(self.0) };
+            }
+        }
+    }
+
+    let user_agent = HSTRING::from("LiiiraaBoost/1.0");
+    let host = HSTRING::from(origin.host.as_str());
+    let method = HSTRING::from(method);
+    let path = HSTRING::from(path);
+    // SAFETY: Inputs are owned UTF-16 strings, handles are checked, and all buffers remain alive
+    // for each synchronous WinHTTP call.
+    unsafe {
+        let session = InternetHandle(WinHttpOpen(
+            &user_agent,
+            WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
+            PCWSTR::null(),
+            PCWSTR::null(),
+            0,
+        ));
+        if session.0.is_null() {
+            return Err(DesktopIdentityError::AuthorizationUnavailable);
+        }
+        WinHttpSetTimeouts(session.0, 5_000, 5_000, 5_000, 10_000)
+            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+        let connection = InternetHandle(WinHttpConnect(session.0, &host, origin.port, 0));
+        if connection.0.is_null() {
+            return Err(DesktopIdentityError::AuthorizationUnavailable);
+        }
+        let request = InternetHandle(WinHttpOpenRequest(
+            connection.0,
+            &method,
+            &path,
+            PCWSTR::null(),
+            PCWSTR::null(),
+            ptr::null(),
+            WINHTTP_FLAG_SECURE,
+        ));
+        if request.0.is_null() {
+            return Err(DesktopIdentityError::AuthorizationUnavailable);
+        }
+        let mut headers = "Accept: application/json\r\n".to_owned();
+        if let Some(credential) = credential {
+            headers.push_str(&format!("Authorization: {} {credential}\r\n", "Bearer"));
+        }
+        if body.is_some() {
+            headers.push_str("Content-Type: application/json\r\n");
+        }
+        let headers: Vec<u16> = headers.encode_utf16().collect();
+        let body_pointer = body.map(|bytes| bytes.as_ptr().cast::<c_void>());
+        let body_length = body.map_or(0, |bytes| bytes.len() as u32);
+        WinHttpSendRequest(
+            request.0,
+            Some(&headers),
+            body_pointer,
+            body_length,
+            body_length,
+            0,
+        )
+        .and_then(|()| WinHttpReceiveResponse(request.0, ptr::null_mut()))
+        .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+
+        let mut status = 0_u32;
+        let mut status_length = std::mem::size_of::<u32>() as u32;
+        let mut header_index = 0_u32;
+        WinHttpQueryHeaders(
+            request.0,
+            WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+            PCWSTR::null(),
+            Some((&mut status as *mut u32).cast()),
+            &mut status_length,
+            &mut header_index,
+        )
+        .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+
+        let mut response_body = Vec::new();
+        loop {
+            let mut chunk = [0_u8; 8_192];
+            let mut read = 0_u32;
+            WinHttpReadData(
+                request.0,
+                chunk.as_mut_ptr().cast(),
+                chunk.len() as u32,
+                &mut read,
+            )
+            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
+            if read == 0 {
+                break;
+            }
+            if response_body.len() + read as usize > MAXIMUM_IDENTITY_RESPONSE_BYTES {
+                return Err(DesktopIdentityError::InvalidExchangeResponse);
+            }
+            response_body.extend_from_slice(&chunk[..read as usize]);
+        }
+        Ok(IdentityApiResponse {
+            status: status as u16,
+            body: response_body,
+        })
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn winhttp_identity_request(
+    _origin: &HttpsOrigin,
+    _method: &str,
+    _path: &str,
+    _credential: Option<&str>,
+    _body: Option<&[u8]>,
+) -> Result<IdentityApiResponse, DesktopIdentityError> {
+    Err(DesktopIdentityError::AuthorizationUnavailable)
 }
 
 pub fn accept_desktop_exchange(

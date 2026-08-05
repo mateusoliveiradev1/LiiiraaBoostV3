@@ -132,7 +132,19 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
     let source = fs::read_to_string(&source_path)
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
 
-    assert_eq!(source.matches("#[tauri::command]").count(), 2);
+    assert_eq!(source.matches("#[tauri::command]").count(), 5);
+    for admitted_command in [
+        "desktop_sign_in,",
+        "desktop_sign_out,",
+        "dispatch_shell_command,",
+        "get_shell_bootstrap,",
+        "sync_account",
+    ] {
+        assert!(
+            source.contains(admitted_command),
+            "missing admitted native command: {admitted_command}"
+        );
+    }
     assert!(source.contains("dispatch_shell_command,"));
     assert!(source.contains("get_shell_bootstrap"));
     assert!(source.contains("tauri_plugin_autostart::init"));

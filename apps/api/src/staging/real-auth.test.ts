@@ -195,6 +195,13 @@ describe('real staging authentication routes', () => {
       session: { accountId: actor.accountId, state: 'active' },
     });
     expect(exchange.body).toContain(credential);
+    const nativeSignOut = await app.inject({
+      headers: { authorization: `Bearer ${credential}` },
+      method: 'POST',
+      url: '/v1/identity/desktop/sign-out',
+    });
+    expect(nativeSignOut.statusCode).toBe(204);
+    expect(identity.signOut).toHaveBeenCalledWith(credential);
     await app.close();
   });
 });

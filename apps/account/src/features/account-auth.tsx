@@ -3,7 +3,7 @@
 import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import { routeHref, type WebLocale } from '@liiiraa/web-core';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState, type SyntheticEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type SyntheticEvent } from 'react';
 
 import accountEn from '../content/account.en.json';
 import accountPtBr from '../content/account.pt-BR.json';
@@ -24,6 +24,7 @@ type AccountAuthPageProps = Readonly<{
 
 type SignInFormProps = Readonly<{
   authorityBaseUrl: string;
+  desktopAuthorization?: Readonly<{ challengeId: string; state: string }> | undefined;
   locale: WebLocale;
   signOutRequested?: boolean | undefined;
 }>;
@@ -38,6 +39,7 @@ const contentByLocale = { en: accountEn, 'pt-BR': accountPtBr } as const;
 const messages = Object.freeze({
   en: Object.freeze({
     authenticationFailed: 'We could not confirm those details. Check them and try again.',
+    browserApproval: 'Confirming this desktop sign-in in your browser…',
     invitationAccepted: 'Invitation recognized. Create the account using the invited email.',
     invitationMissing: 'Open the complete invitation link to create this account.',
     password: 'Password',
@@ -50,6 +52,7 @@ const messages = Object.freeze({
   }),
   'pt-BR': Object.freeze({
     authenticationFailed: 'Não foi possível confirmar esses dados. Revise e tente novamente.',
+    browserApproval: 'Confirmando este login do desktop no navegador…',
     invitationAccepted: 'Convite reconhecido. Crie a conta com o e-mail convidado.',
     invitationMissing: 'Abra o link completo do convite para criar esta conta.',
     password: 'Senha',
@@ -100,7 +103,12 @@ const AuthHeader = ({
   );
 };
 
-const SignInForm = ({ authorityBaseUrl, locale, signOutRequested = false }: SignInFormProps) => {
+const SignInForm = ({
+  authorityBaseUrl,
+  desktopAuthorization,
+  locale,
+  signOutRequested = false,
+}: SignInFormProps) => {
   const content = contentByLocale[locale];
   const labels = messages[locale];
   const [email, setEmail] = useState('');
@@ -112,6 +120,22 @@ const SignInForm = ({ authorityBaseUrl, locale, signOutRequested = false }: Sign
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
   );
+
+  const finishAuthentication = useCallback(async () => {
+    if (desktopAuthorization === undefined) {
+      globalThis.location.assign(hrefFor('account-overview', locale));
+      return;
+    }
+    setNotice(labels.browserApproval);
+    const approval = await auth.approveDesktopAuthorization(desktopAuthorization);
+    if (approval.status === 'approved') {
+      globalThis.location.assign(approval.callbackUrl);
+      return;
+    }
+    setLoading(false);
+    setNotice(null);
+    setError(errorMessage(approval, locale));
+  }, [auth, desktopAuthorization, labels.browserApproval, locale]);
 
   useEffect(() => {
     if (!signOutRequested) return;
@@ -130,6 +154,25 @@ const SignInForm = ({ authorityBaseUrl, locale, signOutRequested = false }: Sign
     };
   }, [auth, labels.signedOut, labels.unavailable, signOutRequested]);
 
+  useEffect(() => {
+    if (desktopAuthorization === undefined || signOutRequested) return;
+    let active = true;
+    setLoading(true);
+    setNotice(labels.browserApproval);
+    void auth.session().then((result) => {
+      if (!active) return;
+      if (result.status === 'authenticated') {
+        void finishAuthentication();
+        return;
+      }
+      setLoading(false);
+      setNotice(null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [auth, desktopAuthorization, finishAuthentication, labels.browserApproval, signOutRequested]);
+
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setNotice(null);
@@ -141,7 +184,7 @@ const SignInForm = ({ authorityBaseUrl, locale, signOutRequested = false }: Sign
     setLoading(true);
     const result = await auth.signIn({ email: email.trim().toLowerCase(), password });
     if (result.status === 'authenticated') {
-      globalThis.location.assign(hrefFor('account-overview', locale));
+      await finishAuthentication();
       return;
     }
     setLoading(false);
@@ -356,9 +399,19 @@ export const AccountAuthPage = (props: AccountAuthPageProps) => {
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('invite') ?? searchParams.get('invitation') ?? undefined;
   const signOutRequested = searchParams.get('action') === 'sign-out';
+  const desktopChallenge = searchParams.get('desktop_challenge');
+  const desktopState = admitInvitationToken(searchParams.get('state') ?? undefined);
+  const desktopAuthorization =
+    desktopChallenge !== null &&
+    desktopChallenge.length <= 128 &&
+    /^[A-Za-z0-9-]+$/u.test(desktopChallenge) &&
+    desktopState !== null
+      ? { challengeId: desktopChallenge, state: desktopState }
+      : undefined;
   return props.routeId === 'account-sign-in' ? (
     <SignInForm
       authorityBaseUrl={props.authorityBaseUrl}
+      desktopAuthorization={desktopAuthorization}
       locale={props.locale}
       signOutRequested={signOutRequested}
     />

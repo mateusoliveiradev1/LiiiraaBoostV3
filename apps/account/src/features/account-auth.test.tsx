@@ -133,6 +133,38 @@ describe('real account authentication client', () => {
     });
   });
 
+  it('approves a desktop challenge with cookie CSRF and admits only the exact loopback callback', async () => {
+    const state = 'state_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef';
+    const transport = vi
+      .fn<AccountAuthTransport>()
+      .mockResolvedValueOnce(response({ token: 'csrf-token-abcdefghijklmnopqrstuvwxyz0123456789' }))
+      .mockResolvedValueOnce(
+        response({
+          callbackUrl: `http://127.0.0.1:43117/oauth/callback?code=one-shot-code&state=${state}`,
+        }),
+      );
+    const auth = createAccountAuth({
+      correlationId: () => 'account-desktop-approval-01',
+      transport,
+    });
+
+    await expect(
+      auth.approveDesktopAuthorization({ challengeId: 'challenge-01', state }),
+    ).resolves.toEqual({
+      callbackUrl: `http://127.0.0.1:43117/oauth/callback?code=one-shot-code&state=${state}`,
+      status: 'approved',
+    });
+    expect(transport.mock.calls[1]?.[0]).toBe(
+      '/v1/identity/desktop/authorizations/challenge-01/approve',
+    );
+    expect(transport.mock.calls[1]?.[1]).toMatchObject({
+      credentials: 'include',
+      method: 'POST',
+    });
+    const body = transport.mock.calls[1]?.[1]?.body;
+    expect(JSON.parse(typeof body === 'string' ? body : '')).toEqual({ state });
+  });
+
   it('admits only bounded base64url invitation tokens', () => {
     expect(admitInvitationToken('i'.repeat(64))).toBe('i'.repeat(64));
     expect(admitInvitationToken('used invitation')).toBeNull();

@@ -26,7 +26,17 @@ export type AccountSessionResult =
   | Readonly<{ status: 'unauthenticated' }>
   | Readonly<{ code: 'invalid-response' | 'unavailable'; status: 'error' }>;
 
+export type DesktopAuthorizationApprovalResult =
+  | Readonly<{ callbackUrl: string; status: 'approved' }>
+  | Readonly<{
+      code: 'authentication-failed' | 'invalid-response' | 'unavailable';
+      status: 'error';
+    }>;
+
 export interface AccountAuth {
+  approveDesktopAuthorization(
+    input: Readonly<{ challengeId: string; state: string }>,
+  ): Promise<DesktopAuthorizationApprovalResult>;
   session(): Promise<AccountSessionResult>;
   signIn(input: Readonly<{ email: string; password: string }>): Promise<AccountAuthResult>;
   signOut(): Promise<Readonly<{ status: 'signed-out' }> | Readonly<{ status: 'error' }>>;
@@ -82,6 +92,25 @@ const admitActor = (value: unknown): AccountAuthActor | null => {
 
 const actorFromBody = (value: unknown): AccountAuthActor | null =>
   isRecord(value) ? admitActor(value['actor']) : null;
+
+const admitLoopbackCallback = (value: unknown, expectedState: string): string | null => {
+  if (typeof value !== 'string' || value.length > 4_096) return null;
+  try {
+    const callback = new URL(value);
+    return callback.protocol === 'http:' &&
+      callback.hostname === '127.0.0.1' &&
+      callback.port.length > 0 &&
+      callback.pathname === '/oauth/callback' &&
+      callback.username.length === 0 &&
+      callback.password.length === 0 &&
+      callback.searchParams.get('state') === expectedState &&
+      (callback.searchParams.get('code')?.length ?? 0) > 0
+      ? callback.toString()
+      : null;
+  } catch {
+    return null;
+  }
+};
 
 const validCsrfToken = (value: unknown): value is string =>
   typeof value === 'string' &&
@@ -183,6 +212,40 @@ export const createAccountAuth = ({
   };
 
   return Object.freeze({
+    async approveDesktopAuthorization(
+      input: Readonly<{ challengeId: string; state: string }>,
+    ): Promise<DesktopAuthorizationApprovalResult> {
+      try {
+        const csrf = await ensureCsrf();
+        if (csrf === null) return { code: 'unavailable', status: 'error' };
+        const response = await transport(
+          `${baseUrl}/v1/identity/desktop/authorizations/${encodeURIComponent(input.challengeId)}/approve`,
+          {
+            body: JSON.stringify({ state: input.state }),
+            credentials: 'include',
+            headers: {
+              ...headers(),
+              'content-type': 'application/json',
+              'x-csrf-token': csrf,
+            },
+            method: 'POST',
+          },
+        );
+        if (response.status === 401 || response.status === 403) {
+          return { code: 'authentication-failed', status: 'error' };
+        }
+        if (!response.ok) return { code: 'unavailable', status: 'error' };
+        const body = await safeJson(response);
+        const callbackUrl = isRecord(body)
+          ? admitLoopbackCallback(body['callbackUrl'], input.state)
+          : null;
+        return callbackUrl === null
+          ? { code: 'invalid-response', status: 'error' }
+          : { callbackUrl, status: 'approved' };
+      } catch {
+        return { code: 'unavailable', status: 'error' };
+      }
+    },
     async session(): Promise<AccountSessionResult> {
       try {
         const response = await transport(`${baseUrl}/v1/identity/session`, {

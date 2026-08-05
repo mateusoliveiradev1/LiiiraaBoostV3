@@ -88,6 +88,13 @@ const requestCredential = (request: FastifyRequest): string | null => {
   return cookieCredential(request);
 };
 
+const bearerCredential = (request: FastifyRequest): string | null => {
+  const authorization = request.headers.authorization;
+  if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ')) return null;
+  const credential = authorization.slice('Bearer '.length);
+  return credential.length > 0 && credential.length <= 4_096 ? credential : null;
+};
+
 const noStore = (reply: FastifyReply): FastifyReply =>
   reply.header('cache-control', 'no-store, private');
 const safeActor = (actor: IdentityActor) => ({
@@ -326,6 +333,17 @@ export const registerRealIdentityRoutes = (
           expiresAt: result.actor.expiresAt,
         },
       });
+  });
+
+  app.post('/v1/identity/desktop/sign-out', async (request, reply) => {
+    const credential = bearerCredential(request);
+    if (credential === null) {
+      return noStore(reply).code(403).send({ code: 'REQUEST_DENIED' });
+    }
+    const actor = await dependencies.authority.resolveCredential(credential);
+    if (actor === null) return noStore(reply).code(204).send();
+    await dependencies.authority.signOut(credential);
+    return noStore(reply).code(204).send();
   });
 
   app.get('/v1/account', async (request, reply) => {
