@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-20-PLAN.md
-last_updated: "2026-08-05T07:58:06.705Z"
+stopped_at: Completed 04-22-PLAN.md
+last_updated: "2026-08-05T08:16:01.959Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 168
+  completed_plans: 169
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 28 of 35
+Plan: 29 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -207,6 +207,7 @@ _Updated after plan completion_
 | Phase 04 P18 | 31min | 2 tasks | 15 files |
 | Phase 04 P19 | 26min | 2 tasks | 15 files |
 | Phase 04 P20 | 16 min | 1 tasks | 6 files |
+| Phase 04 P22 | 14min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -643,6 +644,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Preserve API-owned provider PKCE and exchange authority; Rust validates the API-issued S256 challenge and one-shot callback without receiving a provider verifier or secret.
 - [Phase 04]: Consume the loopback listener before callback validation so rejected first requests cannot be replayed as state guesses.
 - [Phase 04]: Delete Windows Credential Manager custody on revoked or expired authenticated contact without touching local safety data.
+- [Phase 04]: Reject staging startup unless every origin, data, provider, signup, invitation, and channel authority is exactly non-production.
+- [Phase 04]: Require every API and worker registrar before Fastify readiness is exposed.
+- [Phase 04]: Promote only the attested and scanned OCI build digest through the protected staging workflow.
 
 ### Pending Todos
 
@@ -686,6 +690,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T07:58:06.698Z
-Stopped at: Completed 04-20-PLAN.md
+Last session: 2026-08-05T08:16:01.953Z
+Stopped at: Completed 04-22-PLAN.md
 Resume file: None
