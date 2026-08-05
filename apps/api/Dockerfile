@@ -26,7 +26,8 @@ COPY packages/control-plane-adapters packages/control-plane-adapters
 COPY packages/control-plane-application packages/control-plane-application
 COPY packages/control-plane-domain packages/control-plane-domain
 COPY contracts contracts
-COPY tooling tooling
+COPY .github .github
+COPY .dockerignore .dockerignore
 
 RUN pnpm --filter @liiiraa/api test -- --run staging-config
 RUN pnpm --filter @liiiraa/api test -- --run container-contract

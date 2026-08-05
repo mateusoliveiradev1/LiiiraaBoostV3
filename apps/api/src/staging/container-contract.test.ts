@@ -11,6 +11,7 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('FROM node:24.18.0-bookworm-slim');
     expect(dockerfile).toContain('corepack prepare pnpm@11.17.0 --activate');
     expect(dockerfile).toContain('pnpm install --frozen-lockfile --ignore-scripts');
+    expect(dockerfile).not.toContain('COPY tooling tooling');
     expect(dockerfile).toContain('USER node');
     expect(dockerfile).toContain('HEALTHCHECK');
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
