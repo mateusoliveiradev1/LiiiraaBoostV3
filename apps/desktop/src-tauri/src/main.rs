@@ -1,7 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[allow(dead_code)]
+mod credential_store;
+#[allow(dead_code)]
 mod device_identity;
+#[allow(dead_code)]
+mod identity;
 mod navigation;
 mod notifications;
 #[allow(dead_code)]
