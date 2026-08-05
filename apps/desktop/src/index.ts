@@ -12,6 +12,17 @@ const TEST_SCENARIO_PATTERN = /^S(?:0[1-9]|1[0-9]|2[0-4])$/u;
 const TEST_SCALE_VALUES = new Set([100, 125, 150]);
 const TEST_TEXT_SCALE_VALUES = new Set([100, 200]);
 const TEST_OPERATIONAL_STATES = new Set<ShellOperationalState>(SHELL_OPERATIONAL_STATES);
+const TEST_PREMIUM_AUTHORITY_STATES = new Set([
+  'approaching-expiry',
+  'clock-rollback',
+  'contradictory',
+  'expired',
+  'offline-valid',
+  'revoked',
+  'stale',
+  'tampered',
+  'verified',
+]);
 
 const asRecord = (value: unknown): Readonly<Record<string, unknown>> | undefined =>
   typeof value === 'object' && value !== null
@@ -31,6 +42,7 @@ const readDesktopTestComposition = (): DesktopAppProps => {
   const catalogLocale = composition['catalogLocale'];
   const initialPath = composition['initialPath'];
   const operationalState = composition['operationalState'];
+  const premiumAuthorityState = composition['premiumAuthorityState'];
   const scenarioId = composition['scenarioId'];
   const textScale = composition['textScale'];
   const viewportWidth = composition['viewportWidth'];
@@ -50,6 +62,13 @@ const readDesktopTestComposition = (): DesktopAppProps => {
   return Object.freeze({
     initialPath,
     operationalState: operationalState as ShellOperationalState,
+    ...(TEST_PREMIUM_AUTHORITY_STATES.has(premiumAuthorityState as string)
+      ? {
+          premiumAuthorityState: premiumAuthorityState as NonNullable<
+            DesktopAppProps['premiumAuthorityState']
+          >,
+        }
+      : {}),
     scenarioId,
     windowsLocale,
     ...(catalogLocale === 'pseudo' ? { catalogLocale } : {}),

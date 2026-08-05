@@ -275,7 +275,7 @@ const premiumAuthorityStateFor = (state: ShellOperationalState): PremiumAuthorit
     case 'stale-evidence':
       return 'stale';
     case 'offline':
-      return 'offline-valid';
+      return 'stale';
     default:
       return 'verified';
   }
@@ -315,18 +315,21 @@ const paidActionKindForRoute = (pathname: string): PaidActionKind | undefined =>
 const paidActionDecisionForRoute = (
   pathname: string,
   operationalState: ShellOperationalState,
+  premiumAuthorityState?: PremiumAuthorityState,
 ): PaidActionDecision | undefined => {
   const action = paidActionKindForRoute(pathname);
   return action === undefined
     ? undefined
-    : decidePaidAction({ action, authority: premiumAuthorityStateFor(operationalState) });
+    : decidePaidAction({
+        action,
+        authority: premiumAuthorityState ?? premiumAuthorityStateFor(operationalState),
+      });
 };
 
 interface PremiumBoundarySurfaceProps {
   readonly decision: PaidActionDecision | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
-  readonly operationalState: ShellOperationalState;
   readonly pathname: string;
 }
 
@@ -334,11 +337,25 @@ const PremiumBoundarySurface = ({
   decision,
   locale,
   navigate,
-  operationalState,
   pathname,
 }: PremiumBoundarySurfaceProps): ReactNode => {
-  if (decision === undefined || operationalState === 'offline' || decision.code === 'allowed') {
+  if (decision === undefined || decision.code === 'allowed') {
     return null;
+  }
+  if (decision.code === 'allowed-with-expiry-warning') {
+    return (
+      <section
+        aria-label="Autorização Premium perto de expirar"
+        className="premium-authority-boundary"
+        data-lb-region
+        role="status"
+      >
+        <p>{getPaidActionNoticeCopy(decision.notice, locale)}</p>
+        <LbButton onPress={() => navigate('/account/subscription')} variant="secondary">
+          {locale === 'pt-BR' ? 'Verificar Premium online' : 'Verify Premium online'}
+        </LbButton>
+      </section>
+    );
   }
   if (decision.code === 'continued') {
     return (
@@ -1294,6 +1311,7 @@ export interface DesktopAppProps {
   readonly nativeCommandMetadata?: () => HostCommandMetadata;
   readonly nativeShell?: boolean;
   readonly operationalState?: ShellOperationalState;
+  readonly premiumAuthorityState?: PremiumAuthorityState;
   readonly reducedMotion?: boolean;
   readonly scenarioId?: string;
   readonly textScale?: 100 | 200;
@@ -1320,6 +1338,7 @@ const DesktopAppContent = ({
   onSendHostCommand,
   commandMetadata,
   operationalState = 'fixture',
+  premiumAuthorityState,
   reducedMotion,
   scenarioId = 'S01',
   textScale = 100,
@@ -1724,7 +1743,11 @@ const DesktopAppContent = ({
   const responsiveWidth = measuredWidth / (effectiveScale / 100);
   const layout = getResponsiveShellLayout(responsiveWidth);
   const presentation = getOperationalPresentation(operationalState, locale);
-  const paidActionDecision = paidActionDecisionForRoute(route.pathname, operationalState);
+  const paidActionDecision = paidActionDecisionForRoute(
+    route.pathname,
+    operationalState,
+    premiumAuthorityState,
+  );
   const paidWorkBlocked =
     paidActionKindForRoute(route.pathname) === 'start-new-paid-action' &&
     paidActionDecision?.allowed === false;
@@ -1878,7 +1901,6 @@ const DesktopAppContent = ({
             decision={paidActionDecision}
             locale={locale}
             navigate={navigate}
-            operationalState={operationalState}
             pathname={route.pathname}
           />
           <div

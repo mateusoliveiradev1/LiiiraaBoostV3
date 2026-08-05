@@ -37,3 +37,37 @@ test(`@entitlement-smoke [owner:${OWNER_TASK_ID}] expiry does not interrupt in-f
   );
   await expect(page.getByRole('button', { name: 'Encerrar sessão com segurança' })).toBeEnabled();
 });
+
+test(`@entitlement-smoke [owner:${OWNER_TASK_ID}] verified seven-day offline authority admits a new Premium action`, async ({
+  page,
+}) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/competitive',
+    operationalState: 'offline',
+    premiumAuthorityState: 'offline-valid',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  await expect(page.locator('[data-premium-new-work-blocked="false"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Iniciar sessão' })).toBeEnabled();
+  await expect(page.getByRole('alert', { name: 'Premium authorization expired' })).toHaveCount(0);
+});
+
+test(`@entitlement-smoke [owner:${OWNER_TASK_ID}] approaching expiry warns without blocking the new Premium action`, async ({
+  page,
+}) => {
+  await openDesktopTestCase(page, {
+    initialPath: '/competitive',
+    operationalState: 'offline',
+    premiumAuthorityState: 'approaching-expiry',
+    scenarioId: 'S01',
+    windowsLocale: 'pt-BR',
+  });
+
+  await expect(
+    page.getByRole('status', { name: 'Autorização Premium perto de expirar' }),
+  ).toContainText('perto de expirar');
+  await expect(page.getByRole('button', { name: 'Iniciar sessão' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Verificar Premium online' })).toBeVisible();
+});

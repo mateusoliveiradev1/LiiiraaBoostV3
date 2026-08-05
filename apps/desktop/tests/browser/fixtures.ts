@@ -30,6 +30,7 @@ export interface DesktopTestComposition {
   readonly forcedColors?: boolean;
   readonly initialPath: string;
   readonly operationalState: ShellOperationalState;
+  readonly premiumAuthorityState?: NonNullable<DesktopAppProps['premiumAuthorityState']>;
   readonly reducedMotion?: boolean;
   readonly scenarioId: string;
   readonly textScale?: NonNullable<DesktopAppProps['textScale']>;
