@@ -35,6 +35,14 @@ export interface AdmittedApiEnvironment {
   readonly channel: 'internal';
 }
 
+export interface AdmittedStagingInfrastructureEnvironment {
+  readonly buildId: string;
+  readonly dataClassification: 'synthetic';
+  readonly invitationOnly: true;
+  readonly publicSignup: false;
+  readonly channel: 'internal';
+}
+
 export class ApiEnvironmentAdmissionError extends Error {
   readonly code = 'STAGING_ENVIRONMENT_REJECTED';
 
@@ -48,10 +56,7 @@ const reject = (field: keyof ApiEnvironmentInput): never => {
   throw new ApiEnvironmentAdmissionError(field);
 };
 
-const required = (
-  input: ApiEnvironmentInput,
-  field: keyof ApiEnvironmentInput,
-): string => {
+const required = (input: ApiEnvironmentInput, field: keyof ApiEnvironmentInput): string => {
   const value = input[field];
   return typeof value === 'string' && value.length > 0 ? value : reject(field);
 };
@@ -77,10 +82,7 @@ const exactOrigin = (
     return reject(field);
   }
   const loopbackDesktop =
-    desktop &&
-    url.protocol === 'http:' &&
-    url.hostname === '127.0.0.1' &&
-    url.port.length > 0;
+    desktop && url.protocol === 'http:' && url.hostname === '127.0.0.1' && url.port.length > 0;
   if (
     url.origin !== value ||
     url.username.length > 0 ||
@@ -179,6 +181,28 @@ export const admitApiEnvironment = (input: ApiEnvironmentInput): AdmittedApiEnvi
     supportBucket,
     auditAnchorBucket,
     buildId,
+    invitationOnly: true,
+    publicSignup: false,
+    channel: 'internal',
+  });
+};
+
+export const admitStagingInfrastructureEnvironment = (
+  input: ApiEnvironmentInput,
+): AdmittedStagingInfrastructureEnvironment => {
+  if (input.STAGING_DATA_CLASSIFICATION !== 'synthetic') {
+    reject('STAGING_DATA_CLASSIFICATION');
+  }
+  if (input.STAGING_INVITATION_ONLY !== 'true') reject('STAGING_INVITATION_ONLY');
+  if (input.STAGING_PUBLIC_SIGNUP !== 'false') reject('STAGING_PUBLIC_SIGNUP');
+  if (input.STAGING_CHANNEL !== 'internal') reject('STAGING_CHANNEL');
+  const buildId = required(input, 'STAGING_BUILD_ID');
+  if (!/^[a-z0-9][a-z0-9._-]{7,127}$/u.test(buildId) || forbiddenAuthority.test(buildId)) {
+    reject('STAGING_BUILD_ID');
+  }
+  return Object.freeze({
+    buildId,
+    dataClassification: 'synthetic',
     invitationOnly: true,
     publicSignup: false,
     channel: 'internal',

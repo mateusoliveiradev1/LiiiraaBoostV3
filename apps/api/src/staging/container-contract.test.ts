@@ -60,6 +60,7 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('run: pnpm --filter @liiiraa/api db:migrate');
     expect(workflow).toContain('POSTGRES_TEST_STRATEGY: unit');
     expect(workflow).toContain("hashFiles('trivy-results.sarif') != ''");
+    expect(workflow).toContain('--field visibility=public');
     expect(workflow).not.toContain(
       'Run staging migrations before promotion\n        env:\n          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}\n        run: pnpm --filter @liiiraa/api db:migrate:test',
     );

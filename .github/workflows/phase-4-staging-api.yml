@@ -105,6 +105,13 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           version: v0.73.0
+      - name: Publish the scanned package for pull-only staging hosting
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh api --method PATCH
+          "/users/${{ github.repository_owner }}/packages/container/liiiraa-boost-api"
+          --field visibility=public
       - name: Upload bounded scan evidence
         if: always() && hashFiles('trivy-results.sarif') != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

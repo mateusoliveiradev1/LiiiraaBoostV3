@@ -1,8 +1,8 @@
 import { createServer } from 'node:http';
 
-import { admitApiEnvironment } from '../config/env.ts';
+import { admitStagingInfrastructureEnvironment } from '../config/env.ts';
 
-const admitted = admitApiEnvironment(process.env);
+const admitted = admitStagingInfrastructureEnvironment(process.env);
 const port = Number(process.env.PORT ?? '3000');
 
 if (!Number.isInteger(port) || port < 1 || port > 65_535) {

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildApp, REQUIRED_API_MODULES, type ApiModuleRegistrar } from '../app.js';
-import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.js';
+import {
+  admitApiEnvironment,
+  admitStagingInfrastructureEnvironment,
+  type ApiEnvironmentInput,
+} from '../config/env.js';
 import { issueInvitation, redeemInvitation, type StagingInvitation } from './invitations.js';
 import { seedSyntheticStaging } from './seed.js';
 import { buildStagingInfrastructureApp } from './infrastructure-server.js';
@@ -26,6 +30,24 @@ const baseEnvironment = (): ApiEnvironmentInput => ({
 });
 
 describe('staging environment admission', () => {
+  it('admits the infrastructure preview without provider or database secrets', () => {
+    expect(
+      admitStagingInfrastructureEnvironment({
+        STAGING_BUILD_ID: 'staging-a68ca54',
+        STAGING_CHANNEL: 'internal',
+        STAGING_DATA_CLASSIFICATION: 'synthetic',
+        STAGING_INVITATION_ONLY: 'true',
+        STAGING_PUBLIC_SIGNUP: 'false',
+      }),
+    ).toEqual({
+      buildId: 'staging-a68ca54',
+      channel: 'internal',
+      dataClassification: 'synthetic',
+      invitationOnly: true,
+      publicSignup: false,
+    });
+  });
+
   it('admits only the exact public, account, admin, and desktop origins', () => {
     const admitted = admitApiEnvironment(baseEnvironment());
 
