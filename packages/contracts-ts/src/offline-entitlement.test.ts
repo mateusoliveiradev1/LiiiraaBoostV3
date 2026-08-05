@@ -8,6 +8,7 @@ import manifest from './fixtures/offline-entitlement/manifest.json' with { type:
 import validFixture from './fixtures/offline-entitlement/valid.json' with { type: 'json' };
 import { controlPlaneDocumentValidator } from './generated/index.js';
 import {
+  decodeOfflineEntitlementPayload,
   OfflineEntitlementVerdict,
   encodeOfflineEntitlementPayload,
   type OfflineEntitlementSigningKey,
@@ -150,18 +151,16 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
     }
 
     if (fixture.id === 'canonical exact bytes through issuedAt plus seven days') {
-      expect(
-        encodeOfflineEntitlementPayload({
-          schemaVersion: '1.0',
-          accountId: fixture.context.accountId,
-          deviceBinding: fixture.context.deviceBinding,
-          audience: fixture.context.audience,
-          entitlementVersion: fixture.context.entitlementVersion,
-          issuedAt: fixture.envelope.issuedAt,
-          expiresAt: fixture.envelope.expiresAt,
-          validitySeconds: 604_800,
-        }).toString('base64url'),
-      ).toBe(fixture.envelope.payloadBytes);
+      const canonicalClaims = decodeOfflineEntitlementPayload(
+        Buffer.from(fixture.envelope.payloadBytes, 'base64url'),
+      );
+      expect(canonicalClaims).toBeDefined();
+      if (canonicalClaims === undefined) {
+        throw new Error('Canonical offline entitlement claims must decode');
+      }
+      expect(encodeOfflineEntitlementPayload(canonicalClaims).toString('base64url')).toBe(
+        fixture.envelope.payloadBytes,
+      );
       const versionMismatchStore = new MemoryTrustedTimeStore(fixture.lastTrustedUnixSeconds);
       expect(
         verifyOfflineEntitlementBytes(

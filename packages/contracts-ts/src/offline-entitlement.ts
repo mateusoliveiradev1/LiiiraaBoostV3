@@ -120,7 +120,9 @@ const parseCanonicalUtcSeconds = (value: string): number | undefined => {
   return milliseconds / 1_000;
 };
 
-const claimsFromBytes = (payloadBytes: Buffer): OfflineEntitlementClaims | undefined => {
+export const decodeOfflineEntitlementPayload = (
+  payloadBytes: Buffer,
+): OfflineEntitlementClaims | undefined => {
   let value: unknown;
   try {
     value = JSON.parse(payloadBytes.toString('utf8')) as unknown;
@@ -208,7 +210,7 @@ const verifyCandidate = (
 
   if (!controlPlaneDocumentValidator(input)) return verificationRequired();
 
-  const claims = claimsFromBytes(payloadBytes);
+  const claims = decodeOfflineEntitlementPayload(payloadBytes);
   if (claims === undefined) return verificationRequired();
 
   const issuedAt = parseCanonicalUtcSeconds(claims.issuedAt);
