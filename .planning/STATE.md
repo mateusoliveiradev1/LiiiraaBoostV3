@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-24-PLAN.md
-last_updated: "2026-08-05T18:05:55.773Z"
+stopped_at: Completed 04-36-PLAN.md
+last_updated: "2026-08-05T22:28:08.293Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-maj: add real Neon staging migration executor"
+last_activity_desc: "Completed 04-36: persistent real authentication authority"
 progress:
   total_phases: 10
   completed_phases: 3
-  total_plans: 175
-  completed_plans: 173
-  percent: 99
+  total_plans: 180
+  completed_plans: 174
+  percent: 30
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 25 of 35
+Plan: 37 of 40
 Status: Ready to execute
-Last activity: 2026-08-05 — Completed quick task 260805-maj: add real Neon staging migration executor
+Last activity: 2026-08-05 — Completed 04-36: persistent real authentication authority
 
-Progress: [██████████] 99%
+Progress: [█████████░] 97%
 
 ## Performance Metrics
 
@@ -212,6 +212,7 @@ _Updated after plan completion_
 | Phase 04 P35 | 16 min | 1 tasks | 8 files |
 | Phase 04 P23 | 12min | 2 tasks | 14 files |
 | Phase 04 P24 | 18 min | 1 tasks | 11 files |
+| Phase 04 P36 | 24 min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -709,6 +710,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T18:05:55.765Z
-Stopped at: Completed 04-24-PLAN.md
+Last session: 2026-08-05T22:28:08.286Z
+Stopped at: Completed 04-36-PLAN.md
 Resume file: None
