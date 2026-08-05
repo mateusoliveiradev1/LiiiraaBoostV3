@@ -22,4 +22,13 @@ describe('Playwright web-server selection', () => {
       ['public', 'account', 'admin'],
     );
   });
+
+  it('starts no local daemons for static or deployed staging-origin probes', () => {
+    expect(names(['tests/security-artifacts.spec.ts', '--grep', '@staging-origin-smoke'])).toEqual(
+      [],
+    );
+    expect(names(['tests/security-artifacts.spec.ts', '--grep', '@staging-origin-live'])).toEqual(
+      [],
+    );
+  });
 });

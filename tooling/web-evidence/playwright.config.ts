@@ -141,9 +141,13 @@ const finalProjectGrep = (surface: (typeof surfaces)[number]['surface'], axis: s
     'u',
   );
 
+const isStagingOriginRun = (arguments_: readonly string[]): boolean =>
+  arguments_.some((argument) => argument.includes('@staging-origin-'));
+
 export const selectWebTestSurfaces = (
   arguments_: readonly string[],
 ): readonly (typeof surfaces)[number][] => {
+  if (isStagingOriginRun(arguments_)) return [];
   const selector = arguments_
     .filter(
       (argument) => /\.(?:spec|pw)\.ts(?:$|:)/u.test(argument) || argument.startsWith('--project='),
@@ -163,10 +167,10 @@ export const selectWebTestSurfaces = (
     isCrossSurfaceConsentRun
       ? surface === 'account' || surface === 'admin'
       : startsEverySurface
-      ? true
-      : surface === 'public'
-        ? /public|documentation|releases/u.test(selector)
-        : selector.includes(surface),
+        ? true
+        : surface === 'public'
+          ? /public|documentation|releases/u.test(selector)
+          : selector.includes(surface),
   );
 };
 
@@ -230,6 +234,27 @@ const finalProjects: Project[] = surfaces.flatMap(({ baseURL, surface }) =>
   })),
 );
 
+const stagingOriginProject: Project = {
+  grep: /@staging-origin-(?:smoke|live)/u,
+  metadata: {
+    axis: 'staging-origin',
+    finalOnly: false,
+    frozenClock: FROZEN_CLOCK,
+    scenarioIds: '',
+    surface: 'staging',
+  },
+  name: 'staging-origin',
+  testMatch: '**/*.spec.ts',
+  use: {
+    ...chromium,
+    browserName: 'chromium',
+    colorScheme: 'dark',
+    locale: 'pt-BR',
+    reducedMotion: 'reduce',
+    viewport: { height: 900, width: 1440 },
+  },
+};
+
 export default defineConfig({
   expect: {
     timeout: 5_000,
@@ -241,7 +266,7 @@ export default defineConfig({
   forbidOnly: true,
   fullyParallel: false,
   outputDir: 'test-results',
-  projects: [...quickProjects, ...finalProjects],
+  projects: [...quickProjects, ...finalProjects, stagingOriginProject],
   reporter: [['list']],
   retries: 0,
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',

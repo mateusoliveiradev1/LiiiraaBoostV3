@@ -1,0 +1,33 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "liiiraa-boost-admin-staging",
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && pnpm --filter @liiiraa/admin build",
+  "installCommand": "cd ../.. && corepack enable && corepack prepare pnpm@11.17.0 --activate && pnpm install --frozen-lockfile --ignore-scripts",
+  "outputDirectory": ".next",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Liiiraa-Staging-Surface",
+          "value": "admin"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex,nofollow,noarchive"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/v1/:path*",
+      "destination": "https://liiiraa-api-staging.onrender.com/v1/:path*"
+    }
+  ]
+}

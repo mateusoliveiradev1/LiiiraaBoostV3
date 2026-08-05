@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "liiiraa-boost-public-staging",
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && pnpm --filter @liiiraa/web build",
+  "installCommand": "cd ../.. && corepack enable && corepack prepare pnpm@11.17.0 --activate && pnpm install --frozen-lockfile --ignore-scripts",
+  "outputDirectory": ".next",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Liiiraa-Staging-Surface",
+          "value": "public"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex,nofollow,noarchive"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/v1/:path*",
+      "destination": "https://liiiraa-api-staging.onrender.com/v1/:path*"
+    }
+  ]
+}
