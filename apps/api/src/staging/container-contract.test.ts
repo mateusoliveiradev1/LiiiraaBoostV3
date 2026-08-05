@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+
+import workflow from '../../../../.github/workflows/phase-4-staging-api.yml?raw';
+import rootDockerIgnore from '../../../../.dockerignore?raw';
+import dockerIgnore from '../../.dockerignore?raw';
+import dockerfile from '../../Dockerfile?raw';
+import renderManifest from '../../staging.render.yaml?raw';
+
+describe('daemon-free OCI artifact contract', () => {
+  it('pins the application toolchains and uses an unprivileged runtime with health checks', () => {
+    expect(dockerfile).toContain('FROM node:24.18.0-bookworm-slim');
+    expect(dockerfile).toContain('corepack prepare pnpm@11.17.0 --activate');
+    expect(dockerfile).toContain('pnpm install --frozen-lockfile --ignore-scripts');
+    expect(dockerfile).toContain('USER node');
+    expect(dockerfile).toContain('HEALTHCHECK');
+    expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
+    expect(dockerfile).toContain('apps/api/src/server.ts');
+  });
+
+  it('excludes secrets, generated desktop artifacts, and unrelated build output', () => {
+    for (const ignoreFile of [dockerIgnore, rootDockerIgnore]) {
+      expect(ignoreFile).toContain('.env');
+      expect(ignoreFile).toContain('**/node_modules');
+      expect(ignoreFile).toContain('apps/desktop/src-tauri/gen');
+    }
+  });
+
+  it('keeps Render manual and requires the CI-supplied immutable digest', () => {
+    expect(renderManifest).toContain('autoDeploy: false');
+    expect(renderManifest).toContain('ghcr.io/liiiraa/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}');
+    expect(renderManifest).toContain('healthCheckPath: /health');
+    expect(renderManifest).toContain('STAGING_DATA_CLASSIFICATION');
+    expect(renderManifest).toContain('value: synthetic');
+    expect(renderManifest).toContain('STAGING_INVITATION_ONLY');
+    expect(renderManifest).toContain('STAGING_PUBLIC_SIGNUP');
+  });
+
+  it('builds once, attests and scans the digest, then deploys that same digest', () => {
+    expect(workflow).toContain('outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true');
+    expect(workflow).toContain('digest: ${{ steps.build.outputs.digest }}');
+    expect(workflow).toContain('subject-digest: ${{ steps.build.outputs.digest }}');
+    expect(workflow).toContain('ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ needs.build.outputs.digest }}');
+    expect(workflow).toContain('environment: staging-api');
+    expect(workflow).toContain('autoDeploy: false');
+    expect(workflow).not.toMatch(/liiiraa-boost-api:[a-z0-9._-]+/iu);
+  });
+
+  it('pins every GitHub Action reference to a full commit SHA', () => {
+    const actions = [...workflow.matchAll(/uses:\s*[^@\s]+@([^\s]+)/gu)].map(
+      (match) => match[1],
+    );
+    expect(actions.length).toBeGreaterThan(0);
+    expect(actions.every((reference) => /^[0-9a-f]{40}$/u.test(reference ?? ''))).toBe(true);
+  });
+});

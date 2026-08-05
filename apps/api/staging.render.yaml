@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: liiiraa-api-staging
+    runtime: image
+    plan: starter
+    region: ohio
+    autoDeploy: false
+    image:
+      url: ghcr.io/liiiraa/liiiraa-boost-api@${STAGING_IMAGE_DIGEST}
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: STAGING_IMAGE_DIGEST
+        sync: false
+      - key: STAGING_DATABASE_URL
+        sync: false
+      - key: STAGING_DATA_CLASSIFICATION
+        value: synthetic
+      - key: PUBLIC_STAGING_ORIGIN
+        sync: false
+      - key: ACCOUNT_STAGING_ORIGIN
+        sync: false
+      - key: ADMIN_STAGING_ORIGIN
+        sync: false
+      - key: DESKTOP_STAGING_ORIGIN
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: SUPPORT_BUCKET
+        sync: false
+      - key: AUDIT_ANCHOR_BUCKET
+        sync: false
+      - key: STAGING_BUILD_ID
+        sync: false
+      - key: STAGING_INVITATION_ONLY
+        value: "true"
+      - key: STAGING_PUBLIC_SIGNUP
+        value: "false"
+      - key: STAGING_CHANNEL
+        value: internal

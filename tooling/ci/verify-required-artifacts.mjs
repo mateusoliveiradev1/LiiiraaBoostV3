@@ -283,11 +283,65 @@ const checkManifestEvidence = (snapshot, verificationGraph, diagnostics) => {
   }
 };
 
+const checkStagingApiCi = (ci, ciPath, diagnostics) => {
+  for (const marker of [
+    'permissions:',
+    'contents: read',
+    'packages: write',
+    'id-token: write',
+    'attestations: write',
+    'security-events: write',
+    'ubuntu-24.04',
+    'environment: staging-api',
+    'node-version: 24.18.0',
+    'pnpm@11.17.0',
+    'verify-pins.mjs --check',
+    'pnpm install --frozen-lockfile --ignore-scripts',
+    'pnpm contracts:compat',
+    'test -- --run staging-config',
+    'test -- --run container-contract',
+    'db:migrate:test',
+    'file: apps/api/Dockerfile',
+    'push-by-digest=true',
+    'sbom: true',
+    'provenance: mode=max',
+    'subject-digest: ${{ steps.build.outputs.digest }}',
+    'image-ref: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ steps.build.outputs.digest }}',
+    'IMAGE_REF: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ needs.build.outputs.digest }}',
+    "grep -F 'autoDeploy: false' apps/api/staging.render.yaml",
+    'STAGING_API_ORIGIN/health',
+    'STAGING_API_ORIGIN/ready',
+    'persist-credentials: false',
+  ]) {
+    if (!ci.includes(marker)) diagnostics.push(`${ciPath}: missing "${marker}"`);
+  }
+  if (
+    /continue-on-error:\s*true|permissions:\s*write-all|liiiraa-boost-api:[a-z0-9._-]+/iu.test(ci)
+  ) {
+    diagnostics.push(`${ciPath}: staging artifact workflow must fail closed and deploy by digest`);
+  }
+  for (const match of ci.matchAll(/uses:\s*[^@\s]+@([^\s]+)/gu)) {
+    if (!/^[0-9a-f]{40}$/u.test(match[1])) {
+      diagnostics.push(`${ciPath}: every action must be pinned to a full commit SHA`);
+    }
+  }
+  if (
+    ci.indexOf('verify-pins.mjs --check') >
+    ci.indexOf('pnpm install --frozen-lockfile --ignore-scripts')
+  ) {
+    diagnostics.push(`${ciPath}: dependency allowlist verification must precede installation`);
+  }
+};
+
 const checkCi = (snapshot, ciPath, diagnostics) => {
   if (ciPath === undefined) return;
   const ci = snapshot.get(ciPath);
   if (ci === undefined) {
     diagnostics.push(`${ciPath}: required CI workflow missing`);
+    return;
+  }
+  if (ciPath === '.github/workflows/phase-4-staging-api.yml') {
+    checkStagingApiCi(ci, ciPath, diagnostics);
     return;
   }
   for (const marker of [
@@ -359,6 +413,10 @@ export const verifyRequiredArtifacts = (
     if (contents === undefined || !contents.includes(proof.marker)) {
       diagnostics.push(`${proof.path}: required negative proof marker missing: ${proof.marker}`);
     }
+  }
+  if (ciPath === '.github/workflows/phase-4-staging-api.yml') {
+    checkCi(snapshot, ciPath, diagnostics);
+    return diagnostics.toSorted();
   }
   const verificationGraph = checkRootScripts(snapshot, diagnostics);
   checkTurbo(snapshot, diagnostics);

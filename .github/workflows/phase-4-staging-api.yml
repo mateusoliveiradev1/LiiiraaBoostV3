@@ -1,0 +1,154 @@
+name: Phase 4 staging API artifact
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/api/**
+      - packages/contracts-ts/**
+      - packages/control-plane-*/**
+      - pnpm-lock.yaml
+      - .github/workflows/phase-4-staging-api.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-staging-api-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Verify and publish immutable API digest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      security-events: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist before installation
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Verify contracts and focused staging policy
+        run: >-
+          pnpm contracts:compat &&
+          pnpm --filter @liiiraa/api test -- --run staging-config &&
+          pnpm --filter @liiiraa/api test -- --run container-contract &&
+          pnpm --filter @liiiraa/api db:migrate:test
+      - name: Configure BuildKit
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+      - name: Authenticate to GHCR for this job only
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build once and publish by digest with SBOM and provenance
+        id: build
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          platforms: linux/amd64
+          push: true
+          sbom: true
+          provenance: mode=max
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+      - name: Require an immutable digest
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: test "$(printf '%s' "$IMAGE_DIGEST" | grep -Ec '^sha256:[0-9a-f]{64}$')" -eq 1
+      - name: Attest the exact published digest
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      - name: Scan the exact published digest
+        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+      - name: Upload bounded scan evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: staging-api-${{ github.sha }}-scan
+          path: trivy-results.sarif
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy tested digest to protected staging
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: staging-api
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out deployment contract
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Require the tested digest and manual Render policy
+        env:
+          IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
+        run: >-
+          test "$(printf '%s' "$IMAGE_DIGEST" | grep -Ec '^sha256:[0-9a-f]{64}$')" -eq 1 &&
+          grep -F 'autoDeploy: false' apps/api/staging.render.yaml
+      - name: Run staging migrations before promotion
+        env:
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: >-
+          corepack enable && corepack prepare pnpm@11.17.0 --activate &&
+          node tooling/supply-chain/verify-pins.mjs --check &&
+          pnpm install --frozen-lockfile --ignore-scripts &&
+          pnpm --filter @liiiraa/api db:migrate:test
+      - name: Deploy the tested GHCR digest only
+        env:
+          IMAGE_REF: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ needs.build.outputs.digest }}
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: >-
+          curl --fail-with-body --silent --show-error
+          --request PATCH
+          --header "Authorization: Bearer $RENDER_API_TOKEN"
+          --header "Content-Type: application/json"
+          --data "{\"image\":{\"ownerId\":\"$RENDER_SERVICE_ID\",\"imagePath\":\"$IMAGE_REF\"},\"autoDeploy\":false}"
+          "https://api.render.com/v1/services/$RENDER_SERVICE_ID"
+      - name: Verify hosted health and readiness
+        env:
+          STAGING_API_ORIGIN: ${{ secrets.STAGING_API_ORIGIN }}
+          STAGING_BUILD_ID: ${{ github.sha }}
+        run: >-
+          curl --fail-with-body --silent --show-error "$STAGING_API_ORIGIN/health" &&
+          curl --fail-with-body --silent --show-error "$STAGING_API_ORIGIN/ready" |
+          grep -F "$STAGING_BUILD_ID"

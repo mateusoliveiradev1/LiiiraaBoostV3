@@ -1,0 +1,14 @@
+.git
+.github
+.planning
+.impeccable
+**/node_modules
+**/.turbo
+**/coverage
+**/dist
+**/target
+apps/desktop/src-tauri/gen
+*.log
+.env
+.env.*
+!.env.example
