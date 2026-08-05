@@ -1,0 +1,130 @@
+import { createHash } from 'node:crypto';
+
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  provisionStagingInvitations,
+  type ProtectedInvitationOutput,
+  type StagingInvitationProvisioningEnvironment,
+} from './provision-invitations.js';
+
+const emails = ['owner@example.com', 'friend-one@example.com', 'friend-two@example.com'] as const;
+const environment = (): StagingInvitationProvisioningEnvironment => ({
+  ACCOUNT_STAGING_ORIGIN: 'https://account.staging.example',
+  STAGING_INVITATION_EMAILS_JSON: JSON.stringify(emails),
+  STAGING_INVITATION_OUTPUT_PATH: 'C:\\protected\\liiiraa-invitations.json',
+});
+
+const digest = (value: string): string => createHash('sha256').update(value).digest('hex');
+
+describe('secret-driven staging invitation provisioning', () => {
+  it('creates exactly three single-use tester invitations and exposes raw URLs only to protected output', async () => {
+    const committed: string[] = [];
+    const output: ProtectedInvitationOutput = {
+      abort: vi.fn(() => Promise.resolve()),
+      commit: vi.fn((payload) => {
+        committed.push(payload);
+        return Promise.resolve();
+      }),
+    };
+    const database = {
+      query: vi.fn(() => Promise.resolve({ rowCount: 0, rows: [] })),
+    };
+    let tokenSequence = 0;
+    const invitations = {
+      issueInvitation: vi.fn(
+        (input: Readonly<{ email: string; expiresAt: string; role: string }>) => {
+          tokenSequence += 1;
+          const token = `invite-token-${String(tokenSequence)}-${'x'.repeat(48)}`;
+          return Promise.resolve({
+            expiresAt: input.expiresAt,
+            token,
+            tokenDigest: digest(token),
+          });
+        },
+      ),
+    };
+
+    const result = await provisionStagingInvitations(environment(), {
+      clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+      database,
+      invitations,
+      openProtectedOutput: vi.fn(() => Promise.resolve(output)),
+      repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+    });
+
+    expect(result).toEqual({ created: 3, skipped: 0, status: 'complete' });
+    expect(JSON.stringify(result)).not.toMatch(/@|invite-token/iu);
+    expect(invitations.issueInvitation).toHaveBeenCalledTimes(3);
+    expect(invitations.issueInvitation.mock.calls.map(([input]) => input.role)).toEqual([
+      'tester',
+      'tester',
+      'tester',
+    ]);
+    const queryValues = database.query.mock.calls.map(([, values]) => values);
+    expect(queryValues).toEqual(emails.map((email) => [digest(email), '2030-01-15T12:00:00.000Z']));
+    expect(JSON.stringify(queryValues)).not.toContain('@');
+    expect(output.commit).toHaveBeenCalledTimes(1);
+    expect(committed).toHaveLength(1);
+    const protectedPayload = JSON.parse(committed[0] ?? '{}') as {
+      invitations?: readonly { email?: string; invitationUrl?: string }[];
+    };
+    expect(protectedPayload.invitations?.map(({ email }) => email)).toEqual(emails);
+    expect(
+      protectedPayload.invitations?.every(({ invitationUrl }) =>
+        invitationUrl?.startsWith(
+          'https://account.staging.example/pt-BR/account/sign-up?invitation=',
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it('is idempotent and never reconstructs or reveals prior active invitation tokens', async () => {
+    const database = {
+      query: vi.fn(() =>
+        Promise.resolve({ rowCount: 1, rows: [{ token_digest: 'a'.repeat(64) }] }),
+      ),
+    };
+    const invitations = { issueInvitation: vi.fn() };
+    const openProtectedOutput = vi.fn();
+
+    await expect(
+      provisionStagingInvitations(environment(), {
+        clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+        database,
+        invitations,
+        openProtectedOutput,
+        repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+      }),
+    ).resolves.toEqual({ created: 0, skipped: 3, status: 'complete' });
+    expect(invitations.issueInvitation).not.toHaveBeenCalled();
+    expect(openProtectedOutput).not.toHaveBeenCalled();
+  });
+
+  it('rejects anything other than three unique valid emails and a protected absolute output path', async () => {
+    const dependencies = {
+      clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+      database: { query: vi.fn() },
+      invitations: { issueInvitation: vi.fn() },
+      openProtectedOutput: vi.fn(),
+      repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+    };
+    for (const input of [
+      { ...environment(), STAGING_INVITATION_EMAILS_JSON: JSON.stringify(emails.slice(0, 2)) },
+      {
+        ...environment(),
+        STAGING_INVITATION_EMAILS_JSON: JSON.stringify([emails[0], emails[0], emails[2]]),
+      },
+      { ...environment(), STAGING_INVITATION_OUTPUT_PATH: 'relative/invitations.json' },
+      {
+        ...environment(),
+        STAGING_INVITATION_OUTPUT_PATH: 'C:\\workspace\\liiiraa-boost\\invitations.json',
+      },
+    ]) {
+      await expect(provisionStagingInvitations(input, dependencies)).rejects.toThrow(
+        'STAGING_INVITATION_PROVISIONING_REJECTED',
+      );
+    }
+    expect(dependencies.database.query).not.toHaveBeenCalled();
+  });
+});
