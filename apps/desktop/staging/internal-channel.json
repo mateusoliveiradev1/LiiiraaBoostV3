@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "channel": "internal",
+  "buildNumber": 23001,
+  "buildId": "internal-023001",
+  "commit": "5177045dcfb0de9e51ec7c125b46bc4c1fe8f721",
+  "digest": "sha256:8f9aca95cc177780961812c2b984c9e24c04750155754f082072e463001c4ec2",
+  "checksum": "8f9aca95cc177780961812c2b984c9e24c04750155754f082072e463001c4ec2",
+  "accessScope": "invited-pcs",
+  "changeNotes": "CHANGE-NOTES.md",
+  "rollbackBuildId": "internal-023000",
+  "apiOrigin": "https://liiiraa-api-staging.onrender.com",
+  "apiVersion": "v1",
+  "contractVersion": "1.0",
+  "entitlementKeyId": "staging-entitlement-current",
+  "artifact": {
+    "availability": "not-published",
+    "fileName": "Liiiraa Boost Internal 023001_x64-setup.exe",
+    "format": "nsis",
+    "signingClass": "self-signed-development"
+  },
+  "sbom": {
+    "digest": "sha256:01bf13a73b87bacc282b0fc311487ade37226c24212b80f7bd2cf85f2603bdf3",
+    "format": "spdx-json"
+  },
+  "provenance": {
+    "attested": false,
+    "digest": "sha256:43e76c5eb58e57b2966e79ac7634760a453a96a95fdc649c98c7a30c3f799ae4",
+    "kind": "github-actions-slsa"
+  },
+  "trust": {
+    "distributionAllowed": false,
+    "productionReady": false,
+    "publicDownload": false,
+    "publicTrust": false,
+    "smartScreenReputation": false
+  }
+}

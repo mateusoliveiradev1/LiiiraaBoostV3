@@ -1,8 +1,8 @@
+// @ts-expect-error -- Vitest runs this contract in Node; the browser app intentionally excludes Node globals.
 import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-const desktopRoot = new URL('..', import.meta.url);
 const repositoryRoot = new URL('../../..', import.meta.url);
 const runtimeUrl = new URL('./staging-runtime.ts', import.meta.url);
 const schemaUrl = new URL('../staging/internal-channel.schema.json', import.meta.url);
@@ -123,8 +123,8 @@ describe('internal-channel manifest contract', () => {
   ])('rejects %s', async (_name, override) => {
     const runtime = await runtimeModule();
     if (runtime === undefined) return;
-    const candidate = manifest(override);
-    if (override['buildId'] === undefined) delete candidate.buildId;
+    const candidate = manifest(override) as Record<string, unknown>;
+    if ('buildId' in override && override.buildId === undefined) delete candidate['buildId'];
     expect(
       runtime.admitStagingRuntime(candidate, {
         apiOrigin: 'https://liiiraa-api-staging.onrender.com',

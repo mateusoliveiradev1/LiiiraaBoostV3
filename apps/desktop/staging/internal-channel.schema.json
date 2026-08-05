@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liiiraa.internal/desktop/internal-channel.schema.json",
+  "title": "Liiiraa Boost restricted Internal channel manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "channel",
+    "buildNumber",
+    "buildId",
+    "commit",
+    "digest",
+    "checksum",
+    "accessScope",
+    "changeNotes",
+    "rollbackBuildId",
+    "apiOrigin",
+    "apiVersion",
+    "contractVersion",
+    "entitlementKeyId",
+    "artifact",
+    "sbom",
+    "provenance",
+    "trust"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "channel": { "const": "internal" },
+    "buildNumber": { "type": "integer", "minimum": 1 },
+    "buildId": { "type": "string", "pattern": "^internal-[0-9]{6,}$" },
+    "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "checksum": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "accessScope": { "const": "invited-pcs" },
+    "changeNotes": { "const": "CHANGE-NOTES.md" },
+    "rollbackBuildId": { "type": "string", "pattern": "^internal-[0-9]{6,}$" },
+    "apiOrigin": { "const": "https://liiiraa-api-staging.onrender.com" },
+    "apiVersion": { "const": "v1" },
+    "contractVersion": { "const": "1.0" },
+    "entitlementKeyId": { "const": "staging-entitlement-current" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["availability", "fileName", "format", "signingClass"],
+      "properties": {
+        "availability": { "const": "not-published" },
+        "fileName": { "type": "string", "minLength": 1 },
+        "format": { "const": "nsis" },
+        "signingClass": { "const": "self-signed-development" }
+      }
+    },
+    "sbom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "format"],
+      "properties": {
+        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "format": { "const": "spdx-json" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attested", "digest", "kind"],
+      "properties": {
+        "attested": { "const": false },
+        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "kind": { "const": "github-actions-slsa" }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "distributionAllowed",
+        "productionReady",
+        "publicDownload",
+        "publicTrust",
+        "smartScreenReputation"
+      ],
+      "properties": {
+        "distributionAllowed": { "const": false },
+        "productionReady": { "const": false },
+        "publicDownload": { "const": false },
+        "publicTrust": { "const": false },
+        "smartScreenReputation": { "const": false }
+      }
+    }
+  }
+}

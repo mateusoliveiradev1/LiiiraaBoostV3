@@ -18,6 +18,7 @@ on:
       - apps/web/**
       - apps/account/**
       - apps/admin/**
+      - apps/desktop/**
       - tooling/web-evidence/**
       - .github/workflows/phase-4-surfaces.yml
 
@@ -55,6 +56,30 @@ jobs:
       - name: Verify static staging origin contract without local daemons
         run: pnpm --filter @liiiraa/web-evidence exec playwright test tests/security-artifacts.spec.ts --grep @staging-origin-smoke --workers=1
 
+  desktop-internal:
+    name: Admit restricted numbered desktop build
+    needs: verify-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: desktop-internal
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm and install reviewed dependencies
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate && node tooling/supply-chain/verify-pins.mjs --check && pnpm install --frozen-lockfile --ignore-scripts
+      - name: Verify Internal runtime and immutable channel identity
+        run: pnpm --filter @liiiraa/desktop test -- --run internal-channel
+      - name: Admit checked-in restricted channel projection
+        run: node apps/desktop/scripts/validate-internal-channel.mjs --channel internal --build-id internal-023001 --rollback-build-id internal-023000
+
   deploy-public:
     name: Deploy isolated public staging project
     if: github.ref == 'refs/heads/main'
@@ -76,7 +101,8 @@ jobs:
           REPOSITORY_ID: ${{ github.event.repository.id }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid public staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-public-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel public deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
+        run: >-
+          node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid public staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-public-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel public deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
 
   deploy-account:
     name: Deploy isolated account staging project
@@ -99,7 +125,8 @@ jobs:
           REPOSITORY_ID: ${{ github.event.repository.id }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid account staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-account-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { LIIIRAA_ACCOUNT_PREVIEW: 'false', STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel account deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
+        run: >-
+          node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid account staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-account-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { LIIIRAA_ACCOUNT_PREVIEW: 'false', STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel account deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
 
   deploy-admin:
     name: Deploy isolated admin staging project
@@ -122,7 +149,8 @@ jobs:
           REPOSITORY_ID: ${{ github.event.repository.id }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid admin staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-admin-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { LIIIRAA_ADMIN_ORIGIN: expected.origin, LIIIRAA_ADMIN_PREVIEW: 'false', STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel admin deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
+        run: >-
+          node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid admin staging origin'); const response = await fetch('https://api.vercel.com/v13/deployments?teamId=' + encodeURIComponent(process.env.VERCEL_TEAM_ID), { method: 'POST', headers: { authorization: 'Bearer ' + process.env.VERCEL_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'liiiraa-boost-admin-staging', project: process.env.PROJECT_ID, target: 'preview', gitSource: { type: 'github', repoId: process.env.REPOSITORY_ID, ref: process.env.GIT_SHA }, env: { LIIIRAA_ADMIN_ORIGIN: expected.origin, LIIIRAA_ADMIN_PREVIEW: 'false', STAGING_API_ORIGIN: process.env.STAGING_API_ORIGIN } }) }); if (!response.ok) throw new Error('Vercel admin deployment rejected: ' + response.status); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
 
   smoke-isolation:
     name: Probe origin, session, and consent isolation
@@ -168,4 +196,5 @@ jobs:
           OWNED_ADMIN_ORIGIN: ${{ vars.OWNED_ADMIN_ORIGIN }}
           OWNED_CALLBACK_ORIGINS: ${{ vars.OWNED_CALLBACK_ORIGINS }}
           OWNED_EMAIL_IDENTITY: ${{ vars.OWNED_EMAIL_IDENTITY }}
-        run: node --input-type=module --eval "const values = Object.entries(process.env).filter(([key]) => key.startsWith('OWNED_')); if (values.some(([, value]) => !value)) throw new Error('Owned broader-beta identity is incomplete'); if (values.some(([, value]) => /(?:vercel\.app|onrender\.com|example\.(?:com|test))/iu.test(value))) throw new Error('Provider preview identity cannot pass broader-beta promotion'); for (const key of ['OWNED_PUBLIC_ORIGIN','OWNED_ACCOUNT_ORIGIN','OWNED_ADMIN_ORIGIN']) { const url = new URL(process.env[key]); if (url.protocol !== 'https:' || url.hostname.split('.').length < 3) throw new Error(key + ' is not an owned HTTPS origin'); }"
+        run: >-
+          node --input-type=module --eval "const values = Object.entries(process.env).filter(([key]) => key.startsWith('OWNED_')); if (values.some(([, value]) => !value)) throw new Error('Owned broader-beta identity is incomplete'); if (values.some(([, value]) => /(?:vercel\.app|onrender\.com|example\.(?:com|test))/iu.test(value))) throw new Error('Provider preview identity cannot pass broader-beta promotion'); for (const key of ['OWNED_PUBLIC_ORIGIN','OWNED_ACCOUNT_ORIGIN','OWNED_ADMIN_ORIGIN']) { const url = new URL(process.env[key]); if (url.protocol !== 'https:' || url.hostname.split('.').length < 3) throw new Error(key + ' is not an owned HTTPS origin'); }"
