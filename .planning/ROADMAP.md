@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 36/40 plans executed
+**Plans**: 37/40 plans executed
 
 Plans:
 **Wave 1**
@@ -597,7 +597,7 @@ Plans:
 
 **Wave 14** _(blocked on Wave 12 completion)_
 
-- [ ] 04-39-PLAN.md — Replace the deployed admin preview with persistent role-gated authority.
+- [x] 04-39-PLAN.md — Replace the deployed admin preview with persistent role-gated authority.
 
 **Wave 15** _(blocked on Waves 13 and 14 completion)_
 
@@ -738,7 +738,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 36/40          | In Progress |            |
+| 4. Identity, Commerce, Devices, and Administration | 37/40          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |

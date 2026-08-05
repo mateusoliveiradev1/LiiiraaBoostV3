@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-38-PLAN.md
-last_updated: '2026-08-05T23:16:32.860Z'
+stopped_at: Completed 04-39-PLAN.md
+last_updated: '2026-08-05T23:31:11.319Z'
 last_activity: 2026-08-05
-last_activity_desc: 'Completed 04-38: real desktop browser authentication'
+last_activity_desc: 'Completed 04-39: persistent administrative authority'
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 180
-  completed_plans: 176
+  completed_plans: 177
   percent: 30
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 39 of 40
+Plan: 40 of 40
 Status: Ready to execute
-Last activity: 2026-08-05 — Completed 04-38: real desktop browser authentication
+Last activity: 2026-08-05 — Completed 04-39: persistent administrative authority
 
 Progress: [██████████] 98%
 
@@ -214,6 +214,7 @@ _Updated after plan completion_
 | Phase 04 P24 | 18 min | 1 tasks | 11 files |
 | Phase 04 P36 | 24 min | 2 tasks | 16 files |
 | Phase 04 P38 | 21 min | 2 tasks | 14 files |
+| Phase 04 P39 | 9 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -668,6 +669,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Permit Phase 4 to grant at most invited-alpha authority while leaving owner review explicitly pending and forbidding frozen-RC or production promotion.
 - [Phase 04]: Keep desktop OAuth secrets in native custody and return only SessionProjection to React. — PKCE verifier, callback code, bearer credential, revocation, and Windows Credential Manager access never cross into the renderer.
 - [Phase 04]: Require HTTPS service origins and exact one-shot 127.0.0.1 callbacks for desktop authentication. — The native authorization boundary fails closed on origin, issuer, redirect, state, code, timeout, replay, and response mismatches.
+- [Phase 04]: Derive staging Admin roles only from persisted non-tester identities with active admin sessions. — Origin, cookie, persisted role, session kind, and resource policy must all pass before PostgreSQL is queried.
+- [Phase 04]: Keep staging Admin privileged commands unavailable until their real persistence and step-up authorities exist. — Read-only redacted projections are honest; in-memory command emulation would fabricate administrative authority.
 
 ### Pending Todos
 
@@ -713,6 +716,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T23:16:10.438Z
-Stopped at: Completed 04-38-PLAN.md
+Last session: 2026-08-05T23:31:06.783Z
+Stopped at: Completed 04-39-PLAN.md
 Resume file: None
