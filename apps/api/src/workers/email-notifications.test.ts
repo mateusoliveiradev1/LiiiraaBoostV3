@@ -4,10 +4,7 @@ import type {
   EmailNotification,
   EmailPort,
 } from '@liiiraa/control-plane-application';
-import {
-  createSesSandboxEmailAdapter,
-  type SesV2Transport,
-} from '@liiiraa/control-plane-adapters';
+import { createSesSandboxEmailAdapter, type SesV2Transport } from '@liiiraa/control-plane-adapters';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -113,10 +110,7 @@ class MemoryEmailRepository implements EmailNotificationRepository {
     return Promise.resolve();
   }
 
-  fail(
-    jobId: string,
-    failure: Readonly<{ errorCode: string; failedAt: string }>,
-  ): Promise<void> {
+  fail(jobId: string, failure: Readonly<{ errorCode: string; failedAt: string }>): Promise<void> {
     this.failures.push({ jobId, ...failure });
     return Promise.resolve();
   }
@@ -153,21 +147,28 @@ const jobFor = (
 });
 
 describe('bounded localized notification templates', () => {
-  it.each(notificationMatrix)('renders $class in English and PT-BR without reconstructing authority', (entry) => {
-    for (const locale of ['en', 'pt-BR'] as const) {
-      const rendered = renderEmailNotification(notificationFor(entry, locale));
-      expect(rendered.ok).toBe(true);
-      if (!rendered.ok) continue;
-      expect(rendered.message.subject.length).toBeGreaterThan(0);
-      expect(rendered.message.subject.length).toBeLessThanOrEqual(120);
-      expect(rendered.message.text.length).toBeLessThanOrEqual(2_000);
-      expect(rendered.message.text).toContain(Object.values(entry.values)[0]);
-      expect(JSON.stringify(rendered)).not.toMatch(/token|factor|diagnostic|provider[_ -]?payload/iu);
-    }
-  });
+  it.each(notificationMatrix)(
+    'renders $class in English and PT-BR without reconstructing authority',
+    (entry) => {
+      for (const locale of ['en', 'pt-BR'] as const) {
+        const rendered = renderEmailNotification(notificationFor(entry, locale));
+        expect(rendered.ok).toBe(true);
+        if (!rendered.ok) continue;
+        expect(rendered.message.subject.length).toBeGreaterThan(0);
+        expect(rendered.message.subject.length).toBeLessThanOrEqual(120);
+        expect(rendered.message.text.length).toBeLessThanOrEqual(2_000);
+        expect(rendered.message.text).toContain(Object.values(entry.values)[0]);
+        expect(JSON.stringify(rendered)).not.toMatch(
+          /token|factor|diagnostic|provider[_ -]?payload/iu,
+        );
+      }
+    },
+  );
 
   it('fails closed for unknown class, missing locale, extra values, and sensitive-looking values', () => {
-    const valid = notificationFor(notificationMatrix.at(-1)!);
+    const supportEntry = notificationMatrix.at(-1);
+    if (supportEntry === undefined) throw new Error('synthetic-support-entry-required');
+    const valid = notificationFor(supportEntry);
     const invalid = [
       { ...valid, class: 'support.unknown' },
       { ...valid, locale: undefined },
@@ -242,7 +243,9 @@ describe('email notification outbox worker', () => {
         { maxAttempts: 5, now: NOW, workerId: 'email-worker-retry' },
       ),
     ).resolves.toEqual({ claimed: 1, delivered: 0, failed: 0, retried: 1 });
-    expect(Date.parse(retryRepository.retries[0]!.nextAttemptAt) - Date.parse(NOW)).toBeLessThanOrEqual(
+    const retry = retryRepository.retries[0];
+    if (retry === undefined) throw new Error('retry-evidence-required');
+    expect(Date.parse(retry.nextAttemptAt) - Date.parse(NOW)).toBeLessThanOrEqual(
       EMAIL_RETRY_MAX_DELAY_MS,
     );
     expect(retryRepository.retries[0]?.errorCode).toBe('EMAIL_PROVIDER_UNAVAILABLE');
@@ -328,7 +331,9 @@ describe('SES sandbox adapter', () => {
     const transport: SesV2Transport = {
       send: () => {
         calls += 1;
-        throw { message: 'token=provider-secret', requestId: 'provider-request-secret' };
+        throw Object.assign(new Error('token=provider-secret'), {
+          requestId: 'provider-request-secret',
+        });
       },
     };
     const adapter = createSesSandboxEmailAdapter({

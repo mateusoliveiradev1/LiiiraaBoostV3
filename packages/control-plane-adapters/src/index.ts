@@ -1,6 +1,7 @@
 export * from './storage/audit-anchor.js';
 export * from './storage/consent-stream.js';
 export * from './crypto/staging-entitlement-signer.js';
+export * from './email/ses-email.js';
 export {
   createBetterAuthAdapter,
   createPostgresSessionAuthority,

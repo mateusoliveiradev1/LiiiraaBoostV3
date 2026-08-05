@@ -3,6 +3,7 @@ export type * from './ports/audit.js';
 export type * from './ports/diagnostics.js';
 export type * from './ports/identity.js';
 export type * from './ports/entitlement-signing.js';
+export * from './ports/email.js';
 export {
   ADMIN_ROLES,
   authorizeAdminProjection,
