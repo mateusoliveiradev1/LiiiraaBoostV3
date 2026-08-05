@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-08-PLAN.md
-last_updated: "2026-08-05T00:32:17.976Z"
+stopped_at: Completed 04-09-PLAN.md
+last_updated: "2026-08-05T00:57:43.147Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 152
+  completed_plans: 153
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 13 of 35
+Plan: 14 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -191,6 +191,7 @@ _Updated after plan completion_
 | Phase 04 P04 | 22min | 2 tasks | 9 files |
 | Phase 04 P07 | 18 min | 1 tasks | 13 files |
 | Phase 04 P08 | 18 min | 1 tasks | 5 files |
+| Phase 04 P09 | 21 min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -573,6 +574,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Advance trusted offline time only after complete entitlement verification. — Rejected or contradictory data cannot move the monotonic clock authority.
 - [Phase 04]: Reconcile current provider truth after every signed commerce delivery — Webhook payload order is not authoritative; signature verification, unique inbox admission, and fresh provider retrieval make duplicates, delays, replays, and reordering converge.
 - [Phase 04]: Keep commerce lifecycle and Premium grants outside the Stripe adapter — The provider adapter owns protocol verification, admission, and retrieval only; application and domain transactions retain subscription, entitlement, audit, and outbox authority.
+- [Phase 04]: Bind an admitted diagnostic stream to its opening consent aggregate version. — Any consent version change terminates access and requires fresh admission instead of silently changing scope in place.
+- [Phase 04]: Keep generated consent lifecycle truth separate from case and field access context. — DiagnosticConsentJson remains canonical while the application record supplies D-34 case and explicit field-class scope.
+- [Phase 04]: Fail closed with provider-neutral diagnostic stream errors. — Consent, audit, storage, inspection, UTF-8, JSON, and manifest failures expose no provider detail or diagnostic bytes.
 
 ### Pending Todos
 
@@ -616,6 +620,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T00:31:51.511Z
-Stopped at: Completed 04-08-PLAN.md
+Last session: 2026-08-05T00:57:43.136Z
+Stopped at: Completed 04-09-PLAN.md
 Resume file: None
