@@ -1,12 +1,15 @@
-import type { ConsentStateJson, DiagnosticConsentJson } from '@liiiraa/contracts-ts';
+import type { DiagnosticConsentJson } from '@liiiraa/contracts-ts';
 import { describe, expect, it } from 'vitest';
 
 const CONSENT_STREAM_RED_OWNER = '04-09-01';
+const NOW = '2026-08-05T12:00:00.000Z';
+const PURPOSE = 'investigate synthetic startup regression';
+const FIELD_CLASS = 'application-log-redacted';
 
-const activeConsent = {
+const projection = Object.freeze({
   schemaVersion: '1.0',
-  aggregateVersion: '1',
-  etag: 'consent-etag-1',
+  aggregateVersion: '7',
+  etag: 'consent-etag-7',
   correlationId: 'correlation-consent-1',
   provenance: 'postgres-authority',
   kind: 'diagnostic-consent',
@@ -14,58 +17,415 @@ const activeConsent = {
   accountId: 'account-synthetic-1',
   state: 'active',
   scopes: ['support-diagnostics'],
-  purpose: 'synthetic support diagnosis',
-  grantedAt: '2026-08-04T18:00:00Z',
-  expiresAt: '2026-08-07T18:00:00Z',
-} as const satisfies DiagnosticConsentJson;
+  purpose: PURPOSE,
+  grantedAt: '2026-08-04T18:00:00.000Z',
+  expiresAt: '2026-08-07T18:00:00.000Z',
+} as const satisfies DiagnosticConsentJson);
 
-const consentStreamMatrix = [
-  {
-    id: 'in-flight-revocation-abort',
-    triggerState: 'revoked' as ConsentStateJson,
-    behavior:
-      'revocation notification during an active operator stream must abort server delivery and signal the client to clear rendered data immediately',
-  },
-  {
-    id: 'in-flight-expiry-abort',
-    triggerState: 'expired' as ConsentStateJson,
-    behavior:
-      'consent expiry at a chunk boundary must stop the active stream before another diagnostic byte reaches the operator',
-  },
-  {
-    id: 'private-no-store-response',
-    triggerState: 'active' as ConsentStateJson,
-    behavior:
-      'an admitted diagnostic response must be private and Cache-Control no-store with no durable object URL, download, export, clipboard, or service-worker authority',
-  },
-  {
-    id: 'temporary-buffer-disposal',
-    triggerState: 'revoked' as ConsentStateJson,
-    behavior:
-      'revocation or expiry must zero or discard server buffers and clear usable client copies after the stream aborts',
-  },
-  {
-    id: 'immutable-access-audit',
-    triggerState: 'active' as ConsentStateJson,
-    behavior:
-      'each admitted field access must append a bounded immutable receipt naming actor, case, purpose, field class, consent version, and access window',
-  },
-  {
-    id: 'revocation-preserves-audit',
-    triggerState: 'revoked' as ConsentStateJson,
-    behavior:
-      'revocation must terminate access and dispose temporary data without erasing the immutable record of already admitted access',
-  },
-] as const;
+type ConsentRecord = Readonly<{
+  caseId: string;
+  fieldClasses: readonly string[];
+  projection: DiagnosticConsentJson;
+}>;
+
+const activeConsent: ConsentRecord = Object.freeze({
+  caseId: 'case-synthetic-1',
+  fieldClasses: Object.freeze([
+    'hardware-summary',
+    FIELD_CLASS,
+    'optimization-plan-receipt',
+  ]),
+  projection,
+});
 
 const expectedConsentStreamRed = (id: string, behavior: string): never => {
   throw new Error(`EXPECTED_RED[${CONSENT_STREAM_RED_OWNER}][${id}]: ${behavior}`);
 };
 
-describe('diagnostic consent stream pre-implementation lifecycle matrix', () => {
-  it.each(consentStreamMatrix)('$id', ({ id, triggerState, behavior }) => {
-    expect(activeConsent.scopes).toContain('support-diagnostics');
-    expect(['active', 'revoked', 'expired']).toContain(triggerState);
-    expectedConsentStreamRed(id, behavior);
+const loadAdapter = async () => {
+  try {
+    const adapterPackage = '@liiiraa/control-plane-adapters';
+    return await import(adapterPackage);
+  } catch {
+    return expectedConsentStreamRed(
+      'adapter-absent',
+      'the owner must implement continuously revalidated consent-bound diagnostic streaming',
+    );
+  }
+};
+
+class MemoryConsentAuthority {
+  private record: ConsentRecord | undefined;
+  private readonly listeners = new Set<() => void>();
+
+  constructor(record: ConsentRecord | undefined = activeConsent) {
+    this.record = record;
+  }
+
+  readonly readConsent = async (): Promise<ConsentRecord | undefined> => this.record;
+
+  readonly subscribe = (_consentId: string, listener: () => void): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  update(record: ConsentRecord | undefined): void {
+    this.record = record;
+    for (const listener of this.listeners) listener();
+  }
+}
+
+type StoredDescriptor = Readonly<{
+  archiveMembers: readonly string[];
+  byteLength: number;
+  caseByteLength: number;
+  fieldClass: string;
+  mimeType: string;
+  objectKey: string;
+}>;
+
+const descriptor = Object.freeze({
+  archiveMembers: Object.freeze([]),
+  byteLength: 36,
+  caseByteLength: 1_024,
+  fieldClass: FIELD_CLASS,
+  mimeType: 'text/plain; charset=utf-8',
+  objectKey: 'diagnostics/case-synthetic-1/field-synthetic-1',
+} as const satisfies StoredDescriptor);
+
+class MemoryDiagnosticStorage {
+  readonly openedSignals: AbortSignal[] = [];
+  readonly sourceBuffers: Uint8Array[] = [];
+  disposed = false;
+  openCount = 0;
+  private readonly chunks: readonly Uint8Array[];
+  private blockAfter: number | undefined;
+
+  constructor(
+    readonly storedDescriptor: StoredDescriptor = descriptor,
+    chunks: readonly string[] = ['user=synthetic token=top-secret'],
+  ) {
+    this.chunks = chunks.map((chunk) => new TextEncoder().encode(chunk));
+    this.sourceBuffers.push(...this.chunks);
+  }
+
+  blockAfterChunk(index: number): void {
+    this.blockAfter = index;
+  }
+
+  readonly openField = async () => {
+    this.openCount += 1;
+    let index = 0;
+    return {
+      descriptor: this.storedDescriptor,
+      dispose: async () => {
+        this.disposed = true;
+        for (const buffer of this.sourceBuffers) buffer.fill(0);
+      },
+      read: async (signal: AbortSignal): Promise<Uint8Array | null> => {
+        this.openedSignals.push(signal);
+        if (this.blockAfter === index) {
+          return new Promise<Uint8Array | null>((_resolve, reject) => {
+            const rejectAbort = () => {
+              const error = new Error('storage read aborted');
+              error.name = 'AbortError';
+              reject(error);
+            };
+            if (signal.aborted) rejectAbort();
+            else signal.addEventListener('abort', rejectAbort, { once: true });
+          });
+        }
+        const chunk = this.chunks[index];
+        index += 1;
+        return chunk === undefined ? null : chunk;
+      },
+    };
+  };
+}
+
+class MemoryAudit {
+  readonly receipts: unknown[] = [];
+
+  readonly appendAccessReceipt = async (receipt: unknown): Promise<void> => {
+    this.receipts.push(receipt);
+  };
+}
+
+const contentInspector = Object.freeze({
+  inspectAndRedact: async (input: Readonly<{ bytes: Uint8Array }>) => {
+    const decoded = new TextDecoder('utf-8', { fatal: true }).decode(input.bytes);
+    if (decoded.includes('malware-signature')) {
+      return Object.freeze({ code: 'CONTENT_REJECTED', ok: false as const });
+    }
+    return Object.freeze({
+      bytes: new TextEncoder().encode(decoded.replace(/token=[^\s]+/gu, 'token=[redacted]')),
+      ok: true as const,
+      redactionCount: decoded.includes('token=') ? 1 : 0,
+      scanVerdict: 'clean' as const,
+    });
+  },
+});
+
+const request = Object.freeze({
+  actorId: 'operator-security-1',
+  caseId: 'case-synthetic-1',
+  consentId: 'consent-synthetic-1',
+  fieldClass: FIELD_CLASS,
+  fieldId: 'field-synthetic-1',
+  purpose: PURPOSE,
+});
+
+const openStream = async (
+  overrides: Readonly<{
+    authority?: MemoryConsentAuthority;
+    audit?: MemoryAudit;
+    now?: () => Date;
+    onClearData?: (reason: string) => void;
+    request?: typeof request;
+    storage?: MemoryDiagnosticStorage;
+  }> = {},
+) => {
+  const adapter = await loadAdapter();
+  const authority = overrides.authority ?? new MemoryConsentAuthority();
+  const audit = overrides.audit ?? new MemoryAudit();
+  const storage = overrides.storage ?? new MemoryDiagnosticStorage();
+  const result = await adapter.openConsentBoundDiagnosticStream({
+    audit,
+    consentAuthority: authority,
+    contentInspector,
+    now: overrides.now ?? (() => new Date(NOW)),
+    onClearData: overrides.onClearData ?? (() => undefined),
+    request: overrides.request ?? request,
+    storage,
+  });
+  return { audit, authority, result, storage };
+};
+
+const revokedConsent = (): ConsentRecord =>
+  Object.freeze({
+    ...activeConsent,
+    projection: Object.freeze({
+      ...projection,
+      aggregateVersion: '8',
+      etag: 'consent-etag-8',
+      state: 'revoked',
+      revokedAt: NOW,
+    }),
+  });
+
+describe('diagnostic consent admission', () => {
+  it.each([
+    ['wrong-case', { ...request, caseId: 'case-synthetic-other' }],
+    ['wrong-purpose', { ...request, purpose: 'unrelated purpose' }],
+    ['wrong-field', { ...request, fieldClass: 'crash-metadata' }],
+  ])('returns no bytes for %s', async (_id, deniedRequest) => {
+    const { audit, result, storage } = await openStream({
+      request: Object.freeze(deniedRequest) as typeof request,
+    });
+
+    expect(result).toMatchObject({ ok: false, code: 'CONSENT_DENIED' });
+    expect(storage.openCount).toBe(0);
+    expect(audit.receipts).toHaveLength(0);
+  });
+
+  it.each([
+    ['revoked', revokedConsent()],
+    [
+      'expired',
+      Object.freeze({
+        ...activeConsent,
+        projection: Object.freeze({ ...projection, expiresAt: '2026-08-05T11:59:59.999Z' }),
+      }),
+    ],
+    [
+      'over-72-hours',
+      Object.freeze({
+        ...activeConsent,
+        projection: Object.freeze({ ...projection, expiresAt: '2026-08-07T18:00:00.001Z' }),
+      }),
+    ],
+  ])('returns no bytes for %s consent', async (_id, consent) => {
+    const authority = new MemoryConsentAuthority(consent);
+    const { audit, result, storage } = await openStream({ authority });
+
+    expect(result.ok).toBe(false);
+    expect(storage.openCount).toBe(0);
+    expect(audit.receipts).toHaveLength(0);
+  });
+});
+
+describe('continuous consent and temporary-data lifecycle', () => {
+  it('in-flight-revocation-abort', async () => {
+    const cleared: string[] = [];
+    const storage = new MemoryDiagnosticStorage();
+    storage.blockAfterChunk(1);
+    const { authority, audit, result } = await openStream({
+      onClearData: (reason) => cleared.push(reason),
+      storage,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const first = await result.stream.read();
+    expect(first.kind).toBe('chunk');
+    if (first.kind !== 'chunk') return;
+    expect(new TextDecoder().decode(first.bytes)).toContain('token=[redacted]');
+    const pending = result.stream.read();
+    authority.update(revokedConsent());
+
+    await expect(pending).resolves.toEqual({ kind: 'aborted', reason: 'revoked' });
+    expect(storage.openedSignals.at(-1)?.aborted).toBe(true);
+    expect([...first.bytes]).toEqual(new Array(first.bytes.byteLength).fill(0));
+    expect(cleared).toEqual(['revoked']);
+    expect(storage.disposed).toBe(true);
+    expect(audit.receipts).toHaveLength(1);
+  });
+
+  it('in-flight-expiry-abort', async () => {
+    let currentTime = new Date(NOW);
+    const cleared: string[] = [];
+    const authority = new MemoryConsentAuthority();
+    const storage = new MemoryDiagnosticStorage();
+    storage.blockAfterChunk(1);
+    const { result } = await openStream({
+      authority,
+      now: () => currentTime,
+      onClearData: (reason) => cleared.push(reason),
+      storage,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const first = await result.stream.read();
+    const pending = result.stream.read();
+    currentTime = new Date(projection.expiresAt);
+    authority.update(activeConsent);
+
+    await expect(pending).resolves.toEqual({ kind: 'aborted', reason: 'expired' });
+    expect(first.kind === 'chunk' ? [...first.bytes].every((byte) => byte === 0) : false).toBe(true);
+    expect(cleared).toEqual(['expired']);
+    expect(storage.disposed).toBe(true);
+  });
+
+  it('revalidates at every chunk boundary before releasing another byte', async () => {
+    const { authority, result } = await openStream({
+      storage: new MemoryDiagnosticStorage(descriptor, ['first', 'second']),
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect((await result.stream.read()).kind).toBe('chunk');
+    authority.update(revokedConsent());
+    expect(await result.stream.read()).toEqual({ kind: 'aborted', reason: 'revoked' });
+  });
+});
+
+describe('private response and immutable bounded receipt', () => {
+  it('private-no-store-response exposes no bearer or browser persistence authority', async () => {
+    const { result } = await openStream();
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.stream.headers).toEqual({
+      'cache-control': 'private, no-store',
+      expires: '0',
+      pragma: 'no-cache',
+    });
+    expect('objectUrl' in result.stream).toBe(false);
+    expect('downloadUrl' in result.stream).toBe(false);
+    expect('export' in result.stream).toBe(false);
+  });
+
+  it('immutable-access-audit persists minimized access-window evidence after revocation', async () => {
+    const { authority, audit, result } = await openStream();
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(audit.receipts).toHaveLength(1);
+    expect(audit.receipts[0]).toEqual({
+      actorId: request.actorId,
+      caseId: request.caseId,
+      consentId: request.consentId,
+      consentVersion: projection.aggregateVersion,
+      fieldClass: request.fieldClass,
+      fieldId: request.fieldId,
+      openedAt: NOW,
+      purpose: request.purpose,
+    });
+    expect(Object.isFrozen(audit.receipts[0])).toBe(true);
+    expect(JSON.stringify(audit.receipts[0])).not.toContain('top-secret');
+
+    authority.update(revokedConsent());
+    expect(audit.receipts).toHaveLength(1);
+    expect(audit.receipts[0]).toMatchObject({ consentVersion: '7' });
+  });
+});
+
+describe('diagnostic.v1 manifest admission', () => {
+  it.each([
+    ['unknown-mime', { ...descriptor, mimeType: 'application/octet-stream' }],
+    ['unknown-field', { ...descriptor, fieldClass: 'registry-export' }],
+    ['archive-member', { ...descriptor, archiveMembers: ['nested/log.txt'] }],
+    ['oversize-field', { ...descriptor, byteLength: 5 * 1_024 * 1_024 + 1 }],
+    ['oversize-case', { ...descriptor, caseByteLength: 25 * 1_024 * 1_024 + 1 }],
+    ['path-traversal', { ...descriptor, objectKey: 'diagnostics/../credential.txt' }],
+  ])('fails closed for %s', async (_id, rejectedDescriptor) => {
+    const storage = new MemoryDiagnosticStorage(Object.freeze(rejectedDescriptor));
+    const { audit, result } = await openStream({ storage });
+
+    expect(result).toMatchObject({ ok: false, code: 'MANIFEST_REJECTED' });
+    expect(storage.disposed).toBe(true);
+    expect(audit.receipts).toHaveLength(0);
+  });
+
+  it('denies invalid UTF-8, malformed JSON, and scanning rejection', async () => {
+    const adapter = await loadAdapter();
+    for (const fixture of [
+      {
+        mimeType: 'text/plain; charset=utf-8',
+        bytes: Uint8Array.of(0xc3, 0x28),
+      },
+      {
+        mimeType: 'application/json; charset=utf-8',
+        bytes: new TextEncoder().encode('{not-json'),
+      },
+      {
+        mimeType: 'text/plain; charset=utf-8',
+        bytes: new TextEncoder().encode('malware-signature'),
+      },
+    ]) {
+      const storage = new MemoryDiagnosticStorage(
+        Object.freeze({ ...descriptor, byteLength: fixture.bytes.byteLength, mimeType: fixture.mimeType }),
+        [],
+      );
+      storage.sourceBuffers.push(fixture.bytes);
+      storage.blockAfterChunk(1);
+      let read = false;
+      storage.openField = async () => ({
+        descriptor: storage.storedDescriptor,
+        dispose: async () => {
+          storage.disposed = true;
+          fixture.bytes.fill(0);
+        },
+        read: async () => {
+          if (read) return null;
+          read = true;
+          return fixture.bytes;
+        },
+      });
+      const result = await adapter.openConsentBoundDiagnosticStream({
+        audit: new MemoryAudit(),
+        consentAuthority: new MemoryConsentAuthority(),
+        contentInspector,
+        now: () => new Date(NOW),
+        onClearData: () => undefined,
+        request,
+        storage,
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) continue;
+      expect(await result.stream.read()).toEqual({ kind: 'aborted', reason: 'content-rejected' });
+      expect(storage.disposed).toBe(true);
+    }
   });
 });
