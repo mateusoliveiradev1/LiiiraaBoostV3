@@ -95,6 +95,20 @@ export const manageConsent = async (
           },
         });
       }
+      if (input.action.kind === 'revoke' || input.action.kind === 'expire') {
+        await scheduleLifecycleJob(transaction, dependencies.ids, {
+          topic: 'support.consent-copy-disposal',
+          aggregateId: input.command.consentId,
+          commandId: input.command.commandId,
+          idempotencyKey: `${input.command.commandId}:support.consent-copy-disposal`,
+          availableAt: now,
+          payload: {
+            caseId: decision.state.caseId,
+            consentId: decision.state.consentId,
+            consentVersion: String(decision.state.version),
+          },
+        });
+      }
       const applied: ManageConsentResult = { ok: true, state: decision.state };
       await transaction.rememberCommandResult(input.command.commandId, applied);
       return { result: applied, notify };

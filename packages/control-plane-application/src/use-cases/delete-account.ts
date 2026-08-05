@@ -8,7 +8,11 @@ import {
 
 import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.js';
 
-export type { AccountDeletionState } from '@liiiraa/control-plane-domain';
+export type {
+  AccountDeletionState,
+  DeletionEvidence,
+  RetainedEvidenceClass,
+} from '@liiiraa/control-plane-domain';
 
 export type DeleteAccountDependencies = SupportLifecycleDependencies;
 
@@ -74,6 +78,23 @@ export const deleteAccount = async (
           deletionVersion: String(decision.state.version),
         },
       });
+    }
+    if (input.action.kind === 'finalize') {
+      for (const record of decision.state.retentionRecords) {
+        await scheduleLifecycleJob(transaction, dependencies.ids, {
+          topic: 'account.retention-expiry',
+          aggregateId: input.accountId,
+          commandId: input.commandId,
+          idempotencyKey: `${input.commandId}:account.retention-expiry:${record.evidenceClass}:${record.sourceAt}`,
+          availableAt: record.retainUntil,
+          payload: {
+            accountId: input.accountId,
+            evidenceClass: record.evidenceClass,
+            sourceAt: record.sourceAt,
+            retainUntil: record.retainUntil,
+          },
+        });
+      }
     }
     await scheduleLifecycleJob(transaction, dependencies.ids, {
       topic: 'account.deletion-notice',

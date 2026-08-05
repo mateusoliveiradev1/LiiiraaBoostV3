@@ -134,7 +134,10 @@ class LockedDeletionRepository implements SupportLifecycleRepository {
     const commandResults = new Map<string, SupportLifecycleCommandResult>();
     return {
       findCommandResult: (id) => Promise.resolve(commandResults.get(id) ?? null),
-      rememberCommandResult: (id, result) => void commandResults.set(id, result) || Promise.resolve(),
+      rememberCommandResult: (id, result) => {
+        commandResults.set(id, result);
+        return Promise.resolve();
+      },
       loadCase: () => Promise.resolve(null),
       saveCase: () => Promise.resolve(),
       loadConsent: () => Promise.resolve(null),
@@ -224,7 +227,10 @@ describe('privacy lifecycle claim and object purge', () => {
 
       const first = await runPrivacyLifecycleWorkerOnce(
         { deletion: deletionDependencies(deletion), objects, repository: jobs },
-        { now: topic === 'support.attachment-purge' ? '2030-08-31T12:00:00.000Z' : REQUESTED_AT, workerId: 'privacy-a' },
+        {
+          now: topic === 'support.attachment-purge' ? '2030-08-31T12:00:00.000Z' : REQUESTED_AT,
+          workerId: 'privacy-a',
+        },
       );
       const replay = await runPrivacyLifecycleWorkerOnce(
         { deletion: deletionDependencies(deletion), objects, repository: jobs },
@@ -234,15 +240,14 @@ describe('privacy lifecycle claim and object purge', () => {
       expect(first).toEqual({ claimed: 1, completed: 1, failed: 0, retried: 0 });
       expect(replay).toEqual({ claimed: 0, completed: 0, failed: 0, retried: 0 });
       expect(objects.requests).toHaveLength(1);
-      expect(jobs.deleted).toEqual([
-        expect.objectContaining({
-          objectId: 'object-one',
-          receipt: expect.objectContaining({
-            checksumSha256: CHECKSUM,
-            providerReceipt: 'object-version-redacted-01',
-          }),
-        }),
-      ]);
+      expect(jobs.deleted).toHaveLength(1);
+      expect(jobs.deleted[0]?.objectId).toBe('object-one');
+      expect(jobs.deleted[0]?.receipt).toEqual({
+        alreadyAbsent: false,
+        checksumSha256: CHECKSUM,
+        deletedAt: FINALIZE_AT,
+        providerReceipt: 'object-version-redacted-01',
+      });
     },
   );
 
@@ -285,12 +290,20 @@ describe('seven-day account finalization and bounded retention', () => {
     const earlyDeletion = new LockedDeletionRepository(pendingDeletion());
     earlyJobs.jobs.push(accountJob());
     await runPrivacyLifecycleWorkerOnce(
-      { deletion: deletionDependencies(earlyDeletion), objects: new MemoryObjectPort(), repository: earlyJobs },
+      {
+        deletion: deletionDependencies(earlyDeletion),
+        objects: new MemoryObjectPort(),
+        repository: earlyJobs,
+      },
       { now: '2030-08-08T11:59:59.999Z', workerId: 'privacy-early' },
     );
     expect(earlyDeletion.state.ordinaryEraseCount).toBe(0);
     expect(earlyJobs.retries).toEqual([
-      { code: 'ACCOUNT_DELETION_NOT_DUE', jobId: 'job-account-finalization', nextAttemptAt: FINALIZE_AT },
+      {
+        code: 'ACCOUNT_DELETION_NOT_DUE',
+        jobId: 'job-account-finalization',
+        nextAttemptAt: FINALIZE_AT,
+      },
     ]);
 
     const canceledJobs = new MemoryJobRepository();
@@ -302,7 +315,11 @@ describe('seven-day account finalization and bounded retention', () => {
     });
     canceledJobs.jobs.push(accountJob());
     await runPrivacyLifecycleWorkerOnce(
-      { deletion: deletionDependencies(canceledDeletion), objects: new MemoryObjectPort(), repository: canceledJobs },
+      {
+        deletion: deletionDependencies(canceledDeletion),
+        objects: new MemoryObjectPort(),
+        repository: canceledJobs,
+      },
       { now: FINALIZE_AT, workerId: 'privacy-canceled' },
     );
     expect(canceledDeletion.state.ordinaryEraseCount).toBe(0);
@@ -321,7 +338,11 @@ describe('seven-day account finalization and bounded retention', () => {
 
     await expect(
       runPrivacyLifecycleWorkerOnce(
-        { deletion: deletionDependencies(deletion), objects: new MemoryObjectPort(), repository: jobs },
+        {
+          deletion: deletionDependencies(deletion),
+          objects: new MemoryObjectPort(),
+          repository: jobs,
+        },
         { now: FINALIZE_AT, workerId: 'privacy-finalize' },
       ),
     ).resolves.toEqual({ claimed: 1, completed: 1, failed: 0, retried: 0 });
@@ -355,7 +376,11 @@ describe('seven-day account finalization and bounded retention', () => {
       },
     });
     await runPrivacyLifecycleWorkerOnce(
-      { deletion: deletionDependencies(deletion), objects: new MemoryObjectPort(), repository: jobs },
+      {
+        deletion: deletionDependencies(deletion),
+        objects: new MemoryObjectPort(),
+        repository: jobs,
+      },
       { now: '2035-01-02T00:00:00.000Z', workerId: 'privacy-retention' },
     );
     expect(jobs.expiredRetention).toEqual(['account-one:billing-invoice-tax']);
@@ -399,7 +424,15 @@ describe('S3 private-object lifecycle adapter', () => {
       },
     });
     expect(commands).toHaveLength(2);
-    expect(commands[0]).toMatchObject({ input: { Bucket: 'diagnostics-private', ChecksumMode: 'ENABLED' } });
-    expect(commands[1]).toMatchObject({ input: { Bucket: 'diagnostics-private', Key: 'diagnostics/case-one/object-one', VersionId: 'version-01' } });
+    expect(commands[0]).toMatchObject({
+      input: { Bucket: 'diagnostics-private', ChecksumMode: 'ENABLED' },
+    });
+    expect(commands[1]).toMatchObject({
+      input: {
+        Bucket: 'diagnostics-private',
+        Key: 'diagnostics/case-one/object-one',
+        VersionId: 'version-01',
+      },
+    });
   });
 });

@@ -20,12 +20,14 @@ export type {
 export type SupportLifecycleTopic =
   | 'support.case-notice'
   | 'support.consent-receipt'
+  | 'support.consent-copy-disposal'
   | 'support.attachment-purge'
   | 'support.case-consent-expiry'
   | 'account.deletion-notice'
   | 'account.deletion-finalize'
   | 'account.deletion-cancel'
-  | 'account.deletion-completed';
+  | 'account.deletion-completed'
+  | 'account.retention-expiry';
 
 export interface SupportLifecycleOutboxJob {
   readonly jobId: string;
