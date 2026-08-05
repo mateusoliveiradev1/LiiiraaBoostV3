@@ -442,3 +442,34 @@ describe('diagnostic.v1 manifest admission', () => {
     }
   });
 });
+
+describe('provider-neutral storage failures', () => {
+  it('maps an object-provider open failure to a bounded public code', async () => {
+    const storage = new MemoryDiagnosticStorage();
+    storage.openField = () => Promise.reject(new Error('S3 NoSuchKey private provider detail'));
+
+    const { result } = await openStream({ storage });
+
+    expect(result).toEqual({ code: 'STORAGE_UNAVAILABLE', ok: false });
+    expect(JSON.stringify(result)).not.toMatch(/s3|nosuchkey/iu);
+  });
+
+  it('maps a provider read failure to storage-error and still disposes temporary state', async () => {
+    const storage = new MemoryDiagnosticStorage();
+    storage.openField = () =>
+      Promise.resolve({
+        descriptor,
+        dispose: () => {
+          storage.disposed = true;
+          return Promise.resolve();
+        },
+        read: () => Promise.reject(new Error('provider request timeout detail')),
+      });
+    const { result } = await openStream({ storage });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(await result.stream.read()).toEqual({ kind: 'aborted', reason: 'storage-error' });
+    expect(storage.disposed).toBe(true);
+  });
+});
