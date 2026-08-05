@@ -1,6 +1,12 @@
 import { spawnSync } from 'node:child_process';
 
-const requested = process.argv.slice(2).filter((argument) => argument !== '--');
+const filterAliases = new Map([
+  ['entitlement-issuance', 'src/modules/entitlements/issuance.test.ts'],
+]);
+const requested = process.argv
+  .slice(2)
+  .filter((argument) => argument !== '--')
+  .map((argument) => filterAliases.get(argument) ?? argument);
 const forwarded =
   requested.includes('--run') || requested.includes('run') ? requested : ['--run', ...requested];
 const pnpmEntry = process.env['npm_execpath'];
