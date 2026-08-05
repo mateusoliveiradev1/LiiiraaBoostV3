@@ -24,7 +24,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "whitespace or JSON reserialization changes signed bytes",
@@ -51,7 +53,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "unknown signing key",
@@ -78,7 +82,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "wrong signing key",
@@ -105,7 +111,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1785931200,
+    "lastTrustedUnixSeconds": 1785927600
   },
   {
     "id": "retired signing key",
@@ -132,7 +140,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1785931200,
+    "lastTrustedUnixSeconds": 1785927600
   },
   {
     "id": "previous key outside declared rotation window",
@@ -159,7 +169,9 @@
       "issuedAt": "2026-08-01T12:00:00.000Z",
       "expiresAt": "2026-08-08T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786104000,
+    "lastTrustedUnixSeconds": 1786017600
   },
   {
     "id": "wrong account binding",
@@ -186,7 +198,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "wrong device binding",
@@ -213,7 +227,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "wrong audience",
@@ -240,7 +256,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "wrong schema version",
@@ -267,7 +285,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786276800
   },
   {
     "id": "expired seven-day envelope",
@@ -294,7 +314,9 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786449601,
+    "lastTrustedUnixSeconds": 1786449600
   },
   {
     "id": "future issuedAt",
@@ -321,7 +343,9 @@
       "issuedAt": "2026-08-12T12:00:00.000Z",
       "expiresAt": "2026-08-19T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786449600,
+    "lastTrustedUnixSeconds": 1786363200
   },
   {
     "id": "trusted-clock rollback",
@@ -348,6 +372,8 @@
       "issuedAt": "2026-08-04T12:00:00.000Z",
       "expiresAt": "2026-08-11T12:00:00.000Z",
       "validitySeconds": 604800
-    }
+    },
+    "nowUnixSeconds": 1786363200,
+    "lastTrustedUnixSeconds": 1786363201
   }
 ]

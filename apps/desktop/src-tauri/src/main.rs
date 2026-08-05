@@ -4,6 +4,8 @@
 mod device_identity;
 mod navigation;
 mod notifications;
+#[allow(dead_code)]
+mod offline_entitlement;
 mod tray;
 mod window;
 

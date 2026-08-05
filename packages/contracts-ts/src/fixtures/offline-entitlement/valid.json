@@ -23,5 +23,7 @@
     "issuedAt": "2026-08-04T12:00:00.000Z",
     "expiresAt": "2026-08-11T12:00:00.000Z",
     "validitySeconds": 604800
-  }
+  },
+  "nowUnixSeconds": 1786449600,
+  "lastTrustedUnixSeconds": 1786363200
 }
