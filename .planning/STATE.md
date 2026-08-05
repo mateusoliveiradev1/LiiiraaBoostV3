@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-35-PLAN.md
-last_updated: "2026-08-05T17:39:09.588Z"
+stopped_at: Completed 04-24-PLAN.md
+last_updated: "2026-08-05T18:05:55.773Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 172
-  percent: 30
+  completed_plans: 173
+  percent: 99
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 32 of 35
+Plan: 25 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
-Progress: [█████████░] 86%
+Progress: [██████████] 99%
 
 ## Performance Metrics
 
@@ -211,6 +211,7 @@ _Updated after plan completion_
 | Phase 04 P21 | 23 min | 1 tasks | 17 files |
 | Phase 04 P35 | 16 min | 1 tasks | 8 files |
 | Phase 04 P23 | 12min | 2 tasks | 14 files |
+| Phase 04 P24 | 18 min | 1 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -660,6 +661,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Keep public, account, and admin on distinct Vercel project identities while routing only same-origin /v1 traffic to the exact staging API.
 - [Phase 04]: Treat provider preview URLs as bounded early-test identities; broader closed beta requires owned origins, callbacks, and email identity.
 - [Phase 04]: Admit only the numbered Internal desktop channel with invited-PC access, exact staging authority, older immutable rollback, and every public trust claim false.
+- [Phase 04]: Bind Phase 4 evidence to Internal build internal-023001, source commit 51770454aa1d17647c4fe734ae1e57f3e0b403b0, the exact OCI digest, and exact generated contract/schema hashes.
+- [Phase 04]: Keep the real-PC matrix empty until real machines produce immutable cells; this truthfully caps the checked-in build at internal staging.
+- [Phase 04]: Permit Phase 4 to grant at most invited-alpha authority while leaving owner review explicitly pending and forbidding frozen-RC or production promotion.
 
 ### Pending Todos
 
@@ -703,6 +707,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:38:50.076Z
-Stopped at: Completed 04-35-PLAN.md
+Last session: 2026-08-05T18:05:55.765Z
+Stopped at: Completed 04-24-PLAN.md
 Resume file: None
