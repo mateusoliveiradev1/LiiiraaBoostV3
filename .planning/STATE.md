@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-09-PLAN.md
-last_updated: "2026-08-05T00:57:43.147Z"
+stopped_at: Completed 04-10-PLAN.md
+last_updated: "2026-08-05T01:21:47.266Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 153
+  completed_plans: 154
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 14 of 35
+Plan: 15 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -192,6 +192,7 @@ _Updated after plan completion_
 | Phase 04 P07 | 18 min | 1 tasks | 13 files |
 | Phase 04 P08 | 18 min | 1 tasks | 5 files |
 | Phase 04 P09 | 21 min | 1 tasks | 9 files |
+| Phase 04 P10 | 19 min | 1 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -577,6 +578,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Bind an admitted diagnostic stream to its opening consent aggregate version. — Any consent version change terminates access and requires fresh admission instead of silently changing scope in place.
 - [Phase 04]: Keep generated consent lifecycle truth separate from case and field access context. — DiagnosticConsentJson remains canonical while the application record supplies D-34 case and explicit field-class scope.
 - [Phase 04]: Fail closed with provider-neutral diagnostic stream errors. — Consent, audit, storage, inspection, UTF-8, JSON, and manifest failures expose no provider detail or diagnostic bytes.
+- [Phase 04]: Encode only allowlisted generated redacted audit fields plus stream, sequence, authentication context, and correction reference; runtime extras never enter evidence.
+- [Phase 04]: Anchor every 15 minutes or 1,000 events to S3 Object Lock compliance storage and require verified read-back before reporting health.
+- [Phase 04]: Separate the asymmetric audit signer role from API and storage authority; provider errors remain behind stable provider-neutral verification codes.
+- [Phase 04]: Use exact bounded retention: billing/tax 5 years after transaction, antifraud/dispute 5 years after closure, security/recovery 2 years after closure, and audit events/anchors 5 years after append.
 
 ### Pending Todos
 
@@ -620,6 +625,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T00:57:43.136Z
-Stopped at: Completed 04-09-PLAN.md
+Last session: 2026-08-05T01:21:47.259Z
+Stopped at: Completed 04-10-PLAN.md
 Resume file: None
