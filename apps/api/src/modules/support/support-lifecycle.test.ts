@@ -216,6 +216,7 @@ describe('support, consent, retention and deletion transactions', () => {
       expect.objectContaining({
         topic: 'support.attachment-purge',
         idempotencyKey: 'case-one:attachments:purge:1',
+        availableAt: '2030-08-31T12:00:00.000Z',
       }),
     );
   });
@@ -283,6 +284,13 @@ describe('support, consent, retention and deletion transactions', () => {
       expect.objectContaining({
         topic: 'support.consent-receipt',
         idempotencyKey: 'consent-revoke:support.consent-receipt',
+      }),
+    );
+    expect(repository.state.outbox).toContainEqual(
+      expect.objectContaining({
+        topic: 'support.consent-copy-disposal',
+        idempotencyKey: 'consent-revoke:support.consent-copy-disposal',
+        availableAt: NOW,
       }),
     );
     expect(
