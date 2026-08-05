@@ -356,6 +356,15 @@ describe('SES sandbox adapter', () => {
     });
     expect(calls).toBe(0);
 
+    await expect(
+      adapter.send({ ...delivery, recipient: RECIPIENT, text: 'Bearer provider-secret' }),
+    ).resolves.toEqual({
+      ok: false,
+      code: 'EMAIL_CONTENT_REJECTED',
+      retryable: false,
+    });
+    expect(calls).toBe(0);
+
     const providerFailure = await adapter.send({ ...delivery, recipient: RECIPIENT });
     expect(providerFailure).toEqual({
       ok: false,

@@ -41,3 +41,9 @@ export type EmailDeliveryResult =
 export interface EmailPort {
   send(delivery: EmailDelivery): Promise<EmailDeliveryResult>;
 }
+
+const sensitiveEmailContent =
+  /(?:bearer\s+|secret|access[_ -]?token|refresh[_ -]?token|password|private[_ -]?key|diagnostic[_ -]?(?:data|content)|provider[_ -]?payload|eyJ[A-Za-z0-9_-]{10,}\.)/iu;
+
+export const isAdmissibleEmailText = (value: string, maximumLength: number): boolean =>
+  value.length > 0 && value.length <= maximumLength && !sensitiveEmailContent.test(value);

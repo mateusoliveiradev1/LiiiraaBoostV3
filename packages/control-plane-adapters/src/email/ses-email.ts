@@ -4,6 +4,7 @@ import type {
   EmailDeliveryResult,
   EmailPort,
 } from '@liiiraa/control-plane-application';
+import { isAdmissibleEmailText } from '@liiiraa/control-plane-application';
 
 export interface SesV2Transport {
   send(command: SendEmailCommand): Promise<Readonly<{ MessageId?: string }>>;
@@ -38,10 +39,8 @@ const providerFailure = (error: unknown): EmailDeliveryResult => {
 const validDelivery = (delivery: EmailDelivery): boolean =>
   idempotencyPattern.test(delivery.idempotencyKey) &&
   emailPattern.test(delivery.recipient) &&
-  delivery.subject.length > 0 &&
-  delivery.subject.length <= 120 &&
-  delivery.text.length > 0 &&
-  delivery.text.length <= 2_000;
+  isAdmissibleEmailText(delivery.subject, 120) &&
+  isAdmissibleEmailText(delivery.text, 2_000);
 
 export const createSesSandboxEmailAdapter = (options: SesSandboxEmailAdapterOptions): EmailPort => {
   const sourceAddress = normalizeAddress(options.sourceAddress);

@@ -1,5 +1,6 @@
 import {
   EMAIL_NOTIFICATION_CLASSES,
+  isAdmissibleEmailText,
   type EmailNotification,
   type EmailNotificationClass,
   type EmailNotificationLocale,
@@ -141,9 +142,6 @@ const TEMPLATES = {
 const classes = new Set<string>(EMAIL_NOTIFICATION_CLASSES);
 const locales = new Set<string>(['en', 'pt-BR']);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
-const sensitivePattern =
-  /(?:bearer\s+|secret|access[_ -]?token|refresh[_ -]?token|password|private[_ -]?key|diagnostic[_ -]?(?:data|content)|provider[_ -]?payload|eyJ[A-Za-z0-9_-]{10,}\.)/iu;
-
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -168,11 +166,7 @@ const isNotification = (value: unknown): value is EmailNotification => {
     return false;
   }
   return entries.every(
-    ([, entry]) =>
-      typeof entry === 'string' &&
-      entry.length > 0 &&
-      entry.length <= 160 &&
-      !sensitivePattern.test(entry),
+    ([, entry]) => typeof entry === 'string' && isAdmissibleEmailText(entry, 160),
   );
 };
 
@@ -183,14 +177,7 @@ export const renderEmailNotification = (notification: unknown): EmailTemplateRes
     subject: definition.subject[notification.locale],
     text: definition.text(notification.locale, notification.values),
   };
-  if (
-    message.subject.length === 0 ||
-    message.subject.length > 120 ||
-    message.text.length === 0 ||
-    message.text.length > 2_000 ||
-    sensitivePattern.test(message.subject) ||
-    sensitivePattern.test(message.text)
-  ) {
+  if (!isAdmissibleEmailText(message.subject, 120) || !isAdmissibleEmailText(message.text, 2_000)) {
     return { ok: false, code: 'EMAIL_CONTENT_REJECTED' };
   }
   return { ok: true, message };
