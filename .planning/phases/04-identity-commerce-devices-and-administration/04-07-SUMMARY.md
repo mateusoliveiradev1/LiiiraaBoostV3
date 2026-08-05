@@ -98,7 +98,9 @@ status: complete
 ## Files Created/Modified
 
 - `packages/contracts-ts/src/offline-entitlement.ts` — Node Ed25519 verifier, shared verdicts, key policy, binding/time checks, and trusted-time port.
-- `packages/contracts-ts/src/fixtures/offline-entitlement/{manifest,valid,invalid}.json` — hashed 14-case corpus and raw key ring consumed by both runtimes.
+- `packages/contracts-ts/src/fixtures/offline-entitlement/manifest.json` — corpus hashes, verdict vocabulary, seven-day constant, and raw key ring.
+- `packages/contracts-ts/src/fixtures/offline-entitlement/valid.json` — canonical exact-byte entitlement accepted through the seven-day boundary.
+- `packages/contracts-ts/src/fixtures/offline-entitlement/invalid.json` — thirteen tamper, key, binding, expiry, version, and rollback rejections.
 - `packages/contracts-ts/src/offline-entitlement.test.ts` — fixture signing/integrity proof and executable 14-case TypeScript parity suite.
 - `apps/desktop/src-tauri/src/offline_entitlement.rs` — strict Dalek verification, generated contract admission, claim mapping, and monotonic clock enforcement.
 - `apps/desktop/src-tauri/tests/offline_entitlement.rs` — executable 14-case Rust parity suite with the same fixture bytes and keys.
