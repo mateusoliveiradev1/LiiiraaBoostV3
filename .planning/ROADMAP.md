@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 11/35 plans executed
+**Plans**: 12/35 plans executed
 
 Plans:
 **Wave 1**
@@ -542,7 +542,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 04-08-PLAN.md — Reconcile adversarial Stripe webhook delivery.
+- [x] 04-08-PLAN.md — Reconcile adversarial Stripe webhook delivery.
 - [ ] 04-09-PLAN.md — Enforce consent-bound diagnostic streaming.
 - [ ] 04-10-PLAN.md — Build tamper-evident audit chains and anchor adapter.
 - [ ] 04-11-PLAN.md — Implement invited identity and backend-owned desktop exchange.
@@ -718,7 +718,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82 | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 11/35 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 12/35 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
