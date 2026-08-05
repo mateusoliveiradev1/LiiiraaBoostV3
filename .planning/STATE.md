@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-12-PLAN.md
-last_updated: "2026-08-05T03:11:12.827Z"
+stopped_at: Completed 04-13-PLAN.md
+last_updated: "2026-08-05T03:44:44.495Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 157
+  completed_plans: 158
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 17 of 35
+Plan: 18 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -196,6 +196,7 @@ _Updated after plan completion_
 | Phase 04 P11 | 24 min | 1 tasks | 12 files |
 | Phase 04 P14 | 16 min | 1 tasks | 9 files |
 | Phase 04 P12 | 20 min | 1 tasks | 10 files |
+| Phase 04 P13 | 26 min | 1 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -596,6 +597,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Serialize recovery mutations per account and revoke affected sessions before projecting restored basic access. — Preserves singular recovery authority and prevents a recovered session from coexisting with affected pre-recovery credentials.
 - [Phase 04]: Store and compare only injected hashes for one-use recovery codes, with atomic consumption inside the recovery transaction. — Prevents plaintext recovery-code persistence and makes concurrent redemption succeed exactly once.
 - [Phase 04]: Keep recovery and contest notifications provider-neutral in the outbox for Plan 04-28 delivery. — Preserves identity transaction ownership while allowing idempotent redacted delivery through the later email worker.
+- [Phase 04]: Checkout intent remains pending; only reconciled provider truth may activate Premium. — Prevents navigation, URL state, or request bodies from becoming billing authority.
+- [Phase 04]: Bind subscription and invoice truth into one provider-customer reconciliation fingerprint. — Duplicate, replayed, and reordered deliveries converge without duplicate subscription, entitlement, audit, or outbox writes.
+- [Phase 04]: Preserve safety, history, warnings, and restoration independently from new Premium action authorization. — Refund, expiry, and disputes restrict future paid actions without deleting recovery capabilities or evidence.
+- [Phase 04]: Use deterministic serializable repositories for local commerce transaction proof. — Keeps verification daemon-free while retaining PostgreSQL atomicity and SKIP LOCKED contracts.
 
 ### Pending Todos
 
@@ -639,6 +644,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T03:10:38.433Z
-Stopped at: Completed 04-12-PLAN.md
+Last session: 2026-08-05T03:44:44.486Z
+Stopped at: Completed 04-13-PLAN.md
 Resume file: None
