@@ -12,6 +12,23 @@ export {
   type ProtectedDeviceEvidence,
 } from './devices/device-evidence.js';
 export {
+  DEVICE_EXCEPTION_VALIDITY_MS,
+  DEVICE_REPLACEMENT_COOLDOWN_MS,
+  DEVICE_STRONG_AUTH_FRESHNESS_MS,
+  decideDeviceBinding,
+  replacementEligibleAt,
+  type ActiveDeviceBinding,
+  type BindDeviceCommand,
+  type DeviceBindingCommand,
+  type DeviceBindingDecision,
+  type DeviceBindingReasonCode,
+  type DeviceBindingState,
+  type DeviceTransferException,
+  type RevalidateDeviceCommand,
+  type RevokeDeviceCommand,
+  type TransferDeviceCommand,
+} from './devices/device-binding.js';
+export {
   AUDIT_GENESIS_HASH,
   appendAuditEvent,
   encodeAuditEvent,

@@ -160,6 +160,36 @@ describe('D-23 through D-28 device binding decisions', () => {
         now: '2030-02-02T12:00:00.001Z',
       }),
     ).toMatchObject({ outcome: 'denied', reason: 'exception-expired' });
+    expect(
+      decide(state, {
+        ...replacement,
+        exception: { ...replacement.exception, reviewed: false },
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'exception-not-reviewed' });
+    expect(
+      decide(state, {
+        ...replacement,
+        exception: { ...replacement.exception, accountId: 'account-attacker' },
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'exception-account-mismatch' });
+    expect(
+      decide(state, {
+        ...replacement,
+        exception: {
+          ...replacement.exception,
+          expiresAt: '2030-02-03T12:00:00.000Z',
+        },
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'exception-invalid-validity-window' });
+    expect(
+      decide(state, {
+        ...replacement,
+        exception: {
+          ...replacement.exception,
+          strongAuthVerifiedAt: '2030-02-02T10:30:00.000Z',
+        },
+      }),
+    ).toMatchObject({ outcome: 'denied', reason: 'strong-auth-required' });
     expect(decide(state, { ...replacement, confirmedByCustomer: false })).toMatchObject({
       outcome: 'denied',
       reason: 'customer-confirmation-required',
@@ -193,11 +223,14 @@ describe('D-23 through D-28 device binding decisions', () => {
     expect(
       decide(state, { kind: 'revalidate', observedEvidence: minorEvidence, now: NOW }),
     ).toMatchObject({ outcome: 'retain', score: 90 });
-    expect(
-      decide(state, { kind: 'revalidate', observedEvidence: evidence('f'), now: NOW }),
-    ).toMatchObject({
-      outcome: 'revalidation-required',
-      reasons: expect.arrayContaining(['component-changed:platform-trust']),
+    const substantial = decide(state, {
+      kind: 'revalidate',
+      observedEvidence: evidence('f'),
+      now: NOW,
     });
+    expect(substantial).toMatchObject({ outcome: 'revalidation-required' });
+    expect(substantial.outcome === 'revalidation-required' && substantial.reasons).toContain(
+      'component-changed:platform-trust',
+    );
   });
 });
