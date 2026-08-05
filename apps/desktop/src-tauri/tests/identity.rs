@@ -3,14 +3,14 @@ mod credential_store;
 #[path = "../src/identity.rs"]
 mod identity;
 
-use std::{cell::RefCell, fs, path::PathBuf};
+use std::{cell::RefCell, fs, io::Write, net::TcpStream, path::PathBuf, thread};
 
 use credential_store::{CredentialStore, CredentialStoreError};
 use identity::{
-    CredentialCustody, DesktopAuthorizationChallenge, DesktopCallbackEvidence,
-    DesktopExchangeResponse, DesktopIdentityError, DesktopSessionContact, DESKTOP_EXCHANGE_PATH,
-    accept_desktop_exchange, begin_desktop_sign_in, complete_desktop_callback,
-    reconcile_authenticated_contact, revoke_desktop_session,
+    CredentialCustody, DESKTOP_EXCHANGE_PATH, DesktopAuthorizationChallenge,
+    DesktopCallbackEvidence, DesktopExchangeResponse, DesktopIdentityError, DesktopSessionContact,
+    LoopbackCallbackListener, accept_desktop_exchange, begin_desktop_sign_in,
+    complete_desktop_callback, reconcile_authenticated_contact, revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
 use serde_json::{Value, json};
@@ -109,7 +109,11 @@ fn crate_root() -> PathBuf {
 fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_evidence() {
     let mut pending = begin_desktop_sign_in(challenge()).expect("API challenge should be admitted");
     assert!(pending.authorization_url().starts_with(ISSUER));
-    assert!(pending.authorization_url().contains("code_challenge_method=S256"));
+    assert!(
+        pending
+            .authorization_url()
+            .contains("code_challenge_method=S256")
+    );
     assert!(!pending.authorization_url().contains("client_secret"));
 
     let exchange = complete_desktop_callback(&mut pending, callback(STATE))
@@ -148,15 +152,53 @@ fn desktop_callback_is_exact_loopback_state_bound_and_one_shot_even_after_reject
 }
 
 #[test]
+fn desktop_callback_listener_binds_ephemeral_loopback_and_closes_after_one_request() {
+    let mut listener = LoopbackCallbackListener::bind().expect("loopback listener should bind");
+    let redirect_uri = listener.redirect_uri().to_owned();
+    let address = redirect_uri
+        .strip_prefix("http://")
+        .and_then(|value| value.strip_suffix("/oauth/callback"))
+        .expect("listener redirect URI should be exact");
+    let address = address.to_owned();
+    let sender = thread::spawn(move || {
+        let mut stream = TcpStream::connect(address).expect("loopback client should connect");
+        write!(
+            stream,
+            "GET /oauth/callback?code=one-shot%2Dauthorization%2Dcode&state={STATE} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n"
+        )
+        .expect("callback request should write");
+    });
+
+    let evidence = listener
+        .receive(ISSUER)
+        .expect("one callback should be admitted");
+    sender.join().expect("callback sender should finish");
+    assert_eq!(evidence.authorization_code, "one-shot-authorization-code");
+    assert_eq!(evidence.state, STATE);
+    assert_eq!(evidence.redirect_uri, redirect_uri);
+    assert_eq!(evidence.remote_address, "127.0.0.1");
+    assert_eq!(
+        listener.receive(ISSUER),
+        Err(DesktopIdentityError::CallbackConsumed),
+    );
+}
+
+#[test]
 fn api_issued_credential_is_custodied_natively_and_never_returned_to_the_renderer() {
     let store = MemoryCredentialStore::default();
     let response = exchange_response("active");
-    assert_eq!(response.credential_custody.kind, CredentialCustody::WindowsCredentialManager);
+    assert_eq!(
+        response.credential_custody.kind,
+        CredentialCustody::WindowsCredentialManager
+    );
 
     let projection = accept_desktop_exchange(&store, response)
         .expect("API-issued credential should enter native custody");
     assert_eq!(*store.writes.borrow(), 1);
-    assert_eq!(store.read_credential().unwrap().as_deref(), Some(API_CREDENTIAL));
+    assert_eq!(
+        store.read_credential().unwrap().as_deref(),
+        Some(API_CREDENTIAL)
+    );
     let renderer_value = serde_json::to_value(projection).expect("projection should serialize");
     assert_eq!(renderer_value["state"], "active");
     assert!(!renderer_value.to_string().contains(API_CREDENTIAL));
@@ -181,7 +223,10 @@ fn next_authenticated_contact_revocation_deletes_only_the_native_credential() {
     assert_eq!(disposition.as_str(), "signed-out");
     assert_eq!(*store.deletes.borrow(), 1);
     assert_eq!(store.read_credential().unwrap(), None);
-    assert_eq!(local_safety_history, ["restore-point-0001", "audit-event-0001"]);
+    assert_eq!(
+        local_safety_history,
+        ["restore-point-0001", "audit-event-0001"]
+    );
 }
 
 #[test]
@@ -215,8 +260,14 @@ fn rust_identity_boundary_has_no_provider_exchange_secret_or_plaintext_store_pat
         "rusqlite",
         "Authorization: Bearer",
     ] {
-        assert!(!identity_source.contains(prohibited), "prohibited native identity surface: {prohibited}");
-        assert!(!credential_source.contains(prohibited), "prohibited credential custody surface: {prohibited}");
+        assert!(
+            !identity_source.contains(prohibited),
+            "prohibited native identity surface: {prohibited}"
+        );
+        assert!(
+            !credential_source.contains(prohibited),
+            "prohibited credential custody surface: {prohibited}"
+        );
     }
     assert!(identity_source.contains(DESKTOP_EXCHANGE_PATH));
     assert!(credential_source.contains("keyring::Entry"));
@@ -231,11 +282,18 @@ fn packaged_windows_credential_manager_round_trip_smoke() {
 
     let account = format!("plan-04-20-smoke-{}", std::process::id());
     let store = WindowsCredentialStore::for_account(account);
-    store.delete_credential().expect("pre-existing smoke credential should clear");
+    store
+        .delete_credential()
+        .expect("pre-existing smoke credential should clear");
     store
         .write_rotated_credential(API_CREDENTIAL)
         .expect("Credential Manager write should succeed");
-    assert_eq!(store.read_credential().unwrap().as_deref(), Some(API_CREDENTIAL));
-    store.delete_credential().expect("smoke credential should clear");
+    assert_eq!(
+        store.read_credential().unwrap().as_deref(),
+        Some(API_CREDENTIAL)
+    );
+    store
+        .delete_credential()
+        .expect("smoke credential should clear");
     assert_eq!(store.read_credential().unwrap(), None);
 }
