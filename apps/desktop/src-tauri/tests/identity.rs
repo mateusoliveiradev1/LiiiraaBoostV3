@@ -9,8 +9,9 @@ use credential_store::{CredentialStore, CredentialStoreError};
 use identity::{
     CredentialCustody, DESKTOP_EXCHANGE_PATH, DesktopAuthorizationChallenge,
     DesktopCallbackEvidence, DesktopExchangeResponse, DesktopIdentityError, DesktopSessionContact,
-    LoopbackCallbackListener, accept_desktop_exchange, begin_desktop_sign_in,
-    complete_desktop_callback, reconcile_authenticated_contact, revoke_desktop_session,
+    LoopbackCallbackListener, SystemBrowserLauncher, accept_desktop_exchange,
+    begin_desktop_sign_in, complete_desktop_callback, reconcile_authenticated_contact,
+    revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
 use serde_json::{Value, json};
@@ -26,6 +27,18 @@ struct MemoryCredentialStore {
     credential: RefCell<Option<String>>,
     writes: RefCell<usize>,
     deletes: RefCell<usize>,
+}
+
+#[derive(Default)]
+struct RecordingSystemBrowser {
+    opened_urls: RefCell<Vec<String>>,
+}
+
+impl SystemBrowserLauncher for RecordingSystemBrowser {
+    fn open(&self, url: &str) -> Result<(), DesktopIdentityError> {
+        self.opened_urls.borrow_mut().push(url.to_owned());
+        Ok(())
+    }
 }
 
 impl CredentialStore for MemoryCredentialStore {
@@ -107,7 +120,11 @@ fn crate_root() -> PathBuf {
 
 #[test]
 fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_evidence() {
-    let mut pending = begin_desktop_sign_in(challenge()).expect("API challenge should be admitted");
+    let browser = RecordingSystemBrowser::default();
+    let mut pending =
+        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
+    assert_eq!(browser.opened_urls.borrow().len(), 1);
+    assert_eq!(browser.opened_urls.borrow()[0], pending.authorization_url());
     assert!(pending.authorization_url().starts_with(ISSUER));
     assert!(
         pending
@@ -132,7 +149,9 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
 
 #[test]
 fn desktop_callback_is_exact_loopback_state_bound_and_one_shot_even_after_rejection() {
-    let mut pending = begin_desktop_sign_in(challenge()).expect("API challenge should be admitted");
+    let browser = RecordingSystemBrowser::default();
+    let mut pending =
+        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
     assert_eq!(
         complete_desktop_callback(&mut pending, callback("wrong-state")),
         Err(DesktopIdentityError::CallbackMismatch),
@@ -142,7 +161,8 @@ fn desktop_callback_is_exact_loopback_state_bound_and_one_shot_even_after_reject
         Err(DesktopIdentityError::CallbackConsumed),
     );
 
-    let mut pending = begin_desktop_sign_in(challenge()).expect("API challenge should be admitted");
+    let mut pending =
+        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
     let mut non_loopback = callback(STATE);
     non_loopback.remote_address = "192.0.2.1".to_owned();
     assert_eq!(
@@ -272,7 +292,8 @@ fn rust_identity_boundary_has_no_provider_exchange_secret_or_plaintext_store_pat
     assert!(identity_source.contains(DESKTOP_EXCHANGE_PATH));
     assert!(credential_source.contains("keyring::Entry"));
     assert!(cargo.contains("keyring = \"=4.1.5\""));
-    assert!(cargo.contains("windows = \"=0.62.2\""));
+    assert!(cargo.contains("windows = { version = \"=0.62.2\""));
+    assert!(identity_source.contains("ShellExecuteW"));
 }
 
 #[cfg(target_os = "windows")]

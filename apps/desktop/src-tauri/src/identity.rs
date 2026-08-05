@@ -19,6 +19,49 @@ const MAXIMUM_PKCE_VALUE_LENGTH: usize = 128;
 const MAXIMUM_AUTHORIZATION_CODE_LENGTH: usize = 2_048;
 const MAXIMUM_CALLBACK_REQUEST_BYTES: usize = 8_192;
 
+pub trait SystemBrowserLauncher {
+    fn open(&self, url: &str) -> Result<(), DesktopIdentityError>;
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct WindowsSystemBrowser;
+
+#[cfg(target_os = "windows")]
+impl SystemBrowserLauncher for WindowsSystemBrowser {
+    fn open(&self, url: &str) -> Result<(), DesktopIdentityError> {
+        use windows::{
+            Win32::UI::{Shell::ShellExecuteW, WindowsAndMessaging::SW_SHOWNORMAL},
+            core::{HSTRING, PCWSTR},
+        };
+
+        let operation = HSTRING::from("open");
+        let url = HSTRING::from(url);
+        // SAFETY: Every pointer is backed by an owned HSTRING for the duration of this call;
+        // the remaining optional ShellExecute parameters are explicitly null.
+        let result = unsafe {
+            ShellExecuteW(
+                None,
+                &operation,
+                &url,
+                PCWSTR::null(),
+                PCWSTR::null(),
+                SW_SHOWNORMAL,
+            )
+        };
+        if result.0 as usize <= 32 {
+            return Err(DesktopIdentityError::SystemBrowserUnavailable);
+        }
+        Ok(())
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+impl SystemBrowserLauncher for WindowsSystemBrowser {
+    fn open(&self, _url: &str) -> Result<(), DesktopIdentityError> {
+        Err(DesktopIdentityError::SystemBrowserUnavailable)
+    }
+}
+
 #[derive(Clone, Eq, PartialEq)]
 pub struct DesktopAuthorizationChallenge {
     pub challenge_id: String,
@@ -225,6 +268,7 @@ impl AuthenticatedContactDisposition {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DesktopIdentityError {
     InvalidAuthorizationChallenge,
+    SystemBrowserUnavailable,
     CallbackUnavailable,
     CallbackConsumed,
     CallbackMismatch,
@@ -236,6 +280,7 @@ impl fmt::Display for DesktopIdentityError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str(match self {
             Self::InvalidAuthorizationChallenge => "desktop authorization could not begin",
+            Self::SystemBrowserUnavailable => "system browser could not open",
             Self::CallbackUnavailable => "desktop authorization callback is unavailable",
             Self::CallbackConsumed | Self::CallbackMismatch => {
                 "desktop authorization callback was rejected"
@@ -396,6 +441,7 @@ fn valid_browser_authorization(challenge: &DesktopAuthorizationChallenge) -> boo
 }
 
 pub fn begin_desktop_sign_in(
+    browser: &impl SystemBrowserLauncher,
     challenge: DesktopAuthorizationChallenge,
 ) -> Result<PendingDesktopSignIn, DesktopIdentityError> {
     if challenge.challenge_id.is_empty()
@@ -410,6 +456,7 @@ pub fn begin_desktop_sign_in(
         return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
     }
 
+    browser.open(&challenge.authorization_url)?;
     Ok(PendingDesktopSignIn {
         challenge,
         callback_consumed: false,
