@@ -6,14 +6,14 @@ current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
 stopped_at: Completed 04-19-PLAN.md
-last_updated: "2026-08-05T07:38:41.695Z"
+last_updated: "2026-08-05T07:57:33.290Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 167
+  completed_plans: 168
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 27 of 35
+Plan: 28 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -206,6 +206,7 @@ _Updated after plan completion_
 | Phase 04 P29 | 13 min | 1 tasks | 10 files |
 | Phase 04 P18 | 31min | 2 tasks | 15 files |
 | Phase 04 P19 | 26min | 2 tasks | 15 files |
+| Phase 04 P20 | 16 min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -639,6 +640,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Only the server session role admits admin routes and records; URL role state remains navigation-only. — Prevents client-controlled role widening before privileged projection.
 - [Phase 04]: Production and preview admin composition are explicit so deterministic fixtures cannot become production authority. — Preserves visual regression fixtures while keeping production composition server-backed.
 - [Phase 04]: Diagnostic consent is a live capability: revoke or expiry aborts requests and clears data while immutable audit evidence remains. — Bounds diagnostic disclosure to active consent without deleting accountability evidence.
+- [Phase 04]: Preserve API-owned provider PKCE and exchange authority; Rust validates the API-issued S256 challenge and one-shot callback without receiving a provider verifier or secret.
+- [Phase 04]: Consume the loopback listener before callback validation so rejected first requests cannot be replayed as state guesses.
+- [Phase 04]: Delete Windows Credential Manager custody on revoked or expired authenticated contact without touching local safety data.
 
 ### Pending Todos
 
@@ -682,6 +686,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T07:38:41.688Z
+Last session: 2026-08-05T07:57:14.550Z
 Stopped at: Completed 04-19-PLAN.md
 Resume file: None
