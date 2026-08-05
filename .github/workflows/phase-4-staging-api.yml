@@ -2,6 +2,12 @@ name: Phase 4 staging API artifact
 
 on:
   workflow_dispatch:
+    inputs:
+      build_only:
+        description: Publish and verify the immutable image without deploying Render
+        required: true
+        default: true
+        type: boolean
   push:
     branches:
       - main
@@ -105,7 +111,7 @@ jobs:
 
   deploy:
     name: Deploy tested digest to protected staging
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && inputs.build_only != true
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 15

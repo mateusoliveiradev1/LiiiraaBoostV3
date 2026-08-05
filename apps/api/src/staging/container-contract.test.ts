@@ -14,7 +14,7 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('USER node');
     expect(dockerfile).toContain('HEALTHCHECK');
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
-    expect(dockerfile).toContain('apps/api/src/server.ts');
+    expect(dockerfile).toContain('apps/api/src/staging/main.ts');
   });
 
   it('excludes secrets, generated desktop artifacts, and unrelated build output', () => {
@@ -39,6 +39,8 @@ describe('daemon-free OCI artifact contract', () => {
   });
 
   it('builds once, attests and scans the digest, then deploys that same digest', () => {
+    expect(workflow).toContain('build_only:');
+    expect(workflow).toContain('inputs.build_only != true');
     expect(workflow).toContain(
       'outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true',
     );

@@ -2,12 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { buildApp, REQUIRED_API_MODULES, type ApiModuleRegistrar } from '../app.js';
 import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.js';
-import {
-  issueInvitation,
-  redeemInvitation,
-  type StagingInvitation,
-} from './invitations.js';
+import { issueInvitation, redeemInvitation, type StagingInvitation } from './invitations.js';
 import { seedSyntheticStaging } from './seed.js';
+import { buildStagingInfrastructureApp } from './infrastructure-server.js';
 
 const baseEnvironment = (): ApiEnvironmentInput => ({
   STAGING_DATABASE_URL:
@@ -136,6 +133,23 @@ describe('synthetic seed and invitation admission', () => {
 });
 
 describe('Fastify staging composition', () => {
+  it('starts the bounded provider preview entrypoint without claiming live authority', async () => {
+    const app = await buildStagingInfrastructureApp(baseEnvironment());
+
+    await expect(app.inject({ method: 'GET', url: '/health' })).resolves.toMatchObject({
+      statusCode: 200,
+    });
+    const readiness = await app.inject({ method: 'GET', url: '/ready' });
+    expect(readiness.statusCode).toBe(200);
+    expect(readiness.json()).toMatchObject({
+      authorityConnected: false,
+      buildId: 'phase-04-22-test-0001',
+      mode: 'bounded-provider-preview',
+      ready: true,
+    });
+    await app.close();
+  });
+
   it('registers every authority module and exposes health/readiness under Node', async () => {
     const registered: string[] = [];
     const modules: ApiModuleRegistrar[] = REQUIRED_API_MODULES.map((name) => ({
