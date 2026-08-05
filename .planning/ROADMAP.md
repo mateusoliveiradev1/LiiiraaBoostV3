@@ -279,36 +279,36 @@ Plans:
 - [x] 03-02-PLAN.md — Reserve and mutation-test web architecture boundaries
 - [x] 03-03-PLAN.md — Define canonical TypeSpec web contracts
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** _(blocked on Wave 1 completion)_
 
 - [x] 03-04-PLAN.md — Scaffold web-core and web-preview packages
 - [x] 03-05-PLAN.md — Scaffold web-features and web-evidence packages
 - [x] 03-09-PLAN.md — Generate web schema and cross-language transports
 
-**Wave 3** *(blocked on Wave 2 completion)*
+**Wave 3** _(blocked on Wave 2 completion)_
 
 - [x] 03-06-PLAN.md — Scaffold the independent public application
 - [x] 03-07-PLAN.md — Scaffold the independent account preview application
 - [x] 03-08-PLAN.md — Scaffold the isolated admin preview application
 - [x] 03-10-PLAN.md — Runtime-validate web documents in TypeScript and Rust
 
-**Wave 4** *(blocked on Wave 3 completion)*
+**Wave 4** _(blocked on Wave 3 completion)_
 
 - [x] 03-11-PLAN.md — Resolve lockfile and activate the live web workspace
 
-**Wave 5** *(blocked on Wave 4 completion)*
+**Wave 5** _(blocked on Wave 4 completion)_
 
 - [x] 03-12-PLAN.md — Build the canonical route and safe-link authority
 
-**Wave 6** *(blocked on Wave 5 completion)*
+**Wave 6** _(blocked on Wave 5 completion)_
 
 - [x] 03-13-PLAN.md — Build W01-W18 scenarios and no-change adapter
 
-**Wave 7** *(blocked on Wave 6 completion)*
+**Wave 7** _(blocked on Wave 6 completion)_
 
 - [x] 03-14-PLAN.md — Establish Wave 0 verification and evidence harnesses
 
-**Wave 8** *(blocked on Wave 7 completion)*
+**Wave 8** _(blocked on Wave 7 completion)_
 
 - [x] 03-15-PLAN.md — Build the static public security shell
 - [x] 03-16-PLAN.md — Build the account security and preview shell
@@ -316,13 +316,13 @@ Plans:
 - [x] 03-18-PLAN.md — Build shared accessible web components and visual language
 - [x] 03-19-PLAN.md — Build content admission and public-only search
 
-**Wave 9** *(blocked on Wave 8 completion)*
+**Wave 9** _(blocked on Wave 8 completion)_
 
 - [x] 03-20-PLAN.md — Compose the Command Runway and Evidence Stage Home
 - [x] 03-22-PLAN.md — Build versioned documentation resolution and deep links
 - [x] 03-26-PLAN.md — Build guarded account/admin preview workflows
 
-**Wave 10** *(blocked on Wave 9 completion)*
+**Wave 10** _(blocked on Wave 9 completion)_
 
 - [x] 03-21-PLAN.md — Complete public catalog, plans, policies, status, and errors
 - [x] 03-23-PLAN.md — Render the complete versioned documentation experience
@@ -330,143 +330,143 @@ Plans:
 - [x] 03-27-PLAN.md — Complete every account and support preview
 - [x] 03-28-PLAN.md — Complete role, consent, audit, and admin previews
 
-**Wave 11** *(blocked on Wave 10 completion)*
+**Wave 11** _(blocked on Wave 10 completion)_
 
 - [x] 03-25-PLAN.md — Render release integrity and gated download journeys
 
-**Wave 12** *(blocked on Wave 11 completion)*
+**Wave 12** _(blocked on Wave 11 completion)_
 
 - [x] 03-29-PLAN.md — Capture provenance-bound real desktop screenshots
 
-**Wave 13** *(blocked on Wave 12 completion)*
+**Wave 13** _(blocked on Wave 12 completion)_
 
 - [x] 03-30-PLAN.md — Prove W01-W18 E2E, visual, accessibility, security, performance
 
-**Wave 14** *(blocked on Wave 13 completion)*
+**Wave 14** _(blocked on Wave 13 completion)_
 
 - [x] 03-31-PLAN.md — Enforce atomic publication and safe rollback
 
-**Wave 15** *(blocked on Wave 14 completion)*
+**Wave 15** _(blocked on Wave 14 completion)_
 
 - [x] 03-32-PLAN.md — Promote final evidence and recursive Phase 3 acceptance
 
-**Wave 16** *(verification gap closure; blocked on Plan 03-32)*
+**Wave 16** _(verification gap closure; blocked on Plan 03-32)_
 
 - [x] 03-33-PLAN.md — Complete localized account 403/404/410/500 routing and recovery
 - [x] 03-34-PLAN.md — Complete localized admin 410 routing and recovery
 
-**Wave 17** *(blocked on Wave 16 completion)*
+**Wave 17** _(blocked on Wave 16 completion)_
 
 - [x] 03-35-PLAN.md — Prove every declared error route through browser-observed W17 evidence
 
-**Wave 18** *(blocked on Wave 17 completion)*
+**Wave 18** _(blocked on Wave 17 completion)_
 
 - [x] 03-36-PLAN.md — Bind final Phase 3 acceptance to executable route-reachability evidence (completed 2026-07-31)
 
-**Wave 19** *(visual gap closure; blocked on Plan 03-36)*
+**Wave 19** _(visual gap closure; blocked on Plan 03-36)_
 
 - [x] 03-37-PLAN.md — Extract approved shared identity and enforce app-local visual evidence gates
 
-**Wave 20** *(blocked on Plan 03-37)*
+**Wave 20** _(blocked on Plan 03-37)_
 
 - [x] 03-38-PLAN.md — Redesign the public shell and artifact-led Home
 
-**Wave 21** *(blocked on Plan 03-38)*
+**Wave 21** _(blocked on Plan 03-38)_
 
 - [x] 03-39-PLAN.md — Redesign the account shell and responsibility workspaces
 
-**Wave 22** *(blocked on Plan 03-39)*
+**Wave 22** _(blocked on Plan 03-39)_
 
 - [x] 03-40-PLAN.md — Repair dedicated admin origin, canonical entry, and fail-closed localized denial
 
-**Wave 23** *(blocked on Plan 03-40)*
+**Wave 23** _(blocked on Plan 03-40)_
 
 - [x] 03-41-PLAN.md — Redesign admin role landing and representative workspace
 
-**Wave 24** *(blocked on Plan 03-41)*
+**Wave 24** _(blocked on Plan 03-41)_
 
 - [x] 03-42-PLAN.md — Rebaseline public W01-W09, W17, and G01-G02 evidence
 
-**Wave 25** *(blocked on Plan 03-42)*
+**Wave 25** _(blocked on Plan 03-42)_
 
 - [x] 03-43-PLAN.md — Rebaseline account W10-W13, W18, and G03-G05 evidence
 
-**Wave 26** *(blocked on Plan 03-43)*
+**Wave 26** _(blocked on Plan 03-43)_
 
 - [x] 03-44-PLAN.md — Rebaseline admin W14-W16 and G06-G07 evidence
 
-**Wave 27** *(second visual-rejection gap closure; blocked on Plan 03-44)*
+**Wave 27** _(second visual-rejection gap closure; blocked on Plan 03-44)_
 
 - [x] 03-47-PLAN.md — Prove development-only Turbopack CSP compatibility on all three surfaces
 - [x] 03-48-PLAN.md — Add canonical active-route and route-preserving locale foundations
 
-**Wave 28** *(blocked on Plan 03-48)*
+**Wave 28** _(blocked on Plan 03-48)_
 
 - [x] 03-49-PLAN.md — Author the premium public application shell and artifact-led Home
 - [x] 03-50-PLAN.md — Author the premium account shell and compact responsibility navigation
 - [x] 03-51-PLAN.md — Author the premium admin shell and compact role/task navigation
 
-**Wave 29** *(blocked on Plans 03-47 and 03-49 through 03-51)*
+**Wave 29** _(blocked on Plans 03-47 and 03-49 through 03-51)_
 
 - [x] 03-52-PLAN.md — Prove cross-surface behavior and rebaseline all W01-W18/G01-G07 evidence
 
-**Wave 30** *(third visual-rejection gap closure; blocked on Plan 03-52)*
+**Wave 30** _(third visual-rejection gap closure; blocked on Plan 03-52)_
 
 - [x] 03-53-PLAN.md — Establish exact Cobalt Ignition Bay tokens, typography, local fonts, and contrast gates
 
-**Wave 31** *(blocked on Plan 03-53)*
+**Wave 31** _(blocked on Plan 03-53)_
 
 - [x] 03-54-PLAN.md — Build the shared material, component-state, and workspace vocabulary
 
-**Wave 32** *(blocked on Plan 03-54; parallel surface shells)*
+**Wave 32** _(blocked on Plan 03-54; parallel surface shells)_
 
 - [x] 03-55-PLAN.md — Author the branded public shell and centered cinematic product hero
 - [x] 03-57-PLAN.md — Author the premium account shell and responsive responsibility navigation
 - [x] 03-59-PLAN.md — Author the premium admin shell and role-scoped responsive navigation
 
-**Wave 33** *(blocked on each owning Wave 32 shell; parallel surface content)*
+**Wave 33** _(blocked on each owning Wave 32 shell; parallel surface content)_
 
 - [x] 03-56-PLAN.md — Compose public long-form movements and authored documentation/release rhythm
 - [x] 03-58-PLAN.md — Compose dense account responsibility workspaces and complete preview states
 - [x] 03-60-PLAN.md — Compose focal admin decision workspaces, queues, consent, and audit context
 
-**Wave 34** *(blocked on Plans 03-56, 03-58, and 03-60)*
+**Wave 34** _(blocked on Plans 03-56, 03-58, and 03-60)_
 
 - [x] 03-61-PLAN.md — Encode exact candidate manifest, geometry, WCAG, locale, CSP, and truth gates
 
-**Wave 35** *(blocked on Plan 03-61)*
+**Wave 35** _(blocked on Plan 03-61)_
 
 - [x] 03-62-PLAN.md — Archive rejected G01/G04/G06 and perform one mechanical 25-candidate update
 
-**Wave 36** *(blocked on Plan 03-62; parallel surface inspections)*
+**Wave 36** _(blocked on Plan 03-62; parallel surface inspections)_
 
 - [x] 03-63-PLAN.md — Inspect twelve public candidates at original resolution
 - [x] 03-64-PLAN.md — Inspect eight account candidates at original resolution
 - [x] 03-65-PLAN.md — Inspect five admin candidates at original resolution
 
-**Wave 37** *(blocked on Plans 03-63 through 03-65)*
+**Wave 37** _(blocked on Plans 03-63 through 03-65)_
 
 - [x] 03-66-PLAN.md — Aggregate the exact inspected set and pass no-update replay/build/regression
 
-**Wave 38** *(launch-ready contract expansion; blocked on Plan 03-66)*
+**Wave 38** _(launch-ready contract expansion; blocked on Plan 03-66)_
 
 - [x] 03-67-PLAN.md — Lock final commercial, lifecycle, route, and editorial contracts
 
-**Wave 39** *(blocked on Plan 03-67; parallel public acquisition and service content)*
+**Wave 39** _(blocked on Plan 03-67; parallel public acquisition and service content)_
 
 - [x] 03-68-PLAN.md — Rebuild Home and public acquisition routes as the final sales experience
 - [x] 03-69-PLAN.md — Finish documentation, download, releases, status, support, policy, and error routes
 
-**Wave 40** *(blocked on Plan 03-67; parallel product surfaces)*
+**Wave 40** _(blocked on Plan 03-67; parallel product surfaces)_
 
 - [x] 03-70-PLAN.md — Finish authentication, onboarding, and the complete customer account experience
 - [x] 03-71-PLAN.md — Finish the isolated role-scoped administrative experience
 
-**Wave 41** *(blocked on Plans 03-68 through 03-71)*
+**Wave 41** _(blocked on Plans 03-68 through 03-71)_
 
 - [x] 03-72-PLAN.md — Consolidate every canonical route, state, locale, breakpoint, and final evidence candidate
 
-**Wave 42** *(parallel additive launch-readiness slices; each blocked on Plan 03-72)*
+**Wave 42** _(parallel additive launch-readiness slices; each blocked on Plan 03-72)_
 
 - [x] 03-73-PLAN.md — Recompose the flagship Home around conversion, real product proof, and non-fabrication
 - [x] 03-74-PLAN.md — Redesign account navigation and Home around coherent customer goals
@@ -474,28 +474,28 @@ Plans:
 - [x] 03-77-PLAN.md — Add the truthful About route and complete utility/trust footer
 - [x] 03-78-PLAN.md — Complete bilingual public legal, privacy, security, storage, and disclosure content
 
-**Wave 43** *(dependency-ordered account/admin completion)*
+**Wave 43** _(dependency-ordered account/admin completion)_
 
 - [x] 03-79-PLAN.md — Deliver authenticated privacy consent and data-rights workflows
 - [x] 03-80-PLAN.md — Add contextual admin evidence and zoom-safe high-risk review
 
-**Wave 44** *(blocked on Plans 03-73 through 03-80)*
+**Wave 44** _(blocked on Plans 03-73 through 03-80)_
 
 - [x] 03-76-PLAN.md — Harden the D-87–D-110 matrix and deterministic all-route candidate identities
 
-**Wave 45** *(blocked on Plan 03-76)*
+**Wave 45** _(blocked on Plan 03-76)_
 
 - [x] 03-81-PLAN.md — Recapture and inspect every canonical route in both locales and all required widths
 
-**Wave 46** *(blocked on Plan 03-81)*
+**Wave 46** _(blocked on Plan 03-81)_
 
 - [x] 03-82-PLAN.md — Pass clean builds/regressions and bind the pending-human-review handoff
 
-**Wave 47** *(blocked on Plan 03-82)*
+**Wave 47** _(blocked on Plan 03-82)_
 
 - [x] 03-45-PLAN.md — Run complete route-matrix preflight and blocking literal human visual review
 
-**Wave 48** *(blocked on approved Plan 03-45)*
+**Wave 48** _(blocked on approved Plan 03-45)_
 
 - [x] 03-46-PLAN.md — Promote the complete approved route evidence contract and pass final recursive verification
 
@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 33/35 plans executed
+**Plans**: 33/40 plans executed
 
 Plans:
 **Wave 1**
@@ -530,17 +530,17 @@ Plans:
 - [x] 04-33-PLAN.md — Create provider-boundary Wave 1 RED witnesses after scaffold.
 - [x] 04-34-PLAN.md — Create browser Wave 0 RED witnesses.
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** _(blocked on Wave 1 completion)_
 
 - [x] 04-05-PLAN.md — Terminate Better Auth uncertainty before production adoption.
 - [x] 04-06-PLAN.md — Prove privacy-preserving tolerant device evidence.
 
-**Wave 3** *(blocked on Wave 2 completion)*
+**Wave 3** _(blocked on Wave 2 completion)_
 
 - [x] 04-04-PLAN.md — Install approved production dependencies and migrate PostgreSQL.
 - [x] 04-07-PLAN.md — Prove exact-byte seven-day entitlement verification.
 
-**Wave 4** *(blocked on Wave 3 completion)*
+**Wave 4** _(blocked on Wave 3 completion)_
 
 - [x] 04-08-PLAN.md — Reconcile adversarial Stripe webhook delivery.
 - [x] 04-09-PLAN.md — Enforce consent-bound diagnostic streaming.
@@ -548,14 +548,14 @@ Plans:
 - [x] 04-11-PLAN.md — Implement invited identity and backend-owned desktop exchange.
 - [x] 04-14-PLAN.md — Enforce one-PC binding and transfer transactions.
 
-**Wave 5** *(blocked on Wave 4 completion)*
+**Wave 5** _(blocked on Wave 4 completion)_
 
 - [x] 04-12-PLAN.md — Implement MFA and reviewed recovery holds.
 - [x] 04-13-PLAN.md — Implement reconciled subscription authority.
 - [x] 04-15-PLAN.md — Implement support, consent, retention, and deletion commands.
 - [x] 04-30-PLAN.md — Schedule and verify immutable audit anchors.
 
-**Wave 6** *(blocked on Wave 5 completion)*
+**Wave 6** _(blocked on Wave 5 completion)_
 
 - [x] 04-16-PLAN.md — Enforce isolated role-specific administration.
 - [x] 04-17-PLAN.md — Project version-aware shared account truth.
@@ -563,31 +563,51 @@ Plans:
 - [x] 04-28-PLAN.md — Deliver required notifications through SES sandbox.
 - [x] 04-29-PLAN.md — Execute attachment and account-deletion lifecycle jobs.
 
-**Wave 7** *(blocked on Wave 6 completion)*
+**Wave 7** _(blocked on Wave 6 completion)_
 
 - [x] 04-18-PLAN.md — Activate the real account application.
 - [x] 04-19-PLAN.md — Activate the isolated real admin application.
 - [x] 04-20-PLAN.md — Activate native desktop identity and credential custody.
 - [x] 04-22-PLAN.md — Deploy the invitation-only staging control plane.
 
-**Wave 8** *(blocked on Wave 7 completion)*
+**Wave 8** _(blocked on Wave 7 completion)_
 
 - [x] 04-21-PLAN.md — Enforce start/continue/safety Premium boundaries.
 - [x] 04-35-PLAN.md — Activate desktop account synchronization and real account UI.
 
-**Wave 9** *(blocked on Wave 8 completion)*
+**Wave 9** _(blocked on Wave 8 completion)_
 
 - [x] 04-23-PLAN.md — Deploy isolated surfaces and Internal desktop channel.
 
-**Wave 10** *(blocked on Wave 9 completion)*
+**Wave 10** _(blocked on Wave 9 completion)_
 
 - [x] 04-24-PLAN.md — Evaluate immutable build-bound evidence.
 
-**Wave 11** *(blocked on Wave 10 completion)*
+**Wave 11** _(blocked on Wave 10 completion)_
+
+- [ ] 04-36-PLAN.md — Replace the staging identity preview with persistent invitation-only authentication.
+
+**Wave 12** _(blocked on Wave 11 completion)_
+
+- [ ] 04-37-PLAN.md — Connect account signup, login, session, logout, and account chrome to real authority.
+
+**Wave 13** _(blocked on Wave 12 completion)_
+
+- [ ] 04-38-PLAN.md — Connect native desktop PKCE, system browser login, and Credential Manager custody.
+
+**Wave 14** _(blocked on Wave 12 completion)_
+
+- [ ] 04-39-PLAN.md — Replace the deployed admin preview with persistent role-gated authority.
+
+**Wave 15** _(blocked on Waves 13 and 14 completion)_
+
+- [ ] 04-40-PLAN.md — Provision three secure invitations, deploy real staging, and validate web/desktop auth.
+
+**Wave 16** _(blocked on Wave 15 completion)_
 
 - [ ] 04-25-PLAN.md — Perform clean-Windows, consent, and rollback UAT.
 
-**Wave 12** *(blocked on Wave 11 completion)*
+**Wave 17** _(blocked on Wave 16 completion)_
 
 - [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence.
 
@@ -717,8 +737,8 @@ Plans:
 | -------------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
-| 3. Complete Web Experience                         | 82/82 | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 33/35 | In Progress|  |
+| 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
+| 4. Identity, Commerce, Devices, and Administration | 33/35          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
