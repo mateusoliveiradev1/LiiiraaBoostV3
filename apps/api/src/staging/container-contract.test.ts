@@ -59,6 +59,8 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('environment: staging-api');
     expect(workflow).toContain('autoDeploy: false');
     expect(workflow).toContain('run: pnpm --filter @liiiraa/api db:migrate');
+    expect(workflow).toContain('Install exact Node.js for migration promotion');
+    expect(workflow).toContain('Install frozen migration dependencies without lifecycle scripts');
     expect(workflow).toContain('RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}');
     expect(workflow).toContain('services/$RENDER_SERVICE_ID/deploys');
     expect(workflow).toContain('for attempt in $(seq 1 30)');

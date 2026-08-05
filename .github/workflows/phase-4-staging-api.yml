@@ -137,6 +137,16 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - name: Install exact Node.js for migration promotion
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm for migration promotion
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist before migration installation
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen migration dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Require the tested digest and manual Render policy
         env:
           IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
