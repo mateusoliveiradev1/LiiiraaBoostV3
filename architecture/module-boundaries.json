@@ -267,6 +267,15 @@
       "status": "active"
     },
     {
+      "id": "phase4-evidence",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/phase4-evidence"],
+      "publicRoots": ["tooling/phase4-evidence/src/evaluate.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
       "id": "architecture-tests",
       "owner": "architecture",
       "layer": "tooling",

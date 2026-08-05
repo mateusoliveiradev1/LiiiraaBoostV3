@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "build": {
+    "commit": "51770454aa1d17647c4fe734ae1e57f3e0b403b0",
+    "ociDigest": "sha256:8f9aca95cc177780961812c2b984c9e24c04750155754f082072e463001c4ec2",
+    "desktopBuildId": "internal-023001",
+    "contractHash": "3b74af5bd2fef336e455b4e98947864a4fae42455c7cce480ef257c5241a67e3",
+    "schemaHash": "8f65790d1d8a88ad52ec27a5bde93095133ea86240f9e364b7d7ad98d68c299c"
+  },
+  "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+  "artifacts": [
+    {
+      "id": "contract-openapi",
+      "path": "contracts/generated/http/openapi.json",
+      "sha256": "3b74af5bd2fef336e455b4e98947864a4fae42455c7cce480ef257c5241a67e3",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "control-plane-schema",
+      "path": "contracts/generated/control-plane/v1/control-plane-document.schema.json",
+      "sha256": "8f65790d1d8a88ad52ec27a5bde93095133ea86240f9e364b7d7ad98d68c299c",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-web-04",
+      "path": "apps/api/src/staging/staging-config.test.ts",
+      "sha256": "fa5bffbcc72d26065d34f3146166f8ddbaf7ab7109310d850f4c7e0771287ea0",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-web-05",
+      "path": "apps/api/src/modules/devices/device-concurrency.test.ts",
+      "sha256": "12f9993d15ae24a6fae6faf6046ffb8d301a4939b4ee70394637f425c8c0d596",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-web-06",
+      "path": "apps/api/src/modules/admin/admin-authorization.test.ts",
+      "sha256": "32370b4fd0e092a9bf9c89496ac7652124f0180039e3aa4c4bff19cebde041fc",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-web-07",
+      "path": "apps/api/src/modules/support/consent-stream.test.ts",
+      "sha256": "db3bbd1c30eba2277d2a5f8b51c783c91d62a4342338c721335c62caa9c9b9d0",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-01",
+      "path": "apps/api/src/modules/identity/identity-conformance.test.ts",
+      "sha256": "818fc5bfc3067a2d79060f6dbfe3b48cc2105c36a80cbe3965854631b703c5aa",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-02",
+      "path": "apps/api/src/modules/identity/recovery.test.ts",
+      "sha256": "e62b69706889863a35d63b9efb4286a5eda7f7ed7b1dfdfc841c7f930665b249",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-03",
+      "path": "apps/api/src/modules/admin/admin-authorization.test.ts",
+      "sha256": "32370b4fd0e092a9bf9c89496ac7652124f0180039e3aa4c4bff19cebde041fc",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-04",
+      "path": "apps/api/src/modules/devices/device-concurrency.test.ts",
+      "sha256": "12f9993d15ae24a6fae6faf6046ffb8d301a4939b4ee70394637f425c8c0d596",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-05",
+      "path": "packages/control-plane-domain/src/devices/device-evidence.test.ts",
+      "sha256": "c24b0439186833f253e1d269556bc5501004c754397b539350a41e3ff8a5da5b",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-06",
+      "path": "packages/contracts-ts/src/offline-entitlement.test.ts",
+      "sha256": "c59a03ef75a903f9c3f6a60fda7d97bd35f903fde121d1fc53b606832173c912",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-07",
+      "path": "packages/control-plane-domain/src/entitlements/paid-action-policy.test.ts",
+      "sha256": "62cbefae94e5119cca37e95c5a0ba7d7eac3833a885eef5705ed7e150b12c67c",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-08",
+      "path": "apps/desktop/tests/browser/post-premium-safety.spec.ts",
+      "sha256": "14d87ab9eebbabd1989221e25fa0c6966dcc11cb35b52c28d0e92e0e6e4bde28",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "requirement-iden-09",
+      "path": "packages/control-plane-adapters/src/commerce/stripe-webhook.permutation.test.ts",
+      "sha256": "4cdabee5e1d031efbfe55d75ad705241b43c1bee0df5cf23fbe788e4a6ed7855",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-security",
+      "path": "apps/api/src/modules/admin/admin-authorization.test.ts",
+      "sha256": "32370b4fd0e092a9bf9c89496ac7652124f0180039e3aa4c4bff19cebde041fc",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-privacy",
+      "path": "apps/api/src/modules/support/consent-stream.test.ts",
+      "sha256": "db3bbd1c30eba2277d2a5f8b51c783c91d62a4342338c721335c62caa9c9b9d0",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-billing",
+      "path": "apps/api/src/modules/commerce/reconciliation.test.ts",
+      "sha256": "7111a67b2adace744e1a8c77afa7316f9485d2ea8ca2704337bacdb23449e309",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-licensing",
+      "path": "apps/api/src/modules/entitlements/issuance.test.ts",
+      "sha256": "965b5a32b0ac7f505673d03fcec6a669af2abc24e276351bdf7404dbefde34d0",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-data",
+      "path": "packages/control-plane-adapters/src/postgres/migrations.test.ts",
+      "sha256": "3f57717f05139dc2746f172cbb5d2909e6323fb016b847b28b9a00af9a5d1ebd",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-restoration",
+      "path": "apps/desktop/tests/browser/post-premium-safety.spec.ts",
+      "sha256": "14d87ab9eebbabd1989221e25fa0c6966dcc11cb35b52c28d0e92e0e6e4bde28",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-signing",
+      "path": "apps/desktop/src/internal-channel.test.ts",
+      "sha256": "feecbd70db6db9486706ee95658ee1083b446a93f9e36a20c39b7ebb36325afb",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-update",
+      "path": "apps/desktop/src/internal-channel.test.ts",
+      "sha256": "feecbd70db6db9486706ee95658ee1083b446a93f9e36a20c39b7ebb36325afb",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-accessibility",
+      "path": "tooling/web-evidence/tests/account-authority.spec.ts",
+      "sha256": "d2ebcd1f3924f9319f79f26c5393eeab20f1ed93dd3311b7f1364b55f28d09d2",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "gate-compatibility",
+      "path": "apps/desktop/staging/internal-channel.json",
+      "sha256": "cf04781e403a0300e8a0f6c83aba229de76a84844f962cf51c91655e96c90276",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    },
+    {
+      "id": "stage-preview",
+      "path": ".github/workflows/phase-4-surfaces.yml",
+      "sha256": "0bf8556931be87e395a4340769f143701845ccc274dd3db632b5980beb21079f",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f"
+    }
+  ],
+  "requirements": [
+    { "id": "WEB-04", "evidenceId": "requirement-web-04" },
+    { "id": "WEB-05", "evidenceId": "requirement-web-05" },
+    { "id": "WEB-06", "evidenceId": "requirement-web-06" },
+    { "id": "WEB-07", "evidenceId": "requirement-web-07" },
+    { "id": "IDEN-01", "evidenceId": "requirement-iden-01" },
+    { "id": "IDEN-02", "evidenceId": "requirement-iden-02" },
+    { "id": "IDEN-03", "evidenceId": "requirement-iden-03" },
+    { "id": "IDEN-04", "evidenceId": "requirement-iden-04" },
+    { "id": "IDEN-05", "evidenceId": "requirement-iden-05" },
+    { "id": "IDEN-06", "evidenceId": "requirement-iden-06" },
+    { "id": "IDEN-07", "evidenceId": "requirement-iden-07" },
+    { "id": "IDEN-08", "evidenceId": "requirement-iden-08" },
+    { "id": "IDEN-09", "evidenceId": "requirement-iden-09" }
+  ],
+  "gateHistory": [
+    {
+      "sequence": 1,
+      "gate": "security",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-security",
+      "previousHash": null,
+      "recordHash": "f88c8b43726f6ce738cc5c0314c297bcd3e68070a72b5c640769834db73e2243"
+    },
+    {
+      "sequence": 2,
+      "gate": "privacy",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-privacy",
+      "previousHash": "f88c8b43726f6ce738cc5c0314c297bcd3e68070a72b5c640769834db73e2243",
+      "recordHash": "85a824a7414fdae8a221d0445a4252cd9b416153e1e9681ea3ef9b08b6291e63"
+    },
+    {
+      "sequence": 3,
+      "gate": "billing",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-billing",
+      "previousHash": "85a824a7414fdae8a221d0445a4252cd9b416153e1e9681ea3ef9b08b6291e63",
+      "recordHash": "cf2e0cbe89e19de5f07bd87d58e061809a6bc6d428176ca4f56d1e6984a91985"
+    },
+    {
+      "sequence": 4,
+      "gate": "licensing",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-licensing",
+      "previousHash": "cf2e0cbe89e19de5f07bd87d58e061809a6bc6d428176ca4f56d1e6984a91985",
+      "recordHash": "1dc777ed2904cf970bbce3070f35a9319a7900c086340f41ea403020cac5cdad"
+    },
+    {
+      "sequence": 5,
+      "gate": "data",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-data",
+      "previousHash": "1dc777ed2904cf970bbce3070f35a9319a7900c086340f41ea403020cac5cdad",
+      "recordHash": "ffe968e283576bed46864a41de8bda780ac4635486ef759c19e9f6647832773a"
+    },
+    {
+      "sequence": 6,
+      "gate": "restoration",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-restoration",
+      "previousHash": "ffe968e283576bed46864a41de8bda780ac4635486ef759c19e9f6647832773a",
+      "recordHash": "7fea1b5e5dac39e831da7b5e23ae94abdb1dd4321f9192dce345f190c168d783"
+    },
+    {
+      "sequence": 7,
+      "gate": "signing",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-signing",
+      "previousHash": "7fea1b5e5dac39e831da7b5e23ae94abdb1dd4321f9192dce345f190c168d783",
+      "recordHash": "637374a32874e29d7e181513d3004e3483f1884bb9374a7be41bd878e907997c"
+    },
+    {
+      "sequence": 8,
+      "gate": "update",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-update",
+      "previousHash": "637374a32874e29d7e181513d3004e3483f1884bb9374a7be41bd878e907997c",
+      "recordHash": "ae0b6c81332f421f4b69762ce2ae001e970425809e919eae84f6c58cb87d5b51"
+    },
+    {
+      "sequence": 9,
+      "gate": "accessibility",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-accessibility",
+      "previousHash": "ae0b6c81332f421f4b69762ce2ae001e970425809e919eae84f6c58cb87d5b51",
+      "recordHash": "2fbdf72fc4874c7948b3329cdc2513bc5344c9d388b504c9c6c6826f40781e5d"
+    },
+    {
+      "sequence": 10,
+      "gate": "compatibility",
+      "status": "passed",
+      "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+      "evidenceId": "gate-compatibility",
+      "previousHash": "2fbdf72fc4874c7948b3329cdc2513bc5344c9d388b504c9c6c6826f40781e5d",
+      "recordHash": "910b24e21fe3799b174f739968e38a23cc7dc1faea439c66bc8d3df5d98bf15e"
+    }
+  ],
+  "gateHistoryHead": "910b24e21fe3799b174f739968e38a23cc7dc1faea439c66bc8d3df5d98bf15e",
+  "promotionEvidence": [
+    { "stage": "local", "status": "passed", "evidenceIds": ["control-plane-schema"] },
+    { "stage": "preview", "status": "passed", "evidenceIds": ["stage-preview"] },
+    {
+      "stage": "internal-staging",
+      "status": "passed",
+      "evidenceIds": ["gate-compatibility"]
+    }
+  ],
+  "defects": [],
+  "ownerReviewRequired": true
+}

@@ -399,6 +399,7 @@ const expectedPnpmWorkspaceRoots = [
   'tooling/contract-generation-spike',
   'tooling/fixture-guard',
   'tooling/identity-adapter-spike',
+  'tooling/phase4-evidence',
   'tooling/web-evidence',
   'tooling/workspace-smoke',
 ] as const;

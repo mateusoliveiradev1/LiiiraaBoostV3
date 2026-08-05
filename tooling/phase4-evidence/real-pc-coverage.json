@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "buildFingerprint": "9c9b721392aa38cb34427810e75f85a1de2d5cc13c5270b93a0e05a16e914a7f",
+  "coverageStatus": "not-collected",
+  "requiredAxes": {
+    "os": ["windows-10", "windows-11"],
+    "cpu": ["intel", "amd"],
+    "gpu": ["nvidia", "amd", "intel"],
+    "formFactor": ["notebook", "desktop"],
+    "storage": ["nvme", "sata-ssd"],
+    "network": ["ethernet", "wifi"],
+    "journeys": [
+      "clean-install",
+      "upgrade",
+      "offline",
+      "failure",
+      "restoration",
+      "rollback",
+      "uninstall"
+    ]
+  },
+  "cells": []
+}

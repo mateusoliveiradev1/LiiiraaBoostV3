@@ -27,8 +27,7 @@ const REQUIREMENTS = [
   'IDEN-09',
 ] as const;
 
-const sha256 = (value: string): string =>
-  createHash('sha256').update(value, 'utf8').digest('hex');
+const sha256 = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex');
 
 const build: BuildIdentity = {
   commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
@@ -39,21 +38,26 @@ const build: BuildIdentity = {
 };
 
 const buildFingerprint = sha256(
-  [
-    build.commit,
-    build.ociDigest,
-    build.desktopBuildId,
-    build.contractHash,
-    build.schemaHash,
-  ].join('\n'),
+  [build.commit, build.ociDigest, build.desktopBuildId, build.contractHash, build.schemaHash].join(
+    '\n',
+  ),
 );
 
-const artifactContents = Object.fromEntries(
-  [...REQUIREMENTS, ...CRITICAL_GATES].map((id) => [
-    `evidence/${id.toLowerCase()}.json`,
-    `immutable evidence for ${id}`,
-  ]),
-);
+const artifactContents: Record<string, string> = Object.fromEntries([
+  ...[...REQUIREMENTS, ...CRITICAL_GATES].map(
+    (id) => [`evidence/${id.toLowerCase()}.json`, `immutable evidence for ${id}`] as const,
+  ),
+  ['evidence/contract-openapi.json', 'control-plane-contract'] as const,
+  ['evidence/control-plane-schema.json', 'control-plane-schema'] as const,
+]);
+
+const requiredAt = <T>(values: readonly T[], index: number): T => {
+  const value = values[index];
+  if (value === undefined) {
+    throw new Error(`Expected fixture value at index ${String(index)}.`);
+  }
+  return value;
+};
 
 const artifactId = (id: string): string => `artifact-${id.toLowerCase()}`;
 
@@ -83,6 +87,20 @@ const validManifest = (): Phase4EvidenceManifest => {
     sha256: sha256(`immutable evidence for ${id}`),
     buildFingerprint,
   }));
+  artifacts.push(
+    {
+      id: 'contract-openapi',
+      path: 'evidence/contract-openapi.json',
+      sha256: build.contractHash,
+      buildFingerprint,
+    },
+    {
+      id: 'control-plane-schema',
+      path: 'evidence/control-plane-schema.json',
+      sha256: build.schemaHash,
+      buildFingerprint,
+    },
+  );
 
   let previousHash: string | null = null;
   const gateHistory = CRITICAL_GATES.map((gate, index) => {
@@ -214,21 +232,24 @@ describe('build-bound Phase 4 evidence', () => {
 
   it('rejects a stale recorded artifact hash', () => {
     const manifest = validManifest();
-    manifest.artifacts[0] = { ...manifest.artifacts[0]!, sha256: '0'.repeat(64) };
+    manifest.artifacts[0] = { ...requiredAt(manifest.artifacts, 0), sha256: '0'.repeat(64) };
 
     expect(codes(evaluate(manifest))).toContain('ARTIFACT_HASH_MISMATCH');
   });
 
   it('rejects evidence bound to another build', () => {
     const manifest = validManifest();
-    manifest.artifacts[0] = { ...manifest.artifacts[0]!, buildFingerprint: 'f'.repeat(64) };
+    manifest.artifacts[0] = {
+      ...requiredAt(manifest.artifacts, 0),
+      buildFingerprint: 'f'.repeat(64),
+    };
 
     expect(codes(evaluate(manifest))).toContain('ARTIFACT_BUILD_MISMATCH');
   });
 
   it('rejects a prior critical failure even after a later pass', () => {
     const manifest = validManifest();
-    const prior = manifest.gateHistory[0]!;
+    const prior = requiredAt(manifest.gateHistory, 0);
     const failed = { ...prior, status: 'failed' as const };
     failed.recordHash = historyHash(failed);
 
@@ -254,22 +275,19 @@ describe('build-bound Phase 4 evidence', () => {
 
   it('rejects mutation of an append-only gate record', () => {
     const manifest = validManifest();
-    manifest.gateHistory[0] = { ...manifest.gateHistory[0]!, status: 'failed' };
+    manifest.gateHistory[0] = { ...requiredAt(manifest.gateHistory, 0), status: 'failed' };
 
     expect(codes(evaluate(manifest))).toContain('GATE_HISTORY_HASH_MISMATCH');
   });
 });
 
 describe('promotion and coverage policy', () => {
-  it.each(['frozen-rc', 'production'] as const)(
-    'rejects unsupported Phase 4 stage %s',
-    (stage) => {
-      const result = evaluate(validManifest(), fullCoverage(), stage);
+  it.each(['frozen-rc', 'production'] as const)('rejects unsupported Phase 4 stage %s', (stage) => {
+    const result = evaluate(validManifest(), fullCoverage(), stage);
 
-      expect(result.ok).toBe(false);
-      expect(codes(result)).toContain('PHASE4_STAGE_FORBIDDEN');
-    },
-  );
+    expect(result.ok).toBe(false);
+    expect(codes(result)).toContain('PHASE4_STAGE_FORBIDDEN');
+  });
 
   it('rejects invited alpha when a required real-PC coverage axis is absent', () => {
     const coverage = fullCoverage();
@@ -320,9 +338,23 @@ describe('promotion and coverage policy', () => {
     expect(codes(evaluate(manifest))).toContain('KNOWN_CRITICAL_DEFECT');
   });
 
+  it('rejects even minor open defects in a release-critical category', () => {
+    const manifest = validManifest();
+    manifest.defects.push({
+      id: 'accessibility-01',
+      category: 'accessibility',
+      severity: 'minor',
+      material: false,
+      documented: true,
+      status: 'open',
+    });
+
+    expect(codes(evaluate(manifest))).toContain('KNOWN_CRITICAL_DEFECT');
+  });
+
   it('rejects undocumented open defects but admits documented non-material minor defects', () => {
     const manifest = validManifest();
-    manifest.defects[0] = { ...manifest.defects[0]!, documented: false };
+    manifest.defects[0] = { ...requiredAt(manifest.defects, 0), documented: false };
 
     expect(codes(evaluate(manifest))).toContain('UNDOCUMENTED_OPEN_DEFECT');
     expect(evaluate().ok).toBe(true);
