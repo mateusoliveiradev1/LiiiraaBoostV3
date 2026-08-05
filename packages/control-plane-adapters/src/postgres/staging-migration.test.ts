@@ -36,7 +36,7 @@ describe('staging migration execution', () => {
       Promise.resolve({
         applied: true,
         schemaHash: 'a'.repeat(64),
-        version: '0001_control_plane',
+        version: '0002_real_identity',
       }),
     );
     const inspect = vi.fn(() =>
@@ -56,7 +56,7 @@ describe('staging migration execution', () => {
       applied: true,
       schemaHash: 'a'.repeat(64),
       tableCount: 2,
-      version: '0001_control_plane',
+      version: '0002_real_identity',
     });
     expect(createDatabase).toHaveBeenCalledWith(stagingUrl);
     expect(migrate).toHaveBeenCalledWith(database);

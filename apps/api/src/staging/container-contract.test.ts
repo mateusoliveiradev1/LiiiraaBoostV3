@@ -18,9 +18,13 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
     expect(dockerfile).toContain('apps/api/src/staging/main.mjs');
     expect(dockerfile).not.toContain('/workspace /workspace');
-    expect(runtimeEntrypoint).toContain('createServer');
-    expect(runtimeEntrypoint).toContain('authorityConnected: false');
-    expect(runtimeEntrypoint).not.toContain("from 'fastify'");
+    expect(runtimeEntrypoint).toContain('startRealStagingServer');
+    expect(runtimeEntrypoint).not.toContain('createServer');
+    expect(runtimeEntrypoint).not.toContain('authorityConnected: false');
+    expect(dockerfile).toContain('/workspace/node_modules node_modules');
+    expect(dockerfile).toContain('/workspace/apps/api apps/api');
+    expect(dockerfile).toContain('/workspace/packages packages');
+    expect(dockerfile).toContain('0002_real_identity.sql');
   });
 
   it('excludes secrets, generated desktop artifacts, and unrelated build output', () => {
