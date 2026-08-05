@@ -1,4 +1,10 @@
-import { createHash, createPrivateKey, createPublicKey, sign } from 'node:crypto';
+import {
+  createHash,
+  createPrivateKey,
+  createPublicKey,
+  sign,
+  verify as verifySignature,
+} from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
@@ -10,8 +16,10 @@ import { controlPlaneDocumentValidator } from './generated/index.js';
 import {
   decodeOfflineEntitlementPayload,
   OfflineEntitlementVerdict,
+  encodeBase64Url,
   encodeOfflineEntitlementPayload,
   type OfflineEntitlementSigningKey,
+  type OfflineEntitlementSignatureVerifier,
   type TrustedTimeStore,
   verifyOfflineEntitlementBytes,
 } from './offline-entitlement.js';
@@ -45,6 +53,7 @@ const SIGNING_SEEDS = {
 
 const offlineEntitlementCorpus = [validFixture, ...invalidFixture] as OfflineEntitlementFixture[];
 const fixtureRoot = new URL('./fixtures/offline-entitlement/', import.meta.url);
+const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 const keyRing = manifest.keyRing.map((key): OfflineEntitlementSigningKey => ({
   keyId: key.keyId,
   publicKeyBytes: key.publicKeyBytes,
@@ -52,6 +61,22 @@ const keyRing = manifest.keyRing.map((key): OfflineEntitlementSigningKey => ({
   notBeforeUnixSeconds: key.notBeforeUnixSeconds,
   notAfterUnixSeconds: key.notAfterUnixSeconds,
 }));
+
+const verifyEd25519Signature: OfflineEntitlementSignatureVerifier = ({
+  payloadBytes,
+  signatureBytes,
+  publicKeyBytes,
+}) =>
+  verifySignature(
+    null,
+    Buffer.from(payloadBytes),
+    createPublicKey({
+      key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(publicKeyBytes)]),
+      format: 'der',
+      type: 'spki',
+    }),
+    Buffer.from(signatureBytes),
+  );
 
 class MemoryTrustedTimeStore implements TrustedTimeStore {
   public constructor(private lastTrustedUnixSeconds: number | undefined) {}
@@ -124,6 +149,7 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
         keyRing,
         { ...fixture.context, nowUnixSeconds: fixture.nowUnixSeconds },
         trustedTimeStore,
+        verifyEd25519Signature,
       ),
     ).toBe(fixture.expectedVerdict);
 
@@ -146,6 +172,7 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
             nowUnixSeconds: previousKey?.notAfterUnixSeconds ?? Number.NaN,
           },
           insideWindowStore,
+          verifyEd25519Signature,
         ),
       ).toBe(OfflineEntitlementVerdict.Verified);
     }
@@ -158,7 +185,7 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
       if (canonicalClaims === undefined) {
         throw new Error('Canonical offline entitlement claims must decode');
       }
-      expect(encodeOfflineEntitlementPayload(canonicalClaims).toString('base64url')).toBe(
+      expect(encodeBase64Url(encodeOfflineEntitlementPayload(canonicalClaims))).toBe(
         fixture.envelope.payloadBytes,
       );
       const versionMismatchStore = new MemoryTrustedTimeStore(fixture.lastTrustedUnixSeconds);
@@ -172,6 +199,7 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
             nowUnixSeconds: fixture.nowUnixSeconds,
           },
           versionMismatchStore,
+          verifyEd25519Signature,
         ),
       ).toBe(OfflineEntitlementVerdict.OnlineVerificationRequired);
     }

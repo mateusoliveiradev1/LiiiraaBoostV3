@@ -1,4 +1,9 @@
-import { createPrivateKey, type KeyObject } from 'node:crypto';
+import {
+  createPrivateKey,
+  createPublicKey,
+  verify as verifySignature,
+  type KeyObject,
+} from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 import {
@@ -6,6 +11,7 @@ import {
   verifyOfflineEntitlementBytes,
   type OfflineEntitlementEnvelopeJson,
   type OfflineEntitlementSigningKey,
+  type OfflineEntitlementSignatureVerifier,
   type TrustedTimeStore,
 } from '@liiiraa/contracts-ts';
 import {
@@ -89,6 +95,23 @@ class MemoryTrustedTimeStore implements TrustedTimeStore {
     this.value = value;
   }
 }
+
+const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
+const verifyEd25519Signature: OfflineEntitlementSignatureVerifier = ({
+  payloadBytes,
+  signatureBytes,
+  publicKeyBytes,
+}) =>
+  verifySignature(
+    null,
+    Buffer.from(payloadBytes),
+    createPublicKey({
+      key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(publicKeyBytes)]),
+      format: 'der',
+      type: 'spki',
+    }),
+    Buffer.from(signatureBytes),
+  );
 
 class MemoryEntitlementRepository implements EntitlementAuthorityRepository {
   public subscription: EntitlementSubscriptionRecord = {
@@ -283,6 +306,7 @@ describe('entitlement-issuance exact-byte authority', () => {
         keyRing,
         { ...validFixture.context, nowUnixSeconds: validFixture.nowUnixSeconds },
         new MemoryTrustedTimeStore(validFixture.lastTrustedUnixSeconds),
+        verifyEd25519Signature,
       ),
     ).toBe(OfflineEntitlementVerdict.Verified);
     expect(repository.entitlement).toMatchObject({

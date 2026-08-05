@@ -1,6 +1,7 @@
 import {
   OFFLINE_ENTITLEMENT_VALIDITY_SECONDS,
   controlPlaneDocumentValidator,
+  encodeBase64Url,
   encodeOfflineEntitlementPayload,
   type OfflineEntitlementEnvelopeJson,
 } from '@liiiraa/contracts-ts';
@@ -270,7 +271,7 @@ export const issueOfflineEntitlement = async (
       const envelope: OfflineEntitlementEnvelopeJson = {
         schemaVersion: '1.0',
         kind: 'offline-entitlement-envelope',
-        payloadBytes: payloadBytes.toString('base64url'),
+        payloadBytes: encodeBase64Url(payloadBytes),
         signature: signature.signature,
         algorithm: signature.algorithm,
         keyId: signature.keyId,

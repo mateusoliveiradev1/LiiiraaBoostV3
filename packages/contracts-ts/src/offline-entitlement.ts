@@ -1,5 +1,3 @@
-import { createPublicKey, verify } from 'node:crypto';
-
 import { controlPlaneDocumentValidator } from './generated/index.js';
 
 export const OFFLINE_ENTITLEMENT_VALIDITY_SECONDS = 604_800 as const;
@@ -35,6 +33,16 @@ export interface TrustedTimeStore {
   writeLastTrustedUnixSeconds(value: number): void;
 }
 
+export interface OfflineEntitlementSignatureMaterial {
+  readonly payloadBytes: Uint8Array;
+  readonly signatureBytes: Uint8Array;
+  readonly publicKeyBytes: Uint8Array;
+}
+
+export type OfflineEntitlementSignatureVerifier = (
+  material: OfflineEntitlementSignatureMaterial,
+) => boolean;
+
 interface EnvelopeView {
   readonly payloadBytes: string;
   readonly signature: string;
@@ -56,10 +64,12 @@ export interface OfflineEntitlementClaims {
   readonly validitySeconds: typeof OFFLINE_ENTITLEMENT_VALIDITY_SECONDS;
 }
 
-export const encodeOfflineEntitlementPayload = (claims: OfflineEntitlementClaims): Buffer =>
-  Buffer.from(JSON.stringify(claims), 'utf8');
+const UTF8_ENCODER = new TextEncoder();
+const UTF8_DECODER = new TextDecoder('utf-8', { fatal: true });
 
-const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
+export const encodeOfflineEntitlementPayload = (claims: OfflineEntitlementClaims): Uint8Array =>
+  UTF8_ENCODER.encode(JSON.stringify(claims));
+
 const CANONICAL_UTC = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.000Z$/u;
 const BASE64URL = /^[A-Za-z0-9_-]+={0,2}$/u;
 
@@ -103,11 +113,25 @@ const envelopeView = (value: unknown): EnvelopeView | undefined => {
   return { payloadBytes, signature, keyId, audience, deviceBinding, issuedAt, expiresAt };
 };
 
-const decodeBase64Url = (value: string): Buffer | undefined => {
+export const encodeBase64Url = (value: Uint8Array): string => {
+  let binary = '';
+  for (const byte of value) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/gu, '-').replace(/\//gu, '_').replace(/=+$/u, '');
+};
+
+const decodeBase64Url = (value: string): Uint8Array | undefined => {
   if (!BASE64URL.test(value) || value.length % 4 === 1) return undefined;
 
-  const decoded = Buffer.from(value, 'base64url');
-  if (decoded.toString('base64url') !== value.replace(/=+$/u, '')) return undefined;
+  const unpadded = value.replace(/=+$/u, '');
+  const standard = unpadded.replace(/-/gu, '+').replace(/_/gu, '/');
+  let binary: string;
+  try {
+    binary = atob(standard.padEnd(Math.ceil(standard.length / 4) * 4, '='));
+  } catch {
+    return undefined;
+  }
+  const decoded = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  if (encodeBase64Url(decoded) !== unpadded) return undefined;
   return decoded;
 };
 
@@ -121,11 +145,11 @@ const parseCanonicalUtcSeconds = (value: string): number | undefined => {
 };
 
 export const decodeOfflineEntitlementPayload = (
-  payloadBytes: Buffer,
+  payloadBytes: Uint8Array,
 ): OfflineEntitlementClaims | undefined => {
   let value: unknown;
   try {
-    value = JSON.parse(payloadBytes.toString('utf8')) as unknown;
+    value = JSON.parse(UTF8_DECODER.decode(payloadBytes)) as unknown;
   } catch {
     return undefined;
   }
@@ -179,6 +203,7 @@ const verifyCandidate = (
   keyRing: readonly OfflineEntitlementSigningKey[],
   context: OfflineEntitlementVerificationContext,
   trustedTimeStore: TrustedTimeStore,
+  signatureVerifier: OfflineEntitlementSignatureVerifier,
 ): OfflineEntitlementVerdict => {
   const envelope = envelopeView(input);
   if (envelope === undefined) return verificationRequired();
@@ -199,12 +224,7 @@ const verifyCandidate = (
     return verificationRequired();
   }
 
-  const publicKey = createPublicKey({
-    key: Buffer.concat([ED25519_SPKI_PREFIX, publicKeyBytes]),
-    format: 'der',
-    type: 'spki',
-  });
-  if (!verify(null, payloadBytes, publicKey, signatureBytes)) {
+  if (!signatureVerifier({ payloadBytes, signatureBytes, publicKeyBytes })) {
     return verificationRequired();
   }
 
@@ -261,9 +281,10 @@ export const verifyOfflineEntitlementBytes = (
   keyRing: readonly OfflineEntitlementSigningKey[],
   context: OfflineEntitlementVerificationContext,
   trustedTimeStore: TrustedTimeStore,
+  signatureVerifier: OfflineEntitlementSignatureVerifier,
 ): OfflineEntitlementVerdict => {
   try {
-    return verifyCandidate(input, keyRing, context, trustedTimeStore);
+    return verifyCandidate(input, keyRing, context, trustedTimeStore, signatureVerifier);
   } catch {
     return verificationRequired();
   }
