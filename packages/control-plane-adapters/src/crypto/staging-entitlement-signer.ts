@@ -10,6 +10,7 @@ export interface StagingEntitlementSignerOptions {
   readonly privateKeyHandle: KeyObject;
   readonly notBeforeUnixSeconds: number;
   readonly notAfterUnixSeconds: number;
+  readonly additionalVerificationKeys?: readonly EntitlementPublicVerificationKey[];
 }
 
 const canonicalUtc = (unixSeconds: number): string => new Date(unixSeconds * 1_000).toISOString();
@@ -26,7 +27,10 @@ export const createStagingEntitlementSigner = (
   ) {
     throw new Error('invalid-entitlement-signing-key-handle');
   }
-  const publicDer = createPublicKey(options.privateKeyHandle).export({ format: 'der', type: 'spki' });
+  const publicDer = createPublicKey(options.privateKeyHandle).export({
+    format: 'der',
+    type: 'spki',
+  });
   const publicKeyBytes = publicDer.subarray(-32).toString('base64url');
   const verificationKey: EntitlementPublicVerificationKey = Object.freeze({
     keyId: options.keyId,
@@ -37,6 +41,24 @@ export const createStagingEntitlementSigner = (
     notBeforeUnixSeconds: options.notBeforeUnixSeconds,
     notAfterUnixSeconds: options.notAfterUnixSeconds,
   });
+  const additionalKeys = options.additionalVerificationKeys ?? [];
+  const keyIds = new Set([verificationKey.keyId]);
+  for (const key of additionalKeys) {
+    if (
+      key.status === 'current' ||
+      keyIds.has(key.keyId) ||
+      !Number.isSafeInteger(key.notBeforeUnixSeconds) ||
+      !Number.isSafeInteger(key.notAfterUnixSeconds) ||
+      key.notAfterUnixSeconds <= key.notBeforeUnixSeconds
+    ) {
+      throw new Error('invalid-entitlement-verification-key-ring');
+    }
+    keyIds.add(key.keyId);
+  }
+  const verificationKeys = Object.freeze([
+    verificationKey,
+    ...additionalKeys.map((key) => Object.freeze({ ...key })),
+  ]);
 
   return Object.freeze({
     sign: (payloadBytes: Uint8Array) =>
@@ -47,6 +69,6 @@ export const createStagingEntitlementSigner = (
           'base64url',
         ),
       }),
-    publicVerificationData: () => Promise.resolve(Object.freeze([verificationKey])),
+    publicVerificationData: () => Promise.resolve(verificationKeys),
   });
 };

@@ -1,7 +1,7 @@
 export interface EntitlementPublicVerificationKey {
   readonly keyId: string;
   readonly publicKeyBytes: string;
-  readonly status: 'current';
+  readonly status: 'current' | 'previous' | 'retired';
   readonly notBefore: string;
   readonly notAfter: string;
   readonly notBeforeUnixSeconds: number;

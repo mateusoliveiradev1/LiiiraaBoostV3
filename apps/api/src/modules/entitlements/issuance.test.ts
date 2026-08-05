@@ -416,13 +416,34 @@ describe('entitlement-issuance exact-byte authority', () => {
       issueInput(),
     );
     const publicData = await signer.publicVerificationData();
+    const manifestCurrentKey = manifest.keyRing[0];
+    if (manifestCurrentKey === undefined) throw new Error('current-corpus-key-required');
     const serialized = JSON.stringify({ result, publicData, repository }, (_key, value: unknown) =>
       typeof value === 'bigint' ? value.toString() : value,
     );
 
-    expect(publicData).toEqual([manifest.keyRing[0]]);
+    expect(publicData).toEqual([manifestCurrentKey]);
     expect(serialized).not.toContain(CURRENT_KEY_SEED);
     expect(serialized).not.toMatch(/privateKey|private-key|pkcs8/iu);
+
+    const rotated = createStagingEntitlementSigner({
+      keyId: 'development-current-0002',
+      privateKeyHandle: privateKeyHandle(NEXT_KEY_SEED),
+      notBeforeUnixSeconds: 1_782_864_000,
+      notAfterUnixSeconds: 1_798_761_600,
+      additionalVerificationKeys: [
+        {
+          ...manifestCurrentKey,
+          status: 'previous',
+          notAfter: '2026-08-11T12:00:00.000Z',
+          notAfterUnixSeconds: validFixture.nowUnixSeconds,
+        },
+      ],
+    });
+    expect(await rotated.publicVerificationData()).toMatchObject([
+      { keyId: 'development-current-0002', status: 'current' },
+      { keyId: 'development-current-0001', status: 'previous' },
+    ]);
   });
 });
 
