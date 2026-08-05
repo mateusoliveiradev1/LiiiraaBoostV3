@@ -45,9 +45,11 @@ export interface AdmittedStagingInfrastructureEnvironment {
 
 export class ApiEnvironmentAdmissionError extends Error {
   readonly code = 'STAGING_ENVIRONMENT_REJECTED';
+  readonly field: keyof ApiEnvironmentInput;
 
-  constructor(readonly field: keyof ApiEnvironmentInput) {
+  constructor(field: keyof ApiEnvironmentInput) {
     super(`STAGING_ENVIRONMENT_REJECTED:${field}`);
+    this.field = field;
     this.name = 'ApiEnvironmentAdmissionError';
   }
 }
