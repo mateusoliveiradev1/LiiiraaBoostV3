@@ -8,9 +8,11 @@ use std::{cell::RefCell, fs, io::Write, net::TcpStream, path::PathBuf, thread};
 use credential_store::{CredentialStore, CredentialStoreError};
 use identity::{
     CredentialCustody, DESKTOP_EXCHANGE_PATH, DesktopAuthorizationChallenge,
-    DesktopCallbackEvidence, DesktopExchangeResponse, DesktopIdentityError, DesktopSessionContact,
-    LoopbackCallbackListener, SystemBrowserLauncher, accept_desktop_exchange,
-    begin_desktop_sign_in, complete_desktop_callback, reconcile_authenticated_contact,
+    DesktopAuthorizationRequest, DesktopCallbackEvidence, DesktopCallbackReceiver,
+    DesktopExchangeRequest, DesktopExchangeResponse, DesktopIdentityApi, DesktopIdentityError,
+    DesktopPkceProof, DesktopSessionContact, LoopbackCallbackListener, SystemBrowserLauncher,
+    WindowsDesktopIdentityApi, accept_desktop_exchange, begin_desktop_sign_in,
+    complete_desktop_callback, perform_desktop_sign_in, reconcile_authenticated_contact,
     revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
@@ -20,6 +22,7 @@ const ISSUER: &str = "https://identity.liiiraa.test";
 const REDIRECT_URI: &str = "http://127.0.0.1:49152/oauth/callback";
 const STATE: &str = "state_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef";
 const CODE_CHALLENGE: &str = "challenge_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef";
+const CODE_VERIFIER: &str = "verifier_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij";
 const API_CREDENTIAL: &str = "api-issued-rotated-credential-do-not-render";
 
 #[derive(Default)]
@@ -60,13 +63,15 @@ impl CredentialStore for MemoryCredentialStore {
 }
 
 fn challenge() -> DesktopAuthorizationChallenge {
+    let proof = DesktopPkceProof::from_verifier(CODE_VERIFIER)
+        .expect("test PKCE verifier should be admitted");
     DesktopAuthorizationChallenge {
         challenge_id: "challenge_desktop_0001".to_owned(),
         authorization_url: format!(
             "{ISSUER}/api/auth/oauth2/authorize?response_type=code&client_id=liiiraa-windows-public-client&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Foauth%2Fcallback&state={STATE}&code_challenge={CODE_CHALLENGE}&code_challenge_method=S256"
         ),
         state: STATE.to_owned(),
-        code_challenge: CODE_CHALLENGE.to_owned(),
+        code_challenge: proof.code_challenge().to_owned(),
         code_challenge_method: "S256".to_owned(),
         issuer: ISSUER.to_owned(),
         redirect_uri: REDIRECT_URI.to_owned(),
@@ -121,8 +126,8 @@ fn crate_root() -> PathBuf {
 #[test]
 fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_evidence() {
     let browser = RecordingSystemBrowser::default();
-    let mut pending =
-        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
+    let mut pending = begin_desktop_sign_in(&browser, challenge(), CODE_VERIFIER)
+        .expect("API challenge should be admitted");
     assert_eq!(browser.opened_urls.borrow().len(), 1);
     assert_eq!(browser.opened_urls.borrow()[0], pending.authorization_url());
     assert!(pending.authorization_url().starts_with(ISSUER));
@@ -142,16 +147,17 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
     assert_eq!(body["state"], STATE);
     assert_eq!(body["issuer"], ISSUER);
     assert_eq!(body["redirectUri"], REDIRECT_URI);
-    assert!(body.get("codeVerifier").is_none());
+    assert_eq!(body["codeVerifier"], CODE_VERIFIER);
     assert!(body.get("clientSecret").is_none());
     assert!(!body.to_string().contains("/oauth2/token"));
+    assert!(!format!("{exchange:?}").contains(CODE_VERIFIER));
 }
 
 #[test]
 fn desktop_callback_is_exact_loopback_state_bound_and_one_shot_even_after_rejection() {
     let browser = RecordingSystemBrowser::default();
-    let mut pending =
-        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
+    let mut pending = begin_desktop_sign_in(&browser, challenge(), CODE_VERIFIER)
+        .expect("API challenge should be admitted");
     assert_eq!(
         complete_desktop_callback(&mut pending, callback("wrong-state")),
         Err(DesktopIdentityError::CallbackMismatch),
@@ -161,14 +167,136 @@ fn desktop_callback_is_exact_loopback_state_bound_and_one_shot_even_after_reject
         Err(DesktopIdentityError::CallbackConsumed),
     );
 
-    let mut pending =
-        begin_desktop_sign_in(&browser, challenge()).expect("API challenge should be admitted");
+    let mut pending = begin_desktop_sign_in(&browser, challenge(), CODE_VERIFIER)
+        .expect("API challenge should be admitted");
     let mut non_loopback = callback(STATE);
     non_loopback.remote_address = "192.0.2.1".to_owned();
     assert_eq!(
         complete_desktop_callback(&mut pending, non_loopback),
         Err(DesktopIdentityError::CallbackMismatch),
     );
+}
+
+struct StaticCallbackReceiver {
+    callback: Option<DesktopCallbackEvidence>,
+    redirect_uri: String,
+}
+
+impl DesktopCallbackReceiver for StaticCallbackReceiver {
+    fn redirect_uri(&self) -> &str {
+        &self.redirect_uri
+    }
+
+    fn receive(
+        &mut self,
+        _expected_issuer: &str,
+        _timeout: std::time::Duration,
+    ) -> Result<DesktopCallbackEvidence, DesktopIdentityError> {
+        self.callback
+            .take()
+            .ok_or(DesktopIdentityError::CallbackConsumed)
+    }
+}
+
+struct RecordingIdentityApi {
+    authorization_requests: RefCell<Vec<DesktopAuthorizationRequest>>,
+    exchange_requests: RefCell<Vec<Value>>,
+}
+
+impl DesktopIdentityApi for RecordingIdentityApi {
+    fn account_origin(&self) -> &str {
+        "https://account.liiiraa.test"
+    }
+
+    fn issuer(&self) -> &str {
+        ISSUER
+    }
+
+    fn request_authorization(
+        &self,
+        request: &DesktopAuthorizationRequest,
+    ) -> Result<DesktopAuthorizationChallenge, DesktopIdentityError> {
+        self.authorization_requests.borrow_mut().push(request.clone());
+        Ok(DesktopAuthorizationChallenge {
+            challenge_id: "challenge_desktop_0001".to_owned(),
+            authorization_url: format!(
+                "https://account.liiiraa.test/pt-BR/account/sign-in?desktop_challenge=challenge_desktop_0001&state={STATE}"
+            ),
+            state: STATE.to_owned(),
+            code_challenge: request.code_challenge.clone(),
+            code_challenge_method: "S256".to_owned(),
+            issuer: ISSUER.to_owned(),
+            redirect_uri: request.redirect_uri.clone(),
+        })
+    }
+
+    fn exchange(
+        &self,
+        request: &DesktopExchangeRequest,
+    ) -> Result<DesktopExchangeResponse, DesktopIdentityError> {
+        self.exchange_requests.borrow_mut().push(
+            serde_json::to_value(request).expect("exchange request should serialize for evidence"),
+        );
+        Ok(exchange_response("active"))
+    }
+
+    fn revoke(&self, _credential: &str) -> Result<(), DesktopIdentityError> {
+        Ok(())
+    }
+}
+
+#[test]
+fn native_flow_requests_authorization_after_loopback_binding_and_returns_only_session_truth() {
+    let store = MemoryCredentialStore::default();
+    let browser = RecordingSystemBrowser::default();
+    let proof = DesktopPkceProof::from_verifier(CODE_VERIFIER)
+        .expect("test PKCE verifier should be admitted");
+    let api = RecordingIdentityApi {
+        authorization_requests: RefCell::new(Vec::new()),
+        exchange_requests: RefCell::new(Vec::new()),
+    };
+    let mut callback = StaticCallbackReceiver {
+        callback: Some(DesktopCallbackEvidence {
+            redirect_uri: REDIRECT_URI.to_owned(),
+            ..callback(STATE)
+        }),
+        redirect_uri: REDIRECT_URI.to_owned(),
+    };
+
+    let session = perform_desktop_sign_in(
+        &api,
+        &browser,
+        &store,
+        &mut callback,
+        "tester@example.com",
+        proof,
+    )
+    .expect("complete native sign-in should succeed");
+
+    assert_eq!(session.state, SessionState::Active);
+    assert_eq!(api.authorization_requests.borrow().len(), 1);
+    assert_eq!(api.exchange_requests.borrow()[0]["codeVerifier"], CODE_VERIFIER);
+    assert_eq!(store.read_credential().unwrap().as_deref(), Some(API_CREDENTIAL));
+    assert!(!serde_json::to_string(&session).unwrap().contains(API_CREDENTIAL));
+}
+
+#[test]
+fn native_api_configuration_rejects_non_https_and_mismatched_origins() {
+    assert!(WindowsDesktopIdentityApi::from_origins(
+        "http://api.liiiraa.test",
+        "https://account.liiiraa.test"
+    )
+    .is_err());
+    assert!(WindowsDesktopIdentityApi::from_origins(
+        "https://api.liiiraa.test/path",
+        "https://account.liiiraa.test"
+    )
+    .is_err());
+    assert!(WindowsDesktopIdentityApi::from_origins(
+        "https://api.liiiraa.test",
+        "https://account.liiiraa.test"
+    )
+    .is_ok());
 }
 
 #[test]
@@ -294,6 +422,15 @@ fn rust_identity_boundary_has_no_provider_exchange_secret_or_plaintext_store_pat
     assert!(cargo.contains("keyring = \"=4.1.5\""));
     assert!(cargo.contains("windows = { version = \"=0.62.2\""));
     assert!(identity_source.contains("ShellExecuteW"));
+    assert!(identity_source.contains("WinHttpOpenRequest"));
+    assert!(identity_source.contains("WINHTTP_FLAG_SECURE"));
+    assert!(identity_source.contains("code_verifier"));
+
+    let main_source = fs::read_to_string(crate_root().join("src/main.rs"))
+        .expect("desktop main source should be readable");
+    assert!(main_source.contains("desktop_sign_in"));
+    assert!(main_source.contains("desktop_sign_out"));
+    assert!(main_source.contains("LoopbackCallbackListener::bind"));
 }
 
 #[cfg(target_os = "windows")]
