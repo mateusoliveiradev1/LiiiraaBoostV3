@@ -34,6 +34,7 @@ interface ReadAuditAnchorInput {
   readonly client: AuditAnchorS3Client;
   readonly key: string;
   readonly signer: AuditAnchorSignerPort;
+  readonly versionId?: string;
 }
 
 const failure = (code: AuditAnchorFailureCode, retryable = true): AuditAnchorResult =>
@@ -171,12 +172,18 @@ export const readAuditAnchor = async ({
   client,
   key,
   signer,
+  versionId,
 }: ReadAuditAnchorInput): Promise<AuditAnchorResult> => {
   let response: Readonly<Record<string, unknown>>;
   let body: Uint8Array;
   try {
     response = (await client.send(
-      new GetObjectCommand({ Bucket: bucket, Key: key, ChecksumMode: 'ENABLED' }),
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        ChecksumMode: 'ENABLED',
+        ...(versionId === undefined ? {} : { VersionId: versionId }),
+      }),
     )) as Readonly<Record<string, unknown>>;
     body = await readBody(response['Body']);
   } catch {
@@ -185,6 +192,14 @@ export const readAuditAnchor = async ({
 
   const bodyChecksum = bytesToBase64(await sha256Bytes(body));
   if (response['ChecksumSHA256'] !== bodyChecksum) return failure('ANCHOR_CHECKSUM_MISMATCH');
+  const objectVersion = response['VersionId'];
+  if (
+    typeof objectVersion !== 'string' ||
+    objectVersion.length === 0 ||
+    (versionId !== undefined && objectVersion !== versionId)
+  ) {
+    return failure('ANCHOR_INVALID', false);
+  }
 
   let anchor: AuditAnchor;
   try {
@@ -217,7 +232,12 @@ export const readAuditAnchor = async ({
     return failure('ANCHOR_SIGNATURE_MISMATCH');
   }
 
-  return Object.freeze({ anchor: Object.freeze(anchor), ok: true, verified: true });
+  return Object.freeze({
+    anchor: Object.freeze(anchor),
+    objectVersion,
+    ok: true,
+    verified: true,
+  });
 };
 
 export const writeAuditAnchor = async ({
@@ -299,9 +319,18 @@ export const writeAuditAnchor = async ({
       }),
     )) as Readonly<Record<string, unknown>>;
     if (response['ChecksumSHA256'] !== bodyChecksum) return failure('ANCHOR_CHECKSUM_MISMATCH');
+    const objectVersion = response['VersionId'];
+    if (typeof objectVersion !== 'string' || objectVersion.length === 0) {
+      return failure('ANCHOR_INVALID', false);
+    }
+    return await readAuditAnchor({
+      bucket,
+      client,
+      key: objectKey,
+      signer,
+      versionId: objectVersion,
+    });
   } catch {
     return failure('ANCHOR_WRITE_FAILED');
   }
-
-  return readAuditAnchor({ bucket, client, key: objectKey, signer });
 };

@@ -13,6 +13,7 @@ interface StoredObject {
   readonly body: Uint8Array;
   readonly checksum: string;
   readonly retainUntil: Date;
+  readonly versionId: string;
 }
 
 class MemoryObjectLockClient {
@@ -40,8 +41,9 @@ class MemoryObjectLockClient {
       const checksum = String(request['ChecksumSHA256']);
       const retainUntil = request['ObjectLockRetainUntilDate'] as Date;
       if (this.objects.has(key)) throw new Error('immutable-object-exists');
-      this.objects.set(key, { body, checksum, retainUntil });
-      return Promise.resolve({ ChecksumSHA256: checksum });
+      const versionId = `version-${String(this.objects.size + 1)}`;
+      this.objects.set(key, { body, checksum, retainUntil, versionId });
+      return Promise.resolve({ ChecksumSHA256: checksum, VersionId: versionId });
     }
     if (
       (command as { readonly constructor: { readonly name: string } }).constructor.name ===
@@ -62,6 +64,7 @@ class MemoryObjectLockClient {
         ObjectLockRetainUntilDate: this.shortenRetention
           ? new Date('2027-01-01T00:00:00.000Z')
           : stored.retainUntil,
+        VersionId: stored.versionId,
       });
     }
     return Promise.reject(new Error('unsupported command'));
@@ -128,7 +131,12 @@ describe('immutable external audit anchors', () => {
       key: writeResult.anchor.objectKey,
       signer,
     });
-    expect(readResult).toEqual({ ok: true, anchor: writeResult.anchor, verified: true });
+    expect(readResult).toEqual({
+      ok: true,
+      anchor: writeResult.anchor,
+      objectVersion: writeResult.objectVersion,
+      verified: true,
+    });
     expect(writeResult.anchor.retainUntil).toBe('2031-08-05T12:15:00.000Z');
     expect(writeResult.anchor.signingKeyId).toBe('kms-audit-asymmetric-key');
   });

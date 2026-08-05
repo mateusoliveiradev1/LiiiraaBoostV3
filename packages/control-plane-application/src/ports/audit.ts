@@ -69,7 +69,7 @@ export type AuditAnchorFailureCode =
   | 'ANCHOR_WRITE_FAILED';
 
 export type AuditAnchorResult =
-  | Readonly<{ ok: true; anchor: AuditAnchor; verified: true }>
+  | Readonly<{ ok: true; anchor: AuditAnchor; objectVersion: string; verified: true }>
   | Readonly<{
       code: AuditAnchorFailureCode;
       ok: false;
@@ -78,5 +78,5 @@ export type AuditAnchorResult =
 
 export interface AuditAnchorPort {
   write(checkpoint: AuditAnchorCheckpoint, legalHold?: AuditLegalHold): Promise<AuditAnchorResult>;
-  read(objectKey: string): Promise<AuditAnchorResult>;
+  read(objectKey: string, objectVersion?: string): Promise<AuditAnchorResult>;
 }

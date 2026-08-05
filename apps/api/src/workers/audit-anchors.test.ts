@@ -28,13 +28,18 @@ const OBJECT_VERSION = 'immutable-version-0001';
 const anchorFor = (checkpoint: AuditAnchorCheckpoint): AuditAnchor => ({
   schemaVersion: '1.0',
   kind: 'audit-anchor',
-  ...checkpoint,
+  streamId: checkpoint.streamId,
+  segmentId: checkpoint.segmentId,
+  sequenceNumber: checkpoint.sequenceNumber,
+  eventHash: checkpoint.eventHash,
+  segmentStartedAt: checkpoint.segmentStartedAt,
+  anchoredAt: checkpoint.anchoredAt,
+  eventCount: checkpoint.eventCount,
   checksum: 'b'.repeat(64),
   signature: 'synthetic-signature',
   signatureAlgorithm: 'ECDSA_SHA_256',
   signingKeyId: 'audit-signing-role-key',
   objectKey: `audit-anchors/${checkpoint.streamId}/${String(checkpoint.sequenceNumber).padStart(20, '0')}-${checkpoint.eventHash}.json`,
-  objectVersion: OBJECT_VERSION,
   retainUntil: '2031-08-05T12:15:00.000Z',
 });
 
@@ -54,7 +59,12 @@ class MemoryAnchorPort implements AuditAnchorPort {
     if (this.forgedHealthy) {
       return Promise.resolve({ ok: true, anchor, verified: false } as never);
     }
-    return Promise.resolve({ ok: true as const, anchor, verified: true as const });
+    return Promise.resolve({
+      ok: true as const,
+      anchor,
+      objectVersion: OBJECT_VERSION,
+      verified: true as const,
+    });
   }
 
   read(objectKey: string) {
@@ -68,7 +78,12 @@ class MemoryAnchorPort implements AuditAnchorPort {
           code: 'ANCHOR_READ_FAILED' as const,
           retryable: true,
         })
-      : Promise.resolve({ ok: true as const, anchor, verified: true as const });
+      : Promise.resolve({
+          ok: true as const,
+          anchor,
+          objectVersion: OBJECT_VERSION,
+          verified: true as const,
+        });
   }
 }
 
@@ -95,10 +110,7 @@ class MemoryScheduleRepository implements AuditAnchorScheduleRepository {
     return Promise.resolve();
   }
 
-  recordAnchorFailure(
-    _claimId: string,
-    failure: Readonly<{ code: string; terminal: boolean }>,
-  ) {
+  recordAnchorFailure(_claimId: string, failure: Readonly<{ code: string; terminal: boolean }>) {
     this.failures.push(failure);
     return Promise.resolve();
   }
@@ -108,10 +120,7 @@ class MemoryScheduleRepository implements AuditAnchorScheduleRepository {
     return Promise.resolve(this.verification.filter((job) => job.mode === input.mode));
   }
 
-  recordVerification(
-    _claimId: string,
-    result: Readonly<{ code?: string; healthy: boolean }>,
-  ) {
+  recordVerification(_claimId: string, result: Readonly<{ code?: string; healthy: boolean }>) {
     if (!result.healthy) {
       this.failures.push({ code: result.code ?? 'ANCHOR_INVALID', terminal: false });
     }
@@ -210,6 +219,52 @@ describe('audit-anchor-worker durable schedule', () => {
     expect(JSON.stringify(repository.failures)).not.toMatch(/provider|aws|kms|stack/iu);
   });
 
+  it('records bounded terminal failure evidence after the final storage attempt', async () => {
+    const repository = new MemoryScheduleRepository();
+    repository.due.push(dueJob({ attemptCount: 2 }));
+    const port = new MemoryAnchorPort();
+    port.failure = 'ANCHOR_WRITE_FAILED';
+
+    const result = await anchorDueAuditHeads(
+      { repository, port },
+      { limit: 10, maxAttempts: 3, now: NOW, workerId: 'worker-terminal' },
+    );
+
+    expect(result).toEqual({ anchored: 0, claimed: 1, failed: 1, retried: 0 });
+    expect(repository.failures).toEqual([{ code: 'ANCHOR_WRITE_FAILED', terminal: true }]);
+  });
+
+  it('converges an ambiguous duplicate write by reading the deterministic immutable object', async () => {
+    const repository = new MemoryScheduleRepository();
+    const job = dueJob();
+    repository.due.push(job);
+    const checkpoint = {
+      schemaVersion: '1.0' as const,
+      kind: 'audit-anchor-checkpoint' as const,
+      streamId: job.streamId,
+      segmentId: job.segmentId,
+      sequenceNumber: job.head.lastSequence,
+      eventHash: job.head.lastHash,
+      segmentStartedAt: job.segmentStartedAt,
+      anchoredAt: NOW,
+      eventCount: job.eventsSinceAnchor,
+    };
+    const anchor = anchorFor(checkpoint);
+    const port: AuditAnchorPort = {
+      write: () => Promise.resolve({ ok: false, code: 'ANCHOR_WRITE_FAILED', retryable: true }),
+      read: () =>
+        Promise.resolve({ ok: true, anchor, objectVersion: OBJECT_VERSION, verified: true }),
+    };
+
+    await expect(
+      anchorDueAuditHeads(
+        { repository, port },
+        { limit: 10, maxAttempts: 3, now: NOW, workerId: 'worker-recovery' },
+      ),
+    ).resolves.toEqual({ anchored: 1, claimed: 1, failed: 0, retried: 0 });
+    expect(repository.receipts).toHaveLength(1);
+  });
+
   it('runs daily latest-anchor verification and monthly complete-segment continuity drills', async () => {
     const repository = new MemoryScheduleRepository();
     const port = new MemoryAnchorPort();
@@ -233,6 +288,7 @@ describe('audit-anchor-worker durable schedule', () => {
         attemptCount: 0,
         receipt: {
           ...anchor,
+          objectVersion: OBJECT_VERSION,
           purpose: 'audit-chain-integrity',
           verifiedAt: NOW,
         },
@@ -244,6 +300,7 @@ describe('audit-anchor-worker durable schedule', () => {
         attemptCount: 0,
         receipt: {
           ...anchor,
+          objectVersion: OBJECT_VERSION,
           purpose: 'audit-chain-integrity',
           verifiedAt: NOW,
         },
@@ -252,7 +309,7 @@ describe('audit-anchor-worker durable schedule', () => {
       },
     );
 
-    await runAuditAnchorVerificationOnce(
+    const daily = await runAuditAnchorVerificationOnce(
       { repository, port },
       { mode: 'latest', now: NOW, workerId: 'daily-worker' },
     );
@@ -262,7 +319,8 @@ describe('audit-anchor-worker durable schedule', () => {
     );
 
     expect(repository.verificationModes).toEqual(['latest', 'complete-segment']);
-    expect(monthly).toEqual({ claimed: 1, failed: 1, retried: 1, verified: 0 });
+    expect(daily).toEqual({ claimed: 1, failed: 0, retried: 0, verified: 1 });
+    expect(monthly).toEqual({ claimed: 1, failed: 0, retried: 1, verified: 0 });
     expect(repository.failures.at(-1)?.code).toBe('AUDIT_TRUNCATED');
   });
 });

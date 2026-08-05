@@ -30,9 +30,9 @@ describe('audit anchor fail-visible health', () => {
             signatureAlgorithm: 'ECDSA_SHA_256',
             signingKeyId: 'ordinary-api-role',
             objectKey: 'forged',
-            objectVersion: 'forged',
             retainUntil: '2031-08-05T12:15:00.000Z',
           },
+          objectVersion: 'forged',
         }),
       read: () => Promise.reject(new Error('not-called')),
     } as unknown as AuditAnchorPort;
@@ -72,7 +72,7 @@ describe('audit anchor fail-visible health', () => {
         now: '2026-08-05T12:15:00.000Z',
         workerId: 'ordinary-api-worker',
       }),
-    ).resolves.toEqual({ anchored: 0, claimed: 1, failed: 0, retried: 1 });
+    ).resolves.toEqual({ anchored: 0, claimed: 1, failed: 1, retried: 0 });
     expect(health).toEqual([{ healthy: false, code: 'ANCHOR_INVALID' }]);
   });
 

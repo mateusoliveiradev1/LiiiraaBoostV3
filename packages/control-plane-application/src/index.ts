@@ -12,3 +12,4 @@ export * from './use-cases/reconcile-commerce.js';
 export * from './use-cases/manage-support-case.js';
 export * from './use-cases/manage-consent.js';
 export * from './use-cases/delete-account.js';
+export * from './use-cases/anchor-audit-chain.js';
