@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import { decideDeviceBinding } from './device-binding.js';
+import type {
+  BindDeviceCommand,
+  DeviceTransferException,
+  TransferDeviceCommand,
+} from './device-binding.js';
 import type { ProtectedDeviceEvidence } from './device-evidence.js';
 
-const OWNER = '04-14-01';
 const NOW = '2030-02-01T12:00:00.000Z';
 const ELIGIBLE_AT = '2030-03-03T12:00:00.000Z';
 
@@ -18,26 +23,11 @@ const evidence = (platformByte = 'a'): ProtectedDeviceEvidence => ({
   ],
 });
 
-type DecisionModule = Readonly<{
-  decideDeviceBinding?: (state: unknown, command: unknown) => unknown;
-}>;
-
-const loadDecision = async (): Promise<DecisionModule> =>
-  import('./device-binding.js').catch((): DecisionModule => ({}));
-
-const requireDecision = async () => {
-  const module = await loadDecision();
-  if (typeof module.decideDeviceBinding !== 'function') {
-    throw new Error(`EXPECTED_RED[${OWNER}]: device binding decision is not implemented`);
-  }
-  return module.decideDeviceBinding;
-};
-
 describe('D-23 through D-28 device binding decisions', () => {
-  it('requires active Premium and both first-bind confirmations', async () => {
-    const decide = await requireDecision();
+  it('requires active Premium and both first-bind confirmations', () => {
+    const decide = decideDeviceBinding;
     const unbound = { accountId: 'account-player', version: 0n, premiumActive: true };
-    const command = {
+    const command: BindDeviceCommand = {
       kind: 'bind',
       bindingId: 'binding-new',
       deviceDigest: '1'.repeat(64),
@@ -66,8 +56,8 @@ describe('D-23 through D-28 device binding decisions', () => {
     });
   });
 
-  it('keeps the active PC during an ordinary pre-cooldown transfer', async () => {
-    const decide = await requireDecision();
+  it('keeps the active PC during an ordinary pre-cooldown transfer', () => {
+    const decide = decideDeviceBinding;
     const current = {
       accountId: 'account-player',
       version: 7n,
@@ -101,8 +91,8 @@ describe('D-23 through D-28 device binding decisions', () => {
     });
   });
 
-  it('revokes theft immediately and permits replacement only with a valid customer-redeemed exception', async () => {
-    const decide = await requireDecision();
+  it('revokes theft immediately and permits replacement only with a valid customer-redeemed exception', () => {
+    const decide = decideDeviceBinding;
     const state = {
       accountId: 'account-player',
       version: 3n,
@@ -124,7 +114,16 @@ describe('D-23 through D-28 device binding decisions', () => {
       reason: 'theft-revoked-replacement-waits',
     });
 
-    const replacement = {
+    const validException: DeviceTransferException = {
+      exceptionId: 'exception-one',
+      accountId: 'account-player',
+      reviewed: true,
+      issuedAt: NOW,
+      expiresAt: '2030-02-02T12:00:00.000Z',
+      consumedAt: null,
+      strongAuthVerifiedAt: '2030-02-02T10:55:00.000Z',
+    };
+    const replacement: TransferDeviceCommand = {
       kind: 'transfer',
       reason: 'theft',
       bindingId: 'binding-replacement',
@@ -133,15 +132,7 @@ describe('D-23 through D-28 device binding decisions', () => {
       evidence: evidence('f'),
       confirmedByCustomer: true,
       now: '2030-02-02T11:00:00.000Z',
-      exception: {
-        exceptionId: 'exception-one',
-        accountId: 'account-player',
-        reviewed: true,
-        issuedAt: NOW,
-        expiresAt: '2030-02-02T12:00:00.000Z',
-        consumedAt: null,
-        strongAuthVerifiedAt: '2030-02-02T10:55:00.000Z',
-      },
+      exception: validException,
     };
     expect(decide(state, replacement)).toMatchObject({
       outcome: 'replace',
@@ -151,7 +142,7 @@ describe('D-23 through D-28 device binding decisions', () => {
     expect(
       decide(state, {
         ...replacement,
-        exception: { ...replacement.exception, consumedAt: NOW },
+        exception: { ...validException, consumedAt: NOW },
       }),
     ).toMatchObject({ outcome: 'denied', reason: 'exception-already-consumed' });
     expect(
@@ -163,20 +154,20 @@ describe('D-23 through D-28 device binding decisions', () => {
     expect(
       decide(state, {
         ...replacement,
-        exception: { ...replacement.exception, reviewed: false },
+        exception: { ...validException, reviewed: false },
       }),
     ).toMatchObject({ outcome: 'denied', reason: 'exception-not-reviewed' });
     expect(
       decide(state, {
         ...replacement,
-        exception: { ...replacement.exception, accountId: 'account-attacker' },
+        exception: { ...validException, accountId: 'account-attacker' },
       }),
     ).toMatchObject({ outcome: 'denied', reason: 'exception-account-mismatch' });
     expect(
       decide(state, {
         ...replacement,
         exception: {
-          ...replacement.exception,
+          ...validException,
           expiresAt: '2030-02-03T12:00:00.000Z',
         },
       }),
@@ -185,7 +176,7 @@ describe('D-23 through D-28 device binding decisions', () => {
       decide(state, {
         ...replacement,
         exception: {
-          ...replacement.exception,
+          ...validException,
           strongAuthVerifiedAt: '2030-02-02T10:30:00.000Z',
         },
       }),
@@ -196,8 +187,8 @@ describe('D-23 through D-28 device binding decisions', () => {
     });
   });
 
-  it('retains minor evidence changes and opens explainable revalidation for substantial change', async () => {
-    const decide = await requireDecision();
+  it('retains minor evidence changes and opens explainable revalidation for substantial change', () => {
+    const decide = decideDeviceBinding;
     const state = {
       accountId: 'account-player',
       version: 1n,
