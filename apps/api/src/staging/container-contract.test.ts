@@ -49,6 +49,10 @@ describe('daemon-free OCI artifact contract', () => {
     );
     expect(workflow).toContain('environment: staging-api');
     expect(workflow).toContain('autoDeploy: false');
+    expect(workflow).toContain('run: pnpm --filter @liiiraa/api db:migrate');
+    expect(workflow).not.toContain(
+      'Run staging migrations before promotion\n        env:\n          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}\n        run: pnpm --filter @liiiraa/api db:migrate:test',
+    );
     expect(workflow).not.toMatch(/liiiraa-boost-api:[a-z0-9._-]+/iu);
   });
 
