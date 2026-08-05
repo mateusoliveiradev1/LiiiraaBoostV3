@@ -7,3 +7,5 @@ export * from './use-cases/bind-device.js';
 export * from './use-cases/transfer-device.js';
 export * from './use-cases/security-methods.js';
 export * from './use-cases/recover-account.js';
+export * from './use-cases/manage-subscription.js';
+export * from './use-cases/reconcile-commerce.js';

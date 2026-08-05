@@ -3,6 +3,7 @@ import {
   reconcileCommerce,
   type CommerceAuthorityRepository,
   type CommerceReconciliationTransaction,
+  type CommerceSubscriptionRecord,
 } from '@liiiraa/control-plane-application';
 import { describe, expect, it } from 'vitest';
 
@@ -52,7 +53,7 @@ const providerTruth = Object.freeze({
 
 class MemoryCommerceRepository implements CommerceAuthorityRepository {
   readonly inbox = new Map<string, 'processing' | 'processed' | 'retryable'>();
-  readonly subscriptions = new Map<string, unknown>();
+  readonly subscriptions = new Map<string, CommerceSubscriptionRecord>();
   readonly invoices = new Map<string, unknown>();
   readonly entitlements = new Map<string, unknown>();
   readonly audits: unknown[] = [];
@@ -60,15 +61,18 @@ class MemoryCommerceRepository implements CommerceAuthorityRepository {
   failAt: 'audit' | 'outbox' | null = null;
   private serial = Promise.resolve();
 
-  async claimProviderEvent(event: ProviderEventJson) {
+  claimProviderEvent(event: ProviderEventJson) {
     const current = this.inbox.get(event.providerEventId);
-    if (current === 'processed' || current === 'processing') return 'duplicate' as const;
+    if (current === 'processed' || current === 'processing') {
+      return Promise.resolve('duplicate' as const);
+    }
     this.inbox.set(event.providerEventId, 'processing');
-    return 'claimed' as const;
+    return Promise.resolve('claimed' as const);
   }
 
-  async markProviderEventRetryable(eventId: string) {
+  markProviderEventRetryable(eventId: string) {
     this.inbox.set(eventId, 'retryable');
+    return Promise.resolve();
   }
 
   async transaction<T>(
@@ -90,27 +94,33 @@ class MemoryCommerceRepository implements CommerceAuthorityRepository {
       inbox: new Map(this.inbox),
     };
     const transaction = {
-      resolveAccountId: async () => 'account-reconciled',
-      lockSubscription: async () => staged.subscriptions.get('sub_reconciled') ?? null,
-      saveSubscription: async (record: { providerSubscriptionId: string }) => {
+      resolveAccountId: () => Promise.resolve('account-reconciled'),
+      lockSubscription: () => Promise.resolve(staged.subscriptions.get('sub_reconciled') ?? null),
+      saveSubscription: (record: CommerceSubscriptionRecord) => {
         staged.subscriptions.set(record.providerSubscriptionId, record);
+        return Promise.resolve();
       },
-      upsertInvoice: async (record: { providerInvoiceId: string }) => {
+      upsertInvoice: (record: { providerInvoiceId: string }) => {
         staged.invoices.set(record.providerInvoiceId, record);
+        return Promise.resolve();
       },
-      saveEntitlement: async (record: { subscriptionId: string }) => {
+      saveEntitlement: (record: { subscriptionId: string }) => {
         staged.entitlements.set(record.subscriptionId, record);
+        return Promise.resolve();
       },
-      appendAudit: async (record: unknown) => {
+      appendAudit: (record: unknown) => {
         if (this.failAt === 'audit') throw new Error('synthetic-audit-failure');
         staged.audits.push(record);
+        return Promise.resolve();
       },
-      enqueueOutbox: async (record: unknown) => {
+      enqueueOutbox: (record: unknown) => {
         if (this.failAt === 'outbox') throw new Error('synthetic-outbox-failure');
         staged.outbox.push(record);
+        return Promise.resolve();
       },
-      markProviderEventProcessed: async (eventId: string) => {
+      markProviderEventProcessed: (eventId: string) => {
         staged.inbox.set(eventId, 'processed');
+        return Promise.resolve();
       },
     } satisfies CommerceReconciliationTransaction;
     try {
@@ -135,12 +145,13 @@ class MemoryCommerceRepository implements CommerceAuthorityRepository {
 const dependencies = (repository: MemoryCommerceRepository) => ({
   repository,
   provider: {
-    createCheckout: async () => ({
-      ok: false as const,
-      code: 'INVALID_MUTATION' as const,
-      retryable: false,
-    }),
-    retrieveCurrentState: async () => ({ ok: true as const, value: providerTruth }),
+    createCheckout: () =>
+      Promise.resolve({
+        ok: false as const,
+        code: 'INVALID_MUTATION' as const,
+        retryable: false,
+      }),
+    retrieveCurrentState: () => Promise.resolve({ ok: true as const, value: providerTruth }),
   },
   clock: { now: () => new Date(NOW) },
   ids: {
@@ -212,16 +223,18 @@ describe('provider-authoritative commerce reconciliation', () => {
       {
         ...dependencies(repository),
         provider: {
-          createCheckout: async () => ({
-            ok: false as const,
-            code: 'INVALID_MUTATION' as const,
-            retryable: false,
-          }),
-          retrieveCurrentState: async () => ({
-            ok: false as const,
-            code: 'PROVIDER_UNAVAILABLE' as const,
-            retryable: true,
-          }),
+          createCheckout: () =>
+            Promise.resolve({
+              ok: false as const,
+              code: 'INVALID_MUTATION' as const,
+              retryable: false,
+            }),
+          retrieveCurrentState: () =>
+            Promise.resolve({
+              ok: false as const,
+              code: 'PROVIDER_UNAVAILABLE' as const,
+              retryable: true,
+            }),
         },
       },
       { providerEvent: providerEvent('event-unavailable') },
@@ -230,6 +243,84 @@ describe('provider-authoritative commerce reconciliation', () => {
     expect(repository.entitlements.size).toBe(0);
     expect(repository.inbox.get('event-unavailable')).toBe('retryable');
   });
+
+  it('reconciles grace, paid-period cancellation, refund, and dispute from fresh provider truth', async () => {
+    const paidInvoice = providerTruth.invoices[0];
+    if (paidInvoice === undefined) throw new Error('synthetic-paid-invoice-required');
+    const cases = [
+      {
+        id: 'grace',
+        truth: {
+          ...providerTruth,
+          subscription: {
+            ...providerTruth.subscription,
+            state: 'past-due' as const,
+            paymentFailedAt: NOW,
+          },
+        },
+        expected: { status: 'grace', allowNewPremiumActions: true },
+      },
+      {
+        id: 'cancel-paid-period',
+        truth: {
+          ...providerTruth,
+          subscription: {
+            ...providerTruth.subscription,
+            state: 'canceled' as const,
+            cancelAtPeriodEnd: true,
+          },
+        },
+        expected: { status: 'active', allowNewPremiumActions: true },
+      },
+      {
+        id: 'refund',
+        truth: {
+          ...providerTruth,
+          invoices: [{ ...paidInvoice, refundedAt: NOW }],
+        },
+        expected: { status: 'expired', allowNewPremiumActions: false },
+      },
+      {
+        id: 'dispute',
+        truth: {
+          ...providerTruth,
+          invoices: [{ ...paidInvoice, disputeOpenedAt: NOW }],
+        },
+        expected: { status: 'disputed', allowNewPremiumActions: false },
+      },
+    ] as const;
+
+    for (const lifecycleCase of cases) {
+      const repository = new MemoryCommerceRepository();
+      const result = await reconcileCommerce(
+        {
+          ...dependencies(repository),
+          provider: {
+            createCheckout: () =>
+              Promise.resolve({
+                ok: false as const,
+                code: 'INVALID_MUTATION' as const,
+                retryable: false,
+              }),
+            retrieveCurrentState: () =>
+              Promise.resolve({
+                ok: true as const,
+                value: lifecycleCase.truth,
+              }),
+          },
+        },
+        { providerEvent: providerEvent(`event-${lifecycleCase.id}`) },
+      );
+      expect(result).toMatchObject({ ok: true, outcome: 'applied' });
+      const subscription = repository.subscriptions.get('sub_reconciled');
+      expect(subscription).toMatchObject({ status: lifecycleCase.expected.status });
+      expect(subscription?.capabilities).toEqual({
+        newPremiumActions: lifecycleCase.expected.allowNewPremiumActions,
+        safetyHistoryRestoration: true,
+      });
+      expect(repository.inbox.get(`event-${lifecycleCase.id}`)).toBe('processed');
+    }
+  });
 });
 
 describe('bounded commerce worker claiming', () => {
@@ -237,23 +328,37 @@ describe('bounded commerce worker claiming', () => {
     expect(COMMERCE_WORK_CLAIM_SQL).toMatch(/FOR UPDATE SKIP LOCKED/iu);
     const claimedLimits: number[] = [];
     const completed: string[] = [];
-    const retried: Array<{ id: string; delayMs: number }> = [];
+    const retried: { id: string; delayMs: number }[] = [];
     await runCommerceWorkerOnce(
       {
-        claim: async ({ limit }) => {
+        claim: ({ limit }) => {
           claimedLimits.push(limit);
-          return [
-            { id: 'job-success', attemptCount: 0, providerEvent: providerEvent('worker-success') },
-            { id: 'job-retry', attemptCount: 2, providerEvent: providerEvent('worker-retry') },
-            { id: 'job-dead', attemptCount: 4, providerEvent: providerEvent('worker-dead') },
-          ];
+          return Promise.resolve([
+            {
+              id: 'job-success',
+              attemptCount: 0,
+              providerEvent: providerEvent('worker-success'),
+            },
+            {
+              id: 'job-retry',
+              attemptCount: 2,
+              providerEvent: providerEvent('worker-retry'),
+            },
+            {
+              id: 'job-dead',
+              attemptCount: 4,
+              providerEvent: providerEvent('worker-dead'),
+            },
+          ]);
         },
-        complete: async (id) => void completed.push(id),
-        retry: async (id, delayMs) => void retried.push({ id, delayMs }),
-        fail: async (id) => void completed.push(`failed:${id}`),
+        complete: (id) => Promise.resolve(void completed.push(id)),
+        retry: (id, delayMs) => Promise.resolve(void retried.push({ id, delayMs })),
+        fail: (id) => Promise.resolve(void completed.push(`failed:${id}`)),
       },
-      async (event) =>
-        event.providerEventId !== 'worker-retry' && event.providerEventId !== 'worker-dead',
+      (event) =>
+        Promise.resolve(
+          event.providerEventId !== 'worker-retry' && event.providerEventId !== 'worker-dead',
+        ),
       { workerId: 'commerce-worker-1', batchSize: 10, maxAttempts: 5 },
     );
 

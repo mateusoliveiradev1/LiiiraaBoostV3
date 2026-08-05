@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "db:migrate:test": "pnpm --dir ../../packages/control-plane-adapters exec vitest --run src/postgres/migrations.test.ts",
-    "test": "vitest --config vitest.config.ts --run",
+    "test": "node ./scripts/run-tests.mjs",
     "test:postgres": "vitest --config vitest.config.ts --run --mode postgres"
   },
   "dependencies": {

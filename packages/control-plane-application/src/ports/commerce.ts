@@ -22,8 +22,15 @@ export interface ProviderMutationContext {
 export interface ProviderSubscriptionReconciliation {
   readonly providerSubscriptionId: string;
   readonly state: SubscriptionStateJson;
+  readonly plan?: 'free' | 'premium';
+  readonly cadence?: 'monthly' | 'annual';
+  readonly paymentMethod?: 'card' | 'pix';
+  readonly currency?: 'BRL' | 'USD';
+  readonly priceMinor?: number;
   readonly currentPeriodStart: string;
   readonly currentPeriodEnd: string;
+  readonly firstPaymentAt?: string;
+  readonly paymentFailedAt?: string;
   readonly cancelAtPeriodEnd: boolean;
 }
 
@@ -33,6 +40,11 @@ export interface ProviderInvoiceReconciliation {
   readonly currency: string;
   readonly amountDueMinor: number;
   readonly amountPaidMinor: number;
+  readonly issuedAt?: string;
+  readonly paidAt?: string;
+  readonly refundedAt?: string;
+  readonly disputeOpenedAt?: string;
+  readonly disputeResolvedAt?: string;
 }
 
 export interface ProviderReconciliation {
