@@ -1,0 +1,204 @@
+import { readFileSync } from 'node:fs';
+
+import type { AuthorityReceiptJson, DiagnosticConsentJson } from '@liiiraa/contracts-ts';
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  createAdminAuthority,
+  type AdminAuthorityTransport,
+  type AdminDiagnosticProjection,
+} from '../admin-authority';
+import { resolveAdminRuntimeConfig } from '../admin-runtime';
+
+const response = (
+  body: unknown,
+  status = 200,
+  headers: Record<string, string> = {},
+): Response =>
+  new Response(JSON.stringify(body), {
+    headers: { 'cache-control': 'no-store', 'content-type': 'application/json', ...headers },
+    status,
+  });
+
+const consent = (state: 'active' | 'revoked' | 'expired' = 'active'): DiagnosticConsentJson => ({
+  schemaVersion: '1.0',
+  aggregateVersion: state === 'active' ? '4' : '5',
+  etag: `consent-consent-015-${state}`,
+  correlationId: 'admin-consent-test',
+  provenance: 'postgres-authority',
+  kind: 'diagnostic-consent',
+  consentId: 'consent-015',
+  accountId: 'account-015',
+  state,
+  scopes: ['support-diagnostics'],
+  purpose: 'Review startup-state and application-version for case DIA-015',
+  grantedAt: '2026-01-15T11:00:00.000Z',
+  expiresAt: state === 'expired' ? '2026-01-15T11:59:59.000Z' : '2026-01-15T13:00:00.000Z',
+  ...(state === 'revoked' ? { revokedAt: '2026-01-15T12:01:00.000Z' } : {}),
+});
+
+const diagnostic = (state: 'active' | 'revoked' = 'active'): AdminDiagnosticProjection => ({
+  consent: consent(state),
+  fields: state === 'active' ? { 'application-version': '1.0.0', 'startup-state': 'ready' } : {},
+  auditEvents: [
+    {
+      schemaVersion: '1.0',
+      kind: 'audit-event',
+      auditEventId: state === 'active' ? 'audit-diagnostic-opened' : 'audit-diagnostic-revoked',
+      actorReference: 'security-operator',
+      assumedRole: 'security',
+      action: state === 'active' ? 'diagnostic-access-opened' : 'diagnostic-access-revoked',
+      redactedTarget: 'Diagnostic ••••-015',
+      reason: state === 'active' ? 'Active bounded consent' : 'Account owner revoked consent',
+      result: 'succeeded',
+      aggregateVersion: state === 'active' ? '4' : '5',
+      correlationId: 'admin-consent-test',
+      eventHash: 'a'.repeat(64),
+      occurredAt: state === 'active' ? '2026-01-15T12:00:00.000Z' : '2026-01-15T12:01:00.000Z',
+    },
+  ],
+});
+
+const receipt: AuthorityReceiptJson = {
+  schemaVersion: '1.0',
+  kind: 'authority-receipt',
+  receiptId: 'receipt-admin-01',
+  commandId: 'command-admin-01',
+  aggregateId: 'release-017',
+  aggregateVersion: '8',
+  etag: 'release-release-017-v8',
+  correlationId: 'admin-command-test',
+  auditReference: 'audit-admin-command-01',
+  outcome: 'applied',
+  provenance: 'postgres-authority',
+  recordedAt: '2026-01-15T12:02:00.000Z',
+};
+
+describe('production admin authority', () => {
+  it('projects only the singular server-admitted role and never sends URL role authority', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({ actorId: 'developer-01', expiresAt: '2026-01-15T13:00:00.000Z', role: 'security' }),
+      )
+      .mockResolvedValueOnce(response({ records: [{ id: 'DIA-015', redactedTarget: 'Diagnostic ••••-015' }] }));
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-read-test',
+      csrfToken: () => 'csrf-admin-test',
+      transport,
+    });
+
+    await expect(authority.session()).resolves.toMatchObject({ role: 'security' });
+    await expect(authority.list('diagnostic-metadata')).resolves.toMatchObject({
+      records: [{ id: 'DIA-015' }],
+      role: 'security',
+      status: 'online',
+    });
+    expect(transport.mock.calls.map(([url]) => String(url))).toEqual([
+      '/v1/admin/session',
+      '/v1/admin/diagnostic-metadata',
+    ]);
+    expect(transport.mock.calls.map(([url]) => String(url)).join(' ')).not.toContain('role=');
+  });
+
+  it('fails closed before transport until step-up, reason, impact review, and confirmation exist', async () => {
+    const transport = vi.fn<AdminAuthorityTransport>().mockResolvedValue(response(receipt));
+    const authority = createAdminAuthority({
+      clock: () => '2026-01-15T12:02:00.000Z',
+      commandId: () => 'command-admin-01',
+      correlationId: () => 'admin-command-test',
+      csrfToken: () => 'csrf-admin-test',
+      transport,
+    });
+    const base = {
+      action: 'correct-entitlement' as const,
+      actorId: 'developer-01',
+      assumedRole: 'operations' as const,
+      expectedVersion: '7',
+      impactReviewed: true,
+      confirmed: true,
+      reason: 'Keep publication held while integrity is reviewed',
+      redactedTarget: 'Release ••••-017',
+    };
+
+    await expect(authority.execute({ ...base, stepUp: null })).resolves.toEqual({
+      code: 'step-up-required',
+      status: 'denied',
+    });
+    expect(transport).not.toHaveBeenCalled();
+
+    await expect(
+      authority.execute({
+        ...base,
+        stepUp: { authorizationContextId: 'step-up-admin-01', verifiedAt: '2026-01-15T12:01:00.000Z' },
+      }),
+    ).resolves.toEqual({ receipt, status: 'complete' });
+    const [, request] = transport.mock.calls[0] ?? [];
+    expect(request?.headers).toMatchObject({ 'cache-control': 'no-store' });
+    expect(JSON.parse(String(request?.body))).toMatchObject({
+      command: {
+        action: 'correct-entitlement',
+        authorizationContextId: 'step-up-admin-01',
+        reason: base.reason,
+      },
+      confirmed: true,
+      impactReviewed: true,
+    });
+  });
+
+  it('aborts and clears diagnostic bytes on revoke while retaining immutable audit evidence', async () => {
+    const controller = new AbortController();
+    const cleared = vi.fn();
+    const projected = vi.fn();
+    let notify: (() => void) | undefined;
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-consent-test',
+      csrfToken: () => 'csrf-admin-test',
+      subscribeToConsent: (listener) => {
+        notify = listener;
+        return () => undefined;
+      },
+      transport: vi
+        .fn<AdminAuthorityTransport>()
+        .mockResolvedValueOnce(response(diagnostic()))
+        .mockResolvedValueOnce(response(diagnostic('revoked'))),
+    });
+
+    const lifecycle = await authority.openDiagnostic({
+      diagnosticId: 'DIA-015',
+      onClear: cleared,
+      onProjection: projected,
+      signal: controller.signal,
+    });
+    expect(projected).toHaveBeenCalledWith(diagnostic());
+    notify?.();
+    await lifecycle.settled;
+    expect(cleared).toHaveBeenCalledWith({
+      auditEvents: diagnostic('revoked').auditEvents,
+      reason: 'revoked',
+    });
+    expect(lifecycle.signal.aborted).toBe(true);
+  });
+});
+
+describe('admin production composition', () => {
+  it('defaults deployable runtime to production and isolates preview authority', () => {
+    expect(resolveAdminRuntimeConfig({ authorityBaseUrl: 'https://api.liiiraa.test' })).toEqual({
+      authorityBaseUrl: 'https://api.liiiraa.test',
+      kind: 'production',
+    });
+    expect(resolveAdminRuntimeConfig({ previewEnabled: true })).toEqual({ kind: 'preview' });
+
+    const authoritySource = readFileSync(new URL('../admin-authority.ts', import.meta.url), 'utf8');
+    const runtimeSource = readFileSync(new URL('../admin-runtime.ts', import.meta.url), 'utf8');
+    const productionView = readFileSync(new URL('./admin-authority.tsx', import.meta.url), 'utf8');
+    const previewView = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
+    expect(authoritySource).not.toContain('@liiiraa/web-preview');
+    expect(runtimeSource).not.toContain('@liiiraa/web-preview');
+    expect(productionView).not.toContain('@liiiraa/web-preview');
+    expect(productionView).toContain('Active administrative role');
+    expect(productionView).toContain('Verify critical operation');
+    expect(productionView).toContain('Consented diagnostic view');
+    expect(previewView).toContain('@liiiraa/web-preview');
+  });
+});
