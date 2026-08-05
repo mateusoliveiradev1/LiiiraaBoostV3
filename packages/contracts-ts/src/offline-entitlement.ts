@@ -2,7 +2,7 @@ import { createPublicKey, verify } from 'node:crypto';
 
 import { controlPlaneDocumentValidator } from './generated/index.js';
 
-export const OFFLINE_ENTITLEMENT_VALIDITY_SECONDS = 604_800;
+export const OFFLINE_ENTITLEMENT_VALIDITY_SECONDS = 604_800 as const;
 
 export const OfflineEntitlementVerdict = {
   Verified: 'verified',
@@ -45,16 +45,19 @@ interface EnvelopeView {
   readonly expiresAt: string;
 }
 
-interface OfflineEntitlementClaims {
-  readonly schemaVersion: string;
+export interface OfflineEntitlementClaims {
+  readonly schemaVersion: '1.0';
   readonly accountId: string;
   readonly deviceBinding: string;
   readonly audience: string;
   readonly entitlementVersion: number;
   readonly issuedAt: string;
   readonly expiresAt: string;
-  readonly validitySeconds: number;
+  readonly validitySeconds: typeof OFFLINE_ENTITLEMENT_VALIDITY_SECONDS;
 }
+
+export const encodeOfflineEntitlementPayload = (claims: OfflineEntitlementClaims): Buffer =>
+  Buffer.from(JSON.stringify(claims), 'utf8');
 
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 const CANONICAL_UTC = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.000Z$/u;
@@ -150,6 +153,10 @@ const claimsFromBytes = (payloadBytes: Buffer): OfflineEntitlementClaims | undef
     return undefined;
   }
 
+  if (schemaVersion !== '1.0' || validitySeconds !== OFFLINE_ENTITLEMENT_VALIDITY_SECONDS) {
+    return undefined;
+  }
+
   return {
     schemaVersion,
     accountId,
@@ -158,7 +165,7 @@ const claimsFromBytes = (payloadBytes: Buffer): OfflineEntitlementClaims | undef
     entitlementVersion: entitlementVersion as number,
     issuedAt,
     expiresAt,
-    validitySeconds: validitySeconds as number,
+    validitySeconds,
   };
 };
 

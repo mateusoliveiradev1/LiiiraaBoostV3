@@ -35,10 +35,7 @@ interface EntitlementBody {
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const stringValue = (
-  value: Readonly<Record<string, unknown>>,
-  key: string,
-): string | undefined => {
+const stringValue = (value: Readonly<Record<string, unknown>>, key: string): string | undefined => {
   const candidate = value[key];
   return typeof candidate === 'string' && candidate.length > 0 ? candidate : undefined;
 };
@@ -110,23 +107,28 @@ const mutationContext = async (
   dependencies: EntitlementRouteDependencies,
 ) => {
   const actor = await dependencies.resolveSessionActor(request);
+  if (actor === null) return { ok: false as const, status: 401 as const };
   const body = bodyValue(request.body);
-  if (actor === null || body === null) return null;
+  if (body === null) return { ok: false as const, status: 400 as const };
   const entitlementVersion = versionValue(body.expectedEntitlementVersion);
   const deviceVersion = versionValue(body.expectedDeviceVersion);
-  if (entitlementVersion === null || deviceVersion === null) return null;
-  return { actor, body, entitlementVersion, deviceVersion };
+  if (entitlementVersion === null || deviceVersion === null) {
+    return { ok: false as const, status: 400 as const };
+  }
+  return { ok: true as const, actor, body, entitlementVersion, deviceVersion };
 };
 
 export const registerEntitlementRoutes = async (
   app: FastifyInstance,
   dependencies: EntitlementRouteDependencies,
 ): Promise<void> => {
-  const issue = (operation: 'issue' | 'renew') =>
-    async (request: FastifyRequest, reply: FastifyReply) => {
+  const issue =
+    (operation: 'issue' | 'renew') => async (request: FastifyRequest, reply: FastifyReply) => {
       const context = await mutationContext(request, dependencies);
-      if (context === null || context.body.audience === undefined) {
-        return reply.code(400).send({ code: 'INVALID_REQUEST' });
+      if (!context.ok || context.body.audience === undefined) {
+        return reply.code(context.ok ? 400 : context.status).send({
+          code: !context.ok && context.status === 401 ? 'UNAUTHORIZED' : 'INVALID_REQUEST',
+        });
       }
       return sendResult(
         reply,
@@ -148,8 +150,10 @@ export const registerEntitlementRoutes = async (
   app.post('/v1/entitlements/offline/renew', issue('renew'));
   app.post('/v1/entitlements/offline/revoke', async (request, reply) => {
     const context = await mutationContext(request, dependencies);
-    if (context === null || context.body.reason === undefined) {
-      return reply.code(400).send({ code: 'INVALID_REQUEST' });
+    if (!context.ok || context.body.reason === undefined) {
+      return reply.code(context.ok ? 400 : context.status).send({
+        code: !context.ok && context.status === 401 ? 'UNAUTHORIZED' : 'INVALID_REQUEST',
+      });
     }
     return sendResult(
       reply,
@@ -178,8 +182,6 @@ export const registerEntitlementRoutes = async (
   app.get('/v1/entitlements/offline/verification-keys', async (request, reply) => {
     const actor = await dependencies.resolveSessionActor(request);
     if (actor === null) return reply.code(401).send({ code: 'UNAUTHORIZED' });
-    return reply
-      .code(200)
-      .send(await dependencies.authority.signer.publicVerificationData());
+    return reply.code(200).send(await dependencies.authority.signer.publicVerificationData());
   });
 };

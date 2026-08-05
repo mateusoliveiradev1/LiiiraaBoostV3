@@ -20,12 +20,8 @@ import { createStagingEntitlementSigner } from '@liiiraa/control-plane-adapters'
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
 
-import manifest from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/manifest.json' with {
-  type: 'json',
-};
-import validFixture from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/valid.json' with {
-  type: 'json',
-};
+import manifest from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/manifest.json' with { type: 'json' };
+import validFixture from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/valid.json' with { type: 'json' };
 import { registerEntitlementRoutes } from './routes.js';
 
 const ACCOUNT_ID = 'synthetic-account-0001';
@@ -46,10 +42,7 @@ const privateKeyHandle = (seed: string): KeyObject =>
     type: 'pkcs8',
   });
 
-const signingKey = (
-  keyId = 'development-current-0001',
-  seed = CURRENT_KEY_SEED,
-) =>
+const signingKey = (keyId = 'development-current-0001', seed = CURRENT_KEY_SEED) =>
   createStagingEntitlementSigner({
     keyId,
     privateKeyHandle: privateKeyHandle(seed),
@@ -249,15 +242,13 @@ describe('entitlement-issuance exact-byte authority', () => {
 
     expect(envelope).toEqual(validFixture.envelope);
     expect(Date.parse(envelope.expiresAt) - Date.parse(envelope.issuedAt)).toBe(604_800_000);
-    const keyRing = manifest.keyRing.map(
-      (key): OfflineEntitlementSigningKey => ({
-        keyId: key.keyId,
-        publicKeyBytes: key.publicKeyBytes,
-        status: key.status as OfflineEntitlementSigningKey['status'],
-        notBeforeUnixSeconds: key.notBeforeUnixSeconds,
-        notAfterUnixSeconds: key.notAfterUnixSeconds,
-      }),
-    );
+    const keyRing = manifest.keyRing.map((key): OfflineEntitlementSigningKey => ({
+      keyId: key.keyId,
+      publicKeyBytes: key.publicKeyBytes,
+      status: key.status as OfflineEntitlementSigningKey['status'],
+      notBeforeUnixSeconds: key.notBeforeUnixSeconds,
+      notAfterUnixSeconds: key.notAfterUnixSeconds,
+    }));
     expect(
       verifyOfflineEntitlementBytes(
         envelope,
@@ -329,6 +320,24 @@ describe('entitlement-issuance exact-byte authority', () => {
     expect(custodyRepository.entitlement.version).toBe(6n);
     expect(custodyRepository.audits).toHaveLength(0);
     expect(custodyRepository.outbox).toHaveLength(0);
+
+    const outOfWindowRepository = new MemoryEntitlementRepository();
+    const outOfWindow = await issueOfflineEntitlement(
+      dependencies(
+        outOfWindowRepository,
+        ISSUED_AT,
+        createStagingEntitlementSigner({
+          keyId: 'future-key',
+          privateKeyHandle: privateKeyHandle(NEXT_KEY_SEED),
+          notBeforeUnixSeconds: validFixture.nowUnixSeconds,
+          notAfterUnixSeconds: validFixture.nowUnixSeconds + 86_400,
+        }),
+      ),
+      issueInput('future-key'),
+    );
+    expect(outOfWindow).toMatchObject({ ok: false, code: 'SIGNING_UNAVAILABLE' });
+    expect(outOfWindow).not.toHaveProperty('envelope');
+    expect(outOfWindowRepository.entitlement.version).toBe(6n);
   });
 
   it('renews idempotently and advances issuedAt, entitlement version, and signing key', async () => {
@@ -354,7 +363,9 @@ describe('entitlement-issuance exact-byte authority', () => {
       issuedAt: RENEWED_AT,
       expiresAt: '2026-08-12T12:00:00.000Z',
     });
-    expect(JSON.parse(Buffer.from(envelope.payloadBytes, 'base64url').toString('utf8'))).toMatchObject({
+    expect(
+      JSON.parse(Buffer.from(envelope.payloadBytes, 'base64url').toString('utf8')),
+    ).toMatchObject({
       entitlementVersion: 8,
       issuedAt: RENEWED_AT,
     });
@@ -400,11 +411,13 @@ describe('entitlement-issuance exact-byte authority', () => {
   it('keeps private key bytes outside signer results, DTOs, records, and public verification data', async () => {
     const repository = new MemoryEntitlementRepository();
     const signer = signingKey();
-    const result = await issueOfflineEntitlement(dependencies(repository, ISSUED_AT, signer), issueInput());
+    const result = await issueOfflineEntitlement(
+      dependencies(repository, ISSUED_AT, signer),
+      issueInput(),
+    );
     const publicData = await signer.publicVerificationData();
-    const serialized = JSON.stringify(
-      { result, publicData, repository },
-      (_key, value: unknown) => (typeof value === 'bigint' ? value.toString() : value),
+    const serialized = JSON.stringify({ result, publicData, repository }, (_key, value: unknown) =>
+      typeof value === 'bigint' ? value.toString() : value,
     );
 
     expect(publicData).toEqual([manifest.keyRing[0]]);
@@ -438,13 +451,24 @@ describe('entitlement-issuance generated envelope routes', () => {
       expectedDeviceVersion: '3',
       correlationId: 'route-issue',
     };
-    const issued = await app.inject({ method: 'POST', url: '/v1/entitlements/offline/issue', payload: body });
+    const issued = await app.inject({
+      method: 'POST',
+      url: '/v1/entitlements/offline/issue',
+      payload: body,
+    });
     expect(issued.statusCode).toBe(200);
-    expect(issued.json()).toMatchObject({ kind: 'offline-entitlement-envelope', validitySeconds: 604800 });
+    expect(issued.json()).toMatchObject({
+      kind: 'offline-entitlement-envelope',
+      validitySeconds: 604800,
+    });
 
     const version = await app.inject({ method: 'GET', url: '/v1/entitlements/offline/version' });
     expect(version.statusCode).toBe(200);
-    expect(version.json()).toMatchObject({ entitlementVersion: '7', deviceVersion: '3', revoked: false });
+    expect(version.json()).toMatchObject({
+      entitlementVersion: '7',
+      deviceVersion: '3',
+      revoked: false,
+    });
 
     const renewed = await app.inject({
       method: 'POST',
@@ -465,6 +489,32 @@ describe('entitlement-issuance generated envelope routes', () => {
     });
     expect(revoked.statusCode).toBe(200);
     expect(revoked.json()).toMatchObject({ ok: true, outcome: 'revoked', aggregateVersion: '9' });
+    await app.close();
+  });
+
+  it('returns 401 before processing an unauthenticated issuance request', async () => {
+    const repository = new MemoryEntitlementRepository();
+    const app = Fastify();
+    await registerEntitlementRoutes(app, {
+      authority: dependencies(repository),
+      resolveSessionActor: () => Promise.resolve(null),
+      projectVersion: () => Promise.resolve(null),
+    });
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/entitlements/offline/issue',
+      payload: {
+        commandId: 'unauthenticated',
+        accountId: ACCOUNT_ID,
+        deviceBinding: DEVICE_BINDING,
+        audience: AUDIENCE,
+        expectedEntitlementVersion: '6',
+        expectedDeviceVersion: '3',
+        correlationId: 'unauthenticated',
+      },
+    });
+    expect(response.statusCode).toBe(401);
+    expect(repository.entitlement.version).toBe(6n);
     await app.close();
   });
 });

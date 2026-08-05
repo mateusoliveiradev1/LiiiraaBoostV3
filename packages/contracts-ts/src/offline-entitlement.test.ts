@@ -9,6 +9,7 @@ import validFixture from './fixtures/offline-entitlement/valid.json' with { type
 import { controlPlaneDocumentValidator } from './generated/index.js';
 import {
   OfflineEntitlementVerdict,
+  encodeOfflineEntitlementPayload,
   type OfflineEntitlementSigningKey,
   type TrustedTimeStore,
   verifyOfflineEntitlementBytes,
@@ -149,6 +150,18 @@ describe('offline-entitlement exact-byte cross-runtime corpus', () => {
     }
 
     if (fixture.id === 'canonical exact bytes through issuedAt plus seven days') {
+      expect(
+        encodeOfflineEntitlementPayload({
+          schemaVersion: '1.0',
+          accountId: fixture.context.accountId,
+          deviceBinding: fixture.context.deviceBinding,
+          audience: fixture.context.audience,
+          entitlementVersion: fixture.context.entitlementVersion,
+          issuedAt: fixture.envelope.issuedAt,
+          expiresAt: fixture.envelope.expiresAt,
+          validitySeconds: 604_800,
+        }).toString('base64url'),
+      ).toBe(fixture.envelope.payloadBytes);
       const versionMismatchStore = new MemoryTrustedTimeStore(fixture.lastTrustedUnixSeconds);
       expect(
         verifyOfflineEntitlementBytes(

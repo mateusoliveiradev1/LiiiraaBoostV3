@@ -1,14 +1,12 @@
 import {
+  OFFLINE_ENTITLEMENT_VALIDITY_SECONDS,
   controlPlaneDocumentValidator,
+  encodeOfflineEntitlementPayload,
   type OfflineEntitlementEnvelopeJson,
 } from '@liiiraa/contracts-ts';
 
-import type {
-  EntitlementPublicVerificationKey,
-  EntitlementSigningPort,
-} from '../ports/entitlement-signing.js';
+import type { EntitlementSigningPort } from '../ports/entitlement-signing.js';
 
-const OFFLINE_VALIDITY_SECONDS = 604_800;
 const MAX_IDENTIFIER_LENGTH = 128;
 
 export interface EntitlementSubscriptionRecord {
@@ -96,10 +94,12 @@ export interface EntitlementAuthorityTransaction {
     input: Readonly<{
       auditReference: string;
       accountId: string;
-      eventType: 'entitlement.offline-issued' | 'entitlement.offline-renewed' | 'entitlement.revoked';
+      eventType:
+        'entitlement.offline-issued' | 'entitlement.offline-renewed' | 'entitlement.revoked';
       aggregateVersion: bigint;
       deviceBinding: string;
       keyId?: string;
+      reason: string;
       correlationId: string;
       occurredAt: string;
     }>,
@@ -115,10 +115,7 @@ export interface EntitlementAuthorityTransaction {
       availableAt: string;
     }>,
   ): Promise<void>;
-  rememberCommandResult(
-    commandId: string,
-    result: OfflineEntitlementCommandResult,
-  ): Promise<void>;
+  rememberCommandResult(commandId: string, result: OfflineEntitlementCommandResult): Promise<void>;
 }
 
 export interface EntitlementAuthorityRepository {
@@ -169,17 +166,6 @@ export interface RevokeOfflineEntitlementInput {
   readonly reason: 'customer-request' | 'security' | 'commerce';
 }
 
-interface OfflineEntitlementClaims {
-  readonly schemaVersion: '1.0';
-  readonly accountId: string;
-  readonly deviceBinding: string;
-  readonly audience: string;
-  readonly entitlementVersion: number;
-  readonly issuedAt: string;
-  readonly expiresAt: string;
-  readonly validitySeconds: 604800;
-}
-
 const failure = (
   code: OfflineEntitlementFailureCode,
   reason: string,
@@ -187,9 +173,6 @@ const failure = (
 
 const boundedIdentifier = (value: string): boolean =>
   value.length > 0 && value.length <= MAX_IDENTIFIER_LENGTH;
-
-const canonicalPayloadBytes = (claims: OfflineEntitlementClaims): Buffer =>
-  Buffer.from(JSON.stringify(claims), 'utf8');
 
 const eligibleAuthority = (
   subscription: EntitlementSubscriptionRecord,
@@ -206,10 +189,6 @@ const eligibleAuthority = (
   device.state === 'active' &&
   device.bindingId === input.deviceBinding &&
   device.accountId === input.accountId;
-
-const publicVerificationData = (
-  signer: EntitlementSigningPort,
-): Promise<readonly EntitlementPublicVerificationKey[]> => signer.publicVerificationData();
 
 export const issueOfflineEntitlement = async (
   dependencies: OfflineEntitlementDependencies,
@@ -257,9 +236,9 @@ export const issueOfflineEntitlement = async (
       }
       const issuedAt = dependencies.clock.now().toISOString();
       const expiresAt = new Date(
-        Date.parse(issuedAt) + OFFLINE_VALIDITY_SECONDS * 1_000,
+        Date.parse(issuedAt) + OFFLINE_ENTITLEMENT_VALIDITY_SECONDS * 1_000,
       ).toISOString();
-      const payloadBytes = canonicalPayloadBytes({
+      const payloadBytes = encodeOfflineEntitlementPayload({
         schemaVersion: '1.0',
         accountId: input.accountId,
         deviceBinding: input.deviceBinding,
@@ -267,13 +246,25 @@ export const issueOfflineEntitlement = async (
         entitlementVersion: numericVersion,
         issuedAt,
         expiresAt,
-        validitySeconds: OFFLINE_VALIDITY_SECONDS,
+        validitySeconds: OFFLINE_ENTITLEMENT_VALIDITY_SECONDS,
       });
       let signature: Awaited<ReturnType<EntitlementSigningPort['sign']>>;
+      let verificationKeys: Awaited<ReturnType<EntitlementSigningPort['publicVerificationData']>>;
       try {
         signature = await dependencies.signer.sign(payloadBytes);
+        verificationKeys = await dependencies.signer.publicVerificationData();
       } catch {
         return failure('SIGNING_UNAVAILABLE', 'entitlement-signing-unavailable');
+      }
+      const signingKey = verificationKeys.find(({ keyId }) => keyId === signature.keyId);
+      const issuedAtUnixSeconds = Date.parse(issuedAt) / 1_000;
+      if (
+        signingKey === undefined ||
+        signature.algorithm !== 'Ed25519' ||
+        issuedAtUnixSeconds < signingKey.notBeforeUnixSeconds ||
+        issuedAtUnixSeconds > signingKey.notAfterUnixSeconds
+      ) {
+        return failure('SIGNING_UNAVAILABLE', 'entitlement-signing-key-not-current');
       }
       const envelope: OfflineEntitlementEnvelopeJson = {
         schemaVersion: '1.0',
@@ -286,7 +277,7 @@ export const issueOfflineEntitlement = async (
         deviceBinding: input.deviceBinding,
         issuedAt,
         expiresAt,
-        validitySeconds: OFFLINE_VALIDITY_SECONDS,
+        validitySeconds: OFFLINE_ENTITLEMENT_VALIDITY_SECONDS,
       };
       if (!controlPlaneDocumentValidator(envelope)) {
         return failure('SIGNING_UNAVAILABLE', 'signed-envelope-invalid');
@@ -316,6 +307,7 @@ export const issueOfflineEntitlement = async (
             : 'entitlement.offline-renewed',
         aggregateVersion: nextVersion,
         deviceBinding: input.deviceBinding,
+        reason: input.operation,
         keyId: signature.keyId,
         correlationId: input.correlationId,
         occurredAt: issuedAt,
@@ -390,6 +382,7 @@ export const revokeOfflineEntitlement = async (
         eventType: 'entitlement.revoked',
         aggregateVersion: nextVersion,
         deviceBinding: input.deviceBinding,
+        reason: input.reason,
         correlationId: input.correlationId,
         occurredAt: revokedAt,
       });
@@ -409,5 +402,3 @@ export const revokeOfflineEntitlement = async (
     return failure('PERSISTENCE_FAILED', 'entitlement-transaction-failed');
   }
 };
-
-export const entitlementPublicVerificationData = publicVerificationData;
