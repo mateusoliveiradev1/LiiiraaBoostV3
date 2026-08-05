@@ -78,7 +78,9 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
     expect(contract.buildCommand).toBe(
       `cd ../.. && pnpm --filter @liiiraa/${surface === 'web' ? 'web' : surface} build`,
     );
-    expect(contract.installCommand).toContain('pnpm install --frozen-lockfile --ignore-scripts');
+    expect(contract.installCommand).toContain(
+      'corepack pnpm@11.17.0 install --frozen-lockfile --ignore-scripts',
+    );
     expect(contract.outputDirectory).toBe('.next');
     expect(contract.rewrites).toEqual([
       {

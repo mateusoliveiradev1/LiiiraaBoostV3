@@ -3,7 +3,7 @@
   "name": "liiiraa-boost-public-staging",
   "framework": "nextjs",
   "buildCommand": "cd ../.. && pnpm --filter @liiiraa/web build",
-  "installCommand": "cd ../.. && corepack enable && corepack prepare pnpm@11.17.0 --activate && pnpm install --frozen-lockfile --ignore-scripts",
+  "installCommand": "cd ../.. && corepack enable && corepack pnpm@11.17.0 install --frozen-lockfile --ignore-scripts",
   "outputDirectory": ".next",
   "headers": [
     {

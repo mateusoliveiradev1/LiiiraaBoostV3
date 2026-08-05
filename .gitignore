@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 .turbo/
 .next/
+.vercel/
 next-env.d.ts
 coverage/
 dist/
@@ -12,3 +13,5 @@ test-results/
 /target/
 *.tsbuildinfo
 .planning/research/.cache/
+
+.vercel
