@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-11-PLAN.md
-last_updated: "2026-08-05T02:03:13.976Z"
+stopped_at: Completed 04-14-PLAN.md
+last_updated: "2026-08-05T02:25:21.808Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 155
+  completed_plans: 156
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 15 of 35
+Plan: 16 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -194,6 +194,7 @@ _Updated after plan completion_
 | Phase 04 P09 | 21 min | 1 tasks | 9 files |
 | Phase 04 P10 | 19 min | 1 tasks | 11 files |
 | Phase 04 P11 | 24 min | 1 tasks | 12 files |
+| Phase 04 P14 | 16 min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -587,6 +588,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Provider completion must match the exact invited account before local session issuance. — Prevents a valid provider session for another account from crossing the local identity boundary.
 - [Phase 04]: The API alone owns desktop PKCE state, verifier, callback validation, provider exchange, and local credential issuance. — Keeps provider secrets and tokens out of the Windows client while preserving public-client OAuth semantics.
 - [Phase 04]: Session revocation is owner-scoped and independent of Premium device binding. — Concurrent login authority is not the one-PC entitlement rule.
+- [Phase 04]: Check device command idempotency before expected-version arbitration — Safe retries return the original projection without duplicate audit or outbox records.
+- [Phase 04]: Keep session revocation and Premium device binding as separate authorities — One-PC licensing does not limit concurrent account sessions or couple their revocation lifecycles.
+- [Phase 04]: Use deterministic serializable device repositories for daemon-free local race proof — The local 20-way witness preserves transaction and uniqueness semantics without Docker or a live PostgreSQL daemon.
 
 ### Pending Todos
 
@@ -630,6 +634,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T02:03:13.968Z
-Stopped at: Completed 04-11-PLAN.md
+Last session: 2026-08-05T02:25:21.801Z
+Stopped at: Completed 04-14-PLAN.md
 Resume file: None
