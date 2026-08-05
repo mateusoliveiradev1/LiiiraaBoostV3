@@ -19,7 +19,7 @@ const manifest = (overrides: Readonly<Record<string, unknown>> = {}) => ({
   channel: 'internal',
   buildNumber: 23_001,
   buildId: 'internal-023001',
-  commit: '5177045dcfb0de9e51ec7c125b46bc4c1fe8f721',
+  commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
   digest: `sha256:${SHA256}`,
   checksum: SHA256,
   accessScope: 'invited-pcs',
@@ -84,6 +84,11 @@ describe('internal-channel manifest contract', () => {
         'contractVersion',
       ]),
     );
+    if (!existsSync(manifestUrl)) return;
+    const checkedInManifest = JSON.parse(readFileSync(manifestUrl, 'utf8')) as {
+      commit?: string;
+    };
+    expect(checkedInManifest.commit).toBe('51770454aa1d17647c4fe734ae1e57f3e0b403b0');
   });
 
   it('admits one exact restricted runtime and visibly identifies its numbered build', async () => {

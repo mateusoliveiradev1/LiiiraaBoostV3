@@ -3,7 +3,7 @@
   "channel": "internal",
   "buildNumber": 23001,
   "buildId": "internal-023001",
-  "commit": "5177045dcfb0de9e51ec7c125b46bc4c1fe8f721",
+  "commit": "51770454aa1d17647c4fe734ae1e57f3e0b403b0",
   "digest": "sha256:8f9aca95cc177780961812c2b984c9e24c04750155754f082072e463001c4ec2",
   "checksum": "8f9aca95cc177780961812c2b984c9e24c04750155754f082072e463001c4ec2",
   "accessScope": "invited-pcs",
