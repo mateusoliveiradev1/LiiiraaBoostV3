@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": "1.0.0",
-  "baselineRevision": "75e63518992821e77b42d572af7571d817e456b9",
+  "baselineRevision": "c57be192140ba0f6474518a0470dc4be57e489a7",
   "owner": "architecture/contracts",
   "approvalDecision": "ADR-0002",
   "approvedAt": "2026-07-27",
