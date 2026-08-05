@@ -3,7 +3,13 @@
   "compilerOptions": {
     "lib": ["ES2024", "DOM"],
     "skipLibCheck": true,
-    "types": []
+    "types": ["node"]
   },
-  "include": ["src/index.ts", "src/storage/audit-anchor.ts", "src/storage/consent-stream.ts"]
+  "include": [
+    "src/index.ts",
+    "src/postgres/real-identity.ts",
+    "src/postgres/real-identity.test.ts",
+    "src/storage/audit-anchor.ts",
+    "src/storage/consent-stream.ts"
+  ]
 }

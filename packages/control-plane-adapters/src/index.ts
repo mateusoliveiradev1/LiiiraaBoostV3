@@ -12,3 +12,22 @@ export {
   type IdentityRuntimeDependencies,
   type PostgresSessionDatabase,
 } from './identity/better-auth-adapter.js';
+export {
+  createPostgresIdentityPersistence,
+  createRealIdentityAuthority,
+  digestOpaqueToken,
+  hashIdentityPassword,
+  migrateRealIdentity,
+  realIdentitySchemaHash,
+  verifyIdentityPassword,
+  type AuthenticationResult,
+  type DesktopAuthorizationChallenge,
+  type DesktopChallengeRecord,
+  type IdentityActor,
+  type IdentityLocale,
+  type IdentityPersistence,
+  type IdentityRecord,
+  type IdentityRole,
+  type InvitationRecord,
+  type PersistedSessionRecord,
+} from './postgres/real-identity.js';

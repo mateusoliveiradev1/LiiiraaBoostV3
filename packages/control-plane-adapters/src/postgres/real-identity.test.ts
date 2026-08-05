@@ -33,15 +33,16 @@ class MemoryIdentityPersistence implements IdentityPersistence {
     invitationDigest: string;
     now: string;
   }): Promise<IdentityRecord | null> {
-    return this.lock(async () => {
+    return this.lock(() => {
       const invitation = this.invitations.get(input.invitationDigest);
+      if (invitation?.redeemedAt !== null) {
+        return Promise.resolve(null);
+      }
       if (
-        invitation === undefined ||
-        invitation.redeemedAt !== null ||
         Date.parse(invitation.expiresAt) <= Date.parse(input.now) ||
         invitation.email !== input.identity.email
       ) {
-        return null;
+        return Promise.resolve(null);
       }
       this.invitations.set(input.invitationDigest, {
         ...invitation,
@@ -49,7 +50,7 @@ class MemoryIdentityPersistence implements IdentityPersistence {
         redeemedBy: input.identity.id,
       });
       this.identities.set(input.identity.id, input.identity);
-      return input.identity;
+      return Promise.resolve(input.identity);
     });
   }
 
@@ -71,9 +72,7 @@ class MemoryIdentityPersistence implements IdentityPersistence {
   findSessionByDigest(digest: string, now: string): Promise<PersistedSessionRecord | null> {
     const session = this.sessions.get(digest);
     return Promise.resolve(
-      session !== undefined &&
-        session.revokedAt === null &&
-        Date.parse(session.expiresAt) > Date.parse(now)
+      session?.revokedAt === null && Date.parse(session.expiresAt) > Date.parse(now)
         ? session
         : null,
     );
@@ -81,7 +80,7 @@ class MemoryIdentityPersistence implements IdentityPersistence {
 
   revokeSessionByDigest(digest: string, now: string): Promise<boolean> {
     const session = this.sessions.get(digest);
-    if (session === undefined || session.revokedAt !== null) return Promise.resolve(false);
+    if (session?.revokedAt !== null) return Promise.resolve(false);
     this.sessions.set(digest, { ...session, revokedAt: now, version: session.version + 1n });
     return Promise.resolve(true);
   }
@@ -99,11 +98,10 @@ class MemoryIdentityPersistence implements IdentityPersistence {
     stateDigest: string;
   }): Promise<DesktopChallengeRecord | null> {
     const challenge = this.challenges.get(input.challengeId);
-    const identity = challenge ? this.identities.get(input.accountId) : undefined;
+    const identity = this.identities.get(input.accountId);
+    if (challenge === undefined) return Promise.resolve(null);
     if (
-      challenge === undefined ||
-      identity === undefined ||
-      challenge.email !== identity.email ||
+      identity?.email !== challenge.email ||
       challenge.stateDigest !== input.stateDigest ||
       challenge.codeDigest !== null ||
       Date.parse(challenge.expiresAt) <= Date.parse(input.now)
@@ -123,8 +121,8 @@ class MemoryIdentityPersistence implements IdentityPersistence {
     stateDigest: string;
   }): Promise<DesktopChallengeRecord | null> {
     const challenge = this.challenges.get(input.challengeId);
+    if (challenge === undefined) return Promise.resolve(null);
     if (
-      challenge === undefined ||
       challenge.consumedAt !== null ||
       challenge.approvedBy === null ||
       challenge.codeDigest !== input.codeDigest ||
