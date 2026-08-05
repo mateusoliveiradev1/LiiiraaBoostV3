@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-08-04T23:45:05.892Z"
+stopped_at: Completed 04-07-PLAN.md
+last_updated: "2026-08-05T00:08:00.904Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 150
+  completed_plans: 151
   percent: 86
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 11 of 35
+Plan: 12 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -189,6 +189,7 @@ _Updated after plan completion_
 | Phase 04 P05 | 31 min | 2 tasks | 13 files |
 | Phase 04 P06 | 20 min | 1 tasks | 11 files |
 | Phase 04 P04 | 22min | 2 tasks | 9 files |
+| Phase 04 P07 | 18 min | 1 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -565,6 +566,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Use a serializable pg migration transaction with a PostgreSQL advisory lock and SHA-256 migration record; expose Kysely through the database adapter for typed repositories.
 - [Phase 04]: Enforce audit append-only behavior with chain-head locking, contiguous sequence/hash checks, mutation/truncate triggers, and public privilege revocation.
 - [Phase 04]: Run live database probes only for explicit synthetic URLs or isolated Testcontainers; use the daemon-free checksum/DDL/transaction fallback when no PostgreSQL daemon exists.
+- [Phase 04]: Verify decoded offline entitlement bytes before schema validation or claim deserialization. — Exact received bytes are the only authenticated representation.
+- [Phase 04]: Keep raw 32-byte Ed25519 public keys in the shared entitlement manifest. — TypeScript derives SPKI locally while Rust verifies with the same key bytes.
+- [Phase 04]: Bound previous entitlement keys by both issuance and verification time. — A previous key is accepted only inside its declared rotation window.
+- [Phase 04]: Advance trusted offline time only after complete entitlement verification. — Rejected or contradictory data cannot move the monotonic clock authority.
 
 ### Pending Todos
 
@@ -608,6 +613,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T23:44:57.298Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-08-05T00:07:05.621Z
+Stopped at: Completed 04-07-PLAN.md
 Resume file: None
