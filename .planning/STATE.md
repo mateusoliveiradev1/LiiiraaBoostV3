@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-21-PLAN.md
-last_updated: "2026-08-05T16:46:34.296Z"
+stopped_at: Completed 04-35-PLAN.md
+last_updated: "2026-08-05T17:13:39.488Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 170
+  completed_plans: 171
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 30 of 35
+Plan: 31 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -209,6 +209,7 @@ _Updated after plan completion_
 | Phase 04 P20 | 16 min | 1 tasks | 6 files |
 | Phase 04 P22 | 14min | 2 tasks | 14 files |
 | Phase 04 P21 | 23 min | 1 tasks | 17 files |
+| Phase 04 P35 | 16 min | 1 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -652,6 +653,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Retain exact received entitlement-envelope bytes only after full signature, schema, binding, version, time, and key-state verification.
 - [Phase 04]: Treat generic renderer offline state as stale; only explicit native-verified offline-valid authority may admit new Premium work.
 - [Phase 04]: Keep native Premium authorization authoritative while the renderer uses the shared domain policy for presentation and interaction gating.
+- [Phase 04]: Admit desktop browser account authority only under the explicit SIMULATED SCENARIO marker; production transport uses Tauri IPC.
+- [Phase 04]: Keep account credentials in Rust and delete native custody on 401/403 without deleting local safety data.
+- [Phase 04]: Synchronize shared account projections only; technical history, unshared diagnostics, operational history, and restoration remain local.
 
 ### Pending Todos
 
@@ -695,6 +699,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T16:46:34.289Z
-Stopped at: Completed 04-21-PLAN.md
+Last session: 2026-08-05T17:13:39.481Z
+Stopped at: Completed 04-35-PLAN.md
 Resume file: None
