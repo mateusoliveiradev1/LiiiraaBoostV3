@@ -46,6 +46,7 @@ describe('daemon-free OCI artifact contract', () => {
 
   it('builds once, attests and scans the digest, then deploys that same digest', () => {
     expect(workflow).toContain('build_only:');
+    expect(workflow).toContain("github.event_name == 'workflow_dispatch'");
     expect(workflow).toContain('inputs.build_only != true');
     expect(workflow).toContain(
       'outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api,push-by-digest=true,name-canonical=true,push=true',
@@ -60,7 +61,8 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('run: pnpm --filter @liiiraa/api db:migrate');
     expect(workflow).toContain('POSTGRES_TEST_STRATEGY: unit');
     expect(workflow).toContain("hashFiles('trivy-results.sarif') != ''");
-    expect(workflow).toContain('--field visibility=public');
+    expect(workflow).toContain('docker logout ghcr.io');
+    expect(workflow).toContain('docker buildx imagetools inspect');
     expect(workflow).not.toContain(
       'Run staging migrations before promotion\n        env:\n          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}\n        run: pnpm --filter @liiiraa/api db:migrate:test',
     );

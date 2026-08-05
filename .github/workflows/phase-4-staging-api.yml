@@ -105,13 +105,11 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           version: v0.73.0
-      - name: Publish the scanned package for pull-only staging hosting
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Require anonymous pull access for staging hosting
         run: >-
-          gh api --method PATCH
-          "/users/${{ github.repository_owner }}/packages/container/liiiraa-boost-api"
-          --field visibility=public
+          docker logout ghcr.io &&
+          docker buildx imagetools inspect
+          "ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ steps.build.outputs.digest }}"
       - name: Upload bounded scan evidence
         if: always() && hashFiles('trivy-results.sarif') != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -123,7 +121,10 @@ jobs:
 
   deploy:
     name: Deploy tested digest to protected staging
-    if: github.ref == 'refs/heads/main' && inputs.build_only != true
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.build_only != true
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
