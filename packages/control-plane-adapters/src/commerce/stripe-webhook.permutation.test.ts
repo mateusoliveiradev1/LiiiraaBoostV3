@@ -207,15 +207,17 @@ const createProvider = (failures = 0) => {
   };
 };
 
-const permutations = <T>(items: readonly T[]): readonly (readonly T[])[] => {
+const deterministicPermutations = <T>(items: readonly T[]): readonly (readonly T[])[] => {
   if (items.length < 2) return [items];
   return items.flatMap((item, index) =>
-    permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [
+    deterministicPermutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [
       item,
       ...rest,
     ]),
   );
 };
+
+const relevantEventOrders = Object.freeze(deterministicPermutations(stripeEventTypes));
 
 const verifyFixture = async (stripeType: string, eventId: string) => {
   const adapter = await loadAdapter();
@@ -313,10 +315,9 @@ describe('Stripe webhook adversarial delivery reconciliation', () => {
 
   it('delayed-delivery and reordered-delivery converge for all 5040 relevant event orders', async () => {
     const adapter = await loadAdapter();
-    const orders = permutations(stripeEventTypes);
-    expect(orders).toHaveLength(5_040);
+    expect(relevantEventOrders).toHaveLength(5_040);
 
-    for (const [orderIndex, order] of orders.entries()) {
+    for (const [orderIndex, order] of relevantEventOrders.entries()) {
       const database = new MemoryWebhookDatabase();
       const provider = createProvider();
       for (const [eventIndex, [stripeType]] of order.entries()) {

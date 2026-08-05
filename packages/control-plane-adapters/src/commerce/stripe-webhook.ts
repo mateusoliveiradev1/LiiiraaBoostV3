@@ -20,6 +20,7 @@ const STRIPE_EVENT_TYPES = Object.freeze({
   'invoice.paid': 'invoice-updated',
   'invoice.payment_failed': 'invoice-updated',
 } as const satisfies Readonly<Record<string, ProviderEventTypeJson>>);
+const REDACTED_PROVIDER_RETRIEVAL_ERROR = 'provider-retrieval-failed';
 
 export type StripeWebhookFailureCode = 'SIGNATURE_REJECTED' | 'UNSUPPORTED_EVENT';
 
@@ -168,7 +169,7 @@ const markInbox = async (
     `UPDATE provider_inbox
      SET processing_state = 'retryable', error_code = $2
      WHERE provider = 'stripe' AND provider_event_id = $1`,
-    [providerEventId, 'provider-retrieval-failed'],
+    [providerEventId, REDACTED_PROVIDER_RETRIEVAL_ERROR],
   );
 };
 
