@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-10-PLAN.md
-last_updated: "2026-08-05T01:21:47.266Z"
+stopped_at: Completed 04-11-PLAN.md
+last_updated: "2026-08-05T02:03:13.976Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 154
+  completed_plans: 155
   percent: 30
 ---
 
@@ -193,6 +193,7 @@ _Updated after plan completion_
 | Phase 04 P08 | 18 min | 1 tasks | 5 files |
 | Phase 04 P09 | 21 min | 1 tasks | 9 files |
 | Phase 04 P10 | 19 min | 1 tasks | 11 files |
+| Phase 04 P11 | 24 min | 1 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -582,6 +583,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Anchor every 15 minutes or 1,000 events to S3 Object Lock compliance storage and require verified read-back before reporting health.
 - [Phase 04]: Separate the asymmetric audit signer role from API and storage authority; provider errors remain behind stable provider-neutral verification codes.
 - [Phase 04]: Use exact bounded retention: billing/tax 5 years after transaction, antifraud/dispute 5 years after closure, security/recovery 2 years after closure, and audit events/anchors 5 years after append.
+- [Phase 04]: Email verification authority comes only from the invitation identity record; request bodies cannot grant verified status. — Prevents clients from self-granting authentication admission.
+- [Phase 04]: Provider completion must match the exact invited account before local session issuance. — Prevents a valid provider session for another account from crossing the local identity boundary.
+- [Phase 04]: The API alone owns desktop PKCE state, verifier, callback validation, provider exchange, and local credential issuance. — Keeps provider secrets and tokens out of the Windows client while preserving public-client OAuth semantics.
+- [Phase 04]: Session revocation is owner-scoped and independent of Premium device binding. — Concurrent login authority is not the one-PC entitlement rule.
 
 ### Pending Todos
 
@@ -625,6 +630,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T01:21:47.259Z
-Stopped at: Completed 04-10-PLAN.md
+Last session: 2026-08-05T02:03:13.968Z
+Stopped at: Completed 04-11-PLAN.md
 Resume file: None
