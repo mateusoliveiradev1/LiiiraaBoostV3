@@ -29,6 +29,24 @@ export {
   type TransferDeviceCommand,
 } from './devices/device-binding.js';
 export {
+  ADMIN_COMMAND_POLICIES,
+  ADMIN_ROLES,
+  authorizeAdminCommand,
+  authorizeAdminProjection,
+  filterAdminProjection,
+  projectBreakGlassMetadata,
+  type AdminAuthorizationCode,
+  type AdminAuthorizationResult,
+  type AdminCommandAuthorizationContext,
+  type AdminCommandPolicy,
+  type AdminProjectionAction,
+  type AdminProjectionResource,
+  type AdminSessionClaim,
+  type AdminStepUpEvidence,
+  type BreakGlassMetadataInput,
+  type BreakGlassMetadataResult,
+} from './admin/authorization.js';
+export {
   AUDIT_GENESIS_HASH,
   appendAuditEvent,
   encodeAuditEvent,
