@@ -108,6 +108,57 @@ describe('identity-recovery policy witnesses', () => {
         }),
       ).toEqual({ allowed: false, code: 'RECOVERY_HOLD_ACTIVE' });
     }
+
+    const afterHold = '2030-03-03T10:00:00.000Z';
+    expect(
+      authorizeSensitiveAction({
+        action: 'refund',
+        now: afterHold,
+        recoveryHoldUntil: HOLD_UNTIL,
+        stepUp: {
+          action: 'refund',
+          factor: 'totp',
+          verifiedAt: afterHold,
+          expiresAt: '2030-03-03T10:05:00.000Z',
+        },
+      }),
+    ).toEqual({ allowed: true });
+    expect(
+      authorizeSensitiveAction({
+        action: 'refund',
+        now: afterHold,
+        stepUp: {
+          action: 'device-transfer',
+          factor: 'passkey',
+          verifiedAt: afterHold,
+          expiresAt: '2030-03-03T10:05:00.000Z',
+        },
+      }),
+    ).toEqual({ allowed: false, code: 'STEP_UP_WRONG_ACTION' });
+    expect(
+      authorizeSensitiveAction({
+        action: 'refund',
+        now: afterHold,
+        stepUp: {
+          action: 'refund',
+          factor: 'email',
+          verifiedAt: afterHold,
+          expiresAt: '2030-03-03T10:05:00.000Z',
+        },
+      }),
+    ).toEqual({ allowed: false, code: 'UNAPPROVED_FACTOR' });
+    expect(
+      authorizeSensitiveAction({
+        action: 'refund',
+        now: afterHold,
+        stepUp: {
+          action: 'refund',
+          factor: 'recovery-code',
+          verifiedAt: '2030-03-03T09:00:00.000Z',
+          expiresAt: '2030-03-03T09:05:00.000Z',
+        },
+      }),
+    ).toEqual({ allowed: false, code: 'STEP_UP_STALE' });
   });
 
   it('D-06 contest extends the hold and records risk without restoring critical authority', () => {

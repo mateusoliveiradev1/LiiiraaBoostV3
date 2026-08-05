@@ -1,5 +1,4 @@
 import type {
-  RecoverAccountResult,
   RecoveryAggregate,
   RecoveryDependencies,
   RecoveryRepository,
@@ -9,7 +8,10 @@ import type {
   SecurityMethodRepository,
   SecurityMethodTransaction,
 } from '@liiiraa/control-plane-application';
-import type { IdentityProviderResult, IdentityStepUpReceipt } from '@liiiraa/control-plane-application';
+import type {
+  IdentityProviderResult,
+  IdentityStepUpReceipt,
+} from '@liiiraa/control-plane-application';
 import Fastify from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -108,6 +110,7 @@ class SerializableRecoveryRepository implements RecoveryRepository {
         this.state.operations.push(`recovery-code:${consumed ? 'consumed' : 'rejected'}`);
         return Promise.resolve(consumed);
       },
+      trustedSessionIds: () => Promise.resolve([SESSION_ID, 'trusted-session-other']),
       revokeAffectedSessions: () => {
         const revoked = [...this.state.activeSessions];
         this.state.activeSessions.clear();
@@ -158,7 +161,9 @@ const securityDependencies = (repository: MemorySecurityMethods): SecurityMethod
   },
 });
 
-const recoveryDependencies = (repository: SerializableRecoveryRepository): RecoveryDependencies => ({
+const recoveryDependencies = (
+  repository: SerializableRecoveryRepository,
+): RecoveryDependencies => ({
   repository,
   hasher: { digest: (value) => Promise.resolve(`digest:${value}`) },
   clock: { now: () => new Date(NOW) },
@@ -176,6 +181,9 @@ const harness = async () => {
     securityMethods: securityDependencies(securityRepository),
     recovery: recoveryDependencies(recoveryRepository),
     resolveSessionActor: () => Promise.resolve({ accountId: ACCOUNT_ID, sessionId: SESSION_ID }),
+    resolveSecurityReviewer: () => Promise.resolve({ reviewerId: 'security-reviewer' }),
+    verifyRecoveryEmailEvidence: ({ evidenceValue }) =>
+      Promise.resolve(evidenceValue === 'verified-email-token'),
   });
   await app.ready();
   return { app, securityRepository, recoveryRepository };
@@ -218,6 +226,13 @@ describe('identity-recovery API and transaction witnesses', () => {
         },
       });
       expect(response.statusCode).toBe(201);
+      const methodId = response.json<{ method: { methodId: string } }>().method.methodId;
+      const disabled = await app.inject({
+        method: 'POST',
+        url: `/v1/identity/security-methods/${methodId}/disable`,
+        payload: { stepUpFactor: 'passkey', stepUpProof: 'valid-passkey-proof' },
+      });
+      expect(disabled.statusCode).toBe(200);
     }
     for (const factor of ['sms', 'email']) {
       const { app } = await harness();
@@ -233,6 +248,20 @@ describe('identity-recovery API and transaction witnesses', () => {
       });
       expect(response.statusCode).toBe(422);
     }
+
+    const { app } = await harness();
+    const unverifiedEmail = await app.inject({
+      method: 'POST',
+      url: '/v1/identity/recoveries',
+      payload: {
+        accountId: ACCOUNT_ID,
+        email: 'player@example.test',
+        evidence: 'verified-email',
+        verifiedEmail: true,
+        evidenceValue: 'attacker-controlled-value',
+      },
+    });
+    expect(unverifiedEmail.statusCode).toBe(422);
   });
 
   it('IDEN-02 reviewed recovery keeps total factor loss pending without takeover authority', async () => {
@@ -243,7 +272,7 @@ describe('identity-recovery API and transaction witnesses', () => {
       ok: true,
       basicAccess: false,
       state: { status: 'pending-review', route: 'security-review' },
-    } satisfies Partial<RecoverAccountResult>);
+    });
   });
 
   it('IDEN-02 critical-action hold preserves ordinary access and blocks protected actions', async () => {
@@ -306,10 +335,21 @@ describe('identity-recovery API and transaction witnesses', () => {
       topic: 'identity.recovery-contested',
       sessionId: SESSION_ID,
     });
+
+    const riskExtendedUntil = '2030-04-07T12:00:00.000Z';
+    const riskExtension = await app.inject({
+      method: 'POST',
+      url: `/v1/identity/recoveries/${ACCOUNT_ID}/risk-extension`,
+      payload: { extendUntil: riskExtendedUntil },
+    });
+    expect(riskExtension.statusCode).toBe(200);
+    expect(riskExtension.json()).toMatchObject({
+      state: { status: 'contested', endsAt: riskExtendedUntil },
+    });
   });
 
   it('IDEN-02 session revocation is atomic, precedes authority, and recovery code redeems once', async () => {
-    const { app, recoveryRepository } = await harness();
+    const { app } = await harness();
     const redemptionPayload = {
       accountId: ACCOUNT_ID,
       email: 'player@example.test',
