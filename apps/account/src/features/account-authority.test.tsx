@@ -8,6 +8,7 @@ import {
   type AccountAuthorityTransport,
 } from '../account-authority';
 import {
+  advanceAccountMutationPhase,
   mapAccountAuthorityProjection,
   resolveAccountRuntimeConfig,
 } from '../account-runtime';
@@ -233,6 +234,20 @@ describe('production account authority', () => {
 });
 
 describe('account runtime composition', () => {
+  it('preserves every interruption state until an explicit authority transition occurs', () => {
+    expect(advanceAccountMutationPhase('idle', 'review')).toBe('reviewing');
+    expect(advanceAccountMutationPhase('reviewing', 'require-reauth')).toBe('reauth');
+    expect(advanceAccountMutationPhase('reauth', 'confirm')).toBe('confirming');
+    expect(advanceAccountMutationPhase('confirming', 'issue')).toBe('issuing');
+    expect(advanceAccountMutationPhase('issuing', 'pending')).toBe('pending');
+    expect(advanceAccountMutationPhase('issuing', 'conflict')).toBe('conflict');
+    expect(advanceAccountMutationPhase('issuing', 'offline')).toBe('offline');
+    expect(advanceAccountMutationPhase('issuing', 'stale')).toBe('stale');
+    expect(advanceAccountMutationPhase('issuing', 'error')).toBe('error');
+    expect(advanceAccountMutationPhase('issuing', 'complete')).toBe('complete');
+    expect(advanceAccountMutationPhase('conflict', 'review')).toBe('reviewing');
+  });
+
   it('maps all authoritative account responsibilities without inventing fixture truth', () => {
     expect(mapAccountAuthorityProjection(projection(), '2026-01-15T12:00:00.000Z')).toMatchObject({
       authorityState: 'online',
@@ -259,10 +274,15 @@ describe('account runtime composition', () => {
   it('keeps preview authority isolated from production modules', () => {
     const authoritySource = readFileSync(new URL('../account-authority.ts', import.meta.url), 'utf8');
     const runtimeSource = readFileSync(new URL('../account-runtime.ts', import.meta.url), 'utf8');
+    const productionViewSource = readFileSync(new URL('./account-authority.tsx', import.meta.url), 'utf8');
     const previewSource = readFileSync(new URL('./account-preview.tsx', import.meta.url), 'utf8');
 
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
+    expect(productionViewSource).not.toContain('@liiiraa/web-preview');
+    expect(productionViewSource).toContain('Account authority status');
+    expect(productionViewSource).toContain('Profile update receipt');
+    expect(productionViewSource).toContain('Device replacement unavailable');
     expect(previewSource).toContain('@liiiraa/web-preview');
     expect(previewSource).toContain("remoteStateChanged: false");
   });
