@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-14-PLAN.md
-last_updated: "2026-08-05T02:25:21.808Z"
+stopped_at: Completed 04-12-PLAN.md
+last_updated: "2026-08-05T03:11:12.827Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 156
+  completed_plans: 157
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 16 of 35
+Plan: 17 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -195,6 +195,7 @@ _Updated after plan completion_
 | Phase 04 P10 | 19 min | 1 tasks | 11 files |
 | Phase 04 P11 | 24 min | 1 tasks | 12 files |
 | Phase 04 P14 | 16 min | 1 tasks | 9 files |
+| Phase 04 P12 | 20 min | 1 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -591,6 +592,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Check device command idempotency before expected-version arbitration — Safe retries return the original projection without duplicate audit or outbox records.
 - [Phase 04]: Keep session revocation and Premium device binding as separate authorities — One-PC licensing does not limit concurrent account sessions or couple their revocation lifecycles.
 - [Phase 04]: Use deterministic serializable device repositories for daemon-free local race proof — The local 20-way witness preserves transaction and uniqueness semantics without Docker or a live PostgreSQL daemon.
+- [Phase 04]: Accept verified-email recovery evidence only through an injected trusted verifier; request bodies cannot self-assert verification. — Prevents an email address or caller-controlled boolean from becoming immediate takeover authority.
+- [Phase 04]: Serialize recovery mutations per account and revoke affected sessions before projecting restored basic access. — Preserves singular recovery authority and prevents a recovered session from coexisting with affected pre-recovery credentials.
+- [Phase 04]: Store and compare only injected hashes for one-use recovery codes, with atomic consumption inside the recovery transaction. — Prevents plaintext recovery-code persistence and makes concurrent redemption succeed exactly once.
+- [Phase 04]: Keep recovery and contest notifications provider-neutral in the outbox for Plan 04-28 delivery. — Preserves identity transaction ownership while allowing idempotent redacted delivery through the later email worker.
 
 ### Pending Todos
 
@@ -634,6 +639,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T02:25:21.801Z
-Stopped at: Completed 04-14-PLAN.md
+Last session: 2026-08-05T03:10:38.433Z
+Stopped at: Completed 04-12-PLAN.md
 Resume file: None
