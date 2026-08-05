@@ -6,14 +6,14 @@ current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
 stopped_at: Completed 04-35-PLAN.md
-last_updated: "2026-08-05T17:13:39.488Z"
+last_updated: "2026-08-05T17:39:09.588Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 175
-  completed_plans: 171
+  completed_plans: 172
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 31 of 35
+Plan: 32 of 35
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 04 execution started
 
@@ -210,6 +210,7 @@ _Updated after plan completion_
 | Phase 04 P22 | 14min | 2 tasks | 14 files |
 | Phase 04 P21 | 23 min | 1 tasks | 17 files |
 | Phase 04 P35 | 16 min | 1 tasks | 8 files |
+| Phase 04 P23 | 12min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -656,6 +657,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Admit desktop browser account authority only under the explicit SIMULATED SCENARIO marker; production transport uses Tauri IPC.
 - [Phase 04]: Keep account credentials in Rust and delete native custody on 401/403 without deleting local safety data.
 - [Phase 04]: Synchronize shared account projections only; technical history, unshared diagnostics, operational history, and restoration remain local.
+- [Phase 04]: Keep public, account, and admin on distinct Vercel project identities while routing only same-origin /v1 traffic to the exact staging API.
+- [Phase 04]: Treat provider preview URLs as bounded early-test identities; broader closed beta requires owned origins, callbacks, and email identity.
+- [Phase 04]: Admit only the numbered Internal desktop channel with invited-PC access, exact staging authority, older immutable rollback, and every public trust claim false.
 
 ### Pending Todos
 
@@ -699,6 +703,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:13:39.481Z
+Last session: 2026-08-05T17:38:50.076Z
 Stopped at: Completed 04-35-PLAN.md
 Resume file: None
