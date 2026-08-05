@@ -50,3 +50,19 @@ export {
   type AuthenticationIdentityState,
   type AuthenticationMethod,
 } from './identity/authentication.js';
+export {
+  APPROVED_SECURITY_FACTORS,
+  RECOVERY_MINIMUM_HOLD_MS,
+  authorizeSensitiveAction,
+  decideRecoveryTransition,
+  type RecoveryCommand,
+  type RecoveryEffect,
+  type RecoveryEvidence,
+  type RecoveryRoute,
+  type RecoveryState,
+  type RecoveryTransition,
+  type SecurityFactor,
+  type SensitiveAction,
+  type SensitiveActionAuthorization,
+  type StepUpEvidence,
+} from './identity/recovery.js';

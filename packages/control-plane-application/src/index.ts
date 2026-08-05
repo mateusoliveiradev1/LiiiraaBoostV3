@@ -5,3 +5,5 @@ export type * from './ports/identity.js';
 export * from './use-cases/authenticate.js';
 export * from './use-cases/bind-device.js';
 export * from './use-cases/transfer-device.js';
+export * from './use-cases/security-methods.js';
+export * from './use-cases/recover-account.js';
