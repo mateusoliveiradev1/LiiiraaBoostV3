@@ -1,8 +1,10 @@
 import { createPrivateKey, type KeyObject } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 import {
   OfflineEntitlementVerdict,
   verifyOfflineEntitlementBytes,
+  type OfflineEntitlementEnvelopeJson,
   type OfflineEntitlementSigningKey,
   type TrustedTimeStore,
 } from '@liiiraa/contracts-ts';
@@ -20,9 +22,35 @@ import { createStagingEntitlementSigner } from '@liiiraa/control-plane-adapters'
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
 
-import manifest from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/manifest.json' with { type: 'json' };
-import validFixture from '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/valid.json' with { type: 'json' };
 import { registerEntitlementRoutes } from './routes.js';
+
+interface EntitlementCorpusManifest {
+  readonly keyRing: readonly (OfflineEntitlementSigningKey & {
+    readonly notBefore: string;
+    readonly notAfter: string;
+  })[];
+}
+
+interface ValidEntitlementFixture {
+  readonly context: {
+    readonly accountId: string;
+    readonly deviceBinding: string;
+    readonly audience: string;
+    readonly entitlementVersion: number;
+  };
+  readonly envelope: OfflineEntitlementEnvelopeJson;
+  readonly nowUnixSeconds: number;
+  readonly lastTrustedUnixSeconds: number;
+}
+
+const corpusRoot = new URL(
+  '../../../../../packages/contracts-ts/src/fixtures/offline-entitlement/',
+  import.meta.url,
+);
+const readCorpusJson = <T>(fileName: string): T =>
+  JSON.parse(readFileSync(new URL(fileName, corpusRoot), 'utf8')) as T;
+const manifest = readCorpusJson<EntitlementCorpusManifest>('manifest.json');
+const validFixture = readCorpusJson<ValidEntitlementFixture>('valid.json');
 
 const ACCOUNT_ID = 'synthetic-account-0001';
 const DEVICE_BINDING = 'synthetic-device-binding';
