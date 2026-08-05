@@ -109,14 +109,18 @@ describe('D-32/D-33 authoritative support cases', () => {
       effects: [
         {
           kind: 'schedule-attachment-purge',
-          availableAt: new Date(Date.parse(closedAt) + SUPPORT_ATTACHMENT_RETENTION_MS).toISOString(),
+          availableAt: new Date(
+            Date.parse(closedAt) + SUPPORT_ATTACHMENT_RETENTION_MS,
+          ).toISOString(),
         },
       ],
     });
     if (!closed.accepted) return;
 
     const boundary = new Date(Date.parse(closedAt) + SUPPORT_REOPEN_WINDOW_MS).toISOString();
-    expect(decideSupportCaseTransition(closed.state, { kind: 'reopen', now: boundary })).toMatchObject({
+    expect(
+      decideSupportCaseTransition(closed.state, { kind: 'reopen', now: boundary }),
+    ).toMatchObject({
       accepted: true,
       outcome: 'reopened',
       effects: [{ kind: 'expire-case-consents' }],
@@ -127,7 +131,11 @@ describe('D-32/D-33 authoritative support cases', () => {
         now: new Date(Date.parse(boundary) + 1).toISOString(),
         relatedCaseId: 'case-related',
       }),
-    ).toMatchObject({ accepted: true, outcome: 'related-case-created', state: { caseId: 'case-related' } });
+    ).toMatchObject({
+      accepted: true,
+      outcome: 'related-case-created',
+      state: { caseId: 'case-related' },
+    });
   });
 });
 
@@ -173,12 +181,16 @@ describe('D-34 through D-36 consent lifecycle', () => {
       status: 'active',
       version: 1n,
     };
-    expect(decideConsentTransition(active, { kind: 'revoke', now: '2030-08-02T12:00:00.000Z' })).toMatchObject({
+    expect(
+      decideConsentTransition(active, { kind: 'revoke', now: '2030-08-02T12:00:00.000Z' }),
+    ).toMatchObject({
       accepted: true,
       state: { status: 'revoked', version: 2n },
       effects: [{ kind: 'notify-active-streams' }, { kind: 'append-revocation-receipt' }],
     });
-    expect(decideConsentTransition(active, { kind: 'expire', now: active.expiresAt })).toMatchObject({
+    expect(
+      decideConsentTransition(active, { kind: 'expire', now: active.expiresAt }),
+    ).toMatchObject({
       accepted: true,
       state: { status: 'expired', version: 2n },
       effects: [{ kind: 'notify-active-streams' }],
@@ -189,7 +201,14 @@ describe('D-34 through D-36 consent lifecycle', () => {
 describe('D-48 through D-51 account deletion and retention', () => {
   it('requires strong auth and schedules a cancelable seven-day finalization', () => {
     const initial = initialDeletionState('account-player');
-    expect(decideDeletionTransition(initial, { kind: 'request', strongAuthVerified: false, now: NOW })).toEqual({
+    expect(
+      decideDeletionTransition(initial, {
+        kind: 'request',
+        requestId: 'deletion-denied',
+        strongAuthVerified: false,
+        now: NOW,
+      }),
+    ).toEqual({
       accepted: false,
       code: 'STRONG_AUTH_REQUIRED',
     });
@@ -208,7 +227,12 @@ describe('D-48 through D-51 account deletion and retention', () => {
       effects: [{ kind: 'schedule-account-finalization' }],
     });
     if (!requested.accepted) return;
-    expect(decideDeletionTransition(requested.state, { kind: 'cancel', now: '2030-08-05T12:00:00.000Z' })).toMatchObject({
+    expect(
+      decideDeletionTransition(requested.state, {
+        kind: 'cancel',
+        now: '2030-08-05T12:00:00.000Z',
+      }),
+    ).toMatchObject({
       accepted: true,
       state: { status: 'canceled' },
       effects: [{ kind: 'cancel-account-finalization' }],
@@ -241,11 +265,51 @@ describe('D-48 through D-51 account deletion and retention', () => {
     });
     if (!result.accepted) return;
     expect(result.state.retentionRecords).toEqual([
-      expect.objectContaining({ evidenceClass: 'billing-invoice-tax', retainUntil: '2035-01-02T00:00:00.000Z' }),
-      expect.objectContaining({ evidenceClass: 'antifraud-dispute', retainUntil: '2035-02-03T00:00:00.000Z' }),
-      expect.objectContaining({ evidenceClass: 'security-recovery', retainUntil: '2032-03-04T00:00:00.000Z' }),
-      expect.objectContaining({ evidenceClass: 'administrative-audit', retainUntil: '2035-04-05T00:00:00.000Z' }),
+      expect.objectContaining({
+        evidenceClass: 'billing-invoice-tax',
+        retainUntil: '2035-01-02T00:00:00.000Z',
+      }),
+      expect.objectContaining({
+        evidenceClass: 'antifraud-dispute',
+        retainUntil: '2035-02-03T00:00:00.000Z',
+      }),
+      expect.objectContaining({
+        evidenceClass: 'security-recovery',
+        retainUntil: '2032-03-04T00:00:00.000Z',
+      }),
+      expect.objectContaining({
+        evidenceClass: 'administrative-audit',
+        retainUntil: '2035-04-05T00:00:00.000Z',
+      }),
     ]);
-    expect(JSON.stringify(result.state.retentionRecords)).not.toMatch(/diagnostic|message|profile|session|token/iu);
+    expect(JSON.stringify(result.state.retentionRecords)).not.toMatch(
+      /diagnostic|message|profile|session|token/iu,
+    );
+  });
+
+  it('rejects legal holds without a distinct bounded purpose and future expiry', () => {
+    const requested = decideDeletionTransition(initialDeletionState('account-player'), {
+      kind: 'request',
+      requestId: 'deletion-hold',
+      strongAuthVerified: true,
+      now: NOW,
+    });
+    expect(requested.accepted).toBe(true);
+    if (!requested.accepted) return;
+    expect(
+      decideDeletionTransition(requested.state, {
+        kind: 'finalize',
+        now: '2030-08-08T12:00:00.000Z',
+        evidence: [{ evidenceClass: 'security-recovery', sourceAt: NOW }],
+        legalHolds: [
+          {
+            evidenceClass: 'security-recovery',
+            authorizedBy: 'audit-reviewer',
+            purpose: ' ',
+            expiresAt: '2031-08-08T12:00:00.000Z',
+          },
+        ],
+      }),
+    ).toEqual({ accepted: false, code: 'LEGAL_HOLD_INVALID' });
   });
 });
