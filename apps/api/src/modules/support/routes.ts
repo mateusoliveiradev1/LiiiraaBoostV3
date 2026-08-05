@@ -64,7 +64,7 @@ const validatedCommand = <TKind extends 'support-command' | 'consent-command' | 
   { kind: TKind }
 > | null => {
   if (!isRecord(value) || !controlPlaneDocumentValidator(value)) return null;
-  return value['kind'] === kind
+  return value.kind === kind
     ? (value as unknown as Extract<
         SupportCommandJson | ConsentCommandJson | AccountCommandJson,
         { kind: TKind }
@@ -74,6 +74,12 @@ const validatedCommand = <TKind extends 'support-command' | 'consent-command' | 
 
 const version = (value: string): bigint | null =>
   /^(?:0|[1-9][0-9]*)$/u.test(value) ? BigInt(value) : null;
+
+const routeParameter = (request: FastifyRequest, name: string): string | undefined => {
+  if (!isRecord(request.params)) return undefined;
+  const value = request.params[name];
+  return typeof value === 'string' ? value : undefined;
+};
 
 const jsonSafe = (value: unknown): unknown =>
   JSON.parse(
@@ -108,12 +114,9 @@ const supportContext = async (
   const actor = await dependencies.resolveSessionActor(request);
   if (!actor || !isRecord(request.body)) return null;
   const command = validatedCommand(request.body['command'], 'support-command');
-  if (!command || command.accountId !== actor.accountId) return null;
-  if (
-    isRecord(request.params) &&
-    typeof request.params['caseId'] === 'string' &&
-    request.params['caseId'] !== command.supportCaseId
-  ) {
+  if (command?.accountId !== actor.accountId) return null;
+  const requestedCaseId = routeParameter(request, 'caseId');
+  if (requestedCaseId !== undefined && requestedCaseId !== command.supportCaseId) {
     return null;
   }
   return { actor, body: { ...(request.body as unknown as SupportBody), command } };
@@ -126,12 +129,9 @@ const consentContext = async (
   const actor = await dependencies.resolveSessionActor(request);
   if (!actor || !isRecord(request.body)) return null;
   const command = validatedCommand(request.body['command'], 'consent-command');
-  if (!command || command.accountId !== actor.accountId) return null;
-  if (
-    isRecord(request.params) &&
-    typeof request.params['consentId'] === 'string' &&
-    request.params['consentId'] !== command.consentId
-  ) {
+  if (command?.accountId !== actor.accountId) return null;
+  const requestedConsentId = routeParameter(request, 'consentId');
+  if (requestedConsentId !== undefined && requestedConsentId !== command.consentId) {
     return null;
   }
   return { actor, body: { ...(request.body as unknown as ConsentBody), command } };
@@ -245,12 +245,11 @@ export const registerSupportRoutes = (
 
   app.get('/v1/support/cases/:caseId/attachments', async (request, reply) => {
     const actor = await dependencies.resolveSessionActor(request);
-    if (!actor || !isRecord(request.params) || typeof request.params['caseId'] !== 'string') {
+    const caseId = routeParameter(request, 'caseId');
+    if (!actor || caseId === undefined) {
       return reply.code(401).send({ code: 'UNAUTHORIZED' });
     }
-    return reply
-      .code(200)
-      .send(await dependencies.listAttachmentMetadata(actor.accountId, request.params['caseId']));
+    return reply.code(200).send(await dependencies.listAttachmentMetadata(actor.accountId, caseId));
   });
 
   app.post('/v1/support/consents', async (request, reply) => {
@@ -284,7 +283,7 @@ export const registerSupportRoutes = (
 
   app.post('/v1/support/consents/:consentId/revoke', async (request, reply) => {
     const context = await consentContext(request, dependencies);
-    if (!context || context.body.command.action !== 'revoke') {
+    if (context?.body.command.action !== 'revoke') {
       return reply.code(401).send({ code: 'UNAUTHORIZED' });
     }
     return sendResult(

@@ -16,6 +16,7 @@ import {
   manageSupportCase,
 } from '@liiiraa/control-plane-application';
 import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { registerSupportRoutes } from './routes.js';
@@ -171,7 +172,7 @@ const dependencies = (repository: SerializableLifecycleRepository, changes: stri
   };
 };
 
-const apps: ReturnType<typeof Fastify>[] = [];
+const apps: FastifyInstance[] = [];
 
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));

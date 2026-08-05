@@ -38,18 +38,23 @@ export const manageConsent = async (
   dependencies: ManageConsentDependencies,
   input: ManageConsentInput,
 ): Promise<ManageConsentResult> => {
-  let notify = false;
-  const result = await dependencies.repository.transaction(
+  const outcome = await dependencies.repository.transaction(
     input.command.accountId,
-    async (transaction): Promise<ManageConsentResult> => {
+    async (transaction): Promise<Readonly<{ result: ManageConsentResult; notify: boolean }>> => {
       const replay = await transaction.findCommandResult(input.command.commandId);
-      if (replay !== null) return replay as ManageConsentResult;
+      if (replay !== null) {
+        return { result: replay as ManageConsentResult, notify: false };
+      }
       const expectedVersion = parseVersion(input.command.expectedVersion);
-      if (expectedVersion === null) return { ok: false, code: 'INVALID_VERSION' };
+      if (expectedVersion === null) {
+        return { result: { ok: false, code: 'INVALID_VERSION' }, notify: false };
+      }
       const current = await transaction.loadConsent(input.command.consentId);
-      if ((current?.version ?? 0n) !== expectedVersion) return { ok: false, code: 'STALE' };
+      if ((current?.version ?? 0n) !== expectedVersion) {
+        return { result: { ok: false, code: 'STALE' }, notify: false };
+      }
       if (current !== null && current.accountId !== input.command.accountId) {
-        return { ok: false, code: 'UNAUTHORIZED' };
+        return { result: { ok: false, code: 'UNAUTHORIZED' }, notify: false };
       }
       const now = dependencies.clock.now().toISOString();
       const decision = decideConsentTransition(
@@ -63,9 +68,11 @@ export const manageConsent = async (
             }
           : { kind: input.action.kind, now },
       );
-      if (!decision.accepted) return { ok: false, code: decision.code };
+      if (!decision.accepted) {
+        return { result: { ok: false, code: decision.code }, notify: false };
+      }
       await transaction.saveConsent(decision.state);
-      notify = decision.effects.some((effect) => effect.kind === 'notify-active-streams');
+      const notify = decision.effects.some((effect) => effect.kind === 'notify-active-streams');
       await transaction.appendAudit({
         accountId: input.command.accountId,
         action: `support.consent.${input.action.kind}`,
@@ -90,9 +97,9 @@ export const manageConsent = async (
       }
       const applied: ManageConsentResult = { ok: true, state: decision.state };
       await transaction.rememberCommandResult(input.command.commandId, applied);
-      return applied;
+      return { result: applied, notify };
     },
   );
-  if (notify && result.ok) dependencies.consentChanges.publish(input.command.consentId);
-  return result;
+  if (outcome.notify) dependencies.consentChanges.publish(input.command.consentId);
+  return outcome.result;
 };
