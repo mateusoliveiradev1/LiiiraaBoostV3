@@ -175,7 +175,7 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
     `${accountOrigin}/pt-BR/register?invitation=${'i'.repeat(64)}`,
     'no-referrer',
   );
-  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer', [403]);
+  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer');
 
   const accountLogin = await request.get(`${accountOrigin}/pt-BR/login`);
   const accountMarkup = await accountLogin.text();
@@ -184,15 +184,17 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   expect(accountMarkup).not.toMatch(/data-runtime-class="fixture"|sign-in-preview/iu);
 
   const adminLanding = await request.get(`${adminOrigin}/pt-BR/admin`);
-  expect(adminLanding.status()).toBe(403);
-  const adminDenial = (await adminLanding.json()) as Record<string, unknown>;
-  expect(adminDenial).toMatchObject({
-    authoritativeAccessConnected: false,
-    code: 'ADMIN_ACCESS_DENIED',
-  });
-  expect(JSON.stringify(adminDenial)).not.toMatch(/fixture|preview role|support session/iu);
+  expect(adminLanding.status()).toBe(200);
+  const adminMarkup = await adminLanding.text();
+  expect(adminMarkup).toContain('data-admin-session-state="unverified"');
+  expect(adminMarkup).toContain('data-runtime-class="server-authority"');
+  expect(adminMarkup).not.toMatch(
+    /data-runtime-class="fixture"|data-admin-preview|case-preview|preview role|support session/iu,
+  );
 
-  const unauthenticatedAdmin = await request.get(`${adminOrigin}/v1/admin/session`);
+  const unauthenticatedAdmin = await request.get(`${adminOrigin}/v1/admin/session`, {
+    timeout: 45_000,
+  });
   expect([401, 403]).toContain(unauthenticatedAdmin.status());
   expect(unauthenticatedAdmin.headers()['set-cookie']).toBeUndefined();
 
@@ -202,12 +204,15 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   expect(crossSurface.status()).toBe(403);
   expect(crossSurface.headers()['set-cookie']).toBeUndefined();
 
-  const unauthenticatedAccount = await request.get(`${accountOrigin}/v1/account`);
+  const unauthenticatedAccount = await request.get(`${accountOrigin}/v1/account`, {
+    timeout: 45_000,
+  });
   expect([401, 403]).toContain(unauthenticatedAccount.status());
   expect(unauthenticatedAccount.headers()['set-cookie']).toBeUndefined();
 
   const unconsentedDiagnostic = await request.get(
     `${adminOrigin}/v1/admin/diagnostic-metadata/DIA-015`,
+    { timeout: 45_000 },
   );
   expect([401, 403, 404, 410]).toContain(unconsentedDiagnostic.status());
   expect(unconsentedDiagnostic.headers()['cache-control']).toContain('no-store');

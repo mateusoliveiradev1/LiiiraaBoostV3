@@ -294,6 +294,19 @@ describe('admin security boundary', () => {
     expect(response.headers.get('location')).toBeNull();
   });
 
+  it('seals the server-side admin API rewrite with the configured isolated origin', () => {
+    process.env['LIIIRAA_ADMIN_PREVIEW'] = 'false';
+    const response = adminProxy(
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/v1/admin/session`, {
+        headers: { origin: 'https://untrusted.example' },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-request-origin')).toBe(ADMIN_LOCAL_ORIGIN);
+    expect(response.headers.get('x-liiiraa-admin-role')).toBeNull();
+  });
+
   it('rejects URL-selected roles when production authority is active', () => {
     process.env['LIIIRAA_ADMIN_PREVIEW'] = 'false';
     const response = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`));
