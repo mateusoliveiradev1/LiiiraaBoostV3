@@ -15,6 +15,14 @@ const nextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
   generateBuildId: () => `${ACCOUNT_BUILD_ID_PREFIX}-isolated`,
+  async rewrites() {
+    return [
+      {
+        destination: 'https://liiiraa-api-staging.onrender.com/v1/:path*',
+        source: '/v1/:path*',
+      },
+    ];
+  },
   webpack(config) {
     config.resolve.extensionAlias = {
       ...config.resolve.extensionAlias,
