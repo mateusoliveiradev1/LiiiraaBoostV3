@@ -21,6 +21,7 @@ import { generateMetadata as generatePublicCatchAllMetadata } from './app/[local
 
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
+const proxySource = readFileSync(new URL('../proxy.ts', import.meta.url), 'utf8');
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
 const publicCatchAllSource = readFileSync(
   new URL('./app/[locale]/(public)/[[...slug]]/page.tsx', import.meta.url),
@@ -35,6 +36,10 @@ const routeOwnedSources = [
 ].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8'));
 
 describe('public shell', () => {
+  it('leaves the shared API authority path outside locale routing', () => {
+    expect(proxySource).toContain("matcher: ['/((?!api|v1|_next|_vercel|.*\\\\..*).*)']");
+  });
+
   it('publishes the official brand favicon from the root app boundary', () => {
     const iconUrl = new URL('./app/icon.svg', import.meta.url);
 

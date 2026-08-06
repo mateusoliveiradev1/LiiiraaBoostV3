@@ -3,11 +3,18 @@ import { NextRequest } from 'next/server';
 import accountProxy, {
   accountContextFromUrl,
   accountHeaderContract,
+  config as accountProxyConfig,
   createRequestNonce,
 } from '../proxy';
 import accountRuntimeProxy from './proxy';
 
 describe('account security boundary', () => {
+  it('leaves the real API authority path outside the page proxy', () => {
+    expect(accountProxyConfig.matcher).toEqual([
+      '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    ]);
+  });
+
   it('creates a fresh cryptographically random nonce for every request', () => {
     const first = createRequestNonce();
     const second = createRequestNonce();

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import adminProxy, {
   AdminAccessBoundary,
   adminHeaderContract,
+  config as adminProxyConfig,
   createAdminRequestNonce,
 } from '../proxy';
 import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
@@ -14,6 +15,12 @@ import { ADMIN_CANONICAL_ENTRY, ADMIN_LOCAL_ORIGIN, resolveAdminOrigin } from '.
 describe('admin security boundary', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('leaves the real API authority path outside the administrative page proxy', () => {
+    expect(adminProxyConfig.matcher).toEqual([
+      '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    ]);
   });
 
   it('uses the exact dedicated local origin and never claims connected authority', () => {

@@ -121,6 +121,8 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain("LIIIRAA_ACCOUNT_PREVIEW: 'false'");
   expect(workflow).toContain("LIIIRAA_ADMIN_PREVIEW: 'false'");
   expect(workflow).toContain('LIIIRAA_ACCOUNT_ORIGIN: account.origin');
+  expect(workflow.match(/deployment\.readyState === 'READY'/gu) ?? []).toHaveLength(3);
+  expect(workflow.match(/deployment\.target !== 'production'/gu) ?? []).toHaveLength(3);
   expect(workflow).toContain('needs: [verify-contracts, deploy-account]');
   expect(workflow).toContain('src/staging/provision-invitations.test.ts');
   expect(workflow).not.toContain('DATABASE_URL');
@@ -152,6 +154,9 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
   await expectSecurityHeaders(request, `${accountOrigin}/pt-BR/login`, 'no-referrer');
   await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer', [403]);
+
+  const accountLogin = await request.get(`${accountOrigin}/pt-BR/login`);
+  expect(await accountLogin.text()).toContain('data-authority-connected="true"');
 
   const crossSurface = await request.get(`${adminOrigin}/pt-BR/admin`, {
     headers: { cookie: '__Host-liiiraa_account_session=forbidden-cross-surface-state' },
