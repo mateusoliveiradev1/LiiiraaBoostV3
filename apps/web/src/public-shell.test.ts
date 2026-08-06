@@ -47,8 +47,7 @@ describe('public shell', () => {
 
   it('builds the shared API rewrite into the Next routing manifest', async () => {
     const rewrites = Reflect.get(publicConfig.default, 'rewrites') as
-      | (() => Promise<readonly { destination: string; source: string }[]>)
-      | undefined;
+      (() => Promise<readonly { destination: string; source: string }[]>) | undefined;
 
     expect(rewrites).toBeTypeOf('function');
     await expect(rewrites?.()).resolves.toEqual([

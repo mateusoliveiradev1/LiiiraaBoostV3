@@ -9,7 +9,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { publicBoundaryHref, routing } from '../../public-boundary';
+import { accountRouteBoundaryHref, publicBoundaryHref, routing } from '../../public-boundary';
 import {
   PublicFooter,
   type PublicFooterCopy,
@@ -75,6 +75,8 @@ const COPY = Object.freeze({
     primaryNavigation: 'Navegação principal',
     promise: 'Prepare seu PC. Prove o resultado. Restaure com controle.',
     search: 'Pesquisar',
+    signIn: 'Entrar',
+    signUp: 'Criar conta',
     skip: 'Ir para o conteúdo principal',
   }),
   en: Object.freeze({
@@ -121,6 +123,8 @@ const COPY = Object.freeze({
     primaryNavigation: 'Primary navigation',
     promise: 'Prepare your PC. Prove the result. Restore with control.',
     search: 'Search',
+    signIn: 'Sign in',
+    signUp: 'Create account',
     skip: 'Skip to main content',
   }),
 } satisfies Record<(typeof routing.locales)[number], PublicCopy>);
@@ -180,6 +184,11 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
   setRequestLocale(locale);
 
   const copy = COPY[locale];
+  const accountOrigin = process.env['LIIIRAA_ACCOUNT_ORIGIN'];
+  const accountLinks = Object.freeze({
+    signIn: accountRouteBoundaryHref('account-sign-in', locale, accountOrigin),
+    signUp: accountRouteBoundaryHref('account-sign-up', locale, accountOrigin),
+  });
 
   return (
     <html data-density="comfortable" lang={locale}>
@@ -192,7 +201,7 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
           <div className="public-header__bar">
             <Brand locale={locale} />
 
-            <PublicNavigation copy={copy} locale={locale} />
+            <PublicNavigation accountLinks={accountLinks} copy={copy} locale={locale} />
           </div>
         </header>
 

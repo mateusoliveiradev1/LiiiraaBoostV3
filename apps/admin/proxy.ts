@@ -45,10 +45,7 @@ const EMPTY_POLICIES = Object.freeze([
 
 const UNSAFE_CONTEXT_KEYS = Object.freeze(['destination', 'redirect', 'returnPath', 'returnUrl']);
 
-const createContentSecurityPolicy = (
-  nonce: string,
-  runtimeMode: string | undefined,
-): string =>
+const createContentSecurityPolicy = (nonce: string, runtimeMode: string | undefined): string =>
   [
     "default-src 'self'",
     "base-uri 'none'",

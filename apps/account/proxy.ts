@@ -22,10 +22,7 @@ const EMPTY_POLICIES = Object.freeze([
   'usb=()',
 ]);
 
-const createContentSecurityPolicy = (
-  nonce: string,
-  runtimeMode: string | undefined,
-): string =>
+const createContentSecurityPolicy = (nonce: string, runtimeMode: string | undefined): string =>
   [
     "default-src 'self'",
     "base-uri 'none'",
@@ -110,17 +107,44 @@ export const accountContextFromUrl = (url: URL): AccountSafeContext => {
   });
 };
 
+const INVITATION_TOKEN = /^[A-Za-z0-9_-]{32,512}$/u;
+
+const accountRootDestination = (request: NextRequest): URL | undefined => {
+  const root = /^\/(en|pt-BR)\/?$/u.exec(request.nextUrl.pathname);
+  if (root === null) return undefined;
+
+  const locale = root[1] as WebLocale;
+  const invitation =
+    request.nextUrl.searchParams.get('invitation') ?? request.nextUrl.searchParams.get('invite');
+  const destination = new URL(`/${locale}/login`, request.nextUrl.origin);
+  if (invitation !== null && INVITATION_TOKEN.test(invitation)) {
+    destination.pathname = `/${locale}/register`;
+    destination.searchParams.set('invitation', invitation);
+  }
+  return destination;
+};
+
 export default function accountProxy(request: NextRequest): NextResponse {
   const nonce = createRequestNonce();
+  const headerContract = accountHeaderContract(nonce, process.env.NODE_ENV);
+  const rootDestination = accountRootDestination(request);
+  if (rootDestination !== undefined) {
+    const response = NextResponse.redirect(rootDestination, 307);
+    for (const { key, value } of headerContract) response.headers.set(key, value);
+    return response;
+  }
+
   const requestHeaders = new Headers(request.headers);
   const safeContext = accountContextFromUrl(request.nextUrl);
-  const headerContract = accountHeaderContract(nonce, process.env.NODE_ENV);
   const contentSecurityPolicy = headerContract.find(
     ({ key }) => key === 'Content-Security-Policy',
   )?.value;
 
   requestHeaders.set('x-liiiraa-account-context', JSON.stringify(safeContext));
-  requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
+  requestHeaders.delete('x-liiiraa-preview-authority');
+  if (process.env['LIIIRAA_ACCOUNT_PREVIEW'] === 'true') {
+    requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
+  }
   requestHeaders.set('x-nonce', nonce);
   if (contentSecurityPolicy !== undefined) {
     requestHeaders.set('Content-Security-Policy', contentSecurityPolicy);
@@ -130,8 +154,7 @@ export default function accountProxy(request: NextRequest): NextResponse {
     pathname: request.nextUrl.pathname,
     securityBoundary: 'account-origin',
   });
-  const isNotFound =
-    !routeMatch.ok || routeMatch.value.route.id === 'account-error-404';
+  const isNotFound = !routeMatch.ok || routeMatch.value.route.id === 'account-error-404';
   if (isNotFound) {
     requestHeaders.set('x-liiiraa-account-failure-kind', '404');
   }

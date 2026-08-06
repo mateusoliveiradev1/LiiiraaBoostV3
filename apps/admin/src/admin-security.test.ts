@@ -36,8 +36,7 @@ describe('admin security boundary', () => {
 
   it('builds the real API rewrite into the Next routing manifest', async () => {
     const rewrites = Reflect.get(adminNextConfig, 'rewrites') as
-      | (() => Promise<readonly { destination: string; source: string }[]>)
-      | undefined;
+      (() => Promise<readonly { destination: string; source: string }[]>) | undefined;
 
     expect(rewrites).toBeTypeOf('function');
     await expect(rewrites?.()).resolves.toEqual([
@@ -129,10 +128,7 @@ describe('admin security boundary', () => {
   it('applies the strictest noindex, frame-closed, external-free header contract', () => {
     const nonce = 'dGVzdC1hZG1pbi1ub25jZQ==';
     const headers = Object.fromEntries(
-      adminHeaderContract(nonce, 'production').map(({ key, value }) => [
-        key.toLowerCase(),
-        value,
-      ]),
+      adminHeaderContract(nonce, 'production').map(({ key, value }) => [key.toLowerCase(), value]),
     );
     const csp = headers['content-security-policy'];
 
@@ -168,10 +164,7 @@ describe('admin security boundary', () => {
     ({ allowsEval, runtimeMode }) => {
       const nonce = `dGVzdC1hZG1pbi1ub25jZQ-${runtimeMode}`;
       const headers = Object.fromEntries(
-        adminHeaderContract(nonce, runtimeMode).map(({ key, value }) => [
-          key.toLowerCase(),
-          value,
-        ]),
+        adminHeaderContract(nonce, runtimeMode).map(({ key, value }) => [key.toLowerCase(), value]),
       );
       const csp = headers['content-security-policy'];
 
@@ -303,9 +296,7 @@ describe('admin security boundary', () => {
 
   it('rejects URL-selected roles when production authority is active', () => {
     process.env['LIIIRAA_ADMIN_PREVIEW'] = 'false';
-    const response = adminProxy(
-      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`),
-    );
+    const response = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`));
 
     expect(response.status).toBe(403);
     expect(response.headers.get('x-liiiraa-admin-role')).toBeNull();

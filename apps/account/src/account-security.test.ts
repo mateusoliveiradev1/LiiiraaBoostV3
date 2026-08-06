@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import accountNextConfig from '../next.config';
@@ -20,8 +18,7 @@ describe('account security boundary', () => {
 
   it('builds the real API rewrite into the Next routing manifest', async () => {
     const rewrites = Reflect.get(accountNextConfig, 'rewrites') as
-      | (() => Promise<readonly { destination: string; source: string }[]>)
-      | undefined;
+      (() => Promise<readonly { destination: string; source: string }[]>) | undefined;
 
     expect(rewrites).toBeTypeOf('function');
     await expect(rewrites?.()).resolves.toEqual([
@@ -148,20 +145,19 @@ describe('account security boundary', () => {
     expect(accountRuntimeProxy).toBe(accountProxy);
   });
 
-  it('admits each localized account root and routes it to real authentication', () => {
-    const pageSource = readFileSync(
-      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
-      'utf8',
-    );
-
+  it('redirects each localized account root to real authentication and preserves valid invites', () => {
     for (const locale of ['pt-BR', 'en'] as const) {
-      const response = accountProxy(
-        new NextRequest(`https://account.liiiraa.com/${locale}`),
-      );
-      expect(response.status).toBe(200);
+      const response = accountProxy(new NextRequest(`https://account.liiiraa.com/${locale}`));
+      expect(response.status).toBe(307);
+      expect(response.headers.get('location')).toBe(`https://account.liiiraa.com/${locale}/login`);
     }
-    expect(pageSource).toContain("responsibility?.length === 0");
-    expect(pageSource).toContain("`/${locale}/login`");
-    expect(pageSource).toContain("`/${locale}/register?invitation=${encodeURIComponent(invitation)}`");
+    const invitation = 'i'.repeat(64);
+    const invited = accountProxy(
+      new NextRequest(`https://account.liiiraa.com/pt-BR?invitation=${invitation}`),
+    );
+    expect(invited.status).toBe(307);
+    expect(invited.headers.get('location')).toBe(
+      `https://account.liiiraa.com/pt-BR/register?invitation=${invitation}`,
+    );
   });
 });

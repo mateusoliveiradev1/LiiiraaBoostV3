@@ -21,6 +21,13 @@ export type PublicNavigationCopy = Readonly<{
   navigation: Readonly<Record<PublicPillarId, string>>;
   primaryNavigation: string;
   search: string;
+  signIn: string;
+  signUp: string;
+}>;
+
+export type PublicAccountLinks = Readonly<{
+  signIn: string;
+  signUp: string;
 }>;
 
 export type PublicFooterGroupId = 'product' | 'resources' | 'company' | 'legal';
@@ -245,9 +252,14 @@ const NavigationLinks = ({
 );
 
 export const PublicNavigation = ({
+  accountLinks,
   copy,
   locale,
-}: Readonly<{ copy: PublicNavigationCopy; locale: WebLocale }>) => {
+}: Readonly<{
+  accountLinks: PublicAccountLinks;
+  copy: PublicNavigationCopy;
+  locale: WebLocale;
+}>) => {
   const pathname = usePathname();
   const state = getPublicNavigationState(pathname, locale);
   const localeControl = (
@@ -275,12 +287,11 @@ export const PublicNavigation = ({
         >
           {copy.search}
         </a>
-        <a
-          aria-label={`${copy.download} · Liiiraa Boost`}
-          className="public-action public-action--primary"
-          href={publicBoundaryHref('public-download', locale)}
-        >
-          {copy.download}
+        <a className="public-action public-action--quiet" href={accountLinks.signIn}>
+          {copy.signIn}
+        </a>
+        <a className="public-action public-action--primary" href={accountLinks.signUp}>
+          {copy.signUp}
         </a>
       </div>
 
@@ -294,7 +305,8 @@ export const PublicNavigation = ({
           </nav>
           <div className="public-mobile-menu__actions">
             <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
-            <a href={publicBoundaryHref('public-download', locale)}>{copy.download}</a>
+            <a href={accountLinks.signIn}>{copy.signIn}</a>
+            <a href={accountLinks.signUp}>{copy.signUp}</a>
           </div>
         </div>
       </details>
