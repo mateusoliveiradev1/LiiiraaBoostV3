@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ACCOUNT_COMMERCE_PRICES,
   createAccountCommerce,
+  subscriptionBillingKind,
   type CheckoutCadence,
   type CheckoutCurrency,
 } from '../account-commerce';
@@ -20,6 +21,7 @@ const copy = Object.freeze({
   en: Object.freeze({
     annual: 'Annual',
     annualSaving: 'Save 28%',
+    administrativePermanentActive: 'Permanent administrative Premium',
     billing: 'Billing cycle',
     brand: 'Liiiraa Boost Premium',
     cancelAtEnd: 'Cancellation scheduled for the end of the paid cycle.',
@@ -37,6 +39,10 @@ const copy = Object.freeze({
     monthly: 'Monthly',
     perMonth: '/month',
     perYear: '/year',
+    permanentActive: 'Permanent Premium',
+    permanentBody: 'Permanent access granted by Liiiraa Boost. No charge, renewal, or invoice.',
+    permanentConnected: 'Granted by Liiiraa Boost · no billing',
+    permanentStatus: 'permanent',
     portalError: 'The billing portal could not be opened. Try again in a moment.',
     portalLoading: 'Opening billing portal',
     premiumActive: 'Premium active',
@@ -49,6 +55,7 @@ const copy = Object.freeze({
   'pt-BR': Object.freeze({
     annual: 'Anual',
     annualSaving: 'Economize 30%',
+    administrativePermanentActive: 'Premium administrativo permanente',
     billing: 'Ciclo de cobrança',
     brand: 'Liiiraa Boost Premium',
     cancelAtEnd: 'Cancelamento agendado para o fim do ciclo já pago.',
@@ -66,6 +73,11 @@ const copy = Object.freeze({
     monthly: 'Mensal',
     perMonth: '/mês',
     perYear: '/ano',
+    permanentActive: 'Premium permanente',
+    permanentBody:
+      'Acesso permanente concedido pela Liiiraa Boost. Sem cobrança, renovação ou fatura.',
+    permanentConnected: 'Concedido pela Liiiraa Boost · sem cobrança',
+    permanentStatus: 'permanente',
     portalError: 'Não foi possível abrir o portal de cobrança. Tente novamente em instantes.',
     portalLoading: 'Abrindo portal de cobrança',
     premiumActive: 'Premium ativo',
@@ -130,7 +142,10 @@ export const AccountSubscriptionAuthority = ({
     [authorityBaseUrl],
   );
   const subscription = projection.subscription;
-  const premium = subscription.plan === 'premium' && subscription.state === 'active';
+  const billingKind = subscriptionBillingKind(subscription);
+  const premium = billingKind !== 'free';
+  const administrativePremium =
+    billingKind === 'permanent' && projection.account.administrativeRole !== undefined;
 
   useEffect(() => {
     if (checkoutReturnOverride !== undefined) {
@@ -195,16 +210,30 @@ export const AccountSubscriptionAuthority = ({
       <div className="account-commerce__current">
         <div>
           <span className="account-commerce__eyebrow">{labels.current}</span>
-          <strong>{premium ? labels.premiumActive : labels.essential}</strong>
-          <p>{premium ? labels.premiumBody : labels.essentialBody}</p>
+          <strong>
+            {administrativePremium
+              ? labels.administrativePermanentActive
+              : billingKind === 'permanent'
+                ? labels.permanentActive
+                : billingKind === 'stripe'
+                  ? labels.premiumActive
+                  : labels.essential}
+          </strong>
+          <p>
+            {billingKind === 'permanent'
+              ? labels.permanentBody
+              : billingKind === 'stripe'
+                ? labels.premiumBody
+                : labels.essentialBody}
+          </p>
         </div>
         <span className="account-commerce__status" data-premium={premium || undefined}>
           <ProductIcon name={premium ? 'crown' : 'check'} size={18} />
-          {subscription.state}
+          {billingKind === 'permanent' ? labels.permanentStatus : subscription.state}
         </span>
       </div>
 
-      {premium ? (
+      {billingKind === 'stripe' ? (
         <div className="account-commerce__manage">
           <dl>
             <div>
@@ -228,6 +257,20 @@ export const AccountSubscriptionAuthority = ({
           >
             {labels.manage} <ProductIcon name="arrowRight" size={16} />
           </LbButton>
+        </div>
+      ) : billingKind === 'permanent' ? (
+        <div className="account-commerce__manage account-commerce__manage--permanent">
+          <dl>
+            <div>
+              <dt>
+                {administrativePremium
+                  ? labels.administrativePermanentActive
+                  : labels.permanentActive}
+              </dt>
+              <dd>{labels.permanentConnected}</dd>
+            </div>
+          </dl>
+          <p className="account-commerce__notice">{labels.permanentBody}</p>
         </div>
       ) : (
         <div className="account-commerce__offer">
@@ -311,7 +354,7 @@ export const AccountSubscriptionAuthority = ({
 
       {phase === 'error' ? (
         <p className="account-commerce__error" role="alert">
-          {premium ? labels.portalError : labels.checkoutError}
+          {billingKind === 'stripe' ? labels.portalError : labels.checkoutError}
         </p>
       ) : null}
     </section>

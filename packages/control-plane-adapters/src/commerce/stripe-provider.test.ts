@@ -43,8 +43,8 @@ describe('real Stripe commerce provider', () => {
       provider.createCheckout({
         accountId,
         priceReference: 'BRL:monthly:2990',
-        successUrl: 'https://account.example/pt-BR/plan?checkout=success',
-        cancelUrl: 'https://account.example/pt-BR/plan?checkout=cancel',
+        successUrl: 'https://account.example/pt-BR/account/subscription?checkout=success',
+        cancelUrl: 'https://account.example/pt-BR/account/subscription?checkout=cancel',
         idempotencyKey: 'command-checkout-1',
       }),
     ).resolves.toEqual({
@@ -111,7 +111,7 @@ describe('real Stripe commerce provider', () => {
     await expect(
       provider.createBillingPortal({
         accountId,
-        returnUrl: 'https://account.example/pt-BR/plan',
+        returnUrl: 'https://account.example/pt-BR/account/subscription',
       }),
     ).resolves.toEqual({
       ok: true,
@@ -120,7 +120,7 @@ describe('real Stripe commerce provider', () => {
     expect(createPortal).toHaveBeenCalledWith({
       configuration: 'bpc_liiiraa',
       customer: 'cus_liiiraa',
-      return_url: 'https://account.example/pt-BR/plan',
+      return_url: 'https://account.example/pt-BR/account/subscription',
     });
   });
 

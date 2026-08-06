@@ -7,11 +7,20 @@ import { primeAccountCsrfToken, readAccountCsrfToken } from './account-auth';
 
 export type CheckoutCadence = 'monthly' | 'annual';
 export type CheckoutCurrency = 'BRL' | 'USD';
+export type SubscriptionBillingKind = 'free' | 'permanent' | 'stripe';
 
 export const ACCOUNT_COMMERCE_PRICES = Object.freeze({
   BRL: Object.freeze({ annual: 24_990, monthly: 2_990 }),
   USD: Object.freeze({ annual: 5_999, monthly: 699 }),
 } as const);
+
+export const subscriptionBillingKind = (
+  subscription: SubscriptionProjectionJson,
+): SubscriptionBillingKind => {
+  const premium = subscription.plan === 'premium' && subscription.state === 'active';
+  if (!premium) return 'free';
+  return subscription.currentPeriodEndsAt === undefined ? 'permanent' : 'stripe';
+};
 
 export type AccountCommerceResult =
   | Readonly<{ status: 'redirect'; url: string }>

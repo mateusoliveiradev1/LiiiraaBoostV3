@@ -11,6 +11,7 @@ import type {
   AccountAuthorityReadResult,
   AccountProfileDraft,
 } from '../account-authority';
+import { subscriptionBillingKind } from '../account-commerce';
 import { primeAccountCsrfToken } from '../account-auth';
 import {
   advanceAccountMutationPhase,
@@ -450,12 +451,33 @@ export const AccountAuthorityInspector = ({
   }
   const projection = result.projection;
   const view = mapAccountAuthorityProjection(projection, new Date().toISOString());
+  const billingKind = subscriptionBillingKind(projection.subscription);
+  const administrativePremium =
+    billingKind === 'permanent' && projection.account.administrativeRole !== undefined;
   return (
     <div className="account-inspector__content" data-authority-state={result.status}>
       <section className="account-inspector__section">
         <span className="account-inspector__label">{locale === 'pt-BR' ? 'Plano' : 'Plan'}</span>
-        <h2>{view.billing.plan === 'premium' ? 'Premium' : 'Free'}</h2>
-        <p>{projection.subscription.state}</p>
+        <h2>
+          {administrativePremium
+            ? locale === 'pt-BR'
+              ? 'Premium administrativo'
+              : 'Administrative Premium'
+            : billingKind === 'permanent'
+              ? locale === 'pt-BR'
+                ? 'Premium permanente'
+                : 'Permanent Premium'
+              : view.billing.plan === 'premium'
+                ? 'Premium'
+                : 'Free'}
+        </h2>
+        <p>
+          {billingKind === 'permanent'
+            ? locale === 'pt-BR'
+              ? 'Acesso permanente · sem cobrança'
+              : 'Permanent access · no billing'
+            : projection.subscription.state}
+        </p>
         <p>
           {projection.invoices.length === 0
             ? locale === 'pt-BR'

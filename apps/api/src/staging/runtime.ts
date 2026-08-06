@@ -39,7 +39,7 @@ import Stripe from 'stripe';
 
 import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.ts';
 import { registerAdminRoutes, type AdminRouteDependencies } from '../modules/admin/routes.ts';
-import { registerCommerceRoutes } from '../modules/commerce/routes.ts';
+import { accountSubscriptionUrl, registerCommerceRoutes } from '../modules/commerce/routes.ts';
 import { registerDeviceRoutes } from '../modules/devices/routes.ts';
 import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
 import { registerSupportRoutes } from '../modules/support/routes.ts';
@@ -480,7 +480,7 @@ export const buildRealStagingApp = async (
     createBillingPortal: async (accountId, locale) => {
       const portal = await commerceProvider.createBillingPortal({
         accountId,
-        returnUrl: `${environment.accountOrigin}/${locale}/plan`,
+        returnUrl: accountSubscriptionUrl(environment.accountOrigin, locale),
       });
       return portal.ok ? { ok: true, portalUrl: portal.value.portalUrl } : { ok: false };
     },

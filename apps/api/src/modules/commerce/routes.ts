@@ -59,6 +59,14 @@ export const checkoutReturnUrls = (
   accountOrigin: string,
   locale: 'pt-BR' | 'en',
 ): Readonly<{ cancelUrl: string; successUrl: string }> => {
+  const plan = accountSubscriptionUrl(accountOrigin, locale);
+  return {
+    cancelUrl: `${plan}?checkout=cancelled`,
+    successUrl: `${plan}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+  };
+};
+
+export const accountSubscriptionUrl = (accountOrigin: string, locale: 'pt-BR' | 'en'): string => {
   const origin = new URL(accountOrigin);
   if (
     origin.origin !== accountOrigin ||
@@ -68,11 +76,7 @@ export const checkoutReturnUrls = (
   ) {
     throw new Error('INVALID_ACCOUNT_ORIGIN');
   }
-  const plan = `${accountOrigin}/${locale}/plan`;
-  return {
-    cancelUrl: `${plan}?checkout=cancelled`,
-    successUrl: `${plan}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-  };
+  return `${accountOrigin}/${locale}/account/subscription`;
 };
 
 export const commerceJson = (value: unknown): unknown =>

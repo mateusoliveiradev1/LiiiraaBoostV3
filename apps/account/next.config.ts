@@ -1,20 +1,29 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
-export const ACCOUNT_ORIGIN = "https://account.liiiraa.com";
-export const ACCOUNT_BUILD_ID_PREFIX = "account-preview";
+export const ACCOUNT_ORIGIN = 'https://account.liiiraa.com';
+export const ACCOUNT_BUILD_ID_PREFIX = 'account-preview';
 export const ACCOUNT_RUNTIME_BOUNDARY = Object.freeze({
   authorityConnected: false,
-  cookiePolicy: "none",
-  indexing: "noindex",
+  cookiePolicy: 'none',
+  indexing: 'noindex',
   origin: ACCOUNT_ORIGIN,
 } as const);
 
 const nextConfig = {
   devIndicators: false,
-  output: "standalone",
+  output: 'standalone',
   poweredByHeader: false,
   typedRoutes: true,
   generateBuildId: () => `${ACCOUNT_BUILD_ID_PREFIX}-isolated`,
+  async redirects() {
+    return [
+      {
+        destination: '/:locale/account/subscription',
+        permanent: true,
+        source: '/:locale(pt-BR|en)/plan',
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
@@ -26,8 +35,8 @@ const nextConfig = {
   webpack(config) {
     config.resolve.extensionAlias = {
       ...config.resolve.extensionAlias,
-      ".js": [".ts", ".tsx", ".js"],
-      ".mjs": [".mts", ".mjs"],
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
     };
     return config;
   },
