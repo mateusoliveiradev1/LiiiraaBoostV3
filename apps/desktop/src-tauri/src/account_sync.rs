@@ -230,6 +230,16 @@ fn degraded_response(state: &AccountSyncState, error: AccountSyncError) -> Accou
     )
 }
 
+fn degraded_mutation_response(
+    state: &AccountSyncState,
+    draft: AccountProfileDraft,
+    error: AccountSyncError,
+) -> AccountSyncResponse {
+    let mut degraded = degraded_response(state, error);
+    degraded.local_draft = Some(draft);
+    degraded
+}
+
 pub fn unavailable_account_response() -> AccountSyncResponse {
     response(
         AccountAuthorityState::Offline,
@@ -324,10 +334,19 @@ pub fn sync_account(
 
         let update = match api.update_account(&credential, mutation) {
             Ok(update) => update,
-            Err(error) => return degraded_response(state, error),
+            Err(error) => {
+                return degraded_mutation_response(state, mutation.draft.clone(), error);
+            }
         };
-        if matches!(update.status, 401 | 403) {
+        if update.status == 401 {
             return revoked_response(store, state);
+        }
+        if update.status == 403 {
+            return degraded_mutation_response(
+                state,
+                mutation.draft.clone(),
+                AccountSyncError::InvalidResponse,
+            );
         }
         if update.status == 409 {
             return match decode_projection_from_conflict(&update.body) {
@@ -344,11 +363,19 @@ pub fn sync_account(
             };
         }
         if update.status != 200 {
-            return degraded_response(state, AccountSyncError::InvalidResponse);
+            return degraded_mutation_response(
+                state,
+                mutation.draft.clone(),
+                AccountSyncError::InvalidResponse,
+            );
         }
-        if decode_projection(&update.body).is_err() {
-            return degraded_response(state, AccountSyncError::InvalidResponse);
-        }
+        let updated_projection = match decode_projection(&update.body) {
+            Ok(projection) => projection,
+            Err(error) => {
+                return degraded_mutation_response(state, mutation.draft.clone(), error);
+            }
+        };
+        state.last_projection = Some(updated_projection);
     }
 
     match api.get_account(&credential) {
@@ -434,7 +461,7 @@ impl HttpsOrigin {
 
 impl AccountAuthorityApi for WindowsAccountAuthorityApi {
     fn get_account(&self, credential: &str) -> Result<AccountApiResponse, AccountSyncError> {
-        winhttp_request(&self.origin, "GET", credential, None)
+        winhttp_request(&self.origin, "GET", credential, None, None)
     }
 
     fn update_account(
@@ -451,8 +478,41 @@ impl AccountAuthorityApi for WindowsAccountAuthorityApi {
             "localDraftToken": mutation.local_draft_token,
         }))
         .map_err(|_| AccountSyncError::InvalidRequest)?;
-        winhttp_request(&self.origin, "PATCH", credential, Some(&body))
+        winhttp_request(
+            &self.origin,
+            "PATCH",
+            credential,
+            Some(&body),
+            Some(mutation.command.expected_version.as_str()),
+        )
     }
+}
+
+fn account_request_headers(
+    credential: &str,
+    has_body: bool,
+    expected_version: Option<&str>,
+) -> Result<String, AccountSyncError> {
+    if credential.is_empty() || credential.len() > 4_096 || credential.chars().any(char::is_control)
+    {
+        return Err(AccountSyncError::InvalidRequest);
+    }
+    if expected_version.is_some_and(|version| {
+        version.is_empty()
+            || version.len() > 20
+            || !version.bytes().all(|byte| byte.is_ascii_digit())
+    }) {
+        return Err(AccountSyncError::InvalidRequest);
+    }
+
+    let mut headers = format!("Authorization: Bearer {credential}\r\nAccept: application/json\r\n");
+    if has_body {
+        headers.push_str("Content-Type: application/json\r\n");
+    }
+    if let Some(version) = expected_version {
+        headers.push_str(&format!("If-Match: \"{version}\"\r\n"));
+    }
+    Ok(headers)
 }
 
 #[cfg(target_os = "windows")]
@@ -461,6 +521,7 @@ fn winhttp_request(
     method: &str,
     credential: &str,
     body: Option<&[u8]>,
+    expected_version: Option<&str>,
 ) -> Result<AccountApiResponse, AccountSyncError> {
     use std::{ffi::c_void, ptr};
     use windows::{
@@ -518,11 +579,7 @@ fn winhttp_request(
         if request.0.is_null() {
             return Err(AccountSyncError::NetworkUnavailable);
         }
-        let mut headers =
-            format!("Authorization: Bearer {credential}\r\nAccept: application/json\r\n");
-        if body.is_some() {
-            headers.push_str("Content-Type: application/json\r\n");
-        }
+        let headers = account_request_headers(credential, body.is_some(), expected_version)?;
         let headers: Vec<u16> = headers.encode_utf16().collect();
         let body_pointer = body.map(|bytes| bytes.as_ptr().cast::<c_void>());
         let body_length = body.map_or(0, |bytes| bytes.len() as u32);
@@ -582,6 +639,7 @@ fn winhttp_request(
     _method: &str,
     _credential: &str,
     _body: Option<&[u8]>,
+    _expected_version: Option<&str>,
 ) -> Result<AccountApiResponse, AccountSyncError> {
     Err(AccountSyncError::NetworkUnavailable)
 }
@@ -679,6 +737,24 @@ mod tests {
         }
     }
 
+    fn profile_mutation() -> AccountProfileMutation {
+        serde_json::from_value(serde_json::json!({
+            "command": {
+                "schemaVersion": "1.0",
+                "accountId": "account-01",
+                "action": "update-profile",
+                "commandId": "command-profile-01",
+                "correlationId": "account-sync-test",
+                "expectedVersion": "7",
+                "kind": "account-command",
+                "requestedAt": "2030-01-15T00:00:00.000Z"
+            },
+            "draft": { "displayName": "Mateus Winchester", "locale": "pt-BR" },
+            "localDraftToken": "draft-token-profile-01"
+        }))
+        .expect("valid profile mutation")
+    }
+
     #[test]
     fn synchronizes_generated_projection_and_keeps_stale_copy_offline() {
         let store = store();
@@ -734,5 +810,67 @@ mod tests {
         );
         assert_eq!(result.state, AccountAuthorityState::Revoked);
         assert_eq!(store.read_credential().expect("store available"), None);
+    }
+
+    #[test]
+    fn forbidden_profile_mutation_preserves_credential_projection_and_draft() {
+        let store = store();
+        let api = SequenceApi {
+            get: RefCell::new(VecDeque::from([AccountApiResponse {
+                status: 200,
+                body: projection_body("Mateus Oliveira", "7", "online"),
+            }])),
+            update: RefCell::new(VecDeque::from([AccountApiResponse {
+                status: 403,
+                body: Vec::new(),
+            }])),
+        };
+        let mut sync_state = AccountSyncState::default();
+        let _ = sync_account(
+            &store,
+            &api,
+            &mut sync_state,
+            AccountSyncRequest {
+                trigger: AccountSyncTrigger::Launch,
+                mutation: None,
+            },
+        );
+        let result = sync_account(
+            &store,
+            &api,
+            &mut sync_state,
+            AccountSyncRequest {
+                trigger: AccountSyncTrigger::Mutation,
+                mutation: Some(profile_mutation()),
+            },
+        );
+
+        assert_ne!(result.state, AccountAuthorityState::Revoked);
+        assert_eq!(
+            store.read_credential().expect("store available").as_deref(),
+            Some("credential-in-native-custody")
+        );
+        assert_eq!(
+            result.local_draft.expect("draft preserved").display_name,
+            "Mateus Winchester"
+        );
+        assert_eq!(
+            result
+                .projection
+                .expect("last projection preserved")
+                .account
+                .display_name
+                .as_str(),
+            "Mateus Oliveira"
+        );
+    }
+
+    #[test]
+    fn native_patch_headers_include_the_expected_aggregate_version() {
+        let headers = account_request_headers("credential-in-native-custody", true, Some("7"))
+            .expect("valid native headers");
+
+        assert!(headers.contains("If-Match: \"7\"\r\n"));
+        assert!(headers.contains("Authorization: Bearer credential-in-native-custody\r\n"));
     }
 }

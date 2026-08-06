@@ -104,6 +104,44 @@ export interface DesktopWindowAdapter {
   readonly toggleMaximize: () => Promise<void>;
 }
 
+export interface NativeHostCommandRelay {
+  readonly attach: (bridge: Pick<ShellBridge, 'send'>) => void;
+  readonly detach: (bridge: Pick<ShellBridge, 'send'>) => void;
+  readonly send: (command: RendererToHostShellCommandJson) => void;
+}
+
+export const createNativeHostCommandRelay = (): NativeHostCommandRelay => {
+  let attachedBridge: Pick<ShellBridge, 'send'> | undefined;
+  const pendingCommands: RendererToHostShellCommandJson[] = [];
+
+  const send = (command: RendererToHostShellCommandJson): void => {
+    if (attachedBridge !== undefined) {
+      void attachedBridge.send(command);
+      return;
+    }
+
+    if (pendingCommands.length >= 32) {
+      pendingCommands.shift();
+    }
+    pendingCommands.push(command);
+  };
+
+  const attach = (bridge: Pick<ShellBridge, 'send'>): void => {
+    attachedBridge = bridge;
+    for (const command of pendingCommands.splice(0)) {
+      void bridge.send(command);
+    }
+  };
+
+  const detach = (bridge: Pick<ShellBridge, 'send'>): void => {
+    if (attachedBridge === bridge) {
+      attachedBridge = undefined;
+    }
+  };
+
+  return Object.freeze({ attach, detach, send });
+};
+
 export const runDesktopWindowAction = async (
   action: DesktopWindowAction,
   windowAdapter: DesktopWindowAdapter = getCurrentWindow(),
@@ -722,7 +760,7 @@ interface NativeShellState {
   readonly diagnostic?: ShellBridgeDiagnostic;
   readonly hostPreferenceEvent?: PreferenceEvent;
   readonly installerAccepted: boolean;
-  readonly installerIdentity?: ShellInstallerIdentityJson;
+  readonly installerIdentity?: ShellInstallerIdentityJson | undefined;
   readonly navigation?: Readonly<{ pathname: string; requestId: string }>;
   readonly notificationPreference?: ShellNotificationPreferenceJson;
   readonly startupAcknowledged: boolean;
@@ -1004,6 +1042,7 @@ const measurePathFor = (
 
 export interface DesktopRouteOutletProps {
   readonly activityEvents?: readonly NativeActivityEvent[];
+  readonly installerIdentity?: ShellInstallerIdentityJson | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly route: DesktopRouteMatch;
@@ -1012,6 +1051,7 @@ export interface DesktopRouteOutletProps {
 
 export const DesktopRouteOutlet = ({
   activityEvents = ACTIVITY_EVENTS,
+  installerIdentity,
   locale,
   navigate,
   route,
@@ -1020,10 +1060,24 @@ export const DesktopRouteOutlet = ({
   const surfaceName: string = route.definition.surface;
 
   if (surfaceName === 'ContextualHome') {
-    return <PremiumOperationsSurface locale={locale} navigate={navigate} view="home" />;
+    return (
+      <PremiumOperationsSurface
+        installerIdentity={installerIdentity}
+        locale={locale}
+        navigate={navigate}
+        view="home"
+      />
+    );
   }
   if (surfaceName === 'ActivitySurface') {
-    return <PremiumOperationsSurface locale={locale} navigate={navigate} view="activity" />;
+    return (
+      <PremiumOperationsSurface
+        installerIdentity={installerIdentity}
+        locale={locale}
+        navigate={navigate}
+        view="activity"
+      />
+    );
   }
   if (
     route.definition.surface === 'AccountSettingsSurface' &&
@@ -1031,6 +1085,7 @@ export const DesktopRouteOutlet = ({
   ) {
     return (
       <PremiumOperationsSurface
+        installerIdentity={installerIdentity}
         locale={locale}
         navigate={navigate}
         settingsSection={route.state}
@@ -1081,6 +1136,7 @@ export const DesktopRouteOutlet = ({
     case 'PremiumOperationsSurface':
       return (
         <PremiumOperationsSurface
+          installerIdentity={installerIdentity}
           locale={locale}
           navigate={navigate}
           view={route.state as PremiumRouteId}
@@ -1966,6 +2022,7 @@ const DesktopAppContent = ({
           >
             <DesktopRouteOutlet
               activityEvents={routeActivityEvents}
+              installerIdentity={nativeState?.installerIdentity}
               locale={locale}
               navigate={navigate}
               route={route}
@@ -2355,15 +2412,20 @@ const NativeDesktopApp = ({
   ...appProps
 }: NativeDesktopAppProps): ReactNode => {
   const [nativeState, setNativeState] = useState(() => createInitialNativeShellState(true));
-  const bridgeRef = useRef<ShellBridge | null>(null);
+  const commandRelayRef = useRef<NativeHostCommandRelay | null>(null);
+  commandRelayRef.current ??= createNativeHostCommandRelay();
+  const commandRelay = commandRelayRef.current;
   const commandMetadata = useMemo(
     () => nativeCommandMetadata ?? createHostCommandMetadataFactory(),
     [nativeCommandMetadata],
   );
 
-  const sendHostCommand = useCallback((command: RendererToHostShellCommandJson): void => {
-    void bridgeRef.current?.send(command);
-  }, []);
+  const sendHostCommand = useCallback(
+    (command: RendererToHostShellCommandJson): void => {
+      commandRelay.send(command);
+    },
+    [commandRelay],
+  );
 
   useEffect(() => {
     const bridge = createNativeShellComposition({
@@ -2427,15 +2489,18 @@ const NativeDesktopApp = ({
       ...(nativeBridgeTransport === undefined ? {} : { transport: nativeBridgeTransport }),
     });
 
-    bridgeRef.current = bridge;
-    void bridge.start();
-    return () => {
-      void bridge.dispose();
-      if (bridgeRef.current === bridge) {
-        bridgeRef.current = null;
+    let active = true;
+    void bridge.start().then(() => {
+      if (active) {
+        commandRelay.attach(bridge);
       }
+    });
+    return () => {
+      active = false;
+      commandRelay.detach(bridge);
+      void bridge.dispose();
     };
-  }, [nativeBridgeTransport]);
+  }, [commandRelay, nativeBridgeTransport]);
 
   const resolveClose = useCallback(
     (resolution: ShellCloseResolutionJson): void => {

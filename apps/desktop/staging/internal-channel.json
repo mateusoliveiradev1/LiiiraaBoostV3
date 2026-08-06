@@ -15,7 +15,7 @@
   "entitlementKeyId": "staging-entitlement-current",
   "artifact": {
     "availability": "not-published",
-    "fileName": "Liiiraa Boost Internal 023001_x64-setup.exe",
+    "fileName": "Liiiraa Boost_0.0.1_x64-setup.exe",
     "format": "nsis",
     "signingClass": "self-signed-development"
   },

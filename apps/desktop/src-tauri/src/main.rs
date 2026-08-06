@@ -704,35 +704,47 @@ fn run() -> Result<(), String> {
                 return;
             }
 
-            let WindowEvent::CloseRequested { api, .. } = event else {
-                return;
-            };
-            let lifecycle = window.state::<Mutex<WindowLifecycle>>();
-            let close = lifecycle.lock().ok().and_then(|lifecycle| {
-                lifecycle
-                    .begin_close(HostEventMetadata::now("close-request"))
-                    .ok()
-            });
-
-            let Some(close) = close else {
-                api.prevent_close();
-                return;
-            };
-
-            match close.action {
-                CloseAction::Exit => {}
-                CloseAction::HideToTray => {
-                    api.prevent_close();
-                    let _ = window.hide();
-                }
-                CloseAction::StayVisible | CloseAction::AwaitRendererDecision => {
-                    api.prevent_close();
-                    if let Some(event) = close.event {
-                        let _ = window.emit(HOST_EVENT_CHANNEL, event);
+            match event {
+                WindowEvent::Resized(_) => {
+                    let should_hide = window.is_minimized().unwrap_or(false)
+                        && window
+                            .state::<Mutex<WindowLifecycle>>()
+                            .lock()
+                            .is_ok_and(|lifecycle| lifecycle.should_hide_on_minimize());
+                    if should_hide {
+                        let _ = window.hide();
                     }
-                    let _ = window.show();
-                    let _ = window.set_focus();
                 }
+                WindowEvent::CloseRequested { api, .. } => {
+                    let lifecycle = window.state::<Mutex<WindowLifecycle>>();
+                    let close = lifecycle.lock().ok().and_then(|lifecycle| {
+                        lifecycle
+                            .begin_close(HostEventMetadata::now("close-request"))
+                            .ok()
+                    });
+
+                    let Some(close) = close else {
+                        api.prevent_close();
+                        return;
+                    };
+
+                    match close.action {
+                        CloseAction::Exit => {}
+                        CloseAction::HideToTray => {
+                            api.prevent_close();
+                            let _ = window.hide();
+                        }
+                        CloseAction::StayVisible | CloseAction::AwaitRendererDecision => {
+                            api.prevent_close();
+                            if let Some(event) = close.event {
+                                let _ = window.emit(HOST_EVENT_CHANNEL, event);
+                            }
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                }
+                _ => {}
             }
         })
         .run(tauri::generate_context!())

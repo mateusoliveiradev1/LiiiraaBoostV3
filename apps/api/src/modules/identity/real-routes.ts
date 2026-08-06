@@ -190,6 +190,10 @@ export const registerRealIdentityRoutes = (
     typeof request.headers.origin === 'string' &&
     browserOrigins.has(request.headers.origin) &&
     verifyCsrf(dependencies.csrfSecret, request.headers['x-csrf-token']);
+  const accountMutationAllowed = (request: FastifyRequest): boolean =>
+    request.headers.origin === undefined
+      ? bearerCredential(request) !== null
+      : browserMutationAllowed(request);
   const resolveActor = async (
     request: FastifyRequest,
   ): Promise<Readonly<{ actor: IdentityActor; credential: string }> | null> => {
@@ -354,7 +358,7 @@ export const registerRealIdentityRoutes = (
   });
 
   app.patch('/v1/account', async (request, reply) => {
-    if (!browserMutationAllowed(request) || !isRecord(request.body)) {
+    if (!accountMutationAllowed(request) || !isRecord(request.body)) {
       return noStore(reply).code(403).send({ code: 'REQUEST_DENIED' });
     }
     const resolved = await resolveActor(request);

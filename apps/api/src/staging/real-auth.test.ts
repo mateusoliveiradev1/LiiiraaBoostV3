@@ -220,6 +220,55 @@ describe('real staging authentication routes', () => {
     expect(identity.signOut).toHaveBeenCalledWith(credential);
     await app.close();
   });
+
+  it('allows a bearer-authenticated native profile update without browser CSRF and still rejects a hostile Origin', async () => {
+    const { app, identity } = await createApp();
+    identity.updateProfile.mockResolvedValue({
+      ok: true,
+      actor: {
+        ...actor,
+        displayName: 'Mateus Winchester',
+        identityVersion: 2n,
+        updatedAt: '2030-01-02T00:00:00.000Z',
+      },
+    });
+    const current = await app.inject({
+      headers: { authorization: `Bearer ${credential}` },
+      method: 'GET',
+      url: '/v1/account',
+    });
+    expect(current.statusCode).toBe(200);
+
+    const nativeUpdate = await app.inject({
+      headers: {
+        authorization: `Bearer ${credential}`,
+        'if-match': current.headers.etag,
+      },
+      method: 'PATCH',
+      payload: { patch: { displayName: 'Mateus Winchester', locale: 'pt-BR' } },
+      url: '/v1/account',
+    });
+    expect(nativeUpdate.statusCode).toBe(200);
+    expect(nativeUpdate.json()).toMatchObject({
+      account: { displayName: 'Mateus Winchester' },
+    });
+
+    identity.updateProfile.mockClear();
+    const hostileUpdate = await app.inject({
+      headers: {
+        authorization: `Bearer ${credential}`,
+        'if-match': current.headers.etag,
+        origin: 'https://attacker.example',
+        'x-csrf-token': 'forged',
+      },
+      method: 'PATCH',
+      payload: { patch: { displayName: 'Attacker Name', locale: 'pt-BR' } },
+      url: '/v1/account',
+    });
+    expect(hostileUpdate.statusCode).toBe(403);
+    expect(identity.updateProfile).not.toHaveBeenCalled();
+    await app.close();
+  });
 });
 
 describe('staging subscription authority', () => {

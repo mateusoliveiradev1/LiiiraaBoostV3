@@ -8,6 +8,8 @@ import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/ser
 import { describe, expect, it, vi } from 'vitest';
 import {
   createNativeShellComposition,
+  createNativeHostCommandRelay,
+  DesktopRouteOutlet,
   DesktopApp,
   SHELL_OPERATIONAL_STATES,
   getOperationalPresentation,
@@ -16,7 +18,12 @@ import {
   runDesktopWindowAction,
 } from './app.js';
 import type { ShellBridgeTransport } from './native/shell-bridge.js';
-import { DESKTOP_F6_REGIONS, createDesktopNavigator, desktopRouteTree } from './routes.js';
+import {
+  DESKTOP_F6_REGIONS,
+  createDesktopNavigator,
+  desktopRouteTree,
+  resolveDesktopRoute,
+} from './routes.js';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
@@ -64,9 +71,55 @@ describe('native window controls', () => {
     expect(windowAdapter.close).not.toHaveBeenCalled();
     expect(windowAdapter.toggleMaximize).not.toHaveBeenCalled();
   });
+
+  it('queues startup preferences until the native bridge is ready', () => {
+    const relay = createNativeHostCommandRelay();
+    const bridge = {
+      send: vi.fn(() => Promise.resolve(true)),
+    };
+    const command = {
+      schemaVersion: '1.0',
+      messageType: 'desktop.shell.set-tray-preference.command',
+      requestId: 'request-tray-relay-0001',
+      issuedAt: '2026-08-06T12:00:00.000Z',
+      payload: { preference: 'keep-game-detection-in-tray' },
+    } as const;
+
+    relay.send(command);
+    expect(bridge.send).not.toHaveBeenCalled();
+
+    relay.attach(bridge);
+    expect(bridge.send).toHaveBeenCalledOnce();
+    expect(bridge.send).toHaveBeenCalledWith(command);
+  });
 });
 
 describe('app shell smoke', () => {
+  it('renders the native About route from the validated installer identity without demo copy', () => {
+    const route = resolveDesktopRoute('/about');
+    expect(route.ok).toBe(true);
+    if (!route.ok) return;
+
+    const markup = renderToStaticMarkup(
+      <DesktopRouteOutlet
+        installerIdentity={{
+          publisher: 'Liiiraa Boost',
+          version: '0.0.1',
+          channel: 'development',
+          windowsCompatibility: { kind: 'supported', detectedBuild: 26_200, minimumBuild: 19_045 },
+        }}
+        locale="pt-BR"
+        navigate={() => undefined}
+        route={route.value}
+        scenarioId="S01"
+      />,
+    );
+
+    expect(markup).toContain('0.0.1');
+    expect(markup).toContain('Canal de desenvolvimento');
+    expect(markup).not.toMatch(/0\.0\.0|Fase 2|SIMULAÇÃO SEGURA|Demonstração segura/iu);
+  });
+
   it('mounts every typed route at every locked responsive width with one main and one H1', () => {
     const lockedWidths = [1440, 1280, 960, 760] as const;
 

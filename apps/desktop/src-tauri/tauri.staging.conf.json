@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Liiiraa Boost Internal #023001",
+  "productName": "Liiiraa Boost",
   "identifier": "com.liiiraa.boost.internal",
   "bundle": {
     "createUpdaterArtifacts": false,

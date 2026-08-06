@@ -3,6 +3,7 @@ import type { ProductIconName } from '@liiiraa/design-system';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ShellLocale } from '@liiiraa/feature-shell';
+import type { ShellInstallerIdentityJson } from '@liiiraa/contracts-ts';
 import { PreConsentLocaleControl } from '../preferences.js';
 import {
   DOWNLOADS,
@@ -35,6 +36,7 @@ import { areApplicationNotificationsEnabled, PremiumSettingsSurface } from './pr
 import { PremiumToast, type PremiumToastMessage, type PremiumToastTone } from './premium-toast.js';
 
 interface PremiumOperationsSurfaceProps {
+  readonly installerIdentity?: ShellInstallerIdentityJson | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly settingsSection?: string;
@@ -174,9 +176,11 @@ const PremiumButton = ({
 const RouteHeader = ({
   action,
   meta,
+  showDemoBadge = true,
 }: {
   readonly action?: ReactNode;
   readonly meta: RouteMeta;
+  readonly showDemoBadge?: boolean;
 }) => (
   <header className="premium-route-header">
     <div className="premium-route-heading">
@@ -191,10 +195,12 @@ const RouteHeader = ({
       </div>
     </div>
     <div className="premium-route-actions">
-      <span className="premium-demo-badge">
-        <span aria-hidden="true" />
-        Demonstração segura
-      </span>
+      {showDemoBadge ? (
+        <span className="premium-demo-badge">
+          <span aria-hidden="true" />
+          Demonstração segura
+        </span>
+      ) : null}
       {action}
     </div>
   </header>
@@ -1776,7 +1782,15 @@ export const LegacySettingsSurface = ({
   );
 };
 
-const ActivitySurface = ({ notify }: { readonly notify: (message: string) => void }) => (
+const ActivitySurface = ({
+  identity,
+  locale,
+  notify,
+}: {
+  readonly identity?: ShellInstallerIdentityJson | undefined;
+  readonly locale: ShellLocale;
+  readonly notify: (message: string) => void;
+}) => (
   <section className="premium-activity-timeline">
     {[
       ['Agora', 'Plano competitivo preparado', '5 alterações aguardam revisão', 'list'],
@@ -1784,8 +1798,14 @@ const ActivitySurface = ({ notify }: { readonly notify: (message: string) => voi
       ['18:31', 'Hardware reexaminado', 'Nenhuma mudança de compatibilidade', 'radar'],
       [
         'Ontem',
-        'Atualização 0.0.0 verificada',
-        'Canal estável · assinatura de desenvolvimento',
+        `Atualização ${identity?.version ?? '0.0.0'} verificada`,
+        identity === undefined
+          ? 'Canal estável · assinatura de desenvolvimento'
+          : text(
+              locale,
+              NATIVE_CHANNEL_LABELS[identity.channel][0],
+              NATIVE_CHANNEL_LABELS[identity.channel][1],
+            ),
         'check',
       ],
     ].map(([time, title, detail, icon], index) => (
@@ -1841,7 +1861,7 @@ const formatUpdateSize = (bytes: number, locale: ShellLocale) =>
     minimumFractionDigits: 1,
   }).format(bytes / 1_000_000);
 
-const AboutSurface = ({
+const DemonstrationAboutSurface = ({
   locale,
   notify,
 }: {
@@ -2274,6 +2294,146 @@ const AboutSurface = ({
   );
 };
 
+const NATIVE_CHANNEL_LABELS = Object.freeze({
+  development: ['Canal de desenvolvimento', 'Development channel'],
+  stable: ['Canal estável', 'Stable channel'],
+  beta: ['Canal beta', 'Beta channel'],
+  experimental: ['Canal experimental', 'Experimental channel'],
+} satisfies Readonly<Record<ShellInstallerIdentityJson['channel'], readonly [string, string]>>);
+
+const NativeAboutSurface = ({
+  identity,
+  locale,
+  notify,
+}: {
+  readonly identity: ShellInstallerIdentityJson;
+  readonly locale: ShellLocale;
+  readonly notify: (message: string, tone?: PremiumToastTone) => void;
+}) => {
+  const channelLabel = text(
+    locale,
+    NATIVE_CHANNEL_LABELS[identity.channel][0],
+    NATIVE_CHANNEL_LABELS[identity.channel][1],
+  );
+  const compatibility = identity.windowsCompatibility;
+
+  return (
+    <div className="premium-about-layout" data-native-installer-identity="validated">
+      <section className="premium-about-hero">
+        <span className="premium-about-mark" aria-hidden="true">
+          <svg viewBox="0 0 36 28">
+            <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" />
+            <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" />
+          </svg>
+        </span>
+        <div>
+          <span className="premium-section-label">Liiiraa Boost</span>
+          <h2>
+            {text(
+              locale,
+              'Identidade real desta instalação',
+              'Real identity for this installation',
+            )}
+          </h2>
+          <p>
+            {text(locale, 'Versão', 'Version')} {identity.version} · {channelLabel}
+          </p>
+        </div>
+      </section>
+
+      <section className="premium-updater-card" data-phase="native-disabled">
+        <header className="premium-updater-header">
+          <span className="premium-updater-icon">
+            <ProductIcon name="shield" size={24} weight="duotone" />
+          </span>
+          <div>
+            <span className="premium-section-label">
+              {text(locale, 'IDENTIDADE DO APLICATIVO', 'APP IDENTITY')}
+            </span>
+            <h3>{text(locale, 'Compilação instalada', 'Installed build')}</h3>
+          </div>
+        </header>
+
+        <div className="premium-updater-overview">
+          <div>
+            <span>{text(locale, 'Versão instalada', 'Installed version')}</span>
+            <strong>{identity.version}</strong>
+          </div>
+          <div>
+            <span>{text(locale, 'Canal', 'Channel')}</span>
+            <strong>{channelLabel}</strong>
+          </div>
+          <div>
+            <span>{text(locale, 'Publicador', 'Publisher')}</span>
+            <strong>{identity.publisher}</strong>
+          </div>
+        </div>
+
+        <footer className="premium-updater-footnote">
+          <ProductIcon name="info" size={15} weight="duotone" />
+          <span>
+            {text(
+              locale,
+              'Atualizações automáticas ainda não estão habilitadas nesta compilação de teste.',
+              'Automatic updates are not enabled yet for this test build.',
+            )}
+          </span>
+        </footer>
+      </section>
+
+      <section className="premium-about-grid">
+        {[
+          [
+            text(locale, 'Compatibilidade do Windows', 'Windows compatibility'),
+            compatibility.kind === 'supported'
+              ? text(locale, 'Sistema compatível', 'Compatible system')
+              : text(locale, 'Sistema não compatível', 'Unsupported system'),
+            'windows',
+          ],
+          [text(locale, 'Canal', 'Channel'), channelLabel, 'radar'],
+          [text(locale, 'Publicador', 'Publisher'), identity.publisher, 'shield'],
+        ].map(([title, description, icon]) => (
+          <button
+            key={title}
+            onClick={() => {
+              notify(
+                text(
+                  locale,
+                  `${String(title)} confirmado pela identidade nativa.`,
+                  `${String(title)} confirmed by the native identity.`,
+                ),
+              );
+            }}
+            type="button"
+          >
+            <ProductIcon name={icon as ProductIconName} size={22} weight="duotone" />
+            <span>
+              <strong>{title}</strong>
+              <small>{description}</small>
+            </span>
+            <ProductIcon name="chevronRight" size={17} />
+          </button>
+        ))}
+      </section>
+    </div>
+  );
+};
+
+const AboutSurface = ({
+  identity,
+  locale,
+  notify,
+}: {
+  readonly identity?: ShellInstallerIdentityJson | undefined;
+  readonly locale: ShellLocale;
+  readonly notify: (message: string, tone?: PremiumToastTone) => void;
+}) =>
+  identity === undefined ? (
+    <DemonstrationAboutSurface locale={locale} notify={notify} />
+  ) : (
+    <NativeAboutSurface identity={identity} locale={locale} notify={notify} />
+  );
+
 const ReviewDialog = ({
   changeCount,
   onClose,
@@ -2344,6 +2504,7 @@ const ReviewDialog = ({
 };
 
 export const PremiumOperationsSurface = ({
+  installerIdentity,
   locale,
   navigate,
   settingsSection,
@@ -2460,9 +2621,9 @@ export const PremiumOperationsSurface = ({
       />
     );
   } else if (view === 'activity') {
-    content = <ActivitySurface notify={notify} />;
+    content = <ActivitySurface identity={installerIdentity} locale={locale} notify={notify} />;
   } else {
-    content = <AboutSurface locale={locale} notify={notify} />;
+    content = <AboutSurface identity={installerIdentity} locale={locale} notify={notify} />;
   }
 
   return (
@@ -2480,6 +2641,7 @@ export const PremiumOperationsSurface = ({
           ) : undefined
         }
         meta={ROUTE_META[view]}
+        showDemoBadge={view !== 'about' || installerIdentity === undefined}
       />
       <div className="premium-route-content">{content}</div>
       <PlanBar

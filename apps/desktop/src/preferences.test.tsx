@@ -15,6 +15,7 @@ import {
   loadDesktopPreferences,
   persistDesktopPreferences,
   resolveNativeWindowTheme,
+  syncDesktopPreferencesToHost,
 } from './preferences.js';
 
 const createMemoryStorage = (initialValue: string | null = null) => {
@@ -169,5 +170,40 @@ describe('preferences appearance and generated host commands', () => {
       payload: { preference: 'keep-game-detection-in-tray' },
     });
     expect(createTrayPreferenceCommand(false, metadata).payload.preference).toBe('close-window');
+  });
+
+  it('synchronizes a restored tray opt-in with the native host on startup', () => {
+    const sendHostCommand = vi.fn();
+    const commandMetadata = vi
+      .fn()
+      .mockReturnValueOnce({
+        requestId: 'request-locale-startup-0001',
+        issuedAt: '2026-08-06T12:00:00.000Z',
+      })
+      .mockReturnValueOnce({
+        requestId: 'request-tray-startup-0001',
+        issuedAt: '2026-08-06T12:00:00.001Z',
+      });
+    const preferences = reducePreferences(createDefaultPreferences('pt-BR'), {
+      type: 'set-tray-enabled',
+      enabled: true,
+    });
+
+    syncDesktopPreferencesToHost(preferences, commandMetadata, sendHostCommand);
+
+    expect(sendHostCommand).toHaveBeenNthCalledWith(1, {
+      schemaVersion: '1.0',
+      messageType: 'desktop.shell.set-locale.command',
+      requestId: 'request-locale-startup-0001',
+      issuedAt: '2026-08-06T12:00:00.000Z',
+      payload: { locale: 'pt-BR' },
+    });
+    expect(sendHostCommand).toHaveBeenNthCalledWith(2, {
+      schemaVersion: '1.0',
+      messageType: 'desktop.shell.set-tray-preference.command',
+      requestId: 'request-tray-startup-0001',
+      issuedAt: '2026-08-06T12:00:00.001Z',
+      payload: { preference: 'keep-game-detection-in-tray' },
+    });
   });
 });

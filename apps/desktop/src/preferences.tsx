@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   type ChangeEvent,
   type ReactNode,
@@ -149,6 +150,15 @@ export const createTrayPreferenceCommand = (
     }),
   });
 
+export const syncDesktopPreferencesToHost = (
+  preferences: DesktopPreferences,
+  commandMetadata: () => HostCommandMetadata,
+  sendHostCommand: (command: RendererToHostShellCommandJson) => void,
+): void => {
+  sendHostCommand(createLocalePreferenceCommand(preferences.locale, commandMetadata()));
+  sendHostCommand(createTrayPreferenceCommand(preferences.trayEnabled, commandMetadata()));
+};
+
 export interface DesktopPreferencesContextValue {
   readonly preferences: DesktopPreferences;
   readonly dispatch: (event: PreferenceEvent) => void;
@@ -212,6 +222,7 @@ export const DesktopPreferencesProvider = ({
   );
   const [theme, setThemeState] = useState<DesktopTheme>(() => loadDesktopTheme(storage));
   const [systemTheme, setSystemTheme] = useState<ResolvedDesktopTheme>(detectSystemTheme);
+  const initialHostSyncCompleted = useRef(false);
   const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
@@ -225,6 +236,19 @@ export const DesktopPreferencesProvider = ({
       persistDesktopPreferences(storage, preferences);
     }
   }, [preferences, storage]);
+
+  useEffect(() => {
+    if (
+      initialHostSyncCompleted.current ||
+      sendHostCommand === undefined ||
+      commandMetadata === undefined
+    ) {
+      return;
+    }
+
+    initialHostSyncCompleted.current = true;
+    syncDesktopPreferencesToHost(preferences, commandMetadata, sendHostCommand);
+  }, [commandMetadata, preferences, sendHostCommand]);
 
   useEffect(() => {
     if (typeof globalThis.matchMedia !== 'function') {

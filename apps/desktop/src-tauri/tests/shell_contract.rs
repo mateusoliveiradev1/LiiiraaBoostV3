@@ -152,6 +152,8 @@ fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() 
     assert!(source.contains("validate_host_to_renderer_shell_event"));
     assert!(source.contains("ShellContract::authorize_startup"));
     assert!(source.contains("WindowEvent::CloseRequested"));
+    assert!(source.contains("WindowEvent::Resized"));
+    assert!(source.contains("window.is_minimized()"));
     assert!(source.contains("HostEventMetadata::now(\"close-request\")"));
     assert!(source.contains("current_work_area"));
     assert!(source.contains("HOST_EVENT_CHANNEL"));
@@ -200,6 +202,7 @@ fn primary_work_area() -> WorkArea {
 fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
     let mut lifecycle = WindowLifecycle::default();
     assert_eq!(lifecycle.close_action(), CloseAction::Exit);
+    assert!(!lifecycle.should_hide_on_minimize());
     assert!(
         lifecycle
             .begin_close(HostEventMetadata::fixed(
@@ -234,6 +237,7 @@ fn window_close_defaults_to_exit_and_tray_requires_validated_opt_in() {
         .expect("generated tray opt-in command");
 
     assert_eq!(lifecycle.close_action(), CloseAction::HideToTray);
+    assert!(lifecycle.should_hide_on_minimize());
     assert!(
         lifecycle
             .begin_close(HostEventMetadata::fixed(
@@ -880,7 +884,7 @@ fn notification_startup_installer_identity_uses_the_validated_development_channe
         value["payload"]["installer"],
         json!({
             "publisher": "Liiiraa Boost",
-            "version": "0.0.0",
+            "version": "0.0.1",
             "channel": "development",
             "windowsCompatibility": {
                 "kind": "supported",

@@ -158,6 +158,10 @@ impl WindowLifecycle {
         }
     }
 
+    pub fn should_hide_on_minimize(&self) -> bool {
+        self.keep_game_detection_in_tray && !self.recovery_in_progress
+    }
+
     #[allow(
         dead_code,
         reason = "the recovery workflow owns this bounded host state"

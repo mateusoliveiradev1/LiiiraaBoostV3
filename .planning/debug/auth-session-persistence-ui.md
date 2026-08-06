@@ -1,8 +1,8 @@
 ---
-status: investigating
+status: verifying
 trigger: 'Owner UAT reports desktop login state is lost after app restart, logout fails, Account/Admin navigation flashes and temporarily loses session, desktop browser callback is unfinished, and Premium/Free entitlement labels conflict.'
 created: 2026-08-06T03:00:00-03:00
-updated: 2026-08-06T04:39:00-03:00
+updated: 2026-08-06T05:40:00-03:00
 ---
 
 ## Symptoms
@@ -15,10 +15,10 @@ reproduction: Authenticate from the desktop through the system browser, return t
 
 ## Current Focus
 
-hypothesis: The remaining UAT defects came from three missing boundaries: signup discarded the desktop authorization challenge, Admin session ownership lived in route pages instead of the persistent layout, and the shared account contract omitted the database-backed administrative role.
-test: Preserve and approve desktop authorization through signup, render a success handoff, move Admin authority to a layout provider, project the administrative role through generated contracts, and run complete affected test/build/package gates.
-expecting: Signup returns automatically to the authenticated desktop, Admin route changes retain the verified shell without a signed-out flash, and Premium/Administrator/Security render from the same PostgreSQL projection on every surface.
-next_action: Push the verified commit, wait for Vercel and Render deployments, then repeat owner UAT with the 0.0.1 NSIS installer.
+hypothesis: Confirmed: the 0.0.1 installer supplied to owner UAT was built from tauri.conf.json without tauri.staging.conf.json, so DesktopRuntimeConfig had no API or Account origins and sync_account deterministically returned network-unavailable before making a request.
+test: Package through the explicit staging overlay, prove the release binary embeds the exact Render and Account origins, then repeat owner UAT with the Internal #023001 installer.
+expecting: The connected build restores the saved credential against Render or presents real system-browser sign-in instead of the connection-unavailable dead end.
+next_action: Owner installs `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `17CA0F5D6BAE0BB7C21823060A616E8B5DD3116C7DA1CAB29564A40120B924E8`) and retests profile persistence, About identity and tray behavior.
 
 ## Evidence
 
@@ -52,15 +52,38 @@ next_action: Push the verified commit, wait for Vercel and Render deployments, t
 - timestamp: 2026-08-06T04:39:00-03:00
   observation: Tauri produced target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe from the verified source.
   implication: Native UAT can now verify Windows Credential Manager persistence, restart behavior, browser return, and the real account projection on version 0.0.1.
+- timestamp: 2026-08-06T04:55:00-03:00
+  observation: Owner UAT opened the supplied 0.0.1 package directly into Conexao indisponivel / Sua sessao salva continua protegida, with no sign-in path.
+  implication: The packaged native runtime did not have usable hosted origins even though the hosted API itself was healthy.
+- timestamp: 2026-08-06T04:57:00-03:00
+  observation: The failed installer was named Liiiraa Boost_0.0.1_x64-setup.exe, while tauri.staging.conf.json requires productName Liiiraa Boost Internal #023001 and contains the only packaged apiOrigin/accountOrigin values.
+  implication: The UAT artifact was produced from the base Tauri config and could only return the runtime-origins unavailable response.
+- timestamp: 2026-08-06T04:58:00-03:00
+  observation: A RED regression test proved there was no bounded staging bundle script; after adding bundle:staging with --config src-tauri/tauri.staging.conf.json, all 19 internal-channel tests passed.
+  implication: Invited-staging packaging now has one explicit command that cannot silently omit the connected overlay.
+- timestamp: 2026-08-06T04:59:00-03:00
+  observation: The rebuilt Internal #023001 executable contains both exact hosted origins, reports product version 0.0.1, and passed 117 desktop tests, TypeScript, ESLint, Prettier, 67 Rust tests, Cargo fmt, Vite, Rust release compilation, and NSIS bundling.
+  implication: Automated evidence closes the packaging/configuration defect; only owner installation UAT remains.
+- timestamp: 2026-08-06T05:38:00-03:00
+  observation: RED/GREEN coverage proves native Bearer PATCH is admitted without browser CSRF, hostile Origin remains rejected, `If-Match` is sent, and a mutation `403` preserves credential, projection and local draft.
+  implication: editing the desktop profile no longer converts an authorization-policy response into a destructive logout.
+- timestamp: 2026-08-06T05:39:00-03:00
+  observation: Native About renders version 0.0.1 and the development channel from `ShellInstallerIdentityJson`, hides all Phase 2/demo updater copy, and the staging product name is now `Liiiraa Boost`.
+  implication: the installed app no longer advertises 0.0.0, a stable channel or a simulated update flow.
+- timestamp: 2026-08-06T05:40:00-03:00
+  observation: API 171/171, desktop 120/120, Rust 69/69, desktop TypeScript, Prettier, Cargo fmt, Vite and NSIS passed; the release binary contains both exact hosted origins.
+  implication: the replacement installer contains the complete regression fix set and is ready for owner UAT.
 
 ## Eliminated
 
 - hypothesis: The browser authorization itself is wholly broken.
   reason: The owner successfully completed browser login and reached an authenticated desktop state during the same process lifetime.
+- hypothesis: Render or the published account endpoint was unavailable during the failed desktop launch.
+  reason: External checks returned health ok, ready true at build 384a51097a373b1cc191b8a94cb8edd8cf32b1da, and /v1/account returned the expected live 401 without a credential.
 
 ## Resolution
 
-root_cause:
-fix:
-verification:
-files_changed:
+root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. The About surface still rendered Phase 2 constants instead of native installer identity.
+fix: Added the guarded staging bundle command; admitted Bearer-authenticated native account mutation only when Origin is absent while preserving browser CSRF; sent `If-Match`; restricted credential deletion to 401; preserved drafts on mutation failure; and rendered native About from the host identity without the simulated updater.
+verification: API 171/171, desktop 120/120, Rust 69/69, desktop TypeScript, formatting, Vite release and NSIS pass. The release binary embeds the exact Render and Account origins. Owner retest remains pending.
+files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/real-auth.test.ts, apps/desktop/package.json, apps/desktop/src/internal-channel.test.ts, apps/desktop/src/preferences.tsx, apps/desktop/src/app.tsx, apps/desktop/src/features/premium-operations.tsx, apps/desktop/src-tauri/src/account_sync.rs, apps/desktop/src-tauri/src/window.rs, apps/desktop/src-tauri/src/main.rs, apps/desktop/src-tauri/tauri.staging.conf.json, tests, and Phase 4 UAT artifacts.

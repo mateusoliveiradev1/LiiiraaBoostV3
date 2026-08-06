@@ -7,48 +7,50 @@ const runtimeUrl = new URL('./staging-runtime.ts', import.meta.url);
 const schemaUrl = new URL('../staging/internal-channel.schema.json', import.meta.url);
 const manifestUrl = new URL('../staging/internal-channel.json', import.meta.url);
 const overlayUrl = new URL('../src-tauri/tauri.staging.conf.json', import.meta.url);
+const desktopPackageUrl = new URL('../package.json', import.meta.url);
 const changeNotesUrl = new URL('../staging/CHANGE-NOTES.md', import.meta.url);
 const validatorUrl = new URL('../scripts/validate-internal-channel.mjs', import.meta.url);
 const workflowUrl = new URL('.github/workflows/phase-4-surfaces.yml', repositoryRoot);
 
 const SHA256 = 'a'.repeat(64);
 
-const manifest = (overrides: Readonly<Record<string, unknown>> = {}) => ({
-  schemaVersion: '1.0',
-  channel: 'internal',
-  buildNumber: 23_001,
-  buildId: 'internal-023001',
-  commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
-  digest: `sha256:${SHA256}`,
-  checksum: SHA256,
-  accessScope: 'invited-pcs',
-  changeNotes: 'CHANGE-NOTES.md',
-  rollbackBuildId: 'internal-023000',
-  apiOrigin: 'https://liiiraa-api-staging.onrender.com',
-  apiVersion: 'v1',
-  contractVersion: '1.0',
-  entitlementKeyId: 'staging-entitlement-current',
-  artifact: {
-    availability: 'not-published',
-    fileName: 'Liiiraa Boost Internal 023001_x64-setup.exe',
-    format: 'nsis',
-    signingClass: 'self-signed-development',
-  },
-  sbom: { digest: `sha256:${'b'.repeat(64)}`, format: 'spdx-json' },
-  provenance: {
-    attested: false,
-    digest: `sha256:${'c'.repeat(64)}`,
-    kind: 'github-actions-slsa',
-  },
-  trust: {
-    distributionAllowed: false,
-    productionReady: false,
-    publicDownload: false,
-    publicTrust: false,
-    smartScreenReputation: false,
-  },
-  ...overrides,
-}) as const;
+const manifest = (overrides: Readonly<Record<string, unknown>> = {}) =>
+  ({
+    schemaVersion: '1.0',
+    channel: 'internal',
+    buildNumber: 23_001,
+    buildId: 'internal-023001',
+    commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
+    digest: `sha256:${SHA256}`,
+    checksum: SHA256,
+    accessScope: 'invited-pcs',
+    changeNotes: 'CHANGE-NOTES.md',
+    rollbackBuildId: 'internal-023000',
+    apiOrigin: 'https://liiiraa-api-staging.onrender.com',
+    apiVersion: 'v1',
+    contractVersion: '1.0',
+    entitlementKeyId: 'staging-entitlement-current',
+    artifact: {
+      availability: 'not-published',
+      fileName: 'Liiiraa Boost_0.0.1_x64-setup.exe',
+      format: 'nsis',
+      signingClass: 'self-signed-development',
+    },
+    sbom: { digest: `sha256:${'b'.repeat(64)}`, format: 'spdx-json' },
+    provenance: {
+      attested: false,
+      digest: `sha256:${'c'.repeat(64)}`,
+      kind: 'github-actions-slsa',
+    },
+    trust: {
+      distributionAllowed: false,
+      productionReady: false,
+      publicDownload: false,
+      publicTrust: false,
+      smartScreenReputation: false,
+    },
+    ...overrides,
+  }) as const;
 
 const runtimeModule = async (): Promise<typeof import('./staging-runtime.js') | undefined> => {
   expect(existsSync(runtimeUrl)).toBe(true);
@@ -170,7 +172,7 @@ describe('internal-channel manifest contract', () => {
     };
     const serializedOverlay = JSON.stringify(overlay);
     expect(overlay.identifier).toBe('com.liiiraa.boost.internal');
-    expect(overlay.productName).toContain('Internal #023001');
+    expect(overlay.productName).toBe('Liiiraa Boost');
     expect(serializedOverlay).toContain('"channel":"internal"');
     expect(serializedOverlay).toContain('"publicTrust":false');
     expect(serializedOverlay).toContain('"productionReady":false');
@@ -183,6 +185,16 @@ describe('internal-channel manifest contract', () => {
     expect(workflow).toContain('environment: desktop-internal');
     expect(workflow).not.toContain('--channel stable');
     expect(workflow).not.toContain('--channel beta');
+  });
+
+  it('packages invited staging only through the connected Tauri overlay', () => {
+    const desktopPackage = JSON.parse(readFileSync(desktopPackageUrl, 'utf8')) as {
+      scripts?: Readonly<Record<string, string>>;
+    };
+
+    expect(desktopPackage.scripts?.['bundle:staging']).toBe(
+      'tauri build --config src-tauri/tauri.staging.conf.json',
+    );
   });
 
   it('keeps the checked-in manifest admitted by the same runtime used in CI', async () => {
