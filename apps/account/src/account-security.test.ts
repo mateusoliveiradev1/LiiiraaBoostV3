@@ -20,10 +20,21 @@ describe('account security boundary', () => {
     );
   });
 
-  it('leaves the real API authority path outside the page proxy', () => {
+  it('runs the real API authority path through the origin-sealing proxy', () => {
     expect(accountProxyConfig.matcher).toEqual([
-      '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+      '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
     ]);
+
+    const response = accountProxy(
+      new NextRequest(
+        'https://liiiraa-boost-account-staging.vercel.app/v1/identity/csrf',
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-request-origin')).toBe(
+      'https://liiiraa-boost-account-staging.vercel.app',
+    );
   });
 
   it('builds the real API rewrite into the Next routing manifest', async () => {

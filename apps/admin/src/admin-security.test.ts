@@ -33,10 +33,21 @@ describe('admin security boundary', () => {
     vi.restoreAllMocks();
   });
 
-  it('leaves the real API authority path outside the administrative page proxy', () => {
+  it('runs the real API authority path through the origin-sealing proxy', () => {
     expect(adminProxyConfig.matcher).toEqual([
-      '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+      '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
     ]);
+  });
+
+  it.each([
+    ['/', '/pt-BR/admin'],
+    ['/pt-BR', '/pt-BR/admin'],
+    ['/en', '/en/admin'],
+  ])('redirects %s to the canonical administrative entry', (source, destination) => {
+    const response = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}${source}`));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(`${ADMIN_LOCAL_ORIGIN}${destination}`);
   });
 
   it('builds the real API rewrite into the Next routing manifest', async () => {

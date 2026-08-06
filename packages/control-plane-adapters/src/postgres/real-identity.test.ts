@@ -325,6 +325,7 @@ describe('real invitation-only identity authority', () => {
     });
     expect(challenge.ok).toBe(true);
     if (!challenge.ok) return;
+    expect(new URL(challenge.challenge.authorizationUrl).pathname).toBe('/pt-BR/login');
     const state = new URL(challenge.challenge.authorizationUrl).searchParams.get('state');
     expect(state).toBeTruthy();
 
