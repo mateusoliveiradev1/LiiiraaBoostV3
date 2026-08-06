@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import type { ReactNode } from 'react';
 import type { HostToRendererShellEventJson } from '@liiiraa/contracts-ts';
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
@@ -202,6 +204,27 @@ describe('scale smoke', () => {
 });
 
 describe('native composition smoke', () => {
+  it('keeps the packaged authentication surface real and removes the demo escape hatch', () => {
+    const accountSource = readFileSync(
+      new URL('./features/account-experience.tsx', import.meta.url),
+      'utf8',
+    );
+    const loginSurface = accountSource.slice(
+      accountSource.indexOf('const LoginSurface'),
+      accountSource.indexOf('const AccountTabs'),
+    );
+    const mainSource = readFileSync(new URL('../src-tauri/src/main.rs', import.meta.url), 'utf8');
+
+    expect(loginSurface).not.toContain('Protected local preview');
+    expect(loginSurface).not.toContain('Prévia local protegida');
+    expect(loginSurface).not.toContain('Explore demo mode');
+    expect(loginSurface).not.toContain('Explorar modo demonstração');
+    expect(loginSurface).not.toContain('data-auth-action="offline-demo"');
+    expect(loginSurface).toContain('data-auth-mode="system-browser"');
+    expect(mainSource).toContain('DesktopRuntimeOrigins');
+    expect(mainSource).not.toContain('WindowsDesktopIdentityApi::from_environment()');
+  });
+
   it('projects every validated host event and disposes one deduplicated listener', async () => {
     let listener: ((event: { readonly payload: unknown }) => void) | undefined;
     let listenCalls = 0;

@@ -194,4 +194,21 @@ describe('production account composition', () => {
     expect(layoutSource).not.toContain('Premium · Modo Competitivo');
     expect(layoutSource).not.toContain('Premium · Competitive Mode');
   });
+
+  it('keeps closed beta registration gated and exposes administration only after account sign-in', () => {
+    const authSource = readFileSync(new URL('./account-auth.tsx', import.meta.url), 'utf8');
+    const layoutSource = readFileSync(
+      new URL('../app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(authSource).toContain('data-account-state="invitation-required"');
+    expect(authSource).toContain('Beta fechado');
+    expect(authSource).toContain('Receba um convite individual');
+    expect(authSource).toContain('data-password-requirements');
+    expect(authSource).toContain('Mostrar senha');
+    expect(authSource).toContain('adminOrigin');
+    expect(authSource).toContain('Abrir painel administrativo');
+    expect(layoutSource).toContain('LIIIRAA_ADMIN_ORIGIN');
+  });
 });

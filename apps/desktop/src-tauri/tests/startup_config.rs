@@ -14,3 +14,21 @@ fn disabled_updater_has_a_valid_fail_closed_plugin_config() {
         false
     );
 }
+
+#[test]
+fn staging_identity_origins_are_packaged_with_the_internal_build() {
+    let config: serde_json::Value = serde_json::from_str(include_str!(
+        "../tauri.staging.conf.json"
+    ))
+    .expect("valid staging Tauri config");
+    let runtime = &config["plugins"]["liiiraa-shell"]["identity"]["runtime"];
+
+    assert_eq!(
+        runtime["apiOrigin"],
+        "https://liiiraa-api-staging.onrender.com"
+    );
+    assert_eq!(
+        runtime["accountOrigin"],
+        "https://liiiraa-boost-account-staging.vercel.app"
+    );
+}
