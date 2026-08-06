@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import accountNextConfig from '../next.config';
@@ -144,5 +146,22 @@ describe('account security boundary', () => {
     expect(first.headers.get('location')).toBeNull();
     expect(first.status).toBe(200);
     expect(accountRuntimeProxy).toBe(accountProxy);
+  });
+
+  it('admits each localized account root and routes it to real authentication', () => {
+    const pageSource = readFileSync(
+      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+
+    for (const locale of ['pt-BR', 'en'] as const) {
+      const response = accountProxy(
+        new NextRequest(`https://account.liiiraa.com/${locale}`),
+      );
+      expect(response.status).toBe(200);
+    }
+    expect(pageSource).toContain("responsibility?.length === 0");
+    expect(pageSource).toContain("`/${locale}/login`");
+    expect(pageSource).toContain("`/${locale}/register?invitation=${encodeURIComponent(invitation)}`");
   });
 });

@@ -134,6 +134,7 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
     3,
   );
   expect(workflow).toContain('needs: [verify-contracts, deploy-account]');
+  expect(workflow.match(/needs: \[verify-contracts, deploy-account\]/gu) ?? []).toHaveLength(2);
   expect(workflow).toContain('src/staging/provision-invitations.test.ts');
   expect(workflow).not.toContain('DATABASE_URL');
   expect(workflow).not.toContain('STRIPE_SECRET_KEY');
@@ -162,7 +163,20 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   const accountOrigin = origins.account as string;
   const adminOrigin = origins.admin as string;
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
+  const publicLanding = await request.get(`${publicOrigin}/pt-BR`);
+  const publicMarkup = await publicLanding.text();
+  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/login"`);
+  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/register"`);
+
+  const accountRoot = await request.get(`${accountOrigin}/pt-BR`);
+  expect(accountRoot.status()).toBe(200);
+  expect(accountRoot.url()).toBe(`${accountOrigin}/pt-BR/login`);
   await expectSecurityHeaders(request, `${accountOrigin}/pt-BR/login`, 'no-referrer');
+  await expectSecurityHeaders(
+    request,
+    `${accountOrigin}/pt-BR/register?invitation=${'i'.repeat(64)}`,
+    'no-referrer',
+  );
   await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer');
 
   const accountLogin = await request.get(`${accountOrigin}/pt-BR/login`);

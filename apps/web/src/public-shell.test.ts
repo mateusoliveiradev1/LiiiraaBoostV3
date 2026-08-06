@@ -5,7 +5,12 @@ import { describe, expect, it } from 'vitest';
 import * as publicConfig from '../next.config';
 import catalogEnJson from './content/public/catalog.en.json';
 import catalogPtBrJson from './content/public/catalog.pt-BR.json';
-import { publicBoundaryHref, publicNavigation, routing } from './public-boundary';
+import {
+  accountRouteBoundaryHref,
+  publicBoundaryHref,
+  publicNavigation,
+  routing,
+} from './public-boundary';
 import {
   CLIENT_WEB_LOCALES,
   clientAccountBoundaryHref,
@@ -125,6 +130,23 @@ describe('public shell', () => {
     expect(navigationSource.match(/<LocaleSwitcher/gu)).toHaveLength(2);
     expect(navigationSource).toContain('className="public-header__locale"');
     expect(navigationSource).not.toContain('public-mobile-locale');
+  });
+
+  it('exposes localized sign-in and registration calls to the stable account origin', () => {
+    const accountOrigin = 'https://liiiraa-boost-account-staging.vercel.app';
+
+    expect(accountRouteBoundaryHref('account-sign-in', 'pt-BR', accountOrigin)).toBe(
+      `${accountOrigin}/pt-BR/login`,
+    );
+    expect(accountRouteBoundaryHref('account-sign-up', 'en', accountOrigin)).toBe(
+      `${accountOrigin}/en/register`,
+    );
+    expect(layoutSource).toContain("signIn: 'Entrar'");
+    expect(layoutSource).toContain("signUp: 'Criar conta'");
+    expect(layoutSource).toContain("signIn: 'Sign in'");
+    expect(layoutSource).toContain("signUp: 'Create account'");
+    expect(navigationSource).toContain('href={accountLinks.signIn}');
+    expect(navigationSource).toContain('href={accountLinks.signUp}');
   });
 
   it('uses the approved product lockup without exposing substitute initials', () => {
