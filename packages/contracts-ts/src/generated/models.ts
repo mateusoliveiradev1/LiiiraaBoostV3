@@ -295,6 +295,11 @@ export type ControlPlaneShortTextJson = string;
 export type RedactedAuthorityTextJson = string;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminRole".
+ */
+export type AdminRoleJson = 'support' | 'operations' | 'security' | 'audit';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "SessionState".
  */
 export type SessionStateJson = 'active' | 'challenge-required' | 'revoked' | 'expired';
@@ -395,11 +400,6 @@ export type SupportCommandActionJson = 'create' | 'reply' | 'close';
  * via the `definition` "ConsentCommandAction".
  */
 export type ConsentCommandActionJson = 'grant' | 'revoke';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdminRole".
- */
-export type AdminRoleJson = 'support' | 'operations' | 'security' | 'audit';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminAction".
@@ -1633,6 +1633,7 @@ export interface AccountProjectionJson {
   state: AccountStateJson;
   displayName: ControlPlaneShortTextJson;
   emailRedacted: RedactedAuthorityTextJson;
+  administrativeRole?: AdminRoleJson;
   locale: ShellLocaleJson;
   createdAt: string;
   updatedAt: string;

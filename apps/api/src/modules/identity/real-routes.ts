@@ -149,6 +149,7 @@ const accountProjection = (
     state: 'active',
     displayName: actor.displayName,
     emailRedacted: redactEmail(actor.email),
+    ...(actor.role === 'tester' ? {} : { administrativeRole: actor.role }),
     locale: actor.locale,
     createdAt: actor.createdAt,
     updatedAt: actor.updatedAt,

@@ -220,6 +220,7 @@ model AccountProjection is AuthorityProjectionMetadata {
   state: AccountState;
   displayName: ControlPlaneShortText;
   emailRedacted: RedactedAuthorityText;
+  administrativeRole?: AdminRole;
   locale: ShellLocale;
   createdAt: utcDateTime;
   updatedAt: utcDateTime;

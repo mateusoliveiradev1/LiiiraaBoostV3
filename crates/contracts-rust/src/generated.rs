@@ -341,6 +341,9 @@ impl ::std::convert::TryFrom<::std::string::String> for AccountCommandSchemaVers
 #[doc = "    \"accountId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
 #[doc = "    },"]
+#[doc = "    \"administrativeRole\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminRole\""]
+#[doc = "    },"]
 #[doc = "    \"aggregateVersion\": {"]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    },"]
@@ -394,6 +397,12 @@ impl ::std::convert::TryFrom<::std::string::String> for AccountCommandSchemaVers
 pub struct AccountProjection {
     #[serde(rename = "accountId")]
     pub account_id: ControlPlaneIdentifier,
+    #[serde(
+        rename = "administrativeRole",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub administrative_role: ::std::option::Option<AdminRole>,
     #[serde(rename = "aggregateVersion")]
     pub aggregate_version: ::std::string::String,
     #[serde(rename = "correlationId")]

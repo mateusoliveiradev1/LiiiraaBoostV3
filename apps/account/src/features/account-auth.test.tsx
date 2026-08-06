@@ -211,4 +211,15 @@ describe('production account composition', () => {
     expect(authSource).toContain('Abrir painel administrativo');
     expect(layoutSource).toContain('LIIIRAA_ADMIN_ORIGIN');
   });
+
+  it('finishes authentication with a polished handoff and preserves desktop authorization through signup', () => {
+    const authSource = readFileSync(new URL('./account-auth.tsx', import.meta.url), 'utf8');
+
+    expect(authSource).toContain('const AuthSuccess');
+    expect(authSource).toContain('data-account-state="authentication-success"');
+    expect(authSource).toContain("const DESKTOP_ACCOUNT_DEEP_LINK = 'liiiraa-boost://goal/account'");
+    expect(authSource).toContain('desktopAuthorization={desktopAuthorization}');
+    expect(authSource).toContain("desktop_challenge");
+    expect(authSource).toContain('approveDesktopAuthorization(desktopAuthorization)');
+  });
 });

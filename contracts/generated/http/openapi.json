@@ -67,6 +67,9 @@
           "accountId": {
             "$ref": "#/components/schemas/ControlPlaneIdentifier"
           },
+          "administrativeRole": {
+            "$ref": "#/components/schemas/AdminRole"
+          },
           "aggregateVersion": {
             "type": "string"
           },

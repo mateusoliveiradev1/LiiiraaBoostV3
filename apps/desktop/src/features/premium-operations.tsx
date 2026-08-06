@@ -370,7 +370,7 @@ const HomeSurface = ({
   useEffect(
     () => () => {
       analysisTimersRef.current.forEach((timer) => {
-        globalThis.clearTimeout(timer);
+        window.clearTimeout(timer);
       });
     },
     [],
@@ -382,19 +382,19 @@ const HomeSurface = ({
     }
 
     analysisTimersRef.current.forEach((timer) => {
-      globalThis.clearTimeout(timer);
+      window.clearTimeout(timer);
     });
     analysisTimersRef.current = [];
     setAnalysisPhase('hardware');
 
     analysisTimersRef.current.push(
-      globalThis.setTimeout(() => {
+      window.setTimeout(() => {
         setAnalysisPhase('recovery');
       }, 520),
-      globalThis.setTimeout(() => {
+      window.setTimeout(() => {
         setAnalysisPhase('catalog');
       }, 1040),
-      globalThis.setTimeout(() => {
+      window.setTimeout(() => {
         setAnalysisPhase('complete');
         setHasAnalyzed(true);
         notify(
@@ -405,7 +405,7 @@ const HomeSurface = ({
           ),
         );
       }, 1620),
-      globalThis.setTimeout(() => {
+      window.setTimeout(() => {
         setAnalysisPhase('idle');
       }, 3820),
     );
@@ -1379,7 +1379,7 @@ const UninstallerSurface = ({
   useEffect(
     () => () => {
       if (timer.current !== undefined) {
-        globalThis.clearTimeout(timer.current);
+        window.clearTimeout(timer.current);
       }
     },
     [],
@@ -1391,7 +1391,7 @@ const UninstallerSurface = ({
       return;
     }
     setWorking(true);
-    timer.current = globalThis.setTimeout(() => {
+    timer.current = window.setTimeout(() => {
       setRemoved((current) => new Set([...current, ...appsToRemove.map(({ id }) => id)]));
       setSelected(new Set());
       setWorking(false);

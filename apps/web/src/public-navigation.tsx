@@ -298,7 +298,14 @@ export const PublicNavigation = ({
       <div className="public-header__locale">{localeControl}</div>
 
       <details className="public-mobile-menu">
-        <summary>{copy.menu}</summary>
+        <summary>
+          <span aria-hidden="true" className="public-mobile-menu__icon">
+            <span className="public-mobile-menu__icon-line" />
+            <span className="public-mobile-menu__icon-line" />
+            <span className="public-mobile-menu__icon-line" />
+          </span>
+          <span className="public-visually-hidden">{copy.menu}</span>
+        </summary>
         <div className="public-mobile-menu__surface">
           <nav aria-label={copy.primaryNavigation} className="public-navigation">
             <NavigationLinks copy={copy} items={state.mobileItems} />

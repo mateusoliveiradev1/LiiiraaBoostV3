@@ -72,6 +72,9 @@
         "accountId": {
           "$ref": "ControlPlaneIdentifier.json"
         },
+        "administrativeRole": {
+          "$ref": "AdminRole.json"
+        },
         "aggregateVersion": {
           "type": "string"
         },

@@ -33,6 +33,7 @@ type SignInFormProps = Readonly<{
 
 type SignUpFormProps = Readonly<{
   authorityBaseUrl: string;
+  desktopAuthorization?: Readonly<{ challengeId: string; state: string }> | undefined;
   invitationToken?: string | undefined;
   locale: WebLocale;
 }>;
@@ -43,6 +44,7 @@ type PasswordRequirement = Readonly<{
 }>;
 
 const contentByLocale = { en: accountEn, 'pt-BR': accountPtBr } as const;
+const DESKTOP_ACCOUNT_DEEP_LINK = 'liiiraa-boost://goal/account';
 const messages = Object.freeze({
   en: Object.freeze({
     authenticationFailed: 'We could not confirm those details. Check them and try again.',
@@ -134,6 +136,20 @@ const hrefFor = (routeId: 'account-overview' | AccountAuthRoute, locale: WebLoca
   return href.value;
 };
 
+const authHrefWithDesktopAuthorization = (
+  routeId: AccountAuthRoute,
+  locale: WebLocale,
+  desktopAuthorization: SignInFormProps['desktopAuthorization'],
+): string => {
+  const href = hrefFor(routeId, locale);
+  if (desktopAuthorization === undefined) return href;
+  const params = new URLSearchParams({
+    desktop_challenge: desktopAuthorization.challengeId,
+    state: desktopAuthorization.state,
+  });
+  return `${href}?${params.toString()}`;
+};
+
 const errorMessage = (
   result: Extract<AccountAuthResult, { status: 'error' }>,
   locale: WebLocale,
@@ -156,6 +172,69 @@ const AuthHeader = ({
   );
 };
 
+const AuthSuccess = ({
+  destinationUrl,
+  desktopHandoff,
+  locale,
+}: Readonly<{ destinationUrl: string; desktopHandoff: boolean; locale: WebLocale }>) => {
+  const portalHref = hrefFor('account-overview', locale);
+
+  useEffect(() => {
+    const timer = globalThis.setTimeout(() => {
+      globalThis.location.assign(destinationUrl);
+    }, 900);
+    return () => {
+      globalThis.clearTimeout(timer);
+    };
+  }, [destinationUrl]);
+
+  return (
+    <article className="account-auth-success" data-account-state="authentication-success">
+      <span aria-hidden="true" className="account-auth-success__mark">
+        <ProductIcon name="check" size={28} />
+      </span>
+      <div>
+        <p className="account-auth-success__status" role="status">
+          {locale === 'pt-BR' ? 'Conta confirmada com segurança' : 'Account securely confirmed'}
+        </p>
+        <h1>
+          {desktopHandoff
+            ? locale === 'pt-BR'
+              ? 'Tudo pronto. Voltando ao aplicativo.'
+              : 'Everything is ready. Returning to the app.'
+            : locale === 'pt-BR'
+              ? 'Sua conta está pronta.'
+              : 'Your account is ready.'}
+        </h1>
+        <p>
+          {desktopHandoff
+            ? locale === 'pt-BR'
+              ? 'O Liiiraa Boost será aberto automaticamente já autenticado. Se nada acontecer, use o botão abaixo.'
+              : 'Liiiraa Boost will open automatically already signed in. If nothing happens, use the button below.'
+            : locale === 'pt-BR'
+              ? 'Você já pode continuar no portal ou abrir o aplicativo instalado neste computador.'
+              : 'You can continue to the portal or open the app installed on this computer.'}
+        </p>
+      </div>
+      <div className="account-auth-success__actions">
+        <a className="account-auth-success__primary" href={destinationUrl}>
+          <ProductIcon name="monitor" size={17} />
+          {locale === 'pt-BR' ? 'Abrir aplicativo' : 'Open app'}
+        </a>
+        <Link className="account-auth-success__secondary" href={portalHref as Route}>
+          {locale === 'pt-BR' ? 'Continuar no portal' : 'Continue to portal'}
+        </Link>
+      </div>
+      <p className="account-auth-success__security" role="note">
+        <ProductIcon name="lock" size={15} />
+        {locale === 'pt-BR'
+          ? 'Sua senha nunca é enviada ao aplicativo.'
+          : 'Your password is never sent to the app.'}
+      </p>
+    </article>
+  );
+};
+
 const SignInForm = ({
   authorityBaseUrl,
   desktopAuthorization,
@@ -169,6 +248,7 @@ const SignInForm = ({
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [successDestination, setSuccessDestination] = useState<string | null>(null);
   const [loading, setLoading] = useState(signOutRequested);
   const auth = useMemo(
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
@@ -183,7 +263,7 @@ const SignInForm = ({
     setNotice(labels.browserApproval);
     const approval = await auth.approveDesktopAuthorization(desktopAuthorization);
     if (approval.status === 'approved') {
-      globalThis.location.assign(approval.callbackUrl);
+      setSuccessDestination(approval.callbackUrl);
       return;
     }
     setLoading(false);
@@ -245,6 +325,16 @@ const SignInForm = ({
     setError(errorMessage(result, locale));
   };
 
+  if (successDestination !== null) {
+    return (
+      <AuthSuccess
+        destinationUrl={successDestination}
+        desktopHandoff={desktopAuthorization !== undefined}
+        locale={locale}
+      />
+    );
+  }
+
   return (
     <article className="lb-web-sign-in" data-account-state="sign-in-real">
       <AuthHeader locale={locale} routeId="account-sign-in" />
@@ -300,7 +390,15 @@ const SignInForm = ({
       </form>
       <p className="account-auth-switch">
         <span>{locale === 'pt-BR' ? 'Ainda não tem acesso?' : 'Do not have access yet?'}</span>{' '}
-        <Link href={hrefFor('account-sign-up', locale) as Route}>
+        <Link
+          href={
+            authHrefWithDesktopAuthorization(
+              'account-sign-up',
+              locale,
+              desktopAuthorization,
+            ) as Route
+          }
+        >
           {locale === 'pt-BR' ? 'Entenda o beta por convite' : 'Learn about invitation access'}
         </Link>
       </p>
@@ -325,6 +423,7 @@ const withFieldError = (
 
 const SignUpForm = ({
   authorityBaseUrl,
+  desktopAuthorization,
   invitationToken: invitationCandidate,
   locale,
 }: SignUpFormProps) => {
@@ -339,6 +438,7 @@ const SignUpForm = ({
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<SignUpField, string>>>({});
   const [loading, setLoading] = useState(false);
+  const [successDestination, setSuccessDestination] = useState<string | null>(null);
   const auth = useMemo(
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
@@ -366,7 +466,15 @@ const SignUpForm = ({
         </div>
         <p className="account-auth-switch">
           <span>{content.signUp.signInPrompt}</span>{' '}
-          <Link href={hrefFor('account-sign-in', locale) as Route}>
+          <Link
+            href={
+              authHrefWithDesktopAuthorization(
+                'account-sign-in',
+                locale,
+                desktopAuthorization,
+              ) as Route
+            }
+          >
             {content.signUp.signInAction}
           </Link>
         </p>
@@ -393,12 +501,32 @@ const SignUpForm = ({
       password,
     });
     if (result.status === 'authenticated') {
-      globalThis.location.assign(hrefFor('account-overview', locale));
+      if (desktopAuthorization !== undefined) {
+        const approval = await auth.approveDesktopAuthorization(desktopAuthorization);
+        if (approval.status !== 'approved') {
+          setLoading(false);
+          setErrors({ invitation: errorMessage(approval, locale) });
+          return;
+        }
+        setSuccessDestination(approval.callbackUrl);
+        return;
+      }
+      setSuccessDestination(DESKTOP_ACCOUNT_DEEP_LINK);
       return;
     }
     setLoading(false);
     setErrors({ invitation: errorMessage(result, locale) });
   };
+
+  if (successDestination !== null) {
+    return (
+      <AuthSuccess
+        destinationUrl={successDestination}
+        desktopHandoff={desktopAuthorization !== undefined}
+        locale={locale}
+      />
+    );
+  }
 
   const errorMessages = Object.values(errors);
   return (
@@ -563,7 +691,15 @@ const SignUpForm = ({
       </form>
       <p className="account-auth-switch">
         <span>{content.signUp.signInPrompt}</span>{' '}
-        <Link href={hrefFor('account-sign-in', locale) as Route}>
+        <Link
+          href={
+            authHrefWithDesktopAuthorization(
+              'account-sign-in',
+              locale,
+              desktopAuthorization,
+            ) as Route
+          }
+        >
           {content.signUp.signInAction}
         </Link>
       </p>
@@ -598,6 +734,7 @@ export const AccountAuthPage = (props: AccountAuthPageProps) => {
   ) : (
     <SignUpForm
       authorityBaseUrl={props.authorityBaseUrl}
+      desktopAuthorization={desktopAuthorization}
       invitationToken={invitationToken}
       locale={props.locale}
     />

@@ -1492,6 +1492,103 @@ button:focus-visible,
   padding-inline-start: var(--lb-space-4);
 }
 
+.account-auth-success {
+  display: grid;
+  justify-items: center;
+  gap: var(--lb-space-4);
+  max-inline-size: 620px;
+  margin-inline: auto;
+  padding: clamp(var(--lb-space-5), 6vw, var(--lb-space-7));
+  text-align: center;
+}
+
+.account-auth-success__mark {
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 50%;
+  color: var(--lb-surface-canvas);
+  background: var(--lb-success);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--lb-success) 12%, transparent);
+  animation: account-success-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.account-auth-success h1,
+.account-auth-success p {
+  margin: 0;
+}
+
+.account-auth-success h1 {
+  margin-block: var(--lb-space-2);
+  font-size: clamp(1.75rem, 5vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.account-auth-success > div > p:last-child {
+  max-inline-size: 58ch;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.account-auth-success__status {
+  color: var(--lb-success);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-auth-success__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--lb-space-2);
+}
+
+.account-auth-success__actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lb-space-2);
+  min-block-size: 46px;
+  padding-inline: var(--lb-space-4);
+  border-radius: var(--lb-radius-default);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-auth-success__primary {
+  color: var(--lb-surface-canvas);
+  background: var(--lb-cobalt-signal);
+}
+
+.account-auth-success__secondary {
+  border: 1px solid var(--lb-line-strong);
+  color: var(--lb-text-primary);
+}
+
+.account-auth-success__security {
+  display: flex;
+  align-items: center;
+  gap: var(--lb-space-2);
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+}
+
+@keyframes account-success-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-auth-success__mark {
+    animation: none;
+  }
+}
+
 @media (width < 560px) {
   .account-password-requirements {
     grid-template-columns: minmax(0, 1fr);

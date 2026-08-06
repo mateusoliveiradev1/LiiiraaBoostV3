@@ -18,7 +18,6 @@ import {
   type AdminPreviewRoute,
 } from '../../../admin-preview-model';
 import { AdminAuthorityPage } from '../../../features/admin-authority';
-import { ADMIN_BROWSER_AUTHORITY_BASE_URL } from '../../../admin-runtime';
 import { resolveAdminServerRuntimeConfig } from '../../../admin-runtime-server';
 
 type AdminWorkspacePageProps = Readonly<{
@@ -131,12 +130,5 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
     return <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />;
   }
 
-  return (
-    <AdminAuthorityPage
-      accountOrigin={runtime.accountOrigin}
-      authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}
-      locale={locale}
-      routeId={resolution.routeId}
-    />
-  );
+  return <AdminAuthorityPage locale={locale} routeId={resolution.routeId} />;
 }

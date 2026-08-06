@@ -376,6 +376,7 @@ describe('admin production composition', () => {
       new URL('../app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
       'utf8',
     );
+    const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const previewView = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
@@ -391,6 +392,8 @@ describe('admin production composition', () => {
     expect(productionView).toContain('className="admin-authority__navigation"');
     expect(productionView).toContain('No authorized records are currently available.');
     expect(productionView).toContain('className="admin-production-shell"');
+    expect(productionView).toContain('className="admin-production-loading"');
+    expect(productionView).toContain('AdminAuthorityProvider');
     expect(productionView).toContain('className="admin-production-nav"');
     expect(productionView).toContain("import Link from 'next/link'");
     expect(productionView).toContain('<Link href={routeHref(locale, suffix) as Route}');
@@ -401,6 +404,7 @@ describe('admin production composition', () => {
     expect(productionView).not.toContain('AdminPreviewRoute');
     expect(routeSource).toContain("await import('../../../features/admin-preview')");
     expect(routeSource).not.toContain('import { AdminPreviewPage }');
+    expect(layoutSource).toContain('<AdminAuthorityProvider');
     expect(previewView).toContain('@liiiraa/web-preview');
   });
 });

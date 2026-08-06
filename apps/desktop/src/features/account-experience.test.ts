@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import type { DesktopAccountAuthoritySnapshot } from '../account-authority.js';
@@ -21,5 +23,15 @@ describe('desktop account session restoration', () => {
     expect(resolveDesktopLoginState({ state: 'offline', error: 'network-unavailable' })).toBe(
       'unavailable',
     );
+  });
+
+  it('renders the real account and administrative role without production fixture copy', () => {
+    const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('className="desktop-authority-identity"');
+    expect(source).toContain('administrativeRole');
+    expect(source).toContain("en: 'Administrator'");
+    expect(source).toContain("'pt-BR': 'Administrador'");
+    expect(source).toContain('data-account-runtime="production"');
   });
 });

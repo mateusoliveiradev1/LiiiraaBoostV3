@@ -49,7 +49,7 @@ export const PremiumDownloadsSurface = ({
   const stopTimer = (id: string): void => {
     const timer = timers.current[id];
     if (timer !== undefined) {
-      globalThis.clearInterval(timer);
+      window.clearInterval(timer);
       timers.current[id] = undefined;
     }
   };
@@ -63,7 +63,7 @@ export const PremiumDownloadsSurface = ({
         state: 'downloading',
       },
     }));
-    timers.current[id] = globalThis.setInterval(() => {
+    timers.current[id] = window.setInterval(() => {
       setDownloads((current) => {
         const previous = current[id]?.progress ?? 4;
         const nextProgress = Math.min(100, previous + 8);
@@ -95,7 +95,7 @@ export const PremiumDownloadsSurface = ({
       ...current,
       [id]: { progress: 100, state: 'installing' },
     }));
-    timers.current[id] = globalThis.setTimeout(() => {
+    timers.current[id] = window.setTimeout(() => {
       setDownloads((current) => ({
         ...current,
         [id]: { progress: 100, state: 'installed' },

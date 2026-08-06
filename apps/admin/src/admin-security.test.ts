@@ -64,14 +64,11 @@ describe('admin security boundary', () => {
   });
 
   it('keeps administrative browser credentials on the isolated origin', () => {
-    const page = readFileSync(
-      new URL('./app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
-      'utf8',
-    );
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 
     expect(ADMIN_BROWSER_AUTHORITY_BASE_URL).toBe('');
-    expect(page).toContain('authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}');
-    expect(page).not.toContain('authorityBaseUrl={runtime.authorityBaseUrl}');
+    expect(layout).toContain('authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}');
+    expect(layout).not.toContain('authorityBaseUrl={runtime.authorityBaseUrl}');
   });
 
   it('publishes the request nonce for React Aria and serves every declared local font', () => {

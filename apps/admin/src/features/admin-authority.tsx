@@ -5,7 +5,17 @@ import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-
 import type { WebLocale } from '@liiiraa/web-core';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { useEffect, useMemo, useState, type ReactNode, type SyntheticEvent } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  type SyntheticEvent,
+} from 'react';
 
 import {
   createAdminAuthority,
@@ -20,8 +30,6 @@ import { ProductLockup } from '../admin-product-lockup';
 import { adminRoleCanAccessRoute, type AdminAuthorityRoute } from '../admin-runtime';
 
 type AdminAuthorityPageProps = Readonly<{
-  accountOrigin: string;
-  authorityBaseUrl: string;
   locale: WebLocale;
   routeId: AdminAuthorityRoute;
 }>;
@@ -635,14 +643,27 @@ const AdminProductionShell = ({
   );
 };
 
-export const AdminAuthorityPage = ({
+type AdminAuthorityContextValue = Readonly<{
+  accountOrigin: string;
+  authority: AdminAuthority;
+  session: AdminSessionProjection | null | undefined;
+  setSession: Dispatch<SetStateAction<AdminSessionProjection | null | undefined>>;
+}>;
+
+const AdminAuthorityContext = createContext<AdminAuthorityContextValue | null>(null);
+
+export const AdminAuthorityProvider = ({
   accountOrigin,
   authorityBaseUrl,
+  children,
   locale,
-  routeId,
-}: AdminAuthorityPageProps) => {
+}: Readonly<{
+  accountOrigin: string;
+  authorityBaseUrl: string;
+  children: ReactNode;
+  locale: WebLocale;
+}>) => {
   const [session, setSession] = useState<AdminSessionProjection | null>();
-  const [records, setRecords] = useState<readonly AdminProjectionRecord[]>([]);
   const authority = useMemo(
     () =>
       createAdminAuthority({
@@ -658,20 +679,105 @@ export const AdminAuthorityPage = ({
       }),
     [authorityBaseUrl],
   );
+
+  useEffect(() => {
+    let active = true;
+    void authority.session().then((next) => {
+      if (active) setSession(next);
+    });
+    return () => {
+      active = false;
+    };
+  }, [authority]);
+
+  const context = useMemo(
+    () => ({ accountOrigin, authority, session, setSession }),
+    [accountOrigin, authority, session],
+  );
+
+  if (session === undefined) {
+    return (
+      <section
+        aria-busy="true"
+        aria-label={copy[locale].loading}
+        className="admin-production-loading"
+        data-admin-runtime="production"
+      >
+        <header>
+          <span className="admin-production-loading__brand" />
+          <span className="admin-production-loading__session" />
+        </header>
+        <div>
+          <aside aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </aside>
+          <div className="admin-production-loading__main">
+            <span className="admin-production-loading__title" />
+            <span className="admin-production-loading__copy" />
+            <span className="admin-production-loading__content" />
+          </div>
+        </div>
+        <span className="lb-visually-hidden" role="status">
+          {copy[locale].loading}
+        </span>
+      </section>
+    );
+  }
+
+  return (
+    <AdminAuthorityContext.Provider value={context}>
+      {session === null ? (
+        children
+      ) : (
+        <AdminProductionShell
+          accountOrigin={accountOrigin}
+          authority={authority}
+          locale={locale}
+          onSignedOut={() => {
+            setSession(null);
+          }}
+          session={session}
+        >
+          {children}
+        </AdminProductionShell>
+      )}
+    </AdminAuthorityContext.Provider>
+  );
+};
+
+const useAdminAuthority = (): AdminAuthorityContextValue => {
+  const context = useContext(AdminAuthorityContext);
+  if (context === null) throw new Error('ADMIN_AUTHORITY_PROVIDER_REQUIRED');
+  return context;
+};
+
+export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps) => {
+  const { accountOrigin, authority, session, setSession } = useAdminAuthority();
+  const [records, setRecords] = useState<readonly AdminProjectionRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    void authority.session().then((next) => {
+    if (session === null || session === undefined || routeId === 'admin-diagnostics') {
+      setRecords([]);
+      setRecordsLoading(false);
+      return () => {
+        controller.abort();
+      };
+    }
+    setRecords([]);
+    setRecordsLoading(true);
+    void authority.list(collectionFor(routeId)).then((result) => {
       if (controller.signal.aborted) return;
-      setSession(next);
-      if (next === null || routeId === 'admin-diagnostics') return;
-      void authority.list(collectionFor(routeId)).then((result) => {
-        if (!controller.signal.aborted) setRecords(result.records);
-      });
+      setRecords(result.records);
+      setRecordsLoading(false);
     });
     return () => {
       controller.abort();
     };
-  }, [authority, routeId]);
+  }, [authority, routeId, session]);
 
   if (session === undefined) {
     return (
@@ -704,73 +810,68 @@ export const AdminAuthorityPage = ({
     );
   }
   return (
-    <AdminProductionShell
-      accountOrigin={accountOrigin}
-      authority={authority}
-      locale={locale}
-      onSignedOut={() => {
-        setSession(null);
-        setRecords([]);
-      }}
-      session={session}
+    <article
+      className="admin-authority"
+      data-admin-role={session.role}
+      data-admin-runtime="production"
     >
-      <article
-        className="admin-authority"
-        data-admin-role={session.role}
-        data-admin-runtime="production"
-      >
-        <header className="admin-authority__header">
-          <div>
-            <span className="admin-authority__system" aria-hidden="true">
-              ADMIN CONTROL PLANE
-            </span>
-            <h1>{copy[locale].activeRole}</h1>
-            <p>{copy[locale].authoritySummary}</p>
-          </div>
-          <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
-            <ProductIcon name="shield" size={16} />
-            <span>{roleLabel(locale, session.role)}</span>
-          </p>
-        </header>
-        {routeId === 'admin-diagnostics' ? (
-          <DiagnosticAuthority authority={authority} locale={locale} />
-        ) : null}
-        {routeId === 'admin-operations' && session.role === 'operations' ? (
-          <CriticalCommand authority={authority} locale={locale} session={session} />
-        ) : null}
-        {routeId === 'admin-security' && session.role === 'security' ? (
-          <BreakGlassReview authority={authority} locale={locale} />
-        ) : null}
-        {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
-          <section aria-label={copy[locale].activeRole} className="admin-authority__content">
-            {records.length === 0 ? (
-              <div className="admin-authority__empty" role="status">
-                <ProductIcon name="check" size={20} />
-                <div>
-                  <strong>{copy[locale].noRecordsTitle}</strong>
-                  <p>{copy[locale].noRecordsDescription}</p>
-                  <span>{copy[locale].noRecords}</span>
-                </div>
+      <header className="admin-authority__header">
+        <div>
+          <span className="admin-authority__system" aria-hidden="true">
+            ADMIN CONTROL PLANE
+          </span>
+          <h1>{copy[locale].activeRole}</h1>
+          <p>{copy[locale].authoritySummary}</p>
+        </div>
+        <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
+          <ProductIcon name="shield" size={16} />
+          <span>{roleLabel(locale, session.role)}</span>
+        </p>
+      </header>
+      {routeId === 'admin-diagnostics' ? (
+        <DiagnosticAuthority authority={authority} locale={locale} />
+      ) : null}
+      {routeId === 'admin-operations' && session.role === 'operations' ? (
+        <CriticalCommand authority={authority} locale={locale} session={session} />
+      ) : null}
+      {routeId === 'admin-security' && session.role === 'security' ? (
+        <BreakGlassReview authority={authority} locale={locale} />
+      ) : null}
+      {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
+        <section aria-label={copy[locale].activeRole} className="admin-authority__content">
+          {recordsLoading ? (
+            <div className="admin-authority__records-loading" aria-busy="true">
+              <span />
+              <span />
+              <span />
+            </div>
+          ) : records.length === 0 ? (
+            <div className="admin-authority__empty" role="status">
+              <ProductIcon name="check" size={20} />
+              <div>
+                <strong>{copy[locale].noRecordsTitle}</strong>
+                <p>{copy[locale].noRecordsDescription}</p>
+                <span>{copy[locale].noRecords}</span>
               </div>
-            ) : (
-              <ul className="admin-authority__records">
-                {records.map((record) => (
-                  <li key={record.id}>
-                    <strong className="admin-authority__record-reference">
-                      {formatRecordReference(record.id, locale)}
-                    </strong>{' '}
-                    {typeof record.redactedTarget === 'string'
-                      ? record.redactedTarget
-                      : typeof record.summary === 'string'
-                        ? record.summary
-                        : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        ) : null}
-      </article>
-    </AdminProductionShell>
+            </div>
+          ) : (
+            <ul className="admin-authority__records">
+              {records.map((record) => (
+                <li key={record.id}>
+                  <strong className="admin-authority__record-reference">
+                    {formatRecordReference(record.id, locale)}
+                  </strong>{' '}
+                  {typeof record.redactedTarget === 'string'
+                    ? record.redactedTarget
+                    : typeof record.summary === 'string'
+                      ? record.summary
+                      : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+    </article>
   );
 };

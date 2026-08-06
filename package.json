@@ -1,6 +1,6 @@
 {
   "name": "@liiiraa/workspace",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Deterministic modular workspace for Liiiraa Boost",
   "license": "UNLICENSED",

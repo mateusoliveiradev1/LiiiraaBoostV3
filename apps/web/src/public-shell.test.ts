@@ -201,6 +201,10 @@ describe('public shell', () => {
     expect(shellStyles).toMatch(
       /\.public-mobile-menu > summary\s*\{[\s\S]*min-inline-size:\s*48px;[\s\S]*min-block-size:\s*48px/u,
     );
+    expect(navigationSource).toContain('className="public-mobile-menu__icon"');
+    expect(navigationSource).toContain('className="public-visually-hidden">{copy.menu}');
+    expect(navigationSource).not.toContain('<summary>{copy.menu}</summary>');
+    expect(shellStyles).toContain('.public-mobile-menu[open] .public-mobile-menu__icon-line:first-child');
   });
 
   it('keeps internal origin boundaries out of ordinary visitor chrome', () => {

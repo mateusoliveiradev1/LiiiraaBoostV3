@@ -2,7 +2,7 @@
 status: investigating
 trigger: 'Owner UAT reports desktop login state is lost after app restart, logout fails, Account/Admin navigation flashes and temporarily loses session, desktop browser callback is unfinished, and Premium/Free entitlement labels conflict.'
 created: 2026-08-06T03:00:00-03:00
-updated: 2026-08-06T03:46:00-03:00
+updated: 2026-08-06T04:39:00-03:00
 ---
 
 ## Symptoms
@@ -15,10 +15,10 @@ reproduction: Authenticate from the desktop through the system browser, return t
 
 ## Current Focus
 
-hypothesis: The desktop stores or reads the credential under inconsistent identifiers and startup does not restore it; cross-origin Account/Admin handoff relies on separate cookies plus hard navigation; logout CSRF/origin or session-target semantics are inconsistent; Premium chrome still uses a visual fixture instead of the authoritative entitlement projection.
-test: Trace credential write/read/delete through Tauri and Windows Credential Manager, trace startup restoration, inspect Account/Admin session and logout requests, inspect route navigation primitives, and query the authoritative owner entitlement.
-expecting: One durable credential key restores the desktop session at startup; surface-specific logout succeeds; navigation uses deliberate handoff/loading states without incorrect signed-out flashes; all Premium labels derive from the same API authority.
-next_action: Run full relevant verification, publish the corrected API/web/desktop artifacts, and repeat owner UAT.
+hypothesis: The remaining UAT defects came from three missing boundaries: signup discarded the desktop authorization challenge, Admin session ownership lived in route pages instead of the persistent layout, and the shared account contract omitted the database-backed administrative role.
+test: Preserve and approve desktop authorization through signup, render a success handoff, move Admin authority to a layout provider, project the administrative role through generated contracts, and run complete affected test/build/package gates.
+expecting: Signup returns automatically to the authenticated desktop, Admin route changes retain the verified shell without a signed-out flash, and Premium/Administrator/Security render from the same PostgreSQL projection on every surface.
+next_action: Push the verified commit, wait for Vercel and Render deployments, then repeat owner UAT with the 0.0.1 NSIS installer.
 
 ## Evidence
 
@@ -46,6 +46,12 @@ next_action: Run full relevant verification, publish the corrected API/web/deskt
 - timestamp: 2026-08-06T03:50:00-03:00
   observation: Tauri produced a new NSIS installer at target/release/bundle/nsis/Liiiraa Boost_0.0.0_x64-setup.exe.
   implication: Owner UAT can exercise the corrected native startup and callback behavior in a packaged Windows build.
+- timestamp: 2026-08-06T04:39:00-03:00
+  observation: Account (92), Admin (95), Web (129), API (170), desktop (116), generated-contract (51), and Rust contract suites pass; all four production builds and contract compatibility pass.
+  implication: The browser handoff, persistent Admin provider, database-backed administrative role, responsive menu, and desktop account redesign are covered across their owning deployables.
+- timestamp: 2026-08-06T04:39:00-03:00
+  observation: Tauri produced target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe from the verified source.
+  implication: Native UAT can now verify Windows Credential Manager persistence, restart behavior, browser return, and the real account projection on version 0.0.1.
 
 ## Eliminated
 

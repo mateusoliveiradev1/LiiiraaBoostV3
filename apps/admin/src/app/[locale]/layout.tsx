@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { AdminFocusHandoff } from '../../admin-focus-handoff';
+import { AdminAuthorityProvider } from '../../features/admin-authority';
 import { AdminNavigation } from '../../admin-navigation';
 import { ProductLockup } from '../../admin-product-lockup';
 import {
@@ -18,6 +19,7 @@ import {
   projectAdminRoleNavigation,
 } from '../../admin-shell';
 import { adminWebComposition } from '../../index';
+import { ADMIN_BROWSER_AUTHORITY_BASE_URL } from '../../admin-runtime';
 import { resolveAdminServerRuntimeConfig } from '../../admin-runtime-server';
 
 type AdminLocaleLayoutProps = Readonly<{
@@ -109,7 +111,7 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
 
   setRequestLocale(requestedLocale);
 
-  const locale = requestedLocale as WebLocale;
+  const locale = requestedLocale;
   const requestHeaders = await headers();
   const nonce = requestHeaders.get('x-nonce');
   const runtime = resolveAdminServerRuntimeConfig();
@@ -132,7 +134,13 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           </a>
           <main id="admin-main" tabIndex={-1}>
             <AdminFocusHandoff />
-            {children}
+            <AdminAuthorityProvider
+              accountOrigin={runtime.accountOrigin}
+              authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}
+              locale={locale}
+            >
+              {children}
+            </AdminAuthorityProvider>
           </main>
         </body>
       </html>

@@ -1,4 +1,3 @@
-// @ts-expect-error -- Vitest runs this contract in Node; the browser app intentionally excludes Node globals.
 import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
@@ -49,12 +48,12 @@ const manifest = (overrides: Readonly<Record<string, unknown>> = {}) => ({
     smartScreenReputation: false,
   },
   ...overrides,
-});
+}) as const;
 
-const runtimeModule = async () => {
+const runtimeModule = async (): Promise<typeof import('./staging-runtime.js') | undefined> => {
   expect(existsSync(runtimeUrl)).toBe(true);
   if (!existsSync(runtimeUrl)) return undefined;
-  return import(runtimeUrl.href);
+  return import('./staging-runtime.js');
 };
 
 describe('internal-channel manifest contract', () => {
@@ -94,21 +93,17 @@ describe('internal-channel manifest contract', () => {
   it('admits one exact restricted runtime and visibly identifies its numbered build', async () => {
     const runtime = await runtimeModule();
     if (runtime === undefined) return;
-    expect(
-      runtime.admitStagingRuntime(manifest(), {
-        apiOrigin: 'https://liiiraa-api-staging.onrender.com',
-        apiVersion: 'v1',
-        contractVersion: '1.0',
-        entitlementKeyIds: ['staging-entitlement-current'],
-      }),
-    ).toEqual({
-      ok: true,
-      value: expect.objectContaining({
-        badge: 'Internal #023001',
-        buildId: 'internal-023001',
-        channel: 'internal',
-      }),
+    const admitted = runtime.admitStagingRuntime(manifest(), {
+      apiOrigin: 'https://liiiraa-api-staging.onrender.com',
+      apiVersion: 'v1',
+      contractVersion: '1.0',
+      entitlementKeyIds: ['staging-entitlement-current'],
     });
+    expect(admitted.ok).toBe(true);
+    if (!admitted.ok) return;
+    expect(admitted.value.badge).toBe('Internal #023001');
+    expect(admitted.value.buildId).toBe('internal-023001');
+    expect(admitted.value.channel).toBe('internal');
   });
 
   it.each([
@@ -129,7 +124,7 @@ describe('internal-channel manifest contract', () => {
     const runtime = await runtimeModule();
     if (runtime === undefined) return;
     const candidate = manifest(override) as Record<string, unknown>;
-    if ('buildId' in override && override.buildId === undefined) delete candidate['buildId'];
+    if ('buildId' in override) delete candidate['buildId'];
     expect(
       runtime.admitStagingRuntime(candidate, {
         apiOrigin: 'https://liiiraa-api-staging.onrender.com',
