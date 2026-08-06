@@ -9,7 +9,12 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { accountRouteBoundaryHref, publicBoundaryHref, routing } from '../../public-boundary';
+import {
+  accountRouteBoundaryHref,
+  publicBoundaryHref,
+  resolveAccountBoundaryOrigin,
+  routing,
+} from '../../public-boundary';
 import {
   PublicFooter,
   type PublicFooterCopy,
@@ -184,7 +189,10 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
   setRequestLocale(locale);
 
   const copy = COPY[locale];
-  const accountOrigin = process.env['LIIIRAA_ACCOUNT_ORIGIN'];
+  const accountOrigin = resolveAccountBoundaryOrigin(
+    process.env['LIIIRAA_ACCOUNT_ORIGIN'],
+    process.env['VERCEL'] === '1',
+  );
   const accountLinks = Object.freeze({
     signIn: accountRouteBoundaryHref('account-sign-in', locale, accountOrigin),
     signUp: accountRouteBoundaryHref('account-sign-up', locale, accountOrigin),

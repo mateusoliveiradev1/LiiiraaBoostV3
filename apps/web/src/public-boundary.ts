@@ -40,6 +40,8 @@ export const publicBoundaryHref = (routeId: string, locale: WebLocale): string =
 
 type PublicAccountRouteId = 'account-sign-in' | 'account-sign-up';
 
+export const STAGING_ACCOUNT_ORIGIN = 'https://liiiraa-boost-account-staging.vercel.app';
+
 const exactAccountOrigin = (value: string): string => {
   const candidate = new URL(value);
   if (
@@ -53,6 +55,14 @@ const exactAccountOrigin = (value: string): string => {
   }
   return candidate.origin;
 };
+
+export const resolveAccountBoundaryOrigin = (
+  configuredOrigin: string | undefined,
+  providerPreview: boolean,
+): string =>
+  exactAccountOrigin(
+    configuredOrigin ?? (providerPreview ? STAGING_ACCOUNT_ORIGIN : WEB_ORIGINS['account-origin']),
+  );
 
 export const accountRouteBoundaryHref = (
   routeId: PublicAccountRouteId,

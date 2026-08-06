@@ -1199,7 +1199,8 @@ button:focus-visible,
   align-items: center;
   inline-size: 100%;
   margin-inline: auto;
-  padding: var(--lb-space-4);
+  padding: var(--lb-space-5);
+  border: 1px solid var(--lb-line-subtle);
   border-radius: var(--lb-radius-panel);
   background: var(--lb-surface-inset);
 }
@@ -1218,6 +1219,10 @@ button:focus-visible,
 .account-auth-shell .lb-web-route-header {
   order: 1;
   grid-column: 1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lb-space-2);
+  align-items: start;
+  min-inline-size: 0;
   padding-block-end: var(--lb-space-2);
   border: 0;
 }
@@ -1229,11 +1234,16 @@ button:focus-visible,
 
 .account-auth-shell .lb-web-route-header h1 {
   font-size: 2rem;
+  line-height: 1.12;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .account-auth-shell .lb-web-route-header p {
+  max-inline-size: 48ch;
   color: var(--lb-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .account-auth-shell .lb-web-sign-in > form,

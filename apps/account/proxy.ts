@@ -110,6 +110,9 @@ export const accountContextFromUrl = (url: URL): AccountSafeContext => {
 const INVITATION_TOKEN = /^[A-Za-z0-9_-]{32,512}$/u;
 
 const accountRootDestination = (request: NextRequest): URL | undefined => {
+  if (request.nextUrl.pathname === '/') {
+    return new URL('/pt-BR/login', request.nextUrl.origin);
+  }
   const root = /^\/(en|pt-BR)\/?$/u.exec(request.nextUrl.pathname);
   if (root === null) return undefined;
 
@@ -125,10 +128,7 @@ const accountRootDestination = (request: NextRequest): URL | undefined => {
 };
 
 export default function accountProxy(request: NextRequest): NextResponse {
-  if (
-    request.nextUrl.pathname === '/v1' ||
-    request.nextUrl.pathname.startsWith('/v1/')
-  ) {
+  if (request.nextUrl.pathname === '/v1' || request.nextUrl.pathname.startsWith('/v1/')) {
     return NextResponse.next();
   }
 

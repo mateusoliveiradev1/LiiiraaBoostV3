@@ -5,7 +5,6 @@ import {
   projectNavigation,
   routeHref,
   WEB_LOCALES,
-  WEB_ORIGINS,
   type WebLocale,
   type WebRouteId,
 } from '@liiiraa/web-core';
@@ -21,6 +20,7 @@ import {
   type AccountNavigationItem,
 } from '../../account-navigation';
 import { createAccountFailureModel } from '../../account-errors';
+import { resolvePublicBoundaryOrigin } from '../../account-origins';
 import { ProductLockup } from '../../account-product-lockup';
 import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
 import { AccountIdentityChrome } from '../../features/account-auth';
@@ -161,12 +161,12 @@ const localizedAuthHref = (
   return result.value;
 };
 
-const publicHomeHref = (locale: WebLocale): string => {
+const publicHomeHref = (locale: WebLocale, publicOrigin: string): string => {
   const result = routeHref('public-home', { locale });
   if (!result.ok) {
     throw new Error('Canonical public home route is unavailable.');
   }
-  return `${WEB_ORIGINS['public-origin']}${result.value}`;
+  return `${publicOrigin}${result.value}`;
 };
 
 export function generateStaticParams() {
@@ -214,6 +214,10 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   const runtime = resolveAccountServerRuntimeConfig();
   const webComposition = accountWebComposition(runtime.kind);
   const authorityBaseUrl = runtime.kind === 'production' ? runtime.authorityBaseUrl : '';
+  const publicOrigin = resolvePublicBoundaryOrigin(
+    process.env['LIIIRAA_PUBLIC_ORIGIN'],
+    process.env['VERCEL'] === '1',
+  );
   const copy = COPY[locale];
   const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigationGroups = NAVIGATION_GROUPS.map((group): AccountNavigationGroup => ({
@@ -263,7 +267,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           alternateLocale={alternateLocale}
           authenticatedAction={authenticatedAction}
           authBrand={
-            <a className="account-brand" href={publicHomeHref(locale)}>
+            <a className="account-brand" href={publicHomeHref(locale, publicOrigin)}>
               <ProductLockup />
             </a>
           }
@@ -304,7 +308,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           label={copy.navigation}
           locale={locale}
           publicLink={
-            <a href={publicHomeHref(locale)}>
+            <a href={publicHomeHref(locale, publicOrigin)}>
               {copy.publicLink} <span aria-hidden="true">↗</span>
             </a>
           }

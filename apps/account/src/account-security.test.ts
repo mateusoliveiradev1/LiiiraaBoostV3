@@ -37,9 +37,7 @@ describe('account security boundary', () => {
   });
 
   it('passes API requests through without page-route classification or preview headers', () => {
-    const response = accountProxy(
-      new NextRequest('https://account.liiiraa.com/v1/account'),
-    );
+    const response = accountProxy(new NextRequest('https://account.liiiraa.com/v1/account'));
 
     expect(response.status).toBe(200);
     expect(response.headers.get('x-middleware-next')).toBe('1');
@@ -165,9 +163,7 @@ describe('account security boundary', () => {
   });
 
   it('redirects each localized account root to real authentication and preserves valid invites', () => {
-    const bare = accountProxy(
-      new NextRequest('https://liiiraa-boost-account-staging.vercel.app/'),
-    );
+    const bare = accountProxy(new NextRequest('https://liiiraa-boost-account-staging.vercel.app/'));
     expect(bare.status).toBe(307);
     expect(bare.headers.get('location')).toBe(
       'https://liiiraa-boost-account-staging.vercel.app/pt-BR/login',
