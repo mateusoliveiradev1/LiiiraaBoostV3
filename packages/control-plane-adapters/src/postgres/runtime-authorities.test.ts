@@ -47,7 +47,7 @@ describe('persistent runtime authorities', () => {
         });
       }
       if (statement.includes('INSERT INTO runtime_aggregates')) {
-        stored.set(String(values[1]), JSON.parse(String(values[3])));
+        stored.set(String(values[1]), JSON.parse(String(values[4])));
       }
       return Promise.resolve({ rowCount: 1, rows: [] });
     });

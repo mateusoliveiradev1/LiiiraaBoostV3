@@ -9,6 +9,7 @@ import {
   type ControlPlaneSchemaInspection,
 } from './migrate.ts';
 import { migrateRealIdentity } from './real-identity.ts';
+import { migrateRuntimeAuthorities } from './runtime-authorities.ts';
 
 const forbiddenAuthority = /(?:^|[._/-])(?:prod|production|customer|live)(?:$|[._/?-])/iu;
 const stagingAuthority = /(?:^|[._/-])(?:staging|synthetic)(?:$|[._/?-])/iu;
@@ -71,10 +72,11 @@ const migrateStagingAuthority = async (
 ): Promise<ControlPlaneMigrationResult> => {
   const controlPlane = await migrateControlPlane(database);
   const identity = await migrateRealIdentity(database);
+  const runtimeAuthorities = await migrateRuntimeAuthorities(database);
   return Object.freeze({
-    applied: controlPlane.applied || identity.applied,
-    schemaHash: identity.schemaHash,
-    version: identity.version,
+    applied: controlPlane.applied || identity.applied || runtimeAuthorities.applied,
+    schemaHash: runtimeAuthorities.schemaHash,
+    version: runtimeAuthorities.version,
   });
 };
 
@@ -82,15 +84,15 @@ const inspectStagingAuthority = async (
   database: ControlPlaneDatabase,
 ): Promise<ControlPlaneSchemaInspection> => {
   const inspection = await inspectControlPlaneSchema(database);
-  const identityMigration = await database.query<{ checksum: string }>(
+  const runtimeMigration = await database.query<{ checksum: string }>(
     `SELECT checksum
      FROM control_plane_schema_migrations
      WHERE version = $1`,
-    ['0002_real_identity'],
+    ['0003_runtime_authorities'],
   );
   return Object.freeze({
     ...inspection,
-    schemaHash: identityMigration.rows[0]?.checksum,
+    schemaHash: runtimeMigration.rows[0]?.checksum,
   });
 };
 

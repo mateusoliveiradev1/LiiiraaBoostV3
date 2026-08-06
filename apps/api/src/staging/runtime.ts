@@ -14,6 +14,7 @@ import {
   createRealIdentityAuthority,
   migrateControlPlane,
   migrateRealIdentity,
+  migrateRuntimeAuthorities,
   type IdentityActor,
 } from '@liiiraa/control-plane-adapters/runtime-identity';
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -304,6 +305,7 @@ export const buildRealStagingApp = async (
   try {
     await migrateControlPlane(database);
     await migrateRealIdentity(database);
+    await migrateRuntimeAuthorities(database);
     await database.query('SELECT 1 AS authority_ready');
   } catch (error) {
     await database.close();

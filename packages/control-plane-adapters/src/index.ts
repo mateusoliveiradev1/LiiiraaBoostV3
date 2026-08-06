@@ -16,6 +16,12 @@ export {
   type ControlPlaneMigrationResult,
   type ControlPlaneSchemaInspection,
 } from './postgres/migrate.js';
+export {
+  createPostgresSubscriptionManagementRepository,
+  migrateRuntimeAuthorities,
+  runtimeAuthoritiesSchemaHash,
+  runtimeAuthorityJson,
+} from './postgres/runtime-authorities.js';
 export * from './crypto/staging-entitlement-signer.js';
 export * from './email/ses-email.js';
 export * from './commerce/stripe-provider.js';
