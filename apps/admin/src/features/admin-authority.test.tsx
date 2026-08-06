@@ -74,6 +74,48 @@ const receipt: AuthorityReceiptJson = {
 };
 
 describe('production admin authority', () => {
+  it('creates a real administrative session on the isolated origin', async () => {
+    const csrfToken = 'csrf.'.concat('a'.repeat(43));
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(response({ token: csrfToken }))
+      .mockResolvedValueOnce(
+        response(
+          {
+            actor: {
+              accountId: 'developer-01',
+              displayName: 'Mateus Oliveira',
+              email: 'owner@example.com',
+              expiresAt: '2026-09-05T12:00:00.000Z',
+              locale: 'pt-BR',
+              role: 'security',
+              sessionId: 'session-admin-01',
+              sessionKind: 'admin',
+            },
+          },
+          201,
+        ),
+      );
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-sign-in-test',
+      csrfToken: () => 'unused-command-csrf',
+      transport,
+    });
+
+    await expect(
+      authority.signIn({ email: 'owner@example.com', password: 'CorrectHorse1' }),
+    ).resolves.toEqual({
+      actorId: 'developer-01',
+      expiresAt: '2026-09-05T12:00:00.000Z',
+      role: 'security',
+    });
+    expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
+      '/v1/identity/csrf',
+      '/v1/identity/sign-in',
+    ]);
+    expect(transport.mock.calls[1]?.[1]).toMatchObject({ credentials: 'include', method: 'POST' });
+  });
+
   it('projects only the singular server-admitted role and never sends URL role authority', async () => {
     const transport = vi
       .fn<AdminAuthorityTransport>()
@@ -268,6 +310,8 @@ describe('admin production composition', () => {
     expect(productionView).toContain('Verify critical operation');
     expect(productionView).toContain('Consented diagnostic view');
     expect(productionView).toContain('accountOrigin');
+    expect(productionView).toContain('Entrar no painel administrativo');
+    expect(productionView).toContain('type="password"');
     expect(productionView).toContain('No authorized records are currently available.');
     expect(productionView).not.toContain('AdminPreviewRoute');
     expect(routeSource).toContain("await import('../../../features/admin-preview')");
