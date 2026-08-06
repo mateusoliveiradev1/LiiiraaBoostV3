@@ -1,3 +1,5 @@
+import { chmod, open, readFile } from 'node:fs/promises';
+import { isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import Stripe from 'stripe';
@@ -40,6 +42,34 @@ export interface StripeCatalogProvisioningResult {
   readonly mode: 'test';
   readonly reusedPrices: number;
   readonly status: 'complete';
+}
+
+const WEBHOOK_EVENTS = Object.freeze([
+  'charge.dispute.created',
+  'charge.refunded',
+  'checkout.session.completed',
+  'customer.subscription.deleted',
+  'customer.subscription.updated',
+  'invoice.paid',
+  'invoice.payment_failed',
+] as const);
+
+interface ProtectedStripeRuntime {
+  readonly previousWebhookEndpointIds: readonly string[];
+  readonly webhookEndpointId: string;
+  readonly webhookSecret: string;
+}
+
+export interface PrepareStripeRuntimeInput {
+  readonly webhookUrl: string;
+  readonly writeProtected: (runtime: ProtectedStripeRuntime) => Promise<void>;
+}
+
+export interface PreparedStripeRuntime {
+  readonly portalConfigurationId: string;
+  readonly previousWebhookEndpointIds: readonly string[];
+  readonly status: 'prepared';
+  readonly webhookEndpointId: string;
 }
 
 const managedProduct = (product: Stripe.Product): boolean =>
@@ -100,14 +130,137 @@ export const provisionStripeTestCatalog = async (
   };
 };
 
+const exactWebhookUrl = (value: string): string => {
+  const url = new URL(value);
+  if (
+    url.protocol !== 'https:' ||
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.search.length > 0 ||
+    url.hash.length > 0 ||
+    url.pathname !== '/v1/commerce/provider-webhook'
+  ) {
+    throw new Error('STRIPE_TEST_RUNTIME_REJECTED:WEBHOOK_URL');
+  }
+  return url.toString();
+};
+
+export const prepareStripeTestRuntime = async (
+  stripe: Stripe,
+  input: PrepareStripeRuntimeInput,
+): Promise<PreparedStripeRuntime> => {
+  const webhookUrl = exactWebhookUrl(input.webhookUrl);
+  const configurations = await stripe.billingPortal.configurations.list({
+    active: true,
+    limit: 100,
+  });
+  let portal = configurations.data.find(
+    (configuration) => configuration.name === 'Liiiraa Boost staging managed',
+  );
+  if (portal === undefined) {
+    portal = await stripe.billingPortal.configurations.create({
+      name: 'Liiiraa Boost staging managed',
+      business_profile: {
+        headline: 'Gerencie sua assinatura Liiiraa Boost Premium',
+      },
+      features: {
+        customer_update: { allowed_updates: ['email'], enabled: true },
+        invoice_history: { enabled: true },
+        payment_method_update: { enabled: true },
+        subscription_cancel: { enabled: true, mode: 'at_period_end' },
+      },
+    });
+  }
+
+  const existing = await stripe.webhookEndpoints.list({ limit: 100 });
+  const previousWebhookEndpointIds = existing.data
+    .filter((endpoint) => endpoint.url === webhookUrl && endpoint.status === 'enabled')
+    .map(({ id }) => id);
+  const webhook = await stripe.webhookEndpoints.create(
+    {
+      description: 'Liiiraa Boost staging managed',
+      enabled_events: [...WEBHOOK_EVENTS],
+      url: webhookUrl,
+    },
+    { idempotencyKey: `liiiraa-webhook-${Date.now().toString(36)}` },
+  );
+  if (typeof webhook.secret !== 'string' || !webhook.secret.startsWith('whsec_')) {
+    throw new Error('STRIPE_TEST_RUNTIME_REJECTED:WEBHOOK_SECRET');
+  }
+  await input.writeProtected({
+    previousWebhookEndpointIds,
+    webhookEndpointId: webhook.id,
+    webhookSecret: webhook.secret,
+  });
+  return {
+    portalConfigurationId: portal.id,
+    previousWebhookEndpointIds,
+    status: 'prepared',
+    webhookEndpointId: webhook.id,
+  };
+};
+
+export const finalizeStripeTestRuntime = async (
+  stripe: Stripe,
+  runtime: ProtectedStripeRuntime,
+): Promise<Readonly<{ disabledWebhookEndpoints: number; status: 'finalized' }>> => {
+  const oldEndpoints = runtime.previousWebhookEndpointIds.filter(
+    (endpointId) => endpointId !== runtime.webhookEndpointId,
+  );
+  for (const endpointId of oldEndpoints) {
+    await stripe.webhookEndpoints.update(endpointId, { disabled: true });
+  }
+  return { disabledWebhookEndpoints: oldEndpoints.length, status: 'finalized' };
+};
+
+const protectedWriter =
+  (path: string) =>
+  async (runtime: ProtectedStripeRuntime): Promise<void> => {
+    if (!isAbsolute(path)) throw new Error('STRIPE_TEST_RUNTIME_REJECTED:OUTPUT_PATH');
+    const handle = await open(path, 'wx', 0o600);
+    try {
+      await chmod(path, 0o600);
+      await handle.writeFile(`${JSON.stringify(runtime)}\n`, 'utf8');
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+  };
+
 const run = async (): Promise<void> => {
   const secretKey = process.env['STRIPE_SECRET_KEY'];
   if (typeof secretKey !== 'string' || !/^sk_test_[A-Za-z0-9_]+$/u.test(secretKey)) {
     throw new Error('STRIPE_TEST_CATALOG_REJECTED:STRIPE_SECRET_KEY');
   }
   const stripe = new Stripe(secretKey, { typescript: true });
-  const result = await provisionStripeTestCatalog(stripe);
-  process.stdout.write(`${JSON.stringify(result)}\n`);
+  const catalog = await provisionStripeTestCatalog(stripe);
+  const outputPath = process.env['STRIPE_RUNTIME_OUTPUT_PATH'];
+  const action = process.env['STRIPE_PROVISION_ACTION'] ?? 'catalog';
+  if (action === 'prepare') {
+    if (typeof outputPath !== 'string') {
+      throw new Error('STRIPE_TEST_RUNTIME_REJECTED:OUTPUT_PATH');
+    }
+    const apiOrigin = process.env['STAGING_API_ORIGIN'];
+    if (typeof apiOrigin !== 'string') {
+      throw new Error('STRIPE_TEST_RUNTIME_REJECTED:API_ORIGIN');
+    }
+    const runtime = await prepareStripeTestRuntime(stripe, {
+      webhookUrl: new URL('/v1/commerce/provider-webhook', apiOrigin).toString(),
+      writeProtected: protectedWriter(outputPath),
+    });
+    process.stdout.write(`${JSON.stringify({ catalog, runtime })}\n`);
+    return;
+  }
+  if (action === 'finalize') {
+    if (typeof outputPath !== 'string' || !isAbsolute(outputPath)) {
+      throw new Error('STRIPE_TEST_RUNTIME_REJECTED:OUTPUT_PATH');
+    }
+    const runtime = JSON.parse(await readFile(outputPath, 'utf8')) as ProtectedStripeRuntime;
+    const finalized = await finalizeStripeTestRuntime(stripe, runtime);
+    process.stdout.write(`${JSON.stringify({ catalog, finalized })}\n`);
+    return;
+  }
+  process.stdout.write(`${JSON.stringify(catalog)}\n`);
 };
 
 const invokedPath = process.argv[1];

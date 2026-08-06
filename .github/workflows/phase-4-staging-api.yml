@@ -61,6 +61,7 @@ jobs:
           pnpm contracts:compat &&
           pnpm --filter @liiiraa/api test -- --run staging-config &&
           pnpm --filter @liiiraa/api test -- --run container-contract &&
+          pnpm --filter @liiiraa/api exec vitest --run src/staging/provision-stripe.test.ts src/staging/runtime-control-plane.test.ts &&
           pnpm --filter @liiiraa/api db:migrate:test
       - name: Configure BuildKit
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
@@ -167,6 +168,13 @@ jobs:
         env:
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
         run: pnpm --filter @liiiraa/api db:migrate
+      - name: Provision isolated Stripe test catalog, Portal and signed webhook
+        env:
+          STAGING_API_ORIGIN: ${{ secrets.STAGING_API_ORIGIN }}
+          STRIPE_PROVISION_ACTION: prepare
+          STRIPE_RUNTIME_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-stripe-runtime.json
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: pnpm --filter @liiiraa/api staging:provision-stripe
       - name: Update the bounded staging build identity
         env:
           ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}
@@ -182,14 +190,17 @@ jobs:
           STAGING_BUILD_ID: ${{ github.sha }}
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_RUNTIME_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-stripe-runtime.json
           SUPPORT_BUCKET: ${{ vars.SUPPORT_BUCKET }}
         run: >-
           node --input-type=module --eval
-          "const required = ['ACCOUNT_STAGING_ORIGIN','ADMIN_STAGING_ORIGIN','AUDIT_ANCHOR_BUCKET','AWS_REGION','DESKTOP_STAGING_ORIGIN','PUBLIC_STAGING_ORIGIN','STAGING_API_ORIGIN','STAGING_AUTH_SECRET','STAGING_BUILD_ID','STAGING_DATABASE_URL','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','SUPPORT_BUCKET'];
+          "import { readFileSync } from 'node:fs';
+          const required = ['ACCOUNT_STAGING_ORIGIN','ADMIN_STAGING_ORIGIN','AUDIT_ANCHOR_BUCKET','AWS_REGION','DESKTOP_STAGING_ORIGIN','PUBLIC_STAGING_ORIGIN','STAGING_API_ORIGIN','STAGING_AUTH_SECRET','STAGING_BUILD_ID','STAGING_DATABASE_URL','STRIPE_SECRET_KEY','SUPPORT_BUCKET'];
           if (required.some((key) => !process.env[key])) throw new Error('Render staging authority environment is incomplete');
+          const stripeRuntime = JSON.parse(readFileSync(process.env.STRIPE_RUNTIME_OUTPUT_PATH, 'utf8'));
+          if (!/^whsec_[A-Za-z0-9_]+$/.test(stripeRuntime.webhookSecret)) throw new Error('Managed Stripe webhook secret is invalid');
           const fixed = { NODE_ENV: 'production', PORT: '3000', STAGING_CHANNEL: 'internal', STAGING_DATA_CLASSIFICATION: 'synthetic', STAGING_INVITATION_ONLY: 'true', STAGING_PUBLIC_SIGNUP: 'false' };
-          process.stdout.write(JSON.stringify([...required.map((key) => ({ key, value: process.env[key] })), ...Object.entries(fixed).map(([key, value]) => ({ key, value }))]));" |
+          process.stdout.write(JSON.stringify([...required.map((key) => ({ key, value: process.env[key] })), { key: 'STRIPE_WEBHOOK_SECRET', value: stripeRuntime.webhookSecret }, ...Object.entries(fixed).map(([key, value]) => ({ key, value }))]));" |
           curl --fail-with-body --silent --show-error
           --request PUT
           --header "Authorization: Bearer $RENDER_API_TOKEN"
@@ -228,7 +239,10 @@ jobs:
         run: |
           for attempt in $(seq 1 30); do
             ready="$(curl --fail --silent --show-error --max-time 15 "$STAGING_API_ORIGIN/ready" || true)"
-            if printf '%s' "$ready" | grep -Fq "$STAGING_BUILD_ID"; then
+            if printf '%s' "$ready" | grep -Fq "$STAGING_BUILD_ID" &&
+               printf '%s' "$ready" | grep -Fq '"commerce-stripe-test"' &&
+               printf '%s' "$ready" | grep -Fq '"device-authority"' &&
+               printf '%s' "$ready" | grep -Fq '"support-consent-authority"'; then
               curl --fail-with-body --silent --show-error "$STAGING_API_ORIGIN/health"
               printf '%s\n' "$ready"
               exit 0
@@ -237,3 +251,9 @@ jobs:
           done
           echo "Timed out waiting for the tested staging build" >&2
           exit 1
+      - name: Retire superseded managed Stripe staging webhooks
+        env:
+          STRIPE_PROVISION_ACTION: finalize
+          STRIPE_RUNTIME_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-stripe-runtime.json
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: pnpm --filter @liiiraa/api staging:provision-stripe
