@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   provisionStagingInvitations,
+  repairInvitationOutputPayload,
   type ProtectedInvitationOutput,
   type StagingInvitationProvisioningEnvironment,
 } from './provision-invitations.js';
@@ -77,10 +78,42 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(
       protectedPayload.invitations?.every(({ invitationUrl }) =>
         invitationUrl?.startsWith(
-          'https://account.staging.example/pt-BR/account/sign-up?invitation=',
+          'https://account.staging.example/pt-BR/register?invitation=',
         ),
       ),
     ).toBe(true);
+  });
+
+  it('repairs legacy protected links without changing their invitation authority', () => {
+    const token = 'a'.repeat(64);
+    const legacyPayload = JSON.stringify({
+      invitations: emails.map((email) => ({
+        email,
+        expiresAt: '2030-01-29T12:00:00.000Z',
+        invitationUrl: `https://account.staging.example/pt-BR/account/sign-up?invitation=${token}`,
+      })),
+    });
+
+    const repaired = JSON.parse(
+      repairInvitationOutputPayload(legacyPayload, 'https://account.staging.example'),
+    ) as {
+      invitations: readonly { email: string; invitationUrl: string }[];
+    };
+
+    expect(repaired.invitations.map(({ email }) => email)).toEqual(emails);
+    expect(
+      repaired.invitations.every(
+        ({ invitationUrl }) =>
+          invitationUrl ===
+          `https://account.staging.example/pt-BR/register?invitation=${token}`,
+      ),
+    ).toBe(true);
+    expect(() =>
+      repairInvitationOutputPayload(
+        legacyPayload.replace('account.staging.example', 'attacker.example'),
+        'https://account.staging.example',
+      ),
+    ).toThrow('STAGING_INVITATION_PROVISIONING_REJECTED');
   });
 
   it('is idempotent and never reconstructs or reveals prior active invitation tokens', async () => {
