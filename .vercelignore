@@ -1,0 +1,17 @@
+.git
+.planning
+.impeccable
+**/node_modules
+**/.next
+**/.turbo
+**/coverage
+**/dist
+**/target
+apps/desktop/src-tauri/gen
+playwright-report
+storybook-static
+test-results
+*.log
+.env
+.env.*
+!.env.example
