@@ -95,15 +95,25 @@ jobs:
           subject-name: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
-      - name: Scan the exact published digest
+      - name: Record the exact published digest scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ steps.build.outputs.digest }}
           format: sarif
           output: trivy-results.sarif
+          exit-code: '0'
+          ignore-unfixed: true
+          scanners: vuln
+          version: v0.73.0
+      - name: Reject high or critical vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/liiiraa-boost-api@${{ steps.build.outputs.digest }}
+          format: table
           severity: CRITICAL,HIGH
           exit-code: '1'
           ignore-unfixed: true
+          scanners: vuln
           version: v0.73.0
       - name: Require anonymous pull access for staging hosting
         run: >-

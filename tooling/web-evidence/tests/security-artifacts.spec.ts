@@ -32,9 +32,12 @@ const expectSecurityHeaders = async (
   request: APIRequestContext,
   url: string,
   referrerPolicy: string,
+  allowedProtectedStatuses: readonly number[] = [],
 ) => {
   const response = await request.get(url);
-  expect(response.status()).toBeLessThan(400);
+  expect(response.status() < 400 || allowedProtectedStatuses.includes(response.status())).toBe(
+    true,
+  );
   const headers = response.headers();
   expect(headers['content-security-policy']).toContain("default-src 'self'");
   expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
@@ -148,7 +151,7 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   const adminOrigin = origins.admin as string;
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
   await expectSecurityHeaders(request, `${accountOrigin}/pt-BR/login`, 'no-referrer');
-  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer');
+  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer', [403]);
 
   const crossSurface = await request.get(`${adminOrigin}/pt-BR/admin`, {
     headers: { cookie: '__Host-liiiraa_account_session=forbidden-cross-surface-state' },
