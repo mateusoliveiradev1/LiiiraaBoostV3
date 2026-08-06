@@ -121,12 +121,8 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain("LIIIRAA_ACCOUNT_PREVIEW: 'false'");
   expect(workflow).toContain("LIIIRAA_ADMIN_PREVIEW: 'false'");
   expect(workflow).toContain('LIIIRAA_ACCOUNT_ORIGIN: account.origin');
-  expect(workflow).toContain(
-    'LIIIRAA_ACCOUNT_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN',
-  );
-  expect(workflow).toContain(
-    'LIIIRAA_ADMIN_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN',
-  );
+  expect(workflow).toContain('LIIIRAA_ACCOUNT_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN');
+  expect(workflow).toContain('LIIIRAA_ADMIN_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN');
   expect(
     workflow.match(/ref: process\.env\.GIT_REF, sha: process\.env\.GIT_SHA/gu) ?? [],
   ).toHaveLength(3);
