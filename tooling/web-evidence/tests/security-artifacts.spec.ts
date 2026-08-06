@@ -163,10 +163,26 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   const adminOrigin = origins.admin as string;
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
   await expectSecurityHeaders(request, `${accountOrigin}/pt-BR/login`, 'no-referrer');
-  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer', [403]);
+  await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer');
 
   const accountLogin = await request.get(`${accountOrigin}/pt-BR/login`);
-  expect(await accountLogin.text()).toContain('data-authority-connected="true"');
+  const accountMarkup = await accountLogin.text();
+  expect(accountMarkup).toContain('data-authority-connected="true"');
+  expect(accountMarkup).toContain('data-runtime-class="server-authority"');
+  expect(accountMarkup).not.toMatch(/data-runtime-class="fixture"|sign-in-preview/iu);
+
+  const adminLanding = await request.get(`${adminOrigin}/pt-BR/admin`);
+  expect(adminLanding.status()).toBe(200);
+  const adminMarkup = await adminLanding.text();
+  expect(adminMarkup).toContain('data-admin-session-state="unverified"');
+  expect(adminMarkup).toContain('data-runtime-class="server-authority"');
+  expect(adminMarkup).not.toMatch(
+    /data-runtime-class="fixture"|data-admin-preview|case-preview|preview role/iu,
+  );
+
+  const unauthenticatedAdmin = await request.get(`${adminOrigin}/v1/admin/session`);
+  expect([401, 403]).toContain(unauthenticatedAdmin.status());
+  expect(unauthenticatedAdmin.headers()['set-cookie']).toBeUndefined();
 
   const crossSurface = await request.get(`${adminOrigin}/pt-BR/admin`, {
     headers: { cookie: '__Host-liiiraa_account_session=forbidden-cross-surface-state' },

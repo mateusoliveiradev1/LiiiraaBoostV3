@@ -272,6 +272,14 @@ describe('admin shell', () => {
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
   });
 
+  it('does not render preview role chrome before production session authority is verified', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+
+    expect(layout).toContain("runtime.kind === 'production'");
+    expect(layout).toContain('data-admin-session-state="unverified"');
+    expect(layout).toContain('data-runtime-class="server-authority"');
+  });
+
   it('provides skip, focus, protected operator menu, and role-guarded reflow contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');

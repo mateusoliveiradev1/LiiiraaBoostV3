@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 
 import adminProxy, {
@@ -13,7 +13,18 @@ import adminNextConfig, { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../n
 import { ADMIN_CANONICAL_ENTRY, ADMIN_LOCAL_ORIGIN, resolveAdminOrigin } from './admin-runtime';
 
 describe('admin security boundary', () => {
+  const originalPreviewMode = process.env['LIIIRAA_ADMIN_PREVIEW'];
+
+  beforeEach(() => {
+    process.env['LIIIRAA_ADMIN_PREVIEW'] = 'true';
+  });
+
   afterEach(() => {
+    if (originalPreviewMode === undefined) {
+      delete process.env['LIIIRAA_ADMIN_PREVIEW'];
+    } else {
+      process.env['LIIIRAA_ADMIN_PREVIEW'] = originalPreviewMode;
+    }
     vi.restoreAllMocks();
   });
 
@@ -277,6 +288,28 @@ describe('admin security boundary', () => {
     expect(unsafe.status).toBe(403);
     expect(unsafe.headers.get('set-cookie')).toBeNull();
     expect(unsafe.headers.get('location')).toBeNull();
+  });
+
+  it('never injects a preview role or disconnected fixture marker in production', () => {
+    process.env['LIIIRAA_ADMIN_PREVIEW'] = 'false';
+    const response = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin`));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-liiiraa-admin-role')).toBeNull();
+    expect(response.headers.get('x-liiiraa-preview-authority')).toBeNull();
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('rejects URL-selected roles when production authority is active', () => {
+    process.env['LIIIRAA_ADMIN_PREVIEW'] = 'false';
+    const response = adminProxy(
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`),
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get('x-liiiraa-admin-role')).toBeNull();
+    expect(response.headers.get('x-liiiraa-preview-authority')).toBeNull();
   });
 
   it.each([
