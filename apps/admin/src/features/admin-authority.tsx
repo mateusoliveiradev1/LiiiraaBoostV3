@@ -3,6 +3,8 @@
 import type { AdminRoleJson, AuditEventJson, AuthorityReceiptJson } from '@liiiraa/contracts-ts';
 import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { useEffect, useMemo, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import {
@@ -295,12 +297,12 @@ const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: Ad
   return (
     <div className="admin-production-nav">
       <nav aria-label={labels.activeRole} className="admin-authority__navigation">
-        <a href={routeHref(locale, '')}>
+        <Link href={routeHref(locale, '') as Route}>
           <ProductIcon name="toolbox" size={18} />
           {locale === 'pt-BR' ? 'Visão geral' : 'Overview'}
-        </a>
+        </Link>
         {links.map(([label, suffix]) => (
-          <a href={routeHref(locale, suffix)} key={suffix}>
+          <Link href={routeHref(locale, suffix) as Route} key={suffix}>
             <ProductIcon
               name={
                 suffix.includes('diagnostics')
@@ -316,7 +318,7 @@ const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: Ad
               size={18}
             />
             {label}
-          </a>
+          </Link>
         ))}
       </nav>
     </div>
@@ -586,10 +588,10 @@ const AdminProductionShell = ({
   return (
     <div className="admin-production-shell" data-admin-role={session.role}>
       <header className="admin-production-header">
-        <a className="admin-brand" href={routeHref(locale, '')}>
+        <Link className="admin-brand" href={routeHref(locale, '') as Route}>
           <ProductLockup />
           <span className="admin-brand__surface">Admin</span>
-        </a>
+        </Link>
         <div className="admin-production-header__session">
           <span className="admin-production-header__identity">
             <ProductIcon name="shield" size={18} />

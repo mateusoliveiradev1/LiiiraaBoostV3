@@ -3,7 +3,14 @@ mod credential_store;
 #[path = "../src/identity.rs"]
 mod identity;
 
-use std::{cell::RefCell, fs, io::Write, net::TcpStream, path::PathBuf, thread};
+use std::{
+    cell::RefCell,
+    fs,
+    io::{Read, Write},
+    net::TcpStream,
+    path::PathBuf,
+    thread,
+};
 
 use credential_store::{CredentialStore, CredentialStoreError};
 use identity::{
@@ -333,12 +340,22 @@ fn desktop_callback_listener_binds_ephemeral_loopback_and_closes_after_one_reque
             "GET /oauth/callback?code=one-shot%2Dauthorization%2Dcode&state={STATE} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n"
         )
         .expect("callback request should write");
+        let mut response = String::new();
+        stream
+            .read_to_string(&mut response)
+            .expect("callback response should be readable");
+        response
     });
 
     let evidence = listener
         .receive(ISSUER)
         .expect("one callback should be admitted");
-    sender.join().expect("callback sender should finish");
+    let callback_response = sender.join().expect("callback sender should finish");
+    assert!(callback_response.contains("Content-Type: text/html; charset=utf-8"));
+    assert!(callback_response.contains("Liiiraa Boost"));
+    assert!(callback_response.contains("Login concluído"));
+    assert!(callback_response.contains("You can close this tab"));
+    assert!(callback_response.contains("Content-Security-Policy: default-src 'none'"));
     assert_eq!(evidence.authorization_code, "one-shot-authorization-code");
     assert_eq!(evidence.state, STATE);
     assert_eq!(evidence.redirect_uri, redirect_uri);

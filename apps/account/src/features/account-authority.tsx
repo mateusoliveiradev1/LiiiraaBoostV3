@@ -2,6 +2,8 @@
 
 import { LbButton, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import { routeHref, type WebLocale } from '@liiiraa/web-core';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -393,7 +395,9 @@ export const AccountAuthorityPage = ({
                 ? 'Entre para acessar esta área da conta.'
                 : 'Sign in to access this account area.'}
             </p>
-            <a href={signInRoute.value}>{locale === 'pt-BR' ? 'Entrar' : 'Sign in'}</a>
+            <Link href={signInRoute.value as Route}>
+              {locale === 'pt-BR' ? 'Entrar' : 'Sign in'}
+            </Link>
           </>
         ) : (
           <p role="alert">{copy[locale].error}</p>
@@ -495,10 +499,10 @@ export const AccountAuthorityInspector = ({
               : 'No charges or invoices.'
             : `${String(projection.invoices.length)} ${locale === 'pt-BR' ? 'fatura(s)' : 'invoice(s)'}`}
         </p>
-        <a href={subscriptionHref}>
+        <Link href={subscriptionHref as Route}>
           {locale === 'pt-BR' ? 'Ver assinatura' : 'View subscription'}{' '}
           <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
       <section className="account-inspector__section">
         <span className="account-inspector__label">
@@ -521,10 +525,10 @@ export const AccountAuthorityInspector = ({
             </span>
           </span>
         </div>
-        <a href={deviceHref}>
+        <Link href={deviceHref as Route}>
           {locale === 'pt-BR' ? 'Gerenciar PC' : 'Manage PC'}{' '}
           <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
       <section className="account-inspector__section">
         <span className="account-inspector__label">
@@ -554,10 +558,10 @@ export const AccountAuthorityInspector = ({
             </span>
           </li>
         </ul>
-        <a href={securityHref}>
+        <Link href={securityHref as Route}>
           {locale === 'pt-BR' ? 'Configurar segurança' : 'Configure security'}{' '}
           <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
       <section className="account-inspector__section account-inspector__support">
         <span className="account-inspector__label">
@@ -570,10 +574,10 @@ export const AccountAuthorityInspector = ({
               : 'No open cases.'
             : `${String(view.support.openCount)} ${locale === 'pt-BR' ? 'caso(s) aberto(s)' : 'open case(s)'}`}
         </p>
-        <a href={supportHref}>
+        <Link href={supportHref as Route}>
           {locale === 'pt-BR' ? 'Abrir suporte' : 'Open support'}{' '}
           <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
     </div>
   );

@@ -1354,6 +1354,7 @@ const DesktopAppContent = ({
     readAccountProfile(globalThis.localStorage),
   );
   const [authoritativeAccountName, setAuthoritativeAccountName] = useState<string>();
+  const [authoritativeAccountPlan, setAuthoritativeAccountPlan] = useState<'free' | 'premium'>();
   const [route, setRoute] = useState(() => resolveInitialRoute(initialPath));
   const [announcement, setAnnouncement] = useState(route.definition.headingMessageId);
   const [activityOpen, setActivityOpen] = useState(false);
@@ -1379,12 +1380,15 @@ const DesktopAppContent = ({
       const detail = (event as CustomEvent<unknown>).detail;
       if (typeof detail !== 'object' || detail === null) return;
       const displayName: unknown = Reflect.get(detail, 'displayName');
+      const plan: unknown = Reflect.get(detail, 'plan');
       if (typeof displayName === 'string' && displayName.trim().length >= 2) {
         setAuthoritativeAccountName(displayName.trim());
       }
+      if (plan === 'free' || plan === 'premium') setAuthoritativeAccountPlan(plan);
     };
     const clearAuthoritativeIdentity = () => {
       setAuthoritativeAccountName(undefined);
+      setAuthoritativeAccountPlan(undefined);
     };
     globalThis.addEventListener(ACCOUNT_IDENTITY_PROJECTED_EVENT, updateAuthoritativeIdentity);
     globalThis.addEventListener(ACCOUNT_AUTHORITY_REVOKED_EVENT, clearAuthoritativeIdentity);
@@ -1817,6 +1821,16 @@ const DesktopAppContent = ({
           <WindowTitleBar
             accountInitials={accountProfileInitials(accountDisplayName)}
             accountLabel={accountDisplayName}
+            {...(authoritativeAccountPlan === undefined
+              ? {}
+              : {
+                  accountTierLabel:
+                    authoritativeAccountPlan === 'premium'
+                      ? 'Premium'
+                      : locale === 'pt-BR'
+                        ? 'Gratuito'
+                        : 'Free',
+                })}
             controls={DESKTOP_WINDOW_CONTROLS}
             globalStatus={
               locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'
@@ -1861,6 +1875,16 @@ const DesktopAppContent = ({
         <WindowTitleBar
           accountInitials={accountProfileInitials(accountDisplayName)}
           accountLabel={accountDisplayName}
+          {...(authoritativeAccountPlan === undefined
+            ? {}
+            : {
+                accountTierLabel:
+                  authoritativeAccountPlan === 'premium'
+                    ? 'Premium'
+                    : locale === 'pt-BR'
+                      ? 'Gratuito'
+                      : 'Free',
+              })}
           controls={DESKTOP_WINDOW_CONTROLS}
           globalStatus={presentation.reason}
           locale={locale}

@@ -2,6 +2,8 @@
 
 import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import { routeHref, type WebLocale } from '@liiiraa/web-core';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type SyntheticEvent } from 'react';
 
@@ -298,9 +300,9 @@ const SignInForm = ({
       </form>
       <p className="account-auth-switch">
         <span>{locale === 'pt-BR' ? 'Ainda não tem acesso?' : 'Do not have access yet?'}</span>{' '}
-        <a href={hrefFor('account-sign-up', locale)}>
+        <Link href={hrefFor('account-sign-up', locale) as Route}>
           {locale === 'pt-BR' ? 'Entenda o beta por convite' : 'Learn about invitation access'}
-        </a>
+        </Link>
       </p>
       <p className="account-auth-security" role="note">
         <ProductIcon name="lock" size={16} />
@@ -364,7 +366,9 @@ const SignUpForm = ({
         </div>
         <p className="account-auth-switch">
           <span>{content.signUp.signInPrompt}</span>{' '}
-          <a href={hrefFor('account-sign-in', locale)}>{content.signUp.signInAction}</a>
+          <Link href={hrefFor('account-sign-in', locale) as Route}>
+            {content.signUp.signInAction}
+          </Link>
         </p>
       </article>
     );
@@ -559,7 +563,9 @@ const SignUpForm = ({
       </form>
       <p className="account-auth-switch">
         <span>{content.signUp.signInPrompt}</span>{' '}
-        <a href={hrefFor('account-sign-in', locale)}>{content.signUp.signInAction}</a>
+        <Link href={hrefFor('account-sign-in', locale) as Route}>
+          {content.signUp.signInAction}
+        </Link>
       </p>
       <p className="account-auth-security" role="note">
         <ProductIcon name="lock" size={16} />

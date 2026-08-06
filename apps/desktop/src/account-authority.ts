@@ -298,6 +298,7 @@ export class DesktopAccountAuthority {
             accountId: snapshot.projection.account.accountId,
             displayName: snapshot.projection.account.displayName,
             emailRedacted: snapshot.projection.account.emailRedacted,
+            plan: snapshot.projection.subscription.plan,
           }),
         }),
       );

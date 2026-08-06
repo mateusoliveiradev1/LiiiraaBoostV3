@@ -7,6 +7,7 @@ import type {
   AdminProjectionResource,
   AdminRoleAuthorityDependencies,
 } from '@liiiraa/control-plane-application';
+import type { SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
 import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
@@ -32,6 +33,8 @@ interface StagingAdminDatabase {
   ): Promise<Readonly<{ rows: readonly Readonly<Record<string, unknown>>[] }>>;
 }
 
+type StagingSubscriptionDatabase = StagingAdminDatabase;
+
 interface StagingAdminIdentityAuthority {
   resolveCredential(credential: string): Promise<IdentityActor | null>;
 }
@@ -50,6 +53,62 @@ const ADMIN_ROLES = new Set<Exclude<IdentityActor['role'], 'tester'>>([
   'support',
 ]);
 const ADMIN_RECORD_LIMIT = '100';
+
+export const resolveStagingSubscription = async (
+  database: StagingSubscriptionDatabase,
+  actor: IdentityActor,
+  correlationId: string,
+): Promise<SubscriptionProjectionJson> => {
+  const result = await database.query(
+    `SELECT id::text AS id, status, valid_until, version
+       FROM premium_entitlements
+      WHERE identity_id = $1
+        AND status IN ('active', 'grace')
+        AND valid_from <= CURRENT_TIMESTAMP
+        AND (valid_until IS NULL OR valid_until > CURRENT_TIMESTAMP)
+      ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END,
+               valid_until DESC NULLS FIRST,
+               created_at DESC
+      LIMIT 1`,
+    [actor.accountId],
+  );
+  const row = result.rows[0];
+  if (row === undefined) {
+    return {
+      schemaVersion: '1.0',
+      aggregateVersion: '0',
+      etag: `subscription-${actor.accountId}-v0`,
+      correlationId,
+      provenance: 'postgres-authority',
+      kind: 'subscription-projection',
+      subscriptionId: `free-${actor.accountId}`,
+      accountId: actor.accountId,
+      state: 'none',
+      plan: 'free',
+      entitlements: [],
+      cancelAtPeriodEnd: false,
+    };
+  }
+
+  const entitlementId = text(row['id']);
+  const version = text(row['version']);
+  const validUntil = text(row['valid_until']);
+  return {
+    schemaVersion: '1.0',
+    aggregateVersion: version,
+    etag: `subscription-${entitlementId}-v${version}`,
+    correlationId,
+    provenance: 'postgres-authority',
+    kind: 'subscription-projection',
+    subscriptionId: entitlementId,
+    accountId: actor.accountId,
+    state: 'active',
+    plan: 'premium',
+    entitlements: ['premium-actions'],
+    ...(validUntil.length === 0 ? {} : { currentPeriodEndsAt: validUntil }),
+    cancelAtPeriodEnd: false,
+  };
+};
 
 const cookieCredential = (
   request: Parameters<AdminRouteDependencies['resolveAdminSession']>[0],
@@ -273,6 +332,8 @@ export const buildRealStagingApp = async (
     authority: identity,
     csrfSecret: secret,
     issuer,
+    resolveSubscription: (actor, correlation) =>
+      resolveStagingSubscription(database, actor, correlation),
   });
   await registerAdminRoutes(
     app,

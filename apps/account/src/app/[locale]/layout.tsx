@@ -8,7 +8,8 @@ import {
   type WebLocale,
   type WebRouteId,
 } from '@liiiraa/web-core';
-import type { Metadata } from 'next';
+import type { Metadata, Route } from 'next';
+import Link from 'next/link';
 import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
@@ -291,10 +292,13 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
             </div>
           }
           brand={
-            <a className="account-brand" href={localizedHref('account-overview', locale)}>
+            <Link
+              className="account-brand"
+              href={localizedHref('account-overview', locale) as Route}
+            >
               <ProductLockup />
               <span className="account-brand__surface">{copy.surface}</span>
-            </a>
+            </Link>
           }
           currentTaskLabel={copy.currentTask}
           authRouteItems={authRouteItems}

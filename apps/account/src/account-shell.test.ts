@@ -122,7 +122,8 @@ describe('account shell', () => {
     expect(layoutSource).not.toContain('Astra Player');
     expect(navigationSource).toContain('account-header__route');
     expect(navigationSource).toContain('account-header__support');
-    expect(navigationSource).toContain('href={supportHref}');
+    expect(navigationSource).toContain('href={supportHref as Route}');
+    expect(navigationSource).toContain("import Link from 'next/link'");
     expect(navigationSource).toContain('<LocaleSwitcher');
     expect(navigationSource).toContain('sourceLocale={locale}');
     expect(navigationSource).toContain('targetLocale={alternateLocale}');

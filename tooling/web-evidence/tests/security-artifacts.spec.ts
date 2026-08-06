@@ -164,7 +164,7 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   const publicLanding = await request.get(`${publicOrigin}/pt-BR`);
   const publicMarkup = await publicLanding.text();
   expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/login"`);
-  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/register"`);
+  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/cadastro"`);
 
   const accountRoot = await request.get(`${accountOrigin}/pt-BR`);
   expect(accountRoot.status()).toBe(200);
@@ -172,7 +172,7 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   await expectSecurityHeaders(request, `${accountOrigin}/pt-BR/login`, 'no-referrer');
   await expectSecurityHeaders(
     request,
-    `${accountOrigin}/pt-BR/register?invitation=${'i'.repeat(64)}`,
+    `${accountOrigin}/pt-BR/cadastro?invitation=${'i'.repeat(64)}`,
     'no-referrer',
   );
   await expectSecurityHeaders(request, `${adminOrigin}/pt-BR/admin`, 'no-referrer');

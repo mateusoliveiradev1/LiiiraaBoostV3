@@ -597,6 +597,39 @@
   line-height: 1.6;
 }
 
+.desktop-session-restoration-progress {
+  position: relative;
+  block-size: 2px;
+  overflow: hidden;
+  background: var(--deck-line);
+}
+
+.desktop-session-restoration-progress > span {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 42%;
+  background: var(--deck-ice);
+  box-shadow: 0 0 8px rgba(118, 213, 244, 0.38);
+  animation: desktop-session-restoration 1.25s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes desktop-session-restoration {
+  from {
+    transform: translateX(-110%);
+  }
+
+  to {
+    transform: translateX(350%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-session-restoration-progress > span {
+    inline-size: 100%;
+    animation: none;
+  }
+}
+
 .desktop-login-form {
   display: grid;
   gap: 12px;

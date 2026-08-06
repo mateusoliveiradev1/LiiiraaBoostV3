@@ -18,6 +18,7 @@ export interface WindowControlHandlers {
 export interface WindowTitleBarProps {
   readonly accountInitials?: string;
   readonly accountLabel?: string;
+  readonly accountTierLabel?: string;
   readonly controls?: WindowControlHandlers;
   readonly globalStatus: string;
   readonly locale?: EvidenceLocale;
@@ -31,6 +32,7 @@ export interface WindowTitleBarProps {
 export const WindowTitleBar = ({
   accountInitials,
   accountLabel,
+  accountTierLabel,
   controls,
   globalStatus,
   locale = 'en',
@@ -77,7 +79,7 @@ export const WindowTitleBar = ({
           </span>
           <span className="lb-account-trigger-copy">
             <strong>{accountLabel ?? (locale === 'pt-BR' ? 'Meu perfil' : 'My profile')}</strong>
-            <small>Premium</small>
+            {accountTierLabel === undefined ? null : <small>{accountTierLabel}</small>}
           </span>
         </Button>
       ) : null}

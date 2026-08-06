@@ -131,6 +131,8 @@ describe('role-scoped admin', () => {
     expect(layoutSource).not.toContain('admin-brand__mark');
     expect(navigationSource).toContain('aria-current');
     expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
+    expect(navigationSource).toContain("import Link from 'next/link'");
+    expect(navigationSource).not.toContain('<a');
     expect(layoutSource).not.toContain('AdminPreviewProvenance');
     expect(navigationSource).toContain('<ProductIcon');
   });

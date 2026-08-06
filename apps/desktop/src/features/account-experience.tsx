@@ -32,6 +32,22 @@ export interface AccountExperienceProps {
   readonly view: AccountExperienceView;
 }
 
+export type DesktopLoginState = 'authenticated' | 'restoring' | 'sign-in' | 'unavailable';
+
+export const resolveDesktopLoginState = (
+  snapshot: DesktopAccountAuthoritySnapshot | undefined,
+): DesktopLoginState => {
+  if (snapshot === undefined || snapshot.state === 'revoked') return 'sign-in';
+  if (
+    snapshot.projection !== undefined &&
+    (snapshot.state === 'online' || snapshot.state === 'stale' || snapshot.state === 'conflict')
+  ) {
+    return 'authenticated';
+  }
+  if (snapshot.state === 'pending') return 'restoring';
+  return 'unavailable';
+};
+
 const copy = (locale: ShellLocale, value: Readonly<{ en: string; 'pt-BR': string }>): string =>
   value[locale];
 
@@ -255,6 +271,87 @@ const LoginSurface = ({
     </main>
   );
 };
+
+const SessionRestorationSurface = ({
+  locale,
+  onRetry,
+  state,
+}: Readonly<{
+  locale: ShellLocale;
+  onRetry: () => void;
+  state: 'restoring' | 'unavailable';
+}>) => (
+  <main
+    className="desktop-auth-surface"
+    data-account-view="login"
+    data-auth-mode="native-session-restoration"
+    data-session-restoration={state}
+  >
+    <section className="desktop-auth-story" aria-labelledby="desktop-restoration-story-title">
+      <BrandLockup />
+      <div className="desktop-auth-story-copy">
+        <span className="desktop-preview-badge">
+          <ProductIcon name="shield" size={14} />
+          {copy(locale, { en: 'Protected local session', 'pt-BR': 'Sessão local protegida' })}
+        </span>
+        <h1 id="desktop-restoration-story-title">
+          {copy(locale, {
+            en: 'Your account stays with you.',
+            'pt-BR': 'Sua conta continua com você.',
+          })}
+        </h1>
+        <p>
+          {copy(locale, {
+            en: 'Liiiraa Boost is recovering the credential protected by Windows Credential Manager. Your password is never stored in the app.',
+            'pt-BR':
+              'O Liiiraa Boost está recuperando a credencial protegida pelo Gerenciador de Credenciais do Windows. Sua senha nunca é armazenada no app.',
+          })}
+        </p>
+      </div>
+      <p className="desktop-auth-footnote">WINDOWS 10/11 · BETA PRIVADO</p>
+    </section>
+
+    <section className="desktop-login-panel" aria-labelledby="desktop-restoration-title">
+      <header>
+        <span className="desktop-login-kicker">
+          {state === 'restoring'
+            ? copy(locale, { en: 'Restoring session', 'pt-BR': 'Restaurando sessão' })
+            : copy(locale, { en: 'Connection unavailable', 'pt-BR': 'Conexão indisponível' })}
+        </span>
+        <h2 id="desktop-restoration-title">
+          {state === 'restoring'
+            ? copy(locale, { en: 'Opening your command deck', 'pt-BR': 'Abrindo sua central' })
+            : copy(locale, {
+                en: 'Your saved session is still protected',
+                'pt-BR': 'Sua sessão salva continua protegida',
+              })}
+        </h2>
+        <p aria-live="polite" role="status">
+          {state === 'restoring'
+            ? copy(locale, {
+                en: 'Confirming your account and plan. This should only take a moment.',
+                'pt-BR': 'Confirmando sua conta e seu plano. Isso deve levar apenas um instante.',
+              })
+            : copy(locale, {
+                en: 'We could not contact the account service. You do not need to sign in again.',
+                'pt-BR':
+                  'Não foi possível acessar o serviço da conta. Você não precisa fazer login novamente.',
+              })}
+        </p>
+      </header>
+      {state === 'restoring' ? (
+        <div aria-hidden="true" className="desktop-session-restoration-progress">
+          <span />
+        </div>
+      ) : (
+        <LbButton onPress={onRetry} variant="primary">
+          <ProductIcon name="recovery" size={17} />
+          {copy(locale, { en: 'Try restoring again', 'pt-BR': 'Tentar restaurar novamente' })}
+        </LbButton>
+      )}
+    </section>
+  </main>
+);
 
 const AccountTabs = ({
   locale,
@@ -1993,7 +2090,26 @@ export const AccountExperience = ({
     };
   }, [authority]);
 
+  const loginState = resolveDesktopLoginState(authoritySnapshot);
+
+  useEffect(() => {
+    if (view === 'login' && loginState === 'authenticated') {
+      navigate('/account/overview');
+    }
+  }, [loginState, navigate, view]);
+
   if (view === 'login') {
+    if (authority !== undefined && loginState !== 'sign-in') {
+      return (
+        <SessionRestorationSurface
+          locale={locale}
+          onRetry={() => {
+            void authority.synchronize('reconnection');
+          }}
+          state={loginState === 'unavailable' ? 'unavailable' : 'restoring'}
+        />
+      );
+    }
     return <LoginSurface desktopAuth={desktopAuth} locale={locale} navigate={navigate} />;
   }
 

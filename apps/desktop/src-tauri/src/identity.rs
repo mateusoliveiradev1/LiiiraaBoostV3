@@ -297,9 +297,43 @@ impl LoopbackCallbackListener {
             &self.redirect_uri,
             &peer.ip().to_string(),
         )?;
-        let _ = stream.write_all(
-            b"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 48\r\nConnection: close\r\n\r\nAuthentication received. Return to Liiiraa Boost.",
+        const SUCCESS_HTML: &str = r#"<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Login concluído · Liiiraa Boost</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,Segoe UI,system-ui,sans-serif;background:#070a0e;color:#f1f6f8}
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;background:#070a0e}
+    main{width:min(100%,560px);padding:40px;border:1px solid #20313a;background:#0a1015}
+    .brand{display:flex;align-items:center;gap:10px;margin:0 0 56px;font-weight:700}.mark{color:#76d5f4;font-size:22px}.brand b{color:#76d5f4}
+    .status{display:inline-flex;align-items:center;gap:8px;color:#65f0c2;font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.09em;text-transform:uppercase}
+    .status::before{content:'✓';display:grid;place-items:center;width:22px;height:22px;border:1px solid #3fc99e;border-radius:50%}
+    h1{max-width:12ch;margin:22px 0 14px;font-size:clamp(34px,8vw,52px);line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+    p{max-width:48ch;margin:0;color:#a9bac3;font-size:15px;line-height:1.7}.hint{margin-top:32px;padding-top:24px;border-top:1px solid #20313a;color:#dce7eb}
+    small{display:block;margin-top:12px;color:#72838c;font-size:12px}
+    @media(max-width:520px){main{padding:28px}.brand{margin-bottom:42px}}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand"><span class="mark">ϟ</span><span>Liiiraa <b>Boost</b></span></p>
+    <span class="status">Conexão protegida</span>
+    <h1>Login concluído.</h1>
+    <p>O aplicativo já recebeu a confirmação e está abrindo sua conta com segurança.</p>
+    <p class="hint">Você já pode fechar esta aba e voltar ao Liiiraa Boost.</p>
+    <small>You can close this tab and return to the desktop app.</small>
+  </main>
+</body>
+</html>"#;
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nContent-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nConnection: close\r\n\r\n{}",
+            SUCCESS_HTML.len(),
+            SUCCESS_HTML,
         );
+        let _ = stream.write_all(response.as_bytes());
         Ok(evidence)
     }
 }

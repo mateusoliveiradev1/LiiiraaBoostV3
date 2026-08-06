@@ -3,6 +3,8 @@
 import { LocaleSwitcher } from '@liiiraa/web-features';
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
 import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, type ReactNode } from 'react';
 
@@ -101,14 +103,14 @@ function NavigationGroups({
                 normalizePathname(item.href) === normalizePathname(currentHref);
               return (
                 <li key={item.href}>
-                  <a
+                  <Link
                     aria-current={isCurrent ? 'page' : undefined}
                     data-current={isCurrent ? 'page' : undefined}
-                    href={item.href}
+                    href={item.href as Route}
                   >
                     <ResponsibilityIcon name={item.icon} />
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 </li>
               );
             })}
@@ -253,10 +255,10 @@ export function AccountNavigation({
             <strong>{currentLabel}</strong>
           </nav>
           <div className="account-header__tools">
-            <a className="account-header__support" href={supportHref}>
+            <Link className="account-header__support" href={supportHref as Route}>
               <ProductIcon name="lifebuoy" size={18} />
               <span>{supportLabel}</span>
-            </a>
+            </Link>
             <LocaleSwitcher
               href={localeHref}
               sourceLocale={locale}

@@ -74,6 +74,48 @@ const receipt: AuthorityReceiptJson = {
 };
 
 describe('production admin authority', () => {
+  it('preserves the server-issued CSRF token so administrative logout succeeds', async () => {
+    const csrfToken = 'csrf.'.concat('z'.repeat(43));
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(response({ token: csrfToken }))
+      .mockResolvedValueOnce(
+        response(
+          {
+            actor: {
+              accountId: 'developer-01',
+              displayName: 'Mateus Oliveira',
+              email: 'owner@example.com',
+              expiresAt: '2026-09-05T12:00:00.000Z',
+              locale: 'pt-BR',
+              role: 'security',
+              sessionId: 'session-admin-01',
+              sessionKind: 'admin',
+            },
+          },
+          201,
+        ),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-logout-test',
+      csrfToken: () => 'csrf-unavailable',
+      transport,
+    });
+
+    await authority.signIn({ email: 'owner@example.com', password: 'CorrectHorse1' });
+    await expect(authority.signOut()).resolves.toBe(true);
+
+    expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
+      '/v1/identity/csrf',
+      '/v1/identity/sign-in',
+      '/v1/identity/sign-out',
+    ]);
+    expect(transport.mock.calls[2]?.[1]?.headers).toMatchObject({
+      'x-csrf-token': csrfToken,
+    });
+  });
+
   it('creates a real administrative session on the isolated origin', async () => {
     const csrfToken = 'csrf.'.concat('a'.repeat(43));
     const transport = vi
@@ -350,6 +392,8 @@ describe('admin production composition', () => {
     expect(productionView).toContain('No authorized records are currently available.');
     expect(productionView).toContain('className="admin-production-shell"');
     expect(productionView).toContain('className="admin-production-nav"');
+    expect(productionView).toContain("import Link from 'next/link'");
+    expect(productionView).toContain('<Link href={routeHref(locale, suffix) as Route}');
     expect(productionView).toContain('formatAdminDateTime');
     expect(productionView).toContain('formatRecordReference');
     expect(productionView).toContain('variant="destructive"');

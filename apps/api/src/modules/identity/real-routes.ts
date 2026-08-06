@@ -31,6 +31,10 @@ export interface RealIdentityRouteDependencies {
   readonly authority: RealIdentityRouteAuthority;
   readonly csrfSecret: string;
   readonly issuer: string;
+  readonly resolveSubscription: (
+    actor: IdentityActor,
+    correlationId: string,
+  ) => Promise<SubscriptionProjectionJson>;
 }
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
@@ -129,7 +133,11 @@ const sessionProjection = (actor: IdentityActor, correlation: string): SessionPr
   lastSeenAt: actor.lastSeenAt,
 });
 
-const accountProjection = (actor: IdentityActor, correlation: string) => {
+const accountProjection = (
+  actor: IdentityActor,
+  correlation: string,
+  subscription: SubscriptionProjectionJson,
+) => {
   const account: AccountProjectionJson = {
     schemaVersion: '1.0',
     aggregateVersion: actor.identityVersion.toString(),
@@ -145,21 +153,11 @@ const accountProjection = (actor: IdentityActor, correlation: string) => {
     createdAt: actor.createdAt,
     updatedAt: actor.updatedAt,
   };
-  const subscription: SubscriptionProjectionJson = {
-    schemaVersion: '1.0',
-    aggregateVersion: '0',
-    etag: `subscription-${actor.accountId}-v0`,
-    correlationId: correlation,
-    provenance: 'postgres-authority',
-    kind: 'subscription-projection',
-    subscriptionId: `free-${actor.accountId}`,
-    accountId: actor.accountId,
-    state: 'none',
-    plan: 'free',
-    entitlements: [],
-    cancelAtPeriodEnd: false,
-  };
-  if (!controlPlaneDocumentValidator(account) || !controlPlaneDocumentValidator(subscription)) {
+  if (
+    subscription.accountId !== actor.accountId ||
+    !controlPlaneDocumentValidator(account) ||
+    !controlPlaneDocumentValidator(subscription)
+  ) {
     throw new Error('REAL_ACCOUNT_PROJECTION_REJECTED');
   }
   return Object.freeze({
@@ -348,7 +346,9 @@ export const registerRealIdentityRoutes = (
   app.get('/v1/account', async (request, reply) => {
     const resolved = await resolveActor(request);
     if (resolved === null) return noStore(reply).code(401).send({ code: 'UNAUTHORIZED' });
-    const projection = accountProjection(resolved.actor, correlationId(request));
+    const correlation = correlationId(request);
+    const subscription = await dependencies.resolveSubscription(resolved.actor, correlation);
+    const projection = accountProjection(resolved.actor, correlation, subscription);
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
 
@@ -373,7 +373,9 @@ export const registerRealIdentityRoutes = (
       ...(locale === undefined ? {} : { locale }),
     });
     if (!result.ok) {
-      const projection = accountProjection(resolved.actor, correlationId(request));
+      const correlation = correlationId(request);
+      const subscription = await dependencies.resolveSubscription(resolved.actor, correlation);
+      const projection = accountProjection(resolved.actor, correlation, subscription);
       return noStore(reply)
         .code(result.code === 'CONFLICT' ? 409 : 400)
         .send({
@@ -383,7 +385,9 @@ export const registerRealIdentityRoutes = (
             : {}),
         });
     }
-    const projection = accountProjection(result.actor, correlationId(request));
+    const correlation = correlationId(request);
+    const subscription = await dependencies.resolveSubscription(result.actor, correlation);
+    const projection = accountProjection(result.actor, correlation, subscription);
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
   return Promise.resolve();

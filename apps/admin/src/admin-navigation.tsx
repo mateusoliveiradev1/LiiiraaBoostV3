@@ -3,6 +3,8 @@
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
 import { LocaleSwitcher } from '@liiiraa/web-features';
 import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -82,10 +84,14 @@ function NavigationItems({
 
         return (
           <li key={item.routeId}>
-            <a
+            <Link
               aria-current={isCurrent ? 'page' : undefined}
               data-current={isCurrent ? 'page' : undefined}
-              href={createAdminQueueHref(item.href, role, queueState, { selectedId: undefined })}
+              href={
+                createAdminQueueHref(item.href, role, queueState, {
+                  selectedId: undefined,
+                }) as Route
+              }
             >
               <ProductIcon
                 className="admin-nav__icon"
@@ -93,7 +99,7 @@ function NavigationItems({
                 size={18}
               />
               {item.label}
-            </a>
+            </Link>
           </li>
         );
       })}
@@ -198,17 +204,19 @@ export function AdminNavigation({
             <strong>{savedViewLabels[queueState.savedView]}</strong>
           </div>
           <div className="admin-header__tools">
-            <a
+            <Link
               aria-label={`${alertsLabel}: ${alertCount}`}
               className="admin-header__alerts"
-              href={createAdminQueueHref(roleHomeHref, role, queueState, {
-                savedView: 'sla-risk',
-                selectedId: undefined,
-              })}
+              href={
+                createAdminQueueHref(roleHomeHref, role, queueState, {
+                  savedView: 'sla-risk',
+                  selectedId: undefined,
+                }) as Route
+              }
             >
               <ProductIcon name="bell" size={18} />
               <span aria-live="polite">{alertCount}</span>
-            </a>
+            </Link>
             <LocaleSwitcher
               href={localeHref}
               sourceLocale={locale}
@@ -237,10 +245,10 @@ export function AdminNavigation({
                     <small>{isolatedLabel}</small>
                   </span>
                 </p>
-                <a href={createAdminQueueHref(roleHomeHref, role, queueState)}>
+                <Link href={createAdminQueueHref(roleHomeHref, role, queueState) as Route}>
                   <ProductIcon name="toolbox" size={17} />
                   {roleHomeLabel}
-                </a>
+                </Link>
               </div>
             </details>
           </div>

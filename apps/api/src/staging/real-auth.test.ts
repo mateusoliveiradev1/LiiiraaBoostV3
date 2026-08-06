@@ -7,6 +7,7 @@ import {
   registerRealIdentityRoutes,
   type RealIdentityRouteAuthority,
 } from '../modules/identity/real-routes.js';
+import { resolveStagingSubscription } from './runtime.js';
 
 const accountOrigin = 'https://account.staging.example';
 const adminOrigin = 'https://admin.staging.example';
@@ -84,6 +85,22 @@ const createApp = async () => {
     authority: identity,
     csrfSecret: 'synthetic-auth-secret-with-at-least-32-characters',
     issuer,
+    resolveSubscription: vi.fn(() =>
+      Promise.resolve({
+        schemaVersion: '1.0' as const,
+        aggregateVersion: '4',
+        etag: 'subscription-premium-owner-v4',
+        correlationId: 'premium-owner-test',
+        provenance: 'postgres-authority' as const,
+        kind: 'subscription-projection' as const,
+        subscriptionId: 'premium-owner',
+        accountId: actor.accountId,
+        state: 'active' as const,
+        plan: 'premium' as const,
+        entitlements: ['premium-actions'] as ['premium-actions'],
+        cancelAtPeriodEnd: false,
+      }),
+    ),
   });
   await app.ready();
   return { app, identity };
@@ -136,7 +153,7 @@ describe('real staging authentication routes', () => {
         provenance: 'postgres-authority',
       },
       provenance: 'online',
-      subscription: { plan: 'free', state: 'none' },
+      subscription: { plan: 'premium', state: 'active' },
     });
     const projection = account.json<{ account: unknown; subscription: unknown }>();
     expect(controlPlaneDocumentValidator(projection.account)).toBe(true);
@@ -202,5 +219,49 @@ describe('real staging authentication routes', () => {
     expect(nativeSignOut.statusCode).toBe(204);
     expect(identity.signOut).toHaveBeenCalledWith(credential);
     await app.close();
+  });
+});
+
+describe('staging subscription authority', () => {
+  it('projects an active permanent entitlement as Premium without an expiration', async () => {
+    const query = vi.fn(() =>
+      Promise.resolve({
+        rows: [
+          {
+            id: '00000000-0000-4000-8000-000000000004',
+            status: 'active',
+            valid_until: null,
+            version: 4n,
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      resolveStagingSubscription({ query }, actor, 'premium-authority-test'),
+    ).resolves.toEqual({
+      schemaVersion: '1.0',
+      aggregateVersion: '4',
+      etag: 'subscription-00000000-0000-4000-8000-000000000004-v4',
+      correlationId: 'premium-authority-test',
+      provenance: 'postgres-authority',
+      kind: 'subscription-projection',
+      subscriptionId: '00000000-0000-4000-8000-000000000004',
+      accountId: actor.accountId,
+      state: 'active',
+      plan: 'premium',
+      entitlements: ['premium-actions'],
+      cancelAtPeriodEnd: false,
+    });
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('premium_entitlements'), [
+      actor.accountId,
+    ]);
+  });
+
+  it('projects Free only when no active entitlement exists', async () => {
+    const query = vi.fn(() => Promise.resolve({ rows: [] }));
+    await expect(
+      resolveStagingSubscription({ query }, actor, 'free-authority-test'),
+    ).resolves.toMatchObject({ plan: 'free', state: 'none', entitlements: [] });
   });
 });

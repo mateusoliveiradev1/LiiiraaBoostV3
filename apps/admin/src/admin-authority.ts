@@ -283,13 +283,40 @@ export const createAdminAuthority = ({
   transport = globalThis.fetch.bind(globalThis),
 }: CreateAdminAuthorityOptions): AdminAuthority => {
   let activeSession: AdminSessionProjection | null = null;
+  let activeCsrfToken: string | null = null;
 
-  const headers = (correlation: string): Record<string, string> => ({
+  const headers = (
+    correlation: string,
+    token = activeCsrfToken ?? csrfToken(),
+  ): Record<string, string> => ({
     accept: 'application/json',
     'cache-control': 'no-store',
     'x-correlation-id': correlation,
-    'x-csrf-token': csrfToken(),
+    'x-csrf-token': token,
   });
+
+  const requestCsrfToken = async (correlation: string): Promise<string | null> => {
+    const response = await transport(`${baseUrl}/v1/identity/csrf`, {
+      credentials: 'include',
+      headers: { accept: 'application/json', 'x-correlation-id': correlation },
+      method: 'GET',
+    });
+    const body = await safeJson(response);
+    const token = isRecord(body) ? body['token'] : undefined;
+    if (!response.ok || !validCsrfToken(token)) return null;
+    activeCsrfToken = token;
+    return token;
+  };
+
+  const ensureCsrfToken = async (correlation: string): Promise<string | null> => {
+    if (validCsrfToken(activeCsrfToken)) return activeCsrfToken;
+    const supplied = csrfToken();
+    if (validCsrfToken(supplied)) {
+      activeCsrfToken = supplied;
+      return supplied;
+    }
+    return requestCsrfToken(correlation);
+  };
 
   const readSession = async (): Promise<AdminSessionProjection | null> => {
     try {
@@ -312,14 +339,8 @@ export const createAdminAuthority = ({
     async signIn(input: Readonly<{ email: string; password: string }>) {
       try {
         const correlation = correlationId();
-        const csrfResponse = await transport(`${baseUrl}/v1/identity/csrf`, {
-          credentials: 'include',
-          headers: { accept: 'application/json', 'x-correlation-id': correlation },
-          method: 'GET',
-        });
-        const csrfBody = await safeJson(csrfResponse);
-        const token = isRecord(csrfBody) ? csrfBody['token'] : undefined;
-        if (!csrfResponse.ok || !validCsrfToken(token)) return null;
+        const token = await requestCsrfToken(correlation);
+        if (token === null) return null;
 
         const response = await transport(`${baseUrl}/v1/identity/sign-in`, {
           body: JSON.stringify({
@@ -346,13 +367,17 @@ export const createAdminAuthority = ({
 
     async signOut(): Promise<boolean> {
       try {
+        const correlation = correlationId();
+        const token = await ensureCsrfToken(correlation);
+        if (token === null) return false;
         const response = await transport(`${baseUrl}/v1/identity/sign-out`, {
           credentials: 'include',
-          headers: headers(correlationId()),
+          headers: headers(correlation, token),
           method: 'POST',
         });
         if (!response.ok) return false;
         activeSession = null;
+        activeCsrfToken = null;
         return true;
       } catch {
         return false;

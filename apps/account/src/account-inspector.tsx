@@ -1,6 +1,8 @@
 'use client';
 
 import { ProductIcon } from '@liiiraa/design-system';
+import type { Route } from 'next';
+import Link from 'next/link';
 
 type AccountInspectorCopy = Readonly<{
   accountIdentity: string;
@@ -43,9 +45,9 @@ export function AccountInspector({
         <h2>{copy.planTitle}</h2>
         <p>{copy.planDetail}</p>
         <p>{copy.planPeriod}</p>
-        <a href={subscriptionHref}>
+        <Link href={subscriptionHref as Route}>
           {copy.planAction} <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
 
       <section className="account-inspector__section">
@@ -57,9 +59,9 @@ export function AccountInspector({
             <span>{copy.deviceDetail}</span>
           </span>
         </div>
-        <a href={deviceHref}>
+        <Link href={deviceHref as Route}>
           {copy.deviceAction} <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
 
       <section className="account-inspector__section">
@@ -74,16 +76,16 @@ export function AccountInspector({
             <span>{copy.mfa}</span>
           </li>
         </ul>
-        <a href={securityHref}>
+        <Link href={securityHref as Route}>
           {copy.securityAction} <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
 
       <section className="account-inspector__section account-inspector__support">
         <span className="account-inspector__label">{copy.supportTitle}</span>
-        <a href={supportHref}>
+        <Link href={supportHref as Route}>
           {copy.supportAction} <ProductIcon name="arrowRight" size={16} />
-        </a>
+        </Link>
       </section>
     </div>
   );

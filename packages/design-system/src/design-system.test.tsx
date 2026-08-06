@@ -342,6 +342,21 @@ describe('approved product identity', () => {
     expect(markup).toContain('aria-label="Liiiraa Boost"');
     expect(markup).toContain('Ready');
   });
+
+  it('renders the authoritative account tier instead of a fixed Premium label', () => {
+    const markup = renderToStaticMarkup(
+      <WindowTitleBar
+        accountLabel="Mateus Oliveira"
+        accountTierLabel="Gratuito"
+        globalStatus="Pronto"
+        locale="pt-BR"
+        onOpenAccount={() => undefined}
+      />,
+    );
+
+    expect(markup).toContain('Gratuito');
+    expect(markup).not.toContain('<small>Premium</small>');
+  });
 });
 
 describe('keyboard, dialogs, charts, and accessibility axes', () => {
