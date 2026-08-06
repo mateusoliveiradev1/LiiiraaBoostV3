@@ -2,6 +2,7 @@ import type { AdminRoleJson } from '@liiiraa/contracts-ts';
 
 export const ADMIN_LOCAL_ORIGIN = 'http://admin.localhost:3002';
 export const ADMIN_TEST_ORIGIN = ADMIN_LOCAL_ORIGIN;
+export const ADMIN_BROWSER_AUTHORITY_BASE_URL = '';
 
 export const ADMIN_CANONICAL_ENTRY = Object.freeze({
   en: '/en/admin',

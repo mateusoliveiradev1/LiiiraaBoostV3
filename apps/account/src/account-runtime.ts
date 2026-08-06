@@ -3,6 +3,8 @@ import type { WebLocale } from '@liiiraa/web-core';
 import type { AccountAuthorityObservation, AccountAuthorityProjection } from './account-authority';
 export { advanceAccountMutationPhase } from './account-preview-model';
 
+export const ACCOUNT_BROWSER_AUTHORITY_BASE_URL = '';
+
 export type AccountRuntimeConfig =
   Readonly<{ kind: 'preview' }> | Readonly<{ authorityBaseUrl: string; kind: 'production' }>;
 

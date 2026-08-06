@@ -22,6 +22,7 @@ import {
 import { createAccountFailureModel } from '../../account-errors';
 import { resolvePublicBoundaryOrigin } from '../../account-origins';
 import { ProductLockup } from '../../account-product-lockup';
+import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from '../../account-runtime';
 import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
 import { AccountIdentityChrome } from '../../features/account-auth';
 import { AccountAuthorityInspector } from '../../features/account-authority';
@@ -213,7 +214,6 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   setRequestLocale(locale);
   const runtime = resolveAccountServerRuntimeConfig();
   const webComposition = accountWebComposition(runtime.kind);
-  const authorityBaseUrl = runtime.kind === 'production' ? runtime.authorityBaseUrl : '';
   const publicOrigin = resolvePublicBoundaryOrigin(
     process.env['LIIIRAA_PUBLIC_ORIGIN'],
     process.env['VERCEL'] === '1',
@@ -293,10 +293,15 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
           authRouteItems={authRouteItems}
           fallbackLocaleHref={localizedHref('account-overview', alternateLocale)}
           groups={navigationGroups}
-          identity={<AccountIdentityChrome authorityBaseUrl={authorityBaseUrl} locale={locale} />}
+          identity={
+            <AccountIdentityChrome
+              authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
+              locale={locale}
+            />
+          }
           inspector={
             <AccountAuthorityInspector
-              authorityBaseUrl={authorityBaseUrl}
+              authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
               deviceHref={localizedHref('account-device', locale)}
               locale={locale}
               securityHref={localizedHref('account-security', locale)}

@@ -18,6 +18,7 @@ import {
 import { AccountPreviewPage } from '../../../features/account-preview';
 import { AccountAuthPage, type AccountAuthRoute } from '../../../features/account-auth';
 import { AccountAuthorityPage } from '../../../features/account-authority';
+import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from '../../../account-runtime';
 import { resolveAccountServerRuntimeConfig } from '../../../account-runtime-server';
 
 type AccountResponsibilityPageProps = Readonly<{
@@ -135,7 +136,7 @@ export default async function AccountResponsibilityPage({
     return (
       <Suspense fallback={null}>
         <AccountAuthPage
-          authorityBaseUrl={runtime.authorityBaseUrl}
+          authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
           locale={locale}
           routeId={resolution.routeId}
         />
@@ -144,7 +145,7 @@ export default async function AccountResponsibilityPage({
   }
   return (
     <AccountAuthorityPage
-      authorityBaseUrl={runtime.authorityBaseUrl}
+      authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
       locale={locale}
       routeId={resolution.routeId}
     />
