@@ -83,8 +83,8 @@ const hideDeniedProjection = (reply: FastifyReply) =>
 const commandBody = (
   value: unknown,
 ): Readonly<{ command: AdminCommandJson; impactReviewed: boolean; confirmed: boolean }> | null => {
-  if (!isRecord(value) || !controlPlaneDocumentValidator(value.command)) return null;
-  const command = value.command;
+  if (!isRecord(value) || !controlPlaneDocumentValidator(value['command'])) return null;
+  const command = value['command'];
   if (!isRecord(command) || command.kind !== 'admin-command') return null;
   return {
     command: command as unknown as AdminCommandJson,
