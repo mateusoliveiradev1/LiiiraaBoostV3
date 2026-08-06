@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
@@ -50,6 +50,21 @@ describe('account security boundary', () => {
     expect(page).toContain('authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}');
     expect(layout).toContain('authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}');
     expect(page).not.toContain('authorityBaseUrl={runtime.authorityBaseUrl}');
+  });
+
+  it('publishes the request nonce for React Aria and serves every declared local font', () => {
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+
+    expect(layout).toContain("const nonce = requestHeaders.get('x-nonce');");
+    expect(layout).toContain('<meta content={nonce} property="csp-nonce" />');
+
+    for (const file of [
+      'manrope-variable.woff2',
+      'jetbrains-mono-variable.woff2',
+      'saira-semi-condensed-variable.woff2',
+    ]) {
+      expect(statSync(new URL(`../public/fonts/${file}`, import.meta.url)).size).toBeGreaterThan(0);
+    }
   });
 
   it('passes API requests through without page-route classification or preview headers', () => {
