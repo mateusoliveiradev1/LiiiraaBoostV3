@@ -76,20 +76,32 @@ const managedProduct = (product: Stripe.Product): boolean =>
   product.metadata['liiiraa_product'] === MANAGED_METADATA.liiiraa_product &&
   product.metadata['managed_environment'] === MANAGED_METADATA.managed_environment;
 
+const atStage = async <T>(code: string, operation: () => Promise<T>): Promise<T> => {
+  try {
+    return await operation();
+  } catch {
+    throw new Error(`STRIPE_TEST_PROVISIONING_REJECTED:${code}`);
+  }
+};
+
 export const provisionStripeTestCatalog = async (
   stripe: Stripe,
 ): Promise<StripeCatalogProvisioningResult> => {
-  const products = await stripe.products.list({ active: true, limit: 100 });
+  const products = await atStage('PRODUCT_LIST', () =>
+    stripe.products.list({ active: true, limit: 100 }),
+  );
   let product = products.data.find(managedProduct);
   let createdProducts = 0;
   if (product === undefined) {
-    product = await stripe.products.create(
-      {
-        name: 'Liiiraa Boost Premium',
-        description: 'Plano Premium do Liiiraa Boost — ambiente interno de testes.',
-        metadata: MANAGED_METADATA,
-      },
-      { idempotencyKey: 'liiiraa-boost-staging-product-v1' },
+    product = await atStage('PRODUCT_CREATE', () =>
+      stripe.products.create(
+        {
+          name: 'Liiiraa Boost Premium',
+          description: 'Plano Premium do Liiiraa Boost — ambiente interno de testes.',
+          metadata: MANAGED_METADATA,
+        },
+        { idempotencyKey: 'liiiraa-boost-staging-product-v1' },
+      ),
     );
     createdProducts = 1;
   }
@@ -97,26 +109,30 @@ export const provisionStripeTestCatalog = async (
   let createdPrices = 0;
   let reusedPrices = 0;
   for (const price of PRICES) {
-    const existing = await stripe.prices.list({
-      active: true,
-      limit: 1,
-      lookup_keys: [price.lookupKey],
-      type: 'recurring',
-    });
+    const existing = await atStage('PRICE_LIST', () =>
+      stripe.prices.list({
+        active: true,
+        limit: 1,
+        lookup_keys: [price.lookupKey],
+        type: 'recurring',
+      }),
+    );
     if (existing.data[0] !== undefined) {
       reusedPrices += 1;
       continue;
     }
-    await stripe.prices.create(
-      {
-        currency: price.currency,
-        lookup_key: price.lookupKey,
-        metadata: MANAGED_METADATA,
-        product: product.id,
-        recurring: { interval: price.interval },
-        unit_amount: price.unitAmount,
-      },
-      { idempotencyKey: `liiiraa-boost-price-${price.lookupKey}-v1` },
+    await atStage('PRICE_CREATE', () =>
+      stripe.prices.create(
+        {
+          currency: price.currency,
+          lookup_key: price.lookupKey,
+          metadata: MANAGED_METADATA,
+          product: product.id,
+          recurring: { interval: price.interval },
+          unit_amount: price.unitAmount,
+        },
+        { idempotencyKey: `liiiraa-boost-price-${price.lookupKey}-v1` },
+      ),
     );
     createdPrices += 1;
   }
@@ -150,48 +166,59 @@ export const prepareStripeTestRuntime = async (
   input: PrepareStripeRuntimeInput,
 ): Promise<PreparedStripeRuntime> => {
   const webhookUrl = exactWebhookUrl(input.webhookUrl);
-  const configurations = await stripe.billingPortal.configurations.list({
-    active: true,
-    limit: 100,
-  });
+  const configurations = await atStage('PORTAL_LIST', () =>
+    stripe.billingPortal.configurations.list({
+      active: true,
+      limit: 100,
+    }),
+  );
   let portal = configurations.data.find(
     (configuration) => configuration.name === 'Liiiraa Boost staging managed',
   );
   if (portal === undefined) {
-    portal = await stripe.billingPortal.configurations.create({
-      name: 'Liiiraa Boost staging managed',
-      business_profile: {
-        headline: 'Gerencie sua assinatura Liiiraa Boost Premium',
-      },
-      features: {
-        customer_update: { allowed_updates: ['email'], enabled: true },
-        invoice_history: { enabled: true },
-        payment_method_update: { enabled: true },
-        subscription_cancel: { enabled: true, mode: 'at_period_end' },
-      },
-    });
+    portal = await atStage('PORTAL_CREATE', () =>
+      stripe.billingPortal.configurations.create({
+        name: 'Liiiraa Boost staging managed',
+        business_profile: {
+          headline: 'Gerencie sua assinatura Liiiraa Boost Premium',
+        },
+        features: {
+          customer_update: { allowed_updates: ['email'], enabled: true },
+          invoice_history: { enabled: true },
+          payment_method_update: { enabled: true },
+          subscription_cancel: { enabled: true, mode: 'at_period_end' },
+        },
+      }),
+    );
   }
 
-  const existing = await stripe.webhookEndpoints.list({ limit: 100 });
+  const existing = await atStage('WEBHOOK_LIST', () =>
+    stripe.webhookEndpoints.list({ limit: 100 }),
+  );
   const previousWebhookEndpointIds = existing.data
     .filter((endpoint) => endpoint.url === webhookUrl && endpoint.status === 'enabled')
     .map(({ id }) => id);
-  const webhook = await stripe.webhookEndpoints.create(
-    {
-      description: 'Liiiraa Boost staging managed',
-      enabled_events: [...WEBHOOK_EVENTS],
-      url: webhookUrl,
-    },
-    { idempotencyKey: `liiiraa-webhook-${Date.now().toString(36)}` },
+  const webhook = await atStage('WEBHOOK_CREATE', () =>
+    stripe.webhookEndpoints.create(
+      {
+        description: 'Liiiraa Boost staging managed',
+        enabled_events: [...WEBHOOK_EVENTS],
+        url: webhookUrl,
+      },
+      { idempotencyKey: `liiiraa-webhook-${Date.now().toString(36)}` },
+    ),
   );
   if (typeof webhook.secret !== 'string' || !webhook.secret.startsWith('whsec_')) {
     throw new Error('STRIPE_TEST_RUNTIME_REJECTED:WEBHOOK_SECRET');
   }
-  await input.writeProtected({
-    previousWebhookEndpointIds,
-    webhookEndpointId: webhook.id,
-    webhookSecret: webhook.secret,
-  });
+  const webhookSecret = webhook.secret;
+  await atStage('PROTECTED_OUTPUT', () =>
+    input.writeProtected({
+      previousWebhookEndpointIds,
+      webhookEndpointId: webhook.id,
+      webhookSecret,
+    }),
+  );
   return {
     portalConfigurationId: portal.id,
     previousWebhookEndpointIds,
@@ -265,8 +292,12 @@ const run = async (): Promise<void> => {
 
 const invokedPath = process.argv[1];
 if (invokedPath && import.meta.url === pathToFileURL(invokedPath).href) {
-  run().catch(() => {
-    process.stderr.write('STRIPE_TEST_CATALOG_REJECTED:PROVISIONING_FAILED\n');
+  run().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : '';
+    const safe = /^STRIPE_TEST_(?:CATALOG|RUNTIME|PROVISIONING)_REJECTED:[A-Z_]+$/u.test(message)
+      ? message
+      : 'STRIPE_TEST_PROVISIONING_REJECTED:UNKNOWN';
+    process.stderr.write(`${safe}\n`);
     process.exitCode = 1;
   });
 }
