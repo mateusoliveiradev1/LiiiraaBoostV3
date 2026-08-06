@@ -408,7 +408,13 @@ export const buildRealStagingApp = async (
   const clock = Object.freeze({ now: () => new Date() });
   const ids = Object.freeze({ next: randomUUID });
   const stripe = new Stripe(environment.stripeSecretKey, { typescript: true });
-  const commerceProvider = createStripeCommerceProvider({ database, stripe });
+  const commerceProvider = createStripeCommerceProvider({
+    checkoutBranding: {
+      iconUrl: `${environment.accountOrigin}/icon.svg`,
+    },
+    database,
+    stripe,
+  });
   const resolveSessionActor = async (request: FastifyRequest) => {
     const credential = requestCredential(request);
     if (credential === null) return null;
@@ -425,6 +431,7 @@ export const buildRealStagingApp = async (
       resolveStagingSubscription(database, actor, correlation),
   });
   await registerCommerceRoutes(app, {
+    accountOrigin: environment.accountOrigin,
     management: {
       clock,
       ids,
@@ -470,10 +477,10 @@ export const buildRealStagingApp = async (
       });
       return verified.ok ? verified.value.providerEvent : null;
     },
-    createBillingPortal: async (accountId) => {
+    createBillingPortal: async (accountId, locale) => {
       const portal = await commerceProvider.createBillingPortal({
         accountId,
-        returnUrl: `${environment.accountOrigin}/pt-BR/plan`,
+        returnUrl: `${environment.accountOrigin}/${locale}/plan`,
       });
       return portal.ok ? { ok: true, portalUrl: portal.value.portalUrl } : { ok: false };
     },

@@ -21,9 +21,15 @@ describe('real Stripe commerce provider', () => {
         .mockResolvedValueOnce({ rowCount: 1, rows: [] }),
     };
     const provider = createStripeCommerceProvider({
+      checkoutBranding: {
+        iconUrl: 'https://account.example/icon.svg',
+      },
       database,
       stripe: {
-        billingPortal: { sessions: { create: vi.fn() } },
+        billingPortal: {
+          configurations: { list: vi.fn() },
+          sessions: { create: vi.fn() },
+        },
         checkout: { sessions: { create: createCheckout, retrieve: vi.fn() } },
         customers: { create: createCustomer },
         invoices: { list: vi.fn(), retrieve: vi.fn() },
@@ -62,15 +68,66 @@ describe('real Stripe commerce provider', () => {
         line_items: [{ price: 'price_brl_monthly', quantity: 1 }],
         metadata: { liiiraa_account_id: accountId },
         mode: 'subscription',
+        branding_settings: {
+          background_color: '#090a0d',
+          border_style: 'rounded',
+          button_color: '#315efb',
+          display_name: 'Liiiraa Boost',
+          font_family: 'inter',
+          icon: { type: 'url', url: 'https://account.example/icon.svg' },
+        },
         subscription_data: { metadata: { liiiraa_account_id: accountId } },
       }),
       { idempotencyKey: 'command-checkout-1' },
     );
   });
 
+  it('opens the managed Liiiraa Boost portal configuration only', async () => {
+    const createPortal = vi.fn(() =>
+      Promise.resolve({ id: 'bps_liiiraa', url: 'https://billing.stripe.com/p/session/test' }),
+    );
+    const provider = createStripeCommerceProvider({
+      checkoutBranding: { iconUrl: 'https://account.example/icon.svg' },
+      database: {
+        query: vi.fn(() => Promise.resolve({ rows: [{ provider_customer_id: 'cus_liiiraa' }] })),
+      },
+      stripe: {
+        billingPortal: {
+          configurations: {
+            list: vi.fn(() =>
+              Promise.resolve({
+                data: [
+                  { id: 'bpc_other', name: 'Other portal' },
+                  { id: 'bpc_liiiraa', name: 'Liiiraa Boost staging managed' },
+                ],
+              }),
+            ),
+          },
+          sessions: { create: createPortal },
+        },
+      } as unknown as Stripe,
+    });
+
+    await expect(
+      provider.createBillingPortal({
+        accountId,
+        returnUrl: 'https://account.example/pt-BR/plan',
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      value: { portalUrl: 'https://billing.stripe.com/p/session/test' },
+    });
+    expect(createPortal).toHaveBeenCalledWith({
+      configuration: 'bpc_liiiraa',
+      customer: 'cus_liiiraa',
+      return_url: 'https://account.example/pt-BR/plan',
+    });
+  });
+
   it('rejects an unknown or price-mismatched catalog reference before contacting Stripe', async () => {
     const listPrices = vi.fn();
     const provider = createStripeCommerceProvider({
+      checkoutBranding: { iconUrl: 'https://account.example/icon.svg' },
       database: { query: vi.fn() },
       stripe: { prices: { list: listPrices } } as unknown as Stripe,
     });
@@ -88,6 +145,7 @@ describe('real Stripe commerce provider', () => {
 
   it('retrieves provider authority from a webhook customer and maps subscription terms', async () => {
     const provider = createStripeCommerceProvider({
+      checkoutBranding: { iconUrl: 'https://account.example/icon.svg' },
       database: { query: vi.fn() },
       stripe: {
         invoices: {

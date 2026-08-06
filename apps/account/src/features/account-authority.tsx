@@ -20,6 +20,7 @@ import {
 } from '../account-preview-model';
 import { mapAccountAuthorityProjection } from '../account-runtime';
 import { getLiveAccountAuthority, type LiveAccountAuthority } from '../live-account-authority';
+import { AccountSubscriptionAuthority } from './account-subscription-authority';
 
 type AccountAuthorityPageProps = Readonly<{
   authorityBaseUrl: string;
@@ -282,19 +283,6 @@ const ProjectionResponsibility = ({
       </section>
     );
   }
-  if (routeId === 'account-subscription') {
-    return (
-      <section
-        aria-label={locale === 'pt-BR' ? 'Autoridade da assinatura' : 'Subscription authority'}
-      >
-        <p>{view.billing.plan === 'premium' ? 'Premium' : 'Essential'}</p>
-        <p role="status">
-          {view.billing.checkout === 'pending' ? labels.pending : labels.connected}
-        </p>
-        {projection.subscription.cancelAtPeriodEnd ? <p>{labels.cancellation}</p> : null}
-      </section>
-    );
-  }
   if (routeId === 'account-invoices') {
     return (
       <section aria-label={labels.invoice}>
@@ -407,6 +395,13 @@ export const AccountAuthorityPage = ({
         />
       ) : routeId === 'account-device' ? (
         <DeviceAuthority locale={locale} projection={projection} />
+      ) : routeId === 'account-subscription' ? (
+        <AccountSubscriptionAuthority
+          authority={authority}
+          authorityBaseUrl={authorityBaseUrl}
+          locale={locale}
+          projection={projection}
+        />
       ) : (
         <ProjectionResponsibility locale={locale} projection={projection} routeId={routeId} />
       )}

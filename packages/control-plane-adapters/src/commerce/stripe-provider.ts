@@ -19,23 +19,47 @@ const LOOKUP_CATALOG = Object.freeze({
 
 type CatalogReference = keyof typeof LOOKUP_CATALOG;
 
-interface StripeProviderDatabase extends Pick<ControlPlaneTransaction, 'query'> {}
+type StripeProviderDatabase = Pick<ControlPlaneTransaction, 'query'>;
 
 export interface StripeCommerceProviderInput {
+  readonly checkoutBranding: Readonly<{
+    iconUrl: string;
+  }>;
   readonly database: StripeProviderDatabase;
   readonly stripe: Stripe;
 }
 
 export interface StripeCommerceProvider extends CommerceProviderPort, SubscriptionMutationProvider {
-  createBillingPortal(input: Readonly<{ accountId: string; returnUrl: string }>): Promise<
-    CommerceProviderResult<Readonly<{ portalUrl: string }>>
-  >;
+  createBillingPortal(
+    input: Readonly<{ accountId: string; returnUrl: string }>,
+  ): Promise<CommerceProviderResult<Readonly<{ portalUrl: string }>>>;
 }
 
 const failure = <T>(
   code: 'PROVIDER_UNAVAILABLE' | 'INVALID_PROVIDER_REFERENCE' | 'INVALID_MUTATION',
   retryable = false,
 ): CommerceProviderResult<T> => ({ code, ok: false, retryable });
+
+const CHECKOUT_BRAND = Object.freeze({
+  backgroundColor: '#090a0d',
+  borderStyle: 'rounded',
+  buttonColor: '#315efb',
+  displayName: 'Liiiraa Boost',
+  fontFamily: 'inter',
+} as const);
+
+const MANAGED_PORTAL_CONFIGURATION = 'Liiiraa Boost staging managed';
+
+const exactBrandIconUrl = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.username.length === 0 && url.password.length === 0
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+};
 
 const epoch = (value: unknown): string | undefined =>
   typeof value === 'number' && Number.isFinite(value)
@@ -45,13 +69,20 @@ const epoch = (value: unknown): string | undefined =>
 const catalogTerms = (
   lookupKey: unknown,
   unitAmount: unknown,
-): Readonly<{ cadence: 'monthly' | 'annual'; currency: 'BRL' | 'USD'; priceMinor: number }> | null => {
+): Readonly<{
+  cadence: 'monthly' | 'annual';
+  currency: 'BRL' | 'USD';
+  priceMinor: number;
+}> | null => {
   if (typeof lookupKey !== 'string' || typeof unitAmount !== 'number') return null;
   const entry = Object.entries(LOOKUP_CATALOG).find(([, key]) => key === lookupKey);
   if (entry === undefined) return null;
   const [currency, cadence, amount] = entry[0].split(':');
   if (Number(amount) !== unitAmount) return null;
-  if ((currency !== 'BRL' && currency !== 'USD') || (cadence !== 'monthly' && cadence !== 'annual')) {
+  if (
+    (currency !== 'BRL' && currency !== 'USD') ||
+    (cadence !== 'monthly' && cadence !== 'annual')
+  ) {
     return null;
   }
   return { cadence, currency, priceMinor: unitAmount };
@@ -195,8 +226,8 @@ const subscriptionPrice = async (
   currency: 'BRL' | 'USD',
   cadence: 'monthly' | 'annual',
 ): Promise<string | null> => {
-  const reference = Object.entries(LOOKUP_CATALOG).find(
-    ([key]) => key.startsWith(`${currency}:${cadence}:`),
+  const reference = Object.entries(LOOKUP_CATALOG).find(([key]) =>
+    key.startsWith(`${currency}:${cadence}:`),
   );
   if (reference === undefined) return null;
   const result = await stripe.prices.list({
@@ -209,12 +240,15 @@ const subscriptionPrice = async (
 };
 
 export const createStripeCommerceProvider = ({
+  checkoutBranding,
   database,
   stripe,
 }: StripeCommerceProviderInput): StripeCommerceProvider => ({
   async createCheckout(input) {
+    if (!Object.hasOwn(LOOKUP_CATALOG, input.priceReference)) {
+      return failure('INVALID_PROVIDER_REFERENCE');
+    }
     const lookupKey = LOOKUP_CATALOG[input.priceReference as CatalogReference];
-    if (lookupKey === undefined) return failure('INVALID_PROVIDER_REFERENCE');
     try {
       const prices = await stripe.prices.list({
         active: true,
@@ -224,9 +258,19 @@ export const createStripeCommerceProvider = ({
       });
       const price = prices.data[0];
       if (price === undefined) return failure('INVALID_PROVIDER_REFERENCE');
+      const iconUrl = exactBrandIconUrl(checkoutBranding.iconUrl);
+      if (iconUrl === null) return failure('INVALID_PROVIDER_REFERENCE');
       const customer = await accountCustomer(database, stripe, input.accountId);
       const session = await stripe.checkout.sessions.create(
         {
+          branding_settings: {
+            background_color: CHECKOUT_BRAND.backgroundColor,
+            border_style: CHECKOUT_BRAND.borderStyle,
+            button_color: CHECKOUT_BRAND.buttonColor,
+            display_name: CHECKOUT_BRAND.displayName,
+            font_family: CHECKOUT_BRAND.fontFamily,
+            icon: { type: 'url', url: iconUrl },
+          },
           mode: 'subscription',
           customer,
           client_reference_id: input.accountId,
@@ -337,7 +381,16 @@ export const createStripeCommerceProvider = ({
   async createBillingPortal(input) {
     try {
       const customer = await accountCustomer(database, stripe, input.accountId);
+      const configurations = await stripe.billingPortal.configurations.list({
+        active: true,
+        limit: 100,
+      });
+      const configuration = configurations.data.find(
+        ({ name }) => name === MANAGED_PORTAL_CONFIGURATION,
+      );
+      if (configuration === undefined) return failure('PROVIDER_UNAVAILABLE', true);
       const session = await stripe.billingPortal.sessions.create({
+        configuration: configuration.id,
         customer,
         return_url: input.returnUrl,
       });
@@ -349,3 +402,4 @@ export const createStripeCommerceProvider = ({
 });
 
 export const STRIPE_LOOKUP_CATALOG = LOOKUP_CATALOG;
+export const STRIPE_CHECKOUT_BRAND = CHECKOUT_BRAND;

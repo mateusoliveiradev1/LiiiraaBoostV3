@@ -130,6 +130,18 @@ const response = (body: unknown, status = 200, headers: Record<string, string> =
   });
 
 describe('production account authority', () => {
+  it('ships a real Stripe subscription surface with Liiiraa-only branding and webhook confirmation copy', () => {
+    const subscriptionSource = readFileSync(
+      new URL('./account-subscription-authority.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(subscriptionSource).toContain('data-account-commerce="stripe-live"');
+    expect(subscriptionSource).toContain('createAccountCommerce');
+    expect(subscriptionSource).toContain('Liiiraa Boost Premium');
+    expect(subscriptionSource).toContain('Premium somente após o webhook');
+    expect(subscriptionSource).not.toMatch(/Frescari/iu);
+  });
+
   it('loads the generated account projection with an authenticated same-origin request', async () => {
     const transport = vi
       .fn<AccountAuthorityTransport>()

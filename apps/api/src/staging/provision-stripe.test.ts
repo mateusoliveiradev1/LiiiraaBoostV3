@@ -2,9 +2,89 @@ import type Stripe from 'stripe';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  assertStripeBrandAuthority,
   prepareStripeTestRuntime,
   provisionStripeTestCatalog,
 } from './provision-stripe.js';
+
+describe('Stripe brand authority', () => {
+  it('admits only the dedicated Liiiraa Boost customer-facing account identity', async () => {
+    const stripe = {
+      accounts: {
+        retrieve: vi.fn(() =>
+          Promise.resolve({
+            id: 'acct_liiiraa',
+            business_profile: { name: 'Liiiraa Boost', url: 'https://liiiraa-boost.vercel.app' },
+            settings: {
+              branding: {
+                icon: 'file_liiiraa_icon',
+                logo: 'file_liiiraa_logo',
+                primary_color: '#090a0d',
+                secondary_color: '#315efb',
+              },
+              dashboard: { display_name: 'Liiiraa Boost' },
+              payments: { statement_descriptor: 'LIIIRAA BOOST' },
+            },
+          }),
+        ),
+      },
+    } as unknown as Stripe;
+
+    await expect(assertStripeBrandAuthority(stripe)).resolves.toEqual({
+      accountId: 'acct_liiiraa',
+      status: 'verified',
+    });
+  });
+
+  it('admits the dedicated branded test account while live activation is still pending', async () => {
+    const stripe = {
+      accounts: {
+        retrieve: vi.fn(() =>
+          Promise.resolve({
+            id: 'acct_liiiraa_test',
+            business_profile: { name: 'Área restrita de Liiiraa Boost', url: null },
+            settings: {
+              branding: {
+                icon: 'file_liiiraa_icon',
+                logo: 'file_liiiraa_logo',
+                primary_color: '#090a0d',
+                secondary_color: '#315efb',
+              },
+              dashboard: { display_name: 'Liiiraa Boost' },
+              payments: { statement_descriptor: null },
+            },
+          }),
+        ),
+      },
+    } as unknown as Stripe;
+
+    await expect(assertStripeBrandAuthority(stripe)).resolves.toEqual({
+      accountId: 'acct_liiiraa_test',
+      status: 'verified',
+    });
+  });
+
+  it('rejects the unrelated Frescari account before creating any Liiiraa object', async () => {
+    const stripe = {
+      accounts: {
+        retrieve: vi.fn(() =>
+          Promise.resolve({
+            id: 'acct_frescari',
+            business_profile: { name: null, url: 'https://frescari.example' },
+            settings: {
+              dashboard: { display_name: 'Frescari' },
+              payments: { statement_descriptor: 'FRESCARI' },
+            },
+          }),
+        ),
+      },
+    } as unknown as Stripe;
+
+    await expect(assertStripeBrandAuthority(stripe)).rejects.toThrow(
+      'STRIPE_TEST_BRAND_REJECTED:ACCOUNT_IDENTITY',
+    );
+  });
+});
 
 describe('Stripe test catalog provisioning', () => {
   it('creates one managed product and four recurring prices without touching unrelated products', async () => {
@@ -69,7 +149,13 @@ describe('Stripe test catalog provisioning', () => {
       prices: {
         list: vi.fn(({ lookup_keys: lookupKeys }: { lookup_keys: string[] }) =>
           Promise.resolve({
-            data: [{ id: `price_${lookupKeys[0]}`, lookup_key: lookupKeys[0], active: true }],
+            data: [
+              {
+                id: `price_${lookupKeys[0] ?? 'missing'}`,
+                lookup_key: lookupKeys[0],
+                active: true,
+              },
+            ],
           }),
         ),
         create: createPrice,

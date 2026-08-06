@@ -44,6 +44,11 @@ export interface StripeCatalogProvisioningResult {
   readonly status: 'complete';
 }
 
+export interface StripeBrandAuthorityResult {
+  readonly accountId: string;
+  readonly status: 'verified';
+}
+
 const WEBHOOK_EVENTS = Object.freeze([
   'charge.dispute.created',
   'charge.refunded',
@@ -82,6 +87,38 @@ const atStage = async <T>(code: string, operation: () => Promise<T>): Promise<T>
   } catch {
     throw new Error(`STRIPE_TEST_PROVISIONING_REJECTED:${code}`);
   }
+};
+
+const descriptorIdentity = (value: string | null | undefined): string =>
+  value?.replaceAll(/[^A-Za-z0-9]/gu, '').toUpperCase() ?? '';
+
+export const assertStripeBrandAuthority = async (
+  stripe: Stripe,
+): Promise<StripeBrandAuthorityResult> => {
+  const account = await atStage('ACCOUNT_RETRIEVE', () => stripe.accounts.retrieve(null));
+  const customerName = account.business_profile?.name?.trim();
+  const dashboardName = account.settings?.dashboard.display_name?.trim();
+  const statementDescriptor = descriptorIdentity(account.settings?.payments.statement_descriptor);
+  const customerIdentity = descriptorIdentity(customerName);
+  const branding = account.settings?.branding;
+  const publicUrl = account.business_profile?.url?.toLowerCase() ?? '';
+  const observedIdentity = [customerName, dashboardName, statementDescriptor, publicUrl]
+    .filter((value): value is string => typeof value === 'string')
+    .join('|')
+    .toLowerCase();
+  if (
+    !customerIdentity.includes('LIIIRAABOOST') ||
+    dashboardName !== 'Liiiraa Boost' ||
+    (statementDescriptor !== '' && statementDescriptor !== 'LIIIRAABOOST') ||
+    branding?.primary_color?.toLowerCase() !== '#090a0d' ||
+    branding.secondary_color?.toLowerCase() !== '#315efb' ||
+    branding.icon === null ||
+    branding.logo === null ||
+    observedIdentity.includes('frescari')
+  ) {
+    throw new Error('STRIPE_TEST_BRAND_REJECTED:ACCOUNT_IDENTITY');
+  }
+  return { accountId: account.id, status: 'verified' };
 };
 
 export const provisionStripeTestCatalog = async (
@@ -175,22 +212,20 @@ export const prepareStripeTestRuntime = async (
   let portal = configurations.data.find(
     (configuration) => configuration.name === 'Liiiraa Boost staging managed',
   );
-  if (portal === undefined) {
-    portal = await atStage('PORTAL_CREATE', () =>
-      stripe.billingPortal.configurations.create({
-        name: 'Liiiraa Boost staging managed',
-        business_profile: {
-          headline: 'Gerencie sua assinatura Liiiraa Boost Premium',
-        },
-        features: {
-          customer_update: { allowed_updates: ['email'], enabled: true },
-          invoice_history: { enabled: true },
-          payment_method_update: { enabled: true },
-          subscription_cancel: { enabled: true, mode: 'at_period_end' },
-        },
-      }),
-    );
-  }
+  portal ??= await atStage('PORTAL_CREATE', () =>
+    stripe.billingPortal.configurations.create({
+      name: 'Liiiraa Boost staging managed',
+      business_profile: {
+        headline: 'Gerencie sua assinatura Liiiraa Boost Premium',
+      },
+      features: {
+        customer_update: { allowed_updates: ['email'], enabled: true },
+        invoice_history: { enabled: true },
+        payment_method_update: { enabled: true },
+        subscription_cancel: { enabled: true, mode: 'at_period_end' },
+      },
+    }),
+  );
 
   const existing = await atStage('WEBHOOK_LIST', () =>
     stripe.webhookEndpoints.list({ limit: 100 }),
@@ -260,6 +295,7 @@ const run = async (): Promise<void> => {
     throw new Error('STRIPE_TEST_CATALOG_REJECTED:STRIPE_SECRET_KEY');
   }
   const stripe = new Stripe(secretKey, { typescript: true });
+  await assertStripeBrandAuthority(stripe);
   const catalog = await provisionStripeTestCatalog(stripe);
   const outputPath = process.env['STRIPE_RUNTIME_OUTPUT_PATH'];
   const action = process.env['STRIPE_PROVISION_ACTION'] ?? 'catalog';
@@ -294,7 +330,9 @@ const invokedPath = process.argv[1];
 if (invokedPath && import.meta.url === pathToFileURL(invokedPath).href) {
   run().catch((error: unknown) => {
     const message = error instanceof Error ? error.message : '';
-    const safe = /^STRIPE_TEST_(?:CATALOG|RUNTIME|PROVISIONING)_REJECTED:[A-Z_]+$/u.test(message)
+    const safe = /^STRIPE_TEST_(?:BRAND|CATALOG|RUNTIME|PROVISIONING)_REJECTED:[A-Z_]+$/u.test(
+      message,
+    )
       ? message
       : 'STRIPE_TEST_PROVISIONING_REJECTED:UNKNOWN';
     process.stderr.write(`${safe}\n`);

@@ -11,6 +11,7 @@ import {
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface CommerceRouteDependencies {
+  readonly accountOrigin: string;
   readonly management: ManageSubscriptionDependencies;
   readonly reconciliation: ReconcileCommerceDependencies;
   readonly resolveSessionActor: (
@@ -21,14 +22,14 @@ export interface CommerceRouteDependencies {
   readonly admitSignedWebhook: (request: FastifyRequest) => Promise<ProviderEventJson | null>;
   readonly createBillingPortal?: (
     accountId: string,
+    locale: 'pt-BR' | 'en',
   ) => Promise<Readonly<{ ok: true; portalUrl: string }> | Readonly<{ ok: false }>>;
 }
 
 interface CommerceMutationBody {
   readonly command: CommerceCommandJson;
   readonly selection?: Extract<ManageSubscriptionAction, { kind: 'start-checkout' }>['selection'];
-  readonly successUrl?: string;
-  readonly cancelUrl?: string;
+  readonly locale?: 'pt-BR' | 'en';
   readonly checkoutReference?: string;
   readonly targetCadence?: 'monthly' | 'annual';
   readonly refundReason?: Extract<ManageSubscriptionAction, { kind: 'refund' }>['reason'];
@@ -51,6 +52,36 @@ const ownerContext = async (request: FastifyRequest, dependencies: CommerceRoute
   return { actor, body };
 };
 
+const admittedLocale = (value: unknown): 'pt-BR' | 'en' | null =>
+  value === 'pt-BR' || value === 'en' ? value : null;
+
+export const checkoutReturnUrls = (
+  accountOrigin: string,
+  locale: 'pt-BR' | 'en',
+): Readonly<{ cancelUrl: string; successUrl: string }> => {
+  const origin = new URL(accountOrigin);
+  if (
+    origin.origin !== accountOrigin ||
+    origin.protocol !== 'https:' ||
+    origin.username.length > 0 ||
+    origin.password.length > 0
+  ) {
+    throw new Error('INVALID_ACCOUNT_ORIGIN');
+  }
+  const plan = `${accountOrigin}/${locale}/plan`;
+  return {
+    cancelUrl: `${plan}?checkout=cancelled`,
+    successUrl: `${plan}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+  };
+};
+
+export const commerceJson = (value: unknown): unknown =>
+  JSON.parse(
+    JSON.stringify(value, (_key, item: unknown) =>
+      typeof item === 'bigint' ? item.toString() : item,
+    ),
+  ) as unknown;
+
 const sendManagement = async (
   reply: FastifyReply,
   dependencies: CommerceRouteDependencies,
@@ -62,7 +93,9 @@ const sendManagement = async (
     action,
   });
   if (result.ok)
-    return reply.code(result.outcome === 'pending-reconciliation' ? 202 : 200).send(result);
+    return reply
+      .code(result.outcome === 'pending-reconciliation' ? 202 : 200)
+      .send(commerceJson(result));
   const status =
     result.code === 'STALE' ? 409 : result.code === 'SUBSCRIPTION_NOT_FOUND' ? 404 : 422;
   return reply.code(status).send(result);
@@ -75,7 +108,9 @@ export const registerCommerceRoutes = async (
   app.get('/v1/commerce/subscription', async (request, reply) => {
     const actor = await dependencies.resolveSessionActor(request);
     if (actor === null) return reply.code(401).send({ code: 'UNAUTHORIZED' });
-    return reply.code(200).send(await dependencies.projectSubscription(actor.accountId));
+    return reply
+      .code(200)
+      .send(commerceJson(await dependencies.projectSubscription(actor.accountId)));
   });
 
   app.get('/v1/commerce/invoices', async (request, reply) => {
@@ -90,7 +125,9 @@ export const registerCommerceRoutes = async (
     if (dependencies.createBillingPortal === undefined) {
       return reply.code(503).send({ code: 'PROVIDER_UNAVAILABLE' });
     }
-    const portal = await dependencies.createBillingPortal(actor.accountId);
+    const locale = isRecord(request.body) ? admittedLocale(request.body['locale']) : null;
+    if (locale === null) return reply.code(400).send({ code: 'INVALID_REQUEST' });
+    const portal = await dependencies.createBillingPortal(actor.accountId, locale);
     return portal.ok
       ? reply.code(200).send({ url: portal.portalUrl })
       : reply.code(503).send({ code: 'PROVIDER_UNAVAILABLE' });
@@ -101,16 +138,18 @@ export const registerCommerceRoutes = async (
     if (
       context?.body.command.action !== 'start-checkout' ||
       context.body.selection === undefined ||
-      context.body.successUrl === undefined ||
-      context.body.cancelUrl === undefined
+      admittedLocale(context.body.locale) === null
     ) {
       return reply.code(400).send({ code: 'INVALID_REQUEST' });
     }
+    const locale = admittedLocale(context.body.locale);
+    if (locale === null) return reply.code(400).send({ code: 'INVALID_REQUEST' });
+    const urls = checkoutReturnUrls(dependencies.accountOrigin, locale);
     return sendManagement(reply, dependencies, context.body, {
       kind: 'start-checkout',
       selection: context.body.selection,
-      successUrl: context.body.successUrl,
-      cancelUrl: context.body.cancelUrl,
+      successUrl: urls.successUrl,
+      cancelUrl: urls.cancelUrl,
     });
   });
 
@@ -161,12 +200,14 @@ export const registerCommerceRoutes = async (
     });
   });
 
-  await app.register(async (webhook) => {
+  await app.register((webhook, _options, done) => {
     webhook.removeContentTypeParser('application/json');
     webhook.addContentTypeParser(
       'application/json',
       { parseAs: 'buffer' },
-      (_request, body, done) => done(null, body),
+      (_request, body, parseDone) => {
+        parseDone(null, body);
+      },
     );
     webhook.post('/v1/commerce/provider-webhook', async (request, reply) => {
       const providerEvent = await dependencies.admitSignedWebhook(request);
@@ -174,5 +215,6 @@ export const registerCommerceRoutes = async (
       const result = await reconcileCommerce(dependencies.reconciliation, { providerEvent });
       return reply.code(result.ok ? 202 : result.retryable ? 503 : 422).send(result);
     });
+    done();
   });
 };
