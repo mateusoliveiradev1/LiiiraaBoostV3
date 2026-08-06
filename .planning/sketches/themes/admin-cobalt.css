@@ -1,0 +1,42 @@
+:root {
+  color-scheme: dark;
+  --color-bg: #03050b;
+  --color-sidebar: #060910;
+  --color-topbar: #080c13;
+  --color-surface: #0a0f17;
+  --color-surface-raised: #101722;
+  --color-surface-strong: #151e2b;
+  --color-border: #1d2938;
+  --color-border-strong: #31445e;
+  --color-text: #eef4fc;
+  --color-text-muted: #a7b3c3;
+  --color-text-dim: #7f8b9a;
+  --color-primary: #248cf4;
+  --color-primary-hover: #42a2ff;
+  --color-focus: #65cfff;
+  --color-success: #4bcb71;
+  --color-warning: #f1b83d;
+  --color-danger: #ff6661;
+  --color-destructive: #da303b;
+  --color-scrim: rgb(1 3 7 / 78%);
+  --font-sans: Manrope, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+  --shadow-overlay: 0 24px 64px rgb(0 0 0 / 52%);
+}
+

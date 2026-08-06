@@ -1,0 +1,1869 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Liiiraa Boost Admin — Shell + Visão geral</title>
+    <link rel="stylesheet" href="../themes/admin-cobalt.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+      }
+
+      html {
+        background: #010206;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--color-text);
+        background: #010206;
+        font: 400 var(--text-sm) / 1.45 var(--font-sans);
+      }
+
+      button,
+      input,
+      select {
+        color: inherit;
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .variant-bar {
+        position: fixed;
+        z-index: 900;
+        inset: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 48px;
+        padding: 7px 14px;
+        overflow-x: auto;
+        border-bottom: 1px solid #27303b;
+        background: rgb(5 7 11 / 96%);
+        box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
+      }
+
+      .variant-bar strong {
+        flex: 0 0 auto;
+        margin-right: var(--space-2);
+        color: #c4ceda;
+        font-size: 12px;
+      }
+
+      .variant-tab,
+      .tool-button,
+      .quiet-button,
+      .secondary-button,
+      .primary-button,
+      .icon-button {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        transition:
+          color 100ms linear,
+          border-color 100ms linear,
+          background 160ms cubic-bezier(0.2, 0, 0, 1),
+          transform 160ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .variant-tab {
+        flex: 0 0 auto;
+        color: #aeb8c5;
+        background: #0d1219;
+      }
+
+      .variant-tab:hover,
+      .variant-tab.active {
+        border-color: #3b5372;
+        color: #fff;
+        background: #151d28;
+      }
+
+      .variant-tab.active {
+        box-shadow: inset 0 -2px var(--color-focus);
+      }
+
+      .viewport-shell {
+        position: relative;
+        container-type: inline-size;
+        width: 100%;
+        max-width: none;
+        min-height: calc(100vh - 48px);
+        margin: 48px auto 0;
+        overflow: hidden;
+        border-inline: 1px solid transparent;
+        background: var(--color-bg);
+      }
+
+      .viewport-shell.preview-frame {
+        margin-block: 64px 24px;
+        border-color: #334154;
+        border-radius: 12px;
+        box-shadow: 0 24px 64px rgb(0 0 0 / 55%);
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        grid-template-rows: 52px minmax(calc(100vh - 100px), 1fr);
+        min-height: calc(100vh - 48px);
+        background: var(--color-bg);
+      }
+
+      .topbar {
+        position: relative;
+        z-index: 40;
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: center;
+        gap: var(--space-3);
+        min-width: 0;
+        padding: 0 var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-topbar);
+      }
+
+      .brand {
+        display: flex;
+        flex: 0 0 208px;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid #3b68a2;
+        border-radius: 7px;
+        color: #fff;
+        background: #163f77;
+        font: 600 11px / 1 var(--font-mono);
+      }
+
+      .brand strong {
+        overflow: hidden;
+        font-size: 15px;
+        letter-spacing: -0.02em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mobile-menu {
+        display: none;
+      }
+
+      .command-trigger {
+        display: flex;
+        flex: 1 1 480px;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 640px;
+        min-width: 140px;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        color: var(--color-text-muted);
+        background: var(--color-surface);
+        text-align: left;
+      }
+
+      .command-trigger:hover {
+        border-color: var(--color-border-strong);
+        color: var(--color-text);
+      }
+
+      .command-trigger kbd {
+        color: var(--color-text-dim);
+        font: 400 11px var(--font-mono);
+      }
+
+      .topbar-spacer {
+        flex: 1 1 auto;
+      }
+
+      .environment,
+      .freshness,
+      .role {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 32px;
+        color: var(--color-text-muted);
+        white-space: nowrap;
+      }
+
+      .environment {
+        padding: 0 10px;
+        border: 1px solid #304664;
+        border-radius: var(--radius-sm);
+        color: #c8dcf7;
+        background: #0e1928;
+      }
+
+      .signal-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--color-success);
+      }
+
+      body[data-state='reconnecting'] .signal-dot {
+        background: var(--color-warning);
+      }
+
+      body[data-state='degraded'] .signal-dot {
+        background: var(--color-danger);
+      }
+
+      .sidebar {
+        position: relative;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        border-right: 1px solid var(--color-border);
+        background: var(--color-sidebar);
+      }
+
+      .nav-scroll {
+        flex: 1;
+        padding: var(--space-3) var(--space-2);
+        overflow-y: auto;
+      }
+
+      .nav-group + .nav-group {
+        margin-top: var(--space-4);
+      }
+
+      .nav-group-label {
+        display: block;
+        padding: 0 10px 7px;
+        color: var(--color-text-dim);
+        font-size: 11px;
+      }
+
+      .nav-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 42px;
+        padding: 0 10px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        color: var(--color-text-muted);
+        background: transparent;
+        text-align: left;
+      }
+
+      .nav-item:hover {
+        border-color: var(--color-border);
+        color: var(--color-text);
+        background: var(--color-surface);
+      }
+
+      .nav-item.active {
+        border-color: #2e4059;
+        color: #fff;
+        background: #121b27;
+      }
+
+      .nav-item.active::before {
+        position: absolute;
+        inset-block: 9px;
+        inset-inline-start: -9px;
+        width: 2px;
+        border-radius: 2px;
+        background: var(--color-focus);
+        content: '';
+      }
+
+      .nav-icon {
+        display: grid;
+        flex: 0 0 20px;
+        place-items: center;
+        width: 20px;
+        color: var(--color-text-dim);
+        font: 600 11px var(--font-mono);
+      }
+
+      .nav-item.active .nav-icon {
+        color: var(--color-focus);
+      }
+
+      .count {
+        min-width: 22px;
+        margin-left: auto;
+        padding: 2px 6px;
+        border-radius: var(--radius-full);
+        color: #cad5e2;
+        background: #263140;
+        font: 600 11px var(--font-mono);
+        text-align: center;
+      }
+
+      .sidebar-footer {
+        display: grid;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        border-top: 1px solid var(--color-border);
+      }
+
+      .admin-identity {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--color-border-strong);
+        border-radius: 50%;
+        background: var(--color-surface-strong);
+        font: 600 11px var(--font-mono);
+      }
+
+      .admin-identity span {
+        min-width: 0;
+      }
+
+      .admin-identity strong,
+      .admin-identity small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .admin-identity small {
+        color: var(--color-text-dim);
+      }
+
+      .main {
+        position: relative;
+        min-width: 0;
+        overflow: auto;
+      }
+
+      .state-banner {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        min-height: 44px;
+        padding: 8px var(--space-4);
+        border-bottom: 1px dashed var(--color-warning);
+        color: #f5d798;
+        background: #211a0d;
+      }
+
+      body[data-state='reconnecting'] .state-banner,
+      body[data-state='degraded'] .state-banner {
+        display: flex;
+      }
+
+      body[data-state='degraded'] .state-banner {
+        border-bottom-style: double;
+        border-color: var(--color-danger);
+        color: #ffc2be;
+        background: #251012;
+      }
+
+      .state-banner button {
+        color: inherit;
+      }
+
+      .variant {
+        display: none;
+        min-width: 0;
+        padding: var(--space-5);
+      }
+
+      .variant.active {
+        display: block;
+      }
+
+      .route-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-4);
+      }
+
+      .route-header h1,
+      .route-header p,
+      .briefing h2,
+      .briefing p,
+      .section-heading h2,
+      .section-heading p {
+        margin: 0;
+      }
+
+      .route-header h1 {
+        font-size: clamp(24px, 3vw, 32px);
+        line-height: 1.18;
+        letter-spacing: -0.025em;
+      }
+
+      .route-header p {
+        max-width: 68ch;
+        margin-top: 6px;
+        color: var(--color-text-muted);
+      }
+
+      .route-actions,
+      .filters,
+      .section-actions,
+      .selection-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        align-items: center;
+      }
+
+      .primary-button {
+        border-color: var(--color-primary);
+        color: #02060b;
+        background: var(--color-primary);
+        font-weight: 700;
+      }
+
+      .primary-button:hover {
+        border-color: var(--color-primary-hover);
+        background: var(--color-primary-hover);
+      }
+
+      .secondary-button,
+      .tool-button {
+        border-color: var(--color-border-strong);
+        background: var(--color-surface-raised);
+      }
+
+      .secondary-button:hover,
+      .tool-button:hover,
+      .quiet-button:hover,
+      .icon-button:hover {
+        border-color: var(--color-focus);
+        background: var(--color-surface-strong);
+      }
+
+      .quiet-button {
+        color: var(--color-text-muted);
+      }
+
+      .icon-button {
+        width: 38px;
+        padding: 0;
+      }
+
+      .briefing {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-3) var(--space-5);
+        align-items: end;
+        padding: var(--space-5) 0;
+        border-block: 1px solid var(--color-border);
+      }
+
+      .briefing-copy {
+        max-width: 760px;
+      }
+
+      .briefing-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: var(--color-focus);
+        font-weight: 600;
+      }
+
+      .briefing h2 {
+        max-width: 24ch;
+        font-size: clamp(25px, 3vw, 38px);
+        line-height: 1.1;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+
+      .briefing p {
+        max-width: 68ch;
+        margin-top: 12px;
+        color: var(--color-text-muted);
+        font-size: var(--text-base);
+      }
+
+      .briefing-facts {
+        display: grid;
+        gap: 10px;
+        min-width: 220px;
+        margin: 0;
+      }
+
+      .briefing-facts div {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding-block: 8px;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .briefing-facts dt,
+      .briefing-facts dd {
+        margin: 0;
+      }
+
+      .briefing-facts dt {
+        color: var(--color-text-dim);
+      }
+
+      .briefing-facts dd {
+        font-family: var(--font-mono);
+      }
+
+      .workspace-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.5fr);
+        gap: var(--space-4);
+        margin-top: var(--space-4);
+      }
+
+      .work-region,
+      .context-region,
+      .health-region,
+      .action-region {
+        min-width: 0;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        min-height: 64px;
+        padding: 12px var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .section-heading h2 {
+        font-size: var(--text-base);
+      }
+
+      .section-heading p {
+        margin-top: 3px;
+        color: var(--color-text-dim);
+        font-size: var(--text-xs);
+      }
+
+      .filters {
+        padding: 10px var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .search-input,
+      .filter-select {
+        min-height: 36px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+      }
+
+      .search-input {
+        flex: 1 1 220px;
+        min-width: 120px;
+        padding: 0 11px;
+      }
+
+      .filter-select {
+        padding: 0 30px 0 10px;
+      }
+
+      .work-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .work-row {
+        display: grid;
+        grid-template-columns: 28px 78px minmax(180px, 1fr) minmax(110px, 0.42fr) 92px 28px;
+        gap: var(--space-2);
+        align-items: center;
+        min-height: 58px;
+        padding: 8px var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+        transition:
+          background 120ms linear,
+          box-shadow 120ms linear;
+      }
+
+      body[data-density='compact'] .work-row {
+        min-height: 46px;
+        padding-block: 4px;
+      }
+
+      .work-row:hover,
+      .work-row.selected {
+        background: var(--color-surface-raised);
+      }
+
+      .work-row.selected {
+        box-shadow: inset 2px 0 var(--color-focus);
+      }
+
+      .work-row button.row-open {
+        display: contents;
+        text-align: left;
+      }
+
+      .row-check {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--color-primary);
+      }
+
+      .priority,
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .priority::before,
+      .status::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        content: '';
+      }
+
+      .priority.high,
+      .status.critical {
+        color: var(--color-danger);
+      }
+
+      .priority.medium,
+      .status.warning {
+        color: var(--color-warning);
+      }
+
+      .priority.low,
+      .status.success {
+        color: var(--color-success);
+      }
+
+      .work-title {
+        min-width: 0;
+      }
+
+      .work-title strong,
+      .work-title small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .work-title small,
+      .owner small,
+      .sla small {
+        color: var(--color-text-dim);
+      }
+
+      .work-title small,
+      .sla {
+        font-family: var(--font-mono);
+        font-size: 11px;
+      }
+
+      .owner {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .sla {
+        text-align: right;
+      }
+
+      .context-content,
+      .health-content,
+      .action-content {
+        padding: var(--space-3);
+      }
+
+      .priority-list,
+      .health-list,
+      .timeline {
+        display: grid;
+        gap: 0;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .priority-item,
+      .health-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 4px var(--space-3);
+        padding: 13px 0;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .priority-item small,
+      .health-item small {
+        grid-column: 1 / -1;
+        color: var(--color-text-dim);
+      }
+
+      .capacity-line {
+        display: grid;
+        gap: 8px;
+        margin-top: var(--space-3);
+      }
+
+      .capacity-copy {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+
+      .capacity-copy strong {
+        font-family: var(--font-mono);
+      }
+
+      .meter {
+        height: 7px;
+        overflow: hidden;
+        border: 1px solid var(--color-border-strong);
+        background: var(--color-bg);
+      }
+
+      .meter span {
+        display: block;
+        width: 72%;
+        height: 100%;
+        background: var(--color-primary);
+      }
+
+      .ledger-head {
+        display: grid;
+        grid-template-columns: 28px 78px minmax(180px, 1fr) minmax(110px, 0.42fr) 92px 28px;
+        gap: var(--space-2);
+        padding: 9px var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text-dim);
+        font-size: 11px;
+      }
+
+      .ledger-layout {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        min-height: calc(100vh - 190px);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+      }
+
+      .ledger-layout .work-list {
+        overflow: auto;
+      }
+
+      .jobs-dock {
+        padding: 12px var(--space-3);
+        border-top: 1px solid var(--color-border-strong);
+        background: var(--color-topbar);
+      }
+
+      .job-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 120px 72px;
+        gap: var(--space-3);
+        align-items: center;
+        min-height: 34px;
+      }
+
+      .job-progress {
+        height: 5px;
+        background: #202b39;
+      }
+
+      .job-progress span {
+        display: block;
+        width: 68%;
+        height: 100%;
+        background: var(--color-success);
+      }
+
+      .balanced-grid {
+        display: grid;
+        grid-template-columns: minmax(250px, 0.62fr) minmax(420px, 1.38fr) minmax(250px, 0.64fr);
+        gap: var(--space-3);
+      }
+
+      .action-region {
+        align-self: start;
+      }
+
+      .action-hero {
+        display: grid;
+        gap: var(--space-3);
+        padding: var(--space-4);
+      }
+
+      .action-hero .briefing-label {
+        margin: 0;
+      }
+
+      .action-hero h2,
+      .action-hero p {
+        margin: 0;
+      }
+
+      .action-hero h2 {
+        font-size: 24px;
+        line-height: 1.2;
+        letter-spacing: -0.03em;
+      }
+
+      .action-hero p {
+        color: var(--color-text-muted);
+      }
+
+      .inspector {
+        position: fixed;
+        z-index: 100;
+        inset: 48px 0 0 auto;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        width: min(420px, 100%);
+        transform: translateX(102%);
+        border-left: 1px solid var(--color-border-strong);
+        background: var(--color-surface);
+        box-shadow: var(--shadow-overlay);
+        transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .inspector.open {
+        transform: translateX(0);
+      }
+
+      .inspector-header,
+      .inspector-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .inspector-footer {
+        border-top: 1px solid var(--color-border);
+        border-bottom: 0;
+      }
+
+      .inspector-header h2,
+      .inspector-header p {
+        margin: 0;
+      }
+
+      .inspector-header p {
+        color: var(--color-text-dim);
+        font: 11px var(--font-mono);
+      }
+
+      .inspector-body {
+        padding: var(--space-3);
+        overflow-y: auto;
+      }
+
+      .detail-list {
+        margin: 0 0 var(--space-4);
+      }
+
+      .detail-list div {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: var(--space-3);
+        padding: 10px 0;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .detail-list dt,
+      .detail-list dd {
+        margin: 0;
+      }
+
+      .detail-list dt {
+        color: var(--color-text-dim);
+      }
+
+      .timeline li {
+        position: relative;
+        display: grid;
+        gap: 3px;
+        padding: 0 0 18px 20px;
+        border-left: 1px solid var(--color-border-strong);
+      }
+
+      .timeline li::before {
+        position: absolute;
+        top: 3px;
+        left: -4px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--color-focus);
+        content: '';
+      }
+
+      .timeline time {
+        color: var(--color-text-dim);
+        font: 11px var(--font-mono);
+      }
+
+      .dialog-backdrop {
+        position: fixed;
+        z-index: 200;
+        inset: 0;
+        display: none;
+        place-items: start center;
+        padding: 92px var(--space-3) var(--space-3);
+        background: var(--color-scrim);
+      }
+
+      .dialog-backdrop.open {
+        display: grid;
+      }
+
+      .command-dialog {
+        width: min(620px, 100%);
+        overflow: hidden;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        background: var(--color-surface-raised);
+        box-shadow: var(--shadow-overlay);
+      }
+
+      .command-dialog input {
+        width: 100%;
+        min-height: 54px;
+        padding: 0 var(--space-3);
+        border: 0;
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text);
+        background: transparent;
+        font-size: var(--text-base);
+      }
+
+      .command-list {
+        display: grid;
+        gap: 4px;
+        padding: var(--space-2);
+      }
+
+      .command-item {
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 48px;
+        padding: 0 10px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        color: var(--color-text);
+        background: transparent;
+        text-align: left;
+      }
+
+      .command-item:hover {
+        border-color: var(--color-border-strong);
+        background: var(--color-surface-strong);
+      }
+
+      .command-item small {
+        color: var(--color-text-dim);
+      }
+
+      .toast {
+        position: fixed;
+        z-index: 300;
+        right: 20px;
+        bottom: 20px;
+        max-width: 360px;
+        padding: 12px 16px;
+        transform: translateY(20px);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-sm);
+        opacity: 0;
+        background: var(--color-surface-strong);
+        box-shadow: var(--shadow-overlay);
+        pointer-events: none;
+        transition:
+          opacity 160ms linear,
+          transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .sketch-tools {
+        position: fixed;
+        z-index: 800;
+        right: 12px;
+        bottom: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-width: calc(100vw - 24px);
+        padding: 8px;
+        border: 1px solid #394657;
+        border-radius: 8px;
+        opacity: 0.48;
+        color: white;
+        background: rgb(0 0 0 / 82%);
+        font: 12px system-ui;
+        transition: opacity 160ms linear;
+      }
+
+      .sketch-tools:hover,
+      .sketch-tools:focus-within {
+        opacity: 1;
+      }
+
+      .sketch-tools button,
+      .sketch-tools select {
+        min-height: 30px;
+        padding: 0 8px;
+        border: 1px solid #566274;
+        border-radius: 5px;
+        color: white;
+        background: #171b22;
+      }
+
+      body.annotate *:hover {
+        outline: 1px dashed #ffbf54;
+      }
+
+      .annotation {
+        position: fixed;
+        z-index: 1000;
+        display: none;
+        padding: 5px 7px;
+        border-radius: 4px;
+        color: #111;
+        background: #ffcf70;
+        font: 11px var(--font-mono);
+        pointer-events: none;
+      }
+
+      body.annotate .annotation {
+        display: block;
+      }
+
+      .sidebar-scrim {
+        display: none;
+      }
+
+      @container (max-width: 1180px) {
+        .app {
+          grid-template-columns: 72px minmax(0, 1fr);
+        }
+
+        .brand {
+          flex-basis: 40px;
+        }
+
+        .brand strong,
+        .nav-group-label,
+        .nav-item > span:not(.nav-icon, .count),
+        .sidebar-footer .admin-identity > span {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip-path: inset(50%);
+        }
+
+        .nav-item {
+          justify-content: center;
+          padding: 0;
+        }
+
+        .nav-item.active::before {
+          inset-inline-start: -9px;
+        }
+
+        .count {
+          position: absolute;
+          top: 2px;
+          right: 1px;
+          min-width: 18px;
+          padding: 1px 4px;
+        }
+
+        .admin-identity {
+          grid-template-columns: 32px;
+          justify-content: center;
+        }
+
+        .workspace-grid,
+        .balanced-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .context-region,
+        .health-region,
+        .action-region {
+          grid-column: 1;
+        }
+      }
+
+      @container (max-width: 860px) {
+        .app {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: 56px minmax(calc(100vh - 104px), 1fr);
+        }
+
+        .topbar {
+          grid-column: 1;
+        }
+
+        .mobile-menu {
+          display: grid;
+          place-items: center;
+          width: 40px;
+          height: 40px;
+          padding: 0;
+          border: 1px solid transparent;
+          border-radius: var(--radius-sm);
+          color: var(--color-text);
+          background: transparent;
+        }
+
+        .brand {
+          flex-basis: auto;
+        }
+
+        .brand strong {
+          position: static;
+          width: auto;
+          height: auto;
+          overflow: visible;
+          clip-path: none;
+        }
+
+        .command-trigger {
+          flex: 0 0 40px;
+          width: 40px;
+          min-width: 40px;
+          padding: 0;
+          justify-content: center;
+          font-size: 0;
+        }
+
+        .command-trigger::before {
+          font-size: 16px;
+          content: '⌕';
+        }
+
+        .command-trigger kbd,
+        .freshness,
+        .role span,
+        .environment {
+          display: none;
+        }
+
+        .topbar-spacer {
+          display: block;
+        }
+
+        .sidebar {
+          position: fixed;
+          z-index: 150;
+          inset: 48px auto 0 0;
+          width: min(300px, calc(100vw - 48px));
+          transform: translateX(-102%);
+          border-right-color: var(--color-border-strong);
+          box-shadow: var(--shadow-overlay);
+          transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .viewport-shell.preview-frame .sidebar {
+          position: absolute;
+          inset-block: 56px 0;
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .sidebar.open .nav-group-label,
+        .sidebar.open .nav-item > span:not(.nav-icon, .count),
+        .sidebar.open .sidebar-footer .admin-identity > span {
+          position: static;
+          width: auto;
+          height: auto;
+          overflow: visible;
+          clip-path: none;
+        }
+
+        .sidebar.open .nav-item {
+          justify-content: flex-start;
+          padding: 0 10px;
+        }
+
+        .sidebar.open .count {
+          position: static;
+          margin-left: auto;
+        }
+
+        .sidebar.open .admin-identity {
+          grid-template-columns: 32px 1fr;
+          justify-content: stretch;
+        }
+
+        .sidebar-scrim {
+          position: fixed;
+          z-index: 140;
+          inset: 48px 0 0;
+          background: var(--color-scrim);
+        }
+
+        .viewport-shell.preview-frame .sidebar-scrim {
+          position: absolute;
+          inset-block: 56px 0;
+        }
+
+        .sidebar-scrim.open {
+          display: block;
+        }
+
+        .variant {
+          padding: var(--space-3);
+        }
+
+        .route-header,
+        .briefing {
+          grid-template-columns: minmax(0, 1fr);
+          flex-direction: column;
+        }
+
+        .briefing-facts {
+          min-width: 0;
+        }
+
+        .workspace-grid,
+        .balanced-grid {
+          display: block;
+        }
+
+        .context-region,
+        .health-region,
+        .action-region {
+          margin-top: var(--space-3);
+        }
+
+        .work-row {
+          grid-template-columns: 24px minmax(0, 1fr) auto;
+          min-height: 68px;
+        }
+
+        .work-row .priority {
+          grid-column: 2;
+          grid-row: 2;
+          font-size: 11px;
+        }
+
+        .work-row .work-title {
+          grid-column: 2;
+          grid-row: 1;
+        }
+
+        .work-row .owner {
+          display: none;
+        }
+
+        .work-row .sla {
+          grid-column: 3;
+          grid-row: 1 / span 2;
+        }
+
+        .work-row .row-menu {
+          display: none;
+        }
+
+        .ledger-head {
+          display: none;
+        }
+
+        .ledger-layout {
+          min-height: 0;
+        }
+
+        .job-row {
+          grid-template-columns: minmax(0, 1fr) 90px;
+        }
+
+        .job-row > :last-child {
+          display: none;
+        }
+
+        .inspector {
+          inset: 48px 0 0;
+          width: 100%;
+        }
+      }
+
+      @container (max-width: 520px) {
+        .variant-bar strong {
+          display: none;
+        }
+
+        .brand strong {
+          max-width: 126px;
+        }
+
+        .route-header h1 {
+          font-size: 24px;
+        }
+
+        .briefing {
+          padding-block: var(--space-4);
+        }
+
+        .briefing h2 {
+          font-size: 27px;
+        }
+
+        .filters .filter-select {
+          flex: 1 1 120px;
+        }
+
+        .section-heading {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .section-actions {
+          width: 100%;
+        }
+
+        .section-actions button {
+          flex: 1;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .sketch-tools {
+          right: 8px;
+          bottom: 8px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-density="comfortable" data-state="live">
+    <nav class="variant-bar" aria-label="Variações do protótipo">
+      <strong>Sketch 002 · Admin Web</strong>
+      <button class="variant-tab active" data-variant-target="a">A · Briefing Focus ★ Selected</button>
+      <button class="variant-tab" data-variant-target="b">B · Queue Canvas</button>
+      <button class="variant-tab" data-variant-target="c">C · Balanced Deck</button>
+    </nav>
+
+    <div class="viewport-shell" id="viewport-shell">
+      <div class="app">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" aria-label="Abrir menu" aria-expanded="false">☰</button>
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true">LB</span>
+            <strong>Liiiraa Boost <span style="color: var(--color-focus)">Admin</span></strong>
+          </div>
+          <button class="command-trigger" id="command-trigger">
+            <span>Buscar ou executar um comando</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+          <span class="topbar-spacer"></span>
+          <button class="freshness quiet-button" id="state-cycle" title="Alternar estado da conexão">
+            <span class="signal-dot" aria-hidden="true"></span>
+            <span id="freshness-copy">Sincronizado agora</span>
+          </button>
+          <span class="environment">Staging</span>
+          <button class="icon-button" id="inbox-button" aria-label="Abrir caixa de entrada">◎</button>
+          <button class="role quiet-button"><span>Segurança</span> <strong>SA</strong></button>
+        </header>
+
+        <aside class="sidebar" id="sidebar" aria-label="Navegação administrativa">
+          <div class="nav-scroll">
+            <div class="nav-group">
+              <button class="nav-item active" data-nav="Visão geral">
+                <span class="nav-icon">VG</span><span>Visão geral</span>
+              </button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Pessoas</span>
+              <button class="nav-item" data-nav="Usuários"><span class="nav-icon">US</span><span>Usuários</span></button>
+              <button class="nav-item" data-nav="Convites">
+                <span class="nav-icon">CV</span><span>Convites</span><span class="count">18</span>
+              </button>
+              <button class="nav-item" data-nav="Equipe e acesso"><span class="nav-icon">EA</span><span>Equipe e acesso</span></button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Receita</span>
+              <button class="nav-item" data-nav="Assinaturas"><span class="nav-icon">AS</span><span>Assinaturas</span></button>
+              <button class="nav-item" data-nav="Pagamentos"><span class="nav-icon">PG</span><span>Pagamentos</span></button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Operação</span>
+              <button class="nav-item" data-nav="Fila de trabalho">
+                <span class="nav-icon">FT</span><span>Fila de trabalho</span><span class="count">12</span>
+              </button>
+              <button class="nav-item" data-nav="Trabalhos"><span class="nav-icon">TR</span><span>Trabalhos</span><span class="count">3</span></button>
+              <button class="nav-item" data-nav="Capacidade"><span class="nav-icon">CP</span><span>Capacidade</span></button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Atendimento</span>
+              <button class="nav-item" data-nav="Casos"><span class="nav-icon">CA</span><span>Casos</span><span class="count">7</span></button>
+              <button class="nav-item" data-nav="Diagnósticos"><span class="nav-icon">DG</span><span>Diagnósticos</span></button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Segurança</span>
+              <button class="nav-item" data-nav="Alertas"><span class="nav-icon">AL</span><span>Alertas</span><span class="count">2</span></button>
+              <button class="nav-item" data-nav="Incidentes"><span class="nav-icon">IN</span><span>Incidentes</span></button>
+              <button class="nav-item" data-nav="Privacidade"><span class="nav-icon">PR</span><span>Privacidade</span></button>
+            </div>
+            <div class="nav-group">
+              <span class="nav-group-label">Sistema</span>
+              <button class="nav-item" data-nav="Configurações"><span class="nav-icon">CF</span><span>Configurações</span></button>
+              <button class="nav-item" data-nav="Auditoria"><span class="nav-icon">AU</span><span>Auditoria</span></button>
+            </div>
+          </div>
+          <div class="sidebar-footer">
+            <div class="admin-identity">
+              <span class="avatar">MO</span>
+              <span><strong>Mateus Oliveira</strong><small>Função ativa · Segurança</small></span>
+            </div>
+          </div>
+        </aside>
+        <button class="sidebar-scrim" id="sidebar-scrim" aria-label="Fechar menu"></button>
+
+        <main class="main" id="main-content">
+          <div class="state-banner" role="status">
+            <span id="state-message">Reconectando. Leituras permanecem disponíveis; ações críticas estão pausadas.</span>
+            <button class="quiet-button" id="retry-state">Tentar agora</button>
+          </div>
+
+          <section class="variant active" id="variant-a" aria-labelledby="variant-a-title">
+            <header class="route-header">
+              <div>
+                <h1 id="variant-a-title">Visão geral</h1>
+                <p>Prioridades operacionais primeiro; contexto do negócio logo depois.</p>
+              </div>
+              <div class="route-actions">
+                <button class="secondary-button density-toggle">Densidade: confortável</button>
+                <button class="primary-button" data-action="create-invites">Criar convites</button>
+              </div>
+            </header>
+
+            <section class="briefing" aria-labelledby="briefing-title">
+              <div class="briefing-copy">
+                <span class="briefing-label"><span class="signal-dot"></span>Prioridade de hoje</span>
+                <h2 id="briefing-title">Revisar 7 acessos e 3 convites com risco antes das 09:00.</h2>
+                <p>O ambiente está estável. Uma entrega de e-mail apresenta degradação leve, sem afetar convites já emitidos.</p>
+              </div>
+              <dl class="briefing-facts">
+                <div><dt>Fila atribuída</dt><dd>12</dd></div>
+                <div><dt>Dentro do prazo</dt><dd>9</dd></div>
+                <div><dt>Próxima revisão</dt><dd>08:30</dd></div>
+              </dl>
+            </section>
+
+            <div class="workspace-grid">
+              <section class="work-region" aria-labelledby="a-queue-title">
+                <header class="section-heading">
+                  <div><h2 id="a-queue-title">Fila de trabalho</h2><p>Ordenada por risco, prazo e responsabilidade.</p></div>
+                  <div class="section-actions"><button class="quiet-button">Ver fila completa</button></div>
+                </header>
+                <div class="filters">
+                  <input class="search-input row-search" aria-label="Filtrar fila" placeholder="Filtrar por pessoa, ação ou referência" />
+                  <select class="filter-select" aria-label="Prioridade"><option>Todas as prioridades</option><option>Alta</option><option>Média</option></select>
+                </div>
+                <ul class="work-list" data-list="a"></ul>
+              </section>
+
+              <aside class="context-region" aria-labelledby="a-context-title">
+                <header class="section-heading"><div><h2 id="a-context-title">Contexto operacional</h2><p>Sinais que mudam uma decisão agora.</p></div></header>
+                <div class="context-content">
+                  <ul class="priority-list">
+                    <li class="priority-item"><strong>Entrega de e-mail</strong><span class="status warning">Degradada</span><small>Fila com 4 minutos de atraso; sem perda confirmada.</small></li>
+                    <li class="priority-item"><strong>Stripe sandbox</strong><span class="status success">Normal</span><small>Última reconciliação concluída há 2 min.</small></li>
+                    <li class="priority-item"><strong>Revisão de acessos</strong><span class="status warning">5 dias</span><small>Dois acessos críticos vencem nesta semana.</small></li>
+                  </ul>
+                  <div class="capacity-line">
+                    <div class="capacity-copy"><span>Convites ativos</span><strong>18 / 25</strong></div>
+                    <div class="meter" aria-label="18 de 25 convites ativos"><span></span></div>
+                    <small style="color: var(--color-text-dim)">7 preparados aguardam uma vaga ativa.</small>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section class="variant" id="variant-b" aria-labelledby="variant-b-title">
+            <header class="route-header">
+              <div><h1 id="variant-b-title">Fila operacional</h1><p>Uma leitura compacta para quem trabalha continuamente no Admin.</p></div>
+              <div class="route-actions"><button class="secondary-button density-toggle">Densidade: confortável</button><button class="primary-button">Assumir próximo item</button></div>
+            </header>
+            <section class="ledger-layout" aria-label="Ledger operacional">
+              <div>
+                <header class="section-heading">
+                  <div><h2>Visão oficial · Prioridade</h2><p>12 itens · sincronizado agora</p></div>
+                  <div class="section-actions"><button class="secondary-button">Filtros · 3</button><button class="quiet-button">Salvar visão</button></div>
+                </header>
+                <div class="filters">
+                  <input class="search-input row-search" aria-label="Filtrar ledger" placeholder="Buscar referência, pessoa ou ação" />
+                  <select class="filter-select"><option>Status: todos</option><option>Em risco</option><option>Pendente</option></select>
+                  <select class="filter-select"><option>Responsável: todos</option><option>Mateus Oliveira</option><option>Sistema</option></select>
+                </div>
+                <div class="ledger-head"><span></span><span>Prioridade</span><span>Assunto</span><span>Responsável</span><span style="text-align: right">SLA</span><span></span></div>
+              </div>
+              <ul class="work-list" data-list="b"></ul>
+              <footer class="jobs-dock">
+                <div class="section-heading" style="min-height: 44px; padding: 0; border: 0"><div><h2>Trabalhos e recebidos <span class="count">3</span></h2></div><button class="quiet-button">Ver todos</button></div>
+                <div class="job-row"><span>Importação · convidados-beta.csv</span><div class="job-progress"><span></span></div><code>68%</code></div>
+                <div class="job-row"><span>Reconciliação · Stripe sandbox</span><div class="job-progress"><span style="width: 100%"></span></div><code>100%</code></div>
+              </footer>
+            </section>
+          </section>
+
+          <section class="variant" id="variant-c" aria-labelledby="variant-c-title">
+            <header class="route-header">
+              <div><h1 id="variant-c-title">Visão geral</h1><p>Prioridade, execução e saúde no mesmo campo de visão.</p></div>
+              <div class="route-actions"><button class="secondary-button density-toggle">Densidade: confortável</button><button class="primary-button">Abrir fila</button></div>
+            </header>
+            <div class="balanced-grid">
+              <section class="action-region">
+                <div class="action-hero">
+                  <span class="briefing-label"><span class="signal-dot"></span>Próxima ação</span>
+                  <h2>Revisar transferência de função com escopo crítico.</h2>
+                  <p>A solicitação vence às 08:42 e precisa de um aprovador independente.</p>
+                  <button class="primary-button" data-open-row="Transferência de função crítica">Revisar impacto</button>
+                </div>
+                <div class="action-content" style="border-top: 1px solid var(--color-border)">
+                  <dl class="briefing-facts" style="min-width: 0">
+                    <div><dt>Fila atribuída</dt><dd>12</dd></div>
+                    <div><dt>Em risco</dt><dd style="color: var(--color-warning)">3</dd></div>
+                    <div><dt>Críticos</dt><dd style="color: var(--color-danger)">1</dd></div>
+                  </dl>
+                </div>
+              </section>
+              <section class="work-region">
+                <header class="section-heading"><div><h2>Fila de trabalho</h2><p>Visão oficial · prioridade</p></div><button class="quiet-button">Filtros</button></header>
+                <ul class="work-list" data-list="c"></ul>
+              </section>
+              <aside class="health-region">
+                <header class="section-heading"><div><h2>Saúde operacional</h2><p>Somente sinais acionáveis.</p></div></header>
+                <div class="health-content">
+                  <ul class="health-list">
+                    <li class="health-item"><strong>API</strong><span class="status success">Normal</span><small>p95 · 182 ms</small></li>
+                    <li class="health-item"><strong>E-mail</strong><span class="status warning">Atraso</span><small>4 min · 11 mensagens</small></li>
+                    <li class="health-item"><strong>Banco</strong><span class="status success">Normal</span><small>Conexões · 18%</small></li>
+                    <li class="health-item"><strong>Convites</strong><span class="status warning">18 / 25</span><small>Previsão de saturação · 3 dias</small></li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <aside class="inspector" id="inspector" aria-hidden="true">
+      <header class="inspector-header">
+        <div><h2 id="inspector-title">Revisar item</h2><p id="inspector-id">ADM-2026-0817</p></div>
+        <button class="icon-button" id="close-inspector" aria-label="Fechar detalhes">×</button>
+      </header>
+      <div class="inspector-body">
+        <span class="status warning">Revisão necessária</span>
+        <dl class="detail-list">
+          <div><dt>Responsável</dt><dd>Mateus Oliveira</dd></div>
+          <div><dt>Função ativa</dt><dd>Segurança</dd></div>
+          <div><dt>Ambiente</dt><dd>Staging</dd></div>
+          <div><dt>Última versão</dt><dd><code>v18</code></dd></div>
+        </dl>
+        <h3>Linha do tempo</h3>
+        <ol class="timeline">
+          <li><time>07:42:18</time><strong>Solicitação criada</strong><span>Escopo e impacto calculados.</span></li>
+          <li><time>07:43:02</time><strong>Autenticação reforçada concluída</strong><span>Passkey verificada para esta ação.</span></li>
+          <li><time>07:44:11</time><strong>Aguardando revisão</strong><span>Nenhuma alteração foi aplicada.</span></li>
+        </ol>
+      </div>
+      <footer class="inspector-footer"><button class="secondary-button" id="full-route">Abrir página completa</button><button class="primary-button" id="review-action">Revisar impacto</button></footer>
+    </aside>
+
+    <div class="dialog-backdrop" id="command-backdrop">
+      <section class="command-dialog" role="dialog" aria-modal="true" aria-label="Central de comandos">
+        <input id="command-input" placeholder="Buscar pessoas, convites, casos ou comandos" autocomplete="off" />
+        <div class="command-list">
+          <button class="command-item"><span>CV</span><span><strong>Criar convites</strong><small>Abrir preflight individual ou CSV</small></span><small>Pessoas</small></button>
+          <button class="command-item"><span>FT</span><span><strong>Abrir minha fila</strong><small>12 itens ordenados por risco</small></span><small>Operação</small></button>
+          <button class="command-item"><span>AC</span><span><strong>Revisar acessos</strong><small>2 recertificações próximas</small></span><small>Segurança</small></button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <div class="annotation" id="annotation"></div>
+
+    <div class="sketch-tools" id="sketch-tools">
+      <select id="theme-switcher" aria-label="Tema">
+        <option value="admin-cobalt.css">Admin Cobalt</option>
+        <option value="default.css">Desktop Ice</option>
+      </select>
+      <button data-width="375">Telefone</button>
+      <button data-width="768">Tablet</button>
+      <button data-width="1280">Desktop</button>
+      <button data-width="full">Livre</button>
+      <button id="annotation-toggle">Anotar</button>
+    </div>
+
+    <script>
+      const records = [
+        { priority: 'high', priorityLabel: 'Alta', title: 'Transferência de função crítica', id: 'ACCESS-81F3', owner: 'Mateus Oliveira', ownerMeta: 'Segurança', sla: '18 min', slaMeta: 'vence 08:42' },
+        { priority: 'high', priorityLabel: 'Alta', title: 'Convite com entrega permanente falha', id: 'INV-09CA', owner: 'Sistema', ownerMeta: 'E-mail', sla: '31 min', slaMeta: 'vence 08:55' },
+        { priority: 'medium', priorityLabel: 'Média', title: 'Recertificação de acesso em 5 dias', id: 'REVIEW-117A', owner: 'Mateus Oliveira', ownerMeta: 'Segurança', sla: '2 h', slaMeta: 'dentro do prazo' },
+        { priority: 'medium', priorityLabel: 'Média', title: 'Reconciliar evento Stripe pendente', id: 'BILL-42D8', owner: 'Operações', ownerMeta: 'Receita', sla: '3 h', slaMeta: 'dentro do prazo' },
+        { priority: 'low', priorityLabel: 'Baixa', title: 'Importação de convites concluída', id: 'JOB-A812', owner: 'Sistema', ownerMeta: 'Operação', sla: '—', slaMeta: 'concluído' },
+        { priority: 'low', priorityLabel: 'Baixa', title: 'Relatório de auditoria disponível', id: 'AUDIT-911C', owner: 'Auditoria', ownerMeta: 'Sistema', sla: '—', slaMeta: 'informativo' }
+      ];
+
+      const listMarkup = (record) => `
+        <li class="work-row" data-title="${record.title.toLowerCase()} ${record.id.toLowerCase()} ${record.owner.toLowerCase()}">
+          <input class="row-check" type="checkbox" aria-label="Selecionar ${record.title}" />
+          <span class="priority ${record.priority}">${record.priorityLabel}</span>
+          <button class="row-open" data-open-row="${record.title}" data-record-id="${record.id}">
+            <span class="work-title"><strong>${record.title}</strong><small>${record.id}</small></span>
+            <span class="owner">${record.owner}<small>${record.ownerMeta}</small></span>
+            <span class="sla">${record.sla}<small>${record.slaMeta}</small></span>
+            <span class="row-menu">⋯</span>
+          </button>
+        </li>`;
+
+      document.querySelectorAll('[data-list]').forEach((list) => {
+        list.innerHTML = records.map(listMarkup).join('');
+      });
+
+      const toast = document.getElementById('toast');
+      let toastTimer;
+      const notify = (message) => {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      };
+
+      const showVariant = (id) => {
+        document.querySelectorAll('.variant').forEach((variant) => variant.classList.remove('active'));
+        document.querySelectorAll('.variant-tab').forEach((tab) => tab.classList.remove('active'));
+        document.getElementById(`variant-${id}`).classList.add('active');
+        document.querySelector(`[data-variant-target="${id}"]`).classList.add('active');
+        document.getElementById('main-content').scrollTop = 0;
+        closeInspector();
+      };
+
+      document.querySelectorAll('[data-variant-target]').forEach((tab) => {
+        tab.addEventListener('click', () => showVariant(tab.dataset.variantTarget));
+      });
+
+      const inspector = document.getElementById('inspector');
+      let inspectorOrigin = null;
+      const openInspector = (trigger) => {
+        inspectorOrigin = trigger;
+        document.querySelectorAll('.work-row').forEach((row) => row.classList.remove('selected'));
+        trigger.closest('.work-row')?.classList.add('selected');
+        document.getElementById('inspector-title').textContent = trigger.dataset.openRow || 'Revisar item';
+        document.getElementById('inspector-id').textContent = trigger.dataset.recordId || 'ACCESS-81F3';
+        inspector.classList.add('open');
+        inspector.setAttribute('aria-hidden', 'false');
+        document.getElementById('close-inspector').focus();
+      };
+
+      function closeInspector() {
+        inspector.classList.remove('open');
+        inspector.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.work-row').forEach((row) => row.classList.remove('selected'));
+        if (inspectorOrigin) inspectorOrigin.focus();
+        inspectorOrigin = null;
+      }
+
+      document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-open-row]');
+        if (trigger) openInspector(trigger);
+      });
+      document.getElementById('close-inspector').addEventListener('click', closeInspector);
+      document.getElementById('full-route').addEventListener('click', () => notify('Página completa aberta sem perder a fila.'));
+      document.getElementById('review-action').addEventListener('click', () => notify('Revisão de impacto iniciada. Nenhuma alteração foi aplicada.'));
+
+      document.querySelectorAll('.row-search').forEach((input) => {
+        input.addEventListener('input', () => {
+          const query = input.value.trim().toLowerCase();
+          input.closest('.variant').querySelectorAll('.work-row').forEach((row) => {
+            row.hidden = query.length > 0 && !row.dataset.title.includes(query);
+          });
+        });
+      });
+
+      document.querySelectorAll('.density-toggle').forEach((button) => {
+        button.addEventListener('click', () => {
+          const compact = document.body.dataset.density !== 'compact';
+          document.body.dataset.density = compact ? 'compact' : 'comfortable';
+          document.querySelectorAll('.density-toggle').forEach((item) => {
+            item.textContent = `Densidade: ${compact ? 'compacta' : 'confortável'}`;
+          });
+          notify(`Densidade ${compact ? 'compacta' : 'confortável'} aplicada.`);
+        });
+      });
+
+      const stateCycle = ['live', 'reconnecting', 'degraded'];
+      const stateCopy = {
+        live: ['Sincronizado agora', 'Todos os serviços necessários estão disponíveis.'],
+        reconnecting: ['Reconectando · 22 s', 'Reconectando. Leituras permanecem disponíveis; ações críticas estão pausadas.'],
+        degraded: ['E-mail degradado', 'Entrega de e-mail degradada. Convites novos estão pausados; demais áreas permanecem disponíveis.']
+      };
+      document.getElementById('state-cycle').addEventListener('click', () => {
+        const next = stateCycle[(stateCycle.indexOf(document.body.dataset.state) + 1) % stateCycle.length];
+        document.body.dataset.state = next;
+        document.getElementById('freshness-copy').textContent = stateCopy[next][0];
+        document.getElementById('state-message').textContent = stateCopy[next][1];
+      });
+      document.getElementById('retry-state').addEventListener('click', () => {
+        document.body.dataset.state = 'live';
+        document.getElementById('freshness-copy').textContent = stateCopy.live[0];
+        notify('Conexão restabelecida e dados atualizados.');
+      });
+
+      const commandBackdrop = document.getElementById('command-backdrop');
+      const openCommand = () => {
+        commandBackdrop.classList.add('open');
+        document.getElementById('command-input').focus();
+      };
+      const closeCommand = () => {
+        commandBackdrop.classList.remove('open');
+        document.getElementById('command-trigger').focus();
+      };
+      document.getElementById('command-trigger').addEventListener('click', openCommand);
+      commandBackdrop.addEventListener('click', (event) => {
+        if (event.target === commandBackdrop) closeCommand();
+      });
+      document.querySelectorAll('.command-item').forEach((item) => item.addEventListener('click', () => {
+        closeCommand();
+        notify(`${item.querySelector('strong').textContent}: rota de revisão aberta.`);
+      }));
+      document.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+          event.preventDefault();
+          openCommand();
+        }
+        if (event.key === 'Escape') {
+          if (commandBackdrop.classList.contains('open')) closeCommand();
+          else if (inspector.classList.contains('open')) closeInspector();
+          else closeSidebar();
+        }
+      });
+
+      const sidebar = document.getElementById('sidebar');
+      const sidebarScrim = document.getElementById('sidebar-scrim');
+      const menuButton = document.getElementById('mobile-menu');
+      const openSidebar = () => {
+        sidebar.classList.add('open');
+        sidebarScrim.classList.add('open');
+        menuButton.setAttribute('aria-expanded', 'true');
+      };
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarScrim.classList.remove('open');
+        menuButton.setAttribute('aria-expanded', 'false');
+      }
+      menuButton.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+      sidebarScrim.addEventListener('click', closeSidebar);
+
+      document.querySelectorAll('[data-nav]').forEach((item) => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('[data-nav]').forEach((nav) => nav.classList.remove('active'));
+          item.classList.add('active');
+          notify(`${item.dataset.nav}: navegação demonstrativa.`);
+          closeSidebar();
+        });
+      });
+
+      document.querySelectorAll('[data-action="create-invites"]').forEach((button) => button.addEventListener('click', () => notify('Preflight de convites será explorado no Sketch 003.')));
+      document.getElementById('inbox-button').addEventListener('click', () => notify('Caixa de entrada: 3 itens precisam de confirmação.'));
+
+      const viewport = document.getElementById('viewport-shell');
+      document.querySelectorAll('[data-width]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const width = button.dataset.width;
+          viewport.style.maxWidth = width === 'full' ? 'none' : `${width}px`;
+          viewport.classList.toggle('preview-frame', width !== 'full');
+          viewport.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      document.getElementById('theme-switcher').addEventListener('change', (event) => {
+        document.querySelector('link[href*="themes"]').href = `../themes/${event.target.value}`;
+      });
+
+      const annotation = document.getElementById('annotation');
+      document.getElementById('annotation-toggle').addEventListener('click', () => document.body.classList.toggle('annotate'));
+      document.addEventListener('mousemove', (event) => {
+        if (!document.body.classList.contains('annotate')) return;
+        const styles = getComputedStyle(event.target);
+        annotation.textContent = `${event.target.tagName.toLowerCase()} · ${styles.fontSize} · p ${styles.padding}`;
+        annotation.style.left = `${Math.min(event.clientX + 12, window.innerWidth - 230)}px`;
+        annotation.style.top = `${Math.min(event.clientY + 12, window.innerHeight - 40)}px`;
+      });
+    </script>
+  </body>
+</html>
