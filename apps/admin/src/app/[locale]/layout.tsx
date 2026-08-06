@@ -110,6 +110,8 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
   setRequestLocale(requestedLocale);
 
   const locale = requestedLocale as WebLocale;
+  const requestHeaders = await headers();
+  const nonce = requestHeaders.get('x-nonce');
   const runtime = resolveAdminServerRuntimeConfig();
   const copy = COPY[locale];
 
@@ -123,6 +125,7 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         data-surface="admin"
         lang={locale}
       >
+        <head>{nonce === null ? null : <meta content={nonce} property="csp-nonce" />}</head>
         <body>
           <a className="admin-skip-link" href="#admin-main">
             {copy.skip}
@@ -136,7 +139,6 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
     );
   }
 
-  const requestHeaders = await headers();
   const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
   const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigation = projectAdminRoleNavigation(role, locale);
@@ -150,6 +152,7 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
       data-surface={composition.surface}
       lang={locale}
     >
+      <head>{nonce === null ? null : <meta content={nonce} property="csp-nonce" />}</head>
       <body>
         <a className="admin-skip-link" href="#admin-main">
           {copy.skip}

@@ -212,6 +212,8 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   }
 
   setRequestLocale(locale);
+  const requestHeaders = await headers();
+  const nonce = requestHeaders.get('x-nonce');
   const runtime = resolveAccountServerRuntimeConfig();
   const webComposition = accountWebComposition(runtime.kind);
   const publicOrigin = resolvePublicBoundaryOrigin(
@@ -262,6 +264,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
       data-surface={webComposition.surface}
       lang={locale}
     >
+      <head>{nonce === null ? null : <meta content={nonce} property="csp-nonce" />}</head>
       <body>
         <a className="account-skip-link" href="#account-main">
           {copy.skip}
