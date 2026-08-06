@@ -28,6 +28,7 @@ import { generateMetadata as generatePublicCatchAllMetadata } from './app/[local
 const layoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 const navigationSource = readFileSync(new URL('./public-navigation.tsx', import.meta.url), 'utf8');
 const proxySource = readFileSync(new URL('../proxy.ts', import.meta.url), 'utf8');
+const runtimeProxyUrl = new URL('./proxy.ts', import.meta.url);
 const shellStyles = readFileSync(new URL('./app/public-shell.css', import.meta.url), 'utf8');
 const publicCatchAllSource = readFileSync(
   new URL('./app/[locale]/(public)/[[...slug]]/page.tsx', import.meta.url),
@@ -45,6 +46,10 @@ describe('public shell', () => {
   it('redirects the bare provider origin to the default localized public entry', () => {
     expect(proxySource).toContain("request.nextUrl.pathname === '/'");
     expect(proxySource).toContain("destination.pathname = '/pt-BR'");
+    expect(existsSync(runtimeProxyUrl)).toBe(true);
+    if (!existsSync(runtimeProxyUrl)) return;
+
+    expect(readFileSync(runtimeProxyUrl, 'utf8')).toContain("from '../proxy'");
   });
 
   it('leaves the shared API authority path outside locale routing', () => {
