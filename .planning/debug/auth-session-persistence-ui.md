@@ -2,7 +2,7 @@
 status: verifying
 trigger: 'Owner UAT reports desktop login state is lost after app restart, logout fails, Account/Admin navigation flashes and temporarily loses session, desktop browser callback is unfinished, and Premium/Free entitlement labels conflict.'
 created: 2026-08-06T03:00:00-03:00
-updated: 2026-08-06T05:40:00-03:00
+updated: 2026-08-06T06:24:00-03:00
 ---
 
 ## Symptoms
@@ -15,10 +15,10 @@ reproduction: Authenticate from the desktop through the system browser, return t
 
 ## Current Focus
 
-hypothesis: Confirmed: the 0.0.1 installer supplied to owner UAT was built from tauri.conf.json without tauri.staging.conf.json, so DesktopRuntimeConfig had no API or Account origins and sync_account deterministically returned network-unavailable before making a request.
-test: Package through the explicit staging overlay, prove the release binary embeds the exact Render and Account origins, then repeat owner UAT with the Internal #023001 installer.
-expecting: The connected build restores the saved credential against Render or presents real system-browser sign-in instead of the connection-unavailable dead end.
-next_action: Owner installs `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `17CA0F5D6BAE0BB7C21823060A616E8B5DD3116C7DA1CAB29564A40120B924E8`) and retests profile persistence, About identity and tray behavior.
+hypothesis: Confirmed: after a successful profile PATCH, native account sync performed an immediate GET that could replace the committed projection with an older name; independently, a focus/resume synchronization could supersede the in-flight renderer mutation result.
+test: Preserve the PATCH projection as the committed authority, reject nominally successful responses that do not contain the requested name and newer version, prevent lifecycle reads during mutation, and exercise save/conflict/restart semantics through Rust, TypeScript and browser regression tests.
+expecting: Saving a valid new display name updates the profile hero and title bar after server confirmation, and the same name is returned by the authoritative GET after app restart.
+next_action: Owner installs `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `1C1B6FF3A09AF2FC71CA527365E5786EA4EDAD34D82FC55C6CB82A97E1BB156B`) and repeats the real-account save/close/reopen UAT.
 
 ## Evidence
 
@@ -73,6 +73,15 @@ next_action: Owner installs `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `17CA0F
 - timestamp: 2026-08-06T05:40:00-03:00
   observation: API 171/171, desktop 120/120, Rust 69/69, desktop TypeScript, Prettier, Cargo fmt, Vite and NSIS passed; the release binary contains both exact hosted origins.
   implication: the replacement installer contains the complete regression fix set and is ready for owner UAT.
+- timestamp: 2026-08-06T06:04:00-03:00
+  observation: RED tests reproduced both defects: the renderer returned no committed result when a resume read overtook profile save, and native sync returned `Mateus Oliveira` after PATCH had returned `Mateus Winchester` because the follow-up GET replaced it.
+  implication: the reported non-persistence was a deterministic authority-ordering defect, not a cosmetic delay.
+- timestamp: 2026-08-06T06:22:00-03:00
+  observation: Desktop 123/123, Rust 70/70 and five Playwright authority tests pass; visual checks cover Profile, Plan, Device and Security at the standard and 800 px minimum viewports with exactly one active tab and no horizontal overflow.
+  implication: committed identity now updates every desktop identity surface, failure keeps the draft, and all four real account routes have final responsive states without simulated device or security claims.
+- timestamp: 2026-08-06T06:24:00-03:00
+  observation: The staging NSIS bundle rebuilt successfully at version 0.0.1 with SHA-256 `1C1B6FF3A09AF2FC71CA527365E5786EA4EDAD34D82FC55C6CB82A97E1BB156B`.
+  implication: owner UAT can now validate database persistence across a real process restart using the corrected mutation authority.
 
 ## Eliminated
 
@@ -83,7 +92,7 @@ next_action: Owner installs `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `17CA0F
 
 ## Resolution
 
-root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. The About surface still rendered Phase 2 constants instead of native installer identity.
-fix: Added the guarded staging bundle command; admitted Bearer-authenticated native account mutation only when Origin is absent while preserving browser CSRF; sent `If-Match`; restricted credential deletion to 401; preserved drafts on mutation failure; and rendered native About from the host identity without the simulated updater.
-verification: API 171/171, desktop 120/120, Rust 69/69, desktop TypeScript, formatting, Vite release and NSIS pass. The release binary embeds the exact Render and Account origins. Owner retest remains pending.
-files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/real-auth.test.ts, apps/desktop/package.json, apps/desktop/src/internal-channel.test.ts, apps/desktop/src/preferences.tsx, apps/desktop/src/app.tsx, apps/desktop/src/features/premium-operations.tsx, apps/desktop/src-tauri/src/account_sync.rs, apps/desktop/src-tauri/src/window.rs, apps/desktop/src-tauri/src/main.rs, apps/desktop/src-tauri/tauri.staging.conf.json, tests, and Phase 4 UAT artifacts.
+root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. After those defects were fixed, a successful PATCH was still followed by an unnecessary GET capable of replacing the committed projection, while focus/resume synchronization could supersede the renderer mutation sequence.
+fix: Added the guarded staging bundle command; admitted Bearer-authenticated native mutation without browser CSRF; sent `If-Match`; restricted credential deletion to 401; made the validated PATCH projection the immediate native authority; blocked lifecycle reads during an in-flight mutation; returned typed committed/conflict/failure results; and rebuilt all four account routes with honest server-backed states.
+verification: API authority coverage remains green; desktop 123/123, Rust 70/70, TypeScript, ESLint, Prettier, Cargo fmt, five browser authority/visual tests, Vite release and NSIS pass. The release binary embeds the staging origins. Owner real-account restart UAT remains pending.
+files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/real-auth.test.ts, apps/desktop/package.json, apps/desktop/src/internal-channel.test.ts, apps/desktop/src/preferences.tsx, apps/desktop/src/app.tsx, apps/desktop/src/account-authority.ts, apps/desktop/src/features/account-experience.tsx, apps/desktop/src/profile-experience.css, apps/desktop/src/features/premium-operations.tsx, apps/desktop/src-tauri/src/account_sync.rs, apps/desktop/src-tauri/src/window.rs, apps/desktop/src-tauri/src/main.rs, apps/desktop/src-tauri/tauri.staging.conf.json, tests, and Phase 4 UAT artifacts.

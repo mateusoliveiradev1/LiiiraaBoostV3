@@ -42,6 +42,19 @@ export interface SafeAccountProfileDraft {
   readonly locale: ShellLocaleJson;
 }
 
+export type AccountProfileMutationResult =
+  | Readonly<{ status: 'committed'; projection: SharedAccountProjection }>
+  | Readonly<{
+      status: 'conflict';
+      projection: SharedAccountProjection;
+      localDraft: SafeAccountProfileDraft;
+    }>
+  | Readonly<{
+      status: 'failed';
+      error: NonNullable<DesktopAccountAuthoritySnapshot['error']>;
+    }>
+  | Readonly<{ status: 'invalid' }>;
+
 export interface DesktopAccountAuthoritySnapshot {
   readonly state: AccountAuthorityState;
   readonly projection?: SharedAccountProjection;
@@ -270,6 +283,7 @@ export class DesktopAccountAuthority {
   #snapshot: DesktopAccountAuthoritySnapshot = Object.freeze({ state: 'pending' });
   #started = false;
   #sequence = 0;
+  #mutationInFlight = false;
 
   public constructor(transport: AccountAuthorityTransport) {
     this.#transport = transport;
@@ -306,6 +320,7 @@ export class DesktopAccountAuthority {
   }
 
   public async synchronize(trigger: AccountLifecycleTrigger): Promise<void> {
+    if (this.#mutationInFlight) return;
     const sequence = ++this.#sequence;
     this.#publish(pendingSnapshot(this.#snapshot));
     try {
@@ -339,10 +354,14 @@ export class DesktopAccountAuthority {
     }
   }
 
-  public async updateProfile(draft: SafeAccountProfileDraft): Promise<void> {
+  public async updateProfile(
+    draft: SafeAccountProfileDraft,
+  ): Promise<AccountProfileMutationResult> {
     const projection = this.#snapshot.projection;
     const normalizedDraft = safeDraft(draft);
-    if (projection === undefined || normalizedDraft === undefined) return;
+    if (projection === undefined || normalizedDraft === undefined || this.#mutationInFlight) {
+      return Object.freeze({ status: 'invalid' });
+    }
     const command: AccountCommandJson = {
       schemaVersion: '1.0',
       kind: 'account-command',
@@ -354,6 +373,7 @@ export class DesktopAccountAuthority {
       requestedAt: new Date().toISOString(),
     };
     const sequence = ++this.#sequence;
+    this.#mutationInFlight = true;
     this.#publish(pendingSnapshot(this.#snapshot, normalizedDraft));
     try {
       const raw = await this.#transport.invoke(ACCOUNT_SYNC_COMMAND, {
@@ -366,7 +386,9 @@ export class DesktopAccountAuthority {
           },
         },
       });
-      if (sequence !== this.#sequence) return;
+      if (sequence !== this.#sequence) {
+        return Object.freeze({ status: 'failed', error: 'network-unavailable' });
+      }
       const next = authoritySnapshot(raw);
       if (next === undefined) {
         this.#publish(
@@ -377,11 +399,50 @@ export class DesktopAccountAuthority {
             error: 'invalid-response',
           }),
         );
-        return;
+        return Object.freeze({ status: 'failed', error: 'invalid-response' });
+      }
+      if (next.state === 'online' && next.projection !== undefined) {
+        const committedAccount = next.projection.account;
+        if (
+          committedAccount.accountId !== projection.account.accountId ||
+          committedAccount.aggregateVersion === projection.account.aggregateVersion ||
+          committedAccount.displayName !== normalizedDraft.displayName ||
+          committedAccount.locale !== normalizedDraft.locale
+        ) {
+          this.#publish(
+            Object.freeze({
+              state: 'stale',
+              projection,
+              localDraft: normalizedDraft,
+              error: 'invalid-response',
+            }),
+          );
+          return Object.freeze({ status: 'failed', error: 'invalid-response' });
+        }
+        this.#publish(next);
+        return Object.freeze({ status: 'committed', projection: next.projection });
+      }
+      if (
+        next.state === 'conflict' &&
+        next.projection !== undefined &&
+        next.localDraft !== undefined
+      ) {
+        this.#publish(next);
+        return Object.freeze({
+          status: 'conflict',
+          projection: next.projection,
+          localDraft: next.localDraft,
+        });
       }
       this.#publish(next);
+      return Object.freeze({
+        status: 'failed',
+        error: next.error ?? 'invalid-response',
+      });
     } catch {
-      if (sequence !== this.#sequence) return;
+      if (sequence !== this.#sequence) {
+        return Object.freeze({ status: 'failed', error: 'network-unavailable' });
+      }
       this.#publish(
         Object.freeze({
           state: 'stale',
@@ -390,6 +451,9 @@ export class DesktopAccountAuthority {
           error: 'network-unavailable',
         }),
       );
+      return Object.freeze({ status: 'failed', error: 'network-unavailable' });
+    } finally {
+      this.#mutationInFlight = false;
     }
   }
 

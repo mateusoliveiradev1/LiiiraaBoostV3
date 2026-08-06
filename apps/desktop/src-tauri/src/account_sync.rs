@@ -375,7 +375,20 @@ pub fn sync_account(
                 return degraded_mutation_response(state, mutation.draft.clone(), error);
             }
         };
-        state.last_projection = Some(updated_projection);
+        if updated_projection.account.account_id.as_str() != mutation.command.account_id.as_str()
+            || updated_projection.account.aggregate_version == mutation.command.expected_version
+            || updated_projection.account.display_name.trim() != mutation.draft.display_name.trim()
+            || updated_projection.account.locale != mutation.draft.locale
+        {
+            return degraded_mutation_response(
+                state,
+                mutation.draft.clone(),
+                AccountSyncError::InvalidResponse,
+            );
+        }
+        let authority_state = updated_projection.provenance;
+        state.last_projection = Some(updated_projection.clone());
+        return response(authority_state, Some(updated_projection), None, None);
     }
 
     match api.get_account(&credential) {
@@ -862,6 +875,67 @@ mod tests {
                 .display_name
                 .as_str(),
             "Mateus Oliveira"
+        );
+    }
+
+    #[test]
+    fn committed_profile_mutation_is_not_replaced_by_an_immediately_stale_read() {
+        let store = store();
+        let mut committed: serde_json::Value =
+            serde_json::from_slice(&projection_body("Mateus Winchester", "8", "online"))
+                .expect("committed projection fixture decodes");
+        committed["account"]["locale"] = serde_json::json!("pt-BR");
+        let api = SequenceApi {
+            get: RefCell::new(VecDeque::from([
+                AccountApiResponse {
+                    status: 200,
+                    body: projection_body("Mateus Oliveira", "7", "online"),
+                },
+                AccountApiResponse {
+                    status: 200,
+                    body: projection_body("Mateus Oliveira", "7", "online"),
+                },
+            ])),
+            update: RefCell::new(VecDeque::from([AccountApiResponse {
+                status: 200,
+                body: serde_json::to_vec(&committed).expect("committed projection serializes"),
+            }])),
+        };
+        let mut sync_state = AccountSyncState::default();
+        let _ = sync_account(
+            &store,
+            &api,
+            &mut sync_state,
+            AccountSyncRequest {
+                trigger: AccountSyncTrigger::Launch,
+                mutation: None,
+            },
+        );
+
+        let result = sync_account(
+            &store,
+            &api,
+            &mut sync_state,
+            AccountSyncRequest {
+                trigger: AccountSyncTrigger::Mutation,
+                mutation: Some(profile_mutation()),
+            },
+        );
+
+        assert_eq!(result.state, AccountAuthorityState::Online);
+        assert_eq!(
+            result
+                .projection
+                .expect("committed projection returned")
+                .account
+                .display_name
+                .as_str(),
+            "Mateus Winchester"
+        );
+        assert_eq!(
+            api.get.borrow().len(),
+            1,
+            "mutation must not perform a stale follow-up GET"
         );
     }
 

@@ -1856,70 +1856,162 @@ const AuthoritativeProfile = ({
   readonly snapshot: DesktopAccountAuthoritySnapshot;
 }) => {
   const remoteName = snapshot.projection?.account.displayName ?? '';
-  const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState(remoteName);
+  const [notice, setNotice] = useState<
+    Readonly<{ tone: 'error' | 'success'; title: string; message: string }> | undefined
+  >();
+  const normalizedName = displayName.trim();
+  const isDirty = normalizedName !== remoteName;
+  const isValid = normalizedName.length >= 2 && normalizedName.length <= 40;
+  const isSaving = snapshot.state === 'pending' && snapshot.localDraft !== undefined;
 
   useEffect(() => {
-    if (!editing && remoteName !== '') setDisplayName(remoteName);
-  }, [editing, remoteName]);
+    if (!isSaving && remoteName !== '') setDisplayName(remoteName);
+  }, [isSaving, remoteName]);
+
+  const saveProfile = async (): Promise<void> => {
+    setNotice(undefined);
+    const result = await authority.updateProfile({ displayName: normalizedName, locale });
+    if (result.status === 'committed') {
+      setDisplayName(result.projection.account.displayName);
+      setNotice({
+        tone: 'success',
+        title: copy(locale, { en: 'Profile saved', 'pt-BR': 'Perfil salvo' }),
+        message: copy(locale, {
+          en: 'The new name is confirmed by the account API and will persist after restart.',
+          'pt-BR': 'O novo nome foi confirmado pela API e continuará salvo após reiniciar.',
+        }),
+      });
+      return;
+    }
+    if (result.status === 'conflict') {
+      setDisplayName(result.localDraft.displayName);
+      setNotice(undefined);
+      return;
+    }
+    setNotice({
+      tone: 'error',
+      title: copy(locale, { en: 'The profile was not saved', 'pt-BR': 'O perfil não foi salvo' }),
+      message: copy(locale, {
+        en: 'Your typed name is still here. Check the connection and try again.',
+        'pt-BR': 'O nome digitado continua aqui. Verifique a conexão e tente novamente.',
+      }),
+    });
+  };
 
   return (
-    <section
-      aria-label={copy(locale, { en: 'Authoritative profile', 'pt-BR': 'Perfil autoritativo' })}
-    >
+    <div className="desktop-authority-profile-form">
       {snapshot.state === 'conflict' && snapshot.projection && snapshot.localDraft ? (
-        <aside
-          aria-label={copy(locale, {
-            en: 'Account version conflict',
-            'pt-BR': 'Conflito de versão da conta',
-          })}
-          role="alert"
-        >
-          <strong>
-            {copy(locale, {
-              en: 'Review before resubmitting',
-              'pt-BR': 'Revise antes de reenviar',
-            })}
-          </strong>
-          <p>{`${copy(locale, { en: 'Remote', 'pt-BR': 'Remoto' })}: ${snapshot.projection.account.displayName}`}</p>
-          <p>{`${copy(locale, { en: 'Local draft', 'pt-BR': 'Rascunho local' })}: ${snapshot.localDraft.displayName}`}</p>
+        <aside className="desktop-authority-notice" data-tone="error" role="alert">
+          <ProductIcon name="warning" size={18} />
+          <div>
+            <strong>
+              {copy(locale, { en: 'Version conflict', 'pt-BR': 'Conflito de versão' })}
+            </strong>
+            <p>
+              {copy(locale, { en: 'Account', 'pt-BR': 'Conta' })}:{' '}
+              {snapshot.projection.account.displayName}
+              {' · '}
+              {copy(locale, { en: 'Your draft', 'pt-BR': 'Seu rascunho' })}:{' '}
+              {snapshot.localDraft.displayName}
+            </p>
+            <p>
+              {copy(locale, {
+                en: 'Your typed name was preserved. Review it and save again.',
+                'pt-BR': 'O nome digitado foi preservado. Revise e salve novamente.',
+              })}
+            </p>
+          </div>
         </aside>
       ) : null}
-      {editing ? (
-        <div>
+      {notice ? (
+        <aside className="desktop-authority-notice" data-tone={notice.tone} aria-live="polite">
+          <ProductIcon name={notice.tone === 'success' ? 'check' : 'warning'} size={18} />
+          <div>
+            <strong>{notice.title}</strong>
+            <p>{notice.message}</p>
+          </div>
+        </aside>
+      ) : null}
+      <section aria-label={copy(locale, { en: 'Profile name', 'pt-BR': 'Nome do perfil' })}>
+        <header>
+          <div>
+            <span className="desktop-authority-kicker">
+              {copy(locale, { en: 'PUBLIC IDENTITY', 'pt-BR': 'IDENTIDADE PÚBLICA' })}
+            </span>
+            <h3>{copy(locale, { en: 'Display name', 'pt-BR': 'Nome de exibição' })}</h3>
+            <p>
+              {copy(locale, {
+                en: 'Shown in this app and in every authenticated Liiiraa Boost surface.',
+                'pt-BR': 'Exibido neste app e em todas as áreas autenticadas do Liiiraa Boost.',
+              })}
+            </p>
+          </div>
+          <span className="desktop-authority-save-state" data-dirty={String(isDirty)}>
+            {isSaving
+              ? copy(locale, { en: 'Saving…', 'pt-BR': 'Salvando…' })
+              : isDirty
+                ? copy(locale, { en: 'Unsaved change', 'pt-BR': 'Alteração não salva' })
+                : copy(locale, { en: 'Up to date', 'pt-BR': 'Atualizado' })}
+          </span>
+        </header>
+        <div className="desktop-authority-profile-controls">
           <LbTextField
             label={copy(locale, { en: 'Display name', 'pt-BR': 'Nome de exibição' })}
             maxLength={40}
-            onChange={setDisplayName}
+            onChange={(value) => {
+              setDisplayName(value);
+              setNotice(undefined);
+            }}
             value={displayName}
           />
-          <LbButton
-            isDisabled={displayName.trim().length < 2 || snapshot.state === 'pending'}
-            isLoading={snapshot.state === 'pending'}
-            loadingLabel={copy(locale, {
-              en: 'Awaiting authority',
-              'pt-BR': 'Aguardando autoridade',
-            })}
-            onPress={() => {
-              void authority.updateProfile({ displayName, locale });
-            }}
-            variant="primary"
-          >
-            {copy(locale, { en: 'Save changes', 'pt-BR': 'Salvar alterações' })}
-          </LbButton>
+          <div className="desktop-authority-profile-actions">
+            {isDirty ? (
+              <LbButton
+                isDisabled={isSaving}
+                onPress={() => {
+                  setDisplayName(remoteName);
+                  setNotice(undefined);
+                }}
+                variant="quiet"
+              >
+                {copy(locale, { en: 'Discard', 'pt-BR': 'Descartar' })}
+              </LbButton>
+            ) : null}
+            <LbButton
+              isDisabled={!isDirty || !isValid || isSaving}
+              isLoading={isSaving}
+              loadingLabel={copy(locale, { en: 'Saving', 'pt-BR': 'Salvando' })}
+              onPress={() => void saveProfile()}
+              variant="primary"
+            >
+              {copy(locale, { en: 'Save profile', 'pt-BR': 'Salvar perfil' })}
+            </LbButton>
+          </div>
         </div>
-      ) : (
-        <LbButton
-          isDisabled={snapshot.projection === undefined}
-          onPress={() => {
-            setEditing(true);
-          }}
-          variant="secondary"
-        >
-          {copy(locale, { en: 'Edit profile', 'pt-BR': 'Editar perfil' })}
-        </LbButton>
-      )}
-    </section>
+        {!isValid && displayName.length > 0 ? (
+          <p className="desktop-authority-field-error" role="alert">
+            {copy(locale, {
+              en: 'Use between 2 and 40 characters.',
+              'pt-BR': 'Use entre 2 e 40 caracteres.',
+            })}
+          </p>
+        ) : null}
+      </section>
+      <dl className="desktop-authority-profile-meta">
+        <div>
+          <dt>{copy(locale, { en: 'Account language', 'pt-BR': 'Idioma da conta' })}</dt>
+          <dd>{locale === 'pt-BR' ? 'Português (Brasil)' : 'English'}</dd>
+        </div>
+        <div>
+          <dt>{copy(locale, { en: 'Persistence', 'pt-BR': 'Persistência' })}</dt>
+          <dd>
+            <ProductIcon name="lock" size={14} />
+            PostgreSQL
+          </dd>
+        </div>
+      </dl>
+    </div>
   );
 };
 
@@ -1980,9 +2072,16 @@ const AuthoritativeAccountContent = ({
   const subscription = projection?.subscription;
   const administrativeRole = account?.administrativeRole;
   const isPremium = subscription?.plan === 'premium' && subscription.state === 'active';
+  const activeSessions = projection?.sessions.filter((session) => session.state === 'active') ?? [];
+  const primarySession = activeSessions[0];
+  const accountIsCurrent = snapshot.state === 'online';
 
   return (
-    <div className="desktop-authority-account" data-account-runtime="production">
+    <div
+      className="desktop-authority-account"
+      data-account-authority-state={snapshot.state}
+      data-account-runtime="production"
+    >
       {account === undefined || subscription === undefined ? (
         <section className="desktop-authority-loading" aria-busy="true">
           <span className="desktop-authority-loading__pulse" />
@@ -2004,16 +2103,16 @@ const AuthoritativeAccountContent = ({
             {authorityInitials(account.displayName, locale)}
           </div>
           <div className="desktop-authority-identity__body">
-            <span className="desktop-authority-identity__status">
-              <ProductIcon name="check" size={14} />
-              {snapshot.state === 'online'
+            <span className="desktop-authority-identity__status" data-state={snapshot.state}>
+              <ProductIcon name={accountIsCurrent ? 'check' : 'warning'} size={14} />
+              {accountIsCurrent
                 ? copy(locale, {
-                    en: 'Synced with your account',
-                    'pt-BR': 'Sincronizado com sua conta',
+                    en: 'Confirmed by the account API',
+                    'pt-BR': 'Confirmado pela API da conta',
                   })
                 : copy(locale, {
-                    en: 'Protected local snapshot',
-                    'pt-BR': 'Cópia local protegida',
+                    en: 'Showing the last confirmed version',
+                    'pt-BR': 'Exibindo a última versão confirmada',
                   })}
             </span>
             <h2 id="desktop-account-name">{account.displayName}</h2>
@@ -2039,10 +2138,8 @@ const AuthoritativeAccountContent = ({
               <dd>{formatAuthorityDate(account.createdAt, locale)}</dd>
             </div>
             <div>
-              <dt>{copy(locale, { en: 'Active sessions', 'pt-BR': 'Sessões ativas' })}</dt>
-              <dd>
-                {projection?.sessions.filter((session) => session.state === 'active').length ?? 0}
-              </dd>
+              <dt>{copy(locale, { en: 'Access level', 'pt-BR': 'Nível de acesso' })}</dt>
+              <dd>{isPremium ? 'Premium' : 'Free'}</dd>
             </div>
             <div>
               <dt>
@@ -2057,142 +2154,414 @@ const AuthoritativeAccountContent = ({
         </section>
       )}
       {view === 'overview' ? (
-        <section className="desktop-authority-section">
-          <header>
-            <span className="desktop-authority-section__icon">
-              <ProductIcon name="profile" size={19} />
+        <div className="desktop-authority-route desktop-authority-route--profile">
+          <section className="desktop-authority-section desktop-authority-section--primary">
+            <header>
+              <span className="desktop-authority-section__icon">
+                <ProductIcon name="profile" size={19} />
+              </span>
+              <div>
+                <span className="desktop-authority-kicker">
+                  {copy(locale, { en: 'ACCOUNT PROFILE', 'pt-BR': 'PERFIL DA CONTA' })}
+                </span>
+                <h2>{copy(locale, { en: 'Your identity', 'pt-BR': 'Sua identidade' })}</h2>
+                <p>
+                  {copy(locale, {
+                    en: 'One authoritative profile shared by the desktop and account portal.',
+                    'pt-BR':
+                      'Um perfil autoritativo compartilhado pelo desktop e pelo portal da conta.',
+                  })}
+                </p>
+              </div>
+            </header>
+            <AuthoritativeProfile authority={authority} locale={locale} snapshot={snapshot} />
+          </section>
+          <aside
+            className="desktop-authority-context"
+            aria-label={copy(locale, { en: 'Account record', 'pt-BR': 'Registro da conta' })}
+          >
+            <span className="desktop-authority-kicker">
+              {copy(locale, { en: 'AUTHORITATIVE RECORD', 'pt-BR': 'REGISTRO AUTORITATIVO' })}
             </span>
-            <div>
-              <h2>{copy(locale, { en: 'Profile details', 'pt-BR': 'Dados do perfil' })}</h2>
-              <p>
-                {copy(locale, {
-                  en: 'Changes are validated by the account API and persisted in PostgreSQL.',
-                  'pt-BR': 'As alterações são validadas pela API da conta e salvas no PostgreSQL.',
-                })}
-              </p>
-            </div>
-          </header>
-          <AuthoritativeProfile authority={authority} locale={locale} snapshot={snapshot} />
-        </section>
+            <h3>{copy(locale, { en: 'Account details', 'pt-BR': 'Detalhes da conta' })}</h3>
+            <dl>
+              <div>
+                <dt>E-mail</dt>
+                <dd>{account?.emailRedacted ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { en: 'Last update', 'pt-BR': 'Última atualização' })}</dt>
+                <dd>{account ? formatAuthorityDate(account.updatedAt, locale) : '—'}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { en: 'Account version', 'pt-BR': 'Versão da conta' })}</dt>
+                <dd>v{account?.aggregateVersion ?? '—'}</dd>
+              </div>
+            </dl>
+            <p>
+              <ProductIcon name="lock" size={15} />
+              {copy(locale, {
+                en: 'Only confirmed server data is presented here.',
+                'pt-BR': 'Somente dados confirmados pelo servidor aparecem aqui.',
+              })}
+            </p>
+          </aside>
+        </div>
       ) : null}
       {view === 'subscription' ? (
-        <section
-          className="desktop-authority-section"
-          aria-label={copy(locale, {
-            en: 'Subscription authority',
-            'pt-BR': 'Autoridade da assinatura',
-          })}
-        >
-          <header>
-            <span className="desktop-authority-section__icon">
-              <ProductIcon name="crown" size={19} />
-            </span>
+        <div className="desktop-authority-route desktop-authority-route--plan">
+          <section className="desktop-authority-plan-hero" data-plan={subscription?.plan ?? 'free'}>
+            <div className="desktop-authority-plan-mark" aria-hidden="true">
+              <ProductIcon name="crown" size={28} />
+            </div>
             <div>
+              <span className="desktop-authority-kicker">
+                {copy(locale, { en: 'CURRENT ACCESS', 'pt-BR': 'ACESSO ATUAL' })}
+              </span>
               <h2>{isPremium ? 'Premium' : 'Free'}</h2>
               <p>
                 {isPremium
                   ? copy(locale, {
-                      en: 'Your Premium access is active and authorized by the server.',
-                      'pt-BR': 'Seu acesso Premium está ativo e autorizado pelo servidor.',
+                      en: 'Full access is active for this account.',
+                      'pt-BR': 'O acesso completo está ativo para esta conta.',
                     })
                   : copy(locale, {
-                      en: 'Your account currently uses the Free plan.',
-                      'pt-BR': 'Sua conta usa atualmente o plano Free.',
+                      en: 'This account currently has essential access.',
+                      'pt-BR': 'Esta conta possui atualmente o acesso essencial.',
                     })}
               </p>
             </div>
-          </header>
-          <dl className="desktop-authority-details">
-            <div>
-              <dt>{copy(locale, { en: 'Status', 'pt-BR': 'Status' })}</dt>
-              <dd>{subscription?.state ?? '—'}</dd>
-            </div>
-            <div>
-              <dt>{copy(locale, { en: 'Entitlements', 'pt-BR': 'Benefícios' })}</dt>
-              <dd>{subscription?.entitlements.length ?? 0}</dd>
-            </div>
-            <div>
-              <dt>{copy(locale, { en: 'Renewal', 'pt-BR': 'Renovação' })}</dt>
-              <dd>
-                {subscription?.currentPeriodEndsAt
-                  ? formatAuthorityDate(subscription.currentPeriodEndsAt, locale)
-                  : copy(locale, { en: 'No expiration', 'pt-BR': 'Sem expiração' })}
-              </dd>
-            </div>
-          </dl>
-        </section>
-      ) : null}
-      {view === 'device' ? (
-        <section
-          className="desktop-authority-section"
-          aria-label={copy(locale, {
-            en: 'Active device authority',
-            'pt-BR': 'Autoridade do dispositivo ativo',
-          })}
-        >
-          <header>
-            <span className="desktop-authority-section__icon">
-              <ProductIcon name="monitor" size={19} />
+            <span className="desktop-authority-plan-state">
+              <ProductIcon name="check" size={15} />
+              {subscription?.state === 'active'
+                ? copy(locale, { en: 'Active', 'pt-BR': 'Ativo' })
+                : (subscription?.state ?? '—')}
             </span>
-            <div>
-              <h2>
-                {projection?.activeDevice?.deviceLabel ??
-                  copy(locale, { en: 'No linked device', 'pt-BR': 'Nenhum dispositivo vinculado' })}
-              </h2>
-              <p>
-                {projection?.activeDevice?.state ??
-                  copy(locale, {
-                    en: 'This computer has not been registered by the API yet.',
-                    'pt-BR': 'Este computador ainda não foi registrado pela API.',
+          </section>
+          <section className="desktop-authority-section desktop-authority-section--ledger">
+            <header>
+              <span className="desktop-authority-section__icon">
+                <ProductIcon name="shield" size={19} />
+              </span>
+              <div>
+                <span className="desktop-authority-kicker">
+                  {copy(locale, { en: 'SERVER ENTITLEMENTS', 'pt-BR': 'DIREITOS DO SERVIDOR' })}
+                </span>
+                <h2>
+                  {copy(locale, {
+                    en: 'What this account unlocks',
+                    'pt-BR': 'O que esta conta libera',
                   })}
-              </p>
-            </div>
-          </header>
-        </section>
-      ) : null}
-      {view === 'security' ? (
-        <section
-          className="desktop-authority-section"
-          aria-label={copy(locale, {
-            en: 'Security authority',
-            'pt-BR': 'Autoridade de segurança',
-          })}
-        >
-          <header>
-            <span className="desktop-authority-section__icon">
-              <ProductIcon name="shield" size={19} />
-            </span>
-            <div>
-              <h2>{copy(locale, { en: 'Account security', 'pt-BR': 'Segurança da conta' })}</h2>
-              <p>
-                {copy(locale, {
-                  en: 'Only methods confirmed by the identity service are shown.',
-                  'pt-BR': 'Somente métodos confirmados pelo serviço de identidade são exibidos.',
-                })}
-              </p>
-            </div>
-          </header>
-          {projection?.securityMethods.length ? (
-            <ul className="desktop-authority-methods">
-              {projection.securityMethods.map((method) => (
-                <li key={method.methodId}>
-                  <ProductIcon name="check" size={15} />
+                </h2>
+                <p>
+                  {copy(locale, {
+                    en: 'The list below comes directly from the subscription authority.',
+                    'pt-BR': 'A lista abaixo vem diretamente da autoridade de assinatura.',
+                  })}
+                </p>
+              </div>
+            </header>
+            <ul className="desktop-authority-entitlements">
+              {(subscription?.entitlements ?? []).map((entitlement) => (
+                <li key={entitlement}>
+                  <ProductIcon name="check" size={16} />
                   <span>
-                    <strong>{method.factor}</strong>
-                    <small>{copy(locale, { en: 'Verified', 'pt-BR': 'Verificado' })}</small>
+                    <strong>{entitlement.replaceAll('-', ' ')}</strong>
+                    <small>{copy(locale, { en: 'Authorized', 'pt-BR': 'Autorizado' })}</small>
                   </span>
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="desktop-authority-empty">
-              {copy(locale, {
-                en: 'No additional security method is registered yet.',
-                'pt-BR': 'Nenhum método adicional de segurança foi cadastrado ainda.',
-              })}
-            </p>
-          )}
-        </section>
+          </section>
+          <dl className="desktop-authority-plan-facts">
+            <div>
+              <dt>{copy(locale, { en: 'Validity', 'pt-BR': 'Validade' })}</dt>
+              <dd>
+                {subscription?.currentPeriodEndsAt
+                  ? formatAuthorityDate(subscription.currentPeriodEndsAt, locale)
+                  : copy(locale, {
+                      en: 'Permanent on this account',
+                      'pt-BR': 'Permanente nesta conta',
+                    })}
+              </dd>
+            </div>
+            <div>
+              <dt>
+                {copy(locale, { en: 'Automatic cancellation', 'pt-BR': 'Cancelamento automático' })}
+              </dt>
+              <dd>
+                {subscription?.cancelAtPeriodEnd
+                  ? copy(locale, { en: 'Scheduled', 'pt-BR': 'Agendado' })
+                  : copy(locale, { en: 'No', 'pt-BR': 'Não' })}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy(locale, { en: 'Authority', 'pt-BR': 'Autoridade' })}</dt>
+              <dd>PostgreSQL · API</dd>
+            </div>
+          </dl>
+        </div>
+      ) : null}
+      {view === 'device' ? (
+        <div className="desktop-authority-route desktop-authority-route--device">
+          <section
+            className="desktop-authority-device-state"
+            data-linked={String(projection?.activeDevice !== null)}
+          >
+            <div className="desktop-authority-device-visual" aria-hidden="true">
+              <ProductIcon name="monitor" size={34} />
+              <span />
+            </div>
+            <div>
+              <span className="desktop-authority-kicker">
+                {copy(locale, { en: 'DEVICE AUTHORITY', 'pt-BR': 'AUTORIDADE DO DISPOSITIVO' })}
+              </span>
+              <h2>
+                {projection?.activeDevice?.deviceLabel ??
+                  copy(locale, {
+                    en: 'This PC is not linked yet',
+                    'pt-BR': 'Este PC ainda não está vinculado',
+                  })}
+              </h2>
+              <p>
+                {projection?.activeDevice
+                  ? copy(locale, {
+                      en: 'This device was confirmed by the account API.',
+                      'pt-BR': 'Este dispositivo foi confirmado pela API da conta.',
+                    })
+                  : copy(locale, {
+                      en: 'Device binding has not been enabled in this beta. Your account and Premium access remain active.',
+                      'pt-BR':
+                        'A vinculação de dispositivo ainda não foi liberada nesta beta. Sua conta e o acesso Premium continuam ativos.',
+                    })}
+              </p>
+            </div>
+            <span className="desktop-authority-device-badge">
+              {projection?.activeDevice
+                ? copy(locale, { en: 'Linked', 'pt-BR': 'Vinculado' })
+                : copy(locale, { en: 'Awaiting beta', 'pt-BR': 'Aguardando beta' })}
+            </span>
+          </section>
+          <section className="desktop-authority-section desktop-authority-section--device-explainer">
+            <header>
+              <span className="desktop-authority-section__icon">
+                <ProductIcon name="shield" size={19} />
+              </span>
+              <div>
+                <h2>
+                  {copy(locale, {
+                    en: 'What linking will protect',
+                    'pt-BR': 'O que a vinculação vai proteger',
+                  })}
+                </h2>
+                <p>
+                  {copy(locale, {
+                    en: 'When released, binding will associate licenses and optimization history with one verified PC.',
+                    'pt-BR':
+                      'Quando liberada, a vinculação associará licenças e histórico de otimização a um PC verificado.',
+                  })}
+                </p>
+              </div>
+            </header>
+            <div className="desktop-authority-device-capabilities">
+              <div>
+                <ProductIcon name="lock" size={18} />
+                <strong>
+                  {copy(locale, { en: 'License custody', 'pt-BR': 'Custódia da licença' })}
+                </strong>
+                <p>
+                  {copy(locale, {
+                    en: 'Prevents silent device swaps.',
+                    'pt-BR': 'Impede trocas silenciosas de dispositivo.',
+                  })}
+                </p>
+              </div>
+              <div>
+                <ProductIcon name="history" size={18} />
+                <strong>
+                  {copy(locale, {
+                    en: 'Recovery continuity',
+                    'pt-BR': 'Continuidade de recuperação',
+                  })}
+                </strong>
+                <p>
+                  {copy(locale, {
+                    en: 'Keeps device evidence traceable.',
+                    'pt-BR': 'Mantém as evidências do dispositivo rastreáveis.',
+                  })}
+                </p>
+              </div>
+              <div>
+                <ProductIcon name="shield" size={18} />
+                <strong>
+                  {copy(locale, { en: 'Verified changes', 'pt-BR': 'Alterações verificadas' })}
+                </strong>
+                <p>
+                  {copy(locale, {
+                    en: 'Confirms which PC received a plan.',
+                    'pt-BR': 'Confirma qual PC recebeu um plano.',
+                  })}
+                </p>
+              </div>
+            </div>
+          </section>
+          {projection?.activeDevice ? (
+            <dl className="desktop-authority-plan-facts">
+              <div>
+                <dt>Status</dt>
+                <dd>{projection.activeDevice.state}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { en: 'Evidence version', 'pt-BR': 'Versão da evidência' })}</dt>
+                <dd>v{projection.activeDevice.evidenceVersion}</dd>
+              </div>
+              <div>
+                <dt>{copy(locale, { en: 'Binding', 'pt-BR': 'Vínculo' })}</dt>
+                <dd>{projection.activeDevice.deviceBindingId}</dd>
+              </div>
+            </dl>
+          ) : null}
+        </div>
+      ) : null}
+      {view === 'security' ? (
+        <div className="desktop-authority-route desktop-authority-route--security">
+          <section className="desktop-authority-security-hero">
+            <span className="desktop-authority-security-mark">
+              <ProductIcon name="shield" size={28} />
+            </span>
+            <div>
+              <span className="desktop-authority-kicker">
+                {copy(locale, { en: 'SECURITY POSTURE', 'pt-BR': 'POSTURA DE SEGURANÇA' })}
+              </span>
+              <h2>{copy(locale, { en: 'Account protected', 'pt-BR': 'Conta protegida' })}</h2>
+              <p>
+                {copy(locale, {
+                  en: 'Session and role information below comes from the identity service.',
+                  'pt-BR': 'As informações de sessão e função abaixo vêm do serviço de identidade.',
+                })}
+              </p>
+            </div>
+            <span className="desktop-authority-security-state">
+              <ProductIcon name="check" size={15} />
+              {copy(locale, { en: 'Authenticated', 'pt-BR': 'Autenticada' })}
+            </span>
+          </section>
+          <div className="desktop-authority-security-grid">
+            <section className="desktop-authority-section desktop-authority-section--sessions">
+              <header>
+                <span className="desktop-authority-section__icon">
+                  <ProductIcon name="monitor" size={19} />
+                </span>
+                <div>
+                  <h2>{copy(locale, { en: 'Active sessions', 'pt-BR': 'Sessões ativas' })}</h2>
+                  <p>
+                    {activeSessions.length}{' '}
+                    {copy(locale, { en: 'confirmed connection', 'pt-BR': 'conexão confirmada' })}
+                    {activeSessions.length === 1 ? '' : 's'}
+                  </p>
+                </div>
+              </header>
+              <ul className="desktop-authority-session-list">
+                {activeSessions.map((session) => (
+                  <li key={session.sessionId}>
+                    <span className="desktop-authority-session-icon">
+                      <ProductIcon name="monitor" size={18} />
+                    </span>
+                    <div>
+                      <strong>
+                        {session.scopes.includes('session-desktop')
+                          ? copy(locale, {
+                              en: 'Liiiraa Boost desktop',
+                              'pt-BR': 'Desktop Liiiraa Boost',
+                            })
+                          : copy(locale, { en: 'Account browser', 'pt-BR': 'Navegador da conta' })}
+                      </strong>
+                      <small>
+                        {copy(locale, { en: 'Authenticated with', 'pt-BR': 'Autenticado com' })}{' '}
+                        {session.authenticationStrength}
+                      </small>
+                    </div>
+                    <time dateTime={session.lastSeenAt}>
+                      {formatAuthorityDate(session.lastSeenAt, locale)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section className="desktop-authority-section desktop-authority-section--methods">
+              <header>
+                <span className="desktop-authority-section__icon">
+                  <ProductIcon name="lock" size={19} />
+                </span>
+                <div>
+                  <h2>
+                    {copy(locale, { en: 'Verified methods', 'pt-BR': 'Métodos verificados' })}
+                  </h2>
+                  <p>
+                    {copy(locale, {
+                      en: 'No simulated security score.',
+                      'pt-BR': 'Sem nota de segurança simulada.',
+                    })}
+                  </p>
+                </div>
+              </header>
+              {projection?.securityMethods.length ? (
+                <ul className="desktop-authority-methods">
+                  {projection.securityMethods.map((method) => (
+                    <li key={method.methodId}>
+                      <ProductIcon name="check" size={15} />
+                      <span>
+                        <strong>{method.factor}</strong>
+                        <small>{copy(locale, { en: 'Verified', 'pt-BR': 'Verificado' })}</small>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="desktop-authority-method-empty">
+                  <ProductIcon name="lock" size={20} />
+                  <strong>
+                    {copy(locale, {
+                      en: 'No additional method',
+                      'pt-BR': 'Nenhum método adicional',
+                    })}
+                  </strong>
+                  <p>
+                    {copy(locale, {
+                      en: 'Passkeys and two-factor authentication are not registered yet.',
+                      'pt-BR':
+                        'Chaves de acesso e autenticação em dois fatores ainda não estão cadastradas.',
+                    })}
+                  </p>
+                </div>
+              )}
+            </section>
+          </div>
+          <dl className="desktop-authority-plan-facts">
+            <div>
+              <dt>
+                {copy(locale, { en: 'Current authentication', 'pt-BR': 'Autenticação atual' })}
+              </dt>
+              <dd>{primarySession?.authenticationStrength ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>
+                {copy(locale, { en: 'Administrative role', 'pt-BR': 'Função administrativa' })}
+              </dt>
+              <dd>
+                {administrativeRole
+                  ? administrativeRoleLabel(locale, administrativeRole)
+                  : copy(locale, { en: 'Standard account', 'pt-BR': 'Conta padrão' })}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy(locale, { en: 'Session expires', 'pt-BR': 'Sessão expira' })}</dt>
+              <dd>
+                {primarySession ? formatAuthorityDate(primarySession.expiresAt, locale) : '—'}
+              </dd>
+            </div>
+          </dl>
+        </div>
       ) : null}
       {snapshot.state === 'revoked' ? <LocalSafetyCapabilities locale={locale} /> : null}
       <footer className="desktop-authority-footer">

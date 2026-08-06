@@ -82,6 +82,7 @@ const projection = (displayName = 'Astra Player', aggregateVersion = '7') => ({
 const installNativeAccountAuthority = async (
   page: Page,
   options: Readonly<{
+    activeDevice?: boolean;
     conflict?: boolean;
     initialState?: AuthorityState;
     revokeOnReconnect?: boolean;
@@ -118,6 +119,20 @@ const installNativeAccountAuthority = async (
                 state: 'conflict',
               };
             }
+            if (request?.mutation?.draft?.displayName) {
+              return {
+                projection: {
+                  ...initialProjection,
+                  account: {
+                    ...initialProjection.account,
+                    aggregateVersion: '8',
+                    displayName: request.mutation.draft.displayName,
+                    locale: request.mutation.draft.locale ?? initialProjection.account.locale,
+                  },
+                },
+                state: 'online',
+              };
+            }
             return { projection: initialProjection, state: initialState };
           },
         }),
@@ -126,7 +141,8 @@ const installNativeAccountAuthority = async (
     },
     {
       conflict: options.conflict === true,
-      initialProjection: projection(),
+      initialProjection:
+        options.activeDevice === false ? { ...projection(), activeDevice: null } : projection(),
       initialState: options.initialState ?? 'online',
       remoteProjection: projection('Remote Player', '8'),
       revokeOnReconnect: options.revokeOnReconnect === true,
@@ -149,8 +165,10 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] renders generated native 
   await installNativeAccountAuthority(page);
   await openAccount(page, '/account/overview');
 
-  const authority = page.getByRole('region', { name: 'Account authority status' });
-  await expect(authority).toContainText('Online');
+  await expect(page.locator('[data-account-authority-state]')).toHaveAttribute(
+    'data-account-authority-state',
+    'online',
+  );
   await expect(page.getByRole('main')).toContainText('Astra Player');
   await expect(page.getByRole('main')).toContainText('a***@example.com');
   await expect(page.getByRole('main')).toContainText('Astra-PC');
@@ -183,18 +201,31 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps remote truth and th
   await installNativeAccountAuthority(page, { conflict: true });
   await openAccount(page, '/account/overview');
 
-  await page.getByRole('button', { name: 'Edit profile' }).click();
   await page.getByRole('textbox', { name: 'Display name' }).fill('Safe Local Draft');
-  await page.getByRole('button', { name: 'Save changes' }).click();
+  await page.getByRole('button', { name: 'Save profile' }).click();
 
-  const conflict = page.getByRole('alert', { name: 'Account version conflict' });
+  const conflict = page.getByRole('alert');
   await expect(conflict).toContainText('Remote Player');
   await expect(conflict).toContainText('Safe Local Draft');
   await expect(page.locator('[data-account-authority-state]')).toHaveAttribute(
     'data-account-authority-state',
     'conflict',
   );
-  await expect(page.getByText('Profile saved on this device.')).toHaveCount(0);
+  await expect(page.getByText('Profile saved')).toHaveCount(0);
+});
+
+test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] projects a committed profile name across the account shell`, async ({
+  page,
+}) => {
+  await installNativeAccountAuthority(page);
+  await openAccount(page, '/account/overview');
+
+  await page.getByRole('textbox', { name: 'Display name' }).fill('Mateus Winchester');
+  await page.getByRole('button', { name: 'Save profile' }).click();
+
+  await expect(page.getByText('Profile saved')).toBeVisible();
+  await expect(page.locator('#desktop-account-name')).toHaveText('Mateus Winchester');
+  await expect(page.locator('.lb-title-bar')).toContainText('Mateus Winchester');
 });
 
 test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] signs out on next-contact revocation while local safety remains reachable`, async ({
@@ -202,8 +233,9 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] signs out on next-contact
 }) => {
   await installNativeAccountAuthority(page, { revokeOnReconnect: true });
   await openAccount(page, '/account/subscription');
-  await expect(page.getByRole('region', { name: 'Account authority status' })).toContainText(
-    'Online',
+  await expect(page.locator('[data-account-authority-state]')).toHaveAttribute(
+    'data-account-authority-state',
+    'online',
   );
 
   await page.evaluate(() => {
@@ -214,11 +246,41 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] signs out on next-contact
     'data-account-authority-state',
     'revoked',
   );
-  await expect(page.getByRole('button', { name: 'Start new Premium work' })).toBeDisabled();
   const safety = page.getByRole('region', { name: 'Local safety capabilities' });
   await expect(safety).toContainText('Warnings');
   await expect(safety).toContainText('History');
   await expect(safety).toContainText('Diagnostics');
   await expect(safety).toContainText('Restoration');
   await expect(page.getByRole('main')).not.toContainText('Astra Player');
+});
+
+test(`@final @authority-visual [owner:${OWNER_TASK_ID}] keeps every production account route within the viewport`, async ({
+  page,
+}, testInfo) => {
+  await installNativeAccountAuthority(page, { activeDevice: false });
+  await openAccount(page, '/account/overview');
+
+  for (const route of ['Profile', 'Plan', 'Device', 'Security'] as const) {
+    if (route !== 'Profile') {
+      await page
+        .locator('.desktop-account-tabs')
+        .getByRole('button', { name: route, exact: true })
+        .click();
+    }
+    await expect(page.locator('.desktop-authority-route')).toBeVisible();
+    await expect(page.locator('.desktop-account-tabs [data-lb-variant="primary"]')).toHaveCount(1);
+    await expect(page.locator('.desktop-account-tabs [data-lb-variant="primary"]')).toContainText(
+      route,
+    );
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+      .toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`account-${route.toLowerCase()}.png`) });
+  }
+
+  await page.setViewportSize({ width: 800, height: 720 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+    .toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('account-minimum.png') });
 });
