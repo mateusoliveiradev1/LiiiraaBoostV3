@@ -7,7 +7,7 @@ import {
   type SupportCaseState,
   type SupportCategory,
   type SupportPlan,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 export type {
   SupportAttachmentMetadata,

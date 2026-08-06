@@ -7,7 +7,7 @@ import {
   type DeviceBindingState,
   type DeviceTransferException,
   type ProtectedDeviceEvidence,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 export interface DeviceEntitlementRecord {
   readonly entitlementId: string;

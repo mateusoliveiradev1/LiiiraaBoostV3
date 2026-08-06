@@ -3,11 +3,11 @@ import {
   decideConsentTransition,
   type DiagnosticConsentState,
   type SupportDiagnosticFieldClass,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
-import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.js';
+import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.ts';
 
-export type { DiagnosticConsentState } from '@liiiraa/control-plane-domain';
+export type { DiagnosticConsentState } from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 export interface ManageConsentDependencies extends SupportLifecycleDependencies {
   readonly consentChanges: Readonly<{ publish(consentId: string): void }>;

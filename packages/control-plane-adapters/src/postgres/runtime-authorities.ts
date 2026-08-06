@@ -21,19 +21,14 @@ import type {
 } from '@liiiraa/control-plane-application';
 import type { ProviderEventJson } from '@liiiraa/contracts-ts';
 
-import type {
-  ControlPlaneMigrationDatabase,
-  ControlPlaneTransaction,
-} from './database.ts';
+import type { ControlPlaneMigrationDatabase, ControlPlaneTransaction } from './database.ts';
 
 const migrationVersion = '0003_runtime_authorities';
 const migrationSql = readFileSync(
   new URL('./migrations/0003_runtime_authorities.sql', import.meta.url),
   'utf8',
 );
-export const runtimeAuthoritiesSchemaHash = createHash('sha256')
-  .update(migrationSql)
-  .digest('hex');
+export const runtimeAuthoritiesSchemaHash = createHash('sha256').update(migrationSql).digest('hex');
 
 export const migrateRuntimeAuthorities = async (
   database: ControlPlaneMigrationDatabase,
@@ -216,7 +211,7 @@ export const createPostgresSubscriptionManagementRepository = (
         },
       }),
     ),
-  });
+});
 
 const listAggregates = async <T>(
   transaction: ControlPlaneTransaction,
@@ -355,7 +350,11 @@ export const createPostgresCommerceAuthorityRepository = (
         },
         upsertInvoice: async (record: CommerceInvoiceRecord) => {
           const status =
-            record.state === 'disputed' ? 'open' : record.state === 'refunded' ? 'refunded' : record.state;
+            record.state === 'disputed'
+              ? 'open'
+              : record.state === 'refunded'
+                ? 'refunded'
+                : record.state;
           await transaction.query(
             `INSERT INTO invoices
                (id, subscription_id, provider, provider_invoice_id, status, currency,
@@ -492,7 +491,11 @@ export const createPostgresDeviceBindingRepository = (
         findCommandResult: (commandId) =>
           loadCommand<DeviceAuthorityResult>(transaction, 'device', commandId),
         getActiveBinding: async (entitlementId) => {
-          const records = await listAggregates<DeviceBindingRecord>(transaction, 'device', accountId);
+          const records = await listAggregates<DeviceBindingRecord>(
+            transaction,
+            'device',
+            accountId,
+          );
           return (
             records.find(
               (record) => record.entitlementId === entitlementId && record.revokedAt === null,
@@ -500,7 +503,11 @@ export const createPostgresDeviceBindingRepository = (
           );
         },
         getLatestBinding: async (entitlementId) => {
-          const records = await listAggregates<DeviceBindingRecord>(transaction, 'device', accountId);
+          const records = await listAggregates<DeviceBindingRecord>(
+            transaction,
+            'device',
+            accountId,
+          );
           return records.find((record) => record.entitlementId === entitlementId) ?? null;
         },
         lockException: async (exceptionId) => {
@@ -646,8 +653,7 @@ export const createPostgresSupportLifecycleRepository = (
         rememberCommandResult: async (commandId, result) => {
           await saveCommand(transaction, 'support', commandId, accountId, result);
         },
-        loadCase: (caseId) =>
-          loadAggregate<SupportCaseState>(transaction, 'support-case', caseId),
+        loadCase: (caseId) => loadAggregate<SupportCaseState>(transaction, 'support-case', caseId),
         saveCase: async (state) => {
           await saveAggregate(
             transaction,
@@ -749,11 +755,7 @@ export const createPostgresSupportLifecycleRepository = (
           return active.map(({ consentId }) => consentId);
         },
         loadDeletion: (requestedAccountId) =>
-          loadAggregate<AccountDeletionState>(
-            transaction,
-            'account-deletion',
-            requestedAccountId,
-          ),
+          loadAggregate<AccountDeletionState>(transaction, 'account-deletion', requestedAccountId),
         saveDeletion: async (state) => {
           await saveAggregate(
             transaction,
@@ -830,13 +832,7 @@ export const createPostgresSupportLifecycleRepository = (
                (id, topic, aggregate_type, aggregate_id, aggregate_version, payload, available_at)
              VALUES ($1, $2, 'identity', $3, 0, $4::jsonb, $5)
              ON CONFLICT (id) DO NOTHING`,
-            [
-              outboxId(input.jobId),
-              input.topic,
-              accountId,
-              encode(input),
-              input.availableAt,
-            ],
+            [outboxId(input.jobId), input.topic, accountId, encode(input), input.availableAt],
           );
         },
       }),

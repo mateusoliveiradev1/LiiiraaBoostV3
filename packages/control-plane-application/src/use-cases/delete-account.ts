@@ -4,15 +4,15 @@ import {
   type AccountDeletionState,
   type DeletionEvidence,
   type LegalHold,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
-import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.js';
+import { scheduleLifecycleJob, type SupportLifecycleDependencies } from './manage-support-case.ts';
 
 export type {
   AccountDeletionState,
   DeletionEvidence,
   RetainedEvidenceClass,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 export type DeleteAccountDependencies = SupportLifecycleDependencies;
 

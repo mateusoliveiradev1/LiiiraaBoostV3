@@ -1,10 +1,10 @@
-import type { ProtectedDeviceEvidence } from '@liiiraa/control-plane-domain';
+import type { ProtectedDeviceEvidence } from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 import {
   executeDeviceMutation,
   type DeviceAuthorityDependencies,
   type DeviceAuthorityResult,
-} from './bind-device.js';
+} from './bind-device.ts';
 
 interface DeviceCommandBase {
   readonly commandId: string;

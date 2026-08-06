@@ -8,11 +8,11 @@ import {
   type RefundReason,
   type SubscriptionState,
   type SubscriptionTransition,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 import type { CommerceProviderPort, CommerceProviderResult } from '../ports/commerce.js';
 
-export type { SubscriptionState } from '@liiiraa/control-plane-domain';
+export type { SubscriptionState } from '@liiiraa/control-plane-domain/runtime-control-plane';
 
 export type ManageSubscriptionAction =
   | Readonly<{

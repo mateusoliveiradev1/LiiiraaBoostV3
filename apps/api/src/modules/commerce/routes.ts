@@ -1,8 +1,5 @@
-import {
-  controlPlaneDocumentValidator,
-  type CommerceCommandJson,
-  type ProviderEventJson,
-} from '@liiiraa/contracts-ts';
+import type { CommerceCommandJson, ProviderEventJson } from '@liiiraa/contracts-ts';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
 import {
   manageSubscription,
   reconcileCommerce,
@@ -10,7 +7,7 @@ import {
   type ManageSubscriptionDependencies,
   type ReconcileCommerceDependencies,
   type SubscriptionState,
-} from '@liiiraa/control-plane-application';
+} from '@liiiraa/control-plane-application/runtime-control-plane';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface CommerceRouteDependencies {

@@ -2,7 +2,7 @@ import {
   compareDeviceEvidence,
   type DeviceEvidenceComparison,
   type ProtectedDeviceEvidence,
-} from './device-evidence.js';
+} from './device-evidence.ts';
 
 export const DEVICE_REPLACEMENT_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1_000;
 export const DEVICE_EXCEPTION_VALIDITY_MS = 24 * 60 * 60 * 1_000;

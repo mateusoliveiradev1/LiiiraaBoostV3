@@ -1,15 +1,12 @@
-import {
-  controlPlaneDocumentValidator,
-  type DeviceBindingProjectionJson,
-  type DeviceCommandJson,
-} from '@liiiraa/contracts-ts';
+import type { DeviceBindingProjectionJson, DeviceCommandJson } from '@liiiraa/contracts-ts';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
 import {
   bindDevice,
   transferDevice,
   type BindDeviceInput,
   type DeviceAuthorityDependencies,
   type DeviceAuthorityResult,
-} from '@liiiraa/control-plane-application';
+} from '@liiiraa/control-plane-application/runtime-control-plane';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface DeviceRouteDependencies {

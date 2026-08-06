@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./runtime-control-plane": "./src/runtime-control-plane.ts",
     "./runtime-identity": "./src/runtime-identity.ts"
   },
   "scripts": {

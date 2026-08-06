@@ -11,7 +11,10 @@ import type {
   SubscriptionState,
   SupportCaseState,
 } from '@liiiraa/control-plane-application';
-import type { DeviceBindingProjectionJson, SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
+import type {
+  DeviceBindingProjectionJson,
+  SubscriptionProjectionJson,
+} from '@liiiraa/contracts-ts';
 import {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
@@ -21,8 +24,7 @@ import {
   listRuntimeAuthority,
   projectRuntimeAggregate,
   verifyRawWebhook,
-} from '@liiiraa/control-plane-adapters';
-import { initialSubscriptionState } from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-adapters/runtime-control-plane';
 import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
@@ -53,6 +55,16 @@ export const REAL_STAGING_CAPABILITIES = Object.freeze([
   'support-consent-authority',
   'admin-read-authority',
 ] as const);
+
+const freeSubscriptionState = (accountId: string): SubscriptionState => ({
+  accountId,
+  version: 0n,
+  plan: 'free',
+  status: 'free',
+  cancelAtPeriodEnd: false,
+  checkoutStatus: 'none',
+  capabilities: { newPremiumActions: false, safetyHistoryRestoration: true },
+});
 
 export interface RealStagingEnvironment extends ApiEnvironmentInput {
   readonly STAGING_AUTH_SECRET?: string;
@@ -427,11 +439,8 @@ export const buildRealStagingApp = async (
     },
     resolveSessionActor,
     projectSubscription: async (accountId) =>
-      (await projectRuntimeAggregate<SubscriptionState>(
-        database,
-        'subscription',
-        accountId,
-      )) ?? initialSubscriptionState(accountId),
+      (await projectRuntimeAggregate<SubscriptionState>(database, 'subscription', accountId)) ??
+      freeSubscriptionState(accountId),
     listInvoices: async (accountId) => {
       const result = await database.query(
         `SELECT invoice.provider_invoice_id AS "invoiceId",
@@ -476,8 +485,7 @@ export const buildRealStagingApp = async (
       ids,
       repository: deviceRepository,
       authorizer: {
-        authorize: ({ actorAccountId, accountId }) =>
-          Promise.resolve(actorAccountId === accountId),
+        authorize: ({ actorAccountId, accountId }) => Promise.resolve(actorAccountId === accountId),
       },
     },
     resolveSessionActor,
@@ -523,11 +531,7 @@ export const buildRealStagingApp = async (
       return state?.accountId === accountId ? state.attachments : [];
     },
     projectDeletion: (accountId) =>
-      projectRuntimeAggregate<AccountDeletionState>(
-        database,
-        'account-deletion',
-        accountId,
-      ),
+      projectRuntimeAggregate<AccountDeletionState>(database, 'account-deletion', accountId),
   });
   await registerAdminRoutes(
     app,
