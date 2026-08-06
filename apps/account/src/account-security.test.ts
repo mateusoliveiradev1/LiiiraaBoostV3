@@ -29,6 +29,18 @@ describe('account security boundary', () => {
     ]);
   });
 
+  it('passes API requests through without page-route classification or preview headers', () => {
+    const response = accountProxy(
+      new NextRequest('https://account.liiiraa.com/v1/account'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-next')).toBe('1');
+    expect(response.headers.get('content-security-policy')).toBeNull();
+    expect(response.headers.get('x-liiiraa-account-failure-kind')).toBeNull();
+    expect(response.headers.get('x-liiiraa-preview-authority')).toBeNull();
+  });
+
   it('creates a fresh cryptographically random nonce for every request', () => {
     const first = createRequestNonce();
     const second = createRequestNonce();
