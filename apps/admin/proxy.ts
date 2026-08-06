@@ -362,6 +362,9 @@ export default function adminProxy(request: NextRequest): NextResponse {
 
   requestHeaders.delete('x-liiiraa-admin-role');
   requestHeaders.delete('x-liiiraa-preview-authority');
+  if (request.nextUrl.pathname === '/v1' || request.nextUrl.pathname.startsWith('/v1/')) {
+    requestHeaders.set('origin', resolveAdminOrigin());
+  }
   if (previewEnabled) {
     requestHeaders.delete('cookie');
     requestHeaders.set('x-liiiraa-admin-role', boundary.role);
