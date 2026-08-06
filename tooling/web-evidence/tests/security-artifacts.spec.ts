@@ -121,8 +121,14 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain("LIIIRAA_ACCOUNT_PREVIEW: 'false'");
   expect(workflow).toContain("LIIIRAA_ADMIN_PREVIEW: 'false'");
   expect(workflow).toContain('LIIIRAA_ACCOUNT_ORIGIN: account.origin');
+  expect(
+    workflow.match(/ref: process\.env\.GIT_REF, sha: process\.env\.GIT_SHA/gu) ?? [],
+  ).toHaveLength(3);
   expect(workflow.match(/deployment\.readyState === 'READY'/gu) ?? []).toHaveLength(3);
   expect(workflow.match(/deployment\.target !== 'production'/gu) ?? []).toHaveLength(3);
+  expect(workflow.match(/deployment\.alias\.includes\(expected\.hostname\)/gu) ?? []).toHaveLength(
+    3,
+  );
   expect(workflow).toContain('needs: [verify-contracts, deploy-account]');
   expect(workflow).toContain('src/staging/provision-invitations.test.ts');
   expect(workflow).not.toContain('DATABASE_URL');

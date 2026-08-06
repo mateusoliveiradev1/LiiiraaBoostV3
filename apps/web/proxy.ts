@@ -7,5 +7,5 @@ const localeProxy = createMiddleware(routing);
 export default localeProxy;
 
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!api|v1|_next|_vercel|.*\\..*).*)'],
 };
