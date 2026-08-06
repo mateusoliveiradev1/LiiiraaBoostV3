@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 import {
+  createPostgresIdentityPersistence,
   createRealIdentityAuthority,
   digestOpaqueToken,
   hashIdentityPassword,
@@ -199,6 +200,47 @@ const authority = (persistence: IdentityPersistence) => {
 };
 
 describe('real invitation-only identity authority', () => {
+  it('binds the session UUID and provider text through distinct PostgreSQL parameters', async () => {
+    let captured:
+      | Readonly<{ statement: string; values: readonly unknown[] | undefined }>
+      | undefined;
+    const database = {
+      query(statement: string, values?: readonly unknown[]) {
+        captured = { statement, values };
+        return Promise.resolve({ rowCount: 1, rows: [] });
+      },
+    } as unknown as Parameters<typeof createPostgresIdentityPersistence>[0];
+    const persistence = createPostgresIdentityPersistence(database);
+
+    await persistence.createSession({
+      id: '00000000-0000-4000-8000-000000000010',
+      accountId: '00000000-0000-4000-8000-000000000001',
+      tokenDigest: 'a'.repeat(64),
+      kind: 'admin',
+      authenticationMethod: 'password',
+      issuedAt: NOW,
+      expiresAt: LATER,
+      lastSeenAt: NOW,
+      revokedAt: null,
+      version: 1n,
+    });
+
+    expect(captured?.statement).toMatch(
+      /VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, 1, \$7\)/u,
+    );
+    expect(captured?.values).toEqual([
+      '00000000-0000-4000-8000-000000000010',
+      '00000000-0000-4000-8000-000000000001',
+      '00000000-0000-4000-8000-000000000010',
+      'admin',
+      'password',
+      'a'.repeat(64),
+      NOW,
+      LATER,
+      NOW,
+    ]);
+  });
+
   it('redeems one invitation once and restores/revokes a persisted session after restart', async () => {
     const persistence = new MemoryIdentityPersistence();
     const firstProcess = authority(persistence);
