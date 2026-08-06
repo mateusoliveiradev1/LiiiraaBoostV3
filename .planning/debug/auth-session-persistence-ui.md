@@ -2,7 +2,7 @@
 status: verifying
 trigger: 'Owner UAT reports desktop login state is lost after app restart, logout fails, Account/Admin navigation flashes and temporarily loses session, desktop browser callback is unfinished, and Premium/Free entitlement labels conflict.'
 created: 2026-08-06T03:00:00-03:00
-updated: 2026-08-06T06:55:00-03:00
+updated: 2026-08-06T14:20:00-03:00
 ---
 
 ## Symptoms
@@ -15,10 +15,10 @@ reproduction: Authenticate from the desktop through the system browser, return t
 
 ## Current Focus
 
-hypothesis: Confirmed: the packaged desktop sends its numeric account version as the valid strong ETag `If-Match: "2"`, but the API parser rejected the leading quote and returned 400 before calling PostgreSQL. After the failure, the profile effect preferred the remote projection over the preserved local draft and visually erased the typed name.
-test: Send the exact native `If-Match` header through the real API route, reject wildcard/list/malformed forms, and return a failed native mutation with a preserved local draft through the production account UI.
-expecting: The API admits the desktop's exact version header and reaches the PostgreSQL authority; any genuine failure leaves the typed name visible for retry.
-next_action: Owner installs the replacement `Liiiraa Boost_0.0.1_x64-setup.exe` (SHA-256 `91A785BCE849438B6961030FC1BAE326B02417CA8E366966CD925A748F7B3817`) and repeats save/close/reopen UAT with the real account.
+hypothesis: Confirmed: desktop-to-web persistence works. The reverse flow exposed two independent defects: a committed web PATCH could lose or reject its response and report a false authority failure instead of reconciling the newer PostgreSQL projection; the desktop authority lifetime was scoped to Account routes, so the overview title bar stopped observing remote identity changes.
+test: Simulate a response lost after a committed web PATCH and require a confirming GET; keep one live authority shared by web chrome/page/inspector and one process-lifetime desktop authority; exercise periodic, focus, visibility, reconnection and mutation synchronization without concurrent reads or dropped triggers.
+expecting: A successful web save never reports a false failure, and both open surfaces converge on the newest account projection automatically within five seconds or immediately when focused.
+next_action: Commit and publish the Account live coordinator, wait for the exact Vercel deployment, rebuild the staging installer, then run owner web-to-desktop and desktop-to-web UAT.
 
 ## Evidence
 
@@ -94,6 +94,15 @@ next_action: Owner installs the replacement `Liiiraa Boost_0.0.1_x64-setup.exe` 
 - timestamp: 2026-08-06T06:55:00-03:00
   observation: The staging NSIS bundle rebuilt successfully at version 0.0.1 with SHA-256 `91A785BCE849438B6961030FC1BAE326B02417CA8E366966CD925A748F7B3817`.
   implication: Owner UAT can now exercise the matching corrected desktop and hosted API.
+- timestamp: 2026-08-06T14:20:00-03:00
+  observation: Owner UAT confirmed desktop save, immediate desktop rendering, PostgreSQL persistence across restart, and matching web projection. A subsequent web save committed version 4 but displayed “A autoridade da conta está indisponível”; after reload the web showed the committed value, while an already-open desktop overview retained the previous name.
+  implication: Persistence is authoritative in both directions, but ambiguous mutation reconciliation and process-lifetime live observation were missing.
+- timestamp: 2026-08-06T14:20:00-03:00
+  observation: RED/GREEN coverage now reconciles a lost committed PATCH response, shares one live web projection across chrome/page/inspector, keeps the desktop authority active outside Account routes, refreshes every five seconds and on lifecycle signals, serializes overlapping refresh triggers, and preserves mutation ordering.
+  implication: Both surfaces converge automatically without restart while PostgreSQL remains the only source of truth.
+- timestamp: 2026-08-06T14:20:00-03:00
+  observation: Account verify passes 94 tests, TypeScript and Next production build; desktop passes 124 tests, seven browser authority/visual tests and 70 Rust tests.
+  implication: The bidirectional synchronization implementation is ready for deployment and packaged UAT.
 
 ## Eliminated
 
@@ -104,7 +113,7 @@ next_action: Owner installs the replacement `Liiiraa Boost_0.0.1_x64-setup.exe` 
 
 ## Resolution
 
-root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. After those defects were fixed, a successful PATCH was still followed by an unnecessary GET capable of replacing the committed projection, while focus/resume synchronization could supersede the renderer mutation sequence. The remaining packaged request sent `If-Match: "2"`, which the API's loose suffix parser paradoxically rejected because of the opening quote; the UI then replaced the preserved local draft with the remote projection after failure.
-fix: Added the guarded staging bundle command; admitted Bearer-authenticated native mutation without browser CSRF; sent `If-Match`; restricted credential deletion to 401; made the validated PATCH projection the immediate native authority; blocked lifecycle reads during an in-flight mutation; returned typed committed/conflict/failure results; rebuilt all four account routes with honest server-backed states; accepted the desktop's exact quoted numeric ETag through a bounded parser; and kept `localDraft.displayName` authoritative in the input after conflict or failure.
-verification: API 171/171, desktop 123/123, Rust 70/70, TypeScript, ESLint, Prettier, Cargo fmt and six browser authority/visual tests pass. The API TypeScript check reports only the two pre-existing `apps/api/src/modules/admin/routes.ts` index-signature errors. Protected workflow 31090501973 deployed build `7e13ef3a35f5f03aef7a685857b608f5239d22d1`; hosted health and readiness pass. The replacement installer is built. Owner real-account restart UAT remains pending.
+root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. After those defects were fixed, a successful PATCH was still followed by an unnecessary GET capable of replacing the committed projection, while focus/resume synchronization could supersede the renderer mutation sequence. The packaged request then sent `If-Match: "2"`, which the API parser rejected. Finally, reverse UAT showed that web mutations did not reconcile ambiguous committed responses and that desktop authority observation existed only while an Account route was mounted.
+fix: Added guarded staging packaging; corrected native authorization, preconditions, credential retention and mutation ordering; rebuilt the real account routes; accepted exact numeric/full ETags; preserved local drafts; reconciled ambiguous web mutations through a confirming authoritative GET; introduced one shared live web authority for chrome/page/inspector; moved desktop authority to process lifetime; and serialized automatic five-second plus lifecycle-triggered refreshes.
+verification: API 171/171 remains deployed at build `7e13ef3a35f5f03aef7a685857b608f5239d22d1`. Account verify passes 94 tests, TypeScript and Next production build; desktop passes 124 tests, seven browser authority/visual tests, TypeScript and 70 Rust tests. Targeted ESLint and Prettier pass; `apps/desktop/src/app.tsx` retains five unrelated pre-existing lint findings. Account deployment, installer rebuild and owner bidirectional live UAT remain pending.
 files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/real-auth.test.ts, apps/desktop/package.json, apps/desktop/src/internal-channel.test.ts, apps/desktop/src/preferences.tsx, apps/desktop/src/app.tsx, apps/desktop/src/account-authority.ts, apps/desktop/src/features/account-experience.tsx, apps/desktop/src/profile-experience.css, apps/desktop/src/features/premium-operations.tsx, apps/desktop/src-tauri/src/account_sync.rs, apps/desktop/src-tauri/src/window.rs, apps/desktop/src-tauri/src/main.rs, apps/desktop/src-tauri/tauri.staging.conf.json, tests, and Phase 4 UAT artifacts.

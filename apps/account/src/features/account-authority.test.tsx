@@ -197,6 +197,37 @@ describe('production account authority', () => {
     });
   });
 
+  it('reconciles an ambiguous committed PATCH instead of reporting a false save failure', async () => {
+    const updated = projection({
+      account: {
+        ...projection().account,
+        aggregateVersion: '8',
+        displayName: 'Mateus Oliveira',
+        etag: 'account-account-01-v8',
+      },
+    });
+    const transport = vi
+      .fn<AccountAuthorityTransport>()
+      .mockRejectedValueOnce(new TypeError('response lost after commit'))
+      .mockResolvedValueOnce(response(updated));
+    const authority = createAccountAuthority({
+      correlationId: () => 'account-reconcile-01',
+      csrfToken: () => 'csrf-account-01',
+      transport,
+    });
+
+    await expect(
+      authority.updateProfile({
+        displayName: 'Mateus Oliveira',
+        localDraftToken: 'draft-profile-01',
+        locale: 'en',
+        projection: projection(),
+      }),
+    ).resolves.toEqual({ projection: updated, status: 'complete' });
+    expect(transport).toHaveBeenCalledTimes(2);
+    expect(transport.mock.calls[1]?.[1]?.method).toBe('GET');
+  });
+
   it('preserves server truth and a bounded safe draft on conflict', async () => {
     const remote = projection({
       account: {

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
+  ACCOUNT_AUTHORITY_REFRESH_MS,
   ACCOUNT_SYNC_COMMAND,
   DesktopAccountAuthority,
   type AccountAuthorityTransport,
@@ -75,6 +76,38 @@ const projection = (displayName: string, version: string, locale: 'en' | 'pt-BR'
 });
 
 describe('desktop account authority mutations', () => {
+  it('keeps synchronizing remote account changes while the desktop stays open', async () => {
+    vi.useFakeTimers();
+    try {
+      const invoke = vi
+        .fn<AccountAuthorityTransport['invoke']>()
+        .mockResolvedValueOnce({
+          state: 'online',
+          projection: projection('Mateus Winchester', '8'),
+        })
+        .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '9') });
+      const authority = new DesktopAccountAuthority({ invoke });
+
+      authority.start();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(authority.snapshot()).toMatchObject({
+        projection: { account: { displayName: 'Mateus Winchester' } },
+      });
+
+      await vi.advanceTimersByTimeAsync(ACCOUNT_AUTHORITY_REFRESH_MS);
+      expect(authority.snapshot()).toMatchObject({
+        projection: { account: { displayName: 'Mateus Oliveira', aggregateVersion: '9' } },
+      });
+      expect(invoke.mock.calls.at(-1)?.[1]).toMatchObject({
+        request: { trigger: 'reconnection' },
+      });
+      authority.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('keeps lifecycle reads from superseding an in-flight committed profile mutation', async () => {
     let resolveMutation: ((value: unknown) => void) | undefined;
     const mutationResponse = new Promise<unknown>((resolve) => {
@@ -83,7 +116,11 @@ describe('desktop account authority mutations', () => {
     const invoke = vi
       .fn<AccountAuthorityTransport['invoke']>()
       .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
-      .mockReturnValueOnce(mutationResponse);
+      .mockReturnValueOnce(mutationResponse)
+      .mockResolvedValueOnce({
+        state: 'online',
+        projection: projection('Mateus Winchester', '8'),
+      });
     const authority = new DesktopAccountAuthority({ invoke });
 
     await authority.synchronize('launch');
@@ -96,9 +133,12 @@ describe('desktop account authority mutations', () => {
     });
 
     await expect(mutation).resolves.toMatchObject({ status: 'committed' });
-    expect(invoke).toHaveBeenCalledTimes(2);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(invoke).toHaveBeenCalledTimes(3);
     expect(invoke.mock.calls.at(-1)?.[0]).toBe(ACCOUNT_SYNC_COMMAND);
-    expect(invoke.mock.calls.at(-1)?.[1]).toMatchObject({ request: { trigger: 'mutation' } });
+    expect(invoke.mock.calls[1]?.[1]).toMatchObject({ request: { trigger: 'mutation' } });
+    expect(invoke.mock.calls.at(-1)?.[1]).toMatchObject({ request: { trigger: 'resume' } });
     expect(authority.snapshot()).toMatchObject({
       state: 'online',
       projection: { account: { displayName: 'Mateus Winchester', aggregateVersion: '8' } },

@@ -86,6 +86,7 @@ const installNativeAccountAuthority = async (
     conflict?: boolean;
     initialState?: AuthorityState;
     rejectMutation?: boolean;
+    remoteRefresh?: boolean;
     revokeOnReconnect?: boolean;
   }> = {},
 ): Promise<void> => {
@@ -95,6 +96,7 @@ const installNativeAccountAuthority = async (
       initialProjection,
       initialState,
       rejectMutation,
+      remoteRefresh,
       remoteProjection,
       revokeOnReconnect,
     }) => {
@@ -119,6 +121,9 @@ const installNativeAccountAuthority = async (
             calls.push({ command, request });
             if (revokeOnReconnect && request?.trigger === 'reconnection') {
               return { state: 'revoked' };
+            }
+            if (remoteRefresh && request?.trigger === 'resume') {
+              return { projection: remoteProjection, state: 'online' };
             }
             if (conflict && request?.mutation !== undefined) {
               return {
@@ -161,6 +166,7 @@ const installNativeAccountAuthority = async (
         options.activeDevice === false ? { ...projection(), activeDevice: null } : projection(),
       initialState: options.initialState ?? 'online',
       rejectMutation: options.rejectMutation === true,
+      remoteRefresh: options.remoteRefresh === true,
       remoteProjection: projection('Remote Player', '8'),
       revokeOnReconnect: options.revokeOnReconnect === true,
     },
@@ -175,6 +181,18 @@ const openAccount = async (page: Page, initialPath: string): Promise<void> => {
     windowsLocale: 'en-US',
   });
 };
+
+test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] refreshes the desktop chrome outside the account route`, async ({
+  page,
+}) => {
+  await installNativeAccountAuthority(page, { remoteRefresh: true });
+  await openAccount(page, '/');
+
+  const title = page.locator('.desktop-title-region');
+  await expect(title).toContainText('Astra Player');
+  await page.evaluate(() => globalThis.dispatchEvent(new Event('focus')));
+  await expect(title).toContainText('Remote Player');
+});
 
 test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] renders generated native authority and synchronizes every lifecycle trigger`, async ({
   page,

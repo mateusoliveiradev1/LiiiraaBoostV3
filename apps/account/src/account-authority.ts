@@ -162,29 +162,51 @@ export const createAccountAuthority = ({
     'x-csrf-token': csrfToken(),
   });
 
-  return Object.freeze({
-    async project(): Promise<AccountAuthorityReadResult> {
-      try {
-        const response = await transport(`${baseUrl}/v1/account`, {
-          credentials: 'include',
-          headers: headers(correlationId()),
-          method: 'GET',
-        });
-        if (response.status === 401) return { code: 'unauthorized', status: 'error' };
-        if (response.status === 503 && lastKnown !== undefined) {
-          return { projection: lastKnown, status: 'stale' };
-        }
-        if (!response.ok) return { code: 'unavailable', status: 'error' };
-        const projection = admitProjection(await safeJson(response));
-        if (projection === null) return { code: 'invalid-authority', status: 'error' };
-        lastKnown = projection;
-        return { projection, status: statusFromProjection(projection) };
-      } catch {
-        return lastKnown === undefined
-          ? { code: 'unavailable', status: 'error' }
-          : { projection: lastKnown, status: 'offline' };
+  const project = async (): Promise<AccountAuthorityReadResult> => {
+    try {
+      const response = await transport(`${baseUrl}/v1/account`, {
+        credentials: 'include',
+        headers: headers(correlationId()),
+        method: 'GET',
+      });
+      if (response.status === 401) return { code: 'unauthorized', status: 'error' };
+      if (response.status === 503 && lastKnown !== undefined) {
+        return { projection: lastKnown, status: 'stale' };
       }
-    },
+      if (!response.ok) return { code: 'unavailable', status: 'error' };
+      const projection = admitProjection(await safeJson(response));
+      if (projection === null) return { code: 'invalid-authority', status: 'error' };
+      lastKnown = projection;
+      return { projection, status: statusFromProjection(projection) };
+    } catch {
+      return lastKnown === undefined
+        ? { code: 'unavailable', status: 'error' }
+        : { projection: lastKnown, status: 'offline' };
+    }
+  };
+
+  const reconcileProfileMutation = async (
+    input: AccountProfileMutationInput,
+    displayName: string,
+  ): Promise<AccountProfileMutationResult | null> => {
+    const reconciled = await project();
+    if (!('projection' in reconciled)) {
+      return reconciled.code === 'unauthorized' ? { code: 'unauthorized', status: 'error' } : null;
+    }
+    const account = reconciled.projection.account;
+    if (
+      account.accountId !== input.projection.account.accountId ||
+      account.aggregateVersion === input.projection.account.aggregateVersion ||
+      account.displayName !== displayName ||
+      account.locale !== input.locale
+    ) {
+      return null;
+    }
+    return { projection: reconciled.projection, status: 'complete' };
+  };
+
+  return Object.freeze({
+    project,
 
     async updateProfile(input: AccountProfileMutationInput): Promise<AccountProfileMutationResult> {
       const displayName = input.displayName.trim();
@@ -235,7 +257,13 @@ export const createAccountAuthority = ({
           return { draft, projection, status: 'conflict' };
         }
         const projection = admitProjection(body);
-        if (projection === null) return { code: 'invalid-authority', status: 'error' };
+        if (projection === null) {
+          if (response.ok) {
+            const reconciled = await reconcileProfileMutation(input, displayName);
+            if (reconciled !== null) return reconciled;
+          }
+          return { code: 'invalid-authority', status: 'error' };
+        }
         lastKnown = projection;
         return {
           projection,
@@ -243,6 +271,8 @@ export const createAccountAuthority = ({
             response.status === 202 || projection.provenance === 'pending' ? 'pending' : 'complete',
         };
       } catch {
+        const reconciled = await reconcileProfileMutation(input, displayName);
+        if (reconciled !== null) return reconciled;
         return lastKnown === undefined
           ? { code: 'unavailable', status: 'offline' }
           : { code: 'unavailable', projection: lastKnown, status: 'offline' };

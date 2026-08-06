@@ -67,6 +67,7 @@ import { AccountExperience, type AccountExperienceView } from './features/accoun
 import {
   ACCOUNT_AUTHORITY_REVOKED_EVENT,
   ACCOUNT_IDENTITY_PROJECTED_EVENT,
+  createDesktopAccountAuthority,
 } from './account-authority.js';
 import {
   ACCOUNT_PROFILE_UPDATED_EVENT,
@@ -1411,6 +1412,7 @@ const DesktopAppContent = ({
   );
   const [authoritativeAccountName, setAuthoritativeAccountName] = useState<string>();
   const [authoritativeAccountPlan, setAuthoritativeAccountPlan] = useState<'free' | 'premium'>();
+  const [accountAuthority] = useState(() => createDesktopAccountAuthority());
   const [route, setRoute] = useState(() => resolveInitialRoute(initialPath));
   const [announcement, setAnnouncement] = useState(route.definition.headingMessageId);
   const [activityOpen, setActivityOpen] = useState(false);
@@ -1453,6 +1455,13 @@ const DesktopAppContent = ({
       globalThis.removeEventListener(ACCOUNT_AUTHORITY_REVOKED_EVENT, clearAuthoritativeIdentity);
     };
   }, []);
+  useEffect(() => {
+    if (accountAuthority === undefined) return undefined;
+    accountAuthority.start();
+    return () => {
+      accountAuthority.dispose();
+    };
+  }, [accountAuthority]);
   const accountDisplayName =
     authoritativeAccountName ??
     (Reflect.has(globalThis, '__LIIIRAA_DESKTOP_TEST__')

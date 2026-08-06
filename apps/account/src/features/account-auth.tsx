@@ -15,6 +15,7 @@ import {
   type AccountAuthActor,
   type AccountAuthResult,
 } from '../account-auth';
+import { getLiveAccountAuthority } from '../live-account-authority';
 
 export type AccountAuthRoute = 'account-sign-in' | 'account-sign-up';
 
@@ -759,6 +760,13 @@ export const AccountIdentityChrome = ({
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
   );
+  const liveAuthority = useMemo(
+    () => getLiveAccountAuthority(authorityBaseUrl),
+    [authorityBaseUrl],
+  );
+  const [projectedIdentity, setProjectedIdentity] = useState<
+    Readonly<{ displayName: string; locale: 'pt-BR' | 'en' }> | undefined
+  >();
   useEffect(() => {
     let active = true;
     void auth.session().then((result) => {
@@ -770,15 +778,29 @@ export const AccountIdentityChrome = ({
       active = false;
     };
   }, [auth]);
+  useEffect(
+    () =>
+      liveAuthority.subscribe((result) => {
+        if (result !== null && 'projection' in result) {
+          setProjectedIdentity({
+            displayName: result.projection.account.displayName,
+            locale: result.projection.account.locale,
+          });
+        }
+      }),
+    [liveAuthority],
+  );
+  const presentedActor =
+    actor === null || projectedIdentity === undefined ? actor : { ...actor, ...projectedIdentity };
 
   return (
     <>
       <span aria-hidden="true" className="account-identity__avatar">
-        {actor === null ? 'LB' : initials(actor)}
+        {presentedActor === null ? 'LB' : initials(presentedActor)}
       </span>
       <span className="account-identity__copy">
         <strong>
-          {actor?.displayName ??
+          {presentedActor?.displayName ??
             (settled
               ? locale === 'pt-BR'
                 ? 'Sessão necessária'
@@ -788,7 +810,7 @@ export const AccountIdentityChrome = ({
                 : 'Loading account')}
         </strong>
         <span>
-          {actor?.email ??
+          {presentedActor?.email ??
             (locale === 'pt-BR' ? 'Entre para ver sua conta' : 'Sign in to view your account')}
         </span>
       </span>

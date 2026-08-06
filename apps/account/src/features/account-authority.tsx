@@ -6,13 +6,12 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-import {
-  createAccountAuthority,
-  type AccountAuthorityProjection,
-  type AccountAuthorityReadResult,
-  type AccountProfileDraft,
+import type {
+  AccountAuthorityProjection,
+  AccountAuthorityReadResult,
+  AccountProfileDraft,
 } from '../account-authority';
-import { primeAccountCsrfToken, readAccountCsrfToken } from '../account-auth';
+import { primeAccountCsrfToken } from '../account-auth';
 import {
   advanceAccountMutationPhase,
   getAccountPreviewMetadata,
@@ -20,6 +19,7 @@ import {
   type AccountPreviewRoute,
 } from '../account-preview-model';
 import { mapAccountAuthorityProjection } from '../account-runtime';
+import { getLiveAccountAuthority, type LiveAccountAuthority } from '../live-account-authority';
 
 type AccountAuthorityPageProps = Readonly<{
   authorityBaseUrl: string;
@@ -76,8 +76,6 @@ const copy = Object.freeze({
   }),
 });
 
-const correlationId = (): string => `account-web-${globalThis.crypto.randomUUID()}`;
-
 const AuthorityStatus = ({
   locale,
   status,
@@ -102,29 +100,25 @@ const AuthorityStatus = ({
 };
 
 const ProfileAuthority = ({
+  authority,
   authorityBaseUrl,
   locale,
-  onProjection,
   projection,
 }: Readonly<{
+  authority: LiveAccountAuthority;
   authorityBaseUrl: string;
   locale: WebLocale;
-  onProjection: (projection: AccountAuthorityProjection) => void;
   projection: AccountAuthorityProjection;
 }>) => {
   const labels = copy[locale];
   const [displayName, setDisplayName] = useState(projection.account.displayName);
   const [phase, setPhase] = useState<AccountMutationPhase>('idle');
   const [draft, setDraft] = useState<AccountProfileDraft | null>(null);
-  const authority = useMemo(
-    () =>
-      createAccountAuthority({
-        baseUrl: authorityBaseUrl,
-        correlationId,
-        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
-      }),
-    [authorityBaseUrl],
-  );
+  useEffect(() => {
+    if (phase === 'idle' || phase === 'complete') {
+      setDisplayName(projection.account.displayName);
+    }
+  }, [phase, projection.account.aggregateVersion, projection.account.displayName]);
 
   const edit = () => {
     setPhase(advanceAccountMutationPhase(phase, 'review'));
@@ -141,7 +135,6 @@ const ProfileAuthority = ({
       locale,
       projection,
     });
-    if ('projection' in result) onProjection(result.projection);
     if (result.status === 'conflict') setDraft(result.draft);
     const event =
       result.status === 'complete'
@@ -352,25 +345,13 @@ export const AccountAuthorityPage = ({
 }: AccountAuthorityPageProps) => {
   const [result, setResult] = useState<AccountAuthorityReadResult | null>(null);
   const [projection, setProjection] = useState<AccountAuthorityProjection | null>(null);
-  const authority = useMemo(
-    () =>
-      createAccountAuthority({
-        baseUrl: authorityBaseUrl,
-        correlationId,
-        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
-      }),
-    [authorityBaseUrl],
-  );
+  const authority = useMemo(() => getLiveAccountAuthority(authorityBaseUrl), [authorityBaseUrl]);
   useEffect(() => {
-    let active = true;
-    void authority.project().then((next) => {
-      if (!active) return;
+    return authority.subscribe((next) => {
+      if (next === null) return;
       setResult(next);
       if ('projection' in next) setProjection(next.projection);
     });
-    return () => {
-      active = false;
-    };
   }, [authority]);
 
   const metadata = getAccountPreviewMetadata(locale, routeId);
@@ -419,9 +400,9 @@ export const AccountAuthorityPage = ({
       <AuthorityStatus locale={locale} status={result.status} />
       {routeId === 'account-profile' ? (
         <ProfileAuthority
+          authority={authority}
           authorityBaseUrl={authorityBaseUrl}
           locale={locale}
-          onProjection={setProjection}
           projection={projection}
         />
       ) : routeId === 'account-device' ? (
@@ -449,23 +430,11 @@ export const AccountAuthorityInspector = ({
   supportHref: string;
 }>) => {
   const [result, setResult] = useState<AccountAuthorityReadResult | null>(null);
-  const authority = useMemo(
-    () =>
-      createAccountAuthority({
-        baseUrl: authorityBaseUrl,
-        correlationId,
-        csrfToken: () => readAccountCsrfToken(authorityBaseUrl),
-      }),
-    [authorityBaseUrl],
-  );
+  const authority = useMemo(() => getLiveAccountAuthority(authorityBaseUrl), [authorityBaseUrl]);
   useEffect(() => {
-    let active = true;
-    void authority.project().then((next) => {
-      if (active) setResult(next);
+    return authority.subscribe((next) => {
+      if (next !== null) setResult(next);
     });
-    return () => {
-      active = false;
-    };
   }, [authority]);
 
   if (result === null) {

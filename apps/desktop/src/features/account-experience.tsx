@@ -2658,7 +2658,6 @@ export const AccountExperience = ({
     authority.start();
     return () => {
       unsubscribe();
-      authority.dispose();
     };
   }, [authority]);
 

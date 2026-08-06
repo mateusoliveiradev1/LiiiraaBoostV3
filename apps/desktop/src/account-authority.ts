@@ -15,6 +15,7 @@ export const ACCOUNT_MUTATION_COMMITTED_EVENT = 'liiiraa:account-mutation-commit
 export const ACCOUNT_AUTHORITY_REVOKED_EVENT = 'liiiraa:account-authority-revoked' as const;
 export const ACCOUNT_IDENTITY_PROJECTED_EVENT = 'liiiraa:account-identity-projected' as const;
 export const ACCOUNT_SYNC_COMMAND = 'sync_account' as const;
+export const ACCOUNT_AUTHORITY_REFRESH_MS = 5_000;
 
 export type AccountLifecycleTrigger = 'launch' | 'resume' | 'reconnection' | 'mutation';
 export type AccountAuthorityState =
@@ -284,6 +285,9 @@ export class DesktopAccountAuthority {
   #started = false;
   #sequence = 0;
   #mutationInFlight = false;
+  #synchronizationInFlight = false;
+  readonly #queuedSynchronizations: AccountLifecycleTrigger[] = [];
+  #refreshTimer: ReturnType<typeof setInterval> | undefined;
 
   public constructor(transport: AccountAuthorityTransport) {
     this.#transport = transport;
@@ -320,7 +324,13 @@ export class DesktopAccountAuthority {
   }
 
   public async synchronize(trigger: AccountLifecycleTrigger): Promise<void> {
-    if (this.#mutationInFlight) return;
+    if (this.#mutationInFlight || this.#synchronizationInFlight) {
+      if (!this.#queuedSynchronizations.includes(trigger)) {
+        this.#queuedSynchronizations.push(trigger);
+      }
+      return;
+    }
+    this.#synchronizationInFlight = true;
     const sequence = ++this.#sequence;
     this.#publish(pendingSnapshot(this.#snapshot));
     try {
@@ -351,6 +361,10 @@ export class DesktopAccountAuthority {
           error: 'network-unavailable',
         }),
       );
+    } finally {
+      this.#synchronizationInFlight = false;
+      const queuedTrigger = this.#queuedSynchronizations.shift();
+      if (queuedTrigger !== undefined) void this.synchronize(queuedTrigger);
     }
   }
 
@@ -454,6 +468,8 @@ export class DesktopAccountAuthority {
       return Object.freeze({ status: 'failed', error: 'network-unavailable' });
     } finally {
       this.#mutationInFlight = false;
+      const queuedTrigger = this.#queuedSynchronizations.shift();
+      if (queuedTrigger !== undefined) void this.synchronize(queuedTrigger);
     }
   }
 
@@ -466,6 +482,9 @@ export class DesktopAccountAuthority {
   readonly #onMutation = (): void => {
     void this.synchronize('mutation');
   };
+  readonly #onRefresh = (): void => {
+    void this.synchronize('reconnection');
+  };
 
   public start(): void {
     if (this.#started) return;
@@ -473,6 +492,7 @@ export class DesktopAccountAuthority {
     globalThis.addEventListener('focus', this.#onResume);
     globalThis.addEventListener('online', this.#onReconnect);
     globalThis.addEventListener(ACCOUNT_MUTATION_COMMITTED_EVENT, this.#onMutation);
+    this.#refreshTimer = globalThis.setInterval(this.#onRefresh, ACCOUNT_AUTHORITY_REFRESH_MS);
     void this.synchronize('launch');
   }
 
@@ -483,11 +503,21 @@ export class DesktopAccountAuthority {
     globalThis.removeEventListener('focus', this.#onResume);
     globalThis.removeEventListener('online', this.#onReconnect);
     globalThis.removeEventListener(ACCOUNT_MUTATION_COMMITTED_EVENT, this.#onMutation);
+    if (this.#refreshTimer !== undefined) {
+      globalThis.clearInterval(this.#refreshTimer);
+      this.#refreshTimer = undefined;
+    }
+    this.#queuedSynchronizations.splice(0);
     this.#listeners.clear();
   }
 }
 
+let applicationAccountAuthority: DesktopAccountAuthority | undefined;
+
 export const createDesktopAccountAuthority = (): DesktopAccountAuthority | undefined => {
+  if (applicationAccountAuthority !== undefined) return applicationAccountAuthority;
   const transport = resolveDesktopAccountAuthorityTransport();
-  return transport === undefined ? undefined : new DesktopAccountAuthority(transport);
+  if (transport === undefined) return undefined;
+  applicationAccountAuthority = new DesktopAccountAuthority(transport);
+  return applicationAccountAuthority;
 };
