@@ -402,6 +402,9 @@ importers:
       fastify:
         specifier: 5.10.0
         version: 5.10.0
+      stripe:
+        specifier: 22.4.0
+        version: 22.4.0(@types/node@24.13.3)
     devDependencies:
       vitest:
         specifier: 4.1.10
