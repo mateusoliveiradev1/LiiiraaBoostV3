@@ -137,7 +137,9 @@ const localizedLegacyDestination = (request: NextRequest): URL | undefined => {
 
 export default function accountProxy(request: NextRequest): NextResponse {
   if (request.nextUrl.pathname === '/v1' || request.nextUrl.pathname.startsWith('/v1/')) {
-    return NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('origin', request.nextUrl.origin);
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   const nonce = createRequestNonce();
@@ -189,5 +191,5 @@ export default function accountProxy(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

@@ -306,10 +306,27 @@ const applyAdminHeaders = (
   return response;
 };
 
+const adminRootDestination = (request: NextRequest): URL | undefined => {
+  if (request.nextUrl.pathname === '/') {
+    return new URL(ADMIN_CANONICAL_ENTRY['pt-BR'], request.nextUrl.origin);
+  }
+  const root = /^\/(en|pt-BR)\/?$/u.exec(request.nextUrl.pathname);
+  if (root === null) return undefined;
+  const locale = root[1] as AdminLocale;
+  return new URL(ADMIN_CANONICAL_ENTRY[locale], request.nextUrl.origin);
+};
+
 export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
   const runtimeMode = process.env.NODE_ENV;
   const previewEnabled = process.env['LIIIRAA_ADMIN_PREVIEW'] === 'true';
+  const rootDestination = adminRootDestination(request);
+  if (rootDestination !== undefined) {
+    return applyAdminHeaders(
+      NextResponse.redirect(rootDestination, 307),
+      adminHeaderContract(nonce, runtimeMode),
+    );
+  }
   const boundary = AdminAccessBoundary({
     cookieHeader: request.headers.get('cookie'),
     requestOrigin: requestHeaderOrigin(request),
@@ -391,5 +408,5 @@ export default function adminProxy(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

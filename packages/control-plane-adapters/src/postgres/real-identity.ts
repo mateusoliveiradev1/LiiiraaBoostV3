@@ -498,7 +498,7 @@ export const createRealIdentityAuthority = (
         consumedAt: null,
       };
       await persistence.createDesktopChallenge(record);
-      const authorizationUrl = new URL('/pt-BR/account/sign-in', input.accountOrigin);
+      const authorizationUrl = new URL('/pt-BR/login', input.accountOrigin);
       authorizationUrl.searchParams.set('desktop_challenge', record.id);
       authorizationUrl.searchParams.set('state', state);
       return {

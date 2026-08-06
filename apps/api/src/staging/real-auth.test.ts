@@ -49,7 +49,7 @@ const authority = () => {
         challenge: {
           challengeId: '00000000-0000-4000-8000-000000000003',
           authorizationUrl:
-            'https://account.staging.example/pt-BR/account/sign-in?desktop_challenge=00000000-0000-4000-8000-000000000003&state=desktop-state-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH',
+            'https://account.staging.example/pt-BR/login?desktop_challenge=00000000-0000-4000-8000-000000000003&state=desktop-state-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH',
           state: 'desktop-state-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH',
           codeChallenge: 'a'.repeat(43),
           codeChallengeMethod: 'S256' as const,
