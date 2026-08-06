@@ -1,8 +1,8 @@
 ---
-status: verifying
+status: resolved
 trigger: 'Owner UAT reports desktop login state is lost after app restart, logout fails, Account/Admin navigation flashes and temporarily loses session, desktop browser callback is unfinished, and Premium/Free entitlement labels conflict.'
 created: 2026-08-06T03:00:00-03:00
-updated: 2026-08-06T14:34:00-03:00
+updated: 2026-08-06T14:40:00-03:00
 ---
 
 ## Symptoms
@@ -18,7 +18,7 @@ reproduction: Authenticate from the desktop through the system browser, return t
 hypothesis: Confirmed: desktop-to-web persistence works. The reverse flow exposed two independent defects: a committed web PATCH could lose or reject its response and report a false authority failure instead of reconciling the newer PostgreSQL projection; the desktop authority lifetime was scoped to Account routes, so the overview title bar stopped observing remote identity changes.
 test: Simulate a response lost after a committed web PATCH and require a confirming GET; keep one live authority shared by web chrome/page/inspector and one process-lifetime desktop authority; exercise periodic, focus, visibility, reconnection and mutation synchronization without concurrent reads or dropped triggers.
 expecting: A successful web save never reports a false failure, and both open surfaces converge on the newest account projection automatically within five seconds or immediately when focused.
-next_action: Run owner web-to-desktop and desktop-to-web live UAT with both surfaces open; keep the session verifying until convergence within five seconds and persistence after restart are confirmed.
+next_action: None. Owner live UAT passed and the debug session is resolved.
 
 ## Evidence
 
@@ -112,6 +112,9 @@ next_action: Run owner web-to-desktop and desktop-to-web live UAT with both surf
 - timestamp: 2026-08-06T14:34:00-03:00
   observation: The replacement staging installer `Liiiraa Boost_0.0.1_x64-setup.exe` was rebuilt with SHA-256 `74CEC05177C0C5D02E5E9788757369582992804B106FC255802E2B29D3484C70` and size 5,515,590 bytes.
   implication: Owner UAT has one immutable artifact matching the published synchronization revision.
+- timestamp: 2026-08-06T14:40:00-03:00
+  observation: Owner live UAT confirmed that the published web and installed desktop now synchronize profile changes automatically in both directions and that the complete account flow is functioning.
+  implication: The final user-observable acceptance criterion passed in the real staging environment, so the account persistence and synchronization debug session can be closed.
 
 ## Eliminated
 
@@ -124,5 +127,5 @@ next_action: Run owner web-to-desktop and desktop-to-web live UAT with both surf
 
 root_cause: The first owner artifact omitted the staging overlay. Separately, native profile PATCH was subjected to browser Origin/CSRF policy, omitted `If-Match`, and treated both 401 and 403 as credential revocation. After those defects were fixed, a successful PATCH was still followed by an unnecessary GET capable of replacing the committed projection, while focus/resume synchronization could supersede the renderer mutation sequence. The packaged request then sent `If-Match: "2"`, which the API parser rejected. Finally, reverse UAT showed that web mutations did not reconcile ambiguous committed responses and that desktop authority observation existed only while an Account route was mounted.
 fix: Added guarded staging packaging; corrected native authorization, preconditions, credential retention and mutation ordering; rebuilt the real account routes; accepted exact numeric/full ETags; preserved local drafts; reconciled ambiguous web mutations through a confirming authoritative GET; introduced one shared live web authority for chrome/page/inspector; moved desktop authority to process lifetime; and serialized automatic five-second plus lifecycle-triggered refreshes.
-verification: API 171/171 remains deployed at build `7e13ef3a35f5f03aef7a685857b608f5239d22d1`. Account verify passes 94 tests, TypeScript and Next production build; desktop passes 124 tests, seven browser authority/visual tests, TypeScript and 70 Rust tests. Targeted ESLint and Prettier pass; `apps/desktop/src/app.tsx` retains five unrelated pre-existing lint findings. Vercel serves exact revision `1cc544d3450c88532d8737d0182fe3ee7b2db7c3`, and the matching installer hash is `74CEC05177C0C5D02E5E9788757369582992804B106FC255802E2B29D3484C70`. Owner bidirectional live UAT remains pending.
+verification: API 171/171 remains deployed at build `7e13ef3a35f5f03aef7a685857b608f5239d22d1`. Account verify passes 94 tests, TypeScript and Next production build; desktop passes 124 tests, seven browser authority/visual tests, TypeScript and 70 Rust tests. Targeted ESLint and Prettier pass; `apps/desktop/src/app.tsx` retains five unrelated pre-existing lint findings. Vercel serves exact revision `1cc544d3450c88532d8737d0182fe3ee7b2db7c3`, and the matching installer hash is `74CEC05177C0C5D02E5E9788757369582992804B106FC255802E2B29D3484C70`. Owner live UAT passed bidirectional automatic synchronization in the real web and desktop surfaces.
 files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/real-auth.test.ts, apps/desktop/package.json, apps/desktop/src/internal-channel.test.ts, apps/desktop/src/preferences.tsx, apps/desktop/src/app.tsx, apps/desktop/src/account-authority.ts, apps/desktop/src/features/account-experience.tsx, apps/desktop/src/profile-experience.css, apps/desktop/src/features/premium-operations.tsx, apps/desktop/src-tauri/src/account_sync.rs, apps/desktop/src-tauri/src/window.rs, apps/desktop/src-tauri/src/main.rs, apps/desktop/src-tauri/tauri.staging.conf.json, tests, and Phase 4 UAT artifacts.
