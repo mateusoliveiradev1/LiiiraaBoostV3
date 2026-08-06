@@ -77,9 +77,7 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(protectedPayload.invitations?.map(({ email }) => email)).toEqual(emails);
     expect(
       protectedPayload.invitations?.every(({ invitationUrl }) =>
-        invitationUrl?.startsWith(
-          'https://account.staging.example/pt-BR/register?invitation=',
-        ),
+        invitationUrl?.startsWith('https://account.staging.example/pt-BR/register?invitation='),
       ),
     ).toBe(true);
   });
@@ -104,8 +102,7 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(
       repaired.invitations.every(
         ({ invitationUrl }) =>
-          invitationUrl ===
-          `https://account.staging.example/pt-BR/register?invitation=${token}`,
+          invitationUrl === `https://account.staging.example/pt-BR/register?invitation=${token}`,
       ),
     ).toBe(true);
     expect(() =>

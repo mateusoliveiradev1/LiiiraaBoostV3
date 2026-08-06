@@ -17,6 +17,7 @@ export interface StagingInvitationProvisioningEnvironment {
   readonly STAGING_DATABASE_URL?: string;
   readonly STAGING_INVITATION_EMAILS_JSON?: string;
   readonly STAGING_INVITATION_OUTPUT_PATH?: string;
+  readonly STAGING_INVITATION_REPAIR_OUTPUT?: string;
 }
 
 export interface ProtectedInvitationOutput {
@@ -101,6 +102,66 @@ const parseEmails = (value: string | undefined): readonly string[] => {
   } catch {
     return reject('EMAILS');
   }
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+export const repairInvitationOutputPayload = (payload: string, accountOrigin: string): string => {
+  const origin = exactHttpsOrigin(accountOrigin);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(payload);
+  } catch {
+    return reject('OUTPUT_PAYLOAD');
+  }
+  if (!isRecord(parsed) || !Array.isArray(parsed['invitations'])) {
+    return reject('OUTPUT_PAYLOAD');
+  }
+  const invitations = parsed['invitations'];
+  if (invitations.length !== 3 || invitations.some((invitation) => !isRecord(invitation))) {
+    return reject('OUTPUT_PAYLOAD');
+  }
+  const normalizedEmails = parseEmails(
+    JSON.stringify(invitations.map((invitation) => invitation['email'])),
+  );
+  const repaired = invitations.map((invitation, index) => {
+    const expiresAt = invitation['expiresAt'];
+    const invitationUrl = invitation['invitationUrl'];
+    if (
+      typeof expiresAt !== 'string' ||
+      !Number.isFinite(Date.parse(expiresAt)) ||
+      typeof invitationUrl !== 'string'
+    ) {
+      return reject('OUTPUT_PAYLOAD');
+    }
+    let url: URL;
+    try {
+      url = new URL(invitationUrl);
+    } catch {
+      return reject('OUTPUT_PAYLOAD');
+    }
+    const tokenValues = url.searchParams.getAll('invitation');
+    if (
+      url.origin !== origin ||
+      url.username.length > 0 ||
+      url.password.length > 0 ||
+      url.hash.length > 0 ||
+      (url.pathname !== '/pt-BR/account/sign-up' && url.pathname !== '/pt-BR/register') ||
+      url.searchParams.size !== 1 ||
+      tokenValues.length !== 1 ||
+      !/^[A-Za-z0-9_-]{43,256}$/u.test(tokenValues[0] ?? '')
+    ) {
+      return reject('OUTPUT_PAYLOAD');
+    }
+    url.pathname = '/pt-BR/register';
+    return {
+      email: normalizedEmails[index],
+      expiresAt,
+      invitationUrl: url.toString(),
+    };
+  });
+  return `${JSON.stringify({ invitations: repaired }, null, 2)}\n`;
 };
 
 const outputPathOutsideRepository = (
@@ -192,7 +253,7 @@ export const provisionStagingInvitations = async (
         expiresAt,
         role: 'tester',
       });
-      const invitationUrl = new URL('/pt-BR/account/sign-up', accountOrigin);
+      const invitationUrl = new URL('/pt-BR/register', accountOrigin);
       invitationUrl.searchParams.set('invitation', invitation.token);
       invitations.push({
         email,
@@ -208,8 +269,34 @@ export const provisionStagingInvitations = async (
   }
 };
 
+export const repairStagingInvitationOutput = async (
+  environment: StagingInvitationProvisioningEnvironment,
+  repositoryRoot: string,
+): Promise<Readonly<{ repaired: 3; status: 'complete' }>> => {
+  const accountOrigin = exactHttpsOrigin(environment.ACCOUNT_STAGING_ORIGIN ?? '');
+  const outputPath = outputPathOutsideRepository(
+    environment.STAGING_INVITATION_OUTPUT_PATH,
+    repositoryRoot,
+  );
+  const handle = await open(outputPath, 'r+', 0o600);
+  try {
+    const repaired = repairInvitationOutputPayload(await handle.readFile('utf8'), accountOrigin);
+    await handle.truncate(0);
+    await handle.write(repaired, 0, 'utf8');
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  return { repaired: 3, status: 'complete' };
+};
+
 const run = async (): Promise<void> => {
   const environment = process.env as StagingInvitationProvisioningEnvironment;
+  if (environment.STAGING_INVITATION_REPAIR_OUTPUT === 'true') {
+    const result = await repairStagingInvitationOutput(environment, process.cwd());
+    process.stdout.write(`${JSON.stringify(result)}\n`);
+    return;
+  }
   const databaseUrl = environment.STAGING_DATABASE_URL;
   if (!databaseUrl) return reject('DATABASE_URL');
   const database = createControlPlaneDatabase(databaseUrl);
