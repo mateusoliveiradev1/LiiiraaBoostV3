@@ -754,10 +754,11 @@ export const createPostgresIdentityPersistence = (
       `INSERT INTO sessions
        (id, identity_id, provider_session_id, session_kind, authentication_method,
         token_digest, issued_at, expires_at, last_seen_at, version, created_at)
-       VALUES ($1, $2, $1, $3, $4, $5, $6, $7, $8, 1, $6)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1, $7)`,
       [
         record.id,
         record.accountId,
+        record.id,
         record.kind,
         record.authenticationMethod,
         record.tokenDigest,
