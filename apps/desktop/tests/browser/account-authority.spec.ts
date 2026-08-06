@@ -85,11 +85,19 @@ const installNativeAccountAuthority = async (
     activeDevice?: boolean;
     conflict?: boolean;
     initialState?: AuthorityState;
+    rejectMutation?: boolean;
     revokeOnReconnect?: boolean;
   }> = {},
 ): Promise<void> => {
   await page.addInitScript(
-    ({ conflict, initialProjection, initialState, remoteProjection, revokeOnReconnect }) => {
+    ({
+      conflict,
+      initialProjection,
+      initialState,
+      rejectMutation,
+      remoteProjection,
+      revokeOnReconnect,
+    }) => {
       const calls: unknown[] = [];
       Object.defineProperty(globalThis, '__LIIIRAA_ACCOUNT_AUTHORITY_CALLS__', {
         configurable: false,
@@ -119,6 +127,14 @@ const installNativeAccountAuthority = async (
                 state: 'conflict',
               };
             }
+            if (rejectMutation && request?.mutation !== undefined) {
+              return {
+                error: 'invalid-response',
+                localDraft: request.mutation.draft,
+                projection: initialProjection,
+                state: 'stale',
+              };
+            }
             if (request?.mutation?.draft?.displayName) {
               return {
                 projection: {
@@ -144,6 +160,7 @@ const installNativeAccountAuthority = async (
       initialProjection:
         options.activeDevice === false ? { ...projection(), activeDevice: null } : projection(),
       initialState: options.initialState ?? 'online',
+      rejectMutation: options.rejectMutation === true,
       remoteProjection: projection('Remote Player', '8'),
       revokeOnReconnect: options.revokeOnReconnect === true,
     },
@@ -226,6 +243,20 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] projects a committed prof
   await expect(page.getByText('Profile saved')).toBeVisible();
   await expect(page.locator('#desktop-account-name')).toHaveText('Mateus Winchester');
   await expect(page.locator('.lb-title-bar')).toContainText('Mateus Winchester');
+});
+
+test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] preserves the typed name when profile persistence fails`, async ({
+  page,
+}) => {
+  await installNativeAccountAuthority(page, { rejectMutation: true });
+  await openAccount(page, '/account/overview');
+
+  const field = page.getByRole('textbox', { name: 'Display name' });
+  await field.fill('Mateus Winchester');
+  await page.getByRole('button', { name: 'Save profile' }).click();
+
+  await expect(page.getByText('The profile was not saved')).toBeVisible();
+  await expect(field).toHaveValue('Mateus Winchester');
 });
 
 test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] signs out on next-contact revocation while local safety remains reachable`, async ({

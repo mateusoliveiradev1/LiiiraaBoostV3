@@ -242,7 +242,7 @@ describe('real staging authentication routes', () => {
     const nativeUpdate = await app.inject({
       headers: {
         authorization: `Bearer ${credential}`,
-        'if-match': current.headers.etag,
+        'if-match': `"${actor.identityVersion.toString()}"`,
       },
       method: 'PATCH',
       payload: { patch: { displayName: 'Mateus Winchester', locale: 'pt-BR' } },
@@ -254,6 +254,20 @@ describe('real staging authentication routes', () => {
     });
 
     identity.updateProfile.mockClear();
+    for (const invalidIfMatch of ['*', '"1", "2"', '"-1"', '"account-invalid-v1']) {
+      const invalidUpdate = await app.inject({
+        headers: {
+          authorization: `Bearer ${credential}`,
+          'if-match': invalidIfMatch,
+        },
+        method: 'PATCH',
+        payload: { patch: { displayName: 'Invalid Version', locale: 'pt-BR' } },
+        url: '/v1/account',
+      });
+      expect(invalidUpdate.statusCode).toBe(400);
+    }
+    expect(identity.updateProfile).not.toHaveBeenCalled();
+
     const hostileUpdate = await app.inject({
       headers: {
         authorization: `Bearer ${credential}`,

@@ -1864,10 +1864,16 @@ const AuthoritativeProfile = ({
   const isDirty = normalizedName !== remoteName;
   const isValid = normalizedName.length >= 2 && normalizedName.length <= 40;
   const isSaving = snapshot.state === 'pending' && snapshot.localDraft !== undefined;
+  const localDraftName = snapshot.localDraft?.displayName;
 
   useEffect(() => {
-    if (!isSaving && remoteName !== '') setDisplayName(remoteName);
-  }, [isSaving, remoteName]);
+    if (isSaving) return;
+    if (localDraftName !== undefined) {
+      setDisplayName(localDraftName);
+      return;
+    }
+    if (remoteName !== '') setDisplayName(remoteName);
+  }, [isSaving, localDraftName, remoteName]);
 
   const saveProfile = async (): Promise<void> => {
     setNotice(undefined);

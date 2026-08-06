@@ -175,9 +175,16 @@ const accountProjection = (
 
 const expectedVersion = (request: FastifyRequest): bigint | null => {
   const header = request.headers['if-match'];
-  if (typeof header !== 'string') return null;
-  const match = /(?:^|v)([0-9]+)"?$/u.exec(header);
-  return match?.[1] ? BigInt(match[1]) : null;
+  if (typeof header !== 'string' || header.length > 256) return null;
+  const candidate = header.trim();
+  const match =
+    /^(?:([0-9]{1,19})|"([0-9]{1,19})"|"account-[A-Za-z0-9][A-Za-z0-9-]{0,127}-v([0-9]{1,19})")$/u.exec(
+      candidate,
+    );
+  const digits = match?.[1] ?? match?.[2] ?? match?.[3];
+  if (digits === undefined) return null;
+  const version = BigInt(digits);
+  return version <= 9_223_372_036_854_775_807n ? version : null;
 };
 
 export const registerRealIdentityRoutes = (
