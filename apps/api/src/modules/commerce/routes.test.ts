@@ -5,9 +5,9 @@ import { checkoutReturnUrls, commerceJson } from './routes.js';
 describe('commerce HTTP boundary', () => {
   it('builds checkout returns exclusively from the admitted account origin and locale', () => {
     expect(checkoutReturnUrls('https://account.example', 'pt-BR')).toEqual({
-      cancelUrl: 'https://account.example/pt-BR/plan?checkout=cancelled',
+      cancelUrl: 'https://account.example/pt-BR/account/subscription?checkout=cancelled',
       successUrl:
-        'https://account.example/pt-BR/plan?checkout=success&session_id={CHECKOUT_SESSION_ID}',
+        'https://account.example/pt-BR/account/subscription?checkout=success&session_id={CHECKOUT_SESSION_ID}',
     });
     expect(() => checkoutReturnUrls('http://account.example', 'en')).toThrow(
       'INVALID_ACCOUNT_ORIGIN',

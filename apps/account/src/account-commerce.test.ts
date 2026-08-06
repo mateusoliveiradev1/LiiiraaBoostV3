@@ -1,7 +1,7 @@
 import type { SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createAccountCommerce } from './account-commerce';
+import { createAccountCommerce, subscriptionBillingKind } from './account-commerce';
 import { primeAccountCsrfToken } from './account-auth';
 
 const subscription = {
@@ -102,5 +102,26 @@ describe('real account commerce client', () => {
       code: 'invalid-response',
       status: 'error',
     });
+  });
+
+  it('distinguishes permanent Premium authority from a Stripe-backed subscription', () => {
+    expect(
+      subscriptionBillingKind({
+        ...subscription,
+        state: 'active',
+        plan: 'premium',
+        entitlements: ['premium-actions'],
+      }),
+    ).toBe('permanent');
+    expect(
+      subscriptionBillingKind({
+        ...subscription,
+        state: 'active',
+        plan: 'premium',
+        entitlements: ['premium-actions'],
+        currentPeriodEndsAt: '2030-01-01T00:00:00.000Z',
+      }),
+    ).toBe('stripe');
+    expect(subscriptionBillingKind(subscription)).toBe('free');
   });
 });

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { REAL_STAGING_CAPABILITIES } from './runtime.js';
@@ -15,5 +17,11 @@ describe('real staging control-plane composition', () => {
       'support-consent-authority',
       'admin-read-authority',
     ]);
+  });
+
+  it('uses the canonical account subscription route for Stripe portal returns', () => {
+    const source = readFileSync(new URL('./runtime.ts', import.meta.url), 'utf8');
+    expect(source).toContain('accountSubscriptionUrl');
+    expect(source).not.toContain('`${environment.accountOrigin}/${locale}/plan`');
   });
 });

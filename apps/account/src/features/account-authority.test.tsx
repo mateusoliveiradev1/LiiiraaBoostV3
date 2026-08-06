@@ -139,6 +139,9 @@ describe('production account authority', () => {
     expect(subscriptionSource).toContain('createAccountCommerce');
     expect(subscriptionSource).toContain('Liiiraa Boost Premium');
     expect(subscriptionSource).toContain('Premium somente após o webhook');
+    expect(subscriptionSource).toContain('Premium administrativo permanente');
+    expect(subscriptionSource).toContain('Sem cobrança, renovação ou fatura');
+    expect(subscriptionSource).toContain("billingKind === 'stripe'");
     expect(subscriptionSource).not.toMatch(/Frescari/iu);
   });
 
