@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import accountNextConfig from '../next.config';
+import { resolvePublicBoundaryOrigin } from './account-origins';
 import accountProxy, {
   accountContextFromUrl,
   accountHeaderContract,
@@ -10,6 +11,12 @@ import accountProxy, {
 import accountRuntimeProxy from './proxy';
 
 describe('account security boundary', () => {
+  it('uses only live provider origins while running in Vercel staging', () => {
+    expect(resolvePublicBoundaryOrigin(undefined, true)).toBe(
+      'https://liiiraa-boost-public-staging.vercel.app',
+    );
+  });
+
   it('leaves the real API authority path outside the page proxy', () => {
     expect(accountProxyConfig.matcher).toEqual([
       '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
@@ -158,6 +165,14 @@ describe('account security boundary', () => {
   });
 
   it('redirects each localized account root to real authentication and preserves valid invites', () => {
+    const bare = accountProxy(
+      new NextRequest('https://liiiraa-boost-account-staging.vercel.app/'),
+    );
+    expect(bare.status).toBe(307);
+    expect(bare.headers.get('location')).toBe(
+      'https://liiiraa-boost-account-staging.vercel.app/pt-BR/login',
+    );
+
     for (const locale of ['pt-BR', 'en'] as const) {
       const response = accountProxy(new NextRequest(`https://account.liiiraa.com/${locale}`));
       expect(response.status).toBe(307);

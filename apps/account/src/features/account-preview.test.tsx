@@ -344,6 +344,10 @@ describe('authored overview and Profile workspaces', () => {
     expect(navigationSource).toContain('className="account-header__account"');
     expect(navigationSource).toContain('{identity}');
     expect(navigationSource).toContain('accountMenuItems');
+    expect(layoutSource).toContain('resolvePublicBoundaryOrigin');
+    expect(accountStyles).toMatch(
+      /\.account-auth-shell \.lb-web-route-header\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/u,
+    );
     expect(featureSource).not.toContain('<ProvenanceLabel');
     expect(featureSource).toContain('<PreviewWorkflow');
   });

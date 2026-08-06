@@ -9,6 +9,7 @@ import {
   accountRouteBoundaryHref,
   publicBoundaryHref,
   publicNavigation,
+  resolveAccountBoundaryOrigin,
   routing,
 } from './public-boundary';
 import {
@@ -41,6 +42,11 @@ const routeOwnedSources = [
 ].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8'));
 
 describe('public shell', () => {
+  it('redirects the bare provider origin to the default localized public entry', () => {
+    expect(proxySource).toContain("request.nextUrl.pathname === '/'");
+    expect(proxySource).toContain("destination.pathname = '/pt-BR'");
+  });
+
   it('leaves the shared API authority path outside locale routing', () => {
     expect(proxySource).toContain("matcher: ['/((?!api|v1|_next|_vercel|.*\\\\..*).*)']");
   });
@@ -133,6 +139,8 @@ describe('public shell', () => {
 
   it('exposes localized sign-in and registration calls to the stable account origin', () => {
     const accountOrigin = 'https://liiiraa-boost-account-staging.vercel.app';
+
+    expect(resolveAccountBoundaryOrigin(undefined, true)).toBe(accountOrigin);
 
     expect(accountRouteBoundaryHref('account-sign-in', 'pt-BR', accountOrigin)).toBe(
       `${accountOrigin}/pt-BR/login`,
