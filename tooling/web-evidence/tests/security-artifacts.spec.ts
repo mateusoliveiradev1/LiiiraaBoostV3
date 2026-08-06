@@ -118,14 +118,20 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain('broader-beta-promotion');
   expect(workflow).toContain('OWNED_CALLBACK_ORIGINS');
   expect(workflow).toContain('OWNED_EMAIL_IDENTITY');
-  expect(workflow).toContain('LIIIRAA_ACCOUNT_PREVIEW=false');
-  expect(workflow).toContain('LIIIRAA_ADMIN_PREVIEW=false');
-  expect(workflow).toContain("'LIIIRAA_ACCOUNT_ORIGIN=' + account.origin");
+  expect(workflow).toContain("LIIIRAA_ACCOUNT_PREVIEW: 'false'");
+  expect(workflow).toContain("LIIIRAA_ADMIN_PREVIEW: 'false'");
+  expect(workflow).toContain('LIIIRAA_ACCOUNT_ORIGIN: account.origin');
+  expect(workflow).toContain(
+    'LIIIRAA_ACCOUNT_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN',
+  );
+  expect(workflow).toContain(
+    'LIIIRAA_ADMIN_AUTHORITY_ORIGIN: process.env.STAGING_API_ORIGIN',
+  );
   expect(
     workflow.match(/ref: process\.env\.GIT_REF, sha: process\.env\.GIT_SHA/gu) ?? [],
   ).toHaveLength(3);
-  expect(workflow.match(/env: \[/gu) ?? []).toHaveLength(3);
-  expect(workflow).not.toContain('env: { STAGING_API_ORIGIN:');
+  expect(workflow.match(/env: \{/gu) ?? []).toHaveLength(3);
+  expect(workflow).not.toContain('env: [');
   expect(workflow.match(/deployment\.readyState === 'READY'/gu) ?? []).toHaveLength(3);
   expect(workflow.match(/deployment\.target !== 'production'/gu) ?? []).toHaveLength(3);
   expect(workflow.match(/deployment\.alias\.includes\(expected\.hostname\)/gu) ?? []).toHaveLength(
