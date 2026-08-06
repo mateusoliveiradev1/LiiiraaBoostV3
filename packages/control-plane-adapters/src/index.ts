@@ -18,6 +18,8 @@ export {
 } from './postgres/migrate.js';
 export * from './crypto/staging-entitlement-signer.js';
 export * from './email/ses-email.js';
+export * from './commerce/stripe-provider.js';
+export * from './commerce/stripe-webhook.js';
 export {
   createBetterAuthAdapter,
   createPostgresSessionAuthority,
