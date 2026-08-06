@@ -1,6 +1,12 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { randomUUID } from 'node:crypto';
+import type {
+  ActiveAdminRoleSession,
+  AdminCommandDependencies,
+  AdminProjectionResource,
+  AdminRoleAuthorityDependencies,
+} from '@liiiraa/control-plane-application';
 import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
@@ -8,18 +14,12 @@ import {
   migrateControlPlane,
   migrateRealIdentity,
   type IdentityActor,
-} from '@liiiraa/control-plane-adapters';
-import type {
-  ActiveAdminRoleSession,
-  AdminCommandDependencies,
-  AdminProjectionResource,
-  AdminRoleAuthorityDependencies,
-} from '@liiiraa/control-plane-application';
+} from '@liiiraa/control-plane-adapters/runtime-identity';
 import Fastify, { type FastifyInstance } from 'fastify';
 
-import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.js';
-import { registerAdminRoutes, type AdminRouteDependencies } from '../modules/admin/routes.js';
-import { registerRealIdentityRoutes } from '../modules/identity/real-routes.js';
+import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.ts';
+import { registerAdminRoutes, type AdminRouteDependencies } from '../modules/admin/routes.ts';
+import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
 
 export interface RealStagingEnvironment extends ApiEnvironmentInput {
   readonly STAGING_AUTH_SECRET?: string;

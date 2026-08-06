@@ -7,6 +7,7 @@
   },
   "include": [
     "src/index.ts",
+    "src/runtime-identity.ts",
     "src/postgres/real-identity.ts",
     "src/postgres/real-identity.test.ts",
     "src/storage/audit-anchor.ts",

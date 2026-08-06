@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-import type { ControlPlaneMigrationDatabase, ControlPlaneTransaction } from './database.js';
+import type { ControlPlaneMigrationDatabase, ControlPlaneTransaction } from './database.ts';
 
 export type IdentityRole = 'tester' | 'support' | 'operations' | 'security' | 'audit';
 export type IdentityLocale = 'pt-BR' | 'en';

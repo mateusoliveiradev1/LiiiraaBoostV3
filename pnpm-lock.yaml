@@ -392,6 +392,9 @@ importers:
       '@liiiraa/control-plane-application':
         specifier: workspace:*
         version: link:../../packages/control-plane-application
+      '@liiiraa/control-plane-domain':
+        specifier: workspace:*
+        version: link:../../packages/control-plane-domain
       fastify:
         specifier: 5.10.0
         version: 5.10.0

@@ -210,10 +210,8 @@ export const createActivatedWorkspaceGraph = (
     }
 
     const publicRoot = module.publicRoots[0];
-    if (module.publicRoots.length !== 1 || publicRoot === undefined) {
-      throw new Error(
-        `Activated canonical module "${moduleId}" must declare exactly one public root.`,
-      );
+    if (publicRoot === undefined) {
+      throw new Error(`Activated canonical module "${moduleId}" must declare a public root.`);
     }
 
     return {
@@ -383,11 +381,7 @@ export const discoverPnpmWorkspaceRoots = (repositoryRoot: string): string[] => 
       const relativeRoot = normalizeRepositoryPath(
         pathApi.relative(normalizedRepositoryRoot, packageRoot),
       );
-      if (
-        relativeRoot.length === 0 ||
-        relativeRoot === '..' ||
-        relativeRoot.startsWith('../')
-      ) {
+      if (relativeRoot.length === 0 || relativeRoot === '..' || relativeRoot.startsWith('../')) {
         throw new Error(`Workspace package "${relativeRoot}" escapes the repository root.`);
       }
       roots.add(relativeRoot);

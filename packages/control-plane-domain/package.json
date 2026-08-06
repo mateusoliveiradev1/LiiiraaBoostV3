@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./runtime-admin-authority": "./src/runtime-admin-authority.ts"
   },
   "scripts": {
     "test": "vitest run src/devices src/identity src/entitlements",

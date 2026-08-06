@@ -725,7 +725,8 @@ describe('real graph adapters', () => {
       },
       to: {
         path: '^packages/contracts-ts(?:/|$)',
-        pathNot: '^packages/contracts-ts/src/index\\.ts$',
+        pathNot:
+          '^(?:packages/contracts-ts/src/index\\.ts|packages/contracts-ts/src/runtime-control-plane-validator\\.ts)$',
       },
     });
 

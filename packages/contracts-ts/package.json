@@ -12,6 +12,10 @@
       "types": "./src/generated/index.ts",
       "default": "./src/generated/index.ts"
     },
+    "./runtime-control-plane-validator": {
+      "types": "./src/runtime-control-plane-validator.ts",
+      "default": "./src/runtime-control-plane-validator.ts"
+    },
     "./web-validation": {
       "types": "./src/web-validation.ts",
       "default": "./src/web-validation.ts"

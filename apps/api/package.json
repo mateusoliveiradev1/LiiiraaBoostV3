@@ -16,6 +16,7 @@
     "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/control-plane-adapters": "workspace:*",
     "@liiiraa/control-plane-application": "workspace:*",
+    "@liiiraa/control-plane-domain": "workspace:*",
     "fastify": "5.10.0"
   },
   "devDependencies": {

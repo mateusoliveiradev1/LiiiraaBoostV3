@@ -7,7 +7,7 @@ import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
   createRealIdentityAuthority,
-} from '@liiiraa/control-plane-adapters';
+} from '@liiiraa/control-plane-adapters/runtime-identity';
 
 const INVITATION_LIFETIME_MS = 14 * 86_400_000;
 const REJECTION = 'STAGING_INVITATION_PROVISIONING_REJECTED';
@@ -53,8 +53,10 @@ export interface StagingInvitationProvisioningResult {
   readonly status: 'complete';
 }
 
-const reject = (): never => {
-  throw new Error(REJECTION);
+const reject = (reason = 'INPUT'): never => {
+  const error = new Error(REJECTION) as Error & { code: string };
+  error.code = `PROVISION_${reason}`;
+  throw error;
 };
 
 const normalizeEmail = (value: string): string => value.trim().toLowerCase();
@@ -73,18 +75,18 @@ const exactHttpsOrigin = (value: string): string => {
       url.username.length > 0 ||
       url.password.length > 0
     ) {
-      return reject();
+      return reject('ORIGIN');
     }
     return url.origin;
   } catch {
-    return reject();
+    return reject('ORIGIN');
   }
 };
 
 const parseEmails = (value: string | undefined): readonly string[] => {
   try {
     const parsed: unknown = JSON.parse(value ?? '');
-    if (!Array.isArray(parsed) || parsed.length !== 3) return reject();
+    if (!Array.isArray(parsed) || parsed.length !== 3) return reject('EMAILS');
     const emails = parsed.map((email) => (typeof email === 'string' ? normalizeEmail(email) : ''));
     if (
       emails.some(
@@ -93,11 +95,11 @@ const parseEmails = (value: string | undefined): readonly string[] => {
       ) ||
       new Set(emails).size !== 3
     ) {
-      return reject();
+      return reject('EMAILS');
     }
     return emails;
   } catch {
-    return reject();
+    return reject('EMAILS');
   }
 };
 
@@ -105,9 +107,9 @@ const outputPathOutsideRepository = (
   outputPath: string | undefined,
   repositoryRoot: string,
 ): string => {
-  if (!outputPath) return reject();
+  if (!outputPath) return reject('OUTPUT_PATH');
   const windowsPath = win32.isAbsolute(outputPath);
-  if (!windowsPath && !isAbsolute(outputPath)) return reject();
+  if (!windowsPath && !isAbsolute(outputPath)) return reject('OUTPUT_PATH');
   const resolvePath = (value: string): string =>
     windowsPath ? win32.resolve(value) : resolve(value);
   const relativePath = (from: string, to: string): string =>
@@ -121,7 +123,7 @@ const outputPathOutsideRepository = (
     fromRepository === '' ||
     (!fromRepository.startsWith('..') && !absoluteCheck(fromRepository))
   ) {
-    return reject();
+    return reject('OUTPUT_PATH');
   }
   return absoluteOutput;
 };
@@ -145,7 +147,7 @@ const protectedFileOutput = async (path: string): Promise<ProtectedInvitationOut
       await rm(path, { force: true });
     },
     async commit(payload) {
-      if (handle === undefined) return reject();
+      if (handle === undefined) return reject('OUTPUT_STATE');
       await handle.writeFile(payload, { encoding: 'utf8' });
       await handle.sync();
       await close();
@@ -164,7 +166,7 @@ export const provisionStagingInvitations = async (
     dependencies.repositoryRoot,
   );
   const now = (dependencies.clock ?? { now: () => new Date() }).now();
-  if (!Number.isFinite(now.getTime())) return reject();
+  if (!Number.isFinite(now.getTime())) return reject('CLOCK');
   const nowIso = now.toISOString();
   const pending: string[] = [];
 
@@ -209,7 +211,7 @@ export const provisionStagingInvitations = async (
 const run = async (): Promise<void> => {
   const environment = process.env as StagingInvitationProvisioningEnvironment;
   const databaseUrl = environment.STAGING_DATABASE_URL;
-  if (!databaseUrl) return reject();
+  if (!databaseUrl) return reject('DATABASE_URL');
   const database = createControlPlaneDatabase(databaseUrl);
   try {
     const result = await provisionStagingInvitations(environment, {
@@ -225,8 +227,13 @@ const run = async (): Promise<void> => {
 
 const invokedPath = process.argv[1];
 if (invokedPath && import.meta.url === pathToFileURL(resolve(invokedPath)).href) {
-  run().catch(() => {
-    process.stderr.write(`${REJECTION}\n`);
+  run().catch((error: unknown) => {
+    const candidate =
+      typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as Readonly<{ code?: unknown }>).code)
+        : 'UNKNOWN';
+    const safeCode = /^[A-Z0-9_]{2,40}$/u.test(candidate) ? candidate : 'UNKNOWN';
+    process.stderr.write(`${REJECTION}:${safeCode}\n`);
     process.exitCode = 1;
   });
 }

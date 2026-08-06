@@ -1,3 +1,6 @@
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import workflow from '../../../../.github/workflows/phase-4-staging-api.yml?raw';
@@ -8,6 +11,25 @@ import runtimeEntrypoint from './main.mjs?raw';
 import renderManifest from '../../staging.render.yaml?raw';
 
 describe('daemon-free OCI artifact contract', () => {
+  it('loads the exact production entrypoint before environment admission', () => {
+    const repositoryRoot = resolve(import.meta.dirname, '../../../..');
+    const result = spawnSync(
+      process.execPath,
+      ['--experimental-strip-types', 'apps/api/src/staging/main.mjs'],
+      {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+        env: Object.fromEntries(
+          Object.entries(process.env).filter(([key]) => !key.startsWith('STAGING_')),
+        ),
+      },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('STAGING_API_STARTUP_FAILED');
+    expect(result.stderr).not.toContain('ERR_MODULE_NOT_FOUND');
+  });
+
   it('pins the application toolchains and uses an unprivileged runtime with health checks', () => {
     expect(dockerfile).toContain('FROM node:24.18.0-bookworm-slim');
     expect(dockerfile).toContain('corepack prepare pnpm@11.17.0 --activate');

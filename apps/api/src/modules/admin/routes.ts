@@ -1,22 +1,23 @@
-import {
-  controlPlaneDocumentValidator,
-  type AdminCommandJson,
-  type AdminRoleJson,
-} from '@liiiraa/contracts-ts';
+import type { AdminCommandJson, AdminRoleJson } from '@liiiraa/contracts-ts';
+import type {
+  ActiveAdminRoleSession,
+  AdminCommandDependencies,
+  AdminProjectionResource,
+  AdminRoleAuthorityDependencies,
+  AdminStepUpEvidence,
+} from '@liiiraa/control-plane-application';
 import {
   assumeAdminRole,
-  ADMIN_ROLES,
-  authorizeAdminProjection,
   executeAdminCommand,
   handoffAdminRole,
-  projectBreakGlassMetadata,
   releaseAdminRole,
-  type ActiveAdminRoleSession,
-  type AdminCommandDependencies,
-  type AdminProjectionResource,
-  type AdminRoleAuthorityDependencies,
-  type AdminStepUpEvidence,
-} from '@liiiraa/control-plane-application';
+} from '@liiiraa/control-plane-application/runtime-admin-authority';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
+import {
+  ADMIN_ROLES,
+  authorizeAdminProjection,
+  projectBreakGlassMetadata,
+} from '@liiiraa/control-plane-domain/runtime-admin-authority';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface AdminRouteDependencies {
@@ -68,8 +69,8 @@ const isRole = (value: unknown): value is AdminRoleJson =>
 const collectionResource = (request: FastifyRequest): AdminProjectionResource | null => {
   if (!isRecord(request.params)) return null;
   const collection = request.params['collection'];
-  return typeof collection === 'string'
-    ? (COLLECTION_RESOURCE[collection as keyof typeof COLLECTION_RESOURCE] ?? null)
+  return typeof collection === 'string' && Object.hasOwn(COLLECTION_RESOURCE, collection)
+    ? COLLECTION_RESOURCE[collection as keyof typeof COLLECTION_RESOURCE]
     : null;
 };
 
@@ -82,9 +83,9 @@ const hideDeniedProjection = (reply: FastifyReply) =>
 const commandBody = (
   value: unknown,
 ): Readonly<{ command: AdminCommandJson; impactReviewed: boolean; confirmed: boolean }> | null => {
-  if (!isRecord(value) || !controlPlaneDocumentValidator(value['command'])) return null;
-  const command = value['command'];
-  if (!isRecord(command) || command['kind'] !== 'admin-command') return null;
+  if (!isRecord(value) || !controlPlaneDocumentValidator(value.command)) return null;
+  const command = value.command;
+  if (!isRecord(command) || command.kind !== 'admin-command') return null;
   return {
     command: command as unknown as AdminCommandJson,
     impactReviewed: value['impactReviewed'] === true,

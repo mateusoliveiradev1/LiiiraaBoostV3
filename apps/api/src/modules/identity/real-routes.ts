@@ -1,16 +1,16 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
-import {
-  controlPlaneDocumentValidator,
-  type AccountProjectionJson,
-  type SessionProjectionJson,
-  type SubscriptionProjectionJson,
+import type {
+  AccountProjectionJson,
+  SessionProjectionJson,
+  SubscriptionProjectionJson,
 } from '@liiiraa/contracts-ts';
 import type {
   IdentityActor,
   IdentityLocale,
   RealIdentityAuthority,
 } from '@liiiraa/control-plane-adapters';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export type RealIdentityRouteAuthority = Pick<

@@ -64,7 +64,10 @@
       "owner": "contracts",
       "layer": "generated",
       "roots": ["packages/contracts-ts"],
-      "publicRoots": ["packages/contracts-ts/src/index.ts"],
+      "publicRoots": [
+        "packages/contracts-ts/src/index.ts",
+        "packages/contracts-ts/src/runtime-control-plane-validator.ts"
+      ],
       "runtimeClass": "production",
       "status": "active"
     },
@@ -172,7 +175,10 @@
       "owner": "control-plane",
       "layer": "domain",
       "roots": ["packages/control-plane-domain"],
-      "publicRoots": ["packages/control-plane-domain/src/index.ts"],
+      "publicRoots": [
+        "packages/control-plane-domain/src/index.ts",
+        "packages/control-plane-domain/src/runtime-admin-authority.ts"
+      ],
       "runtimeClass": "production",
       "status": "active"
     },
@@ -181,7 +187,10 @@
       "owner": "control-plane",
       "layer": "application",
       "roots": ["packages/control-plane-application"],
-      "publicRoots": ["packages/control-plane-application/src/index.ts"],
+      "publicRoots": [
+        "packages/control-plane-application/src/index.ts",
+        "packages/control-plane-application/src/runtime-admin-authority.ts"
+      ],
       "runtimeClass": "production",
       "status": "active"
     },
@@ -190,7 +199,10 @@
       "owner": "control-plane",
       "layer": "adapter",
       "roots": ["packages/control-plane-adapters"],
-      "publicRoots": ["packages/control-plane-adapters/src/index.ts"],
+      "publicRoots": [
+        "packages/control-plane-adapters/src/index.ts",
+        "packages/control-plane-adapters/src/runtime-identity.ts"
+      ],
       "runtimeClass": "production",
       "status": "active"
     },

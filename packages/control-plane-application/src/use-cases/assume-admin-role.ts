@@ -1,5 +1,5 @@
 import type { AdminRoleJson } from '@liiiraa/contracts-ts';
-import { ADMIN_ROLES } from '@liiiraa/control-plane-domain';
+import { ADMIN_ROLES } from '@liiiraa/control-plane-domain/runtime-admin-authority';
 
 export interface ActiveAdminRoleSession {
   readonly sessionId: string;

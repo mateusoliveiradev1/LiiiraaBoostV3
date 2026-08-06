@@ -4,7 +4,7 @@ import {
   type AdminCommandAuthorizationContext,
   type AdminProjectionResource,
   type AdminSessionClaim,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/runtime-admin-authority';
 
 export interface AdminAggregateProjection {
   readonly version: bigint;
