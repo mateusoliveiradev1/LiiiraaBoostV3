@@ -122,8 +122,9 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow.match(/searchParams\.set\('sha', process\.env\.GIT_SHA\)/gu) ?? []).toHaveLength(
     3,
   );
-  expect(workflow.match(/searchParams\.set\('projectId', process\.env\.PROJECT_ID\)/gu) ?? [])
-    .toHaveLength(3);
+  expect(
+    workflow.match(/searchParams\.set\('projectId', process\.env\.PROJECT_ID\)/gu) ?? [],
+  ).toHaveLength(3);
   expect(workflow).not.toContain('api.vercel.com/v13/deployments?');
   expect(workflow).not.toContain("method: 'POST'");
   expect(workflow.match(/deployment\.readyState === 'READY'/gu) ?? []).toHaveLength(3);
