@@ -9,7 +9,7 @@ import adminProxy, {
   config as adminProxyConfig,
   createAdminRequestNonce,
 } from '../proxy';
-import { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
+import adminNextConfig, { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
 import { ADMIN_CANONICAL_ENTRY, ADMIN_LOCAL_ORIGIN, resolveAdminOrigin } from './admin-runtime';
 
 describe('admin security boundary', () => {
@@ -20,6 +20,20 @@ describe('admin security boundary', () => {
   it('leaves the real API authority path outside the administrative page proxy', () => {
     expect(adminProxyConfig.matcher).toEqual([
       '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    ]);
+  });
+
+  it('builds the real API rewrite into the Next routing manifest', async () => {
+    const rewrites = Reflect.get(adminNextConfig, 'rewrites') as
+      | (() => Promise<readonly { destination: string; source: string }[]>)
+      | undefined;
+
+    expect(rewrites).toBeTypeOf('function');
+    await expect(rewrites?.()).resolves.toEqual([
+      {
+        destination: 'https://liiiraa-api-staging.onrender.com/v1/:path*',
+        source: '/v1/:path*',
+      },
     ]);
   });
 

@@ -40,6 +40,20 @@ describe('public shell', () => {
     expect(proxySource).toContain("matcher: ['/((?!api|v1|_next|_vercel|.*\\\\..*).*)']");
   });
 
+  it('builds the shared API rewrite into the Next routing manifest', async () => {
+    const rewrites = Reflect.get(publicConfig.default, 'rewrites') as
+      | (() => Promise<readonly { destination: string; source: string }[]>)
+      | undefined;
+
+    expect(rewrites).toBeTypeOf('function');
+    await expect(rewrites?.()).resolves.toEqual([
+      {
+        destination: 'https://liiiraa-api-staging.onrender.com/v1/:path*',
+        source: '/v1/:path*',
+      },
+    ]);
+  });
+
   it('publishes the official brand favicon from the root app boundary', () => {
     const iconUrl = new URL('./app/icon.svg', import.meta.url);
 

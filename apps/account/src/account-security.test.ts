@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
+import accountNextConfig from '../next.config';
 import accountProxy, {
   accountContextFromUrl,
   accountHeaderContract,
@@ -12,6 +13,20 @@ describe('account security boundary', () => {
   it('leaves the real API authority path outside the page proxy', () => {
     expect(accountProxyConfig.matcher).toEqual([
       '/((?!api|v1|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    ]);
+  });
+
+  it('builds the real API rewrite into the Next routing manifest', async () => {
+    const rewrites = Reflect.get(accountNextConfig, 'rewrites') as
+      | (() => Promise<readonly { destination: string; source: string }[]>)
+      | undefined;
+
+    expect(rewrites).toBeTypeOf('function');
+    await expect(rewrites?.()).resolves.toEqual([
+      {
+        destination: 'https://liiiraa-api-staging.onrender.com/v1/:path*',
+        source: '/v1/:path*',
+      },
     ]);
   });
 
