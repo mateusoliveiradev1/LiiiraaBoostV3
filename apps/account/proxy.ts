@@ -125,6 +125,13 @@ const accountRootDestination = (request: NextRequest): URL | undefined => {
 };
 
 export default function accountProxy(request: NextRequest): NextResponse {
+  if (
+    request.nextUrl.pathname === '/v1' ||
+    request.nextUrl.pathname.startsWith('/v1/')
+  ) {
+    return NextResponse.next();
+  }
+
   const nonce = createRequestNonce();
   const headerContract = accountHeaderContract(nonce, process.env.NODE_ENV);
   const rootDestination = accountRootDestination(request);
