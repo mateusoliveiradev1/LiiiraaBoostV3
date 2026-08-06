@@ -110,12 +110,37 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
   setRequestLocale(requestedLocale);
 
   const locale = requestedLocale as WebLocale;
+  const runtime = resolveAdminServerRuntimeConfig();
+  const copy = COPY[locale];
+
+  if (runtime.kind === 'production') {
+    return (
+      <html
+        data-admin-session-state="unverified"
+        data-authoritative-access-connected="true"
+        data-ordinary-navigation-linked="false"
+        data-runtime-class="server-authority"
+        data-surface="admin"
+        lang={locale}
+      >
+        <body>
+          <a className="admin-skip-link" href="#admin-main">
+            {copy.skip}
+          </a>
+          <main id="admin-main" tabIndex={-1}>
+            <AdminFocusHandoff />
+            {children}
+          </main>
+        </body>
+      </html>
+    );
+  }
+
   const requestHeaders = await headers();
   const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
-  const copy = COPY[locale];
   const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigation = projectAdminRoleNavigation(role, locale);
-  const composition = adminWebComposition(resolveAdminServerRuntimeConfig().kind);
+  const composition = adminWebComposition(runtime.kind);
 
   return (
     <html

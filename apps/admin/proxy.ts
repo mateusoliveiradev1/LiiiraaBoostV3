@@ -23,6 +23,7 @@ export type AdminAccessBoundaryResult = Readonly<{
     | 'deterministic-role-preview'
     | 'origin-rejected'
     | 'unsafe-context-rejected'
+    | 'url-role-rejected'
     | 'unknown-role-rejected';
   role: AdminPreviewRole;
 }>;
@@ -311,13 +312,20 @@ const applyAdminHeaders = (
 export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
   const runtimeMode = process.env.NODE_ENV;
+  const previewEnabled = process.env['LIIIRAA_ADMIN_PREVIEW'] === 'true';
   const boundary = AdminAccessBoundary({
     cookieHeader: request.headers.get('cookie'),
     requestOrigin: requestHeaderOrigin(request),
     url: request.nextUrl,
   });
+  const rejectionReason =
+    boundary.reason !== 'deterministic-role-preview'
+      ? boundary.reason
+      : !previewEnabled && request.nextUrl.searchParams.has('role')
+        ? 'url-role-rejected'
+        : undefined;
 
-  if (boundary.reason !== 'deterministic-role-preview') {
+  if (rejectionReason !== undefined) {
     const requestId = boundedRequestId(request);
     const denialHeaderContract = adminHeaderContract(nonce, 'production');
 
@@ -339,8 +347,8 @@ export default function adminProxy(request: NextRequest): NextResponse {
       NextResponse.json(
         {
           authoritativeAccessConnected: false,
-          code: 'ADMIN_PREVIEW_ACCESS_DENIED',
-          reason: boundary.reason,
+          code: previewEnabled ? 'ADMIN_PREVIEW_ACCESS_DENIED' : 'ADMIN_ACCESS_DENIED',
+          reason: rejectionReason,
           ...(requestId === undefined ? {} : { requestId }),
         },
         { status: 403 },
@@ -355,9 +363,13 @@ export default function adminProxy(request: NextRequest): NextResponse {
     ({ key }) => key === 'Content-Security-Policy',
   )?.value;
 
-  requestHeaders.delete('cookie');
-  requestHeaders.set('x-liiiraa-admin-role', boundary.role);
-  requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
+  requestHeaders.delete('x-liiiraa-admin-role');
+  requestHeaders.delete('x-liiiraa-preview-authority');
+  if (previewEnabled) {
+    requestHeaders.delete('cookie');
+    requestHeaders.set('x-liiiraa-admin-role', boundary.role);
+    requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
+  }
   requestHeaders.set('x-nonce', nonce);
 
   if (contentSecurityPolicy !== undefined) {
@@ -370,8 +382,10 @@ export default function adminProxy(request: NextRequest): NextResponse {
     },
   });
 
-  response.headers.set('x-liiiraa-admin-role', boundary.role);
-  response.headers.set('x-liiiraa-preview-authority', 'disconnected');
+  if (previewEnabled) {
+    response.headers.set('x-liiiraa-admin-role', boundary.role);
+    response.headers.set('x-liiiraa-preview-authority', 'disconnected');
+  }
 
   return applyAdminHeaders(response, headerContract);
 }
