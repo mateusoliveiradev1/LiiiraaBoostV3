@@ -75,6 +75,9 @@ describe('admin security boundary', () => {
 
   it('requires an explicit exact production origin and rejects localhost lookalikes', () => {
     expect(resolveAdminOrigin('https://admin.liiiraa.com')).toBe('https://admin.liiiraa.com');
+    expect(resolveAdminOrigin('https://liiiraa-boost-admin-staging.vercel.app')).toBe(
+      'https://liiiraa-boost-admin-staging.vercel.app',
+    );
     expect(() => resolveAdminOrigin('http://localhost:3002')).toThrow(
       'credential-free dedicated origin',
     );
