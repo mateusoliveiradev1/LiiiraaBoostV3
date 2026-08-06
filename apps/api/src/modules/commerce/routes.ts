@@ -22,6 +22,9 @@ export interface CommerceRouteDependencies {
   readonly projectSubscription: (accountId: string) => Promise<SubscriptionState>;
   readonly listInvoices: (accountId: string) => Promise<readonly unknown[]>;
   readonly admitSignedWebhook: (request: FastifyRequest) => Promise<ProviderEventJson | null>;
+  readonly createBillingPortal?: (
+    accountId: string,
+  ) => Promise<Readonly<{ ok: true; portalUrl: string }> | Readonly<{ ok: false }>>;
 }
 
 interface CommerceMutationBody {
@@ -68,7 +71,7 @@ const sendManagement = async (
   return reply.code(status).send(result);
 };
 
-export const registerCommerceRoutes = (
+export const registerCommerceRoutes = async (
   app: FastifyInstance,
   dependencies: CommerceRouteDependencies,
 ): Promise<void> => {
@@ -82,6 +85,18 @@ export const registerCommerceRoutes = (
     const actor = await dependencies.resolveSessionActor(request);
     if (actor === null) return reply.code(401).send({ code: 'UNAUTHORIZED' });
     return reply.code(200).send(await dependencies.listInvoices(actor.accountId));
+  });
+
+  app.post('/v1/commerce/portal', async (request, reply) => {
+    const actor = await dependencies.resolveSessionActor(request);
+    if (actor === null) return reply.code(401).send({ code: 'UNAUTHORIZED' });
+    if (dependencies.createBillingPortal === undefined) {
+      return reply.code(503).send({ code: 'PROVIDER_UNAVAILABLE' });
+    }
+    const portal = await dependencies.createBillingPortal(actor.accountId);
+    return portal.ok
+      ? reply.code(200).send({ url: portal.portalUrl })
+      : reply.code(503).send({ code: 'PROVIDER_UNAVAILABLE' });
   });
 
   app.post('/v1/commerce/checkout', async (request, reply) => {
@@ -149,11 +164,18 @@ export const registerCommerceRoutes = (
     });
   });
 
-  app.post('/v1/commerce/provider-webhook', async (request, reply) => {
-    const providerEvent = await dependencies.admitSignedWebhook(request);
-    if (providerEvent === null) return reply.code(400).send({ code: 'SIGNATURE_REJECTED' });
-    const result = await reconcileCommerce(dependencies.reconciliation, { providerEvent });
-    return reply.code(result.ok ? 202 : result.retryable ? 503 : 422).send(result);
+  await app.register(async (webhook) => {
+    webhook.removeContentTypeParser('application/json');
+    webhook.addContentTypeParser(
+      'application/json',
+      { parseAs: 'buffer' },
+      (_request, body, done) => done(null, body),
+    );
+    webhook.post('/v1/commerce/provider-webhook', async (request, reply) => {
+      const providerEvent = await dependencies.admitSignedWebhook(request);
+      if (providerEvent === null) return reply.code(400).send({ code: 'SIGNATURE_REJECTED' });
+      const result = await reconcileCommerce(dependencies.reconciliation, { providerEvent });
+      return reply.code(result.ok ? 202 : result.retryable ? 503 : 422).send(result);
+    });
   });
-  return Promise.resolve();
 };

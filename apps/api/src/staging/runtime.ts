@@ -2,12 +2,27 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { randomUUID } from 'node:crypto';
 import type {
+  AccountDeletionState,
   ActiveAdminRoleSession,
   AdminCommandDependencies,
   AdminProjectionResource,
   AdminRoleAuthorityDependencies,
+  DeviceBindingRecord,
+  SubscriptionState,
+  SupportCaseState,
 } from '@liiiraa/control-plane-application';
-import type { SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
+import type { DeviceBindingProjectionJson, SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
+import {
+  createPostgresCommerceAuthorityRepository,
+  createPostgresDeviceBindingRepository,
+  createPostgresSubscriptionManagementRepository,
+  createPostgresSupportLifecycleRepository,
+  createStripeCommerceProvider,
+  listRuntimeAuthority,
+  projectRuntimeAggregate,
+  verifyRawWebhook,
+} from '@liiiraa/control-plane-adapters';
+import { initialSubscriptionState } from '@liiiraa/control-plane-domain';
 import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
@@ -17,11 +32,27 @@ import {
   migrateRuntimeAuthorities,
   type IdentityActor,
 } from '@liiiraa/control-plane-adapters/runtime-identity';
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
+import Stripe from 'stripe';
 
 import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.ts';
 import { registerAdminRoutes, type AdminRouteDependencies } from '../modules/admin/routes.ts';
+import { registerCommerceRoutes } from '../modules/commerce/routes.ts';
+import { registerDeviceRoutes } from '../modules/devices/routes.ts';
 import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
+import { registerSupportRoutes } from '../modules/support/routes.ts';
+
+export const REAL_STAGING_CAPABILITIES = Object.freeze([
+  'invitation-signup',
+  'password-session',
+  'desktop-pkce',
+  'account',
+  'commerce-stripe-test',
+  'billing-portal',
+  'device-authority',
+  'support-consent-authority',
+  'admin-read-authority',
+] as const);
 
 export interface RealStagingEnvironment extends ApiEnvironmentInput {
   readonly STAGING_AUTH_SECRET?: string;
@@ -127,6 +158,40 @@ const cookieCredential = (
     }
   }
   return null;
+};
+
+const requestCredential = (request: FastifyRequest): string | null => {
+  const authorization = request.headers.authorization;
+  if (typeof authorization === 'string' && authorization.startsWith('Bearer ')) {
+    const bearer = authorization.slice('Bearer '.length);
+    return bearer.length >= 43 && bearer.length <= 256 ? bearer : null;
+  }
+  return cookieCredential(request);
+};
+
+const deviceProjection = (
+  record: DeviceBindingRecord,
+  correlationId: string,
+): DeviceBindingProjectionJson => ({
+  schemaVersion: '1.0',
+  aggregateVersion: String(record.version),
+  etag: `device-${record.bindingId}-v${String(record.version)}`,
+  correlationId,
+  provenance: 'postgres-authority',
+  kind: 'device-binding-projection',
+  deviceBindingId: record.bindingId,
+  accountId: record.accountId,
+  state: record.revokedAt === null ? 'active' : 'revoked',
+  deviceLabel: record.deviceLabel,
+  evidenceVersion: String(record.evidence.keyVersion),
+  boundAt: record.boundAt,
+  replacementEligibleAt: record.replacementEligibleAt,
+});
+
+const signedWebhookBody = (request: FastifyRequest): Uint8Array | null => {
+  const body = request.body;
+  if (Buffer.isBuffer(body)) return Uint8Array.from(body);
+  return body instanceof Uint8Array ? Uint8Array.from(body) : null;
 };
 
 const persistedOperator = async (
@@ -328,6 +393,16 @@ export const buildRealStagingApp = async (
   });
 
   const identity = createRealIdentityAuthority(createPostgresIdentityPersistence(database));
+  const clock = Object.freeze({ now: () => new Date() });
+  const ids = Object.freeze({ next: randomUUID });
+  const stripe = new Stripe(environment.stripeSecretKey, { typescript: true });
+  const commerceProvider = createStripeCommerceProvider({ database, stripe });
+  const resolveSessionActor = async (request: FastifyRequest) => {
+    const credential = requestCredential(request);
+    if (credential === null) return null;
+    const actor = await identity.resolveCredential(credential);
+    return actor === null ? null : { accountId: actor.accountId };
+  };
   await registerRealIdentityRoutes(app, {
     accountOrigin: environment.accountOrigin,
     adminOrigin: environment.adminOrigin,
@@ -336,6 +411,123 @@ export const buildRealStagingApp = async (
     issuer,
     resolveSubscription: (actor, correlation) =>
       resolveStagingSubscription(database, actor, correlation),
+  });
+  await registerCommerceRoutes(app, {
+    management: {
+      clock,
+      ids,
+      provider: commerceProvider,
+      repository: createPostgresSubscriptionManagementRepository(database),
+    },
+    reconciliation: {
+      clock,
+      ids,
+      provider: commerceProvider,
+      repository: createPostgresCommerceAuthorityRepository(database),
+    },
+    resolveSessionActor,
+    projectSubscription: async (accountId) =>
+      (await projectRuntimeAggregate<SubscriptionState>(
+        database,
+        'subscription',
+        accountId,
+      )) ?? initialSubscriptionState(accountId),
+    listInvoices: async (accountId) => {
+      const result = await database.query(
+        `SELECT invoice.provider_invoice_id AS "invoiceId",
+                invoice.status AS state,
+                invoice.currency,
+                invoice.amount_total_minor AS "amountDueMinor",
+                invoice.amount_paid_minor AS "amountPaidMinor",
+                invoice.provider_created_at AS "issuedAt",
+                invoice.paid_at AS "paidAt"
+           FROM invoices AS invoice
+           INNER JOIN subscriptions AS subscription ON subscription.id = invoice.subscription_id
+          WHERE subscription.identity_id = $1
+          ORDER BY invoice.provider_created_at DESC`,
+        [accountId],
+      );
+      return result.rows;
+    },
+    admitSignedWebhook: async (request) => {
+      const body = signedWebhookBody(request);
+      const signature = request.headers['stripe-signature'];
+      if (body === null || typeof signature !== 'string') return null;
+      const verified = await verifyRawWebhook({
+        rawBody: body,
+        signatureHeader: signature,
+        webhookSecret: environment.stripeWebhookSecret,
+        stripe,
+      });
+      return verified.ok ? verified.value.providerEvent : null;
+    },
+    createBillingPortal: async (accountId) => {
+      const portal = await commerceProvider.createBillingPortal({
+        accountId,
+        returnUrl: `${environment.accountOrigin}/pt-BR/plan`,
+      });
+      return portal.ok ? { ok: true, portalUrl: portal.value.portalUrl } : { ok: false };
+    },
+  });
+  const deviceRepository = createPostgresDeviceBindingRepository(database);
+  await registerDeviceRoutes(app, {
+    authority: {
+      clock,
+      ids,
+      repository: deviceRepository,
+      authorizer: {
+        authorize: ({ actorAccountId, accountId }) =>
+          Promise.resolve(actorAccountId === accountId),
+      },
+    },
+    resolveSessionActor,
+    project: async (accountId, correlationId) => {
+      const records = await listRuntimeAuthority<DeviceBindingRecord>(
+        database,
+        'device',
+        accountId,
+      );
+      const current = records[0];
+      return current === undefined ? null : deviceProjection(current, correlationId);
+    },
+  });
+  const supportRepository = createPostgresSupportLifecycleRepository(database);
+  await registerSupportRoutes(app, {
+    cases: { clock, ids, repository: supportRepository },
+    consents: {
+      clock,
+      ids,
+      repository: supportRepository,
+      consentChanges: { publish: () => undefined },
+    },
+    deletion: { clock, ids, repository: supportRepository },
+    resolveSessionActor,
+    verifyStrongReauthentication: async (request) => {
+      const credential = requestCredential(request);
+      if (credential === null) return false;
+      const actor = await identity.resolveCredential(credential);
+      return (
+        actor !== null &&
+        actor.authenticationMethod === 'password' &&
+        Date.now() - Date.parse(actor.authenticatedAt) <= 10 * 60 * 1_000
+      );
+    },
+    listCases: (accountId) =>
+      listRuntimeAuthority<SupportCaseState>(database, 'support-case', accountId),
+    listAttachmentMetadata: async (accountId, caseId) => {
+      const state = await projectRuntimeAggregate<SupportCaseState>(
+        database,
+        'support-case',
+        caseId,
+      );
+      return state?.accountId === accountId ? state.attachments : [];
+    },
+    projectDeletion: (accountId) =>
+      projectRuntimeAggregate<AccountDeletionState>(
+        database,
+        'account-deletion',
+        accountId,
+      ),
   });
   await registerAdminRoutes(
     app,
@@ -353,13 +545,7 @@ export const buildRealStagingApp = async (
       return await reply.code(200).send({
         authorityConnected: true,
         buildId: environment.buildId,
-        capabilities: [
-          'invitation-signup',
-          'password-session',
-          'desktop-pkce',
-          'account',
-          'admin-read-authority',
-        ],
+        capabilities: REAL_STAGING_CAPABILITIES,
         dataClassification: environment.dataClassification,
         invitationOnly: environment.invitationOnly,
         ready: true,

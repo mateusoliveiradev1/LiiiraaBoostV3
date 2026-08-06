@@ -17,8 +17,13 @@ export {
   type ControlPlaneSchemaInspection,
 } from './postgres/migrate.js';
 export {
+  createPostgresCommerceAuthorityRepository,
+  createPostgresDeviceBindingRepository,
+  createPostgresSupportLifecycleRepository,
   createPostgresSubscriptionManagementRepository,
+  listRuntimeAuthority,
   migrateRuntimeAuthorities,
+  projectRuntimeAggregate,
   runtimeAuthoritiesSchemaHash,
   runtimeAuthorityJson,
 } from './postgres/runtime-authorities.js';

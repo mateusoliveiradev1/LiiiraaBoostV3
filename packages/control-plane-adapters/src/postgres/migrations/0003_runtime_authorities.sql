@@ -73,3 +73,9 @@ CREATE TRIGGER runtime_audit_receipts_reject_truncate
   FOR EACH STATEMENT EXECUTE FUNCTION reject_runtime_audit_mutation();
 
 REVOKE UPDATE, DELETE, TRUNCATE ON runtime_audit_receipts FROM PUBLIC;
+
+ALTER TABLE premium_entitlements ADD COLUMN authority_reference TEXT UNIQUE;
+ALTER TABLE device_bindings ADD COLUMN authority_reference TEXT UNIQUE;
+ALTER TABLE support_cases ADD COLUMN authority_reference TEXT UNIQUE;
+ALTER TABLE diagnostic_consents ADD COLUMN authority_reference TEXT UNIQUE;
+ALTER TABLE deletion_requests ADD COLUMN authority_reference TEXT UNIQUE;
