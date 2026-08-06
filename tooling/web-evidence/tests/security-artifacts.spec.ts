@@ -97,6 +97,13 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
     expect(headers['X-Robots-Tag']).toBe('noindex,nofollow,noarchive');
     expect(headers['X-Liiiraa-Staging-Surface']).toBe(surface === 'web' ? 'public' : surface);
     expect(Object.keys(headers).map((key) => key.toLowerCase())).not.toContain('set-cookie');
+
+    const deploymentRoute = readFileSync(
+      join(repositoryRoot, `apps/${surface}/src/app/api/deployment/route.ts`),
+      'utf8',
+    );
+    expect(deploymentRoute).toContain("process.env['VERCEL_GIT_COMMIT_SHA']");
+    expect(deploymentRoute).toContain("'Cache-Control': 'no-store, max-age=0'");
   }
 
   const accountIdentityRoutes = readFileSync(
@@ -118,20 +125,12 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain('broader-beta-promotion');
   expect(workflow).toContain('OWNED_CALLBACK_ORIGINS');
   expect(workflow).toContain('OWNED_EMAIL_IDENTITY');
-  expect(workflow.match(/api\.vercel\.com\/v7\/deployments/gu) ?? []).toHaveLength(3);
-  expect(workflow.match(/searchParams\.set\('sha', process\.env\.GIT_SHA\)/gu) ?? []).toHaveLength(
-    3,
-  );
-  expect(
-    workflow.match(/searchParams\.set\('projectId', process\.env\.PROJECT_ID\)/gu) ?? [],
-  ).toHaveLength(3);
-  expect(workflow).not.toContain('api.vercel.com/v13/deployments?');
-  expect(workflow).not.toContain("method: 'POST'");
-  expect(workflow.match(/deployment\.readyState === 'READY'/gu) ?? []).toHaveLength(3);
-  expect(workflow.match(/deployment\.target !== 'production'/gu) ?? []).toHaveLength(3);
-  expect(workflow.match(/deployment\.alias\.includes\(expected\.hostname\)/gu) ?? []).toHaveLength(
-    3,
-  );
+  expect(workflow.match(/new URL\('\/api\/deployment', expected\)/gu) ?? []).toHaveLength(3);
+  expect(workflow.match(/body\.revision === process\.env\.GIT_SHA/gu) ?? []).toHaveLength(3);
+  expect(workflow).not.toContain('api.vercel.com');
+  expect(workflow).not.toContain('VERCEL_TOKEN');
+  expect(workflow).not.toContain('VERCEL_TEAM_ID');
+  expect(workflow).not.toMatch(/VERCEL_\w*_PROJECT_ID/u);
   expect(workflow).toContain('needs: [verify-contracts, deploy-account]');
   expect(workflow.match(/needs: \[verify-contracts, deploy-account\]/gu) ?? []).toHaveLength(2);
   expect(workflow).toContain('src/staging/provision-invitations.test.ts');
