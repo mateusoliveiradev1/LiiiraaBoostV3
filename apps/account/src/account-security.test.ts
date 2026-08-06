@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import accountNextConfig from '../next.config';
@@ -9,6 +11,7 @@ import accountProxy, {
   createRequestNonce,
 } from '../proxy';
 import accountRuntimeProxy from './proxy';
+import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from './account-runtime';
 
 describe('account security boundary', () => {
   it('uses only live provider origins while running in Vercel staging', () => {
@@ -34,6 +37,19 @@ describe('account security boundary', () => {
         source: '/v1/:path*',
       },
     ]);
+  });
+
+  it('keeps browser credentials same-origin behind the reviewed API rewrite', () => {
+    const page = readFileSync(
+      new URL('./app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+
+    expect(ACCOUNT_BROWSER_AUTHORITY_BASE_URL).toBe('');
+    expect(page).toContain('authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}');
+    expect(layout).toContain('authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}');
+    expect(page).not.toContain('authorityBaseUrl={runtime.authorityBaseUrl}');
   });
 
   it('passes API requests through without page-route classification or preview headers', () => {

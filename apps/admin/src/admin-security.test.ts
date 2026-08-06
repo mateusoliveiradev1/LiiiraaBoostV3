@@ -10,7 +10,12 @@ import adminProxy, {
   createAdminRequestNonce,
 } from '../proxy';
 import adminNextConfig, { ADMIN_RUNTIME_BOUNDARY, ADMIN_TEST_ORIGIN } from '../next.config';
-import { ADMIN_CANONICAL_ENTRY, ADMIN_LOCAL_ORIGIN, resolveAdminOrigin } from './admin-runtime';
+import {
+  ADMIN_BROWSER_AUTHORITY_BASE_URL,
+  ADMIN_CANONICAL_ENTRY,
+  ADMIN_LOCAL_ORIGIN,
+  resolveAdminOrigin,
+} from './admin-runtime';
 
 describe('admin security boundary', () => {
   const originalPreviewMode = process.env['LIIIRAA_ADMIN_PREVIEW'];
@@ -45,6 +50,17 @@ describe('admin security boundary', () => {
         source: '/v1/:path*',
       },
     ]);
+  });
+
+  it('keeps administrative browser credentials on the isolated origin', () => {
+    const page = readFileSync(
+      new URL('./app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(ADMIN_BROWSER_AUTHORITY_BASE_URL).toBe('');
+    expect(page).toContain('authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}');
+    expect(page).not.toContain('authorityBaseUrl={runtime.authorityBaseUrl}');
   });
 
   it('uses the exact dedicated local origin and never claims connected authority', () => {
