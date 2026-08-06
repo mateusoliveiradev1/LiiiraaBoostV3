@@ -1,0 +1,84 @@
+import type Stripe from 'stripe';
+import { describe, expect, it, vi } from 'vitest';
+
+import { provisionStripeTestCatalog } from './provision-stripe.js';
+
+describe('Stripe test catalog provisioning', () => {
+  it('creates one managed product and four recurring prices without touching unrelated products', async () => {
+    const createProduct = vi.fn(() =>
+      Promise.resolve({ id: 'prod_liiiraa', name: 'Liiiraa Boost Premium' }),
+    );
+    const createPrice = vi.fn(({ lookup_key: lookupKey }: { lookup_key: string }) =>
+      Promise.resolve({ id: `price_${lookupKey}`, lookup_key: lookupKey }),
+    );
+    const stripe = {
+      products: {
+        list: vi.fn(() => Promise.resolve({ data: [{ id: 'prod_unrelated', metadata: {} }] })),
+        create: createProduct,
+      },
+      prices: {
+        list: vi.fn(() => Promise.resolve({ data: [] })),
+        create: createPrice,
+      },
+    } as unknown as Stripe;
+
+    await expect(provisionStripeTestCatalog(stripe)).resolves.toMatchObject({
+      createdPrices: 4,
+      createdProducts: 1,
+      mode: 'test',
+      reusedPrices: 0,
+    });
+    expect(createProduct).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: { liiiraa_product: 'liiiraa_boost', managed_environment: 'staging' },
+      }),
+      { idempotencyKey: 'liiiraa-boost-staging-product-v1' },
+    );
+    expect(createPrice).toHaveBeenCalledTimes(4);
+    expect(createPrice).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currency: 'brl',
+        lookup_key: 'liiiraa_boost_brl_monthly',
+        recurring: { interval: 'month' },
+        unit_amount: 2990,
+      }),
+      { idempotencyKey: 'liiiraa-boost-price-liiiraa_boost_brl_monthly-v1' },
+    );
+  });
+
+  it('reuses the exact managed product and prices on subsequent runs', async () => {
+    const createProduct = vi.fn();
+    const createPrice = vi.fn();
+    const stripe = {
+      products: {
+        list: vi.fn(() =>
+          Promise.resolve({
+            data: [
+              {
+                id: 'prod_liiiraa',
+                metadata: { liiiraa_product: 'liiiraa_boost', managed_environment: 'staging' },
+              },
+            ],
+          }),
+        ),
+        create: createProduct,
+      },
+      prices: {
+        list: vi.fn(({ lookup_keys: lookupKeys }: { lookup_keys: string[] }) =>
+          Promise.resolve({
+            data: [{ id: `price_${lookupKeys[0]}`, lookup_key: lookupKeys[0], active: true }],
+          }),
+        ),
+        create: createPrice,
+      },
+    } as unknown as Stripe;
+
+    await expect(provisionStripeTestCatalog(stripe)).resolves.toMatchObject({
+      createdPrices: 0,
+      createdProducts: 0,
+      reusedPrices: 4,
+    });
+    expect(createProduct).not.toHaveBeenCalled();
+    expect(createPrice).not.toHaveBeenCalled();
+  });
+});
