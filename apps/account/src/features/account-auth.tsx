@@ -35,13 +35,31 @@ type SignUpFormProps = Readonly<{
   locale: WebLocale;
 }>;
 
+type PasswordRequirement = Readonly<{
+  label: string;
+  met: boolean;
+}>;
+
 const contentByLocale = { en: accountEn, 'pt-BR': accountPtBr } as const;
 const messages = Object.freeze({
   en: Object.freeze({
     authenticationFailed: 'We could not confirm those details. Check them and try again.',
     browserApproval: 'Confirming this desktop sign-in in your browser…',
     invitationAccepted: 'Invitation recognized. Create the account using the invited email.',
-    invitationMissing: 'Open the complete invitation link to create this account.',
+    invitationMissing: 'This private beta requires an individual invitation.',
+    invitationSteps: [
+      'Receive an individual invitation at the email selected for the beta.',
+      'Open the protected link before it expires.',
+      'Create the account using that same invited email.',
+    ],
+    closedBeta: 'Closed beta',
+    closedBetaTitle: 'Account creation is available by invitation',
+    closedBetaBody:
+      'There is no public or reusable registration link. Each invitation belongs to one person, expires, and can be used once.',
+    hidePassword: 'Hide password',
+    showPassword: 'Show password',
+    adminAccess: 'Open administrative panel',
+    adminScope: 'Your account stays here. Administration opens in a separate protected session.',
     password: 'Password',
     signIn: 'Sign in securely',
     signedOut: 'You are signed out. No account data remains on this page.',
@@ -54,7 +72,20 @@ const messages = Object.freeze({
     authenticationFailed: 'Não foi possível confirmar esses dados. Revise e tente novamente.',
     browserApproval: 'Confirmando este login do desktop no navegador…',
     invitationAccepted: 'Convite reconhecido. Crie a conta com o e-mail convidado.',
-    invitationMissing: 'Abra o link completo do convite para criar esta conta.',
+    invitationMissing: 'Este beta fechado exige um convite individual.',
+    invitationSteps: [
+      'Receba um convite individual no e-mail escolhido para o beta.',
+      'Abra o link protegido antes que ele expire.',
+      'Crie a conta usando o mesmo e-mail convidado.',
+    ],
+    closedBeta: 'Beta fechado',
+    closedBetaTitle: 'A criação de conta funciona por convite',
+    closedBetaBody:
+      'Não existe um cadastro público ou um link reutilizável. Cada convite pertence a uma pessoa, expira e só pode ser usado uma vez.',
+    hidePassword: 'Ocultar senha',
+    showPassword: 'Mostrar senha',
+    adminAccess: 'Abrir painel administrativo',
+    adminScope: 'Sua conta continua aqui. A administração abre em uma sessão protegida separada.',
     password: 'Senha',
     signIn: 'Entrar com segurança',
     signedOut: 'Você saiu da conta. Nenhum dado da conta permanece nesta página.',
@@ -74,6 +105,26 @@ const validPassword = (value: string): boolean =>
   /[A-Z]/u.test(value) &&
   /[a-z]/u.test(value) &&
   /[0-9]/u.test(value);
+
+const passwordRequirements = (value: string, locale: WebLocale): readonly PasswordRequirement[] =>
+  Object.freeze([
+    {
+      label: locale === 'pt-BR' ? '10 a 128 caracteres' : '10 to 128 characters',
+      met: value.length >= 10 && value.length <= 128,
+    },
+    {
+      label: locale === 'pt-BR' ? 'Uma letra maiúscula' : 'One uppercase letter',
+      met: /[A-Z]/u.test(value),
+    },
+    {
+      label: locale === 'pt-BR' ? 'Uma letra minúscula' : 'One lowercase letter',
+      met: /[a-z]/u.test(value),
+    },
+    {
+      label: locale === 'pt-BR' ? 'Um número' : 'One number',
+      met: /[0-9]/u.test(value),
+    },
+  ]);
 
 const hrefFor = (routeId: 'account-overview' | AccountAuthRoute, locale: WebLocale): string => {
   const href = routeHref(routeId, { locale });
@@ -113,6 +164,7 @@ const SignInForm = ({
   const labels = messages[locale];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(signOutRequested);
@@ -212,16 +264,28 @@ const SignInForm = ({
           onChange={setEmail}
           value={email}
         />
-        <LbTextField
-          inputType="password"
-          isDisabled={loading}
-          isRequired
-          label={labels.password}
-          maxLength={128}
-          name="password"
-          onChange={setPassword}
-          value={password}
-        />
+        <div className="account-password-field">
+          <LbTextField
+            inputType={passwordVisible ? 'text' : 'password'}
+            isDisabled={loading}
+            isRequired
+            label={labels.password}
+            maxLength={128}
+            name="password"
+            onChange={setPassword}
+            value={password}
+          />
+          <LbButton
+            isDisabled={loading}
+            onPress={() => {
+              setPasswordVisible((visible) => !visible);
+            }}
+            type="button"
+            variant="quiet"
+          >
+            {passwordVisible ? labels.hidePassword : labels.showPassword}
+          </LbButton>
+        </div>
         <LbButton
           isDisabled={loading}
           isLoading={loading}
@@ -233,8 +297,10 @@ const SignInForm = ({
         </LbButton>
       </form>
       <p className="account-auth-switch">
-        <span>{content.signUp.entryPrompt}</span>{' '}
-        <a href={hrefFor('account-sign-up', locale)}>{content.signUp.entryAction}</a>
+        <span>{locale === 'pt-BR' ? 'Ainda não tem acesso?' : 'Do not have access yet?'}</span>{' '}
+        <a href={hrefFor('account-sign-up', locale)}>
+          {locale === 'pt-BR' ? 'Entenda o beta por convite' : 'Learn about invitation access'}
+        </a>
       </p>
       <p className="account-auth-security" role="note">
         <ProductIcon name="lock" size={16} />
@@ -245,6 +311,15 @@ const SignInForm = ({
 };
 
 type SignUpField = 'confirmation' | 'consent' | 'email' | 'invitation' | 'name' | 'password';
+
+const withFieldError = (
+  current: Partial<Record<SignUpField, string>>,
+  field: SignUpField,
+  message: string | undefined,
+): Partial<Record<SignUpField, string>> => {
+  if (message !== undefined) return { ...current, [field]: message };
+  return Object.fromEntries(Object.entries(current).filter(([key]) => key !== field));
+};
 
 const SignUpForm = ({
   authorityBaseUrl,
@@ -259,12 +334,41 @@ const SignUpForm = ({
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [consent, setConsent] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<SignUpField, string>>>({});
   const [loading, setLoading] = useState(false);
   const auth = useMemo(
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
   );
+  const requirements = passwordRequirements(password, locale);
+
+  if (invitationToken === null) {
+    return (
+      <article className="account-invitation-required" data-account-state="invitation-required">
+        <div className="account-invitation-required__body">
+          <span className="account-invitation-required__status">
+            <ProductIcon name="lock" size={16} />
+            {labels.closedBeta}
+          </span>
+          <h1>{labels.closedBetaTitle}</h1>
+          <p>{labels.closedBetaBody}</p>
+          <ol>
+            {labels.invitationSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <p className="account-invitation-required__notice" role="note">
+            {labels.invitationMissing}
+          </p>
+        </div>
+        <p className="account-auth-switch">
+          <span>{content.signUp.signInPrompt}</span>{' '}
+          <a href={hrefFor('account-sign-in', locale)}>{content.signUp.signInAction}</a>
+        </p>
+      </article>
+    );
+  }
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -274,9 +378,8 @@ const SignUpForm = ({
     if (!validPassword(password)) nextErrors.password = content.signUp.invalidPassword;
     if (password !== confirmation) nextErrors.confirmation = content.signUp.invalidConfirmation;
     if (!consent) nextErrors.consent = content.signUp.invalidConsent;
-    if (invitationToken === null) nextErrors.invitation = labels.invitationMissing;
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || invitationToken === null) return;
+    if (Object.keys(nextErrors).length > 0) return;
     setLoading(true);
     const result = await auth.signUp({
       displayName: displayName.trim(),
@@ -298,8 +401,8 @@ const SignUpForm = ({
     <article className="lb-web-sign-up" data-account-state="sign-up-real">
       <AuthHeader locale={locale} routeId="account-sign-up" />
       <form noValidate onSubmit={(event) => void submit(event)}>
-        <p className="account-auth-invitation" data-valid={invitationToken !== null} role="status">
-          {invitationToken === null ? labels.invitationMissing : labels.invitationAccepted}
+        <p className="account-auth-invitation" data-valid="true" role="status">
+          {labels.invitationAccepted}
         </p>
         {errorMessages.length === 0 ? null : (
           <div className="account-auth-errors" role="alert" tabIndex={-1}>
@@ -324,7 +427,18 @@ const SignUpForm = ({
           label={content.signUp.nameLabel}
           maxLength={80}
           name="displayName"
-          onChange={setDisplayName}
+          onChange={(value) => {
+            setDisplayName(value);
+            setErrors((current) =>
+              withFieldError(
+                current,
+                'name',
+                value.length > 0 && value.trim().length < 2
+                  ? content.signUp.invalidName
+                  : undefined,
+              ),
+            );
+          }}
           value={displayName}
         />
         <LbTextField
@@ -337,44 +451,104 @@ const SignUpForm = ({
           label={content.signUp.emailLabel}
           maxLength={254}
           name="email"
-          onChange={setEmail}
+          onChange={(value) => {
+            setEmail(value);
+            setErrors((current) =>
+              withFieldError(
+                current,
+                'email',
+                value.length > 0 && !validEmail(value) ? content.signUp.invalidEmail : undefined,
+              ),
+            );
+          }}
           value={email}
         />
         <div className="account-auth-passwords">
-          <LbTextField
-            description={content.signUp.passwordHint}
-            errorMessage={errors.password}
-            inputType="password"
-            isDisabled={loading}
-            isInvalid={errors.password !== undefined}
-            isRequired
-            label={content.signUp.passwordLabel}
-            maxLength={128}
-            name="password"
-            onChange={setPassword}
-            value={password}
-          />
+          <div className="account-password-field">
+            <LbTextField
+              description={content.signUp.passwordHint}
+              errorMessage={errors.password}
+              inputType={passwordVisible ? 'text' : 'password'}
+              isDisabled={loading}
+              isInvalid={errors.password !== undefined}
+              isRequired
+              label={content.signUp.passwordLabel}
+              maxLength={128}
+              name="password"
+              onChange={(value) => {
+                setPassword(value);
+                setErrors((current) =>
+                  withFieldError(
+                    current,
+                    'password',
+                    value.length > 0 && !validPassword(value)
+                      ? content.signUp.invalidPassword
+                      : undefined,
+                  ),
+                );
+              }}
+              value={password}
+            />
+            <LbButton
+              isDisabled={loading}
+              onPress={() => {
+                setPasswordVisible((visible) => !visible);
+              }}
+              type="button"
+              variant="quiet"
+            >
+              {passwordVisible ? labels.hidePassword : labels.showPassword}
+            </LbButton>
+          </div>
+          <ul className="account-password-requirements" data-password-requirements>
+            {requirements.map((requirement) => (
+              <li data-met={requirement.met} key={requirement.label}>
+                <ProductIcon name={requirement.met ? 'check' : 'info'} size={14} />
+                {requirement.label}
+              </li>
+            ))}
+          </ul>
           <LbTextField
             errorMessage={errors.confirmation}
-            inputType="password"
+            inputType={passwordVisible ? 'text' : 'password'}
             isDisabled={loading}
             isInvalid={errors.confirmation !== undefined}
             isRequired
             label={content.signUp.confirmLabel}
             maxLength={128}
             name="passwordConfirmation"
-            onChange={setConfirmation}
+            onChange={(value) => {
+              setConfirmation(value);
+              setErrors((current) =>
+                withFieldError(
+                  current,
+                  'confirmation',
+                  value.length > 0 && value !== password
+                    ? content.signUp.invalidConfirmation
+                    : undefined,
+                ),
+              );
+            }}
             value={confirmation}
           />
         </div>
         <div className="account-auth-consent">
-          <LbCheckbox isSelected={consent} onChange={setConsent} value="terms">
+          <LbCheckbox
+            isSelected={consent}
+            onChange={(selected) => {
+              setConsent(selected);
+              setErrors((current) =>
+                withFieldError(current, 'consent', selected ? undefined : current.consent),
+              );
+            }}
+            value="terms"
+          >
             {content.signUp.consentLabel}
           </LbCheckbox>
           {errors.consent === undefined ? null : <p role="status">{errors.consent}</p>}
         </div>
         <LbButton
-          isDisabled={loading || invitationToken === null}
+          isDisabled={loading}
           isLoading={loading}
           loadingLabel={labels.signingUp}
           type="submit"
@@ -476,5 +650,48 @@ export const AccountIdentityChrome = ({
         </span>
       </span>
     </>
+  );
+};
+
+const ADMIN_ROLES = new Set<AccountAuthActor['role']>([
+  'audit',
+  'operations',
+  'security',
+  'support',
+]);
+
+export const AccountRoleGateway = ({
+  adminOrigin,
+  authorityBaseUrl,
+  locale,
+}: Readonly<{ adminOrigin: string; authorityBaseUrl: string; locale: WebLocale }>) => {
+  const [actor, setActor] = useState<AccountAuthActor | null>(null);
+  const auth = useMemo(
+    () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
+    [authorityBaseUrl],
+  );
+  useEffect(() => {
+    let active = true;
+    void auth.session().then((result) => {
+      if (active && result.status === 'authenticated') setActor(result.actor);
+    });
+    return () => {
+      active = false;
+    };
+  }, [auth]);
+
+  if (actor === null || !ADMIN_ROLES.has(actor.role)) return null;
+  const labels = messages[locale];
+  return (
+    <aside className="account-admin-gateway" data-account-role={actor.role}>
+      <ProductIcon name="shield" size={18} />
+      <span>
+        <strong>{labels.adminAccess}</strong>
+        <small>{labels.adminScope}</small>
+      </span>
+      <a href={`${adminOrigin}/${locale}/admin`}>
+        {labels.adminAccess} <ProductIcon name="arrowRight" size={16} />
+      </a>
+    </aside>
   );
 };

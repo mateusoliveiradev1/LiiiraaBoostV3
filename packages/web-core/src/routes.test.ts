@@ -158,6 +158,20 @@ describe('localized current route projection', () => {
     },
     {
       boundary: 'account-origin',
+      expected: '/en/register',
+      pathname: '/pt-BR/cadastro',
+      routeId: 'account-sign-up',
+      targetLocale: 'en',
+    },
+    {
+      boundary: 'account-origin',
+      expected: '/pt-BR/cadastro',
+      pathname: '/en/register',
+      routeId: 'account-sign-up',
+      targetLocale: 'pt-BR',
+    },
+    {
+      boundary: 'account-origin',
       expected: '/en/account/profile',
       pathname: '/pt-BR/account/profile',
       routeId: 'account-profile',
@@ -272,6 +286,14 @@ describe('canonical web route manifest', () => {
     expect(routeHref('public-essential-storage', { locale: 'en' })).toEqual({
       ok: true,
       value: '/en/policies/essential-storage',
+    });
+    expect(routeHref('account-sign-up', { locale: 'pt-BR' })).toEqual({
+      ok: true,
+      value: '/pt-BR/cadastro',
+    });
+    expect(routeHref('account-sign-up', { locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/register',
     });
     expect(
       matchWebRoute({

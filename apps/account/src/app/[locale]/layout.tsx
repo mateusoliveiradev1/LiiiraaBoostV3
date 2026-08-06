@@ -20,11 +20,11 @@ import {
   type AccountNavigationItem,
 } from '../../account-navigation';
 import { createAccountFailureModel } from '../../account-errors';
-import { resolvePublicBoundaryOrigin } from '../../account-origins';
+import { resolveAdminBoundaryOrigin, resolvePublicBoundaryOrigin } from '../../account-origins';
 import { ProductLockup } from '../../account-product-lockup';
 import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from '../../account-runtime';
 import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
-import { AccountIdentityChrome } from '../../features/account-auth';
+import { AccountIdentityChrome, AccountRoleGateway } from '../../features/account-auth';
 import { AccountAuthorityInspector } from '../../features/account-authority';
 import { accountWebComposition } from '../../index';
 
@@ -218,6 +218,10 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
     process.env['LIIIRAA_PUBLIC_ORIGIN'],
     process.env['VERCEL'] === '1',
   );
+  const adminOrigin = resolveAdminBoundaryOrigin(
+    process.env['LIIIRAA_ADMIN_ORIGIN'],
+    process.env['VERCEL'] === '1',
+  );
   const copy = COPY[locale];
   const alternateLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigationGroups = NAVIGATION_GROUPS.map((group): AccountNavigationGroup => ({
@@ -316,6 +320,13 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
             <a href={publicHomeHref(locale, publicOrigin)}>
               {copy.publicLink} <span aria-hidden="true">↗</span>
             </a>
+          }
+          roleGateway={
+            <AccountRoleGateway
+              adminOrigin={adminOrigin}
+              authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
+              locale={locale}
+            />
           }
           supportHref={localizedHref('account-support', locale)}
           supportLabel={copy.help}

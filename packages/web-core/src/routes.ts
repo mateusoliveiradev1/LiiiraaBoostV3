@@ -1,11 +1,11 @@
-import {
-  type CapabilityAvailabilityJson,
-  type IndexingPolicyJson,
-  type SafeContextKeyJson,
-  type WebRouteRecordJson,
-  type WebSecurityBoundaryJson,
-  type WebShellJson,
-  type WebSurfaceJson,
+import type {
+  CapabilityAvailabilityJson,
+  IndexingPolicyJson,
+  SafeContextKeyJson,
+  WebRouteRecordJson,
+  WebSecurityBoundaryJson,
+  WebShellJson,
+  WebSurfaceJson,
 } from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
@@ -321,6 +321,16 @@ const requiredRouteById = (id: WebRouteId): WebRoute => {
   return route;
 };
 
+const localizedPathname = (
+  route: WebRoute,
+  parameters: Readonly<Record<string, string>>,
+): string | undefined => {
+  if (route.id === 'account-sign-up' && parameters['locale'] === 'pt-BR') {
+    return '/pt-BR/cadastro';
+  }
+  return undefined;
+};
+
 export const isWebRouteId = (id: string): id is WebRouteId => routeById(id) !== undefined;
 
 const PARAMETER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
@@ -374,7 +384,7 @@ export const routeHref = (
     href = href.replace(`[${parameter}]`, encodeURIComponent(value));
   }
 
-  return routeSuccess(href);
+  return routeSuccess(localizedPathname(route, parameters) ?? href);
 };
 
 const decodePathSegments = (pathname: string): readonly string[] | undefined => {
@@ -420,6 +430,17 @@ export const matchWebRoute = (
   const pathSegments = decodePathSegments(input.pathname);
   if (pathSegments === undefined) {
     return routeFailure('INVALID_PARAMETER', '$.pathname');
+  }
+
+  if (
+    input.securityBoundary === 'account-origin' &&
+    input.pathname === '/pt-BR/cadastro'
+  ) {
+    return routeSuccess({
+      parameters: deepFreeze({ locale: 'pt-BR' }),
+      pathname: input.pathname,
+      route: requiredRouteById('account-sign-up'),
+    });
   }
 
   let closestParameterFailure: WebRouteResult | undefined;

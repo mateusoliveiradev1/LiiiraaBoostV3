@@ -196,7 +196,15 @@ describe('account security boundary', () => {
     );
     expect(invited.status).toBe(307);
     expect(invited.headers.get('location')).toBe(
-      `https://account.liiiraa.com/pt-BR/register?invitation=${invitation}`,
+      `https://account.liiiraa.com/pt-BR/cadastro?invitation=${invitation}`,
+    );
+
+    const legacy = accountProxy(
+      new NextRequest(`https://account.liiiraa.com/pt-BR/register?invitation=${invitation}`),
+    );
+    expect(legacy.status).toBe(307);
+    expect(legacy.headers.get('location')).toBe(
+      `https://account.liiiraa.com/pt-BR/cadastro?invitation=${invitation}`,
     );
   });
 });

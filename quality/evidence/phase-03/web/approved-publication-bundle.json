@@ -33,11 +33,11 @@
     }
   ],
   "manifestHashes": {
-    "routes": "55868199b8433a5c1a1dc0f8ea02a67a60730d63e9f0f4fb09e8d3abbc390fae",
+    "routes": "0eb4c195ef0874f5208873f20e7807163d1b784bfb601dcbe645241e44d4490c",
     "contentPtBr": "af0867b6a2e1a073db87328da4e7477c115a909643af4f3742fc95f4f6213142",
     "contentEn": "1c24e504c88a83a078dd6a2fa134ed0847c19a9362b0ea543219e34ce3757c21",
     "release": "eef56fe96f706d6b8a902989a18672cd890b0a6e21006abd928083828fcdd856",
-    "visual": "02339c3db9825ce275609128a82580bbad6feb5c29ba8b09c72bb7f0a29bc829",
+    "visual": "8ab3663b13a4b6f465d55e98f891191d9e7cd3565b3653493e591a5776c48683",
     "capture": "508b588b3d0eb892d2765a1f562b02f7fd7c3a19cb96d1421d518f8bd905eeaf",
     "web01": "8e567dc723c2d70e2bc0864bce1d687c1cb3dce59d85dc86f77b2590eee29feb",
     "web02": "46ac0ebb827bb6c88f9c9ba56edabd3b94b817f935fab0563cdb08f57edd53ea",
@@ -56,11 +56,11 @@
     },
     "accessibilityReport": {
       "path": "quality/evidence/phase-03/web/accessibility-report.json",
-      "sha256": "a67d4a01ed0c157fee4592b5dee5d0deb751b71c23cdfb431c854e2e194d5290"
+      "sha256": "f3b0db912c30b90ae57d08b272cd8d7ce16ff5fe690e14344eed60979f660e39"
     },
     "launchReadiness": {
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json",
-      "sha256": "a2cd8e916490ffbc0e4b7a3ceb76a7642fc5f284b6976f6cbb74af2577daa4fe",
+      "sha256": "d29ce51fabf3a78775a37b225e1c67b8692457841c82afd0fb00085cbff8fd63",
       "candidateCount": 480
     },
     "routeMatrix": {
@@ -69,16 +69,16 @@
     },
     "routeReachability": {
       "path": "quality/evidence/phase-03/web/route-reachability.json",
-      "sha256": "ed64d0c3bb1ee189de3e6bbdac2fad75982d950280ec08e773bdf3516e304be9"
+      "sha256": "af1af6130a71312e2ed2ca720eea9982626383598892a400137be4c1da5f1e13"
     },
     "visualManifest": {
       "path": "tooling/web-evidence/visual-manifest.json",
-      "sha256": "02339c3db9825ce275609128a82580bbad6feb5c29ba8b09c72bb7f0a29bc829",
+      "sha256": "8ab3663b13a4b6f465d55e98f891191d9e7cd3565b3653493e591a5776c48683",
       "candidateCount": 480
     },
     "visualReport": {
       "path": "quality/evidence/phase-03/web/visual-report.json",
-      "sha256": "89975b7b5abb14a8285703c3138ec2a65d2072cb56c6dd3d30ce89a0a0b69e54"
+      "sha256": "5a93f04540e4ed55d6c0819126c03cf21d552688b533bbbf1746835613670868"
     },
     "detectorResults": {
       "D-102": "passed",

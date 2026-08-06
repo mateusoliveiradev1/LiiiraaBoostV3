@@ -1,6 +1,7 @@
 import {
   projectIndexing,
   projectNavigation,
+  routeHref,
   WEB_LOCALES,
   WEB_ORIGINS,
   type RouteProjection,
@@ -23,7 +24,7 @@ const publicRoutes = projectIndexing();
 export const publicRouteById = (routeId: string): RouteProjection => {
   const route = publicRoutes.find(({ id }) => id === routeId);
 
-  if (route === undefined || route.securityBoundary !== 'public-origin') {
+  if (route?.securityBoundary !== 'public-origin') {
     throw new Error(`Canonical public route is unavailable: ${routeId}`);
   }
 
@@ -71,11 +72,16 @@ export const accountRouteBoundaryHref = (
 ): string => {
   const accountRoute = publicRoutes.find(({ id }) => id === routeId);
 
-  if (accountRoute === undefined || accountRoute.securityBoundary !== 'account-origin') {
+  if (accountRoute?.securityBoundary !== 'account-origin') {
     throw new Error(`Canonical account route is unavailable: ${routeId}`);
   }
 
-  return `${exactAccountOrigin(origin)}${localizedPublicHref(accountRoute, locale)}`;
+  const href = routeHref(routeId, { locale });
+  if (!href.ok) {
+    throw new Error(`Canonical account route could not be localized: ${routeId}`);
+  }
+
+  return `${exactAccountOrigin(origin)}${href.value}`;
 };
 
 export const accountBoundaryHref = (locale: WebLocale): string =>

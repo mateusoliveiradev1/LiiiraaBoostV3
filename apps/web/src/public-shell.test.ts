@@ -153,6 +153,9 @@ describe('public shell', () => {
     expect(accountRouteBoundaryHref('account-sign-up', 'en', accountOrigin)).toBe(
       `${accountOrigin}/en/register`,
     );
+    expect(accountRouteBoundaryHref('account-sign-up', 'pt-BR', accountOrigin)).toBe(
+      `${accountOrigin}/pt-BR/cadastro`,
+    );
     expect(layoutSource).toContain("signIn: 'Entrar'");
     expect(layoutSource).toContain("signUp: 'Criar conta'");
     expect(layoutSource).toContain("signIn: 'Sign in'");

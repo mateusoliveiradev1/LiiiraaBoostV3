@@ -1,9 +1,9 @@
 'use client';
 
 import type { AdminRoleJson, AuditEventJson, AuthorityReceiptJson } from '@liiiraa/contracts-ts';
-import { LbButton, ProductIcon } from '@liiiraa/design-system';
+import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
-import { useEffect, useMemo, useState, type SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import {
   createAdminAuthority,
@@ -14,6 +14,7 @@ import {
   type AdminSessionProjection,
   type AdminStepUp,
 } from '../admin-authority';
+import { ProductLockup } from '../admin-product-lockup';
 import { adminRoleCanAccessRoute, type AdminAuthorityRoute } from '../admin-runtime';
 
 type AdminAuthorityPageProps = Readonly<{
@@ -59,6 +60,10 @@ const copy = Object.freeze({
     stepUp: 'Verify with a strong credential',
     stepUpDialog: 'Verify critical operation',
     support: 'Support case queue',
+    signOut: 'Sign out of Admin',
+    signOutError: 'The administrative session could not be closed. Try again.',
+    sessionUntil: 'Protected session until',
+    accountPortal: 'Account portal',
   }),
   'pt-BR': Object.freeze({
     activeRole: 'Função administrativa ativa',
@@ -95,6 +100,10 @@ const copy = Object.freeze({
     stepUp: 'Verificar com credencial forte',
     stepUpDialog: 'Verificar operação crítica',
     support: 'Fila de casos de suporte',
+    signOut: 'Sair do painel',
+    signOutError: 'Não foi possível encerrar a sessão administrativa. Tente novamente.',
+    sessionUntil: 'Sessão protegida até',
+    accountPortal: 'Portal da conta',
   }),
 });
 
@@ -109,6 +118,22 @@ const roleLabel = (locale: WebLocale, role: AdminRoleJson): string => {
     },
   } as const;
   return labels[locale][role];
+};
+
+const formatAdminDateTime = (value: string, locale: WebLocale): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime()))
+    return locale === 'pt-BR' ? 'horário indisponível' : 'time unavailable';
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+};
+
+const formatRecordReference = (value: string, locale: WebLocale): string => {
+  if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/iu.test(value)) return value;
+  const ending = value.replaceAll('-', '').slice(-6).toLocaleUpperCase(locale);
+  return `${locale === 'pt-BR' ? 'Referência' : 'Reference'} ••••${ending}`;
 };
 
 const csrfToken = (): string =>
@@ -268,13 +293,33 @@ const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: Ad
             ]
           : [[labels.audit, '/audit']];
   return (
-    <nav aria-label={labels.activeRole} className="admin-authority__navigation">
-      {links.map(([label, suffix]) => (
-        <a href={routeHref(locale, suffix)} key={suffix}>
-          {label}
+    <div className="admin-production-nav">
+      <nav aria-label={labels.activeRole} className="admin-authority__navigation">
+        <a href={routeHref(locale, '')}>
+          <ProductIcon name="toolbox" size={18} />
+          {locale === 'pt-BR' ? 'Visão geral' : 'Overview'}
         </a>
-      ))}
-    </nav>
+        {links.map(([label, suffix]) => (
+          <a href={routeHref(locale, suffix)} key={suffix}>
+            <ProductIcon
+              name={
+                suffix.includes('diagnostics')
+                  ? 'activity'
+                  : role === 'security'
+                    ? 'shield'
+                    : role === 'support'
+                      ? 'lifebuoy'
+                      : role === 'operations'
+                        ? 'rocket'
+                        : 'receipt'
+              }
+              size={18}
+            />
+            {label}
+          </a>
+        ))}
+      </nav>
+    </div>
   );
 };
 
@@ -393,71 +438,62 @@ const CriticalCommand = ({
   const [receipt, setReceipt] = useState<AuthorityReceiptJson | null>(null);
   const ready = reason.trim().length >= 8 && impactReviewed && stepUp !== null;
   return (
-    <section data-high-risk-action="true">
-      <button
-        onClick={() => {
+    <section className="admin-critical-command" data-high-risk-action="true">
+      <LbButton
+        onPress={() => {
           setOpen(true);
         }}
-        type="button"
+        variant="destructive"
       >
-        Review publication hold
-      </button>
+        {locale === 'pt-BR' ? 'Revisar retenção de publicação' : 'Review publication hold'}
+      </LbButton>
       {open ? (
-        <section aria-label={labels.stepUpDialog} role="dialog">
+        <section
+          aria-label={labels.stepUpDialog}
+          className="admin-critical-command__review"
+          role="dialog"
+        >
           <h2>{labels.stepUpDialog}</h2>
-          <label>
-            {labels.reason}
-            <input
-              onChange={(event) => {
-                setReason(event.currentTarget.value);
-              }}
-              value={reason}
-            />
-          </label>
-          <label>
-            <input
-              checked={impactReviewed}
-              onChange={(event) => {
-                setImpactReviewed(event.currentTarget.checked);
-              }}
-              type="checkbox"
-            />
+          <LbTextField label={labels.reason} maxLength={240} onChange={setReason} value={reason} />
+          <LbCheckbox isSelected={impactReviewed} onChange={setImpactReviewed} value="impact">
             {labels.impact}
-          </label>
-          <button
-            onClick={() => {
-              setStepUp({
-                authorizationContextId: correlationId(),
-                verifiedAt: new Date().toISOString(),
-              });
-            }}
-            type="button"
-          >
-            {labels.stepUp}
-          </button>
-          <button
-            disabled={!ready}
-            onClick={() => {
-              void authority
-                .execute({
-                  action: 'correct-entitlement',
-                  actorId: session.actorId,
-                  assumedRole: session.role,
-                  confirmed: true,
-                  expectedVersion: '7',
-                  impactReviewed,
-                  reason,
-                  redactedTarget: 'Release ••••-017',
-                  stepUp,
-                })
-                .then((result) => {
-                  if (result.status === 'complete') setReceipt(result.receipt);
+          </LbCheckbox>
+          <div className="admin-critical-command__actions">
+            <LbButton
+              onPress={() => {
+                setStepUp({
+                  authorizationContextId: correlationId(),
+                  verifiedAt: new Date().toISOString(),
                 });
-            }}
-            type="button"
-          >
-            {labels.confirm}
-          </button>
+              }}
+              variant="secondary"
+            >
+              {labels.stepUp}
+            </LbButton>
+            <LbButton
+              isDisabled={!ready}
+              onPress={() => {
+                void authority
+                  .execute({
+                    action: 'correct-entitlement',
+                    actorId: session.actorId,
+                    assumedRole: session.role,
+                    confirmed: true,
+                    expectedVersion: '7',
+                    impactReviewed,
+                    reason,
+                    redactedTarget: 'Release ••••-017',
+                    stepUp,
+                  })
+                  .then((result) => {
+                    if (result.status === 'complete') setReceipt(result.receipt);
+                  });
+              }}
+              variant="destructive"
+            >
+              {labels.confirm}
+            </LbButton>
+          </div>
         </section>
       ) : null}
       {receipt === null ? null : (
@@ -475,9 +511,24 @@ const BreakGlassReview = ({
 }: Readonly<{ authority: AdminAuthority; locale: WebLocale }>) => {
   const [metadata, setMetadata] = useState<Readonly<Record<string, string>> | null>(null);
   return (
-    <section aria-label="Redacted break-glass metadata" data-redaction="allowlist-only">
-      <button
-        onClick={() => {
+    <section
+      aria-label="Redacted break-glass metadata"
+      className="admin-break-glass"
+      data-redaction="allowlist-only"
+    >
+      <header>
+        <ProductIcon name="shield" size={20} />
+        <div>
+          <h2>{locale === 'pt-BR' ? 'Acesso emergencial' : 'Emergency access'}</h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Exibe somente metadados autorizados, por tempo limitado e com auditoria imutável.'
+              : 'Shows only allowlisted metadata for a limited time with immutable audit.'}
+          </p>
+        </div>
+      </header>
+      <LbButton
+        onPress={() => {
           const verifiedAt = new Date().toISOString();
           void authority
             .breakGlass({
@@ -490,10 +541,10 @@ const BreakGlassReview = ({
               if (result.status === 'complete') setMetadata(result.metadata);
             });
         }}
-        type="button"
+        variant="destructive"
       >
         {locale === 'pt-BR' ? 'Abrir metadados de emergência' : 'Open break-glass metadata'}
-      </button>
+      </LbButton>
       {metadata === null ? null : (
         <dl>
           {Object.entries(metadata).map(([field, value]) => (
@@ -505,6 +556,80 @@ const BreakGlassReview = ({
         </dl>
       )}
     </section>
+  );
+};
+
+const AdminProductionShell = ({
+  accountOrigin,
+  authority,
+  children,
+  locale,
+  onSignedOut,
+  session,
+}: Readonly<{
+  accountOrigin: string;
+  authority: AdminAuthority;
+  children: ReactNode;
+  locale: WebLocale;
+  onSignedOut: () => void;
+  session: AdminSessionProjection;
+}>) => {
+  const labels = copy[locale];
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
+  useEffect(() => {
+    document.documentElement.dataset['adminSessionState'] = 'verified';
+    return () => {
+      document.documentElement.dataset['adminSessionState'] = 'unverified';
+    };
+  }, []);
+  return (
+    <div className="admin-production-shell" data-admin-role={session.role}>
+      <header className="admin-production-header">
+        <a className="admin-brand" href={routeHref(locale, '')}>
+          <ProductLockup />
+          <span className="admin-brand__surface">Admin</span>
+        </a>
+        <div className="admin-production-header__session">
+          <span className="admin-production-header__identity">
+            <ProductIcon name="shield" size={18} />
+            <span>
+              <strong>{roleLabel(locale, session.role)}</strong>
+              <small>
+                {labels.sessionUntil} {formatAdminDateTime(session.expiresAt, locale)}
+              </small>
+            </span>
+          </span>
+          <a href={`${accountOrigin}/${locale}/account`}>{labels.accountPortal}</a>
+          <LbButton
+            isDisabled={signingOut}
+            isLoading={signingOut}
+            loadingLabel={locale === 'pt-BR' ? 'Encerrando' : 'Signing out'}
+            onPress={() => {
+              setSigningOut(true);
+              setSignOutError(false);
+              void authority.signOut().then((signedOut) => {
+                setSigningOut(false);
+                if (signedOut) onSignedOut();
+                else setSignOutError(true);
+              });
+            }}
+            variant="quiet"
+          >
+            {labels.signOut}
+          </LbButton>
+        </div>
+      </header>
+      {signOutError ? (
+        <p className="admin-production-header__error" role="alert">
+          {labels.signOutError}
+        </p>
+      ) : null}
+      <div className="admin-production-workspace">
+        <RoleNavigation locale={locale} role={session.role} />
+        <section className="admin-production-main">{children}</section>
+      </div>
+    </div>
   );
 };
 
@@ -577,61 +702,73 @@ export const AdminAuthorityPage = ({
     );
   }
   return (
-    <article
-      className="admin-authority"
-      data-admin-role={session.role}
-      data-admin-runtime="production"
+    <AdminProductionShell
+      accountOrigin={accountOrigin}
+      authority={authority}
+      locale={locale}
+      onSignedOut={() => {
+        setSession(null);
+        setRecords([]);
+      }}
+      session={session}
     >
-      <header className="admin-authority__header">
-        <div>
-          <span className="admin-authority__system" aria-hidden="true">
-            ADMIN CONTROL PLANE
-          </span>
-          <h1>{copy[locale].activeRole}</h1>
-          <p>{copy[locale].authoritySummary}</p>
-        </div>
-        <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
-          <ProductIcon name="shield" size={16} />
-          <span>{roleLabel(locale, session.role)}</span>
-        </p>
-      </header>
-      <RoleNavigation locale={locale} role={session.role} />
-      {routeId === 'admin-diagnostics' ? (
-        <DiagnosticAuthority authority={authority} locale={locale} />
-      ) : null}
-      {routeId === 'admin-operations' && session.role === 'operations' ? (
-        <CriticalCommand authority={authority} locale={locale} session={session} />
-      ) : null}
-      {routeId === 'admin-security' && session.role === 'security' ? (
-        <BreakGlassReview authority={authority} locale={locale} />
-      ) : null}
-      {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
-        <section aria-label={copy[locale].activeRole} className="admin-authority__content">
-          {records.length === 0 ? (
-            <div className="admin-authority__empty" role="status">
-              <ProductIcon name="check" size={20} />
-              <div>
-                <strong>{copy[locale].noRecordsTitle}</strong>
-                <p>{copy[locale].noRecordsDescription}</p>
-                <span>{copy[locale].noRecords}</span>
+      <article
+        className="admin-authority"
+        data-admin-role={session.role}
+        data-admin-runtime="production"
+      >
+        <header className="admin-authority__header">
+          <div>
+            <span className="admin-authority__system" aria-hidden="true">
+              ADMIN CONTROL PLANE
+            </span>
+            <h1>{copy[locale].activeRole}</h1>
+            <p>{copy[locale].authoritySummary}</p>
+          </div>
+          <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
+            <ProductIcon name="shield" size={16} />
+            <span>{roleLabel(locale, session.role)}</span>
+          </p>
+        </header>
+        {routeId === 'admin-diagnostics' ? (
+          <DiagnosticAuthority authority={authority} locale={locale} />
+        ) : null}
+        {routeId === 'admin-operations' && session.role === 'operations' ? (
+          <CriticalCommand authority={authority} locale={locale} session={session} />
+        ) : null}
+        {routeId === 'admin-security' && session.role === 'security' ? (
+          <BreakGlassReview authority={authority} locale={locale} />
+        ) : null}
+        {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
+          <section aria-label={copy[locale].activeRole} className="admin-authority__content">
+            {records.length === 0 ? (
+              <div className="admin-authority__empty" role="status">
+                <ProductIcon name="check" size={20} />
+                <div>
+                  <strong>{copy[locale].noRecordsTitle}</strong>
+                  <p>{copy[locale].noRecordsDescription}</p>
+                  <span>{copy[locale].noRecords}</span>
+                </div>
               </div>
-            </div>
-          ) : (
-            <ul className="admin-authority__records">
-              {records.map((record) => (
-                <li key={record.id}>
-                  <strong>{record.id}</strong>{' '}
-                  {typeof record.redactedTarget === 'string'
-                    ? record.redactedTarget
-                    : typeof record.summary === 'string'
-                      ? record.summary
-                      : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      ) : null}
-    </article>
+            ) : (
+              <ul className="admin-authority__records">
+                {records.map((record) => (
+                  <li key={record.id}>
+                    <strong className="admin-authority__record-reference">
+                      {formatRecordReference(record.id, locale)}
+                    </strong>{' '}
+                    {typeof record.redactedTarget === 'string'
+                      ? record.redactedTarget
+                      : typeof record.summary === 'string'
+                        ? record.summary
+                        : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
+      </article>
+    </AdminProductionShell>
   );
 };

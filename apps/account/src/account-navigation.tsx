@@ -40,6 +40,7 @@ type AccountNavigationProps = Readonly<{
   label: string;
   locale: WebLocale;
   publicLink: ReactNode;
+  roleGateway: ReactNode;
   supportHref: string;
   supportLabel: string;
   surfaceLabel: string;
@@ -135,6 +136,7 @@ export function AccountNavigation({
   label,
   locale,
   publicLink,
+  roleGateway,
   supportHref,
   supportLabel,
   surfaceLabel,
@@ -297,6 +299,7 @@ export function AccountNavigation({
           </nav>
         </details>
         <main id="account-main" tabIndex={-1}>
+          {roleGateway}
           {children}
         </main>
       </div>

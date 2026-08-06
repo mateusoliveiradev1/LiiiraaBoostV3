@@ -1,6 +1,7 @@
 import { WEB_ORIGINS } from '@liiiraa/web-core';
 
 export const STAGING_PUBLIC_ORIGIN = 'https://liiiraa-boost-public-staging.vercel.app';
+export const STAGING_ADMIN_ORIGIN = 'https://liiiraa-boost-admin-staging.vercel.app';
 
 const exactHttpsOrigin = (value: string): string => {
   const candidate = new URL(value);
@@ -24,4 +25,12 @@ export const resolvePublicBoundaryOrigin = (
 ): string =>
   exactHttpsOrigin(
     configuredOrigin ?? (providerPreview ? STAGING_PUBLIC_ORIGIN : WEB_ORIGINS['public-origin']),
+  );
+
+export const resolveAdminBoundaryOrigin = (
+  configuredOrigin: string | undefined,
+  providerPreview: boolean,
+): string =>
+  exactHttpsOrigin(
+    configuredOrigin ?? (providerPreview ? STAGING_ADMIN_ORIGIN : WEB_ORIGINS['admin-origin']),
   );

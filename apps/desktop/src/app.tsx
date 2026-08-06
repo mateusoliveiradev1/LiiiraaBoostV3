@@ -65,6 +65,10 @@ import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
 import {
+  ACCOUNT_AUTHORITY_REVOKED_EVENT,
+  ACCOUNT_IDENTITY_PROJECTED_EVENT,
+} from './account-authority.js';
+import {
   ACCOUNT_PROFILE_UPDATED_EVENT,
   accountProfileInitials,
   readAccountProfile,
@@ -1349,6 +1353,7 @@ const DesktopAppContent = ({
   const [accountProfile, setAccountProfile] = useState(() =>
     readAccountProfile(globalThis.localStorage),
   );
+  const [authoritativeAccountName, setAuthoritativeAccountName] = useState<string>();
   const [route, setRoute] = useState(() => resolveInitialRoute(initialPath));
   const [announcement, setAnnouncement] = useState(route.definition.headingMessageId);
   const [activityOpen, setActivityOpen] = useState(false);
@@ -1369,6 +1374,32 @@ const DesktopAppContent = ({
       globalThis.removeEventListener('storage', refreshAccountIdentity);
     };
   }, []);
+  useEffect(() => {
+    const updateAuthoritativeIdentity = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail;
+      if (typeof detail !== 'object' || detail === null) return;
+      const displayName: unknown = Reflect.get(detail, 'displayName');
+      if (typeof displayName === 'string' && displayName.trim().length >= 2) {
+        setAuthoritativeAccountName(displayName.trim());
+      }
+    };
+    const clearAuthoritativeIdentity = () => {
+      setAuthoritativeAccountName(undefined);
+    };
+    globalThis.addEventListener(ACCOUNT_IDENTITY_PROJECTED_EVENT, updateAuthoritativeIdentity);
+    globalThis.addEventListener(ACCOUNT_AUTHORITY_REVOKED_EVENT, clearAuthoritativeIdentity);
+    return () => {
+      globalThis.removeEventListener(ACCOUNT_IDENTITY_PROJECTED_EVENT, updateAuthoritativeIdentity);
+      globalThis.removeEventListener(ACCOUNT_AUTHORITY_REVOKED_EVENT, clearAuthoritativeIdentity);
+    };
+  }, []);
+  const accountDisplayName =
+    authoritativeAccountName ??
+    (Reflect.has(globalThis, '__LIIIRAA_DESKTOP_TEST__')
+      ? accountProfile.displayName
+      : locale === 'pt-BR'
+        ? 'Conta autenticada'
+        : 'Authenticated account');
   const [measuredWidth, setMeasuredWidth] = useState(
     viewportWidth ?? (typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : 1280),
   );
@@ -1784,8 +1815,8 @@ const DesktopAppContent = ({
       >
         <div className="desktop-title-region" data-focus-region="title-bar">
           <WindowTitleBar
-            accountInitials={accountProfileInitials(accountProfile.displayName)}
-            accountLabel={accountProfile.displayName}
+            accountInitials={accountProfileInitials(accountDisplayName)}
+            accountLabel={accountDisplayName}
             controls={DESKTOP_WINDOW_CONTROLS}
             globalStatus={
               locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'
@@ -1828,8 +1859,8 @@ const DesktopAppContent = ({
         tabIndex={-1}
       >
         <WindowTitleBar
-          accountInitials={accountProfileInitials(accountProfile.displayName)}
-          accountLabel={accountProfile.displayName}
+          accountInitials={accountProfileInitials(accountDisplayName)}
+          accountLabel={accountDisplayName}
           controls={DESKTOP_WINDOW_CONTROLS}
           globalStatus={presentation.reason}
           locale={locale}

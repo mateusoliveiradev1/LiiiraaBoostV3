@@ -691,6 +691,34 @@
   min-block-size: 36px;
 }
 
+.desktop-account-authority-unavailable {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-block: 22px;
+  border-block: 1px solid var(--deck-line);
+}
+
+.desktop-account-authority-unavailable > svg {
+  flex: 0 0 auto;
+  color: var(--lb-warning);
+}
+
+.desktop-account-authority-unavailable h2,
+.desktop-account-authority-unavailable p {
+  margin: 0;
+}
+
+.desktop-account-authority-unavailable h2 {
+  font-size: var(--lb-text-heading-size);
+}
+
+.desktop-account-authority-unavailable p {
+  max-inline-size: 68ch;
+  margin-block-start: 6px;
+  color: var(--deck-text-muted);
+}
+
 .desktop-work-canvas .lb-settings-tabs {
   display: flex;
   gap: 3px;

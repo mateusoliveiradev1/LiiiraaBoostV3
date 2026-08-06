@@ -1340,6 +1340,127 @@ button:focus-visible,
   gap: var(--lb-space-3);
 }
 
+.account-password-field {
+  position: relative;
+  display: grid;
+}
+
+.account-password-field > .lb-button {
+  position: absolute;
+  inset-block-start: 26px;
+  inset-inline-end: var(--lb-space-1);
+  min-block-size: 36px;
+  padding-inline: var(--lb-space-2);
+}
+
+.account-password-field .lb-input {
+  padding-inline-end: calc(var(--lb-space-7) + var(--lb-space-6));
+}
+
+.account-password-requirements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lb-space-1) var(--lb-space-3);
+  margin: 0;
+  padding: 0;
+  color: var(--lb-text-tertiary);
+  font-size: var(--lb-text-label-size);
+  list-style: none;
+}
+
+.account-password-requirements li {
+  display: flex;
+  gap: var(--lb-space-1);
+  align-items: center;
+}
+
+.account-password-requirements li[data-met='true'] {
+  color: var(--lb-success);
+}
+
+.account-invitation-required {
+  display: grid;
+  gap: var(--lb-space-4);
+}
+
+.account-invitation-required__body {
+  display: grid;
+  gap: var(--lb-space-3);
+  padding-block: var(--lb-space-2);
+}
+
+.account-invitation-required__body h1,
+.account-invitation-required__body p,
+.account-invitation-required__body ol {
+  margin: 0;
+}
+
+.account-invitation-required__body h1 {
+  font-size: var(--lb-text-heading-size);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.account-invitation-required__body > p {
+  max-inline-size: 58ch;
+  color: var(--lb-text-secondary);
+  text-wrap: pretty;
+}
+
+.account-invitation-required__status {
+  display: inline-flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  inline-size: fit-content;
+  color: var(--lb-cobalt-signal);
+  font-weight: var(--lb-weight-semibold);
+}
+
+.account-invitation-required__body ol {
+  display: grid;
+  gap: var(--lb-space-2);
+  padding-inline-start: var(--lb-space-5);
+  color: var(--lb-text-primary);
+}
+
+.account-invitation-required__notice {
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  background: var(--lb-surface-canvas);
+}
+
+.account-admin-gateway {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--lb-space-3);
+  align-items: center;
+  margin-block-end: var(--lb-space-4);
+  padding: var(--lb-space-3) var(--lb-space-4);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  background: var(--lb-surface-inset);
+}
+
+.account-admin-gateway > span {
+  display: grid;
+  gap: var(--lb-space-1);
+}
+
+.account-admin-gateway small {
+  color: var(--lb-text-secondary);
+}
+
+.account-admin-gateway a {
+  display: inline-flex;
+  gap: var(--lb-space-2);
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--lb-cobalt-signal);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
 .account-auth-consent {
   display: grid;
   gap: var(--lb-space-1);
@@ -1369,6 +1490,20 @@ button:focus-visible,
 .account-auth-errors ul {
   margin-block: var(--lb-space-2) 0;
   padding-inline-start: var(--lb-space-4);
+}
+
+@media (width < 560px) {
+  .account-password-requirements {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-admin-gateway {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .account-admin-gateway a {
+    grid-column: 1 / -1;
+  }
 }
 
 .account-auth-shell__stage:has(.account-onboarding) {

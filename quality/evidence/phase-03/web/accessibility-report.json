@@ -56,15 +56,15 @@
     },
     "visualManifest": {
       "path": "tooling/web-evidence/visual-manifest.json",
-      "sha256": "02339c3db9825ce275609128a82580bbad6feb5c29ba8b09c72bb7f0a29bc829"
+      "sha256": "8ab3663b13a4b6f465d55e98f891191d9e7cd3565b3653493e591a5776c48683"
     },
     "launchReadiness": {
       "path": ".planning/phases/03-complete-web-experience/visuals/candidate-inspections/03-76-launch-readiness.json",
-      "sha256": "a2cd8e916490ffbc0e4b7a3ceb76a7642fc5f284b6976f6cbb74af2577daa4fe"
+      "sha256": "d29ce51fabf3a78775a37b225e1c67b8692457841c82afd0fb00085cbff8fd63"
     },
     "routeReachability": {
       "path": "quality/evidence/phase-03/web/route-reachability.json",
-      "sha256": "ed64d0c3bb1ee189de3e6bbdac2fad75982d950280ec08e773bdf3516e304be9",
+      "sha256": "af1af6130a71312e2ed2ca720eea9982626383598892a400137be4c1da5f1e13",
       "owner": "plan-03-35"
     }
   },

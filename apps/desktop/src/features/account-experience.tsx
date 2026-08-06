@@ -2,6 +2,7 @@ import { LbButton, LbSwitch, LbTextField, ProductIcon, RouteHeader } from '@liii
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { AccountAuthoritySummary, type ShellLocale } from '@liiiraa/feature-shell';
 import {
+  ACCOUNT_AUTHORITY_REVOKED_EVENT,
   createDesktopAccountAuthority,
   type DesktopAccountAuthority,
   type DesktopAccountAuthoritySnapshot,
@@ -48,13 +49,6 @@ const profileBioForLocale = (locale: ShellLocale, bio: string): string => {
     : bio;
 };
 
-const LocalPreviewBadge = ({ locale }: { readonly locale: ShellLocale }) => (
-  <span className="desktop-preview-badge">
-    <ProductIcon name="shield" size={14} />
-    {copy(locale, { en: 'Protected local preview', 'pt-BR': 'Prévia local protegida' })}
-  </span>
-);
-
 const BrandLockup = () => (
   <div className="desktop-auth-brand" aria-label="Liiiraa Boost">
     <svg aria-hidden="true" viewBox="0 0 36 28">
@@ -99,11 +93,18 @@ const LoginSurface = ({
   };
 
   return (
-    <main className="desktop-auth-surface" data-account-view="login">
+    <main
+      className="desktop-auth-surface"
+      data-account-view="login"
+      data-auth-mode="system-browser"
+    >
       <section className="desktop-auth-story" aria-labelledby="desktop-login-story-title">
         <BrandLockup />
         <div className="desktop-auth-story-copy">
-          <LocalPreviewBadge locale={locale} />
+          <span className="desktop-preview-badge">
+            <ProductIcon name="shield" size={14} />
+            {copy(locale, { en: 'Private beta access', 'pt-BR': 'Acesso ao beta privado' })}
+          </span>
           <h1 id="desktop-login-story-title">
             {copy(locale, {
               en: 'Your PC, tuned with proof.',
@@ -150,13 +151,13 @@ const LoginSurface = ({
                 {copy(locale, { en: 'Local-first control', 'pt-BR': 'Controle local primeiro' })}
               </strong>
               {copy(locale, {
-                en: 'No optimization runs from this sign-in preview.',
-                'pt-BR': 'Nenhuma otimização é executada nesta prévia de entrada.',
+                en: 'Your password stays in the protected browser session.',
+                'pt-BR': 'Sua senha permanece na sessão protegida do navegador.',
               })}
             </span>
           </li>
         </ul>
-        <p className="desktop-auth-footnote">WINDOWS 10/11 · DESKTOP · v0.0.0</p>
+        <p className="desktop-auth-footnote">WINDOWS 10/11 · BETA PRIVADO</p>
       </section>
 
       <section className="desktop-login-panel" aria-labelledby="desktop-login-title">
@@ -211,22 +212,6 @@ const LoginSurface = ({
             })}
           </LbButton>
         </div>
-
-        <div className="desktop-auth-separator">
-          <span>
-            {copy(locale, { en: 'or preview the product', 'pt-BR': 'ou conheça o produto' })}
-          </span>
-        </div>
-
-        <LbButton
-          data-auth-action="offline-demo"
-          onPress={() => {
-            navigate('/home');
-          }}
-          variant="secondary"
-        >
-          {copy(locale, { en: 'Explore demo mode', 'pt-BR': 'Explorar modo demonstração' })}
-        </LbButton>
 
         {phase === 'opening-browser' || phase === 'waiting-browser' ? (
           <aside className="desktop-auth-boundary" aria-live="polite" role="status">
@@ -1930,6 +1915,7 @@ const AuthoritativeAccountContent = ({
           onPress={() => {
             void desktopAuth.signOut().then((result) => {
               if (result.status === 'signed-out') {
+                globalThis.dispatchEvent(new CustomEvent(ACCOUNT_AUTHORITY_REVOKED_EVENT));
                 navigate('/login');
               } else {
                 setSignOutFailed(true);
@@ -1952,6 +1938,38 @@ const AuthoritativeAccountContent = ({
     </div>
   );
 };
+
+const isExplicitSimulatedScenario = (): boolean => {
+  const candidate: unknown = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__');
+  if (typeof candidate !== 'object' || candidate === null) return false;
+  const scenario: unknown = Reflect.get(candidate, 'scenario');
+  return (
+    typeof scenario === 'object' &&
+    scenario !== null &&
+    Reflect.get(scenario, 'marker') === 'SIMULATED SCENARIO'
+  );
+};
+
+const AccountAuthorityUnavailable = ({ locale }: Readonly<{ locale: ShellLocale }>) => (
+  <section className="desktop-account-authority-unavailable" role="alert">
+    <ProductIcon name="warning" size={20} />
+    <div>
+      <h2>
+        {copy(locale, {
+          en: 'The secure account service is unavailable',
+          'pt-BR': 'O serviço seguro da conta está indisponível',
+        })}
+      </h2>
+      <p>
+        {copy(locale, {
+          en: 'No local profile was substituted. Reopen the app or check your connection to restore the real account.',
+          'pt-BR':
+            'Nenhum perfil local foi substituído. Reabra o app ou verifique sua conexão para restaurar a conta real.',
+        })}
+      </p>
+    </div>
+  </section>
+);
 
 export const AccountExperience = ({
   locale,
@@ -1994,12 +2012,20 @@ export const AccountExperience = ({
     );
   }
 
+  if (isExplicitSimulatedScenario()) {
+    return (
+      <AccountShell locale={locale} navigate={navigate} view={view}>
+        {view === 'overview' ? <ProfileOverview locale={locale} navigate={navigate} /> : null}
+        {view === 'subscription' ? <SubscriptionView locale={locale} /> : null}
+        {view === 'device' ? <DeviceView locale={locale} scenarioId={scenarioId} /> : null}
+        {view === 'security' ? <SecurityView locale={locale} /> : null}
+      </AccountShell>
+    );
+  }
+
   return (
     <AccountShell locale={locale} navigate={navigate} view={view}>
-      {view === 'overview' ? <ProfileOverview locale={locale} navigate={navigate} /> : null}
-      {view === 'subscription' ? <SubscriptionView locale={locale} /> : null}
-      {view === 'device' ? <DeviceView locale={locale} scenarioId={scenarioId} /> : null}
-      {view === 'security' ? <SecurityView locale={locale} /> : null}
+      <AccountAuthorityUnavailable locale={locale} />
     </AccountShell>
   );
 };

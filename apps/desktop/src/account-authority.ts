@@ -13,6 +13,7 @@ import {
 
 export const ACCOUNT_MUTATION_COMMITTED_EVENT = 'liiiraa:account-mutation-committed' as const;
 export const ACCOUNT_AUTHORITY_REVOKED_EVENT = 'liiiraa:account-authority-revoked' as const;
+export const ACCOUNT_IDENTITY_PROJECTED_EVENT = 'liiiraa:account-identity-projected' as const;
 export const ACCOUNT_SYNC_COMMAND = 'sync_account' as const;
 
 export type AccountLifecycleTrigger = 'launch' | 'resume' | 'reconnection' | 'mutation';
@@ -289,6 +290,17 @@ export class DesktopAccountAuthority {
     for (const listener of this.#listeners) listener(snapshot);
     if (snapshot.state === 'revoked') {
       globalThis.dispatchEvent(new CustomEvent(ACCOUNT_AUTHORITY_REVOKED_EVENT));
+    }
+    if (snapshot.projection !== undefined) {
+      globalThis.dispatchEvent(
+        new CustomEvent(ACCOUNT_IDENTITY_PROJECTED_EVENT, {
+          detail: Object.freeze({
+            accountId: snapshot.projection.account.accountId,
+            displayName: snapshot.projection.account.displayName,
+            emailRedacted: snapshot.projection.account.emailRedacted,
+          }),
+        }),
+      );
     }
   }
 

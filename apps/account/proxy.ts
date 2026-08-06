@@ -70,7 +70,7 @@ export const accountHeaderContract = (
   ]);
 
 const localeFromUrl = (url: URL): WebLocale => {
-  const localeSegment = url.pathname.split('/').filter(Boolean)[0];
+  const localeSegment = url.pathname.split('/').find(Boolean);
   return WEB_LOCALES.find((locale) => locale === localeSegment) ?? 'pt-BR';
 };
 
@@ -121,9 +121,17 @@ const accountRootDestination = (request: NextRequest): URL | undefined => {
     request.nextUrl.searchParams.get('invitation') ?? request.nextUrl.searchParams.get('invite');
   const destination = new URL(`/${locale}/login`, request.nextUrl.origin);
   if (invitation !== null && INVITATION_TOKEN.test(invitation)) {
-    destination.pathname = `/${locale}/register`;
+    destination.pathname = locale === 'pt-BR' ? '/pt-BR/cadastro' : '/en/register';
     destination.searchParams.set('invitation', invitation);
   }
+  return destination;
+};
+
+const localizedLegacyDestination = (request: NextRequest): URL | undefined => {
+  if (request.nextUrl.pathname !== '/pt-BR/register') return undefined;
+
+  const destination = request.nextUrl.clone();
+  destination.pathname = '/pt-BR/cadastro';
   return destination;
 };
 
@@ -135,8 +143,9 @@ export default function accountProxy(request: NextRequest): NextResponse {
   const nonce = createRequestNonce();
   const headerContract = accountHeaderContract(nonce, process.env.NODE_ENV);
   const rootDestination = accountRootDestination(request);
-  if (rootDestination !== undefined) {
-    const response = NextResponse.redirect(rootDestination, 307);
+  const redirectDestination = rootDestination ?? localizedLegacyDestination(request);
+  if (redirectDestination !== undefined) {
+    const response = NextResponse.redirect(redirectDestination, 307);
     for (const { key, value } of headerContract) response.headers.set(key, value);
     return response;
   }

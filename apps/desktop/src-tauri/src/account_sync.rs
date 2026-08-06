@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::credential_store::{CredentialStore, CredentialStoreError, WindowsCredentialStore};
 
-pub const ACCOUNT_API_ORIGIN_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_ACCOUNT_API_ORIGIN";
 pub const DESKTOP_ACCOUNT_CREDENTIAL_SLOT: &str = "desktop-account-session";
 const ACCOUNT_PATH: &str = "/v1/account";
 const MAXIMUM_RESPONSE_BYTES: usize = 1_048_576;
@@ -243,8 +242,9 @@ pub fn unavailable_account_response() -> AccountSyncResponse {
 pub fn sync_account_from_native(
     state: &mut AccountSyncState,
     request: AccountSyncRequest,
+    api_origin: &str,
 ) -> AccountSyncResponse {
-    let api = match WindowsAccountAuthorityApi::from_environment() {
+    let api = match WindowsAccountAuthorityApi::from_origin(api_origin) {
         Ok(api) => api,
         Err(error) => return degraded_response(state, error),
     };
@@ -392,11 +392,9 @@ struct HttpsOrigin {
 }
 
 impl WindowsAccountAuthorityApi {
-    pub fn from_environment() -> Result<Self, AccountSyncError> {
-        let origin = std::env::var(ACCOUNT_API_ORIGIN_ENVIRONMENT_VARIABLE)
-            .map_err(|_| AccountSyncError::NetworkUnavailable)?;
+    pub fn from_origin(origin: &str) -> Result<Self, AccountSyncError> {
         Ok(Self {
-            origin: HttpsOrigin::parse(&origin)?,
+            origin: HttpsOrigin::parse(origin)?,
         })
     }
 }

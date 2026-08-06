@@ -103,6 +103,7 @@ export interface AdminAuthority {
   signIn(
     input: Readonly<{ email: string; password: string }>,
   ): Promise<AdminSessionProjection | null>;
+  signOut(): Promise<boolean>;
   session(): Promise<AdminSessionProjection | null>;
   list(collection: AdminProjectionCollection): Promise<AdminAuthorityListResult>;
   execute(input: AdminCommandInput): Promise<AdminCommandResult>;
@@ -340,6 +341,21 @@ export const createAdminAuthority = ({
         return session;
       } catch {
         return null;
+      }
+    },
+
+    async signOut(): Promise<boolean> {
+      try {
+        const response = await transport(`${baseUrl}/v1/identity/sign-out`, {
+          credentials: 'include',
+          headers: headers(correlationId()),
+          method: 'POST',
+        });
+        if (!response.ok) return false;
+        activeSession = null;
+        return true;
+      } catch {
+        return false;
       }
     },
 

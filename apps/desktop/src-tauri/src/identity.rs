@@ -18,8 +18,6 @@ use crate::credential_store::{CredentialStore, CredentialStoreError};
 pub const DESKTOP_AUTHORIZATION_PATH: &str = "/v1/identity/desktop/authorizations";
 pub const DESKTOP_EXCHANGE_PATH: &str = "/v1/identity/desktop/exchanges";
 pub const DESKTOP_SIGN_OUT_PATH: &str = "/v1/identity/desktop/sign-out";
-pub const DESKTOP_API_ORIGIN_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_ACCOUNT_API_ORIGIN";
-pub const DESKTOP_ACCOUNT_ORIGIN_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_ACCOUNT_ORIGIN";
 
 const MINIMUM_PKCE_VALUE_LENGTH: usize = 43;
 const MAXIMUM_PKCE_VALUE_LENGTH: usize = 128;
@@ -758,14 +756,6 @@ pub struct WindowsDesktopIdentityApi {
 }
 
 impl WindowsDesktopIdentityApi {
-    pub fn from_environment() -> Result<Self, DesktopIdentityError> {
-        let api_origin = std::env::var(DESKTOP_API_ORIGIN_ENVIRONMENT_VARIABLE)
-            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
-        let account_origin = std::env::var(DESKTOP_ACCOUNT_ORIGIN_ENVIRONMENT_VARIABLE)
-            .map_err(|_| DesktopIdentityError::AuthorizationUnavailable)?;
-        Self::from_origins(&api_origin, &account_origin)
-    }
-
     pub fn from_origins(
         api_origin: &str,
         account_origin: &str,

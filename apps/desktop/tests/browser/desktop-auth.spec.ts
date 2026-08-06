@@ -103,7 +103,7 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] enters the account only a
   expect(JSON.stringify(rendererStorage)).not.toMatch(/credential|bearer|session-desktop-real/iu);
 });
 
-test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps failures generic and demo mode unauthenticated`, async ({
+test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps failures generic and exposes no demo bypass`, async ({
   page,
 }) => {
   await installDesktopAuth(page, 'failure');
@@ -113,8 +113,8 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps failures generic an
   await expect(page.getByRole('alert')).toContainText('could not complete');
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/login');
 
-  await page.getByRole('button', { name: 'Explore demo mode' }).click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/home');
+  await expect(page.getByRole('button', { name: 'Explore demo mode' })).toHaveCount(0);
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/login');
   const calls = await page.evaluate(() => {
     const recordedCalls: unknown = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_AUTH_CALLS__');
     return Array.isArray(recordedCalls) ? recordedCalls.map((call: unknown) => call) : [];

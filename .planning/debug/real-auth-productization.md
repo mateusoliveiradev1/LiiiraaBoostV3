@@ -1,8 +1,8 @@
 ---
-status: investigating
+status: resolved
 trigger: 'User reports that the deployed Admin is an unacceptable raw technical panel, the desktop remains mocked and has no new authenticated EXE, invite links are not available for future friends, and the account creation screen is visually poor with weak validation and an opaque missing-invite error.'
 created: 2026-08-06T01:30:00-03:00
-updated: 2026-08-06T01:46:00-03:00
+updated: 2026-08-06T02:24:00-03:00
 ---
 
 ## Symptoms
@@ -15,10 +15,10 @@ reproduction: Sign into /pt-BR/admin with the Security account; open /pt-BR/cada
 
 ## Current Focus
 
-hypothesis: Production composition bypasses the previously polished preview shells, exposes generic adapter records directly, and the desktop package still gates real auth behind a production Tauri transport/build path that has not been rebuilt for the current staging revision.
-test: Run the focused account, admin, desktop renderer, and packaged-runtime regression tests.
-expecting: Each test fails on the observed unfinished production behavior before implementation changes.
-next_action: Implement the invitation gate and role gateway, then rebuild the Admin shell and packaged desktop runtime configuration.
+hypothesis: Confirmed. The production compositions exposed authority data without a finished product shell, registration admitted a missing invitation into the form, and the packaged desktop did not carry its real runtime origins.
+test: Account/Admin/web suites, Rust suites, visual browser captures, route/evidence gates, production builds, and staging-configured NSIS packaging.
+expecting: Real authentication remains fail-closed, public login lands in Account, administrative access is an explicit separate gateway, registration without an invitation has no form, and packaged desktop has no demonstration escape hatch.
+next_action: Publish the reviewed commit to staging and execute human UAT without closing Phase 4.
 
 ## Evidence
 
@@ -28,14 +28,19 @@ next_action: Implement the invitation gate and role gateway, then rebuild the Ad
 - timestamp: 2026-08-06T01:46:00-03:00
   observation: Focused RED tests fail because the invitation-required state, account-to-admin gateway, production Admin shell, real-only desktop login, and packaged account origin do not exist.
   implication: The reported problem is reproducible in composition and packaging, not only visual preference.
+- timestamp: 2026-08-06T02:24:00-03:00
+  observation: Account and Admin each pass 90 tests; the web matrix passes 20 tasks including 183 evidence tests; Rust passes 67 tests; visual inspection confirms the closed-beta, login, and isolated-admin states; the staging NSIS bundle completes successfully.
+  implication: The product behavior is implemented and buildable; staging publication and owner UAT remain the release gate.
 
 ## Eliminated
 
-None yet.
+- A sleeping Render service was not the source of the mock identity: production renderer composition was substituting local content when transport was unavailable.
+- The `/pt-BR/cadastro` failure was not a Vercel locale problem: the canonical route generator still emitted `/pt-BR/register`.
+- Admin build failure without origins is intentional fail-closed behavior; a direct build with the real staging origins passes.
 
 ## Resolution
 
-root_cause: pending
-fix: pending
-verification: pending
-files_changed: pending
+root_cause: Production auth routes inherited demonstrative presentation assumptions, PT-BR registration had no localized canonical path, Admin projected raw adapter records, and desktop runtime origins were read from the launching terminal instead of the packaged Tauri configuration.
+fix: Added invitation-only registration UX and validation, localized `/pt-BR/cadastro`, explicit Account-to-Admin role gateway, finished role-scoped Admin shell/logout, real-only system-browser desktop auth with identity projection, and packaged staging origins.
+verification: Account 90/90; Admin 90/90; web task matrix 20/20 with evidence 183/183 (one intentional skip); Rust 67/67; TypeScript checks pass; Account/Admin/Desktop production builds pass with required runtime config; Impeccable detector reports zero findings; NSIS staging bundle generated.
+files_changed: Account auth/navigation/routing/styles; Admin authority shell/styles; desktop authority/runtime/Rust packaging; localized route contracts/tests; route evidence bindings.

@@ -60,6 +60,33 @@ use window::{
 const FIXTURE_ADAPTER: &str = "fixture";
 const ADAPTER_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_DESKTOP_ADAPTER";
 
+#[derive(Clone, Debug)]
+struct DesktopRuntimeOrigins {
+    api_origin: String,
+    account_origin: String,
+}
+
+#[derive(Clone, Debug, Default)]
+struct DesktopRuntimeConfig {
+    origins: Option<DesktopRuntimeOrigins>,
+}
+
+fn desktop_runtime_origins(plugin_config: Option<&Value>) -> Option<DesktopRuntimeOrigins> {
+    let plugin_config = plugin_config?;
+    let api_origin = plugin_config
+        .pointer("/identity/runtime/apiOrigin")?
+        .as_str()?;
+    let account_origin = plugin_config
+        .pointer("/identity/runtime/accountOrigin")?
+        .as_str()?;
+    WindowsDesktopIdentityApi::from_origins(api_origin, account_origin).ok()?;
+    account_sync::WindowsAccountAuthorityApi::from_origin(api_origin).ok()?;
+    Some(DesktopRuntimeOrigins {
+        api_origin: api_origin.to_owned(),
+        account_origin: account_origin.to_owned(),
+    })
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BuildProfile {
     Development,
@@ -469,10 +496,16 @@ fn get_shell_bootstrap() -> Result<Vec<HostToRendererShellEvent>, ShellDispatchE
 #[tauri::command]
 fn sync_account(
     state: State<'_, Mutex<AccountSyncState>>,
+    runtime: State<'_, DesktopRuntimeConfig>,
     request: AccountSyncRequest,
 ) -> AccountSyncResponse {
+    let Some(origins) = runtime.origins.as_ref() else {
+        return account_sync::unavailable_account_response();
+    };
     match state.lock() {
-        Ok(mut state) => account_sync::sync_account_from_native(&mut state, request),
+        Ok(mut state) => {
+            account_sync::sync_account_from_native(&mut state, request, &origins.api_origin)
+        }
         Err(_) => account_sync::unavailable_account_response(),
     }
 }
@@ -516,8 +549,13 @@ struct DesktopSignOutCommandResponse {
 
 #[tauri::command]
 async fn desktop_sign_in(
+    runtime: State<'_, DesktopRuntimeConfig>,
     email: String,
 ) -> Result<DesktopSignInCommandResponse, DesktopAuthCommandError> {
+    let origins = runtime
+        .origins
+        .clone()
+        .ok_or(DesktopAuthCommandError::Unavailable)?;
     tauri::async_runtime::spawn_blocking(move || {
         if email.trim().is_empty() || email.len() > 254 {
             return Err(DesktopAuthCommandError::InvalidRequest);
@@ -526,7 +564,8 @@ async fn desktop_sign_in(
             LoopbackCallbackListener::bind().map_err(DesktopAuthCommandError::from)?;
         let proof = DesktopPkceProof::generate().map_err(DesktopAuthCommandError::from)?;
         let api =
-            WindowsDesktopIdentityApi::from_environment().map_err(DesktopAuthCommandError::from)?;
+            WindowsDesktopIdentityApi::from_origins(&origins.api_origin, &origins.account_origin)
+                .map_err(DesktopAuthCommandError::from)?;
         let store =
             WindowsCredentialStore::for_account(account_sync::DESKTOP_ACCOUNT_CREDENTIAL_SLOT);
         let session = perform_desktop_sign_in(
@@ -548,10 +587,17 @@ async fn desktop_sign_in(
 }
 
 #[tauri::command]
-async fn desktop_sign_out() -> Result<DesktopSignOutCommandResponse, DesktopAuthCommandError> {
+async fn desktop_sign_out(
+    runtime: State<'_, DesktopRuntimeConfig>,
+) -> Result<DesktopSignOutCommandResponse, DesktopAuthCommandError> {
+    let origins = runtime
+        .origins
+        .clone()
+        .ok_or(DesktopAuthCommandError::Unavailable)?;
     tauri::async_runtime::spawn_blocking(move || {
         let api =
-            WindowsDesktopIdentityApi::from_environment().map_err(DesktopAuthCommandError::from)?;
+            WindowsDesktopIdentityApi::from_origins(&origins.api_origin, &origins.account_origin)
+                .map_err(DesktopAuthCommandError::from)?;
         let store =
             WindowsCredentialStore::for_account(account_sync::DESKTOP_ACCOUNT_CREDENTIAL_SLOT);
         sign_out_desktop(&api, &store).map_err(DesktopAuthCommandError::from)?;
@@ -596,6 +642,8 @@ fn run() -> Result<(), String> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(|app| {
+            let origins = desktop_runtime_origins(app.config().plugins.0.get("liiiraa-shell"));
+            app.manage(DesktopRuntimeConfig { origins });
             let config: Value = serde_json::from_str(include_str!("../tauri.conf.json"))?;
             let startup_events = [
                 installer_identity_event(&config, HostEventMetadata::now("installer-identity")),
