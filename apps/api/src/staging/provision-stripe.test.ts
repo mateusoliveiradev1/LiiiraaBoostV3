@@ -1,7 +1,10 @@
 import type Stripe from 'stripe';
 import { describe, expect, it, vi } from 'vitest';
 
-import { provisionStripeTestCatalog } from './provision-stripe.js';
+import {
+  prepareStripeTestRuntime,
+  provisionStripeTestCatalog,
+} from './provision-stripe.js';
 
 describe('Stripe test catalog provisioning', () => {
   it('creates one managed product and four recurring prices without touching unrelated products', async () => {
@@ -80,5 +83,56 @@ describe('Stripe test catalog provisioning', () => {
     });
     expect(createProduct).not.toHaveBeenCalled();
     expect(createPrice).not.toHaveBeenCalled();
+  });
+});
+
+describe('Stripe staging runtime provisioning', () => {
+  it('creates a managed portal and a fresh signed webhook without exposing the secret', async () => {
+    const writeProtected = vi.fn(() => Promise.resolve());
+    const stripe = {
+      billingPortal: {
+        configurations: {
+          list: vi.fn(() => Promise.resolve({ data: [] })),
+          create: vi.fn(() => Promise.resolve({ id: 'bpc_liiiraa' })),
+        },
+      },
+      webhookEndpoints: {
+        list: vi.fn(() =>
+          Promise.resolve({
+            data: [
+              {
+                id: 'we_old',
+                url: 'https://api.staging.example/v1/commerce/provider-webhook',
+                status: 'enabled',
+              },
+            ],
+          }),
+        ),
+        create: vi.fn(() =>
+          Promise.resolve({
+            id: 'we_new',
+            secret: 'whsec_synthetic_secret',
+            url: 'https://api.staging.example/v1/commerce/provider-webhook',
+          }),
+        ),
+      },
+    } as unknown as Stripe;
+
+    await expect(
+      prepareStripeTestRuntime(stripe, {
+        webhookUrl: 'https://api.staging.example/v1/commerce/provider-webhook',
+        writeProtected,
+      }),
+    ).resolves.toEqual({
+      portalConfigurationId: 'bpc_liiiraa',
+      previousWebhookEndpointIds: ['we_old'],
+      status: 'prepared',
+      webhookEndpointId: 'we_new',
+    });
+    expect(writeProtected).toHaveBeenCalledWith({
+      previousWebhookEndpointIds: ['we_old'],
+      webhookEndpointId: 'we_new',
+      webhookSecret: 'whsec_synthetic_secret',
+    });
   });
 });
