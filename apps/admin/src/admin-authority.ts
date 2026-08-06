@@ -100,27 +100,39 @@ export type AdminDiagnosticLifecycle = Readonly<{
 }>;
 
 export interface AdminAuthority {
+  signIn(
+    input: Readonly<{ email: string; password: string }>,
+  ): Promise<AdminSessionProjection | null>;
   session(): Promise<AdminSessionProjection | null>;
   list(collection: AdminProjectionCollection): Promise<AdminAuthorityListResult>;
   execute(input: AdminCommandInput): Promise<AdminCommandResult>;
-  breakGlass(input: Readonly<{
-    expiresAt: string;
-    reason: string;
-    stepUp: AdminStepUp;
-    targetReference: string;
-  }>): Promise<
+  breakGlass(
+    input: Readonly<{
+      expiresAt: string;
+      reason: string;
+      stepUp: AdminStepUp;
+      targetReference: string;
+    }>,
+  ): Promise<
     | Readonly<{ metadata: BreakGlassMetadata; status: 'complete' }>
-    | Readonly<{ code: 'invalid-authority' | 'unauthorized' | 'unavailable'; status: 'denied' | 'error' }>
+    | Readonly<{
+        code: 'invalid-authority' | 'unauthorized' | 'unavailable';
+        status: 'denied' | 'error';
+      }>
   >;
-  openDiagnostic(input: Readonly<{
-    diagnosticId: string;
-    onClear: (result: Readonly<{
-      auditEvents: readonly AuditEventJson[];
-      reason: AdminDiagnosticClearReason;
-    }>) => void;
-    onProjection: (projection: AdminDiagnosticProjection) => void;
-    signal?: AbortSignal;
-  }>): Promise<AdminDiagnosticLifecycle>;
+  openDiagnostic(
+    input: Readonly<{
+      diagnosticId: string;
+      onClear: (
+        result: Readonly<{
+          auditEvents: readonly AuditEventJson[];
+          reason: AdminDiagnosticClearReason;
+        }>,
+      ) => void;
+      onProjection: (projection: AdminDiagnosticProjection) => void;
+      signal?: AbortSignal;
+    }>,
+  ): Promise<AdminDiagnosticLifecycle>;
 }
 
 export interface CreateAdminAuthorityOptions {
@@ -175,11 +187,38 @@ const admitSession = (value: unknown): AdminSessionProjection | null => {
   });
 };
 
+const validCsrfToken = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length >= 43 &&
+  value.length <= 256 &&
+  /^[A-Za-z0-9._-]+$/u.test(value);
+
+const admitSignedInSession = (value: unknown): AdminSessionProjection | null => {
+  if (!isRecord(value) || !isRecord(value['actor'])) return null;
+  const actor = value['actor'];
+  if (
+    typeof actor['accountId'] !== 'string' ||
+    !TOKEN.test(actor['accountId']) ||
+    !isRole(actor['role']) ||
+    actor['sessionKind'] !== 'admin' ||
+    typeof actor['expiresAt'] !== 'string' ||
+    Number.isNaN(Date.parse(actor['expiresAt']))
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    actorId: actor['accountId'],
+    expiresAt: actor['expiresAt'],
+    role: actor['role'],
+  });
+};
+
 const admitRecord = (value: unknown): AdminProjectionRecord | null => {
   if (!isRecord(value) || typeof value['id'] !== 'string' || !TOKEN.test(value['id'])) return null;
   if (
     (value['redactedTarget'] !== undefined &&
-      (typeof value['redactedTarget'] !== 'string' || !REDACTED_TEXT.test(value['redactedTarget']))) ||
+      (typeof value['redactedTarget'] !== 'string' ||
+        !REDACTED_TEXT.test(value['redactedTarget']))) ||
     (value['summary'] !== undefined &&
       (typeof value['summary'] !== 'string' || !REDACTED_TEXT.test(value['summary'])))
   ) {
@@ -188,7 +227,7 @@ const admitRecord = (value: unknown): AdminProjectionRecord | null => {
   return Object.freeze({ ...value, id: value['id'] });
 };
 
-const isGenerated = <Kind extends string>(value: unknown, kind: Kind): boolean =>
+const isGenerated = (value: unknown, kind: string): boolean =>
   isRecord(value) && value['kind'] === kind && controlPlaneDocumentValidator(value);
 
 const admitDiagnostic = (value: unknown): AdminDiagnosticProjection | null => {
@@ -230,7 +269,7 @@ const admitBreakGlass = (value: unknown): BreakGlassMetadata | null => {
   ) {
     return null;
   }
-  return Object.freeze({ ...value }) as BreakGlassMetadata;
+  return Object.freeze({ ...value });
 };
 
 export const createAdminAuthority = ({
@@ -269,6 +308,41 @@ export const createAdminAuthority = ({
   };
 
   return Object.freeze({
+    async signIn(input: Readonly<{ email: string; password: string }>) {
+      try {
+        const correlation = correlationId();
+        const csrfResponse = await transport(`${baseUrl}/v1/identity/csrf`, {
+          credentials: 'include',
+          headers: { accept: 'application/json', 'x-correlation-id': correlation },
+          method: 'GET',
+        });
+        const csrfBody = await safeJson(csrfResponse);
+        const token = isRecord(csrfBody) ? csrfBody['token'] : undefined;
+        if (!csrfResponse.ok || !validCsrfToken(token)) return null;
+
+        const response = await transport(`${baseUrl}/v1/identity/sign-in`, {
+          body: JSON.stringify({
+            email: input.email.trim().toLowerCase(),
+            password: input.password,
+          }),
+          credentials: 'include',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'x-correlation-id': correlationId(),
+            'x-csrf-token': token,
+          },
+          method: 'POST',
+        });
+        if (!response.ok) return null;
+        const session = admitSignedInSession(await safeJson(response));
+        activeSession = session;
+        return session;
+      } catch {
+        return null;
+      }
+    },
+
     session: readSession,
 
     async list(collection: AdminProjectionCollection): Promise<AdminAuthorityListResult> {
@@ -399,7 +473,9 @@ export const createAdminAuthority = ({
       }
     },
 
-    async openDiagnostic(input: Parameters<AdminAuthority['openDiagnostic']>[0]): Promise<AdminDiagnosticLifecycle> {
+    async openDiagnostic(
+      input: Parameters<AdminAuthority['openDiagnostic']>[0],
+    ): Promise<AdminDiagnosticLifecycle> {
       const controller = new AbortController();
       let resolveSettled = (): void => undefined;
       const settled = new Promise<void>((resolve) => {
@@ -457,15 +533,28 @@ export const createAdminAuthority = ({
 
       if (input.signal !== undefined) {
         if (input.signal.aborted) close();
-        else input.signal.addEventListener('abort', () => close(), { once: true });
+        else
+          input.signal.addEventListener(
+            'abort',
+            () => {
+              close();
+            },
+            { once: true },
+          );
       }
       await refresh();
-      if (!closed && subscribeToConsent !== undefined) {
+      if (!controller.signal.aborted && subscribeToConsent !== undefined) {
         unsubscribe = subscribeToConsent(() => {
           void refresh();
         });
       }
-      return Object.freeze({ settled, signal: controller.signal, stop: () => close() });
+      return Object.freeze({
+        settled,
+        signal: controller.signal,
+        stop: () => {
+          close();
+        },
+      });
     },
   });
 };

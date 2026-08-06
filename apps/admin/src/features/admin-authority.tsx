@@ -1,8 +1,9 @@
 'use client';
 
 import type { AdminRoleJson, AuditEventJson, AuthorityReceiptJson } from '@liiiraa/contracts-ts';
+import { LbButton, ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type SyntheticEvent } from 'react';
 
 import {
   createAdminAuthority,
@@ -39,7 +40,17 @@ const copy = Object.freeze({
     receipt: 'Immutable authority receipt',
     revoked: 'Diagnostic access revoked',
     security: 'Security queue',
-    signIn: 'Sign in through the account portal',
+    signIn: 'Sign in to the administrative panel',
+    signInAction: 'Sign in securely',
+    signInDescription:
+      'Use your authorized Liiiraa Boost credentials. Access is admitted by the server for this isolated administrative origin.',
+    signInEmail: 'Administrative email',
+    signInError: 'We could not verify these credentials or administrative access.',
+    signInPassword: 'Password',
+    signingIn: 'Verifying access',
+    signInSecurity: 'Encrypted session · restricted administrative origin · immutable audit',
+    signInScope: 'Administrative access is separate from your public account session.',
+    backToAccount: 'Back to account portal',
     stepUp: 'Verify with a strong credential',
     stepUpDialog: 'Verify critical operation',
     support: 'Support case queue',
@@ -60,7 +71,17 @@ const copy = Object.freeze({
     receipt: 'Comprovante de autoridade imutável',
     revoked: 'Acesso ao diagnóstico revogado',
     security: 'Fila de segurança',
-    signIn: 'Entrar pelo portal da conta',
+    signIn: 'Entrar no painel administrativo',
+    signInAction: 'Entrar com segurança',
+    signInDescription:
+      'Use suas credenciais autorizadas do Liiiraa Boost. O servidor valida o acesso neste domínio administrativo isolado.',
+    signInEmail: 'E-mail administrativo',
+    signInError: 'Não foi possível validar as credenciais ou o acesso administrativo.',
+    signInPassword: 'Senha',
+    signingIn: 'Validando acesso',
+    signInSecurity: 'Sessão criptografada · domínio administrativo restrito · auditoria imutável',
+    signInScope: 'O acesso administrativo é separado da sessão da sua conta pública.',
+    backToAccount: 'Voltar ao portal da conta',
     stepUp: 'Verificar com credencial forte',
     stepUpDialog: 'Verificar operação crítica',
     support: 'Fila de casos de suporte',
@@ -99,6 +120,126 @@ const collectionFor = (routeId: AdminAuthorityRoute): AdminProjectionCollection 
   if (routeId === 'admin-security') return 'sessions';
   if (routeId === 'admin-diagnostics') return 'diagnostic-metadata';
   return 'audit-events';
+};
+
+const loadAuthorizedRecords = async (
+  authority: AdminAuthority,
+  routeId: AdminAuthorityRoute,
+): Promise<readonly AdminProjectionRecord[]> => {
+  if (routeId === 'admin-diagnostics') return [];
+  const result = await authority.list(collectionFor(routeId));
+  return result.status === 'online' ? result.records : [];
+};
+
+const AdminSignIn = ({
+  accountOrigin,
+  authority,
+  locale,
+  onAuthenticated,
+  routeId,
+}: Readonly<{
+  accountOrigin: string;
+  authority: AdminAuthority;
+  locale: WebLocale;
+  onAuthenticated: (
+    session: AdminSessionProjection,
+    records: readonly AdminProjectionRecord[],
+  ) => void;
+  routeId: AdminAuthorityRoute;
+}>) => {
+  const labels = copy[locale];
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    const next = await authority.signIn({ email, password });
+    if (next === null || !adminRoleCanAccessRoute(next.role, routeId)) {
+      setPassword('');
+      setError(labels.signInError);
+      setLoading(false);
+      return;
+    }
+    const records = await loadAuthorizedRecords(authority, routeId);
+    onAuthenticated(next, records);
+  };
+
+  return (
+    <article className="admin-auth" data-admin-runtime="production">
+      <section className="admin-auth__primary" aria-labelledby="admin-auth-title">
+        <div className="admin-auth__mark" aria-hidden="true">
+          <ProductIcon name="lock" size={20} />
+        </div>
+        <header className="admin-auth__header">
+          <h1 id="admin-auth-title">{labels.signIn}</h1>
+          <p>{labels.signInDescription}</p>
+        </header>
+        <form className="admin-auth__form" noValidate onSubmit={(event) => void submit(event)}>
+          {error === null ? null : (
+            <p className="admin-auth__error" role="alert">
+              {error}
+            </p>
+          )}
+          <label className="lb-field">
+            <span>{labels.signInEmail}</span>
+            <input
+              autoComplete="username"
+              autoFocus
+              className="lb-input"
+              disabled={loading}
+              maxLength={254}
+              name="email"
+              onChange={(event) => {
+                setEmail(event.currentTarget.value);
+              }}
+              required
+              type="email"
+              value={email}
+            />
+          </label>
+          <label className="lb-field">
+            <span>{labels.signInPassword}</span>
+            <input
+              autoComplete="current-password"
+              className="lb-input"
+              disabled={loading}
+              maxLength={128}
+              name="password"
+              onChange={(event) => {
+                setPassword(event.currentTarget.value);
+              }}
+              required
+              type="password"
+              value={password}
+            />
+          </label>
+          <LbButton
+            isDisabled={loading || email.trim().length === 0 || password.length === 0}
+            isLoading={loading}
+            loadingLabel={labels.signingIn}
+            type="submit"
+            variant="primary"
+          >
+            {labels.signInAction}
+          </LbButton>
+        </form>
+        <p className="admin-auth__security" role="note">
+          <ProductIcon name="shield" size={16} />
+          <span>{labels.signInSecurity}</span>
+        </p>
+      </section>
+      <aside className="admin-auth__boundary" aria-label={labels.signInScope}>
+        <span aria-hidden="true">ADMIN / RESTRICTED</span>
+        <p>{labels.signInScope}</p>
+        <a href={`${accountOrigin}/${locale}/login`}>{labels.backToAccount}</a>
+      </aside>
+    </article>
+  );
 };
 
 const routeHref = (locale: WebLocale, suffix: string): string => `/${locale}/admin${suffix}`;
@@ -405,11 +546,16 @@ export const AdminAuthorityPage = ({
   }
   if (session === null) {
     return (
-      <article data-admin-runtime="production">
-        <h1>{copy[locale].denied}</h1>
-        <p role="alert">{copy[locale].denied}</p>
-        <a href={`${accountOrigin}/${locale}/account/sign-in`}>{copy[locale].signIn}</a>
-      </article>
+      <AdminSignIn
+        accountOrigin={accountOrigin}
+        authority={authority}
+        locale={locale}
+        onAuthenticated={(next, nextRecords) => {
+          setSession(next);
+          setRecords(nextRecords);
+        }}
+        routeId={routeId}
+      />
     );
   }
   if (!adminRoleCanAccessRoute(session.role, routeId)) {

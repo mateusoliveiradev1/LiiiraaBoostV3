@@ -116,6 +116,38 @@ describe('production admin authority', () => {
     expect(transport.mock.calls[1]?.[1]).toMatchObject({ credentials: 'include', method: 'POST' });
   });
 
+  it('rejects a public browser session at the administrative boundary', async () => {
+    const csrfToken = 'csrf.'.concat('b'.repeat(43));
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-boundary-test',
+      csrfToken: () => 'unused-command-csrf',
+      transport: vi
+        .fn<AdminAuthorityTransport>()
+        .mockResolvedValueOnce(response({ token: csrfToken }))
+        .mockResolvedValueOnce(
+          response(
+            {
+              actor: {
+                accountId: 'developer-01',
+                displayName: 'Mateus Oliveira',
+                email: 'owner@example.com',
+                expiresAt: '2026-09-05T12:00:00.000Z',
+                locale: 'pt-BR',
+                role: 'security',
+                sessionId: 'session-web-01',
+                sessionKind: 'web',
+              },
+            },
+            201,
+          ),
+        ),
+    });
+
+    await expect(
+      authority.signIn({ email: 'owner@example.com', password: 'CorrectHorse1' }),
+    ).resolves.toBeNull();
+  });
+
   it('projects only the singular server-admitted role and never sends URL role authority', async () => {
     const transport = vi
       .fn<AdminAuthorityTransport>()
