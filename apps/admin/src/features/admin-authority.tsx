@@ -26,6 +26,8 @@ type AdminAuthorityPageProps = Readonly<{
 const copy = Object.freeze({
   en: Object.freeze({
     activeRole: 'Active administrative role',
+    authoritySummary:
+      'Server-admitted authority for this isolated session. Every operation remains role-scoped and auditable.',
     audit: 'Immutable administrative audit',
     confirm: 'Confirm publication hold',
     denied: 'Administrative authority unavailable',
@@ -35,6 +37,9 @@ const copy = Object.freeze({
     impact: 'I reviewed the impact and affected authority',
     loading: 'Loading server-authorized administrative projection.',
     noRecords: 'No authorized records are currently available.',
+    noRecordsDescription:
+      'This queue is clear. New authorized events will appear here without exposing data outside your role.',
+    noRecordsTitle: 'No pending records',
     operations: 'Operations queue',
     reason: 'Reason',
     receipt: 'Immutable authority receipt',
@@ -57,6 +62,8 @@ const copy = Object.freeze({
   }),
   'pt-BR': Object.freeze({
     activeRole: 'Função administrativa ativa',
+    authoritySummary:
+      'Autoridade validada pelo servidor para esta sessão isolada. Toda operação permanece limitada à função e auditável.',
     audit: 'Auditoria administrativa imutável',
     confirm: 'Confirmar retenção da publicação',
     denied: 'Autoridade administrativa indisponível',
@@ -66,6 +73,9 @@ const copy = Object.freeze({
     impact: 'Revisei o impacto e a autoridade afetada',
     loading: 'Carregando projeção administrativa autorizada pelo servidor.',
     noRecords: 'Nenhum registro autorizado está disponível no momento.',
+    noRecordsDescription:
+      'Esta fila está limpa. Novos eventos autorizados aparecerão aqui sem expor dados fora da sua função.',
+    noRecordsTitle: 'Nenhum registro pendente',
     operations: 'Fila de operações',
     reason: 'Motivo',
     receipt: 'Comprovante de autoridade imutável',
@@ -258,7 +268,7 @@ const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: Ad
             ]
           : [[labels.audit, '/audit']];
   return (
-    <nav aria-label={labels.activeRole}>
+    <nav aria-label={labels.activeRole} className="admin-authority__navigation">
       {links.map(([label, suffix]) => (
         <a href={routeHref(locale, suffix)} key={suffix}>
           {label}
@@ -567,11 +577,22 @@ export const AdminAuthorityPage = ({
     );
   }
   return (
-    <article data-admin-role={session.role} data-admin-runtime="production">
-      <header>
-        <h1>{copy[locale].activeRole}</h1>
-        <p aria-label={copy[locale].activeRole} role="status">
-          {roleLabel(locale, session.role)}
+    <article
+      className="admin-authority"
+      data-admin-role={session.role}
+      data-admin-runtime="production"
+    >
+      <header className="admin-authority__header">
+        <div>
+          <span className="admin-authority__system" aria-hidden="true">
+            ADMIN CONTROL PLANE
+          </span>
+          <h1>{copy[locale].activeRole}</h1>
+          <p>{copy[locale].authoritySummary}</p>
+        </div>
+        <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
+          <ProductIcon name="shield" size={16} />
+          <span>{roleLabel(locale, session.role)}</span>
         </p>
       </header>
       <RoleNavigation locale={locale} role={session.role} />
@@ -585,11 +606,18 @@ export const AdminAuthorityPage = ({
         <BreakGlassReview authority={authority} locale={locale} />
       ) : null}
       {routeId !== 'admin-diagnostics' && routeId !== 'admin-operations' ? (
-        <section aria-label={copy[locale].activeRole}>
+        <section aria-label={copy[locale].activeRole} className="admin-authority__content">
           {records.length === 0 ? (
-            <p role="status">{copy[locale].noRecords}</p>
+            <div className="admin-authority__empty" role="status">
+              <ProductIcon name="check" size={20} />
+              <div>
+                <strong>{copy[locale].noRecordsTitle}</strong>
+                <p>{copy[locale].noRecordsDescription}</p>
+                <span>{copy[locale].noRecords}</span>
+              </div>
+            </div>
           ) : (
-            <ul>
+            <ul className="admin-authority__records">
               {records.map((record) => (
                 <li key={record.id}>
                   <strong>{record.id}</strong>{' '}
