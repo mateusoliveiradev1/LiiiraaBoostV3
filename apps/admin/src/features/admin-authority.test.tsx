@@ -344,6 +344,9 @@ describe('admin production composition', () => {
     expect(productionView).toContain('accountOrigin');
     expect(productionView).toContain('Entrar no painel administrativo');
     expect(productionView).toContain('type="password"');
+    expect(productionView).toContain('className="admin-authority"');
+    expect(productionView).toContain('className="admin-authority__role"');
+    expect(productionView).toContain('className="admin-authority__navigation"');
     expect(productionView).toContain('No authorized records are currently available.');
     expect(productionView).not.toContain('AdminPreviewRoute');
     expect(routeSource).toContain("await import('../../../features/admin-preview')");
