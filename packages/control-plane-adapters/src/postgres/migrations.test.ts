@@ -15,6 +15,7 @@ import { inspectControlPlaneSchema, migrateControlPlane, schemaHash } from './mi
 
 const migrationUrl = new URL('./migrations/0001_control_plane.sql', import.meta.url);
 const invitationMigrationUrl = new URL('./migrations/0004_admin_invitations.sql', import.meta.url);
+const governanceMigrationUrl = new URL('./migrations/0005_admin_governance.sql', import.meta.url);
 const syntheticIdentity = /(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu;
 const productionIdentity = /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu;
 const unsafeDatabaseMessage =
@@ -276,6 +277,50 @@ describe('admin invitation migration authority', () => {
     expect(sql).toMatch(/active_beta_rank - 25/iu);
     expect(sql).toMatch(/ON CONFLICT DO NOTHING/iu);
     expect(sql).not.toMatch(/legacy\.token_digest/iu);
+  });
+});
+
+describe('admin governance migration authority', () => {
+  it('normalizes membership, function, capability, scope, approval, review, and offboarding truth', async () => {
+    const sql = await readFile(governanceMigrationUrl, 'utf8');
+    for (const table of [
+      'admin_governance_memberships',
+      'admin_membership_functions',
+      'admin_membership_capabilities',
+      'admin_membership_scopes',
+      'admin_function_sessions',
+      'admin_delegations',
+      'admin_permission_impacts',
+      'admin_approval_requests',
+      'admin_approval_decisions',
+      'admin_access_reviews',
+      'admin_inactivity_notices',
+      'admin_offboarding_events',
+      'admin_work_reassignments',
+      'admin_audit_reveals',
+      'admin_governance_commands',
+      'admin_governance_receipts',
+      'admin_governance_audit',
+    ]) {
+      expect(sql).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`, 'iu'));
+    }
+    expect(sql).toMatch(/uq_admin_function_sessions_one_active[\s\S]*WHERE ended_at IS NULL/iu);
+    expect(sql).toMatch(/reject_admin_standing_super_admin/iu);
+    expect(sql).toMatch(/reject_admin_self_approval/iu);
+    expect(sql).toMatch(/approval\.expires_at <= NEW\.decided_at/iu);
+    expect(sql).toMatch(/CHECK \(expires_at > created_at\)/iu);
+    expect(sql).toMatch(/CREATE TRIGGER admin_governance_audit_insert_only/iu);
+    expect(sql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON admin_governance_audit FROM PUBLIC/iu);
+    expect(sql).toMatch(/environment_identity[\s\S]*synthetic-non-production/iu);
+  });
+
+  it('upgrades persisted admin identities without adding functions, capabilities, or scopes', async () => {
+    const sql = await readFile(governanceMigrationUrl, 'utf8');
+    expect(sql).toMatch(/FROM identities AS identity/iu);
+    expect(sql).toMatch(/identity\.role IN \('support', 'operations', 'security', 'audit'\)/iu);
+    expect(sql).toMatch(/SELECT[\s\S]*identity\.role[\s\S]*FROM identities AS identity/iu);
+    expect(sql).not.toMatch(/CROSS JOIN[\s\S]*admin_(?:membership_)?functions/iu);
+    expect(sql).not.toMatch(/super-admin|wildcard|all-capabilities/iu);
   });
 });
 
