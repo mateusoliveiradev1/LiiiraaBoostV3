@@ -3,7 +3,7 @@
 import { LbOperationalNotice, LbSkeletonRegion, ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
 
-import type { AdminQueryFamily } from '../admin-authority';
+import type { AdminQueryFamily, AdminQueryResult } from '../admin-authority';
 import { useAdminAuthority } from './admin-authority';
 import {
   projectAdminBriefing,
@@ -392,6 +392,7 @@ const OVERVIEW_FAMILIES = Object.freeze([
   'jobs',
   'incidents',
   'capacity',
+  'invitations',
 ] as const satisfies readonly AdminQueryFamily[]);
 
 export const AdminOverview = ({
@@ -401,25 +402,46 @@ export const AdminOverview = ({
   locale: WebLocale;
   queueState?: Readonly<{ cursor?: string; view?: string }>;
 }>) => {
-  const { freshness, projections } = useAdminAuthority();
-  const briefing = projections.briefing;
-  if (briefing === undefined) return <AdminOverviewView locale={locale} state="loading" />;
-  const failure = OVERVIEW_FAMILIES.map((family) => projections[family]).find(
-    (result) => result !== undefined && result.status !== 'online',
-  );
-  if (failure !== undefined) {
-    return <AdminOverviewView errorCode={failure.code} locale={locale} state="error" />;
+  const { freshness, projections, session } = useAdminAuthority();
+  const results = OVERVIEW_FAMILIES.map((family) => projections[family]);
+  if (results.some((result) => result === undefined)) {
+    return <AdminOverviewView locale={locale} state="loading" />;
   }
-  const records = OVERVIEW_FAMILIES.flatMap((family) => {
-    const result = projections[family];
-    return result?.status === 'online' ? result.records : [];
-  });
+  const admitted = results.filter(
+    (result): result is Extract<AdminQueryResult, { status: 'online' }> =>
+      result?.status === 'online',
+  );
+  const failed = results.filter(
+    (result): result is Exclude<AdminQueryResult, { status: 'online' }> =>
+      result !== undefined && result.status !== 'online',
+  );
+  if (admitted.length === 0) {
+    return (
+      <AdminOverviewView
+        errorCode={failed[0]?.code ?? 'unavailable'}
+        locale={locale}
+        state="error"
+      />
+    );
+  }
+  const records = admitted.flatMap((result) => result.records);
+  const authorityState = results.some((result) => result?.status === 'error')
+    ? 'degraded'
+    : freshness;
   const model = projectAdminBriefing({
-    authorityState: freshness,
+    authorityState,
     locale,
     now: new Date().toISOString(),
     queueState,
     records,
+    ...(session === null || session === undefined
+      ? {}
+      : {
+          session: {
+            activeFunction: session.role,
+            actorId: session.actorId,
+          },
+        }),
   });
   return <AdminOverviewView locale={locale} model={model} state="ready" />;
 };

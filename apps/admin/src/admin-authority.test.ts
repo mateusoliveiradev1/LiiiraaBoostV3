@@ -510,6 +510,79 @@ describe('invalidation-only live authority', () => {
       expect.stringContaining('cursor=cursor-0001'),
     ]);
   });
+
+  it('keeps live authority stable between successful bounded event polls', async () => {
+    const event = {
+      cursor: 'cursor-0003',
+      version: '9',
+      updatedAt: '2026-08-06T20:03:00.000Z',
+      resources: ['invitations'],
+    };
+    const controller = new AbortController();
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response(
+          `id: ${event.cursor}\nevent: invalidate\ndata: ${JSON.stringify(event)}\n\n`,
+          200,
+          { 'content-type': 'text/event-stream; charset=utf-8' },
+        ),
+      )
+      .mockImplementationOnce(() => {
+        controller.abort();
+        return Promise.reject(new Error('bounded poll stopped'));
+      });
+    const states: string[] = [];
+    const authority = createAuthority(transport);
+
+    const lifecycle = authority.openFreshness({
+      environment: 'staging',
+      onInvalidate: () => undefined,
+      onState: (state) => states.push(state),
+      refetch: () => Promise.resolve(),
+      signal: controller.signal,
+    });
+    await lifecycle.settled;
+
+    expect(states).toEqual(['reconnecting', 'live']);
+  });
+
+  it('treats a repeated cursor as a heartbeat instead of refetching unchanged authority', async () => {
+    const event = {
+      cursor: 'cursor-0004',
+      version: '10',
+      updatedAt: '2026-08-06T20:04:00.000Z',
+      resources: ['invitations'],
+    };
+    const controller = new AbortController();
+    const eventResponse = () =>
+      response(`id: ${event.cursor}\nevent: invalidate\ndata: ${JSON.stringify(event)}\n\n`, 200, {
+        'content-type': 'text/event-stream; charset=utf-8',
+      });
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(eventResponse())
+      .mockResolvedValueOnce(eventResponse())
+      .mockImplementationOnce(() => {
+        controller.abort();
+        return Promise.reject(new Error('bounded poll stopped'));
+      });
+    const invalidations: unknown[] = [];
+    const refetch = vi.fn(() => Promise.resolve());
+    const authority = createAuthority(transport);
+
+    const lifecycle = authority.openFreshness({
+      environment: 'staging',
+      onInvalidate: (next) => invalidations.push(next),
+      onState: () => undefined,
+      refetch,
+      signal: controller.signal,
+    });
+    await lifecycle.settled;
+
+    expect(invalidations).toEqual([event]);
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('production fixture boundary', () => {

@@ -157,6 +157,9 @@ const copy = Object.freeze({
     list: 'Invitation ledger',
     loading: 'Loading server-authorized invitations',
     locale: 'Invitation locale',
+    mutationErrorDetail:
+      'No invitation was admitted and no durable receipt was created. Retry only after delivery authority is available.',
+    mutationErrorTitle: 'Invitation operation failed',
     mutationsPaused: 'Refresh authoritative data before changing invitations.',
     preflight: 'Run preflight',
     preflightResults: 'Preflight review',
@@ -218,6 +221,9 @@ const copy = Object.freeze({
     list: 'Livro de convites',
     loading: 'Carregando convites autorizados pelo servidor',
     locale: 'Idioma do convite',
+    mutationErrorDetail:
+      'Nenhum convite foi admitido e nenhum comprovante durável foi criado. Tente novamente apenas quando a autoridade de entrega estiver disponível.',
+    mutationErrorTitle: 'Falha na operação de convite',
     mutationsPaused: 'Atualize os dados autoritativos antes de alterar convites.',
     preflight: 'Executar preflight',
     preflightResults: 'Revisão do preflight',
@@ -856,6 +862,13 @@ export const AdminInvitationsView = (props: AdminInvitationsViewProps) => {
           title={props.locale === 'pt-BR' ? 'Conflito de versão' : 'Version conflict'}
         />
       ) : null}
+      {model.mutationFeedback?.status === 'error' || model.mutationFeedback?.status === 'denied' ? (
+        <LbOperationalNotice
+          detail={labels.mutationErrorDetail}
+          state="degraded"
+          title={labels.mutationErrorTitle}
+        />
+      ) : null}
       {model.mutationFeedback?.status === 'complete' ||
       model.mutationFeedback?.status === 'partial' ? (
         <p className={styles['success']} role="status">
@@ -1062,7 +1075,7 @@ const parseSelectedInvitation = (): string | undefined => {
 };
 
 export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) => {
-  const { authority, freshness, revision, session } = useAdminAuthority();
+  const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<AdminQueryResult | null>(null);
   const [view, setView] = useState<InvitationView>(parseView);
   const [selectedId, setSelectedId] = useState<string | undefined>(parseSelectedInvitation);
@@ -1177,7 +1190,7 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
       kind: 'admin-operation-command',
       commandId,
       actorId: session.actorId,
-      activeFunction: 'operations',
+      activeFunction: session.role,
       action,
       targetReferences: targets as [string, ...string[]],
       reason,
@@ -1189,7 +1202,11 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
     };
   };
   const mutate = async (input: AdminMutationInput, refetch = true) => {
-    const result = await authority.mutate(input);
+    const authorized = await authorizeMutation(input);
+    const result =
+      authorized === null
+        ? ({ code: 'unauthorized', status: 'denied' } as const)
+        : await authority.mutate(authorized);
     setMutationFeedback(result);
     if (refetch && (result.status === 'complete' || result.status === 'partial'))
       setRefresh((value) => value + 1);
@@ -1213,6 +1230,7 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
           payload: {
             action: input.action,
             approvalGranted: input.approvalGranted,
+            authorizationContextId: key,
             command: command(
               input.action === 'resend' ? 'resend-invitations' : 'revoke-invitations',
               input.invitationIds,
@@ -1245,11 +1263,12 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
             const invitationId = crypto.randomUUID();
             const key = crypto.randomUUID();
             outcomes.push(
-              await authority.mutate({
+              await mutate({
                 expectedVersion: '0',
                 family: 'issue-invitations',
                 idempotencyKey: key,
                 payload: {
+                  authorizationContextId: key,
                   campaign: input.campaign,
                   command: command(
                     'issue-invitations',
@@ -1295,11 +1314,21 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
           setMutationFeedback({ code: 'invalid-authority', status: 'error' });
           return;
         }
+        const key = crypto.randomUUID();
+        const targets = input.recipients.map((_recipient, index) => `row-${String(index + 1)}`);
         void mutate(
           {
             family: 'preflight-invitations',
-            idempotencyKey: crypto.randomUUID(),
+            idempotencyKey: key,
             payload: {
+              authorizationContextId: key,
+              command: command(
+                'issue-invitations',
+                targets,
+                'Review invitation recipients before issuance',
+                '0',
+                'invitation-preflight',
+              ),
               rows: input.recipients.map((recipient, index) => ({
                 recipient,
                 rowId: `row-${String(index + 1)}`,
@@ -1349,6 +1378,7 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
           family: 'resend-invitation',
           idempotencyKey: key,
           payload: {
+            authorizationContextId: key,
             command: command(
               'resend-invitations',
               [invitation.invitationId],
@@ -1371,6 +1401,7 @@ export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) =>
           family: 'revoke-invitation',
           idempotencyKey: key,
           payload: {
+            authorizationContextId: key,
             command: command(
               'revoke-invitations',
               [invitation.invitationId],

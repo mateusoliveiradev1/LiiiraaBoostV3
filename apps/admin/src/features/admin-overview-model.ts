@@ -71,6 +71,10 @@ export type AdminBriefingInput = Readonly<{
   now: string;
   queueState: Readonly<{ cursor?: string; view?: string }>;
   records: readonly AdminAuthorityDocument[];
+  session?: Readonly<{
+    activeFunction: string;
+    actorId: string;
+  }>;
 }>;
 
 const severityRank = Object.freeze({ critical: 0, warning: 1, information: 2 });
@@ -79,6 +83,12 @@ const isKind = <Kind extends AdminAuthorityDocument['kind']>(
   document: AdminAuthorityDocument,
   kind: Kind,
 ): document is Extract<AdminAuthorityDocument, Readonly<{ kind: Kind }>> => document.kind === kind;
+
+const hasProjectionMetadata = (
+  document: AdminAuthorityDocument,
+): document is AdminAuthorityDocument &
+  Pick<AdminAccessContextProjectionJson, 'environment' | 'freshness'> =>
+  'environment' in document && 'freshness' in document;
 
 const hrefFor = ({
   activeFunction,
@@ -476,6 +486,11 @@ const overallStatus = (
 export const projectAdminBriefing = (input: AdminBriefingInput): AdminBriefingModel => {
   const access =
     input.records.find((record) => isKind(record, 'admin-access-context-projection')) ?? null;
+  const contextRecord = input.records.find(hasProjectionMetadata) ?? null;
+  const activeFunction = access?.activeFunction ?? input.session?.activeFunction ?? null;
+  const actorId = access?.actorId ?? input.session?.actorId ?? null;
+  const environment = access?.environment ?? contextRecord?.environment ?? null;
+  const observedAt = access?.freshness.observedAt ?? contextRecord?.freshness.observedAt ?? null;
   const capabilities = new Set(access?.capabilities ?? []);
   const activeIncidents = input.records.filter(
     (record): record is AdminIncidentProjectionJson =>
@@ -504,12 +519,12 @@ export const projectAdminBriefing = (input: AdminBriefingInput): AdminBriefingMo
     }
     return [];
   });
-  priorities.sort((left, right) => prioritySort(access?.actorId ?? null, left, right));
+  priorities.sort((left, right) => prioritySort(actorId, left, right));
   const capacityRecord =
     input.records.find((record) => isKind(record, 'admin-invitation-capacity-projection')) ?? null;
   const topPriority = priorities[0];
   return Object.freeze({
-    activeFunction: access?.activeFunction ?? null,
+    activeFunction,
     connection: input.authorityState,
     context: Object.freeze({
       capacity: projectCapacity({
@@ -520,14 +535,14 @@ export const projectAdminBriefing = (input: AdminBriefingInput): AdminBriefingMo
         record: capacityRecord,
       }),
       environment:
-        access === null
+        environment === null
           ? null
           : Object.freeze({
-              id: access.environment.environmentId,
-              kind: access.environment.kind,
-              label: access.environment.label,
+              id: environment.environmentId,
+              kind: environment.kind,
+              label: environment.label,
             }),
-      observedAt: access?.freshness.observedAt ?? null,
+      observedAt,
     }),
     degradedCapabilities: Object.freeze([...degradedCapabilities].sort()),
     priorities: Object.freeze(priorities),

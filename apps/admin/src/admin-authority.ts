@@ -1350,6 +1350,7 @@ export const createAdminAuthority = ({
         resolveSettled = resolve;
       });
       let cursor = input.cursor;
+      let hasLiveAuthority = false;
 
       const stop = (): void => {
         if (!controller.signal.aborted) controller.abort();
@@ -1363,7 +1364,7 @@ export const createAdminAuthority = ({
       void (async () => {
         try {
           while (!isStopped()) {
-            input.onState('reconnecting');
+            if (!hasLiveAuthority) input.onState('reconnecting');
             const parameters = new URLSearchParams({ environment: input.environment });
             if (cursor !== undefined && boundedToken(cursor)) parameters.set('cursor', cursor);
             try {
@@ -1387,20 +1388,29 @@ export const createAdminAuthority = ({
                 !cachePolicyIsPrivate(response) ||
                 !response.headers.get('content-type')?.includes('text/event-stream')
               ) {
+                hasLiveAuthority = false;
                 input.onState('degraded');
               } else {
                 const event = parseInvalidationEvent(await response.text());
                 if (event === null) {
+                  hasLiveAuthority = false;
                   input.onState('degraded');
                 } else {
+                  const isNewInvalidation = event.cursor !== cursor;
                   cursor = event.cursor;
-                  input.onInvalidate(event);
-                  await input.refetch(event.resources, controller.signal);
+                  if (isNewInvalidation) {
+                    input.onInvalidate(event);
+                    await input.refetch(event.resources, controller.signal);
+                  }
+                  hasLiveAuthority = true;
                   input.onState('live');
                 }
               }
             } catch {
-              if (!isStopped()) input.onState('degraded');
+              if (!isStopped()) {
+                hasLiveAuthority = false;
+                input.onState('degraded');
+              }
             }
             if (!isStopped()) {
               await new Promise<void>((resolve) => {

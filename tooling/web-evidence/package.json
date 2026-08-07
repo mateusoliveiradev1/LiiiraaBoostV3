@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
+    "real-admin:harness": "node real-admin-harness.mjs",
     "readiness": "node readiness.mjs",
     "test": "vitest --run --passWithNoTests",
     "verify": "pnpm check && pnpm test && node run-desktop-capture.mjs"
@@ -23,9 +24,12 @@
     "@liiiraa/web-preview": "workspace:*"
   },
   "devDependencies": {
+    "@liiiraa/control-plane-adapters": "workspace:*",
+    "@peculiar/x509": "1.14.3",
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.62.0",
     "@types/node": "24.13.3",
+    "tsx": "4.23.10",
     "vitest": "4.1.10"
   }
 }

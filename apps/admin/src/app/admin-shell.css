@@ -2610,7 +2610,30 @@ button:focus-visible,
   }
 
   .admin-header__search {
-    min-inline-size: 60px;
+    flex: 0 0 var(--lb-control-min-size);
+    inline-size: var(--lb-control-min-size);
+    min-inline-size: var(--lb-control-min-size);
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .admin-header__search:focus-within {
+    border-color: transparent;
+    outline: 0;
+  }
+
+  .admin-header__search > svg,
+  .admin-header__search input[type='search'] {
+    display: none;
+  }
+
+  .admin-header__search button {
+    inline-size: var(--lb-control-min-size);
+    min-inline-size: var(--lb-control-min-size);
+    padding: 0;
+    border: 1px solid var(--lb-line-strong);
+    border-radius: var(--lb-radius-default);
   }
 
   .admin-header .lb-web-locale-switcher {

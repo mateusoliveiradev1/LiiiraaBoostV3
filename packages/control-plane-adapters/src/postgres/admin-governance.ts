@@ -123,11 +123,11 @@ const loadMembership = async (
   );
   const row = result.rows[0];
   if (row === undefined) return null;
-  const [functions, capabilities, scopes] = await Promise.all([
-    loadGrants(transaction, row.id, 'function'),
-    loadGrants(transaction, row.id, 'capability'),
-    loadGrants(transaction, row.id, 'scope'),
-  ]);
+  // A ControlPlaneTransaction may be backed by one checked-out pg client. Keep
+  // its queries sequential so the same client never executes overlapping work.
+  const functions = await loadGrants(transaction, row.id, 'function');
+  const capabilities = await loadGrants(transaction, row.id, 'capability');
+  const scopes = await loadGrants(transaction, row.id, 'scope');
   return {
     membershipId: row.id,
     identityId: row.identity_id,
@@ -238,11 +238,12 @@ const saveSession = async (
   state: AdminGovernedSession,
 ): Promise<void> => {
   await transaction.query(
-    `WITH ended AS (
-       UPDATE admin_function_sessions SET ended_at = CURRENT_TIMESTAMP
-       WHERE session_id = $1 AND ended_at IS NULL AND version < $4 RETURNING id
-     )
-     INSERT INTO admin_function_sessions
+    `UPDATE admin_function_sessions SET ended_at = CURRENT_TIMESTAMP
+     WHERE session_id = $1 AND ended_at IS NULL AND version < $2`,
+    [state.sessionId, state.version.toString()],
+  );
+  await transaction.query(
+    `INSERT INTO admin_function_sessions
        (id, session_id, membership_id, active_function, simulation, version, started_at)
      SELECT $2, $1, membership.id, $3, FALSE, $4, CURRENT_TIMESTAMP
      FROM admin_governance_memberships AS membership

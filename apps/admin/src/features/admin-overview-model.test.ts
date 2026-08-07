@@ -166,4 +166,25 @@ describe('Admin overview authority projection', () => {
     expect(reconnecting.priorities).toHaveLength(1);
     expect(live.status).toBe('live');
   });
+
+  it('uses the admitted API session and projection metadata when access context is unavailable', () => {
+    const model = projectAdminBriefing({
+      authorityState: 'live',
+      locale: 'en',
+      now: '2026-08-07T05:30:00.000Z',
+      queueState: { view: 'assigned' },
+      records: [capacity],
+      session: { activeFunction: 'operations', actorId: 'administrator-0001' },
+    });
+
+    expect(model.activeFunction).toBe('operations');
+    expect(model.context.environment).toEqual({
+      id: 'staging-brasil',
+      kind: 'staging',
+      label: 'Staging Brasil',
+    });
+    expect(model.context.observedAt).toBe('2026-08-07T05:00:00.000Z');
+    expect(model.context.capacity.status).toBe('live');
+    expect(model.context.capacity.action).toBeNull();
+  });
 });

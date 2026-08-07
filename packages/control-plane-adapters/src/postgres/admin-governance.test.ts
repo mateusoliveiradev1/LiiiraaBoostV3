@@ -208,6 +208,59 @@ describe('PostgreSQL admin governance authority', () => {
     expect(sql).toMatch(/INSERT INTO admin_offboarding_events/iu);
   });
 
+  it('ends the active function session before inserting its versioned replacement', async () => {
+    const statements: string[] = [];
+    let activeSessionExists = true;
+    const query = vi.fn((sql: string) => {
+      statements.push(sql);
+      if (/WITH ended AS[\s\S]*INSERT INTO admin_function_sessions/iu.test(sql)) {
+        return Promise.reject(
+          Object.assign(new Error('duplicate active function session'), {
+            code: '23505',
+            constraint: 'uq_admin_function_sessions_one_active',
+          }),
+        );
+      }
+      if (sql.includes('UPDATE admin_function_sessions')) activeSessionExists = false;
+      if (sql.includes('INSERT INTO admin_function_sessions')) {
+        if (activeSessionExists) {
+          return Promise.reject(new Error('replacement inserted before predecessor ended'));
+        }
+        activeSessionExists = true;
+      }
+      return Promise.resolve({ rowCount: 1, rows: [] });
+    });
+    const database = {
+      query,
+      transaction: vi.fn((operation: (value: { query: typeof query }) => Promise<unknown>) =>
+        operation({ query }),
+      ),
+    };
+    const repository = createPostgresAdminGovernanceRepository(database);
+
+    await expect(
+      repository.transaction(identityId, (transaction) =>
+        transaction.saveSession({
+          sessionId: 'session-one',
+          actorId: identityId,
+          activeFunction: 'operations',
+          navigation: ['operations'],
+          dataScopes: ['devices'],
+          capabilities: ['device:manage'],
+          simulation: false,
+          version: 2n,
+        }),
+      ),
+    ).resolves.toBeUndefined();
+
+    const endIndex = statements.findIndex((sql) => sql.includes('UPDATE admin_function_sessions'));
+    const insertIndex = statements.findIndex((sql) =>
+      sql.includes('INSERT INTO admin_function_sessions'),
+    );
+    expect(endIndex).toBeGreaterThan(-1);
+    expect(insertIndex).toBeGreaterThan(endIndex);
+  });
+
   it('persists reveal reason and authorization context without diagnostic or audit field values', async () => {
     const statements: Array<{ sql: string; values: readonly unknown[] }> = [];
     const query = vi.fn((sql: string, values: readonly unknown[] = []) => {

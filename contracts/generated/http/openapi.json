@@ -2367,7 +2367,7 @@
                 "items": {
                   "type": "string"
                 },
-                "maxItems": 16,
+                "maxItems": 64,
                 "minItems": 1,
                 "type": "array",
                 "uniqueItems": true
@@ -2410,7 +2410,7 @@
                 "items": {
                   "type": "string"
                 },
-                "maxItems": 16,
+                "maxItems": 64,
                 "minItems": 1,
                 "type": "array",
                 "uniqueItems": true
@@ -2890,7 +2890,7 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 16,
+            "maxItems": 64,
             "minItems": 1,
             "type": "array",
             "uniqueItems": true

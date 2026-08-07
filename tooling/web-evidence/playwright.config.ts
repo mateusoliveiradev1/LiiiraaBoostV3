@@ -144,10 +144,18 @@ const finalProjectGrep = (surface: (typeof surfaces)[number]['surface'], axis: s
 const isStagingOriginRun = (arguments_: readonly string[]): boolean =>
   arguments_.some((argument) => argument.includes('@staging-origin-'));
 
+const isProductionAuthorityRun = (arguments_: readonly string[]): boolean =>
+  arguments_.some(
+    (argument) =>
+      argument.includes('admin-operations.spec.ts') ||
+      argument.includes('@production-authority') ||
+      argument.includes('--project=production-authority'),
+  );
+
 export const selectWebTestSurfaces = (
   arguments_: readonly string[],
 ): readonly (typeof surfaces)[number][] => {
-  if (isStagingOriginRun(arguments_)) return [];
+  if (isStagingOriginRun(arguments_) || isProductionAuthorityRun(arguments_)) return [];
   const selector = arguments_
     .filter(
       (argument) => /\.(?:spec|pw)\.ts(?:$|:)/u.test(argument) || argument.startsWith('--project='),
@@ -255,6 +263,62 @@ const stagingOriginProject: Project = {
   },
 };
 
+const productionAuthorityProject: Project = {
+  grep: /@production-authority/u,
+  metadata: {
+    axis: 'production-authority',
+    finalOnly: false,
+    frozenClock: FROZEN_CLOCK,
+    scenarioIds: '',
+    surface: 'admin',
+  },
+  name: 'production-authority',
+  testMatch: '**/admin-operations.spec.ts',
+  use: {
+    ...chromium,
+    baseURL: 'https://admin.staging.localhost:3444',
+    browserName: 'chromium',
+    colorScheme: 'dark',
+    ignoreHTTPSErrors: true,
+    locale: 'pt-BR',
+    reducedMotion: 'reduce',
+    viewport: { height: 1000, width: 1600 },
+  },
+};
+
+const productionAuthorityRun = isProductionAuthorityRun(process.argv.slice(2));
+const webServers = productionAuthorityRun
+  ? [
+      {
+        command: 'pnpm --filter @liiiraa/web-evidence real-admin:harness',
+        cwd: '../..',
+        ignoreHTTPSErrors: true,
+        reuseExistingServer: false,
+        stderr: 'pipe' as const,
+        stdout: 'pipe' as const,
+        timeout: 300_000,
+        url: 'https://admin.staging.localhost:3444/pt-BR/admin',
+      },
+    ]
+  : selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
+      command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
+      cwd: '../..',
+      env:
+        app === '@liiiraa/admin'
+          ? {
+              LIIIRAA_ADMIN_ORIGIN: baseURL,
+              LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
+            }
+          : app === '@liiiraa/account'
+            ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
+            : {},
+      reuseExistingServer: false,
+      stderr: 'pipe' as const,
+      stdout: 'pipe' as const,
+      timeout: 300_000,
+      url: `${baseURL}${readinessPath}`,
+    }));
+
 export default defineConfig({
   expect: {
     timeout: 5_000,
@@ -266,7 +330,7 @@ export default defineConfig({
   forbidOnly: true,
   fullyParallel: false,
   outputDir: 'test-results',
-  projects: [...quickProjects, ...finalProjects, stagingOriginProject],
+  projects: [...quickProjects, ...finalProjects, stagingOriginProject, productionAuthorityProject],
   reporter: [['list']],
   retries: 0,
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',
@@ -279,24 +343,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'off',
   },
-  webServer: selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
-    command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
-    cwd: '../..',
-    env:
-      app === '@liiiraa/admin'
-        ? {
-            LIIIRAA_ADMIN_ORIGIN: baseURL,
-            LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
-          }
-        : app === '@liiiraa/account'
-          ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
-          : {},
-    reuseExistingServer: false,
-    stderr: 'pipe',
-    stdout: 'pipe',
-    timeout: 300_000,
-    url: `${baseURL}${readinessPath}`,
-  })),
+  webServer: webServers,
   workers: 1,
 });
 

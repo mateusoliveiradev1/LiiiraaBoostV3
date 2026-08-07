@@ -2892,58 +2892,9 @@ export interface AdminTeamMemberProjectionJson {
   activeFunction?: AdminFunctionJson;
   /**
    * @minItems 1
-   * @maxItems 16
+   * @maxItems 64
    */
-  capabilities:
-    | [string]
-    | [string, string]
-    | [string, string, string]
-    | [string, string, string, string]
-    | [string, string, string, string, string]
-    | [string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string, string, string, string, string]
-    | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
-    | [
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string
-      ]
-    | [
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string
-      ];
+  capabilities: [string, ...string[]];
   /**
    * @minItems 1
    * @maxItems 16
@@ -3348,58 +3299,9 @@ export interface AdminPermissionImpactProjectionJson {
       | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson, AdminFunctionJson];
     /**
      * @minItems 1
-     * @maxItems 16
+     * @maxItems 64
      */
-    capabilities:
-      | [string]
-      | [string, string]
-      | [string, string, string]
-      | [string, string, string, string]
-      | [string, string, string, string, string]
-      | [string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
-      | [
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string
-        ]
-      | [
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string
-        ];
+    capabilities: [string, ...string[]];
     /**
      * @minItems 1
      * @maxItems 16
@@ -3467,58 +3369,9 @@ export interface AdminPermissionImpactProjectionJson {
       | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson, AdminFunctionJson];
     /**
      * @minItems 1
-     * @maxItems 16
+     * @maxItems 64
      */
-    capabilities:
-      | [string]
-      | [string, string]
-      | [string, string, string]
-      | [string, string, string, string]
-      | [string, string, string, string, string]
-      | [string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
-      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
-      | [
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string
-        ]
-      | [
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string,
-          string
-        ];
+    capabilities: [string, ...string[]];
     /**
      * @minItems 1
      * @maxItems 16

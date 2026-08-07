@@ -1043,6 +1043,7 @@ export const AdminAuthorityProvider = ({
         'exports',
         'configurations',
         'capacity',
+        'invitations',
         'environments',
         'audit-events',
         'alerts',

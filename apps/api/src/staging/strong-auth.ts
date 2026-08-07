@@ -44,16 +44,18 @@ export interface StagingStrongAuthRepository {
   storeTotpFactor(record: StoredStrongFactor): Promise<void>;
   useTotpFactor(factorId: string, counterStartedAt: string, usedAt: string): Promise<boolean>;
   storeStepUpReceipt(record: StoredStepUpReceipt): Promise<void>;
-  consumeStepUpReceipt(input: Readonly<{
-    accountId: string;
-    action: string;
-    authorizationContextId: string;
-    receiptDigest: string;
-    redactedTarget: string;
-    resource: string;
-    sessionId: string;
-    usedAt: string;
-  }>): Promise<StoredStepUpReceipt | null>;
+  consumeStepUpReceipt(
+    input: Readonly<{
+      accountId: string;
+      action: string;
+      authorizationContextId: string;
+      receiptDigest: string;
+      redactedTarget: string;
+      resource: string;
+      sessionId: string;
+      usedAt: string;
+    }>,
+  ): Promise<StoredStepUpReceipt | null>;
   provisionStagingAdministrator(actor: IdentityActor): Promise<void>;
 }
 
@@ -61,10 +63,12 @@ interface StrongAuthTransaction {
   query(
     statement: string,
     values?: readonly unknown[],
-  ): Promise<Readonly<{
-    rowCount?: number;
-    rows: readonly Readonly<Record<string, unknown>>[];
-  }>>;
+  ): Promise<
+    Readonly<{
+      rowCount?: number;
+      rows: readonly Readonly<Record<string, unknown>>[];
+    }>
+  >;
 }
 
 interface StrongAuthDatabase extends StrongAuthTransaction {
@@ -86,10 +90,7 @@ export interface StrongAuthBinding {
 }
 
 export type StrongAuthFailureCode =
-  | 'INVALID_ENROLLMENT'
-  | 'INVALID_TOTP'
-  | 'REPLAYED_TOTP'
-  | 'STRONG_FACTOR_REQUIRED';
+  'INVALID_ENROLLMENT' | 'INVALID_TOTP' | 'REPLAYED_TOTP' | 'STRONG_FACTOR_REQUIRED';
 
 const base32 = (value: Uint8Array): string => {
   let bits = '';
@@ -300,23 +301,54 @@ export const createPostgresStagingStrongAuthRepository = (
 
   provisionStagingAdministrator: (actor) =>
     database.transaction(async (transaction) => {
-      const ownerFunctions = actor.role === 'security'
-        ? ['support', 'operations', 'security', 'audit']
-        : [actor.role];
-      const ownerCapabilities = actor.role === 'security'
-        ? ['support:reply', 'support:view', 'device:manage', 'entitlement:correct', 'session:revoke', 'diagnostics:view', 'audit:reveal-sensitive', 'audit:export']
-        : actor.role === 'support'
-          ? ['support:reply', 'support:view']
-          : actor.role === 'operations'
-            ? ['device:manage', 'entitlement:correct']
-            : ['audit:export', 'audit:reveal-sensitive'];
-      const ownerScopes = actor.role === 'security'
-        ? ['support-cases', 'devices', 'entitlements', 'sessions', 'diagnostic-metadata', 'audit-events']
-        : actor.role === 'support'
-          ? ['support-cases']
-          : actor.role === 'operations'
-            ? ['devices', 'entitlements']
-            : ['audit-events'];
+      const ownerFunctions = actor.role === 'security' ? ['security', 'operations'] : [actor.role];
+      const ownerCapabilities =
+        actor.role === 'security'
+          ? [
+              'support:reply',
+              'support:view',
+              'device:manage',
+              'entitlement:correct',
+              'session:revoke',
+              'diagnostics:view',
+              'audit:reveal-sensitive',
+              'audit:export',
+              'beta-invitations:manage',
+              'beta-invitations:preflight',
+              'beta-invitations:issue',
+              'beta-invitations:batch',
+              'admin-membership:manage',
+              'admin-membership:activate',
+              'admin-function:simulate',
+              'admin-access:review',
+              'admin-delegation:manage',
+              'admin-permissions:manage',
+              'admin-approval:manage',
+            ]
+          : actor.role === 'support'
+            ? ['support:reply', 'support:view']
+            : actor.role === 'operations'
+              ? ['device:manage', 'entitlement:correct']
+              : ['audit:export', 'audit:reveal-sensitive'];
+      const ownerScopes =
+        actor.role === 'security'
+          ? [
+              'support-cases',
+              'devices',
+              'entitlements',
+              'sessions',
+              'diagnostic-metadata',
+              'audit-events',
+              'team',
+              'history',
+              'delegations',
+              'reviews',
+            ]
+          : actor.role === 'support'
+            ? ['support-cases']
+            : actor.role === 'operations'
+              ? ['devices', 'entitlements']
+              : ['audit-events'];
       await transaction.query(
         `INSERT INTO admin_governance_memberships
           (id, identity_id, status, strong_factor, version, activated_at, created_at, updated_at)
@@ -325,33 +357,30 @@ export const createPostgresStagingStrongAuthRepository = (
            version = admin_governance_memberships.version + 1, updated_at = EXCLUDED.updated_at`,
         [actor.accountId, actor.updatedAt],
       );
-      for (const adminFunction of ownerFunctions) {
-        await transaction.query(
-          `INSERT INTO admin_membership_functions
-            (id, membership_id, function, assigned_at, assigned_by)
-           VALUES ($1::uuid, $2::uuid, $3, $4, $2::uuid)
-           ON CONFLICT DO NOTHING`,
-          [randomUUID(), actor.accountId, adminFunction, actor.updatedAt],
-        );
-      }
-      for (const capability of ownerCapabilities) {
-        await transaction.query(
-          `INSERT INTO admin_membership_capabilities
-            (id, membership_id, capability, assigned_at, assigned_by)
-           VALUES ($1::uuid, $2::uuid, $3, $4, $2::uuid)
-           ON CONFLICT DO NOTHING`,
-          [randomUUID(), actor.accountId, capability, actor.updatedAt],
-        );
-      }
-      for (const scope of ownerScopes) {
-        await transaction.query(
-          `INSERT INTO admin_membership_scopes
-            (id, membership_id, scope, assigned_at, assigned_by)
-           VALUES ($1::uuid, $2::uuid, $3, $4, $2::uuid)
-           ON CONFLICT DO NOTHING`,
-          [randomUUID(), actor.accountId, scope, actor.updatedAt],
-        );
-      }
+      await transaction.query(
+        `INSERT INTO admin_membership_functions
+          (id, membership_id, function, assigned_at, assigned_by)
+         SELECT gen_random_uuid(), $2::uuid, grant_value, $3, $2::uuid
+           FROM unnest($1::text[]) AS grant_row(grant_value)
+         ON CONFLICT DO NOTHING`,
+        [ownerFunctions, actor.accountId, actor.updatedAt],
+      );
+      await transaction.query(
+        `INSERT INTO admin_membership_capabilities
+          (id, membership_id, capability, assigned_at, assigned_by)
+         SELECT gen_random_uuid(), $2::uuid, grant_value, $3, $2::uuid
+           FROM unnest($1::text[]) AS grant_row(grant_value)
+         ON CONFLICT DO NOTHING`,
+        [ownerCapabilities, actor.accountId, actor.updatedAt],
+      );
+      await transaction.query(
+        `INSERT INTO admin_membership_scopes
+          (id, membership_id, scope, assigned_at, assigned_by)
+         SELECT gen_random_uuid(), $2::uuid, grant_value, $3, $2::uuid
+           FROM unnest($1::text[]) AS grant_row(grant_value)
+         ON CONFLICT DO NOTHING`,
+        [ownerScopes, actor.accountId, actor.updatedAt],
+      );
       await transaction.query(
         `UPDATE admin_function_sessions SET ended_at = $3
           WHERE session_id = $1 AND membership_id = $2::uuid AND ended_at IS NULL`,
@@ -454,8 +483,7 @@ export const createStagingStrongAuth = ({
     ) {
       if (!admittedBinding(input)) return { ok: false as const, code: 'INVALID_TOTP' as const };
       const factor = await repository.loadTotpFactor(actor.accountId);
-      if (factor === null)
-        return { ok: false as const, code: 'STRONG_FACTOR_REQUIRED' as const };
+      if (factor === null) return { ok: false as const, code: 'STRONG_FACTOR_REQUIRED' as const };
       const secret = decryptFactor(factor);
       const now = clock.now();
       const counter = secret === null ? null : matchedCounter(secret, input.code, now);

@@ -127,6 +127,9 @@ describe('admin security boundary', () => {
     expect(resolveAdminOrigin('https://liiiraa-boost-admin-staging.vercel.app')).toBe(
       'https://liiiraa-boost-admin-staging.vercel.app',
     );
+    expect(resolveAdminOrigin('https://admin.staging.localhost:3444')).toBe(
+      'https://admin.staging.localhost:3444',
+    );
     expect(() => resolveAdminOrigin('http://localhost:3002')).toThrow(
       'credential-free dedicated origin',
     );

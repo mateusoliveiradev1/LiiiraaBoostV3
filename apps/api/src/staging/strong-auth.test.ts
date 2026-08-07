@@ -4,6 +4,7 @@ import type { IdentityActor } from '@liiiraa/control-plane-adapters';
 import { describe, expect, it } from 'vitest';
 
 import {
+  createPostgresStagingStrongAuthRepository,
   createStagingStrongAuth,
   type StagingStrongAuthRepository,
   type StoredStrongFactor,
@@ -116,6 +117,44 @@ class MemoryStrongAuthRepository implements StagingStrongAuthRepository {
 }
 
 describe('real staging TOTP and action-scoped step-up', () => {
+  it('provisions bounded Admin grants with a constant number of PostgreSQL round trips', async () => {
+    const statements: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const query = (sql: string, values: readonly unknown[] = []) => {
+      statements.push({ sql, values });
+      return Promise.resolve({ rowCount: 1, rows: [] });
+    };
+    const repository = createPostgresStagingStrongAuthRepository({
+      query,
+      transaction: (operation) => operation({ query }),
+    });
+
+    await repository.provisionStagingAdministrator(actor);
+
+    expect(statements).toHaveLength(6);
+    const capabilities = statements.find(({ sql }) =>
+      sql.includes('INSERT INTO admin_membership_capabilities'),
+    );
+    const functions = statements.find(({ sql }) =>
+      sql.includes('INSERT INTO admin_membership_functions'),
+    );
+    const scopes = statements.find(({ sql }) =>
+      sql.includes('INSERT INTO admin_membership_scopes'),
+    );
+    expect(functions?.values[0]).toEqual(['security', 'operations']);
+    expect(capabilities?.sql).toMatch(/unnest\(\$1::text\[\]\)/iu);
+    expect(capabilities?.values[0]).toEqual(
+      expect.arrayContaining([
+        'beta-invitations:issue',
+        'admin-membership:manage',
+        'admin-approval:manage',
+      ]),
+    );
+    expect(scopes?.sql).toMatch(/unnest\(\$1::text\[\]\)/iu);
+    expect(scopes?.values[0]).toEqual(
+      expect.arrayContaining(['team', 'history', 'delegations', 'reviews']),
+    );
+  });
+
   it('confirms a real TOTP before provisioning membership and never stores plaintext', async () => {
     const repository = new MemoryStrongAuthRepository();
     const authority = createStagingStrongAuth({
@@ -129,7 +168,9 @@ describe('real staging TOTP and action-scoped step-up', () => {
     const enrollment = authority.beginTotpEnrollment(actor);
     expect(new URL(enrollment.otpauthUri).searchParams.get('issuer')).toBe('Liiiraa Boost');
     expect(enrollment.enrollmentToken).not.toContain(enrollment.secret);
-    expect(await authority.confirmTotpEnrollment(actor, enrollment.enrollmentToken, '000000')).toEqual({
+    expect(
+      await authority.confirmTotpEnrollment(actor, enrollment.enrollmentToken, '000000'),
+    ).toEqual({
       ok: false,
       code: 'INVALID_TOTP',
     });
@@ -172,8 +213,9 @@ describe('real staging TOTP and action-scoped step-up', () => {
     await expect(
       authority.consumeStepUpReceipt(actor, { ...binding, receipt: stepUp.receipt }),
     ).resolves.toBeNull();
-    await expect(
-      authority.verifyTotpStepUp(actor, { ...binding, code }),
-    ).resolves.toEqual({ ok: false, code: 'REPLAYED_TOTP' });
+    await expect(authority.verifyTotpStepUp(actor, { ...binding, code })).resolves.toEqual({
+      ok: false,
+      code: 'REPLAYED_TOTP',
+    });
   });
 });

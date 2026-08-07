@@ -106,12 +106,13 @@ export const resolveAdminOrigin = (value = configuredAdminOrigin()): string => {
   const candidate = value ?? ADMIN_LOCAL_ORIGIN;
   const url = new URL(candidate);
   const exactLocalHostname = url.hostname === 'admin.localhost';
+  const exactStagingEvidenceHostname = url.hostname === 'admin.staging.localhost';
   const localHttp = url.protocol === 'http:' && exactLocalHostname;
-  const boundedProviderPreview =
-    candidate === 'https://liiiraa-boost-admin-staging.vercel.app';
+  const boundedProviderPreview = candidate === 'https://liiiraa-boost-admin-staging.vercel.app';
   const dedicatedHttps =
     url.protocol === 'https:' &&
     (exactLocalHostname ||
+      exactStagingEvidenceHostname ||
       boundedProviderPreview ||
       (url.hostname.startsWith('admin.') && !url.hostname.includes('localhost')));
 

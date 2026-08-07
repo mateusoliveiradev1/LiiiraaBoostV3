@@ -1156,15 +1156,15 @@ const governanceQueries = (
     const result = await database.query(
       `SELECT membership.identity_id::text AS identity_id, identity.display_name,
               identity.email, membership.status, membership.strong_factor, membership.version,
-              COALESCE((SELECT array_agg(grant.function ORDER BY grant.function)
-                FROM admin_membership_functions AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
-              COALESCE((SELECT array_agg(grant.capability ORDER BY grant.capability)
-                FROM admin_membership_capabilities AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
-              COALESCE((SELECT array_agg(grant.scope ORDER BY grant.scope)
-                FROM admin_membership_scopes AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
+              COALESCE((SELECT array_agg(membership_grant.function ORDER BY membership_grant.function)
+                FROM admin_membership_functions AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
+              COALESCE((SELECT array_agg(membership_grant.capability ORDER BY membership_grant.capability)
+                FROM admin_membership_capabilities AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
+              COALESCE((SELECT array_agg(membership_grant.scope ORDER BY membership_grant.scope)
+                FROM admin_membership_scopes AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
               (SELECT session.active_function FROM admin_function_sessions AS session
                 WHERE session.membership_id = membership.id AND session.ended_at IS NULL
                 ORDER BY session.started_at DESC LIMIT 1) AS active_function,
@@ -1210,15 +1210,15 @@ const governanceQueries = (
     const result = await database.query(
       `SELECT membership.identity_id::text AS identity_id, identity.display_name, identity.email,
               membership.status, membership.strong_factor, membership.version,
-              COALESCE((SELECT array_agg(grant.function ORDER BY grant.function)
-                FROM admin_membership_functions AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
-              COALESCE((SELECT array_agg(grant.capability ORDER BY grant.capability)
-                FROM admin_membership_capabilities AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
-              COALESCE((SELECT array_agg(grant.scope ORDER BY grant.scope)
-                FROM admin_membership_scopes AS grant
-                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
+              COALESCE((SELECT array_agg(membership_grant.function ORDER BY membership_grant.function)
+                FROM admin_membership_functions AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
+              COALESCE((SELECT array_agg(membership_grant.capability ORDER BY membership_grant.capability)
+                FROM admin_membership_capabilities AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
+              COALESCE((SELECT array_agg(membership_grant.scope ORDER BY membership_grant.scope)
+                FROM admin_membership_scopes AS membership_grant
+                WHERE membership_grant.membership_id = membership.id AND membership_grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
               (SELECT session.active_function FROM admin_function_sessions AS session
                 WHERE session.membership_id = membership.id AND session.ended_at IS NULL
                 ORDER BY session.started_at DESC LIMIT 1) AS active_function,

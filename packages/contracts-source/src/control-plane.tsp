@@ -837,7 +837,7 @@ model AdminTeamMemberProjection is AdminProjectionMetadata {
   functions: AdminFunction[];
   activeFunction?: AdminFunction;
   @minItems(1)
-  @maxItems(16)
+  @maxItems(64)
   @uniqueItems
   capabilities: string[];
   @minItems(1)
@@ -866,7 +866,7 @@ model AdminPermissionImpactProjection is AdminProjectionMetadata {
     @uniqueItems
     functions: AdminFunction[];
     @minItems(1)
-    @maxItems(16)
+    @maxItems(64)
     @uniqueItems
     capabilities: string[];
     @minItems(1)
@@ -880,7 +880,7 @@ model AdminPermissionImpactProjection is AdminProjectionMetadata {
     @uniqueItems
     functions: AdminFunction[];
     @minItems(1)
-    @maxItems(16)
+    @maxItems(64)
     @uniqueItems
     capabilities: string[];
     @minItems(1)

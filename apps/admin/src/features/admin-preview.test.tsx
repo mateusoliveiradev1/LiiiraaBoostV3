@@ -234,9 +234,15 @@ describe('role-scoped admin', () => {
     expect(stylesSource).toMatch(
       /@media \(width < 640px\)[\s\S]*\.admin-landing__layout[\s\S]*grid-template-columns: minmax\(0, 1fr\)/u,
     );
-    expect(stylesSource).toMatch(/@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile/u);
+    expect(stylesSource).toMatch(/@media \(width <= 959px\)[\s\S]*\.admin-nav__mobile/u);
     expect(stylesSource).toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
+      /@media \(width <= 959px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
+    );
+    expect(stylesSource).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__search input\[type='search'\][\s\S]*display:\s*none/u,
+    );
+    expect(stylesSource).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__search button[\s\S]*min-inline-size:\s*var\(--lb-control-min-size\)/u,
     );
   });
 
@@ -350,7 +356,7 @@ describe('role-scoped admin', () => {
         /@media \(width > 960px\)[\s\S]*\.admin-decision\.admin-decision--critical > \.admin-decision__context\s*\{[\s\S]*grid-column:\s*1 \/ span 8[\s\S]*\.admin-decision\.admin-decision--critical > \.admin-decision__evidence\s*\{[\s\S]*grid-column:\s*9 \/ -1/u,
       );
       expect(stylesSource).toMatch(
-        /@media \(width <= 960px\)[\s\S]*\.admin-decision > \.admin-decision__context,[\s\S]*\.admin-decision > \.admin-decision__evidence,[\s\S]*grid-column:\s*1 \/ -1/u,
+        /@media \(width <= 959px\)[\s\S]*\.admin-decision > \.admin-decision__context,[\s\S]*\.admin-decision > \.admin-decision__evidence,[\s\S]*grid-column:\s*1 \/ -1/u,
       );
     },
   );
