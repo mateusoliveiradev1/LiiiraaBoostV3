@@ -46,6 +46,9 @@ const buildApp = async () => {
     accept: vi.fn(() =>
       Promise.resolve({ ok: true as const, outcome: 'accepted' as const, receiptId: 'receipt-1' }),
     ),
+    decline: vi.fn(() =>
+      Promise.resolve({ ok: true as const, outcome: 'declined' as const, receiptId: 'receipt-2' }),
+    ),
   };
   const app = Fastify();
   await registerInvitationAcceptanceRoutes(app, {
@@ -214,6 +217,40 @@ describe('recipient invitation acceptance routes', () => {
       }),
     );
     expect(accepted.body).not.toMatch(/invitation-secret|account-opaque-1/iu);
+    await app.close();
+  });
+
+  it('declines from validated resumable state using the server-owned version', async () => {
+    const { app, operations } = await buildApp();
+    await app.inject({
+      method: 'POST',
+      url: '/v1/identity/invitations/validate',
+      headers: { origin, 'x-csrf-token': csrf() },
+      payload: { invitationId: 'invitation-1', plaintextSecret: token },
+    });
+
+    const declined = await app.inject({
+      method: 'POST',
+      url: '/v1/identity/invitations/invitation-1/decline',
+      headers: { origin, 'x-csrf-token': csrf() },
+      payload: {
+        resumeId: 'resume-opaque-1',
+        commandId: 'decline-1',
+        idempotencyKey: 'decline-idem',
+        expectedVersion: '999',
+      },
+    });
+
+    expect(declined.statusCode).toBe(200);
+    expect(operations.decline).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        actorId: 'invitation-recipient',
+        action: { kind: 'decline' },
+        expectedVersion: 1n,
+      }),
+    );
+    expect(declined.body).not.toMatch(/resume-opaque|invitation-secret|account|digest/iu);
     await app.close();
   });
 });
