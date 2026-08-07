@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-49-PLAN.md
-last_updated: "2026-08-07T03:19:29.448Z"
+stopped_at: Completed 04-50-PLAN.md
+last_updated: "2026-08-07T03:34:41.652Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 186
+  completed_plans: 187
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 50 of 62
+Plan: 51 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -224,6 +224,7 @@ _Updated after plan completion_
 | Phase 04 P47 | 11 min | 1 tasks | 5 files |
 | Phase 04 P48 | 13 min | 2 tasks | 8 files |
 | Phase 04 P49 | 11 min | 1 tasks | 5 files |
+| Phase 04 P50 | 12 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -700,6 +701,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Resolve admin command replay before version arbitration — Safe retries return the original result without duplicate state, audit, outbox, or receipt effects.
 - [Phase 04]: Fail closed on uncertain operational authority — Critical mutations never create hidden queued work when freshness or environment identity is uncertain.
 - [Phase 04]: Keep recovery and emergency controls allowlisted — Versioned bounded procedures and capability-specific stops prevent free-form execution and global shutdown authority.
+- [Phase 04]: Key every admin operation by environment — Environment UUID participates in primary, unique, foreign, search, command, receipt, and audit authority keys.
+- [Phase 04]: Claim operational work only through bounded PostgreSQL leases — Ordered FOR UPDATE SKIP LOCKED claims prevent two workers from executing one item.
+- [Phase 04]: Append configuration and operational history — Rollback, conflict, incident, receipt, and audit evidence remains immutable across retries and restarts.
+- [Phase 04]: Require synthetic identity for destructive PostgreSQL proof — Concurrency tests cannot use Docker, staging, or production databases.
 
 ### Pending Todos
 
@@ -745,6 +750,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T03:19:29.440Z
-Stopped at: Completed 04-49-PLAN.md
+Last session: 2026-08-07T03:34:41.642Z
+Stopped at: Completed 04-50-PLAN.md
 Resume file: None
