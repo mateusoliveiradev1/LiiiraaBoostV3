@@ -627,7 +627,7 @@ Plans:
 **Wave 20** _(blocked on Wave 19 dependencies)_
 
 - [x] 04-50-PLAN.md — Persist operational ledgers, versions, jobs, and worker claims.
-- [ ] 04-52-PLAN.md — Expose least-privilege governance and approval APIs.
+- [x] 04-52-PLAN.md — Expose least-privilege governance and approval APIs.
 
 **Wave 21** _(blocked on Plans 04-50 through 04-52)_
 
@@ -793,7 +793,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 48/62 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 49/62 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |

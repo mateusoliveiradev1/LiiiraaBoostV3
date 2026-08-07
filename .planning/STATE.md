@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-51-PLAN.md
-last_updated: "2026-08-07T04:04:40.979Z"
+stopped_at: Completed 04-52-PLAN.md
+last_updated: "2026-08-07T04:18:06.633Z"
 last_activity: 2026-08-07 — Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 188
+  completed_plans: 189
   percent: 30
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 52 of 62
+Plan: 53 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -225,6 +225,7 @@ _Updated after plan completion_
 | Phase 04 P49 | 11 min | 1 tasks | 5 files |
 | Phase 04 P50 | 12 min | 2 tasks | 6 files |
 | Phase 04 P51 | 16 min | 2 tasks | 6 files |
+| Phase 04 P52 | 14 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -708,6 +709,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Validate invitation authority before recipient access and expose only masked bounded projections. — Exact origin, CSRF, active function, capability, and scope checks prevent unauthorized discovery and mutation.
 - [Phase 04]: Use opaque persisted recipient progress as the version authority for decline and activation. — Browser claims cannot widen possession, actor, completion, account, or optimistic-concurrency authority.
 - [Phase 04]: Recover invitation jobs and partial batches through persisted effect and item identities. — Crash replay reconstructs complete receipts without duplicating delivery, lifecycle events, promotions, or batch actions.
+- [Phase 04]: Derive governance authority from the active server session and keep simulation read-only. — URL and body role claims cannot widen navigation, data, capabilities, scopes, or actions.
+- [Phase 04]: Compute impact, approval eligibility, and break-glass risk from trusted server state. — Clients may propose intent but cannot declare before-after authority, independence, mass scope, or risk.
+- [Phase 04]: Keep administrative-team invitations separate from beta invitation authority. — Ordinary accounts and beta recipients cannot be promoted into administrative membership.
 
 ### Pending Todos
 
@@ -753,6 +757,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T04:04:30.848Z
-Stopped at: Completed 04-51-PLAN.md
+Last session: 2026-08-07T04:18:06.625Z
+Stopped at: Completed 04-52-PLAN.md
 Resume file: None
