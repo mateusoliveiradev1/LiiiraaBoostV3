@@ -275,6 +275,12 @@ export type ControlPlaneDocumentJson =
   | AdminIncidentProjectionJson
   | AdminConfigurationProjectionJson
   | AdminPrivacyCaseProjectionJson
+  | AdminCapacityProjectionJson
+  | AdminEnvironmentProjectionJson
+  | AdminAuditEventProjectionJson
+  | AdminAlertProjectionJson
+  | AdminEmergencyStopProjectionJson
+  | AdminExportProjectionJson
   | AdminConflictProjectionJson
   | AdminPartialFailureProjectionJson
   | AdminOperationReceiptJson
@@ -592,17 +598,38 @@ export type AdminPrivacyCaseStateJson =
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminPrivacyRequestType".
  */
-export type AdminPrivacyRequestTypeJson = 'access' | 'correction' | 'deletion' | 'portability' | 'restriction';
+export type AdminPrivacyRequestTypeJson =
+  'access' | 'correction' | 'deletion' | 'portability' | 'restriction' | 'unspecified';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdminConflictState".
+ * via the `definition` "AdminOperationalHealth".
  */
-export type AdminConflictStateJson = 'review-required' | 'merge-available' | 'resolved';
+export type AdminOperationalHealthJson = 'healthy' | 'degraded' | 'unavailable' | 'unknown';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminOperationOutcome".
  */
 export type AdminOperationOutcomeJson = 'applied' | 'partial' | 'failed' | 'denied' | 'cancelled';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAlertState".
+ */
+export type AdminAlertStateJson = 'open' | 'acknowledged' | 'resolved' | 'failed';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminEmergencyStopState".
+ */
+export type AdminEmergencyStopStateJson = 'active' | 'expired' | 'restored';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminExportState".
+ */
+export type AdminExportStateJson = 'pending' | 'ready' | 'expired' | 'revoked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminConflictState".
+ */
+export type AdminConflictStateJson = 'review-required' | 'merge-available' | 'resolved';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminOperationAction".
@@ -2756,9 +2783,9 @@ export interface AdminInboxItemProjectionJson {
   severity: AdminSeverityJson;
   state: AdminInboxStateJson;
   title: ControlPlaneShortTextJson;
-  ownerReference: ControlPlaneIdentifierJson;
+  ownerReference?: ControlPlaneIdentifierJson;
   relatedRecordReference: ControlPlaneIdentifierJson;
-  deadlineAt: string;
+  deadlineAt?: string;
   updatedAt: string;
 }
 /**
@@ -3719,6 +3746,140 @@ export interface AdminPrivacyCaseProjectionJson {
    */
   retentionReferences: ControlPlaneIdentifierJson[];
   ownerReference: ControlPlaneIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminCapacityProjection".
+ */
+export interface AdminCapacityProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-capacity-projection';
+  capacityId: ControlPlaneIdentifierJson;
+  resourceReference: ControlPlaneIdentifierJson;
+  currentUse: string;
+  safeLimit: string;
+  growthPerDay?: number;
+  forecastExhaustionAt?: string;
+  recommendedAction: ControlPlaneIdentifierJson;
+  observedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminEnvironmentProjection".
+ */
+export interface AdminEnvironmentProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-environment-projection';
+  environmentReference: ControlPlaneIdentifierJson;
+  sessionEnvironment: AdminEnvironmentKindJson;
+  integrationEnvironment: AdminEnvironmentKindJson;
+  health: AdminOperationalHealthJson;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAuditEventProjection".
+ */
+export interface AdminAuditEventProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-audit-event-projection';
+  auditEventId: ControlPlaneIdentifierJson;
+  action: ControlPlaneIdentifierJson;
+  scope: ControlPlaneIdentifierJson;
+  outcome: AdminOperationOutcomeJson;
+  actorReference: ControlPlaneIdentifierJson;
+  subjectReference: ControlPlaneIdentifierJson;
+  occurredAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAlertProjection".
+ */
+export interface AdminAlertProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-alert-projection';
+  alertId: ControlPlaneIdentifierJson;
+  severity: AdminSeverityJson;
+  state: AdminAlertStateJson;
+  ownerReference: ControlPlaneIdentifierJson;
+  subjectReference: ControlPlaneIdentifierJson;
+  safeSummary: ControlPlaneShortTextJson;
+  deadlineAt?: string;
+  acknowledgedAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminEmergencyStopProjection".
+ */
+export interface AdminEmergencyStopProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-emergency-stop-projection';
+  stopId: ControlPlaneIdentifierJson;
+  capabilityReference: ControlPlaneIdentifierJson;
+  state: AdminEmergencyStopStateJson;
+  actorReference: ControlPlaneIdentifierJson;
+  reasonRedacted: RedactedAuthorityTextJson;
+  requestedAt: string;
+  expiresAt: string;
+  restoredAt?: string;
+  safeRestorationDefined: boolean;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminExportProjection".
+ */
+export interface AdminExportProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-export-projection';
+  exportId: ControlPlaneIdentifierJson;
+  state: AdminExportStateJson;
+  actorReference: ControlPlaneIdentifierJson;
+  purposeRedacted: RedactedAuthorityTextJson;
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  fieldReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  encrypted: true;
+  masked: true;
+  createdAt: string;
+  expiresAt: string;
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema

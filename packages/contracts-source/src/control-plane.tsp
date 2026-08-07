@@ -632,6 +632,7 @@ union AdminPrivacyRequestType {
   deletion: "deletion",
   portability: "portability",
   restriction: "restriction",
+  unspecified: "unspecified",
 }
 
 union AdminPrivacyCaseState {
@@ -643,6 +644,33 @@ union AdminPrivacyCaseState {
   executing: "executing",
   completed: "completed",
   denied: "denied",
+}
+
+union AdminOperationalHealth {
+  healthy: "healthy",
+  degraded: "degraded",
+  unavailable: "unavailable",
+  unknownState: "unknown",
+}
+
+union AdminAlertState {
+  open: "open",
+  acknowledged: "acknowledged",
+  resolved: "resolved",
+  failed: "failed",
+}
+
+union AdminEmergencyStopState {
+  active: "active",
+  expired: "expired",
+  restored: "restored",
+}
+
+union AdminExportState {
+  pending: "pending",
+  ready: "ready",
+  expired: "expired",
+  revoked: "revoked",
 }
 
 union AdminConflictState {
@@ -742,9 +770,9 @@ model AdminInboxItemProjection is AdminProjectionMetadata {
   severity: AdminSeverity;
   state: AdminInboxState;
   title: ControlPlaneShortText;
-  ownerReference: ControlPlaneIdentifier;
+  ownerReference?: ControlPlaneIdentifier;
   relatedRecordReference: ControlPlaneIdentifier;
-  deadlineAt: utcDateTime;
+  deadlineAt?: utcDateTime;
   updatedAt: utcDateTime;
 }
 
@@ -946,6 +974,79 @@ model AdminPrivacyCaseProjection is AdminProjectionMetadata {
   ownerReference: ControlPlaneIdentifier;
 }
 
+model AdminCapacityProjection is AdminProjectionMetadata {
+  kind: "admin-capacity-projection";
+  capacityId: ControlPlaneIdentifier;
+  resourceReference: ControlPlaneIdentifier;
+  currentUse: uint64;
+  safeLimit: uint64;
+  growthPerDay?: uint32;
+  forecastExhaustionAt?: utcDateTime;
+  recommendedAction: ControlPlaneIdentifier;
+  observedAt: utcDateTime;
+}
+
+model AdminEnvironmentProjection is AdminProjectionMetadata {
+  kind: "admin-environment-projection";
+  environmentReference: ControlPlaneIdentifier;
+  sessionEnvironment: AdminEnvironmentKind;
+  integrationEnvironment: AdminEnvironmentKind;
+  health: AdminOperationalHealth;
+  updatedAt: utcDateTime;
+}
+
+model AdminAuditEventProjection is AdminProjectionMetadata {
+  kind: "admin-audit-event-projection";
+  auditEventId: ControlPlaneIdentifier;
+  action: ControlPlaneIdentifier;
+  scope: ControlPlaneIdentifier;
+  outcome: AdminOperationOutcome;
+  actorReference: ControlPlaneIdentifier;
+  subjectReference: ControlPlaneIdentifier;
+  occurredAt: utcDateTime;
+}
+
+model AdminAlertProjection is AdminProjectionMetadata {
+  kind: "admin-alert-projection";
+  alertId: ControlPlaneIdentifier;
+  severity: AdminSeverity;
+  state: AdminAlertState;
+  ownerReference: ControlPlaneIdentifier;
+  subjectReference: ControlPlaneIdentifier;
+  safeSummary: ControlPlaneShortText;
+  deadlineAt?: utcDateTime;
+  acknowledgedAt?: utcDateTime;
+}
+
+model AdminEmergencyStopProjection is AdminProjectionMetadata {
+  kind: "admin-emergency-stop-projection";
+  stopId: ControlPlaneIdentifier;
+  capabilityReference: ControlPlaneIdentifier;
+  state: AdminEmergencyStopState;
+  actorReference: ControlPlaneIdentifier;
+  reasonRedacted: RedactedAuthorityText;
+  requestedAt: utcDateTime;
+  expiresAt: utcDateTime;
+  restoredAt?: utcDateTime;
+  safeRestorationDefined: boolean;
+}
+
+model AdminExportProjection is AdminProjectionMetadata {
+  kind: "admin-export-projection";
+  exportId: ControlPlaneIdentifier;
+  state: AdminExportState;
+  actorReference: ControlPlaneIdentifier;
+  purposeRedacted: RedactedAuthorityText;
+  @minItems(1)
+  @maxItems(32)
+  @uniqueItems
+  fieldReferences: ControlPlaneIdentifier[];
+  encrypted: true;
+  masked: true;
+  createdAt: utcDateTime;
+  expiresAt: utcDateTime;
+}
+
 model AdminConflictProjection is AdminProjectionMetadata {
   kind: "admin-conflict-projection";
   conflictId: ControlPlaneIdentifier;
@@ -1046,6 +1147,12 @@ union ControlPlaneDocument {
   adminIncidentProjection: AdminIncidentProjection,
   adminConfigurationProjection: AdminConfigurationProjection,
   adminPrivacyCaseProjection: AdminPrivacyCaseProjection,
+  adminCapacityProjection: AdminCapacityProjection,
+  adminEnvironmentProjection: AdminEnvironmentProjection,
+  adminAuditEventProjection: AdminAuditEventProjection,
+  adminAlertProjection: AdminAlertProjection,
+  adminEmergencyStopProjection: AdminEmergencyStopProjection,
+  adminExportProjection: AdminExportProjection,
   adminConflictProjection: AdminConflictProjection,
   adminPartialFailureProjection: AdminPartialFailureProjection,
   adminOperationReceipt: AdminOperationReceipt,

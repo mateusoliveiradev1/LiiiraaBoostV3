@@ -258,6 +258,67 @@ const sendResult = (
     .send(failure ? { ...projected, secretlyQueued: false } : projected);
 };
 
+const sendOperationResult = (
+  reply: FastifyReply,
+  result: Readonly<Record<string, unknown>>,
+  success: number,
+  context: Readonly<{
+    commandId: string;
+    correlationId: string;
+    environment: AdminEnvironment;
+    subjectId: string;
+  }>,
+) => {
+  if (result['ok'] !== true) return sendResult(reply, result, success);
+  const receiptId = boundedString(result['receiptId'], 128);
+  const auditReference = boundedString(result['auditReference'], 128);
+  const recordedAt = boundedString(result['occurredAt'], 64);
+  if (
+    receiptId === null ||
+    auditReference === null ||
+    recordedAt === null ||
+    !Number.isFinite(Date.parse(recordedAt))
+  ) {
+    return noStore(reply).code(503).send({
+      code: 'OPERATIONS_RECEIPT_UNAVAILABLE',
+      secretlyQueued: false,
+    });
+  }
+  const document = {
+    schemaVersion: '1.0',
+    aggregateVersion: '1',
+    etag: `admin-operation-receipt-${receiptId}`.slice(0, 128),
+    correlationId: context.correlationId,
+    provenance: 'postgres-authority',
+    environment: {
+      environmentId: 'synthetic-non-production',
+      kind: context.environment,
+      label: context.environment === 'staging' ? 'Staging' : 'Development',
+    },
+    freshness: {
+      state: 'live',
+      source: 'postgres-admin-operations',
+      sequence: '1',
+      observedAt: recordedAt,
+    },
+    kind: 'admin-operation-receipt',
+    receiptId,
+    commandId: context.commandId,
+    outcome: 'applied',
+    affectedReferences: [context.subjectId],
+    approvalReferences: [],
+    auditReference,
+    recordedAt,
+  };
+  if (!controlPlaneDocumentValidator(document)) {
+    return noStore(reply).code(503).send({
+      code: 'OPERATIONS_RECEIPT_INVALID',
+      secretlyQueued: false,
+    });
+  }
+  return noStore(reply).code(success).send({ document });
+};
+
 interface ParsedAdminCommand {
   readonly commandId: string;
   readonly correlationId: string;
@@ -482,7 +543,17 @@ export const registerAdminOperationsRoutes = (
         targetEnvironment,
         reason: stringValue(body, 'reason'),
       } as TransitionAdminOperationalJobInput;
-      return sendResult(reply, await handlers.transitionJob(dependencies.operations, input), 200);
+      return sendOperationResult(
+        reply,
+        await handlers.transitionJob(dependencies.operations, input),
+        200,
+        {
+          commandId: input.commandId,
+          correlationId: input.correlationId,
+          environment: targetEnvironment,
+          subjectId: input.jobId,
+        },
+      );
     },
   );
 
@@ -526,7 +597,17 @@ export const registerAdminOperationsRoutes = (
         remote: body['remote'],
         targetEnvironment,
       };
-      return sendResult(reply, await handlers.resolveConflict(dependencies.operations, input), 200);
+      return sendOperationResult(
+        reply,
+        await handlers.resolveConflict(dependencies.operations, input),
+        200,
+        {
+          commandId: input.commandId,
+          correlationId: input.correlationId,
+          environment: targetEnvironment,
+          subjectId: input.subjectId,
+        },
+      );
     },
   );
 
@@ -575,7 +656,17 @@ export const registerAdminOperationsRoutes = (
         compensationDefined: booleanValue(body, 'compensationDefined'),
         targetEnvironment,
       };
-      return sendResult(reply, await handlers.recoverIncident(dependencies.operations, input), 202);
+      return sendOperationResult(
+        reply,
+        await handlers.recoverIncident(dependencies.operations, input),
+        202,
+        {
+          commandId: parsed.commandId,
+          correlationId: parsed.correlationId,
+          environment: targetEnvironment,
+          subjectId: input.incidentId,
+        },
+      );
     },
   );
 
@@ -679,10 +770,16 @@ export const registerAdminOperationsRoutes = (
         productionStrongAccess: booleanValue(body, 'productionStrongAccess'),
         reason: parsed.reason,
       } as ChangeAdminConfigurationInput;
-      return sendResult(
+      return sendOperationResult(
         reply,
         await handlers.changeConfiguration(dependencies.operations, input),
         200,
+        {
+          commandId: parsed.commandId,
+          correlationId: parsed.correlationId,
+          environment: targetEnvironment,
+          subjectId: input.configurationId,
+        },
       );
     },
   );
@@ -728,7 +825,17 @@ export const registerAdminOperationsRoutes = (
         finalReceiptRequired: booleanValue(body, 'finalReceiptRequired'),
         targetEnvironment,
       };
-      return sendResult(reply, await handlers.executePrivacy(dependencies.operations, input), 202);
+      return sendOperationResult(
+        reply,
+        await handlers.executePrivacy(dependencies.operations, input),
+        202,
+        {
+          commandId: parsed.commandId,
+          correlationId: parsed.correlationId,
+          environment: targetEnvironment,
+          subjectId: input.caseId,
+        },
+      );
     },
   );
 
@@ -765,7 +872,17 @@ export const registerAdminOperationsRoutes = (
       safeRestorationDefined: booleanValue(body, 'safeRestorationDefined'),
       targetEnvironment,
     };
-    return sendResult(reply, await handlers.stopCapability(dependencies.operations, input), 202);
+    return sendOperationResult(
+      reply,
+      await handlers.stopCapability(dependencies.operations, input),
+      202,
+      {
+        commandId: input.commandId,
+        correlationId: input.correlationId,
+        environment: targetEnvironment,
+        subjectId: input.capability,
+      },
+    );
   });
 
   return Promise.resolve();

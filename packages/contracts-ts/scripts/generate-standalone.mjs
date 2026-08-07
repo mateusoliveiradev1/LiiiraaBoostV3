@@ -27,13 +27,52 @@ const ajv = new Ajv2020({
   code: { esm: true, source: true },
 });
 ajv.addKeyword('x-liiiraa-generated');
-for (const definition of [
+const definitions = [
   ...Object.values(diagnostic.$defs),
   ...Object.values(shell.$defs),
   ...Object.values(controlPlane.$defs),
   ...Object.values(web.$defs),
-]) {
-  if (ajv.getSchema(definition.$id) === undefined) ajv.addSchema(definition);
+];
+const definitionsById = new Map(
+  definitions.map((definition) => [definition.$id, definition]),
+);
+const registeredDefinitionIds = new Set();
+const referencedDefinitionIds = (definition) => {
+  const references = new Set();
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (value === null || typeof value !== 'object') return;
+    if (typeof value.$ref === 'string') references.add(value.$ref.split('#', 1)[0]);
+    Object.values(value).forEach(visit);
+  };
+  visit(definition);
+  return references;
+};
+const pendingDefinitions = [...definitionsById.values()];
+while (pendingDefinitions.length > 0) {
+  const readyDefinitions = pendingDefinitions.filter((definition) =>
+    [...referencedDefinitionIds(definition)].every(
+      (reference) =>
+        reference.length === 0 ||
+        !definitionsById.has(reference) ||
+        registeredDefinitionIds.has(reference),
+    ),
+  );
+  if (readyDefinitions.length === 0) {
+    throw new Error(
+      `Generated schema definitions contain an unresolved reference cycle: ${pendingDefinitions
+        .map((definition) => definition.$id)
+        .join(', ')}`,
+    );
+  }
+  for (const definition of readyDefinitions) {
+    if (ajv.getSchema(definition.$id) === undefined) ajv.addSchema(definition);
+    registeredDefinitionIds.add(definition.$id);
+    pendingDefinitions.splice(pendingDefinitions.indexOf(definition), 1);
+  }
 }
 ajv.addSchema(web);
 ajv.addSchema(controlPlane);

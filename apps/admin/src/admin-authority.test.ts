@@ -121,9 +121,12 @@ describe('complete typed Admin query authority', () => {
       'approvals',
       'jobs',
       'incidents',
+      'exports',
       'configurations',
       'capacity',
+      'environments',
       'audit',
+      'alerts',
       'privacy',
       'emergency',
     ]);

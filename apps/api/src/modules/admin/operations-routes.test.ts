@@ -55,6 +55,15 @@ const session = {
   scopes: ['support-cases', 'jobs', 'incidents', 'configuration', 'privacy'],
 };
 
+const completedOperation = (outcome: string, detail: Readonly<Record<string, unknown>> = {}) => ({
+  ok: true,
+  outcome,
+  auditReference: `audit-${outcome}`,
+  receiptId: `receipt-${outcome}`,
+  occurredAt: now,
+  ...detail,
+});
+
 const buildApp = async (overrides: Readonly<Record<string, unknown>> = {}, rateLimit = true) => {
   const operations = {
     search: vi.fn(() =>
@@ -65,21 +74,23 @@ const buildApp = async (overrides: Readonly<Record<string, unknown>> = {}, rateL
       }),
     ),
     transitionJob: vi.fn(() =>
-      Promise.resolve({ ok: true, outcome: 'job-transitioned', state: { status: 'completed' } }),
+      Promise.resolve(completedOperation('job-transitioned', { state: { status: 'completed' } })),
     ),
-    resolveConflict: vi.fn(() => Promise.resolve({ ok: true, outcome: 'conflict-merged' })),
+    resolveConflict: vi.fn(() => Promise.resolve(completedOperation('conflict-merged'))),
     recoverIncident: vi.fn(() =>
-      Promise.resolve({ ok: true, outcome: 'recovery-started', incident: { incidentId: 'one' } }),
+      Promise.resolve(
+        completedOperation('recovery-started', { incident: { incidentId: 'one' } }),
+      ),
     ),
     startExport: vi.fn(() =>
       Promise.resolve({ ok: true, outcome: 'export-started', export: { exportId: 'export-one' } }),
     ),
     changeConfiguration: vi.fn(() =>
-      Promise.resolve({ ok: true, outcome: 'configuration-transitioned' }),
+      Promise.resolve(completedOperation('configuration-transitioned')),
     ),
-    executePrivacy: vi.fn(() => Promise.resolve({ ok: true, outcome: 'privacy-case-started' })),
+    executePrivacy: vi.fn(() => Promise.resolve(completedOperation('privacy-case-started'))),
     stopCapability: vi.fn(() =>
-      Promise.resolve({ ok: true, outcome: 'capability-paused', globalStop: false }),
+      Promise.resolve(completedOperation('capability-paused', { globalStop: false })),
     ),
     ...overrides,
   };

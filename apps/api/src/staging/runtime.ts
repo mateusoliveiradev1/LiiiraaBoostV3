@@ -17,10 +17,8 @@ import type {
   SubscriptionState,
   SupportCaseState,
 } from '@liiiraa/control-plane-application';
-import type {
-  DeviceBindingProjectionJson,
-  SubscriptionProjectionJson,
-} from '@liiiraa/contracts-ts';
+import type { DeviceBindingProjectionJson, SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts';
 import {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
@@ -1240,34 +1238,380 @@ const approvalQueries = (
 };
 
 const OPERATIONS_QUERY = Object.freeze({
-  queues: `SELECT job_id AS record_id, kind, status, progress, updated_at FROM admin_operational_jobs`,
-  views: `SELECT view_id AS record_id, visibility, name, updated_at FROM admin_saved_views`,
-  inbox: `SELECT item_id AS record_id, scope, state, severity, masked_title, occurred_at FROM admin_inbox_items`,
-  jobs: `SELECT job_id AS record_id, kind, status, progress, updated_at FROM admin_operational_jobs`,
-  incidents: `SELECT incident_id AS record_id, severity, status, owner_id, started_at FROM admin_incidents`,
-  exports: `SELECT export_id AS record_id, purpose, status, masked, encrypted, created_at, expires_at FROM admin_sensitive_exports`,
-  configurations: `SELECT configuration_id AS record_id, version, status, created_at FROM admin_configuration_versions`,
-  capacity: `SELECT sample_id AS record_id, capability, utilization, sampled_at FROM admin_capacity_samples`,
-  environments: `SELECT id::text AS record_id, environment_identity, created_at FROM admin_operational_environments`,
-  'audit-events': `SELECT event_id AS record_id, action, scope, outcome, occurred_at FROM admin_operations_audit`,
-  alerts: `SELECT alert_id AS record_id, severity, status, created_at FROM admin_alerts`,
-  'privacy-cases': `SELECT case_id AS record_id, legal_basis, status, created_at FROM admin_privacy_cases`,
-  'emergency-stops': `SELECT stop_id AS record_id, capability, status, requested_at, expires_at FROM admin_emergency_controls`,
+  queues: `SELECT job.environment_id, job.job_id AS record_id, job.kind, job.status, job.version, job.progress,
+      job.affected_items, job.receipt_id, job.claimed_by, job.created_at, job.updated_at,
+      COUNT(item.item_id)::integer AS total_items,
+      COUNT(item.item_id) FILTER (WHERE item.status = 'completed')::integer AS completed_items,
+      COUNT(item.item_id) FILTER (WHERE item.status = 'failed')::integer AS failed_items
+    FROM admin_operational_jobs AS job
+    LEFT JOIN admin_operational_job_items AS item
+      ON item.environment_id = job.environment_id AND item.job_id = job.job_id
+    GROUP BY job.environment_id, job.job_id`,
+  views: `SELECT environment_id, id AS record_id, kind, name, query_text, version, updated_at FROM admin_saved_views`,
+  inbox: `SELECT environment_id, record_id, scope, owner_id, status, priority, masked_title, occurred_at, updated_at, version FROM admin_inbox_items`,
+  jobs: `SELECT job.environment_id, job.job_id AS record_id, job.kind, job.status, job.version, job.progress,
+      job.affected_items, job.receipt_id, job.claimed_by, job.created_at, job.updated_at,
+      COUNT(item.item_id)::integer AS total_items,
+      COUNT(item.item_id) FILTER (WHERE item.status = 'completed')::integer AS completed_items,
+      COUNT(item.item_id) FILTER (WHERE item.status = 'failed')::integer AS failed_items
+    FROM admin_operational_jobs AS job
+    LEFT JOIN admin_operational_job_items AS item
+      ON item.environment_id = job.environment_id AND item.job_id = job.job_id
+    GROUP BY job.environment_id, job.job_id`,
+  incidents: `SELECT environment_id, incident_id AS record_id, procedure_version, severity, status, version,
+      owner_id, substitute_id, started_at, updated_at FROM admin_incidents`,
+  exports: `SELECT environment_id, export_id AS record_id, actor_id, purpose, fields, status, masked, encrypted,
+      created_at, expires_at FROM admin_sensitive_exports`,
+  configurations: `SELECT environment_id, configuration_id AS record_id, version, status, cohort, known_version,
+      previous_version, created_at FROM admin_configuration_versions`,
+  capacity: `SELECT sample.environment_id, sample.sample_id AS record_id, sample.resource, sample.current_use,
+      sample.safe_limit, sample.sampled_at, forecast.level, forecast.forecast_exhaustion_days,
+      forecast.early_action_required
+    FROM admin_capacity_samples AS sample
+    LEFT JOIN LATERAL (
+      SELECT level, forecast_exhaustion_days, early_action_required
+      FROM admin_capacity_forecasts
+      WHERE environment_id = sample.environment_id AND resource = sample.resource
+      ORDER BY calculated_at DESC LIMIT 1
+    ) AS forecast ON TRUE`,
+  environments: `SELECT id AS environment_id, id::text AS record_id, environment_identity, created_at FROM admin_operational_environments`,
+  'audit-events': `SELECT environment_id, event_id AS record_id, actor_id, subject_id, action, scope, occurred_at FROM admin_operations_audit`,
+  alerts: `SELECT alert.environment_id, alert.alert_id AS record_id, alert.subject_id, alert.severity,
+      alert.channel_reference, alert.status, alert.created_at, alert.updated_at,
+      acknowledgement.occurred_at AS acknowledged_at
+    FROM admin_alerts AS alert
+    LEFT JOIN admin_alert_acknowledgements AS acknowledgement
+      ON acknowledgement.environment_id = alert.environment_id AND acknowledgement.alert_id = alert.alert_id`,
+  'privacy-cases': `SELECT environment_id, case_id AS record_id, actor_id, legal_basis, status, version,
+      created_at, completed_at, retention_expires_at FROM admin_privacy_cases`,
+  'emergency-stops': `SELECT environment_id, stop_id AS record_id, actor_id, capability, reason, status, version,
+      requested_at, expires_at, restored_at FROM admin_emergency_controls`,
 } as const);
+
+const operationTimestamp = (value: unknown): string => {
+  const projected = text(value);
+  if (projected.length === 0 || Number.isNaN(Date.parse(projected))) {
+    throw new Error('ADMIN_OPERATION_TIMESTAMP_INVALID');
+  }
+  return projected;
+};
+
+const operationVersion = (row: Readonly<Record<string, unknown>>, observedAt: string): string => {
+  const persisted = text(row['version']);
+  if (/^(?:0|[1-9][0-9]{0,18})$/u.test(persisted)) return persisted;
+  return String(Math.max(1, Date.parse(observedAt)));
+};
+
+const operationProjectionMetadata = (
+  kind: string,
+  recordId: string,
+  version: string,
+  observedAt: string,
+  environmentKind: AdminEnvironment,
+) => ({
+  schemaVersion: '1.0' as const,
+  aggregateVersion: version,
+  etag: `admin-operations-${version}`,
+  correlationId: `operations-${recordId}`,
+  provenance: 'postgres-authority' as const,
+  environment: {
+    environmentId: 'synthetic-non-production',
+    kind: environmentKind,
+    label: environmentKind === 'staging' ? 'Staging' : 'Development',
+  },
+  freshness: {
+    state: 'live' as const,
+    source: 'postgres-admin-operations',
+    sequence: version,
+    observedAt,
+  },
+  kind,
+});
+
+const operationJobType = (value: unknown) => {
+  const kind = text(value);
+  return [
+    'invitation-import',
+    'invitation-export',
+    'invitation-resend',
+    'invitation-revoke',
+    'reconciliation',
+    'recalculation',
+    'release',
+    'configuration-export',
+    'privacy-export',
+  ].includes(kind)
+    ? kind
+    : 'reconciliation';
+};
+
+export const projectStagingAdminOperationRecord = (
+  resource: keyof typeof OPERATIONS_QUERY,
+  row: Readonly<Record<string, unknown>>,
+  environmentKind: AdminEnvironment,
+): Readonly<Record<string, unknown>> => {
+  const recordId = text(row['record_id']);
+  if (recordId.length === 0 || recordId.length > 128) {
+    throw new Error('ADMIN_OPERATION_IDENTIFIER_INVALID');
+  }
+  const observedAt = operationTimestamp(
+    row['updated_at'] ??
+      row['occurred_at'] ??
+      row['sampled_at'] ??
+      row['created_at'] ??
+      row['requested_at'],
+  );
+  const version = operationVersion(row, observedAt);
+  const metadata = (kind: string) =>
+    operationProjectionMetadata(kind, recordId, version, observedAt, environmentKind);
+  let projection: Readonly<Record<string, unknown>>;
+  switch (resource) {
+    case 'queues':
+    case 'jobs': {
+      const affectedItems = Number(row['affected_items']);
+      const totalItems = Math.max(affectedItems, Number(row['total_items']));
+      projection = {
+        ...metadata('admin-job-projection'),
+        jobId: recordId,
+        jobType: operationJobType(row['kind']),
+        state: text(row['status']),
+        progressPercent: Number(row['progress']),
+        totalItems,
+        completedItems: Number(row['completed_items']),
+        failedItems: Number(row['failed_items']),
+        ownerReference: text(row['claimed_by']) || 'unassigned',
+        startedAt: operationTimestamp(row['created_at']),
+        ...(text(row['receipt_id']).length === 0
+          ? {}
+          : { receiptReference: text(row['receipt_id']) }),
+        ...(text(row['status']) === 'completed' ? { completedAt: observedAt } : {}),
+      };
+      break;
+    }
+    case 'views':
+      projection = {
+        ...metadata('admin-saved-view-projection'),
+        savedViewId: recordId,
+        domain: 'operation',
+        name: text(row['name']),
+        visibility: text(row['kind']),
+        state: {
+          filters: text(row['query_text']).length === 0 ? [] : [text(row['query_text'])],
+          sort: [],
+          density: 'comfortable',
+        },
+      };
+      break;
+    case 'inbox':
+      projection = {
+        ...metadata('admin-inbox-item-projection'),
+        inboxItemId: recordId,
+        severity:
+          text(row['priority']) === 'critical'
+            ? 'critical'
+            : text(row['priority']) === 'urgent'
+              ? 'warning'
+              : 'information',
+        state:
+          text(row['status']) === 'closed'
+            ? 'resolved'
+            : text(row['status']) === 'acknowledged'
+              ? 'acknowledged'
+              : 'open',
+        title: text(row['masked_title']),
+        ...(text(row['owner_id']).length === 0 ? {} : { ownerReference: text(row['owner_id']) }),
+        relatedRecordReference: recordId,
+        updatedAt: observedAt,
+      };
+      break;
+    case 'incidents':
+      projection = {
+        ...metadata('admin-incident-projection'),
+        incidentId: recordId,
+        severity:
+          text(row['severity']) === 'critical'
+            ? 'critical'
+            : text(row['severity']) === 'urgent'
+              ? 'warning'
+              : 'information',
+        state:
+          text(row['status']) === 'recovery-started'
+            ? 'contained'
+            : text(row['status']) === 'recovered' || text(row['status']) === 'closed'
+              ? 'resolved'
+              : 'open',
+        title: `Incident ${recordId}`,
+        ownerReference: text(row['owner_id']),
+        substituteReference: text(row['substitute_id']),
+        affectedCapabilities: [text(row['procedure_version'])],
+        impactReferences: [`incident-${recordId}`],
+        nextUpdateAt: observedAt,
+      };
+      break;
+    case 'exports':
+      projection = {
+        ...metadata('admin-export-projection'),
+        exportId: recordId,
+        state: text(row['status']),
+        actorReference: text(row['actor_id']),
+        purposeRedacted: 'Restricted administrative export purpose',
+        fieldReferences: row['fields'],
+        encrypted: true,
+        masked: true,
+        createdAt: operationTimestamp(row['created_at']),
+        expiresAt: operationTimestamp(row['expires_at']),
+      };
+      break;
+    case 'configurations':
+      projection = {
+        ...metadata('admin-configuration-projection'),
+        configurationId: recordId,
+        state:
+          text(row['status']) === 'rolling-out'
+            ? 'approval-pending'
+            : text(row['status']) === 'published'
+              ? 'published'
+              : text(row['status']) === 'paused'
+                ? 'paused'
+                : text(row['status']) === 'rolled-back'
+                  ? 'rolled-back'
+                  : 'draft',
+        version: text(row['known_version']),
+        cohortReference: text(row['cohort']),
+        validationReference: `validated-${text(row['known_version'])}`,
+        ...(text(row['previous_version']).length === 0
+          ? {}
+          : { rollbackVersion: text(row['previous_version']) }),
+      };
+      break;
+    case 'capacity': {
+      const days = Number(row['forecast_exhaustion_days']);
+      projection = {
+        ...metadata('admin-capacity-projection'),
+        capacityId: recordId,
+        resourceReference: text(row['resource']),
+        currentUse: text(row['current_use']),
+        safeLimit: text(row['safe_limit']),
+        ...(Number.isSafeInteger(days) && days >= 0
+          ? { forecastExhaustionAt: new Date(Date.parse(observedAt) + days * 86_400_000).toISOString() }
+          : {}),
+        recommendedAction: row['early_action_required'] === true ? 'review-capacity' : 'none',
+        observedAt,
+      };
+      break;
+    }
+    case 'environments':
+      projection = {
+        ...metadata('admin-environment-projection'),
+        environmentReference: text(row['environment_identity']),
+        sessionEnvironment: environmentKind,
+        integrationEnvironment: environmentKind,
+        health: 'healthy',
+        updatedAt: observedAt,
+      };
+      break;
+    case 'audit-events':
+      projection = {
+        ...metadata('admin-audit-event-projection'),
+        auditEventId: recordId,
+        action: text(row['action']),
+        scope: text(row['scope']),
+        outcome: 'applied',
+        actorReference: text(row['actor_id']),
+        subjectReference: text(row['subject_id']),
+        occurredAt: observedAt,
+      };
+      break;
+    case 'alerts':
+      projection = {
+        ...metadata('admin-alert-projection'),
+        alertId: recordId,
+        severity:
+          text(row['severity']) === 'critical'
+            ? 'critical'
+            : text(row['severity']) === 'urgent'
+              ? 'warning'
+              : 'information',
+        state:
+          text(row['status']) === 'acknowledged'
+            ? 'acknowledged'
+            : text(row['status']) === 'failed'
+              ? 'failed'
+              : 'open',
+        ownerReference: text(row['channel_reference']),
+        subjectReference: text(row['subject_id']),
+        safeSummary: `Alert ${recordId}`,
+        ...(text(row['acknowledged_at']).length === 0
+          ? {}
+          : { acknowledgedAt: operationTimestamp(row['acknowledged_at']) }),
+      };
+      break;
+    case 'privacy-cases':
+      projection = {
+        ...metadata('admin-privacy-case-projection'),
+        privacyCaseId: recordId,
+        state:
+          text(row['status']) === 'running'
+            ? 'executing'
+            : text(row['status']) === 'completed'
+              ? 'completed'
+              : text(row['status']) === 'failed'
+                ? 'denied'
+                : 'approval-pending',
+        requestType: 'unspecified',
+        subjectReference: text(row['actor_id']),
+        legalBasisReference: 'legal-basis-recorded',
+        dataCategoryReferences: ['requested-data-scope-redacted'],
+        retentionReferences: [`retention-until-${operationTimestamp(row['retention_expires_at'])}`],
+        ownerReference: text(row['actor_id']),
+      };
+      break;
+    case 'emergency-stops':
+      projection = {
+        ...metadata('admin-emergency-stop-projection'),
+        stopId: recordId,
+        capabilityReference: text(row['capability']),
+        state: text(row['status']),
+        actorReference: text(row['actor_id']),
+        reasonRedacted: 'Restricted emergency containment reason',
+        requestedAt: operationTimestamp(row['requested_at']),
+        expiresAt: operationTimestamp(row['expires_at']),
+        ...(text(row['restored_at']).length === 0
+          ? {}
+          : { restoredAt: operationTimestamp(row['restored_at']) }),
+        safeRestorationDefined: true,
+      };
+      break;
+  }
+  if (!controlPlaneDocumentValidator(projection)) {
+    throw new Error(`ADMIN_OPERATION_PROJECTION_INVALID:${resource}:${recordId}`);
+  }
+  return Object.freeze(projection);
+};
 
 const operationsQueries = (
   database: PersistentAdminDatabase,
+  environmentKind: AdminEnvironment,
 ): AdminOperationsRouteDependencies['queries'] => ({
   list: async ({ resource, targetEnvironment, limit }) => {
     if (targetEnvironment === 'production') throw new Error('PRODUCTION_ADMIN_QUERY_FORBIDDEN');
     const result = await database.query(
-      `${OPERATIONS_QUERY[resource]} WHERE environment_id = $1 ORDER BY 1 DESC LIMIT $2`,
+      `SELECT * FROM (${OPERATIONS_QUERY[resource]}) AS authority_record
+       WHERE authority_record.environment_id = $1 ORDER BY authority_record.record_id DESC LIMIT $2`,
       [ADMIN_OPERATIONS_ENVIRONMENT_ID, limit],
     );
+    const observedAt = new Date().toISOString();
     return {
-      records: result.rows,
+      records: result.rows.map((row) =>
+        projectStagingAdminOperationRecord(resource, row, environmentKind),
+      ),
       nextCursor: null,
-      freshness: { state: 'live', sequence: '0', observedAt: new Date().toISOString() },
+      freshness: {
+        state: 'live',
+        source: 'postgres-admin-operations',
+        sequence: String(Math.max(1, Date.parse(observedAt))),
+        observedAt,
+      },
     };
   },
 });
@@ -1525,7 +1869,7 @@ export const createPersistentStagingAdminAuthority = ({
       allowedOrigin: adminOrigin,
       csrfSecret: authSecret,
       operations,
-      queries: operationsQueries(database),
+      queries: operationsQueries(database, environmentId),
       freshness: {
         current: async (
           input: Parameters<AdminOperationsRouteDependencies['freshness']['current']>[0],

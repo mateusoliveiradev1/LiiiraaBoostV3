@@ -227,12 +227,14 @@ const collectionFor = (routeId: AdminAuthorityRoute): AdminProjectionCollection 
 
 const ADMIN_RESOURCE_QUERY: Readonly<Record<string, AdminQueryFamily>> = Object.freeze({
   'access-context': 'briefing',
-  alerts: 'incidents',
+  alerts: 'alerts',
   'audit-events': 'audit',
   capacity: 'capacity',
   configurations: 'configurations',
   conflicts: 'configurations',
   'emergency-stops': 'emergency',
+  environments: 'environments',
+  exports: 'exports',
   governance: 'approvals',
   incidents: 'incidents',
   inbox: 'briefing',
@@ -789,7 +791,21 @@ export const AdminAuthorityProvider = ({
     if (session === null || session === undefined) return undefined;
     const controller = new AbortController();
     void refetchAdminResources(
-      ['access-context', 'inbox', 'governance', 'jobs', 'incidents', 'capacity'],
+      [
+        'access-context',
+        'inbox',
+        'governance',
+        'jobs',
+        'incidents',
+        'exports',
+        'configurations',
+        'capacity',
+        'environments',
+        'audit-events',
+        'alerts',
+        'privacy-cases',
+        'emergency-stops',
+      ],
       controller.signal,
     );
     return () => {

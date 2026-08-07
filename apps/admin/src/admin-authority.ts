@@ -19,9 +19,12 @@ export const ADMIN_QUERY_FAMILIES = Object.freeze([
   'approvals',
   'jobs',
   'incidents',
+  'exports',
   'configurations',
   'capacity',
+  'environments',
   'audit',
+  'alerts',
   'privacy',
   'emergency',
 ] as const);
@@ -445,11 +448,14 @@ const admitBreakGlass = (value: unknown): BreakGlassMetadata | null => {
 
 const QUERY_PATHS = Object.freeze({
   approvals: '/v1/admin/governance/approvals',
+  alerts: '/v1/admin/operations/alerts',
   audit: '/v1/admin/operations/audit-events',
   briefing: '/v1/admin/operations/queues',
   capacity: '/v1/admin/operations/capacity',
   configurations: '/v1/admin/operations/configurations',
   emergency: '/v1/admin/operations/emergency-stops',
+  environments: '/v1/admin/operations/environments',
+  exports: '/v1/admin/operations/exports',
   incidents: '/v1/admin/operations/incidents',
   invitations: '/v1/admin/invitations',
   jobs: '/v1/admin/operations/jobs',
@@ -460,10 +466,13 @@ const QUERY_PATHS = Object.freeze({
 
 const OPERATION_QUERY_FAMILIES = new Set<AdminQueryFamily>([
   'audit',
+  'alerts',
   'briefing',
   'capacity',
   'configurations',
   'emergency',
+  'environments',
+  'exports',
   'incidents',
   'jobs',
   'privacy',
@@ -849,12 +858,37 @@ export const createAdminAuthority = ({
     'governance-break-glass',
   ]);
 
-  const governancePayload = async (
+  const OPERATIONS_MUTATIONS = new Set<AdminMutationFamily>([
+    'transition-job',
+    'resolve-conflict',
+    'recover-incident',
+    'export-data',
+    'transition-configuration',
+    'execute-privacy',
+    'emergency-stop',
+  ]);
+
+  const mutationPayload = async (
     input: AdminMutationInput,
     correlation: string,
   ): Promise<Readonly<Record<string, unknown>> | null> => {
-    if (!GOVERNANCE_MUTATIONS.has(input.family) && input.family !== 'export-data') {
+    if (!GOVERNANCE_MUTATIONS.has(input.family) && !OPERATIONS_MUTATIONS.has(input.family)) {
       return input.payload;
+    }
+    const operationRequiresCommand =
+      input.family === 'recover-incident' ||
+      input.family === 'export-data' ||
+      input.family === 'transition-configuration' ||
+      input.family === 'execute-privacy';
+    if (OPERATIONS_MUTATIONS.has(input.family) && !operationRequiresCommand) {
+      return Object.freeze({
+        ...input.payload,
+        commandId: input.idempotencyKey || commandId(),
+        correlationId: correlation,
+        idempotencyKey: input.idempotencyKey,
+        expectedVersion: input.expectedVersion ?? '1',
+        reason: input.reason?.trim() ?? 'Reviewed bounded administrative operation',
+      });
     }
     const session = activeSession ?? (await readSession());
     if (session === null) return null;
@@ -871,18 +905,40 @@ export const createAdminAuthority = ({
     if (target === undefined) return null;
     const expectedVersion = input.expectedVersion ?? '1';
     const expectedEtag = input.expectedEtag ?? `admin-${target}-v${expectedVersion}`;
-    if (input.family === 'export-data') {
-      return Object.freeze({
+    if (OPERATIONS_MUTATIONS.has(input.family)) {
+      const reason = input.reason?.trim() ?? 'Reviewed bounded administrative operation';
+      const base = Object.freeze({
         ...input.payload,
+        commandId: input.idempotencyKey || commandId(),
+        correlationId: correlation,
+        idempotencyKey: input.idempotencyKey,
+        expectedVersion,
+        reason,
+      });
+      const commandAction =
+        input.family === 'recover-incident'
+          ? 'resolve-incident'
+          : input.family === 'transition-configuration'
+            ? input.payload['transition'] === 'rollback'
+              ? 'rollback-configuration'
+              : 'publish-configuration'
+            : input.family === 'execute-privacy'
+              ? 'execute-privacy-case'
+              : input.family === 'export-data'
+                ? 'export-sensitive-data'
+                : null;
+      if (commandAction === null) return base;
+      return Object.freeze({
+        ...base,
         command: {
           schemaVersion: '1.0',
           kind: 'admin-operation-command',
           commandId: input.idempotencyKey || commandId(),
           actorId: session.actorId,
           activeFunction: session.role,
-          action: 'export-sensitive-data',
+          action: commandAction,
           targetReferences: [target],
-          reason: input.reason?.trim() ?? '',
+          reason,
           expectedVersion,
           expectedEtag,
           approvalReferences: input.approvalReferences ?? [],
@@ -1026,7 +1082,7 @@ export const createAdminAuthority = ({
         const correlation = correlationId();
         const token = await ensureCsrfToken(correlation);
         if (token === null) return { code: 'unavailable', status: 'error' };
-        const payload = await governancePayload(input, correlation);
+        const payload = await mutationPayload(input, correlation);
         if (payload === null) return { code: 'unauthorized', status: 'denied' };
         const response = await transport(`${baseUrl}${path}`, {
           body: JSON.stringify({

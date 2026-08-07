@@ -996,6 +996,346 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminAction {
         value.parse()
     }
 }
+#[doc = "`AdminAlertProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminAlertProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"alertId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"ownerReference\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"safeSummary\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"severity\","]
+#[doc = "    \"state\","]
+#[doc = "    \"subjectReference\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"acknowledgedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"alertId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"deadlineAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-alert-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"ownerReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"safeSummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneShortText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"severity\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminSeverity\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminAlertState\""]
+#[doc = "    },"]
+#[doc = "    \"subjectReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminAlertProjection {
+    #[serde(
+        rename = "acknowledgedAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub acknowledged_at: ::std::option::Option<::std::string::String>,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "alertId")]
+    pub alert_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(
+        rename = "deadlineAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub deadline_at: ::std::option::Option<::std::string::String>,
+    pub environment: AdminEnvironmentIdentity,
+    pub etag: AuthorityEtag,
+    pub freshness: AdminFreshness,
+    pub kind: AdminAlertProjectionKind,
+    #[serde(rename = "ownerReference")]
+    pub owner_reference: ControlPlaneIdentifier,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "safeSummary")]
+    pub safe_summary: ControlPlaneShortText,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminAlertProjectionSchemaVersion,
+    pub severity: AdminSeverity,
+    pub state: AdminAlertState,
+    #[serde(rename = "subjectReference")]
+    pub subject_reference: ControlPlaneIdentifier,
+}
+#[doc = "`AdminAlertProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-alert-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAlertProjectionKind {
+    #[serde(rename = "admin-alert-projection")]
+    AdminAlertProjection,
+}
+impl ::std::fmt::Display for AdminAlertProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminAlertProjection => f.write_str("admin-alert-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAlertProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-alert-projection" => Ok(Self::AdminAlertProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAlertProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAlertProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAlertProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminAlertProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAlertProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminAlertProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAlertProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAlertProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAlertProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAlertProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminAlertState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminAlertState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"open\","]
+#[doc = "    \"acknowledged\","]
+#[doc = "    \"resolved\","]
+#[doc = "    \"failed\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAlertState {
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "acknowledged")]
+    Acknowledged,
+    #[serde(rename = "resolved")]
+    Resolved,
+    #[serde(rename = "failed")]
+    Failed,
+}
+impl ::std::fmt::Display for AdminAlertState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Open => f.write_str("open"),
+            Self::Acknowledged => f.write_str("acknowledged"),
+            Self::Resolved => f.write_str("resolved"),
+            Self::Failed => f.write_str("failed"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAlertState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "open" => Ok(Self::Open),
+            "acknowledged" => Ok(Self::Acknowledged),
+            "resolved" => Ok(Self::Resolved),
+            "failed" => Ok(Self::Failed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAlertState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAlertState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAlertState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminAuditEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1083,6 +1423,249 @@ pub struct AdminAuditEvent {
     pub result: AdminAuditEventResult,
     pub role: WebIdentifier,
 }
+#[doc = "`AdminAuditEventProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminAuditEventProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"action\","]
+#[doc = "    \"actorReference\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"auditEventId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"scope\","]
+#[doc = "    \"subjectReference\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"actorReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"auditEventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-audit-event-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminOperationOutcome\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"scope\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"subjectReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminAuditEventProjection {
+    pub action: ControlPlaneIdentifier,
+    #[serde(rename = "actorReference")]
+    pub actor_reference: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "auditEventId")]
+    pub audit_event_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub environment: AdminEnvironmentIdentity,
+    pub etag: AuthorityEtag,
+    pub freshness: AdminFreshness,
+    pub kind: AdminAuditEventProjectionKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    pub outcome: AdminOperationOutcome,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminAuditEventProjectionSchemaVersion,
+    pub scope: ControlPlaneIdentifier,
+    #[serde(rename = "subjectReference")]
+    pub subject_reference: ControlPlaneIdentifier,
+}
+#[doc = "`AdminAuditEventProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-audit-event-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAuditEventProjectionKind {
+    #[serde(rename = "admin-audit-event-projection")]
+    AdminAuditEventProjection,
+}
+impl ::std::fmt::Display for AdminAuditEventProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminAuditEventProjection => f.write_str("admin-audit-event-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAuditEventProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-audit-event-projection" => Ok(Self::AdminAuditEventProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAuditEventProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAuditEventProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAuditEventProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminAuditEventProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminAuditEventProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminAuditEventProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminAuditEventProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminAuditEventProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminAuditEventProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminAuditEventProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminAuditEventResult`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1143,6 +1726,266 @@ impl ::std::convert::TryFrom<&::std::string::String> for AdminAuditEventResult {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for AdminAuditEventResult {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminCapacityProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminCapacityProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"capacityId\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"currentUse\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedAt\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"recommendedAction\","]
+#[doc = "    \"resourceReference\","]
+#[doc = "    \"safeLimit\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"capacityId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"currentUse\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"forecastExhaustionAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"growthPerDay\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-capacity-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"recommendedAction\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"resourceReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"safeLimit\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminCapacityProjection {
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "capacityId")]
+    pub capacity_id: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "currentUse")]
+    pub current_use: ::std::string::String,
+    pub environment: AdminEnvironmentIdentity,
+    pub etag: AuthorityEtag,
+    #[serde(
+        rename = "forecastExhaustionAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub forecast_exhaustion_at: ::std::option::Option<::std::string::String>,
+    pub freshness: AdminFreshness,
+    #[serde(
+        rename = "growthPerDay",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub growth_per_day: ::std::option::Option<u32>,
+    pub kind: AdminCapacityProjectionKind,
+    #[serde(rename = "observedAt")]
+    pub observed_at: ::std::string::String,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "recommendedAction")]
+    pub recommended_action: ControlPlaneIdentifier,
+    #[serde(rename = "resourceReference")]
+    pub resource_reference: ControlPlaneIdentifier,
+    #[serde(rename = "safeLimit")]
+    pub safe_limit: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminCapacityProjectionSchemaVersion,
+}
+#[doc = "`AdminCapacityProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-capacity-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminCapacityProjectionKind {
+    #[serde(rename = "admin-capacity-projection")]
+    AdminCapacityProjection,
+}
+impl ::std::fmt::Display for AdminCapacityProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminCapacityProjection => f.write_str("admin-capacity-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminCapacityProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-capacity-projection" => Ok(Self::AdminCapacityProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminCapacityProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminCapacityProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminCapacityProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminCapacityProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminCapacityProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminCapacityProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminCapacityProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminCapacityProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminCapacityProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminCapacityProjectionSchemaVersion {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -2217,6 +3060,345 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminDomain {
         value.parse()
     }
 }
+#[doc = "`AdminEmergencyStopProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminEmergencyStopProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"actorReference\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"capabilityReference\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"reasonRedacted\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"safeRestorationDefined\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\","]
+#[doc = "    \"stopId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"actorReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"capabilityReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-emergency-stop-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"reasonRedacted\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"restoredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"safeRestorationDefined\": {"]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEmergencyStopState\""]
+#[doc = "    },"]
+#[doc = "    \"stopId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminEmergencyStopProjection {
+    #[serde(rename = "actorReference")]
+    pub actor_reference: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "capabilityReference")]
+    pub capability_reference: ControlPlaneIdentifier,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub environment: AdminEnvironmentIdentity,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    pub freshness: AdminFreshness,
+    pub kind: AdminEmergencyStopProjectionKind,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "reasonRedacted")]
+    pub reason_redacted: RedactedAuthorityText,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(
+        rename = "restoredAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub restored_at: ::std::option::Option<::std::string::String>,
+    #[serde(rename = "safeRestorationDefined")]
+    pub safe_restoration_defined: bool,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminEmergencyStopProjectionSchemaVersion,
+    pub state: AdminEmergencyStopState,
+    #[serde(rename = "stopId")]
+    pub stop_id: ControlPlaneIdentifier,
+}
+#[doc = "`AdminEmergencyStopProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-emergency-stop-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminEmergencyStopProjectionKind {
+    #[serde(rename = "admin-emergency-stop-projection")]
+    AdminEmergencyStopProjection,
+}
+impl ::std::fmt::Display for AdminEmergencyStopProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminEmergencyStopProjection => f.write_str("admin-emergency-stop-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminEmergencyStopProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-emergency-stop-projection" => Ok(Self::AdminEmergencyStopProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminEmergencyStopProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminEmergencyStopProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminEmergencyStopProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminEmergencyStopProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminEmergencyStopProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminEmergencyStopProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminEmergencyStopProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminEmergencyStopProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminEmergencyStopProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminEmergencyStopProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminEmergencyStopState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminEmergencyStopState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"active\","]
+#[doc = "    \"expired\","]
+#[doc = "    \"restored\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminEmergencyStopState {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "expired")]
+    Expired,
+    #[serde(rename = "restored")]
+    Restored,
+}
+impl ::std::fmt::Display for AdminEmergencyStopState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Active => f.write_str("active"),
+            Self::Expired => f.write_str("expired"),
+            Self::Restored => f.write_str("restored"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminEmergencyStopState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "active" => Ok(Self::Active),
+            "expired" => Ok(Self::Expired),
+            "restored" => Ok(Self::Restored),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminEmergencyStopState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminEmergencyStopState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminEmergencyStopState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminEnvironmentIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -2326,6 +3508,589 @@ impl ::std::convert::TryFrom<&::std::string::String> for AdminEnvironmentKind {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for AdminEnvironmentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminEnvironmentProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminEnvironmentProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"environmentReference\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"health\","]
+#[doc = "    \"integrationEnvironment\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionEnvironment\","]
+#[doc = "    \"updatedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"environmentReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"health\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminOperationalHealth\""]
+#[doc = "    },"]
+#[doc = "    \"integrationEnvironment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentKind\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-environment-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sessionEnvironment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentKind\""]
+#[doc = "    },"]
+#[doc = "    \"updatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminEnvironmentProjection {
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    pub environment: AdminEnvironmentIdentity,
+    #[serde(rename = "environmentReference")]
+    pub environment_reference: ControlPlaneIdentifier,
+    pub etag: AuthorityEtag,
+    pub freshness: AdminFreshness,
+    pub health: AdminOperationalHealth,
+    #[serde(rename = "integrationEnvironment")]
+    pub integration_environment: AdminEnvironmentKind,
+    pub kind: AdminEnvironmentProjectionKind,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminEnvironmentProjectionSchemaVersion,
+    #[serde(rename = "sessionEnvironment")]
+    pub session_environment: AdminEnvironmentKind,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: ::std::string::String,
+}
+#[doc = "`AdminEnvironmentProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-environment-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminEnvironmentProjectionKind {
+    #[serde(rename = "admin-environment-projection")]
+    AdminEnvironmentProjection,
+}
+impl ::std::fmt::Display for AdminEnvironmentProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminEnvironmentProjection => f.write_str("admin-environment-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminEnvironmentProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-environment-projection" => Ok(Self::AdminEnvironmentProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminEnvironmentProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminEnvironmentProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminEnvironmentProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminEnvironmentProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminEnvironmentProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminEnvironmentProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminEnvironmentProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminEnvironmentProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminEnvironmentProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminEnvironmentProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminExportProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminExportProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"actorReference\","]
+#[doc = "    \"aggregateVersion\","]
+#[doc = "    \"correlationId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"encrypted\","]
+#[doc = "    \"environment\","]
+#[doc = "    \"etag\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"exportId\","]
+#[doc = "    \"fieldReferences\","]
+#[doc = "    \"freshness\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"masked\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"purposeRedacted\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"actorReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"aggregateVersion\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"correlationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CorrelationId\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"encrypted\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"environment\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"etag\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityEtag\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"exportId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"fieldReferences\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"freshness\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminFreshness\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"admin-export-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"masked\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuthorityProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"purposeRedacted\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedAuthorityText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminExportState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdminExportProjection {
+    #[serde(rename = "actorReference")]
+    pub actor_reference: ControlPlaneIdentifier,
+    #[serde(rename = "aggregateVersion")]
+    pub aggregate_version: ::std::string::String,
+    #[serde(rename = "correlationId")]
+    pub correlation_id: CorrelationId,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    pub encrypted: bool,
+    pub environment: AdminEnvironmentIdentity,
+    pub etag: AuthorityEtag,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    #[serde(rename = "exportId")]
+    pub export_id: ControlPlaneIdentifier,
+    #[serde(rename = "fieldReferences")]
+    pub field_references: ::std::vec::Vec<ControlPlaneIdentifier>,
+    pub freshness: AdminFreshness,
+    pub kind: AdminExportProjectionKind,
+    pub masked: bool,
+    pub provenance: AuthorityProvenance,
+    #[serde(rename = "purposeRedacted")]
+    pub purpose_redacted: RedactedAuthorityText,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: AdminExportProjectionSchemaVersion,
+    pub state: AdminExportState,
+}
+#[doc = "`AdminExportProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admin-export-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminExportProjectionKind {
+    #[serde(rename = "admin-export-projection")]
+    AdminExportProjection,
+}
+impl ::std::fmt::Display for AdminExportProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdminExportProjection => f.write_str("admin-export-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminExportProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admin-export-projection" => Ok(Self::AdminExportProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminExportProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminExportProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminExportProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminExportProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminExportProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for AdminExportProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminExportProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminExportProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminExportProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminExportProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdminExportState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminExportState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"pending\","]
+#[doc = "    \"ready\","]
+#[doc = "    \"expired\","]
+#[doc = "    \"revoked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminExportState {
+    #[serde(rename = "pending")]
+    Pending,
+    #[serde(rename = "ready")]
+    Ready,
+    #[serde(rename = "expired")]
+    Expired,
+    #[serde(rename = "revoked")]
+    Revoked,
+}
+impl ::std::fmt::Display for AdminExportState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Pending => f.write_str("pending"),
+            Self::Ready => f.write_str("ready"),
+            Self::Expired => f.write_str("expired"),
+            Self::Revoked => f.write_str("revoked"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminExportState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "pending" => Ok(Self::Pending),
+            "ready" => Ok(Self::Ready),
+            "expired" => Ok(Self::Expired),
+            "revoked" => Ok(Self::Revoked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminExportState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminExportState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminExportState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -3026,13 +4791,11 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminGovernanceState {
 #[doc = "  \"required\": ["]
 #[doc = "    \"aggregateVersion\","]
 #[doc = "    \"correlationId\","]
-#[doc = "    \"deadlineAt\","]
 #[doc = "    \"environment\","]
 #[doc = "    \"etag\","]
 #[doc = "    \"freshness\","]
 #[doc = "    \"inboxItemId\","]
 #[doc = "    \"kind\","]
-#[doc = "    \"ownerReference\","]
 #[doc = "    \"provenance\","]
 #[doc = "    \"relatedRecordReference\","]
 #[doc = "    \"schemaVersion\","]
@@ -3109,16 +4872,24 @@ pub struct AdminInboxItemProjection {
     pub aggregate_version: ::std::string::String,
     #[serde(rename = "correlationId")]
     pub correlation_id: CorrelationId,
-    #[serde(rename = "deadlineAt")]
-    pub deadline_at: ::std::string::String,
+    #[serde(
+        rename = "deadlineAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub deadline_at: ::std::option::Option<::std::string::String>,
     pub environment: AdminEnvironmentIdentity,
     pub etag: AuthorityEtag,
     pub freshness: AdminFreshness,
     #[serde(rename = "inboxItemId")]
     pub inbox_item_id: ControlPlaneIdentifier,
     pub kind: AdminInboxItemProjectionKind,
-    #[serde(rename = "ownerReference")]
-    pub owner_reference: ControlPlaneIdentifier,
+    #[serde(
+        rename = "ownerReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub owner_reference: ::std::option::Option<ControlPlaneIdentifier>,
     pub provenance: AuthorityProvenance,
     #[serde(rename = "relatedRecordReference")]
     pub related_record_reference: ControlPlaneIdentifier,
@@ -5742,6 +7513,90 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminOperationReceiptSch
         value.parse()
     }
 }
+#[doc = "`AdminOperationalHealth`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdminOperationalHealth.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"healthy\","]
+#[doc = "    \"degraded\","]
+#[doc = "    \"unavailable\","]
+#[doc = "    \"unknown\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdminOperationalHealth {
+    #[serde(rename = "healthy")]
+    Healthy,
+    #[serde(rename = "degraded")]
+    Degraded,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+    #[serde(rename = "unknown")]
+    Unknown,
+}
+impl ::std::fmt::Display for AdminOperationalHealth {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Healthy => f.write_str("healthy"),
+            Self::Degraded => f.write_str("degraded"),
+            Self::Unavailable => f.write_str("unavailable"),
+            Self::Unknown => f.write_str("unknown"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdminOperationalHealth {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "healthy" => Ok(Self::Healthy),
+            "degraded" => Ok(Self::Degraded),
+            "unavailable" => Ok(Self::Unavailable),
+            "unknown" => Ok(Self::Unknown),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdminOperationalHealth {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdminOperationalHealth {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdminOperationalHealth {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminPartialFailureItem`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -6828,7 +8683,8 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminPrivacyCaseState {
 #[doc = "    \"correction\","]
 #[doc = "    \"deletion\","]
 #[doc = "    \"portability\","]
-#[doc = "    \"restriction\""]
+#[doc = "    \"restriction\","]
+#[doc = "    \"unspecified\""]
 #[doc = "  ],"]
 #[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
 #[doc = "}"]
@@ -6857,6 +8713,8 @@ pub enum AdminPrivacyRequestType {
     Portability,
     #[serde(rename = "restriction")]
     Restriction,
+    #[serde(rename = "unspecified")]
+    Unspecified,
 }
 impl ::std::fmt::Display for AdminPrivacyRequestType {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -6866,6 +8724,7 @@ impl ::std::fmt::Display for AdminPrivacyRequestType {
             Self::Deletion => f.write_str("deletion"),
             Self::Portability => f.write_str("portability"),
             Self::Restriction => f.write_str("restriction"),
+            Self::Unspecified => f.write_str("unspecified"),
         }
     }
 }
@@ -6878,6 +8737,7 @@ impl ::std::str::FromStr for AdminPrivacyRequestType {
             "deletion" => Ok(Self::Deletion),
             "portability" => Ok(Self::Portability),
             "restriction" => Ok(Self::Restriction),
+            "unspecified" => Ok(Self::Unspecified),
             _ => Err("invalid value".into()),
         }
     }
@@ -10331,6 +12191,24 @@ impl<'de> ::serde::Deserialize<'de> for ContractSchemaVersion {
 #[doc = "      \"$ref\": \"#/definitions/AdminPrivacyCaseProjection\""]
 #[doc = "    },"]
 #[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminCapacityProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEnvironmentProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminAuditEventProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminAlertProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminEmergencyStopProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdminExportProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
 #[doc = "      \"$ref\": \"#/definitions/AdminConflictProjection\""]
 #[doc = "    },"]
 #[doc = "    {"]
@@ -10375,6 +12253,12 @@ pub enum ControlPlaneDocument {
     AdminIncidentProjection(AdminIncidentProjection),
     AdminConfigurationProjection(AdminConfigurationProjection),
     AdminPrivacyCaseProjection(AdminPrivacyCaseProjection),
+    AdminCapacityProjection(AdminCapacityProjection),
+    AdminEnvironmentProjection(AdminEnvironmentProjection),
+    AdminAuditEventProjection(AdminAuditEventProjection),
+    AdminAlertProjection(AdminAlertProjection),
+    AdminEmergencyStopProjection(AdminEmergencyStopProjection),
+    AdminExportProjection(AdminExportProjection),
     AdminConflictProjection(AdminConflictProjection),
     AdminPartialFailureProjection(AdminPartialFailureProjection),
     AdminOperationReceipt(AdminOperationReceipt),
@@ -10503,6 +12387,36 @@ impl ::std::convert::From<AdminConfigurationProjection> for ControlPlaneDocument
 impl ::std::convert::From<AdminPrivacyCaseProjection> for ControlPlaneDocument {
     fn from(value: AdminPrivacyCaseProjection) -> Self {
         Self::AdminPrivacyCaseProjection(value)
+    }
+}
+impl ::std::convert::From<AdminCapacityProjection> for ControlPlaneDocument {
+    fn from(value: AdminCapacityProjection) -> Self {
+        Self::AdminCapacityProjection(value)
+    }
+}
+impl ::std::convert::From<AdminEnvironmentProjection> for ControlPlaneDocument {
+    fn from(value: AdminEnvironmentProjection) -> Self {
+        Self::AdminEnvironmentProjection(value)
+    }
+}
+impl ::std::convert::From<AdminAuditEventProjection> for ControlPlaneDocument {
+    fn from(value: AdminAuditEventProjection) -> Self {
+        Self::AdminAuditEventProjection(value)
+    }
+}
+impl ::std::convert::From<AdminAlertProjection> for ControlPlaneDocument {
+    fn from(value: AdminAlertProjection) -> Self {
+        Self::AdminAlertProjection(value)
+    }
+}
+impl ::std::convert::From<AdminEmergencyStopProjection> for ControlPlaneDocument {
+    fn from(value: AdminEmergencyStopProjection) -> Self {
+        Self::AdminEmergencyStopProjection(value)
+    }
+}
+impl ::std::convert::From<AdminExportProjection> for ControlPlaneDocument {
+    fn from(value: AdminExportProjection) -> Self {
+        Self::AdminExportProjection(value)
     }
 }
 impl ::std::convert::From<AdminConflictProjection> for ControlPlaneDocument {

@@ -269,6 +269,102 @@
           }
         ]
       },
+      "AdminAlertProjection": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "alertId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "deadlineAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "kind": {
+            "const": "admin-alert-projection",
+            "type": "string"
+          },
+          "ownerReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "safeSummary": {
+            "$ref": "#/components/schemas/ControlPlaneShortText"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/AdminSeverity"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AdminAlertState"
+          },
+          "subjectReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "alertId",
+          "severity",
+          "state",
+          "ownerReference",
+          "subjectReference",
+          "safeSummary"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminAlertState": {
+        "anyOf": [
+          {
+            "const": "open",
+            "type": "string"
+          },
+          {
+            "const": "acknowledged",
+            "type": "string"
+          },
+          {
+            "const": "resolved",
+            "type": "string"
+          },
+          {
+            "const": "failed",
+            "type": "string"
+          }
+        ]
+      },
       "AdminAuditEvent": {
         "properties": {
           "action": {
@@ -318,6 +414,157 @@
           "result",
           "correlationId",
           "receipt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminAuditEventProjection": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "actorReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "auditEventId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "kind": {
+            "const": "admin-audit-event-projection",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/AdminOperationOutcome"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "subjectReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "auditEventId",
+          "action",
+          "scope",
+          "outcome",
+          "actorReference",
+          "subjectReference",
+          "occurredAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminCapacityProjection": {
+        "properties": {
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "capacityId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "currentUse": {
+            "type": "string"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "forecastExhaustionAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "growthPerDay": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "kind": {
+            "const": "admin-capacity-projection",
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "recommendedAction": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "resourceReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "safeLimit": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "capacityId",
+          "resourceReference",
+          "currentUse",
+          "safeLimit",
+          "recommendedAction",
+          "observedAt"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -618,6 +865,104 @@
           }
         ]
       },
+      "AdminEmergencyStopProjection": {
+        "properties": {
+          "actorReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "capabilityReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "kind": {
+            "const": "admin-emergency-stop-projection",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "reasonRedacted": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "restoredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "safeRestorationDefined": {
+            "type": "boolean"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AdminEmergencyStopState"
+          },
+          "stopId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "stopId",
+          "capabilityReference",
+          "state",
+          "actorReference",
+          "reasonRedacted",
+          "requestedAt",
+          "expiresAt",
+          "safeRestorationDefined"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminEmergencyStopState": {
+        "anyOf": [
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "expired",
+            "type": "string"
+          },
+          {
+            "const": "restored",
+            "type": "string"
+          }
+        ]
+      },
       "AdminEnvironmentIdentity": {
         "properties": {
           "environmentId": {
@@ -652,6 +997,181 @@
           },
           {
             "const": "production",
+            "type": "string"
+          }
+        ]
+      },
+      "AdminEnvironmentProjection": {
+        "properties": {
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "environmentReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "health": {
+            "$ref": "#/components/schemas/AdminOperationalHealth"
+          },
+          "integrationEnvironment": {
+            "$ref": "#/components/schemas/AdminEnvironmentKind"
+          },
+          "kind": {
+            "const": "admin-environment-projection",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "sessionEnvironment": {
+            "$ref": "#/components/schemas/AdminEnvironmentKind"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "environmentReference",
+          "sessionEnvironment",
+          "integrationEnvironment",
+          "health",
+          "updatedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminExportProjection": {
+        "properties": {
+          "actorReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "encrypted": {
+            "const": true,
+            "type": "boolean"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exportId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "fieldReferences": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "kind": {
+            "const": "admin-export-projection",
+            "type": "string"
+          },
+          "masked": {
+            "const": true,
+            "type": "boolean"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "purposeRedacted": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AdminExportState"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "exportId",
+          "state",
+          "actorReference",
+          "purposeRedacted",
+          "fieldReferences",
+          "encrypted",
+          "masked",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminExportState": {
+        "anyOf": [
+          {
+            "const": "pending",
+            "type": "string"
+          },
+          {
+            "const": "ready",
+            "type": "string"
+          },
+          {
+            "const": "expired",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
             "type": "string"
           }
         ]
@@ -951,9 +1471,7 @@
           "severity",
           "state",
           "title",
-          "ownerReference",
           "relatedRecordReference",
-          "deadlineAt",
           "updatedAt"
         ],
         "type": "object",
@@ -1535,6 +2053,26 @@
           },
           {
             "const": "export-sensitive-data",
+            "type": "string"
+          }
+        ]
+      },
+      "AdminOperationalHealth": {
+        "anyOf": [
+          {
+            "const": "healthy",
+            "type": "string"
+          },
+          {
+            "const": "degraded",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          },
+          {
+            "const": "unknown",
             "type": "string"
           }
         ]
@@ -2129,6 +2667,10 @@
           },
           {
             "const": "restriction",
+            "type": "string"
+          },
+          {
+            "const": "unspecified",
             "type": "string"
           }
         ]
@@ -3130,6 +3672,24 @@
           },
           {
             "$ref": "#/components/schemas/AdminPrivacyCaseProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminCapacityProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminEnvironmentProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminAuditEventProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminAlertProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminEmergencyStopProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminExportProjection"
           },
           {
             "$ref": "#/components/schemas/AdminConflictProjection"

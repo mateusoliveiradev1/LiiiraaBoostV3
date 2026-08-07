@@ -101,8 +101,9 @@ const durableOperation = async (
     auditReference,
     availableAt: input.occurredAt,
   });
+  const receiptId = dependencies.ids.next();
   await transaction.saveReceipt({
-    receiptId: dependencies.ids.next(),
+    receiptId,
     commandId: input.commandId,
     idempotencyKey: input.idempotencyKey,
     actorId: input.actorId,
@@ -115,6 +116,10 @@ const durableOperation = async (
     ok: true,
     outcome: input.outcome,
     auditReference,
+    receiptId,
+    commandId: input.commandId,
+    subjectId: input.subjectId,
+    occurredAt: input.occurredAt,
     ...input.result,
   });
   await transaction.rememberCommandResult(input.commandId, result);
