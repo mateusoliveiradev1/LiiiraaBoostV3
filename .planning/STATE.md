@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Phase 04 UI-SPEC approved
-last_updated: "2026-08-06T22:20:16.602Z"
-last_activity: 2026-08-05
-last_activity_desc: "Completed 04-39: persistent administrative authority"
+stopped_at: Completed 04-41-PLAN.md
+last_updated: "2026-08-07T01:03:46.161Z"
+last_activity: 2026-08-07
+last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
-  total_plans: 180
-  completed_plans: 177
+  total_plans: 202
+  completed_plans: 178
   percent: 30
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 40 of 40
-Status: Ready to execute
-Last activity: 2026-08-05 — Completed 04-39: persistent administrative authority
+Plan: 42 of 62
+Status: Executing Phase 04
+Last activity: 2026-08-07 — Phase 04 execution started
 
 Progress: [██████████] 98%
 
@@ -215,6 +215,7 @@ _Updated after plan completion_
 | Phase 04 P36 | 24 min | 2 tasks | 16 files |
 | Phase 04 P38 | 21 min | 2 tasks | 14 files |
 | Phase 04 P39 | 9 min | 2 tasks | 7 files |
+| Phase 04 P41 | 16 min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -671,6 +672,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Require HTTPS service origins and exact one-shot 127.0.0.1 callbacks for desktop authentication. — The native authorization boundary fails closed on origin, issuer, redirect, state, code, timeout, replay, and response mismatches.
 - [Phase 04]: Derive staging Admin roles only from persisted non-tester identities with active admin sessions. — Origin, cookie, persisted role, session kind, and resource policy must all pass before PostgreSQL is queried.
 - [Phase 04]: Keep staging Admin privileged commands unavailable until their real persistence and step-up authorities exist. — Read-only redacted projections are honest; in-memory command emulation would fabricate administrative authority.
+- [Phase 04]: Admin contracts remain control-plane-only and are generated with TypeScript/Rust parity — Prevents desktop schema leakage and handwritten DTO drift
 
 ### Pending Todos
 
@@ -716,6 +718,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-06T22:20:16.595Z
-Stopped at: Phase 04 UI-SPEC approved
-Resume file: .planning/phases/04-identity-commerce-devices-and-administration/04-UI-SPEC.md
+Last session: 2026-08-07T01:03:46.152Z
+Stopped at: Completed 04-41-PLAN.md
+Resume file: None
