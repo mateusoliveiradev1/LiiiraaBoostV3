@@ -4,6 +4,8 @@ import { delimiter, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const COMMAND_TIMEOUT_MS = 120_000;
+const QUICK_FOUNDATION_TIMEOUT_MS = 10 * 60_000;
+const FINAL_FOUNDATION_TIMEOUT_MS = 25 * 60_000;
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = resolve(desktopRoot, '..', '..');
 const isPnpmNodeCli = (candidate) =>
@@ -47,17 +49,17 @@ const requirePath = (relativePath, owner) => {
   return absolutePath;
 };
 
-const run = (executable, arguments_, cwd = desktopRoot) => {
+const run = (executable, arguments_, cwd = desktopRoot, timeoutMs = COMMAND_TIMEOUT_MS) => {
   const result = spawnSync(executable, arguments_, {
     cwd,
     encoding: 'utf8',
     stdio: 'inherit',
-    timeout: COMMAND_TIMEOUT_MS,
+    timeout: timeoutMs,
   });
 
   if (result.error?.code === 'ETIMEDOUT') {
     throw new Error(
-      `Command exceeded the ${COMMAND_TIMEOUT_MS / 1_000}-second lifecycle budget: ${executable} ${arguments_.join(' ')}`,
+      `Command exceeded the ${timeoutMs / 1_000}-second lifecycle budget: ${executable} ${arguments_.join(' ')}`,
     );
   }
 
@@ -72,13 +74,13 @@ const run = (executable, arguments_, cwd = desktopRoot) => {
   }
 };
 
-const runPnpm = (arguments_, cwd = desktopRoot) => {
+const runPnpm = (arguments_, cwd = desktopRoot, timeoutMs = COMMAND_TIMEOUT_MS) => {
   if (pnpmCliPath === undefined || !isPnpmNodeCli(pnpmCliPath)) {
     throw new Error(
       'Unable to resolve the active pnpm Node CLI from npm_execpath. Run this lifecycle through pnpm.',
     );
   }
-  run(process.execPath, [pnpmCliPath, ...arguments_], cwd);
+  run(process.execPath, [pnpmCliPath, ...arguments_], cwd, timeoutMs);
 };
 
 const hasFlag = (arguments_, flag) => arguments_.includes(flag);
@@ -283,14 +285,14 @@ const executeCommand = (command, arguments_) => {
         verifyLifecycleContract();
         return;
       }
-      runPnpm(['verify:foundation:quick'], workspaceRoot);
+      runPnpm(['verify:foundation:quick'], workspaceRoot, QUICK_FOUNDATION_TIMEOUT_MS);
       executeCommand('unit', []);
       executeCommand('stories', []);
       executeCommand('browser', ['--project', 'harness', '--grep', '@browser-smoke']);
       executeCommand('wave-zero', ['--packaged-schema']);
       return;
     case 'final':
-      runPnpm(['verify:foundation'], workspaceRoot);
+      runPnpm(['verify:foundation'], workspaceRoot, FINAL_FOUNDATION_TIMEOUT_MS);
       executeCommand('unit', arguments_);
       executeCommand('stories', arguments_);
       executeCommand('browser', arguments_);

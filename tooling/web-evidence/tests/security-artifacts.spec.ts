@@ -141,6 +141,8 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
 test('@staging-origin-live probes deployed origin, session, and consent boundaries', async ({
   request,
 }) => {
+  test.setTimeout(180_000);
+
   const origins = {
     account: process.env['ACCOUNT_STAGING_ORIGIN'],
     admin: process.env['ADMIN_STAGING_ORIGIN'],
