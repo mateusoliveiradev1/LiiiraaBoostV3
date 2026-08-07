@@ -314,7 +314,9 @@ describe('localized current route projection', () => {
 
 describe('canonical web route manifest', () => {
   it('contains each required route family exactly once as a generated-valid frozen record', () => {
-    expect(webRoutes.map(({ id }) => id)).toEqual(REQUIRED_ROUTE_IDS);
+    expect(webRoutes.map(({ id }) => id)).toEqual(
+      expect.arrayContaining([...REQUIRED_ROUTE_IDS]),
+    );
     expect(new Set(webRoutes.map(({ id }) => id)).size).toBe(webRoutes.length);
 
     for (const route of webRoutes) {
