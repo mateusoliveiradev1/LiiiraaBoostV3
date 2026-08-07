@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-47-PLAN.md
-last_updated: "2026-08-07T02:48:55.322Z"
+stopped_at: Completed 04-48-PLAN.md
+last_updated: "2026-08-07T03:03:57.124Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 184
+  completed_plans: 185
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 48 of 62
+Plan: 49 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -222,6 +222,7 @@ _Updated after plan completion_
 | Phase 04 P44 | 4 min | 1 tasks | 4 files |
 | Phase 04 P46 | 17 min | 2 tasks | 9 files |
 | Phase 04 P47 | 11 min | 1 tasks | 5 files |
+| Phase 04 P48 | 13 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -691,6 +692,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Treat client-supplied approval IDs only as references. — Eligibility comes from repository-loaded approved, unexpired, independent records with exact capability and scope.
 - [Phase 04]: Validate admin step-up before protected repository access. — Actor, context, action, resource, target, verifier, expiry, and five-minute freshness are bound together.
 - [Phase 04]: Offboarding authority effects commit in one governance transaction. — Membership, sessions, delegations, approvals, work, audit, outbox, receipt, and replay cannot diverge.
+- [Phase 04]: Migrate legacy admins only with active passkey or TOTP proof. — Database upgrade cannot fabricate strong-factor authority.
+- [Phase 04]: Permit exactly one approval decision per request. — The locked pending request and unique request constraint make concurrent decisions singular.
+- [Phase 04]: Load governance membership from normalized grants only. — Masked projections exclude email, credential, token, and sensitive audit fields by construction.
 
 ### Pending Todos
 
@@ -736,6 +740,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T02:48:55.313Z
-Stopped at: Completed 04-47-PLAN.md
+Last session: 2026-08-07T03:03:57.117Z
+Stopped at: Completed 04-48-PLAN.md
 Resume file: None
