@@ -118,7 +118,9 @@ describe('admin operations, security, and system presentation policy', () => {
       admitted: false,
       code: 'ENVIRONMENT_CROSSING_FORBIDDEN',
     });
-    expect(reviewConfigurationTransition({ ...base, rollbackVersion: undefined })).toEqual({
+    const { rollbackVersion, ...withoutRollback } = base;
+    expect(rollbackVersion).toBe('3.3.2');
+    expect(reviewConfigurationTransition(withoutRollback)).toEqual({
       admitted: false,
       code: 'ROLLBACK_PATH_REQUIRED',
     });
