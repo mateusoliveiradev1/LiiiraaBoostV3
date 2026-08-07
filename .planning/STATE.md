@@ -2,18 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
+current_phase: 04
+current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-52-PLAN.md
-last_updated: "2026-08-07T04:18:06.633Z"
-last_activity: 2026-08-07 — Phase 04 execution started
+stopped_at: Completed 04-53-PLAN.md
+last_updated: "2026-08-07T04:53:48.507Z"
+last_activity: 2026-08-07
+last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 189
+  completed_plans: 190
   percent: 30
-current_phase: 04
-current_phase_name: identity-commerce-devices-and-administration
 ---
 
 # Project State
@@ -28,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 53 of 62
+Plan: 54 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -226,6 +227,7 @@ _Updated after plan completion_
 | Phase 04 P50 | 12 min | 2 tasks | 6 files |
 | Phase 04 P51 | 16 min | 2 tasks | 6 files |
 | Phase 04 P52 | 14 min | 2 tasks | 4 files |
+| Phase 04 P53 | 25 min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -712,6 +714,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Derive governance authority from the active server session and keep simulation read-only. — URL and body role claims cannot widen navigation, data, capabilities, scopes, or actions.
 - [Phase 04]: Compute impact, approval eligibility, and break-glass risk from trusted server state. — Clients may propose intent but cannot declare before-after authority, independence, mass scope, or risk.
 - [Phase 04]: Keep administrative-team invitations separate from beta invitation authority. — Ordinary accounts and beta recipients cannot be promoted into administrative membership.
+- [Phase 04]: Keep live Admin delivery invalidation-only with authoritative refetch. — Cursor, version, time, and resource names preserve freshness without streaming secret record data.
+- [Phase 04]: Require every Admin registrar, schema, and worker claim function before staging readiness. — A partial administrative authority must never advertise authorityConnected.
+- [Phase 04]: Fail closed when invitation delivery provider authority is unavailable. — Zero mocks means the API cannot manufacture a provider receipt or claim delivery success.
 
 ### Pending Todos
 
@@ -757,6 +762,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T04:18:06.625Z
-Stopped at: Completed 04-52-PLAN.md
+Last session: 2026-08-07T04:53:48.500Z
+Stopped at: Completed 04-53-PLAN.md
 Resume file: None
