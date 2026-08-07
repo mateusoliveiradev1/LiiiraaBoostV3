@@ -102,8 +102,42 @@ const buildApp = async (options: Readonly<{ stepUp?: ReturnType<typeof stepUp> |
   await registerAdminApprovalRoutes(app, {
     allowedOrigin: origin,
     csrfSecret,
+    environment: { environmentId: 'staging-admin', kind: 'staging', label: 'Staging' },
     governance: {} as never,
     operations: operations as never,
+    queries: {
+      listApprovals: () =>
+        Promise.resolve({
+          records: [
+            {
+              requestId: 'approval-one',
+              authorId: 'author-one',
+              beneficiaryId: 'beneficiary-one',
+              capability: 'admin-permissions:manage',
+              scope: 'membership',
+              risk: 'critical',
+              status: 'pending',
+              assignedApproverId: 'approver-one',
+              version: '1',
+              expiresAt: '2030-02-01T12:10:00.000Z',
+            },
+          ],
+          nextCursor: null,
+        }),
+      loadApproval: (requestId) =>
+        Promise.resolve({
+          requestId,
+          authorId: 'author-one',
+          beneficiaryId: 'beneficiary-one',
+          capability: 'admin-permissions:manage',
+          scope: 'membership',
+          risk: 'critical',
+          status: 'approved',
+          assignedApproverId: 'approver-one',
+          version: '2',
+          expiresAt: '2030-02-01T12:10:00.000Z',
+        }),
+    },
     resolveSession: () => Promise.resolve(session),
     resolveStepUp: () => Promise.resolve(options.stepUp === undefined ? stepUp() : options.stepUp),
     loadBreakGlassContext: () =>
@@ -124,6 +158,25 @@ const buildApp = async (options: Readonly<{ stepUp?: ReturnType<typeof stepUp> |
 };
 
 describe('admin approval and impact routes', () => {
+  it('lists canonical approval projections without requiring mutation CSRF', async () => {
+    const { app } = await buildApp();
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/admin/governance/approvals?limit=25',
+      headers: { origin },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(
+      response.json<{ records: readonly Readonly<Record<string, unknown>>[] }>().records[0],
+    ).toMatchObject({
+      kind: 'admin-governance-projection',
+      governanceKind: 'approval',
+      governanceRecordId: 'approval-one',
+      state: 'pending',
+    });
+    await app.close();
+  });
+
   it('projects server-owned impact and ignores client-computed before/after authority', async () => {
     const { app, operations } = await buildApp();
     const response = await app.inject({

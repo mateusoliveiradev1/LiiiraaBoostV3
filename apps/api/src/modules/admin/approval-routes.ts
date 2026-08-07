@@ -13,6 +13,12 @@ import {
   requestAdminApproval,
 } from '@liiiraa/control-plane-application/admin-governance';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
+import type {
+  AdminEnvironmentIdentityJson,
+  AdminGovernanceProjectionJson,
+  AdminPermissionImpactProjectionJson,
+  AdminRiskLevelJson,
+} from '@liiiraa/contracts-ts';
 import { decideBreakGlassAdmission } from '@liiiraa/control-plane-domain/admin/governance';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -38,8 +44,18 @@ export interface AdminBreakGlassContext {
 export interface AdminApprovalRouteDependencies {
   readonly allowedOrigin: string;
   readonly csrfSecret: string;
+  readonly environment: AdminEnvironmentIdentityJson;
   readonly governance: AdminGovernanceDependencies;
   readonly operations?: AdminApprovalRouteOperations;
+  readonly queries: Readonly<{
+    listApprovals(input: Readonly<{ cursor?: string; limit: number }>): Promise<
+      Readonly<{
+        nextCursor: string | null;
+        records: readonly Readonly<Record<string, unknown>>[];
+      }>
+    >;
+    loadApproval(requestId: string): Promise<Readonly<Record<string, unknown>> | null>;
+  }>;
   readonly resolveSession: (request: FastifyRequest) => Promise<AdminGovernanceRouteSession | null>;
   readonly resolveStepUp: (
     request: FastifyRequest,
@@ -97,10 +113,11 @@ const authorize = async (
   request: FastifyRequest,
   dependencies: AdminApprovalRouteDependencies,
   capability: 'admin-permissions:manage' | 'admin-approval:manage',
+  mutation = true,
 ): Promise<AdminGovernanceRouteSession | null> => {
   if (
     request.headers.origin !== dependencies.allowedOrigin ||
-    !verifyCsrf(dependencies.csrfSecret, request.headers['x-csrf-token'])
+    (mutation && !verifyCsrf(dependencies.csrfSecret, request.headers['x-csrf-token']))
   ) {
     return null;
   }
@@ -113,6 +130,149 @@ const authorize = async (
     return null;
   }
   return session;
+};
+
+const boundedText = (value: unknown, maximum = 256): string | null =>
+  typeof value === 'string' && value.length >= 1 && value.length <= maximum ? value : null;
+
+const versionText = (value: unknown): string | null => {
+  const normalized = typeof value === 'bigint' ? value.toString() : value;
+  return typeof normalized === 'string' && /^(?:0|[1-9][0-9]{0,18})$/u.test(normalized)
+    ? normalized
+    : typeof normalized === 'number' && Number.isSafeInteger(normalized) && normalized >= 0
+      ? String(normalized)
+      : null;
+};
+
+const correlationFor = (request: FastifyRequest): string => {
+  const header = boundedText(request.headers['x-correlation-id'], 128);
+  if (header !== null) return header;
+  const requestId = request.id.replace(/[^A-Za-z0-9._:-]/gu, '-').slice(0, 128);
+  return requestId.length > 0 ? requestId : 'admin-approval-request';
+};
+
+const projectionMetadata = (
+  request: FastifyRequest,
+  dependencies: AdminApprovalRouteDependencies,
+  aggregateVersion: string,
+  recordReference: string,
+) => ({
+  schemaVersion: '1.0' as const,
+  aggregateVersion,
+  etag: `admin-${recordReference}-v${aggregateVersion}`,
+  correlationId: correlationFor(request),
+  provenance: 'postgres-authority' as const,
+  environment: dependencies.environment,
+  freshness: {
+    state: 'live' as const,
+    source: 'admin-approvals-api',
+    sequence: aggregateVersion,
+    observedAt: dependencies.clock.now().toISOString(),
+  },
+});
+
+const riskLevel = (value: unknown): AdminRiskLevelJson =>
+  value === 'irreversible'
+    ? 'irreversible'
+    : value === 'critical'
+      ? 'critical'
+      : value === 'sensitive'
+        ? 'medium'
+        : 'low';
+
+const approvalProjection = (
+  record: Readonly<Record<string, unknown>>,
+  request: FastifyRequest,
+  dependencies: AdminApprovalRouteDependencies,
+): AdminGovernanceProjectionJson | null => {
+  const id = boundedText(record['requestId'] ?? record['id'], 128);
+  const version = versionText(record['version']);
+  const author = boundedText(record['authorId'], 128);
+  const beneficiary = boundedText(record['beneficiaryId'], 128);
+  const capability = boundedText(record['capability'], 128);
+  const scope = boundedText(record['scope'], 128);
+  const status = record['status'];
+  const expiresAt = boundedText(record['expiresAt']);
+  if (
+    id === null ||
+    version === null ||
+    author === null ||
+    beneficiary === null ||
+    capability === null ||
+    scope === null ||
+    !['pending', 'approved', 'cancelled', 'expired'].includes(String(status)) ||
+    expiresAt === null ||
+    Number.isNaN(Date.parse(expiresAt))
+  ) {
+    return null;
+  }
+  const approver = boundedText(record['assignedApproverId'], 128);
+  const projection: AdminGovernanceProjectionJson = {
+    ...projectionMetadata(request, dependencies, version, id),
+    kind: 'admin-governance-projection',
+    governanceRecordId: id,
+    governanceKind: 'approval',
+    state: status === 'cancelled' ? 'revoked' : (status as never),
+    risk: riskLevel(record['risk']),
+    authorReference: author,
+    beneficiaryReference: beneficiary,
+    eligibleApproverReferences: approver === null ? [] : [approver],
+    impactedReferences: [capability, scope],
+    expiresAt,
+  };
+  return controlPlaneDocumentValidator(projection) ? Object.freeze(projection) : null;
+};
+
+const impactProjection = (
+  impact: Readonly<AdminPermissionImpact>,
+  request: FastifyRequest,
+  dependencies: AdminApprovalRouteDependencies,
+): AdminPermissionImpactProjectionJson => ({
+  ...projectionMetadata(
+    request,
+    dependencies,
+    impact.membershipVersion.toString(),
+    impact.impactId,
+  ),
+  kind: 'admin-permission-impact-projection',
+  impactId: impact.impactId,
+  identityReference: impact.identityId,
+  before: {
+    functions: [
+      ...impact.before.functions,
+    ] as AdminPermissionImpactProjectionJson['before']['functions'],
+    capabilities: [
+      ...impact.before.capabilities,
+    ] as AdminPermissionImpactProjectionJson['before']['capabilities'],
+    scopes: [...impact.before.scopes] as AdminPermissionImpactProjectionJson['before']['scopes'],
+  },
+  after: {
+    functions: [
+      ...impact.after.functions,
+    ] as AdminPermissionImpactProjectionJson['after']['functions'],
+    capabilities: [
+      ...impact.after.capabilities,
+    ] as AdminPermissionImpactProjectionJson['after']['capabilities'],
+    scopes: [...impact.after.scopes] as AdminPermissionImpactProjectionJson['after']['scopes'],
+  },
+  conflicts: [],
+  affectedData: [
+    ...new Set([...impact.before.scopes, ...impact.after.scopes]),
+  ] as AdminPermissionImpactProjectionJson['affectedData'],
+  sessionReferences: [],
+  invalidatesPendingApprovals: impact.invalidatesPendingApprovals,
+  projectedAt: impact.projectedAt,
+});
+
+const listQuery = (query: unknown): Readonly<{ cursor?: string; limit: number }> | null => {
+  if (!isRecord(query)) return { limit: 25 };
+  const value = typeof query['limit'] === 'string' ? query['limit'] : '25';
+  if (!/^[0-9]{1,3}$/u.test(value)) return null;
+  const limit = Number(value);
+  const cursor = typeof query['cursor'] === 'string' ? query['cursor'] : undefined;
+  return limit >= 1 && limit <= 100 && (cursor === undefined || cursor.length <= 256)
+    ? { limit, ...(cursor === undefined ? {} : { cursor }) }
+    : null;
 };
 
 interface ApprovalCommand {
@@ -176,8 +336,12 @@ const freshStepUp = (
   );
 };
 
-const publicResult = (result: Readonly<Record<string, unknown>>) => ({
+const publicResult = (
+  result: Readonly<Record<string, unknown>>,
+  document?: AdminGovernanceProjectionJson,
+) => ({
   ok: result['ok'] === true,
+  ...(document === undefined ? {} : { document }),
   ...(result['outcome'] === undefined ? {} : { outcome: result['outcome'] }),
   ...(result['receiptId'] === undefined ? {} : { receiptId: result['receiptId'] }),
   ...(result['code'] === undefined ? {} : { code: result['code'] }),
@@ -213,6 +377,28 @@ export const registerAdminApprovalRoutes = (
   if (dependencies.csrfSecret.length < 32) throw new Error('ADMIN_APPROVAL_CSRF_REJECTED');
   const operations = dependencies.operations ?? defaultOperations;
 
+  app.get('/v1/admin/governance/approvals', async (request, reply) => {
+    const session = await authorize(request, dependencies, 'admin-approval:manage', false);
+    if (session === null) return hidden(reply);
+    const parsed = listQuery(request.query);
+    if (parsed === null) return noStore(reply).code(400).send({ code: 'REQUEST_INVALID' });
+    if (!(await dependencies.rateLimit(`${session.actorId}:approval-list:${request.ip}`))) {
+      return noStore(reply).code(429).send({ code: 'RATE_LIMITED' });
+    }
+    const result = await dependencies.queries.listApprovals(parsed);
+    const records = result.records.map((record) =>
+      approvalProjection(record, request, dependencies),
+    );
+    if (records.some((record) => record === null)) {
+      return noStore(reply).code(503).send({ code: 'APPROVAL_AUTHORITY_INVALID' });
+    }
+    return noStore(reply).code(200).send({
+      records,
+      freshness: records[0]?.freshness,
+      nextCursor: result.nextCursor,
+    });
+  });
+
   app.post('/v1/admin/governance/impact', async (request, reply) => {
     const session = await authorize(request, dependencies, 'admin-permissions:manage');
     if (session === null || !isRecord(request.body)) return hidden(reply);
@@ -235,9 +421,18 @@ export const registerAdminApprovalRoutes = (
       },
     });
     if (!result.ok) return noStore(reply).code(403).send(publicResult(result));
+    const document = impactProjection(result.impact, request, dependencies);
+    if (!controlPlaneDocumentValidator(document)) {
+      return noStore(reply).code(503).send({ code: 'IMPACT_AUTHORITY_INVALID' });
+    }
     return noStore(reply)
       .code(200)
-      .send({ ok: true, outcome: result.outcome, impact: publicImpact(result.impact) });
+      .send({
+        ok: true,
+        outcome: result.outcome,
+        impact: publicImpact(result.impact),
+        document,
+      });
   });
 
   app.post('/v1/admin/governance/approvals', async (request, reply) => {
@@ -260,7 +455,25 @@ export const registerAdminApprovalRoutes = (
         ? { assignedApproverId: request.body['assignedApproverId'] }
         : {}),
     });
-    return noStore(reply).code(resultStatus(result)).send(publicResult(result));
+    const document = approvalProjection(
+      {
+        requestId,
+        version: '1',
+        authorId: session.actorId,
+        beneficiaryId: stringValue(request.body, 'beneficiaryId'),
+        capability: stringValue(request.body, 'capability'),
+        scope: stringValue(request.body, 'scope'),
+        risk: request.body['risk'],
+        status: 'pending',
+        expiresAt: stringValue(request.body, 'expiresAt'),
+        assignedApproverId: request.body['assignedApproverId'],
+      },
+      request,
+      dependencies,
+    );
+    return document === null
+      ? noStore(reply).code(503).send({ code: 'APPROVAL_AUTHORITY_INVALID' })
+      : noStore(reply).code(resultStatus(result)).send(publicResult(result, document));
   });
 
   const approvalMutation =
@@ -305,7 +518,11 @@ export const registerAdminApprovalRoutes = (
                 ...common,
                 newApproverId: stringValue(request.body, 'newApproverId'),
               });
-      return noStore(reply).code(resultStatus(result)).send(publicResult(result));
+      const record = await dependencies.queries.loadApproval(request.params.requestId);
+      const document = record === null ? null : approvalProjection(record, request, dependencies);
+      return document === null
+        ? noStore(reply).code(503).send({ code: 'APPROVAL_AUTHORITY_INVALID' })
+        : noStore(reply).code(resultStatus(result)).send(publicResult(result, document));
     };
 
   app.post<{ Params: { requestId: string } }>(
@@ -359,7 +576,24 @@ export const registerAdminApprovalRoutes = (
       expiresAt,
       authorizationContextId,
     });
-    return noStore(reply).code(resultStatus(result)).send(publicResult(result));
+    const document = approvalProjection(
+      {
+        requestId: parsed.commandId,
+        version: '1',
+        authorId: session.actorId,
+        beneficiaryId: parsed.targetReference,
+        capability: 'break-glass',
+        scope: parsed.targetReference,
+        risk: 'critical',
+        status: 'approved',
+        expiresAt,
+      },
+      request,
+      dependencies,
+    );
+    return document === null
+      ? noStore(reply).code(503).send({ code: 'APPROVAL_AUTHORITY_INVALID' })
+      : noStore(reply).code(resultStatus(result)).send(publicResult(result, document));
   });
 
   return Promise.resolve();

@@ -269,6 +269,8 @@ export type ControlPlaneDocumentJson =
   | AdminInvitationProjectionJson
   | AdminInvitationCapacityProjectionJson
   | AdminGovernanceProjectionJson
+  | AdminTeamMemberProjectionJson
+  | AdminPermissionImpactProjectionJson
   | AdminJobProjectionJson
   | AdminIncidentProjectionJson
   | AdminConfigurationProjectionJson
@@ -540,6 +542,16 @@ export type AdminGovernanceStateJson =
  * via the `definition` "AdminRiskLevel".
  */
 export type AdminRiskLevelJson = 'low' | 'medium' | 'high' | 'critical' | 'irreversible';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminMembershipState".
+ */
+export type AdminMembershipStateJson = 'active' | 'suspended' | 'offboarded';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminStrongFactor".
+ */
+export type AdminStrongFactorJson = 'passkey' | 'mfa';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminJobType".
@@ -2822,6 +2834,785 @@ export interface AdminGovernanceProjectionJson {
    */
   impactedReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
   expiresAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminTeamMemberProjection".
+ */
+export interface AdminTeamMemberProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-team-member-projection';
+  identityReference: ControlPlaneIdentifierJson;
+  displayName: ControlPlaneShortTextJson;
+  maskedEmail: RedactedAuthorityTextJson;
+  state: AdminMembershipStateJson;
+  strongFactor: AdminStrongFactorJson;
+  /**
+   * @minItems 1
+   * @maxItems 4
+   */
+  functions:
+    | [AdminFunctionJson]
+    | [AdminFunctionJson, AdminFunctionJson]
+    | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson]
+    | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson, AdminFunctionJson];
+  activeFunction?: AdminFunctionJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  capabilities:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ];
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  scopes:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ];
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  sessionReferences:
+    | []
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  activeDelegationReferences:
+    | []
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  lastActiveAt?: string;
+  nextReviewAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPermissionImpactProjection".
+ */
+export interface AdminPermissionImpactProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-permission-impact-projection';
+  impactId: ControlPlaneIdentifierJson;
+  identityReference: ControlPlaneIdentifierJson;
+  before: {
+    /**
+     * @minItems 1
+     * @maxItems 4
+     */
+    functions:
+      | [AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson, AdminFunctionJson];
+    /**
+     * @minItems 1
+     * @maxItems 16
+     */
+    capabilities:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ];
+    /**
+     * @minItems 1
+     * @maxItems 16
+     */
+    scopes:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ];
+  };
+  after: {
+    /**
+     * @minItems 1
+     * @maxItems 4
+     */
+    functions:
+      | [AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson]
+      | [AdminFunctionJson, AdminFunctionJson, AdminFunctionJson, AdminFunctionJson];
+    /**
+     * @minItems 1
+     * @maxItems 16
+     */
+    capabilities:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ];
+    /**
+     * @minItems 1
+     * @maxItems 16
+     */
+    scopes:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string
+        ];
+  };
+  /**
+   * @minItems 0
+   * @maxItems 32
+   */
+  conflicts: string[];
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  affectedData:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+      ];
+  /**
+   * @minItems 0
+   * @maxItems 100
+   */
+  sessionReferences: ControlPlaneIdentifierJson[];
+  invalidatesPendingApprovals: boolean;
+  projectedAt: string;
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema

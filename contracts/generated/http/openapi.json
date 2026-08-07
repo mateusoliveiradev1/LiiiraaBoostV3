@@ -1475,6 +1475,22 @@
           }
         ]
       },
+      "AdminMembershipState": {
+        "anyOf": [
+          {
+            "const": "active",
+            "type": "string"
+          },
+          {
+            "const": "suspended",
+            "type": "string"
+          },
+          {
+            "const": "offboarded",
+            "type": "string"
+          }
+        ]
+      },
       "AdminOperationAction": {
         "anyOf": [
           {
@@ -1790,6 +1806,179 @@
           "completedCount",
           "failedCount",
           "failures"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdminPermissionImpactProjection": {
+        "properties": {
+          "affectedData": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "after": {
+            "properties": {
+              "capabilities": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "functions": {
+                "items": {
+                  "$ref": "#/components/schemas/AdminFunction"
+                },
+                "maxItems": 4,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "scopes": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "functions",
+              "capabilities",
+              "scopes"
+            ],
+            "type": "object",
+            "unevaluatedProperties": {
+              "not": {}
+            }
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "before": {
+            "properties": {
+              "capabilities": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "functions": {
+                "items": {
+                  "$ref": "#/components/schemas/AdminFunction"
+                },
+                "maxItems": 4,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "scopes": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "functions",
+              "capabilities",
+              "scopes"
+            ],
+            "type": "object",
+            "unevaluatedProperties": {
+              "not": {}
+            }
+          },
+          "conflicts": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 32,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "identityReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "impactId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "invalidatesPendingApprovals": {
+            "type": "boolean"
+          },
+          "kind": {
+            "const": "admin-permission-impact-projection",
+            "type": "string"
+          },
+          "projectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "sessionReferences": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "impactId",
+          "identityReference",
+          "before",
+          "after",
+          "conflicts",
+          "affectedData",
+          "sessionReferences",
+          "invalidatesPendingApprovals",
+          "projectedAt"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -2125,6 +2314,143 @@
             "type": "string"
           }
         ]
+      },
+      "AdminStrongFactor": {
+        "anyOf": [
+          {
+            "const": "passkey",
+            "type": "string"
+          },
+          {
+            "const": "mfa",
+            "type": "string"
+          }
+        ]
+      },
+      "AdminTeamMemberProjection": {
+        "properties": {
+          "activeDelegationReferences": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "activeFunction": {
+            "$ref": "#/components/schemas/AdminFunction"
+          },
+          "aggregateVersion": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "correlationId": {
+            "$ref": "#/components/schemas/CorrelationId"
+          },
+          "displayName": {
+            "$ref": "#/components/schemas/ControlPlaneShortText"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/AdminEnvironmentIdentity"
+          },
+          "etag": {
+            "$ref": "#/components/schemas/AuthorityEtag"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/AdminFreshness"
+          },
+          "functions": {
+            "items": {
+              "$ref": "#/components/schemas/AdminFunction"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "identityReference": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "kind": {
+            "const": "admin-team-member-projection",
+            "type": "string"
+          },
+          "lastActiveAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "maskedEmail": {
+            "$ref": "#/components/schemas/RedactedAuthorityText"
+          },
+          "nextReviewAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AuthorityProvenance"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sessionReferences": {
+            "items": {
+              "$ref": "#/components/schemas/ControlPlaneIdentifier"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "state": {
+            "$ref": "#/components/schemas/AdminMembershipState"
+          },
+          "strongFactor": {
+            "$ref": "#/components/schemas/AdminStrongFactor"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "aggregateVersion",
+          "etag",
+          "correlationId",
+          "provenance",
+          "environment",
+          "freshness",
+          "kind",
+          "identityReference",
+          "displayName",
+          "maskedEmail",
+          "state",
+          "strongFactor",
+          "functions",
+          "capabilities",
+          "scopes",
+          "sessionReferences",
+          "activeDelegationReferences"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "AuditEvent": {
         "properties": {
@@ -2786,6 +3112,12 @@
           },
           {
             "$ref": "#/components/schemas/AdminGovernanceProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminTeamMemberProjection"
+          },
+          {
+            "$ref": "#/components/schemas/AdminPermissionImpactProjection"
           },
           {
             "$ref": "#/components/schemas/AdminJobProjection"

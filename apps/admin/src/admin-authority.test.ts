@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import type {
   AdminInvitationProjectionJson,
+  AdminGovernanceProjectionJson,
   AdminJobProjectionJson,
   AdminOperationReceiptJson,
 } from '@liiiraa/contracts-ts';
@@ -69,6 +70,20 @@ const receipt: AdminOperationReceiptJson = {
   approvalReferences: ['approval-0001'],
   auditReference: 'audit-0001',
   recordedAt: '2026-08-06T20:01:00.000Z',
+};
+
+const governance: AdminGovernanceProjectionJson = {
+  ...metadata,
+  kind: 'admin-governance-projection',
+  governanceRecordId: 'approval-0001',
+  governanceKind: 'approval',
+  state: 'pending',
+  risk: 'critical',
+  authorReference: 'administrator-0001',
+  beneficiaryReference: 'identity-0002',
+  eligibleApproverReferences: ['administrator-0003'],
+  impactedReferences: ['session:revoke'],
+  expiresAt: '2026-08-06T20:10:00.000Z',
 };
 
 const invitation: AdminInvitationProjectionJson = {
@@ -143,6 +158,7 @@ describe('complete typed Admin query authority', () => {
         expect.stringContaining('/v1/admin/operations/search?q=invitation'),
         expect.stringContaining('/v1/admin/invitations'),
         expect.stringContaining('/v1/admin/governance/team'),
+        expect.stringContaining('/v1/admin/governance/approvals'),
         expect.stringContaining('/v1/admin/operations/jobs'),
       ]),
     );
@@ -229,6 +245,52 @@ describe('complete typed Admin mutation authority', () => {
       expectedVersion: '7',
       reason: mutation.reason,
       transition: 'pause',
+    });
+  });
+
+  it('builds the generated governed command from the admitted active session', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'administrator-0001',
+          role: 'security',
+          expiresAt: '2030-08-06T20:00:00.000Z',
+        }),
+      )
+      .mockResolvedValueOnce(response({ document: governance, ok: true }));
+    const authority = createAuthority(transport);
+
+    await expect(
+      authority.mutate({
+        family: 'approve-request',
+        targetId: 'approval-0001',
+        payload: {
+          authorizationContextId: 'context-0001',
+          capability: 'admin-permissions:manage',
+          scopes: ['membership'],
+        },
+        expectedVersion: '7',
+        expectedEtag: 'admin-approval-0001-v7',
+        idempotencyKey: 'approval-command-0001',
+        reason: 'Approve the independently reviewed access transition.',
+        stepUp: 'context-0001',
+      }),
+    ).resolves.toEqual({ document: governance, status: 'complete' });
+
+    const [, init] = transport.mock.calls[1] ?? [];
+    const body = init?.body;
+    expect(typeof body).toBe('string');
+    if (typeof body !== 'string') throw new Error('EXPECTED_SERIALIZED_ADMIN_COMMAND');
+    expect(JSON.parse(body)).toMatchObject({
+      command: {
+        kind: 'admin-operation-command',
+        actorId: 'administrator-0001',
+        activeFunction: 'security',
+        action: 'request-approval',
+        targetReferences: ['approval-0001'],
+        expectedVersion: '7',
+      },
     });
   });
 

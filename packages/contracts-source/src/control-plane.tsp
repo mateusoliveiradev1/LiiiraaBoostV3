@@ -568,6 +568,17 @@ union AdminGovernanceState {
   completed: "completed",
 }
 
+union AdminMembershipState {
+  active: "active",
+  suspended: "suspended",
+  offboarded: "offboarded",
+}
+
+union AdminStrongFactor {
+  passkey: "passkey",
+  mfa: "mfa",
+}
+
 union AdminRiskLevel {
   low: "low",
   medium: "medium",
@@ -785,6 +796,86 @@ model AdminGovernanceProjection is AdminProjectionMetadata {
   expiresAt?: utcDateTime;
 }
 
+model AdminTeamMemberProjection is AdminProjectionMetadata {
+  kind: "admin-team-member-projection";
+  identityReference: ControlPlaneIdentifier;
+  displayName: ControlPlaneShortText;
+  maskedEmail: RedactedAuthorityText;
+  state: AdminMembershipState;
+  strongFactor: AdminStrongFactor;
+  @minItems(1)
+  @maxItems(4)
+  @uniqueItems
+  functions: AdminFunction[];
+  activeFunction?: AdminFunction;
+  @minItems(1)
+  @maxItems(16)
+  @uniqueItems
+  capabilities: string[];
+  @minItems(1)
+  @maxItems(16)
+  @uniqueItems
+  scopes: string[];
+  @minItems(0)
+  @maxItems(16)
+  @uniqueItems
+  sessionReferences: ControlPlaneIdentifier[];
+  @minItems(0)
+  @maxItems(16)
+  @uniqueItems
+  activeDelegationReferences: ControlPlaneIdentifier[];
+  lastActiveAt?: utcDateTime;
+  nextReviewAt?: utcDateTime;
+}
+
+model AdminPermissionImpactProjection is AdminProjectionMetadata {
+  kind: "admin-permission-impact-projection";
+  impactId: ControlPlaneIdentifier;
+  identityReference: ControlPlaneIdentifier;
+  before: {
+    @minItems(1)
+    @maxItems(4)
+    @uniqueItems
+    functions: AdminFunction[];
+    @minItems(1)
+    @maxItems(16)
+    @uniqueItems
+    capabilities: string[];
+    @minItems(1)
+    @maxItems(16)
+    @uniqueItems
+    scopes: string[];
+  };
+  after: {
+    @minItems(1)
+    @maxItems(4)
+    @uniqueItems
+    functions: AdminFunction[];
+    @minItems(1)
+    @maxItems(16)
+    @uniqueItems
+    capabilities: string[];
+    @minItems(1)
+    @maxItems(16)
+    @uniqueItems
+    scopes: string[];
+  };
+  @minItems(0)
+  @maxItems(32)
+  @uniqueItems
+  conflicts: string[];
+  @minItems(1)
+  @maxItems(16)
+  @uniqueItems
+  affectedData: string[];
+  @minItems(0)
+  @maxItems(100)
+  @uniqueItems
+  sessionReferences: ControlPlaneIdentifier[];
+  invalidatesPendingApprovals: boolean;
+  projectedAt: utcDateTime;
+}
+
 model AdminJobProjection is AdminProjectionMetadata {
   kind: "admin-job-projection";
   jobId: ControlPlaneIdentifier;
@@ -949,6 +1040,8 @@ union ControlPlaneDocument {
   adminInvitationProjection: AdminInvitationProjection,
   adminInvitationCapacityProjection: AdminInvitationCapacityProjection,
   adminGovernanceProjection: AdminGovernanceProjection,
+  adminTeamMemberProjection: AdminTeamMemberProjection,
+  adminPermissionImpactProjection: AdminPermissionImpactProjection,
   adminJobProjection: AdminJobProjection,
   adminIncidentProjection: AdminIncidentProjection,
   adminConfigurationProjection: AdminConfigurationProjection,

@@ -66,6 +66,7 @@ export type AdminMutationFamily =
   | 'revoke-invitation'
   | 'batch-invitations'
   | 'invite-team-member'
+  | 'preview-permission-impact'
   | 'switch-function'
   | 'offboard-member'
   | 'activate-member'
@@ -429,7 +430,7 @@ const admitBreakGlass = (value: unknown): BreakGlassMetadata | null => {
 };
 
 const QUERY_PATHS = Object.freeze({
-  approvals: '/v1/admin/operations/queues',
+  approvals: '/v1/admin/governance/approvals',
   audit: '/v1/admin/operations/audit-events',
   briefing: '/v1/admin/operations/queues',
   capacity: '/v1/admin/operations/capacity',
@@ -444,7 +445,6 @@ const QUERY_PATHS = Object.freeze({
 } satisfies Readonly<Record<AdminQueryFamily, string>>);
 
 const OPERATION_QUERY_FAMILIES = new Set<AdminQueryFamily>([
-  'approvals',
   'audit',
   'briefing',
   'capacity',
@@ -633,6 +633,8 @@ const mutationPath = (input: AdminMutationInput): string | null => {
       return '/v1/admin/invitations/batches';
     case 'invite-team-member':
       return '/v1/admin/governance/team/invitations';
+    case 'preview-permission-impact':
+      return '/v1/admin/governance/impact';
     case 'switch-function':
       return '/v1/admin/governance/functions/switch';
     case 'create-delegation':
@@ -772,6 +774,69 @@ export const createAdminAuthority = ({
     }
   };
 
+  const GOVERNANCE_MUTATIONS = new Set<AdminMutationFamily>([
+    'invite-team-member',
+    'preview-permission-impact',
+    'switch-function',
+    'offboard-member',
+    'activate-member',
+    'create-delegation',
+    'review-access',
+    'request-approval',
+    'approve-request',
+    'cancel-request',
+    'reassign-request',
+    'governance-break-glass',
+  ]);
+
+  const governancePayload = async (
+    input: AdminMutationInput,
+    correlation: string,
+  ): Promise<Readonly<Record<string, unknown>> | null> => {
+    if (!GOVERNANCE_MUTATIONS.has(input.family)) return input.payload;
+    const session = activeSession ?? (await readSession());
+    if (session === null) return null;
+    const candidates = [
+      input.targetId,
+      input.payload['identityId'],
+      input.payload['requestId'],
+      input.payload['invitationId'],
+      input.payload['delegationId'],
+      input.payload['targetReference'],
+      session.actorId,
+    ];
+    const target = candidates.find(boundedToken);
+    if (target === undefined) return null;
+    const expectedVersion = input.expectedVersion ?? '1';
+    const expectedEtag = input.expectedEtag ?? `admin-${target}-v${expectedVersion}`;
+    const action =
+      input.family === 'request-approval' ||
+      input.family === 'approve-request' ||
+      input.family === 'cancel-request' ||
+      input.family === 'reassign-request' ||
+      input.family === 'governance-break-glass'
+        ? 'request-approval'
+        : 'update-access';
+    return Object.freeze({
+      ...input.payload,
+      command: {
+        schemaVersion: '1.0',
+        kind: 'admin-operation-command',
+        commandId: input.idempotencyKey || commandId(),
+        actorId: session.actorId,
+        activeFunction: session.role,
+        action,
+        targetReferences: [target],
+        reason: input.reason?.trim() ?? 'Reviewed administrative governance transition',
+        expectedVersion,
+        expectedEtag,
+        approvalReferences: input.approvalReferences ?? [],
+        correlationId: correlation,
+        requestedAt: clock(),
+      },
+    });
+  };
+
   return Object.freeze({
     async loadInvitation(
       input: Readonly<{ invitationId: string; signal?: AbortSignal }>,
@@ -879,9 +944,11 @@ export const createAdminAuthority = ({
         const correlation = correlationId();
         const token = await ensureCsrfToken(correlation);
         if (token === null) return { code: 'unavailable', status: 'error' };
+        const payload = await governancePayload(input, correlation);
+        if (payload === null) return { code: 'unauthorized', status: 'denied' };
         const response = await transport(`${baseUrl}${path}`, {
           body: JSON.stringify({
-            ...input.payload,
+            ...payload,
             ...(input.approvalReferences === undefined
               ? {}
               : { approvalReferences: input.approvalReferences }),

@@ -902,18 +902,52 @@ const governanceQueries = (
 ): AdminGovernanceRouteDependencies['queries'] => ({
   listTeam: async ({ limit, cursor }) => {
     const result = await database.query(
-      `SELECT membership.identity_id::text AS identity_id, membership.status,
-              membership.strong_factor, membership.version
+      `SELECT membership.identity_id::text AS identity_id, identity.display_name,
+              identity.email, membership.status, membership.strong_factor, membership.version,
+              COALESCE((SELECT array_agg(grant.function ORDER BY grant.function)
+                FROM admin_membership_functions AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
+              COALESCE((SELECT array_agg(grant.capability ORDER BY grant.capability)
+                FROM admin_membership_capabilities AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
+              COALESCE((SELECT array_agg(grant.scope ORDER BY grant.scope)
+                FROM admin_membership_scopes AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
+              (SELECT session.active_function FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id AND session.ended_at IS NULL
+                ORDER BY session.started_at DESC LIMIT 1) AS active_function,
+              COALESCE((SELECT array_agg(session.session_id ORDER BY session.started_at DESC)
+                FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id AND session.ended_at IS NULL), ARRAY[]::text[]) AS session_references,
+              COALESCE((SELECT array_agg(delegation.id ORDER BY delegation.expires_at)
+                FROM admin_delegations AS delegation
+                WHERE delegation.status = 'active'
+                  AND (delegation.delegator_id = membership.identity_id OR delegation.delegate_id = membership.identity_id)), ARRAY[]::text[]) AS active_delegation_references,
+              (SELECT MAX(session.started_at) FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id) AS last_active_at,
+              (SELECT MAX(review.next_review_at) FROM admin_access_reviews AS review
+                WHERE review.membership_id = membership.id) AS next_review_at
          FROM admin_governance_memberships AS membership
+         INNER JOIN identities AS identity ON identity.id = membership.identity_id
         WHERE ($2::uuid IS NULL OR membership.identity_id < $2::uuid)
         ORDER BY membership.identity_id DESC LIMIT $1`,
       [limit, cursor ?? null],
     );
     const records = result.rows.map((row) => ({
       identityId: text(row['identity_id']),
+      displayName: text(row['display_name']),
+      email: text(row['email']),
       status: text(row['status']),
       strongFactor: text(row['strong_factor']),
       version: text(row['version']),
+      functions: row['functions'],
+      capabilities: row['capabilities'],
+      scopes: row['scopes'],
+      activeFunction: text(row['active_function']),
+      sessionReferences: row['session_references'],
+      activeDelegationReferences: row['active_delegation_references'],
+      lastActiveAt: text(row['last_active_at']),
+      nextReviewAt: text(row['next_review_at']),
     }));
     return {
       records,
@@ -922,12 +956,55 @@ const governanceQueries = (
   },
   loadTeamMember: async (identityId) => {
     const result = await database.query(
-      `SELECT identity_id::text AS identity_id, status, strong_factor, version,
-              activated_at, offboarded_at
-         FROM admin_governance_memberships WHERE identity_id = $1::uuid`,
+      `SELECT membership.identity_id::text AS identity_id, identity.display_name, identity.email,
+              membership.status, membership.strong_factor, membership.version,
+              COALESCE((SELECT array_agg(grant.function ORDER BY grant.function)
+                FROM admin_membership_functions AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS functions,
+              COALESCE((SELECT array_agg(grant.capability ORDER BY grant.capability)
+                FROM admin_membership_capabilities AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS capabilities,
+              COALESCE((SELECT array_agg(grant.scope ORDER BY grant.scope)
+                FROM admin_membership_scopes AS grant
+                WHERE grant.membership_id = membership.id AND grant.revoked_at IS NULL), ARRAY[]::text[]) AS scopes,
+              (SELECT session.active_function FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id AND session.ended_at IS NULL
+                ORDER BY session.started_at DESC LIMIT 1) AS active_function,
+              COALESCE((SELECT array_agg(session.session_id ORDER BY session.started_at DESC)
+                FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id AND session.ended_at IS NULL), ARRAY[]::text[]) AS session_references,
+              COALESCE((SELECT array_agg(delegation.id ORDER BY delegation.expires_at)
+                FROM admin_delegations AS delegation
+                WHERE delegation.status = 'active'
+                  AND (delegation.delegator_id = membership.identity_id OR delegation.delegate_id = membership.identity_id)), ARRAY[]::text[]) AS active_delegation_references,
+              (SELECT MAX(session.started_at) FROM admin_function_sessions AS session
+                WHERE session.membership_id = membership.id) AS last_active_at,
+              (SELECT MAX(review.next_review_at) FROM admin_access_reviews AS review
+                WHERE review.membership_id = membership.id) AS next_review_at
+         FROM admin_governance_memberships AS membership
+         INNER JOIN identities AS identity ON identity.id = membership.identity_id
+         WHERE membership.identity_id = $1::uuid`,
       [identityId],
     );
-    return result.rows[0] ?? null;
+    const row = result.rows[0];
+    return row === undefined
+      ? null
+      : {
+          identityId: text(row['identity_id']),
+          displayName: text(row['display_name']),
+          email: text(row['email']),
+          status: text(row['status']),
+          strongFactor: text(row['strong_factor']),
+          version: text(row['version']),
+          functions: row['functions'],
+          capabilities: row['capabilities'],
+          scopes: row['scopes'],
+          activeFunction: text(row['active_function']),
+          sessionReferences: row['session_references'],
+          activeDelegationReferences: row['active_delegation_references'],
+          lastActiveAt: text(row['last_active_at']),
+          nextReviewAt: text(row['next_review_at']),
+        };
   },
   history: async (identityId) => {
     const result = await database.query(
@@ -938,6 +1015,47 @@ const governanceQueries = (
     return result.rows;
   },
 });
+
+const approvalQueries = (
+  database: PersistentAdminDatabase,
+): AdminApprovalRouteDependencies['queries'] => {
+  const project = (row: Readonly<Record<string, unknown>>) => ({
+    requestId: text(row['request_id']),
+    authorId: text(row['author_id']),
+    beneficiaryId: text(row['beneficiary_id']),
+    capability: text(row['capability']),
+    scope: text(row['scope']),
+    risk: text(row['risk']),
+    status: text(row['status']),
+    assignedApproverId: text(row['assigned_approver_id']),
+    version: text(row['version']),
+    createdAt: text(row['created_at']),
+    expiresAt: text(row['expires_at']),
+  });
+  const selection = `SELECT id AS request_id, author_id::text, beneficiary_id::text,
+      capability, scope, risk, status, assigned_approver_id::text, version, created_at, expires_at
+      FROM admin_approval_requests`;
+  return {
+    listApprovals: async ({ limit, cursor }) => {
+      const result = await database.query(
+        `${selection}
+          WHERE ($2::text IS NULL OR id < $2)
+          ORDER BY id DESC LIMIT $1`,
+        [limit, cursor ?? null],
+      );
+      const records = result.rows.map(project);
+      return {
+        records,
+        nextCursor: records.length === limit ? (records.at(-1)?.requestId ?? null) : null,
+      };
+    },
+    loadApproval: async (requestId) => {
+      const result = await database.query(`${selection} WHERE id = $1 LIMIT 1`, [requestId]);
+      const row = result.rows[0];
+      return row === undefined ? null : project(row);
+    },
+  };
+};
 
 const OPERATIONS_QUERY = Object.freeze({
   queues: `SELECT job_id AS record_id, kind, status, progress, updated_at FROM admin_operational_jobs`,
@@ -1100,7 +1218,13 @@ export const createPersistentStagingAdminAuthority = ({
   });
   const governanceRoutes: AdminGovernanceRouteDependencies = {
     allowedOrigin: adminOrigin,
+    clock,
     csrfSecret: authSecret,
+    environment: {
+      environmentId: ADMIN_OPERATIONS_ENVIRONMENT_ID,
+      kind: environmentId,
+      label: environmentId === 'staging' ? 'Staging' : 'Development',
+    },
     governance,
     inviteTeam: async (input) => {
       const recipientDigest = createHmac('sha256', authSecret)
@@ -1132,7 +1256,13 @@ export const createPersistentStagingAdminAuthority = ({
   const approvals: AdminApprovalRouteDependencies = {
     allowedOrigin: adminOrigin,
     csrfSecret: authSecret,
+    environment: {
+      environmentId: ADMIN_OPERATIONS_ENVIRONMENT_ID,
+      kind: environmentId,
+      label: environmentId === 'staging' ? 'Staging' : 'Development',
+    },
     governance,
+    queries: approvalQueries(database),
     resolveSession,
     resolveStepUp,
     loadBreakGlassContext: async (targetReference) => {
