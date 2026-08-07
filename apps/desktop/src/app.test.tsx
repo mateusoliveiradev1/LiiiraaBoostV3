@@ -120,6 +120,25 @@ describe('app shell smoke', () => {
     expect(markup).not.toMatch(/0\.0\.0|Fase 2|SIMULAÇÃO SEGURA|Demonstração segura/iu);
   });
 
+  it('fails closed on About when the installed build identity is unavailable', () => {
+    const route = resolveDesktopRoute('/about');
+    expect(route.ok).toBe(true);
+    if (!route.ok) return;
+
+    const markup = renderToStaticMarkup(
+      <DesktopRouteOutlet
+        locale="pt-BR"
+        navigate={() => undefined}
+        route={route.value}
+        scenarioId="S01"
+      />,
+    );
+
+    expect(markup).toContain('Identidade da instalação indisponível');
+    expect(markup).toContain('Não é possível verificar atualizações');
+    expect(markup).not.toMatch(/0\.0\.0|Fase 2|SIMULAÇÃO SEGURA|Demonstração/iu);
+  });
+
   it('mounts every typed route at every locked responsive width with one main and one H1', () => {
     const lockedWidths = [1440, 1280, 960, 760] as const;
 

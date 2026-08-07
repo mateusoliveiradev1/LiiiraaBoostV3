@@ -43,7 +43,7 @@ describe('launch-on-startup adapter', () => {
     expect(nativeApi.isEnabled).toHaveBeenCalledOnce();
   });
 
-  it('keeps a deterministic in-memory state outside Tauri', async () => {
+  it('fails closed outside Tauri instead of manufacturing in-memory state', async () => {
     const nativeApi = {
       disable: vi.fn(() => Promise.reject(new Error('native host unavailable'))),
       enable: vi.fn(() => Promise.reject(new Error('native host unavailable'))),
@@ -51,9 +51,8 @@ describe('launch-on-startup adapter', () => {
     };
     const adapter = createLaunchOnStartupAdapter(nativeApi, false);
 
-    await expect(adapter.get()).resolves.toBe(false);
-    await expect(adapter.set(true)).resolves.toBe(true);
-    await expect(adapter.get()).resolves.toBe(true);
+    await expect(adapter.get()).rejects.toThrow('NATIVE_AUTOSTART_UNAVAILABLE');
+    await expect(adapter.set(true)).rejects.toThrow('NATIVE_AUTOSTART_UNAVAILABLE');
     expect(nativeApi.disable).not.toHaveBeenCalled();
     expect(nativeApi.enable).not.toHaveBeenCalled();
     expect(nativeApi.isEnabled).not.toHaveBeenCalled();
