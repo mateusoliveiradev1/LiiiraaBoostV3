@@ -1,7 +1,7 @@
 import '@liiiraa/design-tokens/tokens.css';
 import '../admin-shell.css';
 
-import { routeHref, WEB_LOCALES, type WebLocale } from '@liiiraa/web-core';
+import { routeHref, WEB_LOCALES, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
@@ -34,7 +34,10 @@ const COPY = Object.freeze({
     alerts: 'Alertas de SLA',
     boundary: 'Origem administrativa dedicada. Cookies públicos e da conta não são aceitos.',
     currentQueue: 'Fila atual',
+    environment: 'Prévia isolada',
+    inbox: 'Caixa de entrada',
     isolated: 'Origem isolada e sem cookies públicos',
+    jobs: 'Atividade e tarefas',
     navigation: 'Escopo da função',
     currentTask: 'Tarefa atual',
     roleHome: 'Área da função',
@@ -57,7 +60,10 @@ const COPY = Object.freeze({
     alerts: 'SLA alerts',
     boundary: 'Dedicated administrative origin. Public and account cookies are not accepted.',
     currentQueue: 'Current queue',
+    environment: 'Isolated preview',
+    inbox: 'Inbox',
     isolated: 'Isolated origin with no public cookies',
+    jobs: 'Activity and jobs',
     navigation: 'Role scope',
     currentTask: 'Current task',
     roleHome: 'Role workspace',
@@ -84,6 +90,12 @@ const localizedRoleHref = (locale: WebLocale, role: keyof typeof ADMIN_ROLE_COPY
   }
 
   return role === 'support' ? result.value : `${result.value}?role=${role}`;
+};
+
+const localizedAdminHref = (locale: WebLocale, routeId: WebRouteId): string => {
+  const result = routeHref(routeId, { locale });
+  if (!result.ok) throw new Error(`Canonical Admin route unavailable: ${routeId}`);
+  return result.value;
 };
 
 export const metadata: Metadata = {
@@ -132,16 +144,13 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           <a className="admin-skip-link" href="#admin-main">
             {copy.skip}
           </a>
-          <main id="admin-main" tabIndex={-1}>
-            <AdminFocusHandoff />
-            <AdminAuthorityProvider
-              accountOrigin={runtime.accountOrigin}
-              authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}
-              locale={locale}
-            >
-              {children}
-            </AdminAuthorityProvider>
-          </main>
+          <AdminAuthorityProvider
+            accountOrigin={runtime.accountOrigin}
+            authorityBaseUrl={ADMIN_BROWSER_AUTHORITY_BASE_URL}
+            locale={locale}
+          >
+            {children}
+          </AdminAuthorityProvider>
         </body>
       </html>
     );
@@ -169,11 +178,15 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
         <AdminNavigation
           accountLabel={copy.accountLabel}
           accountName={copy.accountName}
+          actorId={`preview-${role}`}
           alertsLabel={copy.alerts}
           alternateLocale={alternateLocale}
           currentQueueLabel={copy.currentQueue}
           currentTaskLabel={copy.currentTask}
+          environmentId="preview"
+          environmentLabel={copy.environment}
           fallbackLocaleHref={localizedRoleHref(alternateLocale, role)}
+          freshness="offline"
           header={
             <>
               <a className="admin-brand" href={localizedRoleHref(locale, role)}>
@@ -184,14 +197,19 @@ export default async function AdminLocaleLayout({ children, params }: AdminLocal
           }
           isolatedLabel={copy.isolated}
           items={navigation}
+          inboxHref={localizedAdminHref(locale, 'admin-inbox')}
+          inboxLabel={copy.inbox}
+          jobsHref={localizedAdminHref(locale, 'admin-activity')}
+          jobsLabel={copy.jobs}
           label={copy.navigation}
           locale={locale}
+          previewRole={role}
           roleHomeHref={localizedRoleHref(locale, role)}
           roleHomeLabel={copy.roleHome}
-          role={role}
           roleLabel={ADMIN_ROLE_COPY[role][locale]}
           savedViewLabels={copy.savedViews}
           searchAction={copy.searchAction}
+          searchHref={localizedAdminHref(locale, 'admin-search')}
           searchLabel={copy.searchLabel}
           searchPlaceholder={copy.searchPlaceholder}
           securityLabel={copy.security}

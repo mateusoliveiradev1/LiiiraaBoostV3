@@ -18,7 +18,12 @@ import {
   parseAdminQueueUrlState,
   searchAdminQueue,
 } from './admin-preview-model';
-import { adminRoleFromHeader, projectAdminRoleNavigation } from './admin-shell';
+import {
+  ADMIN_DOMAIN_ORDER,
+  adminRoleFromHeader,
+  projectAdminDomainNavigation,
+  projectAdminRoleNavigation,
+} from './admin-shell';
 import { ADMIN_WEB_COMPOSITION } from './index';
 
 describe('admin shell', () => {
@@ -33,25 +38,25 @@ describe('admin shell', () => {
     expect(icon).toContain('M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z');
   });
 
-  it('enforces the exact desktop operations shell geometry', () => {
+  it('enforces the approved expanded, compact, and mobile shell geometry', () => {
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
     const tokens = readFileSync(
       new URL('../../../packages/design-tokens/src/tokens.css', import.meta.url),
       'utf8',
     );
 
-    expect(styles).toMatch(/\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*72px/u);
+    expect(styles).toMatch(/\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*52px/u);
     expect(styles).not.toContain('.admin-preview-band');
     expect(styles).toMatch(
-      /\.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*280px minmax\(0, 1fr\)/u,
-    );
-    expect(tokens).toMatch(/--lb-admin-workspace-max:\s*1320px;/u);
-    expect(styles).toMatch(
-      /\.admin-workspace\s*\{[\s\S]*max-inline-size:\s*var\(--lb-admin-workspace-max\)/u,
+      /\.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*240px minmax\(0, 1fr\)/u,
     );
     expect(styles).toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*60px/u,
+      /\[data-sidebar-mode='compact'\] \.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*72px minmax\(0, 1fr\)/u,
     );
+    expect(styles).toMatch(
+      /@media \(width <= 959px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*min-block-size:\s*56px/u,
+    );
+    expect(tokens).toMatch(/--lb-control-min-size:\s*44px;/u);
   });
 
   it('keeps operational identity, task, isolated session, role, and locale legible without preview chrome', () => {
@@ -94,14 +99,20 @@ describe('admin shell', () => {
     expect(navigation).not.toMatch(/public navigation|account navigation/iu);
   });
 
-  it('keeps the queue and compact header inside the 960px and 320px reflow boundaries', () => {
+  it('keeps the queue and account access inside the 959px and 320px reflow boundaries', () => {
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
     expect(styles).toMatch(
       /@media \(width <= 1100px\)[\s\S]*\.admin-queue__filters[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.admin-header__account\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 400px\)[\s\S]*\.admin-header__account\s*\{[\s\S]*display:\s*block/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header \.lb-web-locale-switcher\s*\{[\s\S]*inline-size:\s*var\(--lb-control-min-size\)/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header \.lb-web-locale-switcher > span\s*\{[\s\S]*display:\s*none/u,
     );
   });
 
@@ -165,43 +176,44 @@ describe('admin shell', () => {
     expect(navigation).toContain('useSearchParams');
     expect(navigation).toContain('resolveLocalizedCurrentRoute');
     expect(navigation).toContain("securityBoundary: 'admin-origin'");
-    expect(navigation).toContain('createAdminQueueHref(alternatePath, role, queueState)');
-    expect(navigation).toContain('currentItems.length === 1');
+    expect(navigation).toContain('createAdminShellHref(alternatePath, queueState, previewRole)');
+    expect(navigation).toContain('items.find(');
     expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigation).toContain('<LocaleSwitcher');
     expect(navigation).toContain('parseAdminQueueUrlState(searchParameters)');
   });
 
-  it('collapses narrow role navigation into a compact current-task disclosure', () => {
+  it('uses a focus-trapped modal drawer below 960px', () => {
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
     expect(navigation).toContain('admin-nav__desktop');
-    expect(navigation).toContain('admin-nav__mobile');
-    expect(navigation).toContain('<details');
-    expect(navigation).toContain('<summary>');
+    expect(navigation).toContain('<LbDialog');
+    expect(navigation).toContain('<LbButton');
+    expect(navigation).toContain('buttonRef={drawerTriggerRef}');
+    expect(navigation).toContain('data-admin-drawer="true"');
+    expect(navigation).toContain('drawerTriggerRef.current?.focus()');
+    expect(navigation).toContain('preferenceKeyLoaded !== preferenceKey');
     expect(navigation).toContain('{currentLabel}');
-    expect(styles).toMatch(/\.admin-nav__mobile\s*\{[\s\S]*display:\s*none/u);
     expect(styles).toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-nav__desktop\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width <= 959px\)[\s\S]*\.admin-nav__desktop\s*\{[\s\S]*display:\s*none/u,
     );
     expect(styles).toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile\s*\{[\s\S]*display:\s*block/u,
-    );
-    expect(styles).not.toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-nav__list\s*\{[\s\S]*flex-wrap:\s*wrap/u,
+      /@media \(width <= 959px\)[\s\S]*\.admin-nav__drawer-trigger\s*\{[\s\S]*display:\s*inline-flex/u,
     );
   });
 
-  it('keeps the mobile disclosure exactly 48px and preserves one canonical current task', () => {
+  it('keeps mobile targets at least 44px and preserves current-route semantics', () => {
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
-    expect(navigation).toContain('<details className="admin-nav admin-nav__mobile">');
-    expect(navigation).toContain('markCurrent={false}');
+    expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigation.match(/aria-current=/gu)).toHaveLength(1);
     expect(styles).toMatch(
-      /@media \(width <= 960px\)[\s\S]*\.admin-nav__mobile > summary\s*\{[\s\S]*block-size:\s*48px/u,
+      /\.admin-nav__drawer-trigger,[\s\S]*min-block-size:\s*var\(--lb-control-min-size\)/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-nav__drawer-trigger\s*\{[\s\S]*inline-size:\s*var\(--lb-control-min-size\)/u,
     );
     expect(styles).toMatch(
       /@media \(width < 640px\)[\s\S]*#admin-main\s*\{[\s\S]*padding-inline:\s*16px/u,
@@ -243,7 +255,7 @@ describe('admin shell', () => {
     );
   });
 
-  it('persists disconnected fixture provenance and scopes every role', () => {
+  it('keeps one stable seven-domain order and removes domains absent from server authority', () => {
     expect(ADMIN_WEB_COMPOSITION).toEqual({
       authorityConnected: false,
       ordinaryNavigationLinked: false,
@@ -252,6 +264,26 @@ describe('admin shell', () => {
       surface: 'admin',
     });
 
+    expect(
+      projectAdminDomainNavigation(ADMIN_DOMAIN_ORDER, 'pt-BR').map(({ domain, label }) => ({
+        domain,
+        label,
+      })),
+    ).toEqual([
+      { domain: 'overview', label: 'Visão geral' },
+      { domain: 'people', label: 'Pessoas' },
+      { domain: 'revenue', label: 'Receita' },
+      { domain: 'operation', label: 'Operação' },
+      { domain: 'support', label: 'Atendimento' },
+      { domain: 'security', label: 'Segurança' },
+      { domain: 'system', label: 'Sistema' },
+    ]);
+    expect(
+      projectAdminDomainNavigation(['system', 'overview', 'security', 'security'], 'en').map(
+        ({ domain }) => domain,
+      ),
+    ).toEqual(['overview', 'security', 'system']);
+
     const roleIds = {
       audit: projectAdminRoleNavigation('audit', 'en').map(({ routeId }) => routeId),
       operations: projectAdminRoleNavigation('operations', 'en').map(({ routeId }) => routeId),
@@ -259,15 +291,22 @@ describe('admin shell', () => {
       support: projectAdminRoleNavigation('support', 'en').map(({ routeId }) => routeId),
     };
 
-    expect(roleIds.support).toEqual(['admin-role', 'admin-support']);
-    expect(roleIds.operations).toEqual(['admin-role', 'admin-operations', 'admin-audit']);
-    expect(roleIds.security).toEqual([
-      'admin-role',
-      'admin-security',
-      'admin-diagnostics',
-      'admin-audit',
+    expect(roleIds.support).toEqual(['admin-overview', 'admin-support-domain']);
+    expect(roleIds.operations).toEqual([
+      'admin-overview',
+      'admin-people',
+      'admin-revenue',
+      'admin-operation',
+      'admin-system',
     ]);
-    expect(roleIds.audit).toEqual(['admin-role', 'admin-audit', 'admin-audit-event']);
+    expect(roleIds.security).toEqual([
+      'admin-overview',
+      'admin-people',
+      'admin-support-domain',
+      'admin-security-domain',
+      'admin-system',
+    ]);
+    expect(roleIds.audit).toEqual(['admin-overview', 'admin-security-domain', 'admin-system']);
     expect(new Set(Object.values(roleIds).map((ids) => ids.join(','))).size).toBe(4);
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
   });

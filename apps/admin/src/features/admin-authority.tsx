@@ -34,7 +34,10 @@ import {
   type AdminSessionProjection,
   type AdminStepUp,
 } from '../admin-authority';
+import { AdminFocusHandoff } from '../admin-focus-handoff';
+import { AdminNavigation } from '../admin-navigation';
 import { ProductLockup } from '../admin-product-lockup';
+import { projectAdminRoleNavigation } from '../admin-shell';
 import { adminRoleCanAccessRoute, type AdminAuthorityRoute } from '../admin-runtime';
 
 type AdminAuthorityPageProps = Readonly<{
@@ -137,6 +140,53 @@ const roleLabel = (locale: WebLocale, role: AdminRoleJson): string => {
   } as const;
   return labels[locale][role];
 };
+
+const productionShellCopy = Object.freeze({
+  en: Object.freeze({
+    account: 'Operator menu',
+    alerts: 'Actionable inbox',
+    currentQueue: 'Current view',
+    currentTask: 'Current task',
+    environment: 'Staging',
+    inbox: 'Inbox',
+    isolated: 'Isolated Admin origin',
+    jobs: 'Activity and jobs',
+    navigation: 'Administrative domains',
+    roleHome: 'Overview',
+    savedViews: Object.freeze({
+      assigned: 'Assigned work',
+      'sla-risk': 'SLA at risk',
+      unowned: 'Unassigned',
+      'all-permitted': 'All permitted',
+    }),
+    searchAction: 'Search',
+    searchLabel: 'Search server-authorized administrative records',
+    searchPlaceholder: 'Search permitted records',
+    security: 'Protected administrative session',
+  }),
+  'pt-BR': Object.freeze({
+    account: 'Menu do operador',
+    alerts: 'Caixa de entrada acionável',
+    currentQueue: 'Visão atual',
+    currentTask: 'Tarefa atual',
+    environment: 'Staging',
+    inbox: 'Caixa de entrada',
+    isolated: 'Origem Admin isolada',
+    jobs: 'Atividade e tarefas',
+    navigation: 'Domínios administrativos',
+    roleHome: 'Visão geral',
+    savedViews: Object.freeze({
+      assigned: 'Trabalho atribuído',
+      'sla-risk': 'SLA em risco',
+      unowned: 'Sem responsável',
+      'all-permitted': 'Todos permitidos',
+    }),
+    searchAction: 'Buscar',
+    searchLabel: 'Buscar registros administrativos autorizados pelo servidor',
+    searchPlaceholder: 'Buscar registros permitidos',
+    security: 'Sessão administrativa protegida',
+  }),
+});
 
 const formatAdminDateTime = (value: string, locale: WebLocale): string => {
   const date = new Date(value);
@@ -324,50 +374,6 @@ const AdminSignIn = ({
 };
 
 const routeHref = (locale: WebLocale, suffix: string): string => `/${locale}/admin${suffix}`;
-
-const RoleNavigation = ({ locale, role }: Readonly<{ locale: WebLocale; role: AdminRoleJson }>) => {
-  const labels = copy[locale];
-  const links: readonly (readonly [string, string])[] =
-    role === 'support'
-      ? [[labels.support, '/support/case-authority']]
-      : role === 'operations'
-        ? [[labels.operations, '/operations/OPS-117']]
-        : role === 'security'
-          ? [
-              [labels.security, '/security/SEC-083'],
-              [labels.diagnosticAccess, '/diagnostics/DIA-015'],
-            ]
-          : [[labels.audit, '/audit']];
-  return (
-    <div className="admin-production-nav">
-      <nav aria-label={labels.activeRole} className="admin-authority__navigation">
-        <Link href={routeHref(locale, '') as Route}>
-          <ProductIcon name="toolbox" size={18} />
-          {locale === 'pt-BR' ? 'Visão geral' : 'Overview'}
-        </Link>
-        {links.map(([label, suffix]) => (
-          <Link href={routeHref(locale, suffix) as Route} key={suffix}>
-            <ProductIcon
-              name={
-                suffix.includes('diagnostics')
-                  ? 'activity'
-                  : role === 'security'
-                    ? 'shield'
-                    : role === 'support'
-                      ? 'lifebuoy'
-                      : role === 'operations'
-                        ? 'rocket'
-                        : 'receipt'
-              }
-              size={18}
-            />
-            {label}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
-};
 
 const AuditTable = ({
   events,
@@ -611,6 +617,8 @@ const AdminProductionShell = ({
   children,
   locale,
   onSignedOut,
+  freshness,
+  inboxCount,
   session,
 }: Readonly<{
   accountOrigin: string;
@@ -618,11 +626,16 @@ const AdminProductionShell = ({
   children: ReactNode;
   locale: WebLocale;
   onSignedOut: () => void;
+  freshness: AdminAuthorityContextValue['freshness'];
+  inboxCount: number;
   session: AdminSessionProjection;
 }>) => {
   const labels = copy[locale];
+  const shellLabels = productionShellCopy[locale];
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
+  const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
+  const navigation = projectAdminRoleNavigation(session.role, locale);
   useEffect(() => {
     document.documentElement.dataset['adminSessionState'] = 'verified';
     return () => {
@@ -630,22 +643,9 @@ const AdminProductionShell = ({
     };
   }, []);
   return (
-    <div className="admin-production-shell" data-admin-role={session.role}>
-      <header className="admin-production-header">
-        <Link className="admin-brand" href={routeHref(locale, '') as Route}>
-          <ProductLockup />
-          <span className="admin-brand__surface">Admin</span>
-        </Link>
-        <div className="admin-production-header__session">
-          <span className="admin-production-header__identity">
-            <ProductIcon name="shield" size={18} />
-            <span>
-              <strong>{roleLabel(locale, session.role)}</strong>
-              <small>
-                {labels.sessionUntil} {formatAdminDateTime(session.expiresAt, locale)}
-              </small>
-            </span>
-          </span>
+    <AdminNavigation
+      accountActions={
+        <>
           <a href={`${accountOrigin}/${locale}/account`}>{labels.accountPortal}</a>
           <LbButton
             isDisabled={signingOut}
@@ -664,18 +664,50 @@ const AdminProductionShell = ({
           >
             {labels.signOut}
           </LbButton>
-        </div>
-      </header>
-      {signOutError ? (
-        <p className="admin-production-header__error" role="alert">
-          {labels.signOutError}
-        </p>
-      ) : null}
-      <div className="admin-production-workspace">
-        <RoleNavigation locale={locale} role={session.role} />
-        <section className="admin-production-main">{children}</section>
-      </div>
-    </div>
+          {signOutError ? <span role="alert">{labels.signOutError}</span> : null}
+        </>
+      }
+      accountLabel={shellLabels.account}
+      accountName={roleLabel(locale, session.role)}
+      actorId={session.actorId}
+      alertsLabel={shellLabels.alerts}
+      alternateLocale={alternateLocale}
+      currentQueueLabel={shellLabels.currentQueue}
+      currentTaskLabel={shellLabels.currentTask}
+      environmentId="staging"
+      environmentLabel={shellLabels.environment}
+      fallbackLocaleHref={routeHref(alternateLocale, '/overview')}
+      freshness={freshness}
+      header={
+        <Link className="admin-brand" href={routeHref(locale, '/overview') as Route}>
+          <ProductLockup />
+          <span className="admin-brand__surface">Admin</span>
+        </Link>
+      }
+      inboxCount={inboxCount}
+      inboxHref={routeHref(locale, '/inbox')}
+      inboxLabel={shellLabels.inbox}
+      isolatedLabel={`${shellLabels.isolated} · ${labels.sessionUntil} ${formatAdminDateTime(session.expiresAt, locale)}`}
+      items={navigation}
+      jobsHref={routeHref(locale, '/activity')}
+      jobsLabel={shellLabels.jobs}
+      label={shellLabels.navigation}
+      locale={locale}
+      roleHomeHref={routeHref(locale, '/overview')}
+      roleHomeLabel={shellLabels.roleHome}
+      roleLabel={roleLabel(locale, session.role)}
+      savedViewLabels={shellLabels.savedViews}
+      searchAction={shellLabels.searchAction}
+      searchHref={routeHref(locale, '/search')}
+      searchLabel={shellLabels.searchLabel}
+      searchPlaceholder={shellLabels.searchPlaceholder}
+      securityLabel={shellLabels.security}
+    >
+      <main id="admin-main" tabIndex={-1}>
+        <AdminFocusHandoff />
+        {children}
+      </main>
+    </AdminNavigation>
   );
 };
 
@@ -754,6 +786,18 @@ export const AdminAuthorityProvider = ({
   }, [authority]);
 
   useEffect(() => {
+    if (session === null || session === undefined) return undefined;
+    const controller = new AbortController();
+    void refetchAdminResources(
+      ['access-context', 'inbox', 'jobs', 'incidents', 'capacity'],
+      controller.signal,
+    );
+    return () => {
+      controller.abort();
+    };
+  }, [refetchAdminResources, session]);
+
+  useEffect(() => {
     if (session === null || session === undefined) {
       setFreshness('offline');
       return undefined;
@@ -781,40 +825,45 @@ export const AdminAuthorityProvider = ({
 
   if (session === undefined) {
     return (
-      <section
-        aria-busy="true"
-        aria-label={copy[locale].loading}
-        className="admin-production-loading"
-        data-admin-runtime="production"
-      >
-        <header>
-          <span className="admin-production-loading__brand" />
-          <span className="admin-production-loading__session" />
-        </header>
-        <div>
-          <aside aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </aside>
-          <div className="admin-production-loading__main">
-            <span className="admin-production-loading__title" />
-            <span className="admin-production-loading__copy" />
-            <span className="admin-production-loading__content" />
+      <main id="admin-main" tabIndex={-1}>
+        <section
+          aria-busy="true"
+          aria-label={copy[locale].loading}
+          className="admin-production-loading"
+          data-admin-runtime="production"
+        >
+          <header>
+            <span className="admin-production-loading__brand" />
+            <span className="admin-production-loading__session" />
+          </header>
+          <div>
+            <aside aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </aside>
+            <div className="admin-production-loading__main">
+              <span className="admin-production-loading__title" />
+              <span className="admin-production-loading__copy" />
+              <span className="admin-production-loading__content" />
+            </div>
           </div>
-        </div>
-        <span className="lb-visually-hidden" role="status">
-          {copy[locale].loading}
-        </span>
-      </section>
+          <span className="lb-visually-hidden" role="status">
+            {copy[locale].loading}
+          </span>
+        </section>
+      </main>
     );
   }
 
   return (
     <AdminAuthorityContext.Provider value={context}>
       {session === null ? (
-        children
+        <main id="admin-main" tabIndex={-1}>
+          <AdminFocusHandoff />
+          {children}
+        </main>
       ) : (
         <AdminProductionShell
           accountOrigin={accountOrigin}
@@ -823,6 +872,10 @@ export const AdminAuthorityProvider = ({
           onSignedOut={() => {
             setSession(null);
           }}
+          freshness={freshness}
+          inboxCount={
+            projections.briefing?.status === 'online' ? projections.briefing.records.length : 0
+          }
           session={session}
         >
           {children}

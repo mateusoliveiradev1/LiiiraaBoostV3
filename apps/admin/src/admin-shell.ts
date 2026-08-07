@@ -1,16 +1,29 @@
 import { routeHref, webRoutes, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
+import type { AdminDomainJson } from '@liiiraa/contracts-ts';
 
 import { ADMIN_PREVIEW_ROLES, type AdminPreviewRole } from '../proxy';
 
+export const ADMIN_DOMAIN_ORDER = Object.freeze([
+  'overview',
+  'people',
+  'revenue',
+  'operation',
+  'support',
+  'security',
+  'system',
+] as const satisfies readonly AdminDomainJson[]);
+
+export type AdminShellDomain = (typeof ADMIN_DOMAIN_ORDER)[number];
+
 export type AdminNavigationItem = Readonly<{
+  domain: AdminShellDomain;
   href: string;
   label: string;
   routeId: WebRouteId;
 }>;
 
-type AdminNavigationDefinition = Readonly<{
+type AdminDomainNavigationDefinition = Readonly<{
   label: Readonly<Record<WebLocale, string>>;
-  parameters?: Readonly<Record<string, string>>;
   routeId: WebRouteId;
 }>;
 
@@ -18,69 +31,43 @@ const CANONICAL_ADMIN_ROUTES = new Set(
   webRoutes.filter(({ surface }) => surface === 'admin').map(({ id }) => id),
 );
 
-const ROLE_NAVIGATION = Object.freeze({
-  support: Object.freeze([
-    {
-      label: { 'pt-BR': 'Área da função', en: 'Role workspace' },
-      routeId: 'admin-role',
-    },
-    {
-      label: { 'pt-BR': 'Caso de suporte', en: 'Support case' },
-      parameters: { caseId: 'case-preview' },
-      routeId: 'admin-support',
-    },
-  ]),
-  operations: Object.freeze([
-    {
-      label: { 'pt-BR': 'Área da função', en: 'Role workspace' },
-      routeId: 'admin-role',
-    },
-    {
-      label: { 'pt-BR': 'Revisão operacional', en: 'Operations review' },
-      parameters: { reviewId: 'review-preview' },
-      routeId: 'admin-operations',
-    },
-    {
-      label: { 'pt-BR': 'Auditoria', en: 'Audit' },
-      routeId: 'admin-audit',
-    },
-  ]),
-  security: Object.freeze([
-    {
-      label: { 'pt-BR': 'Área da função', en: 'Role workspace' },
-      routeId: 'admin-role',
-    },
-    {
-      label: { 'pt-BR': 'Revisão de segurança', en: 'Security review' },
-      parameters: { reviewId: 'review-preview' },
-      routeId: 'admin-security',
-    },
-    {
-      label: { 'pt-BR': 'Diagnóstico com consentimento', en: 'Consent diagnostic' },
-      parameters: { diagnosticId: 'diagnostic-preview' },
-      routeId: 'admin-diagnostics',
-    },
-    {
-      label: { 'pt-BR': 'Auditoria', en: 'Audit' },
-      routeId: 'admin-audit',
-    },
-  ]),
-  audit: Object.freeze([
-    {
-      label: { 'pt-BR': 'Área da função', en: 'Role workspace' },
-      routeId: 'admin-role',
-    },
-    {
-      label: { 'pt-BR': 'Linha do tempo de auditoria', en: 'Audit timeline' },
-      routeId: 'admin-audit',
-    },
-    {
-      label: { 'pt-BR': 'Evento correlacionado', en: 'Correlated event' },
-      parameters: { eventId: 'event-preview' },
-      routeId: 'admin-audit-event',
-    },
-  ]),
-} as const satisfies Readonly<Record<AdminPreviewRole, readonly AdminNavigationDefinition[]>>);
+const ADMIN_DOMAIN_NAVIGATION = Object.freeze({
+  overview: Object.freeze({
+    label: { 'pt-BR': 'Visão geral', en: 'Overview' },
+    routeId: 'admin-overview',
+  }),
+  people: Object.freeze({
+    label: { 'pt-BR': 'Pessoas', en: 'People' },
+    routeId: 'admin-people',
+  }),
+  revenue: Object.freeze({
+    label: { 'pt-BR': 'Receita', en: 'Revenue' },
+    routeId: 'admin-revenue',
+  }),
+  operation: Object.freeze({
+    label: { 'pt-BR': 'Operação', en: 'Operation' },
+    routeId: 'admin-operation',
+  }),
+  support: Object.freeze({
+    label: { 'pt-BR': 'Atendimento', en: 'Support' },
+    routeId: 'admin-support-domain',
+  }),
+  security: Object.freeze({
+    label: { 'pt-BR': 'Segurança', en: 'Security' },
+    routeId: 'admin-security-domain',
+  }),
+  system: Object.freeze({
+    label: { 'pt-BR': 'Sistema', en: 'System' },
+    routeId: 'admin-system',
+  }),
+} as const satisfies Readonly<Record<AdminShellDomain, AdminDomainNavigationDefinition>>);
+
+const ROLE_DOMAINS = Object.freeze({
+  support: Object.freeze(['overview', 'support'] as const),
+  operations: Object.freeze(['overview', 'people', 'revenue', 'operation', 'system'] as const),
+  security: Object.freeze(['overview', 'people', 'support', 'security', 'system'] as const),
+  audit: Object.freeze(['overview', 'security', 'system'] as const),
+} satisfies Readonly<Record<AdminPreviewRole, readonly AdminShellDomain[]>>);
 
 export const ADMIN_ROLE_COPY = Object.freeze({
   support: Object.freeze({
@@ -104,31 +91,47 @@ export const ADMIN_ROLE_COPY = Object.freeze({
 export const adminRoleFromHeader = (value: string | null): AdminPreviewRole =>
   ADMIN_PREVIEW_ROLES.includes(value as AdminPreviewRole) ? (value as AdminPreviewRole) : 'support';
 
-export const projectAdminRoleNavigation = (
-  role: AdminPreviewRole,
+const uniqueDomainsInStableOrder = (
+  domains: readonly AdminDomainJson[],
+): readonly AdminShellDomain[] => {
+  const authorized = new Set(domains);
+  return Object.freeze(ADMIN_DOMAIN_ORDER.filter((domain) => authorized.has(domain)));
+};
+
+/**
+ * Projects only the domain identifiers admitted by the server. The client owns labels and
+ * stable ordering, but never adds a destination that was absent from the authority projection.
+ */
+export const projectAdminDomainNavigation = (
+  domains: readonly AdminDomainJson[],
   locale: WebLocale,
 ): readonly AdminNavigationItem[] =>
   Object.freeze(
-    ROLE_NAVIGATION[role].map((definition) => {
+    uniqueDomainsInStableOrder(domains).map((domain) => {
+      const definition = ADMIN_DOMAIN_NAVIGATION[domain];
       if (!CANONICAL_ADMIN_ROUTES.has(definition.routeId)) {
-        throw new Error(`Admin role navigation route is not canonical: ${definition.routeId}`);
+        throw new Error(`Admin domain navigation route is not canonical: ${definition.routeId}`);
       }
 
-      const result = routeHref(definition.routeId, {
-        locale,
-        ...('parameters' in definition ? definition.parameters : {}),
-      });
-
+      const result = routeHref(definition.routeId, { locale });
       if (!result.ok) {
-        throw new Error(`Admin role navigation route is unavailable: ${definition.routeId}`);
+        throw new Error(`Admin domain navigation route is unavailable: ${definition.routeId}`);
       }
-
-      const roleContext = role === 'support' ? '' : `?role=${role}`;
 
       return Object.freeze({
-        href: `${result.value}${roleContext}`,
+        domain,
+        href: result.value,
         label: definition.label[locale],
         routeId: definition.routeId,
       });
     }),
   );
+
+/**
+ * Compatibility projection for the disconnected role preview and the current bounded server
+ * session. Production callers receive the role from the server; URL role claims never reach it.
+ */
+export const projectAdminRoleNavigation = (
+  role: AdminPreviewRole,
+  locale: WebLocale,
+): readonly AdminNavigationItem[] => projectAdminDomainNavigation(ROLE_DOMAINS[role], locale);

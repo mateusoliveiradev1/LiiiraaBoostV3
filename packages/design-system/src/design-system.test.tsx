@@ -93,6 +93,11 @@ describe('authored primitive interaction states', () => {
       isLoading: true,
       loadingLabel: 'Preparing',
     });
+    const customButton = LbButton({
+      ariaLabel: 'Open navigation',
+      children: 'Menu',
+      className: 'admin-nav__drawer-trigger',
+    });
 
     expect(elementProps(defaultButton)).toMatchObject({
       'data-lb-control': true,
@@ -105,6 +110,10 @@ describe('authored primitive interaction states', () => {
       'aria-busy': true,
       'data-loading': true,
       isPending: true,
+    });
+    expect(elementProps(customButton)).toMatchObject({
+      'aria-label': 'Open navigation',
+      className: 'lb-button admin-nav__drawer-trigger',
     });
 
     const defaultMarkup = renderToStaticMarkup(defaultButton);

@@ -11,9 +11,13 @@ const config = {
     options: {},
   },
   staticDirs: [{ from: '../../web/public/fonts', to: '/fonts' }],
-  stories: ['../src/testing/**/*.stories.@(ts|tsx)'],
+  stories: ['../src/**/*.stories.@(ts|tsx)'],
   viteFinal: (viteConfig) => ({
     ...viteConfig,
+    define: {
+      ...viteConfig.define,
+      __dirname: JSON.stringify('/'),
+    },
     plugins: [...(viteConfig.plugins ?? []), react()],
   }),
 } satisfies StorybookConfig;

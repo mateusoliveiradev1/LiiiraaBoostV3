@@ -1,104 +1,188 @@
 'use client';
 
+import { LbButton, LbDialog, ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
 import { LocaleSwitcher } from '@liiiraa/web-features';
-import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { AdminPreviewRole } from '../proxy';
 import {
-  createAdminQueueHref,
   parseAdminQueueUrlState,
-  projectAdminQueue,
   type AdminQueueSavedView,
   type AdminQueueUrlState,
 } from './admin-preview-model';
+import type { AdminNavigationItem, AdminShellDomain } from './admin-shell';
 
-export type AdminNavigationItem = Readonly<{
-  href: string;
-  label: string;
-  routeId: string;
-}>;
+export type AdminShellFreshness = 'live' | 'reconnecting' | 'offline' | 'degraded';
+export type AdminShellDensity = 'comfortable' | 'compact';
+export type AdminSidebarMode = 'expanded' | 'compact';
 
 type AdminNavigationProps = Readonly<{
+  accountActions?: ReactNode;
   accountLabel: string;
   accountName: string;
+  actorId: string;
   alertsLabel: string;
   alternateLocale: WebLocale;
   children: ReactNode;
   currentQueueLabel: string;
   currentTaskLabel: string;
+  environmentId: string;
+  environmentLabel: string;
   fallbackLocaleHref: string;
+  freshness: AdminShellFreshness;
   header: ReactNode;
+  inboxCount?: number;
+  inboxHref: string;
+  inboxLabel: string;
+  initialDensity?: AdminShellDensity;
+  initialDrawerOpen?: boolean;
+  initialSidebarMode?: AdminSidebarMode;
   isolatedLabel: string;
   items: readonly AdminNavigationItem[];
+  jobsHref: string;
+  jobsLabel: string;
   label: string;
   locale: WebLocale;
+  persistPreference?: boolean;
+  previewRole?: AdminPreviewRole;
   roleHomeHref: string;
   roleHomeLabel: string;
-  role: AdminPreviewRole;
   roleLabel: string;
   savedViewLabels: Readonly<Record<AdminQueueSavedView, string>>;
   searchAction: string;
+  searchHref: string;
   searchLabel: string;
   searchPlaceholder: string;
   securityLabel: string;
 }>;
 
-const ADMIN_NAV_ICONS: Readonly<Record<string, ProductIconName>> = Object.freeze({
-  'admin-role': 'toolbox',
-  'admin-support': 'lifebuoy',
-  'admin-operations': 'rocket',
-  'admin-security': 'shield',
-  'admin-diagnostics': 'activity',
-  'admin-audit': 'receipt',
-  'admin-audit-event': 'search',
+const ADMIN_NAV_ICONS: Readonly<Record<AdminShellDomain, ProductIconName>> = Object.freeze({
+  overview: 'app',
+  people: 'profile',
+  revenue: 'receipt',
+  operation: 'rocket',
+  support: 'lifebuoy',
+  security: 'shield',
+  system: 'toolbox',
 });
 
 const normalizePathname = (href: string): string =>
   (href.split('?')[0] ?? '/').replace(/\/+$/u, '') || '/';
 
+const appendSafeQueueState = (parameters: URLSearchParams, state: AdminQueueUrlState): void => {
+  if (state.query) parameters.set('q', state.query);
+  if (state.savedView !== 'assigned') parameters.set('view', state.savedView);
+  if (state.priority !== 'all') parameters.set('priority', state.priority);
+  if (state.status !== 'all') parameters.set('status', state.status);
+  if (state.owner !== 'all') parameters.set('owner', state.owner);
+  if (state.selectedId) parameters.set('selected', state.selectedId);
+};
+
+export const createAdminShellHref = (
+  href: string,
+  state: AdminQueueUrlState,
+  previewRole?: AdminPreviewRole,
+  override: Partial<AdminQueueUrlState> = {},
+): string => {
+  const pathname = href.split('?')[0] ?? href;
+  const parameters = new URLSearchParams();
+  if (previewRole !== undefined && previewRole !== 'support') {
+    parameters.set('role', previewRole);
+  }
+  appendSafeQueueState(parameters, Object.freeze({ ...state, ...override }));
+  const query = parameters.toString();
+  return query ? `${pathname}?${query}` : pathname;
+};
+
+export const adminShellPreferenceKey = (actorId: string, environmentId: string): string =>
+  `liiiraa-admin-shell:${environmentId}:${actorId}`;
+
+const freshnessCopy = Object.freeze({
+  en: Object.freeze({
+    degraded: 'Degraded',
+    live: 'Live',
+    offline: 'Offline',
+    reconnecting: 'Reconnecting',
+  }),
+  'pt-BR': Object.freeze({
+    degraded: 'Degradado',
+    live: 'Ao vivo',
+    offline: 'Offline',
+    reconnecting: 'Reconectando',
+  }),
+});
+
+const shellCopy = Object.freeze({
+  en: Object.freeze({
+    closeNavigation: 'Close navigation',
+    compactDensity: 'Use compact density',
+    compactSidebar: 'Use compact sidebar',
+    comfortableDensity: 'Use comfortable density',
+    density: 'Display density',
+    environment: 'Environment',
+    expandedSidebar: 'Expand sidebar',
+    navigation: 'Administrative navigation',
+    openNavigation: 'Open navigation',
+    utilities: 'Utilities',
+  }),
+  'pt-BR': Object.freeze({
+    closeNavigation: 'Fechar navegação',
+    compactDensity: 'Usar densidade compacta',
+    compactSidebar: 'Usar barra lateral compacta',
+    comfortableDensity: 'Usar densidade confortável',
+    density: 'Densidade da interface',
+    environment: 'Ambiente',
+    expandedSidebar: 'Expandir barra lateral',
+    navigation: 'Navegação administrativa',
+    openNavigation: 'Abrir navegação',
+    utilities: 'Utilitários',
+  }),
+});
+
 function NavigationItems({
   currentHref,
   items,
-  markCurrent,
+  onNavigate,
+  previewRole,
   queueState,
-  role,
 }: Readonly<{
   currentHref: string | undefined;
   items: readonly AdminNavigationItem[];
-  markCurrent: boolean;
+  onNavigate?: () => void;
+  previewRole?: AdminPreviewRole;
   queueState: AdminQueueUrlState;
-  role: AdminPreviewRole;
 }>) {
   return (
     <ol className="admin-nav__list">
       {items.map((item) => {
         const isCurrent =
-          markCurrent &&
           currentHref !== undefined &&
           normalizePathname(item.href) === normalizePathname(currentHref);
 
         return (
-          <li key={item.routeId}>
+          <li key={item.domain}>
             <Link
               aria-current={isCurrent ? 'page' : undefined}
+              aria-label={item.label}
               data-current={isCurrent ? 'page' : undefined}
               href={
-                createAdminQueueHref(item.href, role, queueState, {
+                createAdminShellHref(item.href, queueState, previewRole, {
                   selectedId: undefined,
                 }) as Route
               }
+              {...(onNavigate === undefined ? {} : { onClick: onNavigate })}
+              title={item.label}
             >
               <ProductIcon
                 className="admin-nav__icon"
-                name={ADMIN_NAV_ICONS[item.routeId] ?? 'app'}
+                name={ADMIN_NAV_ICONS[item.domain]}
                 size={18}
               />
-              {item.label}
+              <span className="admin-nav__label">{item.label}</span>
             </Link>
           </li>
         );
@@ -107,68 +191,224 @@ function NavigationItems({
   );
 }
 
-export function AdminNavigation({
+type AdminShellFrameProps = Omit<AdminNavigationProps, 'fallbackLocaleHref'> &
+  Readonly<{
+    alternatePath: string;
+    currentHref?: string;
+    queueState: AdminQueueUrlState;
+  }>;
+
+export function AdminShellFrame({
+  accountActions,
   accountLabel,
   accountName,
+  actorId,
   alertsLabel,
   alternateLocale,
+  alternatePath,
   children,
+  currentHref,
   currentQueueLabel,
   currentTaskLabel,
-  fallbackLocaleHref,
+  environmentId,
+  environmentLabel,
+  freshness,
   header,
+  inboxCount = 0,
+  inboxHref,
+  inboxLabel,
+  initialDensity = 'comfortable',
+  initialDrawerOpen = false,
+  initialSidebarMode = 'expanded',
   isolatedLabel,
   items,
+  jobsHref,
+  jobsLabel,
   label,
   locale,
+  persistPreference = true,
+  previewRole,
+  queueState,
   roleHomeHref,
   roleHomeLabel,
-  role,
   roleLabel,
   savedViewLabels,
   searchAction,
+  searchHref,
   searchLabel,
   searchPlaceholder,
   securityLabel,
-}: AdminNavigationProps) {
-  const pathname = usePathname();
-  const searchParameters = useSearchParams();
-  const queueState = parseAdminQueueUrlState(searchParameters);
-  const localizedCurrentRoute = resolveLocalizedCurrentRoute({
-    pathname,
-    securityBoundary: 'admin-origin',
-    targetLocale: locale,
-  });
-  const currentHref = localizedCurrentRoute.ok ? localizedCurrentRoute.value : undefined;
-  const currentItems = items.filter(
+}: AdminShellFrameProps) {
+  const labels = shellCopy[locale];
+  const preferenceKey = adminShellPreferenceKey(actorId, environmentId);
+  const [density, setDensity] = useState<AdminShellDensity>(initialDensity);
+  const [sidebarMode, setSidebarMode] = useState<AdminSidebarMode>(initialSidebarMode);
+  const [drawerOpen, setDrawerOpen] = useState(initialDrawerOpen);
+  const [preferenceKeyLoaded, setPreferenceKeyLoaded] = useState<string | null>(
+    persistPreference ? null : preferenceKey,
+  );
+  const drawerTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const currentItem = items.find(
     ({ href }) =>
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
-  const currentItem = currentItems.length === 1 ? currentItems[0] : undefined;
   const currentLabel = currentItem?.label ?? label;
-  const localizedAlternateRoute = resolveLocalizedCurrentRoute({
-    pathname,
-    securityBoundary: 'admin-origin',
-    targetLocale: alternateLocale,
-  });
-  const alternatePath = localizedAlternateRoute.ok
-    ? localizedAlternateRoute.value
-    : fallbackLocaleHref;
-  const localeHref = createAdminQueueHref(alternatePath, role, queueState);
-  const alertCount = projectAdminQueue({ locale, role, savedView: 'sla-risk' }).length;
-  const searchActionHref = roleHomeHref.split('?')[0] ?? roleHomeHref;
+  const localeHref = createAdminShellHref(alternatePath, queueState, previewRole);
+
+  useEffect(() => {
+    if (!persistPreference) return;
+    try {
+      const stored = window.localStorage.getItem(preferenceKey);
+      if (stored === null) return;
+      const value = JSON.parse(stored) as Partial<{
+        density: AdminShellDensity;
+        sidebarMode: AdminSidebarMode;
+      }>;
+      if (value.density === 'comfortable' || value.density === 'compact') {
+        setDensity(value.density);
+      }
+      if (value.sidebarMode === 'expanded' || value.sidebarMode === 'compact') {
+        setSidebarMode(value.sidebarMode);
+      }
+    } catch {
+      // A blocked or corrupted preference store must never block the administrative shell.
+    } finally {
+      setPreferenceKeyLoaded(preferenceKey);
+    }
+  }, [persistPreference, preferenceKey]);
+
+  useEffect(() => {
+    if (!persistPreference || preferenceKeyLoaded !== preferenceKey) return;
+    try {
+      window.localStorage.setItem(preferenceKey, JSON.stringify({ density, sidebarMode }));
+    } catch {
+      // The current safe in-memory preference remains usable for this session.
+    }
+  }, [density, persistPreference, preferenceKey, preferenceKeyLoaded, sidebarMode]);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const target = event.target;
+      const editing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement && target.isContentEditable);
+      if (
+        (!editing && event.key === '/') ||
+        ((event.ctrlKey || event.metaKey) && event.key === 'k')
+      ) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => {
+      window.removeEventListener('keydown', handleShortcut);
+    };
+  }, []);
+
+  const updateDrawer = useCallback((open: boolean) => {
+    setDrawerOpen(open);
+    if (!open) {
+      window.queueMicrotask(() => drawerTriggerRef.current?.focus());
+    }
+  }, []);
+
+  const navigation = (
+    <>
+      <div className="admin-nav__identity">
+        <span>{labels.environment}</span>
+        <strong>{environmentLabel}</strong>
+        <span className="admin-nav__function">{roleLabel}</span>
+        <span className="admin-nav__freshness" data-state={freshness} role="status">
+          <span aria-hidden="true" />
+          {freshnessCopy[locale][freshness]}
+        </span>
+      </div>
+      <NavigationItems
+        currentHref={currentHref}
+        items={items}
+        {...(drawerOpen
+          ? {
+              onNavigate: () => {
+                updateDrawer(false);
+              },
+            }
+          : {})}
+        {...(previewRole === undefined ? {} : { previewRole })}
+        queueState={queueState}
+      />
+      <div className="admin-nav__utilities">
+        <span>{labels.utilities}</span>
+        <Link href={createAdminShellHref(inboxHref, queueState, previewRole) as Route}>
+          <ProductIcon name="bell" size={18} />
+          <span className="admin-nav__label">{inboxLabel}</span>
+          {inboxCount > 0 ? <strong>{inboxCount}</strong> : null}
+        </Link>
+        <Link href={createAdminShellHref(jobsHref, queueState, previewRole) as Route}>
+          <ProductIcon name="activity" size={18} />
+          <span className="admin-nav__label">{jobsLabel}</span>
+        </Link>
+      </div>
+    </>
+  );
 
   return (
-    <>
+    <div
+      className="admin-shell-frame"
+      data-density={density}
+      data-freshness={freshness}
+      data-sidebar-mode={sidebarMode}
+    >
       <header className="admin-header">
         <div className="admin-header__bar">
-          {header}
-          <form
-            action={searchActionHref}
-            className="admin-header__search"
-            method="get"
-            role="search"
+          <LbDialog
+            description={`${environmentLabel} · ${roleLabel}`}
+            isOpen={drawerOpen}
+            onOpenChange={updateDrawer}
+            title={labels.navigation}
+            trigger={
+              <LbButton
+                ariaLabel={labels.openNavigation}
+                buttonRef={drawerTriggerRef}
+                className="admin-nav__drawer-trigger"
+                variant="quiet"
+              >
+                <ProductIcon name="list" size={20} />
+              </LbButton>
+            }
           >
+            <div className="admin-nav__drawer" data-admin-drawer="true">
+              <button
+                aria-label={labels.closeNavigation}
+                className="admin-nav__drawer-close"
+                onClick={() => {
+                  updateDrawer(false);
+                }}
+                type="button"
+              >
+                <ProductIcon name="close" size={20} />
+              </button>
+              <nav aria-label={label}>{navigation}</nav>
+              <div className="admin-nav__drawer-preferences">
+                <span>{labels.density}</span>
+                <button
+                  onClick={() => {
+                    setDensity((current) =>
+                      current === 'comfortable' ? 'compact' : 'comfortable',
+                    );
+                  }}
+                  type="button"
+                >
+                  <ProductIcon name="activity" size={18} />
+                  {density === 'comfortable' ? labels.compactDensity : labels.comfortableDensity}
+                </button>
+              </div>
+            </div>
+          </LbDialog>
+          {header}
+          <form action={searchHref} className="admin-header__search" method="get" role="search">
             <ProductIcon name="search" size={17} />
             <label className="lb-visually-hidden" htmlFor="admin-global-search">
               {searchLabel}
@@ -176,23 +416,14 @@ export function AdminNavigation({
             <input
               defaultValue={queueState.query}
               id="admin-global-search"
-              maxLength={64}
+              maxLength={128}
               name="q"
               placeholder={searchPlaceholder}
+              ref={searchRef}
               type="search"
             />
-            {role !== 'support' ? <input name="role" type="hidden" value={role} /> : null}
-            {queueState.savedView !== 'assigned' ? (
-              <input name="view" type="hidden" value={queueState.savedView} />
-            ) : null}
-            {queueState.priority !== 'all' ? (
-              <input name="priority" type="hidden" value={queueState.priority} />
-            ) : null}
-            {queueState.status !== 'all' ? (
-              <input name="status" type="hidden" value={queueState.status} />
-            ) : null}
-            {queueState.owner !== 'all' ? (
-              <input name="owner" type="hidden" value={queueState.owner} />
+            {previewRole !== undefined && previewRole !== 'support' ? (
+              <input name="role" type="hidden" value={previewRole} />
             ) : null}
             <button aria-label={searchAction} type="submit">
               <ProductIcon name="search" size={16} />
@@ -205,18 +436,25 @@ export function AdminNavigation({
           </div>
           <div className="admin-header__tools">
             <Link
-              aria-label={`${alertsLabel}: ${alertCount}`}
+              aria-label={`${alertsLabel}: ${String(inboxCount)}`}
               className="admin-header__alerts"
-              href={
-                createAdminQueueHref(roleHomeHref, role, queueState, {
-                  savedView: 'sla-risk',
-                  selectedId: undefined,
-                }) as Route
-              }
+              href={createAdminShellHref(inboxHref, queueState, previewRole) as Route}
             >
               <ProductIcon name="bell" size={18} />
-              <span aria-live="polite">{alertCount}</span>
+              <span aria-live="polite">{inboxCount}</span>
             </Link>
+            <button
+              aria-label={
+                density === 'comfortable' ? labels.compactDensity : labels.comfortableDensity
+              }
+              className="admin-header__density"
+              onClick={() => {
+                setDensity((current) => (current === 'comfortable' ? 'compact' : 'comfortable'));
+              }}
+              type="button"
+            >
+              <ProductIcon name="activity" size={18} />
+            </button>
             <LocaleSwitcher
               href={localeHref}
               sourceLocale={locale}
@@ -245,10 +483,11 @@ export function AdminNavigation({
                     <small>{isolatedLabel}</small>
                   </span>
                 </p>
-                <Link href={createAdminQueueHref(roleHomeHref, role, queueState) as Route}>
+                <Link href={createAdminShellHref(roleHomeHref, queueState, previewRole) as Route}>
                   <ProductIcon name="toolbox" size={17} />
                   {roleHomeLabel}
                 </Link>
+                {accountActions}
               </div>
             </details>
           </div>
@@ -257,39 +496,55 @@ export function AdminNavigation({
 
       <div className="admin-workspace">
         <nav aria-label={label} className="admin-nav admin-nav__desktop">
-          <div className="admin-nav__identity">
-            <span>{label}</span>
-            <strong>{roleLabel}</strong>
-          </div>
-          <NavigationItems
-            currentHref={currentHref}
-            items={items}
-            markCurrent
-            queueState={queueState}
-            role={role}
-          />
+          <button
+            aria-label={sidebarMode === 'expanded' ? labels.compactSidebar : labels.expandedSidebar}
+            className="admin-nav__mode"
+            onClick={() => {
+              setSidebarMode((current) => (current === 'expanded' ? 'compact' : 'expanded'));
+            }}
+            type="button"
+          >
+            <ProductIcon name="chevronRight" size={18} />
+          </button>
+          {navigation}
         </nav>
 
-        <details className="admin-nav admin-nav__mobile">
-          <summary>
-            <ProductIcon name="toolbox" size={18} />
-            <span>{roleLabel}</span>
-            <strong>{currentLabel}</strong>
-            <ProductIcon className="admin-nav__disclosure-icon" name="chevronRight" size={18} />
-          </summary>
-          <nav aria-label={label}>
-            <NavigationItems
-              currentHref={currentHref}
-              items={items}
-              markCurrent={false}
-              queueState={queueState}
-              role={role}
-            />
-          </nav>
-        </details>
-
-        <div className="admin-main-column">{children}</div>
+        <div className="admin-main-column" data-current-domain={currentItem?.domain ?? 'none'}>
+          <p className="lb-visually-hidden" aria-live="polite">
+            {currentLabel}
+          </p>
+          {children}
+        </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+export function AdminNavigation({ fallbackLocaleHref, ...props }: AdminNavigationProps) {
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
+  const queueState = parseAdminQueueUrlState(searchParameters);
+  const localizedCurrentRoute = resolveLocalizedCurrentRoute({
+    pathname,
+    securityBoundary: 'admin-origin',
+    targetLocale: props.locale,
+  });
+  const currentHref = localizedCurrentRoute.ok ? localizedCurrentRoute.value : undefined;
+  const localizedAlternateRoute = resolveLocalizedCurrentRoute({
+    pathname,
+    securityBoundary: 'admin-origin',
+    targetLocale: props.alternateLocale,
+  });
+  const alternatePath = localizedAlternateRoute.ok
+    ? localizedAlternateRoute.value
+    : fallbackLocaleHref;
+
+  return (
+    <AdminShellFrame
+      {...props}
+      alternatePath={alternatePath}
+      {...(currentHref === undefined ? {} : { currentHref })}
+      queueState={queueState}
+    />
   );
 }

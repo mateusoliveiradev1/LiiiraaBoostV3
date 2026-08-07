@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import {
   Button,
   CheckboxButton,
@@ -64,7 +64,10 @@ export const LB_MOTION_ROLES = Object.freeze({
 } as const);
 
 export interface LbButtonProps {
+  readonly ariaLabel?: string;
+  readonly buttonRef?: Ref<HTMLButtonElement>;
   readonly children: ReactNode;
+  readonly className?: string;
   readonly isDisabled?: boolean;
   readonly isLoading?: boolean;
   readonly loadingLabel?: string;
@@ -74,7 +77,10 @@ export interface LbButtonProps {
 }
 
 export const LbButton = ({
+  ariaLabel,
+  buttonRef,
   children,
+  className,
   isDisabled = false,
   isLoading = false,
   loadingLabel = 'Working',
@@ -84,13 +90,15 @@ export const LbButton = ({
 }: LbButtonProps) => (
   <Button
     aria-busy={isLoading || undefined}
-    className="lb-button"
+    className={className ? `lb-button ${className}` : 'lb-button'}
     data-lb-control
     data-lb-variant={variant}
     data-loading={isLoading || undefined}
     isDisabled={isDisabled}
     isPending={isLoading}
     type={type}
+    {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
+    {...(buttonRef ? { ref: buttonRef } : {})}
     {...(onPress ? { onPress } : {})}
   >
     <span aria-hidden={isLoading || undefined} className="lb-button-label">
