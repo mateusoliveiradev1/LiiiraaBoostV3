@@ -8,6 +8,8 @@ import {
 } from '@liiiraa/web-core';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { accountPreviewRuntimeAllowed } from './src/account-runtime';
+
 export type AccountSafeContext = Readonly<{
   destination?: WebRouteId;
   locale: WebLocale;
@@ -160,7 +162,13 @@ export default function accountProxy(request: NextRequest): NextResponse {
 
   requestHeaders.set('x-liiiraa-account-context', JSON.stringify(safeContext));
   requestHeaders.delete('x-liiiraa-preview-authority');
-  if (process.env['LIIIRAA_ACCOUNT_PREVIEW'] === 'true') {
+  if (
+    process.env['LIIIRAA_ACCOUNT_PREVIEW'] === 'true' &&
+    accountPreviewRuntimeAllowed({
+      nodeEnv: process.env.NODE_ENV,
+      vercel: process.env['VERCEL'],
+    })
+  ) {
     requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
   }
   requestHeaders.set('x-nonce', nonce);

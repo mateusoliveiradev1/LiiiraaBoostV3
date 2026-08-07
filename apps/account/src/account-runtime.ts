@@ -8,14 +8,24 @@ export const ACCOUNT_BROWSER_AUTHORITY_BASE_URL = '';
 export type AccountRuntimeConfig =
   Readonly<{ kind: 'preview' }> | Readonly<{ authorityBaseUrl: string; kind: 'production' }>;
 
+export const accountPreviewRuntimeAllowed = ({
+  nodeEnv,
+  vercel,
+}: Readonly<{ nodeEnv?: string | undefined; vercel?: string | undefined }>): boolean =>
+  nodeEnv !== 'production' && vercel !== '1';
+
 export const resolveAccountRuntimeConfig = ({
   authorityBaseUrl = '',
+  previewAllowed = false,
   previewEnabled = false,
 }: Readonly<{
   authorityBaseUrl?: string;
+  previewAllowed?: boolean;
   previewEnabled?: boolean;
 }>): AccountRuntimeConfig =>
-  previewEnabled ? { kind: 'preview' } : { authorityBaseUrl, kind: 'production' };
+  previewEnabled && previewAllowed
+    ? { kind: 'preview' }
+    : { authorityBaseUrl, kind: 'production' };
 
 export type AccountAuthorityViewModel = Readonly<{
   authorityState: AccountAuthorityObservation;

@@ -39,6 +39,12 @@ export type AdminRuntimeConfig =
   | Readonly<{ kind: 'preview' }>
   | Readonly<{ accountOrigin: string; authorityBaseUrl: string; kind: 'production' }>;
 
+export const adminPreviewRuntimeAllowed = ({
+  nodeEnv,
+  vercel,
+}: Readonly<{ nodeEnv?: string | undefined; vercel?: string | undefined }>): boolean =>
+  nodeEnv !== 'production' && vercel !== '1';
+
 const exactHttpsOrigin = (value: string, label: string): string => {
   try {
     const url = new URL(value);
@@ -60,13 +66,15 @@ const exactHttpsOrigin = (value: string, label: string): string => {
 export const resolveAdminRuntimeConfig = ({
   accountOrigin = '',
   authorityBaseUrl = '',
+  previewAllowed = false,
   previewEnabled = false,
 }: Readonly<{
   accountOrigin?: string;
   authorityBaseUrl?: string;
+  previewAllowed?: boolean;
   previewEnabled?: boolean;
 }>): AdminRuntimeConfig =>
-  previewEnabled
+  previewEnabled && previewAllowed
     ? { kind: 'preview' }
     : {
         accountOrigin: exactHttpsOrigin(accountOrigin, 'Account origin'),

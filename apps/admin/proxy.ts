@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
   ADMIN_CANONICAL_ENTRY,
   ADMIN_DENIAL_COPY,
+  adminPreviewRuntimeAllowed,
   resolveAdminOrigin,
   type AdminLocale,
 } from './src/admin-runtime';
@@ -319,7 +320,12 @@ const adminRootDestination = (request: NextRequest): URL | undefined => {
 export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
   const runtimeMode = process.env.NODE_ENV;
-  const previewEnabled = process.env['LIIIRAA_ADMIN_PREVIEW'] === 'true';
+  const previewEnabled =
+    process.env['LIIIRAA_ADMIN_PREVIEW'] === 'true' &&
+    adminPreviewRuntimeAllowed({
+      nodeEnv: process.env.NODE_ENV,
+      vercel: process.env['VERCEL'],
+    });
   const rootDestination = adminRootDestination(request);
   if (rootDestination !== undefined) {
     return applyAdminHeaders(
