@@ -54,6 +54,20 @@ export interface AdminGovernanceRouteDependencies {
   readonly csrfSecret: string;
   readonly governance: AdminGovernanceDependencies;
   readonly operations?: AdminGovernanceRouteOperations;
+  readonly inviteTeam: (
+    input: Readonly<{
+      actorId: string;
+      commandId: string;
+      invitationId: string;
+      invitationKind: 'administrative-team';
+      recipient: string;
+      functions: readonly string[];
+      reason: string;
+      expectedVersion: bigint;
+      approvalReferences: readonly string[];
+      stepUp: AdminGovernanceStepUpEvidence;
+    }>,
+  ) => Promise<Readonly<Record<string, unknown>>>;
   readonly queries: AdminGovernanceQueryPort;
   readonly resolveSession: (request: FastifyRequest) => Promise<AdminGovernanceRouteSession | null>;
   readonly resolveStepUp: (
@@ -175,6 +189,8 @@ const publicHistory = (record: Readonly<Record<string, unknown>>) => ({
   ...(record['outcome'] === undefined ? {} : { outcome: record['outcome'] }),
 });
 
+const emailPattern = /^[^\s@]{1,64}@[^\s@]{1,190}$/u;
+
 const publicResult = (result: Readonly<Record<string, unknown>>) => {
   if (result['ok'] !== true) {
     return {
@@ -260,6 +276,39 @@ export const registerAdminGovernanceRoutes = (
       return member === null ? hidden(reply) : noStore(reply).code(200).send(publicMember(member));
     },
   );
+
+  app.post('/v1/admin/governance/team/invitations', async (request, reply) => {
+    const session = await authorize(request, dependencies, 'admin-membership:manage', 'team', true);
+    if (session === null || !isRecord(request.body)) return hidden(reply);
+    const invitationId = stringValue(request.body, 'invitationId');
+    const parsed = governanceCommand(request.body['command'], session, invitationId);
+    const recipient = stringValue(request.body, 'recipient').trim().toLowerCase();
+    const functions = stringArray(request.body['functions']);
+    const stepUp = await dependencies.resolveStepUp(request);
+    if (
+      parsed === null ||
+      request.body['invitationKind'] !== 'administrative-team' ||
+      !emailPattern.test(recipient) ||
+      functions === null ||
+      functions.length < 1 ||
+      stepUp === null
+    ) {
+      return noStore(reply).code(400).send({ code: 'REQUEST_INVALID' });
+    }
+    const result = await dependencies.inviteTeam({
+      actorId: session.actorId,
+      commandId: parsed.commandId,
+      invitationId,
+      invitationKind: 'administrative-team',
+      recipient,
+      functions,
+      reason: parsed.reason,
+      expectedVersion: parsed.expectedVersion,
+      approvalReferences: parsed.approvalReferences,
+      stepUp,
+    });
+    return noStore(reply).code(resultStatus(result)).send(publicResult(result));
+  });
 
   app.get<{ Params: { identityId: string } }>(
     '/v1/admin/governance/team/:identityId/history',
