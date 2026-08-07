@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-44-PLAN.md
-last_updated: "2026-08-07T02:05:06.615Z"
+stopped_at: Completed 04-46-PLAN.md
+last_updated: "2026-08-07T02:34:21.717Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 182
+  completed_plans: 183
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 46 of 62
+Plan: 47 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -220,6 +220,7 @@ _Updated after plan completion_
 | Phase 04 P43 | 5 min | 1 tasks | 4 files |
 | Phase 04 P45 | 11 min | 1 tasks | 5 files |
 | Phase 04 P44 | 4 min | 1 tasks | 4 files |
+| Phase 04 P46 | 17 min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -683,6 +684,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Restrict plaintext invitation secrets to the injected delivery handoff. — Persistent state, audit, outbox, jobs, receipts, and replay records retain only digests or bounded references.
 - [Phase 04]: Merge Admin conflicts only when fields are independent; preserve incompatible drafts. — Prevents silent last-write-wins while retaining operator work for explicit comparison.
 - [Phase 04]: Keep degradation and emergency control capability-specific. — Uncertain critical mutations fail closed without secret queues, and emergency response cannot become a global stop.
+- [Phase 04]: Serialize beta invitation capacity through a locked singleton aggregate. — The PostgreSQL trigger and transaction lock make the 25-active limit authoritative under concurrency.
+- [Phase 04]: Retain immutable rotated secret digests with exactly one active digest. — Rotation history remains auditable without persisting plaintext or allowing multiple usable secrets.
+- [Phase 04]: Queue legacy beta invitations beyond the first 25 during upgrade. — Existing records migrate deterministically without exceeding the authoritative active capacity.
 
 ### Pending Todos
 
@@ -728,6 +732,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T02:05:06.608Z
-Stopped at: Completed 04-44-PLAN.md
+Last session: 2026-08-07T02:34:21.710Z
+Stopped at: Completed 04-46-PLAN.md
 Resume file: None
