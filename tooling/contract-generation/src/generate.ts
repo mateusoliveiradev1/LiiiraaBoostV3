@@ -269,9 +269,6 @@ const WEB_DOCUMENT_ROOTS = Object.freeze([
   'AdminAuditEvent',
 ]);
 
-const WEB_DEFINITION_NAME_SET = new Set<string>(WEB_DEFINITION_NAMES);
-const CONTROL_PLANE_DEFINITION_NAME_SET = new Set<string>(CONTROL_PLANE_DEFINITION_NAMES);
-
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -355,26 +352,6 @@ function requireDefinitions(bundle: JsonObject): JsonObject {
   return definitions;
 }
 
-function inspectionDefinitions(definitions: JsonObject): JsonObject {
-  return Object.fromEntries(
-    Object.entries(definitions).filter(
-      ([name]) =>
-        !name.startsWith('Shell') &&
-        name !== 'HostToRendererShellEvent' &&
-        name !== 'RendererToHostShellCommand',
-    ),
-  );
-}
-
-function desktopDefinitions(definitions: JsonObject): JsonObject {
-  return Object.fromEntries(
-    Object.entries(definitions).filter(
-      ([name]) =>
-        !WEB_DEFINITION_NAME_SET.has(name) && !CONTROL_PLANE_DEFINITION_NAME_SET.has(name),
-    ),
-  );
-}
-
 function collectReferencedDefinitionNames(value: unknown, names: Set<string>): void {
   if (Array.isArray(value)) {
     for (const entry of value) {
@@ -397,8 +374,12 @@ function collectReferencedDefinitionNames(value: unknown, names: Set<string>): v
   }
 }
 
-function webDefinitions(definitions: JsonObject): JsonObject {
-  const selectedNames = new Set<string>(WEB_DOCUMENT_ROOTS);
+function reachableDefinitions(
+  definitions: JsonObject,
+  rootNames: readonly string[],
+  family: string,
+): JsonObject {
+  const selectedNames = new Set<string>(rootNames);
   const pendingNames = [...selectedNames];
 
   while (pendingNames.length > 0) {
@@ -409,7 +390,7 @@ function webDefinitions(definitions: JsonObject): JsonObject {
 
     const definition = definitions[name];
     if (!isJsonObject(definition)) {
-      throw new Error(`TypeSpec JSON Schema bundle missing web dependency ${name}.`);
+      throw new Error(`TypeSpec JSON Schema bundle missing ${family} dependency ${name}.`);
     }
 
     const referencedNames = new Set<string>();
@@ -419,12 +400,6 @@ function webDefinitions(definitions: JsonObject): JsonObject {
         selectedNames.add(referencedName);
         pendingNames.push(referencedName);
       }
-    }
-  }
-
-  for (const name of WEB_DEFINITION_NAMES) {
-    if (!selectedNames.has(name)) {
-      throw new Error(`Web document schema does not reach required definition ${name}.`);
     }
   }
 
@@ -433,34 +408,45 @@ function webDefinitions(definitions: JsonObject): JsonObject {
   );
 }
 
-function controlPlaneDefinitions(definitions: JsonObject): JsonObject {
-  const selectedNames = new Set<string>(['ControlPlaneDocument']);
-  const pendingNames = [...selectedNames];
+function inspectionDefinitions(definitions: JsonObject): JsonObject {
+  return reachableDefinitions(
+    definitions,
+    ['DiagnosticValue', 'InspectSystemRequest', 'InspectSystemResult'],
+    'desktop inspection',
+  );
+}
 
-  while (pendingNames.length > 0) {
-    const name = pendingNames.pop();
-    if (name === undefined) {
-      continue;
-    }
+function desktopDefinitions(definitions: JsonObject): JsonObject {
+  return reachableDefinitions(
+    definitions,
+    [
+      'DiagnosticValue',
+      'HostToRendererShellEvent',
+      'InspectSystemRequest',
+      'InspectSystemResult',
+      'RendererToHostShellCommand',
+    ],
+    'desktop',
+  );
+}
 
-    const definition = definitions[name];
-    if (!isJsonObject(definition)) {
-      throw new Error(`TypeSpec JSON Schema bundle missing control-plane dependency ${name}.`);
-    }
+function webDefinitions(definitions: JsonObject): JsonObject {
+  const selectedDefinitions = reachableDefinitions(definitions, WEB_DOCUMENT_ROOTS, 'web');
 
-    const referencedNames = new Set<string>();
-    collectReferencedDefinitionNames(definition, referencedNames);
-    for (const referencedName of referencedNames) {
-      if (!selectedNames.has(referencedName)) {
-        selectedNames.add(referencedName);
-        pendingNames.push(referencedName);
-      }
+  for (const name of WEB_DEFINITION_NAMES) {
+    if (!(name in selectedDefinitions)) {
+      throw new Error(`Web document schema does not reach required definition ${name}.`);
     }
   }
 
-  return Object.fromEntries(
-    Object.entries(definitions).filter(([name]) => selectedNames.has(name)),
+  return selectedDefinitions;
+}
+
+function controlPlaneDefinitions(definitions: JsonObject): JsonObject {
+  const emittedRoots = CONTROL_PLANE_DEFINITION_NAMES.filter((name) =>
+    isJsonObject(definitions[name]),
   );
+  return reachableDefinitions(definitions, emittedRoots, 'control-plane');
 }
 
 function createRuntimeSchema(
@@ -468,6 +454,18 @@ function createRuntimeSchema(
   definitions: JsonObject,
   root: JsonObject,
 ): JsonObject {
+  const referencedNames = new Set<string>();
+  collectReferencedDefinitionNames(root, referencedNames);
+  collectReferencedDefinitionNames(definitions, referencedNames);
+  const unresolvedNames = [...referencedNames]
+    .filter((name) => !(name in definitions))
+    .sort((left, right) => left.localeCompare(right));
+  if (unresolvedNames.length > 0) {
+    throw new Error(
+      `Runtime schema ${schemaId} has unresolved local references: ${unresolvedNames.join(', ')}.`,
+    );
+  }
+
   return {
     $schema: SCHEMA_DIALECT,
     $id: schemaId,

@@ -5,7 +5,7 @@
     {
       "id": "desktop.diagnostic-value.v1",
       "path": "contracts/generated/desktop/v1/diagnostic-value.schema.json",
-      "sha256": "f0266ec6cee4645634d61cdaae37bdec8fb7aa0677e4017a7bb32ba1dc8b5469"
+      "sha256": "e37266c9211b6ead4c80df419e5068e03ac73b8880ae5b9b47698abcfb6fb7ee"
     }
   ],
   "matrices": [
