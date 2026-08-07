@@ -24,6 +24,14 @@ const invitation = Object.freeze({
 
 describe('admin invitation presentation policy', () => {
   it('classifies single and CSV preflight rows without retaining raw recipients', () => {
+    const single = reviewInvitationPreflight({
+      capacity: { activeCount: 12, activeLimit: 25, queuedCount: 0 },
+      mode: 'individual',
+      rows: [{ classification: 'valid', recipient: 'single@example.com', rowId: 'single-1' }],
+    });
+    expect(single.counts).toMatchObject({ valid: 1, willActivate: 1, queued: 0 });
+    expect(JSON.stringify(single)).not.toContain('single@example.com');
+
     const review = reviewInvitationPreflight({
       capacity: { activeCount: 23, activeLimit: 25, queuedCount: 4 },
       mode: 'csv',
@@ -76,13 +84,29 @@ describe('admin invitation presentation policy', () => {
   });
 
   it('keeps beta and administrative-team invitation capabilities disjoint', () => {
+    const activeActions = classifyInvitationActions({
+      invitation,
+      invitationKind: 'beta',
+      now: '2026-08-07T10:00:00.000Z',
+    });
+    expect(activeActions).toMatchObject({
+      canCorrectAddress: true,
+      canRemind: true,
+      canResend: true,
+      canRevoke: true,
+      recipientImmutable: true,
+    });
     expect(
       classifyInvitationActions({
-        invitation,
+        invitation: {
+          ...invitation,
+          lifecycleState: 'accepted',
+          reminderCount: 2,
+        },
         invitationKind: 'beta',
         now: '2026-08-07T10:00:00.000Z',
       }),
-    ).toMatchObject({ canRemind: true, canResend: true, canRevoke: true });
+    ).toMatchObject({ canRemind: false, canResend: false, canRevoke: false });
     expect(
       classifyInvitationActions({
         invitation,
