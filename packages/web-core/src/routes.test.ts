@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 import {
+  ADMIN_CANONICAL_ROUTE_IDS,
+  ADMIN_DOMAIN_ROUTE_IDS,
   auditRouteProjection,
   createBoundaryLink,
   createDesktopAnalyzeLink,
+  decodeAdminRouteState,
+  encodeAdminRouteState,
   matchWebRoute,
   projectBreadcrumbs,
   projectDesktopLinks,
@@ -80,6 +84,51 @@ const REQUIRED_ROUTE_IDS = Object.freeze([
   'admin-error-410',
   'admin-error-500',
 ] as const);
+
+const REQUIRED_ADMIN_DOMAIN_ROUTES = Object.freeze({
+  operation: [
+    'admin-operation',
+    'admin-operation-queue',
+    'admin-operation-jobs',
+    'admin-operation-imports',
+    'admin-operation-exports',
+    'admin-operation-releases',
+    'admin-operation-configurations',
+    'admin-operation-capacity',
+  ],
+  overview: ['admin-overview'],
+  people: [
+    'admin-people',
+    'admin-people-users',
+    'admin-people-invitations',
+    'admin-people-team',
+    'admin-people-access-reviews',
+  ],
+  revenue: [
+    'admin-revenue',
+    'admin-revenue-subscriptions',
+    'admin-revenue-invoices',
+    'admin-revenue-payments',
+    'admin-revenue-refunds',
+    'admin-revenue-disputes',
+  ],
+  security: [
+    'admin-security-domain',
+    'admin-security-alerts',
+    'admin-security-recovery',
+    'admin-security-privacy',
+    'admin-security-incidents',
+  ],
+  support: ['admin-support-domain', 'admin-support-cases', 'admin-support-diagnostics'],
+  system: [
+    'admin-system',
+    'admin-system-integrations',
+    'admin-system-webhooks',
+    'admin-system-audit',
+    'admin-system-environments',
+    'admin-system-service-health',
+  ],
+} as const);
 
 const expectDeeplyFrozen = (value: unknown): void => {
   if (typeof value !== 'object' || value === null) {
@@ -276,6 +325,101 @@ describe('canonical web route manifest', () => {
       expectDeeplyFrozen(route);
     }
     expectDeeplyFrozen(webRoutes);
+  });
+
+  it('registers the seven stable Admin domains and their full-detail route families', () => {
+    expect(ADMIN_DOMAIN_ROUTE_IDS).toEqual(REQUIRED_ADMIN_DOMAIN_ROUTES);
+    expect(new Set(ADMIN_CANONICAL_ROUTE_IDS).size).toBe(ADMIN_CANONICAL_ROUTE_IDS.length);
+    expect(ADMIN_CANONICAL_ROUTE_IDS).toEqual(
+      expect.arrayContaining(Object.values(REQUIRED_ADMIN_DOMAIN_ROUTES).flat()),
+    );
+
+    for (const routeId of ADMIN_CANONICAL_ROUTE_IDS) {
+      const route = webRoutes.find(({ id }) => id === routeId);
+      expect(route, routeId).toMatchObject({
+        indexing: 'noindex',
+        securityBoundary: 'admin-origin',
+        shell: 'admin',
+        surface: 'admin',
+      });
+    }
+
+    expect(
+      matchWebRoute({
+        pathname: '/pt-BR/admin/people/invitations/invitation-0001',
+        securityBoundary: 'admin-origin',
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        parameters: { invitationId: 'invitation-0001', locale: 'pt-BR' },
+        route: { id: 'admin-people-invitation' },
+      },
+    });
+    expect(
+      matchWebRoute({
+        pathname: '/en/admin/security/incidents/incident-0001',
+        securityBoundary: 'admin-origin',
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        parameters: { incidentId: 'incident-0001', locale: 'en' },
+        route: { id: 'admin-security-incident' },
+      },
+    });
+    expect(
+      matchWebRoute({
+        pathname: '/en/admin/security/incidents/incident-0001',
+        securityBoundary: 'account-origin',
+      }),
+    ).toMatchObject({ error: { code: 'UNKNOWN_ROUTE' }, ok: false });
+  });
+
+  it('round-trips only allowlisted Admin URL state and rejects personal or secret state', () => {
+    const state = {
+      cursor: 'cursor-0002',
+      density: 'compact',
+      filters: ['state:active', 'owner:me'],
+      recordId: 'invitation-0001',
+      savedViewId: 'expiring-soon',
+      sort: ['expiresAt:asc'],
+      tab: 'timeline',
+    } as const;
+    const encoded = encodeAdminRouteState(state);
+    expect(encoded).toEqual({
+      ok: true,
+      value:
+        '?filter=state%3Aactive&filter=owner%3Ame&sort=expiresAt%3Aasc&cursor=cursor-0002&tab=timeline&view=expiring-soon&density=compact&record=invitation-0001',
+    });
+    expect(encoded.ok && decodeAdminRouteState(encoded.value)).toEqual({ ok: true, value: state });
+
+    for (const unsafe of [
+      '?email=private%40example.test',
+      '?reason=secret',
+      '?draft=private-copy',
+      '?token=secret-token',
+      '?secret=secret-token',
+      '?arbitrary=value',
+      '?record=https%3A%2F%2Fevil.example',
+    ]) {
+      expect(decodeAdminRouteState(unsafe), unsafe).toMatchObject({ ok: false });
+    }
+  });
+
+  it('retains the old Admin route IDs as compatible aliases', () => {
+    expect(routeHref('admin-role', { locale: 'pt-BR' })).toEqual({
+      ok: true,
+      value: '/pt-BR/admin',
+    });
+    expect(routeHref('admin-support', { caseId: 'CASE-2048', locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/admin/support/CASE-2048',
+    });
+    expect(routeHref('admin-audit-event', { eventId: 'EVENT-8', locale: 'en' })).toEqual({
+      ok: true,
+      value: '/en/admin/audit/EVENT-8',
+    });
   });
 
   it('resolves exact localized parameters and rejects unknown routes, parameters, and origins', () => {
