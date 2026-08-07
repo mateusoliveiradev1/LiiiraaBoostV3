@@ -105,7 +105,7 @@ const buildApp = async (authorized = true) => {
     csrfSecret,
     governance: {} as never,
     queries,
-    operations: operations as never,
+    operations,
     resolveSession: () => Promise.resolve(authorized ? session : null),
     resolveStepUp: () =>
       Promise.resolve({
