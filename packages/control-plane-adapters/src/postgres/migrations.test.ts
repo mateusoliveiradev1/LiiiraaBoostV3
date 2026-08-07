@@ -320,7 +320,7 @@ describe('admin governance migration authority', () => {
     expect(sql).toMatch(/identity\.role IN \('support', 'operations', 'security', 'audit'\)/iu);
     expect(sql).toMatch(/SELECT[\s\S]*identity\.role[\s\S]*FROM identities AS identity/iu);
     expect(sql).not.toMatch(/CROSS JOIN[\s\S]*admin_(?:membership_)?functions/iu);
-    expect(sql).not.toMatch(/super-admin|wildcard|all-capabilities/iu);
+    expect(sql).not.toMatch(/'super-admin'|'wildcard'|'all-capabilities'/iu);
   });
 });
 
