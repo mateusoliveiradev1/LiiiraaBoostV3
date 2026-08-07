@@ -53,6 +53,7 @@ export type AdminBriefingCapacity = Readonly<{
 
 export type AdminBriefingModel = Readonly<{
   activeFunction: string | null;
+  connection: AdminBriefingAuthorityState;
   context: Readonly<{
     capacity: AdminBriefingCapacity;
     environment: Readonly<{ id: string; kind: string; label: string }> | null;
@@ -509,6 +510,7 @@ export const projectAdminBriefing = (input: AdminBriefingInput): AdminBriefingMo
   const topPriority = priorities[0];
   return Object.freeze({
     activeFunction: access?.activeFunction ?? null,
+    connection: input.authorityState,
     context: Object.freeze({
       capacity: projectCapacity({
         access,

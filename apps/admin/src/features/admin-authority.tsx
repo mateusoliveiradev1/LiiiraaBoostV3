@@ -789,7 +789,7 @@ export const AdminAuthorityProvider = ({
     if (session === null || session === undefined) return undefined;
     const controller = new AbortController();
     void refetchAdminResources(
-      ['access-context', 'inbox', 'jobs', 'incidents', 'capacity'],
+      ['access-context', 'inbox', 'governance', 'jobs', 'incidents', 'capacity'],
       controller.signal,
     );
     return () => {
