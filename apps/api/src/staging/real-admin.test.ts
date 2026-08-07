@@ -2,8 +2,13 @@ import type { IdentityActor } from '@liiiraa/control-plane-adapters';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
-import { registerAdminRoutes } from '../modules/admin/routes.js';
-import { createPersistentStagingAdminDependencies } from './runtime.js';
+import { registerAdminRoutes, registerCompleteAdminRoutes } from '../modules/admin/routes.js';
+import {
+  createPersistentStagingAdminAuthority,
+  createPersistentStagingAdminDependencies,
+  REAL_STAGING_CAPABILITIES,
+} from './runtime.js';
+import { runAdminControlPlaneWorkersOnce } from '../worker.js';
 
 const adminOrigin = 'https://admin.staging.example';
 const operatorCredential = 'operator-credential-abcdefghijklmnopqrstuvwxyz0123456789';
@@ -88,6 +93,69 @@ const cookie = (credential: string): string =>
   `__Host-liiiraa_session=${encodeURIComponent(credential)}`;
 
 describe('real staging administrative authority', () => {
+  it('composes every PostgreSQL registrar before advertising complete Admin readiness', async () => {
+    const database = {
+      query: vi.fn(() => Promise.resolve({ rowCount: 0, rows: [] })),
+      transaction: vi.fn(),
+    };
+    const identity = { resolveCredential: vi.fn(() => Promise.resolve(null)) };
+    const authority = createPersistentStagingAdminAuthority({
+      adminOrigin,
+      authSecret: 'synthetic-admin-authority-secret-abcdefghijklmnopqrstuvwxyz',
+      clock: { now: () => new Date('2030-01-15T12:05:00.000Z') },
+      database: database as never,
+      environmentId: 'staging',
+      identity,
+    });
+    expect(Object.keys(authority).sort()).toEqual([
+      'approvals',
+      'core',
+      'governance',
+      'invitations',
+      'operations',
+    ]);
+
+    const app = Fastify();
+    await registerCompleteAdminRoutes(app, authority);
+    await app.ready();
+    const routes = app.printRoutes();
+    expect(routes).toContain('invitations');
+    expect(routes).toContain('governance');
+    expect(routes).toContain('operations');
+    expect(REAL_STAGING_CAPABILITIES).toEqual(
+      expect.arrayContaining([
+        'admin-invitation-authority',
+        'admin-governance-authority',
+        'admin-operations-authority',
+        'admin-worker-authority',
+      ]),
+    );
+    await app.close();
+  });
+
+  it('runs invitation and operational claims through one bounded worker entrypoint', async () => {
+    const invitations = vi.fn(() =>
+      Promise.resolve({ claimed: 2, completed: 2, failed: 0, retried: 0 }),
+    );
+    const operations = { claim: vi.fn(() => Promise.resolve([{ itemId: 'item-one' }])) };
+    await expect(
+      runAdminControlPlaneWorkersOnce(
+        { invitations, operations: operations as never },
+        {
+          batchSize: 10,
+          leaseUntil: '2030-01-15T12:10:00.000Z',
+          now: '2030-01-15T12:05:00.000Z',
+          workerId: 'admin-worker-one',
+        },
+      ),
+    ).resolves.toEqual({ invitationJobs: 2, operationalItems: 1 });
+    expect(operations.claim).toHaveBeenCalledWith({
+      leaseUntil: '2030-01-15T12:10:00.000Z',
+      maximumItems: 10,
+      workerId: 'admin-worker-one',
+    });
+  });
+
   it('resolves a persisted operator session and returns only redacted PostgreSQL projections', async () => {
     const { app, database } = await createApp();
     const headers = { cookie: cookie(operatorCredential), origin: adminOrigin };
