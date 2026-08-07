@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import type { AdminConfigurationState, AdminJobState } from '@liiiraa/control-plane-domain';
+
 import type {
+  AdminOperationsAuthorizationPort,
+  AdminOperationsCommandResult,
   AdminOperationsDependencies,
   AdminOperationsTransaction,
+  AdminSearchQuery,
   AdminSearchRecord,
 } from '../ports/admin-operations.js';
 import {
@@ -24,7 +29,7 @@ const harness = () => {
     { recordId: 'hidden', scope: 'audit-events', ownerId: 'auditor', maskedTitle: 'Audit •••2' },
   ];
   const effects: string[] = [];
-  const search = vi.fn((input: Readonly<Record<string, unknown>>) =>
+  const search = vi.fn((input: AdminSearchQuery) =>
     Promise.resolve(
       records.filter(
         (record) =>
@@ -33,7 +38,7 @@ const harness = () => {
       ),
     ),
   );
-  const authorize = vi.fn(() =>
+  const authorize = vi.fn<AdminOperationsAuthorizationPort['authorize']>(() =>
     Promise.resolve({
       allowed: true as const,
       allowedScopes: ['support-cases'] as const,
@@ -42,7 +47,8 @@ const harness = () => {
   );
   let transactionCount = 0;
   let id = 0;
-  const jobs = new Map([
+  const commandResults = new Map<string, AdminOperationsCommandResult>();
+  const jobs = new Map<string, AdminJobState>([
     [
       'job-1',
       {
@@ -58,7 +64,7 @@ const harness = () => {
       },
     ],
   ]);
-  const configurations = new Map([
+  const configurations = new Map<string, AdminConfigurationState>([
     [
       'config-1',
       {
@@ -77,8 +83,11 @@ const harness = () => {
       transactionCount += 1;
       const pending: (() => void)[] = [];
       const transaction: AdminOperationsTransaction = {
-        findCommandResult: () => Promise.resolve(null),
-        rememberCommandResult: () => Promise.resolve(),
+        findCommandResult: (commandId) => Promise.resolve(commandResults.get(commandId) ?? null),
+        rememberCommandResult: (commandId, result) => {
+          pending.push(() => commandResults.set(commandId, result));
+          return Promise.resolve();
+        },
         loadJob: (jobId) => Promise.resolve(jobs.get(jobId) ?? null),
         saveJob: (state) => {
           pending.push(() => jobs.set(state.jobId, state));
@@ -178,7 +187,11 @@ describe('transactional admin operations', () => {
         targetEnvironment: 'staging',
         view: { kind: 'personal', viewId: 'mine' },
       }),
-    ).resolves.toEqual({ ok: true, freshness: 'current', records: [expect.objectContaining({ recordId: 'visible' })] });
+    ).resolves.toEqual({
+      ok: true,
+      freshness: 'current',
+      records: [expect.objectContaining({ recordId: 'visible' })],
+    });
     expect(test.search).toHaveBeenCalledWith(
       expect.objectContaining({
         allowedScopes: ['support-cases'],
@@ -213,25 +226,34 @@ describe('transactional admin operations', () => {
 
   it('commits durable partial job progress with audit, outbox, receipt, and replay evidence', async () => {
     const test = harness();
-    await expect(
-      transitionAdminOperationalJob(test.dependencies, {
-        actorId: 'operator',
-        commandId: 'job-command-2',
-        correlationId: 'correlation-2',
-        jobId: 'job-1',
-        expectedVersion: 1n,
-        idempotencyKey: 'idem-1',
-        command: 'partial',
-        progress: 60,
-        receiptId: 'partial-receipt',
-        connection: 'connected',
-        lastUpdatedAt: now,
-        targetEnvironment: 'staging',
-        reason: 'Provider returned partial results',
-      }),
-    ).resolves.toMatchObject({ ok: true, outcome: 'job-transitioned', state: { status: 'partial', progress: 60 } });
+    const input = {
+      actorId: 'operator',
+      commandId: 'job-command-2',
+      correlationId: 'correlation-2',
+      jobId: 'job-1',
+      expectedVersion: 1n,
+      idempotencyKey: 'idem-1',
+      command: 'partial',
+      progress: 60,
+      receiptId: 'partial-receipt',
+      connection: 'connected',
+      lastUpdatedAt: now,
+      targetEnvironment: 'staging',
+      reason: 'Provider returned partial results',
+    } as const;
+    await expect(transitionAdminOperationalJob(test.dependencies, input)).resolves.toMatchObject({
+      ok: true,
+      outcome: 'job-transitioned',
+      state: { status: 'partial', progress: 60 },
+    });
     expect(test.jobs.get('job-1')).toMatchObject({ status: 'partial', version: 2n });
     expect(test.effects).toEqual(expect.arrayContaining(['audit', 'outbox', 'receipt']));
+    const effectsAfterFirstCommit = [...test.effects];
+    await expect(transitionAdminOperationalJob(test.dependencies, input)).resolves.toMatchObject({
+      ok: true,
+      outcome: 'job-transitioned',
+    });
+    expect(test.effects).toEqual(effectsAfterFirstCommit);
   });
 
   it('preserves incompatible local drafts and exposes an explicit conflict outcome', async () => {
@@ -240,6 +262,8 @@ describe('transactional admin operations', () => {
       resolveAdminOperationalConflict(test.dependencies, {
         actorId: 'operator',
         commandId: 'conflict-1',
+        idempotencyKey: 'conflict-idem',
+        correlationId: 'conflict-correlation',
         subjectId: 'config-1',
         expectedVersion: 1n,
         actualVersion: 2n,
@@ -255,6 +279,7 @@ describe('transactional admin operations', () => {
       conflictingFields: ['cohort'],
     });
     expect(test.effects).toContain('conflict');
+    expect(test.effects).toEqual(expect.arrayContaining(['audit', 'outbox', 'receipt']));
   });
 
   it('admits only allowlisted bounded recovery and emits payload-free external escalation', async () => {
@@ -299,7 +324,9 @@ describe('transactional admin operations', () => {
       ownerReference: 'substitute',
       correlationId: 'correlation-recovery',
     });
-    expect(JSON.stringify(test.alerts.send.mock.calls)).not.toMatch(/diagnostic|token|secret|payload/iu);
+    expect(JSON.stringify(test.alerts.send.mock.calls)).not.toMatch(
+      /diagnostic|token|secret|payload/iu,
+    );
   });
 
   it('enforces minimum-scope encrypted exports and exact environment configuration', async () => {
@@ -307,6 +334,7 @@ describe('transactional admin operations', () => {
     const exportInput = {
       actorId: 'auditor',
       commandId: 'export-1',
+      idempotencyKey: 'export-idem',
       correlationId: 'export-correlation',
       purpose: 'Quarterly access review',
       fields: ['recordId', 'secret'],
@@ -334,6 +362,7 @@ describe('transactional admin operations', () => {
       changeAdminConfiguration(test.dependencies, {
         actorId: 'operator',
         commandId: 'config-command-1',
+        idempotencyKey: 'config-idem',
         correlationId: 'config-correlation',
         configurationId: 'config-1',
         expectedVersion: 1n,
@@ -348,6 +377,46 @@ describe('transactional admin operations', () => {
         reason: 'Publish internal configuration',
       }),
     ).resolves.toEqual({ ok: false, code: 'ENVIRONMENT_CROSSING_FORBIDDEN' });
+
+    await expect(
+      changeAdminConfiguration(test.dependencies, {
+        actorId: 'operator',
+        commandId: 'config-command-2',
+        idempotencyKey: 'config-idem-2',
+        correlationId: 'config-correlation-2',
+        configurationId: 'config-1',
+        expectedVersion: 1n,
+        command: 'publish',
+        validated: true,
+        impactReviewed: true,
+        approved: true,
+        sessionEnvironment: 'staging',
+        targetEnvironment: 'staging',
+        integrationEnvironment: 'staging',
+        productionStrongAccess: false,
+        reason: 'Publish internal configuration',
+      }),
+    ).resolves.toMatchObject({ ok: true, state: { status: 'rolling-out', version: 2n } });
+    await expect(
+      changeAdminConfiguration(test.dependencies, {
+        actorId: 'operator',
+        commandId: 'config-command-3',
+        idempotencyKey: 'config-idem-3',
+        correlationId: 'config-correlation-3',
+        configurationId: 'config-1',
+        expectedVersion: 2n,
+        command: 'rollback',
+        rollbackVersion: 'v0',
+        sessionEnvironment: 'staging',
+        targetEnvironment: 'staging',
+        integrationEnvironment: 'staging',
+        productionStrongAccess: false,
+        reason: 'Rollback internal configuration',
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      state: { status: 'rolled-back', version: 3n, knownVersion: 'v0' },
+    });
   });
 
   it('executes approved privacy work and rejects global or unknown emergency stops', async () => {
@@ -356,6 +425,7 @@ describe('transactional admin operations', () => {
       executeAdminPrivacyCase(test.dependencies, {
         actorId: 'auditor',
         commandId: 'privacy-1',
+        idempotencyKey: 'privacy-idem',
         correlationId: 'privacy-correlation',
         caseId: 'privacy-case-1',
         identityVerified: true,
@@ -373,6 +443,7 @@ describe('transactional admin operations', () => {
       stopAdminCapability(test.dependencies, {
         actorId: 'security',
         commandId: 'stop-1',
+        idempotencyKey: 'stop-idem-1',
         correlationId: 'stop-correlation',
         capability: '*',
         strongAuth: true,
@@ -385,7 +456,22 @@ describe('transactional admin operations', () => {
     await expect(
       stopAdminCapability(test.dependencies, {
         actorId: 'security',
+        commandId: 'stop-unknown',
+        idempotencyKey: 'stop-idem-unknown',
+        correlationId: 'stop-correlation',
+        capability: 'unknown-capability',
+        strongAuth: true,
+        reason: 'Contain provider incident',
+        expiresAt: '2030-01-01T00:30:00.000Z',
+        safeRestorationDefined: true,
+        targetEnvironment: 'staging',
+      }),
+    ).resolves.toEqual({ ok: false, code: 'CAPABILITY_NOT_ALLOWLISTED' });
+    await expect(
+      stopAdminCapability(test.dependencies, {
+        actorId: 'security',
         commandId: 'stop-2',
+        idempotencyKey: 'stop-idem-2',
         correlationId: 'stop-correlation',
         capability: 'email-delivery',
         strongAuth: true,
