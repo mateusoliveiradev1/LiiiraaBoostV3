@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { AdminAuthorityDocument } from '../admin-authority';
-import { projectAdminBriefing } from './admin-overview-model';
+import { projectAdminBriefing, type AdminBriefingAuthorityState } from './admin-overview-model';
 
 const metadata = Object.freeze({
   schemaVersion: '1.0',
@@ -23,7 +23,7 @@ const metadata = Object.freeze({
 } as const);
 
 const document = (value: Readonly<Record<string, unknown>>): AdminAuthorityDocument =>
-  value as AdminAuthorityDocument;
+  value as unknown as AdminAuthorityDocument;
 
 const accessContext = document({
   ...metadata,
@@ -79,7 +79,10 @@ const capacity = document({
   forecastExhaustionAt: '2026-08-12T20:00:00.000Z',
 });
 
-const project = (records: readonly AdminAuthorityDocument[], authorityState = 'live' as const) =>
+const project = (
+  records: readonly AdminAuthorityDocument[],
+  authorityState: AdminBriefingAuthorityState = 'live',
+) =>
   projectAdminBriefing({
     authorityState,
     locale: 'pt-BR',
