@@ -1,12 +1,134 @@
 import {
   controlPlaneDocumentValidator,
+  type AdminEnvironmentKindJson,
   type AdminActionJson,
   type AdminCommandJson,
   type AdminRoleJson,
   type AuditEventJson,
   type AuthorityReceiptJson,
   type DiagnosticConsentJson,
+  type ControlPlaneDocumentJson,
 } from '@liiiraa/contracts-ts';
+
+export const ADMIN_QUERY_FAMILIES = Object.freeze([
+  'briefing',
+  'search',
+  'invitations',
+  'team',
+  'approvals',
+  'jobs',
+  'incidents',
+  'configurations',
+  'capacity',
+  'audit',
+  'privacy',
+  'emergency',
+] as const);
+
+export type AdminQueryFamily = (typeof ADMIN_QUERY_FAMILIES)[number];
+
+export type AdminAuthorityDocument = Extract<
+  ControlPlaneDocumentJson,
+  Readonly<{ kind: `admin-${string}` }>
+>;
+
+export type AdminQueryOptions = Readonly<{
+  cursor?: string;
+  environment: AdminEnvironmentKindJson;
+  limit?: number;
+  query?: string;
+  signal?: AbortSignal;
+}>;
+
+export type AdminQueryResult =
+  | Readonly<{
+      freshness?: Readonly<{
+        observedAt: string;
+        sequence: string;
+        source: string;
+        state: 'live' | 'reconnecting' | 'stale' | 'offline' | 'degraded';
+      }>;
+      nextCursor: string | null;
+      records: readonly AdminAuthorityDocument[];
+      status: 'online';
+    }>
+  | Readonly<{
+      code: 'invalid-authority' | 'unauthorized' | 'unavailable' | 'rate-limit';
+      records: readonly [];
+      status: 'denied' | 'error';
+    }>;
+
+export type AdminMutationFamily =
+  | 'preflight-invitations'
+  | 'issue-invitations'
+  | 'resend-invitation'
+  | 'revoke-invitation'
+  | 'batch-invitations'
+  | 'invite-team-member'
+  | 'switch-function'
+  | 'offboard-member'
+  | 'activate-member'
+  | 'create-delegation'
+  | 'review-access'
+  | 'request-approval'
+  | 'approve-request'
+  | 'cancel-request'
+  | 'reassign-request'
+  | 'governance-break-glass'
+  | 'transition-job'
+  | 'resolve-conflict'
+  | 'recover-incident'
+  | 'export-data'
+  | 'transition-configuration'
+  | 'execute-privacy'
+  | 'emergency-stop';
+
+export type AdminMutationInput = Readonly<{
+  approvalReferences?: readonly string[];
+  expectedEtag?: string;
+  expectedVersion?: string;
+  family: AdminMutationFamily;
+  idempotencyKey: string;
+  payload: Readonly<Record<string, unknown>>;
+  reason?: string;
+  signal?: AbortSignal;
+  stepUp?: string;
+  targetId?: string;
+}>;
+
+export type AdminMutationResult =
+  | Readonly<{ document: AdminAuthorityDocument; status: 'complete' | 'partial' }>
+  | Readonly<{
+      code: 'conflict';
+      document?: AdminAuthorityDocument;
+      status: 'conflict';
+    }>
+  | Readonly<{
+      code: 'degraded' | 'invalid-authority' | 'rate-limit' | 'unauthorized' | 'unavailable';
+      status: 'denied' | 'error';
+    }>;
+
+export type AdminFreshnessInvalidation = Readonly<{
+  cursor: string;
+  resources: readonly string[];
+  updatedAt: string;
+  version: string;
+}>;
+
+export type AdminFreshnessLifecycle = Readonly<{
+  settled: Promise<void>;
+  signal: AbortSignal;
+  stop: () => void;
+}>;
+
+export type AdminFreshnessInput = Readonly<{
+  cursor?: string;
+  environment: AdminEnvironmentKindJson;
+  onInvalidate: (event: AdminFreshnessInvalidation) => void;
+  onState: (state: 'live' | 'reconnecting' | 'offline' | 'degraded') => void;
+  refetch: (resources: readonly string[], signal: AbortSignal) => Promise<void>;
+  signal?: AbortSignal;
+}>;
 
 export const ADMIN_PROJECTION_RESOURCES = Object.freeze([
   'support-cases',
@@ -100,6 +222,9 @@ export type AdminDiagnosticLifecycle = Readonly<{
 }>;
 
 export interface AdminAuthority {
+  query(family: AdminQueryFamily, options: AdminQueryOptions): Promise<AdminQueryResult>;
+  mutate(input: AdminMutationInput): Promise<AdminMutationResult>;
+  openFreshness(input: AdminFreshnessInput): AdminFreshnessLifecycle;
   signIn(
     input: Readonly<{ email: string; password: string }>,
   ): Promise<AdminSessionProjection | null>;
@@ -142,6 +267,7 @@ export interface CreateAdminAuthorityOptions {
   readonly commandId?: () => string;
   readonly correlationId: () => string;
   readonly csrfToken: () => string;
+  readonly reconnectDelayMs?: number;
   readonly subscribeToConsent?: (listener: () => void) => () => void;
   readonly transport?: AdminAuthorityTransport;
 }
@@ -273,12 +399,178 @@ const admitBreakGlass = (value: unknown): BreakGlassMetadata | null => {
   return Object.freeze({ ...value });
 };
 
+const QUERY_PATHS = Object.freeze({
+  approvals: '/v1/admin/operations/queues',
+  audit: '/v1/admin/operations/audit-events',
+  briefing: '/v1/admin/operations/queues',
+  capacity: '/v1/admin/operations/capacity',
+  configurations: '/v1/admin/operations/configurations',
+  emergency: '/v1/admin/operations/emergency-stops',
+  incidents: '/v1/admin/operations/incidents',
+  invitations: '/v1/admin/invitations',
+  jobs: '/v1/admin/operations/jobs',
+  privacy: '/v1/admin/operations/privacy-cases',
+  search: '/v1/admin/operations/search',
+  team: '/v1/admin/governance/team',
+} satisfies Readonly<Record<AdminQueryFamily, string>>);
+
+const OPERATION_QUERY_FAMILIES = new Set<AdminQueryFamily>([
+  'approvals',
+  'audit',
+  'briefing',
+  'capacity',
+  'configurations',
+  'emergency',
+  'incidents',
+  'jobs',
+  'privacy',
+  'search',
+]);
+
+const boundedToken = (value: unknown): value is string =>
+  typeof value === 'string' && TOKEN.test(value);
+
+const admitFreshness = (
+  value: unknown,
+): Exclude<Extract<AdminQueryResult, { status: 'online' }>['freshness'], undefined> | null => {
+  if (
+    !isRecord(value) ||
+    !['live', 'reconnecting', 'stale', 'offline', 'degraded'].includes(String(value['state'])) ||
+    !boundedToken(value['source']) ||
+    !boundedToken(value['sequence']) ||
+    typeof value['observedAt'] !== 'string' ||
+    Number.isNaN(Date.parse(value['observedAt']))
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    observedAt: value['observedAt'],
+    sequence: value['sequence'],
+    source: value['source'],
+    state: value['state'] as 'live' | 'reconnecting' | 'stale' | 'offline' | 'degraded',
+  });
+};
+
+const admitAdminDocument = (value: unknown): AdminAuthorityDocument | null => {
+  if (
+    !isRecord(value) ||
+    typeof value['kind'] !== 'string' ||
+    !value['kind'].startsWith('admin-') ||
+    !controlPlaneDocumentValidator(value)
+  ) {
+    return null;
+  }
+  return Object.freeze({ ...value }) as AdminAuthorityDocument;
+};
+
+const extractAdminDocument = (value: unknown): AdminAuthorityDocument | null => {
+  const direct = admitAdminDocument(value);
+  if (direct !== null) return direct;
+  if (!isRecord(value)) return null;
+  for (const key of ['document', 'projection', 'receipt', 'result'] as const) {
+    const nested = admitAdminDocument(value[key]);
+    if (nested !== null) return nested;
+  }
+  return null;
+};
+
+const requireMutationTarget = (input: AdminMutationInput): string | null =>
+  boundedToken(input.targetId) ? encodeURIComponent(input.targetId) : null;
+
+const mutationPath = (input: AdminMutationInput): string | null => {
+  const target = requireMutationTarget(input);
+  switch (input.family) {
+    case 'preflight-invitations':
+      return '/v1/admin/invitations/preflight';
+    case 'issue-invitations':
+      return '/v1/admin/invitations';
+    case 'batch-invitations':
+      return '/v1/admin/invitations/batches';
+    case 'invite-team-member':
+      return '/v1/admin/governance/team/invitations';
+    case 'switch-function':
+      return '/v1/admin/governance/functions/switch';
+    case 'create-delegation':
+      return '/v1/admin/governance/delegations';
+    case 'review-access':
+      return '/v1/admin/governance/reviews';
+    case 'request-approval':
+      return '/v1/admin/governance/approvals';
+    case 'governance-break-glass':
+      return '/v1/admin/governance/break-glass';
+    case 'export-data':
+      return '/v1/admin/operations/exports';
+    case 'emergency-stop':
+      return '/v1/admin/operations/emergency-stops';
+    case 'resend-invitation':
+      return target === null ? null : `/v1/admin/invitations/${target}/resend`;
+    case 'revoke-invitation':
+      return target === null ? null : `/v1/admin/invitations/${target}/revoke`;
+    case 'offboard-member':
+      return '/v1/admin/governance/offboard';
+    case 'activate-member':
+      return '/v1/admin/governance/activate';
+    case 'approve-request':
+      return target === null ? null : `/v1/admin/governance/approvals/${target}/approve`;
+    case 'cancel-request':
+      return target === null ? null : `/v1/admin/governance/approvals/${target}/cancel`;
+    case 'reassign-request':
+      return target === null ? null : `/v1/admin/governance/approvals/${target}/reassign`;
+    case 'transition-job':
+      return target === null ? null : `/v1/admin/operations/jobs/${target}/transitions`;
+    case 'resolve-conflict':
+      return target === null ? null : `/v1/admin/operations/conflicts/${target}/resolve`;
+    case 'recover-incident':
+      return target === null ? null : `/v1/admin/operations/incidents/${target}/recover`;
+    case 'transition-configuration':
+      return target === null ? null : `/v1/admin/operations/configurations/${target}/transitions`;
+    case 'execute-privacy':
+      return target === null ? null : `/v1/admin/operations/privacy-cases/${target}/execute`;
+  }
+};
+
+const admitInvalidation = (value: unknown): AdminFreshnessInvalidation | null => {
+  if (
+    !isRecord(value) ||
+    !boundedToken(value['cursor']) ||
+    !boundedToken(value['version']) ||
+    typeof value['updatedAt'] !== 'string' ||
+    Number.isNaN(Date.parse(value['updatedAt'])) ||
+    !Array.isArray(value['resources']) ||
+    value['resources'].length === 0 ||
+    value['resources'].length > 32 ||
+    !value['resources'].every(boundedToken)
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    cursor: value['cursor'],
+    resources: Object.freeze([...value['resources']]),
+    updatedAt: value['updatedAt'],
+    version: value['version'],
+  });
+};
+
+const parseInvalidationEvent = (payload: string): AdminFreshnessInvalidation | null => {
+  const data = payload
+    .split(/\r?\n/gu)
+    .find((line) => line.startsWith('data: '))
+    ?.slice('data: '.length);
+  if (data === undefined) return null;
+  try {
+    return admitInvalidation(JSON.parse(data));
+  } catch {
+    return null;
+  }
+};
+
 export const createAdminAuthority = ({
   baseUrl = '',
   clock = () => new Date().toISOString(),
   commandId = () => globalThis.crypto.randomUUID(),
   correlationId,
   csrfToken,
+  reconnectDelayMs = 1_000,
   subscribeToConsent,
   transport = globalThis.fetch.bind(globalThis),
 }: CreateAdminAuthorityOptions): AdminAuthority => {
@@ -336,6 +628,207 @@ export const createAdminAuthority = ({
   };
 
   return Object.freeze({
+    async query(family: AdminQueryFamily, options: AdminQueryOptions): Promise<AdminQueryResult> {
+      try {
+        const parameters = new URLSearchParams();
+        if (family === 'search' && options.query?.trim()) {
+          parameters.set('q', options.query.trim().slice(0, 128));
+        }
+        if (OPERATION_QUERY_FAMILIES.has(family)) {
+          parameters.set('environment', options.environment);
+        }
+        parameters.set('limit', String(Math.min(100, Math.max(1, options.limit ?? 50))));
+        if (options.cursor !== undefined && boundedToken(options.cursor)) {
+          parameters.set('cursor', options.cursor);
+        }
+        const response = await transport(`${baseUrl}${QUERY_PATHS[family]}?${parameters}`, {
+          cache: 'no-store',
+          credentials: 'include',
+          headers: headers(correlationId()),
+          method: 'GET',
+          ...(options.signal === undefined ? {} : { signal: options.signal }),
+        });
+        if ([401, 403, 404].includes(response.status)) {
+          return { code: 'unauthorized', records: [], status: 'denied' };
+        }
+        if (response.status === 429) {
+          return { code: 'rate-limit', records: [], status: 'error' };
+        }
+        if (!response.ok || !cachePolicyIsPrivate(response)) {
+          return { code: 'unavailable', records: [], status: 'error' };
+        }
+        const body = await safeJson(response);
+        if (!isRecord(body)) {
+          return { code: 'invalid-authority', records: [], status: 'error' };
+        }
+        const candidateRecords = Array.isArray(body['records']) ? body['records'] : [body];
+        const records = candidateRecords.map(admitAdminDocument);
+        if (records.some((record) => record === null)) {
+          return { code: 'invalid-authority', records: [], status: 'error' };
+        }
+        const freshness =
+          body['freshness'] === undefined ? undefined : admitFreshness(body['freshness']);
+        if (body['freshness'] !== undefined && freshness === null) {
+          return { code: 'invalid-authority', records: [], status: 'error' };
+        }
+        const nextCursor = body['nextCursor'];
+        if (nextCursor !== undefined && nextCursor !== null && !boundedToken(nextCursor)) {
+          return { code: 'invalid-authority', records: [], status: 'error' };
+        }
+        return Object.freeze({
+          ...(freshness === undefined || freshness === null ? {} : { freshness }),
+          nextCursor: typeof nextCursor === 'string' ? nextCursor : null,
+          records: Object.freeze(records as AdminAuthorityDocument[]),
+          status: 'online',
+        });
+      } catch {
+        return { code: 'unavailable', records: [], status: 'error' };
+      }
+    },
+
+    async mutate(input: AdminMutationInput): Promise<AdminMutationResult> {
+      const path = mutationPath(input);
+      if (
+        path === null ||
+        !boundedToken(input.idempotencyKey) ||
+        (input.expectedVersion !== undefined && !boundedToken(input.expectedVersion)) ||
+        (input.expectedEtag !== undefined && !boundedToken(input.expectedEtag)) ||
+        (input.stepUp !== undefined && !boundedToken(input.stepUp)) ||
+        (input.reason !== undefined &&
+          (input.reason.trim().length < 8 || input.reason.trim().length > 256)) ||
+        (input.approvalReferences?.some((reference) => !boundedToken(reference)) ?? false)
+      ) {
+        return { code: 'invalid-authority', status: 'error' };
+      }
+      try {
+        const correlation = correlationId();
+        const token = await ensureCsrfToken(correlation);
+        if (token === null) return { code: 'unavailable', status: 'error' };
+        const response = await transport(`${baseUrl}${path}`, {
+          body: JSON.stringify({
+            ...input.payload,
+            ...(input.approvalReferences === undefined
+              ? {}
+              : { approvalReferences: input.approvalReferences }),
+            ...(input.expectedEtag === undefined ? {} : { expectedEtag: input.expectedEtag }),
+            ...(input.expectedVersion === undefined
+              ? {}
+              : { expectedVersion: input.expectedVersion }),
+            ...(input.reason === undefined ? {} : { reason: input.reason.trim() }),
+          }),
+          cache: 'no-store',
+          credentials: 'include',
+          headers: {
+            ...headers(correlation, token),
+            'content-type': 'application/json',
+            'x-idempotency-key': input.idempotencyKey,
+            ...(input.expectedEtag === undefined ? {} : { 'if-match': input.expectedEtag }),
+            ...(input.expectedVersion === undefined
+              ? {}
+              : { 'x-expected-version': input.expectedVersion }),
+            ...(input.stepUp === undefined ? {} : { 'x-liiiraa-admin-step-up': input.stepUp }),
+          },
+          method: 'POST',
+          ...(input.signal === undefined ? {} : { signal: input.signal }),
+        });
+        const body = await safeJson(response);
+        if ([401, 403, 404].includes(response.status)) {
+          return { code: 'unauthorized', status: 'denied' };
+        }
+        if (response.status === 409) {
+          const document = extractAdminDocument(body);
+          return document === null
+            ? { code: 'conflict', status: 'conflict' }
+            : { code: 'conflict', document, status: 'conflict' };
+        }
+        if (response.status === 429) return { code: 'rate-limit', status: 'error' };
+        if (response.status === 503) return { code: 'degraded', status: 'error' };
+        const document = extractAdminDocument(body);
+        if ((!response.ok && response.status !== 207) || document === null) {
+          return { code: 'invalid-authority', status: 'error' };
+        }
+        return {
+          document,
+          status: response.status === 207 ? 'partial' : 'complete',
+        };
+      } catch {
+        return { code: 'unavailable', status: 'error' };
+      }
+    },
+
+    openFreshness(input: AdminFreshnessInput): AdminFreshnessLifecycle {
+      const controller = new AbortController();
+      let resolveSettled = (): void => undefined;
+      const settled = new Promise<void>((resolve) => {
+        resolveSettled = resolve;
+      });
+      let cursor = input.cursor;
+
+      const stop = (): void => {
+        if (!controller.signal.aborted) controller.abort();
+      };
+      const isStopped = (): boolean => controller.signal.aborted;
+      if (input.signal !== undefined) {
+        if (input.signal.aborted) stop();
+        else input.signal.addEventListener('abort', stop, { once: true });
+      }
+
+      void (async () => {
+        try {
+          while (!isStopped()) {
+            input.onState('reconnecting');
+            const parameters = new URLSearchParams({ environment: input.environment });
+            if (cursor !== undefined && boundedToken(cursor)) parameters.set('cursor', cursor);
+            try {
+              const response = await transport(
+                `${baseUrl}/v1/admin/operations/live?${parameters}`,
+                {
+                  cache: 'no-store',
+                  credentials: 'include',
+                  headers: headers(correlationId()),
+                  method: 'GET',
+                  signal: controller.signal,
+                },
+              );
+              if ([401, 403, 404].includes(response.status)) {
+                input.onState('offline');
+                stop();
+                continue;
+              }
+              if (
+                !response.ok ||
+                !cachePolicyIsPrivate(response) ||
+                !response.headers.get('content-type')?.includes('text/event-stream')
+              ) {
+                input.onState('degraded');
+              } else {
+                const event = parseInvalidationEvent(await response.text());
+                if (event === null) {
+                  input.onState('degraded');
+                } else {
+                  cursor = event.cursor;
+                  input.onInvalidate(event);
+                  await input.refetch(event.resources, controller.signal);
+                  input.onState('live');
+                }
+              }
+            } catch {
+              if (!isStopped()) input.onState('degraded');
+            }
+            if (!isStopped()) {
+              await new Promise<void>((resolve) => {
+                setTimeout(resolve, Math.max(0, reconnectDelayMs));
+              });
+            }
+          }
+        } finally {
+          resolveSettled();
+        }
+      })();
+
+      return Object.freeze({ settled, signal: controller.signal, stop });
+    },
+
     async signIn(input: Readonly<{ email: string; password: string }>) {
       try {
         const correlation = correlationId();

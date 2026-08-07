@@ -1,12 +1,18 @@
 'use client';
 
-import type { AdminRoleJson, AuditEventJson, AuthorityReceiptJson } from '@liiiraa/contracts-ts';
+import type {
+  AdminEnvironmentKindJson,
+  AdminRoleJson,
+  AuditEventJson,
+  AuthorityReceiptJson,
+} from '@liiiraa/contracts-ts';
 import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
 import type { Route } from 'next';
 import Link from 'next/link';
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -23,6 +29,8 @@ import {
   type AdminDiagnosticProjection,
   type AdminProjectionCollection,
   type AdminProjectionRecord,
+  type AdminQueryFamily,
+  type AdminQueryResult,
   type AdminSessionProjection,
   type AdminStepUp,
 } from '../admin-authority';
@@ -166,6 +174,34 @@ const collectionFor = (routeId: AdminAuthorityRoute): AdminProjectionCollection 
   if (routeId === 'admin-diagnostics') return 'diagnostic-metadata';
   return 'audit-events';
 };
+
+const ADMIN_RESOURCE_QUERY: Readonly<Record<string, AdminQueryFamily>> = Object.freeze({
+  'access-context': 'briefing',
+  alerts: 'incidents',
+  'audit-events': 'audit',
+  capacity: 'capacity',
+  configurations: 'configurations',
+  conflicts: 'configurations',
+  'emergency-stops': 'emergency',
+  governance: 'approvals',
+  incidents: 'incidents',
+  inbox: 'briefing',
+  invitations: 'invitations',
+  jobs: 'jobs',
+  'privacy-cases': 'privacy',
+  queues: 'briefing',
+  team: 'team',
+  views: 'briefing',
+});
+
+const queryFamiliesForResources = (resources: readonly string[]): readonly AdminQueryFamily[] =>
+  Object.freeze([
+    ...new Set(
+      resources
+        .map((resource) => ADMIN_RESOURCE_QUERY[resource])
+        .filter((family) => family !== undefined),
+    ),
+  ]);
 
 const loadAuthorizedRecords = async (
   authority: AdminAuthority,
@@ -646,6 +682,9 @@ const AdminProductionShell = ({
 type AdminAuthorityContextValue = Readonly<{
   accountOrigin: string;
   authority: AdminAuthority;
+  freshness: 'live' | 'reconnecting' | 'offline' | 'degraded';
+  projections: Readonly<Partial<Record<AdminQueryFamily, AdminQueryResult>>>;
+  revision: number;
   session: AdminSessionProjection | null | undefined;
   setSession: Dispatch<SetStateAction<AdminSessionProjection | null | undefined>>;
 }>;
@@ -656,14 +695,21 @@ export const AdminAuthorityProvider = ({
   accountOrigin,
   authorityBaseUrl,
   children,
+  environment = 'staging',
   locale,
 }: Readonly<{
   accountOrigin: string;
   authorityBaseUrl: string;
   children: ReactNode;
+  environment?: AdminEnvironmentKindJson;
   locale: WebLocale;
 }>) => {
   const [session, setSession] = useState<AdminSessionProjection | null>();
+  const [freshness, setFreshness] = useState<AdminAuthorityContextValue['freshness']>('offline');
+  const [projections, setProjections] = useState<
+    Readonly<Partial<Record<AdminQueryFamily, AdminQueryResult>>>
+  >({});
+  const [revision, setRevision] = useState(0);
   const authority = useMemo(
     () =>
       createAdminAuthority({
@@ -680,6 +726,23 @@ export const AdminAuthorityProvider = ({
     [authorityBaseUrl],
   );
 
+  const refetchAdminResources = useCallback(
+    async (resources: readonly string[], signal: AbortSignal): Promise<void> => {
+      const families = queryFamiliesForResources(resources);
+      if (families.length === 0 || signal.aborted) return;
+      const results = await Promise.all(
+        families.map(
+          async (family) =>
+            [family, await authority.query(family, { environment, signal })] as const,
+        ),
+      );
+      signal.throwIfAborted();
+      setProjections((current) => Object.freeze({ ...current, ...Object.fromEntries(results) }));
+      setRevision((current) => current + 1);
+    },
+    [authority, environment],
+  );
+
   useEffect(() => {
     let active = true;
     void authority.session().then((next) => {
@@ -690,9 +753,30 @@ export const AdminAuthorityProvider = ({
     };
   }, [authority]);
 
+  useEffect(() => {
+    if (session === null || session === undefined) {
+      setFreshness('offline');
+      return undefined;
+    }
+    const controller = new AbortController();
+    const lifecycle = authority.openFreshness({
+      environment,
+      onInvalidate: () => {
+        setFreshness('reconnecting');
+      },
+      onState: setFreshness,
+      refetch: refetchAdminResources,
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+      lifecycle.stop();
+    };
+  }, [authority, environment, refetchAdminResources, session]);
+
   const context = useMemo(
-    () => ({ accountOrigin, authority, session, setSession }),
-    [accountOrigin, authority, session],
+    () => ({ accountOrigin, authority, freshness, projections, revision, session, setSession }),
+    [accountOrigin, authority, freshness, projections, revision, session],
   );
 
   if (session === undefined) {
@@ -748,7 +832,7 @@ export const AdminAuthorityProvider = ({
   );
 };
 
-const useAdminAuthority = (): AdminAuthorityContextValue => {
+export const useAdminAuthority = (): AdminAuthorityContextValue => {
   const context = useContext(AdminAuthorityContext);
   if (context === null) throw new Error('ADMIN_AUTHORITY_PROVIDER_REQUIRED');
   return context;
@@ -817,9 +901,6 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     >
       <header className="admin-authority__header">
         <div>
-          <span className="admin-authority__system" aria-hidden="true">
-            ADMIN CONTROL PLANE
-          </span>
           <h1>{copy[locale].activeRole}</h1>
           <p>{copy[locale].authoritySummary}</p>
         </div>
