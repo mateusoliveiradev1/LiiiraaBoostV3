@@ -143,14 +143,10 @@ describe('admin approval and impact routes', () => {
       },
     });
     expect(response.statusCode).toBe(200);
-    expect(operations.preview).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.not.objectContaining({
-        before: expect.anything(),
-        gainedCapabilities: expect.anything(),
-      }),
+    expect(JSON.stringify(operations.preview.mock.calls)).not.toMatch(
+      /"before"|"gainedCapabilities"/u,
     );
-    expect(response.json().impact).toMatchObject({
+    expect(response.json<{ impact: Readonly<Record<string, unknown>> }>().impact).toMatchObject({
       affectedSessions: true,
       invalidatesPendingApprovals: true,
     });
