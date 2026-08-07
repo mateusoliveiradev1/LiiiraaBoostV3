@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-59-PLAN.md
-last_updated: "2026-08-07T09:45:15.169Z"
+stopped_at: Completed 04-60-PLAN.md
+last_updated: "2026-08-07T10:35:05.054Z"
 last_activity: 2026-08-07
-last_activity_desc: Completed Phase 04 Plan 59 Revenue and Support workspaces
+last_activity_desc: Completed Plan 04-60 Operation, Security, and System workspaces
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 197
+  completed_plans: 198
   percent: 98
 ---
 
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 60 of 62
+Plan: 61 of 62
 Status: Ready to execute
-Last activity: 2026-08-07 — Completed Plan 04-59 Revenue and Support workspaces
+Last activity: 2026-08-07 — Completed Plan 04-60 Operation, Security, and System workspaces
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 197
+- Total plans completed: 198
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -234,6 +234,7 @@ _Updated after plan completion_
 | Phase 04 P56 | 23 min | 2 tasks | 6 files |
 | Phase 04 P57 | 60 min | 2 tasks | 16 files |
 | Phase 04 P59 | 41 min | 2 tasks | 9 files |
+| Phase 04 P60 | 45 min | 2 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -736,6 +737,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Keep live invalidation stale until canonical refetch. — Uncertain administrative mutations fail closed while marked reads remain available.
 - [Phase 04]: Preserve incompatible Queue Canvas drafts through version conflict. — Independent changes may merge, but overlapping edits require explicit review instead of last-write-wins.
 - [Phase 04]: Adapt record detail by viewport without losing keyboard context. — Desktop uses an inspector with focus return while mobile follows the canonical full route.
+- [Phase 04]: Validate operational projections before they leave PostgreSQL authority. — Raw database rows and sensitive reasons must never become Admin UI truth.
+- [Phase 04]: Query Operation, Security, and System through surface-specific authority families. — Least-data reads prevent unrelated denial or stale state from blocking or leaking across workspaces.
+- [Phase 04]: Keep recovery, configuration, privacy, export, and emergency commands bounded and versioned. — Command identity, environment, review, validation, and receipts prohibit arbitrary execution and optimistic success.
+- [Phase 04]: Own inspector focus across responsive Admin compositions. — Focus enters details and returns to the exact trigger while desktop, tablet, and mobile preserve route identity.
 
 ### Pending Todos
 
@@ -781,6 +786,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T09:45:15.163Z
-Stopped at: Completed 04-59-PLAN.md
+Last session: 2026-08-07T10:35:05.048Z
+Stopped at: Completed 04-60-PLAN.md
 Resume file: None
