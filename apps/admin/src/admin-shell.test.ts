@@ -247,6 +247,30 @@ describe('admin shell', () => {
     );
   });
 
+  it('removes duplicate production insets and keeps 320px overview facts compact', () => {
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
+    const shellStyles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+    const overviewStyles = readFileSync(
+      new URL('./features/admin-overview.module.css', import.meta.url),
+      'utf8',
+    );
+
+    expect(authority).toContain(
+      '<main className="admin-production-shell" id="admin-main" tabIndex={-1}>',
+    );
+    expect(shellStyles).toContain('#admin-main.admin-production-shell');
+    expect(shellStyles).toContain('#admin-main:has(.admin-production-loading)');
+    expect(overviewStyles).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*\.briefingFacts > div,[\s\S]*\.capacity dl > div[\s\S]*grid-template-columns:\s*88px minmax\(0, 1fr\)/u,
+    );
+    expect(overviewStyles).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*\.priorityMetadata > div[\s\S]*grid-template-columns:\s*88px minmax\(0, 1fr\)/u,
+    );
+  });
+
   it('keeps high-risk review reachable through zoom-safe vertical semantics', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
