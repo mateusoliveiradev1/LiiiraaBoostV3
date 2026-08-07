@@ -499,15 +499,23 @@
 
   .sectionHeader,
   .contextBody {
-    padding-inline: var(--lb-space-3);
+    padding-inline: 0;
   }
 
-  .capacityStatement,
-  .capacity > header,
   .briefingFacts > div,
   .capacity dl > div {
-    align-items: flex-start;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .routeHeader h1 {
+    font-size: 1.375rem;
+  }
+
+  .briefing h2 {
+    font-size: 1.125rem;
+    line-height: 1.35;
   }
 
   .briefingFacts dd,
@@ -516,7 +524,7 @@
   }
 
   .priorityMetadata > div {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
     gap: 2px;
   }
 }

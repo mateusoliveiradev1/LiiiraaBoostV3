@@ -914,7 +914,7 @@ const AdminProductionShell = ({
       searchPlaceholder={shellLabels.searchPlaceholder}
       securityLabel={shellLabels.security}
     >
-      <main id="admin-main" tabIndex={-1}>
+      <main className="admin-production-shell" id="admin-main" tabIndex={-1}>
         <AdminFocusHandoff />
         {children}
       </main>

@@ -803,7 +803,8 @@ summary:focus-visible,
   border-block-end: 1px solid var(--lb-line-subtle);
 }
 
-#admin-main:has(.admin-production-shell) {
+#admin-main.admin-production-shell,
+#admin-main:has(.admin-production-loading) {
   padding: 0;
 }
 
