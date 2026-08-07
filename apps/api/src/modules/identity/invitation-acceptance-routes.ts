@@ -1,7 +1,10 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import type { AdminInvitationDependencies } from '@liiiraa/control-plane-application';
-import { acceptBetaInvitation } from '@liiiraa/control-plane-application/admin-invitations';
+import {
+  acceptBetaInvitation,
+  manageBetaInvitation,
+} from '@liiiraa/control-plane-application/admin-invitations';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface InvitationInspection {
@@ -24,6 +27,7 @@ export interface InvitationAcceptanceProgress {
 
 export interface InvitationAcceptanceRouteOperations {
   readonly accept: typeof acceptBetaInvitation;
+  readonly decline: typeof manageBetaInvitation;
 }
 
 export interface InvitationAcceptanceRouteDependencies {
@@ -70,6 +74,7 @@ export interface InvitationAcceptanceRouteDependencies {
 
 const defaultOperations: InvitationAcceptanceRouteOperations = Object.freeze({
   accept: acceptBetaInvitation,
+  decline: manageBetaInvitation,
 });
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
@@ -216,6 +221,42 @@ export const registerInvitationAcceptanceRoutes = (
       };
       await dependencies.progress.save(request.params.invitationId, resumeId, next);
       return noStore(reply).code(200).send(publicProgress(next));
+    },
+  );
+
+  app.post<{ Params: { invitationId: string } }>(
+    '/v1/identity/invitations/:invitationId/decline',
+    async (request, reply) => {
+      if (!admitted(request, dependencies, true) || !isRecord(request.body)) {
+        return unavailable(reply);
+      }
+      const resumeId = stringValue(request.body, 'resumeId');
+      const commandId = stringValue(request.body, 'commandId');
+      const idempotencyKey = stringValue(request.body, 'idempotencyKey');
+      if (
+        !boundedIdentifier(request.params.invitationId) ||
+        !boundedIdentifier(resumeId) ||
+        !boundedIdentifier(commandId) ||
+        !/^[A-Za-z0-9_-]{1,128}$/u.test(idempotencyKey)
+      ) {
+        return unavailable(reply);
+      }
+      const state = await dependencies.progress.load(request.params.invitationId, resumeId);
+      if (state?.invitationId !== request.params.invitationId) return unavailable(reply);
+      const result = await operations.decline(dependencies.invitations, {
+        actorId: 'invitation-recipient',
+        commandId,
+        idempotencyKey,
+        invitationId: request.params.invitationId,
+        expectedVersion: state.version,
+        action: { kind: 'decline' },
+      });
+      if (!result.ok) return unavailable(reply);
+      return noStore(reply).code(200).send({
+        ok: true,
+        outcome: result.outcome,
+        receiptId: result.receiptId,
+      });
     },
   );
 
