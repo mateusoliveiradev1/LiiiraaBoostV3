@@ -1,5 +1,4 @@
 import type {
-  IdentityActionScope,
   IdentityProviderFailureCode,
   IdentityProviderPort,
   IdentityProviderResult,
@@ -11,26 +10,26 @@ import type {
 
 export interface BetterAuthRuntimeEvidence {
   readonly packageVersions: Readonly<{
-    betterAuth: '1.6.25';
-    passkey: '1.6.25';
-    oauthProvider: '1.6.25';
+    betterAuth: string;
+    passkey: string;
+    oauthProvider: string;
   }>;
-  readonly requireEmailVerification: true;
-  readonly socialProviders: readonly ['google', 'discord'];
-  readonly pluginIds: readonly ['two-factor', 'passkey', 'jwt', 'oauth-provider'];
+  readonly requireEmailVerification: boolean;
+  readonly socialProviders: readonly string[];
+  readonly pluginIds: readonly string[];
   readonly apiNames: readonly string[];
   readonly twoFactorEndpoints: readonly string[];
   readonly passkeyEndpoints: readonly string[];
   readonly oauthProviderEndpoints: readonly string[];
   readonly nativeClient: Readonly<{
-    type: 'native';
-    tokenEndpointAuthMethod: 'none';
-    requirePkce: true;
-    codeChallengeMethod: 'S256';
-    backendCodeExchange: true;
-    tokenEndpointPath: '/oauth2/token';
-    tokenEndpointMethod: 'POST';
-    acceptsPublicCodeExchangeWithoutSecret: true;
+    type: string;
+    tokenEndpointAuthMethod: string;
+    requirePkce: boolean;
+    codeChallengeMethod: string;
+    backendCodeExchange: boolean;
+    tokenEndpointPath: string;
+    tokenEndpointMethod: string;
+    acceptsPublicCodeExchangeWithoutSecret: boolean;
   }>;
 }
 
@@ -147,8 +146,8 @@ export const createBetterAuthSpikeAdapter = (
   now: () => Date = () => new Date('2026-08-04T12:00:00.000Z'),
 ): IdentityProviderPort => {
   if (!evidenceIsComplete(evidence)) {
-    const unavailable = async <T>(): Promise<IdentityProviderResult<T>> =>
-      failure('ADAPTER_UNAVAILABLE');
+    const unavailable = <T>(): Promise<IdentityProviderResult<T>> =>
+      Promise.resolve(failure('ADAPTER_UNAVAILABLE'));
     return {
       beginSignIn: unavailable,
       completeSignIn: unavailable,
@@ -235,78 +234,82 @@ export const createBetterAuthSpikeAdapter = (
       return success(challenge);
     },
 
-    completeSignIn: async (input) => {
+    completeSignIn: (input) => {
       const challenge = challenges.get(input.challengeId);
-      if (!challenge) return failure('INVALID_CHALLENGE');
-      if (challenge.consumed) return failure('REPLAYED_CHALLENGE');
+      if (!challenge) return Promise.resolve(failure('INVALID_CHALLENGE'));
+      if (challenge.consumed) return Promise.resolve(failure('REPLAYED_CHALLENGE'));
 
       if (challenge.transport === 'external-browser') {
-        if (input.redirectUri !== challenge.redirectUri) return failure('REDIRECT_MISMATCH');
-        if (input.issuer !== challenge.issuer) return failure('ISSUER_MISMATCH');
-        if (input.state !== challenge.state) return failure('STATE_MISMATCH');
-        if (!input.authorizationCode) return failure('INVALID_CHALLENGE');
-        if (!challenge.codeVerifier) return failure('INVALID_CHALLENGE');
+        if (input.redirectUri !== challenge.redirectUri) {
+          return Promise.resolve(failure('REDIRECT_MISMATCH'));
+        }
+        if (input.issuer !== challenge.issuer) return Promise.resolve(failure('ISSUER_MISMATCH'));
+        if (input.state !== challenge.state) return Promise.resolve(failure('STATE_MISMATCH'));
+        if (!input.authorizationCode) return Promise.resolve(failure('INVALID_CHALLENGE'));
+        if (!challenge.codeVerifier) return Promise.resolve(failure('INVALID_CHALLENGE'));
       } else if (challenge.method === 'password' && input.emailVerified !== true) {
-        return failure('UNVERIFIED_EMAIL');
+        return Promise.resolve(failure('UNVERIFIED_EMAIL'));
       }
 
       challenge.consumed = true;
       const session = createSession(challenge.method);
       sessions.set(session.id, session);
-      return success(session);
+      return Promise.resolve(success(session));
     },
 
-    verifyEmail: async (input) => {
+    verifyEmail: (input) => {
       if (!input.verificationToken.startsWith('verified-email-')) {
-        return failure('UNVERIFIED_EMAIL');
+        return Promise.resolve(failure('UNVERIFIED_EMAIL'));
       }
       verifiedEmails.add(input.email);
-      return success({ verified: true });
+      return Promise.resolve(success({ verified: true }));
     },
 
-    enrollFactor: async (input) => {
+    enrollFactor: (input) => {
       const session = sessions.get(input.sessionId);
-      if (!session) return failure('UNVERIFIED_EMAIL');
-      if (!APPROVED_FACTORS.has(input.factor)) return failure('INVALID_FACTOR');
+      if (!session) return Promise.resolve(failure('UNVERIFIED_EMAIL'));
+      if (!APPROVED_FACTORS.has(input.factor)) return Promise.resolve(failure('INVALID_FACTOR'));
       const factors = enrolledFactors.get(session.id) ?? new Set<string>();
       factors.add(input.factor);
       enrolledFactors.set(session.id, factors);
-      return success({ factor: input.factor });
+      return Promise.resolve(success({ factor: input.factor }));
     },
 
-    stepUp: async (input) => {
+    stepUp: (input) => {
       const session = sessions.get(input.sessionId);
-      if (!session || session.state === 'revoked') return failure('SESSION_REVOKED');
-      if (!APPROVED_FACTORS.has(input.factor)) return failure('INVALID_FACTOR');
-      if (input.proof.startsWith('stale:')) return failure('STEP_UP_STALE');
+      if (!session || session.state === 'revoked') {
+        return Promise.resolve(failure('SESSION_REVOKED'));
+      }
+      if (!APPROVED_FACTORS.has(input.factor)) return Promise.resolve(failure('INVALID_FACTOR'));
+      if (input.proof.startsWith('stale:')) return Promise.resolve(failure('STEP_UP_STALE'));
       if (
         session.criticalActionHoldUntil &&
         Date.parse(session.criticalActionHoldUntil) > now().getTime()
       ) {
-        return failure('RECOVERY_HOLD_ACTIVE');
+        return Promise.resolve(failure('RECOVERY_HOLD_ACTIVE'));
       }
 
       let assumedRole: 'support' | 'operations' | 'security' | 'audit' | undefined;
       if (input.actionScope.startsWith('admin-role:')) {
         const role = input.actionScope.slice('admin-role:'.length);
-        if (!ADMIN_ROLES.has(role)) return failure('STEP_UP_REQUIRED');
+        if (!ADMIN_ROLES.has(role)) return Promise.resolve(failure('STEP_UP_REQUIRED'));
         if (!input.proof.startsWith('role:') && !input.proof.startsWith('non-production-role:')) {
-          return failure('STEP_UP_REQUIRED');
+          return Promise.resolve(failure('STEP_UP_REQUIRED'));
         }
         activeRole = role;
         assumedRole = role as typeof assumedRole;
       } else if (activeRole && input.actionScope.startsWith('admin-action:')) {
         const roleFromScope = input.actionScope.slice('admin-action:'.length).split(':', 1)[0];
-        if (roleFromScope !== activeRole) return failure('STEP_UP_REQUIRED');
+        if (roleFromScope !== activeRole) return Promise.resolve(failure('STEP_UP_REQUIRED'));
       }
 
       if (input.factor === 'recovery-code') {
-        if (usedRecoveryCodes.has(input.proof)) return failure('INVALID_FACTOR');
+        if (usedRecoveryCodes.has(input.proof)) return Promise.resolve(failure('INVALID_FACTOR'));
         usedRecoveryCodes.add(input.proof);
       }
 
       const verifiedAt = now();
-      return success({
+      return Promise.resolve(success({
         sessionId: session.id,
         actionScope: input.actionScope,
         factor: input.factor,
@@ -314,19 +317,19 @@ export const createBetterAuthSpikeAdapter = (
         expiresAt: new Date(verifiedAt.getTime() + 5 * 60 * 1_000).toISOString(),
         auditReceiptId: id('audit'),
         ...(assumedRole ? { assumedRole } : {}),
-      });
+      }));
     },
 
-    listSessions: async () => success([...sessions.values()]),
+    listSessions: () => Promise.resolve(success([...sessions.values()])),
 
-    revokeSession: async (input) => {
+    revokeSession: (input) => {
       const session = sessions.get(input.sessionId);
-      if (!session) return failure('SESSION_REVOKED');
+      if (!session) return Promise.resolve(failure('SESSION_REVOKED'));
       sessions.set(input.sessionId, { ...session, state: 'revoked' });
-      return success({ sessionId: input.sessionId, state: 'revoked' });
+      return Promise.resolve(success({ sessionId: input.sessionId, state: 'revoked' }));
     },
 
-    beginRecovery: async (input) => {
+    beginRecovery: (input) => {
       const route = input.evidence === 'all-factors-lost' ? 'security-review' : input.evidence;
       const challenge: StoredRecovery = {
         id: id('recovery'),
@@ -335,14 +338,16 @@ export const createBetterAuthSpikeAdapter = (
         consumed: false,
       };
       recoveries.set(challenge.id, challenge);
-      return success(challenge);
+      return Promise.resolve(success(challenge));
     },
 
-    completeRecovery: async (input) => {
+    completeRecovery: (input) => {
       const challenge = recoveries.get(input.challengeId);
-      if (!challenge || challenge.consumed) return failure('INVALID_CHALLENGE');
+      if (!challenge || challenge.consumed) {
+        return Promise.resolve(failure('INVALID_CHALLENGE'));
+      }
       if (challenge.route === 'security-review' && !input.reviewedBySecurity) {
-        return failure('RECOVERY_REVIEW_REQUIRED');
+        return Promise.resolve(failure('RECOVERY_REVIEW_REQUIRED'));
       }
       challenge.consumed = true;
       const reviewed = challenge.route === 'security-review';
@@ -351,13 +356,13 @@ export const createBetterAuthSpikeAdapter = (
         : undefined;
       const session = createSession('password', holdUntil);
       sessions.set(session.id, session);
-      return success({
+      return Promise.resolve(success({
         session,
         reviewed,
         ...(holdUntil ? { criticalActionHoldUntil: holdUntil } : {}),
         ...(reviewed ? { trustedSessionNoticeId: id('notice') } : {}),
         contestable: reviewed,
-      });
+      }));
     },
   };
 };

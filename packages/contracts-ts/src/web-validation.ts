@@ -1,4 +1,4 @@
-import type { ErrorObject, ValidateFunction } from 'ajv';
+import type { ErrorObject } from 'ajv';
 
 import { webDocumentValidator } from './generated/standalone-validators.js';
 import type { WebDocument } from './generated/index.js';
@@ -26,7 +26,7 @@ export type WebDocumentValidationResult =
   | Readonly<{ ok: true; value: WebDocument }>
   | Readonly<{ ok: false; error: WebDocumentValidationError }>;
 
-const validator = webDocumentValidator as ValidateFunction<WebDocument>;
+const validator = webDocumentValidator;
 
 const bounded = (value: string, maximum: number): string =>
   value.length <= maximum ? value : value.slice(0, maximum);

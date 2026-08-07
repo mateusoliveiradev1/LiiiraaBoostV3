@@ -106,7 +106,7 @@ export const expectedCanonicalCandidates = (): readonly CanonicalCandidate[] =>
     .flatMap((route) =>
       WEB_LOCALES.flatMap((locale) =>
         AXES.map(({ axis, height, width }) => {
-        const surface = route.surface as Surface;
+        const surface = route.surface;
         const state = ERROR_ROUTE.test(route.id)
           ? route.id.slice(route.id.lastIndexOf('error-'))
           : 'ready';
@@ -156,6 +156,7 @@ export const candidateDiagnostics = (
     const candidate = actualById.get(id);
     if (candidate === undefined) continue;
     const { sourceHash: _expectedHash, ...expectedMetadata } = expectedCandidate;
+    void _expectedHash;
     const { sourceHash, ...actualMetadata } = candidate;
     if (JSON.stringify(actualMetadata) !== JSON.stringify(expectedMetadata)) {
       diagnostics.push(`CANDIDATE_METADATA_MISMATCH:${id}`);

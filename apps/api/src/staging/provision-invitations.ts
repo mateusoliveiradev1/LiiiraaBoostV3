@@ -119,16 +119,19 @@ export const repairInvitationOutputPayload = (payload: string, accountOrigin: st
     return reject('OUTPUT_PAYLOAD');
   }
   const invitations = parsed['invitations'];
-  if (invitations.length !== 3 || invitations.some((invitation) => !isRecord(invitation))) {
+  const invitationRecords = invitations.filter(isRecord);
+  if (invitations.length !== 3 || invitationRecords.length !== invitations.length) {
     return reject('OUTPUT_PAYLOAD');
   }
   const normalizedEmails = parseEmails(
-    JSON.stringify(invitations.map((invitation) => invitation['email'])),
+    JSON.stringify(invitationRecords.map((invitation) => invitation['email'])),
   );
-  const repaired = invitations.map((invitation, index) => {
+  const repaired = invitationRecords.map((invitation, index) => {
+    const email = normalizedEmails[index];
     const expiresAt = invitation['expiresAt'];
     const invitationUrl = invitation['invitationUrl'];
     if (
+      email === undefined ||
       typeof expiresAt !== 'string' ||
       !Number.isFinite(Date.parse(expiresAt)) ||
       typeof invitationUrl !== 'string'
@@ -156,7 +159,7 @@ export const repairInvitationOutputPayload = (payload: string, accountOrigin: st
     }
     url.pathname = '/pt-BR/register';
     return {
-      email: normalizedEmails[index],
+      email,
       expiresAt,
       invitationUrl: url.toString(),
     };

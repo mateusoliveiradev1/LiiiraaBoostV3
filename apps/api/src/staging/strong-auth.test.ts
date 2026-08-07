@@ -118,7 +118,7 @@ class MemoryStrongAuthRepository implements StagingStrongAuthRepository {
 
 describe('real staging TOTP and action-scoped step-up', () => {
   it('provisions bounded Admin grants with a constant number of PostgreSQL round trips', async () => {
-    const statements: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const statements: { sql: string; values: readonly unknown[] }[] = [];
     const query = (sql: string, values: readonly unknown[] = []) => {
       statements.push({ sql, values });
       return Promise.resolve({ rowCount: 1, rows: [] });

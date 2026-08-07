@@ -1143,14 +1143,6 @@ const validateAdminRouteState = (state: AdminRouteState): AdminRouteStateResult 
       return adminRouteStateFailure('INVALID_ADMIN_QUERY_VALUE', `$.state.${key}`);
     }
   }
-  if (
-    state.density !== undefined &&
-    state.density !== 'comfortable' &&
-    state.density !== 'compact'
-  ) {
-    return adminRouteStateFailure('INVALID_ADMIN_QUERY_VALUE', '$.state.density');
-  }
-
   return deepFreeze({
     ok: true,
     value: {
@@ -1200,11 +1192,14 @@ export const decodeAdminRouteState = (query: string): AdminRouteStateResult => {
   const filters = parameters.getAll('filter');
   const sort = parameters.getAll('sort');
   const density = parameters.get('density');
+  if (density !== null && density !== 'comfortable' && density !== 'compact') {
+    return adminRouteStateFailure('INVALID_ADMIN_QUERY_VALUE', '$.state.density');
+  }
   return validateAdminRouteState({
     ...(parameters.has('cursor') ? { cursor: parameters.get('cursor') ?? '' } : {}),
     ...(density === null
       ? {}
-      : { density: density as NonNullable<AdminRouteState['density']> }),
+      : { density }),
     ...(filters.length === 0 ? {} : { filters }),
     ...(parameters.has('record') ? { recordId: parameters.get('record') ?? '' } : {}),
     ...(parameters.has('view') ? { savedViewId: parameters.get('view') ?? '' } : {}),

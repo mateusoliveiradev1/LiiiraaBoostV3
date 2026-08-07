@@ -58,7 +58,7 @@ const routeParameters = Object.freeze({
   version: 'current',
 } as const);
 
-const surfaceFor = (route: WebRoute): Surface => route.surface as Surface;
+const surfaceFor = (route: WebRoute): Surface => route.surface;
 
 const roleFor = (routeId: string): string | undefined => {
   if (routeId === 'admin-support') return undefined;

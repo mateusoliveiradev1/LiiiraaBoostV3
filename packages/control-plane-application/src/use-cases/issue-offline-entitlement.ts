@@ -260,9 +260,7 @@ export const issueOfflineEntitlement = async (
       const signingKey = verificationKeys.find(({ keyId }) => keyId === signature.keyId);
       const issuedAtUnixSeconds = Date.parse(issuedAt) / 1_000;
       if (
-        signingKey === undefined ||
-        signingKey.status !== 'current' ||
-        signature.algorithm !== 'Ed25519' ||
+        signingKey?.status !== 'current' ||
         issuedAtUnixSeconds < signingKey.notBeforeUnixSeconds ||
         issuedAtUnixSeconds > signingKey.notAfterUnixSeconds
       ) {

@@ -71,13 +71,13 @@ const ProductionWindowTitleBar = ({ locale }: { readonly locale: 'en' | 'pt-BR' 
       <strong className="lb-product-brand">Liiiraa Boost</strong>
       <span>{locale === 'pt-BR' ? 'Ambiente local protegido' : 'Protected local environment'}</span>
       <div className="lb-window-controls">
-        <button aria-label={locale === 'pt-BR' ? 'Minimizar' : 'Minimize'} onClick={() => run('minimize')} type="button">
+        <button aria-label={locale === 'pt-BR' ? 'Minimizar' : 'Minimize'} onClick={() => { run('minimize'); }} type="button">
           <ProductIcon name="minus" size={16} />
         </button>
-        <button aria-label={locale === 'pt-BR' ? 'Maximizar' : 'Maximize'} onClick={() => run('toggleMaximize')} type="button">
+        <button aria-label={locale === 'pt-BR' ? 'Maximizar' : 'Maximize'} onClick={() => { run('toggleMaximize'); }} type="button">
           <ProductIcon name="app" size={16} />
         </button>
-        <button aria-label={locale === 'pt-BR' ? 'Fechar' : 'Close'} onClick={() => run('close')} type="button">
+        <button aria-label={locale === 'pt-BR' ? 'Fechar' : 'Close'} onClick={() => { run('close'); }} type="button">
           <ProductIcon name="close" size={16} />
         </button>
       </div>
@@ -88,7 +88,7 @@ const ProductionWindowTitleBar = ({ locale }: { readonly locale: 'en' | 'pt-BR' 
 const ProductionShell = () => {
   const { preferences } = useDesktopPreferences();
   const locale = preferences.locale === 'pt-BR' ? 'pt-BR' : 'en';
-  const [path, setPath] = useState(() => globalThis.location?.pathname || '/login');
+  const [path, setPath] = useState(() => globalThis.location.pathname || '/login');
   const [installerIdentity, setInstallerIdentity] = useState<ShellInstallerIdentityJson>();
   const [closeContext, setCloseContext] = useState<ShellCloseContextJson>();
   const bridgeRef = useRef<ShellBridge | undefined>(undefined);
@@ -100,19 +100,19 @@ const ProductionShell = () => {
   }, []);
 
   useEffect(() => {
-    const onPopState = () => setPath(globalThis.location.pathname);
+    const onPopState = () => { setPath(globalThis.location.pathname); };
     globalThis.addEventListener('popstate', onPopState);
-    return () => globalThis.removeEventListener('popstate', onPopState);
+    return () => { globalThis.removeEventListener('popstate', onPopState); };
   }, []);
 
   useEffect(() => {
     if (!Reflect.has(globalThis, '__TAURI_INTERNALS__')) return undefined;
     const bridge = createShellBridge({
       handlers: {
-        onCloseRequest: (event) => setCloseContext(event.payload.context),
-        onInstallerIdentity: (event) => setInstallerIdentity(event.payload.installer),
+        onCloseRequest: (event) => { setCloseContext(event.payload.context); },
+        onInstallerIdentity: (event) => { setInstallerIdentity(event.payload.installer); },
         onLocale: () => undefined,
-        onNavigation: (event) => navigate(routeForIntent(event.payload.intent)),
+        onNavigation: (event) => { navigate(routeForIntent(event.payload.intent)); },
         onNotificationPreference: () => undefined,
         onStartupState: () => undefined,
         onTrayPreference: () => undefined,
@@ -186,7 +186,7 @@ const ProductionShell = () => {
             <ul>
               {navigation.map(([href, label, icon]) => (
                 <li key={href}>
-                  <button aria-current={path === href ? 'page' : undefined} onClick={() => navigate(href)} type="button">
+                  <button aria-current={path === href ? 'page' : undefined} onClick={() => { navigate(href); }} type="button">
                     <ProductIcon name={icon} size={19} />
                     <span>{label}</span>
                   </button>
@@ -204,19 +204,19 @@ const ProductionShell = () => {
             {closeContext.kind === 'recovery-in-progress' ? (
               <>
                 <p>{locale === 'pt-BR' ? 'Uma recuperação está em andamento.' : 'Recovery is in progress.'}</p>
-                <LbButton onPress={() => resolveClose({ context: 'recovery-in-progress', decision: 'keep-running-in-tray' })} variant="secondary">
+                <LbButton onPress={() => { resolveClose({ context: 'recovery-in-progress', decision: 'keep-running-in-tray' }); }} variant="secondary">
                   {locale === 'pt-BR' ? 'Manter no tray' : 'Keep running in tray'}
                 </LbButton>
-                <LbButton onPress={() => resolveClose({ context: 'recovery-in-progress', decision: 'stay-here' })} variant="primary">
+                <LbButton onPress={() => { resolveClose({ context: 'recovery-in-progress', decision: 'stay-here' }); }} variant="primary">
                   {locale === 'pt-BR' ? 'Permanecer aqui' : 'Stay here'}
                 </LbButton>
               </>
             ) : (
               <>
-                <LbButton onPress={() => resolveClose({ context: 'ordinary', decision: 'keep-running-in-tray' })} variant="secondary">
+                <LbButton onPress={() => { resolveClose({ context: 'ordinary', decision: 'keep-running-in-tray' }); }} variant="secondary">
                   {locale === 'pt-BR' ? 'Manter no tray' : 'Keep running in tray'}
                 </LbButton>
-                <LbButton onPress={() => resolveClose({ context: 'ordinary', decision: 'close-interface' })} variant="destructive">
+                <LbButton onPress={() => { resolveClose({ context: 'ordinary', decision: 'close-interface' }); }} variant="destructive">
                   {locale === 'pt-BR' ? 'Encerrar interface' : 'Close interface'}
                 </LbButton>
               </>

@@ -2793,8 +2793,8 @@ const ProductionPremiumOperationsSurface = ({
 
   useEffect(() => {
     if (toast === null) return undefined;
-    const timer = globalThis.setTimeout(() => setToast(null), 4200);
-    return () => globalThis.clearTimeout(timer);
+    const timer = globalThis.setTimeout(() => { setToast(null); }, 4200);
+    return () => { globalThis.clearTimeout(timer); };
   }, [toast]);
 
   const notify = (message: string, tone: PremiumToastTone = 'success'): void => {

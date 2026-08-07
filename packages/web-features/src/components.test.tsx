@@ -485,8 +485,8 @@ describe('locale and navigation shell primitives', () => {
       expect(props['onClick']).toBeUndefined();
       expect(visibleText(switcher)).toBe(visibleLabel);
       expect(flagElement).toBeDefined();
-      expect(elementProps(flagElement as ReactElement)['aria-hidden']).toBe('true');
-      expect((flagElement as ReactElement).type).toBe('svg');
+      expect(elementProps(flagElement!)['aria-hidden']).toBe('true');
+      expect((flagElement!).type).toBe('svg');
     },
   );
 
@@ -526,7 +526,7 @@ describe('locale and navigation shell primitives', () => {
 
       expect(navigationAnchors.length).toBeGreaterThanOrEqual(navigation.length);
       expect(currentAnchors).toHaveLength(1);
-      expect(elementProps(currentAnchors[0] as ReactElement)).toMatchObject({
+      expect(elementProps(currentAnchors[0]!)).toMatchObject({
         'aria-current': 'page',
         'data-current': 'page',
         href: '/docs',
@@ -549,9 +549,9 @@ describe('locale and navigation shell primitives', () => {
     const current = anchors.filter((element) => elementProps(element)['aria-current'] === 'page');
 
     expect(current).toHaveLength(1);
-    expect(visibleText(current[0]!)).toContain('Documentation');
+    expect(visibleText(current[0])).toContain('Documentation');
     expect(
-      resolvedIntrinsicElements(current[0]!).some((element) =>
+      resolvedIntrinsicElements(current[0]).some((element) =>
         String(elementProps(element)['className']).includes('lb-web-navigation-icon'),
       ),
     ).toBe(true);

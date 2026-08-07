@@ -157,9 +157,9 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   }
   expect(new Set(Object.values(origins)).size).toBe(3);
 
-  const publicOrigin = origins.public as string;
-  const accountOrigin = origins.account as string;
-  const adminOrigin = origins.admin as string;
+  const publicOrigin = origins.public!;
+  const accountOrigin = origins.account!;
+  const adminOrigin = origins.admin!;
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
   const publicLanding = await request.get(`${publicOrigin}/pt-BR`);
   const publicMarkup = await publicLanding.text();

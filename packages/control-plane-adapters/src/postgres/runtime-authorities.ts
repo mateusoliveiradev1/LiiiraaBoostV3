@@ -66,13 +66,13 @@ export const migrateRuntimeAuthorities = async (
 const encode = (value: unknown): string =>
   JSON.stringify(value, (_key, item: unknown) => (typeof item === 'bigint' ? String(item) : item));
 
-const decode = <T>(value: unknown): T => {
+const decode = (value: unknown): unknown => {
   const serialized = typeof value === 'string' ? value : JSON.stringify(value);
   return JSON.parse(serialized, (key, item: unknown) =>
     key === 'version' && typeof item === 'string' && /^(?:0|[1-9][0-9]*)$/u.test(item)
       ? BigInt(item)
       : item,
-  ) as T;
+  ) as unknown;
 };
 
 const loadAggregate = async <T>(
@@ -87,7 +87,7 @@ const loadAggregate = async <T>(
       FOR UPDATE`,
     [authority, aggregateId],
   );
-  return result.rows[0] === undefined ? null : decode<T>(result.rows[0].state);
+  return result.rows[0] === undefined ? null : (decode(result.rows[0].state) as T);
 };
 
 const saveAggregate = (
@@ -121,7 +121,7 @@ const loadCommand = async <T>(
       WHERE authority = $1 AND command_id = $2`,
     [authority, commandId],
   );
-  return result.rows[0] === undefined ? null : decode<T>(result.rows[0].result);
+  return result.rows[0] === undefined ? null : (decode(result.rows[0].result) as T);
 };
 
 const saveCommand = (
@@ -226,7 +226,7 @@ const listAggregates = async <T>(
       FOR UPDATE`,
     [authority, accountId],
   );
-  return result.rows.map(({ state }) => decode<T>(state));
+  return result.rows.map(({ state }) => decode(state) as T);
 };
 
 const validUuid = (value: string): boolean =>
@@ -520,7 +520,7 @@ export const createPostgresDeviceBindingRepository = (
           );
           return result.rows[0] === undefined
             ? null
-            : decode<DeviceExceptionRecord>(result.rows[0].state);
+            : (decode(result.rows[0].state) as DeviceExceptionRecord);
         },
         insertBinding: async (record) => {
           await saveAggregate(
@@ -848,7 +848,7 @@ export const projectRuntimeAggregate = async <T>(
     `SELECT state FROM runtime_aggregates WHERE authority = $1 AND aggregate_id = $2`,
     [authority, aggregateId],
   );
-  return result.rows[0] === undefined ? null : decode<T>(result.rows[0].state);
+  return result.rows[0] === undefined ? null : (decode(result.rows[0].state) as T);
 };
 
 export const listRuntimeAuthority = async <T>(
@@ -863,7 +863,7 @@ export const listRuntimeAuthority = async <T>(
       ORDER BY updated_at DESC`,
     [authority, accountId],
   );
-  return result.rows.map(({ state }) => decode<T>(state));
+  return result.rows.map(({ state }) => decode(state) as T);
 };
 
 export const runtimeAuthorityJson = Object.freeze({ decode, encode });

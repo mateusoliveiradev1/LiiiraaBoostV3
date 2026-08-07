@@ -97,7 +97,9 @@ const base32 = (value: Uint8Array): string => {
   for (const byte of value) bits += byte.toString(2).padStart(8, '0');
   let encoded = '';
   for (let offset = 0; offset < bits.length; offset += 5) {
-    encoded += BASE32_ALPHABET[Number.parseInt(bits.slice(offset, offset + 5).padEnd(5, '0'), 2)];
+    encoded += BASE32_ALPHABET.charAt(
+      Number.parseInt(bits.slice(offset, offset + 5).padEnd(5, '0'), 2),
+    );
   }
   return encoded;
 };
@@ -149,7 +151,9 @@ const hotp = (secret: Buffer, counter: number): string => {
   const message = Buffer.alloc(8);
   message.writeBigUInt64BE(BigInt(counter));
   const signature = createHmac('sha1', secret).update(message).digest();
-  const offset = signature.at(-1)! & 0x0f;
+  const lastByte = signature.at(-1);
+  if (lastByte === undefined) throw new Error('TOTP_SIGNATURE_EMPTY');
+  const offset = lastByte & 0x0f;
   return String((signature.readUInt32BE(offset) & 0x7fff_ffff) % 1_000_000).padStart(6, '0');
 };
 

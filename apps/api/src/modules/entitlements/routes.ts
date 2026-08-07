@@ -118,7 +118,7 @@ const mutationContext = async (
   return { ok: true as const, actor, body, entitlementVersion, deviceVersion };
 };
 
-export const registerEntitlementRoutes = async (
+export const registerEntitlementRoutes = (
   app: FastifyInstance,
   dependencies: EntitlementRouteDependencies,
 ): Promise<void> => {
@@ -184,4 +184,6 @@ export const registerEntitlementRoutes = async (
     if (actor === null) return reply.code(401).send({ code: 'UNAUTHORIZED' });
     return reply.code(200).send(await dependencies.authority.signer.publicVerificationData());
   });
+
+  return Promise.resolve();
 };

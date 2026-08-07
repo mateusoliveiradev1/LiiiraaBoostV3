@@ -309,18 +309,10 @@ const NEW_PAID_WORK_ROUTES = new Set([
 ]);
 
 const premiumAuthorityStateFor = (state: ShellOperationalState): PremiumAuthorityState => {
-  switch (state) {
-    case 'expired-entitlement':
-      return 'expired';
-    case 'contradictory-evidence':
-      return 'contradictory';
-    case 'stale-evidence':
-      return 'stale';
-    case 'offline':
-      return 'stale';
-    default:
-      return 'verified';
-  }
+  if (state === 'expired-entitlement') return 'expired';
+  if (state === 'contradictory-evidence') return 'contradictory';
+  if (state === 'stale-evidence' || state === 'offline') return 'stale';
+  return 'verified';
 };
 
 const paidActionKindForRoute = (pathname: string): PaidActionKind | undefined => {
@@ -393,7 +385,7 @@ const PremiumBoundarySurface = ({
         role="status"
       >
         <p>{getPaidActionNoticeCopy(decision.notice, locale)}</p>
-        <LbButton onPress={() => navigate('/account/subscription')} variant="secondary">
+        <LbButton onPress={() => { navigate('/account/subscription'); }} variant="secondary">
           {locale === 'pt-BR' ? 'Verificar Premium online' : 'Verify Premium online'}
         </LbButton>
       </section>
@@ -411,7 +403,7 @@ const PremiumBoundarySurface = ({
           A sessão Premium em andamento continua até o encerramento seguro; nenhuma mudança ativa é
           interrompida.
         </p>
-        <LbButton onPress={() => navigate('/session/demo-session/restoring')} variant="secondary">
+        <LbButton onPress={() => { navigate('/session/demo-session/restoring'); }} variant="secondary">
           Encerrar sessão com segurança
         </LbButton>
       </section>
@@ -436,7 +428,7 @@ const PremiumBoundarySurface = ({
           className="premium-authority-boundary"
           data-lb-region
         >
-          <LbButton onPress={() => navigate('/session/demo-session/restoring')} variant="secondary">
+          <LbButton onPress={() => { navigate('/session/demo-session/restoring'); }} variant="secondary">
             Iniciar restauração segura
           </LbButton>
         </section>
@@ -472,7 +464,7 @@ const PremiumBoundarySurface = ({
             Ativar modo competitivo
           </LbButton>
         ) : null}
-        <LbButton onPress={() => navigate('/account/subscription')} variant="secondary">
+        <LbButton onPress={() => { navigate('/account/subscription'); }} variant="secondary">
           Verificar Premium online
         </LbButton>
       </section>

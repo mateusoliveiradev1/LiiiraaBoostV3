@@ -82,7 +82,7 @@ const isDocumentNavigation = (request: NextRequest): boolean => {
 };
 
 const denialLocale = (request: NextRequest): AdminLocale => {
-  const firstSegment = request.nextUrl.pathname.split('/').filter(Boolean)[0];
+  const firstSegment = request.nextUrl.pathname.split('/').find(Boolean);
 
   if (firstSegment === 'pt-BR' || firstSegment === 'en') {
     return firstSegment;

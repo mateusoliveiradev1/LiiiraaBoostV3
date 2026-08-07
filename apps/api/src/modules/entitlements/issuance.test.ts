@@ -296,7 +296,7 @@ describe('entitlement-issuance exact-byte authority', () => {
     const keyRing = manifest.keyRing.map((key): OfflineEntitlementSigningKey => ({
       keyId: key.keyId,
       publicKeyBytes: key.publicKeyBytes,
-      status: key.status as OfflineEntitlementSigningKey['status'],
+      status: key.status,
       notBeforeUnixSeconds: key.notBeforeUnixSeconds,
       notAfterUnixSeconds: key.notAfterUnixSeconds,
     }));

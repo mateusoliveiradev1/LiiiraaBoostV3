@@ -260,20 +260,20 @@ interface Phase3PublicationFileBinding {
 }
 
 interface Phase3PublicationEvidenceBindings {
-  accessibilityReport: Phase3PublicationFileBinding;
-  approval: Phase3PublicationFileBinding & {
+  accessibilityReport?: Phase3PublicationFileBinding;
+  approval?: Phase3PublicationFileBinding & {
     candidateCount: number;
     canonicalDigest: string;
     legacyDigest: string;
     reviewerSignal: string;
     routeCount: number;
   };
-  detectorResults: Record<string, string>;
-  launchReadiness: Phase3PublicationFileBinding & { candidateCount: number };
-  routeMatrix: Phase3PublicationFileBinding;
-  routeReachability: Phase3PublicationFileBinding;
-  visualManifest: Phase3PublicationFileBinding & { candidateCount: number };
-  visualReport: Phase3PublicationFileBinding;
+  detectorResults?: Record<string, string>;
+  launchReadiness?: Phase3PublicationFileBinding & { candidateCount: number };
+  routeMatrix?: Phase3PublicationFileBinding;
+  routeReachability?: Phase3PublicationFileBinding;
+  visualManifest?: Phase3PublicationFileBinding & { candidateCount: number };
+  visualReport?: Phase3PublicationFileBinding;
 }
 
 export interface Phase3VerificationInput {
@@ -473,7 +473,7 @@ const validateRouteReachability = (
   }
 
   const proof = input.artifacts.proofs.find(({ id }) => id === 'route-reachability');
-  const artifact = input.artifacts.routeReachability;
+  const artifact = input.artifacts.routeReachability as RouteReachabilityEvidence | undefined;
   if (
     proof !== undefined &&
     artifact !== undefined &&
@@ -544,7 +544,7 @@ const validatePublicationBindings = (
 ): void => {
   const bindings = input.artifacts.publication.evidenceBindings;
   const rootPath = '$.publication.evidenceBindings';
-  if (bindings === undefined || bindings === null || typeof bindings !== 'object') {
+  if (bindings === undefined) {
     diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', rootPath));
     return;
   }
@@ -553,7 +553,7 @@ const validatePublicationBindings = (
     const binding = bindings[identity as keyof typeof PUBLICATION_BINDING_PATHS] as
       Phase3PublicationFileBinding | undefined;
     const path = `${rootPath}.${identity}`;
-    if (binding === undefined || binding === null || typeof binding !== 'object') {
+    if (binding === undefined) {
       diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', path));
       continue;
     }
@@ -593,11 +593,7 @@ const validatePublicationBindings = (
   }
 
   const detectorResults = bindings.detectorResults;
-  if (
-    detectorResults === undefined ||
-    detectorResults === null ||
-    typeof detectorResults !== 'object'
-  ) {
+  if (detectorResults === undefined) {
     diagnostics.push(diagnostic('PUBLICATION_BINDING_MISSING', `${rootPath}.detectorResults`));
     return;
   }

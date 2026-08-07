@@ -32,7 +32,7 @@ import {
   getWebScenario,
   type WebScenarioId,
 } from '@liiiraa/web-preview';
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import accountEnJson from '../content/account.en.json';
 import accountPtBrJson from '../content/account.pt-BR.json';
@@ -533,7 +533,7 @@ export const SignInPreview = ({
   const [error, setError] = useState<string | null>(null);
   const [workflow, setWorkflow] = useState<PreviewWorkflowInput | null>(null);
 
-  const startEmail = (event: FormEvent<HTMLFormElement>) => {
+  const startEmail = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!validatePreviewEmail(email)) {
       setError(content.signIn.invalidEmail);
@@ -612,7 +612,7 @@ export const SignInPreview = ({
       >
         <LbButton
           onPress={() =>
-            startChoice('social', 'social-provider-preview', content.signIn.socialAction)
+            { startChoice('social', 'social-provider-preview', content.signIn.socialAction); }
           }
           variant="secondary"
         >
@@ -620,7 +620,7 @@ export const SignInPreview = ({
         </LbButton>
         <LbButton
           onPress={() =>
-            startChoice('passkey', 'windows-hello-preview', content.signIn.passkeyAction)
+            { startChoice('passkey', 'windows-hello-preview', content.signIn.passkeyAction); }
           }
           variant="secondary"
         >
@@ -659,7 +659,7 @@ export const SignUpPreview = ({
     );
   }
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: Partial<Record<SignUpField, string>> = {};
     if (displayName.trim().length < 2) nextErrors.name = content.signUp.invalidName;
@@ -851,7 +851,7 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
                 <button
                   aria-current={index === activeStep ? 'step' : undefined}
                   data-complete={index < activeStep || undefined}
-                  onClick={() => setActiveStep(index)}
+                  onClick={() => { setActiveStep(index); }}
                   type="button"
                 >
                   <span className="account-onboarding__step-index">
@@ -913,7 +913,7 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
             <div aria-label={content.onboarding.planTitle} className="account-onboarding__plans">
               <button
                 aria-pressed={plan === 'essential'}
-                onClick={() => setPlan('essential')}
+                onClick={() => { setPlan('essential'); }}
                 type="button"
               >
                 <span>
@@ -924,7 +924,7 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
               </button>
               <button
                 aria-pressed={plan === 'premium'}
-                onClick={() => setPlan('premium')}
+                onClick={() => { setPlan('premium'); }}
                 type="button"
               >
                 <span>
@@ -996,14 +996,14 @@ export const OnboardingPreview = ({ content }: Readonly<{ content: AccountConten
           <div className="account-onboarding__controls">
             <LbButton
               isDisabled={isFirst}
-              onPress={() => setActiveStep((current) => Math.max(0, current - 1))}
+              onPress={() => { setActiveStep((current) => Math.max(0, current - 1)); }}
               variant="quiet"
             >
               {content.onboarding.backAction}
             </LbButton>
             {isLast ? null : (
               <LbButton
-                onPress={() => setActiveStep((current) => Math.min(steps.length - 1, current + 1))}
+                onPress={() => { setActiveStep((current) => Math.min(steps.length - 1, current + 1)); }}
                 variant="primary"
               >
                 {content.onboarding.nextAction}
@@ -1247,7 +1247,7 @@ export const SecurityMethodList = ({
             }
             state="preview"
           />{' '}
-          <LbButton onPress={() => onReview(family)} variant="quiet">
+          <LbButton onPress={() => { onReview(family); }} variant="quiet">
             {content.security.review}
           </LbButton>
         </li>
@@ -1321,7 +1321,7 @@ const SecurityPreview = ({
       >
         <div className="account-security__primary" data-workspace-region="focal">
           <SecurityMethodList content={content} onReview={reviewSecurity} />
-          <SessionList content={content} onReview={() => reviewSecurity('session')} />
+          <SessionList content={content} onReview={() => { reviewSecurity('session'); }} />
         </div>
         <aside
           aria-labelledby="recovery-title"
@@ -1334,7 +1334,7 @@ const SecurityPreview = ({
             label={content.locale === 'pt-BR' ? 'Configuração disponível' : 'Setup available'}
             state="preview"
           />
-          <LbButton onPress={() => reviewSecurity('recovery')} variant="quiet">
+          <LbButton onPress={() => { reviewSecurity('recovery'); }} variant="quiet">
             {content.security.review}
           </LbButton>
         </aside>
@@ -1617,7 +1617,7 @@ export const DeviceBindingReview = ({
             <p>{content.device.cooldown}</p>
             <LbButton
               onPress={() =>
-                setWorkflow(
+                { setWorkflow(
                   actionInput({
                     family: 'device',
                     fields: { device: 'protected-device-01' },
@@ -1638,7 +1638,7 @@ export const DeviceBindingReview = ({
                       },
                     ],
                   }),
-                )
+                ); }
               }
               variant="destructive"
             >
@@ -1779,7 +1779,7 @@ export const ConsentLedger = ({
                 ? 'A revisão termina com um recibo sem alteração remota.'
                 : 'The review ends with a receipt confirming no remote change.'}
             </p>
-            <LbButton onPress={() => onSelect(consent.id)} variant="secondary">
+            <LbButton onPress={() => { onSelect(consent.id); }} variant="secondary">
               {consent.actionLabel}
             </LbButton>
           </div>
@@ -1788,6 +1788,15 @@ export const ConsentLedger = ({
     </div>
   </section>
 );
+
+const remoteChangeLabel = (remoteStateChanged: boolean, locale: WebLocale): string =>
+  remoteStateChanged
+    ? locale === 'pt-BR'
+      ? 'Alteração remota'
+      : 'Remote change'
+    : locale === 'pt-BR'
+      ? 'Nenhuma alteração remota'
+      : 'No remote change';
 
 export const DataRightsJourneys = ({
   content,
@@ -1841,18 +1850,15 @@ export const DataRightsJourneys = ({
               <div>
                 <dt>{content.locale === 'pt-BR' ? 'Resultado desta prévia' : 'Preview result'}</dt>
                 <dd>
-                  {request.noChangeReceipt.remoteStateChanged
-                    ? content.locale === 'pt-BR'
-                      ? 'Alteração remota'
-                      : 'Remote change'
-                    : content.locale === 'pt-BR'
-                      ? 'Nenhuma alteração remota'
-                      : 'No remote change'}
+                  {remoteChangeLabel(
+                    request.noChangeReceipt.remoteStateChanged,
+                    content.locale,
+                  )}
                 </dd>
               </div>
             </dl>
             <LbButton
-              onPress={() => onSelect(request.id)}
+              onPress={() => { onSelect(request.id); }}
               variant={request.id === 'deletion' ? 'destructive' : 'secondary'}
             >
               {request.actionLabel}
@@ -2019,7 +2025,7 @@ export const SupportRequestComposer = ({
           <div className="account-sensitive-action">
             <LbButton
               onPress={() =>
-                setWorkflow(
+                { setWorkflow(
                   actionInput({
                     consent: {
                       expiresAt: '2026-01-15T13:00:00.000Z',
@@ -2055,7 +2061,7 @@ export const SupportRequestComposer = ({
                     ],
                     safeDraftFields: ['subject'],
                   }),
-                )
+                ); }
               }
             >
               {content.support.action}

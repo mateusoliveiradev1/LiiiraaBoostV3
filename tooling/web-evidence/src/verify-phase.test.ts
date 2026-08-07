@@ -173,7 +173,7 @@ const completeInput = (): Phase3InputWithReachability => ({
       evidenceBindings: currentPublicationBindings(),
       officialArtifact: 'unavailable',
       publicDistributionApproved: false,
-    } as Phase3VerificationInput['artifacts']['publication'],
+    },
     requirements: [...PHASE_3_REQUIREMENTS],
     routeReachability: currentRouteReachability(),
     routes: [...PHASE_3_ROUTES],
@@ -470,7 +470,7 @@ describe('Phase 3 route reachability', () => {
     ['admin browser spec', 'tooling/web-evidence/tests/admin.spec.ts'],
   ] as const)('rejects stale %s binding', (_label, source) => {
     const input = cloneInput(completeInput());
-    const evidence = input.artifacts.routeReachability!;
+    const evidence = input.artifacts.routeReachability;
     input.artifacts.routeReachability =
       source === 'canonicalRouteSourceSha256'
         ? { ...evidence, canonicalRouteSourceSha256: '0'.repeat(64) }
@@ -498,12 +498,12 @@ describe('Phase 3 route reachability', () => {
     if (pathProof !== undefined) pathProof.file = 'quality/evidence/phase-03/web/routes.json';
     const identity = cloneInput(completeInput());
     identity.artifacts.routeReachability = {
-      ...identity.artifacts.routeReachability!,
+      ...identity.artifacts.routeReachability,
       owner: 'plan-03-34' as never,
     };
     const schema = cloneInput(completeInput());
     schema.artifacts.routeReachability = {
-      ...schema.artifacts.routeReachability!,
+      ...schema.artifacts.routeReachability,
       schemaVersion: 2 as never,
     };
 

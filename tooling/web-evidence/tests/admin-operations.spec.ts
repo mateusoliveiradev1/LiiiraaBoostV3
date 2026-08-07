@@ -179,7 +179,7 @@ test.describe('real production Admin authority', () => {
   test.describe.configure({ mode: 'serial' });
 
   const databaseUrl = process.env['STAGING_DATABASE_URL'];
-  if (databaseUrl === undefined || !databaseUrl.includes('liiiraa_staging')) {
+  if (!databaseUrl?.includes('liiiraa_staging')) {
     throw new Error('PRODUCTION_AUTHORITY_REQUIRES_STAGING_DATABASE_URL');
   }
   const database = createControlPlaneDatabase(databaseUrl);

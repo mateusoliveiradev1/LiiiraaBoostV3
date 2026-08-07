@@ -388,11 +388,11 @@ describe('public policies and operational trust', () => {
 
   it('fails closed for unknown locale, kind, route, practice, and consent status', () => {
     const source = JSON.parse(JSON.stringify(getPublicPolicies('en'))) as {
-      documents: Array<{
+      documents: {
         kind: string;
-        privacyDetails?: { practices: Array<{ id: string; status: string }> };
+        privacyDetails?: { practices: { id: string; status: string }[] };
         routeId: string;
-      }>;
+      }[];
       locale: string;
     };
     const mutate = (apply: (candidate: typeof source) => void) => {
@@ -438,13 +438,13 @@ describe('public policies and operational trust', () => {
   });
 
   it('fails closed for valid kinds paired to the wrong routes, section drift, and locale drift', () => {
-    type MutablePolicyCandidate = {
-      documents: Array<{
+    interface MutablePolicyCandidate {
+      documents: {
         routeId: WebRouteId;
-        sections: Array<{ id: string }>;
-      }>;
-      claims: Array<{ evidenceIds: string[] }>;
-    };
+        sections: { id: string }[];
+      }[];
+      claims: { evidenceIds: string[] }[];
+    }
     const clone = (locale: 'en' | 'pt-BR') =>
       JSON.parse(JSON.stringify(getPublicPolicies(locale))) as MutablePolicyCandidate;
     const english = clone('en');
@@ -631,13 +631,13 @@ describe('public policies and operational trust', () => {
       }
 
       const unreviewed = JSON.parse(JSON.stringify(policies)) as {
-        documents: Array<{ sections: Array<{ body: string }> }>;
+        documents: { sections: { body: string }[] }[];
       };
       unreviewed.documents[0]!.sections[0]!.body += ' An unreviewed current assertion exists.';
       expect(() => admitPolicies(unreviewed, locale)).toThrow(/claim-coverage/u);
 
       const futureAsCurrent = JSON.parse(JSON.stringify(policies)) as {
-        claims: Array<{ temporal: string }>;
+        claims: { temporal: string }[];
       };
       const futureClaim = futureAsCurrent.claims.find(({ temporal }) => temporal === 'future');
       expect(futureClaim).toBeDefined();
@@ -645,7 +645,7 @@ describe('public policies and operational trust', () => {
       expect(() => admitPolicies(futureAsCurrent, locale)).toThrow(/claim-temporal/u);
 
       const evidenceRemoved = JSON.parse(JSON.stringify(policies)) as {
-        claims: Array<{ evidenceIds: string[] }>;
+        claims: { evidenceIds: string[] }[];
       };
       evidenceRemoved.claims[0]!.evidenceIds = [];
       expect(() => admitPolicies(evidenceRemoved, locale)).toThrow(/claim-evidence/u);

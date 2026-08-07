@@ -125,7 +125,7 @@ describe('fail-closed release decision', () => {
     const result = verifyReleaseIntegrity(futureManifest, {
       ...futureArtifact,
       ...mutation,
-    } as InspectedReleaseArtifact);
+    });
 
     expect(result.ok).toBe(false);
     if (result.ok) return;

@@ -8,7 +8,6 @@ import {
   type DocumentIdentity,
   type DocumentationArticle,
   type DocumentationDomain,
-  type DocumentationPlatform,
   type DocumentationSearchFilters,
   type WebChannel,
   type WebLocale,
@@ -286,8 +285,8 @@ const admitDocumentationCatalog = (candidate: unknown): readonly DocumentationAr
     const english = localeParity.get('en');
     const portuguese = localeParity.get('pt-BR');
     if (
-      english === undefined ||
-      portuguese === undefined ||
+      english?.length === undefined ||
+      portuguese?.length === undefined ||
       english.join('\u0000') !== portuguese.join('\u0000')
     ) {
       throw new Error(`DOCUMENTATION_METADATA_INVALID:locale-parity:${key}`);
@@ -896,7 +895,7 @@ const searchFilters = (
     version,
     channel,
     ...(isOneOf(DOCUMENTATION_PLATFORMS, platform)
-      ? { platform: platform as DocumentationPlatform }
+      ? { platform: platform }
       : {}),
     ...(isOneOf(RISK_VALUES, risk) ? { risk } : {}),
     ...(isOneOf(DOCUMENTATION_DOMAINS, domain) ? { domain } : {}),

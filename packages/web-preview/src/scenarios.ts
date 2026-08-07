@@ -429,10 +429,7 @@ export const resolveWebPreviewScenario = (
     return getWebScenario(publishedPreviewScenarioId);
   }
 
-  if (
-    composition.kind === 'test' &&
-    Object.keys(composition).length === 2
-  ) {
+  if (Object.keys(composition).length === 2) {
     return getWebScenario(composition.scenarioId);
   }
   return fail('$.composition', 'published or explicit test composition');

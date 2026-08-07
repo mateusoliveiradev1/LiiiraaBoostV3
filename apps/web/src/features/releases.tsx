@@ -212,7 +212,7 @@ const admitReleaseMetadata = (candidate: unknown): ReleaseMetadata => {
     throw new Error('RELEASE_METADATA_INVALID:development-artifact-identity');
   }
 
-  return deepFreeze(candidate as unknown as ReleaseMetadata) as ReleaseMetadata;
+  return deepFreeze(candidate as unknown as ReleaseMetadata);
 };
 
 const admitReleaseContent = (candidate: unknown, locale: WebLocale): ReleaseContent => {
@@ -260,7 +260,9 @@ const admitReleaseContent = (candidate: unknown, locale: WebLocale): ReleaseCont
     throw new Error(`RELEASE_CONTENT_INVALID:${locale}:channels`);
   }
 
-  const stable = channels.find((channel) => isRecord(channel) && channel['id'] === 'stable');
+  const stable: unknown = channels.find(
+    (channel) => isRecord(channel) && channel['id'] === 'stable',
+  );
   if (
     !isRecord(stable) ||
     stable['default'] !== true ||
@@ -376,7 +378,7 @@ const admitReleaseContent = (candidate: unknown, locale: WebLocale): ReleaseCont
     throw new Error(`RELEASE_CONTENT_INVALID:${locale}:development-artifact-identity`);
   }
 
-  return deepFreeze(candidate as unknown as ReleaseContent) as ReleaseContent;
+  return deepFreeze(candidate as unknown as ReleaseContent);
 };
 
 const RELEASE_METADATA = admitReleaseMetadata(releaseMetadataJson);
@@ -475,7 +477,7 @@ const releasePathResolution = (pathname: string): ReleasePageResolution | undefi
     locale,
     routeId: match.value.route.id,
     version,
-  }) as ReleasePageResolution;
+  });
 };
 
 export const resolveReleasePage = (
@@ -509,10 +511,6 @@ export const getPublicDownloadPageMetadata = (locale: WebLocale) => {
   return { description: copy.description, title: copy.title };
 };
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unreachable release renderer variant: ${JSON.stringify(value)}`);
-};
-
 export const releaseBlockedReasonCopy = (
   reason: DownloadBlockedReason,
   content: ReleaseContent,
@@ -536,8 +534,6 @@ export const releaseBlockedReasonCopy = (
       return content.downloadGate.reasons['official-artifact-unavailable'];
     case 'record-invalid':
       return content.downloadGate.reasons['record-invalid'];
-    default:
-      return assertNever(reason);
   }
 };
 
@@ -927,8 +923,6 @@ const ReleaseHistory = ({ content }: Readonly<{ content: ReleaseContent }>) => (
       {RELEASE_METADATA.history.map((record) => {
         const copy =
           content.history.records[record.version as keyof typeof content.history.records];
-        if (copy === undefined)
-          throw new Error(`RELEASE_CONTENT_INVALID:history:${record.version}`);
         return (
           <li key={`${record.channel}:${record.version}`}>
             <h3>{copy.title}</h3>
@@ -1060,8 +1054,6 @@ export const DownloadDecisionView = ({
           <InstallationGuide content={content} />
         </section>
       );
-    default:
-      return assertNever(decision);
   }
 };
 
@@ -1150,8 +1142,6 @@ const RouteComposition = ({
           <InstallationGuide content={content} />
         </>
       );
-    default:
-      return assertNever(resolution.routeId);
   }
 };
 

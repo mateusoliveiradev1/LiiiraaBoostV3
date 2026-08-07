@@ -39,7 +39,7 @@ export const generateMetadata = async ({ params }: DownloadPageProps): Promise<M
 
 export default async function DownloadPage({ params }: DownloadPageProps) {
   const resolution = resolveDownloadPage(await params);
-  if (resolution === undefined || resolution.routeId !== 'releases-download') {
+  if (resolution?.routeId !== 'releases-download') {
     notFound();
   }
 

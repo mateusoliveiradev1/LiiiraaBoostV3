@@ -50,30 +50,21 @@ type AccountNavigationProps = Readonly<{
 
 const normalizePathname = (pathname: string): string => pathname.replace(/\/+$/u, '') || '/';
 
-const routeIdForNavigationIcon = (icon: ProductIconName): AccountRoute | undefined => {
-  switch (icon) {
-    case 'gauge':
-      return 'account-overview';
-    case 'profile':
-      return 'account-profile';
-    case 'shield':
-      return 'account-security';
-    case 'crown':
-      return 'account-subscription';
-    case 'receipt':
-      return 'account-invoices';
-    case 'device':
-      return 'account-device';
-    case 'download':
-      return 'account-downloads';
-    case 'lock':
-      return 'account-privacy';
-    case 'lifebuoy':
-      return 'account-support';
-    default:
-      return undefined;
-  }
-};
+const ACCOUNT_ROUTE_BY_ICON: Readonly<Partial<Record<ProductIconName, AccountRoute>>> =
+  Object.freeze({
+    crown: 'account-subscription',
+    device: 'account-device',
+    download: 'account-downloads',
+    gauge: 'account-overview',
+    lifebuoy: 'account-support',
+    lock: 'account-privacy',
+    profile: 'account-profile',
+    receipt: 'account-invoices',
+    shield: 'account-security',
+  });
+
+const routeIdForNavigationIcon = (icon: ProductIconName): AccountRoute | undefined =>
+  ACCOUNT_ROUTE_BY_ICON[icon];
 
 function ResponsibilityIcon({ name }: Readonly<{ name: ProductIconName }>) {
   return <ProductIcon className="account-nav__icon" name={name} size={18} />;

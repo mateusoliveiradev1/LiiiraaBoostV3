@@ -33,8 +33,8 @@ const harness = () => {
     Promise.resolve(
       records.filter(
         (record) =>
-          (input['allowedScopes'] as readonly string[]).includes(record.scope) &&
-          (input['ownerId'] === undefined || record.ownerId === input['ownerId']),
+          (input.allowedScopes).includes(record.scope) &&
+          (input.ownerId === undefined || record.ownerId === input.ownerId),
       ),
     ),
   );

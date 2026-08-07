@@ -467,7 +467,7 @@ const projectInternalAccountScenario = async (page: Page, scenario: Scenario): P
       throw new Error('W12_CAPTURE_PROJECTION_UNAVAILABLE');
     }
     currentProjection.replaceWith(captureProjection);
-    documentClone.querySelectorAll('script').forEach((script) => script.remove());
+    documentClone.querySelectorAll('script').forEach((script) => { script.remove(); });
     documentClone.dataset['evidenceProjection'] = 'W12';
     return `<!doctype html>${documentClone.outerHTML}`;
   }, projection.markup);

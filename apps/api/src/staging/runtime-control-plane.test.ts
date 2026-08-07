@@ -9,6 +9,7 @@ describe('real staging control-plane composition', () => {
     expect(REAL_STAGING_CAPABILITIES).toEqual([
       'invitation-signup',
       'password-session',
+      'totp-strong-auth',
       'desktop-pkce',
       'account',
       'commerce-stripe-test',

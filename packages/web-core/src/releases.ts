@@ -1,7 +1,7 @@
-import {
-  type ReleaseArtifactEvidenceJson,
-  type ReleaseRecordJson,
-  type ShellReleaseChannelJson,
+import type {
+  ReleaseArtifactEvidenceJson,
+  ReleaseRecordJson,
+  ShellReleaseChannelJson,
 } from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 
@@ -14,10 +14,17 @@ export type ExperimentalChannelAcknowledgement = Readonly<{
   updates: 'manual-only';
 }>;
 
+type ExperimentalChannelAcknowledgementInput = Readonly<{
+  risk: string;
+  audience: string;
+  support: string;
+  updates: string;
+}>;
+
 export type ReleaseChannelRequest = Readonly<{
   requested?: ShellReleaseChannelJson;
   betaOptIn?: boolean;
-  experimentalAcknowledgement?: ExperimentalChannelAcknowledgement;
+  experimentalAcknowledgement?: ExperimentalChannelAcknowledgementInput;
 }>;
 
 type ReleaseChannelPolicy = Readonly<{
@@ -207,12 +214,8 @@ const deepFreeze = <Value>(value: Value): Value => {
   return value;
 };
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unreachable release decision variant: ${String(value)}`);
-};
-
 const isExperimentalAcknowledgement = (
-  value: ExperimentalChannelAcknowledgement | undefined,
+  value: ExperimentalChannelAcknowledgementInput | undefined,
 ): value is ExperimentalChannelAcknowledgement =>
   value?.risk === 'high-change' &&
   value.audience === 'hardware-enthusiasts' &&
@@ -271,8 +274,6 @@ export const selectReleaseChannel = (
         requested,
         reason: 'development-channel-not-public',
       });
-    default:
-      return assertNever(requested);
   }
 };
 
@@ -691,8 +692,6 @@ export const decideDownload = (input: DownloadDecisionInput): DownloadDecision =
     case 'current':
     case 'supported':
       break;
-    default:
-      return assertNever(input.historyState);
   }
 
   if (channelSelection.status === 'blocked') {
@@ -734,9 +733,7 @@ export const decideDownload = (input: DownloadDecisionInput): DownloadDecision =
 
   if (
     !isOfficialOrigin(input.manifest.origin) ||
-    (input.manifest.channel !== 'stable' &&
-      input.manifest.channel !== 'beta' &&
-      input.manifest.channel !== 'experimental')
+    !['stable', 'beta', 'experimental'].includes(input.manifest.channel)
   ) {
     return blockedDecision('integrity-disagreement', input.historyState);
   }

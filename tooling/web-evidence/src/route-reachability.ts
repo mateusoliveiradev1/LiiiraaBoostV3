@@ -152,7 +152,7 @@ const canonicalTargets = Object.freeze(
 
 if (canonicalTargets.length !== 24) {
   throw new Error(
-    `Expected 24 canonical error-route targets, received ${canonicalTargets.length}.`,
+    `Expected 24 canonical error-route targets, received ${String(canonicalTargets.length)}.`,
   );
 }
 
@@ -298,7 +298,7 @@ const validateEvidence = (
   } else {
     const valid = input['observations'].filter((value, index) =>
       validateObservation(value, index, diagnostics),
-    ) as RouteReachabilityObservation[];
+    );
     const keys = valid.map(targetKey);
     if (new Set(keys).size !== keys.length) {
       diagnostics.push('OBSERVATION_DUPLICATE $.observations');

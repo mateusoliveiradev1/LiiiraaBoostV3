@@ -254,10 +254,8 @@ const verifyCandidate = (
     context.nowUnixSeconds < issuedAt ||
     context.nowUnixSeconds > expiresAt ||
     expiresAt - issuedAt !== OFFLINE_ENTITLEMENT_VALIDITY_SECONDS ||
-    claims.validitySeconds !== OFFLINE_ENTITLEMENT_VALIDITY_SECONDS ||
     issuedAt !== envelopeIssuedAt ||
     expiresAt !== envelopeExpiresAt ||
-    claims.schemaVersion !== '1.0' ||
     claims.accountId !== context.accountId ||
     claims.deviceBinding !== context.deviceBinding ||
     claims.deviceBinding !== envelope.deviceBinding ||

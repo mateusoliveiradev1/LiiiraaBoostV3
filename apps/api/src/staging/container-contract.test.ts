@@ -15,7 +15,7 @@ describe('daemon-free OCI artifact contract', () => {
     const repositoryRoot = resolve(import.meta.dirname, '../../../..');
     const result = spawnSync(
       process.execPath,
-      ['--experimental-strip-types', 'apps/api/src/staging/main.mjs'],
+      ['apps/api/src/staging/main.mjs'],
       {
         cwd: repositoryRoot,
         encoding: 'utf8',
@@ -39,8 +39,10 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('HEALTHCHECK');
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
     expect(dockerfile).toContain('apps/api/src/staging/main.mjs');
+    expect(dockerfile).toContain('CMD ["node", "apps/api/src/staging/main.mjs"]');
     expect(dockerfile).not.toContain('/workspace /workspace');
     expect(runtimeEntrypoint).toContain('startRealStagingServer');
+    expect(runtimeEntrypoint).toContain("import 'tsx/esm'");
     expect(runtimeEntrypoint).not.toContain('createServer');
     expect(runtimeEntrypoint).not.toContain('authorityConnected: false');
     expect(dockerfile).toContain('/workspace/node_modules node_modules');

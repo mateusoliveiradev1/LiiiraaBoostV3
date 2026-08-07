@@ -43,7 +43,9 @@ const auth = betterAuth({
   plugins: [twoFactorPlugin, passkeyPlugin, jwtPlugin, oauthProviderPlugin],
 });
 
-await new Promise((resolve) => setTimeout(resolve, 25));
+await new Promise((resolve) => {
+  setTimeout(resolve, 25);
+});
 
 const publicCodeExchange = auth.api.oauth2Token.options.body.safeParse({
   grant_type: 'authorization_code',

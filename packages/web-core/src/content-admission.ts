@@ -1,7 +1,7 @@
-import {
-  type ContentRecordJson,
-  type ScreenshotProvenanceJson,
-  type WebRouteRecordJson,
+import type {
+  ContentRecordJson,
+  ScreenshotProvenanceJson,
+  WebRouteRecordJson,
 } from '@liiiraa/contracts-ts/generated';
 import { validateWebDocument } from '@liiiraa/contracts-ts/web-validation';
 

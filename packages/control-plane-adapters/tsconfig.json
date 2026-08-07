@@ -7,9 +7,12 @@
   },
   "include": [
     "src/index.ts",
+    "src/runtime-control-plane.ts",
     "src/runtime-identity.ts",
+    "src/identity/better-auth-spike.ts",
     "src/postgres/real-identity.ts",
     "src/postgres/real-identity.test.ts",
+    "src/postgres/staging-migration.ts",
     "src/storage/audit-anchor.ts",
     "src/storage/consent-stream.ts"
   ]

@@ -17,9 +17,7 @@ const START_AUTHORITY_MATRIX = [
   ['tampered', false, 'online-verification-required', 'contradictory', true],
   ['clock-rollback', false, 'online-verification-required', 'contradictory', true],
   ['contradictory', false, 'online-verification-required', 'contradictory', true],
-] as const satisfies ReadonlyArray<
-  readonly [PremiumAuthorityState, boolean, string, string, boolean]
->;
+] as const satisfies readonly (readonly [PremiumAuthorityState, boolean, string, string, boolean])[];
 
 const NON_START_AUTHORITY_STATES = START_AUTHORITY_MATRIX.map(([authority]) => authority);
 

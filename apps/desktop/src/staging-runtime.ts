@@ -203,15 +203,17 @@ export const selectRollbackManifest = (
       admitInternalChannelManifest(candidate).ok,
   );
   if (matching.length !== 1) return undefined;
-  const identity = internalManifestIdentity(matching[0]!);
+  const selected = matching[0];
+  if (selected === undefined) return undefined;
+  const identity = internalManifestIdentity(selected);
   return candidates.some(
     (candidate) =>
-      candidate !== matching[0] &&
+      candidate !== selected &&
       candidate.buildId === current.rollbackBuildId &&
       internalManifestIdentity(candidate) !== identity,
   )
     ? undefined
-    : matching[0];
+    : selected;
 };
 
 export const admitStagingRuntime = (

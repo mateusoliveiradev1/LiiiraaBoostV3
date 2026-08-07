@@ -109,7 +109,7 @@ type AdminQueueRecord = Readonly<{
   summary: LocalizedQueueText;
 }>;
 
-const ADMIN_QUEUE_RECORDS = Object.freeze([
+const ADMIN_QUEUE_RECORDS: readonly AdminQueueRecord[] = Object.freeze([
   {
     ageMinutes: 14,
     auditEventId: 'admin-event-001',
@@ -305,12 +305,13 @@ const priorityRank: Readonly<Record<AdminQueuePriority, number>> = Object.freeze
   low: 3,
 });
 
-const localizeAge = (locale: WebLocale, minutes: number): string =>
-  locale === 'pt-BR' ? `${minutes} min` : `${minutes} min`;
+const localizeAge = (_locale: WebLocale, minutes: number): string => `${String(minutes)} min`;
 
 const localizeSla = (locale: WebLocale, minutes: number | null): string => {
   if (minutes === null) return locale === 'pt-BR' ? 'Sem prazo' : 'No deadline';
-  return locale === 'pt-BR' ? `${minutes} min restantes` : `${minutes} min left`;
+  return locale === 'pt-BR'
+    ? `${String(minutes)} min restantes`
+    : `${String(minutes)} min left`;
 };
 
 export const projectAdminQueue = ({
@@ -324,7 +325,7 @@ export const projectAdminQueue = ({
 }: ProjectAdminQueueInput): readonly AdminQueueItem[] => {
   // Role admission is deliberately the first operation. Search and filters never see denied rows.
   const roleAdmitted = ADMIN_QUEUE_RECORDS.filter(({ permittedRoles }) =>
-    (permittedRoles as readonly AdminPreviewRole[]).includes(role),
+    permittedRoles.includes(role),
   );
   const admittedQuery = admitQueueQuery(query);
   const normalizedQuery = admittedQuery.toLocaleLowerCase(locale);

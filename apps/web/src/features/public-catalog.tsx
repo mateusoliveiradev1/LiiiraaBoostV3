@@ -360,7 +360,7 @@ const splitPolicySentences = (value: string): readonly string[] =>
 const collectPolicyNarratives = (
   policies: Pick<PublicPolicies, 'documents' | 'disclosure'>,
 ): readonly Readonly<{ id: string; location: string; statement: string }>[] => {
-  const narratives: Array<readonly [string, string]> = [];
+  const narratives: (readonly [string, string])[] = [];
   for (const document of policies.documents) {
     narratives.push([`document:${document.kind}:summary`, document.summary]);
     for (const section of document.sections) {
@@ -551,7 +551,7 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
         value['routeId'] !== documentContract.routeId ? 'kind-route' : 'section-contract';
       throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:${reason}:${String(value['kind'])}`);
     }
-    const latestHistory = value['history'].at(-1);
+    const latestHistory: unknown = value['history'].at(-1);
     if (
       !hasUniqueNonEmptyStrings(sectionIds) ||
       !isRecord(latestHistory) ||
@@ -651,12 +651,14 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
   const expectedClaims = collectPolicyNarratives(admitted);
   if (
     admitted.claims.length !== expectedClaims.length ||
-    !admitted.claims.every(
-      (claim, index) =>
-        claim.id === expectedClaims[index]?.id &&
-        claim.location === expectedClaims[index]?.location &&
-        claim.statement === expectedClaims[index]?.statement,
-    )
+    !admitted.claims.every((claim, index) => {
+      const expected = expectedClaims[index];
+      return (
+        claim.id === expected?.id &&
+        claim.location === expected.location &&
+        claim.statement === expected.statement
+      );
+    })
   ) {
     throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-coverage`);
   }
@@ -672,7 +674,6 @@ export const admitPolicies = (candidate: unknown, locale: WebLocale): PublicPoli
       throw new Error(`PUBLIC_POLICIES_INVALID:${locale}:claim-evidence:${claim.id}`);
     }
     if (
-      (claim.temporal !== 'current' && claim.temporal !== 'future') ||
       (claim.temporal === 'future') !== hasFutureGate ||
       (claim.temporal === 'current' && FUTURE_CLAIM_PATTERN.test(claim.statement))
     ) {

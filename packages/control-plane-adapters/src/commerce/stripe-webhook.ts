@@ -94,7 +94,9 @@ export const verifyRawWebhook = async (input: {
     return verificationFailure('SIGNATURE_REJECTED');
   }
 
-  const eventType = STRIPE_EVENT_TYPES[stripeEvent.type as keyof typeof STRIPE_EVENT_TYPES];
+  const eventType = (
+    STRIPE_EVENT_TYPES as Partial<Record<string, ProviderEventTypeJson>>
+  )[stripeEvent.type];
   if (eventType === undefined) return verificationFailure('UNSUPPORTED_EVENT');
 
   const rawBody = Uint8Array.from(input.rawBody);

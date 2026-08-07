@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { Buffer } from 'node:buffer';
 import { webcrypto } from 'node:crypto';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { request as httpRequest } from 'node:http';
@@ -110,7 +111,9 @@ const waitForHttp = async (url, options = {}, attempts = 180) => {
     } catch {
       // The process may still be booting or applying migrations.
     }
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 500);
+    });
   }
   throw new Error(`REAL_ADMIN_HARNESS_TIMEOUT:${url}`);
 };
@@ -126,7 +129,9 @@ const waitForHttps = async (url, attempts = 180) => {
       request.end();
     });
     if (ready) return;
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 500);
+    });
   }
   throw new Error(`REAL_ADMIN_HARNESS_TIMEOUT:${url}`);
 };
@@ -181,7 +186,11 @@ const createTlsProxy = ({ certificate, key, port, targetPort }) => {
 const stop = async () => {
   if (stopping) return;
   stopping = true;
-  for (const server of servers) await new Promise((resolve) => server.close(resolve));
+  for (const server of servers) {
+    await new Promise((resolve) => {
+      server.close(resolve);
+    });
+  }
   await Promise.all(children.map(terminateProcessTree));
   await rm(temporaryDirectory, { force: true, recursive: true });
 };
@@ -278,7 +287,11 @@ await waitForHttps(`${origins.admin}/pt-BR/admin`);
 process.stdout.write('REAL_ADMIN_HARNESS_READY\n');
 
 await Promise.race([
-  new Promise((resolve) => api.once('exit', resolve)),
-  new Promise((resolve) => admin.once('exit', resolve)),
+  new Promise((resolve) => {
+    api.once('exit', resolve);
+  }),
+  new Promise((resolve) => {
+    admin.once('exit', resolve);
+  }),
 ]);
 await stop();

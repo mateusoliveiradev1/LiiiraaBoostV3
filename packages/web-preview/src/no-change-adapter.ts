@@ -114,10 +114,7 @@ const isFutureAuthorityCommand = (
   const validation = validateWebDocument(value);
   return (
     validation.ok &&
-    typeof validation.value === 'object' &&
-    validation.value !== null &&
     'phase' in validation.value &&
-    validation.value.phase === 'Phase 4' &&
     'surface' in validation.value &&
     'command' in validation.value &&
     'description' in validation.value

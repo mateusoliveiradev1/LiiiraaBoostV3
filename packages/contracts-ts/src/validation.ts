@@ -60,10 +60,10 @@ export type RendererToHostShellCommandValidationResult =
 export type WebDocumentValidationError = ContractValidationError;
 export type WebDocumentValidationResult = ContractValidationResult<WebDocument>;
 
-const diagnosticValidator = diagnosticValueValidator as ValidateFunction<DiagnosticValueJson>;
+const diagnosticValidator = diagnosticValueValidator;
 const shellMessageValidators = {
-  hostToRenderer: hostToRendererValidator as ValidateFunction<HostToRendererShellEventJson>,
-  rendererToHost: rendererToHostValidator as ValidateFunction<RendererToHostShellCommandJson>,
+  hostToRenderer: hostToRendererValidator,
+  rendererToHost: rendererToHostValidator,
 };
 let cachedWebDocumentValidator: ValidateFunction<WebDocument> | undefined;
 
@@ -198,7 +198,7 @@ const unsafeWebDocumentUriPath = (document: WebDocument): string | null => {
   if ('evidence' in document) {
     const unsafeIndex = document.evidence.findIndex((evidence) => !isSafeWebUri(evidence.source));
     if (unsafeIndex !== -1) {
-      return `$/evidence/${unsafeIndex}/source`;
+      return `$/evidence/${String(unsafeIndex)}/source`;
     }
   }
 

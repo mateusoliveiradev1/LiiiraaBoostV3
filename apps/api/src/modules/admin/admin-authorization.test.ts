@@ -111,7 +111,7 @@ const createRoleRepository = () => {
           return Promise.resolve();
         },
         appendAudit: (event: Readonly<Record<string, unknown>>) => {
-          (audits as Readonly<Record<string, unknown>>[]).push(event);
+          (audits).push(event);
           return Promise.resolve();
         },
         enqueueOutbox: () => Promise.resolve(),
@@ -138,11 +138,11 @@ const createCommandRepository = () => {
         },
         apply: () => Promise.resolve({ version: 2n, state: 'revoked' }),
         appendAudit: (event: Readonly<Record<string, unknown>>) => {
-          (audits as Readonly<Record<string, unknown>>[]).push(event);
+          (audits).push(event);
           return Promise.resolve('audit-admin-001');
         },
         enqueueOutbox: (event: Readonly<Record<string, unknown>>) => {
-          (outbox as Readonly<Record<string, unknown>>[]).push(event);
+          (outbox).push(event);
           return Promise.resolve();
         },
         rememberCommandResult: () => Promise.resolve(),

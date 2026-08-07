@@ -8,10 +8,6 @@ export const CLIENT_WEB_LOCALES = Object.freeze([
 export type ClientRecoveryRouteId =
   'docs-index' | 'public-compatibility' | 'public-home' | 'public-status' | 'public-support';
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unreachable client recovery route: ${String(value)}`);
-};
-
 export const clientPublicBoundaryHref = (
   routeId: ClientRecoveryRouteId,
   locale: WebLocale,
@@ -27,8 +23,6 @@ export const clientPublicBoundaryHref = (
       return `/${locale}/status`;
     case 'public-support':
       return `/${locale}/support`;
-    default:
-      return assertNever(routeId);
   }
 };
 
