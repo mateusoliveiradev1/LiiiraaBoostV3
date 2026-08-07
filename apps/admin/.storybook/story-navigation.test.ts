@@ -13,12 +13,16 @@ describe('resolveAdminStoryNavigation', () => {
       ),
     ).toEqual({
       href: '/pt-BR/admin/people/access-reviews?view=pending#review-42',
-      locale: 'pt-BR',
     });
 
     expect(resolveAdminStoryNavigation('/en/admin/overview', storybookOrigin)).toEqual({
       href: '/en/admin/overview',
-      locale: 'en',
+    });
+  });
+
+  it('captures query-only view changes without dropping the active story identity', () => {
+    expect(resolveAdminStoryNavigation('?view=accepted', storybookOrigin)).toEqual({
+      href: '?view=accepted',
     });
   });
 
