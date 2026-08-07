@@ -464,7 +464,7 @@ describe('account shell', () => {
     expect(layoutSource).toContain('href="#account-main"');
     expect(layoutSource).not.toContain('account-preview-rail');
     expect(layoutSource).not.toContain('data-authority="disconnected"');
-    expect(layoutSource).toContain('accountWebComposition');
+    expect(layoutSource).toContain('ACCOUNT_WEB_COMPOSITION');
     expect(layoutSource).toContain('ProductLockup');
     expect(layoutSource).toContain('<AccountNavigation');
     expect(layoutSource).not.toContain('account-header__origin');
@@ -607,7 +607,8 @@ describe('account errors', () => {
     expect(pageSource).toContain("kind: 'workflow'");
     expect(pageSource).toContain("kind: 'error'");
     expect(pageSource).toContain("kind: 'unknown'");
-    expect(pageSource).toContain('isAccountPreviewRoute');
+    expect(pageSource).toContain('isAccountRoute');
+    expect(pageSource).not.toContain('account-preview-model');
     expect(pageSource).toContain('isAccountErrorRoute');
     expect(pageSource).toContain('accountFailureKindForRoute');
     expect(pageSource).toContain('createAccountFailureModel');

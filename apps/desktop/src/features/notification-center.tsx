@@ -20,9 +20,6 @@ const copyFor = (locale: ShellLocale) =>
         empty: 'Nenhuma notificação nova.',
         eyebrow: 'Central do sistema',
         footer: 'Ver todas as atividades',
-        itemDetail: 'O cenário simulado gerou um comprovante de recuperação pronto para revisão.',
-        itemMeta: 'Agora · Recuperação',
-        itemTitle: 'Recuperação pronta para revisão',
         title: 'Notificações',
       }
     : {
@@ -33,11 +30,26 @@ const copyFor = (locale: ShellLocale) =>
         empty: 'No new notifications.',
         eyebrow: 'System center',
         footer: 'View all activity',
-        itemDetail: 'The simulated scenario generated a recovery receipt ready for review.',
-        itemMeta: 'Now · Recovery',
-        itemTitle: 'Recovery ready for review',
         title: 'Notifications',
       };
+
+const stateLabelFor = (item: ActivityItem, locale: ShellLocale): string => {
+  const labels: Readonly<Record<ActivityItem['state'], readonly [string, string]>> = {
+    'contradictory-evidence': ['Evidência contraditória', 'Contradictory evidence'],
+    empty: ['Sem atividade', 'No activity'],
+    'expired-entitlement': ['Acesso expirado', 'Expired access'],
+    fixture: ['Dados de teste', 'Test data'],
+    loading: ['Atualizando', 'Updating'],
+    offline: ['Offline', 'Offline'],
+    'partial-failure': ['Falha parcial', 'Partial failure'],
+    permission: ['Permissão necessária', 'Permission required'],
+    recovery: ['Recuperação', 'Recovery'],
+    'restart-pending': ['Reinicialização pendente', 'Restart pending'],
+    'stale-evidence': ['Dados desatualizados', 'Stale data'],
+    unsupported: ['Indisponível', 'Unavailable'],
+  };
+  return labels[item.state][locale === 'pt-BR' ? 0 : 1];
+};
 
 export const NotificationCenter = ({
   items,
@@ -117,12 +129,14 @@ export const NotificationCenter = ({
                 key={item.id}
               >
                 <span className="desktop-notification-item-icon">
-                  <ProductIcon name="recovery" size={19} />
+                  <ProductIcon name="activity" size={19} />
                 </span>
                 <div className="desktop-notification-item-copy">
-                  <span className="desktop-notification-item-meta">{copy.itemMeta}</span>
-                  <h3>{copy.itemTitle}</h3>
-                  <p>{copy.itemDetail}</p>
+                  <span className="desktop-notification-item-meta">
+                    {stateLabelFor(item, locale)}
+                  </span>
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
                   <LbButton onPress={openActivity} variant="secondary">
                     {copy.action}
                   </LbButton>

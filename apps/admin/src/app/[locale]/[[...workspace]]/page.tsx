@@ -6,27 +6,23 @@ import {
   type WebRouteId,
 } from '@liiiraa/web-core';
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import { createAdminFailureModel, type AdminFailureKind } from '../../../admin-errors';
 import { AdminFailureView } from '../../../admin-failure-view';
-import { adminRoleFromHeader } from '../../../admin-shell';
 import {
   adminFailureKindForRoute,
-  adminRoleCanAccess,
-  getAdminPreviewMetadata,
+  getAdminRouteMetadata,
+  isAdminAuthorityRoute,
   isAdminErrorRoute,
-  isAdminPreviewRoute,
   type AdminErrorRoute,
-  type AdminPreviewRoute,
-} from '../../../admin-preview-model';
+} from '../../../admin-production-routes';
+import type { AdminAuthorityRoute } from '../../../admin-runtime';
 import { AdminAuthorityPage } from '../../../features/admin-authority';
 import { AdminWorkspaceRegistry } from '../../../features/admin-workspace-registry';
 import type { AdminCanonicalRouteId } from '../../../features/admin-workspace-registry-model';
-import { resolveAdminServerRuntimeConfig } from '../../../admin-runtime-server';
 
 type AdminWorkspacePageProps = Readonly<{
   params: Promise<{
@@ -47,7 +43,7 @@ type AdminWorkspaceResolution =
   | Readonly<{
       kind: 'workflow';
       parameters: Readonly<Record<string, string>>;
-      routeId: AdminCanonicalRouteId | AdminPreviewRoute;
+      routeId: AdminCanonicalRouteId | AdminAuthorityRoute;
     }>;
 
 const canonicalAdminRoutes = new Set<WebRouteId>(ADMIN_CANONICAL_ROUTE_IDS);
@@ -70,7 +66,7 @@ const resolveAdminWorkspace = (
     if (failureKind === undefined) return null;
     return Object.freeze({ failureKind, kind: 'error', routeId });
   }
-  return isAdminPreviewRoute(routeId) || isCanonicalAdminRoute(routeId)
+  return isAdminAuthorityRoute(routeId) || isCanonicalAdminRoute(routeId)
     ? Object.freeze({ kind: 'workflow', parameters: match.value.parameters, routeId })
     : null;
 };
@@ -130,7 +126,7 @@ export async function generateMetadata({ params }: AdminWorkspacePageProps): Pro
         })()
       : isCanonicalAdminRoute(resolution.routeId)
         ? canonicalWorkspaceMetadata(locale, resolution.routeId)
-        : getAdminPreviewMetadata(locale, resolution.routeId);
+        : getAdminRouteMetadata(locale, resolution.routeId);
   return {
     description: metadata.summary,
     robots: { follow: false, index: false, nocache: true },
@@ -161,36 +157,6 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
         title={model.copy.title}
       />
     );
-  }
-
-  const requestHeaders = await headers();
-  const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
-  const runtime = resolveAdminServerRuntimeConfig();
-  if (
-    runtime.kind === 'preview' &&
-    (!isAdminPreviewRoute(resolution.routeId) || !adminRoleCanAccess(role, resolution.routeId))
-  ) {
-    const model = createAdminFailureModel('403', locale);
-    const roleHref =
-      role === 'support' ? model.destinations.role : `${model.destinations.role}?role=${role}`;
-    return (
-      <AdminFailureView
-        action={<a href={roleHref}>{model.copy.action}</a>}
-        affected={model.copy.affected}
-        correlationId={model.correlationId}
-        detail={model.copy.detail}
-        kind={model.kind}
-        locale={model.locale}
-        safeState={model.copy.safeState}
-        title={model.copy.title}
-      />
-    );
-  }
-
-  if (runtime.kind === 'preview') {
-    const { AdminPreviewPage } = await import('../../../features/admin-preview');
-    if (!isAdminPreviewRoute(resolution.routeId)) notFound();
-    return <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />;
   }
 
   return isCanonicalAdminRoute(resolution.routeId) ? (

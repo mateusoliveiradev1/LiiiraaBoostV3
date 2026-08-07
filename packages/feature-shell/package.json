@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./preferences": {
+      "types": "./src/model/preferences.ts",
+      "default": "./src/model/preferences.ts"
     }
   },
   "scripts": {

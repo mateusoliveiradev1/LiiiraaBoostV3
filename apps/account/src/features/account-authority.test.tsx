@@ -8,10 +8,8 @@ import {
   type AccountAuthorityTransport,
 } from '../account-authority';
 import {
-  accountPreviewRuntimeAllowed,
   advanceAccountMutationPhase,
   mapAccountAuthorityProjection,
-  resolveAccountRuntimeConfig,
 } from '../account-runtime';
 
 const projection = (
@@ -333,24 +331,16 @@ describe('account runtime composition', () => {
     });
   });
 
-  it('defaults deployable composition to production and permits fixture mode only locally', () => {
-    expect(resolveAccountRuntimeConfig({ authorityBaseUrl: 'https://api.liiiraa.test' })).toEqual({
-      authorityBaseUrl: 'https://api.liiiraa.test',
-      kind: 'production',
-    });
-    expect(
-      resolveAccountRuntimeConfig({
-        authorityBaseUrl: 'https://api.liiiraa.test',
-        previewAllowed: false,
-        previewEnabled: true,
-      }),
-    ).toEqual({ authorityBaseUrl: 'https://api.liiiraa.test', kind: 'production' });
-    expect(
-      resolveAccountRuntimeConfig({ previewAllowed: true, previewEnabled: true }),
-    ).toEqual({ kind: 'preview' });
-    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'production' })).toBe(false);
-    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'development', vercel: '1' })).toBe(false);
-    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'development' })).toBe(true);
+  it('exposes only production account authority from the deployable runtime', () => {
+    const runtimeSource = readFileSync(new URL('../account-runtime.ts', import.meta.url), 'utf8');
+    const compositionSource = readFileSync(
+      new URL('../account-production-composition.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(runtimeSource).not.toMatch(/preview|fixture|mock/iu);
+    expect(compositionSource).toContain("runtimeClass: 'server-authority'");
+    expect(compositionSource).toContain('authorityConnected: true');
   });
 
   it('keeps preview authority isolated from production modules', () => {

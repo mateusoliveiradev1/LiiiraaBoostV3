@@ -9,17 +9,15 @@ import { createAccountFailureModel, type AccountFailureKind } from '../../../acc
 import { AccountFailureView } from '../../../account-failure-view';
 import {
   accountFailureKindForRoute,
-  getAccountPreviewMetadata,
+  getAccountRouteMetadata,
   isAccountErrorRoute,
-  isAccountPreviewRoute,
+  isAccountRoute,
   type AccountErrorRoute,
-  type AccountPreviewRoute,
-} from '../../../account-preview-model';
-import { AccountPreviewPage } from '../../../features/account-preview';
+  type AccountRoute,
+} from '../../../account-production-model';
 import { AccountAuthPage, type AccountAuthRoute } from '../../../features/account-auth';
 import { AccountAuthorityPage } from '../../../features/account-authority';
 import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from '../../../account-runtime';
-import { resolveAccountServerRuntimeConfig } from '../../../account-runtime-server';
 
 type AccountResponsibilityPageProps = Readonly<{
   params: Promise<{
@@ -28,14 +26,14 @@ type AccountResponsibilityPageProps = Readonly<{
   }>;
 }>;
 
-const isAccountAuthRoute = (routeId: AccountPreviewRoute): routeId is AccountAuthRoute =>
+const isAccountAuthRoute = (routeId: AccountRoute): routeId is AccountAuthRoute =>
   routeId === 'account-sign-in' || routeId === 'account-sign-up';
 
 const pathnameFor = (locale: WebLocale, responsibility: readonly string[] | undefined): string =>
   `/${locale}/${responsibility?.join('/') ?? ''}`.replace(/\/$/u, '');
 
 type AccountRouteResolution =
-  | Readonly<{ kind: 'workflow'; routeId: AccountPreviewRoute }>
+  | Readonly<{ kind: 'workflow'; routeId: AccountRoute }>
   | Readonly<{
       failureKind: AccountFailureKind;
       kind: 'error';
@@ -52,7 +50,7 @@ const resolveAccountRoute = (
     securityBoundary: 'account-origin',
   });
   if (!match.ok) return { kind: 'unknown' };
-  if (isAccountPreviewRoute(match.value.route.id)) {
+  if (isAccountRoute(match.value.route.id)) {
     return { kind: 'workflow', routeId: match.value.route.id };
   }
   if (isAccountErrorRoute(match.value.route.id)) {
@@ -79,7 +77,7 @@ export async function generateMetadata({
     };
   }
   if (resolution.kind === 'workflow') {
-    const metadata = getAccountPreviewMetadata(locale, resolution.routeId);
+    const metadata = getAccountRouteMetadata(locale, resolution.routeId);
     return {
       description: metadata.summary,
       title: `${metadata.title} — Liiiraa Boost`,
@@ -127,10 +125,6 @@ export default async function AccountResponsibilityPage({
         title={model.copy.title}
       />
     );
-  }
-  const runtime = resolveAccountServerRuntimeConfig();
-  if (runtime.kind === 'preview') {
-    return <AccountPreviewPage locale={locale} routeId={resolution.routeId} />;
   }
   if (isAccountAuthRoute(resolution.routeId)) {
     return (

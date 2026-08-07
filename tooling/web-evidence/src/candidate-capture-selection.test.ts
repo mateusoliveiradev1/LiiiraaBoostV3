@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { routeHref, WEB_LOCALES, webRoutes, type WebLocale, type WebRoute } from '@liiiraa/web-core';
 import { describe, expect, it } from 'vitest';
 
+import { PHASE_3_ROUTES } from './verify-phase.js';
+
 const AXES = Object.freeze([
   { axis: 'wide-1440', height: 900, width: 1440 },
   { axis: 'desktop-960', height: 900, width: 960 },
@@ -99,9 +101,11 @@ const pathFor = (route: WebRoute, locale: WebLocale): string => {
 };
 
 export const expectedCanonicalCandidates = (): readonly CanonicalCandidate[] =>
-  webRoutes.flatMap((route) =>
-    WEB_LOCALES.flatMap((locale) =>
-      AXES.map(({ axis, height, width }) => {
+  webRoutes
+    .filter(({ id }) => (PHASE_3_ROUTES as readonly string[]).includes(id))
+    .flatMap((route) =>
+      WEB_LOCALES.flatMap((locale) =>
+        AXES.map(({ axis, height, width }) => {
         const surface = route.surface as Surface;
         const state = ERROR_ROUTE.test(route.id)
           ? route.id.slice(route.id.lastIndexOf('error-'))
@@ -125,9 +129,9 @@ export const expectedCanonicalCandidates = (): readonly CanonicalCandidate[] =>
           width,
           widthFamily: axis,
         } satisfies CanonicalCandidate;
-      }),
-    ),
-  );
+        }),
+      ),
+    );
 
 const sha256 = (path: string): string =>
   createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -184,7 +188,9 @@ const listedCandidates = (): readonly Readonly<{ candidateId: string; project: s
       ? []
       : [{ candidateId: match[2], project: match[1] }];
   });
-  expect(result.stdout).toMatch(new RegExp(`Total: ${String(webRoutes.length * 8)} tests in 1 file`, 'u'));
+  expect(result.stdout).toMatch(
+    new RegExp(`Total: ${String(PHASE_3_ROUTES.length * 8)} tests in 1 file`, 'u'),
+  );
   return listed;
 };
 

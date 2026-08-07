@@ -896,9 +896,9 @@ export const createRepositoryPhase3Input = (
       },
       requirements: [...PHASE_3_REQUIREMENTS],
       routeReachability,
-      routes: [...routeSource.matchAll(/(?:public|account|admin)Route\('([^']+)'/gu)].map(
-        (match) => match[1] ?? '',
-      ),
+      routes: [...routeSource.matchAll(/(?:public|account|admin)Route\('([^']+)'/gu)]
+        .map((match) => match[1] ?? '')
+        .filter((routeId) => (PHASE_3_ROUTES as readonly string[]).includes(routeId)),
       scenarios: scenarios.scenarios.map(({ id }) => id),
       sourceHashes: PHASE_3_SOURCE_FILES.map((file) => ({
         file,

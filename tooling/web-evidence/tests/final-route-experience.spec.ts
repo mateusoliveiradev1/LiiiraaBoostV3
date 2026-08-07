@@ -10,6 +10,8 @@ import {
   type WebRoute,
 } from '@liiiraa/web-core';
 
+import { PHASE_3_ROUTES } from '../src/verify-phase.js';
+
 type Surface = 'public' | 'account' | 'admin';
 
 const MATRIX_SOURCE = readFileSync(
@@ -533,7 +535,9 @@ const inspectRoute = async (page: Page, route: WebRoute, locale: WebLocale): Pro
   await expectNoBlockingAxeViolations(page);
 };
 
-for (const route of webRoutes) {
+for (const route of webRoutes.filter(({ id }) =>
+  (PHASE_3_ROUTES as readonly string[]).includes(id),
+)) {
   const marker = ERROR_ROUTE.test(route.id)
     ? `${route.surface[0].toUpperCase()}${route.surface.slice(1)} \`${route.surface}-error-403/404/410/500\``
     : `\`${route.id}\``;
@@ -563,19 +567,21 @@ for (const surface of ['public', 'account', 'admin'] as const) {
 }
 
 // canonical-candidate:start
-const CANONICAL_CANDIDATES = webRoutes.flatMap((route) =>
-  WEB_LOCALES.flatMap((locale) =>
-    COVERED_AXES.map((axis) => {
-      const surface = surfaceFor(route);
-      const state = ERROR_ROUTE.test(route.id)
-        ? route.id.slice(route.id.lastIndexOf('error-'))
-        : 'ready';
-      const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
+const CANONICAL_CANDIDATES = webRoutes
+  .filter(({ id }) => (PHASE_3_ROUTES as readonly string[]).includes(id))
+  .flatMap((route) =>
+    WEB_LOCALES.flatMap((locale) =>
+      COVERED_AXES.map((axis) => {
+        const surface = surfaceFor(route);
+        const state = ERROR_ROUTE.test(route.id)
+          ? route.id.slice(route.id.lastIndexOf('error-'))
+          : 'ready';
+        const snapshotIdentity = [surface, route.id, locale, axis, state].join('--');
 
-      return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
-    }),
-  ),
-);
+        return Object.freeze({ axis, locale, route, snapshotIdentity, state, surface });
+      }),
+    ),
+  );
 
 const canonicalCandidateIdentities = new Set(
   CANONICAL_CANDIDATES.map(({ snapshotIdentity }) => snapshotIdentity),

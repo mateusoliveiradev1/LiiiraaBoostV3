@@ -2792,7 +2792,7 @@ export const AccountExperience = ({
     );
   }
 
-  if (isExplicitSimulatedScenario()) {
+  if (import.meta.env.DEV && isExplicitSimulatedScenario()) {
     return (
       <AccountShell locale={locale} navigate={navigate} view={view}>
         {view === 'overview' ? <ProfileOverview locale={locale} navigate={navigate} /> : null}

@@ -27,6 +27,18 @@ import {
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 
+const withSimulatedScenario = <T,>(run: () => T): T => {
+  Reflect.set(globalThis, '__LIIIRAA_DESKTOP_TEST__', {
+    scenario: { marker: 'SIMULATED SCENARIO' },
+  });
+
+  try {
+    return run();
+  } finally {
+    Reflect.deleteProperty(globalThis, '__LIIIRAA_DESKTOP_TEST__');
+  }
+};
+
 const concretePathFor = (pattern: string): string =>
   pattern
     .replace(':gameId', 'northstar-arena')
@@ -144,12 +156,14 @@ describe('app shell smoke', () => {
 
     for (const definition of desktopRouteTree) {
       for (const viewportWidth of lockedWidths) {
-        const markup = renderToStaticMarkup(
-          <DesktopApp
-            initialPath={concretePathFor(definition.pattern)}
-            scenarioId="S01"
-            viewportWidth={viewportWidth}
-          />,
+        const markup = withSimulatedScenario(() =>
+          renderToStaticMarkup(
+            <DesktopApp
+              initialPath={concretePathFor(definition.pattern)}
+              scenarioId="S01"
+              viewportWidth={viewportWidth}
+            />,
+          ),
         );
 
         const routeCase = `${definition.pattern} at ${String(viewportWidth)}px`;
@@ -190,18 +204,20 @@ describe('shell semantics', () => {
     for (const state of SHELL_OPERATIONAL_STATES) {
       for (const locale of ['pt-BR', 'en-US'] as const) {
         const presentation = getOperationalPresentation(state, locale === 'pt-BR' ? 'pt-BR' : 'en');
-        const markup = renderToStaticMarkup(
-          <DesktopApp
-            appScale={150}
-            forcedColors
-            initialPath="/home"
-            operationalState={state}
-            reducedMotion
-            scenarioId="S24"
-            textScale={200}
-            viewportWidth={760}
-            windowsLocale={locale}
-          />,
+        const markup = withSimulatedScenario(() =>
+          renderToStaticMarkup(
+            <DesktopApp
+              appScale={150}
+              forcedColors
+              initialPath="/home"
+              operationalState={state}
+              reducedMotion
+              scenarioId="S24"
+              textScale={200}
+              viewportWidth={760}
+              windowsLocale={locale}
+            />,
+          ),
         );
 
         expect(markup).toContain(`data-operational-state="${state}"`);
@@ -255,14 +271,17 @@ describe('scale smoke', () => {
         width,
       });
 
-      const markup = renderToStaticMarkup(
-        <DesktopApp
-          appScale={150}
-          initialPath="/recover/emergency"
-          operationalState="recovery"
-          textScale={200}
-          viewportWidth={viewportWidth}
-        />,
+      const markup = withSimulatedScenario(() =>
+        renderToStaticMarkup(
+          <DesktopApp
+            appScale={150}
+            initialPath="/recover/emergency"
+            operationalState="recovery"
+            scenarioId="S01"
+            textScale={200}
+            viewportWidth={viewportWidth}
+          />,
+        ),
       );
       const responsiveWidth = viewportWidth / 1.5;
       const scaledLayout = getResponsiveShellLayout(responsiveWidth);

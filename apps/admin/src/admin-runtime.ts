@@ -4,6 +4,15 @@ export const ADMIN_LOCAL_ORIGIN = 'http://admin.localhost:3002';
 export const ADMIN_TEST_ORIGIN = ADMIN_LOCAL_ORIGIN;
 export const ADMIN_BROWSER_AUTHORITY_BASE_URL = '';
 
+export const ADMIN_ROLES = Object.freeze([
+  'support',
+  'operations',
+  'security',
+  'audit',
+] as const satisfies readonly AdminRoleJson[]);
+
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+
 export const ADMIN_CANONICAL_ENTRY = Object.freeze({
   en: '/en/admin',
   'pt-BR': '/pt-BR/admin',
@@ -34,53 +43,6 @@ export const adminRoleCanAccessRoute = (
   role: AdminRoleJson,
   routeId: AdminAuthorityRoute,
 ): boolean => ADMIN_ROLE_ROUTE_ACCESS[role].includes(routeId as never);
-
-export type AdminRuntimeConfig =
-  | Readonly<{ kind: 'preview' }>
-  | Readonly<{ accountOrigin: string; authorityBaseUrl: string; kind: 'production' }>;
-
-export const adminPreviewRuntimeAllowed = ({
-  nodeEnv,
-  vercel,
-}: Readonly<{ nodeEnv?: string | undefined; vercel?: string | undefined }>): boolean =>
-  nodeEnv !== 'production' && vercel !== '1';
-
-const exactHttpsOrigin = (value: string, label: string): string => {
-  try {
-    const url = new URL(value);
-    if (
-      url.protocol !== 'https:' ||
-      url.origin !== value ||
-      url.pathname !== '/' ||
-      url.username.length > 0 ||
-      url.password.length > 0
-    ) {
-      throw new Error('invalid');
-    }
-    return url.origin;
-  } catch {
-    throw new Error(`${label} must be an exact credential-free HTTPS origin.`);
-  }
-};
-
-export const resolveAdminRuntimeConfig = ({
-  accountOrigin = '',
-  authorityBaseUrl = '',
-  previewAllowed = false,
-  previewEnabled = false,
-}: Readonly<{
-  accountOrigin?: string;
-  authorityBaseUrl?: string;
-  previewAllowed?: boolean;
-  previewEnabled?: boolean;
-}>): AdminRuntimeConfig =>
-  previewEnabled && previewAllowed
-    ? { kind: 'preview' }
-    : {
-        accountOrigin: exactHttpsOrigin(accountOrigin, 'Account origin'),
-        authorityBaseUrl: exactHttpsOrigin(authorityBaseUrl, 'Admin authority origin'),
-        kind: 'production',
-      };
 
 export const ADMIN_DENIAL_COPY = Object.freeze({
   en: Object.freeze({

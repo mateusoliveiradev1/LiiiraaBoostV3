@@ -2301,6 +2301,78 @@ const NATIVE_CHANNEL_LABELS = Object.freeze({
   experimental: ['Canal experimental', 'Experimental channel'],
 } satisfies Readonly<Record<ShellInstallerIdentityJson['channel'], readonly [string, string]>>);
 
+const UnavailableAboutSurface = ({ locale }: { readonly locale: ShellLocale }) => (
+  <div className="premium-about-layout" data-native-installer-identity="unavailable">
+    <section className="premium-about-hero">
+      <span className="premium-about-mark" aria-hidden="true">
+        <svg viewBox="0 0 36 28">
+          <path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z" />
+          <path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z" />
+        </svg>
+      </span>
+      <div>
+        <span className="premium-section-label">Liiiraa Boost</span>
+        <h2>
+          {text(
+            locale,
+            'Identidade da instalação indisponível',
+            'Installation identity unavailable',
+          )}
+        </h2>
+        <p>
+          {text(
+            locale,
+            'O host nativo não forneceu uma identidade validada para esta instalação.',
+            'The native host did not provide a validated identity for this installation.',
+          )}
+        </p>
+      </div>
+    </section>
+
+    <section className="premium-updater-card" data-phase="unavailable" role="status">
+      <header className="premium-updater-header">
+        <span className="premium-updater-icon">
+          <ProductIcon name="warning" size={24} weight="duotone" />
+        </span>
+        <div>
+          <span className="premium-section-label">
+            {text(locale, 'ATUALIZAÇÃO DO APLICATIVO', 'APP UPDATE')}
+          </span>
+          <h3>
+            {text(
+              locale,
+              'Não é possível verificar atualizações',
+              'Updates cannot be checked',
+            )}
+          </h3>
+        </div>
+      </header>
+      <footer className="premium-updater-footnote">
+        <ProductIcon name="info" size={15} weight="duotone" />
+        <span>
+          {text(
+            locale,
+            'Feche e abra o aplicativo novamente. Se o problema continuar, reinstale uma compilação oficial.',
+            'Close and reopen the app. If the problem persists, reinstall an official build.',
+          )}
+        </span>
+      </footer>
+    </section>
+  </div>
+);
+
+const explicitDevelopmentScenarioEnabled = (): boolean => {
+  if (!import.meta.env.DEV) return false;
+  const testState = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__') as unknown;
+  if (typeof testState !== 'object' || testState === null) return false;
+  const scenario = Reflect.get(testState, 'scenario') as unknown;
+  return (
+    typeof scenario === 'object' &&
+    scenario !== null &&
+    Reflect.get(scenario, 'marker') === 'SIMULATED SCENARIO'
+  );
+};
+
 const NativeAboutSurface = ({
   identity,
   locale,
@@ -2429,7 +2501,11 @@ const AboutSurface = ({
   readonly notify: (message: string, tone?: PremiumToastTone) => void;
 }) =>
   identity === undefined ? (
-    <DemonstrationAboutSurface locale={locale} notify={notify} />
+    import.meta.env.DEV && explicitDevelopmentScenarioEnabled() ? (
+      <DemonstrationAboutSurface locale={locale} notify={notify} />
+    ) : (
+      <UnavailableAboutSurface locale={locale} />
+    )
   ) : (
     <NativeAboutSurface identity={identity} locale={locale} notify={notify} />
   );
@@ -2503,7 +2579,7 @@ const ReviewDialog = ({
   );
 };
 
-export const PremiumOperationsSurface = ({
+const DevelopmentPremiumOperationsSurface = ({
   installerIdentity,
   locale,
   navigate,
@@ -2641,7 +2717,7 @@ export const PremiumOperationsSurface = ({
           ) : undefined
         }
         meta={ROUTE_META[view]}
-        showDemoBadge={view !== 'about' || installerIdentity === undefined}
+        showDemoBadge={view !== 'about'}
       />
       <div className="premium-route-content">{content}</div>
       <PlanBar
@@ -2679,3 +2755,86 @@ export const PremiumOperationsSurface = ({
     </main>
   );
 };
+
+const ProductionUnavailableSurface = ({
+  locale,
+  view,
+}: Readonly<{ locale: ShellLocale; view: PremiumRouteId }>) => (
+  <section className="premium-updater-card" data-phase="unavailable" role="status">
+    <header className="premium-updater-header">
+      <span className="premium-updater-icon">
+        <ProductIcon name="warning" size={24} weight="duotone" />
+      </span>
+      <div>
+        <span className="premium-section-label">
+          {text(locale, 'RECURSO NATIVO', 'NATIVE FEATURE')}
+        </span>
+        <h2>{text(locale, 'Ainda não disponível', 'Not available yet')}</h2>
+      </div>
+    </header>
+    <p className="premium-updater-error">
+      {text(
+        locale,
+        `A operação “${ROUTE_META[view].title}” ainda não possui uma autoridade nativa validada nesta versão. Nenhuma alteração foi aplicada ao computador.`,
+        `“${ROUTE_META[view].title}” does not have a validated native authority in this version. No change was applied to the computer.`,
+      )}
+    </p>
+  </section>
+);
+
+const ProductionPremiumOperationsSurface = ({
+  installerIdentity,
+  locale,
+  navigate,
+  settingsSection,
+  view,
+}: PremiumOperationsSurfaceProps) => {
+  const [toast, setToast] = useState<PremiumToastMessage | null>(null);
+
+  useEffect(() => {
+    if (toast === null) return undefined;
+    const timer = globalThis.setTimeout(() => setToast(null), 4200);
+    return () => globalThis.clearTimeout(timer);
+  }, [toast]);
+
+  const notify = (message: string, tone: PremiumToastTone = 'success'): void => {
+    setToast({ id: Date.now(), message, tone });
+  };
+
+  const content =
+    view === 'about' ? (
+      <AboutSurface identity={installerIdentity} locale={locale} notify={notify} />
+    ) : view === 'settings' ? (
+      <PremiumSettingsSurface
+        locale={locale}
+        navigate={navigate}
+        notify={notify}
+        routeState={settingsSection}
+      />
+    ) : (
+      <ProductionUnavailableSurface locale={locale} view={view} />
+    );
+
+  return (
+    <main className="premium-operations" data-premium-route={view}>
+      <RouteHeader meta={ROUTE_META[view]} showDemoBadge={false} />
+      <div className="premium-route-content">{content}</div>
+      {toast === null ? null : (
+        <PremiumToast
+          locale={locale}
+          onClose={() => {
+            setToast(null);
+          }}
+          toast={toast}
+        />
+      )}
+    </main>
+  );
+};
+
+export const PremiumOperationsSurface = (props: PremiumOperationsSurfaceProps) =>
+  import.meta.env.PROD ? (
+    <ProductionPremiumOperationsSurface {...props} />
+  ) : (
+    <DevelopmentPremiumOperationsSurface {...props} />
+  );

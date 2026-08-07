@@ -111,6 +111,7 @@ const ROUTE_FROM_SECTION: Readonly<Record<SettingsSection, string>> = Object.fre
 });
 
 interface PremiumSettingsSurfaceProps {
+  readonly installedVersion?: string | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly notify: (message: string, tone?: 'info' | 'success' | 'warning') => void;
@@ -158,6 +159,7 @@ const SettingSwitch = ({
 );
 
 export const PremiumSettingsSurface = ({
+  installedVersion,
   locale,
   navigate,
   notify,
@@ -170,10 +172,7 @@ export const PremiumSettingsSurface = ({
   const [localSettings, setLocalSettings] = useState<LocalSettings>(loadLocalSettings);
   const [launchEnabled, setLaunchEnabled] = useState(false);
   const [launchStatus, setLaunchStatus] = useState<LaunchOnStartupStatus>('loading');
-  const [dataAction, setDataAction] = useState<'hardware' | null>(null);
-  const [hardwareScannedAt, setHardwareScannedAt] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
-  const dataActionTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setSection(SECTION_FROM_ROUTE[routeState] ?? 'general');
@@ -206,15 +205,6 @@ export const PremiumSettingsSurface = ({
       // Settings remain functional for the active session if storage is unavailable.
     }
   }, [localSettings]);
-
-  useEffect(
-    () => () => {
-      if (dataActionTimer.current !== undefined) {
-        window.clearTimeout(dataActionTimer.current);
-      }
-    },
-    [],
-  );
 
   const sections = useMemo(
     () =>
@@ -357,18 +347,29 @@ export const PremiumSettingsSurface = ({
   };
 
   const exportSupportReport = (): void => {
+    if (installedVersion === undefined) {
+      notify(
+        text(
+          locale,
+          'O host nativo não forneceu a versão instalada. O diagnóstico não foi exportado.',
+          'The native host did not provide the installed version. Diagnostics were not exported.',
+        ),
+        'warning',
+      );
+      return;
+    }
     downloadJson(`liiiraa-boost-diagnostico-${new Date().toISOString().slice(0, 10)}.json`, {
+      application: {
+        locale: preferences.locale,
+        resolvedTheme,
+        themePreference: theme,
+        version: installedVersion,
+      },
       generatedAt: new Date().toISOString(),
       privacy: {
         accountDataIncluded: false,
         personalFilesIncluded: false,
         sensitiveValuesRedacted: true,
-      },
-      scenario: {
-        applicationVersion: '0.0.0',
-        locale: preferences.locale,
-        resolvedTheme,
-        themePreference: theme,
       },
       schemaVersion: 1,
     });
@@ -380,23 +381,6 @@ export const PremiumSettingsSurface = ({
       ),
       'success',
     );
-  };
-
-  const rescanHardware = (): void => {
-    if (dataAction === 'hardware') {
-      return;
-    }
-    setDataAction('hardware');
-    dataActionTimer.current = window.setTimeout(() => {
-      setDataAction(null);
-      setHardwareScannedAt(
-        new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date()),
-      );
-      notify(
-        text(locale, 'Inventário demonstrativo reexaminado.', 'Demonstration inventory rescanned.'),
-        'success',
-      );
-    }, 850);
   };
 
   const toggleLaunchOnStartup = async (): Promise<void> => {
@@ -543,32 +527,19 @@ export const PremiumSettingsSurface = ({
                 <ProductIcon name="chevronRight" size={17} />
               </button>
               <button
-                aria-busy={dataAction === 'hardware'}
-                disabled={dataAction === 'hardware'}
-                onClick={rescanHardware}
+                aria-disabled="true"
+                disabled
                 type="button"
               >
-                <ProductIcon
-                  name={dataAction === 'hardware' ? 'loading' : 'radar'}
-                  size={21}
-                  weight="duotone"
-                />
+                <ProductIcon name="radar" size={21} weight="duotone" />
                 <span>
                   <strong>{text(locale, 'Reexaminar hardware', 'Rescan hardware')}</strong>
                   <small>
-                    {dataAction === 'hardware'
-                      ? text(locale, 'Atualizando inventário…', 'Refreshing inventory…')
-                      : hardwareScannedAt
-                        ? text(
-                            locale,
-                            `Inventário demonstrativo atualizado às ${hardwareScannedAt}.`,
-                            `Demo inventory refreshed at ${hardwareScannedAt}.`,
-                          )
-                        : text(
-                            locale,
-                            'Atualiza o inventário do cenário demonstrativo.',
-                            'Refreshes the demonstration hardware inventory.',
-                          )}
+                    {text(
+                      locale,
+                      'Indisponível até a conexão do inventário nativo real.',
+                      'Unavailable until the real native inventory is connected.',
+                    )}
                   </small>
                 </span>
                 <ProductIcon name="chevronRight" size={17} />

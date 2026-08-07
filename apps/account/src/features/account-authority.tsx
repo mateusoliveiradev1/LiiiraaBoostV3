@@ -13,12 +13,8 @@ import type {
 } from '../account-authority';
 import { subscriptionBillingKind } from '../account-commerce';
 import { primeAccountCsrfToken } from '../account-auth';
-import {
-  advanceAccountMutationPhase,
-  getAccountPreviewMetadata,
-  type AccountMutationPhase,
-  type AccountPreviewRoute,
-} from '../account-preview-model';
+import { advanceAccountMutationPhase, type AccountMutationPhase } from '../account-mutation';
+import { getAccountRouteMetadata, type AccountRoute } from '../account-production-model';
 import { mapAccountAuthorityProjection } from '../account-runtime';
 import { getLiveAccountAuthority, type LiveAccountAuthority } from '../live-account-authority';
 import { AccountSubscriptionAuthority } from './account-subscription-authority';
@@ -26,7 +22,7 @@ import { AccountSubscriptionAuthority } from './account-subscription-authority';
 type AccountAuthorityPageProps = Readonly<{
   authorityBaseUrl: string;
   locale: WebLocale;
-  routeId: AccountPreviewRoute;
+  routeId: AccountRoute;
 }>;
 
 const copy = Object.freeze({
@@ -261,7 +257,7 @@ const ProjectionResponsibility = ({
 }: Readonly<{
   locale: WebLocale;
   projection: AccountAuthorityProjection;
-  routeId: AccountPreviewRoute;
+  routeId: AccountRoute;
 }>) => {
   const view = mapAccountAuthorityProjection(projection, new Date().toISOString());
   const labels = copy[locale];
@@ -343,7 +339,7 @@ export const AccountAuthorityPage = ({
     });
   }, [authority]);
 
-  const metadata = getAccountPreviewMetadata(locale, routeId);
+  const metadata = getAccountRouteMetadata(locale, routeId);
   const signInRoute = routeHref('account-sign-in', { locale });
   if (!signInRoute.ok) throw new Error('ACCOUNT_SIGN_IN_ROUTE_UNAVAILABLE');
   if (result === null) {

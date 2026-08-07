@@ -24,10 +24,9 @@ import { createAccountFailureModel } from '../../account-errors';
 import { resolveAdminBoundaryOrigin, resolvePublicBoundaryOrigin } from '../../account-origins';
 import { ProductLockup } from '../../account-product-lockup';
 import { ACCOUNT_BROWSER_AUTHORITY_BASE_URL } from '../../account-runtime';
-import { resolveAccountServerRuntimeConfig } from '../../account-runtime-server';
 import { AccountIdentityChrome, AccountRoleGateway } from '../../features/account-auth';
 import { AccountAuthorityInspector } from '../../features/account-authority';
-import { accountWebComposition } from '../../index';
+import { ACCOUNT_WEB_COMPOSITION } from '../../account-production-composition';
 
 type AccountLocaleLayoutProps = Readonly<{
   children: ReactNode;
@@ -215,8 +214,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
   setRequestLocale(locale);
   const requestHeaders = await headers();
   const nonce = requestHeaders.get('x-nonce');
-  const runtime = resolveAccountServerRuntimeConfig();
-  const webComposition = accountWebComposition(runtime.kind);
+  const webComposition = ACCOUNT_WEB_COMPOSITION;
   const publicOrigin = resolvePublicBoundaryOrigin(
     process.env['LIIIRAA_PUBLIC_ORIGIN'],
     process.env['VERCEL'] === '1',

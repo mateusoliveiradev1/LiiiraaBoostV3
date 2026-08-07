@@ -30,6 +30,7 @@ const asRecord = (value: unknown): Readonly<Record<string, unknown>> | undefined
     : undefined;
 
 const readDesktopTestComposition = (): DesktopAppProps => {
+  if (!import.meta.env.DEV) return Object.freeze({});
   const testState = asRecord(Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__'));
   const scenario = asRecord(testState?.['scenario']);
   const composition = asRecord(Reflect.get(globalThis, '__LIIIRAA_DESKTOP_COMPOSITION__'));

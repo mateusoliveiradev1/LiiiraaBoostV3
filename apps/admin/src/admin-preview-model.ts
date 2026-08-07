@@ -1,6 +1,6 @@
 import type { WebLocale, WebRouteId } from '@liiiraa/web-core';
 
-import type { AdminPreviewRole } from '../proxy';
+import type { AdminRole as AdminPreviewRole } from './admin-runtime';
 import {
   ADMIN_ROLE_ROUTE_ACCESS as ADMIN_RUNTIME_ROLE_ROUTE_ACCESS,
   adminRoleCanAccessRoute,

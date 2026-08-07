@@ -1,7 +1,7 @@
 import { routeHref, webRoutes, type WebLocale, type WebRouteId } from '@liiiraa/web-core';
 import type { AdminDomainJson } from '@liiiraa/contracts-ts';
 
-import { ADMIN_PREVIEW_ROLES, type AdminPreviewRole } from '../proxy';
+import { ADMIN_ROLES, type AdminRole } from './admin-runtime';
 
 export const ADMIN_DOMAIN_ORDER = Object.freeze([
   'overview',
@@ -67,7 +67,7 @@ const ROLE_DOMAINS = Object.freeze({
   operations: Object.freeze(['overview', 'people', 'revenue', 'operation', 'system'] as const),
   security: Object.freeze(['overview', 'people', 'support', 'security', 'system'] as const),
   audit: Object.freeze(['overview', 'security', 'system'] as const),
-} satisfies Readonly<Record<AdminPreviewRole, readonly AdminShellDomain[]>>);
+} satisfies Readonly<Record<AdminRole, readonly AdminShellDomain[]>>);
 
 export const ADMIN_ROLE_COPY = Object.freeze({
   support: Object.freeze({
@@ -86,10 +86,10 @@ export const ADMIN_ROLE_COPY = Object.freeze({
     'pt-BR': 'Auditoria',
     en: 'Audit',
   }),
-} satisfies Readonly<Record<AdminPreviewRole, Readonly<Record<WebLocale, string>>>>);
+} satisfies Readonly<Record<AdminRole, Readonly<Record<WebLocale, string>>>>);
 
-export const adminRoleFromHeader = (value: string | null): AdminPreviewRole =>
-  ADMIN_PREVIEW_ROLES.includes(value as AdminPreviewRole) ? (value as AdminPreviewRole) : 'support';
+export const adminRoleFromHeader = (value: string | null): AdminRole =>
+  ADMIN_ROLES.includes(value as AdminRole) ? (value as AdminRole) : 'support';
 
 const uniqueDomainsInStableOrder = (
   domains: readonly AdminDomainJson[],
@@ -128,10 +128,9 @@ export const projectAdminDomainNavigation = (
   );
 
 /**
- * Compatibility projection for the disconnected role preview and the current bounded server
- * session. Production callers receive the role from the server; URL role claims never reach it.
+ * Projects the bounded role admitted by the server. URL role claims never reach this boundary.
  */
 export const projectAdminRoleNavigation = (
-  role: AdminPreviewRole,
+  role: AdminRole,
   locale: WebLocale,
 ): readonly AdminNavigationItem[] => projectAdminDomainNavigation(ROLE_DOMAINS[role], locale);

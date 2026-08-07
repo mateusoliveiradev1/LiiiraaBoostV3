@@ -17,7 +17,7 @@ describe('notification center production projection', () => {
           {
             detail: 'A credencial foi revogada pelo servidor.',
             id: 'authority-revoked-0001',
-            state: 'warning',
+            state: 'recovery',
             title: 'Sessão encerrada',
           },
         ]}

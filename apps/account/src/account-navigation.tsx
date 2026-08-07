@@ -11,8 +11,8 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import {
   accountGoalForRoute,
   getAccountGoalNavigation,
-  type AccountPreviewRoute,
-} from './account-preview-model';
+  type AccountRoute,
+} from './account-production-model';
 
 export type AccountNavigationItem = Readonly<{
   href: string;
@@ -50,7 +50,7 @@ type AccountNavigationProps = Readonly<{
 
 const normalizePathname = (pathname: string): string => pathname.replace(/\/+$/u, '') || '/';
 
-const routeIdForNavigationIcon = (icon: ProductIconName): AccountPreviewRoute | undefined => {
+const routeIdForNavigationIcon = (icon: ProductIconName): AccountRoute | undefined => {
   switch (icon) {
     case 'gauge':
       return 'account-overview';

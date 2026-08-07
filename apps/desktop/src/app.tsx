@@ -54,7 +54,6 @@ import {
   WindowTitleBar,
 } from '@liiiraa/design-system';
 import type {
-  ActivityCenter,
   ActivityItem,
   OperationalState,
   WindowControlHandlers,
@@ -76,7 +75,7 @@ import {
 } from './features/account-profile.js';
 import { STARTUP_PRESENTATION_STEPS, StartupSurface } from './features/startup.js';
 import { NotificationCenter } from './features/notification-center.js';
-import { PremiumOperationsSurface } from './features/premium-operations.js';
+import { PremiumOperationsSurface } from './features/premium-operations-production.js';
 import type { PremiumRouteId } from './features/control-center-data.js';
 import {
   createShellBridge,
@@ -548,33 +547,6 @@ const SETTINGS_FAVORITE_CANDIDATES: readonly FavoriteCandidate[] = Object.freeze
 ]);
 
 const SETTINGS_INITIAL_FAVORITES = Object.freeze(SETTINGS_FAVORITE_CANDIDATES.slice(0, 3));
-
-const ACTIVITY_EVENTS: Parameters<typeof ActivitySurface>[0]['events'] = Object.freeze([
-  Object.freeze({
-    correlationId: 'S17-recovery-0001',
-    category: 'recovery',
-    state: 'requires-action',
-    severity: 'warning',
-    title: 'Review guided recovery',
-    affectedObject: 'Scenario preview',
-    occurredAt: '2030-01-15T18:01:00.000Z',
-    source: 'fixture-policy',
-    acknowledged: false,
-    resolved: false,
-    dismissed: false,
-    scenarioMarked: true,
-    notificationCategory: 'recovery-required',
-  }),
-]);
-
-const activityOverlayItems: Parameters<typeof ActivityCenter>[0]['items'] = Object.freeze([
-  Object.freeze({
-    detail: 'Scenario S17 recovery receipt is ready for review.',
-    id: 'S17-recovery-0001',
-    state: 'recovery',
-    title: 'Guided recovery requires attention',
-  }),
-]);
 
 type NativeActivityEvent = Parameters<typeof ActivitySurface>[0]['events'][number];
 
@@ -1050,8 +1022,37 @@ export interface DesktopRouteOutletProps {
   readonly scenarioId: string;
 }
 
+const ProductionUnavailableDesktopSurface = ({ locale }: { readonly locale: ShellLocale }) => (
+  <main className="premium-operations" data-production-authority="unavailable">
+    <header className="premium-route-header">
+      <div className="premium-route-heading">
+        <span className="premium-route-icon">
+          <ProductIcon name="warning" size={24} />
+        </span>
+        <div>
+          <h1 data-route-heading tabIndex={-1}>
+            {locale === 'pt-BR' ? 'Recurso ainda indisponível' : 'Feature not available yet'}
+          </h1>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Esta versão ainda não possui uma autoridade nativa validada para executar esta operação.'
+              : 'This version does not have a validated native authority for this operation yet.'}
+          </p>
+        </div>
+      </div>
+    </header>
+    <section className="premium-updater-card" data-phase="unavailable" role="status">
+      <p className="premium-updater-error">
+        {locale === 'pt-BR'
+          ? 'Nenhuma alteração foi aplicada ao computador.'
+          : 'No change was applied to the computer.'}
+      </p>
+    </section>
+  </main>
+);
+
 export const DesktopRouteOutlet = ({
-  activityEvents = ACTIVITY_EVENTS,
+  activityEvents = Object.freeze([]),
   installerIdentity,
   locale,
   navigate,
@@ -1059,6 +1060,61 @@ export const DesktopRouteOutlet = ({
   scenarioId,
 }: DesktopRouteOutletProps): ReactNode => {
   const surfaceName: string = route.definition.surface;
+
+  if (import.meta.env.PROD) {
+    if (surfaceName === 'ContextualHome') {
+      return (
+        <PremiumOperationsSurface
+          installerIdentity={installerIdentity}
+          locale={locale}
+          navigate={navigate}
+          view="home"
+        />
+      );
+    }
+    if (surfaceName === 'ActivitySurface') {
+      return (
+        <PremiumOperationsSurface
+          installerIdentity={installerIdentity}
+          locale={locale}
+          navigate={navigate}
+          view="activity"
+        />
+      );
+    }
+    if (surfaceName === 'PremiumOperationsSurface') {
+      return (
+        <PremiumOperationsSurface
+          installerIdentity={installerIdentity}
+          locale={locale}
+          navigate={navigate}
+          view={route.state as PremiumRouteId}
+        />
+      );
+    }
+    if (surfaceName === 'AccountSettingsSurface') {
+      if (route.state === 'general' || route.pathname.startsWith('/settings/')) {
+        return (
+          <PremiumOperationsSurface
+            installerIdentity={installerIdentity}
+            locale={locale}
+            navigate={navigate}
+            settingsSection={route.state}
+            view="settings"
+          />
+        );
+      }
+      return (
+        <AccountExperience
+          locale={locale}
+          navigate={navigate}
+          scenarioId={scenarioId}
+          view={accountViewFor(route.state)}
+        />
+      );
+    }
+    return <ProductionUnavailableDesktopSurface locale={locale} />;
+  }
 
   if (surfaceName === 'ContextualHome') {
     return (
@@ -1398,10 +1454,10 @@ const DesktopAppContent = ({
   nativeState,
   onSendHostCommand,
   commandMetadata,
-  operationalState = 'fixture',
+  operationalState = 'loading',
   premiumAuthorityState,
   reducedMotion,
-  scenarioId = 'S01',
+  scenarioId = 'local',
   textScale = 100,
   viewportWidth,
 }: DesktopAppContentProps) => {
@@ -1853,18 +1909,13 @@ const DesktopAppContent = ({
     paidActionDecision?.allowed === false;
   const criticalState = criticalStateFor(operationalState);
   const motion = reducedMotion ?? preferences.motion === 'reduced';
+  const simulatedScenarioEnabled = import.meta.env.DEV && hasSimulatedScenarioMarker();
   const routeActivityEvents = useMemo(
-    () =>
-      nativeState === undefined
-        ? ACTIVITY_EVENTS
-        : Object.freeze([...nativeState.activityEvents, ...ACTIVITY_EVENTS]),
+    () => nativeState?.activityEvents ?? Object.freeze([]),
     [nativeState],
   );
   const overlayActivityItems = useMemo(
-    () =>
-      nativeState === undefined
-        ? activityOverlayItems
-        : Object.freeze([...nativeState.activityItems, ...activityOverlayItems]),
+    () => nativeState?.activityItems ?? Object.freeze([]),
     [nativeState],
   );
 
@@ -1903,7 +1954,9 @@ const DesktopAppContent = ({
             locale={locale}
           />
         </div>
-        <span className="lb-visually-hidden">{`DEMO · ${scenarioId}`}</span>
+        {simulatedScenarioEnabled ? (
+          <span className="lb-visually-hidden">{`DEMO · ${scenarioId}`}</span>
+        ) : null}
         <AccountExperience
           locale={locale}
           navigate={navigate}
@@ -1964,7 +2017,7 @@ const DesktopAppContent = ({
             rememberOverlayInvoker();
             setCommandOpen(true);
           }}
-          scenarioId={scenarioId}
+          {...(simulatedScenarioEnabled ? { scenarioId } : {})}
         />
       </div>
 
@@ -2051,9 +2104,11 @@ const DesktopAppContent = ({
             title={locale === 'pt-BR' ? 'Contexto e evidências' : 'Context and evidence'}
           >
             <p>{presentation.reason}</p>
-            <p>
-              <strong>{`DEMO · ${scenarioId}`}</strong>
-            </p>
+            {simulatedScenarioEnabled ? (
+              <p>
+                <strong>{`DEMO · ${scenarioId}`}</strong>
+              </p>
+            ) : null}
             {nativeState === undefined ? null : (
               <>
                 <p data-native-shell-diagnostic>

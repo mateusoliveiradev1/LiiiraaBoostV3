@@ -8,12 +8,11 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
-import type { AdminPreviewRole } from '../proxy';
 import {
   parseAdminQueueUrlState,
   type AdminQueueSavedView,
   type AdminQueueUrlState,
-} from './admin-preview-model';
+} from './admin-queue-url-state';
 import type { AdminNavigationItem, AdminShellDomain } from './admin-shell';
 
 export type AdminShellFreshness = 'live' | 'reconnecting' | 'offline' | 'degraded';
@@ -48,7 +47,6 @@ type AdminNavigationProps = Readonly<{
   label: string;
   locale: WebLocale;
   persistPreference?: boolean;
-  previewRole?: AdminPreviewRole;
   roleHomeHref: string;
   roleHomeLabel: string;
   roleLabel: string;
@@ -85,14 +83,10 @@ const appendSafeQueueState = (parameters: URLSearchParams, state: AdminQueueUrlS
 export const createAdminShellHref = (
   href: string,
   state: AdminQueueUrlState,
-  previewRole?: AdminPreviewRole,
   override: Partial<AdminQueueUrlState> = {},
 ): string => {
   const pathname = href.split('?')[0] ?? href;
   const parameters = new URLSearchParams();
-  if (previewRole !== undefined && previewRole !== 'support') {
-    parameters.set('role', previewRole);
-  }
   appendSafeQueueState(parameters, Object.freeze({ ...state, ...override }));
   const query = parameters.toString();
   return query ? `${pathname}?${query}` : pathname;
@@ -147,13 +141,11 @@ function NavigationItems({
   currentHref,
   items,
   onNavigate,
-  previewRole,
   queueState,
 }: Readonly<{
   currentHref: string | undefined;
   items: readonly AdminNavigationItem[];
   onNavigate?: () => void;
-  previewRole?: AdminPreviewRole;
   queueState: AdminQueueUrlState;
 }>) {
   return (
@@ -170,7 +162,7 @@ function NavigationItems({
               aria-label={item.label}
               data-current={isCurrent ? 'page' : undefined}
               href={
-                createAdminShellHref(item.href, queueState, previewRole, {
+                createAdminShellHref(item.href, queueState, {
                   selectedId: undefined,
                 }) as Route
               }
@@ -227,7 +219,6 @@ export function AdminShellFrame({
   label,
   locale,
   persistPreference = true,
-  previewRole,
   queueState,
   roleHomeHref,
   roleHomeLabel,
@@ -255,7 +246,7 @@ export function AdminShellFrame({
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
   const currentLabel = currentItem?.label ?? label;
-  const localeHref = createAdminShellHref(alternatePath, queueState, previewRole);
+  const localeHref = createAdminShellHref(alternatePath, queueState);
 
   useEffect(() => {
     if (!persistPreference) return;
@@ -344,17 +335,16 @@ export function AdminShellFrame({
               },
             }
           : {})}
-        {...(previewRole === undefined ? {} : { previewRole })}
         queueState={queueState}
       />
       <div className="admin-nav__utilities">
         <span>{labels.utilities}</span>
-        <Link href={createAdminShellHref(inboxHref, queueState, previewRole) as Route}>
+        <Link href={createAdminShellHref(inboxHref, queueState) as Route}>
           <ProductIcon name="bell" size={18} />
           <span className="admin-nav__label">{inboxLabel}</span>
           {inboxCount > 0 ? <strong>{inboxCount}</strong> : null}
         </Link>
-        <Link href={createAdminShellHref(jobsHref, queueState, previewRole) as Route}>
+        <Link href={createAdminShellHref(jobsHref, queueState) as Route}>
           <ProductIcon name="activity" size={18} />
           <span className="admin-nav__label">{jobsLabel}</span>
         </Link>
@@ -440,9 +430,6 @@ export function AdminShellFrame({
               ref={searchRef}
               type="search"
             />
-            {previewRole !== undefined && previewRole !== 'support' ? (
-              <input name="role" type="hidden" value={previewRole} />
-            ) : null}
             <button
               aria-expanded={mobileSearchOpen}
               aria-label={searchAction}
@@ -467,7 +454,7 @@ export function AdminShellFrame({
             <Link
               aria-label={`${alertsLabel}: ${String(inboxCount)}`}
               className="admin-header__alerts"
-              href={createAdminShellHref(inboxHref, queueState, previewRole) as Route}
+              href={createAdminShellHref(inboxHref, queueState) as Route}
             >
               <ProductIcon name="bell" size={18} />
               <span aria-live="polite">{inboxCount}</span>
@@ -512,7 +499,7 @@ export function AdminShellFrame({
                     <small>{isolatedLabel}</small>
                   </span>
                 </p>
-                <Link href={createAdminShellHref(roleHomeHref, queueState, previewRole) as Route}>
+                <Link href={createAdminShellHref(roleHomeHref, queueState) as Route}>
                   <ProductIcon name="toolbox" size={17} />
                   {roleHomeLabel}
                 </Link>

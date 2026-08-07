@@ -3,30 +3,18 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
   ADMIN_CANONICAL_ENTRY,
   ADMIN_DENIAL_COPY,
-  adminPreviewRuntimeAllowed,
   resolveAdminOrigin,
   type AdminLocale,
 } from './src/admin-runtime';
-
-export const ADMIN_PREVIEW_ROLES = Object.freeze([
-  'support',
-  'operations',
-  'security',
-  'audit',
-] as const);
-
-export type AdminPreviewRole = (typeof ADMIN_PREVIEW_ROLES)[number];
 
 export type AdminAccessBoundaryResult = Readonly<{
   authoritativeAccessConnected: false;
   reason:
     | 'cross-surface-cookie-rejected'
-    | 'deterministic-role-preview'
     | 'origin-rejected'
+    | 'request-forwarded'
     | 'unsafe-context-rejected'
-    | 'url-role-rejected'
-    | 'unknown-role-rejected';
-  role: AdminPreviewRole;
+    | 'url-role-rejected';
 }>;
 
 type AdminAccessBoundaryInput = Readonly<{
@@ -68,9 +56,6 @@ const createContentSecurityPolicy = (nonce: string, runtimeMode: string | undefi
     `style-src 'self' 'nonce-${nonce}'`,
     "worker-src 'self'",
   ].join('; ');
-
-const isAdminPreviewRole = (value: string | null): value is AdminPreviewRole =>
-  value !== null && ADMIN_PREVIEW_ROLES.includes(value as AdminPreviewRole);
 
 const containsCrossSurfaceCookie = (cookieHeader: string | null): boolean => {
   if (cookieHeader === null || cookieHeader.trim().length === 0) {
@@ -255,13 +240,11 @@ export const AdminAccessBoundary = ({
   url,
 }: AdminAccessBoundaryInput): AdminAccessBoundaryResult => {
   const requestedRole = url.searchParams.get('role');
-  const role = isAdminPreviewRole(requestedRole) ? requestedRole : 'support';
 
   if ((requestOrigin === undefined ? url.origin : requestOrigin) !== resolveAdminOrigin()) {
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'origin-rejected',
-      role,
     });
   }
 
@@ -269,7 +252,6 @@ export const AdminAccessBoundary = ({
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'cross-surface-cookie-rejected',
-      role,
     });
   }
 
@@ -277,22 +259,19 @@ export const AdminAccessBoundary = ({
     return Object.freeze({
       authoritativeAccessConnected: false,
       reason: 'unsafe-context-rejected',
-      role,
     });
   }
 
-  if (requestedRole !== null && !isAdminPreviewRole(requestedRole)) {
+  if (requestedRole !== null) {
     return Object.freeze({
       authoritativeAccessConnected: false,
-      reason: 'unknown-role-rejected',
-      role,
+      reason: 'url-role-rejected',
     });
   }
 
   return Object.freeze({
     authoritativeAccessConnected: false,
-    reason: 'deterministic-role-preview',
-    role,
+    reason: 'request-forwarded',
   });
 };
 
@@ -320,12 +299,6 @@ const adminRootDestination = (request: NextRequest): URL | undefined => {
 export default function adminProxy(request: NextRequest): NextResponse {
   const nonce = createAdminRequestNonce();
   const runtimeMode = process.env.NODE_ENV;
-  const previewEnabled =
-    process.env['LIIIRAA_ADMIN_PREVIEW'] === 'true' &&
-    adminPreviewRuntimeAllowed({
-      nodeEnv: process.env.NODE_ENV,
-      vercel: process.env['VERCEL'],
-    });
   const rootDestination = adminRootDestination(request);
   if (rootDestination !== undefined) {
     return applyAdminHeaders(
@@ -338,12 +311,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
     requestOrigin: requestHeaderOrigin(request),
     url: request.nextUrl,
   });
-  const rejectionReason =
-    boundary.reason !== 'deterministic-role-preview'
-      ? boundary.reason
-      : !previewEnabled && request.nextUrl.searchParams.has('role')
-        ? 'url-role-rejected'
-        : undefined;
+  const rejectionReason = boundary.reason === 'request-forwarded' ? undefined : boundary.reason;
 
   if (rejectionReason !== undefined) {
     const requestId = boundedRequestId(request);
@@ -367,7 +335,7 @@ export default function adminProxy(request: NextRequest): NextResponse {
       NextResponse.json(
         {
           authoritativeAccessConnected: false,
-          code: previewEnabled ? 'ADMIN_PREVIEW_ACCESS_DENIED' : 'ADMIN_ACCESS_DENIED',
+          code: 'ADMIN_ACCESS_DENIED',
           reason: rejectionReason,
           ...(requestId === undefined ? {} : { requestId }),
         },
@@ -383,15 +351,11 @@ export default function adminProxy(request: NextRequest): NextResponse {
     ({ key }) => key === 'Content-Security-Policy',
   )?.value;
 
-  requestHeaders.delete('x-liiiraa-admin-role');
-  requestHeaders.delete('x-liiiraa-preview-authority');
+  for (const key of [...requestHeaders.keys()]) {
+    if (key.startsWith('x-liiiraa-')) requestHeaders.delete(key);
+  }
   if (request.nextUrl.pathname === '/v1' || request.nextUrl.pathname.startsWith('/v1/')) {
     requestHeaders.set('origin', resolveAdminOrigin());
-  }
-  if (previewEnabled) {
-    requestHeaders.delete('cookie');
-    requestHeaders.set('x-liiiraa-admin-role', boundary.role);
-    requestHeaders.set('x-liiiraa-preview-authority', 'disconnected');
   }
   requestHeaders.set('x-nonce', nonce);
 
@@ -404,11 +368,6 @@ export default function adminProxy(request: NextRequest): NextResponse {
       headers: requestHeaders,
     },
   });
-
-  if (previewEnabled) {
-    response.headers.set('x-liiiraa-admin-role', boundary.role);
-    response.headers.set('x-liiiraa-preview-authority', 'disconnected');
-  }
 
   return applyAdminHeaders(response, headerContract);
 }

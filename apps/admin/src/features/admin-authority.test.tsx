@@ -8,7 +8,6 @@ import {
   type AdminAuthorityTransport,
   type AdminDiagnosticProjection,
 } from '../admin-authority';
-import { adminPreviewRuntimeAllowed, resolveAdminRuntimeConfig } from '../admin-runtime';
 
 const response = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -476,42 +475,7 @@ describe('production admin authority', () => {
 });
 
 describe('admin production composition', () => {
-  it('defaults deployable runtime to production and permits preview only locally', () => {
-    expect(
-      resolveAdminRuntimeConfig({
-        accountOrigin: 'https://account.liiiraa.test',
-        authorityBaseUrl: 'https://api.liiiraa.test',
-      }),
-    ).toEqual({
-      accountOrigin: 'https://account.liiiraa.test',
-      authorityBaseUrl: 'https://api.liiiraa.test',
-      kind: 'production',
-    });
-    expect(
-      resolveAdminRuntimeConfig({
-        accountOrigin: 'https://account.liiiraa.test',
-        authorityBaseUrl: 'https://api.liiiraa.test',
-        previewAllowed: false,
-        previewEnabled: true,
-      }),
-    ).toEqual({
-      accountOrigin: 'https://account.liiiraa.test',
-      authorityBaseUrl: 'https://api.liiiraa.test',
-      kind: 'production',
-    });
-    expect(resolveAdminRuntimeConfig({ previewAllowed: true, previewEnabled: true })).toEqual({
-      kind: 'preview',
-    });
-    expect(adminPreviewRuntimeAllowed({ nodeEnv: 'production' })).toBe(false);
-    expect(adminPreviewRuntimeAllowed({ nodeEnv: 'development', vercel: '1' })).toBe(false);
-    expect(adminPreviewRuntimeAllowed({ nodeEnv: 'development' })).toBe(true);
-    expect(() =>
-      resolveAdminRuntimeConfig({
-        accountOrigin: 'https://account.liiiraa.test',
-        authorityBaseUrl: 'http://api.liiiraa.test',
-      }),
-    ).toThrow('exact credential-free HTTPS origin');
-
+  it('keeps deployable Admin runtime production-only', () => {
     const authoritySource = readFileSync(new URL('../admin-authority.ts', import.meta.url), 'utf8');
     const runtimeSource = readFileSync(new URL('../admin-runtime.ts', import.meta.url), 'utf8');
     const proxySource = readFileSync(new URL('../../proxy.ts', import.meta.url), 'utf8');
@@ -527,6 +491,7 @@ describe('admin production composition', () => {
     const previewView = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
+    expect(runtimeSource).not.toMatch(/previewAllowed|previewEnabled|kind: 'preview'/u);
     expect(proxySource).not.toContain('x-liiiraa-preview-authority');
     expect(productionView).not.toContain('@liiiraa/web-preview');
     expect(productionView).toContain('Active administrative role');

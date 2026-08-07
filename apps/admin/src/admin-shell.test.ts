@@ -61,6 +61,7 @@ describe('admin shell', () => {
 
   it('keeps operational identity, task, isolated session, role, and locale legible without preview chrome', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const productLockupUrl = new URL('./admin-product-lockup.tsx', import.meta.url);
 
@@ -68,29 +69,29 @@ describe('admin shell', () => {
     if (!existsSync(productLockupUrl)) return;
 
     const productLockupSource = readFileSync(productLockupUrl, 'utf8');
-    expect(layout).toContain('<ProductLockup />');
-    expect(layout).toContain("from '../../admin-product-lockup'");
-    expect(layout).not.toContain('packages/design-system/src');
+    expect(authority).toContain('<ProductLockup />');
+    expect(authority).toContain("from '../admin-product-lockup'");
+    expect(authority).not.toContain('packages/design-system/src');
     expect(productLockupSource).toContain("'use client'");
     expect(productLockupSource).toContain("from '@liiiraa/design-system'");
     expect(productLockupSource).toContain('<DesignSystemProductLockup />');
-    expect(layout).toContain('admin-brand__surface');
+    expect(authority).toContain('admin-brand__surface');
     expect(navigation).toContain('admin-header__task');
     expect(navigation).toContain('admin-header__account');
     expect(navigation).toContain('<ProductIcon');
     expect(navigation).toContain('<LocaleSwitcher');
-    expect(layout).toContain('isolatedLabel={copy.isolated}');
+    expect(authority).toContain('isolatedLabel={`${shellLabels.isolated}');
     expect(layout).not.toContain('AdminPreviewProvenance');
     expect(layout).not.toMatch(/>\s*(fixture|simulated-no-change)\s*</iu);
   });
 
   it('puts localized role-scoped search, queue view, alerts, and operator identity in the shell', () => {
-    const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
 
-    expect(layout).toContain('searchLabel={copy.searchLabel}');
-    expect(layout).toContain('currentQueueLabel={copy.currentQueue}');
-    expect(layout).toContain('alertsLabel={copy.alerts}');
+    expect(authority).toContain('searchLabel={shellLabels.searchLabel}');
+    expect(authority).toContain('currentQueueLabel={shellLabels.currentQueue}');
+    expect(authority).toContain('alertsLabel={shellLabels.alerts}');
     expect(navigation).toContain('className="admin-header__search"');
     expect(navigation).toContain('type="search"');
     expect(navigation).toContain('data-mobile-open={mobileSearchOpen || undefined}');
@@ -203,7 +204,8 @@ describe('admin shell', () => {
     expect(navigation).toContain('useSearchParams');
     expect(navigation).toContain('resolveLocalizedCurrentRoute');
     expect(navigation).toContain("securityBoundary: 'admin-origin'");
-    expect(navigation).toContain('createAdminShellHref(alternatePath, queueState, previewRole)');
+    expect(navigation).toContain('createAdminShellHref(alternatePath, queueState)');
+    expect(navigation).not.toContain("parameters.set('role'");
     expect(navigation).toContain('items.find(');
     expect(navigation).toContain("aria-current={isCurrent ? 'page' : undefined}");
     expect(navigation).toContain('<LocaleSwitcher');
@@ -365,21 +367,22 @@ describe('admin shell', () => {
   it('does not render preview role chrome before production session authority is verified', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
 
-    expect(layout).toContain("runtime.kind === 'production'");
     expect(layout).toContain('data-admin-session-state="unverified"');
     expect(layout).toContain('data-runtime-class="server-authority"');
+    expect(layout).not.toContain('AdminNavigation');
   });
 
   it('provides skip, focus, protected operator menu, and role-guarded reflow contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
     expect(layout).toContain('href="#admin-main"');
-    expect(layout).toContain('securityLabel={copy.security}');
+    expect(authority).toContain('securityLabel={shellLabels.security}');
     expect(layout).not.toContain('className="admin-preview-band"');
     expect(layout).not.toContain('data-viewport-gate="960"');
-    expect(layout).toContain('<main id="admin-main" tabIndex={-1}>');
+    expect(authority).toContain('<main id="admin-main" tabIndex={-1}>');
     expect(focus).toContain('#admin-main > h1');
     expect(styles).toContain('.admin-high-risk-flow');
     expect(styles).not.toContain("[data-high-risk-action='true'] {");
@@ -461,20 +464,20 @@ describe('admin 410', () => {
     expect(isAdminPreviewRoute('admin-error-410')).toBe(false);
   });
 
-  it('dispatches canonical errors before workspace role admission without mutation channels', () => {
+  it('dispatches canonical errors before production workspace composition without mutation channels', () => {
     const page = readFileSync(
       new URL('./app/[locale]/[[...workspace]]/page.tsx', import.meta.url),
       'utf8',
     );
     const errorDispatch = page.indexOf("resolution.kind === 'error'");
-    const roleAdmission = page.indexOf('adminRoleCanAccess(role, resolution.routeId)');
+    const workspaceDispatch = page.indexOf('isCanonicalAdminRoute(resolution.routeId)');
 
     expect(page).toContain("securityBoundary: 'admin-origin'");
     expect(page).toContain('adminFailureKindForRoute(routeId)');
     expect(page).toContain('createAdminFailureModel(resolution.failureKind, locale)');
     expect(page).toContain('robots: { follow: false, index: false, nocache: true }');
     expect(errorDispatch).toBeGreaterThan(-1);
-    expect(roleAdmission).toBeGreaterThan(errorDispatch);
+    expect(workspaceDispatch).toBeGreaterThan(errorDispatch);
     expect(page).not.toMatch(/redirect\(|fetch\(|cookies\(/u);
   });
 });

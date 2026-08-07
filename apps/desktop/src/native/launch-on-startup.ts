@@ -18,20 +18,17 @@ export interface NativeAutostartApi {
 export const createLaunchOnStartupAdapter = (
   nativeApi: NativeAutostartApi,
   nativeAvailable: boolean,
-): LaunchOnStartupAdapter => {
-  let simulatedState = false;
-
-  return Object.freeze({
+): LaunchOnStartupAdapter =>
+  Object.freeze({
     get: async () => {
       if (!nativeAvailable) {
-        return simulatedState;
+        throw new Error('NATIVE_AUTOSTART_UNAVAILABLE');
       }
       return nativeApi.isEnabled();
     },
     set: async (enabled: boolean) => {
       if (!nativeAvailable) {
-        simulatedState = enabled;
-        return simulatedState;
+        throw new Error('NATIVE_AUTOSTART_UNAVAILABLE');
       }
       if (enabled) {
         await nativeApi.enable();
@@ -41,7 +38,6 @@ export const createLaunchOnStartupAdapter = (
       return nativeApi.isEnabled();
     },
   });
-};
 
 export const launchOnStartup = createLaunchOnStartupAdapter(
   {

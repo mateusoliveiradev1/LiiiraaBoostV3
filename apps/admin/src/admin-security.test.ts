@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from 'node:fs';
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 
 import adminProxy, {
@@ -18,18 +18,7 @@ import {
 } from './admin-runtime';
 
 describe('admin security boundary', () => {
-  const originalPreviewMode = process.env['LIIIRAA_ADMIN_PREVIEW'];
-
-  beforeEach(() => {
-    process.env['LIIIRAA_ADMIN_PREVIEW'] = 'true';
-  });
-
   afterEach(() => {
-    if (originalPreviewMode === undefined) {
-      delete process.env['LIIIRAA_ADMIN_PREVIEW'];
-    } else {
-      process.env['LIIIRAA_ADMIN_PREVIEW'] = originalPreviewMode;
-    }
     vi.restoreAllMocks();
   });
 
@@ -259,12 +248,12 @@ describe('admin security boundary', () => {
     expect(ADMIN_LOCAL_ORIGIN).not.toBe('https://liiiraa.com');
   });
 
-  it('admits only closed preview roles and rejects cross-surface state', () => {
-    const defaultPreview = AdminAccessBoundary({
+  it('forwards only clean production requests and rejects URL-selected authority', () => {
+    const defaultRequest = AdminAccessBoundary({
       cookieHeader: null,
       url: new URL(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin`),
     });
-    const preview = AdminAccessBoundary({
+    const selectedRole = AdminAccessBoundary({
       cookieHeader: null,
       url: new URL(`${ADMIN_LOCAL_ORIGIN}/en/admin?role=security`),
     });
@@ -281,15 +270,13 @@ describe('admin security boundary', () => {
       url: new URL('https://account.localhost/en/admin?role=support'),
     });
 
-    expect(defaultPreview).toEqual({
+    expect(defaultRequest).toEqual({
       authoritativeAccessConnected: false,
-      reason: 'deterministic-role-preview',
-      role: 'support',
+      reason: 'request-forwarded',
     });
-    expect(preview).toEqual({
+    expect(selectedRole).toEqual({
       authoritativeAccessConnected: false,
-      reason: 'deterministic-role-preview',
-      role: 'security',
+      reason: 'url-role-rejected',
     });
     expect(foreignCookie).toMatchObject({
       authoritativeAccessConnected: false,
@@ -305,8 +292,15 @@ describe('admin security boundary', () => {
     });
   });
 
-  it('propagates only disconnected preview markers and blocks unsafe requests', () => {
-    const safe = adminProxy(new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?role=support`));
+  it('forwards no caller authority markers and blocks unsafe requests', () => {
+    const safe = adminProxy(
+      new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin`, {
+        headers: {
+          'x-liiiraa-admin-role': 'security',
+          'x-liiiraa-test-authority': 'forged',
+        },
+      }),
+    );
     const unsafe = adminProxy(
       new NextRequest(`${ADMIN_LOCAL_ORIGIN}/pt-BR/admin?returnPath=/account`, {
         headers: {
@@ -316,8 +310,8 @@ describe('admin security boundary', () => {
     );
 
     expect(safe.status).toBe(200);
-    expect(safe.headers.get('x-liiiraa-admin-role')).toBe('support');
-    expect(safe.headers.get('x-liiiraa-preview-authority')).toBe('disconnected');
+    expect(safe.headers.get('x-middleware-request-x-liiiraa-admin-role')).toBeNull();
+    expect(safe.headers.get('x-middleware-request-x-liiiraa-test-authority')).toBeNull();
     expect(safe.headers.get('set-cookie')).toBeNull();
     expect(safe.headers.get('location')).toBeNull();
     expect(unsafe.status).toBe(403);
@@ -412,7 +406,7 @@ describe('admin security boundary', () => {
     expect(response.headers.get('content-type')).toContain('application/json');
     await expect(response.json()).resolves.toEqual({
       authoritativeAccessConnected: false,
-      code: 'ADMIN_PREVIEW_ACCESS_DENIED',
+      code: 'ADMIN_ACCESS_DENIED',
       reason: 'origin-rejected',
       requestId: 'api-request-7',
     });

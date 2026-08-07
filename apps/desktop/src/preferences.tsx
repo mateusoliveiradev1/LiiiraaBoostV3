@@ -20,10 +20,12 @@ import {
   type DesktopLocale,
   type DesktopPreferences,
   type PreferenceEvent,
-  type RendererToHostShellCommandJson,
-  type ShellSetLocaleCommandJson,
-  type ShellSetTrayPreferenceCommandJson,
-} from '@liiiraa/feature-shell';
+} from '@liiiraa/feature-shell/preferences';
+import type {
+  RendererToHostShellCommandJson,
+  ShellSetLocaleCommandJson,
+  ShellSetTrayPreferenceCommandJson,
+} from '@liiiraa/contracts-ts';
 
 import { LocaleProvider, formatMessage, type MessageId } from './locales/i18n.js';
 

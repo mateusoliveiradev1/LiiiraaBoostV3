@@ -33,6 +33,7 @@ const admitSession = (value: unknown): SessionProjectionJson | undefined =>
     : undefined;
 
 const testTransport = (): DesktopAuthTransport | undefined => {
+  if (!import.meta.env.DEV) return undefined;
   const globalRecord = globalThis as unknown as Readonly<Record<PropertyKey, unknown>>;
   const testState = globalRecord['__LIIIRAA_DESKTOP_TEST__'];
   const candidate = globalRecord['__LIIIRAA_DESKTOP_AUTH_TEST_TRANSPORT__'];

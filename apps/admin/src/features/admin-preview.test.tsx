@@ -19,7 +19,7 @@ import {
 } from '../admin-preview-model';
 
 const featureSource = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
-const layoutSource = readFileSync(new URL('../app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const authoritySource = readFileSync(new URL('./admin-authority.tsx', import.meta.url), 'utf8');
 const stylesSource = readFileSync(new URL('../app/admin-shell.css', import.meta.url), 'utf8');
 const navigationUrl = new URL('../admin-navigation.tsx', import.meta.url);
 const navigationSource = existsSync(navigationUrl) ? readFileSync(navigationUrl, 'utf8') : '';
@@ -126,14 +126,14 @@ describe('role-scoped admin', () => {
   });
 
   it('renders the exact product lockup and a perceivable current role workspace', () => {
-    expect(layoutSource).toContain('ProductLockup');
-    expect(layoutSource).toContain('<AdminNavigation');
-    expect(layoutSource).not.toContain('admin-brand__mark');
+    expect(authoritySource).toContain('ProductLockup');
+    expect(authoritySource).toContain('<AdminNavigation');
+    expect(authoritySource).not.toContain('admin-brand__mark');
     expect(navigationSource).toContain('aria-current');
     expect(navigationSource).toContain("data-current={isCurrent ? 'page' : undefined}");
     expect(navigationSource).toContain("import Link from 'next/link'");
     expect(navigationSource).not.toContain('<a');
-    expect(layoutSource).not.toContain('AdminPreviewProvenance');
+    expect(authoritySource).not.toContain('AdminPreviewProvenance');
     expect(navigationSource).toContain('<ProductIcon');
   });
 
@@ -421,7 +421,8 @@ describe('role-scoped admin', () => {
     );
     expect(routeSource).toContain('matchWebRoute');
     expect(routeSource).toContain("securityBoundary: 'admin-origin'");
-    expect(routeSource).toContain("createAdminFailureModel('403'");
+    expect(routeSource).toContain('createAdminFailureModel(resolution.failureKind');
+    expect(routeSource).toContain('<AdminAuthorityPage');
     expect(routeSource).not.toMatch(/redirect\(/u);
 
     expect(adminEn.security.title).toBe('Security review');

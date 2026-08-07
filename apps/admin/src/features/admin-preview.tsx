@@ -25,7 +25,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { AdminPreviewRole } from '../../proxy';
+import type { AdminRole as AdminPreviewRole } from '../admin-runtime';
 import adminEnJson from '../content/admin.en.json';
 import adminPtBrJson from '../content/admin.pt-BR.json';
 import {

@@ -8,6 +8,7 @@ import {
   inspectWorkspaceReadiness,
   type RouteEvidence,
 } from './web-evidence-harness.js';
+import { PHASE_3_ROUTES } from './verify-phase.js';
 
 const routeMatrixSource = readFileSync(
   new URL(
@@ -136,15 +137,16 @@ describe('D-100 complete canonical route experience contract', () => {
     expect(routeMatrixSource).toContain('390');
     expect(routeMatrixSource).toContain('320');
 
-    for (const route of webRoutes) {
-      const familyMarker = `\`${route.surface}-error-403/404/410/500\``;
+    for (const routeId of PHASE_3_ROUTES) {
+      const surface = routeId.slice(0, routeId.indexOf('-'));
+      const familyMarker = `\`${surface}-error-403/404/410/500\``;
       expect(routeMatrixSource).toContain(
-        /-error-(?:403|404|410|500)$/u.test(route.id) ? familyMarker : `\`${route.id}\``,
+        /-error-(?:403|404|410|500)$/u.test(routeId) ? familyMarker : `\`${routeId}\``,
       );
     }
 
     expect(WEB_LOCALES).toEqual(['pt-BR', 'en']);
-    expect(finalRouteExperienceSource).toContain('for (const route of webRoutes)');
+    expect(finalRouteExperienceSource).toContain('for (const route of webRoutes.filter');
     expect(finalRouteExperienceSource).toContain('for (const locale of WEB_LOCALES)');
     expect(finalRouteExperienceSource).not.toContain('isHighRisk');
   });
@@ -172,7 +174,8 @@ describe('D-100 complete canonical route experience contract', () => {
     expect(candidateBlock).toBeDefined();
     expect(candidateBlock).toContain('@canonical-candidate');
     expect(candidateBlock).toContain('@candidate-capture @project-${surface}-final-${axis}');
-    expect(candidateBlock).toContain('webRoutes.flatMap');
+    expect(candidateBlock).toContain('PHASE_3_ROUTES');
+    expect(candidateBlock).toContain('.filter');
     expect(candidateBlock).toContain('WEB_LOCALES.flatMap');
     expect(candidateBlock).toContain('COVERED_AXES.map');
     expect(candidateBlock).toContain("[surface, route.id, locale, axis, state].join('--')");
