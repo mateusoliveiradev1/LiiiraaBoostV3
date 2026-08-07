@@ -264,6 +264,7 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       now: '2030-01-03T12:00:00.000Z',
       recipientPossessionVerified: true,
       accountActivationCompleted: true,
+      essentialTermsAccepted: true,
       accountReference: 'account:opaque:one',
     });
     expect(accepted).toMatchObject({
@@ -296,6 +297,7 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       now: '2030-01-03T12:00:00.000Z',
       recipientPossessionVerified: true,
       accountActivationCompleted: true,
+      essentialTermsAccepted: true,
       accountReference: 'account:opaque:one',
     }) as { state: Readonly<Record<string, unknown>> };
 
@@ -348,5 +350,79 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       action: 'delete-personal-data',
       preserveMinimumAuditReceipt: true,
     });
+  });
+
+  it('requires essential terms and governs risky batch actions before durable execution', async () => {
+    const module = await loadInvitations();
+    const admit = requireFunction<
+      (input: Readonly<Record<string, unknown>>) => Readonly<Record<string, unknown>>
+    >(module, 'decideBetaInvitationAdmission');
+    const transition = requireFunction<
+      (
+        state: Readonly<Record<string, unknown>>,
+        command: Readonly<Record<string, unknown>>,
+      ) => Readonly<Record<string, unknown>>
+    >(module, 'decideBetaInvitationTransition');
+    const batchAdmission = requireFunction<
+      (input: Readonly<Record<string, unknown>>) => Readonly<Record<string, unknown>>
+    >(module, 'decideInvitationBatchAdmission');
+    const issued = admit(admissionInput()) as { state: Readonly<Record<string, unknown>> };
+
+    expect(
+      transition(issued.state, {
+        kind: 'complete-activation',
+        now: '2030-01-03T12:00:00.000Z',
+        recipientPossessionVerified: true,
+        accountActivationCompleted: true,
+        essentialTermsAccepted: false,
+        accountReference: 'account:opaque:one',
+      }),
+    ).toEqual({ accepted: false, code: 'ESSENTIAL_TERMS_REQUIRED' });
+    expect(
+      batchAdmission({
+        action: 'revoke',
+        targetCount: 20,
+        impactReviewed: true,
+        reason: ' ',
+        risk: 'high',
+        approvalGranted: false,
+      }),
+    ).toEqual({ accepted: false, code: 'REASON_REQUIRED' });
+    expect(
+      batchAdmission({
+        action: 'revoke',
+        targetCount: 20,
+        impactReviewed: true,
+        reason: 'close compromised campaign',
+        risk: 'high',
+        approvalGranted: false,
+      }),
+    ).toEqual({ accepted: false, code: 'APPROVAL_REQUIRED' });
+    expect(
+      batchAdmission({
+        action: 'revoke',
+        targetCount: 20,
+        impactReviewed: true,
+        reason: 'close compromised campaign',
+        risk: 'high',
+        approvalGranted: true,
+      }),
+    ).toEqual({
+      accepted: true,
+      jobRequired: true,
+      partialFailureReportingRequired: true,
+      finalReceiptRequired: true,
+      irreversible: true,
+    });
+
+    const delivered = transition(issued.state, {
+      kind: 'record-delivery',
+      now: '2030-01-01T12:01:00.000Z',
+      outcome: 'delivered',
+    }) as { state: Readonly<Record<string, unknown>> };
+    expect(delivered.state).toMatchObject({
+      events: [{ kind: 'created' }, { kind: 'sent' }, { kind: 'delivered' }],
+    });
+    expect(JSON.stringify(delivered.state)).not.toMatch(/open-pixel|click|fingerprint|device-id/iu);
   });
 });
