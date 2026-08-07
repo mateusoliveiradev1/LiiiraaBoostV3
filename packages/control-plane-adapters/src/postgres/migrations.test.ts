@@ -16,6 +16,7 @@ import { inspectControlPlaneSchema, migrateControlPlane, schemaHash } from './mi
 const migrationUrl = new URL('./migrations/0001_control_plane.sql', import.meta.url);
 const invitationMigrationUrl = new URL('./migrations/0004_admin_invitations.sql', import.meta.url);
 const governanceMigrationUrl = new URL('./migrations/0005_admin_governance.sql', import.meta.url);
+const operationsMigrationUrl = new URL('./migrations/0006_admin_operations.sql', import.meta.url);
 const syntheticIdentity = /(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu;
 const productionIdentity = /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu;
 const unsafeDatabaseMessage =
@@ -325,6 +326,63 @@ describe('admin governance migration authority', () => {
     );
     expect(sql).not.toMatch(/CROSS JOIN[\s\S]*admin_(?:membership_)?functions/iu);
     expect(sql).not.toMatch(/'super-admin'|'wildcard'|'all-capabilities'/iu);
+  });
+});
+
+describe('admin operations migration authority', () => {
+  it('declares the complete environment-bound operational model without sensitive payload columns', async () => {
+    const sql = await readFile(operationsMigrationUrl, 'utf8');
+    for (const table of [
+      'admin_operational_environments',
+      'admin_saved_views',
+      'admin_inbox_items',
+      'admin_operational_jobs',
+      'admin_operational_job_items',
+      'admin_operational_conflicts',
+      'admin_incidents',
+      'admin_incident_timeline',
+      'admin_procedures',
+      'admin_sensitive_exports',
+      'admin_configuration_versions',
+      'admin_configuration_rollouts',
+      'admin_capacity_samples',
+      'admin_capacity_forecasts',
+      'admin_ownership_assignments',
+      'admin_escalations',
+      'admin_alerts',
+      'admin_alert_acknowledgements',
+      'admin_privacy_cases',
+      'admin_emergency_controls',
+      'admin_operations_commands',
+      'admin_operations_receipts',
+      'admin_operations_audit',
+    ]) {
+      expect(sql).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`, 'iu'));
+    }
+
+    expect(sql).toMatch(/environment_identity[\s\S]*synthetic-non-production/iu);
+    expect(sql).toMatch(/UNIQUE \(environment_id, idempotency_key\)/iu);
+    expect(sql).toMatch(/expected_version BIGINT/iu);
+    expect(sql).toMatch(/claimed_at TIMESTAMPTZ/iu);
+    expect(sql).toMatch(/claimed_by TEXT/iu);
+    expect(sql).toMatch(/FOR UPDATE SKIP LOCKED/iu);
+    expect(sql).toMatch(/CREATE TRIGGER admin_operations_audit_insert_only/iu);
+    expect(sql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON admin_operations_audit FROM PUBLIC/iu);
+    expect(sql).toMatch(/reject_admin_operations_environment_crossing/iu);
+    expect(sql).not.toMatch(
+      /provider_payload|diagnostic_content|plaintext_secret|bearer_token|raw_email/iu,
+    );
+  });
+
+  it('keeps operational history immutable and worker retries singular', async () => {
+    const sql = await readFile(operationsMigrationUrl, 'utf8');
+    expect(sql).toMatch(/admin_incident_timeline_insert_only/iu);
+    expect(sql).toMatch(/admin_operations_receipts_insert_only/iu);
+    expect(sql).toMatch(/admin_operational_conflicts_insert_only/iu);
+    expect(sql).toMatch(/attempt_count INTEGER[\s\S]*CHECK \(attempt_count >= 0\)/iu);
+    expect(sql).toMatch(/claim_expires_at TIMESTAMPTZ/iu);
+    expect(sql).toMatch(/retention_expires_at TIMESTAMPTZ/iu);
+    expect(sql).toMatch(/environment_id UUID NOT NULL/iu);
   });
 });
 
