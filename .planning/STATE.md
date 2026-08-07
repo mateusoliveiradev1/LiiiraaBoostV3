@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-48-PLAN.md
-last_updated: "2026-08-07T03:03:57.124Z"
+stopped_at: Completed 04-49-PLAN.md
+last_updated: "2026-08-07T03:19:29.448Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 185
+  completed_plans: 186
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 49 of 62
+Plan: 50 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -223,6 +223,7 @@ _Updated after plan completion_
 | Phase 04 P46 | 17 min | 2 tasks | 9 files |
 | Phase 04 P47 | 11 min | 1 tasks | 5 files |
 | Phase 04 P48 | 13 min | 2 tasks | 8 files |
+| Phase 04 P49 | 11 min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -695,6 +696,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Migrate legacy admins only with active passkey or TOTP proof. — Database upgrade cannot fabricate strong-factor authority.
 - [Phase 04]: Permit exactly one approval decision per request. — The locked pending request and unique request constraint make concurrent decisions singular.
 - [Phase 04]: Load governance membership from normalized grants only. — Masked projections exclude email, credential, token, and sensitive audit fields by construction.
+- [Phase 04]: Inject server-owned operational search filters — Allowed scopes, owner, and environment come from authorization before repository access.
+- [Phase 04]: Resolve admin command replay before version arbitration — Safe retries return the original result without duplicate state, audit, outbox, or receipt effects.
+- [Phase 04]: Fail closed on uncertain operational authority — Critical mutations never create hidden queued work when freshness or environment identity is uncertain.
+- [Phase 04]: Keep recovery and emergency controls allowlisted — Versioned bounded procedures and capability-specific stops prevent free-form execution and global shutdown authority.
 
 ### Pending Todos
 
@@ -740,6 +745,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T03:03:57.117Z
-Stopped at: Completed 04-48-PLAN.md
+Last session: 2026-08-07T03:19:29.440Z
+Stopped at: Completed 04-49-PLAN.md
 Resume file: None
