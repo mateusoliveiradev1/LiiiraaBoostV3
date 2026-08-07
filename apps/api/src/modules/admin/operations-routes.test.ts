@@ -55,10 +55,7 @@ const session = {
   scopes: ['support-cases', 'jobs', 'incidents', 'configuration', 'privacy'],
 };
 
-const buildApp = async (
-  overrides: Readonly<Record<string, unknown>> = {},
-  rateLimit = true,
-) => {
+const buildApp = async (overrides: Readonly<Record<string, unknown>> = {}, rateLimit = true) => {
   const operations = {
     search: vi.fn(() =>
       Promise.resolve({
@@ -80,9 +77,7 @@ const buildApp = async (
     changeConfiguration: vi.fn(() =>
       Promise.resolve({ ok: true, outcome: 'configuration-transitioned' }),
     ),
-    executePrivacy: vi.fn(() =>
-      Promise.resolve({ ok: true, outcome: 'privacy-case-started' }),
-    ),
+    executePrivacy: vi.fn(() => Promise.resolve({ ok: true, outcome: 'privacy-case-started' })),
     stopCapability: vi.fn(() =>
       Promise.resolve({ ok: true, outcome: 'capability-paused', globalStop: false }),
     ),
@@ -107,7 +102,7 @@ const buildApp = async (
     allowedOrigin: origin,
     csrfSecret,
     operations: {} as never,
-    handlers: operations as never,
+    handlers: operations,
     queries,
     freshness,
     resolveSession: () => Promise.resolve(session),
@@ -127,15 +122,12 @@ describe('admin operations routes', () => {
       headers: { origin },
     });
     expect(response.statusCode).toBe(200);
-    expect(operations.search).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        actorId: 'operator-one',
-        query: 'mateus',
-        targetEnvironment: 'staging',
-        view: { kind: 'personal', viewId: 'my-view' },
-      },
-    );
+    expect(operations.search).toHaveBeenCalledWith(expect.anything(), {
+      actorId: 'operator-one',
+      query: 'mateus',
+      targetEnvironment: 'staging',
+      view: { kind: 'personal', viewId: 'my-view' },
+    });
     expect(JSON.stringify(operations.search.mock.calls)).not.toMatch(/allowedScopes|ownerId/u);
 
     const hidden = await app.inject({
@@ -295,7 +287,9 @@ describe('admin operations routes', () => {
         targetEnvironment: 'staging',
       },
     });
-    expect([incident.statusCode, rollback.statusCode, emergency.statusCode]).toEqual([202, 200, 202]);
+    expect([incident.statusCode, rollback.statusCode, emergency.statusCode]).toEqual([
+      202, 200, 202,
+    ]);
     expect(operations.recoverIncident).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ procedureVersion: 'recover-provider-v1' }),
