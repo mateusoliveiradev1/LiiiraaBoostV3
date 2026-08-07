@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS admin_approval_decisions (
   decision TEXT NOT NULL CHECK (decision IN ('approved', 'rejected')),
   reason TEXT NOT NULL CHECK (char_length(trim(reason)) > 0),
   decided_at TIMESTAMPTZ NOT NULL,
-  UNIQUE (request_id, approver_id)
+  UNIQUE (request_id)
 );
 
 CREATE TABLE IF NOT EXISTS admin_access_reviews (
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS admin_governance_commands (
 CREATE TABLE IF NOT EXISTS admin_governance_receipts (
   id UUID PRIMARY KEY,
   command_id TEXT NOT NULL UNIQUE,
-  actor_id UUID NOT NULL REFERENCES identities(id) ON DELETE RESTRICT,
+  actor_id TEXT NOT NULL,
   subject_id TEXT NOT NULL,
   outcome TEXT NOT NULL,
   audit_reference TEXT NOT NULL,
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS admin_governance_receipts (
 
 CREATE TABLE IF NOT EXISTS admin_governance_audit (
   id UUID PRIMARY KEY,
-  actor_id UUID NOT NULL REFERENCES identities(id) ON DELETE RESTRICT,
+  actor_id TEXT NOT NULL,
   subject_id TEXT NOT NULL,
   action TEXT NOT NULL,
   details JSONB NOT NULL DEFAULT '{}'::JSONB,
@@ -333,16 +333,32 @@ BEGIN
     INSERT INTO admin_governance_memberships (
       id, identity_id, status, strong_factor, version, activated_at, created_at, updated_at
     )
-    SELECT identity.id, identity.id, 'active', 'passkey', 1, identity.updated_at,
+    SELECT identity.id, identity.id, 'active',
+      CASE WHEN EXISTS (
+        SELECT 1 FROM security_factors AS factor
+        WHERE factor.identity_id = identity.id AND factor.factor_kind = 'passkey'
+          AND factor.revoked_at IS NULL
+      ) THEN 'passkey' ELSE 'mfa' END,
+      1, identity.updated_at,
       identity.created_at, identity.updated_at
     FROM identities AS identity
     WHERE identity.role IN ('support', 'operations', 'security', 'audit')
+      AND EXISTS (
+        SELECT 1 FROM security_factors AS factor
+        WHERE factor.identity_id = identity.id
+          AND factor.factor_kind IN ('passkey', 'totp') AND factor.revoked_at IS NULL
+      )
     ON CONFLICT DO NOTHING;
 
     INSERT INTO admin_membership_functions (id, membership_id, function, assigned_at)
     SELECT gen_random_uuid(), identity.id, identity.role, identity.updated_at
     FROM identities AS identity
     WHERE identity.role IN ('support', 'operations', 'security', 'audit')
+      AND EXISTS (
+        SELECT 1 FROM security_factors AS factor
+        WHERE factor.identity_id = identity.id
+          AND factor.factor_kind IN ('passkey', 'totp') AND factor.revoked_at IS NULL
+      )
     ON CONFLICT DO NOTHING;
 
     INSERT INTO admin_membership_capabilities (id, membership_id, capability, assigned_at)
@@ -356,6 +372,11 @@ BEGIN
       ELSE ARRAY[]::TEXT[]
     END) AS capability(value) ON TRUE
     WHERE identity.role IN ('support', 'operations', 'security', 'audit')
+      AND EXISTS (
+        SELECT 1 FROM security_factors AS factor
+        WHERE factor.identity_id = identity.id
+          AND factor.factor_kind IN ('passkey', 'totp') AND factor.revoked_at IS NULL
+      )
     ON CONFLICT DO NOTHING;
 
     INSERT INTO admin_membership_scopes (id, membership_id, scope, assigned_at)
@@ -369,6 +390,11 @@ BEGIN
       ELSE ARRAY[]::TEXT[]
     END) AS scope(value) ON TRUE
     WHERE identity.role IN ('support', 'operations', 'security', 'audit')
+      AND EXISTS (
+        SELECT 1 FROM security_factors AS factor
+        WHERE factor.identity_id = identity.id
+          AND factor.factor_kind IN ('passkey', 'totp') AND factor.revoked_at IS NULL
+      )
     ON CONFLICT DO NOTHING;
   END IF;
 END;

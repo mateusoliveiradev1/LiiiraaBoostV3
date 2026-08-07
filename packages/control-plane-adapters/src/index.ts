@@ -22,6 +22,11 @@ export {
   migrateAdminInvitations,
 } from './postgres/admin-invitations.js';
 export {
+  adminGovernanceSchemaHash,
+  createPostgresAdminGovernanceRepository,
+  migrateAdminGovernance,
+} from './postgres/admin-governance.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,

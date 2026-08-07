@@ -74,7 +74,10 @@ describe('PostgreSQL admin governance authority', () => {
         return Promise.resolve({ rowCount: 1, rows: [{ value: 'support' }] });
       }
       if (sql.includes('FROM admin_membership_capabilities')) {
-        return Promise.resolve({ rowCount: 2, rows: [{ value: 'support:reply' }, { value: 'support:view' }] });
+        return Promise.resolve({
+          rowCount: 2,
+          rows: [{ value: 'support:reply' }, { value: 'support:view' }],
+        });
       }
       if (sql.includes('FROM admin_membership_scopes')) {
         return Promise.resolve({ rowCount: 1, rows: [{ value: 'support-cases' }] });
@@ -183,6 +186,14 @@ describe('PostgreSQL admin governance authority', () => {
       await transaction.revokeDelegations(identityId, '2030-01-01T00:05:00.000Z');
       await transaction.removeFutureApprovals(identityId, '2030-01-01T00:05:00.000Z');
       await transaction.reassignPendingWork(identityId, '2030-01-01T00:05:00.000Z');
+      await transaction.appendAudit({
+        actorId,
+        subjectId: identityId,
+        action: 'identity-offboarded',
+        reason: 'Compromised credential',
+        compromise: true,
+        occurredAt: '2030-01-01T00:05:00.000Z',
+      });
     });
 
     const sql = statements.join('\n');
@@ -194,6 +205,7 @@ describe('PostgreSQL admin governance authority', () => {
     expect(sql).toMatch(/UPDATE admin_delegations/iu);
     expect(sql).toMatch(/UPDATE admin_approval_requests/iu);
     expect(sql).toMatch(/INSERT INTO admin_work_reassignments/iu);
+    expect(sql).toMatch(/INSERT INTO admin_offboarding_events/iu);
   });
 
   it('persists reveal reason and authorization context without diagnostic or audit field values', async () => {

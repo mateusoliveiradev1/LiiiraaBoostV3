@@ -87,6 +87,7 @@ export interface AdminApprovalRequest {
   readonly assignedApproverId?: string;
   readonly approverId?: string;
   readonly approvedAt?: string;
+  readonly decisionReason?: string;
   readonly cancelledAt?: string;
 }
 

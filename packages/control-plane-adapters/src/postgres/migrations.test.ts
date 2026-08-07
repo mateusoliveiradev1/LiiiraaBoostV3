@@ -307,6 +307,7 @@ describe('admin governance migration authority', () => {
     expect(sql).toMatch(/uq_admin_function_sessions_one_active[\s\S]*WHERE ended_at IS NULL/iu);
     expect(sql).toMatch(/reject_admin_standing_super_admin/iu);
     expect(sql).toMatch(/reject_admin_self_approval/iu);
+    expect(sql).toMatch(/admin_approval_decisions[\s\S]*UNIQUE \(request_id\)/iu);
     expect(sql).toMatch(/approval\.expires_at <= NEW\.decided_at/iu);
     expect(sql).toMatch(/CHECK \(expires_at > created_at\)/iu);
     expect(sql).toMatch(/CREATE TRIGGER admin_governance_audit_insert_only/iu);
@@ -319,6 +320,9 @@ describe('admin governance migration authority', () => {
     expect(sql).toMatch(/FROM identities AS identity/iu);
     expect(sql).toMatch(/identity\.role IN \('support', 'operations', 'security', 'audit'\)/iu);
     expect(sql).toMatch(/SELECT[\s\S]*identity\.role[\s\S]*FROM identities AS identity/iu);
+    expect(sql).toMatch(
+      /security_factors AS factor[\s\S]*factor_kind IN \('passkey', 'totp'\)[\s\S]*revoked_at IS NULL/iu,
+    );
     expect(sql).not.toMatch(/CROSS JOIN[\s\S]*admin_(?:membership_)?functions/iu);
     expect(sql).not.toMatch(/'super-admin'|'wildcard'|'all-capabilities'/iu);
   });

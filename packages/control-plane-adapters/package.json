@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./postgres/admin-governance": "./src/postgres/admin-governance.ts",
     "./postgres/admin-invitations": "./src/postgres/admin-invitations.ts",
     "./runtime-control-plane": "./src/runtime-control-plane.ts",
     "./runtime-identity": "./src/runtime-identity.ts"

@@ -716,6 +716,7 @@ export const approveAdminAccessRequest = async (
         version: current.version + 1n,
         approverId: input.actorId,
         approvedAt: occurredAt,
+        decisionReason: input.reason.trim(),
       };
       await transaction.saveApproval(state);
       return rememberOutcome(dependencies, transaction, {
@@ -930,8 +931,8 @@ export const offboardAdminIdentity = async (
       await transaction.saveMembership(state);
       await transaction.revokeSessions(input.identityId, occurredAt);
       await transaction.revokeDelegations(input.identityId, occurredAt);
-      await transaction.removeFutureApprovals(input.identityId, occurredAt);
       const reassignedWorkIds = await transaction.reassignPendingWork(input.identityId, occurredAt);
+      await transaction.removeFutureApprovals(input.identityId, occurredAt);
       return rememberOutcome(dependencies, transaction, {
         actorId: input.actorId,
         commandId: input.commandId,
@@ -986,6 +987,8 @@ export const reviewAdminAccess = async (
       if (suspend) {
         await transaction.saveMembership(state);
         await transaction.revokeSessions(input.identityId, occurredAt);
+        await transaction.revokeDelegations(input.identityId, occurredAt);
+        await transaction.removeFutureApprovals(input.identityId, occurredAt);
       }
       const review: AdminAccessReviewRecord = {
         reviewId: dependencies.ids.next(),
@@ -1084,7 +1087,11 @@ export const revealAdminAuditValue = async (
         subjectId: input.redactedTarget,
         outcome: 'audit-revealed',
         occurredAt,
-        audit: { reason: input.reason, activeFunction: input.activeFunction },
+        audit: {
+          reason: input.reason,
+          activeFunction: input.activeFunction,
+          authorizationContextId: input.authorizationContextId,
+        },
         result: { value: projection.value },
       });
     });
