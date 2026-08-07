@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-45-PLAN.md
-last_updated: "2026-08-07T01:48:59.578Z"
+stopped_at: Completed 04-44-PLAN.md
+last_updated: "2026-08-07T02:05:06.615Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 181
+  completed_plans: 182
   percent: 30
 ---
 
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 44 of 62
-Status: Executing Phase 04
+Plan: 46 of 62
+Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
 Progress: [██████████] 98%
@@ -219,6 +219,7 @@ _Updated after plan completion_
 | Phase 04 P42 | 10 min | 1 tasks | 4 files |
 | Phase 04 P43 | 5 min | 1 tasks | 4 files |
 | Phase 04 P45 | 11 min | 1 tasks | 5 files |
+| Phase 04 P44 | 4 min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -680,6 +681,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Admin sessions activate exactly one of four functions and simulations can never authorize actions — Prevents standing super-admin authority and keeps permission changes immediately visible
 - [Phase 04]: Classify invitation batch outcomes only from repository-loaded authority. — Prevents callers from declaring issued, queued, skipped, or failed product truth.
 - [Phase 04]: Restrict plaintext invitation secrets to the injected delivery handoff. — Persistent state, audit, outbox, jobs, receipts, and replay records retain only digests or bounded references.
+- [Phase 04]: Merge Admin conflicts only when fields are independent; preserve incompatible drafts. — Prevents silent last-write-wins while retaining operator work for explicit comparison.
+- [Phase 04]: Keep degradation and emergency control capability-specific. — Uncertain critical mutations fail closed without secret queues, and emergency response cannot become a global stop.
 
 ### Pending Todos
 
@@ -725,6 +728,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T01:48:28.465Z
-Stopped at: Completed 04-45-PLAN.md
+Last session: 2026-08-07T02:05:06.608Z
+Stopped at: Completed 04-44-PLAN.md
 Resume file: None
