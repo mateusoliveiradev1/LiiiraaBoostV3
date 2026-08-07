@@ -8,6 +8,7 @@ import {
   type AccountAuthorityTransport,
 } from '../account-authority';
 import {
+  accountPreviewRuntimeAllowed,
   advanceAccountMutationPhase,
   mapAccountAuthorityProjection,
   resolveAccountRuntimeConfig,
@@ -332,12 +333,24 @@ describe('account runtime composition', () => {
     });
   });
 
-  it('defaults deployable composition to production and permits fixture mode only explicitly', () => {
+  it('defaults deployable composition to production and permits fixture mode only locally', () => {
     expect(resolveAccountRuntimeConfig({ authorityBaseUrl: 'https://api.liiiraa.test' })).toEqual({
       authorityBaseUrl: 'https://api.liiiraa.test',
       kind: 'production',
     });
-    expect(resolveAccountRuntimeConfig({ previewEnabled: true })).toEqual({ kind: 'preview' });
+    expect(
+      resolveAccountRuntimeConfig({
+        authorityBaseUrl: 'https://api.liiiraa.test',
+        previewAllowed: false,
+        previewEnabled: true,
+      }),
+    ).toEqual({ authorityBaseUrl: 'https://api.liiiraa.test', kind: 'production' });
+    expect(
+      resolveAccountRuntimeConfig({ previewAllowed: true, previewEnabled: true }),
+    ).toEqual({ kind: 'preview' });
+    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'production' })).toBe(false);
+    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'development', vercel: '1' })).toBe(false);
+    expect(accountPreviewRuntimeAllowed({ nodeEnv: 'development' })).toBe(true);
   });
 
   it('keeps preview authority isolated from production modules', () => {
@@ -346,6 +359,7 @@ describe('account runtime composition', () => {
       'utf8',
     );
     const runtimeSource = readFileSync(new URL('../account-runtime.ts', import.meta.url), 'utf8');
+    const proxySource = readFileSync(new URL('../../proxy.ts', import.meta.url), 'utf8');
     const productionViewSource = readFileSync(
       new URL('./account-authority.tsx', import.meta.url),
       'utf8',
@@ -354,6 +368,7 @@ describe('account runtime composition', () => {
 
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
+    expect(proxySource).toContain('accountPreviewRuntimeAllowed');
     expect(productionViewSource).not.toContain('@liiiraa/web-preview');
     expect(productionViewSource).toContain('Account authority status');
     expect(productionViewSource).toContain('Profile update receipt');
