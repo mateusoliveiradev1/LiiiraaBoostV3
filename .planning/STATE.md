@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-43-PLAN.md
-last_updated: "2026-08-07T01:28:41.676Z"
+stopped_at: Completed 04-45-PLAN.md
+last_updated: "2026-08-07T01:48:59.578Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 180
+  completed_plans: 181
   percent: 30
 ---
 
@@ -218,6 +218,7 @@ _Updated after plan completion_
 | Phase 04 P41 | 16 min | 2 tasks | 11 files |
 | Phase 04 P42 | 10 min | 1 tasks | 4 files |
 | Phase 04 P43 | 5 min | 1 tasks | 4 files |
+| Phase 04 P45 | 11 min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -677,6 +678,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Admin contracts remain control-plane-only and are generated with TypeScript/Rust parity — Prevents desktop schema leakage and handwritten DTO drift
 - [Phase 04]: Invitation policy stores opaque recipient keys and emits secret lifecycle effects without holding plaintext secrets — Preserves recipient privacy and keeps cryptography and delivery in transactional ports
 - [Phase 04]: Admin sessions activate exactly one of four functions and simulations can never authorize actions — Prevents standing super-admin authority and keeps permission changes immediately visible
+- [Phase 04]: Classify invitation batch outcomes only from repository-loaded authority. — Prevents callers from declaring issued, queued, skipped, or failed product truth.
+- [Phase 04]: Restrict plaintext invitation secrets to the injected delivery handoff. — Persistent state, audit, outbox, jobs, receipts, and replay records retain only digests or bounded references.
 
 ### Pending Todos
 
@@ -722,6 +725,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T01:28:41.669Z
-Stopped at: Completed 04-43-PLAN.md
+Last session: 2026-08-07T01:48:28.465Z
+Stopped at: Completed 04-45-PLAN.md
 Resume file: None
