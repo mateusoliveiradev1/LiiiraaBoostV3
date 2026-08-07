@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint @typescript-eslint/no-unnecessary-type-assertion: "off" -- Next.js typed Link requires Route assertions that Linux ESLint misclassifies. */
+
 import { LocaleSwitcher } from '@liiiraa/web-features';
 import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core';
 import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';

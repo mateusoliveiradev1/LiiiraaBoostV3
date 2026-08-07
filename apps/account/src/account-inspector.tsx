@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint @typescript-eslint/no-unnecessary-type-assertion: "off" -- Next.js typed Link requires Route assertions that Linux ESLint misclassifies. */
+
 import { ProductIcon } from '@liiiraa/design-system';
 import type { Route } from 'next';
 import Link from 'next/link';

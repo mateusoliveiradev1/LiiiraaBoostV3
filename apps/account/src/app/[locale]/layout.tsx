@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-unnecessary-type-assertion: "off" -- Next.js typed Link requires Route assertions that Linux ESLint misclassifies. */
 import '@liiiraa/design-tokens/tokens.css';
 import '../account-shell.css';
 

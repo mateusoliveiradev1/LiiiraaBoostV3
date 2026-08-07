@@ -15,7 +15,7 @@
       "outputs": ["coverage/**"]
     },
     "@liiiraa/fixture-guard#test": {
-      "dependsOn": ["check", "^test", "@liiiraa/desktop#test"],
+      "dependsOn": ["check", "^test", "@liiiraa/architecture-tests#test", "@liiiraa/desktop#test"],
       "outputs": ["coverage/**"]
     },
     "build": {
