@@ -133,7 +133,8 @@ export const createQueueHref = (pathname: string, state: QueueUrlState): string 
   if (state.viewId) parameters.set('view', state.viewId);
   if (state.selectedId) parameters.set('selected', state.selectedId);
   const query = parameters.toString();
-  return query ? `${pathname.split('?')[0]}?${query}` : (pathname.split('?')[0] ?? pathname);
+  const cleanPath = pathname.split('?')[0] ?? pathname;
+  return query ? `${cleanPath}?${query}` : cleanPath;
 };
 
 export type QueueSavedView = Readonly<{

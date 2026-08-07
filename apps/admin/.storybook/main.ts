@@ -17,6 +17,9 @@ const config = {
     define: {
       ...viteConfig.define,
       __dirname: JSON.stringify('/'),
+      'process.env': JSON.stringify({
+        NODE_ENV: 'development',
+      }),
     },
     plugins: [...(viteConfig.plugins ?? []), react()],
   }),
