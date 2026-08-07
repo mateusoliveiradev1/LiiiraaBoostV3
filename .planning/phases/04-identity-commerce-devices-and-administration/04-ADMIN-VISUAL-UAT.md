@@ -1,11 +1,11 @@
 ---
-status: testing
+status: passed
 phase: 04-identity-commerce-devices-and-administration
 plan: 04-61
-tested_commit: 9e1d5d9
-storybook_iframe_sha256: b7169da34cced082bd7d2a8559c8ff7bc3a849e376ebc6e2310affbae9b03cfc
+tested_commit: bbc74cc
+storybook_iframe_sha256: b8720177e2e1df3a128f24065b0d709f66e24c0a8887d6396b3ba663c9667a6d
 started: 2026-08-07T18:40:31.4628839Z
-updated: 2026-08-07T18:40:31.4628839Z
+updated: 2026-08-07T19:45:55.0289281Z
 ---
 
 # Admin visual and accessibility UAT
@@ -19,19 +19,19 @@ technology evidence that has not been observed.
 
 ## Current Test
 
-number: 7
-name: Narrator and secondary screen-reader pairing
+number: 9
+name: Complete
 expected: |
-  Narrator with Microsoft Edge and one additional supported browser/screen-reader pairing
-  announce landmarks, headings, tables, sorting, selected counts, live status, validation
-  errors, risk/approval language, dialogs, and restored focus without reading hidden content.
-awaiting: manual assistive-technology observation
+  Every automated and manual visual/accessibility acceptance row passes on the exact
+  tested commit and Storybook build.
+awaiting: none
 
 ## Evidence identity
 
-- Commit: `9e1d5d9`
-- Storybook iframe SHA-256: `b7169da34cced082bd7d2a8559c8ff7bc3a849e376ebc6e2310affbae9b03cfc`
-- Browser: Playwright 1.62 / Chromium on Windows
+- Commit: `bbc74cc`
+- Storybook iframe SHA-256: `b8720177e2e1df3a128f24065b0d709f66e24c0a8887d6396b3ba663c9667a6d`
+- Manual assistive technology: Narrator 10.0.26100.8521 / Edge 151.0.4129.59 and NVDA 2026.1.1 / Chromium on Windows
+- Automated browser: Playwright 1.62 / Chromium on Windows
 - Authority: production flags, real API, PostgreSQL on Neon branch `br-holy-credit-avgpp494`
 - Locales: PT-BR and English
 - Viewports: 1600x1000, 1280x800, 1024x768, 768x1024, 390x844, 320x568
@@ -71,7 +71,8 @@ evidence: Forced-colors/reduced-motion Playwright matrix and axe with zero viola
 
 ### 7. Narrator and secondary screen-reader pairing
 expected: Narrator/Edge and one additional pairing announce semantic structure, status changes, errors, risk, approval, tables, selections, dialogs, and focus restoration without hidden-content leakage.
-result: pending
+result: pass
+evidence: Owner observed Narrator/Edge and NVDA/Chromium across the shell, table, critical approval, error, and inspector/focus stories. The only reported discrepancy was a Storybook-local route escape; commits `c8553c6`, `98da17f`, `ea70636`, and `bbc74cc` added RED regressions, a preview-only navigation boundary, polite live announcements, and query-state containment. Browser verification exercised 34 internal links across all seven domains with zero escapes or HTTP failures.
 
 ### 8. Real authority, degraded states, and durable refetch
 expected: Login/TOTP, invitations, governance, approvals, jobs, search, incidents, configuration, privacy, emergency, consent, audit, reconnecting/degraded blocking, persistence, and HTTP refetch use API/PostgreSQL authority with preview and fixtures disabled.
@@ -86,12 +87,24 @@ evidence: 18/18 focused desktop account-authority and account-experience tests.
 ## Summary
 
 total: 9
-passed: 8
-pending: 1
+passed: 9
+pending: 0
 issues: 0
 blocked: 0
 
-## Remaining gate
+## Resolved issue
 
-- Manual Narrator/Edge and secondary screen-reader observation is required before creating
-  `04-61-SUMMARY.md` or declaring Plan 04-61 complete.
+- Activating `Abrir revisões de acesso` originally navigated the static Storybook origin to
+  `/pt-BR/admin/people/access-reviews` and returned HTTP 404. The preview-only boundary now
+  preserves the active story, retains real accessible link semantics, and announces the
+  validated destination through a polite status region. The production Admin router is
+  unchanged.
+
+## Completion evidence
+
+- Admin verify: 13 files, 165 tests, TypeScript, and Next.js production build passed.
+- Storybook production build passed and the seven-domain link sweep checked 34 routes with
+  zero escapes.
+- Desktop bounded handoff: 18/18 focused tests passed.
+- Real production-authority E2E: 1/1 passed in 1.8 minutes against API/PostgreSQL on Neon with
+  preview and fixture authority disabled.
