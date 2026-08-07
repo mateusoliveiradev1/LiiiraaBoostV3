@@ -88,16 +88,32 @@ describe('admin Queue Canvas model', () => {
     };
 
     expect(
-      validateSavedViewWrite({ actorReference: 'admin_mateus', expectedVersion: '7', view: official }),
+      validateSavedViewWrite({
+        actorReference: 'admin_mateus',
+        expectedVersion: '7',
+        view: official,
+      }),
     ).toEqual({ allowed: false, reason: 'official-read-only' });
     expect(
-      validateSavedViewWrite({ actorReference: 'admin_other', expectedVersion: '3', view: personal }),
+      validateSavedViewWrite({
+        actorReference: 'admin_other',
+        expectedVersion: '3',
+        view: personal,
+      }),
     ).toEqual({ allowed: false, reason: 'owner-mismatch' });
     expect(
-      validateSavedViewWrite({ actorReference: 'admin_mateus', expectedVersion: '2', view: personal }),
+      validateSavedViewWrite({
+        actorReference: 'admin_mateus',
+        expectedVersion: '2',
+        view: personal,
+      }),
     ).toEqual({ allowed: false, reason: 'version-conflict' });
     expect(
-      validateSavedViewWrite({ actorReference: 'admin_mateus', expectedVersion: '3', view: personal }),
+      validateSavedViewWrite({
+        actorReference: 'admin_mateus',
+        expectedVersion: '3',
+        view: personal,
+      }),
     ).toEqual({ allowed: true, expectedVersion: '3' });
   });
 
@@ -166,11 +182,11 @@ describe('admin Queue Canvas model', () => {
         state: 'live',
       },
       jobId: 'job_export_01',
-      jobType: 'export',
+      jobType: 'privacy-export',
       kind: 'admin-job-projection',
       ownerReference: 'admin_mateus',
       progressPercent: 100,
-      provenance: { kind: 'observed', source: 'admin-jobs' },
+      provenance: 'postgres-authority',
       receiptReference: 'receipt_export_01',
       schemaVersion: '1.0',
       state: 'partial',
