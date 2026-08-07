@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-46-PLAN.md
-last_updated: "2026-08-07T02:34:21.717Z"
+stopped_at: Completed 04-47-PLAN.md
+last_updated: "2026-08-07T02:48:55.322Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 183
+  completed_plans: 184
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 47 of 62
+Plan: 48 of 62
 Status: Ready to execute
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -221,6 +221,7 @@ _Updated after plan completion_
 | Phase 04 P45 | 11 min | 1 tasks | 5 files |
 | Phase 04 P44 | 4 min | 1 tasks | 4 files |
 | Phase 04 P46 | 17 min | 2 tasks | 9 files |
+| Phase 04 P47 | 11 min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -687,6 +688,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Serialize beta invitation capacity through a locked singleton aggregate. — The PostgreSQL trigger and transaction lock make the 25-active limit authoritative under concurrency.
 - [Phase 04]: Retain immutable rotated secret digests with exactly one active digest. — Rotation history remains auditable without persisting plaintext or allowing multiple usable secrets.
 - [Phase 04]: Queue legacy beta invitations beyond the first 25 during upgrade. — Existing records migrate deterministically without exceeding the authoritative active capacity.
+- [Phase 04]: Treat client-supplied approval IDs only as references. — Eligibility comes from repository-loaded approved, unexpired, independent records with exact capability and scope.
+- [Phase 04]: Validate admin step-up before protected repository access. — Actor, context, action, resource, target, verifier, expiry, and five-minute freshness are bound together.
+- [Phase 04]: Offboarding authority effects commit in one governance transaction. — Membership, sessions, delegations, approvals, work, audit, outbox, receipt, and replay cannot diverge.
 
 ### Pending Todos
 
@@ -732,6 +736,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T02:34:21.710Z
-Stopped at: Completed 04-46-PLAN.md
+Last session: 2026-08-07T02:48:55.313Z
+Stopped at: Completed 04-47-PLAN.md
 Resume file: None
