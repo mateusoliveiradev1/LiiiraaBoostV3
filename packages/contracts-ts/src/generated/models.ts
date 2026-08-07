@@ -262,7 +262,21 @@ export type ControlPlaneDocumentJson =
   | AuthorityErrorJson
   | ProviderEventJson
   | AuditEventJson
-  | OfflineEntitlementEnvelopeJson;
+  | OfflineEntitlementEnvelopeJson
+  | AdminAccessContextProjectionJson
+  | AdminSavedViewProjectionJson
+  | AdminInboxItemProjectionJson
+  | AdminInvitationProjectionJson
+  | AdminInvitationCapacityProjectionJson
+  | AdminGovernanceProjectionJson
+  | AdminJobProjectionJson
+  | AdminIncidentProjectionJson
+  | AdminConfigurationProjectionJson
+  | AdminPrivacyCaseProjectionJson
+  | AdminConflictProjectionJson
+  | AdminPartialFailureProjectionJson
+  | AdminOperationReceiptJson
+  | AdminOperationCommandJson;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AuthorityEtag".
@@ -457,6 +471,141 @@ export type OpaquePayloadBytesJson = string;
  * via the `definition` "DetachedSignature".
  */
 export type DetachedSignatureJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminEnvironmentKind".
+ */
+export type AdminEnvironmentKindJson = 'development' | 'staging' | 'production';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminFreshnessState".
+ */
+export type AdminFreshnessStateJson = 'live' | 'reconnecting' | 'stale' | 'offline' | 'degraded';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminFunction".
+ */
+export type AdminFunctionJson =
+  'owner' | 'support' | 'finance' | 'operations' | 'security' | 'audit' | 'product-configuration';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminDomain".
+ */
+export type AdminDomainJson = 'overview' | 'people' | 'revenue' | 'operation' | 'support' | 'security' | 'system';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminSavedViewVisibility".
+ */
+export type AdminSavedViewVisibilityJson = 'official' | 'personal';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminDensity".
+ */
+export type AdminDensityJson = 'comfortable' | 'compact';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminSeverity".
+ */
+export type AdminSeverityJson = 'information' | 'warning' | 'critical';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInboxState".
+ */
+export type AdminInboxStateJson = 'open' | 'acknowledged' | 'resolved';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInvitationLifecycleState".
+ */
+export type AdminInvitationLifecycleStateJson =
+  'queued' | 'active' | 'accepted' | 'declined' | 'expired' | 'revoked' | 'bounced';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInvitationDeliveryState".
+ */
+export type AdminInvitationDeliveryStateJson = 'pending' | 'sent' | 'delivered' | 'failed' | 'permanent-bounce';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminGovernanceKind".
+ */
+export type AdminGovernanceKindJson = 'approval' | 'delegation' | 'access-review' | 'permission-change';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminGovernanceState".
+ */
+export type AdminGovernanceStateJson =
+  'pending' | 'approved' | 'denied' | 'expired' | 'revoked' | 'suspended' | 'completed';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminRiskLevel".
+ */
+export type AdminRiskLevelJson = 'low' | 'medium' | 'high' | 'critical' | 'irreversible';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminJobType".
+ */
+export type AdminJobTypeJson =
+  | 'invitation-import'
+  | 'invitation-export'
+  | 'invitation-resend'
+  | 'invitation-revoke'
+  | 'reconciliation'
+  | 'recalculation'
+  | 'release'
+  | 'configuration-export'
+  | 'privacy-export';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminJobState".
+ */
+export type AdminJobStateJson = 'queued' | 'running' | 'paused' | 'completed' | 'partial' | 'failed' | 'cancelled';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminIncidentState".
+ */
+export type AdminIncidentStateJson = 'open' | 'acknowledged' | 'contained' | 'resolved' | 'review';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminConfigurationState".
+ */
+export type AdminConfigurationStateJson =
+  'draft' | 'validated' | 'approval-pending' | 'published' | 'paused' | 'rolled-back';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPrivacyCaseState".
+ */
+export type AdminPrivacyCaseStateJson =
+  'submitted' | 'verified' | 'discovery' | 'review' | 'approval-pending' | 'executing' | 'completed' | 'denied';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPrivacyRequestType".
+ */
+export type AdminPrivacyRequestTypeJson = 'access' | 'correction' | 'deletion' | 'portability' | 'restriction';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminConflictState".
+ */
+export type AdminConflictStateJson = 'review-required' | 'merge-available' | 'resolved';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminOperationOutcome".
+ */
+export type AdminOperationOutcomeJson = 'applied' | 'partial' | 'failed' | 'denied' | 'cancelled';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminOperationAction".
+ */
+export type AdminOperationActionJson =
+  | 'issue-invitations'
+  | 'resend-invitations'
+  | 'revoke-invitations'
+  | 'promote-invitation-queue'
+  | 'update-access'
+  | 'request-approval'
+  | 'resolve-incident'
+  | 'publish-configuration'
+  | 'rollback-configuration'
+  | 'execute-privacy-case'
+  | 'export-sensitive-data';
 
 export interface GeneratedContractRoots {
   messageEnvelope:
@@ -2275,6 +2424,930 @@ export interface OfflineEntitlementEnvelopeJson {
   issuedAt: string;
   expiresAt: string;
   validitySeconds: 604800;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminAccessContextProjection".
+ */
+export interface AdminAccessContextProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-access-context-projection';
+  actorId: ControlPlaneIdentifierJson;
+  activeFunction: AdminFunctionJson;
+  /**
+   * @minItems 1
+   * @maxItems 7
+   */
+  domains:
+    | [AdminDomainJson]
+    | [AdminDomainJson, AdminDomainJson]
+    | [AdminDomainJson, AdminDomainJson, AdminDomainJson]
+    | [AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson]
+    | [AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson]
+    | [AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson, AdminDomainJson]
+    | [
+        AdminDomainJson,
+        AdminDomainJson,
+        AdminDomainJson,
+        AdminDomainJson,
+        AdminDomainJson,
+        AdminDomainJson,
+        AdminDomainJson
+      ];
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  capabilities: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  scopes: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  authenticationStrength: AuthenticationStrengthJson;
+  breakGlassExpiresAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminEnvironmentIdentity".
+ */
+export interface AdminEnvironmentIdentityJson {
+  environmentId: ControlPlaneIdentifierJson;
+  kind: AdminEnvironmentKindJson;
+  label: ControlPlaneShortTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminFreshness".
+ */
+export interface AdminFreshnessJson {
+  state: AdminFreshnessStateJson;
+  source: ControlPlaneIdentifierJson;
+  sequence: string;
+  observedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminSavedViewProjection".
+ */
+export interface AdminSavedViewProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-saved-view-projection';
+  savedViewId: ControlPlaneIdentifierJson;
+  domain: AdminDomainJson;
+  name: ControlPlaneShortTextJson;
+  visibility: AdminSavedViewVisibilityJson;
+  state: AdminSafeRouteStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminSafeRouteState".
+ */
+export interface AdminSafeRouteStateJson {
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  filters:
+    | []
+    | [ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ];
+  /**
+   * @minItems 0
+   * @maxItems 8
+   */
+  sort:
+    | []
+    | [ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson, ControlPlaneShortTextJson]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ]
+    | [
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson,
+        ControlPlaneShortTextJson
+      ];
+  tab?: ControlPlaneIdentifierJson;
+  cursor?: ControlPlaneIdentifierJson;
+  recordId?: ControlPlaneIdentifierJson;
+  savedViewId?: ControlPlaneIdentifierJson;
+  density: AdminDensityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInboxItemProjection".
+ */
+export interface AdminInboxItemProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-inbox-item-projection';
+  inboxItemId: ControlPlaneIdentifierJson;
+  severity: AdminSeverityJson;
+  state: AdminInboxStateJson;
+  title: ControlPlaneShortTextJson;
+  ownerReference: ControlPlaneIdentifierJson;
+  relatedRecordReference: ControlPlaneIdentifierJson;
+  deadlineAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInvitationProjection".
+ */
+export interface AdminInvitationProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-invitation-projection';
+  invitationId: ControlPlaneIdentifierJson;
+  lifecycleState: AdminInvitationLifecycleStateJson;
+  recipientMasked: RedactedAuthorityTextJson;
+  campaignReference: ControlPlaneIdentifierJson;
+  locale: ShellLocaleJson;
+  deliveryState: AdminInvitationDeliveryStateJson;
+  reminderCount: number;
+  ownerReference: ControlPlaneIdentifierJson;
+  expiresAt: string;
+  lastEventAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminInvitationCapacityProjection".
+ */
+export interface AdminInvitationCapacityProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-invitation-capacity-projection';
+  capacityId: ControlPlaneIdentifierJson;
+  activeCount: number;
+  activeLimit: 25;
+  queuedCount: number;
+  forecastExhaustionAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminGovernanceProjection".
+ */
+export interface AdminGovernanceProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-governance-projection';
+  governanceRecordId: ControlPlaneIdentifierJson;
+  governanceKind: AdminGovernanceKindJson;
+  state: AdminGovernanceStateJson;
+  risk: AdminRiskLevelJson;
+  authorReference: ControlPlaneIdentifierJson;
+  beneficiaryReference: ControlPlaneIdentifierJson;
+  /**
+   * @minItems 0
+   * @maxItems 32
+   */
+  eligibleApproverReferences: ControlPlaneIdentifierJson[];
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  impactedReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  expiresAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminJobProjection".
+ */
+export interface AdminJobProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-job-projection';
+  jobId: ControlPlaneIdentifierJson;
+  jobType: AdminJobTypeJson;
+  state: AdminJobStateJson;
+  progressPercent: number;
+  totalItems: number;
+  completedItems: number;
+  failedItems: number;
+  ownerReference: ControlPlaneIdentifierJson;
+  startedAt?: string;
+  completedAt?: string;
+  receiptReference?: ControlPlaneIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminIncidentProjection".
+ */
+export interface AdminIncidentProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-incident-projection';
+  incidentId: ControlPlaneIdentifierJson;
+  severity: AdminSeverityJson;
+  state: AdminIncidentStateJson;
+  title: ControlPlaneShortTextJson;
+  ownerReference: ControlPlaneIdentifierJson;
+  substituteReference: ControlPlaneIdentifierJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  affectedCapabilities: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  impactReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  nextUpdateAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminConfigurationProjection".
+ */
+export interface AdminConfigurationProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-configuration-projection';
+  configurationId: ControlPlaneIdentifierJson;
+  state: AdminConfigurationStateJson;
+  version: ContractSchemaVersionJson;
+  cohortReference: ControlPlaneIdentifierJson;
+  validationReference: ControlPlaneIdentifierJson;
+  rollbackVersion?: ContractSchemaVersionJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPrivacyCaseProjection".
+ */
+export interface AdminPrivacyCaseProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-privacy-case-projection';
+  privacyCaseId: ControlPlaneIdentifierJson;
+  state: AdminPrivacyCaseStateJson;
+  requestType: AdminPrivacyRequestTypeJson;
+  subjectReference: ControlPlaneIdentifierJson;
+  legalBasisReference: ControlPlaneIdentifierJson;
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  dataCategoryReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  /**
+   * @minItems 0
+   * @maxItems 32
+   */
+  retentionReferences: ControlPlaneIdentifierJson[];
+  ownerReference: ControlPlaneIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminConflictProjection".
+ */
+export interface AdminConflictProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-conflict-projection';
+  conflictId: ControlPlaneIdentifierJson;
+  state: AdminConflictStateJson;
+  recordReference: ControlPlaneIdentifierJson;
+  localVersion: string;
+  remoteVersion: string;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  conflictingFieldReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  localDraftReference: ControlPlaneIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPartialFailureProjection".
+ */
+export interface AdminPartialFailureProjectionJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-partial-failure-projection';
+  operationId: ControlPlaneIdentifierJson;
+  completedCount: number;
+  failedCount: number;
+  /**
+   * @minItems 1
+   * @maxItems 100
+   */
+  failures: [AdminPartialFailureItemJson, ...AdminPartialFailureItemJson[]];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminPartialFailureItem".
+ */
+export interface AdminPartialFailureItemJson {
+  recordReference: ControlPlaneIdentifierJson;
+  code: AuthorityErrorCodeJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminOperationReceipt".
+ */
+export interface AdminOperationReceiptJson {
+  schemaVersion: '1.0';
+  aggregateVersion: string;
+  etag: AuthorityEtagJson;
+  correlationId: CorrelationIdJson;
+  provenance: AuthorityProvenanceJson;
+  environment: AdminEnvironmentIdentityJson;
+  freshness: AdminFreshnessJson;
+  kind: 'admin-operation-receipt';
+  receiptId: ControlPlaneIdentifierJson;
+  commandId: ControlPlaneIdentifierJson;
+  outcome: AdminOperationOutcomeJson;
+  /**
+   * @minItems 1
+   * @maxItems 100
+   */
+  affectedReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  approvalReferences:
+    | []
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  auditReference: ControlPlaneIdentifierJson;
+  recordedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdminOperationCommand".
+ */
+export interface AdminOperationCommandJson {
+  schemaVersion: '1.0';
+  kind: 'admin-operation-command';
+  commandId: ControlPlaneIdentifierJson;
+  actorId: ControlPlaneIdentifierJson;
+  activeFunction: AdminFunctionJson;
+  action: AdminOperationActionJson;
+  /**
+   * @minItems 1
+   * @maxItems 100
+   */
+  targetReferences: [ControlPlaneIdentifierJson, ...ControlPlaneIdentifierJson[]];
+  reason: RedactedAuthorityTextJson;
+  expectedVersion: string;
+  expectedEtag: AuthorityEtagJson;
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  approvalReferences:
+    | []
+    | [ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson, ControlPlaneIdentifierJson]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ]
+    | [
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson,
+        ControlPlaneIdentifierJson
+      ];
+  correlationId: CorrelationIdJson;
+  requestedAt: string;
 }
 
 export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];

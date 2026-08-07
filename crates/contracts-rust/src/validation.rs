@@ -449,6 +449,219 @@ mod tests {
         })
     }
 
+    fn admin_document(kind: &str, fields: Value) -> Value {
+        let mut document = json!({
+            "schemaVersion": "1.0",
+            "aggregateVersion": "7",
+            "etag": "admin-etag-0007",
+            "correlationId": "admin-correlation-0007",
+            "provenance": "postgres-authority",
+            "environment": {
+                "environmentId": "staging-brasil",
+                "kind": "staging",
+                "label": "Staging Brasil"
+            },
+            "freshness": {
+                "state": "live",
+                "source": "admin-api",
+                "sequence": "42",
+                "observedAt": "2026-08-06T20:00:00.000Z"
+            },
+            "kind": kind
+        });
+        document
+            .as_object_mut()
+            .expect("admin document object")
+            .extend(fields.as_object().expect("admin fields object").clone());
+        document
+    }
+
+    fn valid_admin_documents() -> Vec<Value> {
+        vec![
+            admin_document(
+                "admin-access-context-projection",
+                json!({
+                    "actorId": "administrator-0001",
+                    "activeFunction": "security",
+                    "domains": ["overview", "people", "security", "system"],
+                    "capabilities": ["incident.review", "access.recertify"],
+                    "scopes": ["environment:staging", "region:brasil"],
+                    "authenticationStrength": "passkey"
+                }),
+            ),
+            admin_document(
+                "admin-saved-view-projection",
+                json!({
+                    "savedViewId": "saved-view-0001",
+                    "domain": "people",
+                    "name": "Convites expirando",
+                    "visibility": "official",
+                    "state": {
+                        "filters": ["state:active", "expiry:soon"],
+                        "sort": ["expiresAt:asc"],
+                        "tab": "active",
+                        "density": "compact"
+                    }
+                }),
+            ),
+            admin_document(
+                "admin-inbox-item-projection",
+                json!({
+                    "inboxItemId": "inbox-0001",
+                    "severity": "warning",
+                    "state": "open",
+                    "title": "Revisar capacidade de convites",
+                    "ownerReference": "administrator-0001",
+                    "relatedRecordReference": "invitation-capacity-staging",
+                    "deadlineAt": "2026-08-07T20:00:00.000Z",
+                    "updatedAt": "2026-08-06T20:00:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-invitation-projection",
+                json!({
+                    "invitationId": "invitation-0001",
+                    "lifecycleState": "active",
+                    "recipientMasked": "wa***@example.test",
+                    "campaignReference": "private-beta-01",
+                    "locale": "pt-BR",
+                    "deliveryState": "delivered",
+                    "reminderCount": 1,
+                    "ownerReference": "administrator-0001",
+                    "expiresAt": "2026-08-20T20:00:00.000Z",
+                    "lastEventAt": "2026-08-06T20:00:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-invitation-capacity-projection",
+                json!({
+                    "capacityId": "invitation-capacity-staging",
+                    "activeCount": 18,
+                    "activeLimit": 25,
+                    "queuedCount": 4,
+                    "forecastExhaustionAt": "2026-08-12T20:00:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-governance-projection",
+                json!({
+                    "governanceRecordId": "approval-0001",
+                    "governanceKind": "approval",
+                    "state": "pending",
+                    "risk": "critical",
+                    "authorReference": "administrator-0001",
+                    "beneficiaryReference": "administrator-0002",
+                    "eligibleApproverReferences": ["administrator-0003"],
+                    "impactedReferences": ["scope:production-security"],
+                    "expiresAt": "2026-08-06T20:15:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-job-projection",
+                json!({
+                    "jobId": "job-0001",
+                    "jobType": "invitation-import",
+                    "state": "running",
+                    "progressPercent": 40,
+                    "totalItems": 25,
+                    "completedItems": 10,
+                    "failedItems": 0,
+                    "ownerReference": "administrator-0001",
+                    "startedAt": "2026-08-06T19:59:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-incident-projection",
+                json!({
+                    "incidentId": "incident-0001",
+                    "severity": "critical",
+                    "state": "contained",
+                    "title": "Entrega de convites degradada",
+                    "ownerReference": "administrator-0001",
+                    "substituteReference": "administrator-0002",
+                    "affectedCapabilities": ["invitation.delivery"],
+                    "impactReferences": ["provider:email"],
+                    "nextUpdateAt": "2026-08-06T20:30:00.000Z"
+                }),
+            ),
+            admin_document(
+                "admin-configuration-projection",
+                json!({
+                    "configurationId": "invitation-reminder-policy",
+                    "state": "validated",
+                    "version": "policy-v3",
+                    "cohortReference": "private-beta",
+                    "validationReference": "validation-0003",
+                    "rollbackVersion": "policy-v2"
+                }),
+            ),
+            admin_document(
+                "admin-privacy-case-projection",
+                json!({
+                    "privacyCaseId": "privacy-case-0001",
+                    "state": "verified",
+                    "requestType": "access",
+                    "subjectReference": "account-0001",
+                    "legalBasisReference": "lgpd-access",
+                    "dataCategoryReferences": ["identity", "billing"],
+                    "retentionReferences": ["invoice-retention"],
+                    "ownerReference": "administrator-0001"
+                }),
+            ),
+            admin_document(
+                "admin-conflict-projection",
+                json!({
+                    "conflictId": "conflict-0001",
+                    "state": "review-required",
+                    "recordReference": "configuration:invitation-reminder-policy",
+                    "localVersion": "7",
+                    "remoteVersion": "8",
+                    "conflictingFieldReferences": ["reminder-window"],
+                    "localDraftReference": "draft-0007"
+                }),
+            ),
+            admin_document(
+                "admin-partial-failure-projection",
+                json!({
+                    "operationId": "operation-0001",
+                    "completedCount": 23,
+                    "failedCount": 2,
+                    "failures": [
+                        {"recordReference": "invitation-0024", "code": "provider-unavailable"},
+                        {"recordReference": "invitation-0025", "code": "conflict"}
+                    ]
+                }),
+            ),
+            admin_document(
+                "admin-operation-receipt",
+                json!({
+                    "receiptId": "receipt-0001",
+                    "commandId": "command-0001",
+                    "outcome": "partial",
+                    "affectedReferences": ["invitation-0024", "invitation-0025"],
+                    "approvalReferences": ["approval-0001"],
+                    "auditReference": "audit-0001",
+                    "recordedAt": "2026-08-06T20:01:00.000Z"
+                }),
+            ),
+            json!({
+                "schemaVersion": "1.0",
+                "kind": "admin-operation-command",
+                "commandId": "command-0001",
+                "actorId": "administrator-0001",
+                "activeFunction": "security",
+                "action": "revoke-invitations",
+                "targetReferences": ["invitation-0024", "invitation-0025"],
+                "reason": "Delivery risk confirmed during private beta.",
+                "expectedVersion": "7",
+                "expectedEtag": "admin-etag-0007",
+                "approvalReferences": ["approval-0001"],
+                "correlationId": "admin-correlation-0007",
+                "requestedAt": "2026-08-06T20:00:30.000Z"
+            }),
+        ]
+    }
+
     fn fixture_provenance() -> Value {
         json!({
             "kind": "fixture",
@@ -662,7 +875,10 @@ mod tests {
             account_command(),
             diagnostic_consent(),
             offline_entitlement(),
-        ] {
+        ]
+        .into_iter()
+        .chain(valid_admin_documents())
+        {
             validate_control_plane_document(&input).expect("valid control-plane document");
         }
 
@@ -687,6 +903,38 @@ mod tests {
         let mut invalid_validity = offline_entitlement();
         invalid_validity["validitySeconds"] = json!(604799);
 
+        let admin_documents = valid_admin_documents();
+        let mut unknown_admin_state = admin_documents[3].clone();
+        unknown_admin_state["lifecycleState"] = json!("mystery");
+
+        let mut hidden_scope = admin_documents[5].clone();
+        hidden_scope
+            .as_object_mut()
+            .expect("governance object")
+            .insert("visibility".to_owned(), json!("hidden-scope"));
+
+        let mut unmasked_recipient = admin_documents[3].clone();
+        unmasked_recipient
+            .as_object_mut()
+            .expect("invitation object")
+            .insert("email".to_owned(), json!("private@example.test"));
+
+        let mut unbounded_capabilities = admin_documents[0].clone();
+        unbounded_capabilities["capabilities"] =
+            Value::Array((0..65).map(|index| json!(format!("c{index}"))).collect());
+
+        let mut missing_admin_version = admin_documents[7].clone();
+        missing_admin_version
+            .as_object_mut()
+            .expect("incident object")
+            .remove("aggregateVersion");
+
+        let mut secret_route_state = admin_documents[1].clone();
+        secret_route_state["state"]
+            .as_object_mut()
+            .expect("route state object")
+            .insert("token".to_owned(), json!("secret-token"));
+
         for input in [
             unknown_state,
             fixture_provenance,
@@ -694,6 +942,12 @@ mod tests {
             missing_expected_version,
             duplicate_scopes,
             invalid_validity,
+            unknown_admin_state,
+            hidden_scope,
+            unmasked_recipient,
+            unbounded_capabilities,
+            missing_admin_version,
+            secret_route_state,
         ] {
             validate_control_plane_document(&input).expect_err("invalid control-plane document");
         }

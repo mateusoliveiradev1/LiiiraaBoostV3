@@ -476,6 +476,456 @@ model OfflineEntitlementEnvelope {
   validitySeconds: 604800;
 }
 
+union AdminEnvironmentKind {
+  development: "development",
+  staging: "staging",
+  production: "production",
+}
+
+union AdminDomain {
+  overview: "overview",
+  people: "people",
+  revenue: "revenue",
+  operation: "operation",
+  support: "support",
+  security: "security",
+  system: "system",
+}
+
+union AdminFunction {
+  owner: "owner",
+  support: "support",
+  finance: "finance",
+  operations: "operations",
+  security: "security",
+  audit: "audit",
+  productConfiguration: "product-configuration",
+}
+
+union AdminFreshnessState {
+  live: "live",
+  reconnecting: "reconnecting",
+  stale: "stale",
+  offline: "offline",
+  degraded: "degraded",
+}
+
+union AdminDensity {
+  comfortable: "comfortable",
+  compact: "compact",
+}
+
+union AdminSavedViewVisibility {
+  official: "official",
+  personal: "personal",
+}
+
+union AdminSeverity {
+  information: "information",
+  warning: "warning",
+  critical: "critical",
+}
+
+union AdminInboxState {
+  open: "open",
+  acknowledged: "acknowledged",
+  resolved: "resolved",
+}
+
+union AdminInvitationLifecycleState {
+  queued: "queued",
+  active: "active",
+  accepted: "accepted",
+  declined: "declined",
+  expired: "expired",
+  revoked: "revoked",
+  bounced: "bounced",
+}
+
+union AdminInvitationDeliveryState {
+  pending: "pending",
+  sent: "sent",
+  delivered: "delivered",
+  failed: "failed",
+  permanentBounce: "permanent-bounce",
+}
+
+union AdminGovernanceKind {
+  approval: "approval",
+  delegation: "delegation",
+  accessReview: "access-review",
+  permissionChange: "permission-change",
+}
+
+union AdminGovernanceState {
+  pending: "pending",
+  approved: "approved",
+  denied: "denied",
+  expired: "expired",
+  revoked: "revoked",
+  suspended: "suspended",
+  completed: "completed",
+}
+
+union AdminRiskLevel {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+  irreversible: "irreversible",
+}
+
+union AdminJobType {
+  invitationImport: "invitation-import",
+  invitationExport: "invitation-export",
+  invitationResend: "invitation-resend",
+  invitationRevoke: "invitation-revoke",
+  reconciliation: "reconciliation",
+  recalculation: "recalculation",
+  release: "release",
+  configurationExport: "configuration-export",
+  privacyExport: "privacy-export",
+}
+
+union AdminJobState {
+  queued: "queued",
+  running: "running",
+  paused: "paused",
+  completed: "completed",
+  partial: "partial",
+  failed: "failed",
+  cancelled: "cancelled",
+}
+
+union AdminIncidentState {
+  open: "open",
+  acknowledged: "acknowledged",
+  contained: "contained",
+  resolved: "resolved",
+  review: "review",
+}
+
+union AdminConfigurationState {
+  draft: "draft",
+  validated: "validated",
+  approvalPending: "approval-pending",
+  published: "published",
+  paused: "paused",
+  rolledBack: "rolled-back",
+}
+
+union AdminPrivacyRequestType {
+  access: "access",
+  correction: "correction",
+  deletion: "deletion",
+  portability: "portability",
+  restriction: "restriction",
+}
+
+union AdminPrivacyCaseState {
+  submitted: "submitted",
+  verified: "verified",
+  discovery: "discovery",
+  review: "review",
+  approvalPending: "approval-pending",
+  executing: "executing",
+  completed: "completed",
+  denied: "denied",
+}
+
+union AdminConflictState {
+  reviewRequired: "review-required",
+  mergeAvailable: "merge-available",
+  resolved: "resolved",
+}
+
+union AdminOperationOutcome {
+  applied: "applied",
+  partial: "partial",
+  failed: "failed",
+  denied: "denied",
+  cancelled: "cancelled",
+}
+
+union AdminOperationAction {
+  issueInvitations: "issue-invitations",
+  resendInvitations: "resend-invitations",
+  revokeInvitations: "revoke-invitations",
+  promoteInvitationQueue: "promote-invitation-queue",
+  updateAccess: "update-access",
+  requestApproval: "request-approval",
+  resolveIncident: "resolve-incident",
+  publishConfiguration: "publish-configuration",
+  rollbackConfiguration: "rollback-configuration",
+  executePrivacyCase: "execute-privacy-case",
+  exportSensitiveData: "export-sensitive-data",
+}
+
+model AdminEnvironmentIdentity {
+  environmentId: ControlPlaneIdentifier;
+  kind: AdminEnvironmentKind;
+  label: ControlPlaneShortText;
+}
+
+model AdminFreshness {
+  state: AdminFreshnessState;
+  source: ControlPlaneIdentifier;
+  sequence: uint64;
+  observedAt: utcDateTime;
+}
+
+model AdminProjectionMetadata is AuthorityProjectionMetadata {
+  environment: AdminEnvironmentIdentity;
+  freshness: AdminFreshness;
+}
+
+model AdminSafeRouteState {
+  @minItems(0)
+  @maxItems(16)
+  @uniqueItems
+  filters: ControlPlaneShortText[];
+  @minItems(0)
+  @maxItems(8)
+  @uniqueItems
+  sort: ControlPlaneShortText[];
+  tab?: ControlPlaneIdentifier;
+  cursor?: ControlPlaneIdentifier;
+  recordId?: ControlPlaneIdentifier;
+  savedViewId?: ControlPlaneIdentifier;
+  density: AdminDensity;
+}
+
+model AdminAccessContextProjection is AdminProjectionMetadata {
+  kind: "admin-access-context-projection";
+  actorId: ControlPlaneIdentifier;
+  activeFunction: AdminFunction;
+  @minItems(1)
+  @maxItems(7)
+  @uniqueItems
+  domains: AdminDomain[];
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  capabilities: ControlPlaneIdentifier[];
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  scopes: ControlPlaneIdentifier[];
+  authenticationStrength: AuthenticationStrength;
+  breakGlassExpiresAt?: utcDateTime;
+}
+
+model AdminSavedViewProjection is AdminProjectionMetadata {
+  kind: "admin-saved-view-projection";
+  savedViewId: ControlPlaneIdentifier;
+  domain: AdminDomain;
+  name: ControlPlaneShortText;
+  visibility: AdminSavedViewVisibility;
+  state: AdminSafeRouteState;
+}
+
+model AdminInboxItemProjection is AdminProjectionMetadata {
+  kind: "admin-inbox-item-projection";
+  inboxItemId: ControlPlaneIdentifier;
+  severity: AdminSeverity;
+  state: AdminInboxState;
+  title: ControlPlaneShortText;
+  ownerReference: ControlPlaneIdentifier;
+  relatedRecordReference: ControlPlaneIdentifier;
+  deadlineAt: utcDateTime;
+  updatedAt: utcDateTime;
+}
+
+model AdminInvitationProjection is AdminProjectionMetadata {
+  kind: "admin-invitation-projection";
+  invitationId: ControlPlaneIdentifier;
+  lifecycleState: AdminInvitationLifecycleState;
+  recipientMasked: RedactedAuthorityText;
+  campaignReference: ControlPlaneIdentifier;
+  locale: ShellLocale;
+  deliveryState: AdminInvitationDeliveryState;
+  @minValue(0)
+  @maxValue(2)
+  reminderCount: uint8;
+  ownerReference: ControlPlaneIdentifier;
+  expiresAt: utcDateTime;
+  lastEventAt: utcDateTime;
+}
+
+model AdminInvitationCapacityProjection is AdminProjectionMetadata {
+  kind: "admin-invitation-capacity-projection";
+  capacityId: ControlPlaneIdentifier;
+  @minValue(0)
+  @maxValue(25)
+  activeCount: uint8;
+  activeLimit: 25;
+  @minValue(0)
+  @maxValue(100000)
+  queuedCount: uint32;
+  forecastExhaustionAt?: utcDateTime;
+}
+
+model AdminGovernanceProjection is AdminProjectionMetadata {
+  kind: "admin-governance-projection";
+  governanceRecordId: ControlPlaneIdentifier;
+  governanceKind: AdminGovernanceKind;
+  state: AdminGovernanceState;
+  risk: AdminRiskLevel;
+  authorReference: ControlPlaneIdentifier;
+  beneficiaryReference: ControlPlaneIdentifier;
+  @minItems(0)
+  @maxItems(32)
+  @uniqueItems
+  eligibleApproverReferences: ControlPlaneIdentifier[];
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  impactedReferences: ControlPlaneIdentifier[];
+  expiresAt?: utcDateTime;
+}
+
+model AdminJobProjection is AdminProjectionMetadata {
+  kind: "admin-job-projection";
+  jobId: ControlPlaneIdentifier;
+  jobType: AdminJobType;
+  state: AdminJobState;
+  @minValue(0)
+  @maxValue(100)
+  progressPercent: uint8;
+  @minValue(0)
+  @maxValue(1000000)
+  totalItems: uint32;
+  @minValue(0)
+  @maxValue(1000000)
+  completedItems: uint32;
+  @minValue(0)
+  @maxValue(1000000)
+  failedItems: uint32;
+  ownerReference: ControlPlaneIdentifier;
+  startedAt?: utcDateTime;
+  completedAt?: utcDateTime;
+  receiptReference?: ControlPlaneIdentifier;
+}
+
+model AdminIncidentProjection is AdminProjectionMetadata {
+  kind: "admin-incident-projection";
+  incidentId: ControlPlaneIdentifier;
+  severity: AdminSeverity;
+  state: AdminIncidentState;
+  title: ControlPlaneShortText;
+  ownerReference: ControlPlaneIdentifier;
+  substituteReference: ControlPlaneIdentifier;
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  affectedCapabilities: ControlPlaneIdentifier[];
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  impactReferences: ControlPlaneIdentifier[];
+  nextUpdateAt: utcDateTime;
+}
+
+model AdminConfigurationProjection is AdminProjectionMetadata {
+  kind: "admin-configuration-projection";
+  configurationId: ControlPlaneIdentifier;
+  state: AdminConfigurationState;
+  version: ContractSchemaVersion;
+  cohortReference: ControlPlaneIdentifier;
+  validationReference: ControlPlaneIdentifier;
+  rollbackVersion?: ContractSchemaVersion;
+}
+
+model AdminPrivacyCaseProjection is AdminProjectionMetadata {
+  kind: "admin-privacy-case-projection";
+  privacyCaseId: ControlPlaneIdentifier;
+  state: AdminPrivacyCaseState;
+  requestType: AdminPrivacyRequestType;
+  subjectReference: ControlPlaneIdentifier;
+  legalBasisReference: ControlPlaneIdentifier;
+  @minItems(1)
+  @maxItems(32)
+  @uniqueItems
+  dataCategoryReferences: ControlPlaneIdentifier[];
+  @minItems(0)
+  @maxItems(32)
+  @uniqueItems
+  retentionReferences: ControlPlaneIdentifier[];
+  ownerReference: ControlPlaneIdentifier;
+}
+
+model AdminConflictProjection is AdminProjectionMetadata {
+  kind: "admin-conflict-projection";
+  conflictId: ControlPlaneIdentifier;
+  state: AdminConflictState;
+  recordReference: ControlPlaneIdentifier;
+  localVersion: uint64;
+  remoteVersion: uint64;
+  @minItems(1)
+  @maxItems(64)
+  @uniqueItems
+  conflictingFieldReferences: ControlPlaneIdentifier[];
+  localDraftReference: ControlPlaneIdentifier;
+}
+
+model AdminPartialFailureItem {
+  recordReference: ControlPlaneIdentifier;
+  code: AuthorityErrorCode;
+}
+
+model AdminPartialFailureProjection is AdminProjectionMetadata {
+  kind: "admin-partial-failure-projection";
+  operationId: ControlPlaneIdentifier;
+  @minValue(0)
+  @maxValue(1000000)
+  completedCount: uint32;
+  @minValue(1)
+  @maxValue(1000000)
+  failedCount: uint32;
+  @minItems(1)
+  @maxItems(100)
+  failures: AdminPartialFailureItem[];
+}
+
+model AdminOperationReceipt is AdminProjectionMetadata {
+  kind: "admin-operation-receipt";
+  receiptId: ControlPlaneIdentifier;
+  commandId: ControlPlaneIdentifier;
+  outcome: AdminOperationOutcome;
+  @minItems(1)
+  @maxItems(100)
+  @uniqueItems
+  affectedReferences: ControlPlaneIdentifier[];
+  @minItems(0)
+  @maxItems(16)
+  @uniqueItems
+  approvalReferences: ControlPlaneIdentifier[];
+  auditReference: ControlPlaneIdentifier;
+  recordedAt: utcDateTime;
+}
+
+model AdminOperationCommand {
+  schemaVersion: "1.0";
+  kind: "admin-operation-command";
+  commandId: ControlPlaneIdentifier;
+  actorId: ControlPlaneIdentifier;
+  activeFunction: AdminFunction;
+  action: AdminOperationAction;
+  @minItems(1)
+  @maxItems(100)
+  @uniqueItems
+  targetReferences: ControlPlaneIdentifier[];
+  reason: RedactedAuthorityText;
+  expectedVersion: uint64;
+  expectedEtag: AuthorityEtag;
+  @minItems(0)
+  @maxItems(16)
+  @uniqueItems
+  approvalReferences: ControlPlaneIdentifier[];
+  correlationId: CorrelationId;
+  requestedAt: utcDateTime;
+}
+
 @jsonSchema
 @oneOf
 union ControlPlaneDocument {
@@ -492,6 +942,20 @@ union ControlPlaneDocument {
   providerEvent: ProviderEvent,
   auditEvent: AuditEvent,
   offlineEntitlementEnvelope: OfflineEntitlementEnvelope,
+  adminAccessContextProjection: AdminAccessContextProjection,
+  adminSavedViewProjection: AdminSavedViewProjection,
+  adminInboxItemProjection: AdminInboxItemProjection,
+  adminInvitationProjection: AdminInvitationProjection,
+  adminInvitationCapacityProjection: AdminInvitationCapacityProjection,
+  adminGovernanceProjection: AdminGovernanceProjection,
+  adminJobProjection: AdminJobProjection,
+  adminIncidentProjection: AdminIncidentProjection,
+  adminConfigurationProjection: AdminConfigurationProjection,
+  adminPrivacyCaseProjection: AdminPrivacyCaseProjection,
+  adminConflictProjection: AdminConflictProjection,
+  adminPartialFailureProjection: AdminPartialFailureProjection,
+  adminOperationReceipt: AdminOperationReceipt,
+  adminOperationCommand: AdminOperationCommand,
 }
 
 op getAccount(): AccountProjection | AuthorityError;

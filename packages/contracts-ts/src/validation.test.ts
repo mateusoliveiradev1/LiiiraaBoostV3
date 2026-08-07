@@ -586,6 +586,17 @@ const validAdminDocuments = [
   },
   {
     ...adminProjectionMetadata,
+    kind: 'admin-conflict-projection',
+    conflictId: 'conflict-0001',
+    state: 'review-required',
+    recordReference: 'configuration:invitation-reminder-policy',
+    localVersion: '7',
+    remoteVersion: '8',
+    conflictingFieldReferences: ['reminder-window'],
+    localDraftReference: 'draft-0007',
+  },
+  {
+    ...adminProjectionMetadata,
     kind: 'admin-partial-failure-projection',
     operationId: 'operation-0001',
     completedCount: 23,

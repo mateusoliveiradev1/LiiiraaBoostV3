@@ -158,6 +158,98 @@
         }
       ]
     },
+    "AdminAccessContextProjection": {
+      "$id": "AdminAccessContextProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "activeFunction": {
+          "$ref": "AdminFunction.json"
+        },
+        "actorId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "authenticationStrength": {
+          "$ref": "AuthenticationStrength.json"
+        },
+        "breakGlassExpiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "domains": {
+          "items": {
+            "$ref": "AdminDomain.json"
+          },
+          "maxItems": 7,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-access-context-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "actorId",
+        "activeFunction",
+        "domains",
+        "capabilities",
+        "scopes",
+        "authenticationStrength"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "AdminAction": {
       "$id": "AdminAction.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -251,6 +343,1658 @@
         "not": {}
       }
     },
+    "AdminConfigurationProjection": {
+      "$id": "AdminConfigurationProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "cohortReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "configurationId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-configuration-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "rollbackVersion": {
+          "$ref": "ContractSchemaVersion.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminConfigurationState.json"
+        },
+        "validationReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "version": {
+          "$ref": "ContractSchemaVersion.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "configurationId",
+        "state",
+        "version",
+        "cohortReference",
+        "validationReference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminConfigurationState": {
+      "$id": "AdminConfigurationState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "draft",
+          "type": "string"
+        },
+        {
+          "const": "validated",
+          "type": "string"
+        },
+        {
+          "const": "approval-pending",
+          "type": "string"
+        },
+        {
+          "const": "published",
+          "type": "string"
+        },
+        {
+          "const": "paused",
+          "type": "string"
+        },
+        {
+          "const": "rolled-back",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminConflictProjection": {
+      "$id": "AdminConflictProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "conflictId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "conflictingFieldReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-conflict-projection",
+          "type": "string"
+        },
+        "localDraftReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "localVersion": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "recordReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "remoteVersion": {
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminConflictState.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "conflictId",
+        "state",
+        "recordReference",
+        "localVersion",
+        "remoteVersion",
+        "conflictingFieldReferences",
+        "localDraftReference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminConflictState": {
+      "$id": "AdminConflictState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "review-required",
+          "type": "string"
+        },
+        {
+          "const": "merge-available",
+          "type": "string"
+        },
+        {
+          "const": "resolved",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminDensity": {
+      "$id": "AdminDensity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "comfortable",
+          "type": "string"
+        },
+        {
+          "const": "compact",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminDomain": {
+      "$id": "AdminDomain.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "overview",
+          "type": "string"
+        },
+        {
+          "const": "people",
+          "type": "string"
+        },
+        {
+          "const": "revenue",
+          "type": "string"
+        },
+        {
+          "const": "operation",
+          "type": "string"
+        },
+        {
+          "const": "support",
+          "type": "string"
+        },
+        {
+          "const": "security",
+          "type": "string"
+        },
+        {
+          "const": "system",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminEnvironmentIdentity": {
+      "$id": "AdminEnvironmentIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "environmentId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "kind": {
+          "$ref": "AdminEnvironmentKind.json"
+        },
+        "label": {
+          "$ref": "ControlPlaneShortText.json"
+        }
+      },
+      "required": [
+        "environmentId",
+        "kind",
+        "label"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminEnvironmentKind": {
+      "$id": "AdminEnvironmentKind.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "development",
+          "type": "string"
+        },
+        {
+          "const": "staging",
+          "type": "string"
+        },
+        {
+          "const": "production",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminFreshness": {
+      "$id": "AdminFreshness.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sequence": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "state": {
+          "$ref": "AdminFreshnessState.json"
+        }
+      },
+      "required": [
+        "state",
+        "source",
+        "sequence",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminFreshnessState": {
+      "$id": "AdminFreshnessState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "live",
+          "type": "string"
+        },
+        {
+          "const": "reconnecting",
+          "type": "string"
+        },
+        {
+          "const": "stale",
+          "type": "string"
+        },
+        {
+          "const": "offline",
+          "type": "string"
+        },
+        {
+          "const": "degraded",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminFunction": {
+      "$id": "AdminFunction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "owner",
+          "type": "string"
+        },
+        {
+          "const": "support",
+          "type": "string"
+        },
+        {
+          "const": "finance",
+          "type": "string"
+        },
+        {
+          "const": "operations",
+          "type": "string"
+        },
+        {
+          "const": "security",
+          "type": "string"
+        },
+        {
+          "const": "audit",
+          "type": "string"
+        },
+        {
+          "const": "product-configuration",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminGovernanceKind": {
+      "$id": "AdminGovernanceKind.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "approval",
+          "type": "string"
+        },
+        {
+          "const": "delegation",
+          "type": "string"
+        },
+        {
+          "const": "access-review",
+          "type": "string"
+        },
+        {
+          "const": "permission-change",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminGovernanceProjection": {
+      "$id": "AdminGovernanceProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "authorReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "beneficiaryReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "eligibleApproverReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "governanceKind": {
+          "$ref": "AdminGovernanceKind.json"
+        },
+        "governanceRecordId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "impactedReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "kind": {
+          "const": "admin-governance-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "risk": {
+          "$ref": "AdminRiskLevel.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminGovernanceState.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "governanceRecordId",
+        "governanceKind",
+        "state",
+        "risk",
+        "authorReference",
+        "beneficiaryReference",
+        "eligibleApproverReferences",
+        "impactedReferences"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminGovernanceState": {
+      "$id": "AdminGovernanceState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pending",
+          "type": "string"
+        },
+        {
+          "const": "approved",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        },
+        {
+          "const": "suspended",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminInboxItemProjection": {
+      "$id": "AdminInboxItemProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "deadlineAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "inboxItemId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "kind": {
+          "const": "admin-inbox-item-projection",
+          "type": "string"
+        },
+        "ownerReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "relatedRecordReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "AdminSeverity.json"
+        },
+        "state": {
+          "$ref": "AdminInboxState.json"
+        },
+        "title": {
+          "$ref": "ControlPlaneShortText.json"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "inboxItemId",
+        "severity",
+        "state",
+        "title",
+        "ownerReference",
+        "relatedRecordReference",
+        "deadlineAt",
+        "updatedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminInboxState": {
+      "$id": "AdminInboxState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "open",
+          "type": "string"
+        },
+        {
+          "const": "acknowledged",
+          "type": "string"
+        },
+        {
+          "const": "resolved",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminIncidentProjection": {
+      "$id": "AdminIncidentProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "affectedCapabilities": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "impactReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "incidentId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "kind": {
+          "const": "admin-incident-projection",
+          "type": "string"
+        },
+        "nextUpdateAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ownerReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "AdminSeverity.json"
+        },
+        "state": {
+          "$ref": "AdminIncidentState.json"
+        },
+        "substituteReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "title": {
+          "$ref": "ControlPlaneShortText.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "incidentId",
+        "severity",
+        "state",
+        "title",
+        "ownerReference",
+        "substituteReference",
+        "affectedCapabilities",
+        "impactReferences",
+        "nextUpdateAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminIncidentState": {
+      "$id": "AdminIncidentState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "open",
+          "type": "string"
+        },
+        {
+          "const": "acknowledged",
+          "type": "string"
+        },
+        {
+          "const": "contained",
+          "type": "string"
+        },
+        {
+          "const": "resolved",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminInvitationCapacityProjection": {
+      "$id": "AdminInvitationCapacityProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "activeCount": {
+          "maximum": 25,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "activeLimit": {
+          "const": 25,
+          "type": "number"
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "capacityId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "forecastExhaustionAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-invitation-capacity-projection",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "queuedCount": {
+          "maximum": 100000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "capacityId",
+        "activeCount",
+        "activeLimit",
+        "queuedCount"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminInvitationDeliveryState": {
+      "$id": "AdminInvitationDeliveryState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pending",
+          "type": "string"
+        },
+        {
+          "const": "sent",
+          "type": "string"
+        },
+        {
+          "const": "delivered",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        },
+        {
+          "const": "permanent-bounce",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminInvitationLifecycleState": {
+      "$id": "AdminInvitationLifecycleState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "queued",
+          "type": "string"
+        },
+        {
+          "const": "active",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "type": "string"
+        },
+        {
+          "const": "declined",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        },
+        {
+          "const": "bounced",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminInvitationProjection": {
+      "$id": "AdminInvitationProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "campaignReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "deliveryState": {
+          "$ref": "AdminInvitationDeliveryState.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "invitationId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "kind": {
+          "const": "admin-invitation-projection",
+          "type": "string"
+        },
+        "lastEventAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "lifecycleState": {
+          "$ref": "AdminInvitationLifecycleState.json"
+        },
+        "locale": {
+          "$ref": "ShellLocale.json"
+        },
+        "ownerReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "recipientMasked": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "reminderCount": {
+          "maximum": 2,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "invitationId",
+        "lifecycleState",
+        "recipientMasked",
+        "campaignReference",
+        "locale",
+        "deliveryState",
+        "reminderCount",
+        "ownerReference",
+        "expiresAt",
+        "lastEventAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminJobProjection": {
+      "$id": "AdminJobProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "completedItems": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "failedItems": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "jobId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "jobType": {
+          "$ref": "AdminJobType.json"
+        },
+        "kind": {
+          "const": "admin-job-projection",
+          "type": "string"
+        },
+        "ownerReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "progressPercent": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "receiptReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminJobState.json"
+        },
+        "totalItems": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "jobId",
+        "jobType",
+        "state",
+        "progressPercent",
+        "totalItems",
+        "completedItems",
+        "failedItems",
+        "ownerReference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminJobState": {
+      "$id": "AdminJobState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "queued",
+          "type": "string"
+        },
+        {
+          "const": "running",
+          "type": "string"
+        },
+        {
+          "const": "paused",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "type": "string"
+        },
+        {
+          "const": "partial",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminJobType": {
+      "$id": "AdminJobType.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "invitation-import",
+          "type": "string"
+        },
+        {
+          "const": "invitation-export",
+          "type": "string"
+        },
+        {
+          "const": "invitation-resend",
+          "type": "string"
+        },
+        {
+          "const": "invitation-revoke",
+          "type": "string"
+        },
+        {
+          "const": "reconciliation",
+          "type": "string"
+        },
+        {
+          "const": "recalculation",
+          "type": "string"
+        },
+        {
+          "const": "release",
+          "type": "string"
+        },
+        {
+          "const": "configuration-export",
+          "type": "string"
+        },
+        {
+          "const": "privacy-export",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminOperationAction": {
+      "$id": "AdminOperationAction.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "issue-invitations",
+          "type": "string"
+        },
+        {
+          "const": "resend-invitations",
+          "type": "string"
+        },
+        {
+          "const": "revoke-invitations",
+          "type": "string"
+        },
+        {
+          "const": "promote-invitation-queue",
+          "type": "string"
+        },
+        {
+          "const": "update-access",
+          "type": "string"
+        },
+        {
+          "const": "request-approval",
+          "type": "string"
+        },
+        {
+          "const": "resolve-incident",
+          "type": "string"
+        },
+        {
+          "const": "publish-configuration",
+          "type": "string"
+        },
+        {
+          "const": "rollback-configuration",
+          "type": "string"
+        },
+        {
+          "const": "execute-privacy-case",
+          "type": "string"
+        },
+        {
+          "const": "export-sensitive-data",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminOperationCommand": {
+      "$id": "AdminOperationCommand.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "AdminOperationAction.json"
+        },
+        "activeFunction": {
+          "$ref": "AdminFunction.json"
+        },
+        "actorId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "approvalReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "expectedEtag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "expectedVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "admin-operation-command",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "RedactedAuthorityText.json"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "targetReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "commandId",
+        "actorId",
+        "activeFunction",
+        "action",
+        "targetReferences",
+        "reason",
+        "expectedVersion",
+        "expectedEtag",
+        "approvalReferences",
+        "correlationId",
+        "requestedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminOperationOutcome": {
+      "$id": "AdminOperationOutcome.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "applied",
+          "type": "string"
+        },
+        {
+          "const": "partial",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminOperationReceipt": {
+      "$id": "AdminOperationReceipt.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "affectedReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "approvalReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "auditReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "commandId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-operation-receipt",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "AdminOperationOutcome.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "receiptId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "receiptId",
+        "commandId",
+        "outcome",
+        "affectedReferences",
+        "approvalReferences",
+        "auditReference",
+        "recordedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminPartialFailureItem": {
+      "$id": "AdminPartialFailureItem.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "code": {
+          "$ref": "AuthorityErrorCode.json"
+        },
+        "recordReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "recordReference",
+        "code"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminPartialFailureProjection": {
+      "$id": "AdminPartialFailureProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "completedCount": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "failedCount": {
+          "maximum": 1000000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "failures": {
+          "items": {
+            "$ref": "AdminPartialFailureItem.json"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-partial-failure-projection",
+          "type": "string"
+        },
+        "operationId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "operationId",
+        "completedCount",
+        "failedCount",
+        "failures"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminPrivacyCaseProjection": {
+      "$id": "AdminPrivacyCaseProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "dataCategoryReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-privacy-case-projection",
+          "type": "string"
+        },
+        "legalBasisReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "ownerReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "privacyCaseId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "requestType": {
+          "$ref": "AdminPrivacyRequestType.json"
+        },
+        "retentionReferences": {
+          "items": {
+            "$ref": "ControlPlaneIdentifier.json"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminPrivacyCaseState.json"
+        },
+        "subjectReference": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "privacyCaseId",
+        "state",
+        "requestType",
+        "subjectReference",
+        "legalBasisReference",
+        "dataCategoryReferences",
+        "retentionReferences",
+        "ownerReference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminPrivacyCaseState": {
+      "$id": "AdminPrivacyCaseState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "submitted",
+          "type": "string"
+        },
+        {
+          "const": "verified",
+          "type": "string"
+        },
+        {
+          "const": "discovery",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        },
+        {
+          "const": "approval-pending",
+          "type": "string"
+        },
+        {
+          "const": "executing",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminPrivacyRequestType": {
+      "$id": "AdminPrivacyRequestType.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "access",
+          "type": "string"
+        },
+        {
+          "const": "correction",
+          "type": "string"
+        },
+        {
+          "const": "deletion",
+          "type": "string"
+        },
+        {
+          "const": "portability",
+          "type": "string"
+        },
+        {
+          "const": "restriction",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminRiskLevel": {
+      "$id": "AdminRiskLevel.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "low",
+          "type": "string"
+        },
+        {
+          "const": "medium",
+          "type": "string"
+        },
+        {
+          "const": "high",
+          "type": "string"
+        },
+        {
+          "const": "critical",
+          "type": "string"
+        },
+        {
+          "const": "irreversible",
+          "type": "string"
+        }
+      ]
+    },
     "AdminRole": {
       "$id": "AdminRole.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -269,6 +2013,152 @@
         },
         {
           "const": "audit",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminSafeRouteState": {
+      "$id": "AdminSafeRouteState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "cursor": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "density": {
+          "$ref": "AdminDensity.json"
+        },
+        "filters": {
+          "items": {
+            "$ref": "ControlPlaneShortText.json"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "recordId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "savedViewId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "sort": {
+          "items": {
+            "$ref": "ControlPlaneShortText.json"
+          },
+          "maxItems": 8,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "tab": {
+          "$ref": "ControlPlaneIdentifier.json"
+        }
+      },
+      "required": [
+        "filters",
+        "sort",
+        "density"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminSavedViewProjection": {
+      "$id": "AdminSavedViewProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "aggregateVersion": {
+          "type": "string"
+        },
+        "correlationId": {
+          "$ref": "CorrelationId.json"
+        },
+        "domain": {
+          "$ref": "AdminDomain.json"
+        },
+        "environment": {
+          "$ref": "AdminEnvironmentIdentity.json"
+        },
+        "etag": {
+          "$ref": "AuthorityEtag.json"
+        },
+        "freshness": {
+          "$ref": "AdminFreshness.json"
+        },
+        "kind": {
+          "const": "admin-saved-view-projection",
+          "type": "string"
+        },
+        "name": {
+          "$ref": "ControlPlaneShortText.json"
+        },
+        "provenance": {
+          "$ref": "AuthorityProvenance.json"
+        },
+        "savedViewId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "AdminSafeRouteState.json"
+        },
+        "visibility": {
+          "$ref": "AdminSavedViewVisibility.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "aggregateVersion",
+        "etag",
+        "correlationId",
+        "provenance",
+        "environment",
+        "freshness",
+        "kind",
+        "savedViewId",
+        "domain",
+        "name",
+        "visibility",
+        "state"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdminSavedViewVisibility": {
+      "$id": "AdminSavedViewVisibility.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "official",
+          "type": "string"
+        },
+        {
+          "const": "personal",
+          "type": "string"
+        }
+      ]
+    },
+    "AdminSeverity": {
+      "$id": "AdminSeverity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "information",
+          "type": "string"
+        },
+        {
+          "const": "warning",
+          "type": "string"
+        },
+        {
+          "const": "critical",
           "type": "string"
         }
       ]
@@ -829,6 +2719,48 @@
         },
         {
           "$ref": "OfflineEntitlementEnvelope.json"
+        },
+        {
+          "$ref": "AdminAccessContextProjection.json"
+        },
+        {
+          "$ref": "AdminSavedViewProjection.json"
+        },
+        {
+          "$ref": "AdminInboxItemProjection.json"
+        },
+        {
+          "$ref": "AdminInvitationProjection.json"
+        },
+        {
+          "$ref": "AdminInvitationCapacityProjection.json"
+        },
+        {
+          "$ref": "AdminGovernanceProjection.json"
+        },
+        {
+          "$ref": "AdminJobProjection.json"
+        },
+        {
+          "$ref": "AdminIncidentProjection.json"
+        },
+        {
+          "$ref": "AdminConfigurationProjection.json"
+        },
+        {
+          "$ref": "AdminPrivacyCaseProjection.json"
+        },
+        {
+          "$ref": "AdminConflictProjection.json"
+        },
+        {
+          "$ref": "AdminPartialFailureProjection.json"
+        },
+        {
+          "$ref": "AdminOperationReceipt.json"
+        },
+        {
+          "$ref": "AdminOperationCommand.json"
         }
       ]
     },
