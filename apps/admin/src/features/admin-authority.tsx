@@ -27,12 +27,14 @@ import {
   createAdminAuthority,
   type AdminAuthority,
   type AdminDiagnosticProjection,
+  type AdminMutationInput,
   type AdminProjectionCollection,
   type AdminProjectionRecord,
   type AdminQueryFamily,
   type AdminQueryResult,
   type AdminSessionProjection,
   type AdminStepUp,
+  type AdminTotpEnrollment,
 } from '../admin-authority';
 import { AdminFocusHandoff } from '../admin-focus-handoff';
 import { AdminNavigation } from '../admin-navigation';
@@ -85,6 +87,15 @@ const copy = Object.freeze({
     signOutError: 'The administrative session could not be closed. Try again.',
     sessionUntil: 'Protected session until',
     accountPortal: 'Account portal',
+    enrollmentCode: 'Six-digit authenticator code',
+    enrollmentConfirm: 'Activate protected Admin access',
+    enrollmentDescription:
+      'Add this key to your authenticator, then enter the current code. Admin remains locked until the server verifies it.',
+    enrollmentError: 'The code could not be verified. Wait for a new code and try again.',
+    enrollmentKey: 'Manual setup key',
+    enrollmentLoading: 'Preparing protected access',
+    enrollmentTitle: 'Protect your administrative account',
+    enrollmentVerifying: 'Verifying authenticator',
   }),
   'pt-BR': Object.freeze({
     activeRole: 'Função administrativa ativa',
@@ -125,6 +136,15 @@ const copy = Object.freeze({
     signOutError: 'Não foi possível encerrar a sessão administrativa. Tente novamente.',
     sessionUntil: 'Sessão protegida até',
     accountPortal: 'Portal da conta',
+    enrollmentCode: 'Código de seis dígitos do autenticador',
+    enrollmentConfirm: 'Ativar acesso protegido ao Admin',
+    enrollmentDescription:
+      'Adicione esta chave ao seu autenticador e informe o código atual. O Admin continua bloqueado até a verificação do servidor.',
+    enrollmentError: 'Não foi possível validar o código. Aguarde um novo código e tente novamente.',
+    enrollmentKey: 'Chave para configuração manual',
+    enrollmentLoading: 'Preparando acesso protegido',
+    enrollmentTitle: 'Proteja sua conta administrativa',
+    enrollmentVerifying: 'Validando autenticador',
   }),
 });
 
@@ -269,6 +289,7 @@ const AdminSignIn = ({
   authority,
   locale,
   onAuthenticated,
+  onEnrollmentRequired,
   routeId,
 }: Readonly<{
   accountOrigin: string;
@@ -278,6 +299,7 @@ const AdminSignIn = ({
     session: AdminSessionProjection,
     records: readonly AdminProjectionRecord[],
   ) => void;
+  onEnrollmentRequired: () => void;
   routeId: AdminAuthorityRoute;
 }>) => {
   const labels = copy[locale];
@@ -292,7 +314,19 @@ const AdminSignIn = ({
     setLoading(true);
     setError(null);
     const next = await authority.signIn({ email, password });
-    if (next === null || !adminRoleCanAccessRoute(next.role, routeId)) {
+    if (next === null) {
+      setPassword('');
+      setError(labels.signInError);
+      setLoading(false);
+      return;
+    }
+    if ('kind' in next) {
+      setPassword('');
+      setLoading(false);
+      onEnrollmentRequired();
+      return;
+    }
+    if (!adminRoleCanAccessRoute(next.role, routeId)) {
       setPassword('');
       setError(labels.signInError);
       setLoading(false);
@@ -370,6 +404,116 @@ const AdminSignIn = ({
         <span aria-hidden="true">ADMIN / RESTRICTED</span>
         <p>{labels.signInScope}</p>
         <a href={`${accountOrigin}/${locale}/login`}>{labels.backToAccount}</a>
+      </aside>
+    </article>
+  );
+};
+
+const AdminTotpEnrollment = ({
+  authority,
+  locale,
+  onComplete,
+}: Readonly<{
+  authority: AdminAuthority;
+  locale: WebLocale;
+  onComplete: (session: AdminSessionProjection) => void;
+}>) => {
+  const labels = copy[locale];
+  const [enrollment, setEnrollment] = useState<AdminTotpEnrollment | null>();
+  const [code, setCode] = useState('');
+  const [error, setError] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void authority.beginTotpEnrollment().then((next) => {
+      if (active) setEnrollment(next);
+    });
+    return () => {
+      active = false;
+    };
+  }, [authority]);
+
+  const confirm = async (event: SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (enrollment === null || enrollment === undefined || verifying) return;
+    setVerifying(true);
+    setError(false);
+    const session = await authority.confirmTotpEnrollment({
+      code,
+      enrollmentToken: enrollment.enrollmentToken,
+    });
+    if (session === null) {
+      setCode('');
+      setError(true);
+      setVerifying(false);
+      return;
+    }
+    onComplete(session);
+  };
+
+  return (
+    <article className="admin-auth admin-auth--enrollment" data-admin-runtime="production">
+      <section className="admin-auth__primary" aria-labelledby="admin-enrollment-title">
+        <div className="admin-auth__mark" aria-hidden="true">
+          <ProductIcon name="shield" size={20} />
+        </div>
+        <header className="admin-auth__header">
+          <h1 id="admin-enrollment-title">{labels.enrollmentTitle}</h1>
+          <p>{labels.enrollmentDescription}</p>
+        </header>
+        {enrollment === undefined ? (
+          <p aria-live="polite" role="status">
+            {labels.enrollmentLoading}
+          </p>
+        ) : enrollment === null ? (
+          <p className="admin-auth__error" role="alert">
+            {labels.enrollmentError}
+          </p>
+        ) : (
+          <form className="admin-auth__form" onSubmit={(event) => void confirm(event)}>
+            <label className="lb-field">
+              <span>{labels.enrollmentKey}</span>
+              <output className="admin-auth__totp-secret">{enrollment.secret}</output>
+            </label>
+            <label className="lb-field">
+              <span>{labels.enrollmentCode}</span>
+              <input
+                autoComplete="one-time-code"
+                autoFocus
+                className="lb-input admin-auth__totp-code"
+                disabled={verifying}
+                inputMode="numeric"
+                maxLength={6}
+                onChange={(event) => {
+                  setCode(event.currentTarget.value.replace(/\D/gu, '').slice(0, 6));
+                  setError(false);
+                }}
+                pattern="[0-9]{6}"
+                required
+                value={code}
+              />
+            </label>
+            {error ? (
+              <p className="admin-auth__error" role="alert">
+                {labels.enrollmentError}
+              </p>
+            ) : null}
+            <LbButton
+              isDisabled={code.length !== 6 || verifying}
+              isLoading={verifying}
+              loadingLabel={labels.enrollmentVerifying}
+              type="submit"
+              variant="primary"
+            >
+              {labels.enrollmentConfirm}
+            </LbButton>
+          </form>
+        )}
+      </section>
+      <aside className="admin-auth__boundary" aria-label={labels.signInSecurity}>
+        <span aria-hidden="true">TOTP / RFC 6238</span>
+        <p>{labels.signInSecurity}</p>
       </aside>
     </article>
   );
@@ -489,8 +633,12 @@ const CriticalCommand = ({
   const [reason, setReason] = useState('');
   const [impactReviewed, setImpactReviewed] = useState(false);
   const [stepUp, setStepUp] = useState<AdminStepUp | null>(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [stepUpPending, setStepUpPending] = useState(false);
+  const [stepUpError, setStepUpError] = useState(false);
   const [receipt, setReceipt] = useState<AuthorityReceiptJson | null>(null);
   const ready = reason.trim().length >= 8 && impactReviewed && stepUp !== null;
+  const redactedTarget = 'Release-redacted-017';
   return (
     <section className="admin-critical-command" data-high-risk-action="true">
       <LbButton
@@ -512,13 +660,41 @@ const CriticalCommand = ({
           <LbCheckbox isSelected={impactReviewed} onChange={setImpactReviewed} value="impact">
             {labels.impact}
           </LbCheckbox>
+          <LbTextField
+            label={labels.enrollmentCode}
+            maxLength={6}
+            onChange={(value) => {
+              setTotpCode(value.replace(/\D/gu, '').slice(0, 6));
+              setStepUp(null);
+              setStepUpError(false);
+            }}
+            value={totpCode}
+          />
+          {stepUpError ? (
+            <p className="admin-auth__error" role="alert">
+              {labels.enrollmentError}
+            </p>
+          ) : null}
           <div className="admin-critical-command__actions">
             <LbButton
+              isDisabled={totpCode.length !== 6 || stepUpPending}
+              isLoading={stepUpPending}
               onPress={() => {
-                setStepUp({
-                  authorizationContextId: correlationId(),
-                  verifiedAt: new Date().toISOString(),
-                });
+                setStepUpPending(true);
+                setStepUpError(false);
+                void authority
+                  .verifyStepUp({
+                    action: 'correct-entitlement',
+                    authorizationContextId: correlationId(),
+                    code: totpCode,
+                    redactedTarget,
+                    resource: 'entitlement',
+                  })
+                  .then((evidence) => {
+                    setStepUp(evidence);
+                    setStepUpError(evidence === null);
+                    setStepUpPending(false);
+                  });
               }}
               variant="secondary"
             >
@@ -536,7 +712,7 @@ const CriticalCommand = ({
                     expectedVersion: '7',
                     impactReviewed,
                     reason,
-                    redactedTarget: 'Release ••••-017',
+                    redactedTarget,
                     stepUp,
                   })
                   .then((result) => {
@@ -564,6 +740,10 @@ const BreakGlassReview = ({
   locale,
 }: Readonly<{ authority: AdminAuthority; locale: WebLocale }>) => {
   const [metadata, setMetadata] = useState<Readonly<Record<string, string>> | null>(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [error, setError] = useState(false);
+  const [pending, setPending] = useState(false);
+  const targetReference = 'security-incident-083';
   return (
     <section
       aria-label="Redacted break-glass metadata"
@@ -581,18 +761,47 @@ const BreakGlassReview = ({
           </p>
         </div>
       </header>
+      <LbTextField
+        label={copy[locale].enrollmentCode}
+        maxLength={6}
+        onChange={(value) => {
+          setTotpCode(value.replace(/\D/gu, '').slice(0, 6));
+          setError(false);
+        }}
+        value={totpCode}
+      />
+      {error ? (
+        <p className="admin-auth__error" role="alert">
+          {copy[locale].enrollmentError}
+        </p>
+      ) : null}
       <LbButton
+        isDisabled={totpCode.length !== 6 || pending}
+        isLoading={pending}
         onPress={() => {
-          const verifiedAt = new Date().toISOString();
+          setPending(true);
+          setError(false);
           void authority
-            .breakGlass({
-              expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
-              reason: 'Contain the reviewed security incident',
-              stepUp: { authorizationContextId: correlationId(), verifiedAt },
-              targetReference: 'security-incident-083',
+            .verifyStepUp({
+              action: 'export-audit-reference',
+              authorizationContextId: correlationId(),
+              code: totpCode,
+              redactedTarget: targetReference,
+              resource: 'audit-event',
+            })
+            .then(async (stepUp) => {
+              if (stepUp === null) return null;
+              return authority.breakGlass({
+                expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+                reason: 'Contain the reviewed security incident',
+                stepUp,
+                targetReference,
+              });
             })
             .then((result) => {
-              if (result.status === 'complete') setMetadata(result.metadata);
+              if (result?.status === 'complete') setMetadata(result.metadata);
+              else setError(true);
+              setPending(false);
             });
         }}
         variant="destructive"
@@ -715,11 +924,14 @@ const AdminProductionShell = ({
 
 type AdminAuthorityContextValue = Readonly<{
   accountOrigin: string;
+  authorizeMutation: (input: AdminMutationInput) => Promise<AdminMutationInput | null>;
   authority: AdminAuthority;
+  enrollmentRequired: boolean;
   freshness: 'live' | 'reconnecting' | 'offline' | 'degraded';
   projections: Readonly<Partial<Record<AdminQueryFamily, AdminQueryResult>>>;
   revision: number;
   session: AdminSessionProjection | null | undefined;
+  setEnrollmentRequired: Dispatch<SetStateAction<boolean>>;
   setSession: Dispatch<SetStateAction<AdminSessionProjection | null | undefined>>;
 }>;
 
@@ -739,11 +951,19 @@ export const AdminAuthorityProvider = ({
   locale: WebLocale;
 }>) => {
   const [session, setSession] = useState<AdminSessionProjection | null>();
+  const [enrollmentRequired, setEnrollmentRequired] = useState(false);
   const [freshness, setFreshness] = useState<AdminAuthorityContextValue['freshness']>('offline');
   const [projections, setProjections] = useState<
     Readonly<Partial<Record<AdminQueryFamily, AdminQueryResult>>>
   >({});
   const [revision, setRevision] = useState(0);
+  const [mutationStepUp, setMutationStepUp] = useState<Readonly<{
+    input: AdminMutationInput;
+    resolve: (input: AdminMutationInput | null) => void;
+  }> | null>(null);
+  const [mutationStepUpCode, setMutationStepUpCode] = useState('');
+  const [mutationStepUpPending, setMutationStepUpPending] = useState(false);
+  const [mutationStepUpError, setMutationStepUpError] = useState(false);
   const authority = useMemo(
     () =>
       createAdminAuthority({
@@ -777,10 +997,33 @@ export const AdminAuthorityProvider = ({
     [authority, environment],
   );
 
+  const authorizeMutation = useCallback(
+    (input: AdminMutationInput): Promise<AdminMutationInput | null> =>
+      new Promise((resolve) => {
+        setMutationStepUp((current) => {
+          current?.resolve(null);
+          return { input, resolve };
+        });
+        setMutationStepUpCode('');
+        setMutationStepUpError(false);
+      }),
+    [],
+  );
+
   useEffect(() => {
     let active = true;
     void authority.session().then((next) => {
-      if (active) setSession(next);
+      if (!active) return;
+      if (next === null) {
+        setEnrollmentRequired(false);
+        setSession(null);
+      } else if ('kind' in next) {
+        setEnrollmentRequired(true);
+        setSession(null);
+      } else {
+        setEnrollmentRequired(false);
+        setSession(next);
+      }
     });
     return () => {
       active = false;
@@ -835,8 +1078,28 @@ export const AdminAuthorityProvider = ({
   }, [authority, environment, refetchAdminResources, session]);
 
   const context = useMemo(
-    () => ({ accountOrigin, authority, freshness, projections, revision, session, setSession }),
-    [accountOrigin, authority, freshness, projections, revision, session],
+    () => ({
+      accountOrigin,
+      authorizeMutation,
+      authority,
+      enrollmentRequired,
+      freshness,
+      projections,
+      revision,
+      session,
+      setEnrollmentRequired,
+      setSession,
+    }),
+    [
+      accountOrigin,
+      authorizeMutation,
+      authority,
+      enrollmentRequired,
+      freshness,
+      projections,
+      revision,
+      session,
+    ],
   );
 
   if (session === undefined) {
@@ -886,6 +1149,7 @@ export const AdminAuthorityProvider = ({
           authority={authority}
           locale={locale}
           onSignedOut={() => {
+            setEnrollmentRequired(false);
             setSession(null);
           }}
           freshness={freshness}
@@ -896,6 +1160,85 @@ export const AdminAuthorityProvider = ({
         >
           {children}
         </AdminProductionShell>
+      )}
+      {mutationStepUp === null ? null : (
+        <div className="admin-step-up" role="presentation">
+          <section
+            aria-labelledby="admin-step-up-title"
+            aria-modal="true"
+            className="admin-step-up__dialog"
+            role="dialog"
+          >
+            <header>
+              <div className="admin-auth__mark" aria-hidden="true">
+                <ProductIcon name="shield" size={20} />
+              </div>
+              <div>
+                <h2 id="admin-step-up-title">{copy[locale].stepUpDialog}</h2>
+                <p>{copy[locale].enrollmentDescription}</p>
+              </div>
+            </header>
+            <p className="admin-step-up__scope">
+              <span>{mutationStepUp.input.family}</span>
+              <strong>
+                {mutationStepUp.input.targetId ?? mutationStepUp.input.idempotencyKey}
+              </strong>
+            </p>
+            <LbTextField
+              label={copy[locale].enrollmentCode}
+              maxLength={6}
+              onChange={(value) => {
+                setMutationStepUpCode(value.replace(/\D/gu, '').slice(0, 6));
+                setMutationStepUpError(false);
+              }}
+              value={mutationStepUpCode}
+            />
+            {mutationStepUpError ? (
+              <p className="admin-auth__error" role="alert">
+                {copy[locale].enrollmentError}
+              </p>
+            ) : null}
+            <div className="admin-step-up__actions">
+              <LbButton
+                isDisabled={mutationStepUpPending}
+                onPress={() => {
+                  mutationStepUp.resolve(null);
+                  setMutationStepUp(null);
+                }}
+                variant="secondary"
+              >
+                {locale === 'pt-BR' ? 'Cancelar' : 'Cancel'}
+              </LbButton>
+              <LbButton
+                isDisabled={mutationStepUpCode.length !== 6 || mutationStepUpPending}
+                isLoading={mutationStepUpPending}
+                loadingLabel={copy[locale].enrollmentVerifying}
+                onPress={() => {
+                  setMutationStepUpPending(true);
+                  void authority
+                    .verifyMutationStepUp({
+                      ...mutationStepUp.input,
+                      code: mutationStepUpCode,
+                    })
+                    .then((stepUp) => {
+                      if (stepUp === null) {
+                        setMutationStepUpCode('');
+                        setMutationStepUpError(true);
+                        setMutationStepUpPending(false);
+                        return;
+                      }
+                      mutationStepUp.resolve({ ...mutationStepUp.input, stepUp });
+                      setMutationStepUp(null);
+                      setMutationStepUpPending(false);
+                    });
+                }}
+                variant="primary"
+              >
+                {copy[locale].stepUp}
+              </LbButton>
+            </div>
+          </section>
+        </div>
       )}
     </AdminAuthorityContext.Provider>
   );
@@ -908,7 +1251,14 @@ export const useAdminAuthority = (): AdminAuthorityContextValue => {
 };
 
 export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps) => {
-  const { accountOrigin, authority, session, setSession } = useAdminAuthority();
+  const {
+    accountOrigin,
+    authority,
+    enrollmentRequired,
+    session,
+    setEnrollmentRequired,
+    setSession,
+  } = useAdminAuthority();
   const [records, setRecords] = useState<readonly AdminProjectionRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   useEffect(() => {
@@ -941,14 +1291,30 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     );
   }
   if (session === null) {
+    if (enrollmentRequired) {
+      return (
+        <AdminTotpEnrollment
+          authority={authority}
+          locale={locale}
+          onComplete={(next) => {
+            setEnrollmentRequired(false);
+            setSession(next);
+          }}
+        />
+      );
+    }
     return (
       <AdminSignIn
         accountOrigin={accountOrigin}
         authority={authority}
         locale={locale}
         onAuthenticated={(next, nextRecords) => {
+          setEnrollmentRequired(false);
           setSession(next);
           setRecords(nextRecords);
+        }}
+        onEnrollmentRequired={() => {
+          setEnrollmentRequired(true);
         }}
         routeId={routeId}
       />

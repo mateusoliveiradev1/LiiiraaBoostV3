@@ -514,6 +514,27 @@ button:focus-visible,
   margin-block-start: var(--lb-space-1);
 }
 
+.admin-auth__totp-secret {
+  display: block;
+  max-inline-size: 100%;
+  padding: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  overflow-wrap: anywhere;
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-work);
+  font-family: var(--lb-font-data);
+  font-size: var(--lb-text-body-size);
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+
+.admin-auth__totp-code {
+  font-family: var(--lb-font-data) !important;
+  font-size: var(--lb-text-title-size) !important;
+  letter-spacing: 0.28em;
+}
+
 .admin-auth__error {
   margin: 0;
   padding: var(--lb-space-3);
@@ -562,6 +583,69 @@ button:focus-visible,
   justify-self: start;
   color: var(--lb-text-primary);
   font-weight: var(--lb-weight-semibold);
+}
+
+.admin-step-up {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--lb-space-4);
+  background: color-mix(in srgb, var(--lb-surface-canvas) 78%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.admin-step-up__dialog {
+  display: grid;
+  gap: var(--lb-space-4);
+  inline-size: min(100%, 520px);
+  padding: clamp(var(--lb-space-4), 5vw, var(--lb-space-6));
+  border: 1px solid var(--lb-line-strong);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-text-primary);
+  background: var(--lb-surface-inset);
+  box-shadow: var(--lb-shadow-overlay);
+}
+
+.admin-step-up__dialog > header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+}
+
+.admin-step-up__dialog h2,
+.admin-step-up__dialog p {
+  margin: 0;
+}
+
+.admin-step-up__dialog header p {
+  margin-block-start: var(--lb-space-1);
+  color: var(--lb-text-secondary);
+}
+
+.admin-step-up__scope {
+  display: grid;
+  gap: var(--lb-space-1);
+  padding: var(--lb-space-3);
+  border-inline-start: 2px solid var(--lb-cobalt-signal);
+  background: var(--lb-surface-work);
+}
+
+.admin-step-up__scope span {
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+  font-size: var(--lb-text-label-size);
+}
+
+.admin-step-up__scope strong {
+  overflow-wrap: anywhere;
+}
+
+.admin-step-up__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lb-space-2);
 }
 
 .admin-authority {

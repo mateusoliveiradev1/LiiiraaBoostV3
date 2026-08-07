@@ -17,7 +17,10 @@ import type {
   SubscriptionState,
   SupportCaseState,
 } from '@liiiraa/control-plane-application';
-import type { DeviceBindingProjectionJson, SubscriptionProjectionJson } from '@liiiraa/contracts-ts';
+import type {
+  DeviceBindingProjectionJson,
+  SubscriptionProjectionJson,
+} from '@liiiraa/contracts-ts';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts';
 import {
   createPostgresCommerceAuthorityRepository,
@@ -272,12 +275,7 @@ const persistedOperator = async (
   const credential = cookieCredential(request);
   if (credential === null) return null;
   const actor = await identity.resolveCredential(credential);
-  if (
-    actor === null ||
-    actor.sessionKind !== 'admin' ||
-    actor.role === 'tester' ||
-    !ADMIN_ROLES.has(actor.role)
-  )
+  if (actor?.sessionKind !== 'admin' || actor.role === 'tester' || !ADMIN_ROLES.has(actor.role))
     return null;
   const governed = await database.query(
     `SELECT membership.id
@@ -835,7 +833,8 @@ export const createPersistentStagingAdminDependencies = ({
       const actor = await persistedOperator(request, identity, database);
       const body = recordValue(request.body);
       const command = recordValue(body?.['command']);
-      const action = text(command?.['action']);
+      const breakGlassMetadata = request.url.startsWith('/v1/admin/break-glass/metadata');
+      const action = breakGlassMetadata ? 'export-audit-reference' : text(command?.['action']);
       const resource: AdminProjectionResource | null =
         action === 'view-support-diagnostics'
           ? 'diagnostic-metadata'
@@ -860,14 +859,12 @@ export const createPersistentStagingAdminDependencies = ({
               action,
               authorizationContextId,
               receipt,
-              redactedTarget: text(command?.['redactedTarget']),
+              redactedTarget: breakGlassMetadata
+                ? text(body?.['targetReference'])
+                : text(command?.['redactedTarget']),
               resource: resource ?? '',
             });
-      if (
-        evidence === null ||
-        command === null ||
-        resource === null
-      ) {
+      if (evidence === null || (!breakGlassMetadata && command === null) || resource === null) {
         return null;
       }
       return {
@@ -879,7 +876,7 @@ export const createPersistentStagingAdminDependencies = ({
           | 'correct-entitlement'
           | 'export-audit-reference',
         resource,
-        redactedTarget: text(command['redactedTarget']),
+        redactedTarget: evidence.redactedTarget,
         authorizationContextId: evidence.authorizationContextId,
         method: evidence.method,
         verifiedAt: evidence.verifiedAt,
@@ -983,6 +980,13 @@ const resolveGovernanceStepUp = async (
   strongAuth: StagingStrongAuth | undefined,
 ): Promise<AdminGovernanceStepUpEvidence | null> => {
   const actor = await persistedOperator(request, identity, database);
+  const body = recordValue(request.body);
+  const command = recordValue(body?.['command']);
+  const targetReferences = command?.['targetReferences'];
+  const expectedAction = text(command?.['action']);
+  const expectedResource = request.url.includes('/approvals') ? 'approvals' : 'governance';
+  const expectedTarget = Array.isArray(targetReferences) ? text(targetReferences[0]) : '';
+  const expectedAuthorizationContextId = text(body?.['authorizationContextId']);
   const receipt = request.headers['x-liiiraa-admin-step-up'];
   const authorizationContextId = request.headers['x-admin-authorization-context'];
   const action = request.headers['x-admin-step-up-action'];
@@ -995,16 +999,20 @@ const resolveGovernanceStepUp = async (
     typeof authorizationContextId !== 'string' ||
     typeof action !== 'string' ||
     typeof resource !== 'string' ||
-    typeof redactedTarget !== 'string'
+    typeof redactedTarget !== 'string' ||
+    action !== expectedAction ||
+    resource !== expectedResource ||
+    redactedTarget !== expectedTarget ||
+    authorizationContextId !== expectedAuthorizationContextId
   ) {
     return null;
   }
   const evidence = await strongAuth.consumeStepUpReceipt(actor, {
-    action,
-    authorizationContextId,
+    action: expectedAction,
+    authorizationContextId: expectedAuthorizationContextId,
     receipt,
-    redactedTarget,
-    resource,
+    redactedTarget: expectedTarget,
+    resource: expectedResource,
   });
   if (evidence === null) return null;
   return Object.freeze({
@@ -1557,7 +1565,11 @@ export const projectStagingAdminOperationRecord = (
         currentUse: text(row['current_use']),
         safeLimit: text(row['safe_limit']),
         ...(Number.isSafeInteger(days) && days >= 0
-          ? { forecastExhaustionAt: new Date(Date.parse(observedAt) + days * 86_400_000).toISOString() }
+          ? {
+              forecastExhaustionAt: new Date(
+                Date.parse(observedAt) + days * 86_400_000,
+              ).toISOString(),
+            }
           : {}),
         recommendedAction: row['early_action_required'] === true ? 'review-capacity' : 'none',
         observedAt,
@@ -1711,7 +1723,7 @@ export const createPersistentStagingAdminAuthority = ({
     stepUp: {
       verify: (evidence) =>
         Promise.resolve(
-          (evidence.method === 'passkey' || evidence.method === 'totp') &&
+          evidence.method === 'totp' &&
             Date.parse(evidence.verifiedAt) <= clock.now().getTime() &&
             Date.parse(evidence.expiresAt) > clock.now().getTime(),
         ),

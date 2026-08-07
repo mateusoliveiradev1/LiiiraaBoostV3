@@ -97,7 +97,7 @@ export type AdminMutationInput = Readonly<{
   payload: Readonly<Record<string, unknown>>;
   reason?: string;
   signal?: AbortSignal;
-  stepUp?: string;
+  stepUp?: AdminStepUp;
   targetId?: string;
 }>;
 
@@ -191,6 +191,19 @@ export type AdminSessionProjection = Readonly<{
   role: AdminRoleJson;
 }>;
 
+export type AdminEnrollmentRequired = Readonly<{
+  kind: 'enrollment-required';
+}>;
+
+export type AdminAccessProjection = AdminEnrollmentRequired | AdminSessionProjection;
+
+export type AdminTotpEnrollment = Readonly<{
+  enrollmentToken: string;
+  expiresAt: string;
+  otpauthUri: string;
+  secret: string;
+}>;
+
 export type AdminProjectionRecord = Readonly<{
   id: string;
   redactedTarget?: string;
@@ -222,8 +235,21 @@ export type AdminAuthorityListResult =
     }>;
 
 export type AdminStepUp = Readonly<{
+  action: string;
   authorizationContextId: string;
+  expiresAt: string;
+  method: 'totp';
+  receipt: string;
+  redactedTarget: string;
+  resource: string;
   verifiedAt: string;
+}>;
+
+export type AdminStepUpBinding = Readonly<{
+  action: string;
+  authorizationContextId: string;
+  redactedTarget: string;
+  resource: string;
 }>;
 
 export type AdminCommandInput = Readonly<{
@@ -266,6 +292,10 @@ export type AdminDiagnosticLifecycle = Readonly<{
 }>;
 
 export interface AdminAuthority {
+  beginTotpEnrollment(): Promise<AdminTotpEnrollment | null>;
+  confirmTotpEnrollment(
+    input: Readonly<{ code: string; enrollmentToken: string }>,
+  ): Promise<AdminSessionProjection | null>;
   loadInvitation(
     input: Readonly<{ invitationId: string; signal?: AbortSignal }>,
   ): Promise<AdminInvitationDetailResult>;
@@ -274,9 +304,13 @@ export interface AdminAuthority {
   openFreshness(input: AdminFreshnessInput): AdminFreshnessLifecycle;
   signIn(
     input: Readonly<{ email: string; password: string }>,
-  ): Promise<AdminSessionProjection | null>;
+  ): Promise<AdminAccessProjection | null>;
   signOut(): Promise<boolean>;
-  session(): Promise<AdminSessionProjection | null>;
+  session(): Promise<AdminAccessProjection | null>;
+  verifyStepUp(input: AdminStepUpBinding & Readonly<{ code: string }>): Promise<AdminStepUp | null>;
+  verifyMutationStepUp(
+    input: AdminMutationInput & Readonly<{ code: string }>,
+  ): Promise<AdminStepUp | null>;
   list(collection: AdminProjectionCollection): Promise<AdminAuthorityListResult>;
   execute(input: AdminCommandInput): Promise<AdminCommandResult>;
   breakGlass(
@@ -384,6 +418,54 @@ const admitSignedInSession = (value: unknown): AdminSessionProjection | null => 
     actorId: actor['accountId'],
     expiresAt: actor['expiresAt'],
     role: actor['role'],
+  });
+};
+
+const admitStrongAuthStatus = (value: unknown): boolean | null =>
+  isRecord(value) && typeof value['enabled'] === 'boolean' ? value['enabled'] : null;
+
+const admitTotpEnrollment = (value: unknown): AdminTotpEnrollment | null => {
+  if (
+    !isRecord(value) ||
+    typeof value['enrollmentToken'] !== 'string' ||
+    value['enrollmentToken'].length < 32 ||
+    typeof value['secret'] !== 'string' ||
+    !/^[A-Z2-7]{16,128}$/u.test(value['secret']) ||
+    typeof value['otpauthUri'] !== 'string' ||
+    !value['otpauthUri'].startsWith('otpauth://totp/') ||
+    typeof value['expiresAt'] !== 'string' ||
+    Number.isNaN(Date.parse(value['expiresAt']))
+  )
+    return null;
+  return Object.freeze({
+    enrollmentToken: value['enrollmentToken'],
+    expiresAt: value['expiresAt'],
+    otpauthUri: value['otpauthUri'],
+    secret: value['secret'],
+  });
+};
+
+const admitStepUp = (value: unknown, binding: AdminStepUpBinding): AdminStepUp | null => {
+  if (
+    !isRecord(value) ||
+    value['ok'] !== true ||
+    value['method'] !== 'totp' ||
+    typeof value['receipt'] !== 'string' ||
+    value['receipt'].length < 43 ||
+    value['receipt'].length > 256 ||
+    !/^[A-Za-z0-9_-]+$/u.test(value['receipt']) ||
+    typeof value['verifiedAt'] !== 'string' ||
+    Number.isNaN(Date.parse(value['verifiedAt'])) ||
+    typeof value['expiresAt'] !== 'string' ||
+    Number.isNaN(Date.parse(value['expiresAt']))
+  )
+    return null;
+  return Object.freeze({
+    ...binding,
+    expiresAt: value['expiresAt'],
+    method: 'totp',
+    receipt: value['receipt'],
+    verifiedAt: value['verifiedAt'],
   });
 };
 
@@ -843,6 +925,64 @@ export const createAdminAuthority = ({
     }
   };
 
+  const readStrongAuthStatus = async (): Promise<boolean | null> => {
+    try {
+      const response = await transport(`${baseUrl}/v1/identity/strong-auth/status`, {
+        cache: 'no-store',
+        credentials: 'include',
+        headers: headers(correlationId()),
+        method: 'GET',
+      });
+      if (!response.ok || !cachePolicyIsPrivate(response)) return null;
+      return admitStrongAuthStatus(await safeJson(response));
+    } catch {
+      return null;
+    }
+  };
+
+  const readAccess = async (): Promise<AdminAccessProjection | null> => {
+    const session = await readSession();
+    if (session !== null) return session;
+    return (await readStrongAuthStatus()) === false
+      ? Object.freeze({ kind: 'enrollment-required' as const })
+      : null;
+  };
+
+  const requestStepUp = async (
+    input: AdminStepUpBinding & Readonly<{ code: string }>,
+  ): Promise<AdminStepUp | null> => {
+    if (
+      !/^\d{6}$/u.test(input.code) ||
+      !boundedToken(input.action) ||
+      !boundedToken(input.authorizationContextId) ||
+      !boundedToken(input.resource) ||
+      input.redactedTarget.length < 1 ||
+      input.redactedTarget.length > 256
+    )
+      return null;
+    try {
+      const correlation = correlationId();
+      const token = await ensureCsrfToken(correlation);
+      if (token === null) return null;
+      const binding: AdminStepUpBinding = {
+        action: input.action,
+        authorizationContextId: input.authorizationContextId,
+        redactedTarget: input.redactedTarget,
+        resource: input.resource,
+      };
+      const response = await transport(`${baseUrl}/v1/identity/strong-auth/step-up`, {
+        body: JSON.stringify({ ...binding, code: input.code }),
+        cache: 'no-store',
+        credentials: 'include',
+        headers: { ...headers(correlation, token), 'content-type': 'application/json' },
+        method: 'POST',
+      });
+      return response.ok ? admitStepUp(await safeJson(response), binding) : null;
+    } catch {
+      return null;
+    }
+  };
+
   const GOVERNANCE_MUTATIONS = new Set<AdminMutationFamily>([
     'invite-team-member',
     'preview-permission-impact',
@@ -976,6 +1116,45 @@ export const createAdminAuthority = ({
   };
 
   return Object.freeze({
+    async beginTotpEnrollment(): Promise<AdminTotpEnrollment | null> {
+      try {
+        const correlation = correlationId();
+        const token = await ensureCsrfToken(correlation);
+        if (token === null) return null;
+        const response = await transport(`${baseUrl}/v1/identity/strong-auth/totp/enrollment`, {
+          cache: 'no-store',
+          credentials: 'include',
+          headers: headers(correlation, token),
+          method: 'POST',
+        });
+        return response.ok && cachePolicyIsPrivate(response)
+          ? admitTotpEnrollment(await safeJson(response))
+          : null;
+      } catch {
+        return null;
+      }
+    },
+
+    async confirmTotpEnrollment(input: Readonly<{ code: string; enrollmentToken: string }>) {
+      if (!/^\d{6}$/u.test(input.code) || input.enrollmentToken.length < 32) return null;
+      try {
+        const correlation = correlationId();
+        const token = await ensureCsrfToken(correlation);
+        if (token === null) return null;
+        const response = await transport(`${baseUrl}/v1/identity/strong-auth/totp/confirm`, {
+          body: JSON.stringify(input),
+          cache: 'no-store',
+          credentials: 'include',
+          headers: { ...headers(correlation, token), 'content-type': 'application/json' },
+          method: 'POST',
+        });
+        if (!response.ok) return null;
+        return await readSession();
+      } catch {
+        return null;
+      }
+    },
+
     async loadInvitation(
       input: Readonly<{ invitationId: string; signal?: AbortSignal }>,
     ): Promise<AdminInvitationDetailResult> {
@@ -1071,7 +1250,12 @@ export const createAdminAuthority = ({
         !boundedToken(input.idempotencyKey) ||
         (input.expectedVersion !== undefined && !boundedToken(input.expectedVersion)) ||
         (input.expectedEtag !== undefined && !boundedToken(input.expectedEtag)) ||
-        (input.stepUp !== undefined && !boundedToken(input.stepUp)) ||
+        (input.stepUp !== undefined &&
+          (!boundedToken(input.stepUp.receipt) ||
+            !boundedToken(input.stepUp.authorizationContextId) ||
+            !boundedToken(input.stepUp.action) ||
+            !boundedToken(input.stepUp.resource) ||
+            input.stepUp.redactedTarget.length > 256)) ||
         (input.reason !== undefined &&
           (input.reason.trim().length < 8 || input.reason.trim().length > 256)) ||
         (input.approvalReferences?.some((reference) => !boundedToken(reference)) ?? false)
@@ -1087,6 +1271,9 @@ export const createAdminAuthority = ({
         const response = await transport(`${baseUrl}${path}`, {
           body: JSON.stringify({
             ...payload,
+            ...(input.stepUp === undefined
+              ? {}
+              : { authorizationContextId: input.stepUp.authorizationContextId }),
             ...(input.approvalReferences === undefined
               ? {}
               : { approvalReferences: input.approvalReferences }),
@@ -1106,7 +1293,15 @@ export const createAdminAuthority = ({
             ...(input.expectedVersion === undefined
               ? {}
               : { 'x-expected-version': input.expectedVersion }),
-            ...(input.stepUp === undefined ? {} : { 'x-liiiraa-admin-step-up': input.stepUp }),
+            ...(input.stepUp === undefined
+              ? {}
+              : {
+                  'x-liiiraa-admin-step-up': input.stepUp.receipt,
+                  'x-admin-authorization-context': input.stepUp.authorizationContextId,
+                  'x-admin-step-up-action': input.stepUp.action,
+                  'x-admin-step-up-resource': input.stepUp.resource,
+                  'x-admin-step-up-target': input.stepUp.redactedTarget,
+                }),
           },
           method: 'POST',
           ...(input.signal === undefined ? {} : { signal: input.signal }),
@@ -1242,9 +1437,14 @@ export const createAdminAuthority = ({
           method: 'POST',
         });
         if (!response.ok) return null;
-        const session = admitSignedInSession(await safeJson(response));
-        activeSession = session;
-        return session;
+        const signedIn = admitSignedInSession(await safeJson(response));
+        if (signedIn === null) return null;
+        const strongAuthEnabled = await readStrongAuthStatus();
+        if (strongAuthEnabled === false) {
+          activeSession = null;
+          return Object.freeze({ kind: 'enrollment-required' as const });
+        }
+        return strongAuthEnabled === true ? await readSession() : null;
       } catch {
         return null;
       }
@@ -1269,7 +1469,34 @@ export const createAdminAuthority = ({
       }
     },
 
-    session: readSession,
+    session: readAccess,
+
+    async verifyStepUp(input: AdminStepUpBinding & Readonly<{ code: string }>) {
+      return requestStepUp(input);
+    },
+
+    async verifyMutationStepUp(input: AdminMutationInput & Readonly<{ code: string }>) {
+      const correlation = correlationId();
+      const payload = await mutationPayload(input, correlation);
+      const commandCandidate = payload?.['command'];
+      const command = isRecord(commandCandidate) ? commandCandidate : null;
+      const targetReferences = command?.['targetReferences'];
+      const action = command?.['action'];
+      const targets: readonly unknown[] = Array.isArray(targetReferences) ? targetReferences : [];
+      const redactedTarget = targets[0];
+      const path = mutationPath(input);
+      if (path === null || !boundedToken(action) || !boundedToken(redactedTarget)) return null;
+      const requestedContext = payload?.['authorizationContextId'];
+      return await requestStepUp({
+        action,
+        authorizationContextId: boundedToken(requestedContext)
+          ? requestedContext
+          : input.idempotencyKey,
+        code: input.code,
+        redactedTarget,
+        resource: path.includes('/approvals') ? 'approvals' : 'governance',
+      });
+    },
 
     async list(collection: AdminProjectionCollection): Promise<AdminAuthorityListResult> {
       const session = activeSession ?? (await readSession());
@@ -1310,8 +1537,12 @@ export const createAdminAuthority = ({
       if (
         input.stepUp === null ||
         !TOKEN.test(input.stepUp.authorizationContextId) ||
+        !boundedToken(input.stepUp.receipt) ||
+        input.stepUp.action !== input.action ||
+        input.stepUp.redactedTarget !== input.redactedTarget ||
         Number.isNaN(Date.parse(input.stepUp.verifiedAt)) ||
-        Date.parse(clock()) - Date.parse(input.stepUp.verifiedAt) > 5 * 60_000
+        Number.isNaN(Date.parse(input.stepUp.expiresAt)) ||
+        Date.parse(input.stepUp.expiresAt) <= Date.parse(clock())
       ) {
         return { code: 'step-up-required', status: 'denied' };
       }
@@ -1344,7 +1575,11 @@ export const createAdminAuthority = ({
           headers: {
             ...headers(correlation),
             'content-type': 'application/json',
-            'x-liiiraa-admin-step-up': input.stepUp.authorizationContextId,
+            'x-liiiraa-admin-step-up': input.stepUp.receipt,
+            'x-admin-authorization-context': input.stepUp.authorizationContextId,
+            'x-admin-step-up-action': input.stepUp.action,
+            'x-admin-step-up-resource': input.stepUp.resource,
+            'x-admin-step-up-target': input.stepUp.redactedTarget,
           },
           method: 'POST',
         });
@@ -1367,7 +1602,8 @@ export const createAdminAuthority = ({
         reason.length < 8 ||
         reason.length > 256 ||
         !TOKEN.test(input.targetReference) ||
-        !TOKEN.test(input.stepUp.authorizationContextId)
+        !TOKEN.test(input.stepUp.authorizationContextId) ||
+        !boundedToken(input.stepUp.receipt)
       ) {
         return { code: 'invalid-authority', status: 'error' } as const;
       }
@@ -1383,7 +1619,11 @@ export const createAdminAuthority = ({
           headers: {
             ...headers(correlationId()),
             'content-type': 'application/json',
-            'x-liiiraa-admin-step-up': input.stepUp.authorizationContextId,
+            'x-liiiraa-admin-step-up': input.stepUp.receipt,
+            'x-admin-authorization-context': input.stepUp.authorizationContextId,
+            'x-admin-step-up-action': input.stepUp.action,
+            'x-admin-step-up-resource': input.stepUp.resource,
+            'x-admin-step-up-target': input.stepUp.redactedTarget,
           },
           method: 'POST',
         });

@@ -1093,7 +1093,7 @@ const onlineApprovals = (result: AdminQueryResult): readonly AdminGovernanceProj
   result.status === 'online' ? result.records.filter(isGovernance) : [];
 
 export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }>) => {
-  const { authority, freshness, revision, session } = useAdminAuthority();
+  const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<Readonly<{
     approvals: AdminQueryResult;
     team: AdminQueryResult;
@@ -1159,12 +1159,19 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
     input: Parameters<typeof authority.mutate>[0],
     after?: (result: AdminMutationResult) => void,
   ) => {
-    void authority.mutate(input).then((result) => {
-      setMutation(result);
-      after?.(result);
-      if (result.status === 'complete' || result.status === 'partial')
-        setRefresh((value) => value + 1);
-    });
+    const requiresStrongAuth = !['preview-permission-impact', 'review-access'].includes(
+      input.family,
+    );
+    void (requiresStrongAuth ? authorizeMutation(input) : Promise.resolve(input)).then(
+      async (admitted) => {
+        if (admitted === null) return;
+        const result = await authority.mutate(admitted);
+        setMutation(result);
+        after?.(result);
+        if (result.status === 'complete' || result.status === 'partial')
+          setRefresh((value) => value + 1);
+      },
+    );
   };
   const onAction = (action: GovernanceAction) => {
     if (action.kind === 'simulate') {
@@ -1188,7 +1195,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
           recipient: action.email,
           functions: action.functions,
         },
-        stepUp: id,
         targetId: id,
       });
     else if (action.kind === 'preview')
@@ -1231,7 +1237,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
                 : action.risk,
           expiresAt: addMinutes(action.member.freshness.observedAt, 15),
         },
-        stepUp: id,
         targetId: id,
       });
     else if (action.kind === 'approval')
@@ -1252,7 +1257,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
           scopes: action.approval.impactedReferences.slice(1),
           ...(action.approver ? { newApproverId: action.approver } : {}),
         },
-        stepUp: id,
         targetId: action.approval.governanceRecordId,
       });
     else if (action.kind === 'delegate')
@@ -1269,7 +1273,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
           expiresAt: action.expiresAt,
           authorizationContextId: id,
         },
-        stepUp: id,
         targetId: id,
       });
     else if (action.kind === 'review')
@@ -1298,7 +1301,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
         expectedVersion: action.member.aggregateVersion,
         expectedEtag: action.member.etag,
         payload: { authorizationContextId: id, compromise: false },
-        stepUp: id,
         targetId: action.member.identityReference,
       });
     else if (action.kind === 'switch')
@@ -1308,7 +1310,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
         reason: action.reason,
         expectedVersion: action.member.aggregateVersion,
         payload: { authorizationContextId: id, targetFunction: action.targetFunction },
-        stepUp: id,
         targetId: session?.actorId ?? action.member.identityReference,
       });
     else
@@ -1322,7 +1323,6 @@ export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }
           expiresAt: action.expiresAt,
           targetReference: action.targetReference,
         },
-        stepUp: id,
         targetId: action.targetReference,
       });
   };

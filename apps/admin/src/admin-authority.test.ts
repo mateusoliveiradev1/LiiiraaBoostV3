@@ -72,6 +72,17 @@ const receipt: AdminOperationReceiptJson = {
   recordedAt: '2026-08-06T20:01:00.000Z',
 };
 
+const strongStepUp = {
+  action: 'transition-job',
+  authorizationContextId: 'step-up-0001',
+  expiresAt: '2030-08-06T20:05:00.000Z',
+  method: 'totp' as const,
+  receipt: 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789',
+  redactedTarget: 'job-0001',
+  resource: 'governance',
+  verifiedAt: '2030-08-06T20:00:00.000Z',
+};
+
 const governance: AdminGovernanceProjectionJson = {
   ...metadata,
   kind: 'admin-governance-projection',
@@ -216,7 +227,7 @@ describe('complete typed Admin mutation authority', () => {
     expectedEtag: 'admin-etag-0007',
     idempotencyKey: 'admin-operation-0001',
     reason: 'Pause the import while delivery health is reviewed.',
-    stepUp: 'step-up-0001',
+    stepUp: strongStepUp,
     approvalReferences: ['approval-0001'],
   };
 
@@ -237,7 +248,11 @@ describe('complete typed Admin mutation authority', () => {
       'if-match': 'admin-etag-0007',
       'x-expected-version': '7',
       'x-idempotency-key': 'admin-operation-0001',
-      'x-liiiraa-admin-step-up': 'step-up-0001',
+      'x-liiiraa-admin-step-up': strongStepUp.receipt,
+      'x-admin-authorization-context': strongStepUp.authorizationContextId,
+      'x-admin-step-up-action': strongStepUp.action,
+      'x-admin-step-up-resource': strongStepUp.resource,
+      'x-admin-step-up-target': strongStepUp.redactedTarget,
     });
     const requestBody = init?.body;
     expect(typeof requestBody).toBe('string');
@@ -277,7 +292,7 @@ describe('complete typed Admin mutation authority', () => {
         expectedEtag: 'admin-approval-0001-v7',
         idempotencyKey: 'approval-command-0001',
         reason: 'Approve the independently reviewed access transition.',
-        stepUp: 'context-0001',
+        stepUp: { ...strongStepUp, authorizationContextId: 'context-0001' },
       }),
     ).resolves.toEqual({ document: governance, status: 'complete' });
 
@@ -349,7 +364,7 @@ describe('complete typed Admin mutation authority', () => {
           targetEnvironment: 'staging',
         },
         reason: 'Investigate the consented support escalation.',
-        stepUp: 'context-export-0001',
+        stepUp: { ...strongStepUp, authorizationContextId: 'context-export-0001' },
         targetId: 'support-case-0001',
       }),
     ).resolves.toEqual({

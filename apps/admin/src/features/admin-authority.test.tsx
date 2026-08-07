@@ -96,6 +96,14 @@ describe('production admin authority', () => {
           201,
         ),
       )
+      .mockResolvedValueOnce(response({ enabled: true }))
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'developer-01',
+          expiresAt: '2026-09-05T12:00:00.000Z',
+          role: 'security',
+        }),
+      )
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
     const authority = createAdminAuthority({
       correlationId: () => 'admin-logout-test',
@@ -109,9 +117,11 @@ describe('production admin authority', () => {
     expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
       '/v1/identity/csrf',
       '/v1/identity/sign-in',
+      '/v1/identity/strong-auth/status',
+      '/v1/admin/session',
       '/v1/identity/sign-out',
     ]);
-    expect(transport.mock.calls[2]?.[1]?.headers).toMatchObject({
+    expect(transport.mock.calls[4]?.[1]?.headers).toMatchObject({
       'x-csrf-token': csrfToken,
     });
   });
@@ -137,6 +147,14 @@ describe('production admin authority', () => {
           },
           201,
         ),
+      )
+      .mockResolvedValueOnce(response({ enabled: true }))
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'developer-01',
+          expiresAt: '2026-09-05T12:00:00.000Z',
+          role: 'security',
+        }),
       );
     const authority = createAdminAuthority({
       correlationId: () => 'admin-sign-in-test',
@@ -154,8 +172,104 @@ describe('production admin authority', () => {
     expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
       '/v1/identity/csrf',
       '/v1/identity/sign-in',
+      '/v1/identity/strong-auth/status',
+      '/v1/admin/session',
     ]);
     expect(transport.mock.calls[1]?.[1]).toMatchObject({ credentials: 'include', method: 'POST' });
+  });
+
+  it('keeps Admin locked after password login until a real TOTP factor is enrolled', async () => {
+    const csrfToken = 'csrf.'.concat('m'.repeat(43));
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(response({ token: csrfToken }))
+      .mockResolvedValueOnce(
+        response(
+          {
+            actor: {
+              accountId: 'developer-01',
+              expiresAt: '2026-09-05T12:00:00.000Z',
+              role: 'security',
+              sessionKind: 'admin',
+            },
+          },
+          201,
+        ),
+      )
+      .mockResolvedValueOnce(response({ enabled: false }));
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-enrollment-required-test',
+      csrfToken: () => 'csrf-unavailable',
+      transport,
+    });
+
+    await expect(
+      authority.signIn({ email: 'owner@example.com', password: 'CorrectHorse1' }),
+    ).resolves.toEqual({ kind: 'enrollment-required' });
+    expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
+      '/v1/identity/csrf',
+      '/v1/identity/sign-in',
+      '/v1/identity/strong-auth/status',
+    ]);
+  });
+
+  it('enrolls TOTP and obtains an opaque action-bound step-up receipt', async () => {
+    const opaqueReceipt = 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789';
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({
+          enrollmentToken: 'sealed-enrollment-token-abcdefghijklmnopqrstuvwxyz',
+          expiresAt: '2026-01-15T12:10:00.000Z',
+          otpauthUri: 'otpauth://totp/Liiiraa%20Boost%3Aowner',
+          secret: 'ABCDEFGHIJKLMNOPQRSTUVWX234567AB',
+        }),
+      )
+      .mockResolvedValueOnce(response({ ok: true, factor: 'totp' }))
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'developer-01',
+          expiresAt: '2026-09-05T12:00:00.000Z',
+          role: 'security',
+        }),
+      )
+      .mockResolvedValueOnce(
+        response({
+          ok: true,
+          expiresAt: '2026-01-15T12:05:00.000Z',
+          method: 'totp',
+          receipt: opaqueReceipt,
+          verifiedAt: '2026-01-15T12:00:00.000Z',
+        }),
+      );
+    const authority = createAdminAuthority({
+      correlationId: () => 'admin-strong-auth-test',
+      csrfToken: () => 'csrf.'.concat('s'.repeat(43)),
+      transport,
+    });
+    const enrollment = await authority.beginTotpEnrollment();
+    expect(enrollment?.secret).toBe('ABCDEFGHIJKLMNOPQRSTUVWX234567AB');
+    await expect(
+      authority.confirmTotpEnrollment({
+        code: '123456',
+        enrollmentToken: enrollment?.enrollmentToken ?? '',
+      }),
+    ).resolves.toMatchObject({ role: 'security' });
+    await expect(
+      authority.verifyStepUp({
+        action: 'correct-entitlement',
+        authorizationContextId: 'context-strong-auth',
+        code: '654321',
+        redactedTarget: 'Release-redacted-017',
+        resource: 'entitlement',
+      }),
+    ).resolves.toMatchObject({ receipt: opaqueReceipt, method: 'totp' });
+    expect(transport.mock.calls.map(([url]) => requestUrl(url))).toEqual([
+      '/v1/identity/strong-auth/totp/enrollment',
+      '/v1/identity/strong-auth/totp/confirm',
+      '/v1/admin/session',
+      '/v1/identity/strong-auth/step-up',
+    ]);
   });
 
   it('rejects a public browser session at the administrative boundary', async () => {
@@ -252,7 +366,13 @@ describe('production admin authority', () => {
       authority.execute({
         ...base,
         stepUp: {
+          action: base.action,
           authorizationContextId: 'step-up-admin-01',
+          expiresAt: '2026-01-15T12:06:00.000Z',
+          method: 'totp',
+          receipt: 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789',
+          redactedTarget: base.redactedTarget,
+          resource: 'entitlement',
           verifiedAt: '2026-01-15T12:01:00.000Z',
         },
       }),
@@ -327,7 +447,13 @@ describe('production admin authority', () => {
       expiresAt: '2026-01-15T12:10:00.000Z',
       reason: 'Contain the reviewed security incident',
       stepUp: {
+        action: 'admin.break-glass.metadata',
         authorizationContextId: 'step-up-break-glass',
+        expiresAt: '2026-01-15T12:05:00.000Z',
+        method: 'totp',
+        receipt: 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789',
+        redactedTarget: 'security-incident-083',
+        resource: 'governance',
         verifiedAt: '2026-01-15T12:00:00.000Z',
       },
       targetReference: 'security-incident-083',
