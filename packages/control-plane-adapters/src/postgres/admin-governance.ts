@@ -18,7 +18,7 @@ import {
   type AdminDelegationState,
   type AdminFunction,
   type AdminGovernedSession,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/admin/governance';
 
 import type { ControlPlaneMigrationDatabase, ControlPlaneTransaction } from './database.ts';
 

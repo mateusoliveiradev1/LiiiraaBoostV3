@@ -11,7 +11,7 @@ import {
   type AdminFunction,
   type AdminGovernedSession,
   type AdminRiskLevel,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/admin/governance';
 
 import type {
   AdminAccessReviewRecord,

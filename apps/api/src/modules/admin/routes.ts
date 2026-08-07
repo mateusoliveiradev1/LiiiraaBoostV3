@@ -20,6 +20,23 @@ import {
 } from '@liiiraa/control-plane-domain/runtime-admin-authority';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
+import {
+  registerAdminApprovalRoutes,
+  type AdminApprovalRouteDependencies,
+} from './approval-routes.ts';
+import {
+  registerAdminGovernanceRoutes,
+  type AdminGovernanceRouteDependencies,
+} from './governance-routes.ts';
+import {
+  registerAdminInvitationRoutes,
+  type AdminInvitationRouteDependencies,
+} from './invitation-routes.ts';
+import {
+  registerAdminOperationsRoutes,
+  type AdminOperationsRouteDependencies,
+} from './operations-routes.ts';
+
 export interface AdminRouteDependencies {
   readonly allowedOrigin: string;
   readonly resolveDeveloperActor: (
@@ -44,6 +61,25 @@ export interface AdminRouteDependencies {
   ) => Promise<boolean>;
   readonly appendBreakGlassAudit?: (event: Readonly<Record<string, unknown>>) => Promise<void>;
 }
+
+export interface CompleteAdminRouteDependencies {
+  readonly core: AdminRouteDependencies;
+  readonly invitations: AdminInvitationRouteDependencies;
+  readonly governance: AdminGovernanceRouteDependencies;
+  readonly approvals: AdminApprovalRouteDependencies;
+  readonly operations: AdminOperationsRouteDependencies;
+}
+
+export const registerCompleteAdminRoutes = async (
+  app: FastifyInstance,
+  dependencies: CompleteAdminRouteDependencies,
+): Promise<void> => {
+  await registerAdminRoutes(app, dependencies.core);
+  await registerAdminInvitationRoutes(app, dependencies.invitations);
+  await registerAdminGovernanceRoutes(app, dependencies.governance);
+  await registerAdminApprovalRoutes(app, dependencies.approvals);
+  await registerAdminOperationsRoutes(app, dependencies.operations);
+};
 
 const COLLECTION_RESOURCE = Object.freeze({
   'support-cases': 'support-case',

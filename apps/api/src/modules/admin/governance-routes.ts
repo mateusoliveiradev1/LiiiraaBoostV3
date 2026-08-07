@@ -14,7 +14,11 @@ import {
   switchAdminFunction,
 } from '@liiiraa/control-plane-application/admin-governance';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
-import type { AdminCapability, AdminDataScope, AdminFunction } from '@liiiraa/control-plane-domain';
+import type {
+  AdminCapability,
+  AdminDataScope,
+  AdminFunction,
+} from '@liiiraa/control-plane-domain/admin/governance';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface AdminGovernanceRouteSession {

@@ -13,7 +13,7 @@ import {
   requestAdminApproval,
 } from '@liiiraa/control-plane-application/admin-governance';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
-import { decideBreakGlassAdmission } from '@liiiraa/control-plane-domain';
+import { decideBreakGlassAdmission } from '@liiiraa/control-plane-domain/admin/governance';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 import type { AdminGovernanceRouteSession } from './governance-routes.js';

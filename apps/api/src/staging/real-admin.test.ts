@@ -140,7 +140,7 @@ describe('real staging administrative authority', () => {
     const operations = { claim: vi.fn(() => Promise.resolve([{ itemId: 'item-one' }])) };
     await expect(
       runAdminControlPlaneWorkersOnce(
-        { invitations, operations: operations as never },
+        { invitations, operations },
         {
           batchSize: 10,
           leaseUntil: '2030-01-15T12:10:00.000Z',
@@ -154,6 +154,46 @@ describe('real staging administrative authority', () => {
       maximumItems: 10,
       workerId: 'admin-worker-one',
     });
+  });
+
+  it('persists an operator role transition, audit and outbox in one database transaction', async () => {
+    const statements: string[] = [];
+    const transaction = {
+      query: vi.fn((statement: string) => {
+        statements.push(statement);
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+    };
+    const database = {
+      query: transaction.query,
+      transaction: <T>(operation: (value: typeof transaction) => Promise<T>) =>
+        operation(transaction),
+    };
+    const identity = {
+      resolveCredential: vi.fn(() => Promise.resolve(actor('security', 'admin'))),
+    };
+    const app = Fastify();
+    await registerAdminRoutes(
+      app,
+      createPersistentStagingAdminDependencies({
+        adminOrigin,
+        clock: { now: () => new Date('2030-01-15T12:05:00.000Z') },
+        database,
+        identity,
+      }),
+    );
+    await app.ready();
+    const response = await app.inject({
+      headers: { cookie: cookie(operatorCredential), origin: adminOrigin },
+      method: 'POST',
+      payload: { reason: 'Activate reviewed security function', role: 'security' },
+      url: '/v1/admin/roles/assume',
+    });
+    expect(response.statusCode).toBe(201);
+    expect(statements.join('\n')).toMatch(/INSERT INTO admin_function_sessions/iu);
+    expect(statements.join('\n')).toMatch(/INSERT INTO admin_governance_audit/iu);
+    expect(statements.join('\n')).toMatch(/INSERT INTO outbox_jobs/iu);
+    await app.close();
   });
 
   it('resolves a persisted operator session and returns only redacted PostgreSQL projections', async () => {

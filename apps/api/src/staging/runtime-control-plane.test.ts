@@ -16,6 +16,10 @@ describe('real staging control-plane composition', () => {
       'device-authority',
       'support-consent-authority',
       'admin-read-authority',
+      'admin-invitation-authority',
+      'admin-governance-authority',
+      'admin-operations-authority',
+      'admin-worker-authority',
     ]);
   });
 

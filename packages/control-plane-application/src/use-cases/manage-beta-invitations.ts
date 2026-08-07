@@ -6,7 +6,7 @@ import {
   type BetaInvitationCommand,
   type BetaInvitationState,
   type InvitationPreflightClassification,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/admin/invitations';
 
 import type {
   AdminInvitationCommandResult,

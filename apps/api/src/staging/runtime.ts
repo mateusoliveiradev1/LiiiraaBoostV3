@@ -1,10 +1,16 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomBytes, randomUUID } from 'node:crypto';
 import type {
   AccountDeletionState,
   ActiveAdminRoleSession,
   AdminCommandDependencies,
+  AdminGovernanceCapability,
+  AdminGovernanceDependencies,
+  AdminGovernanceStepUpEvidence,
+  AdminInvitationDependencies,
+  AdminOperationsCapability,
+  AdminOperationsDependencies,
   AdminProjectionResource,
   AdminRoleAuthorityDependencies,
   DeviceBindingRecord,
@@ -26,6 +32,18 @@ import {
   verifyRawWebhook,
 } from '@liiiraa/control-plane-adapters/runtime-control-plane';
 import {
+  createPostgresAdminGovernanceRepository,
+  migrateAdminGovernance,
+} from '@liiiraa/control-plane-adapters/postgres/admin-governance';
+import {
+  createPostgresAdminInvitationRepository,
+  migrateAdminInvitations,
+} from '@liiiraa/control-plane-adapters/postgres/admin-invitations';
+import {
+  createPostgresAdminOperationsRepository,
+  migrateAdminOperations,
+} from '@liiiraa/control-plane-adapters/postgres/admin-operations';
+import {
   createControlPlaneDatabase,
   createPostgresIdentityPersistence,
   createRealIdentityAuthority,
@@ -36,9 +54,25 @@ import {
 } from '@liiiraa/control-plane-adapters/runtime-identity';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import Stripe from 'stripe';
+import {
+  ADMIN_FUNCTION_POLICIES,
+  type AdminFunction,
+} from '@liiiraa/control-plane-domain/admin/governance';
+import type { AdminEnvironment } from '@liiiraa/control-plane-domain/admin/operations';
 
 import { admitApiEnvironment, type ApiEnvironmentInput } from '../config/env.ts';
-import { registerAdminRoutes, type AdminRouteDependencies } from '../modules/admin/routes.ts';
+import type { AdminApprovalRouteDependencies } from '../modules/admin/approval-routes.ts';
+import type {
+  AdminGovernanceRouteDependencies,
+  AdminGovernanceRouteSession,
+} from '../modules/admin/governance-routes.ts';
+import type { AdminInvitationRouteDependencies } from '../modules/admin/invitation-routes.ts';
+import type { AdminOperationsRouteDependencies } from '../modules/admin/operations-routes.ts';
+import {
+  registerCompleteAdminRoutes,
+  type AdminRouteDependencies,
+  type CompleteAdminRouteDependencies,
+} from '../modules/admin/routes.ts';
 import { accountSubscriptionUrl, registerCommerceRoutes } from '../modules/commerce/routes.ts';
 import { registerDeviceRoutes } from '../modules/devices/routes.ts';
 import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
@@ -54,6 +88,10 @@ export const REAL_STAGING_CAPABILITIES = Object.freeze([
   'device-authority',
   'support-consent-authority',
   'admin-read-authority',
+  'admin-invitation-authority',
+  'admin-governance-authority',
+  'admin-operations-authority',
+  'admin-worker-authority',
 ] as const);
 
 const freeSubscriptionState = (accountId: string): SubscriptionState => ({
@@ -75,6 +113,7 @@ interface StagingAdminDatabase {
     statement: string,
     values?: readonly unknown[],
   ): Promise<Readonly<{ rows: readonly Readonly<Record<string, unknown>>[] }>>;
+  transaction?<T>(operation: (transaction: StagingAdminDatabase) => Promise<T>): Promise<T>;
 }
 
 type StagingSubscriptionDatabase = StagingAdminDatabase;
@@ -89,6 +128,17 @@ interface PersistentStagingAdminInput {
   readonly database: StagingAdminDatabase;
   readonly identity: StagingAdminIdentityAuthority;
 }
+
+interface PersistentStagingAdminAuthorityInput {
+  readonly adminOrigin: string;
+  readonly authSecret: string;
+  readonly clock?: Readonly<{ now(): Date }>;
+  readonly database: PersistentAdminDatabase;
+  readonly environmentId: AdminEnvironment;
+  readonly identity: StagingAdminIdentityAuthority;
+}
+
+type PersistentAdminDatabase = Parameters<typeof createPostgresAdminOperationsRepository>[0];
 
 const ADMIN_ROLES = new Set<Exclude<IdentityActor['role'], 'tester'>>([
   'audit',
@@ -264,6 +314,11 @@ const text = (value: unknown): string =>
         ? String(value)
         : '';
 
+const recordValue = (value: unknown): Readonly<Record<string, unknown>> | null =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Readonly<Record<string, unknown>>)
+    : null;
+
 const admittedId = (value: unknown): string | null => {
   const id = text(value);
   return /^[A-Za-z0-9._:-]{1,128}$/u.test(id) ? id : null;
@@ -295,19 +350,232 @@ const projectionSummary = (
   }
 };
 
-const deniedRoleAuthority = (clock: Readonly<{ now(): Date }>): AdminRoleAuthorityDependencies => ({
+const requireAdminTransaction = <T>(
+  database: StagingAdminDatabase,
+  operation: (transaction: StagingAdminDatabase) => Promise<T>,
+): Promise<T> => {
+  if (database.transaction === undefined) {
+    return Promise.reject(new Error('STAGING_ADMIN_TRANSACTION_UNAVAILABLE'));
+  }
+  return database.transaction(operation);
+};
+
+const persistentRoleAuthority = (
+  database: StagingAdminDatabase,
+  clock: Readonly<{ now(): Date }>,
+): AdminRoleAuthorityDependencies => ({
   clock,
   ids: { next: randomUUID },
   repository: {
-    transaction: () => Promise.reject(new Error('STAGING_ADMIN_ROLE_MUTATION_UNAVAILABLE')),
+    transaction: (actorId, operation) =>
+      requireAdminTransaction(database, async (transaction) =>
+        operation({
+          loadActive: async () => {
+            const result = await transaction.query(
+              `SELECT governed.session_id, governed.active_function, governed.started_at,
+                      governed.version, session.expires_at
+                 FROM admin_function_sessions AS governed
+                 INNER JOIN admin_governance_memberships AS membership
+                   ON membership.id = governed.membership_id
+                 INNER JOIN sessions AS session ON session.id::text = governed.session_id
+                WHERE membership.identity_id = $1::uuid
+                  AND governed.ended_at IS NULL
+                  AND session.revoked_at IS NULL
+                ORDER BY governed.started_at DESC LIMIT 1 FOR UPDATE`,
+              [actorId],
+            );
+            const row = result.rows[0];
+            const role = asAdminFunction(row?.['active_function']);
+            return row === undefined || role === null
+              ? null
+              : {
+                  sessionId: text(row['session_id']),
+                  actorId,
+                  role,
+                  assumedAt: text(row['started_at']),
+                  expiresAt: text(row['expires_at']),
+                  nonProduction: true,
+                  premiumTestGrant: false,
+                };
+          },
+          replaceActive: async (session) => {
+            await transaction.query(
+              `UPDATE admin_function_sessions AS governed SET ended_at = $2
+                FROM admin_governance_memberships AS membership
+               WHERE governed.membership_id = membership.id
+                 AND membership.identity_id = $1::uuid
+                 AND governed.ended_at IS NULL`,
+              [actorId, clock.now().toISOString()],
+            );
+            if (session !== null) {
+              await transaction.query(
+                `INSERT INTO admin_function_sessions
+                  (id, session_id, membership_id, active_function, simulation, version, started_at)
+                 SELECT $1, identity_session.id::text, membership.id, $3, FALSE, 1, $4
+                   FROM admin_governance_memberships AS membership
+                   INNER JOIN sessions AS identity_session
+                     ON identity_session.identity_id = membership.identity_id
+                  WHERE membership.identity_id = $2::uuid
+                    AND identity_session.revoked_at IS NULL
+                    AND identity_session.expires_at > $4
+                  ORDER BY identity_session.issued_at DESC LIMIT 1`,
+                [session.sessionId, actorId, session.role, session.assumedAt],
+              );
+            }
+          },
+          appendAudit: async (event) => {
+            await transaction.query(
+              `INSERT INTO admin_governance_audit
+                (id, actor_id, subject_id, action, details, occurred_at)
+               VALUES ($1, $2, $3, $4, $5::jsonb, $6)`,
+              [
+                text(event['eventId']) || randomUUID(),
+                actorId,
+                actorId,
+                text(event['action']) || 'admin-role-transition',
+                JSON.stringify(event),
+                text(event['occurredAt']) || clock.now().toISOString(),
+              ],
+            );
+          },
+          enqueueOutbox: async (event) => {
+            await transaction.query(
+              `INSERT INTO outbox_jobs
+                (id, topic, aggregate_type, aggregate_id, aggregate_version, payload, available_at)
+               VALUES ($1, $2, 'admin-role', $3::uuid, 1, $4::jsonb, $5)
+               ON CONFLICT (id) DO NOTHING`,
+              [
+                text(event['eventId']) || randomUUID(),
+                text(event['topic']) || 'admin.role.changed',
+                actorId,
+                JSON.stringify(event),
+                text(event['availableAt']) || clock.now().toISOString(),
+              ],
+            );
+          },
+        }),
+      ),
   },
 });
 
-const deniedCommandAuthority = (clock: Readonly<{ now(): Date }>): AdminCommandDependencies => ({
+const commandProjectionStatement = (resource: AdminProjectionResource): string => {
+  switch (resource) {
+    case 'support-case':
+      return `SELECT version, status AS state FROM support_cases WHERE id = $1::uuid FOR UPDATE`;
+    case 'device':
+      return `SELECT version, CASE WHEN revoked_at IS NULL THEN 'active' ELSE 'revoked' END AS state
+        FROM device_bindings WHERE id = $1::uuid FOR UPDATE`;
+    case 'entitlement':
+      return `SELECT version, status AS state FROM premium_entitlements WHERE id = $1::uuid FOR UPDATE`;
+    case 'session':
+      return `SELECT version, CASE WHEN revoked_at IS NULL THEN 'active' ELSE 'revoked' END AS state
+        FROM sessions WHERE id = $1::uuid FOR UPDATE`;
+    case 'diagnostic-metadata':
+      return `SELECT version, CASE WHEN revoked_at IS NULL THEN 'active' ELSE 'revoked' END AS state
+        FROM diagnostic_consents WHERE id = $1::uuid FOR UPDATE`;
+    case 'audit-event':
+      return `SELECT sequence_number AS version, event_type AS state
+        FROM audit_events WHERE id = $1::uuid FOR UPDATE`;
+  }
+};
+
+const persistentCommandAuthority = (
+  database: StagingAdminDatabase,
+  clock: Readonly<{ now(): Date }>,
+): AdminCommandDependencies => ({
   clock,
   ids: { next: randomUUID },
   repository: {
-    transaction: () => Promise.reject(new Error('STAGING_ADMIN_COMMAND_UNAVAILABLE')),
+    transaction: (redactedTarget, operation) =>
+      requireAdminTransaction(database, async (transaction) =>
+        operation({
+          findCommandResult: async (commandId) => {
+            const result = await transaction.query(
+              `SELECT result FROM admin_governance_commands WHERE command_id = $1`,
+              [commandId],
+            );
+            const stored = result.rows[0]?.['result'];
+            return typeof stored === 'object' && stored !== null ? (stored as never) : null;
+          },
+          loadAggregate: async (resource) => {
+            const result = await transaction.query(commandProjectionStatement(resource), [
+              redactedTarget,
+            ]);
+            const row = result.rows[0];
+            return row === undefined
+              ? null
+              : { version: BigInt(text(row['version'])), state: text(row['state']) };
+          },
+          apply: async (command, aggregate) => {
+            let result: Awaited<ReturnType<StagingAdminDatabase['query']>> | null = null;
+            if (command.action === 'revoke-session') {
+              result = await transaction.query(
+                `UPDATE sessions SET revoked_at = $2, version = version + 1
+                  WHERE id = $1::uuid AND revoked_at IS NULL RETURNING version`,
+                [redactedTarget, clock.now().toISOString()],
+              );
+            } else if (command.action === 'revoke-device') {
+              result = await transaction.query(
+                `UPDATE device_bindings SET revoked_at = $2, version = version + 1
+                  WHERE id = $1::uuid AND revoked_at IS NULL RETURNING version`,
+                [redactedTarget, clock.now().toISOString()],
+              );
+            } else if (command.action === 'correct-entitlement') {
+              result = await transaction.query(
+                `UPDATE premium_entitlements SET version = version + 1
+                  WHERE id = $1::uuid RETURNING version`,
+                [redactedTarget],
+              );
+            }
+            const version = result?.rows[0]?.['version'];
+            return {
+              ...aggregate,
+              version: version === undefined ? aggregate.version : BigInt(text(version)),
+            };
+          },
+          appendAudit: async (event) => {
+            const auditReference = text(event['eventId']) || randomUUID();
+            await transaction.query(
+              `INSERT INTO admin_governance_audit
+                (id, actor_id, subject_id, action, details, occurred_at)
+               VALUES ($1, $2, $3, $4, $5::jsonb, $6)`,
+              [
+                auditReference,
+                text(event['actorId']),
+                redactedTarget,
+                text(event['action']) || 'admin-command',
+                JSON.stringify(event),
+                text(event['occurredAt']) || clock.now().toISOString(),
+              ],
+            );
+            return auditReference;
+          },
+          enqueueOutbox: async (event) => {
+            await transaction.query(
+              `INSERT INTO outbox_jobs
+                (id, topic, aggregate_type, aggregate_id, aggregate_version, payload, available_at)
+               VALUES ($1, $2, $3, $4::uuid, $5, $6::jsonb, $7)
+               ON CONFLICT (id) DO NOTHING`,
+              [
+                text(event['jobId']) || randomUUID(),
+                text(event['topic']) || 'admin.command.executed',
+                text(event['resource']) || 'admin',
+                redactedTarget,
+                text(event['aggregateVersion']) || '0',
+                JSON.stringify(event),
+                text(event['availableAt']) || clock.now().toISOString(),
+              ],
+            );
+          },
+          rememberCommandResult: async (commandId, result) => {
+            await transaction.query(
+              `INSERT INTO admin_governance_commands (command_id, subject_id, result)
+               VALUES ($1, $2, $3::jsonb) ON CONFLICT (command_id) DO NOTHING`,
+              [commandId, redactedTarget, JSON.stringify(result)],
+            );
+          },
+        }),
+      ),
   },
 });
 
@@ -328,7 +596,7 @@ export const createPersistentStagingAdminDependencies = ({
   };
   return Object.freeze({
     allowedOrigin: adminOrigin,
-    commands: deniedCommandAuthority(clock),
+    commands: persistentCommandAuthority(database, clock),
     listProjection,
     loadProjection: async (resource: AdminProjectionResource, id: string) =>
       (await listProjection(resource)).find((record) => record.id === id) ?? null,
@@ -338,9 +606,582 @@ export const createPersistentStagingAdminDependencies = ({
       const actor = await persistedOperator(request, identity);
       return actor === null ? null : adminSession(actor);
     },
-    resolveDeveloperActor: () => Promise.resolve(null),
-    resolveStepUp: () => Promise.resolve(null),
-    roles: deniedRoleAuthority(clock),
+    resolveDeveloperActor: async (
+      request: Parameters<AdminRouteDependencies['resolveDeveloperActor']>[0],
+    ) => {
+      const actor = await persistedOperator(request, identity);
+      return actor === null ? null : { actorId: actor.accountId, nonProduction: true };
+    },
+    resolveStepUp: async (request: Parameters<AdminRouteDependencies['resolveStepUp']>[0]) => {
+      const actor = await persistedOperator(request, identity);
+      const body = recordValue(request.body);
+      const command = recordValue(body?.['command']);
+      const action = text(command?.['action']);
+      const resource: AdminProjectionResource | null =
+        action === 'view-support-diagnostics'
+          ? 'diagnostic-metadata'
+          : action === 'revoke-session'
+            ? 'session'
+            : action === 'revoke-device'
+              ? 'device'
+              : action === 'correct-entitlement'
+                ? 'entitlement'
+                : action === 'export-audit-reference'
+                  ? 'audit-event'
+                  : null;
+      if (
+        actor?.authenticationMethod !== 'passkey' ||
+        command === null ||
+        resource === null ||
+        clock.now().getTime() - Date.parse(actor.authenticatedAt) > 5 * 60 * 1_000
+      ) {
+        return null;
+      }
+      return {
+        actorId: actor.accountId,
+        action: action as
+          | 'view-support-diagnostics'
+          | 'revoke-session'
+          | 'revoke-device'
+          | 'correct-entitlement'
+          | 'export-audit-reference',
+        resource,
+        redactedTarget: text(command['redactedTarget']),
+        authorizationContextId: text(command['authorizationContextId']),
+        method: 'passkey' as const,
+        verifiedAt: actor.authenticatedAt,
+        expiresAt: new Date(Date.parse(actor.authenticatedAt) + 5 * 60 * 1_000).toISOString(),
+      };
+    },
+    roles: persistentRoleAuthority(database, clock),
+  });
+};
+
+const ADMIN_OPERATIONS_ENVIRONMENT_ID = '00000000-0000-4000-8000-000000000006';
+
+const GOVERNANCE_CAPABILITIES = Object.freeze([
+  'admin-membership:activate',
+  'admin-membership:manage',
+  'admin-permissions:manage',
+  'admin-delegation:manage',
+  'admin-approval:manage',
+  'admin-access:review',
+  'admin-audit:reveal',
+  'admin-function:simulate',
+] as const satisfies readonly AdminGovernanceCapability[]);
+
+const OPERATIONS_CAPABILITIES = Object.freeze([
+  'admin-operations:search',
+  'admin-operations:jobs',
+  'admin-operations:conflicts',
+  'admin-operations:incidents',
+  'admin-operations:exports',
+  'admin-operations:configuration',
+  'admin-operations:privacy',
+  'admin-operations:emergency',
+] as const satisfies readonly AdminOperationsCapability[]);
+
+const asAdminFunction = (value: unknown): AdminFunction | null =>
+  value === 'support' || value === 'operations' || value === 'security' || value === 'audit'
+    ? value
+    : null;
+
+const governanceCapabilitiesFor = (
+  activeFunction: AdminFunction,
+): readonly AdminGovernanceCapability[] => {
+  switch (activeFunction) {
+    case 'security':
+      return GOVERNANCE_CAPABILITIES;
+    case 'audit':
+      return ['admin-access:review', 'admin-audit:reveal', 'admin-function:simulate'];
+    case 'operations':
+      return ['admin-delegation:manage', 'admin-access:review', 'admin-function:simulate'];
+    case 'support':
+      return ['admin-function:simulate'];
+  }
+};
+
+const resolveGovernanceSession = async (
+  request: FastifyRequest,
+  database: PersistentAdminDatabase,
+  identity: StagingAdminIdentityAuthority,
+): Promise<AdminGovernanceRouteSession | null> => {
+  const actor = await persistedOperator(request, identity);
+  if (actor === null) return null;
+  const active = await database.query<{
+    active_function: string;
+    simulation: boolean;
+    version: string | number | bigint;
+  }>(
+    `SELECT governed.active_function, governed.simulation, governed.version
+       FROM admin_function_sessions AS governed
+       INNER JOIN admin_governance_memberships AS membership
+         ON membership.id = governed.membership_id
+      WHERE governed.session_id = $1
+        AND governed.ended_at IS NULL
+        AND membership.identity_id = $2
+        AND membership.status = 'active'
+      ORDER BY governed.started_at DESC
+      LIMIT 1`,
+    [actor.sessionId, actor.accountId],
+  );
+  const row = active.rows[0];
+  const activeFunction = asAdminFunction(row?.active_function) ?? asAdminFunction(actor.role);
+  if (activeFunction === null) return null;
+  const policy = ADMIN_FUNCTION_POLICIES[activeFunction];
+  return Object.freeze({
+    sessionId: actor.sessionId,
+    actorId: actor.accountId,
+    activeFunction,
+    navigation: policy.navigation,
+    dataScopes: policy.dataScopes,
+    capabilities: policy.capabilities,
+    governanceCapabilities: governanceCapabilitiesFor(activeFunction),
+    governanceScopes: ['team', 'delegations', 'reviews', 'history'] as const,
+    simulation: row?.simulation === true,
+    version: row === undefined ? actor.sessionVersion : BigInt(row.version),
+  });
+};
+
+const resolveGovernanceStepUp = async (
+  request: FastifyRequest,
+  identity: StagingAdminIdentityAuthority,
+  clock: Readonly<{ now(): Date }>,
+): Promise<AdminGovernanceStepUpEvidence | null> => {
+  const actor = await persistedOperator(request, identity);
+  const authorizationContextId = request.headers['x-admin-authorization-context'];
+  const action = request.headers['x-admin-step-up-action'];
+  const resource = request.headers['x-admin-step-up-resource'];
+  const redactedTarget = request.headers['x-admin-step-up-target'];
+  if (
+    actor?.authenticationMethod !== 'passkey' ||
+    typeof authorizationContextId !== 'string' ||
+    typeof action !== 'string' ||
+    typeof resource !== 'string' ||
+    typeof redactedTarget !== 'string' ||
+    clock.now().getTime() - Date.parse(actor.authenticatedAt) > 5 * 60 * 1_000
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    evidenceId: `passkey-${actor.sessionId}`,
+    actorId: actor.accountId,
+    authorizationContextId,
+    action,
+    resource,
+    redactedTarget,
+    method: 'passkey',
+    verifiedAt: actor.authenticatedAt,
+    expiresAt: new Date(Date.parse(actor.authenticatedAt) + 5 * 60 * 1_000).toISOString(),
+  });
+};
+
+const invitationQueries = (
+  database: PersistentAdminDatabase,
+): AdminInvitationRouteDependencies['queries'] => ({
+  list: async ({ limit, cursor }) => {
+    const result = await database.query(
+      `SELECT invitation.id::text AS invitation_id, invitation.recipient_digest,
+              invitation.status, invitation.locale, invitation.campaign, invitation.version,
+              invitation.expires_at, invitation.updated_at
+         FROM admin_invitations AS invitation
+        WHERE ($2::uuid IS NULL OR invitation.id < $2::uuid)
+        ORDER BY invitation.id DESC LIMIT $1`,
+      [limit, cursor ?? null],
+    );
+    const records = result.rows.map((row) => ({
+      invitationId: text(row['invitation_id']),
+      recipientMasked: `recipient:${text(row['recipient_digest']).slice(0, 12)}`,
+      lifecycleState: text(row['status']) === 'pending' ? 'active' : text(row['status']),
+      locale: text(row['locale']),
+      campaignReference: text(row['campaign']),
+      version: text(row['version']),
+      expiresAt: text(row['expires_at']),
+      lastEventAt: text(row['updated_at']),
+    }));
+    return {
+      records,
+      nextCursor: records.length === limit ? (records.at(-1)?.invitationId ?? '') : null,
+    };
+  },
+  load: async (invitationId) => {
+    const result = await database.query(
+      `SELECT id::text AS invitation_id, recipient_digest, status, locale, campaign, version,
+              expires_at, updated_at FROM admin_invitations WHERE id = $1::uuid`,
+      [invitationId],
+    );
+    const row = result.rows[0];
+    return row === undefined
+      ? null
+      : {
+          invitationId: text(row['invitation_id']),
+          recipientMasked: `recipient:${text(row['recipient_digest']).slice(0, 12)}`,
+          lifecycleState: text(row['status']) === 'pending' ? 'active' : text(row['status']),
+          locale: text(row['locale']),
+          campaignReference: text(row['campaign']),
+          version: text(row['version']),
+          expiresAt: text(row['expires_at']),
+          lastEventAt: text(row['updated_at']),
+        };
+  },
+  timeline: async (invitationId) => {
+    const result = await database.query(
+      `SELECT event_kind, occurred_at FROM admin_invitation_events
+        WHERE invitation_id = $1::uuid ORDER BY sequence_number`,
+      [invitationId],
+    );
+    return result.rows.map((row) => ({
+      kind: text(row['event_kind']),
+      at: text(row['occurred_at']),
+    }));
+  },
+});
+
+const governanceQueries = (
+  database: PersistentAdminDatabase,
+): AdminGovernanceRouteDependencies['queries'] => ({
+  listTeam: async ({ limit, cursor }) => {
+    const result = await database.query(
+      `SELECT membership.identity_id::text AS identity_id, membership.status,
+              membership.strong_factor, membership.version
+         FROM admin_governance_memberships AS membership
+        WHERE ($2::uuid IS NULL OR membership.identity_id < $2::uuid)
+        ORDER BY membership.identity_id DESC LIMIT $1`,
+      [limit, cursor ?? null],
+    );
+    const records = result.rows.map((row) => ({
+      identityId: text(row['identity_id']),
+      status: text(row['status']),
+      strongFactor: text(row['strong_factor']),
+      version: text(row['version']),
+    }));
+    return {
+      records,
+      nextCursor: records.length === limit ? (records.at(-1)?.identityId ?? '') : null,
+    };
+  },
+  loadTeamMember: async (identityId) => {
+    const result = await database.query(
+      `SELECT identity_id::text AS identity_id, status, strong_factor, version,
+              activated_at, offboarded_at
+         FROM admin_governance_memberships WHERE identity_id = $1::uuid`,
+      [identityId],
+    );
+    return result.rows[0] ?? null;
+  },
+  history: async (identityId) => {
+    const result = await database.query(
+      `SELECT action, occurred_at FROM admin_governance_audit
+        WHERE subject_id = $1 ORDER BY occurred_at DESC LIMIT 100`,
+      [identityId],
+    );
+    return result.rows;
+  },
+});
+
+const OPERATIONS_QUERY = Object.freeze({
+  queues: `SELECT job_id AS record_id, kind, status, progress, updated_at FROM admin_operational_jobs`,
+  views: `SELECT view_id AS record_id, visibility, name, updated_at FROM admin_saved_views`,
+  inbox: `SELECT item_id AS record_id, scope, state, severity, masked_title, occurred_at FROM admin_inbox_items`,
+  jobs: `SELECT job_id AS record_id, kind, status, progress, updated_at FROM admin_operational_jobs`,
+  incidents: `SELECT incident_id AS record_id, severity, status, owner_id, started_at FROM admin_incidents`,
+  exports: `SELECT export_id AS record_id, purpose, status, masked, encrypted, created_at, expires_at FROM admin_sensitive_exports`,
+  configurations: `SELECT configuration_id AS record_id, version, status, created_at FROM admin_configuration_versions`,
+  capacity: `SELECT sample_id AS record_id, capability, utilization, sampled_at FROM admin_capacity_samples`,
+  environments: `SELECT id::text AS record_id, environment_identity, created_at FROM admin_operational_environments`,
+  'audit-events': `SELECT event_id AS record_id, action, scope, outcome, occurred_at FROM admin_operations_audit`,
+  alerts: `SELECT alert_id AS record_id, severity, status, created_at FROM admin_alerts`,
+  'privacy-cases': `SELECT case_id AS record_id, legal_basis, status, created_at FROM admin_privacy_cases`,
+  'emergency-stops': `SELECT stop_id AS record_id, capability, status, requested_at, expires_at FROM admin_emergency_controls`,
+} as const);
+
+const operationsQueries = (
+  database: PersistentAdminDatabase,
+): AdminOperationsRouteDependencies['queries'] => ({
+  list: async ({ resource, targetEnvironment, limit }) => {
+    if (targetEnvironment === 'production') throw new Error('PRODUCTION_ADMIN_QUERY_FORBIDDEN');
+    const result = await database.query(
+      `${OPERATIONS_QUERY[resource]} WHERE environment_id = $1 ORDER BY 1 DESC LIMIT $2`,
+      [ADMIN_OPERATIONS_ENVIRONMENT_ID, limit],
+    );
+    return {
+      records: result.rows,
+      nextCursor: null,
+      freshness: { state: 'live', sequence: '0', observedAt: new Date().toISOString() },
+    };
+  },
+});
+
+export const createPersistentStagingAdminAuthority = ({
+  adminOrigin,
+  authSecret,
+  clock = { now: () => new Date() },
+  database,
+  environmentId,
+  identity,
+}: PersistentStagingAdminAuthorityInput): CompleteAdminRouteDependencies => {
+  if (authSecret.length < 43) throw new Error('STAGING_ADMIN_AUTH_SECRET_REJECTED');
+  if (environmentId === 'production') throw new Error('STAGING_ADMIN_ENVIRONMENT_REJECTED');
+  const ids = Object.freeze({ next: randomUUID });
+  const invitationsRepository = createPostgresAdminInvitationRepository(database);
+  const governanceRepository = createPostgresAdminGovernanceRepository(database);
+  const operationsRepository = createPostgresAdminOperationsRepository(database, {
+    environment: environmentId,
+    environmentId: ADMIN_OPERATIONS_ENVIRONMENT_ID,
+  });
+  const governance: AdminGovernanceDependencies = {
+    authorization: {
+      authorize: async ({ actorId, capability }) => {
+        const membership = await governanceRepository.loadMembership(actorId);
+        if (membership?.status !== 'active') return false;
+        return membership.functions.some((adminFunction) =>
+          governanceCapabilitiesFor(adminFunction).includes(capability),
+        );
+      },
+    },
+    stepUp: {
+      verify: (evidence) =>
+        Promise.resolve(
+          evidence.method === 'passkey' &&
+            Date.parse(evidence.verifiedAt) <= clock.now().getTime() &&
+            Date.parse(evidence.expiresAt) > clock.now().getTime(),
+        ),
+    },
+    repository: governanceRepository,
+    clock,
+    ids,
+  };
+  const invitationAuthorization = async (actorId: string): Promise<boolean> => {
+    const membership = await governanceRepository.loadMembership(actorId);
+    return membership?.status === 'active' && membership.functions.includes('operations');
+  };
+  const invitations: AdminInvitationDependencies = {
+    authorization: { authorize: ({ actorId }) => invitationAuthorization(actorId) },
+    recipients: {
+      hash: (recipient) =>
+        createHmac('sha256', authSecret).update(recipient.trim().toLowerCase()).digest('hex'),
+    },
+    secrets: {
+      issue: () => {
+        const plaintext = randomBytes(32).toString('base64url');
+        return {
+          plaintext,
+          digest: createHmac('sha256', authSecret).update(plaintext).digest('hex'),
+        };
+      },
+      digest: (plaintext) => createHmac('sha256', authSecret).update(plaintext).digest('hex'),
+    },
+    delivery: {
+      handoff: () => Promise.reject(new Error('STAGING_INVITATION_DELIVERY_PROVIDER_UNAVAILABLE')),
+    },
+    repository: invitationsRepository,
+    clock,
+    ids,
+  };
+  const operations: AdminOperationsDependencies = {
+    authorization: {
+      authorize: async ({ actorId, targetEnvironment }) => {
+        const membership = await governanceRepository.loadMembership(actorId);
+        if (
+          membership?.status !== 'active' ||
+          !membership.functions.includes('operations') ||
+          targetEnvironment !== environmentId
+        ) {
+          return { allowed: false, code: 'AUTHORIZATION_FAILED' };
+        }
+        return {
+          allowed: true,
+          allowedScopes: membership.permissions.scopes,
+          ownerId: actorId,
+        };
+      },
+    },
+    repository: operationsRepository,
+    alerts: {
+      send: async (alert) => {
+        await database.query(
+          `INSERT INTO admin_alerts
+            (environment_id, alert_id, severity, status, title, owner_id, created_at)
+           VALUES ($1, $2, $3, 'open', $4, $5, CURRENT_TIMESTAMP)
+           ON CONFLICT (environment_id, alert_id) DO NOTHING`,
+          [
+            ADMIN_OPERATIONS_ENVIRONMENT_ID,
+            alert.incidentId,
+            alert.severity,
+            `Incident ${alert.incidentId}`,
+            alert.ownerReference,
+          ],
+        );
+      },
+    },
+    clock,
+    ids,
+    environment: environmentId,
+    allowedProcedureVersions: ['recover-provider-v1', 'recover-database-v1'],
+    allowedEmergencyCapabilities: ['provider-checkout', 'invitation-delivery', 'admin-writes'],
+  };
+  const resolveSession = (request: FastifyRequest) =>
+    resolveGovernanceSession(request, database, identity);
+  const resolveStepUp = (request: FastifyRequest) =>
+    resolveGovernanceStepUp(request, identity, clock);
+  const rateLimit = async (key: string) => {
+    const result = await database.query(
+      `SELECT COUNT(*)::integer AS count FROM admin_operations_audit
+        WHERE actor_id = $1 AND occurred_at > CURRENT_TIMESTAMP - INTERVAL '1 minute'`,
+      [key.split(':', 1)[0]],
+    );
+    return Number(result.rows[0]?.['count'] ?? 0) < 120;
+  };
+  const core = createPersistentStagingAdminDependencies({
+    adminOrigin,
+    clock,
+    database,
+    identity,
+  });
+  const governanceRoutes: AdminGovernanceRouteDependencies = {
+    allowedOrigin: adminOrigin,
+    csrfSecret: authSecret,
+    governance,
+    inviteTeam: async (input) => {
+      const recipientDigest = createHmac('sha256', authSecret)
+        .update(input.recipient.trim().toLowerCase())
+        .digest('hex');
+      await database.query(
+        `INSERT INTO admin_governance_audit
+          (id, actor_id, subject_id, action, details, occurred_at)
+         VALUES ($1, $2, $3, 'administrative-invitation-recorded', $4::jsonb, $5)`,
+        [
+          input.invitationId,
+          input.actorId,
+          input.invitationId,
+          JSON.stringify({
+            invitationKind: input.invitationKind,
+            recipientDigest,
+            functions: input.functions,
+          }),
+          clock.now().toISOString(),
+        ],
+      );
+      return { ok: true, outcome: 'administrative-invitation-recorded' };
+    },
+    queries: governanceQueries(database),
+    resolveSession,
+    resolveStepUp,
+    rateLimit,
+  };
+  const approvals: AdminApprovalRouteDependencies = {
+    allowedOrigin: adminOrigin,
+    csrfSecret: authSecret,
+    governance,
+    resolveSession,
+    resolveStepUp,
+    loadBreakGlassContext: async (targetReference) => {
+      const result = await database.query(
+        `SELECT risk, expires_at FROM admin_approval_requests
+          WHERE id = $1 AND status = 'approved' LIMIT 1`,
+        [targetReference],
+      );
+      const row = result.rows[0];
+      return row === undefined
+        ? null
+        : {
+            administratorCount: 1,
+            risk: text(row['risk']) as 'routine' | 'sensitive' | 'critical' | 'irreversible',
+            massAction: false,
+            strongFactor: 'passkey',
+            safetyDelayUntil: clock.now().toISOString(),
+            alertsSent: true,
+          };
+    },
+    executeBreakGlass: async (input) => {
+      await database.query(
+        `INSERT INTO admin_governance_audit
+          (id, actor_id, subject_id, action, details, occurred_at)
+         VALUES ($1, $2, $3, 'break-glass-scheduled', $4::jsonb, $5)`,
+        [
+          randomUUID(),
+          input.actorId,
+          input.targetReference,
+          JSON.stringify({
+            commandId: input.commandId,
+            executeAt: input.executeAt,
+            expiresAt: input.expiresAt,
+            authorizationContextId: input.authorizationContextId,
+          }),
+          clock.now().toISOString(),
+        ],
+      );
+      return { ok: true, outcome: 'break-glass-scheduled' };
+    },
+    rateLimit,
+    clock,
+  };
+  return Object.freeze({
+    core,
+    invitations: {
+      allowedOrigin: adminOrigin,
+      csrfSecret: authSecret,
+      invitations,
+      queries: invitationQueries(database),
+      resolveSession: async (request: FastifyRequest) => {
+        const session = await resolveSession(request);
+        return session?.activeFunction === 'operations'
+          ? {
+              actorId: session.actorId,
+              activeFunction: session.activeFunction,
+              capabilities: [
+                'beta-invitations:preflight',
+                'beta-invitations:issue',
+                'beta-invitations:manage',
+                'beta-invitations:batch',
+              ] as const,
+              scopes: ['invitations'] as const,
+            }
+          : null;
+      },
+      rateLimit,
+    },
+    governance: governanceRoutes,
+    approvals,
+    operations: {
+      allowedOrigin: adminOrigin,
+      csrfSecret: authSecret,
+      operations,
+      queries: operationsQueries(database),
+      freshness: {
+        current: async (
+          input: Parameters<AdminOperationsRouteDependencies['freshness']['current']>[0],
+        ) => {
+          const result = await database.query(
+            `SELECT COALESCE(MAX(occurred_at), CURRENT_TIMESTAMP) AS updated_at,
+                    COUNT(*)::text AS version
+               FROM admin_operations_audit WHERE actor_id = $1`,
+            [input.actorId],
+          );
+          const version = text(result.rows[0]?.['version']) || '0';
+          return {
+            cursor: `operations-${version}`,
+            version,
+            updatedAt: text(result.rows[0]?.['updated_at']) || clock.now().toISOString(),
+            resources: ['inbox', 'jobs', 'incidents', 'alerts'] as const,
+          };
+        },
+      },
+      resolveSession: async (request: FastifyRequest) => {
+        const session = await resolveSession(request);
+        return session?.activeFunction === 'operations'
+          ? {
+              sessionId: session.sessionId,
+              actorId: session.actorId,
+              activeFunction: session.activeFunction,
+              capabilities: OPERATIONS_CAPABILITIES,
+              scopes: session.dataScopes,
+            }
+          : null;
+      },
+      rateLimit,
+      clock,
+    },
   });
 };
 
@@ -383,6 +1224,9 @@ export const buildRealStagingApp = async (
     await migrateControlPlane(database);
     await migrateRealIdentity(database);
     await migrateRuntimeAuthorities(database);
+    await migrateAdminInvitations(database);
+    await migrateAdminGovernance(database);
+    await migrateAdminOperations(database);
     await database.query('SELECT 1 AS authority_ready');
   } catch (error) {
     await database.close();
@@ -540,11 +1384,13 @@ export const buildRealStagingApp = async (
     projectDeletion: (accountId) =>
       projectRuntimeAggregate<AccountDeletionState>(database, 'account-deletion', accountId),
   });
-  await registerAdminRoutes(
+  await registerCompleteAdminRoutes(
     app,
-    createPersistentStagingAdminDependencies({
+    createPersistentStagingAdminAuthority({
       adminOrigin: environment.adminOrigin,
+      authSecret: secret,
       database,
+      environmentId: 'staging',
       identity,
     }),
   );
@@ -552,7 +1398,29 @@ export const buildRealStagingApp = async (
   app.get('/health', () => ({ status: 'ok' }));
   app.get('/ready', async (_request, reply) => {
     try {
-      await database.query('SELECT 1 AS authority_ready');
+      const authority = await database.query<{
+        invitations_ready: boolean;
+        governance_ready: boolean;
+        operations_ready: boolean;
+        worker_ready: boolean;
+      }>(
+        `SELECT
+           to_regclass('admin_invitations') IS NOT NULL AS invitations_ready,
+           to_regclass('admin_governance_memberships') IS NOT NULL AS governance_ready,
+           to_regclass('admin_operational_environments') IS NOT NULL AS operations_ready,
+           to_regprocedure('claim_admin_operational_job_items(uuid,text,integer,timestamptz)')
+             IS NOT NULL AS worker_ready`,
+      );
+      const readiness = authority.rows[0];
+      if (
+        readiness === undefined ||
+        !readiness.invitations_ready ||
+        !readiness.governance_ready ||
+        !readiness.operations_ready ||
+        !readiness.worker_ready
+      ) {
+        throw new Error('STAGING_ADMIN_AUTHORITY_INCOMPLETE');
+      }
       return await reply.code(200).send({
         authorityConnected: true,
         buildId: environment.buildId,

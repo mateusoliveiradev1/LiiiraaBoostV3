@@ -11,7 +11,7 @@ import {
   resolveAdminVersionConflict,
   validateAdminOperationalAudit,
   type AdminEnvironment,
-} from '@liiiraa/control-plane-domain';
+} from '@liiiraa/control-plane-domain/admin/operations';
 
 import type {
   AdminEmergencyStopRecord,

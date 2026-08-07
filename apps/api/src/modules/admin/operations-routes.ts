@@ -23,7 +23,7 @@ import {
   transitionAdminOperationalJob,
 } from '@liiiraa/control-plane-application/admin-operations';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
-import type { AdminEnvironment } from '@liiiraa/control-plane-domain';
+import type { AdminEnvironment } from '@liiiraa/control-plane-domain/admin/operations';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface AdminOperationsRouteSession {

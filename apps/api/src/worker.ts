@@ -42,6 +42,59 @@ export interface CommerceWorkerOptions {
   readonly maxAttempts?: number;
 }
 
+export interface AdminControlPlaneWorkerDependencies {
+  readonly invitations: (
+    input: Readonly<{
+      batchSize: number;
+      now: string;
+      workerId: string;
+    }>,
+  ) => Promise<Readonly<{ claimed: number }>>;
+  readonly operations: Readonly<{
+    claim(
+      input: Readonly<{
+        workerId: string;
+        maximumItems: number;
+        leaseUntil: string;
+      }>,
+    ): Promise<readonly unknown[]>;
+  }>;
+}
+
+export interface AdminControlPlaneWorkerInput {
+  readonly workerId: string;
+  readonly batchSize?: number;
+  readonly now: string;
+  readonly leaseUntil: string;
+}
+
+export const runAdminControlPlaneWorkersOnce = async (
+  dependencies: AdminControlPlaneWorkerDependencies,
+  input: AdminControlPlaneWorkerInput,
+): Promise<Readonly<{ invitationJobs: number; operationalItems: number }>> => {
+  const batchSize = Math.min(50, Math.max(1, input.batchSize ?? 10));
+  if (
+    input.workerId.trim().length === 0 ||
+    !Number.isFinite(Date.parse(input.now)) ||
+    !Number.isFinite(Date.parse(input.leaseUntil)) ||
+    Date.parse(input.leaseUntil) <= Date.parse(input.now)
+  ) {
+    throw new Error('ADMIN_CONTROL_PLANE_WORKER_INPUT_INVALID');
+  }
+  const [invitationResult, operationalItems] = await Promise.all([
+    dependencies.invitations({ batchSize, now: input.now, workerId: input.workerId }),
+    dependencies.operations.claim({
+      workerId: input.workerId,
+      maximumItems: batchSize,
+      leaseUntil: input.leaseUntil,
+    }),
+  ]);
+  return Object.freeze({
+    invitationJobs: invitationResult.claimed,
+    operationalItems: operationalItems.length,
+  });
+};
+
 const retryDelay = (attemptCount: number): number =>
   Math.min(60_000, 1_000 * 2 ** Math.max(0, attemptCount));
 
