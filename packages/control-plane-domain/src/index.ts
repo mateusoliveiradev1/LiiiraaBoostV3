@@ -112,6 +112,7 @@ export {
   type AdminRiskDecision,
   type AdminRiskLevel,
 } from './admin/governance.js';
+export * from './admin/operations.js';
 export {
   AUDIT_GENESIS_HASH,
   appendAuditEvent,
