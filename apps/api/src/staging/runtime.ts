@@ -285,14 +285,45 @@ const adminSession = (actor: IdentityActor): ActiveAdminRoleSession =>
 const projectionStatement = (resource: AdminProjectionResource): string => {
   switch (resource) {
     case 'support-case':
-      return `SELECT id::text AS id, status, priority, assigned_role
-        FROM support_cases ORDER BY created_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
+      return `SELECT sc.id::text AS id, sc.status, sc.priority, sc.assigned_role,
+          sc.version::text AS version, sc.created_at, sc.updated_at,
+          dc.id::text AS consent_id, dc.consent_scope, dc.expires_at AS consent_expires_at,
+          dc.revoked_at AS consent_revoked_at, dc.version::text AS consent_version
+        FROM support_cases sc
+        LEFT JOIN LATERAL (
+          SELECT id, consent_scope, expires_at, revoked_at, version
+          FROM diagnostic_consents
+          WHERE case_id = sc.id
+          ORDER BY granted_at DESC
+          LIMIT 1
+        ) dc ON TRUE
+        ORDER BY sc.created_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
     case 'device':
       return `SELECT id::text AS id, bound_at, revoked_at, replacement_available_at
         FROM device_bindings ORDER BY bound_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
     case 'entitlement':
-      return `SELECT id::text AS id, status, source, valid_until
-        FROM premium_entitlements ORDER BY created_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
+      return `SELECT pe.id::text AS id, pe.status, pe.source, pe.valid_until,
+          pe.version::text AS version, pe.updated_at,
+          s.status AS subscription_status, s.provider, s.currency, s.current_period_end,
+          s.cancel_at_period_end,
+          invoice.status AS invoice_status, invoice.amount_total_minor::text AS amount_minor,
+          invoice.currency AS invoice_currency,
+          COALESCE(provider.pending_events, FALSE) AS pending_provider_events
+        FROM premium_entitlements pe
+        LEFT JOIN subscriptions s ON s.id = pe.subscription_id
+        LEFT JOIN LATERAL (
+          SELECT status, amount_total_minor, currency
+          FROM invoices
+          WHERE subscription_id = s.id
+          ORDER BY provider_created_at DESC
+          LIMIT 1
+        ) invoice ON TRUE
+        LEFT JOIN LATERAL (
+          SELECT BOOL_OR(processing_state IN ('received', 'processing', 'retryable')) AS pending_events
+          FROM provider_inbox
+          WHERE aggregate_type = 'subscription' AND aggregate_id = s.id
+        ) provider ON TRUE
+        ORDER BY pe.created_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
     case 'session':
       return `SELECT id::text AS id, session_kind, expires_at, revoked_at
         FROM sessions ORDER BY issued_at DESC LIMIT ${ADMIN_RECORD_LIMIT}`;
@@ -348,6 +379,85 @@ const projectionSummary = (
         .filter(Boolean)
         .join(' · ');
   }
+};
+
+const projectionRecord = (
+  resource: AdminProjectionResource,
+  row: Readonly<Record<string, unknown>>,
+  now: string,
+): Readonly<Record<string, unknown>> | null => {
+  const id = admittedId(row['id']);
+  if (id === null) return null;
+  const summary = projectionSummary(resource, row).slice(0, 256);
+  if (resource === 'entitlement') {
+    const subscription = text(row['subscription_status']);
+    const subscriptionState = ['active', 'trialing', 'grace'].includes(subscription)
+      ? 'paid'
+      : subscription === 'past-due'
+        ? 'past-due'
+        : ['canceled', 'expired'].includes(subscription)
+          ? 'canceled'
+          : 'unknown';
+    const amountMinor = text(row['amount_minor']);
+    const currency = text(row['invoice_currency']) || text(row['currency']);
+    return Object.freeze({
+      id,
+      ...(amountMinor.length > 0 && currency.length === 3 ? { amountMinor, currency } : {}),
+      cancelAtPeriodEnd: row['cancel_at_period_end'] === true,
+      currentPeriodEndsAt: text(row['current_period_end']),
+      observedAt: text(row['updated_at']) || now,
+      providerState: text(row['provider']).length > 0 ? 'available' : 'unknown',
+      reconciliationState: row['pending_provider_events'] === true ? 'pending' : 'reconciled',
+      source: text(row['source']),
+      subscriptionState,
+      summary,
+      validUntil: text(row['valid_until']),
+      version: text(row['version']) || '1',
+    });
+  }
+  if (resource === 'support-case') {
+    const createdAt = text(row['created_at']) || now;
+    const priority = text(row['priority']) || 'normal';
+    const deadlineHours =
+      priority === 'urgent' ? 1 : priority === 'high' ? 4 : priority === 'low' ? 48 : 24;
+    const consentId = admittedId(row['consent_id']);
+    const consentExpiresAt = text(row['consent_expires_at']);
+    const consentState =
+      consentId === null
+        ? 'absent'
+        : row['consent_revoked_at'] !== null && row['consent_revoked_at'] !== undefined
+          ? 'revoked'
+          : consentExpiresAt.length > 0 && Date.parse(consentExpiresAt) <= Date.parse(now)
+            ? 'expired'
+            : 'active';
+    return Object.freeze({
+      id,
+      ...(consentId === null
+        ? {}
+        : {
+            consent: Object.freeze({
+              consentId,
+              expiresAt: consentExpiresAt,
+              scopes: Object.freeze(['support-diagnostics']),
+              state: consentState,
+              version: text(row['consent_version']) || '1',
+            }),
+            diagnosticId: consentId,
+          }),
+      deadlineAt: new Date(Date.parse(createdAt) + deadlineHours * 60 * 60 * 1_000).toISOString(),
+      metadata: Object.freeze({
+        caseReference: `case-••••${id.replaceAll('-', '').slice(-6)}`,
+        diagnosticCategory: priority,
+      }),
+      observedAt: text(row['updated_at']) || now,
+      ownerReference: text(row['assigned_role']) || 'unassigned',
+      state: text(row['status']) || 'open',
+      subjectRedacted: `Support case ••••${id.replaceAll('-', '').slice(-6)}`,
+      summary,
+      version: text(row['version']) || '1',
+    });
+  }
+  return Object.freeze({ id, ...(summary.length === 0 ? {} : { summary }) });
 };
 
 const requireAdminTransaction = <T>(
@@ -587,11 +697,10 @@ export const createPersistentStagingAdminDependencies = ({
 }: PersistentStagingAdminInput): AdminRouteDependencies => {
   const listProjection = async (resource: AdminProjectionResource) => {
     const result = await database.query(projectionStatement(resource));
+    const now = clock.now().toISOString();
     return result.rows.flatMap((row) => {
-      const id = admittedId(row['id']);
-      if (id === null) return [];
-      const summary = projectionSummary(resource, row).slice(0, 256);
-      return [Object.freeze({ id, ...(summary.length === 0 ? {} : { summary }) })];
+      const record = projectionRecord(resource, row, now);
+      return record === null ? [] : [record];
     });
   };
   return Object.freeze({
@@ -599,7 +708,7 @@ export const createPersistentStagingAdminDependencies = ({
     commands: persistentCommandAuthority(database, clock),
     listProjection,
     loadProjection: async (resource: AdminProjectionResource, id: string) =>
-      (await listProjection(resource)).find((record) => record.id === id) ?? null,
+      (await listProjection(resource)).find((record) => record['id'] === id) ?? null,
     resolveAdminSession: async (
       request: Parameters<AdminRouteDependencies['resolveAdminSession']>[0],
     ) => {
