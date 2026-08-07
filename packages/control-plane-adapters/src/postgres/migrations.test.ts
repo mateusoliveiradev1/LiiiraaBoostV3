@@ -17,6 +17,10 @@ const migrationUrl = new URL('./migrations/0001_control_plane.sql', import.meta.
 const invitationMigrationUrl = new URL('./migrations/0004_admin_invitations.sql', import.meta.url);
 const governanceMigrationUrl = new URL('./migrations/0005_admin_governance.sql', import.meta.url);
 const operationsMigrationUrl = new URL('./migrations/0006_admin_operations.sql', import.meta.url);
+const authorityGrantsMigrationUrl = new URL(
+  './migrations/0008_admin_authority_grants.sql',
+  import.meta.url,
+);
 const syntheticIdentity = /(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu;
 const productionIdentity = /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu;
 const unsafeDatabaseMessage =
@@ -383,6 +387,55 @@ describe('admin operations migration authority', () => {
     expect(sql).toMatch(/claim_expires_at TIMESTAMPTZ/iu);
     expect(sql).toMatch(/retention_expires_at TIMESTAMPTZ/iu);
     expect(sql).toMatch(/environment_id UUID NOT NULL/iu);
+  });
+});
+
+describe('admin authority grants migration', () => {
+  it('admits every bounded production Admin capability and data scope without wildcard authority', async () => {
+    const sql = await readFile(authorityGrantsMigrationUrl, 'utf8');
+
+    for (const capability of [
+      'support:reply',
+      'support:view',
+      'device:manage',
+      'entitlement:correct',
+      'session:revoke',
+      'diagnostics:view',
+      'audit:reveal-sensitive',
+      'audit:export',
+      'beta-invitations:manage',
+      'beta-invitations:preflight',
+      'beta-invitations:issue',
+      'beta-invitations:batch',
+      'admin-membership:manage',
+      'admin-membership:activate',
+      'admin-function:simulate',
+      'admin-access:review',
+      'admin-delegation:manage',
+      'admin-permissions:manage',
+      'admin-approval:manage',
+    ]) {
+      expect(sql).toContain(`'${capability}'`);
+    }
+
+    for (const scope of [
+      'support-cases',
+      'devices',
+      'entitlements',
+      'sessions',
+      'diagnostic-metadata',
+      'audit-events',
+      'team',
+      'history',
+      'delegations',
+      'reviews',
+    ]) {
+      expect(sql).toContain(`'${scope}'`);
+    }
+
+    expect(sql).toMatch(/DROP CONSTRAINT IF EXISTS admin_membership_capabilities_capability_check/iu);
+    expect(sql).toMatch(/DROP CONSTRAINT IF EXISTS admin_membership_scopes_scope_check/iu);
+    expect(sql).not.toMatch(/super-admin|all-capabilities|wildcard|\*/iu);
   });
 });
 

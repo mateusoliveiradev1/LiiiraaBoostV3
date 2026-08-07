@@ -41,6 +41,10 @@ export {
   migrateIdentityStrongAuth,
 } from './postgres/identity-strong-auth.js';
 export {
+  adminAuthorityGrantsSchemaHash,
+  migrateAdminAuthorityGrants,
+} from './postgres/admin-authority-grants.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,
