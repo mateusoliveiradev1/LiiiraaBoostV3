@@ -3,7 +3,10 @@ import { createHmac } from 'node:crypto';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
-import { registerInvitationAcceptanceRoutes } from './invitation-acceptance-routes.js';
+import {
+  registerInvitationAcceptanceRoutes,
+  type InvitationAcceptanceProgress,
+} from './invitation-acceptance-routes.js';
 
 const origin = 'https://account.test.liiiraa.dev';
 const secret = 'synthetic-account-invitation-csrf-secret-12345678';
@@ -14,7 +17,7 @@ const csrf = (nonce = 'acceptance-nonce-abcdefghijklmnopqrstuvwxyz') =>
   `${nonce}.${createHmac('sha256', secret).update(nonce).digest('base64url')}`;
 
 const buildApp = async () => {
-  const progress = new Map<string, Readonly<Record<string, unknown>>>();
+  const progress = new Map<string, InvitationAcceptanceProgress>();
   const inspect = {
     validate: vi.fn((input: Readonly<{ plaintextSecret: string }>) =>
       Promise.resolve(
@@ -84,7 +87,10 @@ describe('recipient invitation acceptance routes', () => {
         method: 'POST',
         url: '/v1/identity/invitations/validate',
         headers: { origin, 'x-csrf-token': csrf() },
-        payload: { invitationId: 'invitation-1', plaintextSecret: 'invalid-token' },
+        payload: {
+          invitationId: 'invitation-1',
+          plaintextSecret: 'invalid-token-abcdefghijklmnopqrstuvwxyz0123456789',
+        },
       }),
     ];
     for (const response of responses) {

@@ -3,7 +3,11 @@ import { createHmac } from 'node:crypto';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
-import { registerAdminInvitationRoutes } from './invitation-routes.js';
+import {
+  registerAdminInvitationRoutes,
+  type AdminInvitationRouteOperations,
+  type AdminInvitationRouteSession,
+} from './invitation-routes.js';
 
 const origin = 'https://admin.test.liiiraa.dev';
 const secret = 'synthetic-admin-invitation-csrf-secret-123456789';
@@ -32,12 +36,16 @@ const command = (
 });
 
 const buildApp = async (authorized = true) => {
-  const operations = {
+  const operations: AdminInvitationRouteOperations = {
     preflight: vi.fn(() =>
       Promise.resolve({
         ok: true as const,
         rows: [
-          { rowId: 'row-1', recipientKey: 'digest-must-not-leak', classification: 'eligible' },
+          {
+            rowId: 'row-1',
+            recipientKey: 'digest-must-not-leak',
+            classification: 'valid' as const,
+          },
         ],
       }),
     ),
@@ -99,6 +107,19 @@ const buildApp = async (authorized = true) => {
     timeline: vi.fn(() => Promise.resolve([{ kind: 'issued', at: now }])),
   };
   const app = Fastify({ bodyLimit: 256 * 1024 });
+  const session: AdminInvitationRouteSession | null = authorized
+    ? {
+        actorId: 'operator-1',
+        activeFunction: 'operations',
+        capabilities: [
+          'beta-invitations:preflight',
+          'beta-invitations:issue',
+          'beta-invitations:manage',
+          'beta-invitations:batch',
+        ],
+        scopes: ['invitations'],
+      }
+    : null;
   await registerAdminInvitationRoutes(app, {
     allowedOrigin: origin,
     csrfSecret: secret,
@@ -106,23 +127,7 @@ const buildApp = async (authorized = true) => {
     operations,
     queries,
     rateLimit: vi.fn(() => Promise.resolve(true)),
-    resolveSession: vi.fn(() =>
-      Promise.resolve(
-        authorized
-          ? {
-              actorId: 'operator-1',
-              activeFunction: 'operations' as const,
-              capabilities: [
-                'beta-invitations:preflight',
-                'beta-invitations:issue',
-                'beta-invitations:manage',
-                'beta-invitations:batch',
-              ],
-              scopes: ['invitations'],
-            }
-          : null,
-      ),
-    ),
+    resolveSession: vi.fn(() => Promise.resolve(session)),
   });
   await app.ready();
   return { app, operations, queries };
@@ -152,7 +157,7 @@ describe('admin invitation management routes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       ok: true,
-      rows: [{ rowId: 'row-1', classification: 'eligible' }],
+      rows: [{ rowId: 'row-1', classification: 'valid' }],
     });
     expect(response.body).not.toMatch(/private@example\.com|digest-must-not-leak/iu);
     await allowed.app.close();
@@ -260,10 +265,8 @@ describe('admin invitation management routes', () => {
       payload: 'recipient\nfirst@example.com\nsecond@example.com',
     });
     expect(csv.statusCode).toBe(200);
-    expect(operations.preflight).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ rows: expect.any(Array) }),
-    );
+    const preflightCall = vi.mocked(operations.preflight).mock.calls.at(-1);
+    expect(preflightCall?.[1].rows).toHaveLength(2);
     await app.close();
   });
 
@@ -291,11 +294,11 @@ describe('admin invitation management routes', () => {
       url: '/v1/admin/invitations/batches',
       headers: { origin, 'x-csrf-token': csrf() },
       payload: {
-        command: command('issue-invitations'),
+        command: command('resend-invitations'),
         idempotencyKey: 'batch-idem',
-        action: 'issue',
+        action: 'resend',
         impactReviewed: true,
-        risk: 'low',
+        risk: 'standard',
         approvalGranted: true,
         items: [{ invitationId: 'invitation-1' }],
       },
