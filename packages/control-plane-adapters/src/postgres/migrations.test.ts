@@ -455,7 +455,9 @@ describe.sequential.skipIf(harness.strategy === 'unit')(
             POSTGRES_USER: 'liiiraa_synthetic',
           })
           .withExposedPorts(5432)
-          .withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/iu))
+          .withWaitStrategy(
+            Wait.forLogMessage(/database system is ready to accept connections/iu, 2),
+          )
           .start();
         databaseUrl = `postgresql://liiiraa_synthetic:synthetic-secret@${container.getHost()}:${container.getMappedPort(5432)}/liiiraa_synthetic_test`;
       }
