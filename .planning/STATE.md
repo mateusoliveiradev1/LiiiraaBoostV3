@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-42-PLAN.md
-last_updated: "2026-08-07T01:20:38.648Z"
+stopped_at: Completed 04-43-PLAN.md
+last_updated: "2026-08-07T01:28:41.676Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 179
+  completed_plans: 180
   percent: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 43 of 62
+Plan: 44 of 62
 Status: Executing Phase 04
 Last activity: 2026-08-07 — Phase 04 execution started
 
@@ -217,6 +217,7 @@ _Updated after plan completion_
 | Phase 04 P39 | 9 min | 2 tasks | 7 files |
 | Phase 04 P41 | 16 min | 2 tasks | 11 files |
 | Phase 04 P42 | 10 min | 1 tasks | 4 files |
+| Phase 04 P43 | 5 min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -675,6 +676,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Keep staging Admin privileged commands unavailable until their real persistence and step-up authorities exist. — Read-only redacted projections are honest; in-memory command emulation would fabricate administrative authority.
 - [Phase 04]: Admin contracts remain control-plane-only and are generated with TypeScript/Rust parity — Prevents desktop schema leakage and handwritten DTO drift
 - [Phase 04]: Invitation policy stores opaque recipient keys and emits secret lifecycle effects without holding plaintext secrets — Preserves recipient privacy and keeps cryptography and delivery in transactional ports
+- [Phase 04]: Admin sessions activate exactly one of four functions and simulations can never authorize actions — Prevents standing super-admin authority and keeps permission changes immediately visible
 
 ### Pending Todos
 
@@ -720,6 +722,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T01:20:38.637Z
-Stopped at: Completed 04-42-PLAN.md
+Last session: 2026-08-07T01:28:41.669Z
+Stopped at: Completed 04-43-PLAN.md
 Resume file: None
