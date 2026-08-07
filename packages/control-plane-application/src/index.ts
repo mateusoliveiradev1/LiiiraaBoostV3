@@ -5,6 +5,7 @@ export type * from './ports/identity.js';
 export type * from './ports/entitlement-signing.js';
 export type * from './ports/objects.js';
 export * from './ports/email.js';
+export type * from './ports/admin-invitations.js';
 export {
   ADMIN_ROLES,
   authorizeAdminProjection,
@@ -28,3 +29,4 @@ export * from './use-cases/execute-admin-command.js';
 export * from './use-cases/project-account.js';
 export * from './use-cases/update-account.js';
 export * from './use-cases/issue-offline-entitlement.js';
+export * from './use-cases/manage-beta-invitations.js';

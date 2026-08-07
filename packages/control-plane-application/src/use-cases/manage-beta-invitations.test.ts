@@ -20,6 +20,7 @@ import {
 import type { BetaInvitationState, InvitationState } from '@liiiraa/control-plane-domain';
 
 const NOW = '2026-08-07T02:00:00.000Z';
+const tick = (): Promise<void> => Promise.resolve();
 
 interface Store {
   invitations: Map<string, InvitationState>;
@@ -57,9 +58,7 @@ const cloneStore = (store: Store): Store => ({
   activations: [...store.activations],
 });
 
-const pendingInvitation = (
-  overrides: Partial<BetaInvitationState> = {},
-): BetaInvitationState => ({
+const pendingInvitation = (overrides: Partial<BetaInvitationState> = {}): BetaInvitationState => ({
   kind: 'beta',
   invitationId: 'inv-1',
   recipientKey: 'recipient:alice',
@@ -87,6 +86,7 @@ const harness = (initial: Store = emptyStore()) => {
   const dependencies: AdminInvitationDependencies = {
     authorization: {
       authorize: async () => {
+        await tick();
         authorizationCalls += 1;
         return !failures.has('authorization');
       },
@@ -97,12 +97,16 @@ const harness = (initial: Store = emptyStore()) => {
     secrets: {
       issue: () => {
         issuedSecrets += 1;
-        return { plaintext: `plain-secret-${String(issuedSecrets)}`, digest: `digest-${String(issuedSecrets)}` };
+        return {
+          plaintext: `plain-secret-${String(issuedSecrets)}`,
+          digest: `digest-${String(issuedSecrets)}`,
+        };
       },
       digest: (plaintext) => `digest:${plaintext}`,
     },
     delivery: {
       handoff: async (input) => {
+        await tick();
         if (failures.has('delivery')) throw new Error(`provider leaked ${input.plaintextSecret}`);
         deliveries.push(input);
         return { deliveryReference: `delivery-${String(deliveries.length)}` };
@@ -111,7 +115,8 @@ const harness = (initial: Store = emptyStore()) => {
     clock: { now: () => new Date(NOW) },
     ids: { next: () => `id-${String(++nextId)}` },
     repository: {
-      findActiveRecipientKeys: async (recipientKeys) =>
+      findActiveRecipientKeys: async (recipientKeys) => (
+        await tick(),
         recipientKeys.filter((key) =>
           [...store.invitations.values()].some(
             (invitation) =>
@@ -119,65 +124,88 @@ const harness = (initial: Store = emptyStore()) => {
               invitation.recipientKey === key &&
               (invitation.status === 'pending' || invitation.status === 'queued'),
           ),
-        ),
+        )
+      ),
       transaction: async (operation) => {
         transactionCalls += 1;
         const draft = cloneStore(store);
         const transaction: AdminInvitationTransaction = {
-          findCommandResult: async (key) => draft.commands.get(key) ?? null,
+          findCommandResult: async (key) => (await tick(), draft.commands.get(key) ?? null),
           rememberCommandResult: async (key, result) => {
+            await tick();
             if (failures.has('command')) throw new Error('command persistence leaked');
             draft.commands.set(key, result);
           },
-          findActiveRecipient: async (recipientKey) =>
+          findActiveRecipient: async (recipientKey) => (
+            await tick(),
             [...draft.invitations.values()].find(
               (invitation) =>
                 invitation.recipientKey === recipientKey &&
                 (invitation.status === 'pending' || invitation.status === 'queued'),
-            ) ?? null,
-          countActiveBetaInvitations: async () =>
+            ) ?? null
+          ),
+          countActiveBetaInvitations: async () => (
+            await tick(),
             [...draft.invitations.values()].filter(
               (invitation) => invitation.kind === 'beta' && invitation.status === 'pending',
-            ).length,
-          nextQueuePosition: async () =>
+            ).length
+          ),
+          nextQueuePosition: async () => (
+            await tick(),
             Math.max(
               0,
               ...[...draft.invitations.values()].map((invitation) =>
                 invitation.kind === 'beta' ? (invitation.queuePosition ?? 0) : 0,
               ),
-            ) + 1,
-          loadInvitation: async (invitationId) => draft.invitations.get(invitationId) ?? null,
+            ) + 1
+          ),
+          loadInvitation: async (invitationId) => {
+            await tick();
+            if (failures.has(`load:${invitationId}`)) throw new Error('load failed');
+            return draft.invitations.get(invitationId) ?? null;
+          },
           saveInvitation: async (invitation) => {
+            await tick();
             if (failures.has('save')) throw new Error('save leaked alice@example.test');
             draft.invitations.set(invitation.invitationId, invitation);
           },
           invalidateSecretDigest: async (invitationId) => {
+            await tick();
             draft.secretDigests.delete(invitationId);
           },
           saveSecretDigest: async (invitationId, digest) => {
+            await tick();
             draft.secretDigests.set(invitationId, digest);
           },
-          verifySecretDigest: async (invitationId, digest) =>
-            draft.secretDigests.get(invitationId) === digest,
+          verifySecretDigest: async (invitationId, digest) => (
+            await tick(),
+            draft.secretDigests.get(invitationId) === digest
+          ),
           appendLifecycleEvent: async (record) => {
+            await tick();
             draft.lifecycle.push(record);
           },
           appendAudit: async (record) => {
+            await tick();
             if (failures.has('audit')) throw new Error('audit leaked alice@example.test');
             draft.audit.push(record);
           },
           enqueueOutbox: async (record) => {
+            await tick();
             if (failures.has('outbox')) throw new Error('outbox leaked plain-secret');
             draft.outbox.push(record);
           },
           saveJob: async (job) => {
+            await tick();
             draft.jobs.push(job);
           },
           saveReceipt: async (receipt) => {
+            await tick();
             if (failures.has('receipt')) throw new Error('receipt leaked');
             draft.receipts.push(receipt);
           },
           consumeInvitationAndActivateAccount: async (input) => {
+            await tick();
             if (draft.activations.includes(input.invitationId)) return false;
             if (draft.secretDigests.get(input.invitationId) !== input.secretDigest) return false;
             draft.secretDigests.delete(input.invitationId);
@@ -196,10 +224,18 @@ const harness = (initial: Store = emptyStore()) => {
     dependencies,
     deliveries,
     failures,
-    get authorizationCalls() { return authorizationCalls; },
-    get issuedSecrets() { return issuedSecrets; },
-    get store() { return store; },
-    get transactionCalls() { return transactionCalls; },
+    get authorizationCalls() {
+      return authorizationCalls;
+    },
+    get issuedSecrets() {
+      return issuedSecrets;
+    },
+    get store() {
+      return store;
+    },
+    get transactionCalls() {
+      return transactionCalls;
+    },
   };
 };
 
@@ -231,8 +267,13 @@ describe('beta invitation application authority', () => {
   it('serializes issue, stores only a digest and replays the durable receipt idempotently', async () => {
     const test = harness();
     const command = {
-      actorId: 'admin-1', commandId: 'command-1', idempotencyKey: 'idem-1', expectedVersion: 0n,
-      invitationId: 'inv-1', recipient: 'Alice@example.test', locale: 'pt-BR' as const,
+      actorId: 'admin-1',
+      commandId: 'command-1',
+      idempotencyKey: 'idem-1',
+      expectedVersion: 0n,
+      invitationId: 'inv-1',
+      recipient: 'Alice@example.test',
+      locale: 'pt-BR' as const,
     };
     const first = await issueBetaInvitation(test.dependencies, command);
     const replay = await issueBetaInvitation(test.dependencies, command);
@@ -241,9 +282,19 @@ describe('beta invitation application authority', () => {
     expect(first).toMatchObject({ ok: true, outcome: 'issued' });
     expect(test.issuedSecrets).toBe(1);
     expect(test.deliveries).toHaveLength(1);
-    expect(test.deliveries[0]).toMatchObject({ plaintextSecret: 'plain-secret-1', locale: 'pt-BR' });
+    expect(test.deliveries[0]).toMatchObject({
+      plaintextSecret: 'plain-secret-1',
+      locale: 'pt-BR',
+    });
     expect(test.store.secretDigests.get('inv-1')).toBe('digest-1');
-    expect(JSON.stringify([...test.store.secretDigests, ...test.store.audit, ...test.store.outbox, ...test.store.receipts])).not.toContain('plain-secret-1');
+    expect(
+      JSON.stringify([
+        ...test.store.secretDigests,
+        ...test.store.audit,
+        ...test.store.outbox,
+        ...test.store.receipts,
+      ]),
+    ).not.toContain('plain-secret-1');
     expect(test.store.lifecycle).toHaveLength(2);
     expect(test.store.audit).toHaveLength(1);
     expect(test.store.outbox).toHaveLength(1);
@@ -254,8 +305,13 @@ describe('beta invitation application authority', () => {
     const test = harness();
     test.failures.add('audit');
     const result = await issueBetaInvitation(test.dependencies, {
-      actorId: 'admin-1', commandId: 'command-1', idempotencyKey: 'idem-1', expectedVersion: 0n,
-      invitationId: 'inv-1', recipient: 'Alice@example.test', locale: 'pt-BR',
+      actorId: 'admin-1',
+      commandId: 'command-1',
+      idempotencyKey: 'idem-1',
+      expectedVersion: 0n,
+      invitationId: 'inv-1',
+      recipient: 'Alice@example.test',
+      locale: 'pt-BR',
     });
 
     expect(result).toEqual({ ok: false, code: 'INVITATION_OPERATION_FAILED' });
@@ -272,22 +328,40 @@ describe('beta invitation application authority', () => {
     initial.invitations.set('inv-1', pendingInvitation());
     initial.secretDigests.set('inv-1', 'digest-old');
     initial.invitations.set('admin-inv', {
-      kind: 'administrative-team', invitationId: 'admin-inv', recipientKey: 'recipient:ops',
-      role: 'support', status: 'pending', version: 1n, createdAt: NOW, updatedAt: NOW,
+      kind: 'administrative-team',
+      invitationId: 'admin-inv',
+      recipientKey: 'recipient:ops',
+      role: 'support',
+      status: 'pending',
+      version: 1n,
+      createdAt: NOW,
+      updatedAt: NOW,
     });
     const test = harness(initial);
 
     const stale = await manageBetaInvitation(test.dependencies, {
-      actorId: 'admin-1', commandId: 'stale', idempotencyKey: 'stale', invitationId: 'inv-1',
-      expectedVersion: 0n, action: { kind: 'resend', expiryMode: 'preserve', justification: 'requested' },
+      actorId: 'admin-1',
+      commandId: 'stale',
+      idempotencyKey: 'stale',
+      invitationId: 'inv-1',
+      expectedVersion: 0n,
+      action: { kind: 'resend', expiryMode: 'preserve', justification: 'requested' },
     });
     const rotated = await manageBetaInvitation(test.dependencies, {
-      actorId: 'admin-1', commandId: 'resend', idempotencyKey: 'resend', invitationId: 'inv-1',
-      expectedVersion: 1n, action: { kind: 'resend', expiryMode: 'restart', justification: 'requested' },
+      actorId: 'admin-1',
+      commandId: 'resend',
+      idempotencyKey: 'resend',
+      invitationId: 'inv-1',
+      expectedVersion: 1n,
+      action: { kind: 'resend', expiryMode: 'restart', justification: 'requested' },
     });
     const administrative = await manageBetaInvitation(test.dependencies, {
-      actorId: 'admin-1', commandId: 'admin', idempotencyKey: 'admin', invitationId: 'admin-inv',
-      expectedVersion: 1n, action: { kind: 'revoke', reason: 'no longer needed' },
+      actorId: 'admin-1',
+      commandId: 'admin',
+      idempotencyKey: 'admin',
+      invitationId: 'admin-inv',
+      expectedVersion: 1n,
+      action: { kind: 'revoke', reason: 'no longer needed' },
     });
 
     expect(stale).toEqual({ ok: false, code: 'STALE' });
@@ -302,10 +376,16 @@ describe('beta invitation application authority', () => {
     initial.secretDigests.set('inv-1', 'digest:token-1');
     const test = harness(initial);
     const input = {
-      commandId: 'accept-1', idempotencyKey: 'accept-1', invitationId: 'inv-1', expectedVersion: 1n,
-      plaintextSecret: 'token-1', recipientPossessionVerified: true,
-      possessionEvidenceExpiresAt: '2026-08-07T02:05:00.000Z', accountActivationCompleted: true,
-      essentialTermsAccepted: true, accountReference: 'account-1',
+      commandId: 'accept-1',
+      idempotencyKey: 'accept-1',
+      invitationId: 'inv-1',
+      expectedVersion: 1n,
+      plaintextSecret: 'token-1',
+      recipientPossessionVerified: true,
+      possessionEvidenceExpiresAt: '2026-08-07T02:05:00.000Z',
+      accountActivationCompleted: true,
+      essentialTermsAccepted: true,
+      accountReference: 'account-1',
     };
 
     const accepted = await acceptBetaInvitation(test.dependencies, input);
@@ -315,7 +395,10 @@ describe('beta invitation application authority', () => {
     expect(accepted).toMatchObject({ ok: true, outcome: 'accepted' });
     expect(test.store.activations).toEqual(['inv-1']);
     expect(test.store.secretDigests.has('inv-1')).toBe(false);
-    expect(test.store.invitations.get('inv-1')).toMatchObject({ status: 'accepted', accountReference: 'account-1' });
+    expect(test.store.invitations.get('inv-1')).toMatchObject({
+      status: 'accepted',
+      accountReference: 'account-1',
+    });
   });
 
   it('commits revoke, reminder and decline transitions with lifecycle, audit, outbox and receipt', async () => {
@@ -328,8 +411,12 @@ describe('beta invitation application authority', () => {
       initial.invitations.set('inv-1', pendingInvitation());
       const test = harness(initial);
       const result = await manageBetaInvitation(test.dependencies, {
-        actorId: 'admin-1', commandId: expected, idempotencyKey: expected,
-        invitationId: 'inv-1', expectedVersion: 1n, action,
+        actorId: 'admin-1',
+        commandId: expected,
+        idempotencyKey: expected,
+        invitationId: 'inv-1',
+        expectedVersion: 1n,
+        action,
       });
       expect(result).toMatchObject({ ok: true, outcome: expected });
       expect(test.store.lifecycle.length).toBeGreaterThan(0);
@@ -342,15 +429,31 @@ describe('beta invitation application authority', () => {
   it('creates one durable batch receipt with explicit issued, queued, skipped and failed results', async () => {
     const initial = emptyStore();
     initial.invitations.set('inv-1', pendingInvitation());
+    initial.invitations.set(
+      'inv-2',
+      pendingInvitation({
+        invitationId: 'inv-2',
+        recipientKey: 'recipient:queued',
+        status: 'queued',
+        queuePosition: 1,
+      }),
+    );
     const test = harness(initial);
+    test.failures.add('load:inv-4');
     const result = await startBetaInvitationBatch(test.dependencies, {
-      actorId: 'admin-1', commandId: 'batch-1', idempotencyKey: 'batch-1', action: 'resend',
-      impactReviewed: true, reason: 'beta campaign', risk: 'standard', approvalGranted: false,
+      actorId: 'admin-1',
+      commandId: 'batch-1',
+      idempotencyKey: 'batch-1',
+      action: 'resend',
+      impactReviewed: true,
+      reason: 'beta campaign',
+      risk: 'standard',
+      approvalGranted: false,
       items: [
-        { invitationId: 'inv-1', disposition: 'issued' },
-        { invitationId: 'inv-2', disposition: 'queued' },
-        { invitationId: 'inv-3', disposition: 'skipped' },
-        { invitationId: 'inv-4', disposition: 'failed' },
+        { invitationId: 'inv-1' },
+        { invitationId: 'inv-2' },
+        { invitationId: 'inv-3' },
+        { invitationId: 'inv-4' },
       ],
     });
 
