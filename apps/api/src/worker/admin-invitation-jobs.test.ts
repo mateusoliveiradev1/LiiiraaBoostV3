@@ -7,7 +7,9 @@ import {
   type AdminInvitationBatchItemResult,
   type AdminInvitationJobRepository,
   type AdminInvitationWorkerJob,
+  type InvitationDeliveryWorkerJob,
   type InvitationDeliveryPort,
+  type InvitationReminderWorkerJob,
 } from './admin-invitation-jobs.js';
 
 const NOW = '2030-01-10T12:00:00.000Z';
@@ -30,6 +32,12 @@ const invitation = (
   events: [{ kind: 'sent', at: '2030-01-01T00:00:00.000Z' }],
   ...overrides,
 });
+
+const queuedInvitation = (invitationId: string, queuePosition: number): BetaInvitationState => {
+  const { expiresAt: _expiresAt, ...base } = invitation(invitationId);
+  void _expiresAt;
+  return { ...base, status: 'queued', queuePosition };
+};
 
 class MemoryDeliveryPort implements InvitationDeliveryPort {
   readonly calls: Parameters<InvitationDeliveryPort['send']>[0][] = [];
@@ -59,6 +67,7 @@ class MemoryRepository implements AdminInvitationJobRepository {
   readonly batchReceipts: Readonly<{ jobId: string; receiptId: string }>[] = [];
   readonly pseudonymized: string[] = [];
   failNextCompletion = false;
+  activeCountOverride: number | undefined;
 
   claim(input: Readonly<{ workerId: string; limit: number }>) {
     void input.workerId;
@@ -120,6 +129,9 @@ class MemoryRepository implements AdminInvitationJobRepository {
   }
 
   countActive() {
+    if (this.activeCountOverride !== undefined) {
+      return Promise.resolve(this.activeCountOverride);
+    }
     return Promise.resolve(
       [...this.invitations.values()].filter((state) => state.status === 'pending').length,
     );
@@ -129,14 +141,23 @@ class MemoryRepository implements AdminInvitationJobRepository {
     if (!this.batchResults.some((entry) => entry.itemId === result.itemId)) {
       this.batchResults.push(result);
     }
+    this.recorded.add(`batch-job:${result.itemId}`);
     return Promise.resolve();
+  }
+
+  listBatchResults(jobId: string) {
+    return Promise.resolve(
+      this.batchResults.filter((result) => this.recorded.has(`${jobId}:${result.itemId}`)),
+    );
   }
 
   finalizeBatch(
     jobId: string,
     receipt: Readonly<{ receiptId: string; results: readonly AdminInvitationBatchItemResult[] }>,
   ) {
-    this.batchReceipts.push({ jobId, receiptId: receipt.receiptId });
+    if (!this.batchReceipts.some((entry) => entry.jobId === jobId)) {
+      this.batchReceipts.push({ jobId, receiptId: receipt.receiptId });
+    }
     return Promise.resolve();
   }
 
@@ -146,21 +167,33 @@ class MemoryRepository implements AdminInvitationJobRepository {
     this.pseudonymized.push(invitationId);
     return Promise.resolve(true);
   }
+
+  deletePersonalData(invitationId: string, occurredAt: string) {
+    void occurredAt;
+    this.pseudonymized.push(`deleted:${invitationId}`);
+    return Promise.resolve(true);
+  }
 }
 
 const deliveryJob = (
-  overrides: Partial<AdminInvitationWorkerJob> = {},
-): AdminInvitationWorkerJob => ({
-  id: 'job-delivery-one',
-  kind: 'delivery',
-  attemptCount: 1,
-  invitationId: 'invitation-one',
-  expectedVersion: 1n,
-  deliveryReference: 'opaque-delivery-one',
-  locale: 'pt-BR',
-  campaignReference: 'private-beta-2030',
-  ...overrides,
-});
+  overrides: Partial<Omit<InvitationDeliveryWorkerJob, 'kind'>> & {
+    readonly kind?: 'delivery' | 'reminder';
+  } = {},
+): InvitationDeliveryWorkerJob | InvitationReminderWorkerJob => {
+  const base = {
+    id: 'job-delivery-one',
+    attemptCount: 1,
+    invitationId: 'invitation-one',
+    expectedVersion: 1n,
+    deliveryReference: 'opaque-delivery-one',
+    locale: 'pt-BR' as const,
+    campaignReference: 'private-beta-2030',
+    ...overrides,
+  };
+  return overrides.kind === 'reminder'
+    ? { ...base, kind: 'reminder' }
+    : { ...base, kind: 'delivery' };
+};
 
 describe('durable admin invitation worker', () => {
   it('claims only bounded due jobs with row locking and persisted attempt identity', () => {
@@ -241,7 +274,13 @@ describe('durable admin invitation worker', () => {
       kind: 'reminder',
       invitationId: 'reminder-limit',
     });
-    repository.invitations.set('reminder-due', invitation('reminder-due', { reminderCount: 1 }));
+    repository.invitations.set(
+      'reminder-due',
+      invitation('reminder-due', {
+        reminderCount: 1,
+        expiresAt: '2030-01-12T12:00:00.000Z',
+      }),
+    );
     repository.jobs.push({
       ...deliveryJob(),
       id: 'reminder-due-job',
@@ -263,14 +302,9 @@ describe('durable admin invitation worker', () => {
   it('promotes the oldest eligible queued invitation when capacity is released', async () => {
     const repository = new MemoryRepository();
     const delivery = new MemoryDeliveryPort();
-    repository.invitations.set(
-      'queued-second',
-      invitation('queued-second', { status: 'queued', queuePosition: 2, expiresAt: undefined }),
-    );
-    repository.invitations.set(
-      'queued-first',
-      invitation('queued-first', { status: 'queued', queuePosition: 1, expiresAt: undefined }),
-    );
+    repository.activeCountOverride = 24;
+    repository.invitations.set('queued-second', queuedInvitation('queued-second', 2));
+    repository.invitations.set('queued-first', queuedInvitation('queued-first', 1));
     repository.jobs.push({ id: 'promotion-job', kind: 'promotion', attemptCount: 1 });
 
     await runAdminInvitationJobsOnce(
@@ -309,9 +343,16 @@ describe('durable admin invitation worker', () => {
           : ({ outcome: 'failed', code: 'STALE' } as const),
       );
 
+    repository.failNextCompletion = true;
+    await expect(
+      runAdminInvitationJobsOnce(
+        { batch: { execute }, delivery, repository },
+        { now: NOW, workerId: 'batch-worker-crash' },
+      ),
+    ).rejects.toThrow('synthetic-crash-after-effect');
     await runAdminInvitationJobsOnce(
       { batch: { execute }, delivery, repository },
-      { now: NOW, workerId: 'batch-worker' },
+      { now: NOW, workerId: 'batch-worker-replay' },
     );
 
     expect(repository.batchResults).toEqual([
