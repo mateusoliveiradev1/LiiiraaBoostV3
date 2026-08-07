@@ -373,6 +373,12 @@ const checkCi = (snapshot, ciPath, diagnostics) => {
       diagnostics.push(`${ciPath}: missing "${marker}"`);
     }
   }
+  const fullHistoryCheckoutCount = [...ci.matchAll(/fetch-depth:\s*0/gu)].length;
+  if (fullHistoryCheckoutCount !== 3) {
+    diagnostics.push(
+      `${ciPath}: all three verification jobs must fetch complete history for immutable contract baselines`,
+    );
+  }
   if (
     /continue-on-error:\s*true|permissions:\s*write-all|\$\{\{\s*secrets\.|(?:actions|checks|deployments|id-token|packages|pull-requests|security-events|statuses):\s*write/u.test(
       ci,

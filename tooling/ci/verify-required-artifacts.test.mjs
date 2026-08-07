@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
@@ -124,6 +125,21 @@ test('root and CI reachability reject compatibility or final-policy omission', a
   assert.ok(
     verifyRequiredArtifacts(withoutFinalMode, { ciPath }).some((diagnostic) =>
       diagnostic.includes('--mode final'),
+    ),
+  );
+});
+
+test('all CI verification jobs fetch immutable contract baseline history', async () => {
+  const clean = await loadCleanSnapshot();
+  const ci = await readFile(
+    fileURLToPath(new URL('../../.github/workflows/ci.yml', import.meta.url)),
+    'utf8',
+  );
+  const shallowCheckout = new Map(clean);
+  shallowCheckout.set(ciPath, ci.replace('fetch-depth: 0', 'fetch-depth: 1'));
+  assert.ok(
+    verifyRequiredArtifacts(shallowCheckout, { ciPath }).some((diagnostic) =>
+      diagnostic.includes('all three verification jobs must fetch complete history'),
     ),
   );
 });
