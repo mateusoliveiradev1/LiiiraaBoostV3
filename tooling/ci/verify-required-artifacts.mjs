@@ -123,8 +123,8 @@ const ROOT_FULL_GATES = Object.freeze([
 ]);
 
 const ROOT_DESKTOP_LIFECYCLE = Object.freeze({
-  'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick',
-  verify: 'pnpm --filter @liiiraa/desktop verify',
+  'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick',
+  verify: 'pnpm --filter @liiiraa/desktop verify && pnpm web:verify',
 });
 
 const ROOT_FOUNDATION_DELEGATES = Object.freeze({
@@ -217,7 +217,7 @@ const checkRootScripts = (snapshot, diagnostics) => {
   ]) {
     if (scripts[entry] !== ROOT_DESKTOP_LIFECYCLE[entry]) {
       diagnostics.push(
-        `package.json:${entry}: must delegate exactly to the bounded desktop lifecycle`,
+        `package.json:${entry}: must delegate exactly to the bounded desktop and web lifecycle`,
       );
     }
     const body =

@@ -51,8 +51,8 @@
     "web:verify:phase": "node --experimental-strip-types tooling/web-evidence/src/verify-phase.ts",
     "web:verify": "pnpm web:verify:quick && pnpm web:build && pnpm --filter @liiiraa/web-evidence exec playwright test && pnpm web:verify:phase -- --mode final",
     "phase4:verify": "node --experimental-strip-types tooling/phase4-evidence/src/evaluate.ts",
-    "verify:quick": "pnpm --filter @liiiraa/desktop verify:quick",
-    "verify": "pnpm --filter @liiiraa/desktop verify"
+    "verify:quick": "pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick",
+    "verify": "pnpm --filter @liiiraa/desktop verify && pnpm web:verify"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.65.0",

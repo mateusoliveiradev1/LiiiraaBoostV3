@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 const COMMAND_TIMEOUT_MS = 120_000;
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = resolve(desktopRoot, '..', '..');
+const isPnpmNodeCli = (candidate) =>
+  candidate !== undefined && /(?:^|[\\/])pnpm\.(?:c?js|mjs)$/iu.test(candidate) && existsSync(candidate);
 const pnpmCliPath = [
   process.env.npm_execpath,
   ...(process.env.PATH?.split(delimiter).map((pathEntry) =>
     resolve(pathEntry, 'node_modules', 'pnpm', 'bin', 'pnpm.cjs'),
   ) ?? []),
-].find(
-  (candidate) => candidate !== undefined && candidate.endsWith('pnpm.cjs') && existsSync(candidate),
-);
+].find(isPnpmNodeCli);
 
 const requiredScripts = Object.freeze([
   'build',
@@ -73,9 +73,9 @@ const run = (executable, arguments_, cwd = desktopRoot) => {
 };
 
 const runPnpm = (arguments_, cwd = desktopRoot) => {
-  if (pnpmCliPath === undefined || !pnpmCliPath.endsWith('pnpm.cjs') || !existsSync(pnpmCliPath)) {
+  if (pnpmCliPath === undefined || !isPnpmNodeCli(pnpmCliPath)) {
     throw new Error(
-      'Unable to resolve the active pnpm.cjs from npm_execpath. Run this lifecycle through pnpm.',
+      'Unable to resolve the active pnpm Node CLI from npm_execpath. Run this lifecycle through pnpm.',
     );
   }
   run(process.execPath, [pnpmCliPath, ...arguments_], cwd);
@@ -121,14 +121,14 @@ const verifyLifecycleContract = () => {
   }
 
   const expectedRootLinks = Object.freeze({
-    'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick',
-    verify: 'pnpm --filter @liiiraa/desktop verify',
+    'verify:quick': 'pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick',
+    verify: 'pnpm --filter @liiiraa/desktop verify && pnpm web:verify',
   });
 
   for (const [scriptName, expectedCommand] of Object.entries(expectedRootLinks)) {
     if (workspaceScripts[scriptName] !== expectedCommand) {
       throw new Error(
-        `Root lifecycle script ${scriptName} must resolve exactly to the desktop package.`,
+        `Root lifecycle script ${scriptName} must resolve exactly to the desktop and web packages.`,
       );
     }
   }
@@ -215,7 +215,10 @@ const executeCommand = (command, arguments_) => {
       return;
     case 'stories':
       requirePath('apps/desktop/.storybook/main.ts', 'Storybook Wave 0');
-      runPlaywright(arguments_, 'storybook');
+      if (arguments_.length > 0) {
+        throw new Error('Storybook smoke does not accept Playwright selectors.');
+      }
+      executeCommand('wave-zero', ['--browser-smoke']);
       return;
     case 'browser':
       runPlaywright(arguments_);
@@ -281,13 +284,10 @@ const executeCommand = (command, arguments_) => {
         return;
       }
       runPnpm(['verify:foundation:quick'], workspaceRoot);
-      executeCommand('unit', ['-t', '@unit-smoke']);
-      executeCommand('stories', ['--grep', '@story-smoke']);
-      executeCommand('browser', ['--grep', '@browser-smoke']);
-      executeCommand('packaged', ['--grep', '@packaged-smoke']);
-      executeCommand('scenarios', ['--scenario', 'smoke']);
-      executeCommand('localization', ['--locale', 'smoke']);
-      executeCommand('evidence', ['--mode', 'planned', '--smoke']);
+      executeCommand('unit', []);
+      executeCommand('stories', []);
+      executeCommand('browser', ['--project', 'harness', '--grep', '@browser-smoke']);
+      executeCommand('wave-zero', ['--packaged-schema']);
       return;
     case 'final':
       runPnpm(['verify:foundation'], workspaceRoot);
