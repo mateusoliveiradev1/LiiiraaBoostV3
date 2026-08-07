@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: identity-commerce-devices-and-administration
 status: executing
-stopped_at: Completed 04-55-PLAN.md
-last_updated: "2026-08-07T03:35:48.1881609-03:00"
+stopped_at: Completed 04-56-PLAN.md
+last_updated: '2026-08-07T04:04:34.2973382-03:00'
 last_activity: 2026-08-07
-last_activity_desc: Completed Phase 04 Plan 55 Calm operational briefing
+last_activity_desc: Completed Phase 04 Plan 56 authority-connected Queue Canvas
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 202
-  completed_plans: 193
+  completed_plans: 194
   percent: 96
 ---
 
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
-Plan: 56 of 62
+Plan: 57 of 62
 Status: Ready to execute
-Last activity: 2026-08-07 — Completed Plan 04-55 Calm operational briefing
+Last activity: 2026-08-07 — Completed Plan 04-56 authority-connected Queue Canvas
 
-Progress: [████████░░] 85%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 192
+- Total plans completed: 194
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -231,6 +231,7 @@ _Updated after plan completion_
 | Phase 04 P54 | 11 min | 2 tasks | 11 files |
 | Phase 04 P62 | 57 min | 2 tasks | 13 files |
 | Phase 04 P55 | 18 min | 2 tasks | 6 files |
+| Phase 04 P56 | 23 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -728,6 +729,11 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Treat live invalidation as stale until authoritative HTTP refetch succeeds. — Reconnecting communicates transport recovery without presenting cached data as current truth.
 - [Phase 04]: Remove only actions affected by a degraded capability. — Trustworthy marked reads and unrelated authorized work remain usable during partial failure.
 - [Phase 04]: Represent unavailable operational measurements explicitly. — The Admin overview never converts missing capacity or queue data into fabricated zeroes or trends.
+- [Phase 04]: Keep Queue Canvas URLs allowlisted and bounded. — Query state remains shareable without serializing email, tokens, reasons, diagnostics, drafts, or authorization claims.
+- [Phase 04]: Preserve saved-view authority explicitly. — Official views remain read-only while personal views retain owner and aggregate version.
+- [Phase 04]: Keep live invalidation stale until canonical refetch. — Uncertain administrative mutations fail closed while marked reads remain available.
+- [Phase 04]: Preserve incompatible Queue Canvas drafts through version conflict. — Independent changes may merge, but overlapping edits require explicit review instead of last-write-wins.
+- [Phase 04]: Adapt record detail by viewport without losing keyboard context. — Desktop uses an inspector with focus return while mobile follows the canonical full route.
 
 ### Pending Todos
 
@@ -773,6 +779,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-07T03:35:48.1881609-03:00
-Stopped at: Completed 04-55-PLAN.md
+Last session: 2026-08-07T04:04:34.2973382-03:00
+Stopped at: Completed 04-56-PLAN.md
 Resume file: None
