@@ -5,6 +5,7 @@ import {
   HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID,
   RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID,
   WEB_DOCUMENT_SCHEMA_ID,
+  controlPlaneDocumentValidator,
   validateDiagnosticValue,
   validateHostToRendererShellEvent,
   validateRendererToHostShellCommand,
@@ -440,5 +441,220 @@ describe('web document runtime validation', () => {
       ).toBe(true);
       expect(JSON.stringify(first.error)).not.toContain(secret);
     }
+  });
+});
+
+const adminProjectionMetadata = {
+  schemaVersion: '1.0',
+  aggregateVersion: '7',
+  etag: 'admin-etag-0007',
+  correlationId: 'admin-correlation-0007',
+  provenance: 'postgres-authority',
+  environment: {
+    environmentId: 'staging-brasil',
+    kind: 'staging',
+    label: 'Staging Brasil',
+  },
+  freshness: {
+    state: 'live',
+    source: 'admin-api',
+    sequence: '42',
+    observedAt: '2026-08-06T20:00:00.000Z',
+  },
+} as const;
+
+const validAdminDocuments = [
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-access-context-projection',
+    actorId: 'administrator-0001',
+    activeFunction: 'security',
+    domains: ['overview', 'people', 'security', 'system'],
+    capabilities: ['incident.review', 'access.recertify'],
+    scopes: ['environment:staging', 'region:brasil'],
+    authenticationStrength: 'passkey',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-saved-view-projection',
+    savedViewId: 'saved-view-0001',
+    domain: 'people',
+    name: 'Convites expirando',
+    visibility: 'official',
+    state: {
+      filters: ['state:active', 'expiry:soon'],
+      sort: ['expiresAt:asc'],
+      tab: 'active',
+      density: 'compact',
+    },
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-inbox-item-projection',
+    inboxItemId: 'inbox-0001',
+    severity: 'warning',
+    state: 'open',
+    title: 'Revisar capacidade de convites',
+    ownerReference: 'administrator-0001',
+    relatedRecordReference: 'invitation-capacity-staging',
+    deadlineAt: '2026-08-07T20:00:00.000Z',
+    updatedAt: '2026-08-06T20:00:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-invitation-projection',
+    invitationId: 'invitation-0001',
+    lifecycleState: 'active',
+    recipientMasked: 'wa***@example.test',
+    campaignReference: 'private-beta-01',
+    locale: 'pt-BR',
+    deliveryState: 'delivered',
+    reminderCount: 1,
+    ownerReference: 'administrator-0001',
+    expiresAt: '2026-08-20T20:00:00.000Z',
+    lastEventAt: '2026-08-06T20:00:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-invitation-capacity-projection',
+    capacityId: 'invitation-capacity-staging',
+    activeCount: 18,
+    activeLimit: 25,
+    queuedCount: 4,
+    forecastExhaustionAt: '2026-08-12T20:00:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-governance-projection',
+    governanceRecordId: 'approval-0001',
+    governanceKind: 'approval',
+    state: 'pending',
+    risk: 'critical',
+    authorReference: 'administrator-0001',
+    beneficiaryReference: 'administrator-0002',
+    eligibleApproverReferences: ['administrator-0003'],
+    impactedReferences: ['scope:production-security'],
+    expiresAt: '2026-08-06T20:15:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-job-projection',
+    jobId: 'job-0001',
+    jobType: 'invitation-import',
+    state: 'running',
+    progressPercent: 40,
+    totalItems: 25,
+    completedItems: 10,
+    failedItems: 0,
+    ownerReference: 'administrator-0001',
+    startedAt: '2026-08-06T19:59:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-incident-projection',
+    incidentId: 'incident-0001',
+    severity: 'critical',
+    state: 'contained',
+    title: 'Entrega de convites degradada',
+    ownerReference: 'administrator-0001',
+    substituteReference: 'administrator-0002',
+    affectedCapabilities: ['invitation.delivery'],
+    impactReferences: ['provider:email'],
+    nextUpdateAt: '2026-08-06T20:30:00.000Z',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-configuration-projection',
+    configurationId: 'invitation-reminder-policy',
+    state: 'validated',
+    version: 'policy-v3',
+    cohortReference: 'private-beta',
+    validationReference: 'validation-0003',
+    rollbackVersion: 'policy-v2',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-privacy-case-projection',
+    privacyCaseId: 'privacy-case-0001',
+    state: 'verified',
+    requestType: 'access',
+    subjectReference: 'account-0001',
+    legalBasisReference: 'lgpd-access',
+    dataCategoryReferences: ['identity', 'billing'],
+    retentionReferences: ['invoice-retention'],
+    ownerReference: 'administrator-0001',
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-partial-failure-projection',
+    operationId: 'operation-0001',
+    completedCount: 23,
+    failedCount: 2,
+    failures: [
+      { recordReference: 'invitation-0024', code: 'provider-unavailable' },
+      { recordReference: 'invitation-0025', code: 'conflict' },
+    ],
+  },
+  {
+    ...adminProjectionMetadata,
+    kind: 'admin-operation-receipt',
+    receiptId: 'receipt-0001',
+    commandId: 'command-0001',
+    outcome: 'partial',
+    affectedReferences: ['invitation-0024', 'invitation-0025'],
+    approvalReferences: ['approval-0001'],
+    auditReference: 'audit-0001',
+    recordedAt: '2026-08-06T20:01:00.000Z',
+  },
+  {
+    schemaVersion: '1.0',
+    kind: 'admin-operation-command',
+    commandId: 'command-0001',
+    actorId: 'administrator-0001',
+    activeFunction: 'security',
+    action: 'revoke-invitations',
+    targetReferences: ['invitation-0024', 'invitation-0025'],
+    reason: 'Delivery risk confirmed during private beta.',
+    expectedVersion: '7',
+    expectedEtag: 'admin-etag-0007',
+    approvalReferences: ['approval-0001'],
+    correlationId: 'admin-correlation-0007',
+    requestedAt: '2026-08-06T20:00:30.000Z',
+  },
+] as const;
+
+describe('generated Admin control-plane documents', () => {
+  it.each(validAdminDocuments)('admits $kind through the generated runtime', (document) => {
+    expect(controlPlaneDocumentValidator(document)).toBe(true);
+  });
+
+  it.each([
+    ['unknown lifecycle state', { ...validAdminDocuments[3], lifecycleState: 'mystery' }],
+    [
+      'record outside admitted scope',
+      { ...validAdminDocuments[5], visibility: 'hidden-scope' },
+    ],
+    [
+      'unmasked recipient field',
+      { ...validAdminDocuments[3], email: 'private@example.test' },
+    ],
+    [
+      'unbounded collection',
+      { ...validAdminDocuments[0], capabilities: Array.from({ length: 65 }, (_, i) => `c${i}`) },
+    ],
+    ['missing aggregate version', { ...validAdminDocuments[7], aggregateVersion: undefined }],
+    [
+      'personal or secret URL state',
+      {
+        ...validAdminDocuments[1],
+        state: {
+          ...validAdminDocuments[1].state,
+          email: 'private@example.test',
+          token: 'secret-token',
+        },
+      },
+    ],
+  ])('rejects %s', (_name, document) => {
+    expect(controlPlaneDocumentValidator(document)).toBe(false);
   });
 });
