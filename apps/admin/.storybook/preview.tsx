@@ -2,8 +2,10 @@ import '@liiiraa/design-tokens/tokens.css';
 import '../src/app/admin-shell.css';
 
 import type { Decorator, Preview } from '@storybook/react-vite';
+import { useState, type MouseEvent, type ReactNode } from 'react';
 
 import { ADMIN_STORY_CLOCK, ADMIN_STORY_SEED } from '../src/testing/admin-state-fixtures';
+import { resolveAdminStoryNavigation } from './story-navigation';
 
 const viewports = {
   desktop1440: {
@@ -19,6 +21,72 @@ const viewports = {
     styles: { height: '844px', width: '390px' },
   },
 } as const;
+
+interface AdminStoryBoundaryProps {
+  readonly children: ReactNode;
+  readonly contrast: string;
+  readonly density: string;
+  readonly locale: string;
+  readonly motion: string;
+}
+
+const AdminStoryBoundary = ({
+  children,
+  contrast,
+  density,
+  locale,
+  motion,
+}: AdminStoryBoundaryProps) => {
+  const [navigationTarget, setNavigationTarget] = useState<string>();
+
+  const captureAdminNavigation = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const anchor = target.closest<HTMLAnchorElement>('a[href]');
+    if (anchor === null) return;
+
+    const navigation = resolveAdminStoryNavigation(
+      anchor.getAttribute('href') ?? '',
+      globalThis.location.origin,
+    );
+    if (navigation === null) return;
+
+    event.preventDefault();
+    setNavigationTarget(navigation.href);
+  };
+
+  const navigationAnnouncement =
+    navigationTarget === undefined
+      ? ''
+      : locale === 'pt-BR'
+        ? `Prévia validada sem sair da história: ${navigationTarget}`
+        : `Preview validated without leaving the story: ${navigationTarget}`;
+
+  return (
+    <div
+      data-contrast={contrast}
+      data-density={density}
+      data-forced-colors={contrast === 'forced' || undefined}
+      data-locale={locale}
+      data-motion={motion}
+      data-storybook-fixture="admin-state-matrix-v1"
+      lang={locale}
+      onClickCapture={captureAdminNavigation}
+      style={{ minHeight: '100vh' }}
+    >
+      <p
+        aria-live="polite"
+        className="lb-visually-hidden"
+        data-admin-story-navigation-status="true"
+        role="status"
+      >
+        {navigationAnnouncement}
+      </p>
+      {children}
+    </div>
+  );
+};
 
 const withAdminAxes: Decorator = (Story, context) => {
   const contrast = String(context.globals['contrast'] ?? 'normal');
@@ -39,15 +107,11 @@ const withAdminAxes: Decorator = (Story, context) => {
   });
 
   return (
-    <div
-      data-contrast={contrast}
-      data-density={density}
-      data-forced-colors={contrast === 'forced' || undefined}
-      data-locale={locale}
-      data-motion={motion}
-      data-storybook-fixture="admin-state-matrix-v1"
-      lang={locale}
-      style={{ minHeight: '100vh' }}
+    <AdminStoryBoundary
+      contrast={contrast}
+      density={density}
+      locale={locale}
+      motion={motion}
     >
       <style>{`
         *, *::before, *::after {
@@ -76,7 +140,7 @@ const withAdminAxes: Decorator = (Story, context) => {
         }
       `}</style>
       <Story />
-    </div>
+    </AdminStoryBoundary>
   );
 };
 
