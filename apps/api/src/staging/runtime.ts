@@ -783,6 +783,7 @@ const invitationQueries = (
     const result = await database.query(
       `SELECT invitation.id::text AS invitation_id, invitation.recipient_digest,
               invitation.status, invitation.locale, invitation.campaign, invitation.version,
+              invitation.delivery_state, invitation.reminder_count, invitation.owner_reference,
               invitation.expires_at, invitation.updated_at
          FROM admin_invitations AS invitation
         WHERE ($2::uuid IS NULL OR invitation.id < $2::uuid)
@@ -794,19 +795,70 @@ const invitationQueries = (
       recipientMasked: `recipient:${text(row['recipient_digest']).slice(0, 12)}`,
       lifecycleState: text(row['status']) === 'pending' ? 'active' : text(row['status']),
       locale: text(row['locale']),
-      campaignReference: text(row['campaign']),
+      ...(text(row['campaign']).length === 0 ? {} : { campaignReference: text(row['campaign']) }),
+      deliveryState: text(row['delivery_state']),
+      reminderCount: Number(row['reminder_count']),
+      ...(text(row['owner_reference']).length === 0
+        ? {}
+        : { ownerReference: text(row['owner_reference']) }),
       version: text(row['version']),
-      expiresAt: text(row['expires_at']),
+      ...(text(row['expires_at']).length === 0 ? {} : { expiresAt: text(row['expires_at']) }),
       lastEventAt: text(row['updated_at']),
     }));
+    const capacityResult = await database.query(
+      `SELECT capacity.active_beta_count, capacity.version, capacity.updated_at,
+              (SELECT COUNT(*)::integer FROM admin_invitations WHERE kind = 'beta' AND status = 'queued') AS queued_count
+         FROM admin_invitation_capacity AS capacity WHERE capacity.singleton = TRUE`,
+    );
+    const capacityRow = capacityResult.rows[0];
+    const jobsResult = await database.query(
+      `SELECT job.id::text AS job_id, job.action, job.status, job.items, job.progress,
+              job.created_at, job.completed_at, receipt.id::text AS receipt_reference
+         FROM admin_invitation_jobs AS job
+         LEFT JOIN admin_invitation_receipts AS receipt ON receipt.aggregate_id = job.id::text
+        ORDER BY job.created_at DESC LIMIT 50`,
+    );
+    const jobs = jobsResult.rows.map((row) => {
+      const items = Array.isArray(row['items']) ? row['items'] : [];
+      const progress = recordValue(row['progress']);
+      const issued = Array.isArray(progress?.['issued']) ? progress['issued'].length : 0;
+      const queued = Array.isArray(progress?.['queued']) ? progress['queued'].length : 0;
+      const skipped = Array.isArray(progress?.['skipped']) ? progress['skipped'].length : 0;
+      const failed = Array.isArray(progress?.['failed']) ? progress['failed'].length : 0;
+      return {
+        jobId: text(row['job_id']),
+        action: text(row['action']),
+        state: text(row['status']),
+        totalItems: items.length,
+        completedItems: issued + queued + skipped,
+        failedItems: failed,
+        version: `${text(row['status'])}:${String(issued + queued + skipped)}:${String(failed)}`,
+        startedAt: text(row['created_at']),
+        ...(text(row['completed_at']).length === 0
+          ? {}
+          : { completedAt: text(row['completed_at']) }),
+        ...(text(row['receipt_reference']).length === 0
+          ? {}
+          : { receiptReference: text(row['receipt_reference']) }),
+      };
+    });
     return {
       records,
+      capacity: {
+        activeCount: Number(capacityRow?.['active_beta_count']),
+        activeLimit: 25,
+        queuedCount: Number(capacityRow?.['queued_count']),
+        version: text(capacityRow?.['version']),
+        updatedAt: text(capacityRow?.['updated_at']),
+      },
+      jobs,
       nextCursor: records.length === limit ? (records.at(-1)?.invitationId ?? '') : null,
     };
   },
   load: async (invitationId) => {
     const result = await database.query(
       `SELECT id::text AS invitation_id, recipient_digest, status, locale, campaign, version,
+              delivery_state, reminder_count, owner_reference, retention_state,
               expires_at, updated_at FROM admin_invitations WHERE id = $1::uuid`,
       [invitationId],
     );
@@ -818,9 +870,17 @@ const invitationQueries = (
           recipientMasked: `recipient:${text(row['recipient_digest']).slice(0, 12)}`,
           lifecycleState: text(row['status']) === 'pending' ? 'active' : text(row['status']),
           locale: text(row['locale']),
-          campaignReference: text(row['campaign']),
+          ...(text(row['campaign']).length === 0
+            ? {}
+            : { campaignReference: text(row['campaign']) }),
+          deliveryState: text(row['delivery_state']),
+          reminderCount: Number(row['reminder_count']),
+          ...(text(row['owner_reference']).length === 0
+            ? {}
+            : { ownerReference: text(row['owner_reference']) }),
+          retentionState: text(row['retention_state']),
           version: text(row['version']),
-          expiresAt: text(row['expires_at']),
+          ...(text(row['expires_at']).length === 0 ? {} : { expiresAt: text(row['expires_at']) }),
           lastEventAt: text(row['updated_at']),
         };
   },
@@ -1120,7 +1180,13 @@ export const createPersistentStagingAdminAuthority = ({
     core,
     invitations: {
       allowedOrigin: adminOrigin,
+      clock,
       csrfSecret: authSecret,
+      environment: {
+        environmentId: ADMIN_OPERATIONS_ENVIRONMENT_ID,
+        kind: environmentId,
+        label: environmentId === 'staging' ? 'Staging' : 'Development',
+      },
       invitations,
       queries: invitationQueries(database),
       resolveSession: async (request: FastifyRequest) => {

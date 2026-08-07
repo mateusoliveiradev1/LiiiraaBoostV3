@@ -543,6 +543,7 @@ union AdminInvitationLifecycleState {
 }
 
 union AdminInvitationDeliveryState {
+  unavailable: "unavailable",
   pending: "pending",
   sent: "sent",
   delivered: "delivered",
@@ -741,14 +742,14 @@ model AdminInvitationProjection is AdminProjectionMetadata {
   invitationId: ControlPlaneIdentifier;
   lifecycleState: AdminInvitationLifecycleState;
   recipientMasked: RedactedAuthorityText;
-  campaignReference: ControlPlaneIdentifier;
+  campaignReference?: ControlPlaneIdentifier;
   locale: ShellLocale;
   deliveryState: AdminInvitationDeliveryState;
   @minValue(0)
   @maxValue(2)
   reminderCount: uint8;
-  ownerReference: ControlPlaneIdentifier;
-  expiresAt: utcDateTime;
+  ownerReference?: ControlPlaneIdentifier;
+  expiresAt?: utcDateTime;
   lastEventAt: utcDateTime;
 }
 

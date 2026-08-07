@@ -7,6 +7,14 @@ import {
   preflightBetaInvitations,
   startBetaInvitationBatch,
 } from '@liiiraa/control-plane-application/admin-invitations';
+import type {
+  AdminEnvironmentIdentityJson,
+  AdminInvitationCapacityProjectionJson,
+  AdminInvitationDeliveryStateJson,
+  AdminInvitationLifecycleStateJson,
+  AdminInvitationProjectionJson,
+  AdminJobProjectionJson,
+} from '@liiiraa/contracts-ts';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -30,7 +38,12 @@ export interface AdminInvitationQueryPort {
       cursor?: string;
     }>,
   ): Promise<
-    Readonly<{ records: readonly Readonly<Record<string, unknown>>[]; nextCursor: string | null }>
+    Readonly<{
+      records: readonly Readonly<Record<string, unknown>>[];
+      capacity: Readonly<Record<string, unknown>>;
+      jobs: readonly Readonly<Record<string, unknown>>[];
+      nextCursor: string | null;
+    }>
   >;
   load(invitationId: string): Promise<Readonly<Record<string, unknown>> | null>;
   timeline(invitationId: string): Promise<readonly Readonly<Record<string, unknown>>[]>;
@@ -45,7 +58,9 @@ export interface AdminInvitationRouteOperations {
 
 export interface AdminInvitationRouteDependencies {
   readonly allowedOrigin: string;
+  readonly clock: Readonly<{ now(): Date }>;
   readonly csrfSecret: string;
+  readonly environment: AdminEnvironmentIdentityJson;
   readonly invitations: AdminInvitationDependencies;
   readonly operations?: AdminInvitationRouteOperations;
   readonly queries: AdminInvitationQueryPort;
@@ -197,9 +212,213 @@ const idempotencyKey = (body: Readonly<Record<string, unknown>>): string | null 
   return /^[A-Za-z0-9_-]{1,128}$/u.test(value) ? value : null;
 };
 
+const boundedText = (value: unknown, maximum = 128): string | null =>
+  typeof value === 'string' && value.trim().length > 0 && value.length <= maximum
+    ? value.trim()
+    : null;
+
+const versionText = (value: unknown): string | null => {
+  if (typeof value === 'bigint') return value >= 0n ? value.toString() : null;
+  if (typeof value === 'number')
+    return Number.isSafeInteger(value) && value >= 0 ? String(value) : null;
+  return boundedText(value);
+};
+
+const integerValue = (value: unknown, minimum: number, maximum: number): number | null =>
+  typeof value === 'number' && Number.isSafeInteger(value) && value >= minimum && value <= maximum
+    ? value
+    : null;
+
+const correlationFor = (request: FastifyRequest): string => {
+  const header = boundedText(request.headers['x-correlation-id']);
+  if (header !== null) return header;
+  const requestId = request.id.replace(/[^A-Za-z0-9._:-]/gu, '-').slice(0, 128);
+  return requestId.length > 0 ? requestId : 'admin-invitation-request';
+};
+
+const projectionMetadata = (
+  request: FastifyRequest,
+  dependencies: AdminInvitationRouteDependencies,
+  aggregateVersion: string,
+  recordReference: string,
+) => ({
+  schemaVersion: '1.0' as const,
+  aggregateVersion,
+  etag: `admin-${recordReference}-v${aggregateVersion}`,
+  correlationId: correlationFor(request),
+  provenance: 'postgres-authority' as const,
+  environment: dependencies.environment,
+  freshness: {
+    state: 'live' as const,
+    source: 'admin-invitations-api',
+    sequence: aggregateVersion,
+    observedAt: dependencies.clock.now().toISOString(),
+  },
+});
+
+const lifecycleState = (value: unknown): AdminInvitationLifecycleStateJson | null => {
+  const normalized =
+    value === 'pending' ? 'active' : value === 'permanently-bounced' ? 'bounced' : value;
+  return typeof normalized === 'string' &&
+    ['queued', 'active', 'accepted', 'declined', 'expired', 'revoked', 'bounced'].includes(
+      normalized,
+    )
+    ? (normalized as AdminInvitationLifecycleStateJson)
+    : null;
+};
+
+const deliveryState = (value: unknown): AdminInvitationDeliveryStateJson | null => {
+  const normalized =
+    value === undefined || value === null || value === 'not-requested'
+      ? 'unavailable'
+      : value === 'queued'
+        ? 'pending'
+        : value === 'permanently-bounced'
+          ? 'permanent-bounce'
+          : value;
+  return typeof normalized === 'string' &&
+    ['unavailable', 'pending', 'sent', 'delivered', 'failed', 'permanent-bounce'].includes(
+      normalized,
+    )
+    ? (normalized as AdminInvitationDeliveryStateJson)
+    : null;
+};
+
+const publicInvitation = (
+  record: Readonly<Record<string, unknown>>,
+  request: FastifyRequest,
+  dependencies: AdminInvitationRouteDependencies,
+): AdminInvitationProjectionJson | null => {
+  const invitationId = boundedText(record['invitationId']);
+  const aggregateVersion = versionText(record['version'] ?? record['aggregateVersion']);
+  const state = lifecycleState(record['lifecycleState'] ?? record['status']);
+  const locale = record['locale'];
+  const delivery = deliveryState(record['deliveryState']);
+  const reminderCount = integerValue(record['reminderCount'], 0, 2);
+  const lastEventAt = boundedText(record['lastEventAt'] ?? record['updatedAt']);
+  const recipientMasked = boundedText(record['recipientMasked'], 256) ?? 'recipient-protected';
+  if (
+    invitationId === null ||
+    aggregateVersion === null ||
+    state === null ||
+    (locale !== 'en' && locale !== 'pt-BR') ||
+    delivery === null ||
+    reminderCount === null ||
+    lastEventAt === null ||
+    Number.isNaN(Date.parse(lastEventAt))
+  ) {
+    return null;
+  }
+  const campaignReference = boundedText(record['campaignReference'] ?? record['campaign']);
+  const ownerReference = boundedText(record['ownerReference']);
+  const expiresAt = boundedText(record['expiresAt']);
+  if (expiresAt !== null && Number.isNaN(Date.parse(expiresAt))) return null;
+  const projection: AdminInvitationProjectionJson = {
+    ...projectionMetadata(request, dependencies, aggregateVersion, invitationId),
+    kind: 'admin-invitation-projection',
+    invitationId,
+    lifecycleState: state,
+    recipientMasked,
+    ...(campaignReference === null ? {} : { campaignReference }),
+    locale,
+    deliveryState: delivery,
+    reminderCount,
+    ...(ownerReference === null ? {} : { ownerReference }),
+    ...(expiresAt === null ? {} : { expiresAt }),
+    lastEventAt,
+  };
+  return controlPlaneDocumentValidator(projection) ? Object.freeze(projection) : null;
+};
+
+const publicCapacity = (
+  record: Readonly<Record<string, unknown>>,
+  request: FastifyRequest,
+  dependencies: AdminInvitationRouteDependencies,
+): AdminInvitationCapacityProjectionJson | null => {
+  const aggregateVersion = versionText(record['version'] ?? record['aggregateVersion']);
+  const activeCount = integerValue(record['activeCount'], 0, 25);
+  const activeLimit = integerValue(record['activeLimit'], 25, 25);
+  const queuedCount = integerValue(record['queuedCount'], 0, 100_000);
+  if (
+    aggregateVersion === null ||
+    activeCount === null ||
+    activeLimit !== 25 ||
+    queuedCount === null
+  ) {
+    return null;
+  }
+  const projection: AdminInvitationCapacityProjectionJson = {
+    ...projectionMetadata(request, dependencies, aggregateVersion, 'invitation-capacity'),
+    kind: 'admin-invitation-capacity-projection',
+    capacityId: 'beta-invitations',
+    activeCount,
+    activeLimit: 25,
+    queuedCount,
+  };
+  return controlPlaneDocumentValidator(projection) ? Object.freeze(projection) : null;
+};
+
+const publicJob = (
+  record: Readonly<Record<string, unknown>>,
+  ownerReference: string,
+  request: FastifyRequest,
+  dependencies: AdminInvitationRouteDependencies,
+): AdminJobProjectionJson | null => {
+  const jobId = boundedText(record['jobId']);
+  const action = record['action'];
+  const stateValue = record['state'] ?? record['status'];
+  const state =
+    stateValue === 'completed-with-failures'
+      ? 'partial'
+      : ['queued', 'running', 'paused', 'completed', 'partial', 'failed', 'cancelled'].includes(
+            String(stateValue),
+          )
+        ? stateValue
+        : null;
+  const totalItems = integerValue(record['totalItems'], 1, 1_000);
+  const completedItems = integerValue(record['completedItems'], 0, totalItems ?? 0);
+  const failedItems = integerValue(record['failedItems'], 0, totalItems ?? 0);
+  const aggregateVersion = versionText(record['version'] ?? record['aggregateVersion']);
+  if (
+    jobId === null ||
+    (action !== 'resend' && action !== 'revoke') ||
+    state === null ||
+    totalItems === null ||
+    completedItems === null ||
+    failedItems === null ||
+    completedItems + failedItems > totalItems ||
+    aggregateVersion === null
+  ) {
+    return null;
+  }
+  const progressPercent = Math.floor(((completedItems + failedItems) / totalItems) * 100);
+  const startedAt = boundedText(record['startedAt']);
+  const completedAt = boundedText(record['completedAt']);
+  const receiptReference = boundedText(record['receiptReference']);
+  const projection: AdminJobProjectionJson = {
+    ...projectionMetadata(request, dependencies, aggregateVersion, jobId),
+    kind: 'admin-job-projection',
+    jobId,
+    jobType: action === 'resend' ? 'invitation-resend' : 'invitation-revoke',
+    state: state as AdminJobProjectionJson['state'],
+    progressPercent,
+    totalItems,
+    completedItems,
+    failedItems,
+    ownerReference,
+    ...(startedAt === null ? {} : { startedAt }),
+    ...(completedAt === null ? {} : { completedAt }),
+    ...(receiptReference === null ? {} : { receiptReference }),
+  };
+  return controlPlaneDocumentValidator(projection) ? Object.freeze(projection) : null;
+};
+
 const publicResult = (
   result: Readonly<Record<string, unknown>>,
-): Readonly<Record<string, unknown>> => {
+  session: AdminInvitationRouteSession,
+  request: FastifyRequest,
+  dependencies: AdminInvitationRouteDependencies,
+): Readonly<Record<string, unknown>> | null => {
   if (result['ok'] !== true) {
     return {
       ok: false,
@@ -207,52 +426,99 @@ const publicResult = (
     };
   }
   const state = isRecord(result['state']) ? result['state'] : null;
+  const document =
+    state === null
+      ? typeof result['jobId'] === 'string' && isRecord(result['results'])
+        ? (() => {
+            const results = result['results'];
+            const values = ['issued', 'queued', 'skipped', 'failed'].map((key) =>
+              Array.isArray(results[key]) ? results[key].length : -1,
+            );
+            if (values.some((value) => value < 0)) return null;
+            const totalItems = values.reduce((sum, value) => sum + value, 0);
+            return publicJob(
+              {
+                jobId: result['jobId'],
+                action: result['batchAction'],
+                state: 'queued',
+                totalItems,
+                completedItems: 0,
+                failedItems: 0,
+                version: 'queued:0:0',
+                startedAt: dependencies.clock.now().toISOString(),
+                receiptReference: result['receiptId'],
+              },
+              session.actorId,
+              request,
+              dependencies,
+            );
+          })()
+        : null
+      : publicInvitation(state, request, dependencies);
+  if (document === null) return null;
   return Object.freeze({
     ok: true,
     outcome: result['outcome'],
     receiptId: result['receiptId'],
+    document,
     ...(result['jobId'] === undefined ? {} : { jobId: result['jobId'] }),
     ...(result['results'] === undefined ? {} : { results: result['results'] }),
-    ...(state === null
-      ? {}
-      : {
-          invitation: {
-            invitationId: state['invitationId'],
-            locale: state['locale'],
-            status: state['status'],
-            version:
-              typeof state['version'] === 'bigint' ? state['version'].toString() : state['version'],
-            expiresAt: state['expiresAt'],
-            reminderCount: state['reminderCount'],
-          },
-        }),
   });
 };
 
-const publicInvitation = (record: Readonly<Record<string, unknown>>) => ({
-  invitationId: record['invitationId'],
-  recipientMasked: record['recipientMasked'],
-  lifecycleState: record['lifecycleState'],
-  ...(record['deliveryState'] === undefined ? {} : { deliveryState: record['deliveryState'] }),
-  ...(record['locale'] === undefined ? {} : { locale: record['locale'] }),
-  ...(record['campaignReference'] === undefined
-    ? {}
-    : { campaignReference: record['campaignReference'] }),
-  ...(record['version'] === undefined
-    ? {}
-    : {
-        version:
-          typeof record['version'] === 'bigint' ? record['version'].toString() : record['version'],
-      }),
-  ...(record['expiresAt'] === undefined ? {} : { expiresAt: record['expiresAt'] }),
-  ...(record['lastEventAt'] === undefined ? {} : { lastEventAt: record['lastEventAt'] }),
-});
+const TIMELINE_KINDS = new Set([
+  'created',
+  'queued',
+  'sent',
+  'delivered',
+  'delivery-failed',
+  'resent',
+  'reminded',
+  'accepted',
+  'expired',
+  'declined',
+  'revoked',
+  'permanently-bounced',
+  'suspicious-attempt',
+]);
 
-const publicTimeline = (event: Readonly<Record<string, unknown>>) => ({
-  kind: event['kind'],
-  at: event['at'],
-  ...(event['outcome'] === undefined ? {} : { outcome: event['outcome'] }),
-});
+const publicTimeline = (event: Readonly<Record<string, unknown>>) => {
+  const kind = boundedText(event['kind']);
+  const at = boundedText(event['at']);
+  const outcome = event['outcome'] === undefined ? null : boundedText(event['outcome']);
+  if (
+    kind === null ||
+    !TIMELINE_KINDS.has(kind) ||
+    at === null ||
+    Number.isNaN(Date.parse(at)) ||
+    (event['outcome'] !== undefined && outcome === null) ||
+    outcome?.includes('@') === true
+  ) {
+    return null;
+  }
+  return Object.freeze({ kind, at, ...(outcome === null ? {} : { outcome }) });
+};
+
+const publicRetention = (record: Readonly<Record<string, unknown>>) => {
+  switch (record['retentionState']) {
+    case 'operational':
+      return Object.freeze({ action: 'retain' as const, basis: 'operational' as const });
+    case 'retained':
+      return Object.freeze({ action: 'retain' as const, basis: 'purpose' as const });
+    case 'pseudonymized':
+      return Object.freeze({
+        action: 'pseudonymize-personal-data' as const,
+        preserveMinimumAuditReceipt: true as const,
+      });
+    case 'personal-data-deleted':
+      return Object.freeze({
+        action: 'delete-personal-data' as const,
+        preserveMinimumAuditReceipt: true as const,
+      });
+    default:
+      return null;
+  }
+};
 
 const resultStatus = (result: Readonly<Record<string, unknown>>, success: number): number => {
   if (result['ok'] === true) return success;
@@ -295,10 +561,23 @@ export const registerAdminInvitationRoutes = (
       return noStore(reply).code(429).send({ code: 'RATE_LIMITED' });
     }
     const result = await dependencies.queries.list(query);
+    const invitationRecords = result.records.map((record) =>
+      publicInvitation(record, request, dependencies),
+    );
+    const capacity = publicCapacity(result.capacity, request, dependencies);
+    const jobs = result.jobs.map((job) => publicJob(job, session.actorId, request, dependencies));
+    if (
+      invitationRecords.some((record) => record === null) ||
+      capacity === null ||
+      jobs.some((job) => job === null)
+    ) {
+      return noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' });
+    }
     return noStore(reply)
       .code(200)
       .send({
-        records: result.records.map(publicInvitation),
+        records: [...invitationRecords, capacity, ...jobs],
+        freshness: capacity.freshness,
         nextCursor: result.nextCursor,
       });
   });
@@ -309,9 +588,16 @@ export const registerAdminInvitationRoutes = (
       const session = await authorize(request, dependencies, 'beta-invitations:manage', false);
       if (session === null) return hidden(reply);
       const record = await dependencies.queries.load(request.params.invitationId);
-      return record === null
-        ? hidden(reply)
-        : noStore(reply).code(200).send(publicInvitation(record));
+      if (record === null) return hidden(reply);
+      const document = publicInvitation(record, request, dependencies);
+      const timeline = (await dependencies.queries.timeline(request.params.invitationId)).map(
+        publicTimeline,
+      );
+      const retention = publicRetention(record);
+      if (document === null || timeline.some((event) => event === null) || retention === null) {
+        return noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' });
+      }
+      return noStore(reply).code(200).send({ document, retention, timeline });
     },
   );
 
@@ -320,13 +606,13 @@ export const registerAdminInvitationRoutes = (
     async (request, reply) => {
       const session = await authorize(request, dependencies, 'beta-invitations:manage', false);
       if (session === null) return hidden(reply);
-      return noStore(reply)
-        .code(200)
-        .send({
-          events: (await dependencies.queries.timeline(request.params.invitationId)).map(
-            publicTimeline,
-          ),
-        });
+      const events = (await dependencies.queries.timeline(request.params.invitationId)).map(
+        publicTimeline,
+      );
+      if (events.some((event) => event === null)) {
+        return noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' });
+      }
+      return noStore(reply).code(200).send({ events });
     },
   );
 
@@ -382,7 +668,10 @@ export const registerAdminInvitationRoutes = (
       ...(typeof body['campaign'] === 'string' ? { campaign: body['campaign'] } : {}),
       ...(typeof body['cohort'] === 'string' ? { cohort: body['cohort'] } : {}),
     });
-    return noStore(reply).code(resultStatus(result, 201)).send(publicResult(result));
+    const projected = publicResult(result, session, request, dependencies);
+    return projected === null
+      ? noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' })
+      : noStore(reply).code(resultStatus(result, 201)).send(projected);
   });
 
   const transition =
@@ -417,7 +706,10 @@ export const registerAdminInvitationRoutes = (
               }
             : { kind: 'revoke', reason: parsed.reason },
       });
-      return noStore(reply).code(resultStatus(result, 200)).send(publicResult(result));
+      const projected = publicResult(result, session, request, dependencies);
+      return projected === null
+        ? noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' })
+        : noStore(reply).code(resultStatus(result, 200)).send(projected);
     };
 
   app.post<{ Params: { invitationId: string } }>(
@@ -471,7 +763,15 @@ export const registerAdminInvitationRoutes = (
         invitationId: stringValue(item as Readonly<Record<string, unknown>>, 'invitationId'),
       })),
     });
-    return noStore(reply).code(resultStatus(result, 202)).send(publicResult(result));
+    const projected = publicResult(
+      { ...result, batchAction: action },
+      session,
+      request,
+      dependencies,
+    );
+    return projected === null
+      ? noStore(reply).code(503).send({ code: 'INVITATION_AUTHORITY_INVALID' })
+      : noStore(reply).code(resultStatus(result, 202)).send(projected);
   });
   return Promise.resolve();
 };

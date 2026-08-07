@@ -522,7 +522,8 @@ export type AdminInvitationLifecycleStateJson =
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminInvitationDeliveryState".
  */
-export type AdminInvitationDeliveryStateJson = 'pending' | 'sent' | 'delivered' | 'failed' | 'permanent-bounce';
+export type AdminInvitationDeliveryStateJson =
+  'unavailable' | 'pending' | 'sent' | 'delivered' | 'failed' | 'permanent-bounce';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "AdminGovernanceKind".
@@ -2764,12 +2765,12 @@ export interface AdminInvitationProjectionJson {
   invitationId: ControlPlaneIdentifierJson;
   lifecycleState: AdminInvitationLifecycleStateJson;
   recipientMasked: RedactedAuthorityTextJson;
-  campaignReference: ControlPlaneIdentifierJson;
+  campaignReference?: ControlPlaneIdentifierJson;
   locale: ShellLocaleJson;
   deliveryState: AdminInvitationDeliveryStateJson;
   reminderCount: number;
-  ownerReference: ControlPlaneIdentifierJson;
-  expiresAt: string;
+  ownerReference?: ControlPlaneIdentifierJson;
+  expiresAt?: string;
   lastEventAt: string;
 }
 /**

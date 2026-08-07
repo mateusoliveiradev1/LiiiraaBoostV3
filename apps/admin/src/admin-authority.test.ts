@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
 
-import type { AdminJobProjectionJson, AdminOperationReceiptJson } from '@liiiraa/contracts-ts';
+import type {
+  AdminInvitationProjectionJson,
+  AdminJobProjectionJson,
+  AdminOperationReceiptJson,
+} from '@liiiraa/contracts-ts';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -65,6 +69,21 @@ const receipt: AdminOperationReceiptJson = {
   approvalReferences: ['approval-0001'],
   auditReference: 'audit-0001',
   recordedAt: '2026-08-06T20:01:00.000Z',
+};
+
+const invitation: AdminInvitationProjectionJson = {
+  ...metadata,
+  kind: 'admin-invitation-projection',
+  invitationId: 'invitation-0001',
+  lifecycleState: 'active',
+  recipientMasked: 'm••••@example.com',
+  campaignReference: 'private-beta',
+  locale: 'pt-BR',
+  deliveryState: 'delivered',
+  reminderCount: 0,
+  ownerReference: 'administrator-0001',
+  expiresAt: '2026-08-20T20:00:00.000Z',
+  lastEventAt: '2026-08-06T20:00:00.000Z',
 };
 
 const createAuthority = (transport: AdminAuthorityTransport) =>
@@ -146,6 +165,27 @@ describe('complete typed Admin query authority', () => {
       status: 'error',
     });
   });
+
+  it('loads a validated invitation detail with masked timeline and retention authority', async () => {
+    const authority = createAuthority(
+      vi.fn<AdminAuthorityTransport>().mockResolvedValue(
+        response({
+          document: invitation,
+          retention: { action: 'retain', basis: 'operational' },
+          timeline: [{ kind: 'delivered', at: metadata.freshness.observedAt }],
+        }),
+      ),
+    );
+
+    await expect(
+      authority.loadInvitation({ invitationId: invitation.invitationId }),
+    ).resolves.toEqual({
+      invitation,
+      retention: { action: 'retain', basis: 'operational' },
+      status: 'online',
+      timeline: [{ kind: 'delivered', at: metadata.freshness.observedAt }],
+    });
+  });
 });
 
 describe('complete typed Admin mutation authority', () => {
@@ -218,6 +258,41 @@ describe('complete typed Admin mutation authority', () => {
     await expect(authority.mutate(mutation)).resolves.toEqual({
       code: 'unauthorized',
       status: 'denied',
+    });
+  });
+
+  it('admits bounded invitation preflight rows without forcing them into an Admin document', async () => {
+    const transport = vi.fn<AdminAuthorityTransport>().mockResolvedValue(
+      response({
+        ok: true,
+        rows: [
+          { rowId: 'row-1', classification: 'valid' },
+          { rowId: 'row-2', classification: 'duplicate' },
+        ],
+      }),
+    );
+    const authority = createAuthority(transport);
+
+    await expect(
+      authority.mutate({
+        family: 'preflight-invitations',
+        idempotencyKey: 'preflight-0001',
+        payload: {
+          rows: [
+            { rowId: 'row-1', recipient: 'first@example.com' },
+            { rowId: 'row-2', recipient: 'first@example.com' },
+          ],
+        },
+      }),
+    ).resolves.toEqual({
+      preflight: {
+        kind: 'admin-invitation-preflight',
+        rows: [
+          { rowId: 'row-1', classification: 'valid' },
+          { rowId: 'row-2', classification: 'duplicate' },
+        ],
+      },
+      status: 'complete',
     });
   });
 });

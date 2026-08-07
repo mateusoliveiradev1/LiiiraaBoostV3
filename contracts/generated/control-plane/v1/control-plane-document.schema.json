@@ -1164,6 +1164,10 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "anyOf": [
         {
+          "const": "unavailable",
+          "type": "string"
+        },
+        {
           "const": "pending",
           "type": "string"
         },
@@ -1296,12 +1300,9 @@
         "invitationId",
         "lifecycleState",
         "recipientMasked",
-        "campaignReference",
         "locale",
         "deliveryState",
         "reminderCount",
-        "ownerReference",
-        "expiresAt",
         "lastEventAt"
       ],
       "type": "object",

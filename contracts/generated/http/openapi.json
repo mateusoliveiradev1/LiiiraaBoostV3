@@ -1166,6 +1166,10 @@
       "AdminInvitationDeliveryState": {
         "anyOf": [
           {
+            "const": "unavailable",
+            "type": "string"
+          },
+          {
             "const": "pending",
             "type": "string"
           },
@@ -1294,12 +1298,9 @@
           "invitationId",
           "lifecycleState",
           "recipientMasked",
-          "campaignReference",
           "locale",
           "deliveryState",
           "reminderCount",
-          "ownerReference",
-          "expiresAt",
           "lastEventAt"
         ],
         "type": "object",

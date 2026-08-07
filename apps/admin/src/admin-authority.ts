@@ -1,5 +1,6 @@
 import {
   controlPlaneDocumentValidator,
+  type AdminInvitationProjectionJson,
   type AdminEnvironmentKindJson,
   type AdminActionJson,
   type AdminCommandJson,
@@ -96,8 +97,33 @@ export type AdminMutationInput = Readonly<{
   targetId?: string;
 }>;
 
+export type AdminInvitationPreflightAuthority = Readonly<{
+  kind: 'admin-invitation-preflight';
+  rows: readonly Readonly<{
+    classification: 'valid' | 'duplicate' | 'active' | 'invalid' | 'ineligible';
+    rowId: string;
+  }>[];
+}>;
+
+export type AdminInvitationDetailResult =
+  | Readonly<{
+      invitation: AdminInvitationProjectionJson;
+      retention: Readonly<{
+        action: 'retain' | 'delete-personal-data' | 'pseudonymize-personal-data';
+        basis?: 'operational' | 'purpose' | 'legal-hold';
+        preserveMinimumAuditReceipt?: true;
+      }>;
+      status: 'online';
+      timeline: readonly Readonly<{ at: string; kind: string; outcome?: string }>[];
+    }>
+  | Readonly<{
+      code: 'invalid-authority' | 'unauthorized' | 'unavailable';
+      status: 'denied' | 'error';
+    }>;
+
 export type AdminMutationResult =
   | Readonly<{ document: AdminAuthorityDocument; status: 'complete' | 'partial' }>
+  | Readonly<{ preflight: AdminInvitationPreflightAuthority; status: 'complete' }>
   | Readonly<{
       code: 'conflict';
       document?: AdminAuthorityDocument;
@@ -222,6 +248,9 @@ export type AdminDiagnosticLifecycle = Readonly<{
 }>;
 
 export interface AdminAuthority {
+  loadInvitation(
+    input: Readonly<{ invitationId: string; signal?: AbortSignal }>,
+  ): Promise<AdminInvitationDetailResult>;
   query(family: AdminQueryFamily, options: AdminQueryOptions): Promise<AdminQueryResult>;
   mutate(input: AdminMutationInput): Promise<AdminMutationResult>;
   openFreshness(input: AdminFreshnessInput): AdminFreshnessLifecycle;
@@ -474,6 +503,122 @@ const extractAdminDocument = (value: unknown): AdminAuthorityDocument | null => 
   return null;
 };
 
+const PREFLIGHT_CLASSIFICATIONS = new Set([
+  'valid',
+  'duplicate',
+  'active',
+  'invalid',
+  'ineligible',
+]);
+
+const admitInvitationPreflight = (value: unknown): AdminInvitationPreflightAuthority | null => {
+  if (!isRecord(value) || value['ok'] !== true || !Array.isArray(value['rows'])) return null;
+  if (value['rows'].length < 1 || value['rows'].length > 100) return null;
+  const rowIds = new Set<string>();
+  const rows: AdminInvitationPreflightAuthority['rows'][number][] = [];
+  for (const candidate of value['rows']) {
+    if (!isRecord(candidate)) return null;
+    const rowId = candidate['rowId'];
+    const classification = candidate['classification'];
+    if (
+      !boundedToken(rowId) ||
+      rowIds.has(rowId) ||
+      typeof classification !== 'string' ||
+      !PREFLIGHT_CLASSIFICATIONS.has(classification)
+    ) {
+      return null;
+    }
+    rowIds.add(rowId);
+    rows.push({
+      rowId,
+      classification:
+        classification as AdminInvitationPreflightAuthority['rows'][number]['classification'],
+    });
+  }
+  return Object.freeze({
+    kind: 'admin-invitation-preflight',
+    rows: Object.freeze(rows.map((row) => Object.freeze(row))),
+  });
+};
+
+const INVITATION_TIMELINE_KINDS = new Set([
+  'created',
+  'queued',
+  'sent',
+  'delivered',
+  'delivery-failed',
+  'resent',
+  'reminded',
+  'accepted',
+  'expired',
+  'declined',
+  'revoked',
+  'permanently-bounced',
+  'suspicious-attempt',
+]);
+
+const admitInvitationDetail = (value: unknown): AdminInvitationDetailResult | null => {
+  if (!isRecord(value)) return null;
+  const document = admitAdminDocument(value['document']);
+  if (document?.kind !== 'admin-invitation-projection' || !Array.isArray(value['timeline'])) {
+    return null;
+  }
+  const timeline: Extract<AdminInvitationDetailResult, { status: 'online' }>['timeline'][number][] =
+    [];
+  for (const event of value['timeline']) {
+    if (!isRecord(event)) return null;
+    const kind = event['kind'];
+    const at = event['at'];
+    const outcome = event['outcome'];
+    if (
+      typeof kind !== 'string' ||
+      !INVITATION_TIMELINE_KINDS.has(kind) ||
+      typeof at !== 'string' ||
+      Number.isNaN(Date.parse(at)) ||
+      (outcome !== undefined &&
+        (typeof outcome !== 'string' || outcome.length > 128 || outcome.includes('@')))
+    ) {
+      return null;
+    }
+    timeline.push(Object.freeze({ at, kind, ...(outcome === undefined ? {} : { outcome }) }));
+  }
+  const retention = value['retention'];
+  if (!isRecord(retention)) return null;
+  const action = retention['action'];
+  const basis = retention['basis'];
+  const preserveMinimumAuditReceipt = retention['preserveMinimumAuditReceipt'];
+  if (
+    typeof action !== 'string' ||
+    !['retain', 'delete-personal-data', 'pseudonymize-personal-data'].includes(action) ||
+    (basis !== undefined &&
+      (typeof basis !== 'string' || !['operational', 'purpose', 'legal-hold'].includes(basis))) ||
+    (preserveMinimumAuditReceipt !== undefined && preserveMinimumAuditReceipt !== true)
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    invitation: document,
+    retention: Object.freeze({
+      action: action as Extract<
+        AdminInvitationDetailResult,
+        { status: 'online' }
+      >['retention']['action'],
+      ...(basis === undefined
+        ? {}
+        : {
+            basis: basis as NonNullable<
+              Extract<AdminInvitationDetailResult, { status: 'online' }>['retention']['basis']
+            >,
+          }),
+      ...(preserveMinimumAuditReceipt === true
+        ? { preserveMinimumAuditReceipt: true as const }
+        : {}),
+    }),
+    status: 'online',
+    timeline: Object.freeze(timeline),
+  });
+};
+
 const requireMutationTarget = (input: AdminMutationInput): string | null =>
   boundedToken(input.targetId) ? encodeURIComponent(input.targetId) : null;
 
@@ -628,6 +773,36 @@ export const createAdminAuthority = ({
   };
 
   return Object.freeze({
+    async loadInvitation(
+      input: Readonly<{ invitationId: string; signal?: AbortSignal }>,
+    ): Promise<AdminInvitationDetailResult> {
+      if (!boundedToken(input.invitationId)) {
+        return { code: 'invalid-authority', status: 'error' };
+      }
+      try {
+        const response = await transport(
+          `${baseUrl}/v1/admin/invitations/${encodeURIComponent(input.invitationId)}`,
+          {
+            cache: 'no-store',
+            credentials: 'include',
+            headers: headers(correlationId()),
+            method: 'GET',
+            ...(input.signal === undefined ? {} : { signal: input.signal }),
+          },
+        );
+        if ([401, 403, 404].includes(response.status)) {
+          return { code: 'unauthorized', status: 'denied' };
+        }
+        if (!response.ok || !cachePolicyIsPrivate(response)) {
+          return { code: 'unavailable', status: 'error' };
+        }
+        const detail = admitInvitationDetail(await safeJson(response));
+        return detail ?? { code: 'invalid-authority', status: 'error' };
+      } catch {
+        return { code: 'unavailable', status: 'error' };
+      }
+    },
+
     async query(family: AdminQueryFamily, options: AdminQueryOptions): Promise<AdminQueryResult> {
       try {
         const parameters = new URLSearchParams();
@@ -743,6 +918,12 @@ export const createAdminAuthority = ({
         }
         if (response.status === 429) return { code: 'rate-limit', status: 'error' };
         if (response.status === 503) return { code: 'degraded', status: 'error' };
+        if (input.family === 'preflight-invitations' && response.ok) {
+          const preflight = admitInvitationPreflight(body);
+          return preflight === null
+            ? { code: 'invalid-authority', status: 'error' }
+            : { preflight, status: 'complete' };
+        }
         const document = extractAdminDocument(body);
         if ((!response.ok && response.status !== 207) || document === null) {
           return { code: 'invalid-authority', status: 'error' };

@@ -70,7 +70,25 @@ const buildApp = async (authorized = true) => {
       }),
     ),
     manage: vi.fn(() =>
-      Promise.resolve({ ok: true as const, outcome: 'resent' as const, receiptId: 'receipt-2' }),
+      Promise.resolve({
+        ok: true as const,
+        outcome: 'resent' as const,
+        receiptId: 'receipt-2',
+        state: {
+          kind: 'beta' as const,
+          invitationId: 'invitation-1',
+          recipientKey: 'digest-must-not-leak',
+          locale: 'pt-BR' as const,
+          version: 2n,
+          status: 'pending' as const,
+          reminderCount: 0,
+          reminderWindowStartedAt: now,
+          createdAt: now,
+          updatedAt: now,
+          expiresAt: '2030-01-15T00:00:00.000Z',
+          events: [],
+        },
+      }),
     ),
     batch: vi.fn(() =>
       Promise.resolve({
@@ -90,7 +108,27 @@ const buildApp = async (authorized = true) => {
             invitationId: 'invitation-1',
             recipientMasked: 'w***@example.com',
             lifecycleState: 'active',
+            deliveryState: 'delivered',
+            reminderCount: 0,
+            locale: 'pt-BR',
+            campaignReference: 'private-beta',
+            ownerReference: 'operator-1',
+            expiresAt: '2030-01-15T00:00:00.000Z',
+            lastEventAt: now,
             version: 1n,
+          },
+        ],
+        capacity: { activeCount: 1, activeLimit: 25, queuedCount: 0, version: 4n, updatedAt: now },
+        jobs: [
+          {
+            jobId: 'job-1',
+            action: 'resend',
+            state: 'queued',
+            totalItems: 1,
+            completedItems: 0,
+            failedItems: 0,
+            version: 'queued:0:0',
+            startedAt: now,
           },
         ],
         nextCursor: null,
@@ -101,10 +139,18 @@ const buildApp = async (authorized = true) => {
         invitationId: 'invitation-1',
         recipientMasked: 'w***@example.com',
         lifecycleState: 'active',
+        deliveryState: 'delivered',
+        reminderCount: 0,
+        locale: 'pt-BR',
+        campaignReference: 'private-beta',
+        ownerReference: 'operator-1',
+        expiresAt: '2030-01-15T00:00:00.000Z',
+        lastEventAt: now,
+        retentionState: 'operational',
         version: 1n,
       }),
     ),
-    timeline: vi.fn(() => Promise.resolve([{ kind: 'issued', at: now }])),
+    timeline: vi.fn(() => Promise.resolve([{ kind: 'sent', at: now }])),
   };
   const app = Fastify({ bodyLimit: 256 * 1024 });
   const session: AdminInvitationRouteSession | null = authorized
@@ -124,6 +170,12 @@ const buildApp = async (authorized = true) => {
     allowedOrigin: origin,
     csrfSecret: secret,
     invitations: {} as never,
+    clock: { now: () => new Date(now) },
+    environment: {
+      environmentId: 'staging-brasil',
+      kind: 'staging',
+      label: 'Staging Brasil',
+    },
     operations,
     queries,
     rateLimit: vi.fn(() => Promise.resolve(true)),
@@ -205,6 +257,13 @@ describe('admin invitation management routes', () => {
       },
     });
     expect(issued.statusCode).toBe(201);
+    expect(issued.json()).toMatchObject({
+      document: {
+        kind: 'admin-invitation-projection',
+        invitationId: 'invitation-1',
+        aggregateVersion: '1',
+      },
+    });
     expect(issued.body).not.toMatch(/private@example\.com|digest-must-not-leak|secret/iu);
     expect(operations.issue).toHaveBeenCalledWith(
       expect.anything(),
@@ -278,8 +337,26 @@ describe('admin invitation management routes', () => {
       headers: { origin },
     });
     expect(list.statusCode).toBe(200);
+    const listBody = list.json<{ records: { kind: string }[] }>();
+    expect(listBody.records.map((record) => record.kind)).toEqual([
+      'admin-invitation-projection',
+      'admin-invitation-capacity-projection',
+      'admin-job-projection',
+    ]);
     expect(list.body).toContain('w***@example.com');
     expect(list.body).not.toContain('digest');
+
+    const detail = await app.inject({
+      method: 'GET',
+      url: '/v1/admin/invitations/invitation-1',
+      headers: { origin },
+    });
+    expect(detail.statusCode).toBe(200);
+    expect(detail.json()).toMatchObject({
+      document: { kind: 'admin-invitation-projection', invitationId: 'invitation-1' },
+      retention: { action: 'retain', basis: 'operational' },
+      timeline: [{ kind: 'sent', at: now }],
+    });
 
     const timeline = await app.inject({
       method: 'GET',
@@ -287,7 +364,7 @@ describe('admin invitation management routes', () => {
       headers: { origin },
     });
     expect(timeline.statusCode).toBe(200);
-    expect(timeline.json()).toEqual({ events: [{ kind: 'issued', at: now }] });
+    expect(timeline.json()).toEqual({ events: [{ kind: 'sent', at: now }] });
 
     const batch = await app.inject({
       method: 'POST',

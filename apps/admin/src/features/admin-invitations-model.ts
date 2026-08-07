@@ -17,7 +17,7 @@ export type InvitationKind = 'beta' | 'administrative-team';
 export type InvitationRecordAuthority = Readonly<{
   aggregateVersion: string;
   deliveryState: AdminInvitationDeliveryStateJson;
-  expiresAt: string;
+  expiresAt?: string;
   invitationId: string;
   lifecycleState: AdminInvitationLifecycleStateJson;
   recipientMasked: string;
@@ -134,8 +134,12 @@ export const classifyInvitationActions = (
     });
   }
   const now = instant(input.now, 'INVITATION_NOW_INVALID');
-  const expiresAt = instant(input.invitation.expiresAt, 'INVITATION_EXPIRY_INVALID');
-  const active = input.invitation.lifecycleState === 'active' && expiresAt > now;
+  const expiresAt =
+    input.invitation.expiresAt === undefined
+      ? null
+      : instant(input.invitation.expiresAt, 'INVITATION_EXPIRY_INVALID');
+  const active =
+    input.invitation.lifecycleState === 'active' && expiresAt !== null && expiresAt > now;
   const queued = input.invitation.lifecycleState === 'queued';
   const deliveryStopped = input.invitation.deliveryState === 'permanent-bounce';
   return Object.freeze({

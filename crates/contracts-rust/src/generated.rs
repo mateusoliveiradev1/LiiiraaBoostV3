@@ -4002,6 +4002,7 @@ impl ::std::convert::TryFrom<::std::string::String>
 #[doc = "  \"$id\": \"AdminInvitationDeliveryState.json\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
+#[doc = "    \"unavailable\","]
 #[doc = "    \"pending\","]
 #[doc = "    \"sent\","]
 #[doc = "    \"delivered\","]
@@ -4025,6 +4026,8 @@ impl ::std::convert::TryFrom<::std::string::String>
     PartialOrd,
 )]
 pub enum AdminInvitationDeliveryState {
+    #[serde(rename = "unavailable")]
+    Unavailable,
     #[serde(rename = "pending")]
     Pending,
     #[serde(rename = "sent")]
@@ -4039,6 +4042,7 @@ pub enum AdminInvitationDeliveryState {
 impl ::std::fmt::Display for AdminInvitationDeliveryState {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
+            Self::Unavailable => f.write_str("unavailable"),
             Self::Pending => f.write_str("pending"),
             Self::Sent => f.write_str("sent"),
             Self::Delivered => f.write_str("delivered"),
@@ -4051,6 +4055,7 @@ impl ::std::str::FromStr for AdminInvitationDeliveryState {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
+            "unavailable" => Ok(Self::Unavailable),
             "pending" => Ok(Self::Pending),
             "sent" => Ok(Self::Sent),
             "delivered" => Ok(Self::Delivered),
@@ -4191,19 +4196,16 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminInvitationLifecycle
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"aggregateVersion\","]
-#[doc = "    \"campaignReference\","]
 #[doc = "    \"correlationId\","]
 #[doc = "    \"deliveryState\","]
 #[doc = "    \"environment\","]
 #[doc = "    \"etag\","]
-#[doc = "    \"expiresAt\","]
 #[doc = "    \"freshness\","]
 #[doc = "    \"invitationId\","]
 #[doc = "    \"kind\","]
 #[doc = "    \"lastEventAt\","]
 #[doc = "    \"lifecycleState\","]
 #[doc = "    \"locale\","]
-#[doc = "    \"ownerReference\","]
 #[doc = "    \"provenance\","]
 #[doc = "    \"recipientMasked\","]
 #[doc = "    \"reminderCount\","]
@@ -4283,16 +4285,24 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminInvitationLifecycle
 pub struct AdminInvitationProjection {
     #[serde(rename = "aggregateVersion")]
     pub aggregate_version: ::std::string::String,
-    #[serde(rename = "campaignReference")]
-    pub campaign_reference: ControlPlaneIdentifier,
+    #[serde(
+        rename = "campaignReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub campaign_reference: ::std::option::Option<ControlPlaneIdentifier>,
     #[serde(rename = "correlationId")]
     pub correlation_id: CorrelationId,
     #[serde(rename = "deliveryState")]
     pub delivery_state: AdminInvitationDeliveryState,
     pub environment: AdminEnvironmentIdentity,
     pub etag: AuthorityEtag,
-    #[serde(rename = "expiresAt")]
-    pub expires_at: ::std::string::String,
+    #[serde(
+        rename = "expiresAt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub expires_at: ::std::option::Option<::std::string::String>,
     pub freshness: AdminFreshness,
     #[serde(rename = "invitationId")]
     pub invitation_id: ControlPlaneIdentifier,
@@ -4302,8 +4312,12 @@ pub struct AdminInvitationProjection {
     #[serde(rename = "lifecycleState")]
     pub lifecycle_state: AdminInvitationLifecycleState,
     pub locale: ShellLocale,
-    #[serde(rename = "ownerReference")]
-    pub owner_reference: ControlPlaneIdentifier,
+    #[serde(
+        rename = "ownerReference",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub owner_reference: ::std::option::Option<ControlPlaneIdentifier>,
     pub provenance: AuthorityProvenance,
     #[serde(rename = "recipientMasked")]
     pub recipient_masked: RedactedAuthorityText,
