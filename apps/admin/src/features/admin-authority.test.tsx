@@ -527,7 +527,7 @@ describe('admin production composition', () => {
     const previewView = readFileSync(new URL('./admin-preview.tsx', import.meta.url), 'utf8');
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
-    expect(proxySource).toContain('adminPreviewRuntimeAllowed');
+    expect(proxySource).not.toContain('x-liiiraa-preview-authority');
     expect(productionView).not.toContain('@liiiraa/web-preview');
     expect(productionView).toContain('Active administrative role');
     expect(productionView).toContain('Verify critical operation');
@@ -557,8 +557,9 @@ describe('admin production composition', () => {
     expect(productionView).toContain('variant="destructive"');
     expect(productionView).toContain('Sair do painel');
     expect(productionView).not.toContain('AdminPreviewRoute');
-    expect(routeSource).toContain("await import('../../../features/admin-preview')");
-    expect(routeSource).not.toContain('import { AdminPreviewPage }');
+    expect(routeSource).not.toContain('AdminPreviewPage');
+    expect(routeSource).not.toContain('resolveAdminServerRuntimeConfig');
+    expect(layoutSource).not.toContain('resolveAdminServerRuntimeConfig');
     expect(layoutSource).toContain('<AdminAuthorityProvider');
     expect(previewView).toContain('@liiiraa/web-preview');
   });

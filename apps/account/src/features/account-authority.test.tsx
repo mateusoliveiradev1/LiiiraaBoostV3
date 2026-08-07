@@ -360,6 +360,14 @@ describe('account runtime composition', () => {
     );
     const runtimeSource = readFileSync(new URL('../account-runtime.ts', import.meta.url), 'utf8');
     const proxySource = readFileSync(new URL('../../proxy.ts', import.meta.url), 'utf8');
+    const routeSource = readFileSync(
+      new URL('../app/[locale]/[[...responsibility]]/page.tsx', import.meta.url),
+      'utf8',
+    );
+    const layoutSource = readFileSync(
+      new URL('../app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
     const productionViewSource = readFileSync(
       new URL('./account-authority.tsx', import.meta.url),
       'utf8',
@@ -368,7 +376,10 @@ describe('account runtime composition', () => {
 
     expect(authoritySource).not.toContain('@liiiraa/web-preview');
     expect(runtimeSource).not.toContain('@liiiraa/web-preview');
-    expect(proxySource).toContain('accountPreviewRuntimeAllowed');
+    expect(proxySource).not.toContain('x-liiiraa-preview-authority');
+    expect(routeSource).not.toContain('AccountPreviewPage');
+    expect(routeSource).not.toContain('resolveAccountServerRuntimeConfig');
+    expect(layoutSource).not.toContain('resolveAccountServerRuntimeConfig');
     expect(productionViewSource).not.toContain('@liiiraa/web-preview');
     expect(productionViewSource).toContain('Account authority status');
     expect(productionViewSource).toContain('Profile update receipt');
