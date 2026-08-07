@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 37/40 plans executed
+**Plans**: 37/62 plans executed
 
 Plans:
 **Wave 1**
@@ -599,17 +599,72 @@ Plans:
 
 - [x] 04-39-PLAN.md — Replace the deployed admin preview with persistent role-gated authority.
 
-**Wave 15** _(blocked on Waves 13 and 14 completion)_
+**Wave 15** _(blocked on Plan 04-39)_
 
-- [ ] 04-40-PLAN.md — Provision three secure invitations, deploy real staging, and validate web/desktop auth.
+- [ ] 04-41-PLAN.md — Expand generated Admin contracts and canonical safe route grammar.
 
-**Wave 16** _(blocked on Wave 15 completion)_
+**Wave 16** _(blocked on Plan 04-41)_
 
-- [ ] 04-25-PLAN.md — Perform clean-Windows, consent, and rollback UAT.
+- [ ] 04-42-PLAN.md — Encode the complete private-beta invitation lifecycle.
 
-**Wave 17** _(blocked on Wave 16 completion)_
+**Wave 17** _(blocked on Plan 04-42)_
 
-- [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence.
+- [ ] 04-43-PLAN.md — Encode administrative governance and approval policy.
+- [ ] 04-45-PLAN.md — Orchestrate transactional beta invitation authority.
+
+**Wave 18** _(blocked on Wave 17 dependencies)_
+
+- [ ] 04-44-PLAN.md — Encode operational resilience, governance, and privacy policy.
+- [ ] 04-46-PLAN.md — Persist the complete invitation lifecycle under PostgreSQL concurrency.
+- [ ] 04-47-PLAN.md — Orchestrate transactional administrative access and approvals.
+
+**Wave 19** _(blocked on Wave 18 dependencies)_
+
+- [ ] 04-48-PLAN.md — Persist administrative governance and segregation of duties.
+- [ ] 04-49-PLAN.md — Orchestrate scalable Admin operational workflows.
+- [ ] 04-51-PLAN.md — Expose real invitation management, acceptance, and durable jobs.
+
+**Wave 20** _(blocked on Wave 19 dependencies)_
+
+- [ ] 04-50-PLAN.md — Persist operational ledgers, versions, jobs, and worker claims.
+- [ ] 04-52-PLAN.md — Expose least-privilege governance and approval APIs.
+
+**Wave 21** _(blocked on Plans 04-50 through 04-52)_
+
+- [ ] 04-53-PLAN.md — Compose the complete real Admin API, worker, live state, and readiness boundary.
+
+**Wave 22** _(blocked on Plan 04-53)_
+
+- [ ] 04-54-PLAN.md — Build Admin visual tokens, accessible operational primitives, and the Storybook state foundation.
+
+**Wave 23** _(blocked on Plan 04-54)_
+
+- [ ] 04-62-PLAN.md — Connect typed Admin authority, enforce the production fixture guard, and deliver the responsive shell.
+
+**Wave 24** _(blocked on Plan 04-62; parallel route families with disjoint ownership)_
+
+- [ ] 04-55-PLAN.md — Deliver the authority-connected Briefing Focus overview and stories.
+- [ ] 04-56-PLAN.md — Deliver the authority-connected Queue Canvas and stories.
+- [ ] 04-57-PLAN.md — Deliver real invitation operations and complete stories.
+- [ ] 04-58-PLAN.md — Deliver real access governance and complete stories.
+- [ ] 04-59-PLAN.md — Deliver real Revenue/Support/consent routes and stories.
+- [ ] 04-60-PLAN.md — Deliver real Operation/Security/System routes and stories.
+
+**Wave 25** _(blocked on Plans 04-55 through 04-60)_
+
+- [ ] 04-61-PLAN.md — Integrate all Admin routes, prove Storybook/E2E/accessibility, and add the bounded desktop handoff.
+
+**Wave 26** _(blocked on Plans 04-38, 04-39, and 04-61)_
+
+- [ ] 04-40-PLAN.md — Provision protected tester invitations, deploy real staging, and validate complete web/desktop/Admin authority.
+
+**Wave 27** _(blocked on Plan 04-40)_
+
+- [ ] 04-25-PLAN.md — Perform clean-Windows, complete Admin authority, consent, and rollback UAT.
+
+**Wave 28** _(blocked on Plan 04-25)_
+
+- [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence for WEB/IDEN requirements and every D-01 through D-111 decision.
 
 **UI hint**: yes
 
@@ -738,7 +793,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 37/40          | In Progress |            |
+| 4. Identity, Commerce, Devices, and Administration | 37/61          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
