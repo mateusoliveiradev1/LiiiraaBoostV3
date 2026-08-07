@@ -1,8 +1,8 @@
 .overview {
   display: grid;
-  gap: var(--lb-space-4);
+  gap: var(--lb-space-5);
   min-width: 0;
-  padding: var(--lb-space-5);
+  padding: 28px 32px 40px;
   color: var(--lb-text-primary);
 }
 
@@ -20,6 +20,7 @@
 .sectionHeader p,
 .priorityHeading h3,
 .priorityContext,
+.briefingDetail,
 .emptyState p,
 .capacity h3,
 .capacity p,
@@ -73,8 +74,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 0.34fr);
   gap: var(--lb-space-5);
-  align-items: end;
-  padding-block: var(--lb-space-5);
+  align-items: start;
+  padding-block: var(--lb-space-4);
   border-block: 1px solid var(--lb-admin-border);
 }
 
@@ -92,12 +93,24 @@
 }
 
 .briefing h2 {
-  max-width: 30ch;
-  font-size: 2rem;
+  max-width: 44ch;
+  font-size: 1.5rem;
   font-weight: 600;
-  line-height: 1.16;
-  letter-spacing: -0.035em;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
   text-wrap: balance;
+}
+
+.briefing h2[data-empty='true'] {
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+}
+
+.briefingDetail {
+  max-width: 64ch;
+  margin-top: var(--lb-space-2);
+  color: var(--lb-text-secondary);
+  line-height: 1.5;
 }
 
 .briefingFacts,
@@ -141,21 +154,25 @@
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.45fr);
-  gap: var(--lb-space-4);
+  gap: 0;
   min-width: 0;
+  border-block-start: 1px solid var(--lb-admin-border);
 }
 
 .workRegion,
 .contextRegion {
   min-width: 0;
-  border: 1px solid var(--lb-admin-border);
-  border-radius: var(--lb-radius-panel);
-  background: var(--lb-admin-surface);
+  background: transparent;
+}
+
+.contextRegion {
+  padding-inline-start: var(--lb-space-5);
+  border-inline-start: 1px solid var(--lb-admin-border);
 }
 
 .sectionHeader {
-  min-height: 68px;
-  padding: var(--lb-space-3) var(--lb-space-4);
+  min-height: 0;
+  padding: var(--lb-space-4) 0;
   border-bottom: 1px solid var(--lb-admin-border);
 }
 
@@ -183,7 +200,7 @@
   gap: var(--lb-space-3);
   align-items: center;
   min-height: 112px;
-  padding: var(--lb-space-3) var(--lb-space-4);
+  padding: var(--lb-space-3) 0;
   border-bottom: 1px solid var(--lb-admin-border);
 }
 
@@ -303,15 +320,16 @@
   display: flex;
   align-items: center;
   gap: var(--lb-space-3);
-  min-height: 160px;
-  padding: var(--lb-space-4);
+  min-height: 72px;
+  padding: var(--lb-space-3) 0;
+  border-bottom: 1px solid var(--lb-admin-border);
   color: var(--lb-text-secondary);
 }
 
 .contextBody {
   display: grid;
   gap: var(--lb-space-4);
-  padding: var(--lb-space-4);
+  padding: var(--lb-space-4) 0;
 }
 
 .capacity {
@@ -395,12 +413,18 @@
   .workspace {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .contextRegion {
+    padding-inline-start: 0;
+    border-block-start: 1px solid var(--lb-admin-border);
+    border-inline-start: 0;
+  }
 }
 
 @media (max-width: 720px) {
   .overview {
     gap: var(--lb-space-3);
-    padding: var(--lb-space-3);
+    padding: 20px 16px 32px;
   }
 
   .routeHeader,
@@ -420,8 +444,13 @@
 
   .briefing h2 {
     max-width: none;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     letter-spacing: -0.025em;
+  }
+
+  .routeHeader h1 {
+    font-size: 1.5rem;
+    line-height: 1.25;
   }
 
   .priorityRow {

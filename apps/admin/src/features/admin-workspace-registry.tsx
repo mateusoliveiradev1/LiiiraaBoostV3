@@ -11,6 +11,7 @@ import { AdminQueueCanvas } from './admin-queue-canvas';
 import { AdminRevenueSupport } from './admin-revenue-support';
 import {
   adminSessionCanOpenWorkspace,
+  resolveAdminWorkspaceRecordId,
   resolveAdminWorkspaceDefinition,
   type AdminCanonicalRouteId,
   type AdminWorkspaceDefinition,
@@ -30,26 +31,38 @@ const SafeWorkspaceDenial = ({ locale }: Readonly<{ locale: WebLocale }>) => (
 const Workspace = ({
   definition,
   locale,
-}: Readonly<{ definition: AdminWorkspaceDefinition; locale: WebLocale }>) => {
+  recordId,
+}: Readonly<{
+  definition: AdminWorkspaceDefinition;
+  locale: WebLocale;
+  recordId: string | undefined;
+}>) => {
+  const selection = recordId === undefined ? {} : { initialSelectedId: recordId };
   if (definition.kind === 'overview') return <AdminOverview locale={locale} />;
-  if (definition.kind === 'queue') return <AdminQueueCanvas locale={locale} />;
-  if (definition.kind === 'invitations') return <AdminInvitations locale={locale} />;
-  if (definition.kind === 'access-governance') return <AdminAccessGovernance locale={locale} />;
+  if (definition.kind === 'queue') return <AdminQueueCanvas {...selection} locale={locale} />;
+  if (definition.kind === 'invitations') return <AdminInvitations {...selection} locale={locale} />;
+  if (definition.kind === 'access-governance')
+    return <AdminAccessGovernance {...selection} locale={locale} />;
   if (definition.kind === 'revenue')
-    return <AdminRevenueSupport locale={locale} surface="revenue" />;
+    return <AdminRevenueSupport {...selection} locale={locale} surface="revenue" />;
   if (definition.kind === 'support')
-    return <AdminRevenueSupport locale={locale} surface="support" />;
+    return <AdminRevenueSupport {...selection} locale={locale} surface="support" />;
   if (definition.kind === 'operation')
-    return <AdminOperationsSystem locale={locale} surface="operation" />;
+    return <AdminOperationsSystem {...selection} locale={locale} surface="operation" />;
   if (definition.kind === 'security')
-    return <AdminOperationsSystem locale={locale} surface="security" />;
-  return <AdminOperationsSystem locale={locale} surface="system" />;
+    return <AdminOperationsSystem {...selection} locale={locale} surface="security" />;
+  return <AdminOperationsSystem {...selection} locale={locale} surface="system" />;
 };
 
 export const AdminWorkspaceRegistry = ({
   locale,
   routeId,
-}: Readonly<{ locale: WebLocale; routeId: AdminCanonicalRouteId }>) => {
+  routeParameters = Object.freeze({}),
+}: Readonly<{
+  locale: WebLocale;
+  routeId: AdminCanonicalRouteId;
+  routeParameters?: Readonly<Record<string, string>>;
+}>) => {
   const { session } = useAdminAuthority();
   const definition = resolveAdminWorkspaceDefinition(routeId);
   if (definition === null) return <SafeWorkspaceDenial locale={locale} />;
@@ -57,5 +70,6 @@ export const AdminWorkspaceRegistry = ({
     return <AdminAuthorityPage locale={locale} routeId="admin-role" />;
   if (!adminSessionCanOpenWorkspace(definition, locale, session.role))
     return <SafeWorkspaceDenial locale={locale} />;
-  return <Workspace definition={definition} locale={locale} />;
+  const recordId = resolveAdminWorkspaceRecordId(routeId, routeParameters);
+  return <Workspace definition={definition} locale={locale} recordId={recordId} />;
 };

@@ -886,16 +886,22 @@ const localeFullRoute = (locale: WebLocale): string =>
 const onlineRecords = (result: AdminQueryResult): readonly AdminAuthorityDocument[] =>
   result.status === 'online' ? result.records : [];
 
-export const AdminQueueCanvas = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+export const AdminQueueCanvas = ({
+  initialSelectedId,
+  locale,
+}: Readonly<{ initialSelectedId?: string; locale: WebLocale }>) => {
   const { authority, freshness, revision, session } = useAdminAuthority();
   const basePath = `/${locale}/admin/operation`;
-  const [urlState, setUrlState] = useState<QueueUrlState>(() =>
-    parseQueueUrlState(
+  const [urlState, setUrlState] = useState<QueueUrlState>(() => {
+    const parsed = parseQueueUrlState(
       typeof window === 'undefined'
         ? new URLSearchParams()
         : new URLSearchParams(window.location.search),
-    ),
-  );
+    );
+    return initialSelectedId === undefined
+      ? parsed
+      : Object.freeze({ ...parsed, selectedId: initialSelectedId });
+  });
   const [results, setResults] = useState<Readonly<{
     briefing: AdminQueryResult;
     jobs: AdminQueryResult;

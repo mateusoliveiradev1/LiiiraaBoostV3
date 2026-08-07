@@ -46,6 +46,7 @@ type AdminWorkspaceResolution =
     }>
   | Readonly<{
       kind: 'workflow';
+      parameters: Readonly<Record<string, string>>;
       routeId: AdminCanonicalRouteId | AdminPreviewRoute;
     }>;
 
@@ -70,7 +71,7 @@ const resolveAdminWorkspace = (
     return Object.freeze({ failureKind, kind: 'error', routeId });
   }
   return isAdminPreviewRoute(routeId) || isCanonicalAdminRoute(routeId)
-    ? Object.freeze({ kind: 'workflow', routeId })
+    ? Object.freeze({ kind: 'workflow', parameters: match.value.parameters, routeId })
     : null;
 };
 
@@ -193,7 +194,11 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
   }
 
   return isCanonicalAdminRoute(resolution.routeId) ? (
-    <AdminWorkspaceRegistry locale={locale} routeId={resolution.routeId} />
+    <AdminWorkspaceRegistry
+      locale={locale}
+      routeId={resolution.routeId}
+      routeParameters={resolution.parameters}
+    />
   ) : (
     <AdminAuthorityPage locale={locale} routeId={resolution.routeId} />
   );

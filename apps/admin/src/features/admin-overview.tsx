@@ -20,6 +20,8 @@ const overviewCopy = Object.freeze({
     capacityEmpty: 'Capacity is unavailable from the current authorized projection.',
     context: 'Operational context',
     contextDetail: 'Only evidence that changes a decision now.',
+    deckClear: 'Deck clear',
+    deckClearDetail: 'No assigned work is waiting. Authorized context remains available below.',
     deadline: 'Deadline',
     degradedDetail:
       'Affected actions are unavailable. Unaffected authorized work remains available.',
@@ -62,6 +64,9 @@ const overviewCopy = Object.freeze({
     capacityEmpty: 'A capacidade não está disponível na projeção autorizada atual.',
     context: 'Contexto operacional',
     contextDetail: 'Somente evidências que mudam uma decisão agora.',
+    deckClear: 'Operação em dia',
+    deckClearDetail:
+      'Nenhum trabalho atribuído está aguardando. O contexto autorizado permanece disponível abaixo.',
     deadline: 'Prazo',
     degradedDetail:
       'As ações afetadas estão indisponíveis. O trabalho autorizado não afetado permanece disponível.',
@@ -269,7 +274,12 @@ export const AdminOverviewView = (props: AdminOverviewViewProps) => {
             <ProductIcon name="shield" size={17} />
             {labels.priority}
           </span>
-          <h2 id="admin-overview-briefing">{model.statement}</h2>
+          <h2 data-empty={model.priorities.length === 0 || undefined} id="admin-overview-briefing">
+            {model.priorities.length === 0 ? labels.deckClear : model.statement}
+          </h2>
+          {model.priorities.length === 0 ? (
+            <p className={styles['briefingDetail']}>{labels.deckClearDetail}</p>
+          ) : null}
         </div>
         <dl className={styles['briefingFacts']}>
           <div>

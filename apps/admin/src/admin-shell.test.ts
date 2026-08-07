@@ -93,7 +93,9 @@ describe('admin shell', () => {
     expect(layout).toContain('alertsLabel={copy.alerts}');
     expect(navigation).toContain('className="admin-header__search"');
     expect(navigation).toContain('type="search"');
-    expect(navigation).toContain('<button aria-label={searchAction} type="submit">');
+    expect(navigation).toContain('data-mobile-open={mobileSearchOpen || undefined}');
+    expect(navigation).toContain('aria-expanded={mobileSearchOpen}');
+    expect(navigation).toContain("window.matchMedia('(max-width: 959px)').matches");
     expect(navigation).toContain('aria-live="polite"');
     expect(navigation).toContain('{roleLabel}');
     expect(navigation).not.toMatch(/public navigation|account navigation/iu);
@@ -109,11 +111,36 @@ describe('admin shell', () => {
       /@media \(width < 400px\)[\s\S]*\.admin-header__account\s*\{[\s\S]*display:\s*block/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.admin-header \.lb-web-locale-switcher\s*\{[\s\S]*inline-size:\s*var\(--lb-control-min-size\)/u,
+      /@media \(width < 400px\)[\s\S]*\.admin-header__mobile-context\s*\{[\s\S]*min-inline-size:\s*0/u,
     );
     expect(styles).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.admin-header \.lb-web-locale-switcher > span\s*\{[\s\S]*display:\s*none/u,
+      /@media \(width < 400px\)[\s\S]*\.admin-header__account > summary\s*\{[\s\S]*min-inline-size:\s*44px[\s\S]*padding-inline:\s*0/u,
     );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__account-chevron\s*\{[\s\S]*display:\s*none/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__bar\s*\{[\s\S]*display:\s*grid[\s\S]*grid-template-columns:\s*44px 44px minmax\(0, 1fr\) 44px 44px/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width < 400px\)[\s\S]*\.admin-header__tools\s*\{[\s\S]*margin-inline-start:\s*0/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width <= 959px\)[\s\S]*\.admin-header__mobile-context\s*\{[\s\S]*display:\s*grid/u,
+    );
+    expect(styles).toMatch(
+      /@media \(width <= 959px\)[\s\S]*\.admin-shell-frame\[data-sidebar-mode='compact'\] \.admin-workspace\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-header__search\[data-mobile-open='true'\][\s\S]*\.admin-header__search\[data-mobile-open='true'\] input\[type='search'\][\s\S]*display:\s*block/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-header__search > \.lb-product-icon,[\s\S]*\.admin-header__search input\[type='search'\][\s\S]*display:\s*none/u,
+    );
+    expect(styles).toContain(
+      ".admin-header__search button > span:not(.lb-product-icon)",
+    );
+    expect(styles).not.toContain('.admin-header__search button > span {');
   });
 
   it('filters bounded global search by validated role before matching redacted records', () => {

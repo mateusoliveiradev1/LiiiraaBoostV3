@@ -66,6 +66,7 @@ type ViewProps =
       surface: OperationsSystemSurface;
     }>
   | Readonly<{
+      initialSelectedId?: string;
       locale: WebLocale;
       model: OperationsSystemModel;
       mutation?: AdminMutationResult | null;
@@ -634,8 +635,29 @@ const SystemEvidence = ({
 
 export const AdminOperationsSystemView = (props: ViewProps) => {
   const inspector = useRef<HTMLElement | null>(null);
+  const admittedRouteRecord = useRef<string | null>(null);
   const selectedTrigger = useRef<HTMLButtonElement | null>(null);
   const [selected, setSelected] = useState<SelectedRecord>();
+  const readyModel = props.state === 'ready' ? props.model : null;
+  const initialSelectedId = props.state === 'ready' ? props.initialSelectedId : undefined;
+  useEffect(() => {
+    if (
+      readyModel === null ||
+      initialSelectedId === undefined ||
+      admittedRouteRecord.current === initialSelectedId
+    )
+      return;
+    const records: readonly SelectedRecord[] = [
+      ...readyModel.jobs,
+      ...readyModel.configurations,
+      ...readyModel.incidents,
+      ...readyModel.privacyCases,
+      ...readyModel.emergencyStops,
+    ];
+    const requested = records.find((record) => recordId(record) === initialSelectedId);
+    admittedRouteRecord.current = initialSelectedId;
+    if (requested !== undefined) setSelected(requested);
+  }, [initialSelectedId, readyModel]);
   useEffect(() => {
     if (selected === undefined) return;
     const frame = requestAnimationFrame(() => {
@@ -870,9 +892,14 @@ const queryFamiliesBySurface = Object.freeze({
 });
 
 export const AdminOperationsSystem = ({
+  initialSelectedId,
   locale,
   surface,
-}: Readonly<{ locale: WebLocale; surface: OperationsSystemSurface }>) => {
+}: Readonly<{
+  initialSelectedId?: string;
+  locale: WebLocale;
+  surface: OperationsSystemSurface;
+}>) => {
   const { authority, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<
     Readonly<Partial<Record<AdminQueryFamily, AdminQueryResult>>>
@@ -957,6 +984,7 @@ export const AdminOperationsSystem = ({
     return <AdminOperationsSystemView locale={locale} state="loading" surface={surface} />;
   return (
     <AdminOperationsSystemView
+      {...(initialSelectedId === undefined ? {} : { initialSelectedId })}
       locale={locale}
       model={model}
       mutation={mutation}

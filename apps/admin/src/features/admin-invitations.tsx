@@ -1074,11 +1074,16 @@ const parseSelectedInvitation = (): string | undefined => {
   }
 };
 
-export const AdminInvitations = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+export const AdminInvitations = ({
+  initialSelectedId,
+  locale,
+}: Readonly<{ initialSelectedId?: string; locale: WebLocale }>) => {
   const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<AdminQueryResult | null>(null);
   const [view, setView] = useState<InvitationView>(parseView);
-  const [selectedId, setSelectedId] = useState<string | undefined>(parseSelectedInvitation);
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    () => initialSelectedId ?? parseSelectedInvitation(),
+  );
   const [detail, setDetail] = useState<Extract<
     Awaited<ReturnType<typeof authority.loadInvitation>>,
     { status: 'online' }

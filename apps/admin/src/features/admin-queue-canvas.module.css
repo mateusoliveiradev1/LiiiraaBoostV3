@@ -674,3 +674,31 @@
 [data-motion='reduced'] .table a {
   transition: none;
 }
+
+/* Queue Canvas is a continuous workbench rather than a stack of cards. */
+.canvas {
+  gap: var(--lb-space-5);
+  padding: 28px 32px 40px;
+}
+.workSurface {
+  border-inline: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.workSurface > .sectionHeader {
+  padding-inline: 0;
+}
+.inspector {
+  border-radius: 10px;
+}
+
+@media (max-width: 720px) {
+  .canvas {
+    gap: var(--lb-space-4);
+    padding: 20px 16px 32px;
+  }
+  .routeHeader h1 {
+    font-size: 1.5rem;
+    line-height: 1.875rem;
+  }
+}

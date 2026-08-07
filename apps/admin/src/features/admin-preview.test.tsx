@@ -239,10 +239,10 @@ describe('role-scoped admin', () => {
       /@media \(width <= 959px\)[\s\S]*\.admin-decision > \.lb-web-route-header,[\s\S]*grid-column:\s*1 \/ -1/u,
     );
     expect(stylesSource).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.admin-header__search input\[type='search'\][\s\S]*display:\s*none/u,
+      /@media \(width <= 959px\)[\s\S]*\.admin-header__search input\[type='search'\][\s\S]*display:\s*none/u,
     );
     expect(stylesSource).toMatch(
-      /@media \(width < 400px\)[\s\S]*\.admin-header__search button[\s\S]*min-inline-size:\s*var\(--lb-control-min-size\)/u,
+      /@media \(width <= 959px\)[\s\S]*\.admin-header__search\[data-mobile-open='true'\] input\[type='search'\][\s\S]*display:\s*block/u,
     );
   });
 

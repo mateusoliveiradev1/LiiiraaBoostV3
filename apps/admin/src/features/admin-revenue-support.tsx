@@ -1019,16 +1019,17 @@ const auditEvidence = (events: readonly AuditEventJson[]): readonly DiagnosticEv
   );
 
 export const AdminRevenueSupport = ({
+  initialSelectedId,
   locale,
   surface,
-}: Readonly<{ locale: WebLocale; surface: 'revenue' | 'support' }>) => {
+}: Readonly<{ initialSelectedId?: string; locale: WebLocale; surface: 'revenue' | 'support' }>) => {
   const { authority, freshness, revision, session } = useAdminAuthority();
   const [collections, setCollections] = useState<Readonly<{
     entitlements: Awaited<ReturnType<typeof authority.list>>;
     jobs: AdminQueryResult;
     support: Awaited<ReturnType<typeof authority.list>>;
   }> | null>(null);
-  const [selectedId, setSelectedId] = useState<string>();
+  const [selectedId, setSelectedId] = useState<string | undefined>(initialSelectedId);
   const [diagnostic, setDiagnostic] = useState<DiagnosticAuthorityState>({
     fields: {},
     state: 'empty',

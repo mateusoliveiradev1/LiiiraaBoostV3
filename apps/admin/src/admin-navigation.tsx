@@ -244,6 +244,7 @@ export function AdminShellFrame({
   const [density, setDensity] = useState<AdminShellDensity>(initialDensity);
   const [sidebarMode, setSidebarMode] = useState<AdminSidebarMode>(initialSidebarMode);
   const [drawerOpen, setDrawerOpen] = useState(initialDrawerOpen);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [preferenceKeyLoaded, setPreferenceKeyLoaded] = useState<string | null>(
     persistPreference ? null : preferenceKey,
   );
@@ -299,14 +300,21 @@ export function AdminShellFrame({
         ((event.ctrlKey || event.metaKey) && event.key === 'k')
       ) {
         event.preventDefault();
-        searchRef.current?.focus();
+        if (window.matchMedia('(max-width: 959px)').matches) {
+          setMobileSearchOpen(true);
+          window.queueMicrotask(() => searchRef.current?.focus());
+        } else {
+          searchRef.current?.focus();
+        }
+      } else if (event.key === 'Escape' && mobileSearchOpen) {
+        setMobileSearchOpen(false);
       }
     };
     window.addEventListener('keydown', handleShortcut);
     return () => {
       window.removeEventListener('keydown', handleShortcut);
     };
-  }, []);
+  }, [mobileSearchOpen]);
 
   const updateDrawer = useCallback((open: boolean) => {
     setDrawerOpen(open);
@@ -408,7 +416,17 @@ export function AdminShellFrame({
             </div>
           </LbDialog>
           {header}
-          <form action={searchHref} className="admin-header__search" method="get" role="search">
+          <div className="admin-header__mobile-context" role="status">
+            <strong>{roleLabel}</strong>
+            <span>{environmentLabel}</span>
+          </div>
+          <form
+            action={searchHref}
+            className="admin-header__search"
+            data-mobile-open={mobileSearchOpen || undefined}
+            method="get"
+            role="search"
+          >
             <ProductIcon name="search" size={17} />
             <label className="lb-visually-hidden" htmlFor="admin-global-search">
               {searchLabel}
@@ -425,7 +443,18 @@ export function AdminShellFrame({
             {previewRole !== undefined && previewRole !== 'support' ? (
               <input name="role" type="hidden" value={previewRole} />
             ) : null}
-            <button aria-label={searchAction} type="submit">
+            <button
+              aria-expanded={mobileSearchOpen}
+              aria-label={searchAction}
+              onClick={(event) => {
+                if (window.matchMedia('(max-width: 959px)').matches && !mobileSearchOpen) {
+                  event.preventDefault();
+                  setMobileSearchOpen(true);
+                  window.queueMicrotask(() => searchRef.current?.focus());
+                }
+              }}
+              type="submit"
+            >
               <ProductIcon name="search" size={16} />
               <span>{searchAction}</span>
             </button>
@@ -487,6 +516,11 @@ export function AdminShellFrame({
                   <ProductIcon name="toolbox" size={17} />
                   {roleHomeLabel}
                 </Link>
+                <LocaleSwitcher
+                  href={localeHref}
+                  sourceLocale={locale}
+                  targetLocale={alternateLocale}
+                />
                 {accountActions}
               </div>
             </details>

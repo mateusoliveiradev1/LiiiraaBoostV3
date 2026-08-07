@@ -26,6 +26,8 @@ a {
 
 a:focus-visible,
 button:focus-visible,
+[role='button']:focus-visible,
+summary:focus-visible,
 [tabindex='-1']:focus-visible {
   outline: var(--lb-focus-width) solid var(--lb-focus-ring);
   outline-offset: var(--lb-focus-separation);
@@ -54,6 +56,7 @@ button:focus-visible,
 }
 
 .admin-header__bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--lb-space-3);
@@ -61,6 +64,11 @@ button:focus-visible,
   inline-size: 100%;
   margin-inline: auto;
   padding-inline: var(--lb-screen-padding);
+}
+
+.admin-header__mobile-context {
+  display: none;
+  min-inline-size: 0;
 }
 
 .admin-brand {
@@ -2296,8 +2304,7 @@ button:focus-visible,
 
 @media (width <= 1100px) {
   .admin-header__task,
-  .admin-brand__surface,
-  .admin-header__account-copy {
+  .admin-brand__surface {
     display: none;
   }
 
@@ -2326,6 +2333,32 @@ button:focus-visible,
     display: inline-flex;
   }
 
+  .admin-header__mobile-context {
+    display: grid;
+    flex: 1 1 auto;
+    gap: 1px;
+    min-inline-size: 96px;
+  }
+
+  .admin-header__mobile-context strong,
+  .admin-header__mobile-context span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-header__mobile-context strong {
+    color: var(--lb-text-primary);
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    text-transform: capitalize;
+  }
+
+  .admin-header__mobile-context span {
+    color: var(--lb-text-tertiary);
+    font: 600 0.6875rem/1.2 var(--lb-font-data);
+  }
+
   .admin-header .lb-web-locale-switcher {
     min-block-size: 48px;
   }
@@ -2335,13 +2368,84 @@ button:focus-visible,
   }
 
   .admin-header__search {
-    flex-basis: 220px;
+    flex: 0 0 var(--lb-control-min-size);
+    inline-size: var(--lb-control-min-size);
+    min-inline-size: var(--lb-control-min-size);
     margin-inline-start: 0;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .admin-header__search > svg,
+  .admin-header__search > .lb-product-icon,
+  .admin-header__search input[type='search'] {
+    display: none;
+  }
+
+  .admin-header__search button {
+    inline-size: var(--lb-control-min-size);
+    min-inline-size: var(--lb-control-min-size);
+    padding: 0;
+    border: 1px solid var(--lb-line-strong);
+    border-radius: var(--lb-radius-default);
+  }
+
+  .admin-header__search button > span:not(.lb-product-icon) {
+    display: none;
+  }
+
+  .admin-header__search[data-mobile-open='true'] {
+    position: absolute;
+    z-index: var(--lb-layer-dropdown);
+    inset-block-start: calc(100% + var(--lb-space-2));
+    inset-inline: var(--lb-space-2);
+    display: flex;
+    inline-size: auto;
+    min-inline-size: 0;
+    padding-inline-start: var(--lb-space-3);
+    border-color: var(--lb-cobalt-signal);
+    background: var(--lb-surface-raised);
+    box-shadow: var(--lb-shadow-overlay);
+  }
+
+  .admin-header__search[data-mobile-open='true'] > svg,
+  .admin-header__search[data-mobile-open='true'] > .lb-product-icon,
+  .admin-header__search[data-mobile-open='true'] input[type='search'] {
+    display: block;
+  }
+
+  .admin-header__search[data-mobile-open='true'] button {
+    inline-size: auto;
+    padding-inline: var(--lb-space-3);
+    border-block: 0;
+    border-inline-end: 0;
+    border-radius: 0;
+  }
+
+  .admin-header__search[data-mobile-open='true']
+    button
+    > span:not(.lb-product-icon) {
+    display: inline;
+  }
+
+  .admin-header__alerts,
+  .admin-header__density,
+  .admin-header > .admin-header__bar > .admin-header__tools > .lb-web-locale-switcher {
+    display: none;
+  }
+
+  .admin-header__account-copy {
+    display: none;
   }
 
   .admin-workspace {
     grid-template-columns: minmax(0, 1fr);
     border-inline: 0;
+  }
+
+  .admin-shell-frame[data-sidebar-mode='compact'] .admin-workspace {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .admin-nav__desktop {
@@ -2449,25 +2553,6 @@ button:focus-visible,
   }
 
   .admin-header__task {
-    display: none;
-  }
-
-  .admin-header__search {
-    flex: 1 1 96px;
-    min-inline-size: 72px;
-    padding-inline-start: var(--lb-space-2);
-  }
-
-  .admin-header__search button {
-    min-inline-size: 44px;
-    padding-inline: var(--lb-space-2);
-  }
-
-  .admin-header__search button > span {
-    display: none;
-  }
-
-  .admin-header__account-copy {
     display: none;
   }
 
@@ -2588,15 +2673,11 @@ button:focus-visible,
     display: none;
   }
 
+  .admin-header__mobile-context {
+    min-inline-size: 0;
+  }
+
   .admin-header__task {
-    display: none;
-  }
-
-  .admin-header__alerts {
-    display: none;
-  }
-
-  .admin-header__density {
     display: none;
   }
 
@@ -2604,47 +2685,32 @@ button:focus-visible,
     display: block;
   }
 
+  .admin-header__account > summary {
+    justify-content: center;
+    inline-size: 44px;
+    min-inline-size: 44px;
+    padding-inline: 0;
+  }
+
+  .admin-header__account-chevron {
+    display: none;
+  }
+
   .admin-header__bar {
+    display: grid;
+    grid-template-columns: 44px 44px minmax(0, 1fr) 44px 44px;
     gap: var(--lb-space-1);
     padding-inline: var(--lb-space-2);
   }
 
-  .admin-header__search {
-    flex: 0 0 var(--lb-control-min-size);
-    inline-size: var(--lb-control-min-size);
-    min-inline-size: var(--lb-control-min-size);
-    padding: 0;
-    border: 0;
-    background: transparent;
+  .admin-header__tools {
+    min-inline-size: 0;
+    margin-inline-start: 0;
   }
 
-  .admin-header__search:focus-within {
-    border-color: transparent;
-    outline: 0;
-  }
-
-  .admin-header__search > svg,
-  .admin-header__search input[type='search'] {
-    display: none;
-  }
-
-  .admin-header__search button {
-    inline-size: var(--lb-control-min-size);
-    min-inline-size: var(--lb-control-min-size);
-    padding: 0;
-    border: 1px solid var(--lb-line-strong);
-    border-radius: var(--lb-radius-default);
-  }
-
-  .admin-header .lb-web-locale-switcher {
-    inline-size: var(--lb-control-min-size);
-    min-inline-size: var(--lb-control-min-size);
-    margin-inline-start: auto;
-    padding-inline: 0;
-  }
-
-  .admin-header .lb-web-locale-switcher > span {
-    display: none;
+  .admin-brand {
+    min-inline-size: 44px;
+    min-block-size: 44px;
   }
 }
 

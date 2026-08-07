@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   adminSessionCanOpenWorkspace,
   isAdminCanonicalRoute,
+  resolveAdminWorkspaceRecordId,
   resolveAdminWorkspaceDefinition,
 } from './admin-workspace-registry-model';
 
@@ -52,5 +53,23 @@ describe('production Admin workspace registry', () => {
         domain: 'overview',
         kind: 'queue',
       });
+  });
+
+  it('preserves the canonical record identity for detail routes', () => {
+    expect(
+      resolveAdminWorkspaceRecordId('admin-operation-job', {
+        jobId: 'job-04-61',
+        locale: 'pt-BR',
+      }),
+    ).toBe('job-04-61');
+    expect(
+      resolveAdminWorkspaceRecordId('admin-security-incident', {
+        incidentId: 'incident-critical-1',
+        locale: 'en',
+      }),
+    ).toBe('incident-critical-1');
+    expect(
+      resolveAdminWorkspaceRecordId('admin-revenue-refunds', { locale: 'pt-BR' }),
+    ).toBeUndefined();
   });
 });

@@ -1092,13 +1092,16 @@ const onlineMembers = (result: AdminQueryResult): readonly AdminTeamMemberProjec
 const onlineApprovals = (result: AdminQueryResult): readonly AdminGovernanceProjectionJson[] =>
   result.status === 'online' ? result.records.filter(isGovernance) : [];
 
-export const AdminAccessGovernance = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+export const AdminAccessGovernance = ({
+  initialSelectedId,
+  locale,
+}: Readonly<{ initialSelectedId?: string; locale: WebLocale }>) => {
   const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<Readonly<{
     approvals: AdminQueryResult;
     team: AdminQueryResult;
   }> | null>(null);
-  const [selectedId, setSelectedId] = useState<string>();
+  const [selectedId, setSelectedId] = useState<string | undefined>(initialSelectedId);
   const [impact, setImpact] = useState<AdminPermissionImpactProjectionJson>();
   const [simulatedFunction, setSimulatedFunction] = useState<AdminFunctionJson>();
   const [mutation, setMutation] = useState<AdminMutationResult | null>(null);

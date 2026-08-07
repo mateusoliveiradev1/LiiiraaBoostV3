@@ -25,6 +25,15 @@ const canonicalRoutes = new Set<WebRouteId>(ADMIN_CANONICAL_ROUTE_IDS);
 export const isAdminCanonicalRoute = (routeId: WebRouteId): routeId is AdminCanonicalRouteId =>
   canonicalRoutes.has(routeId);
 
+export const resolveAdminWorkspaceRecordId = (
+  routeId: AdminCanonicalRouteId,
+  parameters: Readonly<Record<string, string>>,
+): string | undefined => {
+  if (!isAdminCanonicalRoute(routeId)) return undefined;
+  const entry = Object.entries(parameters).find(([key]) => key !== 'locale');
+  return entry?.[1];
+};
+
 export const resolveAdminWorkspaceDefinition = (
   routeId: WebRouteId,
 ): AdminWorkspaceDefinition | null => {

@@ -682,3 +682,33 @@
     border-style: dashed;
   }
 }
+
+/* Revenue and support keep their own ledgers; inspectors remain bounded overlays. */
+.route {
+  gap: var(--lb-space-5);
+  padding: 28px 32px 40px;
+}
+.workSurface,
+.jobs {
+  border-inline: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.workSurface > .sectionHeader,
+.jobs > header {
+  padding-inline: 0;
+}
+.inspector {
+  border-radius: 10px;
+}
+
+@media (max-width: 720px) {
+  .route {
+    gap: var(--lb-space-4);
+    padding: 20px 16px 32px;
+  }
+  .routeHeader h1 {
+    font-size: 1.5rem;
+    line-height: 1.875rem;
+  }
+}
