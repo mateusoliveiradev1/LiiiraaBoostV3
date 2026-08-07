@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   adminOperationsSchemaHash,
@@ -6,10 +6,32 @@ import {
   createPostgresAdminOperationsWorker,
   migrateAdminOperations,
 } from './admin-operations.js';
+import { createControlPlaneDatabase, type ControlPlaneDatabase } from './database.js';
+import { migrateControlPlane } from './migrate.js';
 
 const environment = 'staging' as const;
 const environmentId = '00000000-0000-4000-8000-000000000006';
 const now = '2030-01-01T00:00:00.000Z';
+
+const configuredDatabaseUrl = (
+  globalThis as unknown as {
+    readonly process?: { readonly env?: { readonly TEST_DATABASE_URL?: string } };
+  }
+).process?.env?.TEST_DATABASE_URL?.trim();
+
+const syntheticDatabaseUrl = (() => {
+  if (configuredDatabaseUrl === undefined || configuredDatabaseUrl.length === 0) return undefined;
+  const parsed = new URL(configuredDatabaseUrl);
+  const identity = `${parsed.hostname}-${parsed.username}-${parsed.pathname}`;
+  if (
+    !['postgres:', 'postgresql:'].includes(parsed.protocol) ||
+    /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu.test(identity) ||
+    !/(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu.test(identity)
+  ) {
+    throw new Error('Admin operations live proof requires an explicitly synthetic database URL.');
+  }
+  return configuredDatabaseUrl;
+})();
 
 describe('PostgreSQL admin operations authority', () => {
   it('applies migration 0006 once under the shared advisory lock and rejects checksum drift', async () => {
@@ -284,3 +306,182 @@ describe('PostgreSQL admin operations authority', () => {
     expect(sql).toMatch(/INSERT INTO admin_operations_audit/iu);
   });
 });
+
+describe.sequential.skipIf(syntheticDatabaseUrl === undefined)(
+  'PostgreSQL admin operations live concurrency proof',
+  () => {
+    let database: ControlPlaneDatabase;
+    const options = { environment, environmentId } as const;
+
+    beforeAll(async () => {
+      database = createControlPlaneDatabase(syntheticDatabaseUrl ?? '');
+      await database.query('DROP SCHEMA public CASCADE');
+      await database.query('CREATE SCHEMA public');
+      await migrateControlPlane(database);
+      await migrateAdminOperations(database);
+    }, 120_000);
+
+    afterAll(async () => {
+      await database?.close();
+    });
+
+    it('serializes competing claims and preserves completed effects, history, and scoped reads', async () => {
+      await database.query(
+        `INSERT INTO admin_operational_jobs
+          (environment_id, job_id, kind, status, version, progress, affected_items,
+           idempotency_key, expected_version, created_at, updated_at)
+         VALUES ($1, 'job-claim', 'import', 'queued', 1, 0, 1,
+           'job-claim-idem', 0, $2, $2)`,
+        [environmentId, now],
+      );
+      await database.query(
+        `INSERT INTO admin_operational_job_items
+          (environment_id, item_id, job_id, item_reference, status, idempotency_key,
+           expected_version, version, created_at, updated_at)
+         VALUES ($1, 'item-1', 'job-claim', 'account-1', 'queued', 'item-idem',
+           0, 1, $2, $2)`,
+        [environmentId, now],
+      );
+      const workerOne = createPostgresAdminOperationsWorker(database, options);
+      const workerTwo = createPostgresAdminOperationsWorker(database, options);
+      const claims = await Promise.all([
+        workerOne.claim({
+          workerId: 'worker-1',
+          maximumItems: 1,
+          leaseUntil: '2030-01-01T00:05:00.000Z',
+        }),
+        workerTwo.claim({
+          workerId: 'worker-2',
+          maximumItems: 1,
+          leaseUntil: '2030-01-01T00:05:00.000Z',
+        }),
+      ]);
+      expect(claims.flat()).toHaveLength(1);
+      expect(claims.flat()[0]).toMatchObject({ itemId: 'item-1', attemptCount: 1 });
+
+      await database.query(
+        `INSERT INTO admin_operational_jobs
+          (environment_id, job_id, kind, status, version, progress, affected_items,
+           idempotency_key, expected_version, created_at, updated_at)
+         VALUES ($1, 'job-preserve', 'export', 'running', 1, 50, 1,
+           'job-preserve-idem', 0, $2, $2)`,
+        [environmentId, now],
+      );
+      const repository = createPostgresAdminOperationsRepository(database, options);
+      await repository.transaction('job-preserve', (transaction) =>
+        transaction.saveJob({
+          jobId: 'job-preserve',
+          kind: 'export',
+          status: 'completed',
+          version: 2n,
+          progress: 100,
+          affectedItems: 1,
+          idempotencyKey: 'job-preserve-idem',
+          receiptId: 'receipt-complete',
+          createdAt: now,
+          updatedAt: now,
+        }),
+      );
+      await repository.transaction('job-preserve', (transaction) =>
+        transaction.saveJob({
+          jobId: 'job-preserve',
+          kind: 'export',
+          status: 'cancelled',
+          version: 3n,
+          progress: 100,
+          affectedItems: 1,
+          idempotencyKey: 'job-preserve-idem',
+          createdAt: now,
+          updatedAt: now,
+        }),
+      );
+      await expect(
+        database.query<{ status: string; version: string }>(
+          `SELECT status, version FROM admin_operational_jobs
+           WHERE environment_id = $1 AND job_id = 'job-preserve'`,
+          [environmentId],
+        ),
+      ).resolves.toMatchObject({ rows: [{ status: 'completed', version: '2' }] });
+
+      await repository.transaction('config-1', async (transaction) => {
+        await transaction.saveConfiguration({
+          configurationId: 'config-1',
+          version: 1n,
+          status: 'draft',
+          environment,
+          cohort: 'internal',
+          knownVersion: 'v1',
+          updatedAt: now,
+        });
+        await transaction.saveConfiguration({
+          configurationId: 'config-1',
+          version: 2n,
+          status: 'rolled-back',
+          environment,
+          cohort: 'internal',
+          knownVersion: 'v0',
+          updatedAt: now,
+        });
+        await transaction.saveConflictDraft({
+          draftId: 'draft-live',
+          subjectId: 'config-1',
+          actorId: 'operator-1',
+          expectedVersion: 1n,
+          actualVersion: 2n,
+          localDraft: { cohort: 'local' },
+          remote: { cohort: 'remote' },
+          conflictingFields: ['cohort'],
+          preservedAt: now,
+        });
+        await transaction.saveReceipt({
+          receiptId: 'receipt-live',
+          commandId: 'command-live',
+          idempotencyKey: 'receipt-live-idem',
+          actorId: 'operator-1',
+          subjectId: 'config-1',
+          outcome: 'configuration-rolled-back',
+          occurredAt: now,
+          auditReference: 'audit-live',
+        });
+      });
+      await expect(repository.loadConflictDraft('draft-live')).resolves.toMatchObject({
+        localDraft: { cohort: 'local' },
+        remote: { cohort: 'remote' },
+      });
+      await expect(
+        database.query<{ count: string }>(
+          `SELECT count(*)::text AS count FROM admin_configuration_versions
+           WHERE environment_id = $1 AND configuration_id = 'config-1'`,
+          [environmentId],
+        ),
+      ).resolves.toMatchObject({ rows: [{ count: '2' }] });
+      await expect(
+        database.query(
+          `UPDATE admin_operations_receipts SET outcome = 'tampered'
+           WHERE environment_id = $1 AND receipt_id = 'receipt-live'`,
+          [environmentId],
+        ),
+      ).rejects.toThrow(/insert-only/iu);
+
+      await database.query(
+        `INSERT INTO admin_inbox_items
+          (environment_id, record_id, scope, owner_id, masked_title, status, priority,
+           version, occurred_at, updated_at)
+         VALUES
+          ($1, 'visible', 'support-cases', 'operator-1', 'Case •••1', 'open', 'normal', 1, $2, $2),
+          ($1, 'hidden-scope', 'audit-events', 'operator-1', 'Audit •••2', 'open', 'normal', 1, $2, $2),
+          ($1, 'hidden-owner', 'support-cases', 'operator-2', 'Case •••3', 'open', 'normal', 1, $2, $2)`,
+        [environmentId, now],
+      );
+      await expect(
+        repository.search({
+          query: '',
+          environment,
+          allowedScopes: ['support-cases'],
+          ownerId: 'operator-1',
+          view: { kind: 'personal', viewId: 'mine' },
+        }),
+      ).resolves.toEqual([expect.objectContaining({ recordId: 'visible' })]);
+    });
+  },
+);

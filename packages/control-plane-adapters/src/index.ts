@@ -27,6 +27,16 @@ export {
   migrateAdminGovernance,
 } from './postgres/admin-governance.js';
 export {
+  adminOperationsSchemaHash,
+  createPostgresAdminOperationsRepository,
+  createPostgresAdminOperationsWorker,
+  migrateAdminOperations,
+  type AdminOperationsWorkerItem,
+  type PostgresAdminOperationsOptions,
+  type PostgresAdminOperationsRepository,
+  type PostgresAdminOperationsWorker,
+} from './postgres/admin-operations.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,

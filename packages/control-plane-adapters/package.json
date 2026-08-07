@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./postgres/admin-governance": "./src/postgres/admin-governance.ts",
     "./postgres/admin-invitations": "./src/postgres/admin-invitations.ts",
+    "./postgres/admin-operations": "./src/postgres/admin-operations.ts",
     "./runtime-control-plane": "./src/runtime-control-plane.ts",
     "./runtime-identity": "./src/runtime-identity.ts"
   },

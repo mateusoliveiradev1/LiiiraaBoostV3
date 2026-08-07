@@ -196,9 +196,8 @@ CREATE TABLE IF NOT EXISTS admin_configuration_versions (
   CHECK (previous_version IS NULL OR previous_version < version)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_admin_configuration_current
-  ON admin_configuration_versions (environment_id, configuration_id)
-  WHERE status IN ('draft', 'rolling-out', 'paused', 'published');
+CREATE INDEX IF NOT EXISTS ix_admin_configuration_current
+  ON admin_configuration_versions (environment_id, configuration_id, version DESC);
 
 CREATE TABLE IF NOT EXISTS admin_configuration_rollouts (
   environment_id UUID NOT NULL,
