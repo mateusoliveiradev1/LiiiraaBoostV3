@@ -15,6 +15,7 @@ export const ACCOUNT_MUTATION_COMMITTED_EVENT = 'liiiraa:account-mutation-commit
 export const ACCOUNT_AUTHORITY_REVOKED_EVENT = 'liiiraa:account-authority-revoked' as const;
 export const ACCOUNT_IDENTITY_PROJECTED_EVENT = 'liiiraa:account-identity-projected' as const;
 export const ACCOUNT_SYNC_COMMAND = 'sync_account' as const;
+export const OPEN_ADMIN_COMMAND = 'open_admin' as const;
 export const ACCOUNT_AUTHORITY_REFRESH_MS = 5_000;
 
 export type AccountLifecycleTrigger = 'launch' | 'resume' | 'reconnection' | 'mutation';
@@ -67,6 +68,23 @@ export interface DesktopAccountAuthoritySnapshot {
     | 'network-unavailable'
     | 'unauthorized';
 }
+
+export type DesktopAdminHandoffStatus =
+  'eligible' | 'ineligible' | 'offline' | 'expired' | 'revoked';
+export type DesktopAdministrativeMembership =
+  'active' | 'none' | 'offline' | 'expired' | 'revoked';
+
+export interface DesktopAdminHandoffProjection {
+  readonly status: DesktopAdminHandoffStatus;
+  readonly membership: DesktopAdministrativeMembership;
+  readonly activeFunction?: NonNullable<AccountProjectionJson['administrativeRole']>;
+  readonly plan?: SubscriptionProjectionJson['plan'];
+  readonly actionable: boolean;
+}
+
+export type DesktopAdminOpenResult = Readonly<{
+  status: 'opened' | DesktopAdminHandoffStatus | 'unavailable';
+}>;
 
 export interface AccountAuthorityTransport {
   readonly invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
@@ -139,6 +157,13 @@ const validSecurityMethod = (value: unknown): value is AccountSecurityMethodProj
     value['factor'] === 'recovery-code') &&
   typeof value['verifiedAt'] === 'string';
 
+const isDesktopSessionDocument = (value: unknown): value is SessionProjectionJson =>
+  isGeneratedDocument(value, 'session-projection') &&
+  isRecord(value) &&
+  Array.isArray(value['scopes']) &&
+  value['scopes'].length === 1 &&
+  value['scopes'][0] === 'session-desktop';
+
 const sharedProjection = (value: unknown): SharedAccountProjection | undefined => {
   if (
     !isRecord(value) ||
@@ -151,7 +176,8 @@ const sharedProjection = (value: unknown): SharedAccountProjection | undefined =
     value['securityMethods'].length > 16 ||
     !value['securityMethods'].every(validSecurityMethod) ||
     !Array.isArray(value['sessions']) ||
-    !value['sessions'].every((session) => isGeneratedDocument(session, 'session-projection')) ||
+    value['sessions'].length > 16 ||
+    !value['sessions'].every(isDesktopSessionDocument) ||
     !Array.isArray(value['invoices']) ||
     !value['invoices'].every((invoice) => isGeneratedDocument(invoice, 'invoice-projection')) ||
     !Array.isArray(value['supportCases']) ||
@@ -194,6 +220,56 @@ const sharedProjection = (value: unknown): SharedAccountProjection | undefined =
     sessions: Object.freeze(value['sessions'] as readonly SessionProjectionJson[]),
     subscription: value['subscription'] as SubscriptionProjectionJson,
     supportCases: Object.freeze(value['supportCases'] as readonly SupportCaseProjectionJson[]),
+  });
+};
+
+const handoffWithoutAction = (
+  status: Exclude<DesktopAdminHandoffStatus, 'eligible'>,
+  membership: Exclude<DesktopAdministrativeMembership, 'active'>,
+  projection?: SharedAccountProjection,
+): DesktopAdminHandoffProjection =>
+  Object.freeze({
+    status,
+    membership,
+    ...(projection === undefined ? {} : { plan: projection.subscription.plan }),
+    actionable: false,
+  });
+
+export const resolveDesktopAdminHandoff = (
+  snapshot: DesktopAccountAuthoritySnapshot | undefined,
+  now = new Date(),
+): DesktopAdminHandoffProjection => {
+  if (snapshot?.state === 'revoked') {
+    return handoffWithoutAction('revoked', 'revoked');
+  }
+  if (snapshot?.state !== 'online' || snapshot.projection === undefined) {
+    return handoffWithoutAction('offline', 'offline', snapshot?.projection);
+  }
+
+  const projection = snapshot.projection;
+  const activeFunction = projection.account.administrativeRole;
+  if (projection.account.state !== 'active' || activeFunction === undefined) {
+    return handoffWithoutAction('ineligible', 'none', projection);
+  }
+
+  const nowEpoch = now.getTime();
+  const hasCurrentDesktopSession =
+    Number.isFinite(nowEpoch) &&
+    projection.sessions.some((session) => {
+      if (session.state !== 'active' || !session.scopes.includes('session-desktop')) return false;
+      const expiresAt = Date.parse(session.expiresAt);
+      return Number.isFinite(expiresAt) && expiresAt > nowEpoch;
+    });
+  if (!hasCurrentDesktopSession) {
+    return handoffWithoutAction('expired', 'expired', projection);
+  }
+
+  return Object.freeze({
+    status: 'eligible',
+    membership: 'active',
+    activeFunction,
+    plan: projection.subscription.plan,
+    actionable: true,
   });
 };
 
@@ -470,6 +546,20 @@ export class DesktopAccountAuthority {
       this.#mutationInFlight = false;
       const queuedTrigger = this.#queuedSynchronizations.shift();
       if (queuedTrigger !== undefined) void this.synchronize(queuedTrigger);
+    }
+  }
+
+  public async openAdmin(now = new Date()): Promise<DesktopAdminOpenResult> {
+    const handoff = resolveDesktopAdminHandoff(this.#snapshot, now);
+    if (!handoff.actionable) return Object.freeze({ status: handoff.status });
+    try {
+      const raw = await this.#transport.invoke(OPEN_ADMIN_COMMAND);
+      if (!isRecord(raw) || Object.keys(raw).length !== 1 || raw['status'] !== 'opened') {
+        return Object.freeze({ status: 'unavailable' });
+      }
+      return Object.freeze({ status: 'opened' });
+    } catch {
+      return Object.freeze({ status: 'unavailable' });
     }
   }
 

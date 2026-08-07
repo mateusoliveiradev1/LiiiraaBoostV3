@@ -23,7 +23,8 @@ use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
 use credential_store::WindowsCredentialStore;
 use identity::{
     DesktopIdentityError, DesktopPkceProof, LoopbackCallbackListener, WindowsDesktopIdentityApi,
-    WindowsSystemBrowser, perform_desktop_sign_in, sign_out_desktop,
+    WindowsSystemBrowser, open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop,
+    validate_https_origin,
 };
 
 use liiiraa_contracts_rust::{
@@ -62,6 +63,7 @@ const ADAPTER_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_DESKTOP_ADAPTER";
 
 #[derive(Clone, Debug)]
 struct DesktopRuntimeOrigins {
+    admin_origin: String,
     api_origin: String,
     account_origin: String,
 }
@@ -79,9 +81,14 @@ fn desktop_runtime_origins(plugin_config: Option<&Value>) -> Option<DesktopRunti
     let account_origin = plugin_config
         .pointer("/identity/runtime/accountOrigin")?
         .as_str()?;
+    let admin_origin = plugin_config
+        .pointer("/identity/runtime/adminOrigin")?
+        .as_str()?;
     WindowsDesktopIdentityApi::from_origins(api_origin, account_origin).ok()?;
     account_sync::WindowsAccountAuthorityApi::from_origin(api_origin).ok()?;
+    validate_https_origin(admin_origin).ok()?;
     Some(DesktopRuntimeOrigins {
+        admin_origin: admin_origin.to_owned(),
         api_origin: api_origin.to_owned(),
         account_origin: account_origin.to_owned(),
     })
@@ -547,6 +554,30 @@ struct DesktopSignOutCommandResponse {
     status: &'static str,
 }
 
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopOpenAdminCommandResponse {
+    status: &'static str,
+}
+
+#[tauri::command]
+async fn open_admin(
+    runtime: State<'_, DesktopRuntimeConfig>,
+) -> Result<DesktopOpenAdminCommandResponse, DesktopAuthCommandError> {
+    let admin_origin = runtime
+        .origins
+        .as_ref()
+        .map(|origins| origins.admin_origin.clone())
+        .ok_or(DesktopAuthCommandError::Unavailable)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        open_admin_in_system_browser(&WindowsSystemBrowser, &admin_origin)
+            .map_err(DesktopAuthCommandError::from)?;
+        Ok(DesktopOpenAdminCommandResponse { status: "opened" })
+    })
+    .await
+    .map_err(|_| DesktopAuthCommandError::Unavailable)?
+}
+
 #[tauri::command]
 async fn desktop_sign_in(
     runtime: State<'_, DesktopRuntimeConfig>,
@@ -697,6 +728,7 @@ fn run() -> Result<(), String> {
             desktop_sign_out,
             dispatch_shell_command,
             get_shell_bootstrap,
+            open_admin,
             sync_account
         ])
         .on_window_event(|window, event| {

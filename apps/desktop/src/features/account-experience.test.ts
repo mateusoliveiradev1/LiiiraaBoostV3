@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import { createElement } from 'react';
+// @ts-expect-error The workspace intentionally omits ReactDOM server declarations from desktop production types.
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
@@ -74,14 +75,15 @@ describe('desktop Admin handoff presentation', () => {
     'does not render an actionable Admin handoff while authority is %s',
     (status) => {
       const membership = status === 'ineligible' ? 'none' : status;
+      const unavailableHandoff: DesktopAdminHandoffProjection = {
+        status,
+        membership,
+        plan: 'premium',
+        actionable: false,
+      };
       const markup = renderToStaticMarkup(
         createElement(DesktopAdminHandoff, {
-          handoff: handoff({
-            status,
-            membership,
-            activeFunction: undefined,
-            actionable: false,
-          }),
+          handoff: unavailableHandoff,
           locale: 'en',
           onOpen: () => undefined,
         }),

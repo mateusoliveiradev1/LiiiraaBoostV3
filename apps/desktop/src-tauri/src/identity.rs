@@ -783,6 +783,18 @@ impl HttpsOrigin {
     }
 }
 
+pub fn validate_https_origin(value: &str) -> Result<(), DesktopIdentityError> {
+    HttpsOrigin::parse(value).map(|_| ())
+}
+
+pub fn open_admin_in_system_browser(
+    browser: &impl SystemBrowserLauncher,
+    configured_admin_origin: &str,
+) -> Result<(), DesktopIdentityError> {
+    let origin = HttpsOrigin::parse(configured_admin_origin)?;
+    browser.open(&origin.serialized)
+}
+
 #[derive(Clone, Debug)]
 pub struct WindowsDesktopIdentityApi {
     account_origin: HttpsOrigin,

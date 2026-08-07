@@ -1325,6 +1325,73 @@
   border-block-end: 0;
 }
 
+.desktop-authority-admin-handoff {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--deck-ice) 18%, var(--deck-line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--deck-panel) 84%, var(--deck-inset));
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--deck-ice) 58%, transparent);
+}
+
+.desktop-authority-admin-handoff > span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: 46px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--deck-line) 78%, transparent);
+  border-radius: 7px;
+  color: var(--deck-ice);
+  background: var(--deck-inset);
+}
+
+.desktop-authority-admin-handoff > span > span {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.desktop-authority-admin-handoff strong,
+.desktop-authority-admin-handoff small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desktop-authority-admin-handoff strong {
+  color: var(--deck-copy);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.desktop-authority-admin-handoff small {
+  margin-block-start: 2px;
+  color: var(--deck-muted);
+  font-family: var(--lb-font-data);
+  font-size: 10px;
+}
+
+.desktop-authority-admin-handoff .lb-button {
+  align-self: stretch;
+  min-block-size: 46px;
+  white-space: nowrap;
+}
+
+.desktop-authority-admin-handoff:not([data-admin-handoff='eligible']) {
+  grid-template-columns: minmax(0, 1fr);
+  border-color: var(--deck-line);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--deck-muted) 38%, transparent);
+}
+
+.desktop-authority-admin-handoff:not([data-admin-handoff='eligible'])
+  [data-administrative-membership] {
+  color: var(--deck-muted);
+}
+
 .desktop-authority-route {
   display: grid;
   gap: 16px;
@@ -1879,6 +1946,14 @@
     border-block-start: 1px solid var(--deck-line);
   }
 
+  .desktop-authority-admin-handoff {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .desktop-authority-admin-handoff .lb-button {
+    grid-column: 1 / -1;
+  }
+
   .desktop-authority-plan-hero,
   .desktop-authority-device-state,
   .desktop-authority-security-hero {
@@ -1919,6 +1994,17 @@
   .desktop-authority-device-capabilities > div {
     border-block-start: 1px solid var(--deck-line);
     border-inline-start: 0;
+  }
+}
+
+@media (width < 560px) {
+  .desktop-authority-admin-handoff {
+    grid-template-columns: 1fr;
+  }
+
+  .desktop-authority-admin-handoff .lb-button {
+    grid-column: auto;
+    inline-size: 100%;
   }
 }
 

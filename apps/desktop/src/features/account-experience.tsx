@@ -4,8 +4,10 @@ import type { ShellLocale } from '@liiiraa/feature-shell';
 import {
   ACCOUNT_AUTHORITY_REVOKED_EVENT,
   createDesktopAccountAuthority,
+  resolveDesktopAdminHandoff,
   type DesktopAccountAuthority,
   type DesktopAccountAuthoritySnapshot,
+  type DesktopAdminHandoffProjection,
 } from '../account-authority.js';
 import { createDesktopAuth, type DesktopAuth, type DesktopAuthPhase } from '../desktop-auth.js';
 import {
@@ -2050,6 +2052,76 @@ const administrativeRoleLabel = (
   return labels[locale][role];
 };
 
+const administrativeMembershipStateLabel = (
+  locale: ShellLocale,
+  membership: DesktopAdminHandoffProjection['membership'],
+): string => {
+  const labels = {
+    en: {
+      active: 'Active',
+      expired: 'Expired',
+      none: 'Standard account',
+      offline: 'Authority unavailable',
+      revoked: 'Revoked',
+    },
+    'pt-BR': {
+      active: 'Ativa',
+      expired: 'Expirada',
+      none: 'Conta padrão',
+      offline: 'Autoridade indisponível',
+      revoked: 'Revogada',
+    },
+  } as const;
+  return labels[locale][membership];
+};
+
+export const DesktopAdminHandoff = ({
+  handoff,
+  locale,
+  onOpen,
+}: Readonly<{
+  handoff: DesktopAdminHandoffProjection;
+  locale: ShellLocale;
+  onOpen: () => void;
+}>) => (
+  <aside
+    aria-label={copy(locale, {
+      en: 'Administrative membership',
+      'pt-BR': 'Associação administrativa',
+    })}
+    className="desktop-authority-admin-handoff"
+    data-admin-handoff={handoff.status}
+  >
+    <span data-administrative-membership={handoff.membership}>
+      <ProductIcon name="shield" size={16} />
+      <span>
+        <strong>
+          {copy(locale, {
+            en: 'Administrative member',
+            'pt-BR': 'Membro administrativo',
+          })}
+        </strong>
+        <small>{administrativeMembershipStateLabel(locale, handoff.membership)}</small>
+      </span>
+    </span>
+    {handoff.activeFunction === undefined ? null : (
+      <span data-admin-active-function={handoff.activeFunction}>
+        <ProductIcon name="sliders" size={16} />
+        <span>
+          <strong>{copy(locale, { en: 'Active function', 'pt-BR': 'Função ativa' })}</strong>
+          <small>{administrativeRoleLabel(locale, handoff.activeFunction)}</small>
+        </span>
+      </span>
+    )}
+    {handoff.actionable ? (
+      <LbButton onPress={onOpen} variant="primary">
+        <ProductIcon name="arrowRight" size={16} />
+        {copy(locale, { en: 'Open Admin', 'pt-BR': 'Abrir Admin' })}
+      </LbButton>
+    ) : null}
+  </aside>
+);
+
 const formatAuthorityDate = (value: string, locale: ShellLocale): string =>
   new Intl.DateTimeFormat(locale, {
     day: '2-digit',
@@ -2073,6 +2145,7 @@ const AuthoritativeAccountContent = ({
   readonly view: Exclude<AccountExperienceView, 'login'>;
 }) => {
   const [signOutFailed, setSignOutFailed] = useState(false);
+  const [adminOpenFailed, setAdminOpenFailed] = useState(false);
   const projection = snapshot.projection;
   const account = projection?.account;
   const subscription = projection?.subscription;
@@ -2081,6 +2154,7 @@ const AuthoritativeAccountContent = ({
   const activeSessions = projection?.sessions.filter((session) => session.state === 'active') ?? [];
   const primarySession = activeSessions[0];
   const accountIsCurrent = snapshot.state === 'online';
+  const adminHandoff = resolveDesktopAdminHandoff(snapshot);
 
   return (
     <div
@@ -2159,6 +2233,25 @@ const AuthoritativeAccountContent = ({
           </dl>
         </section>
       )}
+      <DesktopAdminHandoff
+        handoff={adminHandoff}
+        locale={locale}
+        onOpen={() => {
+          setAdminOpenFailed(false);
+          void authority.openAdmin().then((result) => {
+            if (result.status !== 'opened') setAdminOpenFailed(true);
+          });
+        }}
+      />
+      {adminOpenFailed ? (
+        <p role="alert">
+          {copy(locale, {
+            en: 'Admin could not open in the system browser. Confirm your connection and try again.',
+            'pt-BR':
+              'Não foi possível abrir o Admin no navegador do sistema. Confirme sua conexão e tente novamente.',
+          })}
+        </p>
+      ) : null}
       {view === 'overview' ? (
         <div className="desktop-authority-route desktop-authority-route--profile">
           <section className="desktop-authority-section desktop-authority-section--primary">

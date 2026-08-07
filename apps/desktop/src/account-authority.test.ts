@@ -7,6 +7,7 @@ import {
   OPEN_ADMIN_COMMAND,
   resolveDesktopAdminHandoff,
   type AccountAuthorityTransport,
+  type SharedAccountProjection,
 } from './account-authority.js';
 
 const events = new EventTarget();
@@ -26,11 +27,11 @@ const projection = (
   version: string,
   locale: 'en' | 'pt-BR' = 'pt-BR',
   options: Readonly<{
-    administrativeRole?: 'audit' | 'operations' | 'security' | 'support';
+    administrativeRole?: 'audit' | 'operations' | 'security' | 'support' | null;
     expiresAt?: string;
-    sessionScopes?: readonly string[];
+    sessionScopes?: SharedAccountProjection['sessions'][number]['scopes'];
   }> = {},
-) => ({
+): SharedAccountProjection => ({
   account: {
     schemaVersion: '1.0',
     aggregateVersion: version,
@@ -42,9 +43,9 @@ const projection = (
     state: 'active',
     displayName,
     emailRedacted: 'w***@gmail.com',
-    ...(options.administrativeRole === undefined
-      ? { administrativeRole: 'security' }
-      : { administrativeRole: options.administrativeRole }),
+    ...(options.administrativeRole === null
+      ? {}
+      : { administrativeRole: options.administrativeRole ?? 'security' }),
     locale,
     createdAt: '2030-01-01T00:00:00.000Z',
     updatedAt: '2030-01-15T00:00:00.000Z',
@@ -105,8 +106,9 @@ describe('bounded desktop Admin handoff', () => {
       actionable: true,
     });
 
-    const standardAccount = projection('Friend Tester', '2');
-    delete (standardAccount.account as { administrativeRole?: string }).administrativeRole;
+    const standardAccount = projection('Friend Tester', '2', 'pt-BR', {
+      administrativeRole: null,
+    });
     expect(
       resolveDesktopAdminHandoff({ state: 'online', projection: standardAccount }, NOW),
     ).toMatchObject({ status: 'ineligible', membership: 'none', actionable: false });

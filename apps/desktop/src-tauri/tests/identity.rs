@@ -20,8 +20,7 @@ use identity::{
     DesktopPkceProof, DesktopSessionContact, LoopbackCallbackListener, SystemBrowserLauncher,
     WindowsDesktopIdentityApi, accept_desktop_exchange, begin_desktop_sign_in,
     complete_desktop_callback, open_admin_in_system_browser, perform_desktop_sign_in,
-    reconcile_authenticated_contact,
-    revoke_desktop_session,
+    reconcile_authenticated_contact, revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
 use serde_json::{Value, json};
@@ -165,11 +164,8 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
 fn admin_handoff_opens_only_the_exact_configured_https_origin() {
     let browser = RecordingSystemBrowser::default();
 
-    open_admin_in_system_browser(
-        &browser,
-        "https://liiiraa-boost-admin-staging.vercel.app",
-    )
-    .expect("exact configured HTTPS Admin origin should open");
+    open_admin_in_system_browser(&browser, "https://liiiraa-boost-admin-staging.vercel.app")
+        .expect("exact configured HTTPS Admin origin should open");
     assert_eq!(
         browser.opened_urls.borrow().as_slice(),
         ["https://liiiraa-boost-admin-staging.vercel.app"]
