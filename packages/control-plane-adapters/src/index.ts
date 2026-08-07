@@ -37,6 +37,10 @@ export {
   type PostgresAdminOperationsWorker,
 } from './postgres/admin-operations.js';
 export {
+  identityStrongAuthSchemaHash,
+  migrateIdentityStrongAuth,
+} from './postgres/identity-strong-auth.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,

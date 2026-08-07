@@ -5,6 +5,7 @@ import { createControlPlaneDatabase, type ControlPlaneDatabase } from './databas
 import { migrateAdminGovernance } from './admin-governance.ts';
 import { migrateAdminInvitations } from './admin-invitations.ts';
 import { migrateAdminOperations } from './admin-operations.ts';
+import { migrateIdentityStrongAuth } from './identity-strong-auth.ts';
 import {
   inspectControlPlaneSchema,
   migrateControlPlane,
@@ -21,6 +22,7 @@ export const STAGING_MIGRATION_VERSIONS = Object.freeze([
   '0004_admin_invitations',
   '0005_admin_governance',
   '0006_admin_operations',
+  '0007_identity_strong_auth',
 ] as const);
 
 const forbiddenAuthority = /(?:^|[._/-])(?:prod|production|customer|live)(?:$|[._/?-])/iu;
@@ -88,6 +90,7 @@ const migrateStagingAuthority = async (
   const adminInvitations = await migrateAdminInvitations(database);
   const adminGovernance = await migrateAdminGovernance(database);
   const adminOperations = await migrateAdminOperations(database);
+  const identityStrongAuth = await migrateIdentityStrongAuth(database);
   return Object.freeze({
     applied:
       controlPlane.applied ||
@@ -95,9 +98,10 @@ const migrateStagingAuthority = async (
       runtimeAuthorities.applied ||
       adminInvitations.applied ||
       adminGovernance.applied ||
-      adminOperations.applied,
-    schemaHash: adminOperations.schemaHash,
-    version: adminOperations.version,
+      adminOperations.applied ||
+      identityStrongAuth.applied,
+    schemaHash: identityStrongAuth.schemaHash,
+    version: identityStrongAuth.version,
   });
 };
 

@@ -46,6 +46,7 @@ import {
   createPostgresIdentityPersistence,
   createRealIdentityAuthority,
   migrateControlPlane,
+  migrateIdentityStrongAuth,
   migrateRealIdentity,
   migrateRuntimeAuthorities,
   type IdentityActor,
@@ -74,11 +75,18 @@ import {
 import { accountSubscriptionUrl, registerCommerceRoutes } from '../modules/commerce/routes.ts';
 import { registerDeviceRoutes } from '../modules/devices/routes.ts';
 import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
+import { registerStrongAuthRoutes } from '../modules/identity/strong-auth-routes.ts';
 import { registerSupportRoutes } from '../modules/support/routes.ts';
+import {
+  createPostgresStagingStrongAuthRepository,
+  createStagingStrongAuth,
+  type StagingStrongAuth,
+} from './strong-auth.ts';
 
 export const REAL_STAGING_CAPABILITIES = Object.freeze([
   'invitation-signup',
   'password-session',
+  'totp-strong-auth',
   'desktop-pkce',
   'account',
   'commerce-stripe-test',
@@ -125,6 +133,7 @@ interface PersistentStagingAdminInput {
   readonly clock?: Readonly<{ now(): Date }>;
   readonly database: StagingAdminDatabase;
   readonly identity: StagingAdminIdentityAuthority;
+  readonly strongAuth?: StagingStrongAuth;
 }
 
 interface PersistentStagingAdminAuthorityInput {
@@ -134,6 +143,7 @@ interface PersistentStagingAdminAuthorityInput {
   readonly database: PersistentAdminDatabase;
   readonly environmentId: AdminEnvironment;
   readonly identity: StagingAdminIdentityAuthority;
+  readonly strongAuth?: StagingStrongAuth;
 }
 
 type PersistentAdminDatabase = Parameters<typeof createPostgresAdminOperationsRepository>[0];
@@ -257,28 +267,56 @@ const signedWebhookBody = (request: FastifyRequest): Uint8Array | null => {
 const persistedOperator = async (
   request: Parameters<AdminRouteDependencies['resolveAdminSession']>[0],
   identity: StagingAdminIdentityAuthority,
+  database: StagingAdminDatabase,
 ): Promise<IdentityActor | null> => {
   const credential = cookieCredential(request);
   if (credential === null) return null;
   const actor = await identity.resolveCredential(credential);
-  return actor !== null &&
-    actor.sessionKind === 'admin' &&
-    actor.role !== 'tester' &&
-    ADMIN_ROLES.has(actor.role)
-    ? actor
-    : null;
+  if (
+    actor === null ||
+    actor.sessionKind !== 'admin' ||
+    actor.role === 'tester' ||
+    !ADMIN_ROLES.has(actor.role)
+  )
+    return null;
+  const governed = await database.query(
+    `SELECT membership.id
+       FROM admin_governance_memberships AS membership
+       INNER JOIN security_factors AS factor
+         ON factor.identity_id = membership.identity_id
+        AND factor.factor_kind IN ('passkey', 'totp') AND factor.revoked_at IS NULL
+      WHERE membership.identity_id = $1::uuid AND membership.status = 'active'
+      LIMIT 1`,
+    [actor.accountId],
+  );
+  return governed.rows[0] === undefined ? null : actor;
 };
 
-const adminSession = (actor: IdentityActor): ActiveAdminRoleSession =>
-  Object.freeze({
+const adminSession = async (
+  actor: IdentityActor,
+  database: StagingAdminDatabase,
+): Promise<ActiveAdminRoleSession> => {
+  const active = await database.query(
+    `SELECT governed.active_function
+       FROM admin_function_sessions AS governed
+       INNER JOIN admin_governance_memberships AS membership
+         ON membership.id = governed.membership_id
+      WHERE governed.session_id = $1 AND membership.identity_id = $2::uuid
+        AND governed.ended_at IS NULL AND membership.status = 'active'
+      ORDER BY governed.started_at DESC LIMIT 1`,
+    [actor.sessionId, actor.accountId],
+  );
+  const role = asAdminFunction(active.rows[0]?.['active_function']) ?? actor.role;
+  return Object.freeze({
     actorId: actor.accountId,
     assumedAt: actor.authenticatedAt,
     expiresAt: actor.expiresAt,
     nonProduction: true,
     premiumTestGrant: false,
-    role: actor.role as ActiveAdminRoleSession['role'],
+    role: role as ActiveAdminRoleSession['role'],
     sessionId: actor.sessionId,
   });
+};
 
 const projectionStatement = (resource: AdminProjectionResource): string => {
   switch (resource) {
@@ -763,6 +801,7 @@ export const createPersistentStagingAdminDependencies = ({
   clock = { now: () => new Date() },
   database,
   identity,
+  strongAuth,
 }: PersistentStagingAdminInput): AdminRouteDependencies => {
   const listProjection = async (resource: AdminProjectionResource) => {
     const result = await database.query(projectionStatement(resource));
@@ -783,17 +822,17 @@ export const createPersistentStagingAdminDependencies = ({
     resolveAdminSession: async (
       request: Parameters<AdminRouteDependencies['resolveAdminSession']>[0],
     ) => {
-      const actor = await persistedOperator(request, identity);
-      return actor === null ? null : adminSession(actor);
+      const actor = await persistedOperator(request, identity, database);
+      return actor === null ? null : adminSession(actor, database);
     },
     resolveDeveloperActor: async (
       request: Parameters<AdminRouteDependencies['resolveDeveloperActor']>[0],
     ) => {
-      const actor = await persistedOperator(request, identity);
+      const actor = await persistedOperator(request, identity, database);
       return actor === null ? null : { actorId: actor.accountId, nonProduction: true };
     },
     resolveStepUp: async (request: Parameters<AdminRouteDependencies['resolveStepUp']>[0]) => {
-      const actor = await persistedOperator(request, identity);
+      const actor = await persistedOperator(request, identity, database);
       const body = recordValue(request.body);
       const command = recordValue(body?.['command']);
       const action = text(command?.['action']);
@@ -809,16 +848,30 @@ export const createPersistentStagingAdminDependencies = ({
                 : action === 'export-audit-reference'
                   ? 'audit-event'
                   : null;
+      const receipt = request.headers['x-liiiraa-admin-step-up'];
+      const authorizationContextId = request.headers['x-admin-authorization-context'];
+      const evidence =
+        actor === null ||
+        strongAuth === undefined ||
+        typeof receipt !== 'string' ||
+        typeof authorizationContextId !== 'string'
+          ? null
+          : await strongAuth.consumeStepUpReceipt(actor, {
+              action,
+              authorizationContextId,
+              receipt,
+              redactedTarget: text(command?.['redactedTarget']),
+              resource: resource ?? '',
+            });
       if (
-        actor?.authenticationMethod !== 'passkey' ||
+        evidence === null ||
         command === null ||
-        resource === null ||
-        clock.now().getTime() - Date.parse(actor.authenticatedAt) > 5 * 60 * 1_000
+        resource === null
       ) {
         return null;
       }
       return {
-        actorId: actor.accountId,
+        actorId: evidence.actorId,
         action: action as
           | 'view-support-diagnostics'
           | 'revoke-session'
@@ -827,10 +880,10 @@ export const createPersistentStagingAdminDependencies = ({
           | 'export-audit-reference',
         resource,
         redactedTarget: text(command['redactedTarget']),
-        authorizationContextId: text(command['authorizationContextId']),
-        method: 'passkey' as const,
-        verifiedAt: actor.authenticatedAt,
-        expiresAt: new Date(Date.parse(actor.authenticatedAt) + 5 * 60 * 1_000).toISOString(),
+        authorizationContextId: evidence.authorizationContextId,
+        method: evidence.method,
+        verifiedAt: evidence.verifiedAt,
+        expiresAt: evidence.expiresAt,
       };
     },
     roles: persistentRoleAuthority(database, clock),
@@ -886,7 +939,7 @@ const resolveGovernanceSession = async (
   database: PersistentAdminDatabase,
   identity: StagingAdminIdentityAuthority,
 ): Promise<AdminGovernanceRouteSession | null> => {
-  const actor = await persistedOperator(request, identity);
+  const actor = await persistedOperator(request, identity, database);
   if (actor === null) return null;
   const active = await database.query<{
     active_function: string;
@@ -926,33 +979,44 @@ const resolveGovernanceSession = async (
 const resolveGovernanceStepUp = async (
   request: FastifyRequest,
   identity: StagingAdminIdentityAuthority,
-  clock: Readonly<{ now(): Date }>,
+  database: PersistentAdminDatabase,
+  strongAuth: StagingStrongAuth | undefined,
 ): Promise<AdminGovernanceStepUpEvidence | null> => {
-  const actor = await persistedOperator(request, identity);
+  const actor = await persistedOperator(request, identity, database);
+  const receipt = request.headers['x-liiiraa-admin-step-up'];
   const authorizationContextId = request.headers['x-admin-authorization-context'];
   const action = request.headers['x-admin-step-up-action'];
   const resource = request.headers['x-admin-step-up-resource'];
   const redactedTarget = request.headers['x-admin-step-up-target'];
   if (
-    actor?.authenticationMethod !== 'passkey' ||
+    actor === null ||
+    strongAuth === undefined ||
+    typeof receipt !== 'string' ||
     typeof authorizationContextId !== 'string' ||
     typeof action !== 'string' ||
     typeof resource !== 'string' ||
-    typeof redactedTarget !== 'string' ||
-    clock.now().getTime() - Date.parse(actor.authenticatedAt) > 5 * 60 * 1_000
+    typeof redactedTarget !== 'string'
   ) {
     return null;
   }
-  return Object.freeze({
-    evidenceId: `passkey-${actor.sessionId}`,
-    actorId: actor.accountId,
-    authorizationContextId,
+  const evidence = await strongAuth.consumeStepUpReceipt(actor, {
     action,
-    resource,
+    authorizationContextId,
+    receipt,
     redactedTarget,
-    method: 'passkey',
-    verifiedAt: actor.authenticatedAt,
-    expiresAt: new Date(Date.parse(actor.authenticatedAt) + 5 * 60 * 1_000).toISOString(),
+    resource,
+  });
+  if (evidence === null) return null;
+  return Object.freeze({
+    evidenceId: evidence.evidenceId,
+    actorId: evidence.actorId,
+    authorizationContextId: evidence.authorizationContextId,
+    action: evidence.action,
+    resource: evidence.resource,
+    redactedTarget: evidence.redactedTarget,
+    method: evidence.method,
+    verifiedAt: evidence.verifiedAt,
+    expiresAt: evidence.expiresAt,
   });
 };
 
@@ -1623,6 +1687,7 @@ export const createPersistentStagingAdminAuthority = ({
   database,
   environmentId,
   identity,
+  strongAuth,
 }: PersistentStagingAdminAuthorityInput): CompleteAdminRouteDependencies => {
   if (authSecret.length < 43) throw new Error('STAGING_ADMIN_AUTH_SECRET_REJECTED');
   if (environmentId === 'production') throw new Error('STAGING_ADMIN_ENVIRONMENT_REJECTED');
@@ -1646,7 +1711,7 @@ export const createPersistentStagingAdminAuthority = ({
     stepUp: {
       verify: (evidence) =>
         Promise.resolve(
-          evidence.method === 'passkey' &&
+          (evidence.method === 'passkey' || evidence.method === 'totp') &&
             Date.parse(evidence.verifiedAt) <= clock.now().getTime() &&
             Date.parse(evidence.expiresAt) > clock.now().getTime(),
         ),
@@ -1727,7 +1792,7 @@ export const createPersistentStagingAdminAuthority = ({
   const resolveSession = (request: FastifyRequest) =>
     resolveGovernanceSession(request, database, identity);
   const resolveStepUp = (request: FastifyRequest) =>
-    resolveGovernanceStepUp(request, identity, clock);
+    resolveGovernanceStepUp(request, identity, database, strongAuth);
   const rateLimit = async (key: string) => {
     const result = await database.query(
       `SELECT COUNT(*)::integer AS count FROM admin_operations_audit
@@ -1741,6 +1806,7 @@ export const createPersistentStagingAdminAuthority = ({
     clock,
     database,
     identity,
+    ...(strongAuth === undefined ? {} : { strongAuth }),
   });
   const governanceRoutes: AdminGovernanceRouteDependencies = {
     allowedOrigin: adminOrigin,
@@ -1949,6 +2015,7 @@ export const buildRealStagingApp = async (
     await migrateAdminInvitations(database);
     await migrateAdminGovernance(database);
     await migrateAdminOperations(database);
+    await migrateIdentityStrongAuth(database);
     await database.query('SELECT 1 AS authority_ready');
   } catch (error) {
     await database.close();
@@ -1973,6 +2040,11 @@ export const buildRealStagingApp = async (
   const identity = createRealIdentityAuthority(createPostgresIdentityPersistence(database));
   const clock = Object.freeze({ now: () => new Date() });
   const ids = Object.freeze({ next: randomUUID });
+  const strongAuth = createStagingStrongAuth({
+    clock,
+    encryptionSecret: secret,
+    repository: createPostgresStagingStrongAuthRepository(database),
+  });
   const stripe = new Stripe(environment.stripeSecretKey, { typescript: true });
   const commerceProvider = createStripeCommerceProvider({
     checkoutBranding: {
@@ -1995,6 +2067,15 @@ export const buildRealStagingApp = async (
     issuer,
     resolveSubscription: (actor, correlation) =>
       resolveStagingSubscription(database, actor, correlation),
+  });
+  await registerStrongAuthRoutes(app, {
+    allowedOrigins: [environment.accountOrigin, environment.adminOrigin],
+    authority: strongAuth,
+    csrfSecret: secret,
+    resolveActor: async (request) => {
+      const credential = requestCredential(request);
+      return credential === null ? null : identity.resolveCredential(credential);
+    },
   });
   await registerCommerceRoutes(app, {
     accountOrigin: environment.accountOrigin,
@@ -2114,6 +2195,7 @@ export const buildRealStagingApp = async (
       database,
       environmentId: 'staging',
       identity,
+      strongAuth,
     }),
   );
 

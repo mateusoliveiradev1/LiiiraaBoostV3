@@ -127,7 +127,7 @@ describe('real staging TOTP and action-scoped step-up', () => {
     });
 
     const enrollment = authority.beginTotpEnrollment(actor);
-    expect(enrollment.otpauthUri).toContain('issuer=Liiiraa%20Boost');
+    expect(new URL(enrollment.otpauthUri).searchParams.get('issuer')).toBe('Liiiraa Boost');
     expect(enrollment.enrollmentToken).not.toContain(enrollment.secret);
     expect(await authority.confirmTotpEnrollment(actor, enrollment.enrollmentToken, '000000')).toEqual({
       ok: false,

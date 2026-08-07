@@ -7,11 +7,14 @@ import {
   registerRealIdentityRoutes,
   type RealIdentityRouteAuthority,
 } from '../modules/identity/real-routes.js';
+import { registerStrongAuthRoutes } from '../modules/identity/strong-auth-routes.js';
+import type { StagingStrongAuth } from './strong-auth.js';
 import { resolveStagingSubscription } from './runtime.js';
 
 const accountOrigin = 'https://account.staging.example';
 const adminOrigin = 'https://admin.staging.example';
 const issuer = 'https://api.staging.example';
+const csrfSecret = 'synthetic-auth-secret-with-at-least-32-characters';
 const credential = 'session-credential-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG';
 const actor: IdentityActor = {
   accountId: '00000000-0000-4000-8000-000000000001',
@@ -79,11 +82,38 @@ const authority = () => {
 const createApp = async () => {
   const app = Fastify();
   const identity = authority();
+  const strongAuth = {
+    status: vi.fn(() => Promise.resolve({ enabled: false })),
+    beginTotpEnrollment: vi.fn(() => ({
+      enrollmentToken: 'sealed-enrollment-token',
+      expiresAt: '2030-01-01T00:10:00.000Z',
+      otpauthUri: 'otpauth://totp/Liiiraa%20Boost%3Atester%40example.com',
+      secret: 'ABCDEFGHIJKLMNOPQRSTUVWX23456789',
+    })),
+    confirmTotpEnrollment: vi.fn(() =>
+      Promise.resolve({
+        ok: true as const,
+        factor: 'totp' as const,
+        factorId: '00000000-0000-4000-8000-000000000004',
+        verifiedAt: '2030-01-01T00:00:00.000Z',
+      }),
+    ),
+    verifyTotpStepUp: vi.fn(() =>
+      Promise.resolve({
+        ok: true as const,
+        expiresAt: '2030-01-01T00:05:00.000Z',
+        method: 'totp' as const,
+        receipt: 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789',
+        verifiedAt: '2030-01-01T00:00:00.000Z',
+      }),
+    ),
+    consumeStepUpReceipt: vi.fn(),
+  } as unknown as StagingStrongAuth;
   await registerRealIdentityRoutes(app, {
     accountOrigin,
     adminOrigin,
     authority: identity,
-    csrfSecret: 'synthetic-auth-secret-with-at-least-32-characters',
+    csrfSecret,
     issuer,
     resolveSubscription: vi.fn(() =>
       Promise.resolve({
@@ -102,8 +132,21 @@ const createApp = async () => {
       }),
     ),
   });
+  await registerStrongAuthRoutes(app, {
+    allowedOrigins: [accountOrigin, adminOrigin],
+    authority: strongAuth,
+    csrfSecret,
+    resolveActor: async (request) => {
+      const match = /(?:^|;\s*)__Host-liiiraa_session=([^;]+)/u.exec(
+        request.headers.cookie ?? '',
+      );
+      return match?.[1] === undefined
+        ? null
+        : identity.resolveCredential(decodeURIComponent(match[1]));
+    },
+  });
   await app.ready();
-  return { app, identity };
+  return { app, identity, strongAuth };
 };
 
 const csrf = async (app: Awaited<ReturnType<typeof createApp>>['app']) => {
@@ -117,6 +160,67 @@ const csrf = async (app: Awaited<ReturnType<typeof createApp>>['app']) => {
 };
 
 describe('real staging authentication routes', () => {
+  it('exposes authenticated TOTP enrollment, confirmation and action-bound step-up over HTTP', async () => {
+    const { app, strongAuth } = await createApp();
+    const cookie = `__Host-liiiraa_session=${encodeURIComponent(credential)}`;
+    const csrfToken = await csrf(app);
+
+    const status = await app.inject({
+      headers: { cookie, origin: adminOrigin },
+      method: 'GET',
+      url: '/v1/identity/strong-auth/status',
+    });
+    expect(status.statusCode).toBe(200);
+    expect(status.json()).toEqual({ enabled: false });
+
+    const denied = await app.inject({
+      headers: { cookie, origin: adminOrigin },
+      method: 'POST',
+      url: '/v1/identity/strong-auth/totp/enrollment',
+    });
+    expect(denied.statusCode).toBe(403);
+
+    const headers = { cookie, origin: adminOrigin, 'x-csrf-token': csrfToken };
+    const enrollment = await app.inject({
+      headers,
+      method: 'POST',
+      url: '/v1/identity/strong-auth/totp/enrollment',
+    });
+    expect(enrollment.statusCode).toBe(201);
+    expect(enrollment.json()).toMatchObject({ enrollmentToken: 'sealed-enrollment-token' });
+
+    const confirmation = await app.inject({
+      headers,
+      method: 'POST',
+      payload: { code: '123456', enrollmentToken: 'sealed-enrollment-token' },
+      url: '/v1/identity/strong-auth/totp/confirm',
+    });
+    expect(confirmation.statusCode).toBe(200);
+    expect(strongAuth.confirmTotpEnrollment).toHaveBeenCalledWith(
+      actor,
+      'sealed-enrollment-token',
+      '123456',
+    );
+
+    const binding = {
+      action: 'switch-function',
+      authorizationContextId: 'context-one',
+      code: '654321',
+      redactedTarget: 'owner-membership',
+      resource: 'governance',
+    };
+    const stepUp = await app.inject({
+      headers,
+      method: 'POST',
+      payload: binding,
+      url: '/v1/identity/strong-auth/step-up',
+    });
+    expect(stepUp.statusCode).toBe(200);
+    expect(stepUp.json()).toMatchObject({ method: 'totp' });
+    expect(strongAuth.verifyTotpStepUp).toHaveBeenCalledWith(actor, binding);
+    await app.close();
+  });
+
   it('creates an invited account, persists a secure cookie, projects real account state and revokes logout', async () => {
     const { app, identity } = await createApp();
     expect((await app.inject({ method: 'GET', url: '/v1/account' })).statusCode).toBe(401);

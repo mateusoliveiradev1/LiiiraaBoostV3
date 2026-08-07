@@ -49,7 +49,18 @@ const createApp = async () => {
     query: vi.fn((statement: string) => {
       queries.push(statement);
       return Promise.resolve(
-        statement.includes('FROM sessions')
+        statement.includes('INNER JOIN security_factors AS factor')
+          ? {
+              rowCount: 1,
+              rows: [{ id: '00000000-0000-4000-8000-000000000080' }],
+            }
+          : statement.includes('FROM admin_function_sessions AS governed') &&
+              statement.includes('governed.session_id = $1')
+            ? {
+                rowCount: 1,
+                rows: [{ active_function: 'security' }],
+              }
+            : statement.includes('FROM sessions')
           ? {
               rowCount: 1,
               rows: [
@@ -163,7 +174,14 @@ describe('real staging administrative authority', () => {
     const transaction = {
       query: vi.fn((statement: string) => {
         statements.push(statement);
-        return Promise.resolve({ rowCount: 0, rows: [] });
+        return Promise.resolve(
+          statement.includes('INNER JOIN security_factors AS factor')
+            ? {
+                rowCount: 1,
+                rows: [{ id: '00000000-0000-4000-8000-000000000080' }],
+              }
+            : { rowCount: 0, rows: [] },
+        );
       }),
     };
     const database = {
@@ -220,7 +238,7 @@ describe('real staging administrative authority', () => {
     });
     expect(collection.body).not.toContain('must-never-leave-postgres');
     expect(collection.body).not.toContain('operator@example.com');
-    expect(database.query).toHaveBeenCalledTimes(1);
+    expect(database.query).toHaveBeenCalledTimes(5);
     await app.close();
   });
 
