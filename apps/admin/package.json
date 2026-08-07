@@ -14,6 +14,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "check": "tsc -p tsconfig.json --noEmit",
+    "storybook": "storybook dev -p 6007 --ci",
+    "storybook:build": "storybook build --quiet",
     "test": "vitest",
     "verify": "pnpm run check && pnpm run test && pnpm run build"
   },
@@ -30,8 +32,12 @@
   },
   "devDependencies": {
     "@liiiraa/web-preview": "workspace:*",
+    "@storybook/react-vite": "10.5.4",
     "@types/node": "24.13.3",
     "@types/react": "19.2.17",
+    "@vitejs/plugin-react": "6.0.4",
+    "storybook": "10.5.4",
+    "vite": "8.1.5",
     "vitest": "4.1.10"
   }
 }

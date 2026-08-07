@@ -369,12 +369,24 @@ importers:
       '@liiiraa/web-preview':
         specifier: workspace:*
         version: link:../../packages/web-preview
+      '@storybook/react-vite':
+        specifier: 10.5.4
+        version: 10.5.4(@types/react@19.2.17)(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(storybook@10.5.4(@types/react@19.2.17)(prettier@3.9.6)(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
       '@types/react':
         specifier: 19.2.17
         version: 19.2.17
+      '@vitejs/plugin-react':
+        specifier: 6.0.4
+        version: 6.0.4(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      storybook:
+        specifier: 10.5.4
+        version: 10.5.4(@types/react@19.2.17)(prettier@3.9.6)(react@19.2.8)
+      vite:
+        specifier: 8.1.5
+        version: 8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)
