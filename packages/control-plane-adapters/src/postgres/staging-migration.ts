@@ -2,6 +2,9 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { createControlPlaneDatabase, type ControlPlaneDatabase } from './database.ts';
+import { migrateAdminGovernance } from './admin-governance.ts';
+import { migrateAdminInvitations } from './admin-invitations.ts';
+import { migrateAdminOperations } from './admin-operations.ts';
 import {
   inspectControlPlaneSchema,
   migrateControlPlane,
@@ -10,6 +13,15 @@ import {
 } from './migrate.ts';
 import { migrateRealIdentity } from './real-identity.ts';
 import { migrateRuntimeAuthorities } from './runtime-authorities.ts';
+
+export const STAGING_MIGRATION_VERSIONS = Object.freeze([
+  '0001_control_plane',
+  '0002_real_identity',
+  '0003_runtime_authorities',
+  '0004_admin_invitations',
+  '0005_admin_governance',
+  '0006_admin_operations',
+] as const);
 
 const forbiddenAuthority = /(?:^|[._/-])(?:prod|production|customer|live)(?:$|[._/?-])/iu;
 const stagingAuthority = /(?:^|[._/-])(?:staging|synthetic)(?:$|[._/?-])/iu;
@@ -73,10 +85,19 @@ const migrateStagingAuthority = async (
   const controlPlane = await migrateControlPlane(database);
   const identity = await migrateRealIdentity(database);
   const runtimeAuthorities = await migrateRuntimeAuthorities(database);
+  const adminInvitations = await migrateAdminInvitations(database);
+  const adminGovernance = await migrateAdminGovernance(database);
+  const adminOperations = await migrateAdminOperations(database);
   return Object.freeze({
-    applied: controlPlane.applied || identity.applied || runtimeAuthorities.applied,
-    schemaHash: runtimeAuthorities.schemaHash,
-    version: runtimeAuthorities.version,
+    applied:
+      controlPlane.applied ||
+      identity.applied ||
+      runtimeAuthorities.applied ||
+      adminInvitations.applied ||
+      adminGovernance.applied ||
+      adminOperations.applied,
+    schemaHash: adminOperations.schemaHash,
+    version: adminOperations.version,
   });
 };
 
@@ -84,15 +105,15 @@ const inspectStagingAuthority = async (
   database: ControlPlaneDatabase,
 ): Promise<ControlPlaneSchemaInspection> => {
   const inspection = await inspectControlPlaneSchema(database);
-  const runtimeMigration = await database.query<{ checksum: string }>(
+  const latestMigration = await database.query<{ checksum: string }>(
     `SELECT checksum
      FROM control_plane_schema_migrations
      WHERE version = $1`,
-    ['0003_runtime_authorities'],
+    [STAGING_MIGRATION_VERSIONS.at(-1)],
   );
   return Object.freeze({
     ...inspection,
-    schemaHash: runtimeMigration.rows[0]?.checksum,
+    schemaHash: latestMigration.rows[0]?.checksum,
   });
 };
 

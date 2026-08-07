@@ -4,6 +4,7 @@ import type { ControlPlaneDatabase } from './database.ts';
 import {
   requireStagingDatabaseUrl,
   runStagingMigration,
+  STAGING_MIGRATION_VERSIONS,
   StagingMigrationAdmissionError,
 } from './staging-migration.ts';
 
@@ -28,6 +29,17 @@ describe('staging migration database admission', () => {
 });
 
 describe('staging migration execution', () => {
+  it('keeps deploy migration authority current through the complete Admin schema', () => {
+    expect(STAGING_MIGRATION_VERSIONS).toEqual([
+      '0001_control_plane',
+      '0002_real_identity',
+      '0003_runtime_authorities',
+      '0004_admin_invitations',
+      '0005_admin_governance',
+      '0006_admin_operations',
+    ]);
+  });
+
   it('migrates, inspects, returns bounded metadata, and closes the database', async () => {
     const close = vi.fn(() => Promise.resolve());
     const database = { close } as unknown as ControlPlaneDatabase;
