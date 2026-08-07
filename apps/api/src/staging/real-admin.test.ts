@@ -1,4 +1,5 @@
 import type { IdentityActor } from '@liiiraa/control-plane-adapters';
+import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -226,45 +227,60 @@ describe('real staging administrative authority', () => {
     const database = {
       query: vi.fn((statement: string) =>
         Promise.resolve(
-          statement.includes('FROM premium_entitlements pe')
+          statement.includes('WHERE id = $1::uuid')
             ? {
                 rowCount: 1,
                 rows: [
                   {
-                    amount_minor: '9990',
-                    currency: 'BRL',
-                    id: '00000000-0000-4000-8000-000000000070',
-                    invoice_currency: 'BRL',
-                    pending_provider_events: true,
-                    provider: 'stripe',
-                    source: 'subscription',
-                    status: 'active',
-                    subscription_status: 'active',
-                    updated_at: '2030-01-15T12:00:00.000Z',
-                    version: '7',
+                    access_reason: 'Review the consented diagnostic package.',
+                    expires_at: '2030-01-15T12:15:00.000Z',
+                    granted_at: '2030-01-15T12:00:00.000Z',
+                    id: '00000000-0000-4000-8000-000000000072',
+                    identity_id: '00000000-0000-4000-8000-000000000073',
+                    revoked_at: null,
+                    version: '3',
                   },
                 ],
               }
-            : {
-                rowCount: 1,
-                rows: [
-                  {
-                    assigned_role: 'support',
-                    consent_expires_at: '2030-01-15T12:15:00.000Z',
-                    consent_id: '00000000-0000-4000-8000-000000000072',
-                    consent_revoked_at: null,
-                    consent_scope: 'case-session',
-                    consent_version: '3',
-                    created_at: '2030-01-15T11:30:00.000Z',
-                    id: '00000000-0000-4000-8000-000000000071',
-                    priority: 'urgent',
-                    status: 'awaiting-support',
-                    subject: 'raw customer subject must never leave postgres',
-                    updated_at: '2030-01-15T12:00:00.000Z',
-                    version: '5',
-                  },
-                ],
-              },
+            : statement.includes('FROM premium_entitlements pe')
+              ? {
+                  rowCount: 1,
+                  rows: [
+                    {
+                      amount_minor: '9990',
+                      currency: 'BRL',
+                      id: '00000000-0000-4000-8000-000000000070',
+                      invoice_currency: 'BRL',
+                      pending_provider_events: true,
+                      provider: 'stripe',
+                      source: 'subscription',
+                      status: 'active',
+                      subscription_status: 'active',
+                      updated_at: '2030-01-15T12:00:00.000Z',
+                      version: '7',
+                    },
+                  ],
+                }
+              : {
+                  rowCount: 1,
+                  rows: [
+                    {
+                      assigned_role: 'support',
+                      consent_expires_at: '2030-01-15T12:15:00.000Z',
+                      consent_id: '00000000-0000-4000-8000-000000000072',
+                      consent_revoked_at: null,
+                      consent_scope: 'case-session',
+                      consent_version: '3',
+                      created_at: '2030-01-15T11:30:00.000Z',
+                      id: '00000000-0000-4000-8000-000000000071',
+                      priority: 'urgent',
+                      status: 'awaiting-support',
+                      subject: 'raw customer subject must never leave postgres',
+                      updated_at: '2030-01-15T12:00:00.000Z',
+                      version: '5',
+                    },
+                  ],
+                },
         ),
       ),
     };
@@ -277,7 +293,7 @@ describe('real staging administrative authority', () => {
     await expect(dependencies.listProjection('entitlement')).resolves.toEqual([
       expect.objectContaining({
         amountMinor: '9990',
-        providerState: 'available',
+        providerState: 'unknown',
         reconciliationState: 'pending',
         subscriptionState: 'paid',
         version: '7',
@@ -293,6 +309,22 @@ describe('real staging administrative authority', () => {
     ]);
     expect(support[0]?.['consent']).toMatchObject({ state: 'active', version: '3' });
     expect(JSON.stringify(support)).not.toContain('raw customer subject');
+    const diagnostic = await dependencies.loadProjection(
+      'diagnostic-metadata',
+      '00000000-0000-4000-8000-000000000072',
+    );
+    expect(diagnostic).toMatchObject({
+      auditEvents: [],
+      consent: {
+        aggregateVersion: '3',
+        consentId: '00000000-0000-4000-8000-000000000072',
+        kind: 'diagnostic-consent',
+        provenance: 'postgres-authority',
+        state: 'active',
+      },
+      fields: {},
+    });
+    expect(controlPlaneDocumentValidator(diagnostic?.['consent'])).toBe(true);
   });
 
   it('hides collections from tester sessions and every non-admin origin without touching records', async () => {

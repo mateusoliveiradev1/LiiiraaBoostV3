@@ -125,6 +125,7 @@ export type AdminInvitationDetailResult =
 export type AdminMutationResult =
   | Readonly<{ document: AdminAuthorityDocument; status: 'complete' | 'partial' }>
   | Readonly<{ preflight: AdminInvitationPreflightAuthority; status: 'complete' }>
+  | Readonly<{ receipt: AdminSensitiveExportReceipt; status: 'complete' }>
   | Readonly<{
       code: 'conflict';
       document?: AdminAuthorityDocument;
@@ -134,6 +135,19 @@ export type AdminMutationResult =
       code: 'degraded' | 'invalid-authority' | 'rate-limit' | 'unauthorized' | 'unavailable';
       status: 'denied' | 'error';
     }>;
+
+export type AdminSensitiveExportReceipt = Readonly<{
+  auditReference: string;
+  createdAt: string;
+  encrypted: true;
+  environment: AdminEnvironmentKindJson;
+  expiresAt: string;
+  exportId: string;
+  fields: readonly string[];
+  masked: true;
+  outcome: 'export-started';
+  purpose: string;
+}>;
 
 export type AdminFreshnessInvalidation = Readonly<{
   cursor: string;
@@ -541,6 +555,52 @@ const admitInvitationPreflight = (value: unknown): AdminInvitationPreflightAutho
   });
 };
 
+const admitSensitiveExportReceipt = (value: unknown): AdminSensitiveExportReceipt | null => {
+  if (
+    !isRecord(value) ||
+    value['ok'] !== true ||
+    value['outcome'] !== 'export-started' ||
+    !boundedToken(value['auditReference']) ||
+    !isRecord(value['export'])
+  ) {
+    return null;
+  }
+  const record = value['export'];
+  const fields = record['fields'];
+  if (
+    !boundedToken(record['exportId']) ||
+    typeof record['purpose'] !== 'string' ||
+    record['purpose'].trim().length < 8 ||
+    record['purpose'].length > 256 ||
+    !Array.isArray(fields) ||
+    fields.length < 1 ||
+    fields.length > 32 ||
+    !fields.every(boundedToken) ||
+    new Set(fields).size !== fields.length ||
+    record['encrypted'] !== true ||
+    record['masked'] !== true ||
+    !['development', 'staging', 'production'].includes(String(record['environment'])) ||
+    typeof record['expiresAt'] !== 'string' ||
+    Number.isNaN(Date.parse(record['expiresAt'])) ||
+    typeof record['createdAt'] !== 'string' ||
+    Number.isNaN(Date.parse(record['createdAt']))
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    auditReference: value['auditReference'],
+    createdAt: record['createdAt'],
+    encrypted: true,
+    environment: record['environment'] as AdminEnvironmentKindJson,
+    expiresAt: record['expiresAt'],
+    exportId: record['exportId'],
+    fields: Object.freeze([...fields]),
+    masked: true,
+    outcome: 'export-started',
+    purpose: record['purpose'].trim(),
+  });
+};
+
 const INVITATION_TIMELINE_KINDS = new Set([
   'created',
   'queued',
@@ -793,7 +853,9 @@ export const createAdminAuthority = ({
     input: AdminMutationInput,
     correlation: string,
   ): Promise<Readonly<Record<string, unknown>> | null> => {
-    if (!GOVERNANCE_MUTATIONS.has(input.family)) return input.payload;
+    if (!GOVERNANCE_MUTATIONS.has(input.family) && input.family !== 'export-data') {
+      return input.payload;
+    }
     const session = activeSession ?? (await readSession());
     if (session === null) return null;
     const candidates = [
@@ -809,6 +871,26 @@ export const createAdminAuthority = ({
     if (target === undefined) return null;
     const expectedVersion = input.expectedVersion ?? '1';
     const expectedEtag = input.expectedEtag ?? `admin-${target}-v${expectedVersion}`;
+    if (input.family === 'export-data') {
+      return Object.freeze({
+        ...input.payload,
+        command: {
+          schemaVersion: '1.0',
+          kind: 'admin-operation-command',
+          commandId: input.idempotencyKey || commandId(),
+          actorId: session.actorId,
+          activeFunction: session.role,
+          action: 'export-sensitive-data',
+          targetReferences: [target],
+          reason: input.reason?.trim() ?? '',
+          expectedVersion,
+          expectedEtag,
+          approvalReferences: input.approvalReferences ?? [],
+          correlationId: correlation,
+          requestedAt: clock(),
+        },
+      });
+    }
     const action =
       input.family === 'request-approval' ||
       input.family === 'approve-request' ||
@@ -990,6 +1072,12 @@ export const createAdminAuthority = ({
           return preflight === null
             ? { code: 'invalid-authority', status: 'error' }
             : { preflight, status: 'complete' };
+        }
+        if (input.family === 'export-data' && response.ok) {
+          const receipt = admitSensitiveExportReceipt(body);
+          return receipt === null
+            ? { code: 'invalid-authority', status: 'error' }
+            : { receipt, status: 'complete' };
         }
         const document = extractAdminDocument(body);
         if ((!response.ok && response.status !== 207) || document === null) {

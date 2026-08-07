@@ -294,6 +294,92 @@ describe('complete typed Admin mutation authority', () => {
     });
   });
 
+  it('builds and admits a consent-bounded sensitive export receipt', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'administrator-0001',
+          role: 'support',
+          expiresAt: '2030-08-06T20:00:00.000Z',
+        }),
+      )
+      .mockResolvedValueOnce(
+        response(
+          {
+            ok: true,
+            outcome: 'export-started',
+            auditReference: 'audit-export-0001',
+            export: {
+              exportId: 'export-0001',
+              actorId: 'administrator-0001',
+              purpose: 'Investigate the consented support escalation.',
+              fields: ['case-reference', 'event-time'],
+              encrypted: true,
+              masked: true,
+              environment: 'staging',
+              expiresAt: '2030-08-06T19:15:00.000Z',
+              createdAt: '2030-08-06T19:00:00.000Z',
+            },
+          },
+          202,
+        ),
+      );
+    const authority = createAuthority(transport);
+
+    await expect(
+      authority.mutate({
+        approvalReferences: ['approval-export-0001'],
+        expectedEtag: 'admin-support-case-0001-v5',
+        expectedVersion: '5',
+        family: 'export-data',
+        idempotencyKey: 'export-command-0001',
+        payload: {
+          approved: true,
+          encrypted: true,
+          expiresAt: '2030-08-06T19:15:00.000Z',
+          fields: ['case-reference', 'event-time'],
+          masked: true,
+          minimumFields: ['case-reference', 'event-time'],
+          previewed: true,
+          purpose: 'Investigate the consented support escalation.',
+          targetEnvironment: 'staging',
+        },
+        reason: 'Investigate the consented support escalation.',
+        stepUp: 'context-export-0001',
+        targetId: 'support-case-0001',
+      }),
+    ).resolves.toEqual({
+      receipt: {
+        auditReference: 'audit-export-0001',
+        createdAt: '2030-08-06T19:00:00.000Z',
+        encrypted: true,
+        environment: 'staging',
+        expiresAt: '2030-08-06T19:15:00.000Z',
+        exportId: 'export-0001',
+        fields: ['case-reference', 'event-time'],
+        masked: true,
+        outcome: 'export-started',
+        purpose: 'Investigate the consented support escalation.',
+      },
+      status: 'complete',
+    });
+
+    const [, init] = transport.mock.calls[1] ?? [];
+    const body = init?.body;
+    expect(typeof body).toBe('string');
+    if (typeof body !== 'string') throw new Error('EXPECTED_SERIALIZED_EXPORT_COMMAND');
+    expect(JSON.parse(body)).toMatchObject({
+      command: {
+        action: 'export-sensitive-data',
+        actorId: 'administrator-0001',
+        activeFunction: 'support',
+        kind: 'admin-operation-command',
+        targetReferences: ['support-case-0001'],
+      },
+    });
+  });
+
   it('preserves partial, conflict, rate-limit, degraded, and denied outcomes', async () => {
     const transport = vi
       .fn<AdminAuthorityTransport>()

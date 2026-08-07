@@ -314,7 +314,7 @@ const projectionStatement = (resource: AdminProjectionResource): string => {
         LEFT JOIN LATERAL (
           SELECT status, amount_total_minor, currency
           FROM invoices
-          WHERE subscription_id = s.id
+          WHERE subscription_id = s.id AND status = 'paid'
           ORDER BY provider_created_at DESC
           LIMIT 1
         ) invoice ON TRUE
@@ -391,13 +391,14 @@ const projectionRecord = (
   const summary = projectionSummary(resource, row).slice(0, 256);
   if (resource === 'entitlement') {
     const subscription = text(row['subscription_status']);
-    const subscriptionState = ['active', 'trialing', 'grace'].includes(subscription)
-      ? 'paid'
-      : subscription === 'past-due'
-        ? 'past-due'
-        : ['canceled', 'expired'].includes(subscription)
-          ? 'canceled'
-          : 'unknown';
+    const subscriptionState =
+      subscription === 'active'
+        ? 'paid'
+        : ['past-due', 'grace'].includes(subscription)
+          ? 'past-due'
+          : ['canceled', 'expired'].includes(subscription)
+            ? 'canceled'
+            : 'unknown';
     const amountMinor = text(row['amount_minor']);
     const currency = text(row['invoice_currency']) || text(row['currency']);
     return Object.freeze({
@@ -406,8 +407,13 @@ const projectionRecord = (
       cancelAtPeriodEnd: row['cancel_at_period_end'] === true,
       currentPeriodEndsAt: text(row['current_period_end']),
       observedAt: text(row['updated_at']) || now,
-      providerState: text(row['provider']).length > 0 ? 'available' : 'unknown',
-      reconciliationState: row['pending_provider_events'] === true ? 'pending' : 'reconciled',
+      providerState: 'unknown',
+      reconciliationState:
+        text(row['provider']).length === 0
+          ? 'unknown'
+          : row['pending_provider_events'] === true
+            ? 'pending'
+            : 'reconciled',
       source: text(row['source']),
       subscriptionState,
       summary,
@@ -458,6 +464,71 @@ const projectionRecord = (
     });
   }
   return Object.freeze({ id, ...(summary.length === 0 ? {} : { summary }) });
+};
+
+const loadDiagnosticProjection = async (
+  database: StagingAdminDatabase,
+  id: string,
+  now: string,
+): Promise<Readonly<Record<string, unknown>> | null> => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(id)) {
+    return null;
+  }
+  const result = await database.query(
+    `SELECT id::text AS id, case_id::text AS case_id, identity_id::text AS identity_id,
+        access_reason, granted_at, expires_at, revoked_at, version::text AS version
+      FROM diagnostic_consents
+      WHERE id = $1::uuid
+      LIMIT 1`,
+    [id],
+  );
+  const row = result.rows[0];
+  if (row === undefined) return null;
+  const consentId = admittedId(row['id']);
+  const accountId = admittedId(row['identity_id']);
+  const purpose = text(row['access_reason']).slice(0, 256);
+  const grantedAt = text(row['granted_at']);
+  const expiresAt = text(row['expires_at']);
+  const aggregateVersion = text(row['version']);
+  if (
+    consentId === null ||
+    accountId === null ||
+    purpose.length === 0 ||
+    !/^(?:0|[1-9][0-9]{0,19})$/u.test(aggregateVersion) ||
+    Number.isNaN(Date.parse(grantedAt)) ||
+    Number.isNaN(Date.parse(expiresAt))
+  ) {
+    return null;
+  }
+  const state =
+    row['revoked_at'] !== null && row['revoked_at'] !== undefined
+      ? 'revoked'
+      : Date.parse(expiresAt) <= Date.parse(now)
+        ? 'expired'
+        : 'active';
+  return Object.freeze({
+    auditEvents: Object.freeze([]),
+    consent: Object.freeze({
+      schemaVersion: '1.0',
+      aggregateVersion,
+      etag: `diagnostic-consent-${consentId}-v${aggregateVersion}`,
+      correlationId: `admin-diagnostic-${consentId}`,
+      provenance: 'postgres-authority',
+      kind: 'diagnostic-consent',
+      consentId,
+      accountId,
+      state,
+      scopes: Object.freeze(['support-diagnostics']),
+      purpose,
+      grantedAt,
+      expiresAt,
+      ...(row['revoked_at'] === null || row['revoked_at'] === undefined
+        ? {}
+        : { revokedAt: text(row['revoked_at']) }),
+    }),
+    fields: Object.freeze({}),
+    id: consentId,
+  });
 };
 
 const requireAdminTransaction = <T>(
@@ -708,7 +779,9 @@ export const createPersistentStagingAdminDependencies = ({
     commands: persistentCommandAuthority(database, clock),
     listProjection,
     loadProjection: async (resource: AdminProjectionResource, id: string) =>
-      (await listProjection(resource)).find((record) => record['id'] === id) ?? null,
+      resource === 'diagnostic-metadata'
+        ? loadDiagnosticProjection(database, id, clock.now().toISOString())
+        : ((await listProjection(resource)).find((record) => record['id'] === id) ?? null),
     resolveAdminSession: async (
       request: Parameters<AdminRouteDependencies['resolveAdminSession']>[0],
     ) => {
