@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type {
   AdminApprovalRequest,
+  AdminGovernanceCommandResult,
   AdminGovernanceDependencies,
   AdminGovernanceTransaction,
   AdminPermissionAssignment,
@@ -13,6 +14,8 @@ import {
   expireAdminDelegation,
   offboardAdminIdentity,
   previewAdminPermissionChange,
+  reassignAdminApproval,
+  requestAdminApproval,
   revealAdminAuditValue,
   simulateAdminFunction,
 } from './manage-admin-access.js';
@@ -40,65 +43,94 @@ const stepUp = (actorId: string, action: string, resource: string, target: strin
 });
 
 const harness = () => {
-  const memberships = new Map<string, Awaited<ReturnType<AdminGovernanceTransaction['loadMembership']>>>();
+  const memberships = new Map<
+    string,
+    Awaited<ReturnType<AdminGovernanceTransaction['loadMembership']>>
+  >();
   const approvals = new Map<string, AdminApprovalRequest>();
-  const delegations = new Map<string, Awaited<ReturnType<AdminGovernanceTransaction['loadDelegation']>>>();
-  const commands = new Map<string, unknown>();
+  const delegations = new Map<
+    string,
+    Awaited<ReturnType<AdminGovernanceTransaction['loadDelegation']>>
+  >();
+  const sessions = new Map<
+    string,
+    Awaited<ReturnType<AdminGovernanceTransaction['loadSession']>>
+  >();
+  const commands = new Map<string, AdminGovernanceCommandResult>();
   const committedEffects: string[] = [];
-  const authorize = vi.fn(async () => true);
-  const verify = vi.fn(async () => true);
+  const authorize = vi.fn(() => Promise.resolve(true));
+  const verify = vi.fn(() => Promise.resolve(true));
   let failReassignment = false;
   let id = 0;
   let transactionCount = 0;
 
   const repository: AdminGovernanceDependencies['repository'] = {
-    loadMembership: async (identityId) => memberships.get(identityId) ?? null,
+    loadMembership: (identityId) => Promise.resolve(memberships.get(identityId) ?? null),
     transaction: async (_subjectId, operation) => {
       transactionCount += 1;
-      const pending: Array<() => void> = [];
+      const pending: (() => void)[] = [];
       const transaction: AdminGovernanceTransaction = {
-        findCommandResult: async (commandId) => commands.get(commandId) ?? null,
-        rememberCommandResult: async (commandId, result) => {
+        findCommandResult: (commandId) => Promise.resolve(commands.get(commandId) ?? null),
+        rememberCommandResult: (commandId, result) => {
           pending.push(() => commands.set(commandId, result));
+          return Promise.resolve();
         },
-        loadMembership: async (identityId) => memberships.get(identityId) ?? null,
-        saveMembership: async (membership) => {
+        loadMembership: (identityId) => Promise.resolve(memberships.get(identityId) ?? null),
+        saveMembership: (membership) => {
           pending.push(() => memberships.set(membership.identityId, membership));
+          return Promise.resolve();
         },
-        loadDelegation: async (delegationId) => delegations.get(delegationId) ?? null,
-        saveDelegation: async (delegation) => {
+        loadSession: (sessionId) => Promise.resolve(sessions.get(sessionId) ?? null),
+        saveSession: (session) => {
+          pending.push(() => sessions.set(session.sessionId, session));
+          return Promise.resolve();
+        },
+        loadDelegation: (delegationId) => Promise.resolve(delegations.get(delegationId) ?? null),
+        saveDelegation: (delegation) => {
           pending.push(() => delegations.set(delegation.delegationId, delegation));
+          return Promise.resolve();
         },
-        loadApproval: async (requestId) => approvals.get(requestId) ?? null,
-        saveApproval: async (approval) => {
+        loadApproval: (requestId) => Promise.resolve(approvals.get(requestId) ?? null),
+        saveApproval: (approval) => {
           pending.push(() => approvals.set(approval.requestId, approval));
+          return Promise.resolve();
         },
-        saveImpact: async () => {
+        saveImpact: () => {
           pending.push(() => committedEffects.push('impact'));
+          return Promise.resolve();
         },
-        revokeSessions: async () => {
+        saveAccessReview: () => {
+          pending.push(() => committedEffects.push('review'));
+          return Promise.resolve();
+        },
+        revokeSessions: () => {
           pending.push(() => committedEffects.push('sessions'));
+          return Promise.resolve();
         },
-        revokeDelegations: async () => {
+        revokeDelegations: () => {
           pending.push(() => committedEffects.push('delegations'));
+          return Promise.resolve();
         },
-        removeFutureApprovals: async () => {
+        removeFutureApprovals: () => {
           pending.push(() => committedEffects.push('approvals'));
+          return Promise.resolve();
         },
-        reassignPendingWork: async () => {
+        reassignPendingWork: () => {
           if (failReassignment) throw new Error('reassignment unavailable');
           pending.push(() => committedEffects.push('work'));
-          return ['work-1'];
+          return Promise.resolve(['work-1']);
         },
-        appendAudit: async () => {
+        appendAudit: () => {
           pending.push(() => committedEffects.push('audit'));
-          return `audit-${id + 1}`;
+          return Promise.resolve(`audit-${String(id + 1)}`);
         },
-        enqueueOutbox: async () => {
+        enqueueOutbox: () => {
           pending.push(() => committedEffects.push('outbox'));
+          return Promise.resolve();
         },
-        saveReceipt: async () => {
+        saveReceipt: () => {
           pending.push(() => committedEffects.push('receipt'));
+          return Promise.resolve();
         },
       };
       const result = await operation(transaction);
@@ -111,7 +143,7 @@ const harness = () => {
     stepUp: { verify },
     repository,
     clock: { now: () => new Date(now) },
-    ids: { next: () => `id-${++id}` },
+    ids: { next: () => `id-${String(++id)}` },
   };
   return {
     dependencies,
@@ -214,6 +246,24 @@ describe('transactional admin access governance', () => {
         lostCapabilities: ['support:view', 'support:reply'],
       },
     });
+    if (!preview.ok) throw new Error('permission impact preview unexpectedly failed');
+    expect(test.memberships.get('member-1')?.permissions).toEqual(supportAssignment);
+
+    await expect(
+      applyAdminPermissionChange(test.dependencies, {
+        actorId: 'owner',
+        commandId: 'permission-mismatched-step-up',
+        identityId: 'member-1',
+        expectedVersion: 1n,
+        proposed,
+        impact: preview.impact,
+        risk: 'sensitive',
+        reason: 'Move device work to operations',
+        confirmed: true,
+        authorizationContextId: 'different-context',
+        stepUp: stepUp('owner', 'admin.permission.change', 'membership', 'membership:member-1'),
+      }),
+    ).resolves.toEqual({ ok: false, code: 'STEP_UP_INVALID' });
     expect(test.memberships.get('member-1')?.permissions).toEqual(supportAssignment);
 
     await expect(
@@ -223,11 +273,12 @@ describe('transactional admin access governance', () => {
         identityId: 'member-1',
         expectedVersion: 1n,
         proposed,
-        impact: preview.ok ? preview.impact : undefined,
+        impact: preview.impact,
         risk: 'sensitive',
         reason: 'Move device work to operations',
         confirmed: true,
-        stepUp: stepUp('owner', 'admin.permission.change', 'membership', 'member:1'),
+        authorizationContextId: 'context-admin.permission.change',
+        stepUp: stepUp('owner', 'admin.permission.change', 'membership', 'membership:member-1'),
       }),
     ).resolves.toMatchObject({ ok: true, outcome: 'permissions-changed' });
     expect(test.memberships.get('member-1')).toMatchObject({
@@ -259,13 +310,14 @@ describe('transactional admin access governance', () => {
       capability: 'session:revoke',
       scopes: ['sessions'],
       reason: 'Independent critical review',
+      authorizationContextId: 'context-admin.approval.approve',
     } as const;
 
     await expect(
       approveAdminAccessRequest(test.dependencies, {
         ...base,
         actorId: 'author',
-        stepUp: stepUp('author', 'admin.approval.approve', 'approval', 'approval:1'),
+        stepUp: stepUp('author', 'admin.approval.approve', 'approval', 'approval:approval-1'),
       }),
     ).resolves.toMatchObject({ ok: false, code: 'INDEPENDENT_APPROVER_REQUIRED' });
     await expect(
@@ -273,7 +325,7 @@ describe('transactional admin access governance', () => {
         ...base,
         actorId: 'approver',
         scopes: ['devices'],
-        stepUp: stepUp('approver', 'admin.approval.approve', 'approval', 'approval:1'),
+        stepUp: stepUp('approver', 'admin.approval.approve', 'approval', 'approval:approval-1'),
       }),
     ).resolves.toMatchObject({ ok: false, code: 'APPROVAL_SCOPE_MISMATCH' });
 
@@ -281,12 +333,78 @@ describe('transactional admin access governance', () => {
       approveAdminAccessRequest(test.dependencies, {
         ...base,
         actorId: 'approver',
-        stepUp: stepUp('approver', 'admin.approval.approve', 'approval', 'approval:1'),
+        stepUp: stepUp('approver', 'admin.approval.approve', 'approval', 'approval:approval-1'),
       }),
     ).resolves.toMatchObject({ ok: true, outcome: 'approval-recorded' });
     expect(test.approvals.get('approval-1')).toMatchObject({
       status: 'approved',
       approverId: 'approver',
+      version: 2n,
+    });
+  });
+
+  it('bounds approval requests to fifteen minutes and reassigns only to an independent actor', async () => {
+    const test = harness();
+    await expect(
+      requestAdminApproval(test.dependencies, {
+        actorId: 'author',
+        commandId: 'request-too-long',
+        requestId: 'approval-too-long',
+        beneficiaryId: 'beneficiary',
+        capability: 'session:revoke',
+        scope: 'sessions',
+        risk: 'critical',
+        expiresAt: '2030-01-01T00:15:00.001Z',
+      }),
+    ).resolves.toEqual({ ok: false, code: 'APPROVAL_WINDOW_INVALID' });
+
+    await expect(
+      requestAdminApproval(test.dependencies, {
+        actorId: 'author',
+        commandId: 'request-1',
+        requestId: 'approval-2',
+        beneficiaryId: 'beneficiary',
+        capability: 'session:revoke',
+        scope: 'sessions',
+        risk: 'critical',
+        expiresAt: fifteenMinutesLater,
+      }),
+    ).resolves.toMatchObject({ ok: true, outcome: 'approval-requested' });
+
+    await expect(
+      reassignAdminApproval(test.dependencies, {
+        actorId: 'security-lead',
+        commandId: 'reassign-self',
+        requestId: 'approval-2',
+        newApproverId: 'beneficiary',
+        reason: 'Move review coverage',
+        authorizationContextId: 'context-admin.approval.reassign',
+        stepUp: stepUp(
+          'security-lead',
+          'admin.approval.reassign',
+          'approval',
+          'approval:approval-2',
+        ),
+      }),
+    ).resolves.toMatchObject({ ok: false, code: 'INDEPENDENT_APPROVER_REQUIRED' });
+    await expect(
+      reassignAdminApproval(test.dependencies, {
+        actorId: 'security-lead',
+        commandId: 'reassign-1',
+        requestId: 'approval-2',
+        newApproverId: 'independent-approver',
+        reason: 'Move review coverage',
+        authorizationContextId: 'context-admin.approval.reassign',
+        stepUp: stepUp(
+          'security-lead',
+          'admin.approval.reassign',
+          'approval',
+          'approval:approval-2',
+        ),
+      }),
+    ).resolves.toMatchObject({ ok: true, outcome: 'approval-reassigned' });
+    expect(test.approvals.get('approval-2')).toMatchObject({
+      assignedApproverId: 'independent-approver',
       version: 2n,
     });
   });
@@ -310,7 +428,8 @@ describe('transactional admin access governance', () => {
       expectedVersion: 1n,
       reason: 'Compromised administrator credential',
       compromise: true,
-      stepUp: stepUp('owner', 'admin.membership.offboard', 'membership', 'member:1'),
+      authorizationContextId: 'context-admin.membership.offboard',
+      stepUp: stepUp('owner', 'admin.membership.offboard', 'membership', 'membership:member-1'),
     } as const;
     test.failReassignment();
 
@@ -322,15 +441,28 @@ describe('transactional admin access governance', () => {
     expect(test.committedEffects).toEqual([]);
 
     const success = harness();
-    success.memberships.set('member-1', test.memberships.get('member-1')!);
+    const activeMembership = test.memberships.get('member-1');
+    if (activeMembership === undefined) throw new Error('active membership fixture missing');
+    success.memberships.set('member-1', activeMembership);
     await expect(offboardAdminIdentity(success.dependencies, input)).resolves.toMatchObject({
       ok: true,
       outcome: 'identity-offboarded',
       reassignedWorkIds: ['work-1'],
     });
-    expect(success.memberships.get('member-1')).toMatchObject({ status: 'offboarded', version: 2n });
+    expect(success.memberships.get('member-1')).toMatchObject({
+      status: 'offboarded',
+      version: 2n,
+    });
     expect(success.committedEffects).toEqual(
-      expect.arrayContaining(['sessions', 'delegations', 'approvals', 'work', 'audit', 'outbox', 'receipt']),
+      expect.arrayContaining([
+        'sessions',
+        'delegations',
+        'approvals',
+        'work',
+        'audit',
+        'outbox',
+        'receipt',
+      ]),
     );
   });
 
@@ -406,6 +538,7 @@ describe('transactional admin access governance', () => {
         reason: 'Investigate immutable chain discrepancy',
         activeFunction: 'audit',
         capabilities: ['audit:reveal-sensitive'],
+        authorizationContextId: 'context-admin.audit.reveal',
         stepUp: stepUp('auditor', 'admin.audit.reveal', 'audit-event', 'audit:1'),
       }),
     ).resolves.toMatchObject({ ok: true, outcome: 'audit-revealed', value: 'sensitive-value' });
