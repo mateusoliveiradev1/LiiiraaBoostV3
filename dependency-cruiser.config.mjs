@@ -7,7 +7,7 @@ import {
 export default {
   forbidden: createDependencyCruiserRestrictions(canonicalPolicy),
   options: {
-    exclude: '(^|/)(?:node_modules|dist)(?:/|$)',
+    exclude: '(^|/)(?:node_modules|dist|\\.next|storybook-static|coverage|\\.turbo)(?:/|$)',
     includeOnly: createWorkspaceRootPattern(process.cwd()),
     tsConfig: {
       fileName: 'tsconfig.base.json',

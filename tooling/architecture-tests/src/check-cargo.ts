@@ -46,9 +46,12 @@ type ExecFileSync = (
   options: {
     cwd: string;
     encoding: 'utf8';
+    maxBuffer: number;
     windowsHide: true;
   },
 ) => unknown;
+
+const ARCHITECTURE_COMMAND_MAX_BUFFER_BYTES = 32 * 1024 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -64,6 +67,7 @@ export const execFileUtf8 = (file: string, arguments_: string[]): string => {
   const output = childProcess.execFileSync(file, arguments_, {
     cwd: process.cwd(),
     encoding: 'utf8',
+    maxBuffer: ARCHITECTURE_COMMAND_MAX_BUFFER_BYTES,
     windowsHide: true,
   });
   if (typeof output !== 'string') {

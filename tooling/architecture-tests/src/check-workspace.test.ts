@@ -123,6 +123,7 @@ const phase3WebModules = [
     packageName: '@liiiraa/web-evidence',
     workspaceDependencies: [
       '@liiiraa/contracts-ts',
+      '@liiiraa/control-plane-adapters',
       '@liiiraa/web-core',
       '@liiiraa/web-features',
       '@liiiraa/web-preview',

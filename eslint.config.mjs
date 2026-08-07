@@ -40,6 +40,7 @@ export default defineConfig([
       '**/dist/**',
       '**/generated/**',
       '**/node_modules/**',
+      '**/storybook-static/**',
       '.planning/**',
     ],
   },
