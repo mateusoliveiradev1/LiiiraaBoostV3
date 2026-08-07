@@ -1,4 +1,10 @@
-import { matchWebRoute, WEB_LOCALES, type WebLocale } from '@liiiraa/web-core';
+import {
+  ADMIN_CANONICAL_ROUTE_IDS,
+  matchWebRoute,
+  WEB_LOCALES,
+  type WebLocale,
+  type WebRouteId,
+} from '@liiiraa/web-core';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { hasLocale } from 'next-intl';
@@ -18,6 +24,8 @@ import {
   type AdminPreviewRoute,
 } from '../../../admin-preview-model';
 import { AdminAuthorityPage } from '../../../features/admin-authority';
+import { AdminWorkspaceRegistry } from '../../../features/admin-workspace-registry';
+import type { AdminCanonicalRouteId } from '../../../features/admin-workspace-registry-model';
 import { resolveAdminServerRuntimeConfig } from '../../../admin-runtime-server';
 
 type AdminWorkspacePageProps = Readonly<{
@@ -38,8 +46,12 @@ type AdminWorkspaceResolution =
     }>
   | Readonly<{
       kind: 'workflow';
-      routeId: AdminPreviewRoute;
+      routeId: AdminCanonicalRouteId | AdminPreviewRoute;
     }>;
+
+const canonicalAdminRoutes = new Set<WebRouteId>(ADMIN_CANONICAL_ROUTE_IDS);
+const isCanonicalAdminRoute = (routeId: WebRouteId): routeId is AdminCanonicalRouteId =>
+  canonicalAdminRoutes.has(routeId);
 
 const resolveAdminWorkspace = (
   locale: WebLocale,
@@ -57,7 +69,51 @@ const resolveAdminWorkspace = (
     if (failureKind === undefined) return null;
     return Object.freeze({ failureKind, kind: 'error', routeId });
   }
-  return isAdminPreviewRoute(routeId) ? Object.freeze({ kind: 'workflow', routeId }) : null;
+  return isAdminPreviewRoute(routeId) || isCanonicalAdminRoute(routeId)
+    ? Object.freeze({ kind: 'workflow', routeId })
+    : null;
+};
+
+const canonicalWorkspaceMetadata = (locale: WebLocale, routeId: AdminCanonicalRouteId) => {
+  const domain =
+    routeId === 'admin-overview'
+      ? locale === 'pt-BR'
+        ? 'Visão geral'
+        : 'Overview'
+      : routeId.startsWith('admin-people')
+        ? locale === 'pt-BR'
+          ? 'Pessoas'
+          : 'People'
+        : routeId.startsWith('admin-revenue')
+          ? locale === 'pt-BR'
+            ? 'Receita'
+            : 'Revenue'
+          : routeId.startsWith('admin-operation')
+            ? locale === 'pt-BR'
+              ? 'Operação'
+              : 'Operation'
+            : routeId.startsWith('admin-support')
+              ? locale === 'pt-BR'
+                ? 'Atendimento'
+                : 'Support'
+              : routeId.startsWith('admin-security')
+                ? locale === 'pt-BR'
+                  ? 'Segurança'
+                  : 'Security'
+                : routeId.startsWith('admin-system')
+                  ? locale === 'pt-BR'
+                    ? 'Sistema'
+                    : 'System'
+                  : locale === 'pt-BR'
+                    ? 'Fila administrativa'
+                    : 'Administrative queue';
+  return {
+    summary:
+      locale === 'pt-BR'
+        ? 'Área administrativa isolada, autorizada pelo servidor e auditável.'
+        : 'Isolated, server-authorized, and auditable administrative workspace.',
+    title: domain,
+  };
 };
 
 export async function generateMetadata({ params }: AdminWorkspacePageProps): Promise<Metadata> {
@@ -71,7 +127,9 @@ export async function generateMetadata({ params }: AdminWorkspacePageProps): Pro
           const copy = createAdminFailureModel(resolution.failureKind, locale).copy;
           return { summary: copy.detail, title: copy.title };
         })()
-      : getAdminPreviewMetadata(locale, resolution.routeId);
+      : isCanonicalAdminRoute(resolution.routeId)
+        ? canonicalWorkspaceMetadata(locale, resolution.routeId)
+        : getAdminPreviewMetadata(locale, resolution.routeId);
   return {
     description: metadata.summary,
     robots: { follow: false, index: false, nocache: true },
@@ -107,7 +165,10 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
   const requestHeaders = await headers();
   const role = adminRoleFromHeader(requestHeaders.get('x-liiiraa-admin-role'));
   const runtime = resolveAdminServerRuntimeConfig();
-  if (runtime.kind === 'preview' && !adminRoleCanAccess(role, resolution.routeId)) {
+  if (
+    runtime.kind === 'preview' &&
+    (!isAdminPreviewRoute(resolution.routeId) || !adminRoleCanAccess(role, resolution.routeId))
+  ) {
     const model = createAdminFailureModel('403', locale);
     const roleHref =
       role === 'support' ? model.destinations.role : `${model.destinations.role}?role=${role}`;
@@ -127,8 +188,13 @@ export default async function AdminWorkspacePage({ params }: AdminWorkspacePageP
 
   if (runtime.kind === 'preview') {
     const { AdminPreviewPage } = await import('../../../features/admin-preview');
+    if (!isAdminPreviewRoute(resolution.routeId)) notFound();
     return <AdminPreviewPage locale={locale} role={role} routeId={resolution.routeId} />;
   }
 
-  return <AdminAuthorityPage locale={locale} routeId={resolution.routeId} />;
+  return isCanonicalAdminRoute(resolution.routeId) ? (
+    <AdminWorkspaceRegistry locale={locale} routeId={resolution.routeId} />
+  ) : (
+    <AdminAuthorityPage locale={locale} routeId={resolution.routeId} />
+  );
 }
