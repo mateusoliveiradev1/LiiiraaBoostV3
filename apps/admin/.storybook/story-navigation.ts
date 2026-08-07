@@ -1,6 +1,5 @@
 export interface AdminStoryNavigation {
   readonly href: string;
-  readonly locale: 'en' | 'pt-BR';
 }
 
 const ADMIN_STORY_ROUTE = /^\/(en|pt-BR)\/admin(?:\/|$)/;
@@ -19,11 +18,14 @@ export const resolveAdminStoryNavigation = (
 
   if (destination.origin !== storybookOrigin) return null;
 
+  if (href.trimStart().startsWith('?')) {
+    return { href: `${destination.search}${destination.hash}` };
+  }
+
   const route = ADMIN_STORY_ROUTE.exec(destination.pathname);
   if (route === null) return null;
 
   return {
     href: `${destination.pathname}${destination.search}${destination.hash}`,
-    locale: route[1] as AdminStoryNavigation['locale'],
   };
 };
