@@ -193,19 +193,20 @@ describe('admin access governance presentation policy', () => {
   });
 
   it('offboards with redistribution, session revocation, and immutable history', () => {
-    expect(projectAdminOffboarding({ identityReference: 'admin-001', reason: 'Employment ended' }))
-      .toEqual({
-        admitted: true,
-        effects: [
-          'suspend-membership',
-          'revoke-sessions',
-          'revoke-delegations',
-          'remove-future-approvals',
-          'reassign-pending-work',
-          'preserve-immutable-history',
-        ],
-        irreversible: true,
-      });
+    expect(
+      projectAdminOffboarding({ identityReference: 'admin-001', reason: 'Employment ended' }),
+    ).toEqual({
+      admitted: true,
+      effects: [
+        'suspend-membership',
+        'revoke-sessions',
+        'revoke-delegations',
+        'remove-future-approvals',
+        'reassign-pending-work',
+        'preserve-immutable-history',
+      ],
+      irreversible: true,
+    });
   });
 
   it('keeps target-function simulation read-only and secret-free', () => {
