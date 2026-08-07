@@ -89,6 +89,17 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
     >(module, 'selectNextBetaInvitationPromotions');
 
     expect(limit).toBe(25);
+    for (let activeCount = 0; activeCount < limit; activeCount += 1) {
+      expect(
+        admit(
+          admissionInput({
+            invitationId: `property-${String(activeCount)}`,
+            recipientKey: `recipient:sha256:property-${String(activeCount)}`,
+            activeCount,
+          }),
+        ),
+      ).toMatchObject({ accepted: true, state: { status: 'pending' } });
+    }
     const issued = admit(admissionInput({ activeCount: 24 }));
     expect(issued).toMatchObject({
       accepted: true,
@@ -102,6 +113,10 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       effects: [],
     });
     expect(safeJson(queued)).not.toMatch(/expiresAt|secret|send-invitation/iu);
+    expect(admit(admissionInput({ activeCount: 26 }))).toEqual({
+      accepted: false,
+      code: 'CAPACITY_STATE_INVALID',
+    });
 
     const queue = [
       (queued as { state: Readonly<Record<string, unknown>> }).state,
@@ -279,6 +294,18 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       state: { status: 'accepted', accountReference: 'account:opaque:one' },
       effects: [{ kind: 'consume-secret' }, { kind: 'handoff-beta-access' }],
     });
+    if ('state' in accepted) {
+      expect(
+        transition(accepted['state'] as Readonly<Record<string, unknown>>, {
+          kind: 'complete-activation',
+          now: '2030-01-03T12:00:01.000Z',
+          recipientPossessionVerified: true,
+          accountActivationCompleted: true,
+          essentialTermsAccepted: true,
+          accountReference: 'account:opaque:one',
+        }),
+      ).toEqual({ accepted: false, code: 'INVITATION_STATE_IMMUTABLE' });
+    }
   });
 
   it('keeps accepted accounts and team invitations outside beta revocation and applies purpose-bound retention', async () => {
