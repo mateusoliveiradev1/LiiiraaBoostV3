@@ -99,6 +99,13 @@ const buildApp = async (authorized = true) => {
       }),
     ),
   };
+  const inviteTeam = vi.fn(() =>
+    Promise.resolve({
+      ok: true as const,
+      outcome: 'team-invitation-issued',
+      receiptId: 'receipt-team',
+    }),
+  );
   const app = Fastify();
   await registerAdminGovernanceRoutes(app, {
     allowedOrigin: origin,
@@ -106,6 +113,7 @@ const buildApp = async (authorized = true) => {
     governance: {} as never,
     queries,
     operations,
+    inviteTeam,
     resolveSession: () => Promise.resolve(authorized ? session : null),
     resolveStepUp: () =>
       Promise.resolve({
@@ -122,7 +130,7 @@ const buildApp = async (authorized = true) => {
     rateLimit: () => Promise.resolve(true),
   });
   await app.ready();
-  return { app, operations, queries };
+  return { app, operations, queries, inviteTeam };
 };
 
 describe('admin governance routes', () => {
@@ -211,6 +219,46 @@ describe('admin governance routes', () => {
         expectedVersion: 7n,
       }),
     );
+    await app.close();
+  });
+
+  it('keeps administrative team invitations separate from beta and ordinary accounts', async () => {
+    const { app, inviteTeam } = await buildApp();
+    const beta = await app.inject({
+      method: 'POST',
+      url: '/v1/admin/governance/team/invitations',
+      headers: { origin, 'x-csrf-token': csrf() },
+      payload: {
+        command: command('team-invitation-one'),
+        invitationKind: 'beta',
+        invitationId: 'team-invitation-one',
+        recipient: 'private@example.com',
+        functions: ['support'],
+      },
+    });
+    expect(beta.statusCode).toBe(400);
+    expect(inviteTeam).not.toHaveBeenCalled();
+
+    const team = await app.inject({
+      method: 'POST',
+      url: '/v1/admin/governance/team/invitations',
+      headers: { origin, 'x-csrf-token': csrf() },
+      payload: {
+        command: command('team-invitation-one'),
+        invitationKind: 'administrative-team',
+        invitationId: 'team-invitation-one',
+        recipient: 'private@example.com',
+        functions: ['support'],
+      },
+    });
+    expect(team.statusCode).toBe(200);
+    expect(inviteTeam).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorId: 'operator-one',
+        invitationKind: 'administrative-team',
+      }),
+    );
+    expect(team.body).not.toContain('private@example.com');
     await app.close();
   });
 });
