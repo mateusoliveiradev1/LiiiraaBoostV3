@@ -579,6 +579,169 @@ export const LbProgress = ({ label, maxValue, value }: LbProgressProps) => (
   </ProgressBar>
 );
 
+export type LbOperationalNoticeState =
+  'reconnecting' | 'stale' | 'offline' | 'degraded' | 'conflict' | 'rate-limit';
+
+const operationalNoticePresentation = Object.freeze({
+  conflict: Object.freeze({ icon: '!', pattern: 'double', tone: 'critical' }),
+  degraded: Object.freeze({ icon: '!', pattern: 'dashed', tone: 'critical' }),
+  offline: Object.freeze({ icon: '×', pattern: 'dotted', tone: 'critical' }),
+  'rate-limit': Object.freeze({ icon: '⌛', pattern: 'dotted', tone: 'warning' }),
+  reconnecting: Object.freeze({ icon: '↻', pattern: 'dashed', tone: 'warning' }),
+  stale: Object.freeze({ icon: '◷', pattern: 'dotted', tone: 'warning' }),
+} satisfies Record<
+  LbOperationalNoticeState,
+  Readonly<{ icon: string; pattern: string; tone: string }>
+>);
+
+export interface LbOperationalNoticeProps {
+  readonly action?: ReactNode;
+  readonly detail: ReactNode;
+  readonly state: LbOperationalNoticeState;
+  readonly title: ReactNode;
+}
+
+export const LbOperationalNotice = ({ action, detail, state, title }: LbOperationalNoticeProps) => {
+  const presentation = operationalNoticePresentation[state];
+  const urgent = state === 'offline' || state === 'degraded' || state === 'conflict';
+
+  return (
+    <section
+      aria-live={urgent ? 'assertive' : 'polite'}
+      className="lb-operational-notice"
+      data-lb-region
+      data-pattern={presentation.pattern}
+      data-state={state}
+      data-tone={presentation.tone}
+      role={urgent ? 'alert' : 'status'}
+    >
+      <span aria-hidden="true" className="lb-operational-notice-icon">
+        {presentation.icon}
+      </span>
+      <span className="lb-operational-notice-copy">
+        <strong>{title}</strong>
+        <span>{detail}</span>
+      </span>
+      {action ? <span className="lb-operational-notice-action">{action}</span> : null}
+    </section>
+  );
+};
+
+export interface LbInspectorProps {
+  readonly children: ReactNode;
+  readonly label: string;
+  readonly onClose: () => void;
+  readonly title: ReactNode;
+}
+
+export const LbInspector = ({ children, label, onClose, title }: LbInspectorProps) => (
+  <aside aria-label={label} className="lb-context-inspector" data-lb-region tabIndex={-1}>
+    <header className="lb-context-inspector-header">
+      <h2>{title}</h2>
+      <LbIconButton icon="×" label={`Close ${label}`} onPress={onClose} />
+    </header>
+    <div className="lb-context-inspector-content">{children}</div>
+  </aside>
+);
+
+export interface LbCommand {
+  readonly description: ReactNode;
+  readonly id: string;
+  readonly label: ReactNode;
+}
+
+export interface LbCommandSearchProps {
+  readonly commands: readonly LbCommand[];
+  readonly label: string;
+  readonly onCommand: (commandId: string) => void;
+  readonly onQueryChange?: (query: string) => void;
+  readonly query?: string;
+}
+
+export const LbCommandSearch = ({
+  commands,
+  label,
+  onCommand,
+  onQueryChange,
+  query,
+}: LbCommandSearchProps) => (
+  <form
+    className="lb-command-search"
+    role="search"
+    onSubmit={(event) => {
+      event.preventDefault();
+    }}
+  >
+    <LbSearchField
+      label={label}
+      {...(onQueryChange ? { onChange: onQueryChange } : {})}
+      {...(query === undefined ? {} : { value: query })}
+    />
+    <ul aria-label="Admin command results" className="lb-command-list">
+      {commands.map((command) => (
+        <li key={command.id}>
+          <Button
+            className="lb-command"
+            data-lb-control
+            onPress={() => {
+              onCommand(command.id);
+            }}
+            type="button"
+          >
+            <strong>{command.label}</strong>
+            <span>{command.description}</span>
+          </Button>
+        </li>
+      ))}
+    </ul>
+  </form>
+);
+
+export type LbRiskLevel = 'low' | 'elevated' | 'critical';
+
+const riskPresentation = Object.freeze({
+  critical: Object.freeze({ label: 'Critical risk', pattern: 'double', tone: 'critical' }),
+  elevated: Object.freeze({ label: 'Elevated risk', pattern: 'dashed', tone: 'warning' }),
+  low: Object.freeze({ label: 'Low risk', pattern: 'solid', tone: 'success' }),
+} satisfies Record<LbRiskLevel, Readonly<{ label: string; pattern: string; tone: string }>>);
+
+export interface LbRiskReviewProps {
+  readonly action?: ReactNode;
+  readonly consequences: readonly ReactNode[];
+  readonly level: LbRiskLevel;
+  readonly title: ReactNode;
+}
+
+export const LbRiskReview = ({ action, consequences, level, title }: LbRiskReviewProps) => {
+  const presentation = riskPresentation[level];
+
+  return (
+    <section
+      aria-label={presentation.label}
+      className="lb-risk-review"
+      data-lb-region
+      data-pattern={presentation.pattern}
+      data-tone={presentation.tone}
+    >
+      <header>
+        <span aria-hidden="true" className="lb-risk-review-icon">
+          {level === 'critical' ? '!' : '◇'}
+        </span>
+        <span>
+          <strong>{presentation.label}</strong>
+          <h2>{title}</h2>
+        </span>
+      </header>
+      <ul>
+        {consequences.map((consequence, index) => (
+          <li key={index}>{consequence}</li>
+        ))}
+      </ul>
+      {action ? <footer>{action}</footer> : null}
+    </section>
+  );
+};
+
 export interface LbSkeletonProps {
   readonly blockSize?: string;
   readonly inlineSize?: string;
@@ -643,12 +806,22 @@ export interface LbDataTableRow {
 export interface LbDataTableProps {
   readonly caption: string;
   readonly columns: readonly LbDataTableColumn[];
+  readonly density?: 'comfortable' | 'compact';
+  readonly onRowOpen?: (rowId: string) => void;
   readonly rows: readonly LbDataTableRow[];
+  readonly selectedRowId?: string;
 }
 
-export const LbDataTable = ({ caption, columns, rows }: LbDataTableProps) => (
-  <div className="lb-table-viewport" data-lb-region>
-    <table>
+export const LbDataTable = ({
+  caption,
+  columns,
+  density = 'comfortable',
+  onRowOpen,
+  rows,
+  selectedRowId,
+}: LbDataTableProps) => (
+  <div className="lb-table-viewport" data-density={density} data-lb-region>
+    <table className="lb-data-table" data-density={density}>
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -661,7 +834,30 @@ export const LbDataTable = ({ caption, columns, rows }: LbDataTableProps) => (
       </thead>
       <tbody>
         {rows.map((row) => (
-          <tr key={row.id}>
+          <tr
+            aria-label={onRowOpen ? `Open row ${row.id}` : undefined}
+            aria-selected={selectedRowId === row.id || undefined}
+            data-selected={selectedRowId === row.id || undefined}
+            key={row.id}
+            onClick={
+              onRowOpen
+                ? () => {
+                    onRowOpen(row.id);
+                  }
+                : undefined
+            }
+            onKeyDown={
+              onRowOpen
+                ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onRowOpen(row.id);
+                    }
+                  }
+                : undefined
+            }
+            tabIndex={onRowOpen ? 0 : undefined}
+          >
             {columns.map((column) => (
               <td key={column.id}>{row.cells[column.id]}</td>
             ))}

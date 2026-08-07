@@ -26,6 +26,7 @@ import {
   LB_INTERACTION_STATES,
   LB_MOTION_ROLES,
   LbButton,
+  LbCommandSearch,
   LbDataTable,
   LbDetailRow,
   LbDialog,
@@ -33,8 +34,11 @@ import {
   LbDialogContent,
   LbDisclosure,
   LbIconButton,
+  LbInspector,
+  LbOperationalNotice,
   LbPanel,
   LbRowList,
+  LbRiskReview,
   LbSkeletonRegion,
 } from './primitives.tsx';
 import { ProductLockup } from './product-lockup.tsx';
@@ -360,6 +364,87 @@ describe('approved product identity', () => {
 });
 
 describe('keyboard, dialogs, charts, and accessibility axes', () => {
+  it('encodes operational notices with text, icon, and non-color patterns', () => {
+    for (const state of ['reconnecting', 'stale', 'degraded', 'conflict', 'rate-limit'] as const) {
+      const markup = renderToStaticMarkup(
+        <LbOperationalNotice
+          detail={`Operational detail for ${state}`}
+          state={state}
+          title={`State ${state}`}
+        />,
+      );
+
+      expect(markup).toContain(`data-state="${state}"`);
+      expect(markup).toContain('data-pattern=');
+      expect(markup).toContain('aria-hidden="true"');
+      expect(markup).toContain(`Operational detail for ${state}`);
+      expect(semanticAudit(markup)).toEqual([]);
+    }
+  });
+
+  it('provides named inspectors with an accessible close control and focus destination', () => {
+    const markup = renderToStaticMarkup(
+      <LbInspector label="Invite details" onClose={() => undefined} title="Invite INV-2048">
+        <p>Created by Mateus Oliveira.</p>
+      </LbInspector>,
+    );
+
+    expect(markup).toContain('<aside');
+    expect(markup).toContain('aria-label="Invite details"');
+    expect(markup).toContain('tabindex="-1"');
+    expect(markup).toContain('aria-label="Close Invite details"');
+    expect(semanticAudit(markup)).toEqual([]);
+  });
+
+  it('keeps command search and risk review keyboard-readable without color authority', () => {
+    const commandMarkup = renderToStaticMarkup(
+      <LbCommandSearch
+        commands={[
+          { description: 'Open pending approvals', id: 'approvals', label: 'Approvals' },
+          { description: 'Review active invitations', id: 'invites', label: 'Invitations' },
+        ]}
+        label="Search admin commands"
+        onCommand={() => undefined}
+      />,
+    );
+    const riskMarkup = renderToStaticMarkup(
+      <LbRiskReview
+        consequences={['Revokes every active session.', 'Creates an immutable audit event.']}
+        level="critical"
+        title="Revoke sessions"
+      />,
+    );
+
+    expect(commandMarkup).toContain('role="search"');
+    expect(commandMarkup).toContain('aria-label="Admin command results"');
+    expect(commandMarkup).toContain('Open pending approvals');
+    expect(riskMarkup).toContain('data-pattern="double"');
+    expect(riskMarkup).toContain('Critical risk');
+    expect(riskMarkup).toContain('<ul');
+    expect(semanticAudit(`${commandMarkup}${riskMarkup}`)).toEqual([]);
+  });
+
+  it('projects comfortable and compact operational table density without shrinking touch targets', () => {
+    for (const density of ['comfortable', 'compact'] as const) {
+      const markup = renderToStaticMarkup(
+        <LbDataTable
+          caption="Approval queue"
+          columns={[{ id: 'subject', label: 'Subject' }]}
+          density={density}
+          onRowOpen={() => undefined}
+          rows={[{ cells: { subject: 'Invite batch' }, id: 'approval-1' }]}
+          selectedRowId="approval-1"
+        />,
+      );
+
+      expect(markup).toContain(`data-density="${density}"`);
+      expect(markup).toContain('data-selected="true"');
+      expect(markup).toContain('tabindex="0"');
+      expect(markup).toContain('aria-label="Open row approval-1"');
+      expect(semanticAudit(markup)).toEqual([]);
+    }
+  });
+
   it('uses the React Aria dialog trigger for focus return and a title slot for naming', () => {
     const dialog = LbDialog({
       children: createElement('p', null, 'Review evidence before continuing.'),

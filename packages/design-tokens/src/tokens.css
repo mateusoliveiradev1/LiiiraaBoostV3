@@ -154,6 +154,14 @@
   --lb-row-primary-size: 64px;
   --lb-screen-padding: 32px;
   --lb-admin-workspace-max: 1320px;
+  --lb-admin-canvas: var(--lb-canvas);
+  --lb-admin-surface: var(--lb-panel);
+  --lb-admin-surface-raised: var(--lb-panel-raised);
+  --lb-admin-boundary: var(--lb-line-subtle);
+  --lb-admin-briefing-accent: var(--lb-cobalt-action);
+  --lb-admin-row-size: var(--lb-row-standard-size);
+  --lb-admin-inspector-size: min(420px, 100%);
+  --lb-admin-command-size: 52px;
   --lb-grid-gutter: 24px;
   --lb-control-gap: 16px;
   --lb-section-gap: 24px;
@@ -231,6 +239,7 @@
 [data-density='compact'] {
   --lb-control-gap: 8px;
   --lb-section-gap: 16px;
+  --lb-admin-row-size: var(--lb-row-dense-size);
 }
 
 [data-app-scale='100'] {
@@ -335,6 +344,16 @@
   [data-lb-status],
   [data-lb-region] {
     border-color: CanvasText;
+  }
+
+  .lb-operational-notice,
+  .lb-risk-review,
+  .lb-context-inspector,
+  .lb-data-table tbody tr[data-selected] {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
   }
 }
 
@@ -716,6 +735,109 @@
   transition: inline-size var(--lb-motion-progress-duration) var(--lb-motion-easing);
 }
 
+.lb-operational-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--lb-space-3);
+  min-block-size: var(--lb-row-standard-size);
+  padding: var(--lb-space-2) var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-inline-start: 4px solid currentColor;
+  border-radius: var(--lb-radius-control);
+  color: var(--lb-text-primary);
+  background: var(--lb-admin-surface);
+}
+
+.lb-operational-notice-copy {
+  display: grid;
+  gap: var(--lb-space-1);
+}
+
+.lb-operational-notice-copy > span {
+  color: var(--lb-text-secondary);
+}
+
+.lb-operational-notice-icon,
+.lb-risk-review-icon {
+  display: grid;
+  place-items: center;
+  inline-size: var(--lb-space-4);
+  block-size: var(--lb-space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--lb-radius-pill);
+  font-family: var(--lb-font-data);
+}
+
+.lb-context-inspector {
+  inline-size: var(--lb-admin-inspector-size);
+  border-inline-start: 1px solid var(--lb-line-strong);
+  background: var(--lb-admin-surface-raised);
+  transition: transform var(--lb-motion-inspector-duration) var(--lb-motion-easing);
+}
+
+.lb-context-inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-3);
+  padding-block-end: var(--lb-space-3);
+  border-block-end: 1px solid var(--lb-line-subtle);
+}
+
+.lb-context-inspector-content,
+.lb-command-search {
+  display: grid;
+  gap: var(--lb-section-gap);
+}
+
+.lb-command-list li {
+  min-inline-size: 0;
+}
+
+.lb-command {
+  min-block-size: var(--lb-admin-command-size);
+  align-items: center;
+  gap: var(--lb-space-3);
+  text-align: start;
+}
+
+.lb-command > span {
+  color: var(--lb-text-secondary);
+  font-weight: var(--lb-weight-regular);
+}
+
+.lb-risk-review {
+  display: grid;
+  gap: var(--lb-space-3);
+  padding: var(--lb-section-gap);
+  border: 2px solid currentColor;
+  border-radius: var(--lb-radius-panel);
+  color: var(--lb-text-primary);
+  background: var(--lb-admin-surface);
+}
+
+.lb-risk-review > header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+}
+
+.lb-risk-review h2,
+.lb-risk-review p {
+  margin: 0;
+}
+
+.lb-risk-review ul {
+  margin: 0;
+  padding-inline-start: var(--lb-space-4);
+}
+
+.lb-risk-review footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .lb-skeleton {
   border: 1px dashed var(--lb-line-strong);
   border-radius: var(--lb-radius-default);
@@ -1019,6 +1141,19 @@
 .lb-plot table {
   inline-size: 100%;
   border-collapse: collapse;
+}
+
+.lb-data-table[data-density='comfortable'] tbody tr {
+  block-size: var(--lb-row-standard-size);
+}
+
+.lb-data-table[data-density='compact'] tbody tr {
+  block-size: var(--lb-row-dense-size);
+}
+
+.lb-data-table tbody tr[data-selected] {
+  box-shadow: inset 3px 0 0 var(--lb-admin-briefing-accent);
+  background: var(--lb-admin-surface-raised);
 }
 
 .lb-table-viewport th,

@@ -140,9 +140,9 @@ describe('Cobalt Ignition Bay token contract', () => {
 
   it('computes every authored CTA pair at or above 4.5:1 and locks forced colors', () => {
     for (const state of ['default', 'hover', 'pressed', 'disabled'] as const) {
-      expect(contrastRatio(CTA_STATES[state].background, CTA_STATES[state].label)).toBeGreaterThanOrEqual(
-        4.5,
-      );
+      expect(
+        contrastRatio(CTA_STATES[state].background, CTA_STATES[state].label),
+      ).toBeGreaterThanOrEqual(4.5);
     }
     expect(CTA_STATES.loading).toEqual(CTA_STATES.default);
     expect(CTA_STATES.forcedColors).toEqual({
@@ -239,7 +239,9 @@ describe('Cobalt Ignition Bay token contract', () => {
     const css = await readFile(new URL('./tokens.css', import.meta.url), 'utf8');
 
     expect(css).toContain("font-family: 'Saira Semi Condensed Variable';");
-    expect(css).toContain("src: url('/fonts/saira-semi-condensed-variable.woff2') format('woff2-variations');");
+    expect(css).toContain(
+      "src: url('/fonts/saira-semi-condensed-variable.woff2') format('woff2-variations');",
+    );
     expect(css).toContain('font-weight: 600;');
     expect(css).toContain('font-stretch: 87.5%;');
     expect(css).toContain('--lb-font-display:');
@@ -306,26 +308,38 @@ describe('Cobalt Ignition Bay token contract', () => {
     }
   });
 
+  it('locks the Briefing Focus admin density and operational material vocabulary', async () => {
+    const css = await readFile(new URL('./tokens.css', import.meta.url), 'utf8');
+
+    expect(css).toContain('--lb-admin-canvas:');
+    expect(css).toContain('--lb-admin-briefing-accent: var(--lb-cobalt-action);');
+    expect(css).toContain('--lb-admin-row-size: var(--lb-row-standard-size);');
+    expect(css).toMatch(
+      /\[data-density='compact'\]\s*\{[^}]*--lb-admin-row-size:\s*var\(--lb-row-dense-size\);/u,
+    );
+    expect(css).toMatch(/\.lb-operational-notice\s*\{[^}]*border-inline-start:/u);
+    expect(css).toMatch(/\.lb-context-inspector\s*\{[^}]*transition:/u);
+    expect(css).toMatch(
+      /\.lb-data-table\[data-density='comfortable'\][\s\S]*var\(--lb-row-standard-size\)/u,
+    );
+    expect(css).toMatch(/@media \(forced-colors: active\)[\s\S]*\.lb-risk-review/u);
+  });
+
   it('admits only the approved Saira Semi Condensed variable source and display weight', async () => {
     const fontDirectory = new URL('../../../apps/web/public/fonts/', import.meta.url);
-    const license = await readFile(
-      new URL('OFL-Saira-Semi-Condensed.txt', fontDirectory),
-      'utf8',
-    );
+    const license = await readFile(new URL('OFL-Saira-Semi-Condensed.txt', fontDirectory), 'utf8');
 
     expect(license).toContain('Copyright 2016 The Saira Project Authors');
     expect(license).toContain('reserved font name "Saira"');
     expect({
       family: 'Saira Semi Condensed',
-      officialArtifact:
-        'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
+      officialArtifact: 'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
       officialSource: 'https://github.com/Omnibus-Type/Saira',
       stretch: '87.5%',
       weights: [600],
     }).toEqual({
       family: 'Saira Semi Condensed',
-      officialArtifact:
-        'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
+      officialArtifact: 'https://fonts.gstatic.com/s/saira/v23/memwYa2wxmKQyNknTZM.woff2',
       officialSource: 'https://github.com/Omnibus-Type/Saira',
       stretch: '87.5%',
       weights: [600],
