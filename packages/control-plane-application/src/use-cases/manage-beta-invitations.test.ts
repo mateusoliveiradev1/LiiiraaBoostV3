@@ -115,6 +115,14 @@ const harness = (initial: Store = emptyStore()) => {
     clock: { now: () => new Date(NOW) },
     ids: { next: () => `id-${String(++nextId)}` },
     repository: {
+      claimJobs: async () => {
+        await tick();
+        return [];
+      },
+      pseudonymizeClosedRecipient: async () => {
+        await tick();
+        return false;
+      },
       findActiveRecipientKeys: async (recipientKeys) => (
         await tick(),
         recipientKeys.filter((key) =>

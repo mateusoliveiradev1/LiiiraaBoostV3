@@ -189,6 +189,7 @@ export const issueBetaInvitation = async (
       });
       if (!decision.accepted) return { ok: false, code: decision.code };
 
+      await transaction.saveInvitation(decision.state);
       let deliveryReference: string | undefined;
       const issueSecret = decision.effects.some((effect) => effect.kind === 'issue-secret');
       if (issueSecret) {
@@ -204,7 +205,6 @@ export const issueBetaInvitation = async (
         });
         deliveryReference = handoff.deliveryReference;
       }
-      await transaction.saveInvitation(decision.state);
       await appendNewEvents(transaction, decision.state);
       return durableResult(dependencies, transaction, {
         actorId: input.actorId,

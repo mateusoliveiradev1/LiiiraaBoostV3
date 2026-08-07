@@ -72,7 +72,7 @@ export interface InvitationBatchJob {
   readonly jobId: string;
   readonly commandId: string;
   readonly action: InvitationBatchAction;
-  readonly status: 'queued' | 'completed-with-failures' | 'completed';
+  readonly status: 'queued' | 'running' | 'completed-with-failures' | 'completed' | 'failed';
   readonly createdAt: string;
   readonly items: readonly Readonly<{
     invitationId: string;
@@ -148,6 +148,12 @@ export interface AdminInvitationTransaction {
 export interface AdminInvitationRepositoryPort {
   findActiveRecipientKeys(recipientKeys: readonly string[]): Promise<readonly string[]>;
   transaction<T>(operation: (transaction: AdminInvitationTransaction) => Promise<T>): Promise<T>;
+  claimJobs(workerId: string, limit: number): Promise<readonly InvitationBatchJob[]>;
+  pseudonymizeClosedRecipient(
+    invitationId: string,
+    pseudonymDigest: string,
+    occurredAt: string,
+  ): Promise<boolean>;
 }
 
 export interface AdminInvitationDependencies {

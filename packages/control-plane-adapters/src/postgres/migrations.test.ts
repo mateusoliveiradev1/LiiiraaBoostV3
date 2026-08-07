@@ -242,12 +242,18 @@ describe('admin invitation migration authority', () => {
       'admin_invitation_commands',
       'admin_invitation_jobs',
       'admin_invitation_receipts',
-    ]) expect(sql).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`, 'iu'));
+      'admin_invitation_audit',
+    ])
+      expect(sql).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`, 'iu'));
 
-    expect(sql).toMatch(/recipient_digest CHAR\(64\)[\s\S]*CHECK \(recipient_digest ~ '\^\[0-9a-f\]\{64\}\$'\)/iu);
+    expect(sql).toMatch(
+      /recipient_digest CHAR\(64\)[\s\S]*CHECK \(recipient_digest ~ '\^\[0-9a-f\]\{64\}\$'\)/iu,
+    );
     expect(sql).toMatch(/secret_digest CHAR\(64\)[\s\S]*UNIQUE/iu);
     expect(sql).toMatch(/CHECK \(active_beta_count BETWEEN 0 AND 25\)/iu);
-    expect(sql).toMatch(/CREATE UNIQUE INDEX[\s\S]*recipient_digest[\s\S]*WHERE status IN \('queued', 'pending'\)/iu);
+    expect(sql).toMatch(
+      /CREATE UNIQUE INDEX[\s\S]*recipient_digest[\s\S]*WHERE status IN \('queued', 'pending'\)/iu,
+    );
     expect(sql).toMatch(/CREATE TRIGGER admin_invitation_events_insert_only/iu);
     expect(sql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON admin_invitation_events FROM PUBLIC/iu);
     expect(sql).toMatch(/FOR UPDATE/iu);
@@ -263,6 +269,11 @@ describe('admin invitation migration authority', () => {
     const sql = await readFile(invitationMigrationUrl, 'utf8');
     expect(sql).toMatch(/identity_invitations/iu);
     expect(sql).toMatch(/digest\(lower\(trim\(legacy\.email\)\)/iu);
+    expect(sql).toMatch(
+      /row_number\(\) OVER \(ORDER BY deduplicated\.issued_at, deduplicated\.id\)/iu,
+    );
+    expect(sql).toMatch(/active_beta_rank > 25[\s\S]*'queued'/iu);
+    expect(sql).toMatch(/active_beta_rank - 25/iu);
     expect(sql).toMatch(/ON CONFLICT DO NOTHING/iu);
     expect(sql).not.toMatch(/legacy\.token_digest/iu);
   });

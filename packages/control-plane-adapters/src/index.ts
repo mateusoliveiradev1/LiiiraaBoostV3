@@ -17,6 +17,11 @@ export {
   type ControlPlaneSchemaInspection,
 } from './postgres/migrate.js';
 export {
+  adminInvitationsSchemaHash,
+  createPostgresAdminInvitationRepository,
+  migrateAdminInvitations,
+} from './postgres/admin-invitations.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,

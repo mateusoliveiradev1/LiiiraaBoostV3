@@ -57,7 +57,8 @@ CREATE INDEX IF NOT EXISTS ix_admin_invitations_status_created
   ON admin_invitations (status, created_at, id);
 
 CREATE TABLE IF NOT EXISTS admin_invitation_secrets (
-  invitation_id UUID PRIMARY KEY REFERENCES admin_invitations(id) ON DELETE RESTRICT,
+  id UUID PRIMARY KEY,
+  invitation_id UUID NOT NULL REFERENCES admin_invitations(id) ON DELETE RESTRICT,
   secret_digest CHAR(64) NOT NULL UNIQUE
     CHECK (secret_digest ~ '^[0-9a-f]{64}$'),
   issued_at TIMESTAMPTZ NOT NULL,
@@ -65,6 +66,10 @@ CREATE TABLE IF NOT EXISTS admin_invitation_secrets (
   consumed_at TIMESTAMPTZ,
   CHECK (NOT (invalidated_at IS NOT NULL AND consumed_at IS NOT NULL))
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_admin_invitation_secrets_one_active
+  ON admin_invitation_secrets (invitation_id)
+  WHERE invalidated_at IS NULL AND consumed_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS admin_invitation_events (
   invitation_id UUID NOT NULL REFERENCES admin_invitations(id) ON DELETE RESTRICT,
@@ -103,6 +108,15 @@ CREATE TABLE IF NOT EXISTS admin_invitation_receipts (
   aggregate_id TEXT NOT NULL,
   outcome TEXT NOT NULL,
   results JSONB,
+  occurred_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS admin_invitation_audit (
+  id UUID PRIMARY KEY,
+  actor_digest CHAR(64) NOT NULL CHECK (actor_digest ~ '^[0-9a-f]{64}$'),
+  action TEXT NOT NULL,
+  command_id TEXT NOT NULL,
+  redacted_target TEXT NOT NULL,
   occurred_at TIMESTAMPTZ NOT NULL
 );
 
@@ -181,34 +195,70 @@ $$;
 DO $$
 BEGIN
   IF to_regclass('identity_invitations') IS NOT NULL THEN
+    WITH deduplicated AS (
+      SELECT DISTINCT ON (encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex'))
+        legacy.*,
+        encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex') AS recipient_digest
+      FROM identity_invitations AS legacy
+      ORDER BY encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex'), legacy.issued_at DESC
+    ), ranked AS (
+      SELECT
+        deduplicated.*,
+        CASE
+          WHEN deduplicated.role = 'tester'
+            AND deduplicated.redeemed_at IS NULL
+            AND deduplicated.expires_at > CURRENT_TIMESTAMP
+          THEN row_number() OVER (ORDER BY deduplicated.issued_at, deduplicated.id)
+          ELSE NULL
+        END AS active_beta_rank
+      FROM deduplicated
+    )
     INSERT INTO admin_invitations (
       id, kind, recipient_digest, status, version, locale, queue_position, expires_at,
       reminder_window_started_at, delivery_state, administrative_role, account_reference,
       closed_at, retention_state, created_at, updated_at
     )
-    SELECT DISTINCT ON (encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex'))
-      legacy.id,
-      CASE WHEN legacy.role = 'tester' THEN 'beta' ELSE 'administrative-team' END,
-      encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex'),
+    SELECT
+      ranked.id,
+      CASE WHEN ranked.role = 'tester' THEN 'beta' ELSE 'administrative-team' END,
+      ranked.recipient_digest,
       CASE
-        WHEN legacy.redeemed_at IS NOT NULL THEN 'accepted'
-        WHEN legacy.expires_at <= CURRENT_TIMESTAMP THEN 'expired'
+        WHEN ranked.redeemed_at IS NOT NULL THEN 'accepted'
+        WHEN ranked.expires_at <= CURRENT_TIMESTAMP THEN 'expired'
+        WHEN ranked.role = 'tester' AND ranked.active_beta_rank > 25 THEN 'queued'
         ELSE 'pending'
       END,
       1,
       'pt-BR',
-      NULL,
-      CASE WHEN legacy.redeemed_at IS NULL AND legacy.expires_at > CURRENT_TIMESTAMP THEN legacy.expires_at ELSE NULL END,
-      legacy.issued_at,
+      CASE
+        WHEN ranked.role = 'tester' AND ranked.active_beta_rank > 25
+        THEN ranked.active_beta_rank - 25
+        ELSE NULL
+      END,
+      CASE
+        WHEN ranked.redeemed_at IS NULL
+          AND ranked.expires_at > CURRENT_TIMESTAMP
+          AND NOT (ranked.role = 'tester' AND ranked.active_beta_rank > 25)
+        THEN ranked.expires_at
+        ELSE NULL
+      END,
+      ranked.issued_at,
       'not-requested',
-      CASE WHEN legacy.role = 'tester' THEN NULL ELSE legacy.role END,
-      legacy.redeemed_by::TEXT,
-      CASE WHEN legacy.redeemed_at IS NOT NULL THEN legacy.redeemed_at WHEN legacy.expires_at <= CURRENT_TIMESTAMP THEN legacy.expires_at ELSE NULL END,
-      CASE WHEN legacy.redeemed_at IS NULL AND legacy.expires_at > CURRENT_TIMESTAMP THEN 'operational' ELSE 'retained' END,
-      legacy.issued_at,
-      COALESCE(legacy.redeemed_at, legacy.issued_at)
-    FROM identity_invitations AS legacy
-    ORDER BY encode(digest(lower(trim(legacy.email)), 'sha256'), 'hex'), legacy.issued_at DESC
+      CASE WHEN ranked.role = 'tester' THEN NULL ELSE ranked.role END,
+      ranked.redeemed_by::TEXT,
+      CASE
+        WHEN ranked.redeemed_at IS NOT NULL THEN ranked.redeemed_at
+        WHEN ranked.expires_at <= CURRENT_TIMESTAMP THEN ranked.expires_at
+        ELSE NULL
+      END,
+      CASE
+        WHEN ranked.redeemed_at IS NULL AND ranked.expires_at > CURRENT_TIMESTAMP
+        THEN 'operational'
+        ELSE 'retained'
+      END,
+      ranked.issued_at,
+      COALESCE(ranked.redeemed_at, ranked.issued_at)
+    FROM ranked
     ON CONFLICT DO NOTHING;
   END IF;
 END;
