@@ -622,7 +622,7 @@ Plans:
 
 - [x] 04-48-PLAN.md — Persist administrative governance and segregation of duties.
 - [x] 04-49-PLAN.md — Orchestrate scalable Admin operational workflows.
-- [ ] 04-51-PLAN.md — Expose real invitation management, acceptance, and durable jobs.
+- [x] 04-51-PLAN.md — Expose real invitation management, acceptance, and durable jobs.
 
 **Wave 20** _(blocked on Wave 19 dependencies)_
 
@@ -793,7 +793,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 47/62 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 48/62 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
