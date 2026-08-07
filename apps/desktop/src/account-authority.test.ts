@@ -4,6 +4,8 @@ import {
   ACCOUNT_AUTHORITY_REFRESH_MS,
   ACCOUNT_SYNC_COMMAND,
   DesktopAccountAuthority,
+  OPEN_ADMIN_COMMAND,
+  resolveDesktopAdminHandoff,
   type AccountAuthorityTransport,
 } from './account-authority.js';
 
@@ -19,7 +21,16 @@ afterAll(() => {
   vi.unstubAllGlobals();
 });
 
-const projection = (displayName: string, version: string, locale: 'en' | 'pt-BR' = 'pt-BR') => ({
+const projection = (
+  displayName: string,
+  version: string,
+  locale: 'en' | 'pt-BR' = 'pt-BR',
+  options: Readonly<{
+    administrativeRole?: 'audit' | 'operations' | 'security' | 'support';
+    expiresAt?: string;
+    sessionScopes?: readonly string[];
+  }> = {},
+) => ({
   account: {
     schemaVersion: '1.0',
     aggregateVersion: version,
@@ -31,7 +42,9 @@ const projection = (displayName: string, version: string, locale: 'en' | 'pt-BR'
     state: 'active',
     displayName,
     emailRedacted: 'w***@gmail.com',
-    administrativeRole: 'security',
+    ...(options.administrativeRole === undefined
+      ? { administrativeRole: 'security' }
+      : { administrativeRole: options.administrativeRole }),
     locale,
     createdAt: '2030-01-01T00:00:00.000Z',
     updatedAt: '2030-01-15T00:00:00.000Z',
@@ -50,9 +63,9 @@ const projection = (displayName: string, version: string, locale: 'en' | 'pt-BR'
       accountId: 'account-01',
       state: 'active',
       authenticationStrength: 'password',
-      scopes: ['session-desktop'],
+      scopes: options.sessionScopes ?? ['session-desktop'],
       authenticatedAt: '2030-01-15T00:00:00.000Z',
-      expiresAt: '2030-01-16T00:00:00.000Z',
+      expiresAt: options.expiresAt ?? '2030-01-16T00:00:00.000Z',
       lastSeenAt: '2030-01-15T00:00:00.000Z',
     },
   ],
@@ -73,6 +86,95 @@ const projection = (displayName: string, version: string, locale: 'en' | 'pt-BR'
   invoices: [],
   supportCases: [],
   activeDevice: null,
+});
+
+const NOW = new Date('2030-01-15T12:00:00.000Z');
+
+describe('bounded desktop Admin handoff', () => {
+  it('derives membership, active function, and plan only from current account authority', () => {
+    expect(
+      resolveDesktopAdminHandoff(
+        { state: 'online', projection: projection('Mateus Oliveira', '7') },
+        NOW,
+      ),
+    ).toEqual({
+      status: 'eligible',
+      membership: 'active',
+      activeFunction: 'security',
+      plan: 'premium',
+      actionable: true,
+    });
+
+    const standardAccount = projection('Friend Tester', '2');
+    delete (standardAccount.account as { administrativeRole?: string }).administrativeRole;
+    expect(
+      resolveDesktopAdminHandoff({ state: 'online', projection: standardAccount }, NOW),
+    ).toMatchObject({ status: 'ineligible', membership: 'none', actionable: false });
+  });
+
+  it('fails closed for offline, stale, expired, and revoked authority', () => {
+    const currentProjection = projection('Mateus Oliveira', '7');
+    const expiredProjection = projection('Mateus Oliveira', '7', 'pt-BR', {
+      expiresAt: '2030-01-15T11:59:59.000Z',
+    });
+
+    expect(resolveDesktopAdminHandoff({ state: 'offline' }, NOW)).toMatchObject({
+      status: 'offline',
+      actionable: false,
+    });
+    expect(
+      resolveDesktopAdminHandoff({ state: 'stale', projection: currentProjection }, NOW),
+    ).toMatchObject({ status: 'offline', actionable: false });
+    expect(
+      resolveDesktopAdminHandoff({ state: 'online', projection: expiredProjection }, NOW),
+    ).toMatchObject({ status: 'expired', membership: 'expired', actionable: false });
+    expect(resolveDesktopAdminHandoff({ state: 'revoked', error: 'unauthorized' }, NOW)).toEqual({
+      status: 'revoked',
+      membership: 'revoked',
+      actionable: false,
+    });
+  });
+
+  it('opens Admin through one argument-free native command only while eligible', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
+      .mockResolvedValueOnce({ status: 'opened' });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(authority.openAdmin(NOW)).resolves.toEqual({ status: 'opened' });
+    expect(invoke).toHaveBeenLastCalledWith(OPEN_ADMIN_COMMAND);
+    expect(invoke.mock.calls.at(-1)).toHaveLength(1);
+
+    const offlineInvoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValue({ state: 'offline', error: 'network-unavailable' });
+    const offlineAuthority = new DesktopAccountAuthority({ invoke: offlineInvoke });
+    await offlineAuthority.synchronize('launch');
+    await expect(offlineAuthority.openAdmin(NOW)).resolves.toEqual({ status: 'offline' });
+    expect(offlineInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects Admin payloads and Admin sessions instead of retaining them in desktop state', async () => {
+    const withAdminRecords = { ...projection('Mateus Oliveira', '7'), adminRecords: [{}] };
+    const adminSessionProjection = projection('Mateus Oliveira', '7', 'pt-BR', {
+      sessionScopes: ['session-admin'],
+    });
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: withAdminRecords })
+      .mockResolvedValueOnce({ state: 'online', projection: adminSessionProjection });
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    expect(authority.snapshot()).toEqual({ state: 'offline', error: 'invalid-response' });
+    await authority.synchronize('reconnection');
+    expect(authority.snapshot()).toEqual({ state: 'offline', error: 'invalid-response' });
+    expect(JSON.stringify(authority.snapshot())).not.toMatch(
+      /adminRecords|session-admin|cookie|credential|accessToken|refreshToken/u,
+    );
+  });
 });
 
 describe('desktop account authority mutations', () => {

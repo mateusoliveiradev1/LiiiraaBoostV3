@@ -19,7 +19,8 @@ use identity::{
     DesktopExchangeRequest, DesktopExchangeResponse, DesktopIdentityApi, DesktopIdentityError,
     DesktopPkceProof, DesktopSessionContact, LoopbackCallbackListener, SystemBrowserLauncher,
     WindowsDesktopIdentityApi, accept_desktop_exchange, begin_desktop_sign_in,
-    complete_desktop_callback, perform_desktop_sign_in, reconcile_authenticated_contact,
+    complete_desktop_callback, open_admin_in_system_browser, perform_desktop_sign_in,
+    reconcile_authenticated_contact,
     revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
@@ -158,6 +159,34 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
     assert!(body.get("clientSecret").is_none());
     assert!(!body.to_string().contains("/oauth2/token"));
     assert!(!format!("{exchange:?}").contains(CODE_VERIFIER));
+}
+
+#[test]
+fn admin_handoff_opens_only_the_exact_configured_https_origin() {
+    let browser = RecordingSystemBrowser::default();
+
+    open_admin_in_system_browser(
+        &browser,
+        "https://liiiraa-boost-admin-staging.vercel.app",
+    )
+    .expect("exact configured HTTPS Admin origin should open");
+    assert_eq!(
+        browser.opened_urls.borrow().as_slice(),
+        ["https://liiiraa-boost-admin-staging.vercel.app"]
+    );
+
+    for rejected in [
+        "http://liiiraa-boost-admin-staging.vercel.app",
+        "https://liiiraa-boost-admin-staging.vercel.app/operations",
+        "https://liiiraa-boost-admin-staging.vercel.app?token=forbidden",
+        "https://user@liiiraa-boost-admin-staging.vercel.app",
+    ] {
+        assert_eq!(
+            open_admin_in_system_browser(&browser, rejected),
+            Err(DesktopIdentityError::InvalidAuthorizationChallenge),
+        );
+    }
+    assert_eq!(browser.opened_urls.borrow().len(), 1);
 }
 
 #[test]

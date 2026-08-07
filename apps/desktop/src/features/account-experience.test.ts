@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import type { DesktopAccountAuthoritySnapshot } from '../account-authority.js';
-import { resolveDesktopLoginState } from './account-experience.js';
+import type {
+  DesktopAccountAuthoritySnapshot,
+  DesktopAdminHandoffProjection,
+} from '../account-authority.js';
+import { DesktopAdminHandoff, resolveDesktopLoginState } from './account-experience.js';
 
 const projected = (state: DesktopAccountAuthoritySnapshot['state']) =>
   ({ state, projection: {} }) as DesktopAccountAuthoritySnapshot;
@@ -33,5 +38,66 @@ describe('desktop account session restoration', () => {
     expect(source).toContain("en: 'Administrator'");
     expect(source).toContain("'pt-BR': 'Administrador'");
     expect(source).toContain('data-account-runtime="production"');
+  });
+});
+
+const handoff = (
+  overrides: Partial<DesktopAdminHandoffProjection> = {},
+): DesktopAdminHandoffProjection => ({
+  status: 'eligible',
+  membership: 'active',
+  activeFunction: 'security',
+  plan: 'premium',
+  actionable: true,
+  ...overrides,
+});
+
+describe('desktop Admin handoff presentation', () => {
+  it('shows authoritative membership and active function with one bounded action', () => {
+    const markup = renderToStaticMarkup(
+      createElement(DesktopAdminHandoff, {
+        handoff: handoff(),
+        locale: 'pt-BR',
+        onOpen: () => undefined,
+      }),
+    );
+
+    expect(markup).toContain('data-administrative-membership="active"');
+    expect(markup).toContain('data-admin-active-function="security"');
+    expect(markup).toContain('Membro administrativo');
+    expect(markup).toContain('Função ativa');
+    expect(markup).toContain('Segurança');
+    expect(markup).toContain('Abrir Admin');
+  });
+
+  it.each(['ineligible', 'offline', 'expired', 'revoked'] as const)(
+    'does not render an actionable Admin handoff while authority is %s',
+    (status) => {
+      const membership = status === 'ineligible' ? 'none' : status;
+      const markup = renderToStaticMarkup(
+        createElement(DesktopAdminHandoff, {
+          handoff: handoff({
+            status,
+            membership,
+            activeFunction: undefined,
+            actionable: false,
+          }),
+          locale: 'en',
+          onOpen: () => undefined,
+        }),
+      );
+
+      expect(markup).not.toContain('Open Admin');
+      expect(markup).not.toContain('<button');
+    },
+  );
+
+  it('keeps the Admin origin, records, commands, sessions, and credentials out of the WebView', () => {
+    const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('authority.openAdmin()');
+    expect(source).not.toContain('liiiraa-boost-admin-staging.vercel.app');
+    expect(source).not.toContain('<iframe');
+    expect(source).not.toMatch(/adminRecords|adminSearchResults|adminCommands|adminCookie/u);
   });
 });
