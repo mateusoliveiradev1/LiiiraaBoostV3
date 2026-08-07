@@ -14,6 +14,7 @@ import {
 import { inspectControlPlaneSchema, migrateControlPlane, schemaHash } from './migrate.ts';
 
 const migrationUrl = new URL('./migrations/0001_control_plane.sql', import.meta.url);
+const invitationMigrationUrl = new URL('./migrations/0004_admin_invitations.sql', import.meta.url);
 const syntheticIdentity = /(?:^|[-_])(synthetic|test)(?:[-_]|$)/iu;
 const productionIdentity = /(?:^|[-_])(live|prod|production)(?:[-_]|$)/iu;
 const unsafeDatabaseMessage =
@@ -227,6 +228,43 @@ describe('control-plane migration deterministic proof', () => {
     ]) {
       expect(migrationSql).not.toMatch(new RegExp(`\\b${forbiddenColumn}\\b`, 'iu'));
     }
+  });
+});
+
+describe('admin invitation migration authority', () => {
+  it('declares the complete durable invitation lifecycle without plaintext identity or secrets', async () => {
+    const sql = await readFile(invitationMigrationUrl, 'utf8');
+    for (const table of [
+      'admin_invitation_capacity',
+      'admin_invitations',
+      'admin_invitation_secrets',
+      'admin_invitation_events',
+      'admin_invitation_commands',
+      'admin_invitation_jobs',
+      'admin_invitation_receipts',
+    ]) expect(sql).toMatch(new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`, 'iu'));
+
+    expect(sql).toMatch(/recipient_digest CHAR\(64\)[\s\S]*CHECK \(recipient_digest ~ '\^\[0-9a-f\]\{64\}\$'\)/iu);
+    expect(sql).toMatch(/secret_digest CHAR\(64\)[\s\S]*UNIQUE/iu);
+    expect(sql).toMatch(/CHECK \(active_beta_count BETWEEN 0 AND 25\)/iu);
+    expect(sql).toMatch(/CREATE UNIQUE INDEX[\s\S]*recipient_digest[\s\S]*WHERE status IN \('queued', 'pending'\)/iu);
+    expect(sql).toMatch(/CREATE TRIGGER admin_invitation_events_insert_only/iu);
+    expect(sql).toMatch(/REVOKE UPDATE, DELETE, TRUNCATE ON admin_invitation_events FROM PUBLIC/iu);
+    expect(sql).toMatch(/FOR UPDATE/iu);
+    expect(sql).toMatch(/SKIP LOCKED/iu);
+    expect(sql).toMatch(/retention_state/iu);
+    expect(sql).toMatch(/campaign/iu);
+    expect(sql).toMatch(/cohort/iu);
+    expect(sql).toMatch(/note_reference/iu);
+    expect(sql).not.toMatch(/plaintext_secret|raw_email|invitation_token/iu);
+  });
+
+  it('contains an upgrade path that pseudonymizes legacy email and never copies legacy token material', async () => {
+    const sql = await readFile(invitationMigrationUrl, 'utf8');
+    expect(sql).toMatch(/identity_invitations/iu);
+    expect(sql).toMatch(/digest\(lower\(trim\(legacy\.email\)\)/iu);
+    expect(sql).toMatch(/ON CONFLICT DO NOTHING/iu);
+    expect(sql).not.toMatch(/legacy\.token_digest/iu);
   });
 });
 
