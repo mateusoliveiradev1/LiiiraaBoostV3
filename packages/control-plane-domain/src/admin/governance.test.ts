@@ -34,7 +34,7 @@ type GovernanceModule = Readonly<{
 
 const loadGovernance = async (): Promise<GovernanceModule> =>
   import('./governance.js')
-    .then((module) => module as GovernanceModule)
+    .then((module) => module as unknown as GovernanceModule)
     .catch((): GovernanceModule => ({}));
 
 const requireFunction = <T extends (...args: never[]) => unknown>(
