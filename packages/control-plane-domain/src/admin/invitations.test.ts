@@ -4,6 +4,11 @@ const OWNER = '04-42-01';
 const NOW = '2030-01-01T12:00:00.000Z';
 const DAY_MS = 24 * 60 * 60 * 1_000;
 
+const safeJson = (value: unknown): string =>
+  JSON.stringify(value, (_key, candidate: unknown) =>
+    typeof candidate === 'bigint' ? candidate.toString() : candidate,
+  );
+
 type InvitationModule = Readonly<Record<string, unknown>>;
 
 const loadInvitations = async (): Promise<InvitationModule> =>
@@ -14,7 +19,9 @@ const loadInvitations = async (): Promise<InvitationModule> =>
 const requireFunction = <T extends (...args: never[]) => unknown>(
   module: InvitationModule,
   name: string,
+  typeWitness?: T,
 ): T => {
+  void typeWitness;
   const value = module[name];
   if (typeof value !== 'function') {
     throw new Error(`EXPECTED_RED[${OWNER}][${name}]: invitation policy is not implemented`);
@@ -94,7 +101,7 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       state: { status: 'queued', queuePosition: 2 },
       effects: [],
     });
-    expect(JSON.stringify(queued)).not.toMatch(/expiresAt|secret|send-invitation/iu);
+    expect(safeJson(queued)).not.toMatch(/expiresAt|secret|send-invitation/iu);
 
     const queue = [
       (queued as { state: Readonly<Record<string, unknown>> }).state,
@@ -135,7 +142,7 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
       ) => Readonly<Record<string, unknown>>
     >(module, 'decideBetaInvitationTransition');
     const issued = admit(admissionInput()) as { state: Readonly<Record<string, unknown>> };
-    const originalExpiry = issued.state.expiresAt;
+    const originalExpiry = issued.state['expiresAt'];
 
     const preserve = transition(issued.state, {
       kind: 'resend',
@@ -145,7 +152,7 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
     });
     expect(preserve).toMatchObject({
       accepted: true,
-      state: { expiresAt: originalExpiry, recipientKey: issued.state.recipientKey },
+      state: { expiresAt: originalExpiry, recipientKey: issued.state['recipientKey'] },
       effects: [
         { kind: 'invalidate-secret' },
         { kind: 'issue-secret' },
@@ -423,6 +430,6 @@ describe('D-88 through D-98 deterministic private-beta invitation policy', () =>
     expect(delivered.state).toMatchObject({
       events: [{ kind: 'created' }, { kind: 'sent' }, { kind: 'delivered' }],
     });
-    expect(JSON.stringify(delivered.state)).not.toMatch(/open-pixel|click|fingerprint|device-id/iu);
+    expect(safeJson(delivered.state)).not.toMatch(/open-pixel|click|fingerprint|device-id/iu);
   });
 });

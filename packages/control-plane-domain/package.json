@@ -5,11 +5,12 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./admin/invitations": "./src/admin/invitations.ts",
     "./runtime-admin-authority": "./src/runtime-admin-authority.ts",
     "./runtime-control-plane": "./src/runtime-control-plane.ts"
   },
   "scripts": {
-    "test": "vitest run src/devices src/identity src/entitlements",
+    "test": "vitest run src/devices src/identity src/entitlements src/admin",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
