@@ -2337,7 +2337,7 @@ summary:focus-visible,
   .admin-header__mobile-context {
     display: grid;
     flex: 1 1 auto;
-    gap: 1px;
+    gap: var(--lb-space-1);
     min-inline-size: 96px;
   }
 
