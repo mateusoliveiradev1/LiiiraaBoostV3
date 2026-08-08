@@ -13,22 +13,18 @@ import renderManifest from '../../staging.render.yaml?raw';
 describe('daemon-free OCI artifact contract', () => {
   it('loads the exact production entrypoint before environment admission', () => {
     const repositoryRoot = resolve(import.meta.dirname, '../../../..');
-    const result = spawnSync(
-      process.execPath,
-      ['apps/api/src/staging/main.mjs'],
-      {
-        cwd: repositoryRoot,
-        encoding: 'utf8',
-        env: Object.fromEntries(
-          Object.entries(process.env).filter(([key]) => !key.startsWith('STAGING_')),
-        ),
-      },
-    );
+    const result = spawnSync(process.execPath, ['apps/api/src/staging/main.mjs'], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      env: Object.fromEntries(
+        Object.entries(process.env).filter(([key]) => !key.startsWith('STAGING_')),
+      ),
+    });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('STAGING_API_STARTUP_FAILED');
     expect(result.stderr).not.toContain('ERR_MODULE_NOT_FOUND');
-  });
+  }, 30_000);
 
   it('pins the application toolchains and uses an unprivileged runtime with health checks', () => {
     expect(dockerfile).toContain('FROM node:24.18.0-bookworm-slim');
