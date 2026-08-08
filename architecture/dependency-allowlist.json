@@ -540,6 +540,18 @@
       "verdict": "SUS: too-new"
     },
     {
+      "name": "@vercel/blob",
+      "version": "2.7.0",
+      "ecosystem": "npm",
+      "registry": "https://registry.npmjs.org",
+      "repository": "https://github.com/vercel/storage",
+      "license": "Apache-2.0",
+      "purpose": "Authenticated private delivery of the numbered Phase 4 Internal Windows installer",
+      "disposition": "REVIEW_REQUIRED",
+      "reviewReason": "Phase 4 uses the current official Vercel Private Blob SDK; user approved the invited-only private download scope and this exact free Apache-2.0 package identity on 2026-08-08.",
+      "allowedLifecycleScripts": {}
+    },
+    {
       "name": "@vitejs/plugin-react",
       "version": "6.0.4",
       "ecosystem": "npm",

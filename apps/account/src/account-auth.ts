@@ -71,7 +71,7 @@ const safeJson = async (response: Response): Promise<unknown> => {
 const roles = new Set(['tester', 'support', 'operations', 'security', 'audit']);
 const sessionKinds = new Set(['web', 'admin', 'desktop']);
 
-const admitActor = (value: unknown): AccountAuthActor | null => {
+export const admitAccountAuthActor = (value: unknown): AccountAuthActor | null => {
   if (
     !isRecord(value) ||
     typeof value['accountId'] !== 'string' ||
@@ -91,7 +91,7 @@ const admitActor = (value: unknown): AccountAuthActor | null => {
 };
 
 const actorFromBody = (value: unknown): AccountAuthActor | null =>
-  isRecord(value) ? admitActor(value['actor']) : null;
+  isRecord(value) ? admitAccountAuthActor(value['actor']) : null;
 
 const admitLoopbackCallback = (value: unknown, expectedState: string): string | null => {
   if (typeof value !== 'string' || value.length > 4_096) return null;

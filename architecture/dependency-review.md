@@ -6,7 +6,7 @@
 
 No dependency package has been installed. The verifier fetched public registry endpoints without registry credentials, confirmed every exact identity and version, compared canonical repositories and license expectations, and rejected lifecycle-script drift.
 
-The 23 entries under **Review required before installation** need explicit human approval because the research legitimacy audit classified their recent official releases as `SUS: too-new`. That classification is a review trigger, not evidence of a malicious package.
+The 24 entries under **Review required before installation** need explicit human approval because the research legitimacy audit classified their recent official releases as `SUS: too-new`. That classification is a review trigger, not evidence of a malicious package.
 
 ## Review required before installation
 
@@ -24,6 +24,7 @@ The 23 entries under **Review required before installation** need explicit human
 | `@typespec/http@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fhttp/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/json-schema@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fjson-schema/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
 | `@typespec/openapi3@1.14.0` | npm | [verified exact version](https://registry.npmjs.org/%40typespec%2Fopenapi3/1.14.0) | [https://github.com/microsoft/typespec](https://github.com/microsoft/typespec) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
+| `@vercel/blob@2.7.0` | npm | [verified exact version](https://registry.npmjs.org/%40vercel%2Fblob/2.7.0) | [https://github.com/vercel/storage](https://github.com/vercel/storage) | `Apache-2.0` | None | Phase 4 uses the current official Vercel Private Blob SDK; user approved the invited-only private download scope and this exact free Apache-2.0 package identity on 2026-08-08. |
 | `better-auth@1.6.25` | npm | [verified exact version](https://registry.npmjs.org/better-auth/1.6.25) | [https://github.com/better-auth/better-auth](https://github.com/better-auth/better-auth) | `MIT` | None | Phase 4 legitimacy audit flagged this recent official release as SUS: too-new; user approved this exact identity and version on 2026-08-04 after the bounded identity spike passed. |
 | `dependency-cruiser@18.1.0` | npm | [verified exact version](https://registry.npmjs.org/dependency-cruiser/18.1.0) | [https://github.com/sverweij/dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | `MIT` | `postpack`: `git restore package.json bin src types configs`<br>`prepack`: `npm-run-all --node-run prepack:format-src-with-tabs prepack:clean-pkg-json`<br>`prepare`: `husky` | Research legitimacy audit flagged the recent official release as too new; published metadata also declares packaging lifecycle scripts. |
 | `eslint@10.8.0` | npm | [verified exact version](https://registry.npmjs.org/eslint/10.8.0) | [https://github.com/eslint/eslint](https://github.com/eslint/eslint) | `MIT` | None | Research legitimacy audit flagged the recent official release as too new. |
@@ -103,6 +104,7 @@ npm:@typespec/compiler@1.14.0
 npm:@typespec/http@1.14.0
 npm:@typespec/json-schema@1.14.0
 npm:@typespec/openapi3@1.14.0
+npm:@vercel/blob@2.7.0
 npm:ajv@8.20.0
 npm:better-auth@1.6.25
 npm:dependency-cruiser@18.1.0

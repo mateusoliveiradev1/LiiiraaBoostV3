@@ -4,10 +4,11 @@ import {
   authenticateInternalDownload,
   createInternalDownloadHandler,
   resolveInternalDownloadArtifact,
+  type InternalDownloadArtifact,
   type InternalDownloadBlob,
 } from './internal-download';
 
-const artifact = Object.freeze({
+const artifact: InternalDownloadArtifact = Object.freeze({
   buildId: 'internal-023001',
   fileName: 'Liiiraa Boost_0.0.1_x64-setup.exe',
   pathname: 'internal/windows/internal-023001/Liiiraa Boost_0.0.1_x64-setup.exe',
@@ -41,13 +42,14 @@ describe('private Internal installer delivery', () => {
       }),
     ).toEqual(artifact);
 
-    for (const invalid of [
+    const invalidArtifacts: ReadonlyArray<Partial<typeof artifact>> = [
       {},
       { ...artifact, pathname: 'https://public.example.test/setup.exe' },
       { ...artifact, pathname: '../setup.exe' },
       { ...artifact, pathname: 'internal/windows/other/setup.exe' },
       { ...artifact, sha256: 'not-a-digest' },
-    ]) {
+    ];
+    for (const invalid of invalidArtifacts) {
       expect(
         resolveInternalDownloadArtifact({
           INTERNAL_DOWNLOAD_BUILD_ID: invalid.buildId,
@@ -154,7 +156,9 @@ describe('private Internal installer delivery', () => {
     );
     expect(response.headers.get('cache-control')).toBe('private, no-store, max-age=0');
     expect(response.headers.get('x-content-type-options')).toBe('nosniff');
-    expect(response.headers.get('content-security-policy')).toBe("default-src 'none'; frame-ancestors 'none'");
+    expect(response.headers.get('content-security-policy')).toBe(
+      "default-src 'none'; frame-ancestors 'none'",
+    );
     expect(response.headers.get('location')).toBeNull();
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
   });
