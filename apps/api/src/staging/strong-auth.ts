@@ -420,7 +420,15 @@ export const createStagingStrongAuth = ({
 
   return Object.freeze({
     async status(actor: IdentityActor) {
-      return { enabled: (await repository.loadTotpFactor(actor.accountId)) !== null };
+      const factor = await repository.loadTotpFactor(actor.accountId);
+      return factor === null
+        ? { enabled: false as const }
+        : {
+            enabled: true as const,
+            factor: 'totp' as const,
+            methodId: factor.factorId,
+            verifiedAt: factor.verifiedAt,
+          };
     },
 
     beginTotpEnrollment(actor: IdentityActor) {

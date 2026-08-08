@@ -25,12 +25,21 @@ export type RealIdentityRouteAuthority = Pick<
   | 'updateProfile'
 >;
 
+export type RealAccountSecurityMethodProjection = Readonly<{
+  factor: 'password' | 'passkey' | 'totp' | 'recovery-code';
+  methodId: string;
+  verifiedAt: string;
+}>;
+
 export interface RealIdentityRouteDependencies {
   readonly accountOrigin: string;
   readonly adminOrigin: string;
   readonly authority: RealIdentityRouteAuthority;
   readonly csrfSecret: string;
   readonly issuer: string;
+  readonly resolveSecurityMethods: (
+    actor: IdentityActor,
+  ) => Promise<readonly RealAccountSecurityMethodProjection[]>;
   readonly resolveSubscription: (
     actor: IdentityActor,
     correlationId: string,
@@ -136,6 +145,7 @@ const sessionProjection = (actor: IdentityActor, correlation: string): SessionPr
 const accountProjection = (
   actor: IdentityActor,
   correlation: string,
+  securityMethods: readonly RealAccountSecurityMethodProjection[],
   subscription: SubscriptionProjectionJson,
 ) => {
   const account: AccountProjectionJson = {
@@ -164,7 +174,7 @@ const accountProjection = (
   return Object.freeze({
     account,
     provenance: 'online' as const,
-    securityMethods: Object.freeze([]),
+    securityMethods: Object.freeze([...securityMethods]),
     sessions: Object.freeze([sessionProjection(actor, correlation)]),
     subscription,
     invoices: Object.freeze([]),
@@ -359,8 +369,16 @@ export const registerRealIdentityRoutes = (
     const resolved = await resolveActor(request);
     if (resolved === null) return noStore(reply).code(401).send({ code: 'UNAUTHORIZED' });
     const correlation = correlationId(request);
-    const subscription = await dependencies.resolveSubscription(resolved.actor, correlation);
-    const projection = accountProjection(resolved.actor, correlation, subscription);
+    const [securityMethods, subscription] = await Promise.all([
+      dependencies.resolveSecurityMethods(resolved.actor),
+      dependencies.resolveSubscription(resolved.actor, correlation),
+    ]);
+    const projection = accountProjection(
+      resolved.actor,
+      correlation,
+      securityMethods,
+      subscription,
+    );
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
 
@@ -386,8 +404,16 @@ export const registerRealIdentityRoutes = (
     });
     if (!result.ok) {
       const correlation = correlationId(request);
-      const subscription = await dependencies.resolveSubscription(resolved.actor, correlation);
-      const projection = accountProjection(resolved.actor, correlation, subscription);
+      const [securityMethods, subscription] = await Promise.all([
+        dependencies.resolveSecurityMethods(resolved.actor),
+        dependencies.resolveSubscription(resolved.actor, correlation),
+      ]);
+      const projection = accountProjection(
+        resolved.actor,
+        correlation,
+        securityMethods,
+        subscription,
+      );
       return noStore(reply)
         .code(result.code === 'CONFLICT' ? 409 : 400)
         .send({
@@ -398,8 +424,11 @@ export const registerRealIdentityRoutes = (
         });
     }
     const correlation = correlationId(request);
-    const subscription = await dependencies.resolveSubscription(result.actor, correlation);
-    const projection = accountProjection(result.actor, correlation, subscription);
+    const [securityMethods, subscription] = await Promise.all([
+      dependencies.resolveSecurityMethods(result.actor),
+      dependencies.resolveSubscription(result.actor, correlation),
+    ]);
+    const projection = accountProjection(result.actor, correlation, securityMethods, subscription);
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
   return Promise.resolve();

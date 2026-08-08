@@ -15,19 +15,17 @@ import { ProductLockup } from './public-product-lockup';
 export type PublicPillarId = (typeof publicNavigation)[number]['id'];
 
 export type PublicNavigationCopy = Readonly<{
+  account: string;
   current: string;
   download: string;
   menu: string;
   navigation: Readonly<Record<PublicPillarId, string>>;
   primaryNavigation: string;
   search: string;
-  signIn: string;
-  signUp: string;
 }>;
 
 export type PublicAccountLinks = Readonly<{
-  signIn: string;
-  signUp: string;
+  account: string;
 }>;
 
 export type PublicFooterGroupId = 'product' | 'resources' | 'company' | 'legal';
@@ -287,11 +285,8 @@ export const PublicNavigation = ({
         >
           {copy.search}
         </a>
-        <a className="public-action public-action--quiet" href={accountLinks.signIn}>
-          {copy.signIn}
-        </a>
-        <a className="public-action public-action--primary" href={accountLinks.signUp}>
-          {copy.signUp}
+        <a className="public-action public-action--primary" href={accountLinks.account}>
+          {copy.account}
         </a>
       </div>
 
@@ -312,8 +307,7 @@ export const PublicNavigation = ({
           </nav>
           <div className="public-mobile-menu__actions">
             <a href={publicBoundaryHref('public-search', locale)}>{copy.search}</a>
-            <a href={accountLinks.signIn}>{copy.signIn}</a>
-            <a href={accountLinks.signUp}>{copy.signUp}</a>
+            <a href={accountLinks.account}>{copy.account}</a>
           </div>
         </div>
       </details>

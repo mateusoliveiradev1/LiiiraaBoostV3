@@ -37,6 +37,7 @@ type PublicCopy = PublicFooterCopy &
 
 const COPY = Object.freeze({
   'pt-BR': Object.freeze({
+    account: 'Minha conta',
     brandDescription: 'Otimização de jogos explicável, mensurável e reversível para Windows.',
     copyright: '© Liiiraa Boost · Web v1.0.0',
     current: 'página atual',
@@ -80,11 +81,10 @@ const COPY = Object.freeze({
     primaryNavigation: 'Navegação principal',
     promise: 'Prepare seu PC. Prove o resultado. Restaure com controle.',
     search: 'Pesquisar',
-    signIn: 'Entrar',
-    signUp: 'Criar conta',
     skip: 'Ir para o conteúdo principal',
   }),
   en: Object.freeze({
+    account: 'My account',
     brandDescription: 'Explainable, measurable, reversible Windows gaming optimization.',
     copyright: '© Liiiraa Boost · Web v1.0.0',
     current: 'current page',
@@ -128,8 +128,6 @@ const COPY = Object.freeze({
     primaryNavigation: 'Primary navigation',
     promise: 'Prepare your PC. Prove the result. Restore with control.',
     search: 'Search',
-    signIn: 'Sign in',
-    signUp: 'Create account',
     skip: 'Skip to main content',
   }),
 } satisfies Record<(typeof routing.locales)[number], PublicCopy>);
@@ -194,8 +192,7 @@ export default async function PublicLocaleLayout({ children, params }: PublicLoc
     process.env['VERCEL'] === '1',
   );
   const accountLinks = Object.freeze({
-    signIn: accountRouteBoundaryHref('account-sign-in', locale, accountOrigin),
-    signUp: accountRouteBoundaryHref('account-sign-up', locale, accountOrigin),
+    account: accountRouteBoundaryHref('account-overview', locale, accountOrigin),
   });
 
   return (

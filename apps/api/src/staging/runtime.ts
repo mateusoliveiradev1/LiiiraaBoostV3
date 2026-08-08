@@ -2077,6 +2077,18 @@ export const buildRealStagingApp = async (
     authority: identity,
     csrfSecret: secret,
     issuer,
+    resolveSecurityMethods: async (actor) => {
+      const status = await strongAuth.status(actor);
+      return status.enabled
+        ? [
+            {
+              factor: status.factor,
+              methodId: status.methodId,
+              verifiedAt: status.verifiedAt,
+            },
+          ]
+        : [];
+    },
     resolveSubscription: (actor, correlation) =>
       resolveStagingSubscription(database, actor, correlation),
   });

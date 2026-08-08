@@ -39,7 +39,7 @@ export const localizedPublicHref = (
 export const publicBoundaryHref = (routeId: string, locale: WebLocale): string =>
   localizedPublicHref(publicRouteById(routeId), locale);
 
-type PublicAccountRouteId = 'account-sign-in' | 'account-sign-up';
+type PublicAccountRouteId = 'account-overview' | 'account-sign-in' | 'account-sign-up';
 
 export const STAGING_ACCOUNT_ORIGIN = 'https://liiiraa-boost-account-staging.vercel.app';
 

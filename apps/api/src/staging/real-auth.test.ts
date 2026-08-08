@@ -79,25 +79,38 @@ const authority = () => {
   } satisfies RealIdentityRouteAuthority;
 };
 
-const createApp = async () => {
+const createApp = async ({ totpEnabled = false } = {}) => {
   const app = Fastify();
   const identity = authority();
+  let currentTotpEnabled = totpEnabled;
   const strongAuth = {
-    status: vi.fn(() => Promise.resolve({ enabled: false })),
+    status: vi.fn(() =>
+      Promise.resolve(
+        currentTotpEnabled
+          ? {
+              enabled: true as const,
+              factor: 'totp' as const,
+              methodId: '00000000-0000-4000-8000-000000000004',
+              verifiedAt: '2030-01-01T00:00:00.000Z',
+            }
+          : { enabled: false as const },
+      ),
+    ),
     beginTotpEnrollment: vi.fn(() => ({
       enrollmentToken: 'sealed-enrollment-token',
       expiresAt: '2030-01-01T00:10:00.000Z',
       otpauthUri: 'otpauth://totp/Liiiraa%20Boost%3Atester%40example.com',
       secret: 'ABCDEFGHIJKLMNOPQRSTUVWX23456789',
     })),
-    confirmTotpEnrollment: vi.fn(() =>
-      Promise.resolve({
+    confirmTotpEnrollment: vi.fn(() => {
+      currentTotpEnabled = true;
+      return Promise.resolve({
         ok: true as const,
         factor: 'totp' as const,
         factorId: '00000000-0000-4000-8000-000000000004',
         verifiedAt: '2030-01-01T00:00:00.000Z',
-      }),
-    ),
+      });
+    }),
     verifyTotpStepUp: vi.fn(() =>
       Promise.resolve({
         ok: true as const,
@@ -115,6 +128,18 @@ const createApp = async () => {
     authority: identity,
     csrfSecret,
     issuer,
+    resolveSecurityMethods: async (currentActor) => {
+      const status = await strongAuth.status(currentActor);
+      return status.enabled
+        ? [
+            {
+              factor: status.factor,
+              methodId: status.methodId,
+              verifiedAt: status.verifiedAt,
+            },
+          ]
+        : [];
+    },
     resolveSubscription: vi.fn(() =>
       Promise.resolve({
         schemaVersion: '1.0' as const,
@@ -137,9 +162,7 @@ const createApp = async () => {
     authority: strongAuth,
     csrfSecret,
     resolveActor: async (request) => {
-      const match = /(?:^|;\s*)__Host-liiiraa_session=([^;]+)/u.exec(
-        request.headers.cookie ?? '',
-      );
+      const match = /(?:^|;\s*)__Host-liiiraa_session=([^;]+)/u.exec(request.headers.cookie ?? '');
       return match?.[1] === undefined
         ? null
         : identity.resolveCredential(decodeURIComponent(match[1]));
@@ -222,7 +245,7 @@ describe('real staging authentication routes', () => {
   });
 
   it('creates an invited account, persists a secure cookie, projects real account state and revokes logout', async () => {
-    const { app, identity } = await createApp();
+    const { app, identity, strongAuth } = await createApp({ totpEnabled: true });
     expect((await app.inject({ method: 'GET', url: '/v1/account' })).statusCode).toBe(401);
     const csrfToken = await csrf(app);
     const signup = await app.inject({
@@ -257,8 +280,16 @@ describe('real staging authentication routes', () => {
         provenance: 'postgres-authority',
       },
       provenance: 'online',
+      securityMethods: [
+        {
+          factor: 'totp',
+          methodId: '00000000-0000-4000-8000-000000000004',
+          verifiedAt: '2030-01-01T00:00:00.000Z',
+        },
+      ],
       subscription: { plan: 'premium', state: 'active' },
     });
+    expect(strongAuth.status).toHaveBeenCalledWith(actor);
     const projection = account.json<{ account: unknown; subscription: unknown }>();
     expect(controlPlaneDocumentValidator(projection.account)).toBe(true);
     expect(controlPlaneDocumentValidator(projection.subscription)).toBe(true);

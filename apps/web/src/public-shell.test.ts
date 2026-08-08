@@ -142,26 +142,19 @@ describe('public shell', () => {
     expect(navigationSource).not.toContain('public-mobile-locale');
   });
 
-  it('exposes localized sign-in and registration calls to the stable account origin', () => {
+  it('uses one neutral account destination so isolated cookies never look like a logout', () => {
     const accountOrigin = 'https://liiiraa-boost-account-staging.vercel.app';
 
     expect(resolveAccountBoundaryOrigin(undefined, true)).toBe(accountOrigin);
 
-    expect(accountRouteBoundaryHref('account-sign-in', 'pt-BR', accountOrigin)).toBe(
-      `${accountOrigin}/pt-BR/login`,
+    expect(accountRouteBoundaryHref('account-overview', 'pt-BR', accountOrigin)).toBe(
+      `${accountOrigin}/pt-BR/account`,
     );
-    expect(accountRouteBoundaryHref('account-sign-up', 'en', accountOrigin)).toBe(
-      `${accountOrigin}/en/register`,
-    );
-    expect(accountRouteBoundaryHref('account-sign-up', 'pt-BR', accountOrigin)).toBe(
-      `${accountOrigin}/pt-BR/cadastro`,
-    );
-    expect(layoutSource).toContain("signIn: 'Entrar'");
-    expect(layoutSource).toContain("signUp: 'Criar conta'");
-    expect(layoutSource).toContain("signIn: 'Sign in'");
-    expect(layoutSource).toContain("signUp: 'Create account'");
-    expect(navigationSource).toContain('href={accountLinks.signIn}');
-    expect(navigationSource).toContain('href={accountLinks.signUp}');
+    expect(layoutSource).toContain("account: 'Minha conta'");
+    expect(layoutSource).toContain("account: 'My account'");
+    expect(navigationSource).toContain('href={accountLinks.account}');
+    expect(navigationSource).not.toContain('href={accountLinks.signIn}');
+    expect(navigationSource).not.toContain('href={accountLinks.signUp}');
   });
 
   it('uses the approved product lockup without exposing substitute initials', () => {
@@ -204,7 +197,9 @@ describe('public shell', () => {
     expect(navigationSource).toContain('className="public-mobile-menu__icon"');
     expect(navigationSource).toContain('className="public-visually-hidden">{copy.menu}');
     expect(navigationSource).not.toContain('<summary>{copy.menu}</summary>');
-    expect(shellStyles).toContain('.public-mobile-menu[open] .public-mobile-menu__icon-line:first-child');
+    expect(shellStyles).toContain(
+      '.public-mobile-menu[open] .public-mobile-menu__icon-line:first-child',
+    );
   });
 
   it('keeps internal origin boundaries out of ordinary visitor chrome', () => {
