@@ -165,8 +165,9 @@ test('@staging-origin-live probes deployed origin, session, and consent boundari
   await expectSecurityHeaders(request, `${publicOrigin}/pt-BR`, 'strict-origin-when-cross-origin');
   const publicLanding = await request.get(`${publicOrigin}/pt-BR`);
   const publicMarkup = await publicLanding.text();
-  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/login"`);
-  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/cadastro"`);
+  expect(publicMarkup).toContain(`href="${accountOrigin}/pt-BR/account"`);
+  expect(publicMarkup).not.toContain(`href="${accountOrigin}/pt-BR/login"`);
+  expect(publicMarkup).not.toContain(`href="${accountOrigin}/pt-BR/cadastro"`);
 
   const accountRoot = await request.get(`${accountOrigin}/pt-BR`);
   expect(accountRoot.status()).toBe(200);
