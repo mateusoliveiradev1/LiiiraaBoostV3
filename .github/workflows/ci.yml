@@ -63,7 +63,7 @@ jobs:
   full-linux:
     name: Full verification (Linux)
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Check out repository without persisted credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -113,7 +113,7 @@ jobs:
   full-windows:
     name: Full verification (Windows)
     runs-on: windows-2025
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Check out repository without persisted credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
