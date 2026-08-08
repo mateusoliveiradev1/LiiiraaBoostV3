@@ -19,15 +19,19 @@ describe('published desktop composition', () => {
     const html = readFileSync(resolve(desktopRoot, 'index.html'), 'utf8');
     const playwrightConfig = readFileSync(resolve(desktopRoot, 'playwright.config.ts'), 'utf8');
     const productionIndex = readFileSync(resolve(sourceRoot, 'production-index.tsx'), 'utf8');
-    const productionApp = readFileSync(resolve(sourceRoot, 'production-app.tsx'), 'utf8');
+    const productionApp = readFileSync(resolve(sourceRoot, 'app.tsx'), 'utf8');
     const viteConfig = readFileSync(resolve(desktopRoot, 'vite.config.ts'), 'utf8');
 
     expect(html).toContain('/src/production-index.tsx');
     expect(html).not.toContain('/src/index.ts');
-    expect(productionIndex).toContain("from './production-app.js'");
-    expect(productionApp).not.toMatch(/from ['"]\.\/app(?:\.js)?['"]/u);
-    expect(productionApp).not.toMatch(/premium-operations(?:\.js)?['"]/u);
-    expect(productionApp).not.toMatch(/premium-updater(?:\.js)?['"]/u);
+    expect(productionIndex).toContain("from './app.js'");
+    expect(productionIndex).toContain('<DesktopApp />');
+    expect(productionIndex).not.toContain("from './production-app.js'");
+    expect(productionApp).not.toMatch(
+      /from ['"][^'"]*\/premium-operations(?:\.js)?['"]/u,
+    );
+    expect(productionApp).not.toMatch(/from ['"][^'"]*\/premium-updater(?:\.js)?['"]/u);
+    expect(productionApp).toContain("import.meta.env.PROD");
     expect(playwrightConfig).toContain(
       'pnpm exec vite build --mode browser-test && pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort',
     );
