@@ -965,6 +965,100 @@ button:focus-visible,
   background: var(--lb-surface-raised);
 }
 
+.account-internal-download {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.75fr);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: var(--lb-radius-default);
+  background: var(--lb-line-subtle);
+}
+
+.account-internal-download__artifact,
+.account-internal-download__trust {
+  background: var(--lb-surface-inset);
+}
+
+.account-internal-download__artifact {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--lb-space-5);
+  padding: var(--lb-space-7);
+}
+
+.account-internal-download__eyebrow {
+  grid-column: 1 / -1;
+  color: var(--lb-cobalt-signal);
+  font-family: var(--lb-font-data);
+  font-size: var(--lb-text-caption-size);
+  font-weight: var(--lb-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-internal-download__artifact h2,
+.account-internal-download__artifact p,
+.account-internal-download__trust p {
+  margin: 0;
+}
+
+.account-internal-download__artifact h2 {
+  margin-block-end: var(--lb-space-2);
+}
+
+.account-internal-download__action {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--lb-space-2);
+  min-block-size: 44px;
+  padding-inline: var(--lb-space-4);
+  border: 1px solid var(--lb-cobalt-action);
+  border-radius: var(--lb-radius-default);
+  color: var(--lb-primary-label);
+  background: var(--lb-cobalt-action);
+  font-size: var(--lb-text-label-size);
+  font-weight: var(--lb-weight-semibold);
+  text-decoration: none;
+}
+
+.account-internal-download__action:hover,
+.account-internal-download__action:focus-visible {
+  border-color: var(--lb-cobalt-signal);
+  background: var(--lb-surface-raised);
+}
+
+.account-internal-download__trust {
+  display: flex;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-6);
+  color: var(--lb-text-secondary);
+}
+
+.account-internal-download__trust > svg {
+  flex: 0 0 auto;
+  color: var(--lb-warning);
+}
+
+.account-internal-download__trust strong {
+  display: block;
+  margin-block-end: var(--lb-space-3);
+  color: var(--lb-primary-label);
+}
+
+.account-internal-download__trust p + p {
+  margin-block-start: var(--lb-space-3);
+}
+
+@media (max-width: 58rem) {
+  .account-internal-download {
+    grid-template-columns: 1fr;
+  }
+}
+
 .account-support__fields {
   max-inline-size: min(100%, 560px);
 }

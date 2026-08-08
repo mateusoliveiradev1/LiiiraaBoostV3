@@ -252,6 +252,59 @@ const DeviceAuthority = ({
   );
 };
 
+export const InternalDownloadsAuthority = ({ locale }: Readonly<{ locale: WebLocale }>) => (
+  <section
+    aria-labelledby="internal-download-title"
+    className="account-internal-download"
+    data-internal-download="restricted"
+  >
+    <div className="account-internal-download__artifact">
+      <span className="account-internal-download__eyebrow">
+        {locale === 'pt-BR'
+          ? 'Canal Internal · acesso convidado'
+          : 'Internal channel · invited access'}
+      </span>
+      <ProductIcon name="download" size={28} />
+      <div>
+        <h2 id="internal-download-title">
+          {locale === 'pt-BR'
+            ? 'Build interno para testes convidados'
+            : 'Internal invited-test build'}
+        </h2>
+        <p>
+          {locale === 'pt-BR'
+            ? 'Este instalador é exclusivo do beta fechado e só é entregue por esta sessão autenticada.'
+            : 'This installer is restricted to the closed beta and is delivered only through this authenticated session.'}
+        </p>
+      </div>
+      <a className="account-internal-download__action" href="/api/internal-download">
+        <ProductIcon name="download" size={18} />
+        {locale === 'pt-BR' ? 'Baixar para Windows' : 'Download for Windows'}
+      </a>
+    </div>
+    <aside className="account-internal-download__trust" role="note">
+      <ProductIcon name="warning" size={20} />
+      <div>
+        <strong>
+          {locale === 'pt-BR'
+            ? 'Ainda não é uma versão pública'
+            : 'This is not a public release yet'}
+        </strong>
+        <p>
+          {locale === 'pt-BR'
+            ? 'O build não possui assinatura pública e o Windows pode exibir um aviso durante a instalação.'
+            : 'The build does not have a public signature, so Windows may show a warning during installation.'}
+        </p>
+        <p>
+          {locale === 'pt-BR'
+            ? 'O canal público estável continua indisponível até a assinatura e a promoção final.'
+            : 'The public stable channel remains unavailable until signing and final promotion.'}
+        </p>
+      </div>
+    </aside>
+  </section>
+);
+
 const ProjectionResponsibility = ({
   locale,
   projection,
@@ -401,6 +454,8 @@ export const AccountAuthorityPage = ({
           locale={locale}
           projection={projection}
         />
+      ) : routeId === 'account-downloads' ? (
+        <InternalDownloadsAuthority locale={locale} />
       ) : (
         <ProjectionResponsibility locale={locale} projection={projection} routeId={routeId} />
       )}

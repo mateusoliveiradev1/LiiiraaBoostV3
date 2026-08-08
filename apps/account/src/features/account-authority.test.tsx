@@ -7,10 +7,7 @@ import {
   type AccountAuthorityProjection,
   type AccountAuthorityTransport,
 } from '../account-authority';
-import {
-  advanceAccountMutationPhase,
-  mapAccountAuthorityProjection,
-} from '../account-runtime';
+import { advanceAccountMutationPhase, mapAccountAuthorityProjection } from '../account-runtime';
 
 const projection = (
   overrides: Partial<AccountAuthorityProjection> = {},
