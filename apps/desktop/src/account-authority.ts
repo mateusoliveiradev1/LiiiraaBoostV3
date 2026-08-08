@@ -411,7 +411,9 @@ export class DesktopAccountAuthority {
     }
     this.#synchronizationInFlight = true;
     const sequence = ++this.#sequence;
-    this.#publish(pendingSnapshot(this.#snapshot));
+    if (this.#snapshot.state !== 'revoked') {
+      this.#publish(pendingSnapshot(this.#snapshot));
+    }
     try {
       const raw = await this.#transport.invoke(ACCOUNT_SYNC_COMMAND, { request: { trigger } });
       if (sequence !== this.#sequence) return;

@@ -180,6 +180,24 @@ describe('bounded desktop Admin handoff', () => {
 });
 
 describe('desktop account authority mutations', () => {
+  it('keeps a confirmed signed-out state stable during background refresh', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValue({ state: 'revoked', error: 'unauthorized' });
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    const publishedStates: string[] = [];
+    const unsubscribe = authority.subscribe((snapshot) => {
+      publishedStates.push(snapshot.state);
+    });
+
+    await authority.synchronize('reconnection');
+
+    expect(publishedStates).toEqual(['revoked', 'revoked']);
+    unsubscribe();
+  });
+
   it('keeps synchronizing remote account changes while the desktop stays open', async () => {
     vi.useFakeTimers();
     try {
