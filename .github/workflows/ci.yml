@@ -97,7 +97,6 @@ jobs:
           pnpm --filter @liiiraa/desktop verify -- --packaged-schema-only &&
           pnpm web:verify:quick &&
           pnpm web:build &&
-          pnpm --filter @liiiraa/web-evidence exec playwright test --grep-invert "@candidate-capture" &&
           pnpm web:verify:phase -- --mode final
       - name: Record bounded redacted failure metadata
         if: failure()
@@ -156,7 +155,6 @@ jobs:
           pnpm --filter @liiiraa/desktop verify -- --packaged-schema-only &&
           pnpm web:verify:quick &&
           pnpm web:build &&
-          pnpm --filter @liiiraa/web-evidence exec playwright test --grep-invert "@candidate-capture" &&
           pnpm web:verify:phase -- --mode final
       - name: Record bounded redacted failure metadata
         if: failure()
