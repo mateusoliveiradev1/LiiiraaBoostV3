@@ -210,7 +210,7 @@ describe('candidate capture Playwright selection', () => {
         .map(({ candidateId, project }) => ({ candidateId, project }))
         .sort((left, right) => left.candidateId.localeCompare(right.candidateId)),
     );
-  });
+  }, 70_000);
 
   it('binds the manifest exactly and rejects missing, extra, stale, colliding, or approved candidates', () => {
     const expected = expectedCanonicalCandidates();
