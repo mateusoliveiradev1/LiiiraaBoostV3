@@ -127,6 +127,24 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and settings jour
 }) => {
   test.setTimeout(60_000);
 
+  await page.addInitScript(() => {
+    const nativeRequestAnimationFrame = globalThis.requestAnimationFrame.bind(globalThis);
+    let delayNextFrame = false;
+
+    Reflect.set(globalThis, '__LIIIRAA_DELAY_NEXT_FRAME__', () => {
+      delayNextFrame = true;
+    });
+    globalThis.requestAnimationFrame = (callback) => {
+      if (!delayNextFrame) {
+        return nativeRequestAnimationFrame(callback);
+      }
+      delayNextFrame = false;
+      return globalThis.setTimeout(() => {
+        callback(globalThis.performance.now());
+      }, 100);
+    };
+  });
+
   await openDesktopTestCase(page, {
     appScale: 150,
     initialPath: '/calibration/welcome',
@@ -158,6 +176,13 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and settings jour
   await expect(page.locator('h1')).toBeFocused();
   await page.keyboard.press('Control+Shift+A');
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/activity');
+  await page.evaluate(() => {
+    const delayNextFrame = Reflect.get(globalThis, '__LIIIRAA_DELAY_NEXT_FRAME__');
+    if (typeof delayNextFrame !== 'function') {
+      throw new Error('Delayed-frame accessibility fixture is unavailable.');
+    }
+    Reflect.apply(delayNextFrame, undefined, []);
+  });
   await page.keyboard.press('Control+,');
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
     'data-route-path',
@@ -167,6 +192,7 @@ test('@a11y-visual-smoke completes command, F6, route, locale, and settings jour
   await expect(page.getByLabel('Language')).toBeVisible();
   const locale = page.locator('#desktop-locale');
   await locale.focus();
+  await page.waitForTimeout(150);
   await page.keyboard.press('Home');
   await expect(locale).toHaveValue('pt-BR');
   await expect(page.getByLabel('Idioma')).toBeVisible();

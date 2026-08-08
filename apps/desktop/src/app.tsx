@@ -1526,6 +1526,20 @@ const DesktopAppContent = ({
   const inspectorRegionRef = useRef<HTMLDivElement>(null);
   const lastOverlayInvoker = useRef<HTMLElement | null>(null);
   const navigatorRef = useRef<DesktopNavigator | null>(null);
+  const focusOwnershipRef = useRef(0);
+  const managedFocusRef = useRef(false);
+
+  useEffect(() => {
+    const claimFocus = (): void => {
+      if (!managedFocusRef.current) {
+        focusOwnershipRef.current += 1;
+      }
+    };
+    document.addEventListener('focusin', claimFocus);
+    return () => {
+      document.removeEventListener('focusin', claimFocus);
+    };
+  }, []);
 
   useEffect(() => {
     if (catalogLocale !== 'pseudo' || !hasSimulatedScenarioMarker()) {
@@ -1545,28 +1559,48 @@ const DesktopAppContent = ({
     };
   }, [catalogLocale, locale, operationalState, route.pathname]);
 
-  const focusHeading = useCallback(() => {
-    deferFocus(() => {
-      const workCanvas = workCanvasRef.current;
-      workCanvas?.scrollTo({ left: 0, top: 0 });
-      workCanvas?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
-    });
+  const runManagedFocus = useCallback((focus: () => void): void => {
+    managedFocusRef.current = true;
+    try {
+      focus();
+    } finally {
+      managedFocusRef.current = false;
+    }
   }, []);
 
-  const focusRegion = useCallback((region: DesktopF6Region) => {
-    if (region === 'inspector') {
-      setInspectorOpen(true);
-    }
+  const focusHeading = useCallback(() => {
+    const focusOwnership = focusOwnershipRef.current;
     deferFocus(() => {
-      const regions: Readonly<Record<DesktopF6Region, HTMLElement | null>> = {
-        'title-bar': titleRegionRef.current,
-        'goal-rail': goalRegionRef.current,
-        main: workCanvasRef.current,
-        inspector: inspectorRegionRef.current,
-      };
-      regions[region]?.focus();
+      if (focusOwnershipRef.current !== focusOwnership) {
+        return;
+      }
+      const workCanvas = workCanvasRef.current;
+      workCanvas?.scrollTo({ left: 0, top: 0 });
+      runManagedFocus(() => {
+        workCanvas?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+      });
     });
-  }, []);
+  }, [runManagedFocus]);
+
+  const focusRegion = useCallback(
+    (region: DesktopF6Region) => {
+      if (region === 'inspector') {
+        setInspectorOpen(true);
+      }
+      deferFocus(() => {
+        const regions: Readonly<Record<DesktopF6Region, HTMLElement | null>> = {
+          'title-bar': titleRegionRef.current,
+          'goal-rail': goalRegionRef.current,
+          main: workCanvasRef.current,
+          inspector: inspectorRegionRef.current,
+        };
+        runManagedFocus(() => {
+          regions[region]?.focus();
+        });
+      });
+    },
+    [runManagedFocus],
+  );
 
   navigatorRef.current ??= createDesktopNavigator({
     announce: setAnnouncement,
@@ -1661,8 +1695,10 @@ const DesktopAppContent = ({
 
   const restoreOverlayFocus = useCallback(() => {
     const invoker = lastOverlayInvoker.current;
-    deferFocus(() => invoker?.focus());
-  }, []);
+    deferFocus(() => {
+      runManagedFocus(() => invoker?.focus());
+    });
+  }, [runManagedFocus]);
 
   useEffect(() => {
     if (viewportWidth !== undefined || typeof globalThis.addEventListener !== 'function') {

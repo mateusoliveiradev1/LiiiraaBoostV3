@@ -33,3 +33,13 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** tooling/web-evidence/playwright.config.ts, tooling/web-evidence/src/playwright-config.test.ts
 
 ---
+
+## desktop-locale-home-key — Deferred route heading focus stole the locale selector
+
+- **Date:** 2026-08-08
+- **Error patterns:** #desktop-locale, Expected pt-BR Received en-US, Home, keyboard, requestAnimationFrame, focus
+- **Root cause:** `focusHeading` scheduled an unconditional `h1` focus through `requestAnimationFrame`; on slower runners it fired after the locale selector received focus, so `Home` targeted the heading and the controlled select remained `en-US`.
+- **Fix:** Track external focus ownership across deferred frames and suppress ownership changes during app-managed heading, F6-region, and overlay-restoration focus, preventing stale heading callbacks from overwriting newer user focus.
+- **Files changed:** apps/desktop/src/app.tsx, apps/desktop/tests/browser/accessibility.spec.ts
+
+---
