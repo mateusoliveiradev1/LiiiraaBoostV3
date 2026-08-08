@@ -656,13 +656,17 @@ Plans:
 
 **Wave 26** _(blocked on Plans 04-38, 04-39, and 04-61)_
 
+- [ ] 04-63-PLAN.md — Deliver the numbered Internal Windows installer through an authenticated private Account download.
+
+**Wave 27** _(blocked on Plan 04-63)_
+
 - [ ] 04-40-PLAN.md — Provision protected tester invitations, deploy real staging, and validate complete web/desktop/Admin authority.
 
-**Wave 27** _(blocked on Plan 04-40)_
+**Wave 28** _(blocked on Plan 04-40)_
 
 - [ ] 04-25-PLAN.md — Perform clean-Windows, complete Admin authority, consent, and rollback UAT.
 
-**Wave 28** _(blocked on Plan 04-25)_
+**Wave 29** _(blocked on Plan 04-25)_
 
 - [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence for WEB/IDEN requirements and every D-01 through D-111 decision.
 
@@ -793,7 +797,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 59/62 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 59/63 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |

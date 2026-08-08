@@ -123,6 +123,11 @@ jobs:
           GIT_SHA: ${{ github.sha }}
         run: >-
           node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid account staging origin'); const probe = new URL('/api/deployment', expected); probe.searchParams.set('revision', process.env.GIT_SHA); let exact = false; for (let attempt = 0; attempt < 90; attempt += 1) { const response = await fetch(probe, { headers: { accept: 'application/json', 'cache-control': 'no-cache' }, redirect: 'manual' }); if (response.ok) { const body = await response.json(); if (body.revision === process.env.GIT_SHA) { exact = true; break; } } await new Promise((resolve) => setTimeout(resolve, 10000)); } if (!exact) throw new Error('Account staging alias did not serve the exact Git revision'); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
+      - name: Prove private installer denies anonymous delivery
+        env:
+          ACCOUNT_STAGING_ORIGIN: ${{ steps.deploy.outputs.origin }}
+        run: >-
+          node --input-type=module --eval "const target = new URL('/api/internal-download', process.env.ACCOUNT_STAGING_ORIGIN); const response = await fetch(target, { headers: { accept: 'application/octet-stream', 'cache-control': 'no-cache' }, redirect: 'manual' }); if (response.status !== 401) throw new Error('Private installer route did not deny anonymous delivery'); if (response.headers.has('location')) throw new Error('Private installer route exposed a redirect'); if (response.headers.get('cache-control') !== 'no-store') throw new Error('Private installer denial must be no-store'); const body = await response.text(); if (/blob\.vercel-storage\.com|internal\/windows\//iu.test(body)) throw new Error('Private installer denial exposed storage identity');"
 
   deploy-admin:
     name: Deploy isolated admin staging project
