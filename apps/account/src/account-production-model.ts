@@ -56,24 +56,54 @@ const ACCOUNT_METADATA = Object.freeze({
     'account-overview': { title: 'Overview', summary: 'Review your account and product status.' },
     'account-privacy': { title: 'Privacy', summary: 'Manage consent and privacy requests.' },
     'account-profile': { title: 'Profile', summary: 'Keep your account identity up to date.' },
-    'account-security': { title: 'Security', summary: 'Review sessions and stronger sign-in methods.' },
+    'account-security': {
+      title: 'Security',
+      summary: 'Review sessions and stronger sign-in methods.',
+    },
     'account-sign-in': { title: 'Sign in', summary: 'Access your Liiiraa Boost account securely.' },
-    'account-sign-up': { title: 'Create account', summary: 'Create your invited Liiiraa Boost account.' },
-    'account-subscription': { title: 'Subscription', summary: 'Manage your plan and payment status.' },
+    'account-sign-up': {
+      title: 'Create account',
+      summary: 'Create your invited Liiiraa Boost account.',
+    },
+    'account-subscription': {
+      title: 'Subscription',
+      summary: 'Manage your plan and payment status.',
+    },
     'account-support': { title: 'Support', summary: 'Open and follow support requests.' },
   }),
   'pt-BR': Object.freeze({
     'account-device': { title: 'Dispositivo', summary: 'Gerencie o PC vinculado à sua licença.' },
     'account-downloads': { title: 'Downloads', summary: 'Baixe versões verificadas do produto.' },
     'account-invoices': { title: 'Faturas', summary: 'Consulte os registros reais de cobrança.' },
-    'account-onboarding': { title: 'Primeiros passos', summary: 'Conclua a configuração da sua conta.' },
-    'account-overview': { title: 'Visão geral', summary: 'Consulte sua conta e o estado do produto.' },
-    'account-privacy': { title: 'Privacidade', summary: 'Gerencie consentimentos e solicitações de privacidade.' },
-    'account-profile': { title: 'Perfil', summary: 'Mantenha a identidade da sua conta atualizada.' },
-    'account-security': { title: 'Segurança', summary: 'Revise sessões e métodos fortes de acesso.' },
-    'account-sign-in': { title: 'Entrar', summary: 'Acesse sua conta Liiiraa Boost com segurança.' },
+    'account-onboarding': {
+      title: 'Primeiros passos',
+      summary: 'Conclua a configuração da sua conta.',
+    },
+    'account-overview': {
+      title: 'Visão geral',
+      summary: 'Consulte sua conta e o estado do produto.',
+    },
+    'account-privacy': {
+      title: 'Privacidade',
+      summary: 'Gerencie consentimentos e solicitações de privacidade.',
+    },
+    'account-profile': {
+      title: 'Perfil',
+      summary: 'Mantenha a identidade da sua conta atualizada.',
+    },
+    'account-security': {
+      title: 'Segurança',
+      summary: 'Revise sessões e métodos fortes de acesso.',
+    },
+    'account-sign-in': {
+      title: 'Entrar',
+      summary: 'Acesse sua conta Liiiraa Boost com segurança.',
+    },
     'account-sign-up': { title: 'Criar conta', summary: 'Crie sua conta Liiiraa Boost convidada.' },
-    'account-subscription': { title: 'Assinatura', summary: 'Gerencie seu plano e estado do pagamento.' },
+    'account-subscription': {
+      title: 'Assinatura',
+      summary: 'Gerencie seu plano e estado do pagamento.',
+    },
     'account-support': { title: 'Suporte', summary: 'Abra e acompanhe solicitações de suporte.' },
   }),
 } as const satisfies Readonly<
@@ -86,6 +116,7 @@ export const getAccountRouteMetadata = (locale: WebLocale, routeId: AccountRoute
 export const ACCOUNT_GOAL_ROUTE_IDS = Object.freeze([
   'account-overview',
   'account-device',
+  'account-downloads',
   'account-subscription',
   'account-security',
   'account-support',
@@ -95,6 +126,7 @@ export type AccountGoalRoute = (typeof ACCOUNT_GOAL_ROUTE_IDS)[number];
 
 const ACCOUNT_GOAL_LABELS = Object.freeze({
   'account-device': { 'pt-BR': 'PCs e licenças', en: 'PCs and licenses' },
+  'account-downloads': { 'pt-BR': 'Downloads', en: 'Downloads' },
   'account-overview': { 'pt-BR': 'Início', en: 'Home' },
   'account-security': { 'pt-BR': 'Segurança e privacidade', en: 'Security and privacy' },
   'account-subscription': { 'pt-BR': 'Plano e pagamentos', en: 'Plan and payments' },
@@ -102,7 +134,8 @@ const ACCOUNT_GOAL_LABELS = Object.freeze({
 } as const satisfies Readonly<Record<AccountGoalRoute, Readonly<Record<WebLocale, string>>>>);
 
 const ACCOUNT_GOAL_RELATED_ROUTES = Object.freeze({
-  'account-device': ['account-downloads'],
+  'account-device': [],
+  'account-downloads': [],
   'account-overview': ['account-profile'],
   'account-security': ['account-privacy'],
   'account-subscription': ['account-invoices'],
@@ -121,10 +154,10 @@ export const accountGoalForRoute = (routeId: AccountRoute): AccountGoalRoute | u
     routeId === 'account-sign-in' ||
     routeId === 'account-sign-up' ||
     routeId === 'account-onboarding'
-  ) return undefined;
+  )
+    return undefined;
   if (routeId === 'account-profile') return 'account-overview';
   if (routeId === 'account-invoices') return 'account-subscription';
-  if (routeId === 'account-downloads') return 'account-device';
   if (routeId === 'account-privacy') return 'account-security';
   return routeId;
 };

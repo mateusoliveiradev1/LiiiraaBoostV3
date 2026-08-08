@@ -24,6 +24,7 @@ export type AccountPreviewRoute = (typeof ACCOUNT_ENTRY_ROUTE_IDS)[number];
 export const ACCOUNT_GOAL_ROUTE_IDS = Object.freeze([
   'account-overview',
   'account-device',
+  'account-downloads',
   'account-subscription',
   'account-security',
   'account-support',
@@ -39,6 +40,7 @@ type AccountGoalNavigationItem = Readonly<{
 
 const ACCOUNT_GOAL_LABELS = Object.freeze({
   'account-device': { 'pt-BR': 'PCs e licenças', en: 'PCs and licenses' },
+  'account-downloads': { 'pt-BR': 'Downloads', en: 'Downloads' },
   'account-overview': { 'pt-BR': 'Início', en: 'Home' },
   'account-security': { 'pt-BR': 'Segurança e privacidade', en: 'Security and privacy' },
   'account-subscription': { 'pt-BR': 'Plano e pagamentos', en: 'Plan and payments' },
@@ -46,7 +48,8 @@ const ACCOUNT_GOAL_LABELS = Object.freeze({
 } as const satisfies Readonly<Record<AccountGoalRoute, Readonly<Record<WebLocale, string>>>>);
 
 const ACCOUNT_GOAL_RELATED_ROUTES = Object.freeze({
-  'account-device': ['account-downloads'],
+  'account-device': [],
+  'account-downloads': [],
   'account-overview': ['account-profile'],
   'account-security': ['account-privacy'],
   'account-subscription': ['account-invoices'],
@@ -70,7 +73,6 @@ export const accountGoalForRoute = (routeId: AccountPreviewRoute): AccountGoalRo
   }
   if (routeId === 'account-profile') return 'account-overview';
   if (routeId === 'account-invoices') return 'account-subscription';
-  if (routeId === 'account-downloads') return 'account-device';
   if (routeId === 'account-privacy') return 'account-security';
   return routeId;
 };

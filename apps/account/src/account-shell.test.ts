@@ -18,10 +18,11 @@ import {
 } from './account-preview-model';
 
 describe('account shell', () => {
-  it('projects navigation into five goals with profile, payments, and downloads contextual', () => {
+  it('keeps downloads as a permanent account goal while secondary routes stay contextual', () => {
     expect(ACCOUNT_GOAL_ROUTE_IDS).toEqual([
       'account-overview',
       'account-device',
+      'account-downloads',
       'account-subscription',
       'account-security',
       'account-support',
@@ -29,6 +30,7 @@ describe('account shell', () => {
     expect(getAccountGoalNavigation('pt-BR').map(({ label }) => label)).toEqual([
       'Início',
       'PCs e licenças',
+      'Downloads',
       'Plano e pagamentos',
       'Segurança e privacidade',
       'Ajuda',
@@ -36,13 +38,14 @@ describe('account shell', () => {
     expect(getAccountGoalNavigation('en').map(({ label }) => label)).toEqual([
       'Home',
       'PCs and licenses',
+      'Downloads',
       'Plan and payments',
       'Security and privacy',
       'Help',
     ]);
     expect(accountGoalForRoute('account-profile')).toBe('account-overview');
     expect(accountGoalForRoute('account-invoices')).toBe('account-subscription');
-    expect(accountGoalForRoute('account-downloads')).toBe('account-device');
+    expect(accountGoalForRoute('account-downloads')).toBe('account-downloads');
     expect(accountGoalForRoute('account-privacy')).toBe('account-security');
     expect(ACCOUNT_ENTRY_ROUTE_IDS).toEqual(
       expect.arrayContaining([
