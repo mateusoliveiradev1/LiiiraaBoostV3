@@ -144,7 +144,7 @@ jobs:
         run: pnpm acceptance:check -- --mode final
       - name: Run authoritative full verification
         env:
-          TESTCONTAINERS_RYUK_DISABLED: "true"
+          POSTGRES_TEST_STRATEGY: unit
         run: pnpm verify
       - name: Record bounded redacted failure metadata
         if: failure()
