@@ -81,7 +81,7 @@ jobs:
       - name: Install frozen dependencies without lifecycle scripts
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Install exact Chromium runtime for full browser verification
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @liiiraa/web-evidence exec playwright install --with-deps chromium
       - name: Install exact Rust and Cargo toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
       - name: Select exact Rust and Cargo toolchain
@@ -131,7 +131,7 @@ jobs:
       - name: Install frozen dependencies without lifecycle scripts
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Install exact Chromium runtime for full browser verification
-        run: pnpm exec playwright install chromium
+        run: pnpm --filter @liiiraa/web-evidence exec playwright install chromium
       - name: Install exact Rust and Cargo toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
       - name: Select exact Rust and Cargo toolchain
