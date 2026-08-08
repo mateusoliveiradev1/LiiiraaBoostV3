@@ -1,8 +1,6 @@
-import { EventEmitter } from 'node:events';
+import { describe, expect, it } from 'vitest';
 
-import { describe, expect, it, vi } from 'vitest';
-
-import { closePostgresPool, normalizePostgresResult } from './database.ts';
+import { normalizePostgresPoolError, normalizePostgresResult } from './database.ts';
 
 describe('PostgreSQL result normalization', () => {
   it('normalizes a single query result', () => {
@@ -27,31 +25,17 @@ describe('PostgreSQL result normalization', () => {
     });
   });
 
-  it('waits for every PostgreSQL client socket to close before teardown continues', async () => {
-    const lifecycle = new EventEmitter() as EventEmitter & { totalCount: number };
-    lifecycle.totalCount = 2;
-    let finishDestroy: (() => void) | undefined;
-    const destroy = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          finishDestroy = resolve;
-        }),
-    );
-
-    let closed = false;
-    const closing = closePostgresPool(lifecycle, destroy).then(() => {
-      closed = true;
+  it('reduces idle pool failures to bounded metadata without connection details', () => {
+    expect(
+      normalizePostgresPoolError({
+        code: '57P01',
+        connectionParameters: {
+          password: 'must-never-leak',
+        },
+      }),
+    ).toEqual({ code: '57P01' });
+    expect(normalizePostgresPoolError(new Error('socket closed'))).toEqual({
+      code: 'postgres-pool-error',
     });
-    await vi.waitFor(() => expect(destroy).toHaveBeenCalledOnce());
-
-    lifecycle.emit('remove');
-    lifecycle.emit('remove');
-    await Promise.resolve();
-    expect(closed).toBe(false);
-
-    finishDestroy?.();
-    await closing;
-    expect(closed).toBe(true);
-    expect(lifecycle.listenerCount('remove')).toBe(0);
   });
 });

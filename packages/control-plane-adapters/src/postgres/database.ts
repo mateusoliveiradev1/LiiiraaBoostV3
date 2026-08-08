@@ -46,6 +46,14 @@ export interface ControlPlaneDatabase extends ControlPlaneMigrationDatabase {
   close(): Promise<void>;
 }
 
+export interface ControlPlanePoolError {
+  readonly code: string;
+}
+
+export interface ControlPlaneDatabaseOptions {
+  readonly onPoolError?: (error: ControlPlanePoolError) => void;
+}
+
 interface PgQueryResult {
   readonly rowCount: number | null;
   readonly rows: readonly Record<string, unknown>[];
@@ -61,41 +69,19 @@ interface PgClient {
 interface PgPool {
   connect(): Promise<PgClient>;
   end(): Promise<void>;
-  off(event: 'remove', listener: () => void): void;
-  on(event: 'remove', listener: () => void): void;
   query(statement: string, values?: readonly unknown[]): Promise<PgQueryResponse>;
-  readonly totalCount: number;
 }
 
-export const closePostgresPool = async (
-  pool: Pick<PgPool, 'off' | 'on' | 'totalCount'>,
-  destroy: () => Promise<void>,
-): Promise<void> => {
-  let pendingClients = pool.totalCount;
-  if (pendingClients === 0) {
-    await destroy();
-    return;
-  }
-
-  let resolveClientShutdown: (() => void) | undefined;
-  const clientShutdown = new Promise<void>((resolve) => {
-    resolveClientShutdown = resolve;
+export const normalizePostgresPoolError = (error: unknown): ControlPlanePoolError =>
+  Object.freeze({
+    code:
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : 'postgres-pool-error',
   });
-  const handleClientRemoval = () => {
-    pendingClients -= 1;
-    if (pendingClients === 0) {
-      resolveClientShutdown?.();
-    }
-  };
-
-  pool.on('remove', handleClientRemoval);
-  try {
-    await destroy();
-    await clientShutdown;
-  } finally {
-    pool.off('remove', handleClientRemoval);
-  }
-};
 
 export const normalizePostgresResult = <TRow extends Record<string, unknown>>(
   response: PgQueryResponse,
@@ -115,17 +101,24 @@ const queryWith = async <TRow extends Record<string, unknown>>(
 ): Promise<ControlPlaneQueryResult<TRow>> =>
   normalizePostgresResult<TRow>(await executor.query(statement, values));
 
-export const createControlPlaneDatabase = (databaseUrl: string): ControlPlaneDatabase => {
+export const createControlPlaneDatabase = (
+  databaseUrl: string,
+  options: ControlPlaneDatabaseOptions = {},
+): ControlPlaneDatabase => {
   if (databaseUrl.trim().length === 0) {
     throw new Error('A PostgreSQL connection URL is required.');
   }
 
-  const pool = new pg.Pool({
+  const nativePool = new pg.Pool({
     application_name: 'liiiraa-boost-control-plane',
     connectionString: databaseUrl,
     max: 5,
     statement_timeout: 15_000,
-  }) as unknown as PgPool;
+  });
+  nativePool.on('error', (error) => {
+    options.onPoolError?.(normalizePostgresPoolError(error));
+  });
+  const pool = nativePool as unknown as PgPool;
   const kysely = new Kysely<ControlPlaneDatabaseSchema>({
     dialect: new PostgresDialect({ pool: pool as never }),
   });
@@ -160,7 +153,7 @@ export const createControlPlaneDatabase = (databaseUrl: string): ControlPlaneDat
       }
     },
     close: async (): Promise<void> => {
-      await closePostgresPool(pool, () => kysely.destroy());
+      await kysely.destroy();
     },
   });
 };
