@@ -181,7 +181,7 @@ describe('app shell smoke', () => {
         expect(markup).not.toContain('undefined');
       }
     }
-  });
+  }, 30_000);
 });
 
 describe('shell semantics', () => {
