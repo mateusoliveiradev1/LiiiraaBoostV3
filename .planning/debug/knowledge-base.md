@@ -23,3 +23,13 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** tooling/architecture-tests/src/check-workspace.test.ts
 
 ---
+
+## playwright-project-worker-drift — Playwright worker omitted CLI-selected conditional projects
+
+- **Date:** 2026-08-08
+- **Error patterns:** Project staging-origin not found, worker process, project name does not change, process.argv, --grep
+- **Root cause:** `tooling/web-evidence/playwright.config.ts` included conditional projects using only local CLI arguments; Playwright did not preserve the coordinator's `--grep` argument in the worker, so config reload removed `staging-origin` or `production-authority`.
+- **Fix:** Detect conditional modes in the coordinator, persist exact-value internal markers in `process.env`, and reuse those inherited markers when the worker reloads config without CLI filters.
+- **Files changed:** tooling/web-evidence/playwright.config.ts, tooling/web-evidence/src/playwright-config.test.ts
+
+---

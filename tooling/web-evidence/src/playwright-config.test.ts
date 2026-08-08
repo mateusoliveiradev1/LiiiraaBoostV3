@@ -1,9 +1,28 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { selectWebTestSurfaces } from '../playwright.config.js';
 
 const names = (arguments_: readonly string[]): string[] =>
   selectWebTestSurfaces(arguments_).map(({ surface }) => surface);
+
+const originalArguments = [...process.argv];
+const originalEnvironment = { ...process.env };
+
+const configuredProjectNames = async (arguments_: readonly string[]) => {
+  process.argv = ['node', 'playwright', ...arguments_];
+  vi.resetModules();
+  const { default: config } = await import('../playwright.config.js');
+  return (config.projects ?? []).map(({ name }) => name);
+};
+
+afterEach(() => {
+  process.argv = [...originalArguments];
+  for (const key of Object.keys(process.env)) {
+    if (!(key in originalEnvironment)) delete process.env[key];
+  }
+  Object.assign(process.env, originalEnvironment);
+  vi.resetModules();
+});
 
 describe('Playwright web-server selection', () => {
   it('starts every surface for bare and reporter-only full-suite commands', () => {
@@ -31,4 +50,21 @@ describe('Playwright web-server selection', () => {
       [],
     );
   });
+
+  it.each([
+    {
+      arguments_: ['tests/security-artifacts.spec.ts', '--grep', '@staging-origin-smoke'],
+      project: 'staging-origin',
+    },
+    {
+      arguments_: ['tests/admin-operations.spec.ts', '--grep', '@production-authority'],
+      project: 'production-authority',
+    },
+  ])(
+    'keeps the $project project when a worker reloads config without CLI filters',
+    async ({ arguments_, project }) => {
+      expect(await configuredProjectNames(arguments_)).toContain(project);
+      expect(await configuredProjectNames([])).toContain(project);
+    },
+  );
 });

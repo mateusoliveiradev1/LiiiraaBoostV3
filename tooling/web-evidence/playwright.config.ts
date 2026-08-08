@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { defineConfig, devices, type Project } from '@playwright/test';
 
 const FROZEN_CLOCK = '2026-01-15T12:00:00.000Z';
+const PRODUCTION_AUTHORITY_RUN_MARKER = 'LIIIRAA_PLAYWRIGHT_PRODUCTION_AUTHORITY_RUN';
+const STAGING_ORIGIN_RUN_MARKER = 'LIIIRAA_PLAYWRIGHT_STAGING_ORIGIN_RUN';
 
 type Scenario = Readonly<{ id: string; routeId: string }>;
 
@@ -152,6 +154,21 @@ const isProductionAuthorityRun = (arguments_: readonly string[]): boolean =>
       argument.includes('--project=production-authority'),
   );
 
+const resolveConditionalProjectRuns = (
+  arguments_: readonly string[],
+  environment: NodeJS.ProcessEnv = process.env,
+) => {
+  const productionAuthorityRun =
+    isProductionAuthorityRun(arguments_) || environment[PRODUCTION_AUTHORITY_RUN_MARKER] === '1';
+  const stagingOriginRun =
+    isStagingOriginRun(arguments_) || environment[STAGING_ORIGIN_RUN_MARKER] === '1';
+
+  if (productionAuthorityRun) environment[PRODUCTION_AUTHORITY_RUN_MARKER] = '1';
+  if (stagingOriginRun) environment[STAGING_ORIGIN_RUN_MARKER] = '1';
+
+  return { productionAuthorityRun, stagingOriginRun } as const;
+};
+
 export const selectWebTestSurfaces = (
   arguments_: readonly string[],
 ): readonly (typeof surfaces)[number][] => {
@@ -182,7 +199,11 @@ export const selectWebTestSurfaces = (
   );
 };
 
-const selectedSurfaces = selectWebTestSurfaces(process.argv.slice(2));
+const { productionAuthorityRun, stagingOriginRun } = resolveConditionalProjectRuns(
+  process.argv.slice(2),
+);
+const selectedSurfaces =
+  productionAuthorityRun || stagingOriginRun ? [] : selectWebTestSurfaces(process.argv.slice(2));
 const accountAuthorityRun = process.argv.some((argument) =>
   argument.includes('account-authority.spec.ts'),
 );
@@ -287,8 +308,6 @@ const productionAuthorityProject: Project = {
   },
 };
 
-const productionAuthorityRun = isProductionAuthorityRun(process.argv.slice(2));
-const stagingOriginRun = isStagingOriginRun(process.argv.slice(2));
 const webServers = productionAuthorityRun
   ? [
       {
