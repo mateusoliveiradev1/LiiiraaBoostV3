@@ -61,8 +61,41 @@ interface PgClient {
 interface PgPool {
   connect(): Promise<PgClient>;
   end(): Promise<void>;
+  off(event: 'remove', listener: () => void): void;
+  on(event: 'remove', listener: () => void): void;
   query(statement: string, values?: readonly unknown[]): Promise<PgQueryResponse>;
+  readonly totalCount: number;
 }
+
+export const closePostgresPool = async (
+  pool: Pick<PgPool, 'off' | 'on' | 'totalCount'>,
+  destroy: () => Promise<void>,
+): Promise<void> => {
+  let pendingClients = pool.totalCount;
+  if (pendingClients === 0) {
+    await destroy();
+    return;
+  }
+
+  let resolveClientShutdown: (() => void) | undefined;
+  const clientShutdown = new Promise<void>((resolve) => {
+    resolveClientShutdown = resolve;
+  });
+  const handleClientRemoval = () => {
+    pendingClients -= 1;
+    if (pendingClients === 0) {
+      resolveClientShutdown?.();
+    }
+  };
+
+  pool.on('remove', handleClientRemoval);
+  try {
+    await destroy();
+    await clientShutdown;
+  } finally {
+    pool.off('remove', handleClientRemoval);
+  }
+};
 
 export const normalizePostgresResult = <TRow extends Record<string, unknown>>(
   response: PgQueryResponse,
@@ -127,7 +160,7 @@ export const createControlPlaneDatabase = (databaseUrl: string): ControlPlaneDat
       }
     },
     close: async (): Promise<void> => {
-      await kysely.destroy();
+      await closePostgresPool(pool, () => kysely.destroy());
     },
   });
 };
