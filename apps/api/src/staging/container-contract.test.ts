@@ -98,6 +98,8 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('deploys/$RENDER_DEPLOY_ID');
     expect(workflow).toContain('for attempt in $(seq 1 90)');
     expect(workflow).toContain('after 15 minutes');
+    expect(workflow).toContain('https://api.render.com/v1/logs');
+    expect(workflow).toContain('STAGING_API_STARTUP_FAILED:');
     expect(workflow).toContain('POSTGRES_TEST_STRATEGY: unit');
     expect(workflow).toContain("hashFiles('trivy-results.sarif') != ''");
     expect(workflow).toContain('docker logout ghcr.io');

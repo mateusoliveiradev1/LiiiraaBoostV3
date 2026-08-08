@@ -274,6 +274,23 @@ jobs:
           done
           echo "Timed out waiting for the tested staging build after 15 minutes" >&2
           exit 1
+      - name: Emit bounded sanitized Render startup diagnostics
+        if: failure()
+        env:
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
+          RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          curl --fail --silent --show-error --get \
+            --header "Authorization: Bearer $RENDER_API_TOKEN" \
+            --data-urlencode "ownerId=$RENDER_OWNER_ID" \
+            --data-urlencode "resource=$RENDER_SERVICE_ID" \
+            --data-urlencode "type=app" \
+            --data-urlencode "direction=backward" \
+            --data-urlencode "limit=20" \
+            "https://api.render.com/v1/logs" |
+          node --input-type=module --eval \
+            "let input = ''; for await (const chunk of process.stdin) input += chunk; const matches = new Set(); const visit = (value) => { if (typeof value === 'string' && value.includes('STAGING_API_STARTUP_FAILED:')) matches.add(value); else if (Array.isArray(value)) value.forEach(visit); else if (value && typeof value === 'object') Object.values(value).forEach(visit); }; visit(JSON.parse(input)); const safe = [...matches].map((value) => value.replace(/postgres(?:ql)?:\\/\\/[^\\s]+/giu, '[REDACTED_DATABASE_URL]').replace(/(?:sk_(?:live|test)|whsec)_[A-Za-z0-9_]+/gu, '[REDACTED_PROVIDER_SECRET]').replace(/[\\r\\n]+/gu, ' ').slice(0, 320)); process.stdout.write(safe.length > 0 ? safe.join('\\n') + '\\n' : 'No sanitized startup diagnostic found in the last 20 Render app logs.\\n');"
       - name: Retire superseded managed Stripe staging webhooks
         env:
           STRIPE_PROVISION_ACTION: finalize
