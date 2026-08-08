@@ -34,6 +34,9 @@ describe('daemon-free OCI artifact contract', () => {
     expect(dockerfile).toContain('USER node');
     expect(dockerfile).toContain('HEALTHCHECK');
     expect(dockerfile).toContain("fetch('http://127.0.0.1:3000/health')");
+    expect(dockerfile).toContain(
+      'COPY --from=verified --chown=node:node /workspace/contracts contracts',
+    );
     expect(dockerfile).toContain('apps/api/src/staging/main.mjs');
     expect(dockerfile).toContain('CMD ["node", "apps/api/src/staging/main.mjs"]');
     expect(dockerfile).not.toContain('/workspace /workspace');

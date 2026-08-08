@@ -47,6 +47,7 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack 
 COPY --from=verified --chown=node:node /workspace/node_modules node_modules
 COPY --from=verified --chown=node:node /workspace/apps/api apps/api
 COPY --from=verified --chown=node:node /workspace/packages packages
+COPY --from=verified --chown=node:node /workspace/contracts contracts
 
 USER node
 EXPOSE 3000
