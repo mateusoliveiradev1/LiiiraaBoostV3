@@ -80,6 +80,8 @@ jobs:
         run: node tooling/supply-chain/verify-pins.mjs --check
       - name: Install frozen dependencies without lifecycle scripts
         run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact Chromium runtime for full browser verification
+        run: pnpm exec playwright install --with-deps chromium
       - name: Install exact Rust and Cargo toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
       - name: Select exact Rust and Cargo toolchain
@@ -128,6 +130,8 @@ jobs:
         run: node tooling/supply-chain/verify-pins.mjs --check
       - name: Install frozen dependencies without lifecycle scripts
         run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact Chromium runtime for full browser verification
+        run: pnpm exec playwright install chromium
       - name: Install exact Rust and Cargo toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
       - name: Select exact Rust and Cargo toolchain
@@ -139,6 +143,8 @@ jobs:
       - name: Run final acceptance preflight
         run: pnpm acceptance:check -- --mode final
       - name: Run authoritative full verification
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
         run: pnpm verify
       - name: Record bounded redacted failure metadata
         if: failure()
