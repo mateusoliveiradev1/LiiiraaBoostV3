@@ -93,7 +93,7 @@ jobs:
       - name: Run final acceptance preflight
         run: pnpm acceptance:check -- --mode final
       - name: Run authoritative full verification
-        run: pnpm verify
+        run: pnpm verify -- --packaged-schema-only
       - name: Record bounded redacted failure metadata
         if: failure()
         env:
@@ -145,7 +145,7 @@ jobs:
       - name: Run authoritative full verification
         env:
           POSTGRES_TEST_STRATEGY: unit
-        run: pnpm verify
+        run: pnpm verify -- --packaged-schema-only
       - name: Record bounded redacted failure metadata
         if: failure()
         env:

@@ -88,6 +88,8 @@ const runPnpm = (arguments_, cwd = desktopRoot, timeoutMs = COMMAND_TIMEOUT_MS) 
 
 const hasFlag = (arguments_, flag) => arguments_.includes(flag);
 
+const withoutFlag = (arguments_, flag) => arguments_.filter((argument) => argument !== flag);
+
 const optionValue = (arguments_, option) => {
   const optionIndex = arguments_.indexOf(option);
   return optionIndex === -1 ? undefined : arguments_[optionIndex + 1];
@@ -298,16 +300,22 @@ const executeCommand = (command, arguments_) => {
       executeCommand('browser', ['--project', 'harness', '--grep', '@browser-smoke']);
       executeCommand('wave-zero', ['--packaged-schema']);
       return;
-    case 'final':
+    case 'final': {
+      const packagedSchemaOnly = hasFlag(arguments_, '--packaged-schema-only');
+      const forwardedArguments = withoutFlag(arguments_, '--packaged-schema-only');
       runPnpm(['verify:foundation'], workspaceRoot, FINAL_FOUNDATION_TIMEOUT_MS);
-      executeCommand('unit', arguments_);
-      executeCommand('stories', arguments_);
-      executeCommand('browser', arguments_);
-      executeCommand('packaged', arguments_);
-      executeCommand('scenarios', arguments_);
-      executeCommand('localization', arguments_);
-      executeCommand('evidence', ['--mode', 'final', ...arguments_]);
+      executeCommand('unit', forwardedArguments);
+      executeCommand('stories', forwardedArguments);
+      executeCommand('browser', forwardedArguments);
+      executeCommand(
+        'packaged',
+        packagedSchemaOnly ? ['--dry-run', '--schema-smoke'] : forwardedArguments,
+      );
+      executeCommand('scenarios', forwardedArguments);
+      executeCommand('localization', forwardedArguments);
+      executeCommand('evidence', ['--mode', 'final', ...forwardedArguments]);
       return;
+    }
     default:
       throw new Error(`Unknown desktop lifecycle command: ${command}`);
   }

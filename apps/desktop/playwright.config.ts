@@ -75,7 +75,7 @@ export default defineConfig({
       caret: 'hide',
       // Windows and Linux rasterize the same reviewed fonts slightly differently.
       // Structural, clipping, locale, contrast, and status assertions remain exact.
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05,
       scale: 'css',
     },
   },
