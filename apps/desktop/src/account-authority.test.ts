@@ -230,6 +230,38 @@ describe('desktop account authority mutations', () => {
     }
   });
 
+  it('keeps the last confirmed projection visually stable during background refresh', async () => {
+    let resolveRefresh: ((value: unknown) => void) | undefined;
+    const refreshResponse = new Promise<unknown>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
+      .mockReturnValueOnce(refreshResponse);
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    const publishedStates: string[] = [];
+    const unsubscribe = authority.subscribe((snapshot) => {
+      publishedStates.push(snapshot.state);
+    });
+
+    const refresh = authority.synchronize('reconnection');
+    await Promise.resolve();
+
+    expect(publishedStates).toEqual(['online']);
+    expect(authority.snapshot()).toMatchObject({
+      state: 'online',
+      projection: { account: { displayName: 'Mateus Oliveira', aggregateVersion: '7' } },
+    });
+
+    resolveRefresh?.({ state: 'online', projection: projection('Mateus Oliveira', '8') });
+    await refresh;
+    expect(publishedStates).toEqual(['online', 'online']);
+    unsubscribe();
+  });
+
   it('keeps lifecycle reads from superseding an in-flight committed profile mutation', async () => {
     let resolveMutation: ((value: unknown) => void) | undefined;
     const mutationResponse = new Promise<unknown>((resolve) => {
