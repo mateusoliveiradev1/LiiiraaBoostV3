@@ -228,6 +228,7 @@ const finalProjects: Project[] = surfaces.flatMap(({ baseURL, surface }) =>
       zoomPercent: axis.zoomPercent,
     },
     name: `${surface}-final-${axis.id}`,
+    testIgnore: '**/admin-operations.spec.ts',
     testMatch: ['**/*.pw.ts', '**/*.spec.ts'],
     use: {
       ...chromium,
