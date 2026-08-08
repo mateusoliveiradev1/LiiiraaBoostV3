@@ -132,6 +132,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Install exact Chromium runtime for full browser verification
         run: pnpm --filter @liiiraa/web-evidence exec playwright install chromium
+      - name: Register isolated localhost origins
+        run: Add-Content -LiteralPath "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`n127.0.0.1 public.localhost account.localhost admin.localhost"
       - name: Install exact Rust and Cargo toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
       - name: Select exact Rust and Cargo toolchain

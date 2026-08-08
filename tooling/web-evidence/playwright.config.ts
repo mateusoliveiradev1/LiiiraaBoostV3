@@ -306,6 +306,7 @@ const webServers = productionAuthorityRun
       env:
         app === '@liiiraa/admin'
           ? {
+              LIIIRAA_ACCOUNT_ORIGIN: 'https://liiiraa-boost-account-staging.vercel.app',
               LIIIRAA_ADMIN_ORIGIN: baseURL,
               LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
             }
