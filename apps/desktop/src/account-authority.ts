@@ -327,8 +327,10 @@ const pendingSnapshot = (
     ...(localDraft === undefined ? {} : { localDraft }),
   });
 
+const browserHarnessEnabled = import.meta.env.DEV || import.meta.env.MODE === 'browser-test';
+
 const testTransport = (): AccountAuthorityTransport | undefined => {
-  if (!import.meta.env.DEV) return undefined;
+  if (!browserHarnessEnabled) return undefined;
   const globalRecord = globalThis as unknown as Readonly<Record<PropertyKey, unknown>>;
   const testState = globalRecord['__LIIIRAA_DESKTOP_TEST__'];
   const candidate = globalRecord['__LIIIRAA_ACCOUNT_AUTHORITY_TEST_TRANSPORT__'];

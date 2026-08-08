@@ -24,13 +24,15 @@ const TEST_PREMIUM_AUTHORITY_STATES = new Set([
   'verified',
 ]);
 
+const browserHarnessEnabled = import.meta.env.DEV || import.meta.env.MODE === 'browser-test';
+
 const asRecord = (value: unknown): Readonly<Record<string, unknown>> | undefined =>
   typeof value === 'object' && value !== null
     ? (value as Readonly<Record<string, unknown>>)
     : undefined;
 
 const readDesktopTestComposition = (): DesktopAppProps => {
-  if (!import.meta.env.DEV) return Object.freeze({});
+  if (!browserHarnessEnabled) return Object.freeze({});
   const testState = asRecord(Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__'));
   const scenario = asRecord(testState?.['scenario']);
   const composition = asRecord(Reflect.get(globalThis, '__LIIIRAA_DESKTOP_COMPOSITION__'));

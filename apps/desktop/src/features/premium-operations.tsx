@@ -2362,7 +2362,7 @@ const UnavailableAboutSurface = ({ locale }: { readonly locale: ShellLocale }) =
 );
 
 const explicitDevelopmentScenarioEnabled = (): boolean => {
-  if (!import.meta.env.DEV) return false;
+  if (!(import.meta.env.DEV || import.meta.env.MODE === 'browser-test')) return false;
   const testState = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_TEST__') as unknown;
   if (typeof testState !== 'object' || testState === null) return false;
   const scenario = Reflect.get(testState, 'scenario') as unknown;
@@ -2501,7 +2501,7 @@ const AboutSurface = ({
   readonly notify: (message: string, tone?: PremiumToastTone) => void;
 }) =>
   identity === undefined ? (
-    import.meta.env.DEV && explicitDevelopmentScenarioEnabled() ? (
+    explicitDevelopmentScenarioEnabled() ? (
       <DemonstrationAboutSurface locale={locale} notify={notify} />
     ) : (
       <UnavailableAboutSurface locale={locale} />
@@ -2833,7 +2833,7 @@ const ProductionPremiumOperationsSurface = ({
 };
 
 export const PremiumOperationsSurface = (props: PremiumOperationsSurfaceProps) =>
-  import.meta.env.PROD ? (
+  import.meta.env.PROD && import.meta.env.MODE !== 'browser-test' ? (
     <ProductionPremiumOperationsSurface {...props} />
   ) : (
     <DevelopmentPremiumOperationsSurface {...props} />

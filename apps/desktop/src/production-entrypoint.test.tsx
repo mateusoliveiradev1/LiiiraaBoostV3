@@ -29,7 +29,7 @@ describe('published desktop composition', () => {
     expect(productionApp).not.toMatch(/premium-operations(?:\.js)?['"]/u);
     expect(productionApp).not.toMatch(/premium-updater(?:\.js)?['"]/u);
     expect(playwrightConfig).toContain(
-      'pnpm exec vite --mode browser-test --host 127.0.0.1 --port 4173 --strictPort',
+      'pnpm exec vite build --mode browser-test && pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort',
     );
     expect(viteConfig).toContain("mode === 'browser-test'");
     expect(viteConfig).toContain("const PRODUCTION_ENTRYPOINT = '/src/production-index.tsx'");

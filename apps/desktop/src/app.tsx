@@ -1053,7 +1053,7 @@ export const DesktopRouteOutlet = ({
 }: DesktopRouteOutletProps): ReactNode => {
   const surfaceName: string = route.definition.surface;
 
-  if (import.meta.env.PROD) {
+  if (import.meta.env.PROD && import.meta.env.MODE !== 'browser-test') {
     if (surfaceName === 'ContextualHome') {
       return (
         <PremiumOperationsSurface
@@ -1901,7 +1901,9 @@ const DesktopAppContent = ({
     paidActionDecision?.allowed === false;
   const criticalState = criticalStateFor(operationalState);
   const motion = reducedMotion ?? preferences.motion === 'reduced';
-  const simulatedScenarioEnabled = import.meta.env.DEV && hasSimulatedScenarioMarker();
+  const simulatedScenarioEnabled =
+    (import.meta.env.DEV || import.meta.env.MODE === 'browser-test') &&
+    hasSimulatedScenarioMarker();
   const routeActivityEvents = useMemo(
     () => nativeState?.activityEvents ?? Object.freeze([]),
     [nativeState],
