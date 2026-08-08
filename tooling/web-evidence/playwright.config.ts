@@ -287,6 +287,7 @@ const productionAuthorityProject: Project = {
 };
 
 const productionAuthorityRun = isProductionAuthorityRun(process.argv.slice(2));
+const stagingOriginRun = isStagingOriginRun(process.argv.slice(2));
 const webServers = productionAuthorityRun
   ? [
       {
@@ -331,7 +332,12 @@ export default defineConfig({
   forbidOnly: true,
   fullyParallel: false,
   outputDir: 'test-results',
-  projects: [...quickProjects, ...finalProjects, stagingOriginProject, productionAuthorityProject],
+  projects: [
+    ...quickProjects,
+    ...finalProjects,
+    ...(stagingOriginRun ? [stagingOriginProject] : []),
+    ...(productionAuthorityRun ? [productionAuthorityProject] : []),
+  ],
   reporter: [['list']],
   retries: 0,
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',
