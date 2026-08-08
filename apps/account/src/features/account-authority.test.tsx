@@ -299,6 +299,17 @@ describe('production account authority', () => {
 });
 
 describe('account runtime composition', () => {
+  it('offers the restricted Internal installer without claiming public signing', () => {
+    const markup = readFileSync(new URL('./account-authority.tsx', import.meta.url), 'utf8');
+
+    expect(markup).toContain('data-internal-download="restricted"');
+    expect(markup).toContain('href="/api/internal-download"');
+    expect(markup).toContain('Build interno para testes convidados');
+    expect(markup).toContain('não possui assinatura pública');
+    expect(markup).toContain('O canal público estável continua indisponível');
+    expect(markup).not.toMatch(/blob\.vercel-storage\.com|BLOB_READ_WRITE_TOKEN/iu);
+  });
+
   it('preserves every interruption state until an explicit authority transition occurs', () => {
     expect(advanceAccountMutationPhase('idle', 'review')).toBe('reviewing');
     expect(advanceAccountMutationPhase('reviewing', 'require-reauth')).toBe('reauth');
