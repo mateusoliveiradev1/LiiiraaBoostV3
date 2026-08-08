@@ -52,7 +52,7 @@ const installDesktopAuth = async (page: Page, outcome: 'success' | 'failure' = '
           invoke: async (command: string) => {
             await Promise.resolve();
             if (command !== 'sync_account') throw new Error('unexpected account command');
-            return { state: 'offline' };
+            return { state: 'revoked' };
           },
         }),
         writable: false,
@@ -70,14 +70,20 @@ const openLogin = async (page: Page) =>
     windowsLocale: 'en-US',
   });
 
+const accountEmail = (page: Page) =>
+  page.getByRole('textbox', { name: /Account email|E-mail da conta/iu });
+
+const continueSecurely = (page: Page) =>
+  page.getByRole('button', { name: /Continue securely|Continuar com segurança/iu });
+
 test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] enters the account only after a real native session and stores no credential`, async ({
   page,
 }) => {
   await installDesktopAuth(page);
   await openLogin(page);
 
-  await page.getByRole('textbox', { name: 'Account email' }).fill('tester@example.com');
-  await page.getByRole('button', { name: 'Continue securely' }).click();
+  await accountEmail(page).fill('tester@example.com');
+  await continueSecurely(page).click();
   await expect(page.getByRole('status')).toContainText('browser');
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
     'data-route-path',
@@ -108,9 +114,11 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps failures generic an
 }) => {
   await installDesktopAuth(page, 'failure');
   await openLogin(page);
-  await page.getByRole('textbox', { name: 'Account email' }).fill('tester@example.com');
-  await page.getByRole('button', { name: 'Continue securely' }).click();
-  await expect(page.getByRole('alert')).toContainText('could not complete');
+  await accountEmail(page).fill('tester@example.com');
+  await continueSecurely(page).click();
+  await expect(page.getByRole('alert')).toContainText(
+    /could not complete|não foi possível concluir/iu,
+  );
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/login');
 
   await expect(page.getByRole('button', { name: 'Explore demo mode' })).toHaveCount(0);
@@ -134,10 +142,13 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] removes the prepared shor
     page.getByRole('button', { name: /Open local account preview|Abrir prévia da conta local/iu }),
   ).toHaveCount(0);
 
-  await page.getByRole('textbox', { name: 'Account email' }).fill('tester@example.com');
-  await page.getByRole('button', { name: 'Continue securely' }).click();
-  await page.getByRole('main').getByRole('button', { exact: true, name: 'Security' }).click();
-  await page.getByRole('button', { name: 'Sign out securely' }).click();
+  await accountEmail(page).fill('tester@example.com');
+  await continueSecurely(page).click();
+  await page
+    .getByRole('main')
+    .getByRole('button', { exact: true, name: /Security|Segurança/iu })
+    .click();
+  await page.getByRole('button', { name: /Sign out securely|Sair com segurança/iu }).click();
 
   await expect
     .poll(() =>

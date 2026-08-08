@@ -1,10 +1,31 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+import { defineConfig, type Plugin } from 'vite';
 
 const LOOPBACK_HOST = '127.0.0.1';
+const PRODUCTION_ENTRYPOINT = '/src/production-index.tsx';
+const BROWSER_TEST_ENTRYPOINT = '/src/index.ts';
+const PRODUCTION_OPERATIONS_MODULE = './features/premium-operations-production.js';
+const BROWSER_TEST_OPERATIONS_MODULE = fileURLToPath(
+  new URL('./src/features/premium-operations.tsx', import.meta.url),
+);
 
-export default defineConfig({
+const browserTestComposition = (): Plugin => ({
+  name: 'liiiraa-desktop-browser-test-composition',
+  enforce: 'pre',
+  resolveId(source) {
+    return source === PRODUCTION_OPERATIONS_MODULE ? BROWSER_TEST_OPERATIONS_MODULE : null;
+  },
+  transformIndexHtml(html) {
+    if (!html.includes(PRODUCTION_ENTRYPOINT)) {
+      throw new Error('Desktop browser test refused: production entrypoint was not found.');
+    }
+    return html.replace(PRODUCTION_ENTRYPOINT, BROWSER_TEST_ENTRYPOINT);
+  },
+});
+
+export default defineConfig(({ mode }) => ({
   appType: 'spa',
   base: './',
   build: {
@@ -15,7 +36,7 @@ export default defineConfig({
   },
   cacheDir: '../../node_modules/.vite/apps-desktop',
   clearScreen: false,
-  plugins: [react(), tailwindcss()],
+  plugins: [...(mode === 'browser-test' ? [browserTestComposition()] : []), react(), tailwindcss()],
   preview: {
     host: LOOPBACK_HOST,
     port: 4173,
@@ -27,4 +48,4 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
   },
-});
+}));

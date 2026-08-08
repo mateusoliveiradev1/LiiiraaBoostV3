@@ -138,7 +138,7 @@ export default defineConfig({
     video: 'off',
   },
   webServer: {
-    command: 'pnpm build && pnpm exec vite preview',
+    command: 'pnpm exec vite --mode browser-test --host 127.0.0.1 --port 4173 --strictPort',
     reuseExistingServer: false,
     stderr: 'pipe',
     stdout: 'pipe',

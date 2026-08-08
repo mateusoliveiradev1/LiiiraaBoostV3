@@ -12,6 +12,7 @@ interface ResponsiveGeometry {
   readonly routeClientWidth: number;
   readonly routeScrollWidth: number;
   readonly toolbarOverlaps: readonly string[];
+  readonly workOverflow: readonly string[];
   readonly workClientWidth: number;
   readonly workScrollWidth: number;
 }
@@ -56,6 +57,20 @@ const responsiveGeometry = async (page: Page): Promise<ResponsiveGeometry> =>
       return rect.width > 0 && rect.height > 0;
     });
     const toolbarOverlaps: string[] = [];
+    const workOverflow = [...workCanvas.querySelectorAll<HTMLElement>('*')]
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          (rect.left < workRect.left - 1 || rect.right > workRect.right + 1)
+        );
+      })
+      .slice(0, 12)
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return `${element.tagName.toLocaleLowerCase()}.${element.className} rect=${Math.round(rect.left)}..${Math.round(rect.right)} client=${String(element.clientWidth)} scroll=${String(element.scrollWidth)}`;
+      });
 
     for (let leftIndex = 0; leftIndex < toolbarItems.length; leftIndex += 1) {
       for (let rightIndex = leftIndex + 1; rightIndex < toolbarItems.length; rightIndex += 1) {
@@ -98,6 +113,7 @@ const responsiveGeometry = async (page: Page): Promise<ResponsiveGeometry> =>
       routeClientWidth: routeContent.clientWidth,
       routeScrollWidth: routeContent.scrollWidth,
       toolbarOverlaps,
+      workOverflow,
       workClientWidth: workCanvas.clientWidth,
       workScrollWidth: workCanvas.scrollWidth,
     };
@@ -145,6 +161,7 @@ for (const routeCase of routeCases) {
     expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.documentClientWidth);
     expect(geometry.goalCenterDeviation).toBeLessThanOrEqual(1);
     expect(geometry.goalMinSize).toBeGreaterThanOrEqual(40);
+    expect(geometry.workOverflow).toEqual([]);
     expect(geometry.workScrollWidth).toBeLessThanOrEqual(geometry.workClientWidth);
     expect(geometry.routeScrollWidth).toBeLessThanOrEqual(geometry.routeClientWidth);
     expect(geometry.interactiveOverflow).toEqual([]);

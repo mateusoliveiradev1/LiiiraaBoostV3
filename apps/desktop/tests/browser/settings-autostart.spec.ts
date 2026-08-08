@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 
 import { openDesktopTestCase } from './fixtures.ts';
 
-test('@premium-settings start with Windows reflects confirmed state changes', async ({ page }) => {
+test('@premium-settings start with Windows reports native failure without simulating success', async ({
+  page,
+}) => {
   await openDesktopTestCase(page, {
     initialPath: '/settings/general',
     operationalState: 'fixture',
@@ -10,25 +12,15 @@ test('@premium-settings start with Windows reflects confirmed state changes', as
     windowsLocale: 'pt-BR',
   });
 
-  await expect(
-    page.getByText('Abre o Liiiraa Boost ao entrar na sua conta do Windows.'),
-  ).toBeVisible();
-
-  const enableSwitch = page.getByRole('switch', {
+  const launchSwitch = page.getByRole('switch', {
     name: 'Ativar Iniciar com o Windows',
   });
-  await expect(enableSwitch).not.toBeChecked();
-  await enableSwitch.click();
-
-  const disableSwitch = page.getByRole('switch', {
-    name: 'Desativar Iniciar com o Windows',
-  });
-  await expect(disableSwitch).toBeChecked();
-  await expect(page.getByRole('status')).toContainText('Liiiraa Boost iniciará com o Windows.');
-
-  await disableSwitch.click();
-  await expect(enableSwitch).not.toBeChecked();
-  await expect(page.getByRole('status')).toContainText('Inicialização com o Windows desativada.');
+  await expect(launchSwitch).toBeEnabled();
+  await expect(launchSwitch).not.toBeChecked();
+  await expect(page.getByText('Não foi possível verificar. Tente novamente.')).toBeVisible();
+  await launchSwitch.click();
+  await expect(launchSwitch).not.toBeChecked();
+  await expect(page.getByText('Não foi possível verificar. Tente novamente.')).toBeVisible();
 });
 
 test('@premium-settings system theme follows live Windows color scheme changes', async ({
@@ -71,8 +63,11 @@ test('@premium-settings data actions execute and update their visible state', as
     /^liiiraa-boost-perfil-\d{4}-\d{2}-\d{2}\.json$/u,
   );
 
-  await page.getByRole('button', { name: /Reexaminar hardware/u }).click();
-  await expect(page.getByText(/Inventário demonstrativo atualizado às/u)).toBeVisible();
+  const rescanHardware = page.getByRole('button', { name: /Reexaminar hardware/u });
+  await expect(rescanHardware).toBeDisabled();
+  await expect(
+    page.getByText('Indisponível até a conexão do inventário nativo real.'),
+  ).toBeVisible();
 
   await page.getByRole('button', { name: /Rever primeira abertura/u }).click();
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute(

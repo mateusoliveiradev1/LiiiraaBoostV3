@@ -2,18 +2,16 @@ import { expect, test } from '@playwright/test';
 
 import { openDesktopTestCase } from './fixtures.ts';
 
-test('@premium-navigation login, profile, plan and optimization details are connected', async ({
+test('@premium-navigation profile, plan and optimization details are connected', async ({
   page,
 }) => {
   await openDesktopTestCase(page, {
-    initialPath: '/login',
+    initialPath: '/home',
     operationalState: 'fixture',
     scenarioId: 'S01',
     windowsLocale: 'pt-BR',
   });
 
-  await expect(page.getByRole('heading', { name: 'Seu PC, otimizado com provas.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Explorar modo demonstração' }).click();
   await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/home');
   const titleBarBox = await page.locator('.lb-title-bar').boundingBox();
   const accountBox = await page.getByRole('button', { name: 'Abrir perfil e conta' }).boundingBox();

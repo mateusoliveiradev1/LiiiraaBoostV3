@@ -18,7 +18,9 @@ const readShellGeometry = async (page: import('@playwright/test').Page) =>
       };
     };
 
-    const main = boxFor('.desktop-work-canvas > main');
+    const main = boxFor(
+      '.desktop-work-canvas > main, .desktop-work-canvas > [role="main"], .premium-route-content',
+    );
     return {
       body: boxFor('.desktop-shell-body'),
       canvas: boxFor('.desktop-work-canvas'),
@@ -95,7 +97,8 @@ test('@premium-notifications drawer is dismissible and never changes shell geome
   await activityButton.click();
   const drawer = page.getByRole('dialog', { name: 'Notificações' });
   await expect(drawer).toBeVisible();
-  await expect(drawer).toContainText('Recuperação pronta para revisão');
+  await expect(drawer).toContainText('Nenhuma notificação nova.');
+  await expect(drawer.locator('.desktop-notification-summary > strong')).toHaveText('0');
   await expect(drawer).not.toContainText('Activity');
   await expect(drawer).not.toContainText('Recovery required');
   await expect(drawer).not.toContainText('Close');

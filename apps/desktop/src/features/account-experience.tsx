@@ -997,7 +997,8 @@ const ProfileOverview = ({
                   aria-invalid={attempted && validation.bio ? 'true' : 'false'}
                   maxLength={120}
                   onChange={(event) => {
-                    setDraft((current) => ({ ...current, bio: event.currentTarget.value }));
+                    const bio = event.currentTarget.value;
+                    setDraft((current) => ({ ...current, bio }));
                   }}
                   rows={3}
                   value={draft.bio}

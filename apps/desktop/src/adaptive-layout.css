@@ -121,6 +121,12 @@ html[data-theme='light'] {
   container-type: inline-size;
 }
 
+.desktop-work-canvas > .premium-authority-boundary {
+  box-sizing: border-box;
+  inline-size: calc(100% - (var(--lb-space-3) * 2));
+  max-inline-size: calc(100% - (var(--lb-space-3) * 2));
+}
+
 @container premium-route (max-width: 900px) {
   .premium-route-header {
     align-items: flex-start;
@@ -198,6 +204,27 @@ html[data-theme='light'] {
 
   .premium-route-heading p {
     max-inline-size: 52ch;
+  }
+
+  .premium-restore-readiness {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    min-inline-size: 0;
+  }
+
+  .premium-restore-readiness > div,
+  .premium-restore-readiness > .premium-button {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .premium-restore-grid,
+  .premium-restore-grid > article,
+  .premium-restore-grid article > button,
+  .premium-restore-grid article > div,
+  .premium-restore-grid article span {
+    min-inline-size: 0;
   }
 
   .premium-uninstall-toolbar {

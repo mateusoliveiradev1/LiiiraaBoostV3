@@ -35,18 +35,13 @@ test('@premium-profile edits, validates and persists the complete local identity
     .getByRole('textbox', { name: 'Apresentação curta' })
     .fill('Perfil competitivo configurado neste dispositivo.');
 
-  await page.getByLabel('Escolher imagem do perfil').evaluate((element) => {
-    const bytes = Uint8Array.from(
-      globalThis.atob(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z1m8AAAAASUVORK5CYII=',
-      ),
-      (character) => character.codePointAt(0) ?? 0,
-    );
-    const transfer = new DataTransfer();
-    transfer.items.add(new File([bytes], 'avatar.png', { type: 'image/png' }));
-    const input = element as HTMLInputElement;
-    input.files = transfer.files;
-    input.dispatchEvent(new Event('change', { bubbles: true }));
+  await page.locator('.desktop-profile-avatar-editor input[type="file"]').setInputFiles({
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z1m8AAAAASUVORK5CYII=',
+      'base64',
+    ),
+    mimeType: 'image/png',
+    name: 'avatar.png',
   });
   await expect(page.locator('.desktop-profile-avatar-editor img')).toBeVisible();
   await page.getByRole('button', { name: 'Remover' }).click();
@@ -140,7 +135,7 @@ test('@premium-profile keeps native wheel scrolling available in the installed s
   await expect(page.getByRole('heading', { name: 'Conta e dados locais' })).toBeVisible();
 });
 
-test('@premium-profile clear confirmation and preview sign-out preserve honest local behavior', async ({
+test('@premium-profile clear confirmation and sign-out preserve honest local behavior', async ({
   page,
 }) => {
   await openProfile(page);
@@ -148,18 +143,6 @@ test('@premium-profile clear confirmation and preview sign-out preserve honest l
   await page.getByRole('button', { name: 'Editar perfil' }).click();
   await page.getByRole('textbox', { name: 'Nome de exibição' }).fill('Perfil Temporário');
   await page.getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(page.getByRole('heading', { name: 'Perfil Temporário' })).toBeVisible();
-
-  await page.getByRole('button', { name: /Sair da prévia/ }).click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/login');
-  await expect(page.getByRole('heading', { name: 'Acesse sua central de comando' })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Explorar modo demonstração' }).click();
-  await page.getByRole('button', { name: 'Abrir perfil e conta' }).click();
-  await expect(page.locator('.desktop-app-shell')).toHaveAttribute(
-    'data-route-path',
-    '/account/overview',
-  );
   await expect(page.getByRole('heading', { name: 'Perfil Temporário' })).toBeVisible();
 
   await page.getByRole('button', { name: /Limpar prévia local/ }).click();
@@ -173,6 +156,11 @@ test('@premium-profile clear confirmation and preview sign-out preserve honest l
   await expect(page.getByRole('heading', { name: 'Liiiraa Player' })).toBeVisible();
   await expect(page.locator('.lb-account-trigger-copy strong')).toHaveText('Liiiraa Player');
   await expect(page.getByText('Perfil local restaurado ao estado padrão.')).toBeVisible();
+
+  await page.getByRole('button', { name: /Sair da prévia/ }).click();
+  await expect(page.locator('.desktop-app-shell')).toHaveAttribute('data-route-path', '/login');
+  await expect(page.getByRole('heading', { name: 'Acesse sua central de comando' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Explorar modo demonstração' })).toHaveCount(0);
 });
 
 test('@premium-profile English catalog covers profile, editor and local-data actions', async ({

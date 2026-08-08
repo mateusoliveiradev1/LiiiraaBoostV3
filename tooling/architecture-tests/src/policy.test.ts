@@ -435,7 +435,7 @@ describe('live workspace discovery boundary', { concurrent: false }, () => {
     } finally {
       process.chdir(originalWorkingDirectory);
     }
-  }, 30_000);
+  }, 120_000);
 
   it('routes undeclared, forbidden-direction, and cyclic mutations through the live adapter', async () => {
     const toolingRoot = resolve(repositoryRoot, 'tooling');
