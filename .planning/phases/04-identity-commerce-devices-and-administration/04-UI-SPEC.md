@@ -13,7 +13,7 @@ created: 2026-08-06
 
 ## Scope and surface boundary
 
-- The designed product is the isolated **Admin Web** application at its own origin and deployment, not a route embedded in the public/account site and not an embedded desktop panel.
+- The designed product includes the isolated **Admin Web** application and the authenticated **Account Web** portal at their own origins and deployments; neither surface is embedded in the public site or desktop WebView.
 - The Windows desktop remains the customer optimizer. For an authorized identity it may render database-backed plan, administrator membership, and active-function labels plus an **Open Admin** action that launches the secure Admin Web in the system browser.
 - Administrative data, commands, role assumption, approvals, and audit views never render inside the desktop WebView.
 - The contract covers the whole Admin surface: overview, people, revenue, operation, support, security, system, invitations, team access, jobs, incidents, audit, search, inbox, inspectors, dialogs, sheets, and all responsive/degraded states.
@@ -336,6 +336,56 @@ Primary buttons use verb + object. Generic **OK**, **Submit**, **Yes**, **Contin
 
 No copied dashboard template, prebuilt admin theme, or remote registry block may determine information architecture or appearance.
 
+## Account portal visual recovery addendum
+
+This addendum locks the production composition for the authenticated account routes after real authority replaced the deterministic preview. It restores the authored visual hierarchy without reintroducing fixtures or simulated data.
+
+### Shell and navigation
+
+- Desktop uses a 232px navigation rail, a fluid work surface, and a 296px contextual summary. The work surface must remain the visual owner of the route.
+- The right summary is a compact account health panel, not a second navigation column. It groups plan, device, security, and support into concise rows with status, next action, and no repeated prose.
+- Administrative access becomes a compact contextual handoff near the route heading. It must not dominate every page as a full-width banner.
+- The active navigation item uses one restrained cobalt boundary and tonal fill. Other links stay neutral until hover or focus.
+- At widths below 1180px, the contextual summary becomes a disclosure below the route content. Below 760px, navigation becomes a labelled drawer/list and all content is single-column.
+
+### Shared route grammar
+
+Every authenticated route follows the same order:
+
+1. Eyebrow identifying the account domain and a single page heading.
+2. Short outcome-oriented summary and authoritative connection state.
+3. One primary work card containing the route's current state and safe next action.
+4. Supporting facts or guidance in a secondary card/ledger.
+
+Cards are bounded work regions, not decorative KPI tiles. Ordinary screens use at most one raised focal card and one supporting region. Empty space must communicate focus, not missing implementation.
+
+### Route compositions
+
+| Route | Focal composition | Supporting composition | Primary action |
+| --- | --- | --- | --- |
+| Overview | Welcome/identity heading plus three account health facts | Recommended next step with verified state | Route to the highest-value incomplete setup |
+| PCs and licenses | Device state card with icon, current binding and eligibility | License rules and replacement consequence | `Vincular PC` or `Substituir dispositivo` |
+| Downloads | Release card with channel, version/trust metadata and Windows requirement | Signing warning and install guidance | `Baixar para Windows` |
+| Plan and payments | Plan identity, access state, billing model and benefits | Billing/renewal safeguards | `Gerenciar assinatura` only when provider-backed |
+| Security and privacy | Separate method rows for passkey, MFA, recovery, and active sessions | Security posture summary and recovery guidance | Precise method-specific action |
+| Help | Empty/support state with expected response and protected-data boundary | Direct guidance and existing-case count | `Abrir solicitação` when authority supports it |
+
+### Status and copy rules
+
+- Raw transport values such as `active`, `unavailable`, and `premium` never appear untranslated in user-facing PT-BR.
+- Every status combines icon, human label, and supporting meaning. `MFA ativa`, `Nenhum PC vinculado`, and `Acesso permanente` are valid examples.
+- Destructive styling appears only when an actual destructive operation is available. A missing device must not present `Substituir dispositivo` as the default action.
+- Administrative grants are described as access state, not a commercial subscription or fake billing product.
+- Empty support, invoice, or device states include what the user can do next; bare numeric sentences are forbidden.
+
+### Production-state constraints
+
+- All displayed identity, subscription, security, invoice, support, and device values come from the admitted account projection.
+- Loading preserves the shell and final card geometry. Route changes must not replace the entire workspace with blank content.
+- Authority status is shown once near the route heading; `Conectada` is supporting confidence, never the page's main content.
+- Long email/name strings truncate visually but remain available to assistive technology and native title disclosure.
+- Existing authentication, CSRF, mutation, invitation-only download, origin isolation, and administrator handoff contracts remain unchanged.
+
 ## Verification and visual acceptance
 
 - Storybook/state fixtures cover every item in the state matrix for desktop, tablet, and mobile.
@@ -344,6 +394,7 @@ No copied dashboard template, prebuilt admin theme, or remote registry block may
 - Visual review must confirm the selected hybrid direction: Calm Briefing hierarchy, Mission Control structure, and Operational Ledger compact mode.
 - Visual review fails if cobalt exceeds its signal role, if cards become the primary page grammar, if mobile shows compressed tables, if loading causes blank/full-page flashing, or if unauthorized content appears before admission.
 - No route is complete while it contains fixture labels, hard-coded administrator/plan badges, dead controls, placeholder copy, fake final metrics, or a text-only pseudo-menu.
+- Account acceptance covers overview, device, downloads, subscription, security, and support with real projection fixtures at 1920Ã—1080, 1280Ã—800, 1024Ã—768, and 390Ã—844. It fails on bare text stacks, untranslated status values, repeated full-width admin banners, or empty regions that look unfinished.
 
 ## Checker sign-off
 
@@ -354,4 +405,4 @@ No copied dashboard template, prebuilt admin theme, or remote registry block may
 - [x] Dimension 5 Spacing: PASS — 4px-derived scale, structural exceptions, density modes, touch targets, breakpoints, and zoom behavior are explicit.
 - [x] Dimension 6 Registry Safety: PASS — shadcn/templates and third-party blocks are excluded; React Aria is constrained to behavior behind the bespoke system.
 
-**Approval:** approved 2026-08-06 (inline checker; no subagents requested)
+**Approval:** approved 2026-08-08 (account portal addendum verified inline; no subagents requested)
