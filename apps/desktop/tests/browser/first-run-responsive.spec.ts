@@ -1,13 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 
-const APP_STYLES = decodeURIComponent(
-  new URL('../../src/app.css', import.meta.url).pathname.slice(1),
+const APP_STYLES = fileURLToPath(new URL('../../src/app.css', import.meta.url));
+const FIRST_RUN_STYLES = fileURLToPath(
+  new URL('../../src/premium-experience.css', import.meta.url),
 );
-const FIRST_RUN_STYLES = decodeURIComponent(
-  new URL('../../src/premium-experience.css', import.meta.url).pathname.slice(1),
-);
-const OPERATION_STYLES = decodeURIComponent(
-  new URL('../../src/premium-operations.css', import.meta.url).pathname.slice(1),
+const OPERATION_STYLES = fileURLToPath(
+  new URL('../../src/premium-operations.css', import.meta.url),
 );
 
 test('@premium-first-run stays inside the resized window', async ({ page }) => {

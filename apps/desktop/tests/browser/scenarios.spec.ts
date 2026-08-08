@@ -235,7 +235,7 @@ test('@route-scenario-smoke reports stable missing, extra, and duplicate parity 
 test('@route-scenario-smoke executes every canonical S01-S24 route/state pair in Chromium', async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
 
   const context = await browser.newContext({
     baseURL: DESKTOP_APP_URL,

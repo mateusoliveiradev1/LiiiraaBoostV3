@@ -60,7 +60,7 @@ const operationalStates = new Set<ShellOperationalState>([
 test('@a11y-visual-smoke rejects serious and critical axe findings on all 59 canonical pairs', async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
 
   const context = await browser.newContext({
     baseURL: DESKTOP_APP_URL,

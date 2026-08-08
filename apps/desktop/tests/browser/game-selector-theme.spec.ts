@@ -1,11 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 
-const OPERATION_STYLES = decodeURIComponent(
-  new URL('../../src/premium-operations.css', import.meta.url).pathname.slice(1),
+const OPERATION_STYLES = fileURLToPath(
+  new URL('../../src/premium-operations.css', import.meta.url),
 );
-const LIGHT_THEME_STYLES = decodeURIComponent(
-  new URL('../../src/light-theme.css', import.meta.url).pathname.slice(1),
-);
+const LIGHT_THEME_STYLES = fileURLToPath(new URL('../../src/light-theme.css', import.meta.url));
 
 test('@premium-game-selector keeps native options legible in light theme', async ({ page }) => {
   await page.setContent(`

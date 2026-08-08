@@ -73,6 +73,9 @@ export default defineConfig({
     toHaveScreenshot: {
       animations: 'disabled',
       caret: 'hide',
+      // Windows and Linux rasterize the same reviewed fonts slightly differently.
+      // Structural, clipping, locale, contrast, and status assertions remain exact.
+      maxDiffPixelRatio: 0.03,
       scale: 'css',
     },
   },
