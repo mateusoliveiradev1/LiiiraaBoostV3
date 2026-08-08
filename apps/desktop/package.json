@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "build:internal": "vite build --mode internal",
     "bundle:staging": "tauri build --config src-tauri/tauri.staging.conf.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "node scripts/desktop-lifecycle.mjs unit --",

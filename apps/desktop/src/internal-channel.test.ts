@@ -8,6 +8,8 @@ const schemaUrl = new URL('../staging/internal-channel.schema.json', import.meta
 const manifestUrl = new URL('../staging/internal-channel.json', import.meta.url);
 const overlayUrl = new URL('../src-tauri/tauri.staging.conf.json', import.meta.url);
 const desktopPackageUrl = new URL('../package.json', import.meta.url);
+const viteConfigUrl = new URL('../vite.config.ts', import.meta.url);
+const premiumOperationsUrl = new URL('./features/premium-operations.tsx', import.meta.url);
 const changeNotesUrl = new URL('../staging/CHANGE-NOTES.md', import.meta.url);
 const validatorUrl = new URL('../scripts/validate-internal-channel.mjs', import.meta.url);
 const workflowUrl = new URL('.github/workflows/phase-4-surfaces.yml', repositoryRoot);
@@ -191,10 +193,20 @@ describe('internal-channel manifest contract', () => {
     const desktopPackage = JSON.parse(readFileSync(desktopPackageUrl, 'utf8')) as {
       scripts?: Readonly<Record<string, string>>;
     };
+    const overlay = JSON.parse(readFileSync(overlayUrl, 'utf8')) as {
+      build?: Readonly<{ beforeBuildCommand?: string }>;
+    };
+    const viteConfig = readFileSync(viteConfigUrl, 'utf8');
+    const premiumOperations = readFileSync(premiumOperationsUrl, 'utf8');
 
     expect(desktopPackage.scripts?.['bundle:staging']).toBe(
       'tauri build --config src-tauri/tauri.staging.conf.json',
     );
+    expect(desktopPackage.scripts?.['build:internal']).toBe('vite build --mode internal');
+    expect(overlay.build?.beforeBuildCommand).toBe('pnpm build:internal');
+    expect(viteConfig).toContain("mode === 'internal'");
+    expect(viteConfig).toContain('INTERNAL_OPERATIONS_MODULE');
+    expect(premiumOperations).toContain("import.meta.env.MODE !== 'internal'");
   });
 
   it('keeps the checked-in manifest admitted by the same runtime used in CI', async () => {

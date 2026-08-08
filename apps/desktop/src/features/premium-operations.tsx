@@ -2833,7 +2833,9 @@ const ProductionPremiumOperationsSurface = ({
 };
 
 export const PremiumOperationsSurface = (props: PremiumOperationsSurfaceProps) =>
-  import.meta.env.PROD && import.meta.env.MODE !== 'browser-test' ? (
+  import.meta.env.PROD &&
+  import.meta.env.MODE !== 'browser-test' &&
+  import.meta.env.MODE !== 'internal' ? (
     <ProductionPremiumOperationsSurface {...props} />
   ) : (
     <DevelopmentPremiumOperationsSurface {...props} />

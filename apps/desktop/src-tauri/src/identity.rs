@@ -308,7 +308,7 @@ impl LoopbackCallbackListener {
     :root{color-scheme:dark;font-family:Inter,Segoe UI,system-ui,sans-serif;background:#070a0e;color:#f1f6f8}
     *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;background:#070a0e}
     main{width:min(100%,560px);padding:40px;border:1px solid #20313a;background:#0a1015}
-    .brand{display:flex;align-items:center;gap:10px;margin:0 0 56px;font-weight:700}.mark{color:#76d5f4;font-size:22px}.brand b{color:#76d5f4}
+    .brand{display:flex;align-items:center;gap:10px;margin:0 0 56px;font-weight:700}.brand svg{width:26px;height:auto;fill:#76d5f4}.brand b{color:#76d5f4}
     .status{display:inline-flex;align-items:center;gap:8px;color:#65f0c2;font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.09em;text-transform:uppercase}
     .status::before{content:'✓';display:grid;place-items:center;width:22px;height:22px;border:1px solid #3fc99e;border-radius:50%}
     h1{max-width:12ch;margin:22px 0 14px;font-size:clamp(34px,8vw,52px);line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
@@ -319,7 +319,7 @@ impl LoopbackCallbackListener {
 </head>
 <body>
   <main>
-    <p class="brand"><span class="mark">ϟ</span><span>Liiiraa <b>Boost</b></span></p>
+    <p class="brand"><svg aria-hidden="true" viewBox="0 0 36 28"><path d="M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z"/><path d="m20.7 7.2 10.3 7-10.3 7 3-3.7 4.8-3.3-4.8-3.3-3-3.7Z"/></svg><span>Liiiraa <b>Boost</b></span></p>
     <span class="status">Conexão protegida</span>
     <h1>Login concluído.</h1>
     <p>O aplicativo já recebeu a confirmação e está abrindo sua conta com segurança.</p>

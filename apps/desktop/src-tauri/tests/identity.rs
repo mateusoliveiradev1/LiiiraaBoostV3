@@ -380,6 +380,10 @@ fn desktop_callback_listener_binds_ephemeral_loopback_and_closes_after_one_reque
     assert!(callback_response.contains("Liiiraa Boost"));
     assert!(callback_response.contains("Login concluído"));
     assert!(callback_response.contains("You can close this tab"));
+    assert!(callback_response.contains("viewBox=\"0 0 36 28\""));
+    assert!(callback_response.contains("M2 25.5 10.6 2h7.2l-5.7 15.2h9.2l-7.1 8.3H2Z"));
+    assert!(callback_response.contains("m20.7 7.2 10.3 7-10.3 7"));
+    assert!(!callback_response.contains("<span class=\"mark\">"));
     assert!(callback_response.contains("Content-Security-Policy: default-src 'none'"));
     assert_eq!(evidence.authorization_code, "one-shot-authorization-code");
     assert_eq!(evidence.state, STATE);

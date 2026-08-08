@@ -2,6 +2,10 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Liiiraa Boost",
   "identifier": "com.liiiraa.boost.internal",
+  "build": {
+    "beforeBuildCommand": "pnpm build:internal",
+    "frontendDist": "../dist"
+  },
   "bundle": {
     "createUpdaterArtifacts": false,
     "publisher": "Liiiraa Boost Internal",

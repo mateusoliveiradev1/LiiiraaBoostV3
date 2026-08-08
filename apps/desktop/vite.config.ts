@@ -11,6 +11,7 @@ const PRODUCTION_OPERATIONS_MODULE = './features/premium-operations-production.j
 const BROWSER_TEST_OPERATIONS_MODULE = fileURLToPath(
   new URL('./src/features/premium-operations.tsx', import.meta.url),
 );
+const INTERNAL_OPERATIONS_MODULE = BROWSER_TEST_OPERATIONS_MODULE;
 const DESKTOP_HTML = fileURLToPath(new URL('./index.html', import.meta.url));
 
 const browserTestComposition = (): Plugin => ({
@@ -35,6 +36,14 @@ const browserTestComposition = (): Plugin => ({
   },
 });
 
+const internalVisualFoundationComposition = (): Plugin => ({
+  name: 'liiiraa-desktop-internal-visual-foundation',
+  enforce: 'pre',
+  resolveId(source) {
+    return source === PRODUCTION_OPERATIONS_MODULE ? INTERNAL_OPERATIONS_MODULE : null;
+  },
+});
+
 export default defineConfig(({ mode }) => ({
   appType: 'spa',
   base: './',
@@ -46,7 +55,15 @@ export default defineConfig(({ mode }) => ({
   },
   cacheDir: '../../node_modules/.vite/apps-desktop',
   clearScreen: false,
-  plugins: [...(mode === 'browser-test' ? [browserTestComposition()] : []), react(), tailwindcss()],
+  plugins: [
+    ...(mode === 'browser-test'
+      ? [browserTestComposition()]
+      : mode === 'internal'
+        ? [internalVisualFoundationComposition()]
+        : []),
+    react(),
+    tailwindcss(),
+  ],
   preview: {
     host: LOOPBACK_HOST,
     port: 4173,
