@@ -4,12 +4,15 @@ import { delimiter, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const COMMAND_TIMEOUT_MS = 120_000;
+const BROWSER_TIMEOUT_MS = 15 * 60_000;
 const QUICK_FOUNDATION_TIMEOUT_MS = 10 * 60_000;
 const FINAL_FOUNDATION_TIMEOUT_MS = 25 * 60_000;
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = resolve(desktopRoot, '..', '..');
 const isPnpmNodeCli = (candidate) =>
-  candidate !== undefined && /(?:^|[\\/])pnpm\.(?:c?js|mjs)$/iu.test(candidate) && existsSync(candidate);
+  candidate !== undefined &&
+  /(?:^|[\\/])pnpm\.(?:c?js|mjs)$/iu.test(candidate) &&
+  existsSync(candidate);
 const pnpmCliPath = [
   process.env.npm_execpath,
   ...(process.env.PATH?.split(delimiter).map((pathEntry) =>
@@ -193,15 +196,19 @@ const runPlaywright = (arguments_, defaultProject) => {
     defaultProject !== undefined && !hasFlag(arguments_, '--project')
       ? ['--project', defaultProject]
       : [];
-  runPnpm([
-    'exec',
-    'playwright',
-    'test',
-    '--config',
-    'playwright.config.ts',
-    ...projectArguments,
-    ...arguments_,
-  ]);
+  runPnpm(
+    [
+      'exec',
+      'playwright',
+      'test',
+      '--config',
+      'playwright.config.ts',
+      ...projectArguments,
+      ...arguments_,
+    ],
+    desktopRoot,
+    BROWSER_TIMEOUT_MS,
+  );
 };
 
 const runFocusedVitest = (arguments_, option, prefix) => {
