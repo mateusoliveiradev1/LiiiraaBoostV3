@@ -2,8 +2,10 @@
 mod device_identity;
 
 use device_identity::{
-    ComponentClass, DeviceClass, DeviceEvidenceOutcome, DeviceIdentityError,
-    RawComponentObservation, collect_protected_device_evidence, compare_device_evidence,
+    ComponentClass, DeviceBindingReadiness, DeviceClass, DeviceEvidenceOutcome,
+    DeviceIdentityError, DeviceInventoryCollector, RawComponentObservation, RawDeviceInventory,
+    WindowsDeviceInventoryCollector, collect_protected_device_evidence, compare_device_evidence,
+    prepare_device_binding_with_collector,
 };
 
 const ACCOUNT_SALT_ALPHA: &[u8] = b"synthetic-account-salt-alpha";
@@ -180,4 +182,55 @@ fn device_identity_score_matrix_matches_the_typescript_threshold_policy() {
         compare_device_evidence(&before, &replacement).changed_components,
         vec![ComponentClass::PlatformTrust, ComponentClass::Cpu],
     );
+}
+
+struct SyntheticInventoryCollector;
+
+impl DeviceInventoryCollector for SyntheticInventoryCollector {
+    fn collect(&self) -> Result<RawDeviceInventory, DeviceIdentityError> {
+        Ok(RawDeviceInventory::new(
+            "Astra-PC",
+            DeviceClass::Physical,
+            vec![
+                (
+                    ComponentClass::PlatformTrust,
+                    "SMBIOS-BOARD-SERIAL-RAW-9001".to_owned(),
+                ),
+                (
+                    ComponentClass::Cpu,
+                    "PROCESSOR-ID-RAW-9002".to_owned(),
+                ),
+                (
+                    ComponentClass::MemoryTopology,
+                    "DIMM-SERIAL-RAW-9005".to_owned(),
+                ),
+            ],
+        ))
+    }
+}
+
+#[test]
+fn prepared_device_preview_exposes_only_friendly_readiness_metadata() {
+    let preview = prepare_device_binding_with_collector(&SyntheticInventoryCollector);
+    assert_eq!(preview.readiness, DeviceBindingReadiness::Ready);
+    assert_eq!(preview.device_label, "Astra-PC");
+    assert_eq!(preview.admitted_components.len(), 3);
+
+    let serialized = serde_json::to_string(&preview).expect("preview should serialize");
+    assert!(!serialized.contains("RAW-9001"));
+    assert!(!serialized.contains("RAW-9002"));
+    assert!(!serialized.contains("RAW-9005"));
+    assert!(!serialized.contains("localDigest"));
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn current_windows_inventory_produces_a_privacy_safe_ready_preview() {
+    let preview = prepare_device_binding_with_collector(&WindowsDeviceInventoryCollector);
+
+    assert_eq!(preview.readiness, DeviceBindingReadiness::Ready);
+    assert!(preview.admitted_components.len() >= 3);
+    let serialized = serde_json::to_string(&preview).expect("preview should serialize");
+    assert!(!serialized.contains("localDigest"));
+    assert!(!serialized.contains("rawValue"));
 }
