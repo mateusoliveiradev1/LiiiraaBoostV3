@@ -152,8 +152,13 @@ const run = async (): Promise<void> => {
 
 const invokedPath = process.argv[1];
 if (invokedPath && import.meta.url === pathToFileURL(resolve(invokedPath)).href) {
-  run().catch(() => {
-    process.stderr.write('STAGING_INVITATION_CRYPTO_REJECTED\n');
+  run().catch((error: unknown) => {
+    const candidate =
+      typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as Readonly<{ code?: unknown }>).code)
+        : 'UNKNOWN';
+    const safeCode = /^[A-Z0-9_]{2,40}$/u.test(candidate) ? candidate : 'UNKNOWN';
+    process.stderr.write(`STAGING_INVITATION_CRYPTO_REJECTED:${safeCode}\n`);
     process.exitCode = 1;
   });
 }

@@ -12,6 +12,7 @@ import type {
   ControlPlaneMigrationDatabase,
   ControlPlaneTransaction,
 } from '@liiiraa/control-plane-adapters';
+import { encryptInvitationOutput } from './invitation-output-crypto.js';
 
 const INVITATION_LIFETIME_MS = 14 * 86_400_000;
 const REJECTION = 'STAGING_INVITATION_PROVISIONING_REJECTED';
@@ -19,9 +20,13 @@ const REJECTION = 'STAGING_INVITATION_PROVISIONING_REJECTED';
 export interface StagingInvitationProvisioningEnvironment {
   readonly ACCOUNT_STAGING_ORIGIN?: string;
   readonly STAGING_DATABASE_URL?: string;
+  readonly STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH?: string;
   readonly STAGING_INVITATION_EMAILS_JSON?: string;
   readonly STAGING_INVITATION_OUTPUT_PATH?: string;
+  readonly STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64?: string;
   readonly STAGING_INVITATION_REISSUE_ACTIVE?: string;
+  readonly STAGING_INVITATION_REISSUE_AFTER?: string;
+  readonly STAGING_INVITATION_REISSUE_BEFORE?: string;
   readonly STAGING_INVITATION_REPAIR_OUTPUT?: string;
 }
 
@@ -239,7 +244,22 @@ export const provisionStagingInvitations = async (
   const nowIso = now.toISOString();
   const pending: string[] = [];
 
-  if (environment.STAGING_INVITATION_REISSUE_ACTIVE === 'owner-approved-exactly-two') {
+  const reissueMode = environment.STAGING_INVITATION_REISSUE_ACTIVE;
+  const compensating = reissueMode === 'compensate-run-31300134764-exactly-three';
+  if (reissueMode === 'owner-approved-exactly-two' || compensating) {
+    const expectedCount = compensating ? 3 : 2;
+    const after = environment.STAGING_INVITATION_REISSUE_AFTER;
+    const before = environment.STAGING_INVITATION_REISSUE_BEFORE;
+    if (
+      compensating &&
+      (!after ||
+        !before ||
+        !Number.isFinite(Date.parse(after)) ||
+        !Number.isFinite(Date.parse(before)) ||
+        Date.parse(after) >= Date.parse(before))
+    ) {
+      return reject('REISSUE_WINDOW');
+    }
     const invalidated = await dependencies.database.query(
       `UPDATE identity_invitations
        SET expires_at = $2
@@ -247,12 +267,17 @@ export const provisionStagingInvitations = async (
          AND role = 'tester'
          AND redeemed_at IS NULL
          AND expires_at > $2
+         ${compensating ? 'AND issued_at >= $3 AND issued_at < $4' : ''}
        RETURNING token_digest`,
-      [emails.map(digestEmail), nowIso],
+      compensating
+        ? [emails.map(digestEmail), nowIso, after, before]
+        : [emails.map(digestEmail), nowIso],
     );
-    if ((invalidated.rowCount ?? invalidated.rows.length) !== 2) {
+    if ((invalidated.rowCount ?? invalidated.rows.length) !== expectedCount) {
       return reject('REISSUE_COUNT');
     }
+  } else if (reissueMode !== undefined) {
+    return reject('REISSUE_MODE');
   }
 
   for (const email of emails) {
@@ -334,13 +359,30 @@ const run = async (): Promise<void> => {
         transaction: <TResult>(operation: (nested: ControlPlaneTransaction) => Promise<TResult>) =>
           operation(transaction),
       };
-      return provisionStagingInvitations(environment, {
+      const result = await provisionStagingInvitations(environment, {
         database: transactionalDatabase,
         invitations: createRealIdentityAuthority(
           createPostgresIdentityPersistence(transactionalDatabase),
         ),
         repositoryRoot: process.cwd(),
       });
+      const publicKeyBase64 = environment.STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64;
+      const encryptedOutputPath = environment.STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH;
+      if (publicKeyBase64 !== undefined || encryptedOutputPath !== undefined) {
+        if (
+          !publicKeyBase64 ||
+          !encryptedOutputPath ||
+          !environment.STAGING_INVITATION_OUTPUT_PATH
+        ) {
+          return reject('ENCRYPTED_OUTPUT');
+        }
+        await encryptInvitationOutput({
+          encryptedPath: outputPathOutsideRepository(encryptedOutputPath, process.cwd()),
+          plaintextPath: environment.STAGING_INVITATION_OUTPUT_PATH,
+          publicKeyBase64,
+        });
+      }
+      return result;
     });
     process.stdout.write(`${JSON.stringify(result)}\n`);
   } finally {

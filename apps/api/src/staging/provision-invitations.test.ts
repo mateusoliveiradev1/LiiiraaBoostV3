@@ -217,6 +217,62 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(openProtectedOutput).not.toHaveBeenCalled();
   });
 
+  it('limits compensation to the three invitations created inside the failed-run window', async () => {
+    const database = {
+      query: vi.fn((statement: string, _values?: readonly unknown[]) => {
+        if (statement.includes('UPDATE identity_invitations')) {
+          return Promise.resolve({
+            rowCount: 3,
+            rows: [
+              { token_digest: 'a'.repeat(64) },
+              { token_digest: 'b'.repeat(64) },
+              { token_digest: 'c'.repeat(64) },
+            ],
+          });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+    };
+
+    await provisionStagingInvitations(
+      {
+        ...environment(),
+        STAGING_INVITATION_REISSUE_ACTIVE: 'compensate-run-31300134764-exactly-three',
+        STAGING_INVITATION_REISSUE_AFTER: '2026-08-09T07:00:00.000Z',
+        STAGING_INVITATION_REISSUE_BEFORE: '2026-08-09T07:01:00.000Z',
+      },
+      {
+        clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+        database,
+        invitations: {
+          issueInvitation: vi.fn((input: Readonly<{ email: string; expiresAt: string }>) =>
+            Promise.resolve({
+              expiresAt: input.expiresAt,
+              token: `replacement-${digest(input.email)}`,
+              tokenDigest: digest(`replacement-${input.email}`),
+            }),
+          ),
+        },
+        openProtectedOutput: vi.fn(() =>
+          Promise.resolve({
+            abort: vi.fn(() => Promise.resolve()),
+            commit: vi.fn(() => Promise.resolve()),
+          }),
+        ),
+        repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+      },
+    );
+
+    const recoveryCall = database.query.mock.calls[0];
+    expect(recoveryCall?.[0]).toContain('issued_at >= $3 AND issued_at < $4');
+    expect(recoveryCall?.[1]).toEqual([
+      emails.map((email) => digest(email)),
+      '2030-01-15T12:00:00.000Z',
+      '2026-08-09T07:00:00.000Z',
+      '2026-08-09T07:01:00.000Z',
+    ]);
+  });
+
   it('rejects anything other than three unique valid emails and a protected absolute output path', async () => {
     const dependencies = {
       clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
@@ -265,7 +321,11 @@ describe('secret-driven staging invitation provisioning', () => {
 
     expect(workflow).toContain('secrets.STAGING_INVITATION_EMAILS_JSON');
     expect(workflow).toContain('secrets.STAGING_DATABASE_URL');
-    expect(workflow).toContain('STAGING_INVITATION_REISSUE_ACTIVE: owner-approved-exactly-two');
+    expect(workflow).toContain(
+      'STAGING_INVITATION_REISSUE_ACTIVE: compensate-run-31300134764-exactly-three',
+    );
+    expect(workflow).toContain('Prove encryption before touching PostgreSQL');
+    expect(workflow).toContain('STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH');
     expect(workflow).toContain('liiiraa-invitations.encrypted.json');
     expect(workflow).toContain('retention-days: 1');
     expect(workflow).toContain('test ! -e');

@@ -1,9 +1,9 @@
 ---
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
-status: protected-invitation-reissue-authorized
+status: protected-invitation-compensation-ready
 tested_commit: 210f1b354da6a7a152e087a4db02f9db5f5c3ba4
-updated: 2026-08-09T06:58:58.604Z
+updated: 2026-08-09T07:04:06.969Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -85,6 +85,18 @@ Owner authorization receipt:
 - Safety gate: the recovery aborts unless PostgreSQL returns exactly two matching records; the
   replacement URLs are transported only as a one-day encrypted artifact and decrypted into an
   owner-only local file.
+
+First recovery execution receipt:
+
+- GitHub run: `31300134764`, exact revision `6431b0ba3e20eb5d982edce01f1a15017a458e9d`.
+- PostgreSQL step: PASS; exactly two lost records were invalidated and three replacements issued.
+- Encryption/upload step: FAIL before any artifact upload; the ephemeral runner discarded the raw
+  URLs and no token appeared in logs.
+- Compensating boundary: invalidate exactly the three active tester invitations created between
+  `2026-08-09T07:00:00.000Z` and `2026-08-09T07:01:00.000Z` for the same protected recipient
+  digests, then encrypt the next output inside the same database transaction before commit.
+- The corrected workflow proves encryption with benign input before touching PostgreSQL and rolls
+  back the transaction if protected-output encryption fails.
 
 ## Human real-authority observations
 

@@ -40,23 +40,33 @@ jobs:
         run: node tooling/supply-chain/verify-pins.mjs --check
       - name: Install frozen dependencies without lifecycle scripts
         run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Revoke exactly two lost invitations and issue three replacements
+      - name: Prove encryption before touching PostgreSQL
+        env:
+          PREFLIGHT_PLAINTEXT: ${{ runner.temp }}/liiiraa-preflight.json
+          PREFLIGHT_ENCRYPTED: ${{ runner.temp }}/liiiraa-preflight.encrypted.json
+          STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
+        run: |
+          node -e "require('node:fs').writeFileSync(process.env.PREFLIGHT_PLAINTEXT, '{\"preflight\":true}', { mode: 0o600 })"
+          pnpm --filter @liiiraa/api staging:invitation-crypto encrypt
+            "$PREFLIGHT_PLAINTEXT" "$PREFLIGHT_ENCRYPTED"
+          test ! -e "$PREFLIGHT_PLAINTEXT"
+          test -s "$PREFLIGHT_ENCRYPTED"
+      - name: Compensate the three links lost by run 31300134764 and encrypt before commit
         env:
           ACCOUNT_STAGING_ORIGIN: https://liiiraa-boost-account-staging.vercel.app
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.encrypted.json
           STAGING_INVITATION_EMAILS_JSON: ${{ secrets.STAGING_INVITATION_EMAILS_JSON }}
           STAGING_INVITATION_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.json
-          STAGING_INVITATION_REISSUE_ACTIVE: owner-approved-exactly-two
-        run: pnpm --filter @liiiraa/api staging:provision-invitations
-      - name: Encrypt protected output and remove plaintext
-        env:
           STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
-        run: >-
-          pnpm --filter @liiiraa/api staging:invitation-crypto encrypt
-          "${{ runner.temp }}/liiiraa-invitations.json"
-          "${{ runner.temp }}/liiiraa-invitations.encrypted.json"
-      - name: Assert plaintext no longer exists
-        run: test ! -e "${{ runner.temp }}/liiiraa-invitations.json"
+          STAGING_INVITATION_REISSUE_ACTIVE: compensate-run-31300134764-exactly-three
+          STAGING_INVITATION_REISSUE_AFTER: '2026-08-09T07:00:00.000Z'
+          STAGING_INVITATION_REISSUE_BEFORE: '2026-08-09T07:01:00.000Z'
+        run: pnpm --filter @liiiraa/api staging:provision-invitations
+      - name: Assert encrypted output exists and plaintext no longer exists
+        run: |
+          test ! -e "${{ runner.temp }}/liiiraa-invitations.json"
+          test -s "${{ runner.temp }}/liiiraa-invitations.encrypted.json"
       - name: Upload encrypted owner-only recovery artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
