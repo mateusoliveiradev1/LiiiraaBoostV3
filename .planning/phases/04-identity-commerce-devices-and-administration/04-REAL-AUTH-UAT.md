@@ -1,9 +1,9 @@
 ---
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
-status: protected-invitation-compensation-ready
-tested_commit: 210f1b354da6a7a152e087a4db02f9db5f5c3ba4
-updated: 2026-08-09T07:04:06.969Z
+status: awaiting-real-auth-human-uat
+tested_commit: cbb9adc821422301f4a84c4a9eb5051236c63c74
+updated: 2026-08-09T07:17:01.035Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -14,10 +14,10 @@ password, database credential, or session credential is recorded here.
 
 ## Current checkpoint
 
-- Progress: Task 04-40-01 automated provisioner complete; Tasks 04-40-02 and 04-40-03 blocked.
+- Progress: Tasks 04-40-01 and 04-40-02 complete; Task 04-40-03 human observations pending.
 - Automated environment: ready on one exact revision with fixture/preview authority disabled.
-- Recovery action: owner authorized invalidating exactly two lost active tester invitations and
-  reissuing all three from protected input; execution is pending the encrypted recovery workflow.
+- Recovery action: complete; three unique replacement URLs are available only in the owner-protected
+  local output.
 - Human approval: pending until the exact build passes every real-auth observation below.
 
 ## Exact deployment identity
@@ -64,17 +64,16 @@ Those failures must not be converted into a pass for this plan.
 
 Aggregate Neon inspection at this checkpoint found:
 
-| Lifecycle         | Role   | Count | Usable after workstation format                                                       |
-| ----------------- | ------ | ----: | ------------------------------------------------------------------------------------- |
-| Active            | tester |     2 | No: only token digests remain in PostgreSQL and the protected local URL file was lost |
-| Redeemed          | tester |     0 | Not applicable                                                                        |
-| Tester identities | active |     0 | Not applicable                                                                        |
+| Lifecycle         | Role   | Count | Current state                                          |
+| ----------------- | ------ | ----: | ------------------------------------------------------ |
+| Active            | tester |     3 | Yes: replacement URLs exist in owner-only local output |
+| Redeemed          | tester |     0 | Pending human UAT                                      |
+| Tester identities | active |     0 | Pending invitation redemption                          |
 
 The GitHub secret input exists, but GitHub correctly does not allow its value to be read back.
-The two existing tokens cannot be reconstructed from their SHA-256 digests. Recovery therefore
-requires invalidating only those two unusable active tester invitations and provisioning all three
-addresses again into a new owner-only file outside the repository. That destructive recovery has
-not yet been performed.
+The two original tokens could not be reconstructed from their SHA-256 digests. They were invalidated
+within the authorized scope and replaced by three new invitations in the owner-only file outside
+the repository.
 
 Owner authorization receipt:
 
@@ -112,6 +111,17 @@ First recovery execution receipt:
   were incorrectly classified as Windows-rooted paths and rewritten with backslashes. The path
   classifier now recognizes only drive-letter and UNC paths as Windows paths, with a Linux-runner
   regression test.
+
+Successful recovery receipt:
+
+- GitHub run: `31300711469`, exact revision `cbb9adc821422301f4a84c4a9eb5051236c63c74`.
+- Benign crypto preflight, exact three-record compensation, in-transaction encryption, plaintext
+  absence assertion, and encrypted artifact upload: PASS.
+- Local decryption validation: three invitations, three unique protected recipients, three unique
+  tokens, canonical Account staging origin, canonical `/pt-BR/register` route: PASS.
+- Remote encrypted artifact `9034398973` was deleted after local validation; the run now reports
+  zero retained artifacts.
+- Raw emails and tokens remain absent from Git, CI logs, this UAT record, and chat.
 
 ## Human real-authority observations
 
