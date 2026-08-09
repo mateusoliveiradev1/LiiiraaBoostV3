@@ -517,7 +517,7 @@ Plans:
 4. Expiration blocks new paid actions but leaves existing changes intact and keeps diagnostic history, security warnings, and restoration available.
 5. Delayed or duplicate payment events cannot corrupt entitlement state, and staff can access user-provided diagnostics only through role-specific, time-limited consent that creates an immutable audit event.
 
-**Plans**: 60/63 plans executed
+**Plans**: 61/66 plans executed
 
 Plans:
 **Wave 1**
@@ -661,13 +661,24 @@ Plans:
 **Wave 27** _(blocked on Plan 04-63)_
 
 - [x] 04-64-PLAN.md — Recover the authored Admin visual language across real production-authority routes.
+
+**Wave 28** _(blocked on Plans 04-35 and 04-38)_
+
+- [ ] 04-65-PLAN.md — Make real desktop logout a single durable authority transition.
+
+**Wave 29** _(blocked on Plans 04-06, 04-14, 04-17, 04-20, 04-38, and 04-65)_
+
+- [ ] 04-66-PLAN.md — Replace the device beta gate with secure Free/Premium one-PC binding.
+
+**Wave 30** _(blocked on Plans 04-63, 04-65, and 04-66)_
+
 - [ ] 04-40-PLAN.md — Provision protected tester invitations, deploy real staging, and validate complete web/desktop/Admin authority.
 
-**Wave 28** _(blocked on Plans 04-40 and 04-64)_
+**Wave 31** _(blocked on Plans 04-40 and 04-64)_
 
 - [ ] 04-25-PLAN.md — Perform clean-Windows, complete Admin authority, consent, and rollback UAT.
 
-**Wave 29** _(blocked on Plan 04-25)_
+**Wave 32** _(blocked on Plan 04-25)_
 
 - [ ] 04-26-PLAN.md — Seal recursive Phase 4 evidence for WEB/IDEN requirements and every D-01 through D-111 decision.
 
