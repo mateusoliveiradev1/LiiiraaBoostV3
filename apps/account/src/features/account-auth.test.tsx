@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  admitInvitedRecipient,
   admitInvitationToken,
   createAccountAuth,
   type AccountAuthTransport,
@@ -111,7 +112,7 @@ describe('real account authentication client', () => {
         locale: 'pt-BR',
         password: 'CorrectHorse1',
       }),
-    ).resolves.toEqual({ code: 'authentication-failed', status: 'error' });
+    ).resolves.toEqual({ code: 'invitation-failed', status: 'error' });
   });
 
   it('revokes the cookie session and leaves the client signed out', async () => {
@@ -170,6 +171,13 @@ describe('real account authentication client', () => {
     expect(admitInvitationToken('used invitation')).toBeNull();
     expect(admitInvitationToken('short')).toBeNull();
   });
+
+  it('admits only a valid email encoded in the protected invitation fragment', () => {
+    expect(admitInvitedRecipient('#recipient=dGVzdGVyQGV4YW1wbGUuY29t')).toBe('tester@example.com');
+    expect(admitInvitedRecipient('#recipient=bm90IGFuIGVtYWls')).toBeNull();
+    expect(admitInvitedRecipient('#recipient=%')).toBeNull();
+    expect(admitInvitedRecipient('')).toBeNull();
+  });
 });
 
 describe('production account composition', () => {
@@ -209,6 +217,8 @@ describe('production account composition', () => {
     expect(authSource).toContain('Mostrar senha');
     expect(authSource).toContain('adminOrigin');
     expect(authSource).toContain('Abrir painel administrativo');
+    expect(authSource).toContain('isReadOnly={invitedEmail !== null}');
+    expect(authSource).toContain('submissionInFlight.current');
     expect(layoutSource).toContain('LIIIRAA_ADMIN_ORIGIN');
   });
 
@@ -217,9 +227,11 @@ describe('production account composition', () => {
 
     expect(authSource).toContain('const AuthSuccess');
     expect(authSource).toContain('data-account-state="authentication-success"');
-    expect(authSource).toContain("const DESKTOP_ACCOUNT_DEEP_LINK = 'liiiraa-boost://goal/account'");
+    expect(authSource).toContain(
+      "const DESKTOP_ACCOUNT_DEEP_LINK = 'liiiraa-boost://goal/account'",
+    );
     expect(authSource).toContain('desktopAuthorization={desktopAuthorization}');
-    expect(authSource).toContain("desktop_challenge");
+    expect(authSource).toContain('desktop_challenge');
     expect(authSource).toContain('approveDesktopAuthorization(desktopAuthorization)');
   });
 });

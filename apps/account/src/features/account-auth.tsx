@@ -7,11 +7,12 @@ import { routeHref, type WebLocale } from '@liiiraa/web-core';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState, type SyntheticEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react';
 
 import accountEn from '../content/account.en.json';
 import accountPtBr from '../content/account.pt-BR.json';
 import {
+  admitInvitedRecipient,
   admitInvitationToken,
   createAccountAuth,
   type AccountAuthActor,
@@ -54,6 +55,9 @@ const messages = Object.freeze({
     browserApproval: 'Confirming this desktop sign-in in your browser…',
     invitationAccepted: 'Invitation recognized. Create the account using the invited email.',
     invitationMissing: 'This private beta requires an individual invitation.',
+    invitationFailed:
+      'This invitation could not be confirmed. Use exactly the invited email or request a new link.',
+    invitedEmailLocked: 'Email protected by this individual invitation.',
     invitationSteps: [
       'Receive an individual invitation at the email selected for the beta.',
       'Open the protected link before it expires.',
@@ -80,6 +84,9 @@ const messages = Object.freeze({
     browserApproval: 'Confirmando este login do desktop no navegador…',
     invitationAccepted: 'Convite reconhecido. Crie a conta com o e-mail convidado.',
     invitationMissing: 'Este beta fechado exige um convite individual.',
+    invitationFailed:
+      'Não foi possível confirmar este convite. Use exatamente o e-mail convidado ou solicite um novo link.',
+    invitedEmailLocked: 'E-mail protegido por este convite individual.',
     invitationSteps: [
       'Receba um convite individual no e-mail escolhido para o beta.',
       'Abra o link protegido antes que ele expire.',
@@ -159,7 +166,9 @@ const errorMessage = (
 ): string =>
   result.code === 'authentication-failed'
     ? messages[locale].authenticationFailed
-    : messages[locale].unavailable;
+    : result.code === 'invitation-failed'
+      ? messages[locale].invitationFailed
+      : messages[locale].unavailable;
 
 const AuthHeader = ({
   locale,
@@ -435,6 +444,7 @@ const SignUpForm = ({
   const invitationToken = admitInvitationToken(invitationCandidate);
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
+  const [invitedEmail, setInvitedEmail] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [consent, setConsent] = useState(false);
@@ -442,11 +452,18 @@ const SignUpForm = ({
   const [errors, setErrors] = useState<Partial<Record<SignUpField, string>>>({});
   const [loading, setLoading] = useState(false);
   const [successDestination, setSuccessDestination] = useState<string | null>(null);
+  const submissionInFlight = useRef(false);
   const auth = useMemo(
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
   );
   const requirements = passwordRequirements(password, locale);
+
+  useEffect(() => {
+    const recipient = admitInvitedRecipient(globalThis.location.hash);
+    setInvitedEmail(recipient);
+    if (recipient !== null) setEmail(recipient);
+  }, [invitationToken]);
 
   if (invitationToken === null) {
     return (
@@ -487,6 +504,7 @@ const SignUpForm = ({
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionInFlight.current) return;
     const nextErrors: Partial<Record<SignUpField, string>> = {};
     if (displayName.trim().length < 2) nextErrors.name = content.signUp.invalidName;
     if (!validEmail(email)) nextErrors.email = content.signUp.invalidEmail;
@@ -495,6 +513,7 @@ const SignUpForm = ({
     if (!consent) nextErrors.consent = content.signUp.invalidConsent;
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
+    submissionInFlight.current = true;
     setLoading(true);
     const result = await auth.signUp({
       displayName: displayName.trim(),
@@ -507,6 +526,7 @@ const SignUpForm = ({
       if (desktopAuthorization !== undefined) {
         const approval = await auth.approveDesktopAuthorization(desktopAuthorization);
         if (approval.status !== 'approved') {
+          submissionInFlight.current = false;
           setLoading(false);
           setErrors({ invitation: errorMessage(approval, locale) });
           return;
@@ -517,6 +537,7 @@ const SignUpForm = ({
       setSuccessDestination(DESKTOP_ACCOUNT_DEEP_LINK);
       return;
     }
+    submissionInFlight.current = false;
     setLoading(false);
     setErrors({ invitation: errorMessage(result, locale) });
   };
@@ -577,11 +598,12 @@ const SignUpForm = ({
           value={displayName}
         />
         <LbTextField
-          description={content.signUp.emailHint}
+          description={invitedEmail === null ? content.signUp.emailHint : labels.invitedEmailLocked}
           errorMessage={errors.email}
           inputType="email"
           isDisabled={loading}
           isInvalid={errors.email !== undefined}
+          isReadOnly={invitedEmail !== null}
           isRequired
           label={content.signUp.emailLabel}
           maxLength={254}

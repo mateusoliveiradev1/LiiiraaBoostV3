@@ -22,6 +22,9 @@ export interface StagingInvitationProvisioningEnvironment {
   readonly STAGING_DATABASE_URL?: string;
   readonly STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH?: string;
   readonly STAGING_INVITATION_EMAILS_JSON?: string;
+  readonly STAGING_INVITATION_EXPOSED_TOKEN_DIGEST?: string;
+  readonly STAGING_INVITATION_OWNER_EMAIL_DIGEST?: string;
+  readonly STAGING_INVITATION_REPLACEMENT_EMAIL?: string;
   readonly STAGING_INVITATION_OUTPUT_PATH?: string;
   readonly STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64?: string;
   readonly STAGING_INVITATION_REISSUE_ACTIVE?: string;
@@ -251,7 +254,42 @@ export const provisionStagingInvitations = async (
 
   const reissueMode = environment.STAGING_INVITATION_REISSUE_ACTIVE;
   const compensating = reissueMode === 'compensate-run-31300134764-exactly-three';
-  if (reissueMode === 'owner-approved-exactly-two' || compensating) {
+  const replacingExposed = reissueMode === 'replace-exposed-owner-invitation';
+  let candidateEmails = emails;
+  if (replacingExposed) {
+    const tokenDigest = environment.STAGING_INVITATION_EXPOSED_TOKEN_DIGEST;
+    const ownerEmailDigest = environment.STAGING_INVITATION_OWNER_EMAIL_DIGEST;
+    const replacementEmail = normalizeEmail(environment.STAGING_INVITATION_REPLACEMENT_EMAIL ?? '');
+    if (
+      !tokenDigest ||
+      !ownerEmailDigest ||
+      replacementEmail.length === 0 ||
+      replacementEmail.length > 254 ||
+      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(replacementEmail) ||
+      !/^[a-f0-9]{64}$/u.test(tokenDigest) ||
+      !/^[a-f0-9]{64}$/u.test(ownerEmailDigest)
+    ) {
+      return reject('EXPOSED_DIGEST');
+    }
+    if (!emails.some((email) => digestEmail(email) === ownerEmailDigest)) {
+      return reject('OWNER_EMAIL');
+    }
+    const invalidated = await dependencies.database.query(
+      `UPDATE identity_invitations
+       SET expires_at = $3
+       WHERE token_digest = $1
+         AND email = $2
+         AND role = 'tester'
+         AND redeemed_at IS NULL
+         AND expires_at > $3
+       RETURNING token_digest`,
+      [tokenDigest, ownerEmailDigest, nowIso],
+    );
+    if ((invalidated.rowCount ?? invalidated.rows.length) !== 1) {
+      return reject('EXPOSED_COUNT');
+    }
+    candidateEmails = [replacementEmail];
+  } else if (reissueMode === 'owner-approved-exactly-two' || compensating) {
     const expectedCount = compensating ? 3 : 2;
     const after = environment.STAGING_INVITATION_REISSUE_AFTER;
     const before = environment.STAGING_INVITATION_REISSUE_BEFORE;
@@ -285,7 +323,7 @@ export const provisionStagingInvitations = async (
     return reject('REISSUE_MODE');
   }
 
-  for (const email of emails) {
+  for (const email of candidateEmails) {
     const active = await dependencies.database.query(
       `SELECT token_digest FROM identity_invitations
        WHERE email = $1 AND redeemed_at IS NULL AND expires_at > $2
@@ -309,6 +347,9 @@ export const provisionStagingInvitations = async (
       });
       const invitationUrl = new URL('/pt-BR/register', accountOrigin);
       invitationUrl.searchParams.set('invitation', invitation.token);
+      invitationUrl.hash = new URLSearchParams({
+        recipient: Buffer.from(email, 'utf8').toString('base64url'),
+      }).toString();
       invitations.push({
         email,
         expiresAt: invitation.expiresAt,
@@ -371,7 +412,14 @@ const run = async (): Promise<void> => {
         ),
         repositoryRoot: process.cwd(),
       });
-      if (environment.STAGING_INVITATION_REISSUE_ACTIVE !== undefined && result.created !== 3) {
+      const expectedReissueCount =
+        environment.STAGING_INVITATION_REISSUE_ACTIVE === 'replace-exposed-owner-invitation'
+          ? 1
+          : 3;
+      if (
+        environment.STAGING_INVITATION_REISSUE_ACTIVE !== undefined &&
+        result.created !== expectedReissueCount
+      ) {
         return reject('REISSUE_RESULT');
       }
       const publicKeyBase64 = environment.STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64;

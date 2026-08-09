@@ -1,8 +1,6 @@
 import type { ReactNode, Ref } from 'react';
 import {
   Button,
-  CheckboxButton,
-  CheckboxField,
   ComboBox,
   Dialog,
   DialogTrigger,
@@ -169,6 +167,7 @@ export interface LbTextFieldProps extends LbFieldCopy {
   readonly isDisabled?: boolean;
   readonly isInvalid?: boolean;
   readonly isRequired?: boolean;
+  readonly isReadOnly?: boolean;
   readonly inputType?: 'email' | 'password' | 'text';
   readonly maxLength?: number;
   readonly name?: string;
@@ -235,19 +234,33 @@ export interface LbChoiceProps {
   readonly value?: string;
 }
 
-export const LbCheckbox = ({ children, ...props }: LbChoiceProps) => (
-  <CheckboxField {...props}>
-    <CheckboxButton className="lb-choice" data-lb-control>
-      {({ isSelected }) => (
-        <>
-          <span aria-hidden="true" className="lb-choice-mark">
-            {isSelected ? '✓' : ''}
-          </span>
-          {children}
-        </>
-      )}
-    </CheckboxButton>
-  </CheckboxField>
+export const LbCheckbox = ({
+  children,
+  isDisabled = false,
+  isSelected = false,
+  onChange,
+  value,
+}: LbChoiceProps) => (
+  <label
+    className="lb-choice"
+    data-disabled={isDisabled || undefined}
+    data-lb-control
+    data-selected={isSelected || undefined}
+  >
+    <input
+      checked={isSelected}
+      className="lb-choice-input"
+      disabled={isDisabled}
+      onChange={(event) => onChange?.(event.currentTarget.checked)}
+      readOnly={onChange === undefined}
+      type="checkbox"
+      value={value}
+    />
+    <span aria-hidden="true" className="lb-choice-mark">
+      {isSelected ? '✓' : ''}
+    </span>
+    {children}
+  </label>
 );
 
 export interface LbRadioOption {

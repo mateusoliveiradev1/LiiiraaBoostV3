@@ -90,35 +90,35 @@
   --lb-canvas-inset: var(--lb-canvas-inset-srgb);
   --lb-canvas-inset: oklch(0.145 0.024 260);
   --lb-panel: var(--lb-panel-srgb);
-  --lb-panel: oklch(0.180 0.032 258);
+  --lb-panel: oklch(0.18 0.032 258);
   --lb-panel-raised: var(--lb-panel-raised-srgb);
   --lb-panel-raised: oklch(0.225 0.045 257);
   --lb-accent-electric: var(--lb-accent-electric-srgb);
-  --lb-accent-electric: oklch(0.670 0.210 255);
+  --lb-accent-electric: oklch(0.67 0.21 255);
   --lb-accent-electric-hover: var(--lb-accent-electric-hover-srgb);
-  --lb-accent-electric-hover: oklch(0.730 0.190 250);
+  --lb-accent-electric-hover: oklch(0.73 0.19 250);
   --lb-accent-electric-pressed: var(--lb-accent-electric-pressed-srgb);
-  --lb-accent-electric-pressed: oklch(0.610 0.200 255);
+  --lb-accent-electric-pressed: oklch(0.61 0.2 255);
   --lb-accent-cyan: var(--lb-accent-cyan-srgb);
-  --lb-accent-cyan: oklch(0.820 0.135 220);
+  --lb-accent-cyan: oklch(0.82 0.135 220);
   --lb-text-primary: var(--lb-text-primary-srgb);
   --lb-text-primary: oklch(0.965 0.012 255);
   --lb-text-secondary: var(--lb-text-secondary-srgb);
-  --lb-text-secondary: oklch(0.760 0.030 255);
+  --lb-text-secondary: oklch(0.76 0.03 255);
   --lb-text-tertiary: var(--lb-text-tertiary-srgb);
-  --lb-text-tertiary: oklch(0.650 0.028 255);
+  --lb-text-tertiary: oklch(0.65 0.028 255);
   --lb-line-subtle: var(--lb-line-subtle-srgb);
   --lb-line-subtle: oklch(0.285 0.035 255);
   --lb-line-strong: var(--lb-line-strong-srgb);
-  --lb-line-strong: oklch(0.390 0.060 255);
+  --lb-line-strong: oklch(0.39 0.06 255);
   --lb-success: var(--lb-success-srgb);
-  --lb-success: oklch(0.750 0.170 150);
+  --lb-success: oklch(0.75 0.17 150);
   --lb-warning: var(--lb-warning-srgb);
-  --lb-warning: oklch(0.820 0.160 82);
+  --lb-warning: oklch(0.82 0.16 82);
   --lb-critical: var(--lb-critical-srgb);
-  --lb-critical: oklch(0.700 0.200 25);
+  --lb-critical: oklch(0.7 0.2 25);
   --lb-destructive: var(--lb-destructive-srgb);
-  --lb-destructive: oklch(0.580 0.220 25);
+  --lb-destructive: oklch(0.58 0.22 25);
   --lb-disabled-opacity: 1;
   --lb-scrim: rgba(3, 5, 8, 0.76);
   --lb-layer-dropdown: 30;
@@ -143,7 +143,7 @@
   --lb-hero-glow-height: 360px;
   --lb-hero-glow-opacity: 0.2;
   --lb-hero-glow-blur: 64px;
-  --lb-action-glow: 0 0 24px oklch(0.670 0.210 255 / 14%);
+  --lb-action-glow: 0 0 24px oklch(0.67 0.21 255 / 14%);
   --lb-glow-max-visible: 2;
   --lb-focus-width: 2px;
   --lb-focus-separation: 2px;
@@ -518,6 +518,30 @@
   gap: var(--lb-space-2);
   min-block-size: var(--lb-control-min-size);
   color: var(--lb-text-primary);
+}
+
+.lb-choice {
+  position: relative;
+  cursor: pointer;
+}
+
+.lb-choice[data-disabled='true'] {
+  cursor: not-allowed;
+  opacity: var(--lb-disabled-opacity);
+}
+
+.lb-choice-input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lb-choice-input:focus-visible + .lb-choice-mark {
+  outline: var(--lb-focus-width) solid var(--lb-forced-focus);
+  outline-offset: var(--lb-focus-separation);
 }
 
 .lb-choice-mark,

@@ -246,16 +246,21 @@ export const registerRealIdentityRoutes = (
       return noStore(reply).code(403).send({ code: 'AUTHENTICATION_FAILED' });
     }
     const locale = localeValue(request.body['locale']);
-    const result =
-      locale === null
-        ? { ok: false as const, code: 'AUTHENTICATION_FAILED' as const }
-        : await dependencies.authority.signUp({
-            displayName: stringValue(request.body, 'displayName'),
-            email: stringValue(request.body, 'email'),
-            invitationToken: stringValue(request.body, 'invitationToken'),
-            locale,
-            password: stringValue(request.body, 'password'),
-          });
+    let result;
+    try {
+      result =
+        locale === null
+          ? { ok: false as const, code: 'AUTHENTICATION_FAILED' as const }
+          : await dependencies.authority.signUp({
+              displayName: stringValue(request.body, 'displayName'),
+              email: stringValue(request.body, 'email'),
+              invitationToken: stringValue(request.body, 'invitationToken'),
+              locale,
+              password: stringValue(request.body, 'password'),
+            });
+    } catch {
+      return noStore(reply).code(503).send({ code: 'AUTHENTICATION_UNAVAILABLE' });
+    }
     if (!result.ok) {
       return noStore(reply).code(401).send({ code: 'AUTHENTICATION_FAILED' });
     }

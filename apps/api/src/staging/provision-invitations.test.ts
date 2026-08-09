@@ -217,6 +217,74 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(openProtectedOutput).not.toHaveBeenCalled();
   });
 
+  it('replaces only the exposed active invitation selected by token and recipient digests', async () => {
+    const committed: string[] = [];
+    const exposedTokenDigest = 'd'.repeat(64);
+    const ownerEmailDigest = digest(emails[0]);
+    const replacementEmail = 'owner+signup-test@example.com';
+    const database = {
+      query: vi.fn((statement: string, values?: readonly unknown[]) => {
+        if (statement.includes('UPDATE identity_invitations')) {
+          expect(values).toEqual([
+            exposedTokenDigest,
+            ownerEmailDigest,
+            '2030-01-15T12:00:00.000Z',
+          ]);
+          return Promise.resolve({ rowCount: 1, rows: [{ token_digest: exposedTokenDigest }] });
+        }
+        const selectedDigest = values?.[0];
+        return Promise.resolve({
+          rowCount: selectedDigest === digest(replacementEmail) ? 0 : 1,
+          rows:
+            selectedDigest === digest(replacementEmail) ? [] : [{ token_digest: 'a'.repeat(64) }],
+        });
+      }),
+    };
+
+    const result = await provisionStagingInvitations(
+      {
+        ...environment(),
+        STAGING_INVITATION_EXPOSED_TOKEN_DIGEST: exposedTokenDigest,
+        STAGING_INVITATION_OWNER_EMAIL_DIGEST: ownerEmailDigest,
+        STAGING_INVITATION_REPLACEMENT_EMAIL: replacementEmail,
+        STAGING_INVITATION_REISSUE_ACTIVE: 'replace-exposed-owner-invitation',
+      },
+      {
+        clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+        database,
+        invitations: {
+          issueInvitation: vi.fn((input: Readonly<{ email: string; expiresAt: string }>) =>
+            Promise.resolve({
+              expiresAt: input.expiresAt,
+              token: `replacement-${digest(input.email)}`,
+              tokenDigest: digest(`replacement-${input.email}`),
+            }),
+          ),
+        },
+        openProtectedOutput: vi.fn(() =>
+          Promise.resolve({
+            abort: vi.fn(() => Promise.resolve()),
+            commit: vi.fn((payload: string) => {
+              committed.push(payload);
+              return Promise.resolve();
+            }),
+          }),
+        ),
+        repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+      },
+    );
+
+    expect(result).toEqual({ created: 1, skipped: 2, status: 'complete' });
+    const protectedPayload = JSON.parse(committed[0] ?? '{}') as {
+      invitations?: readonly { email: string; invitationUrl: string }[];
+    };
+    expect(protectedPayload.invitations).toHaveLength(1);
+    expect(protectedPayload.invitations?.[0]?.email).toBe(replacementEmail);
+    expect(protectedPayload.invitations?.[0]?.invitationUrl).toContain(
+      `#recipient=${Buffer.from(replacementEmail).toString('base64url')}`,
+    );
+  });
+
   it('limits compensation to the three invitations created inside the failed-run window', async () => {
     const database = {
       query: vi.fn((statement: string, _values?: readonly unknown[]) => {
@@ -361,8 +429,11 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(workflow).toContain('secrets.STAGING_INVITATION_EMAILS_JSON');
     expect(workflow).toContain('secrets.STAGING_DATABASE_URL');
     expect(workflow).toContain(
-      'STAGING_INVITATION_REISSUE_ACTIVE: compensate-run-31300134764-exactly-three',
+      'STAGING_INVITATION_REISSUE_ACTIVE: replace-exposed-owner-invitation',
     );
+    expect(workflow).toContain('inputs.exposed_token_digest');
+    expect(workflow).toContain('inputs.owner_email_digest');
+    expect(workflow).toContain('secrets.STAGING_INVITATION_OWNER_TEST_EMAIL');
     expect(workflow).toContain('Prove encryption before touching PostgreSQL');
     expect(workflow).toContain('STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH');
     expect(workflow).toContain('liiiraa-invitations.encrypted.json');

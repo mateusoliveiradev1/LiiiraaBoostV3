@@ -183,6 +183,28 @@ const csrf = async (app: Awaited<ReturnType<typeof createApp>>['app']) => {
 };
 
 describe('real staging authentication routes', () => {
+  it('maps unexpected signup authority failures to controlled temporary unavailability', async () => {
+    const { app, identity } = await createApp();
+    identity.signUp.mockRejectedValueOnce(new Error('synthetic persistence failure'));
+    const csrfToken = await csrf(app);
+    const response = await app.inject({
+      headers: { origin: accountOrigin, 'x-csrf-token': csrfToken },
+      method: 'POST',
+      payload: {
+        displayName: 'Real Tester',
+        email: 'tester@example.com',
+        invitationToken: 'invite-token-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJ',
+        locale: 'pt-BR',
+        password: 'CorrectHorse1',
+      },
+      url: '/v1/identity/sign-up',
+    });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toEqual({ code: 'AUTHENTICATION_UNAVAILABLE' });
+    await app.close();
+  });
+
   it('exposes authenticated TOTP enrollment, confirmation and action-bound step-up over HTTP', async () => {
     const { app, strongAuth } = await createApp();
     const cookie = `__Host-liiiraa_session=${encodeURIComponent(credential)}`;

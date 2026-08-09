@@ -202,8 +202,7 @@ const authority = (persistence: IdentityPersistence) => {
 describe('real invitation-only identity authority', () => {
   it('binds the session UUID and provider text through distinct PostgreSQL parameters', async () => {
     let captured:
-      | Readonly<{ statement: string; values: readonly unknown[] | undefined }>
-      | undefined;
+      Readonly<{ statement: string; values: readonly unknown[] | undefined }> | undefined;
     const database = {
       query(statement: string, values?: readonly unknown[]) {
         captured = { statement, values };
@@ -294,6 +293,40 @@ describe('real invitation-only identity authority', () => {
     });
     await expect(restartedProcess.signOut(signedIn.credential)).resolves.toBe(true);
     await expect(restartedProcess.resolveCredential(signedIn.credential)).resolves.toBeNull();
+  });
+
+  it('rejects signup for an existing identity without consuming its invitation', async () => {
+    const persistence = new MemoryIdentityPersistence();
+    persistence.identities.set('00000000-0000-4000-8000-000000000099', {
+      id: '00000000-0000-4000-8000-000000000099',
+      email: 'existing@example.com',
+      emailVerifiedAt: NOW,
+      passwordHash: 'hashed:ExistingHorse1',
+      displayName: 'Existing Tester',
+      locale: 'pt-BR',
+      role: 'tester',
+      status: 'active',
+      version: 1n,
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+    const service = authority(persistence);
+    const invitation = await service.issueInvitation({
+      email: 'existing@example.com',
+      expiresAt: LATER,
+      role: 'tester',
+    });
+
+    await expect(
+      service.signUp({
+        displayName: 'Duplicate Tester',
+        email: 'existing@example.com',
+        invitationToken: invitation.token,
+        locale: 'pt-BR',
+        password: 'CorrectHorse1',
+      }),
+    ).resolves.toEqual({ ok: false, code: 'AUTHENTICATION_FAILED' });
+    expect(persistence.invitations.get(invitation.tokenDigest)?.redeemedAt).toBeNull();
   });
 
   it('requires one-time state, code and S256 verifier for desktop exchange', async () => {

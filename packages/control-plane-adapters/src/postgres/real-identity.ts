@@ -360,6 +360,7 @@ export const createRealIdentityAuthority = (
       ) {
         return failure();
       }
+      if ((await persistence.findIdentityByEmail(email)) !== null) return failure();
       let passwordHash: string;
       try {
         passwordHash = await passwords.hash(input.password);

@@ -17,7 +17,7 @@ export type AccountAuthActor = Readonly<{
 export type AccountAuthResult =
   | Readonly<{ actor: AccountAuthActor; status: 'authenticated' }>
   | Readonly<{
-      code: 'authentication-failed' | 'invalid-response' | 'unavailable';
+      code: 'authentication-failed' | 'invitation-failed' | 'invalid-response' | 'unavailable';
       status: 'error';
     }>;
 
@@ -169,6 +169,20 @@ export const admitInvitationToken = (candidate: string | undefined): string | nu
     : null;
 };
 
+export const admitInvitedRecipient = (fragment: string): string | null => {
+  try {
+    const encoded = new URLSearchParams(fragment.replace(/^#/u, '')).get('recipient');
+    if (encoded === null || !/^[A-Za-z0-9_-]{4,512}$/u.test(encoded)) return null;
+    const base64 = encoded.replace(/-/gu, '+').replace(/_/gu, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    const bytes = Uint8Array.from(globalThis.atob(padded), (character) => character.charCodeAt(0));
+    const email = new TextDecoder().decode(bytes).trim().toLowerCase();
+    return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email) ? email : null;
+  } catch {
+    return null;
+  }
+};
+
 export const createAccountAuth = ({
   baseUrl = '',
   correlationId,
@@ -184,7 +198,11 @@ export const createAccountAuth = ({
     csrfToken = (await requestCsrfToken(baseUrl, correlationId(), transport)) ?? undefined;
     return csrfToken ?? null;
   };
-  const authenticate = async (path: string, body: Readonly<Record<string, unknown>>) => {
+  const authenticate = async (
+    path: string,
+    body: Readonly<Record<string, unknown>>,
+    rejectionCode: 'authentication-failed' | 'invitation-failed' = 'authentication-failed',
+  ) => {
     try {
       const csrf = await ensureCsrf();
       if (csrf === null) return { code: 'unavailable', status: 'error' } as const;
@@ -199,7 +217,7 @@ export const createAccountAuth = ({
         method: 'POST',
       });
       if (response.status === 401 || response.status === 403) {
-        return { code: 'authentication-failed', status: 'error' } as const;
+        return { code: rejectionCode, status: 'error' } as const;
       }
       if (!response.ok) return { code: 'unavailable', status: 'error' } as const;
       const actor = actorFromBody(await safeJson(response));
@@ -290,6 +308,6 @@ export const createAccountAuth = ({
         locale: 'pt-BR' | 'en';
         password: string;
       }>,
-    ) => authenticate('/v1/identity/sign-up', input),
+    ) => authenticate('/v1/identity/sign-up', input, 'invitation-failed'),
   });
 };

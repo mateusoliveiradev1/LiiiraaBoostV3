@@ -26,6 +26,7 @@ import {
   LB_INTERACTION_STATES,
   LB_MOTION_ROLES,
   LbButton,
+  LbCheckbox,
   LbCommandSearch,
   LbDataTable,
   LbDetailRow,
@@ -142,6 +143,19 @@ describe('authored primitive interaction states', () => {
 
     expect(semanticAudit(renderToStaticMarkup(iconButton))).toEqual([]);
     expect(renderToStaticMarkup(iconButton)).toContain('Close inspector');
+  });
+
+  it('renders checkbox semantics without CSP-blocked inline styles', () => {
+    const markup = renderToStaticMarkup(
+      <LbCheckbox isSelected value="terms">
+        Accept terms
+      </LbCheckbox>,
+    );
+
+    expect(markup).toContain('type="checkbox"');
+    expect(markup).toContain('checked=""');
+    expect(markup).toContain('class="lb-choice-input"');
+    expect(markup).not.toContain('style=');
   });
 });
 

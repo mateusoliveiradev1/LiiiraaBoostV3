@@ -11,6 +11,14 @@ on:
         description: Exact owner recovery confirmation
         required: true
         type: string
+      exposed_token_digest:
+        description: SHA-256 digest of the exposed invitation token (never the raw token)
+        required: true
+        type: string
+      owner_email_digest:
+        description: SHA-256 digest of the protected owner recipient email
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -21,7 +29,7 @@ concurrency:
 
 jobs:
   recover:
-    if: inputs.confirmation == 'invalidate-exactly-two-and-reissue-three'
+    if: inputs.confirmation == 'replace-exposed-owner-invitation'
     runs-on: ubuntu-24.04
     environment: staging-api
     timeout-minutes: 15
@@ -50,17 +58,18 @@ jobs:
           pnpm --filter @liiiraa/api staging:invitation-crypto encrypt "$PREFLIGHT_PLAINTEXT" "$PREFLIGHT_ENCRYPTED"
           test ! -e "$PREFLIGHT_PLAINTEXT"
           test -s "$PREFLIGHT_ENCRYPTED"
-      - name: Compensate the three links lost by run 31300134764 and encrypt before commit
+      - name: Replace only the exposed owner invitation and encrypt before commit
         env:
           ACCOUNT_STAGING_ORIGIN: https://liiiraa-boost-account-staging.vercel.app
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.encrypted.json
           STAGING_INVITATION_EMAILS_JSON: ${{ secrets.STAGING_INVITATION_EMAILS_JSON }}
+          STAGING_INVITATION_EXPOSED_TOKEN_DIGEST: ${{ inputs.exposed_token_digest }}
+          STAGING_INVITATION_OWNER_EMAIL_DIGEST: ${{ inputs.owner_email_digest }}
+          STAGING_INVITATION_REPLACEMENT_EMAIL: ${{ secrets.STAGING_INVITATION_OWNER_TEST_EMAIL }}
           STAGING_INVITATION_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.json
           STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
-          STAGING_INVITATION_REISSUE_ACTIVE: compensate-run-31300134764-exactly-three
-          STAGING_INVITATION_REISSUE_AFTER: '2026-08-09T07:00:00.000Z'
-          STAGING_INVITATION_REISSUE_BEFORE: '2026-08-09T07:01:00.000Z'
+          STAGING_INVITATION_REISSUE_ACTIVE: replace-exposed-owner-invitation
         run: pnpm --filter @liiiraa/api staging:provision-invitations
       - name: Assert encrypted output exists and plaintext no longer exists
         run: |
