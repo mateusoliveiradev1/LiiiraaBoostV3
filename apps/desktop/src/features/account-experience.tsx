@@ -2147,6 +2147,7 @@ const AuthoritativeAccountContent = ({
 }) => {
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [adminOpenFailed, setAdminOpenFailed] = useState(false);
+  const [subscriptionOpenFailed, setSubscriptionOpenFailed] = useState(false);
   const projection = snapshot.projection;
   const account = projection?.account;
   const subscription = projection?.subscription;
@@ -2338,6 +2339,60 @@ const AuthoritativeAccountContent = ({
                 : (subscription?.state ?? '—')}
             </span>
           </section>
+          <section
+            className="desktop-authority-plan-handoff"
+            data-plan-action={isPremium ? 'manage' : 'upgrade'}
+          >
+            <span className="desktop-authority-plan-handoff__icon">
+              <ProductIcon name={isPremium ? 'sliders' : 'crown'} size={22} />
+            </span>
+            <div>
+              <span className="desktop-authority-kicker">
+                {copy(locale, { en: 'PLANS AND BILLING', 'pt-BR': 'PLANOS E COBRANÇA' })}
+              </span>
+              <h3>
+                {isPremium
+                  ? copy(locale, {
+                      en: 'Manage your subscription',
+                      'pt-BR': 'Gerencie sua assinatura',
+                    })
+                  : copy(locale, {
+                      en: 'Unlock the complete experience',
+                      'pt-BR': 'Libere a experiência completa',
+                    })}
+              </h3>
+              <p>
+                {copy(locale, {
+                  en: 'Payment opens in the secure browser. The desktop never receives card data.',
+                  'pt-BR':
+                    'O pagamento abre no navegador seguro. O desktop nunca recebe dados do cartão.',
+                })}
+              </p>
+            </div>
+            <LbButton
+              onPress={() => {
+                setSubscriptionOpenFailed(false);
+                void authority.openSubscription(locale).then((result) => {
+                  if (result.status !== 'opened') setSubscriptionOpenFailed(true);
+                });
+              }}
+              variant="primary"
+            >
+              {isPremium
+                ? copy(locale, { en: 'Manage subscription', 'pt-BR': 'Gerenciar assinatura' })
+                : copy(locale, { en: 'View plans and subscribe', 'pt-BR': 'Ver planos e assinar' })}
+              <ProductIcon name="arrowRight" size={16} />
+            </LbButton>
+          </section>
+          {subscriptionOpenFailed ? (
+            <p className="desktop-authority-plan-handoff__error" role="alert">
+              {copy(locale, {
+                en: 'The secure Account portal could not open. Confirm your connection and try again.',
+                'pt-BR':
+                  'Não foi possível abrir o portal seguro da Conta. Confirme sua conexão e tente novamente.',
+              })}
+            </p>
+          ) : null}
           <section className="desktop-authority-section desktop-authority-section--ledger">
             <header>
               <span className="desktop-authority-section__icon">

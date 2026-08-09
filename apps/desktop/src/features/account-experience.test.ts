@@ -40,6 +40,16 @@ describe('desktop account session restoration', () => {
     expect(source).toContain("'pt-BR': 'Administrador'");
     expect(source).toContain('data-account-runtime="production"');
   });
+
+  it('offers real plan management from the authoritative desktop Plan route', () => {
+    const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('authority.openSubscription(locale)');
+    expect(source).toContain("'pt-BR': 'Ver planos e assinar'");
+    expect(source).toContain("'pt-BR': 'Gerenciar assinatura'");
+    expect(source).toContain('O pagamento abre no navegador seguro');
+    expect(source).not.toContain('liiiraa-boost-account-staging.vercel.app');
+  });
 });
 
 const handoff = (

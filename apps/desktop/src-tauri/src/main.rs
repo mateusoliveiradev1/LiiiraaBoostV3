@@ -23,8 +23,8 @@ use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
 use credential_store::WindowsCredentialStore;
 use identity::{
     DesktopIdentityError, DesktopPkceProof, LoopbackCallbackListener, WindowsDesktopIdentityApi,
-    WindowsSystemBrowser, open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop,
-    validate_https_origin,
+    WindowsSystemBrowser, open_account_subscription_in_system_browser,
+    open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop, validate_https_origin,
 };
 
 use liiiraa_contracts_rust::{
@@ -560,6 +560,12 @@ struct DesktopOpenAdminCommandResponse {
     status: &'static str,
 }
 
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopOpenAccountSubscriptionCommandResponse {
+    status: &'static str,
+}
+
 #[tauri::command]
 async fn open_admin(
     runtime: State<'_, DesktopRuntimeConfig>,
@@ -573,6 +579,29 @@ async fn open_admin(
         open_admin_in_system_browser(&WindowsSystemBrowser, &admin_origin)
             .map_err(DesktopAuthCommandError::from)?;
         Ok(DesktopOpenAdminCommandResponse { status: "opened" })
+    })
+    .await
+    .map_err(|_| DesktopAuthCommandError::Unavailable)?
+}
+
+#[tauri::command]
+async fn open_account_subscription(
+    runtime: State<'_, DesktopRuntimeConfig>,
+    locale: String,
+) -> Result<DesktopOpenAccountSubscriptionCommandResponse, DesktopAuthCommandError> {
+    let account_origin = runtime
+        .origins
+        .as_ref()
+        .map(|origins| origins.account_origin.clone())
+        .ok_or(DesktopAuthCommandError::Unavailable)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        open_account_subscription_in_system_browser(
+            &WindowsSystemBrowser,
+            &account_origin,
+            &locale,
+        )
+        .map_err(DesktopAuthCommandError::from)?;
+        Ok(DesktopOpenAccountSubscriptionCommandResponse { status: "opened" })
     })
     .await
     .map_err(|_| DesktopAuthCommandError::Unavailable)?
@@ -728,6 +757,7 @@ fn run() -> Result<(), String> {
             desktop_sign_out,
             dispatch_shell_command,
             get_shell_bootstrap,
+            open_account_subscription,
             open_admin,
             sync_account
         ])

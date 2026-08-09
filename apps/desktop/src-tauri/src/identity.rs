@@ -795,6 +795,21 @@ pub fn open_admin_in_system_browser(
     browser.open(&origin.serialized)
 }
 
+pub fn open_account_subscription_in_system_browser(
+    browser: &impl SystemBrowserLauncher,
+    configured_account_origin: &str,
+    locale: &str,
+) -> Result<(), DesktopIdentityError> {
+    let origin = HttpsOrigin::parse(configured_account_origin)?;
+    if !matches!(locale, "en" | "pt-BR") {
+        return Err(DesktopIdentityError::InvalidAuthorizationChallenge);
+    }
+    browser.open(&format!(
+        "{}/{locale}/account/subscription",
+        origin.serialized
+    ))
+}
+
 #[derive(Clone, Debug)]
 pub struct WindowsDesktopIdentityApi {
     account_origin: HttpsOrigin,

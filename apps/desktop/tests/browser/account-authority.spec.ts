@@ -85,6 +85,7 @@ const installNativeAccountAuthority = async (
     activeDevice?: boolean;
     conflict?: boolean;
     initialState?: AuthorityState;
+    plan?: 'free' | 'premium';
     rejectMutation?: boolean;
     remoteRefresh?: boolean;
     revokeOnReconnect?: boolean;
@@ -111,14 +112,15 @@ const installNativeAccountAuthority = async (
         value: Object.freeze({
           invoke: async (command: string, args?: Record<string, unknown>) => {
             await Promise.resolve();
-            if (command !== 'sync_account') throw new Error('unexpected native command');
             const request = args?.request as
               | {
                   mutation?: { draft?: { displayName?: string; locale?: string } };
                   trigger?: string;
                 }
               | undefined;
-            calls.push({ command, request });
+            calls.push({ args, command, request });
+            if (command === 'open_account_subscription') return { status: 'opened' };
+            if (command !== 'sync_account') throw new Error('unexpected native command');
             if (revokeOnReconnect && request?.trigger === 'reconnection') {
               return { state: 'revoked' };
             }
@@ -162,8 +164,22 @@ const installNativeAccountAuthority = async (
     },
     {
       conflict: options.conflict === true,
-      initialProjection:
-        options.activeDevice === false ? { ...projection(), activeDevice: null } : projection(),
+      initialProjection: {
+        ...projection(),
+        ...(options.activeDevice === false ? { activeDevice: null } : {}),
+        ...(options.plan === 'free'
+          ? {
+              subscription: {
+                ...projection().subscription,
+                subscriptionId: 'free-account-01',
+                state: 'none',
+                plan: 'free',
+                entitlements: [],
+                currentPeriodEndsAt: undefined,
+              },
+            }
+          : {}),
+      },
       initialState: options.initialState ?? 'online',
       rejectMutation: options.rejectMutation === true,
       remoteRefresh: options.remoteRefresh === true,
@@ -228,6 +244,32 @@ test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] renders generated native 
       ),
     )
     .toEqual(expect.arrayContaining(['launch', 'resume', 'reconnection', 'mutation']));
+});
+
+test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] opens real plan selection through the bounded Account handoff`, async ({
+  page,
+}) => {
+  await installNativeAccountAuthority(page, { plan: 'free' });
+  await openAccount(page, '/account/subscription');
+
+  await expect(page.getByRole('button', { name: 'View plans and subscribe' })).toBeVisible();
+  await expect(page.getByRole('main')).toContainText(
+    'Payment opens in the secure browser. The desktop never receives card data.',
+  );
+  await page.getByRole('button', { name: 'View plans and subscribe' }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (
+          Reflect.get(globalThis, '__LIIIRAA_ACCOUNT_AUTHORITY_CALLS__') as {
+            args?: { locale?: string };
+            command?: string;
+          }[]
+        ).find((call) => call.command === 'open_account_subscription'),
+      ),
+    )
+    .toEqual(expect.objectContaining({ args: { locale: 'en' } }));
 });
 
 test(`@final @authority-smoke [owner:${OWNER_TASK_ID}] keeps remote truth and the safe local draft on version conflict`, async ({

@@ -19,8 +19,9 @@ use identity::{
     DesktopExchangeRequest, DesktopExchangeResponse, DesktopIdentityApi, DesktopIdentityError,
     DesktopPkceProof, DesktopSessionContact, LoopbackCallbackListener, SystemBrowserLauncher,
     WindowsDesktopIdentityApi, accept_desktop_exchange, begin_desktop_sign_in,
-    complete_desktop_callback, open_admin_in_system_browser, perform_desktop_sign_in,
-    reconcile_authenticated_contact, revoke_desktop_session,
+    complete_desktop_callback, open_account_subscription_in_system_browser,
+    open_admin_in_system_browser, perform_desktop_sign_in, reconcile_authenticated_contact,
+    revoke_desktop_session,
 };
 use liiiraa_contracts_rust::SessionState;
 use serde_json::{Value, json};
@@ -182,6 +183,42 @@ fn admin_handoff_opens_only_the_exact_configured_https_origin() {
             Err(DesktopIdentityError::InvalidAuthorizationChallenge),
         );
     }
+    assert_eq!(browser.opened_urls.borrow().len(), 1);
+}
+
+#[test]
+fn subscription_handoff_opens_only_the_configured_account_route_and_locale() {
+    let browser = RecordingSystemBrowser::default();
+
+    open_account_subscription_in_system_browser(
+        &browser,
+        "https://liiiraa-boost-account-staging.vercel.app",
+        "pt-BR",
+    )
+    .expect("bounded Account subscription route should open");
+    assert_eq!(
+        browser.opened_urls.borrow().as_slice(),
+        ["https://liiiraa-boost-account-staging.vercel.app/pt-BR/account/subscription"]
+    );
+
+    for rejected_origin in [
+        "http://liiiraa-boost-account-staging.vercel.app",
+        "https://liiiraa-boost-account-staging.vercel.app/pt-BR/account/subscription",
+        "https://user@liiiraa-boost-account-staging.vercel.app",
+    ] {
+        assert_eq!(
+            open_account_subscription_in_system_browser(&browser, rejected_origin, "en"),
+            Err(DesktopIdentityError::InvalidAuthorizationChallenge),
+        );
+    }
+    assert_eq!(
+        open_account_subscription_in_system_browser(
+            &browser,
+            "https://liiiraa-boost-account-staging.vercel.app",
+            "fr",
+        ),
+        Err(DesktopIdentityError::InvalidAuthorizationChallenge),
+    );
     assert_eq!(browser.opened_urls.borrow().len(), 1);
 }
 

@@ -15,6 +15,7 @@ export const ACCOUNT_MUTATION_COMMITTED_EVENT = 'liiiraa:account-mutation-commit
 export const ACCOUNT_AUTHORITY_REVOKED_EVENT = 'liiiraa:account-authority-revoked' as const;
 export const ACCOUNT_IDENTITY_PROJECTED_EVENT = 'liiiraa:account-identity-projected' as const;
 export const ACCOUNT_SYNC_COMMAND = 'sync_account' as const;
+export const OPEN_ACCOUNT_SUBSCRIPTION_COMMAND = 'open_account_subscription' as const;
 export const OPEN_ADMIN_COMMAND = 'open_admin' as const;
 export const ACCOUNT_AUTHORITY_REFRESH_MS = 5_000;
 
@@ -71,8 +72,7 @@ export interface DesktopAccountAuthoritySnapshot {
 
 export type DesktopAdminHandoffStatus =
   'eligible' | 'ineligible' | 'offline' | 'expired' | 'revoked';
-export type DesktopAdministrativeMembership =
-  'active' | 'none' | 'offline' | 'expired' | 'revoked';
+export type DesktopAdministrativeMembership = 'active' | 'none' | 'offline' | 'expired' | 'revoked';
 
 export interface DesktopAdminHandoffProjection {
   readonly status: DesktopAdminHandoffStatus;
@@ -84,6 +84,10 @@ export interface DesktopAdminHandoffProjection {
 
 export type DesktopAdminOpenResult = Readonly<{
   status: 'opened' | DesktopAdminHandoffStatus | 'unavailable';
+}>;
+
+export type DesktopSubscriptionOpenResult = Readonly<{
+  status: 'opened' | 'offline' | 'revoked' | 'unavailable';
 }>;
 
 export interface AccountAuthorityTransport {
@@ -559,6 +563,22 @@ export class DesktopAccountAuthority {
     if (!handoff.actionable) return Object.freeze({ status: handoff.status });
     try {
       const raw = await this.#transport.invoke(OPEN_ADMIN_COMMAND);
+      if (!isRecord(raw) || Object.keys(raw).length !== 1 || raw['status'] !== 'opened') {
+        return Object.freeze({ status: 'unavailable' });
+      }
+      return Object.freeze({ status: 'opened' });
+    } catch {
+      return Object.freeze({ status: 'unavailable' });
+    }
+  }
+
+  public async openSubscription(locale: ShellLocaleJson): Promise<DesktopSubscriptionOpenResult> {
+    if (this.#snapshot.state === 'revoked') return Object.freeze({ status: 'revoked' });
+    if (this.#snapshot.state !== 'online' || this.#snapshot.projection === undefined) {
+      return Object.freeze({ status: 'offline' });
+    }
+    try {
+      const raw = await this.#transport.invoke(OPEN_ACCOUNT_SUBSCRIPTION_COMMAND, { locale });
       if (!isRecord(raw) || Object.keys(raw).length !== 1 || raw['status'] !== 'opened') {
         return Object.freeze({ status: 'unavailable' });
       }

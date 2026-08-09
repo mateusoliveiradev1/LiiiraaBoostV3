@@ -4,6 +4,7 @@ import {
   ACCOUNT_AUTHORITY_REFRESH_MS,
   ACCOUNT_SYNC_COMMAND,
   DesktopAccountAuthority,
+  OPEN_ACCOUNT_SUBSCRIPTION_COMMAND,
   OPEN_ADMIN_COMMAND,
   resolveDesktopAdminHandoff,
   type AccountAuthorityTransport,
@@ -176,6 +177,33 @@ describe('bounded desktop Admin handoff', () => {
     expect(JSON.stringify(authority.snapshot())).not.toMatch(
       /adminRecords|session-admin|cookie|credential|accessToken|refreshToken/u,
     );
+  });
+});
+
+describe('bounded desktop subscription handoff', () => {
+  it('opens the Account subscription route through one locale-bound native command', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Friend Tester', '2') })
+      .mockResolvedValueOnce({ status: 'opened' });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(authority.openSubscription('pt-BR')).resolves.toEqual({ status: 'opened' });
+    expect(invoke).toHaveBeenLastCalledWith(OPEN_ACCOUNT_SUBSCRIPTION_COMMAND, {
+      locale: 'pt-BR',
+    });
+  });
+
+  it('does not open plan management without a current account authority', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValue({ state: 'offline', error: 'network-unavailable' });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(authority.openSubscription('en')).resolves.toEqual({ status: 'offline' });
+    expect(invoke).toHaveBeenCalledTimes(1);
   });
 });
 
