@@ -1,0 +1,50 @@
+name: Phase 4 published Admin authority
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_revision:
+        description: Exact deployed Git revision to verify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-published-admin-${{ inputs.expected_revision }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify published Admin against PostgreSQL authority
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: staging-api
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the requested revision without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.expected_revision }}
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm and install reviewed dependencies
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate && node tooling/supply-chain/verify-pins.mjs --check && pnpm install --frozen-lockfile --ignore-scripts
+      - name: Require the exact published Admin revision
+        env:
+          ADMIN_STAGING_ORIGIN: ${{ vars.ADMIN_STAGING_ORIGIN }}
+          EXPECTED_REVISION: ${{ inputs.expected_revision }}
+        run: >-
+          node --input-type=module --eval "const revision = process.env.EXPECTED_REVISION; if (!/^[0-9a-f]{40}$/u.test(revision)) throw new Error('Invalid expected revision'); const origin = new URL(process.env.ADMIN_STAGING_ORIGIN); if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash) throw new Error('Invalid Admin staging origin'); const probe = new URL('/api/deployment', origin); probe.searchParams.set('revision', revision); const response = await fetch(probe, { headers: { accept: 'application/json', 'cache-control': 'no-cache' } }); if (!response.ok) throw new Error('Published Admin revision probe failed'); const body = await response.json(); if (body.revision !== revision) throw new Error('Published Admin does not match the requested revision');"
+      - name: Install the bounded Chromium runtime
+        run: pnpm --filter @liiiraa/web-evidence exec playwright install --with-deps chromium
+      - name: Prove the published Admin uses the real staging authority
+        env:
+          ADMIN_STAGING_ORIGIN: ${{ vars.ADMIN_STAGING_ORIGIN }}
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: pnpm --filter @liiiraa/web-evidence exec playwright test tests/admin-operations.spec.ts --grep @published-authority --project=published-authority --workers=1

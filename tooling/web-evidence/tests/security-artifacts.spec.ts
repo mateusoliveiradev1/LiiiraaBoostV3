@@ -136,6 +136,18 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow).toContain('src/staging/provision-invitations.test.ts');
   expect(workflow).not.toContain('DATABASE_URL');
   expect(workflow).not.toContain('STRIPE_SECRET_KEY');
+
+  const publishedAuthorityWorkflow = readFileSync(
+    join(repositoryRoot, '.github/workflows/phase-4-published-admin.yml'),
+    'utf8',
+  );
+  expect(publishedAuthorityWorkflow).toContain('workflow_dispatch:');
+  expect(publishedAuthorityWorkflow).toContain('expected_revision:');
+  expect(publishedAuthorityWorkflow).toContain('environment: staging-api');
+  expect(publishedAuthorityWorkflow).toContain('${{ vars.ADMIN_STAGING_ORIGIN }}');
+  expect(publishedAuthorityWorkflow).toContain('${{ secrets.STAGING_DATABASE_URL }}');
+  expect(publishedAuthorityWorkflow).toContain('--grep @published-authority');
+  expect(publishedAuthorityWorkflow).not.toMatch(/\n  push:/u);
 });
 
 test('@staging-origin-live probes deployed origin, session, and consent boundaries', async ({

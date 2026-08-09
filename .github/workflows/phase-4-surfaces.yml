@@ -149,38 +149,10 @@ jobs:
         run: >-
           node --input-type=module --eval "import { appendFileSync } from 'node:fs'; const expected = new URL(process.env.EXPECTED_ORIGIN); if (expected.protocol !== 'https:' || expected.pathname !== '/' || expected.search || expected.hash) throw new Error('Invalid admin staging origin'); const probe = new URL('/api/deployment', expected); probe.searchParams.set('revision', process.env.GIT_SHA); let exact = false; for (let attempt = 0; attempt < 90; attempt += 1) { const response = await fetch(probe, { headers: { accept: 'application/json', 'cache-control': 'no-cache' }, redirect: 'manual' }); if (response.ok) { const body = await response.json(); if (body.revision === process.env.GIT_SHA) { exact = true; break; } } await new Promise((resolve) => setTimeout(resolve, 10000)); } if (!exact) throw new Error('Admin staging alias did not serve the exact Git revision'); appendFileSync(process.env.GITHUB_OUTPUT, 'origin=' + expected.origin + '\n');"
 
-  published-admin-authority:
-    name: Verify published Admin against PostgreSQL authority
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-admin
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    environment: staging-api
-    permissions:
-      contents: read
-    steps:
-      - name: Check out exact deployed revision
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-      - name: Install exact Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 24.18.0
-      - name: Activate exact pnpm and install reviewed dependencies
-        run: corepack enable && corepack prepare pnpm@11.17.0 --activate && node tooling/supply-chain/verify-pins.mjs --check && pnpm install --frozen-lockfile --ignore-scripts
-      - name: Install the bounded Chromium runtime
-        run: pnpm --filter @liiiraa/web-evidence exec playwright install --with-deps chromium
-      - name: Prove the published Admin uses the real staging authority
-        env:
-          ADMIN_STAGING_ORIGIN: ${{ needs.deploy-admin.outputs.origin }}
-          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
-        run: pnpm --filter @liiiraa/web-evidence exec playwright test tests/admin-operations.spec.ts --grep @published-authority --project=published-authority --workers=1
-
   smoke-isolation:
     name: Probe origin, session, and consent isolation
     if: github.ref == 'refs/heads/main'
-    needs: [deploy-public, deploy-account, deploy-admin, published-admin-authority]
+    needs: [deploy-public, deploy-account, deploy-admin]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: staging-surfaces
