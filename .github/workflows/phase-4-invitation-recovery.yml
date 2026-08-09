@@ -1,0 +1,66 @@
+name: Phase 4 protected invitation recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      recovery_public_key_b64:
+        description: Base64-encoded RSA public key for the encrypted owner-only artifact
+        required: true
+        type: string
+      confirmation:
+        description: Exact owner recovery confirmation
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-protected-invitation-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: inputs.confirmation == 'invalidate-exactly-two-and-reissue-three'
+    runs-on: ubuntu-24.04
+    environment: staging-api
+    timeout-minutes: 15
+    steps:
+      - name: Check out the exact recovery revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install exact Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.18.0
+      - name: Activate exact pnpm
+        run: corepack enable && corepack prepare pnpm@11.17.0 --activate
+      - name: Verify dependency allowlist
+        run: node tooling/supply-chain/verify-pins.mjs --check
+      - name: Install frozen dependencies without lifecycle scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Revoke exactly two lost invitations and issue three replacements
+        env:
+          ACCOUNT_STAGING_ORIGIN: https://liiiraa-boost-account-staging.vercel.app
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          STAGING_INVITATION_EMAILS_JSON: ${{ secrets.STAGING_INVITATION_EMAILS_JSON }}
+          STAGING_INVITATION_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.json
+          STAGING_INVITATION_REISSUE_ACTIVE: owner-approved-exactly-two
+        run: pnpm --filter @liiiraa/api staging:provision-invitations
+      - name: Encrypt protected output and remove plaintext
+        env:
+          STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
+        run: >-
+          pnpm --filter @liiiraa/api staging:invitation-crypto encrypt
+          "${{ runner.temp }}/liiiraa-invitations.json"
+          "${{ runner.temp }}/liiiraa-invitations.encrypted.json"
+      - name: Assert plaintext no longer exists
+        run: test ! -e "${{ runner.temp }}/liiiraa-invitations.json"
+      - name: Upload encrypted owner-only recovery artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phase-4-protected-invitations-${{ github.run_id }}
+          path: ${{ runner.temp }}/liiiraa-invitations.encrypted.json
+          if-no-files-found: error
+          retention-days: 1

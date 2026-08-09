@@ -135,6 +135,88 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(openProtectedOutput).not.toHaveBeenCalled();
   });
 
+  it('reissues only the two owner-approved active tester invitations for the protected recipients', async () => {
+    const committed: string[] = [];
+    const database = {
+      query: vi.fn((statement: string, _values?: readonly unknown[]) => {
+        if (statement.includes('UPDATE identity_invitations')) {
+          return Promise.resolve({
+            rowCount: 2,
+            rows: [{ token_digest: 'a'.repeat(64) }, { token_digest: 'b'.repeat(64) }],
+          });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+    };
+    const invitations = {
+      issueInvitation: vi.fn(
+        (input: Readonly<{ email: string; expiresAt: string; role: string }>) =>
+          Promise.resolve({
+            expiresAt: input.expiresAt,
+            token: `replacement-${digest(input.email)}`,
+            tokenDigest: digest(`replacement-${input.email}`),
+          }),
+      ),
+    };
+
+    await expect(
+      provisionStagingInvitations(
+        { ...environment(), STAGING_INVITATION_REISSUE_ACTIVE: 'owner-approved-exactly-two' },
+        {
+          clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+          database,
+          invitations,
+          openProtectedOutput: vi.fn(() =>
+            Promise.resolve({
+              abort: vi.fn(() => Promise.resolve()),
+              commit: vi.fn((payload: string) => {
+                committed.push(payload);
+                return Promise.resolve();
+              }),
+            }),
+          ),
+          repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+        },
+      ),
+    ).resolves.toEqual({ created: 3, skipped: 0, status: 'complete' });
+
+    const recoveryCall = database.query.mock.calls[0];
+    expect(recoveryCall?.[0]).toContain("role = 'tester'");
+    expect(recoveryCall?.[0]).toContain('redeemed_at IS NULL');
+    expect(recoveryCall?.[1]).toEqual([
+      emails.map((email) => digest(email)),
+      '2030-01-15T12:00:00.000Z',
+    ]);
+    expect(JSON.stringify(recoveryCall?.[1])).not.toContain('@');
+    expect(invitations.issueInvitation).toHaveBeenCalledTimes(3);
+    expect(committed).toHaveLength(1);
+  });
+
+  it('aborts recovery unless the database returns exactly two lost active invitations', async () => {
+    const database = {
+      query: vi.fn(() =>
+        Promise.resolve({ rowCount: 1, rows: [{ token_digest: 'a'.repeat(64) }] }),
+      ),
+    };
+    const invitations = { issueInvitation: vi.fn() };
+    const openProtectedOutput = vi.fn();
+
+    await expect(
+      provisionStagingInvitations(
+        { ...environment(), STAGING_INVITATION_REISSUE_ACTIVE: 'owner-approved-exactly-two' },
+        {
+          clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+          database,
+          invitations,
+          openProtectedOutput,
+          repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+        },
+      ),
+    ).rejects.toThrow('STAGING_INVITATION_PROVISIONING_REJECTED');
+    expect(invitations.issueInvitation).not.toHaveBeenCalled();
+    expect(openProtectedOutput).not.toHaveBeenCalled();
+  });
+
   it('rejects anything other than three unique valid emails and a protected absolute output path', async () => {
     const dependencies = {
       clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
@@ -173,5 +255,20 @@ describe('secret-driven staging invitation provisioning', () => {
     );
 
     expect(routes).not.toMatch(/\|\s*'issueInvitation'/u);
+  });
+
+  it('publishes only an encrypted short-lived recovery artifact', async () => {
+    const workflow = await readFile(
+      new URL('../../../../.github/workflows/phase-4-invitation-recovery.yml', import.meta.url),
+      'utf8',
+    );
+
+    expect(workflow).toContain('secrets.STAGING_INVITATION_EMAILS_JSON');
+    expect(workflow).toContain('secrets.STAGING_DATABASE_URL');
+    expect(workflow).toContain('STAGING_INVITATION_REISSUE_ACTIVE: owner-approved-exactly-two');
+    expect(workflow).toContain('liiiraa-invitations.encrypted.json');
+    expect(workflow).toContain('retention-days: 1');
+    expect(workflow).toContain('test ! -e');
+    expect(workflow).not.toMatch(/^\s+path:\s+.*liiiraa-invitations\.json\s*$/mu);
   });
 });

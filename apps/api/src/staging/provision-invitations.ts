@@ -8,6 +8,10 @@ import {
   createPostgresIdentityPersistence,
   createRealIdentityAuthority,
 } from '@liiiraa/control-plane-adapters/runtime-identity';
+import type {
+  ControlPlaneMigrationDatabase,
+  ControlPlaneTransaction,
+} from '@liiiraa/control-plane-adapters';
 
 const INVITATION_LIFETIME_MS = 14 * 86_400_000;
 const REJECTION = 'STAGING_INVITATION_PROVISIONING_REJECTED';
@@ -17,6 +21,7 @@ export interface StagingInvitationProvisioningEnvironment {
   readonly STAGING_DATABASE_URL?: string;
   readonly STAGING_INVITATION_EMAILS_JSON?: string;
   readonly STAGING_INVITATION_OUTPUT_PATH?: string;
+  readonly STAGING_INVITATION_REISSUE_ACTIVE?: string;
   readonly STAGING_INVITATION_REPAIR_OUTPUT?: string;
 }
 
@@ -234,6 +239,22 @@ export const provisionStagingInvitations = async (
   const nowIso = now.toISOString();
   const pending: string[] = [];
 
+  if (environment.STAGING_INVITATION_REISSUE_ACTIVE === 'owner-approved-exactly-two') {
+    const invalidated = await dependencies.database.query(
+      `UPDATE identity_invitations
+       SET expires_at = $2
+       WHERE email = ANY($1::text[])
+         AND role = 'tester'
+         AND redeemed_at IS NULL
+         AND expires_at > $2
+       RETURNING token_digest`,
+      [emails.map(digestEmail), nowIso],
+    );
+    if ((invalidated.rowCount ?? invalidated.rows.length) !== 2) {
+      return reject('REISSUE_COUNT');
+    }
+  }
+
   for (const email of emails) {
     const active = await dependencies.database.query(
       `SELECT token_digest FROM identity_invitations
@@ -304,10 +325,22 @@ const run = async (): Promise<void> => {
   if (!databaseUrl) return reject('DATABASE_URL');
   const database = createControlPlaneDatabase(databaseUrl);
   try {
-    const result = await provisionStagingInvitations(environment, {
-      database,
-      invitations: createRealIdentityAuthority(createPostgresIdentityPersistence(database)),
-      repositoryRoot: process.cwd(),
+    const result = await database.transaction(async (transaction) => {
+      const transactionalDatabase: ControlPlaneMigrationDatabase = {
+        query: <TRow extends Record<string, unknown>>(
+          statement: string,
+          values?: readonly unknown[],
+        ) => transaction.query<TRow>(statement, values),
+        transaction: <TResult>(operation: (nested: ControlPlaneTransaction) => Promise<TResult>) =>
+          operation(transaction),
+      };
+      return provisionStagingInvitations(environment, {
+        database: transactionalDatabase,
+        invitations: createRealIdentityAuthority(
+          createPostgresIdentityPersistence(transactionalDatabase),
+        ),
+        repositoryRoot: process.cwd(),
+      });
     });
     process.stdout.write(`${JSON.stringify(result)}\n`);
   } finally {
