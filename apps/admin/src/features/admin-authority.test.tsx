@@ -8,6 +8,7 @@ import {
   type AdminAuthorityTransport,
   type AdminDiagnosticProjection,
 } from '../admin-authority';
+import { resolveAdminAuthorityPresentation } from '../admin-production-routes';
 
 const response = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -527,5 +528,25 @@ describe('admin production composition', () => {
     expect(layoutSource).not.toContain('resolveAdminServerRuntimeConfig');
     expect(layoutSource).toContain('<AdminAuthorityProvider');
     expect(previewView).toContain('@liiiraa/web-preview');
+  });
+});
+
+describe('production authority presentation', () => {
+  it.each([
+    ['admin-role', 'Visão da função', 'Role briefing'],
+    ['admin-support', 'Fila de atendimento', 'Support queue'],
+    ['admin-operations', 'Revisão operacional', 'Operational review'],
+    ['admin-security', 'Revisão de segurança', 'Security review'],
+    ['admin-diagnostics', 'Diagnóstico consentido', 'Consented diagnostics'],
+    ['admin-audit', 'Auditoria administrativa', 'Administrative audit'],
+    ['admin-audit-event', 'Detalhe do evento', 'Audit event detail'],
+  ] as const)('gives %s a task-specific localized identity', (routeId, ptTitle, enTitle) => {
+    const pt = resolveAdminAuthorityPresentation('pt-BR', routeId);
+    const en = resolveAdminAuthorityPresentation('en', routeId);
+    expect(pt.title).toBe(ptTitle);
+    expect(en.title).toBe(enTitle);
+    expect(pt.eyebrow).not.toBe(pt.title);
+    expect(pt.emptyTitle.length).toBeGreaterThan(8);
+    expect(pt.emptyDescription.length).toBeGreaterThan(24);
   });
 });

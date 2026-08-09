@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { ADMIN_CANONICAL_ROUTE_IDS } from '@liiiraa/web-core';
 import { describe, expect, it } from 'vitest';
 
@@ -9,6 +11,15 @@ import {
 } from './admin-workspace-registry-model';
 
 describe('production Admin workspace registry', () => {
+  it('renders denial as a complete masked workspace with a safe recovery path', () => {
+    const source = readFileSync(new URL('./admin-workspace-registry.tsx', import.meta.url), 'utf8');
+    expect(source).toContain('className="admin-workspace-denial"');
+    expect(source).toContain('Voltar à visão geral');
+    expect(source).toContain('Return to overview');
+    expect(source).toContain('Nenhum dado protegido foi carregado');
+    expect(source).toContain('No protected data was loaded');
+  });
+
   it('maps every canonical Admin route to one stable seven-domain workspace', () => {
     const definitions = ADMIN_CANONICAL_ROUTE_IDS.map(resolveAdminWorkspaceDefinition);
     expect(definitions).not.toContain(null);
