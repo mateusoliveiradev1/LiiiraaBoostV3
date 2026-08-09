@@ -12131,6 +12131,12 @@ impl<'de> ::serde::Deserialize<'de> for ContractSchemaVersion {
 #[doc = "      \"$ref\": \"#/definitions/DeviceBindingProjection\""]
 #[doc = "    },"]
 #[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceEvidenceContextProjection\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceLocalEvidenceSubmission\""]
+#[doc = "    },"]
+#[doc = "    {"]
 #[doc = "      \"$ref\": \"#/definitions/SupportCaseProjection\""]
 #[doc = "    },"]
 #[doc = "    {"]
@@ -12233,6 +12239,8 @@ pub enum ControlPlaneDocument {
     SubscriptionProjection(SubscriptionProjection),
     InvoiceProjection(InvoiceProjection),
     DeviceBindingProjection(DeviceBindingProjection),
+    DeviceEvidenceContextProjection(DeviceEvidenceContextProjection),
+    DeviceLocalEvidenceSubmission(DeviceLocalEvidenceSubmission),
     SupportCaseProjection(SupportCaseProjection),
     DiagnosticConsent(DiagnosticConsent),
     AuthorityCommand(AuthorityCommand),
@@ -12287,6 +12295,16 @@ impl ::std::convert::From<InvoiceProjection> for ControlPlaneDocument {
 impl ::std::convert::From<DeviceBindingProjection> for ControlPlaneDocument {
     fn from(value: DeviceBindingProjection) -> Self {
         Self::DeviceBindingProjection(value)
+    }
+}
+impl ::std::convert::From<DeviceEvidenceContextProjection> for ControlPlaneDocument {
+    fn from(value: DeviceEvidenceContextProjection) -> Self {
+        Self::DeviceEvidenceContextProjection(value)
+    }
+}
+impl ::std::convert::From<DeviceLocalEvidenceSubmission> for ControlPlaneDocument {
+    fn from(value: DeviceLocalEvidenceSubmission) -> Self {
+        Self::DeviceLocalEvidenceSubmission(value)
     }
 }
 impl ::std::convert::From<SupportCaseProjection> for ControlPlaneDocument {
@@ -13134,6 +13152,80 @@ impl ::std::convert::TryFrom<::std::string::String> for DeviceBindingState {
         value.parse()
     }
 }
+#[doc = "`DeviceClass`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceClass.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical\","]
+#[doc = "    \"virtual\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceClass {
+    #[serde(rename = "physical")]
+    Physical,
+    #[serde(rename = "virtual")]
+    Virtual,
+}
+impl ::std::fmt::Display for DeviceClass {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Physical => f.write_str("physical"),
+            Self::Virtual => f.write_str("virtual"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceClass {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical" => Ok(Self::Physical),
+            "virtual" => Ok(Self::Virtual),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceClass {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`DeviceCommand`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -13419,6 +13511,605 @@ impl ::std::convert::TryFrom<&::std::string::String> for DeviceCommandSchemaVers
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for DeviceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceComponentClass`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceComponentClass.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"platform-trust\","]
+#[doc = "    \"virtual-platform\","]
+#[doc = "    \"cpu\","]
+#[doc = "    \"storage-controller\","]
+#[doc = "    \"gpu\","]
+#[doc = "    \"memory-topology\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceComponentClass {
+    #[serde(rename = "platform-trust")]
+    PlatformTrust,
+    #[serde(rename = "virtual-platform")]
+    VirtualPlatform,
+    #[serde(rename = "cpu")]
+    Cpu,
+    #[serde(rename = "storage-controller")]
+    StorageController,
+    #[serde(rename = "gpu")]
+    Gpu,
+    #[serde(rename = "memory-topology")]
+    MemoryTopology,
+}
+impl ::std::fmt::Display for DeviceComponentClass {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PlatformTrust => f.write_str("platform-trust"),
+            Self::VirtualPlatform => f.write_str("virtual-platform"),
+            Self::Cpu => f.write_str("cpu"),
+            Self::StorageController => f.write_str("storage-controller"),
+            Self::Gpu => f.write_str("gpu"),
+            Self::MemoryTopology => f.write_str("memory-topology"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceComponentClass {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "platform-trust" => Ok(Self::PlatformTrust),
+            "virtual-platform" => Ok(Self::VirtualPlatform),
+            "cpu" => Ok(Self::Cpu),
+            "storage-controller" => Ok(Self::StorageController),
+            "gpu" => Ok(Self::Gpu),
+            "memory-topology" => Ok(Self::MemoryTopology),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceComponentClass {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceComponentClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceComponentClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceEvidenceContextProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceEvidenceContextProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"accountSalt\","]
+#[doc = "    \"contextVersion\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"accountSalt\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceEvidenceDigest\""]
+#[doc = "    },"]
+#[doc = "    \"contextVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ContractSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"device-evidence-context-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceEvidenceContextProjection {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    #[serde(rename = "accountSalt")]
+    pub account_salt: DeviceEvidenceDigest,
+    #[serde(rename = "contextVersion")]
+    pub context_version: ContractSchemaVersion,
+    pub kind: DeviceEvidenceContextProjectionKind,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: DeviceEvidenceContextProjectionSchemaVersion,
+}
+#[doc = "`DeviceEvidenceContextProjectionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"device-evidence-context-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceEvidenceContextProjectionKind {
+    #[serde(rename = "device-evidence-context-projection")]
+    DeviceEvidenceContextProjection,
+}
+impl ::std::fmt::Display for DeviceEvidenceContextProjectionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeviceEvidenceContextProjection => {
+                f.write_str("device-evidence-context-projection")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceEvidenceContextProjectionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "device-evidence-context-projection" => Ok(Self::DeviceEvidenceContextProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceEvidenceContextProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceEvidenceContextProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceEvidenceContextProjectionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceEvidenceContextProjectionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceEvidenceContextProjectionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for DeviceEvidenceContextProjectionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceEvidenceContextProjectionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceEvidenceContextProjectionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for DeviceEvidenceContextProjectionSchemaVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for DeviceEvidenceContextProjectionSchemaVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceEvidenceDigest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceEvidenceDigest.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 64,"]
+#[doc = "  \"minLength\": 64,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct DeviceEvidenceDigest(::std::string::String);
+impl ::std::ops::Deref for DeviceEvidenceDigest {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<DeviceEvidenceDigest> for ::std::string::String {
+    fn from(value: DeviceEvidenceDigest) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for DeviceEvidenceDigest {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 64usize {
+            return Err("longer than 64 characters".into());
+        }
+        if value.chars().count() < 64usize {
+            return Err("shorter than 64 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceEvidenceDigest {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceEvidenceDigest {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceEvidenceDigest {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for DeviceEvidenceDigest {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`DeviceLocalEvidenceComponent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceLocalEvidenceComponent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"componentClass\","]
+#[doc = "    \"localDigest\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"componentClass\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceComponentClass\""]
+#[doc = "    },"]
+#[doc = "    \"localDigest\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceEvidenceDigest\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceLocalEvidenceComponent {
+    #[serde(rename = "componentClass")]
+    pub component_class: DeviceComponentClass,
+    #[serde(rename = "localDigest")]
+    pub local_digest: DeviceEvidenceDigest,
+}
+#[doc = "`DeviceLocalEvidenceSubmission`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceLocalEvidenceSubmission.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"accountId\","]
+#[doc = "    \"components\","]
+#[doc = "    \"contextVersion\","]
+#[doc = "    \"deviceClass\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"accountId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ControlPlaneIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"components\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/DeviceLocalEvidenceComponent\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 6,"]
+#[doc = "      \"minItems\": 3"]
+#[doc = "    },"]
+#[doc = "    \"contextVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ContractSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"deviceClass\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceClass\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"device-local-evidence-submission\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceLocalEvidenceSubmission {
+    #[serde(rename = "accountId")]
+    pub account_id: ControlPlaneIdentifier,
+    pub components: ::std::vec::Vec<DeviceLocalEvidenceComponent>,
+    #[serde(rename = "contextVersion")]
+    pub context_version: ContractSchemaVersion,
+    #[serde(rename = "deviceClass")]
+    pub device_class: DeviceClass,
+    pub kind: DeviceLocalEvidenceSubmissionKind,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: DeviceLocalEvidenceSubmissionSchemaVersion,
+}
+#[doc = "`DeviceLocalEvidenceSubmissionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"device-local-evidence-submission\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceLocalEvidenceSubmissionKind {
+    #[serde(rename = "device-local-evidence-submission")]
+    DeviceLocalEvidenceSubmission,
+}
+impl ::std::fmt::Display for DeviceLocalEvidenceSubmissionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeviceLocalEvidenceSubmission => f.write_str("device-local-evidence-submission"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceLocalEvidenceSubmissionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "device-local-evidence-submission" => Ok(Self::DeviceLocalEvidenceSubmission),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceLocalEvidenceSubmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeviceLocalEvidenceSubmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceLocalEvidenceSubmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DeviceLocalEvidenceSubmissionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeviceLocalEvidenceSubmissionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for DeviceLocalEvidenceSubmissionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeviceLocalEvidenceSubmissionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeviceLocalEvidenceSubmissionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for DeviceLocalEvidenceSubmissionSchemaVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeviceLocalEvidenceSubmissionSchemaVersion {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

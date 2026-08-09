@@ -3594,6 +3594,12 @@
           "$ref": "DeviceBindingProjection.json"
         },
         {
+          "$ref": "DeviceEvidenceContextProjection.json"
+        },
+        {
+          "$ref": "DeviceLocalEvidenceSubmission.json"
+        },
+        {
           "$ref": "SupportCaseProjection.json"
         },
         {
@@ -3810,6 +3816,20 @@
         }
       ]
     },
+    "DeviceClass": {
+      "$id": "DeviceClass.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "physical",
+          "type": "string"
+        },
+        {
+          "const": "virtual",
+          "type": "string"
+        }
+      ]
+    },
     "DeviceCommand": {
       "$id": "DeviceCommand.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3878,6 +3898,142 @@
           "type": "string"
         }
       ]
+    },
+    "DeviceComponentClass": {
+      "$id": "DeviceComponentClass.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "platform-trust",
+          "type": "string"
+        },
+        {
+          "const": "virtual-platform",
+          "type": "string"
+        },
+        {
+          "const": "cpu",
+          "type": "string"
+        },
+        {
+          "const": "storage-controller",
+          "type": "string"
+        },
+        {
+          "const": "gpu",
+          "type": "string"
+        },
+        {
+          "const": "memory-topology",
+          "type": "string"
+        }
+      ]
+    },
+    "DeviceEvidenceContextProjection": {
+      "$id": "DeviceEvidenceContextProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "accountSalt": {
+          "$ref": "DeviceEvidenceDigest.json"
+        },
+        "contextVersion": {
+          "$ref": "ContractSchemaVersion.json"
+        },
+        "kind": {
+          "const": "device-evidence-context-projection",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "accountId",
+        "contextVersion",
+        "accountSalt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeviceEvidenceDigest": {
+      "$id": "DeviceEvidenceDigest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "DeviceLocalEvidenceComponent": {
+      "$id": "DeviceLocalEvidenceComponent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "componentClass": {
+          "$ref": "DeviceComponentClass.json"
+        },
+        "localDigest": {
+          "$ref": "DeviceEvidenceDigest.json"
+        }
+      },
+      "required": [
+        "componentClass",
+        "localDigest"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeviceLocalEvidenceSubmission": {
+      "$id": "DeviceLocalEvidenceSubmission.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "accountId": {
+          "$ref": "ControlPlaneIdentifier.json"
+        },
+        "components": {
+          "items": {
+            "$ref": "DeviceLocalEvidenceComponent.json"
+          },
+          "maxItems": 6,
+          "minItems": 3,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "contextVersion": {
+          "$ref": "ContractSchemaVersion.json"
+        },
+        "deviceClass": {
+          "$ref": "DeviceClass.json"
+        },
+        "kind": {
+          "const": "device-local-evidence-submission",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "accountId",
+        "contextVersion",
+        "deviceClass",
+        "components"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
     },
     "DiagnosticConsent": {
       "$id": "DiagnosticConsent.json",

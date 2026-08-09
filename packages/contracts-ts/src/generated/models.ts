@@ -255,6 +255,8 @@ export type ControlPlaneDocumentJson =
   | SubscriptionProjectionJson
   | InvoiceProjectionJson
   | DeviceBindingProjectionJson
+  | DeviceEvidenceContextProjectionJson
+  | DeviceLocalEvidenceSubmissionJson
   | SupportCaseProjectionJson
   | DiagnosticConsentJson
   | AuthorityCommandJson
@@ -365,6 +367,22 @@ export type DeviceBindingStateJson = 'unbound' | 'active' | 'replacement-cooldow
  * via the `definition` "ContractSchemaVersion".
  */
 export type ContractSchemaVersionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceEvidenceDigest".
+ */
+export type DeviceEvidenceDigestJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceClass".
+ */
+export type DeviceClassJson = 'physical' | 'virtual';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceComponentClass".
+ */
+export type DeviceComponentClassJson =
+  'platform-trust' | 'virtual-platform' | 'cpu' | 'storage-controller' | 'gpu' | 'memory-topology';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "SupportCaseState".
@@ -2222,6 +2240,63 @@ export interface DeviceBindingProjectionJson {
   evidenceVersion: ContractSchemaVersionJson;
   boundAt?: string;
   replacementEligibleAt?: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceEvidenceContextProjection".
+ */
+export interface DeviceEvidenceContextProjectionJson {
+  schemaVersion: '1.0';
+  kind: 'device-evidence-context-projection';
+  accountId: ControlPlaneIdentifierJson;
+  contextVersion: ContractSchemaVersionJson;
+  accountSalt: DeviceEvidenceDigestJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceLocalEvidenceSubmission".
+ */
+export interface DeviceLocalEvidenceSubmissionJson {
+  schemaVersion: '1.0';
+  kind: 'device-local-evidence-submission';
+  accountId: ControlPlaneIdentifierJson;
+  contextVersion: ContractSchemaVersionJson;
+  deviceClass: DeviceClassJson;
+  /**
+   * @minItems 3
+   * @maxItems 6
+   */
+  components:
+    | [DeviceLocalEvidenceComponentJson, DeviceLocalEvidenceComponentJson, DeviceLocalEvidenceComponentJson]
+    | [
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson
+      ]
+    | [
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson
+      ]
+    | [
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson,
+        DeviceLocalEvidenceComponentJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceLocalEvidenceComponent".
+ */
+export interface DeviceLocalEvidenceComponentJson {
+  componentClass: DeviceComponentClassJson;
+  localDigest: DeviceEvidenceDigestJson;
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema

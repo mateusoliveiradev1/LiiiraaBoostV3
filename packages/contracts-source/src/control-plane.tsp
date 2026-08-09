@@ -22,6 +22,11 @@ scalar AuthorityEtag extends string;
 @maxLength(32)
 scalar ContractSchemaVersion extends string;
 
+@minLength(64)
+@maxLength(64)
+@pattern("^[0-9a-f]{64}$")
+scalar DeviceEvidenceDigest extends string;
+
 @minLength(1)
 @maxLength(16384)
 @pattern("^[A-Za-z0-9_-]+={0,2}$")
@@ -94,6 +99,20 @@ union DeviceBindingState {
   active: "active",
   replacementCooldown: "replacement-cooldown",
   revoked: "revoked",
+}
+
+union DeviceClass {
+  physical: "physical",
+  virtual: "virtual",
+}
+
+union DeviceComponentClass {
+  platformTrust: "platform-trust",
+  virtualPlatform: "virtual-platform",
+  cpu: "cpu",
+  storageController: "storage-controller",
+  gpu: "gpu",
+  memoryTopology: "memory-topology",
 }
 
 union SupportCaseState {
@@ -277,6 +296,31 @@ model DeviceBindingProjection is AuthorityProjectionMetadata {
   evidenceVersion: ContractSchemaVersion;
   boundAt?: utcDateTime;
   replacementEligibleAt?: utcDateTime;
+}
+
+model DeviceEvidenceContextProjection {
+  schemaVersion: "1.0";
+  kind: "device-evidence-context-projection";
+  accountId: ControlPlaneIdentifier;
+  contextVersion: ContractSchemaVersion;
+  accountSalt: DeviceEvidenceDigest;
+}
+
+model DeviceLocalEvidenceComponent {
+  componentClass: DeviceComponentClass;
+  localDigest: DeviceEvidenceDigest;
+}
+
+model DeviceLocalEvidenceSubmission {
+  schemaVersion: "1.0";
+  kind: "device-local-evidence-submission";
+  accountId: ControlPlaneIdentifier;
+  contextVersion: ContractSchemaVersion;
+  deviceClass: DeviceClass;
+  @minItems(3)
+  @maxItems(6)
+  @uniqueItems
+  components: DeviceLocalEvidenceComponent[];
 }
 
 model SupportCaseProjection is AuthorityProjectionMetadata {
@@ -1127,6 +1171,8 @@ union ControlPlaneDocument {
   subscriptionProjection: SubscriptionProjection,
   invoiceProjection: InvoiceProjection,
   deviceBindingProjection: DeviceBindingProjection,
+  deviceEvidenceContextProjection: DeviceEvidenceContextProjection,
+  deviceLocalEvidenceSubmission: DeviceLocalEvidenceSubmission,
   supportCaseProjection: SupportCaseProjection,
   diagnosticConsent: DiagnosticConsent,
   authorityCommand: AuthorityCommand,

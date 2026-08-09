@@ -76,7 +76,7 @@ import {
   type CompleteAdminRouteDependencies,
 } from '../modules/admin/routes.ts';
 import { accountSubscriptionUrl, registerCommerceRoutes } from '../modules/commerce/routes.ts';
-import { registerDeviceRoutes } from '../modules/devices/routes.ts';
+import { createDeviceEvidenceProtector, registerDeviceRoutes } from '../modules/devices/routes.ts';
 import { registerRealIdentityRoutes } from '../modules/identity/real-routes.ts';
 import { registerStrongAuthRoutes } from '../modules/identity/strong-auth-routes.ts';
 import { registerSupportRoutes } from '../modules/support/routes.ts';
@@ -2166,6 +2166,16 @@ export const buildRealStagingApp = async (
         authorize: ({ actorAccountId, accountId }) => Promise.resolve(actorAccountId === accountId),
       },
     },
+    evidenceProtector: createDeviceEvidenceProtector({
+      contextSecret: createHmac('sha256', secret)
+        .update('liiiraa-device-evidence-context-secret-v1')
+        .digest('base64url'),
+      wrappingKey: createHmac('sha256', secret)
+        .update('liiiraa-device-evidence-wrapping-key-v1')
+        .digest('base64url'),
+      contextVersion: '1',
+      keyVersion: 1,
+    }),
     resolveSessionActor,
     project: async (accountId, correlationId) => {
       const records = await listRuntimeAuthority<DeviceBindingRecord>(

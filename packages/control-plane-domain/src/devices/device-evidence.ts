@@ -188,6 +188,26 @@ export const deriveProtectedDeviceEvidence = async ({
   return { deviceClass: evidence.deviceClass, keyVersion, components };
 };
 
+export const deriveDeviceDigest = async (evidence: ProtectedDeviceEvidence): Promise<string> => {
+  const evidenceProblem = validateEvidence(evidence);
+  if (evidenceProblem !== undefined) {
+    throw new Error(`device evidence rejected: ${evidenceProblem}`);
+  }
+  const components = [...evidence.components].sort(
+    (left, right) =>
+      COMPONENT_ORDER.indexOf(left.componentClass) - COMPONENT_ORDER.indexOf(right.componentClass),
+  );
+  const message = [
+    'liiiraa-device-binding-digest-v1',
+    evidence.deviceClass,
+    String(evidence.keyVersion),
+    ...components.map(
+      ({ componentClass, protectedDigest }) => `${componentClass}:${protectedDigest}`,
+    ),
+  ].join('\0');
+  return encodeHex(await globalThis.crypto.subtle.digest('SHA-256', TEXT_ENCODER.encode(message)));
+};
+
 export const compareDeviceEvidence = (
   expected: ProtectedDeviceEvidence,
   observed: ProtectedDeviceEvidence,

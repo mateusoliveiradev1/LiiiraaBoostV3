@@ -1,4 +1,11 @@
-import type { DeviceBindingProjectionJson, DeviceCommandJson } from '@liiiraa/contracts-ts';
+import { createHmac } from 'node:crypto';
+
+import type {
+  DeviceBindingProjectionJson,
+  DeviceCommandJson,
+  DeviceEvidenceContextProjectionJson,
+  DeviceLocalEvidenceSubmissionJson,
+} from '@liiiraa/contracts-ts';
 import { controlPlaneDocumentValidator } from '@liiiraa/contracts-ts/runtime-control-plane-validator';
 import {
   bindDevice,
@@ -7,10 +14,17 @@ import {
   type DeviceAuthorityDependencies,
   type DeviceAuthorityResult,
 } from '@liiiraa/control-plane-application/runtime-control-plane';
+import {
+  deriveDeviceDigest,
+  deriveProtectedDeviceEvidence,
+  type LocalDeviceEvidence,
+  type ProtectedDeviceEvidence,
+} from '@liiiraa/control-plane-domain/runtime-control-plane';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export interface DeviceRouteDependencies {
   readonly authority: DeviceAuthorityDependencies;
+  readonly evidenceProtector: DeviceEvidenceProtector;
   readonly resolveSessionActor: (
     request: FastifyRequest,
   ) => Promise<Readonly<{ accountId: string }> | null>;
@@ -22,8 +36,9 @@ export interface DeviceRouteDependencies {
 
 interface DeviceMutationBody {
   readonly command: DeviceCommandJson;
-  readonly deviceDigest?: string;
   readonly deviceLabel?: string;
+  readonly evidenceSubmission?: DeviceLocalEvidenceSubmissionJson;
+  readonly deviceDigest?: string;
   readonly evidence?: BindDeviceInput['evidence'];
   readonly confirmedFriendlyIdentity?: boolean;
   readonly confirmedOnePcConsequences?: boolean;
@@ -32,6 +47,100 @@ interface DeviceMutationBody {
   readonly exceptionId?: string;
   readonly observedEvidence?: BindDeviceInput['evidence'];
 }
+
+export interface DeviceEvidenceProtector {
+  context(accountId: string): Promise<DeviceEvidenceContextProjectionJson>;
+  protect(
+    accountId: string,
+    submission: unknown,
+  ): Promise<Readonly<{ deviceDigest: string; evidence: ProtectedDeviceEvidence }>>;
+}
+
+export interface DeviceEvidenceProtectorInput {
+  readonly contextSecret: string;
+  readonly wrappingKey: string;
+  readonly contextVersion: string;
+  readonly keyVersion: number;
+}
+
+const SECRET = /^[A-Za-z0-9_-]{43,256}$/u;
+const CONTEXT_VERSION = /^[1-9][0-9]{0,8}$/u;
+const BIND_BODY_KEYS = new Set([
+  'command',
+  'deviceLabel',
+  'evidenceSubmission',
+  'confirmedFriendlyIdentity',
+  'confirmedOnePcConsequences',
+]);
+
+const accountSalt = (contextSecret: string, accountId: string): string =>
+  createHmac('sha256', contextSecret)
+    .update('liiiraa-device-evidence-account-context-v1\0')
+    .update(accountId)
+    .digest('hex');
+
+const localEvidence = (submission: DeviceLocalEvidenceSubmissionJson): LocalDeviceEvidence => ({
+  deviceClass: submission.deviceClass,
+  components: submission.components.map(({ componentClass, localDigest }) => ({
+    componentClass,
+    localDigest,
+  })),
+});
+
+export const createDeviceEvidenceProtector = ({
+  contextSecret,
+  wrappingKey,
+  contextVersion,
+  keyVersion,
+}: DeviceEvidenceProtectorInput): DeviceEvidenceProtector => {
+  if (
+    !SECRET.test(contextSecret) ||
+    !SECRET.test(wrappingKey) ||
+    contextSecret === wrappingKey ||
+    !CONTEXT_VERSION.test(contextVersion) ||
+    !Number.isSafeInteger(keyVersion) ||
+    keyVersion < 1
+  ) {
+    throw new Error('DEVICE_EVIDENCE_PROTECTOR_CONFIGURATION_REJECTED');
+  }
+  const context = async (accountId: string): Promise<DeviceEvidenceContextProjectionJson> => ({
+    schemaVersion: '1.0',
+    kind: 'device-evidence-context-projection',
+    accountId,
+    contextVersion,
+    accountSalt: accountSalt(contextSecret, accountId),
+  });
+  return Object.freeze({
+    context,
+    protect: async (accountId: string, submission: unknown) => {
+      if (
+        !controlPlaneDocumentValidator(submission) ||
+        !isRecord(submission) ||
+        submission['kind'] !== 'device-local-evidence-submission'
+      ) {
+        throw new Error('device evidence rejected: invalid-submission');
+      }
+      const typed = submission as unknown as DeviceLocalEvidenceSubmissionJson;
+      if (typed.accountId !== accountId) {
+        throw new Error('device evidence rejected: account-mismatch');
+      }
+      if (typed.contextVersion !== contextVersion) {
+        throw new Error('device evidence rejected: stale-context-version');
+      }
+      try {
+        const evidence = await deriveProtectedDeviceEvidence({
+          evidence: localEvidence(typed),
+          accountSalt: accountSalt(contextSecret, accountId),
+          serverWrappingKey: wrappingKey,
+          keyVersion,
+        });
+        return Object.freeze({ evidence, deviceDigest: await deriveDeviceDigest(evidence) });
+      } catch {
+        throw new Error('device evidence rejected: invalid-local-evidence');
+      }
+    },
+  });
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -44,6 +153,17 @@ const bodyValue = (value: unknown): DeviceMutationBody | null => {
   }
   return value as unknown as DeviceMutationBody;
 };
+
+const exactBindBody = (value: unknown): value is DeviceMutationBody =>
+  isRecord(value) && Object.keys(value).every((key) => BIND_BODY_KEYS.has(key));
+
+const deviceLabel = (value: unknown): string | null =>
+  typeof value === 'string' &&
+  value.length >= 1 &&
+  value.length <= 128 &&
+  !/[\u0000-\u001f\u007f]/u.test(value)
+    ? value
+    : null;
 
 const expectedVersion = (value: string): bigint | null => {
   if (!/^(?:0|[1-9][0-9]*)$/u.test(value)) return null;
@@ -95,14 +215,33 @@ export const registerDeviceRoutes = (
       : reply.code(404).send({ code: 'NOT_FOUND', reason: 'binding-not-found' });
   });
 
+  app.get('/v1/devices/evidence-context', async (request, reply) => {
+    const actor = await dependencies.resolveSessionActor(request);
+    if (!actor) return reply.code(401).send({ code: 'UNAUTHORIZED', reason: 'owner-required' });
+    return reply.code(200).send(await dependencies.evidenceProtector.context(actor.accountId));
+  });
+
   app.post('/v1/devices/bind', async (request, reply) => {
     const context = await mutationContext(request, dependencies);
     if (context?.body.command.action !== 'bind') {
       return reply.code(401).send({ code: 'UNAUTHORIZED', reason: 'request-denied' });
     }
     const { body, actor, version } = context;
-    if (!body.deviceDigest || !body.deviceLabel || !body.evidence) {
+    const label = deviceLabel(body.deviceLabel);
+    if (!exactBindBody(request.body) || label === null || body.evidenceSubmission === undefined) {
       return reply.code(400).send({ code: 'INVALID_REQUEST', reason: 'device-evidence-required' });
+    }
+    let protectedEvidence: Readonly<{
+      deviceDigest: string;
+      evidence: ProtectedDeviceEvidence;
+    }>;
+    try {
+      protectedEvidence = await dependencies.evidenceProtector.protect(
+        actor.accountId,
+        body.evidenceSubmission,
+      );
+    } catch {
+      return reply.code(400).send({ code: 'INVALID_REQUEST', reason: 'device-evidence-rejected' });
     }
     return sendAuthorityResult(
       reply,
@@ -112,9 +251,9 @@ export const registerDeviceRoutes = (
         accountId: body.command.accountId,
         expectedVersion: version,
         bindingId: body.command.deviceBindingId,
-        deviceDigest: body.deviceDigest,
-        deviceLabel: body.deviceLabel,
-        evidence: body.evidence,
+        deviceDigest: protectedEvidence.deviceDigest,
+        deviceLabel: label,
+        evidence: protectedEvidence.evidence,
         confirmedFriendlyIdentity: body.confirmedFriendlyIdentity === true,
         confirmedOnePcConsequences: body.confirmedOnePcConsequences === true,
         correlationId: body.command.correlationId,

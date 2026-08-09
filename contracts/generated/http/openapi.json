@@ -3614,6 +3614,12 @@
             "$ref": "#/components/schemas/DeviceBindingProjection"
           },
           {
+            "$ref": "#/components/schemas/DeviceEvidenceContextProjection"
+          },
+          {
+            "$ref": "#/components/schemas/DeviceLocalEvidenceSubmission"
+          },
+          {
             "$ref": "#/components/schemas/SupportCaseProjection"
           },
           {
@@ -3816,6 +3822,18 @@
           }
         ]
       },
+      "DeviceClass": {
+        "anyOf": [
+          {
+            "const": "physical",
+            "type": "string"
+          },
+          {
+            "const": "virtual",
+            "type": "string"
+          }
+        ]
+      },
       "DeviceCommand": {
         "properties": {
           "accountId": {
@@ -3880,6 +3898,132 @@
             "type": "string"
           }
         ]
+      },
+      "DeviceComponentClass": {
+        "anyOf": [
+          {
+            "const": "platform-trust",
+            "type": "string"
+          },
+          {
+            "const": "virtual-platform",
+            "type": "string"
+          },
+          {
+            "const": "cpu",
+            "type": "string"
+          },
+          {
+            "const": "storage-controller",
+            "type": "string"
+          },
+          {
+            "const": "gpu",
+            "type": "string"
+          },
+          {
+            "const": "memory-topology",
+            "type": "string"
+          }
+        ]
+      },
+      "DeviceEvidenceContextProjection": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "accountSalt": {
+            "$ref": "#/components/schemas/DeviceEvidenceDigest"
+          },
+          "contextVersion": {
+            "$ref": "#/components/schemas/ContractSchemaVersion"
+          },
+          "kind": {
+            "const": "device-evidence-context-projection",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "accountId",
+          "contextVersion",
+          "accountSalt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DeviceEvidenceDigest": {
+        "maxLength": 64,
+        "minLength": 64,
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "DeviceLocalEvidenceComponent": {
+        "properties": {
+          "componentClass": {
+            "$ref": "#/components/schemas/DeviceComponentClass"
+          },
+          "localDigest": {
+            "$ref": "#/components/schemas/DeviceEvidenceDigest"
+          }
+        },
+        "required": [
+          "componentClass",
+          "localDigest"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DeviceLocalEvidenceSubmission": {
+        "properties": {
+          "accountId": {
+            "$ref": "#/components/schemas/ControlPlaneIdentifier"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceLocalEvidenceComponent"
+            },
+            "maxItems": 6,
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "contextVersion": {
+            "$ref": "#/components/schemas/ContractSchemaVersion"
+          },
+          "deviceClass": {
+            "$ref": "#/components/schemas/DeviceClass"
+          },
+          "kind": {
+            "const": "device-local-evidence-submission",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "kind",
+          "accountId",
+          "contextVersion",
+          "deviceClass",
+          "components"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "DiagnosticConsent": {
         "properties": {

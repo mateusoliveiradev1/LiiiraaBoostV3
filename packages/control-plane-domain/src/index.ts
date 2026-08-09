@@ -1,5 +1,6 @@
 export {
   compareDeviceEvidence,
+  deriveDeviceDigest,
   deriveProtectedDeviceEvidence,
   type DeriveProtectedDeviceEvidenceInput,
   type DeviceClass,

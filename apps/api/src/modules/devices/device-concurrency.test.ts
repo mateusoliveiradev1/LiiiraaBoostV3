@@ -75,11 +75,11 @@ class SerializableDeviceRepository implements DeviceBindingRepository {
           },
         ],
       ]),
-    bindings: new Map(),
-    exceptions: new Map(),
-    commandResults: new Map(),
-    audits: [],
-    outbox: [],
+      bindings: new Map(),
+      exceptions: new Map(),
+      commandResults: new Map(),
+      audits: [],
+      outbox: [],
     };
   }
 
@@ -448,7 +448,9 @@ describe('device evidence route boundary', () => {
   it.each([
     localEvidenceSubmission({ contextVersion: '0' }),
     localEvidenceSubmission({ accountId: 'account-attacker' }),
-    localEvidenceSubmission({ components: [{ componentClass: 'cpu', localDigest: '1'.repeat(64) }] }),
+    localEvidenceSubmission({
+      components: [{ componentClass: 'cpu', localDigest: '1'.repeat(64) }],
+    }),
     localEvidenceSubmission({
       components: [
         { componentClass: 'cpu', localDigest: '1'.repeat(64) },
@@ -463,11 +465,14 @@ describe('device evidence route boundary', () => {
         { componentClass: 'gpu', localDigest: '3'.repeat(64) },
       ],
     }),
-  ])('rejects stale, cross-account, sparse, duplicate, or malformed local evidence', async (submission) => {
-    await expect(protector().protect(ACCOUNT_ID, submission)).rejects.toThrow(
-      'device evidence rejected',
-    );
-  });
+  ])(
+    'rejects stale, cross-account, sparse, duplicate, or malformed local evidence',
+    async (submission) => {
+      await expect(protector().protect(ACCOUNT_ID, submission)).rejects.toThrow(
+        'device evidence rejected',
+      );
+    },
+  );
 
   it('rejects caller-authored protected authority before persistence', async () => {
     const repository = new SerializableDeviceRepository();
