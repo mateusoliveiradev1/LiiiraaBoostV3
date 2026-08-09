@@ -1,11 +1,11 @@
 ---
-status: complete
+status: diagnosed
 phase: 04-identity-commerce-devices-and-administration
 source:
   - 04-39-SUMMARY.md
   - ../../debug/auth-session-persistence-ui.md
 started: 2026-08-06T07:53:16.4689728Z
-updated: 2026-08-09T13:42:00.0000000Z
+updated: 2026-08-09T14:05:00.0000000Z
 ---
 
 ## Current Test
@@ -86,20 +86,38 @@ blocked: 0
   reason: "User reported: aqui ainda nao funciona nao nao vincula o pc"
   severity: major
   test: 11
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "A producao renderiza um bloqueio hardcoded de beta e nao expoe qualquer mutacao de dispositivo. A API e o dominio ja possuem bind transacional para uma licenca Premium, e o Rust ja protege observacoes fornecidas, mas faltam o coletor Windows real, a fronteira de protecao servidor-cliente, o comando Tauri, o metodo da autoridade e a UI Free/Premium correta."
+  artifacts:
+    - path: "apps/desktop/src/features/account-experience.tsx"
+      issue: "A rota Device substitui a acao real por texto e badge Aguardando beta para toda conta sem dispositivo."
+    - path: "apps/desktop/src/account-authority.ts"
+      issue: "A autoridade do desktop suporta somente leitura, perfil, Admin e assinatura; nao existe mutacao de vinculo."
+    - path: "apps/desktop/src-tauri/src/device_identity.rs"
+      issue: "A derivacao local existe, mas nao ha coletor de observacoes Windows nem chamada ao endpoint de bind."
+    - path: "apps/api/src/modules/devices/routes.ts"
+      issue: "O endpoint seguro existe e exige Premium e confirmacoes, mas nenhum cliente de producao o alcança."
+  missing:
+    - "Mostrar requisito de Premium e acao de planos para conta Free."
+    - "Coletar e proteger evidencia do Windows sem enviar identificadores crus."
+    - "Conectar Tauri e autoridade React ao bind transacional e atualizar a projecao confirmada pela API."
+    - "Cobrir conflito de um PC, falha, estado pendente e confirmacoes explicitas."
+  debug_session: ".planning/debug/desktop-device-binding-beta-gate.md"
 
 - truth: "O logout do desktop deve remover a credencial local e retornar ao estado de entrada com um unico clique."
   status: failed
   reason: "User reported: preciso apertar duas vezes em sair no app mais dps q sai e pass"
   severity: minor
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "O comando nativo revoga e apaga a credencial, mas a autoridade React singleton conserva a ultima projecao online. O evento limpa apenas o chrome; ao navegar para /login, resolveDesktopLoginState ainda ve a conta autenticada e redireciona de volta para Account, fazendo o primeiro logout parecer ignorado."
+  artifacts:
+    - path: "apps/desktop/src/features/account-experience.tsx"
+      issue: "O sucesso dispara um evento e navega, mas nao invalida o snapshot da autoridade que controla a guarda da rota."
+    - path: "apps/desktop/src/account-authority.ts"
+      issue: "Nao existe transicao explicita para revoked apos o logout local confirmado."
+  missing:
+    - "Adicionar uma transicao idempotente de logout confirmado que remova imediatamente a projecao em memoria."
+    - "Cobrir que um unico clique permanece na rota de login mesmo com refresh concorrente."
+  debug_session: ".planning/debug/desktop-sign-out-double-action.md"
 
 - truth: "O desktop 0.0.1 deve conseguir restaurar a sessao publicada ou oferecer o login real no navegador, sem ficar preso em conexao indisponivel."
   status: resolved
