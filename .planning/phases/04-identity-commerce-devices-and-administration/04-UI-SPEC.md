@@ -361,14 +361,14 @@ Cards are bounded work regions, not decorative KPI tiles. Ordinary screens use a
 
 ### Route compositions
 
-| Route | Focal composition | Supporting composition | Primary action |
-| --- | --- | --- | --- |
-| Overview | Welcome/identity heading plus three account health facts | Recommended next step with verified state | Route to the highest-value incomplete setup |
-| PCs and licenses | Device state card with icon, current binding and eligibility | License rules and replacement consequence | `Vincular PC` or `Substituir dispositivo` |
-| Downloads | Release card with channel, version/trust metadata and Windows requirement | Signing warning and install guidance | `Baixar para Windows` |
-| Plan and payments | Plan identity, access state, billing model and benefits | Billing/renewal safeguards | `Gerenciar assinatura` only when provider-backed |
-| Security and privacy | Separate method rows for passkey, MFA, recovery, and active sessions | Security posture summary and recovery guidance | Precise method-specific action |
-| Help | Empty/support state with expected response and protected-data boundary | Direct guidance and existing-case count | `Abrir solicitação` when authority supports it |
+| Route                | Focal composition                                                         | Supporting composition                         | Primary action                                   |
+| -------------------- | ------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------ |
+| Overview             | Welcome/identity heading plus three account health facts                  | Recommended next step with verified state      | Route to the highest-value incomplete setup      |
+| PCs and licenses     | Device state card with icon, current binding and eligibility              | License rules and replacement consequence      | `Vincular PC` or `Substituir dispositivo`        |
+| Downloads            | Release card with channel, version/trust metadata and Windows requirement | Signing warning and install guidance           | `Baixar para Windows`                            |
+| Plan and payments    | Plan identity, access state, billing model and benefits                   | Billing/renewal safeguards                     | `Gerenciar assinatura` only when provider-backed |
+| Security and privacy | Separate method rows for passkey, MFA, recovery, and active sessions      | Security posture summary and recovery guidance | Precise method-specific action                   |
+| Help                 | Empty/support state with expected response and protected-data boundary    | Direct guidance and existing-case count        | `Abrir solicitação` when authority supports it   |
 
 ### Status and copy rules
 
