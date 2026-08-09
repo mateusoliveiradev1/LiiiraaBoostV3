@@ -208,6 +208,74 @@ describe('bounded desktop subscription handoff', () => {
 });
 
 describe('desktop account authority mutations', () => {
+  it('publishes a confirmed sign-out immediately and idempotently', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValue({ state: 'online', projection: projection('Mateus Oliveira', '7') });
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    const publishedStates: string[] = [];
+    const unsubscribe = authority.subscribe((snapshot) => {
+      publishedStates.push(snapshot.state);
+    });
+
+    authority.confirmSignedOut();
+    authority.confirmSignedOut();
+
+    expect(authority.snapshot()).toEqual({ state: 'revoked', error: 'unauthorized' });
+    expect(publishedStates).toEqual(['online', 'revoked']);
+    unsubscribe();
+  });
+
+  it('ignores an online synchronization that finishes after confirmed sign-out', async () => {
+    let resolveRefresh: ((value: unknown) => void) | undefined;
+    const refreshResponse = new Promise<unknown>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
+      .mockReturnValueOnce(refreshResponse);
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    const refresh = authority.synchronize('reconnection');
+    await Promise.resolve();
+
+    authority.confirmSignedOut();
+    resolveRefresh?.({ state: 'online', projection: projection('Mateus Oliveira', '8') });
+    await refresh;
+
+    expect(authority.snapshot()).toEqual({ state: 'revoked', error: 'unauthorized' });
+  });
+
+  it('discards queued lifecycle synchronization after confirmed sign-out', async () => {
+    let resolveRefresh: ((value: unknown) => void) | undefined;
+    const refreshResponse = new Promise<unknown>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
+      .mockReturnValueOnce(refreshResponse)
+      .mockResolvedValue({ state: 'online', projection: projection('Mateus Oliveira', '9') });
+    const authority = new DesktopAccountAuthority({ invoke });
+
+    await authority.synchronize('launch');
+    const refresh = authority.synchronize('reconnection');
+    await Promise.resolve();
+    await authority.synchronize('resume');
+
+    authority.confirmSignedOut();
+    resolveRefresh?.({ state: 'online', projection: projection('Mateus Oliveira', '8') });
+    await refresh;
+    await Promise.resolve();
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(authority.snapshot()).toEqual({ state: 'revoked', error: 'unauthorized' });
+  });
+
   it('keeps a confirmed signed-out state stable during background refresh', async () => {
     const invoke = vi
       .fn<AccountAuthorityTransport['invoke']>()

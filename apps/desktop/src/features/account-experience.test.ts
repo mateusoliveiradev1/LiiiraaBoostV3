@@ -50,6 +50,16 @@ describe('desktop account session restoration', () => {
     expect(source).toContain('O pagamento abre no navegador seguro');
     expect(source).not.toContain('liiiraa-boost-account-staging.vercel.app');
   });
+
+  it('confirms the revoked authority before routing back to sign-in', () => {
+    const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
+    const signOutBranch = source.slice(source.indexOf("result.status === 'signed-out'"));
+
+    expect(signOutBranch.indexOf('authority.confirmSignedOut()')).toBeGreaterThan(-1);
+    expect(signOutBranch.indexOf('authority.confirmSignedOut()')).toBeLessThan(
+      signOutBranch.indexOf("navigate('/login')"),
+    );
+  });
 });
 
 const handoff = (
