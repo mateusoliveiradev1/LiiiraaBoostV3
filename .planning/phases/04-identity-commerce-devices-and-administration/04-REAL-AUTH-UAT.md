@@ -2,8 +2,8 @@
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
-tested_commit: 61d8db9f8e4e1d090d75c67e918f53228bec03de
-updated: 2026-08-09T17:10:56.5996535Z
+tested_commit: 60d6f37984c5d3b9471f05f075acd253c75feb14
+updated: 2026-08-09T17:37:57.3289694Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -15,7 +15,9 @@ password, database credential, or session credential is recorded here.
 ## Current checkpoint
 
 - Progress: Tasks 04-40-01 and 04-40-02 complete; Task 04-40-03 human observations pending.
-- Automated environment: ready on one exact revision with fixture/preview authority disabled.
+- Automated environment: exact surface and API component revisions are recorded below with
+  fixture/preview authority disabled.
+- Published Admin automation: complete against Vercel -> API -> PostgreSQL authority.
 - Device-binding remediation: deployed on the exact API revision below; owner UAT confirmed the
   PostgreSQL-backed binding and authoritative projection after refresh/restart.
 - Recovery action: complete; three unique replacement URLs are available only in the owner-protected
@@ -26,15 +28,17 @@ password, database credential, or session credential is recorded here.
 
 | Identity                         | Exact value                                                               | Result |
 | -------------------------------- | ------------------------------------------------------------------------- | ------ |
-| Source commit / API build ID     | `61d8db9f8e4e1d090d75c67e918f53228bec03de`                                | PASS   |
+| Published surface/test revision  | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
+| API build ID                     | `61d8db9f8e4e1d090d75c67e918f53228bec03de`                                | PASS   |
 | API OCI digest                   | `sha256:332c8007d4e077ea6e8a0efac62b430cea413c106bba9b175634232c893d3933` | PASS   |
 | GitHub API promotion run         | `31324354207`                                                             | PASS   |
 | Render deploy                    | `dep-d9saslqfngtc73eva5a0`                                                | PASS   |
 | API origin                       | `https://liiiraa-api-staging.onrender.com`                                | PASS   |
-| Public Vercel revision endpoint  | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
-| Account Vercel revision endpoint | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
-| Admin Vercel revision endpoint   | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
-| Surface verification run         | `31303291728`                                                             | PASS   |
+| Public Vercel revision endpoint  | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
+| Account Vercel revision endpoint | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
+| Admin Vercel revision endpoint   | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
+| Surface verification run         | `31326664826`                                                             | PASS   |
+| Published Admin authority run    | `31326815831`                                                             | PASS   |
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
 | Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
 | Desktop installer                | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
@@ -42,26 +46,26 @@ password, database credential, or session credential is recorded here.
 
 The API readiness endpoint reported build ID
 `61d8db9f8e4e1d090d75c67e918f53228bec03de`, `authorityConnected=true`, and
-`device-authority`. The unchanged Public, Account, and Admin artifacts remain on their previously
-verified `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15` revision and continue to proxy to this API.
+`device-authority`. Public, Account, and Admin serve the exact
+`60d6f37984c5d3b9471f05f075acd253c75feb14` revision and continue to proxy to this API.
 
 ## Automated receipts
 
-| Receipt                  | Observation                                                                                                        | Result              |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| Provisioner preflight    | invitation provisioning/crypto: 2 files, 11 tests passed                                                           | PASS                |
-| Dependency policy        | 72 exact dependency pins verified                                                                                  | PASS                |
-| Vulnerability gate       | `nanoid` resolved to `3.3.18`; production audit has no HIGH/CRITICAL finding                                       | PASS                |
-| API artifact             | SBOM, provenance, digest validation, Trivy scan, and anonymous digest pull passed                                  | PASS                |
-| API promotion            | Migrations, Stripe test catalog/webhook, immutable Render digest, health, and readiness passed                     | PASS                |
-| API readiness            | `authorityConnected=true`, `invitationOnly=true`, `dataClassification=synthetic`, all Phase 4 capabilities present | PASS                |
-| Isolated surfaces        | Public, Account, and Admin exact Git deployments are READY                                                         | PASS                |
-| Fail-closed probes       | Origin, session, and consent-isolation probes passed                                                               | PASS                |
-| Desktop package          | Tauri staging overlay compiled and produced one NSIS x64 installer                                                 | PASS                |
-| Device authority         | Free denial, Premium confirmations, native Windows evidence, server-only wrapping, replay, and concurrency passed  | PASS                |
-| Device privacy scan      | No raw serial, machine GUID, protected digest, or local digest crosses React source; beta gate absent              | PASS                |
-| Phase evidence evaluator | Refused stale artifact hashes and 20 missing real-PC coverage cells                                                | BLOCKED AS DESIGNED |
-| Published Admin selector | Plan selector `@published-authority` is absent; the implemented real-authority test uses `@production-authority` | BLOCKED AS DESIGNED |
+| Receipt                   | Observation                                                                                                                                                                    | Result              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| Provisioner preflight     | invitation provisioning/crypto: 2 files, 11 tests passed                                                                                                                       | PASS                |
+| Dependency policy         | 72 exact dependency pins verified                                                                                                                                              | PASS                |
+| Vulnerability gate        | `nanoid` resolved to `3.3.18`; production audit has no HIGH/CRITICAL finding                                                                                                   | PASS                |
+| API artifact              | SBOM, provenance, digest validation, Trivy scan, and anonymous digest pull passed                                                                                              | PASS                |
+| API promotion             | Migrations, Stripe test catalog/webhook, immutable Render digest, health, and readiness passed                                                                                 | PASS                |
+| API readiness             | `authorityConnected=true`, `invitationOnly=true`, `dataClassification=synthetic`, all Phase 4 capabilities present                                                             | PASS                |
+| Isolated surfaces         | Public, Account, and Admin exact Git deployments are READY                                                                                                                     | PASS                |
+| Fail-closed probes        | Origin, session, and consent-isolation probes passed                                                                                                                           | PASS                |
+| Desktop package           | Tauri staging overlay compiled and produced one NSIS x64 installer                                                                                                             | PASS                |
+| Device authority          | Free denial, Premium confirmations, native Windows evidence, server-only wrapping, replay, and concurrency passed                                                              | PASS                |
+| Device privacy scan       | No raw serial, machine GUID, protected digest, or local digest crosses React source; beta gate absent                                                                          | PASS                |
+| Phase evidence evaluator  | Refused stale artifact hashes and 20 missing real-PC coverage cells                                                                                                            | BLOCKED AS DESIGNED |
+| Published Admin authority | Exact Vercel revision passed signup, TOTP, function switch, authorized PostgreSQL reads, fail-closed invitation issuance, responsive layout, accessibility, and runtime guards | PASS                |
 
 The global evidence evaluator remains closed because the checked-in evidence manifest predates
 this revision and the required Windows 10/11 hardware and lifecycle matrix has not been observed.
@@ -151,24 +155,24 @@ Owner signup recovery supplement:
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
 revision mismatch, or result that does not survive reload is a critical failure.
 
-| Observation                                                                                            | Evidence                    | Result  |
-| ------------------------------------------------------------------------------------------------------ | --------------------------- | ------- |
-| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed             | PASS    |
-| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`   | PASS    |
-| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9` | PASS    |
-| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md` | PASS    |
-| Three invitation URLs create three persistent tester accounts                                          | _pending protected reissue_ | PENDING |
-| Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                   | PENDING |
-| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                   | PENDING |
-| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                   | PENDING |
-| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                   | PENDING |
-| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                   | PENDING |
-| Invitation issue/resend/revoke and governance/approval changes survive reload                          | _pending_                   | PENDING |
-| Function switch and independent approval enforce permission impact and strong authentication           | _pending_                   | PENDING |
-| Jobs expose durable progress and final receipt; universal search respects authorization                | _pending_                   | PENDING |
-| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | _pending_                   | PENDING |
-| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | _pending_                   | PENDING |
-| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`  | PASS    |
+| Observation                                                                                            | Evidence                               | Result  |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------- |
+| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                        | PASS    |
+| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`              | PASS    |
+| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
+| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
+| Three invitation URLs create three persistent tester accounts                                          | _pending protected reissue_            | PENDING |
+| Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                              | PENDING |
+| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
+| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
+| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
+| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
+| Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
+| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`     | PENDING |
+| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`  | PENDING |
+| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`              | PENDING |
+| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`  | PENDING |
+| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`             | PASS    |
 
 ## Approval
 

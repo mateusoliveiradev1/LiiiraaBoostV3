@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "04-40 Task 03: device binding passed; tester invitation and complete real Admin UAT pending"
-last_updated: "2026-08-09T17:11:38.523Z"
+stopped_at: "04-40 Task 03: published Admin authority and device binding passed; tester invitation and remaining human UAT pending"
+last_updated: "2026-08-09T17:38:33.822Z"
 last_activity: 2026-08-09 -- Secure current-PC binding deployed and packaged
 progress:
   total_phases: 10
@@ -787,6 +787,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-09T17:11:38.505Z
-Stopped at: 04-40 Task 03: device binding passed; tester invitation and complete real Admin UAT pending
+Last session: 2026-08-09T17:38:33.816Z
+Stopped at: 04-40 Task 03: published Admin authority and device binding passed; tester invitation and remaining human UAT pending
 Resume file: None
