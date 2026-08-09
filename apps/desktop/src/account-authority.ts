@@ -406,6 +406,13 @@ export class DesktopAccountAuthority {
     }
   }
 
+  public confirmSignedOut(): void {
+    this.#sequence += 1;
+    this.#queuedSynchronizations.splice(0);
+    if (this.#snapshot.state === 'revoked' && this.#snapshot.error === 'unauthorized') return;
+    this.#publish(Object.freeze({ state: 'revoked', error: 'unauthorized' }));
+  }
+
   public async synchronize(trigger: AccountLifecycleTrigger): Promise<void> {
     if (this.#mutationInFlight || this.#synchronizationInFlight) {
       if (!this.#queuedSynchronizations.includes(trigger)) {

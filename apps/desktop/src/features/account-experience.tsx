@@ -2,7 +2,6 @@ import { LbButton, LbSwitch, LbTextField, ProductIcon, RouteHeader } from '@liii
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import type { ShellLocale } from '@liiiraa/feature-shell';
 import {
-  ACCOUNT_AUTHORITY_REVOKED_EVENT,
   createDesktopAccountAuthority,
   resolveDesktopAdminHandoff,
   type DesktopAccountAuthority,
@@ -2732,7 +2731,7 @@ const AuthoritativeAccountContent = ({
             onPress={() => {
               void desktopAuth.signOut().then((result) => {
                 if (result.status === 'signed-out') {
-                  globalThis.dispatchEvent(new CustomEvent(ACCOUNT_AUTHORITY_REVOKED_EVENT));
+                  authority.confirmSignedOut();
                   navigate('/login');
                 } else {
                   setSignOutFailed(true);
