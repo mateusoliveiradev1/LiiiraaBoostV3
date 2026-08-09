@@ -1,71 +1,82 @@
 ---
-status: diagnosed
+status: retesting
 phase: 04-identity-commerce-devices-and-administration
 source:
   - 04-39-SUMMARY.md
   - ../../debug/auth-session-persistence-ui.md
 started: 2026-08-06T07:53:16.4689728Z
-updated: 2026-08-09T14:05:00.0000000Z
+updated: 2026-08-09T10:22:18.1347807Z
 ---
 
 ## Current Test
 
-[testing complete]
+[test 11 ready for owner retest on the replacement installer]
 
 ## Tests
 
 ### 1. Abertura do login pelo desktop 0.0.1
+
 expected: Ao abrir o Liiiraa Boost 0.0.1 e clicar em Entrar, o navegador padrao abre a pagina de login em portugues no dominio Account da Vercel. A pagina nao mostra erro de rota e preserva a autorizacao solicitada pelo aplicativo.
 result: pass
 retest: "O instalador conectado Internal #023001 abriu a conta real com sucesso."
 
 ### 2. Login e retorno automatico ao aplicativo
+
 expected: O login com a conta principal termina em uma tela de sucesso clara e retorna automaticamente ao desktop, sem copiar codigos ou abrir uma WebView embutida.
 result: pass
 
 ### 3. Identidade, plano e funcao reais
+
 expected: O desktop mostra o email da conta principal, Premium, Administrador e Seguranca de forma consistente, sem qualquer indicacao conflitante de plano Free.
 result: pass
 
 ### 4. Persistencia apos fechar e reabrir
+
 expected: Depois de fechar completamente o aplicativo e abri-lo novamente, a sessao e restaurada pelo armazenamento seguro do Windows e o usuario continua autenticado sem repetir o login.
 result: pass
 
 ### 5. Portal da conta autenticado e sem piscadas
+
 expected: Portal da conta abre a conta correta ja autenticada; navegar pelas secoes nao exibe rapidamente a tela Sessao necessaria nem provoca recarregamentos completos perceptiveis.
 result: pass
 
 ### 6. Painel administrativo persistente
+
 expected: A conta principal acessa o Admin como administradora; o menu e as rotas carregam dentro do mesmo shell, sem piscar uma tela deslogada antes do conteudo autorizado.
 result: pass
 
 ### 7. Logout administrativo e do desktop
+
 expected: O logout administrativo encerra a sessao correspondente sem erro, e o logout do desktop remove a credencial local e retorna ao estado de entrada de maneira previsivel.
-result: issue
-reported: "preciso apertar duas vezes em sair no app mais dps q sai e pass"
-severity: minor
+result: pass
+retest: "Owner confirmed the one-action logout retest passed after the authority race fix."
 
 ### 8. Experiencia mobile do menu
+
 expected: Em largura de celular, o cabecalho publico apresenta um botao de menu acessivel que abre e fecha a navegacao real, em vez de exibir apenas a palavra Menu.
 result: pass
 
 ### 9. Identidade da versao instalada
+
 expected: A tela Sobre mostra Liiiraa Boost 0.0.1 e o canal de teste atual, sem versao 0.0.0, compilacao visual da Fase 2 ou rotulos de demonstracao/simulacao.
 result: pass
 retest: "A identidade 0.0.1 e o canal atual aparecem corretamente no instalador substituto."
 
 ### 10. Atualizacao persistente do perfil
+
 expected: Alterar o nome de exibicao salva no PostgreSQL, mantem a sessao autenticada e reaparece com o novo valor apos atualizar ou reabrir o aplicativo.
 result: pass
 retest: "A atualizacao do perfil persistiu corretamente sem perder a sessao."
 
 ### 11. Vinculo deste computador
+
 expected: O desktop registra ou oferece uma acao clara para vincular este computador a conta, e a aba Dispositivo mostra o vinculo real persistido pela API.
-result: issue
+result: pending
 reported: "aqui ainda nao funciona nao nao vincula o pc"
-severity: major
+retest: "Fix deployed on db996787627c3817ddbef72350eb75f39cb32bac and packaged as installer SHA-256 7be3df5497dadad71399b00c46c736597707a7c9bbb3a753f185baf2bd92ecf4; owner observation pending."
 
 ### 12. Minimizar para a bandeja
+
 expected: Com a opcao de minimizar para a bandeja ativada, fechar ou minimizar conforme a preferencia esconde a janela principal, mantem o processo na bandeja e permite restaurar o aplicativo pelo icone.
 result: pass
 retest: "Minimizar, manter na bandeja e restaurar pelo icone funcionaram no instalador substituto."
@@ -73,50 +84,46 @@ retest: "Minimizar, manter na bandeja e restaurar pelo icone funcionaram no inst
 ## Summary
 
 total: 12
-passed: 10
-issues: 2
-pending: 0
+passed: 11
+issues: 0
+pending: 1
 skipped: 0
 blocked: 0
 
 ## Gaps
 
 - truth: "O desktop deve vincular este computador a conta e persistir o dispositivo real pela API."
-  status: failed
+  status: fixed-awaiting-retest
   reason: "User reported: aqui ainda nao funciona nao nao vincula o pc"
   severity: major
   test: 11
-  root_cause: "A producao renderiza um bloqueio hardcoded de beta e nao expoe qualquer mutacao de dispositivo. A API e o dominio ja possuem bind transacional para uma licenca Premium, e o Rust ja protege observacoes fornecidas, mas faltam o coletor Windows real, a fronteira de protecao servidor-cliente, o comando Tauri, o metodo da autoridade e a UI Free/Premium correta."
+  root_cause: "A producao renderizava um bloqueio hardcoded de beta e nao expunha qualquer mutacao de dispositivo. O plano 04-66 removeu o bloqueio, implementou coleta nativa, protecao server-only, comandos Tauri e a UI Free/Premium, e publicou a API exata para o instalador substituto."
   artifacts:
     - path: "apps/desktop/src/features/account-experience.tsx"
-      issue: "A rota Device substitui a acao real por texto e badge Aguardando beta para toda conta sem dispositivo."
+      issue: "Resolvido: a rota oferece plano para Free e preview, duas confirmacoes e vinculo para Premium."
     - path: "apps/desktop/src/account-authority.ts"
-      issue: "A autoridade do desktop suporta somente leitura, perfil, Admin e assinatura; nao existe mutacao de vinculo."
+      issue: "Resolvido: prepare/bind tipados aguardam a projecao PostgreSQL confirmada antes de exibir sucesso."
     - path: "apps/desktop/src-tauri/src/device_identity.rs"
-      issue: "A derivacao local existe, mas nao ha coletor de observacoes Windows nem chamada ao endpoint de bind."
+      issue: "Resolvido: o coletor Windows allowlisted mantem valores crus sob custodia nativa e chama a API autenticada."
     - path: "apps/api/src/modules/devices/routes.ts"
-      issue: "O endpoint seguro existe e exige Premium e confirmacoes, mas nenhum cliente de producao o alcança."
+      issue: "Resolvido: a API deriva a autoridade protegida no servidor e o cliente nativo alcanca o endpoint publicado."
   missing:
-    - "Mostrar requisito de Premium e acao de planos para conta Free."
-    - "Coletar e proteger evidencia do Windows sem enviar identificadores crus."
-    - "Conectar Tauri e autoridade React ao bind transacional e atualizar a projecao confirmada pela API."
-    - "Cobrir conflito de um PC, falha, estado pendente e confirmacoes explicitas."
+    - "Reteste humano no PC atual: preview, duas confirmacoes, vinculo, reinicio e projecao no portal da conta."
   debug_session: ".planning/debug/desktop-device-binding-beta-gate.md"
 
 - truth: "O logout do desktop deve remover a credencial local e retornar ao estado de entrada com um unico clique."
-  status: failed
+  status: resolved
   reason: "User reported: preciso apertar duas vezes em sair no app mais dps q sai e pass"
   severity: minor
   test: 7
   root_cause: "O comando nativo revoga e apaga a credencial, mas a autoridade React singleton conserva a ultima projecao online. O evento limpa apenas o chrome; ao navegar para /login, resolveDesktopLoginState ainda ve a conta autenticada e redireciona de volta para Account, fazendo o primeiro logout parecer ignorado."
   artifacts:
     - path: "apps/desktop/src/features/account-experience.tsx"
-      issue: "O sucesso dispara um evento e navega, mas nao invalida o snapshot da autoridade que controla a guarda da rota."
+      issue: "Resolvido: a tela confirma a revogacao na autoridade antes de navegar."
     - path: "apps/desktop/src/account-authority.ts"
-      issue: "Nao existe transicao explicita para revoked apos o logout local confirmado."
+      issue: "Resolvido: a transicao idempotente invalida leituras concorrentes e publica revoked."
   missing:
-    - "Adicionar uma transicao idempotente de logout confirmado que remova imediatamente a projecao em memoria."
-    - "Cobrir que um unico clique permanece na rota de login mesmo com refresh concorrente."
+    - "Nenhum; o owner confirmou o reteste com um unico clique."
   debug_session: ".planning/debug/desktop-sign-out-double-action.md"
 
 - truth: "O desktop 0.0.1 deve conseguir restaurar a sessao publicada ou oferecer o login real no navegador, sem ficar preso em conexao indisponivel."

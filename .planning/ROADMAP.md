@@ -668,7 +668,7 @@ Plans:
 
 **Wave 29** _(blocked on Plans 04-06, 04-14, 04-17, 04-20, 04-38, and 04-65)_
 
-- [ ] 04-66-PLAN.md — Replace the device beta gate with secure Free/Premium one-PC binding.
+- [x] 04-66-PLAN.md — Replace the device beta gate with secure Free/Premium one-PC binding.
 
 **Wave 30** _(blocked on Plans 04-63, 04-65, and 04-66)_
 
@@ -809,7 +809,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 62/66 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |

@@ -2,8 +2,8 @@
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
-tested_commit: 943445ecf2d635e0bc9eea3c7e4de934dc7c2e15
-updated: 2026-08-09T09:45:00.000Z
+tested_commit: db996787627c3817ddbef72350eb75f39cb32bac
+updated: 2026-08-09T10:22:18.134Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -16,6 +16,7 @@ password, database credential, or session credential is recorded here.
 
 - Progress: Tasks 04-40-01 and 04-40-02 complete; Task 04-40-03 human observations pending.
 - Automated environment: ready on one exact revision with fixture/preview authority disabled.
+- Device-binding remediation: deployed and packaged on the exact revision below; owner retest pending.
 - Recovery action: complete; three unique replacement URLs are available only in the owner-protected
   local output.
 - Human approval: pending until the exact build passes every real-auth observation below.
@@ -24,10 +25,10 @@ password, database credential, or session credential is recorded here.
 
 | Identity                         | Exact value                                                               | Result |
 | -------------------------------- | ------------------------------------------------------------------------- | ------ |
-| Source commit / API build ID     | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
-| API OCI digest                   | `sha256:9b38eef67ccf7e2b3fe4402653a98e6b568d854f24950ffb94cdd00974d033e5` | PASS   |
-| GitHub API promotion run         | `31303054707`                                                             | PASS   |
-| Render deploy                    | `dep-d9s3fgajnfac738o9ea0`                                                | PASS   |
+| Source commit / API build ID     | `db996787627c3817ddbef72350eb75f39cb32bac`                                | PASS   |
+| API OCI digest                   | `sha256:303e33f02d9e9c1a15eaa6fc37ab5041dee82ae0499c4bb3c9806f615c506b3c` | PASS   |
+| GitHub API promotion run         | `31307797683`                                                             | PASS   |
+| Render deploy                    | `dep-d9s577u7bikc738tmon0`                                                | PASS   |
 | API origin                       | `https://liiiraa-api-staging.onrender.com`                                | PASS   |
 | Public Vercel revision endpoint  | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
 | Account Vercel revision endpoint | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
@@ -36,10 +37,12 @@ password, database credential, or session credential is recorded here.
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
 | Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
 | Desktop installer                | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
-| Desktop installer SHA-256        | `3d1c31a14dff1987b296f043f5f7dc96625199a9b6a5919232f2a900341deb89`        | PASS   |
+| Desktop installer SHA-256        | `7be3df5497dadad71399b00c46c736597707a7c9bbb3a753f185baf2bd92ecf4`        | PASS   |
 
-The canonical Public, Account, Admin, and API endpoints each reported revision/build ID
-`943445ecf2d635e0bc9eea3c7e4de934dc7c2e15` after promotion.
+The API readiness endpoint reported build ID
+`db996787627c3817ddbef72350eb75f39cb32bac`, `authorityConnected=true`, and
+`device-authority`. The unchanged Public, Account, and Admin artifacts remain on their previously
+verified `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15` revision and continue to proxy to this API.
 
 ## Automated receipts
 
@@ -54,6 +57,8 @@ The canonical Public, Account, Admin, and API endpoints each reported revision/b
 | Isolated surfaces        | Public, Account, and Admin exact Git deployments are READY                                                         | PASS                |
 | Fail-closed probes       | Origin, session, and consent-isolation probes passed                                                               | PASS                |
 | Desktop package          | Tauri staging overlay compiled and produced one NSIS x64 installer                                                 | PASS                |
+| Device authority         | Free denial, Premium confirmations, native Windows evidence, server-only wrapping, replay, and concurrency passed  | PASS                |
+| Device privacy scan      | No raw serial, machine GUID, protected digest, or local digest crosses React source; beta gate absent              | PASS                |
 | Phase evidence evaluator | Refused stale artifact hashes and 20 missing real-PC coverage cells                                                | BLOCKED AS DESIGNED |
 
 The global evidence evaluator remains closed because the checked-in evidence manifest predates
@@ -146,8 +151,10 @@ revision mismatch, or result that does not survive reload is a critical failure.
 
 | Observation                                                                                            | Evidence                    | Result  |
 | ------------------------------------------------------------------------------------------------------ | --------------------------- | ------- |
-| Owner-test replacement creates an account and authenticates the packaged desktop                      | owner-confirmed             | PASS    |
+| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed             | PASS    |
 | Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`   | PASS    |
+| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | _new installer pending_     | PENDING |
+| The same binding survives desktop restart and appears in the authenticated Account device route        | _new installer pending_     | PENDING |
 | Three invitation URLs create three persistent tester accounts                                          | _pending protected reissue_ | PENDING |
 | Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                   | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                   | PENDING |
