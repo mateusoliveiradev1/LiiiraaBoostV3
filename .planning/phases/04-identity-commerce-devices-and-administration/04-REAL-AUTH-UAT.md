@@ -100,6 +100,10 @@ First recovery execution receipt:
 - Preflight run `31300324810` stopped before PostgreSQL because the YAML split the benign crypto
   command arguments onto a separate shell line. No invitation state changed in this run; the
   command was corrected to keep the paths on the invocation line.
+- Atomic run `31300385241` passed benign encryption, then returned `ENOENT` inside the real
+  transaction. PostgreSQL rolled back the compensation and issuance; no invitation state changed.
+  The crypto boundary now reports only a safe stage/code pair so the missing file operation can be
+  corrected without exposing protected values.
 
 ## Human real-authority observations
 

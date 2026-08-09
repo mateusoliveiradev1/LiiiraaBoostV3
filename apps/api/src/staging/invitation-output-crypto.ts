@@ -26,6 +26,17 @@ interface InvitationEnvelope {
   readonly version: 1;
 }
 
+const stageError = (stage: string, error: unknown): Error => {
+  const candidate =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as Readonly<{ code?: unknown }>).code)
+      : 'UNKNOWN';
+  const safeCode = /^[A-Z0-9_]{2,20}$/u.test(candidate) ? candidate : 'UNKNOWN';
+  return Object.assign(new Error('STAGING_INVITATION_CRYPTO_REJECTED'), {
+    code: `${stage}_${safeCode}`,
+  });
+};
+
 const writeProtected = async (path: string, contents: string | Buffer): Promise<void> => {
   await mkdir(dirname(path), { recursive: true });
   const temporaryPath = `${path}.tmp-${String(process.pid)}`;
@@ -62,7 +73,9 @@ export const encryptInvitationOutput = async (input: {
 }): Promise<void> => {
   const plaintextPath = resolve(input.plaintextPath);
   const encryptedPath = resolve(input.encryptedPath);
-  const plaintext = await readFile(plaintextPath);
+  const plaintext = await readFile(plaintextPath).catch((error: unknown) => {
+    throw stageError('READ', error);
+  });
   const publicKey = Buffer.from(input.publicKeyBase64, 'base64').toString('utf8');
   const contentKey = randomBytes(32);
   const iv = randomBytes(12);
@@ -84,8 +97,12 @@ export const encryptInvitationOutput = async (input: {
     iv: iv.toString('base64'),
     version: 1,
   };
-  await writeProtected(encryptedPath, `${JSON.stringify(envelope)}\n`);
-  await rm(plaintextPath, { force: false });
+  await writeProtected(encryptedPath, `${JSON.stringify(envelope)}\n`).catch((error: unknown) => {
+    throw stageError('WRITE', error);
+  });
+  await rm(plaintextPath, { force: false }).catch((error: unknown) => {
+    throw stageError('REMOVE', error);
+  });
 };
 
 export const decryptInvitationOutput = async (input: {
