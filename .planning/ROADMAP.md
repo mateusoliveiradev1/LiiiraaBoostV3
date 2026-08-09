@@ -664,7 +664,7 @@ Plans:
 
 **Wave 28** _(blocked on Plans 04-35 and 04-38)_
 
-- [ ] 04-65-PLAN.md — Make real desktop logout a single durable authority transition.
+- [x] 04-65-PLAN.md — Make real desktop logout a single durable authority transition.
 
 **Wave 29** _(blocked on Plans 04-06, 04-14, 04-17, 04-20, 04-38, and 04-65)_
 
@@ -809,7 +809,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 61/64 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 62/66 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
