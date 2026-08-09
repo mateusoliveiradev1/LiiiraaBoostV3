@@ -288,6 +288,19 @@ export const provisionStagingInvitations = async (
     if ((invalidated.rowCount ?? invalidated.rows.length) !== 1) {
       return reject('EXPOSED_COUNT');
     }
+    const supersededReplacement = await dependencies.database.query(
+      `UPDATE identity_invitations
+       SET expires_at = $2
+       WHERE email = $1
+         AND role = 'tester'
+         AND redeemed_at IS NULL
+         AND expires_at > $2
+       RETURNING token_digest`,
+      [digestEmail(replacementEmail), nowIso],
+    );
+    if ((supersededReplacement.rowCount ?? supersededReplacement.rows.length) > 1) {
+      return reject('REPLACEMENT_COUNT');
+    }
     candidateEmails = [replacementEmail];
   } else if (reissueMode === 'owner-approved-exactly-two' || compensating) {
     const expectedCount = compensating ? 3 : 2;

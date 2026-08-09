@@ -222,14 +222,16 @@ describe('secret-driven staging invitation provisioning', () => {
     const exposedTokenDigest = 'd'.repeat(64);
     const ownerEmailDigest = digest(emails[0]);
     const replacementEmail = 'owner+signup-test@example.com';
+    let updateCount = 0;
     const database = {
       query: vi.fn((statement: string, values?: readonly unknown[]) => {
         if (statement.includes('UPDATE identity_invitations')) {
-          expect(values).toEqual([
-            exposedTokenDigest,
-            ownerEmailDigest,
-            '2030-01-15T12:00:00.000Z',
-          ]);
+          updateCount += 1;
+          expect(values).toEqual(
+            updateCount === 1
+              ? [exposedTokenDigest, ownerEmailDigest, '2030-01-15T12:00:00.000Z']
+              : [digest(replacementEmail), '2030-01-15T12:00:00.000Z'],
+          );
           return Promise.resolve({ rowCount: 1, rows: [{ token_digest: exposedTokenDigest }] });
         }
         const selectedDigest = values?.[0];
@@ -275,6 +277,7 @@ describe('secret-driven staging invitation provisioning', () => {
     );
 
     expect(result).toEqual({ created: 1, skipped: 2, status: 'complete' });
+    expect(updateCount).toBe(2);
     const protectedPayload = JSON.parse(committed[0] ?? '{}') as {
       invitations?: readonly { email: string; invitationUrl: string }[];
     };

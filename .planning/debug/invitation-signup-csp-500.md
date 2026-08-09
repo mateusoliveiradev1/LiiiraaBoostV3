@@ -46,16 +46,21 @@ updated: 2026-08-09T05:07:30-03:00
   found: 61 focused tests pass; affected account/design-system TypeScript checks and affected ESLint pass. The broader control-plane adapter typecheck retains an unrelated pre-existing exact-optional-property error in `better-auth-spike.ts`.
   implication: The changed behavior is covered without weakening CSP or disclosing invitation secrets.
 
+- timestamp: 2026-08-09T05:10:00-03:00
+  checked: Protected recovery run 31302825077 at exact revision 9837d11.
+  found: The exact exposed token/recipient match succeeded, but a separate active invitation already exists for the plus-address replacement, so the created-count gate rejected and rolled the transaction back.
+  implication: Supersede at most one active replacement-recipient invitation inside the same transaction before issuing the owner-visible replacement; abort if more than one exists.
+
 ## Resolution
 
 - root_cause: Existing owner identity was invited for signup, duplicate persistence escaped as HTTP 500, the UI allowed a different plus-address that the authority correctly rejected, and the React Aria checkbox emitted a CSP-blocked inline visually-hidden style.
 - fix: Reject duplicate signup before redemption, catch unexpected signup authority failures as 503, distinguish invitation rejection in the client, lock recipient-bearing replacement links, guard concurrent submission, replace the checkbox with a class-styled native semantic input, and add digest-bound one-invitation recovery.
 - verification: Local focused tests, TypeScript checks, ESLint, formatting, staging promotion, protected replacement recovery, and browser UAT; staging work remains pending.
 - files_changed:
-    - apps/account/src/account-auth.ts
-    - apps/account/src/features/account-auth.tsx
-    - apps/api/src/modules/identity/real-routes.ts
-    - apps/api/src/staging/provision-invitations.ts
-    - packages/control-plane-adapters/src/postgres/real-identity.ts
-    - packages/design-system/src/primitives.tsx
-    - packages/design-tokens/src/tokens.css
+  - apps/account/src/account-auth.ts
+  - apps/account/src/features/account-auth.tsx
+  - apps/api/src/modules/identity/real-routes.ts
+  - apps/api/src/staging/provision-invitations.ts
+  - packages/control-plane-adapters/src/postgres/real-identity.ts
+  - packages/design-system/src/primitives.tsx
+  - packages/design-tokens/src/tokens.css
