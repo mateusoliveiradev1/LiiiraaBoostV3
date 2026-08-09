@@ -1,20 +1,16 @@
 ---
-status: testing
+status: complete
 phase: 04-identity-commerce-devices-and-administration
 source:
   - 04-39-SUMMARY.md
   - ../../debug/auth-session-persistence-ui.md
 started: 2026-08-06T07:53:16.4689728Z
-updated: 2026-08-06T08:40:00.0000000Z
+updated: 2026-08-09T13:42:00.0000000Z
 ---
 
 ## Current Test
 
-number: 4
-name: Persistencia apos fechar e reabrir
-expected: |
-  Depois de fechar completamente o aplicativo e abri-lo novamente, a sessao e restaurada pelo armazenamento seguro do Windows e o usuario continua autenticado sem repetir o login.
-awaiting: install replacement 0.0.1 and retest tests 4, 9, 10 and 12
+[testing complete]
 
 ## Tests
 
@@ -33,56 +29,77 @@ result: pass
 
 ### 4. Persistencia apos fechar e reabrir
 expected: Depois de fechar completamente o aplicativo e abri-lo novamente, a sessao e restaurada pelo armazenamento seguro do Windows e o usuario continua autenticado sem repetir o login.
-result: [pending]
+result: pass
 
 ### 5. Portal da conta autenticado e sem piscadas
 expected: Portal da conta abre a conta correta ja autenticada; navegar pelas secoes nao exibe rapidamente a tela Sessao necessaria nem provoca recarregamentos completos perceptiveis.
-result: [pending]
+result: pass
 
 ### 6. Painel administrativo persistente
 expected: A conta principal acessa o Admin como administradora; o menu e as rotas carregam dentro do mesmo shell, sem piscar uma tela deslogada antes do conteudo autorizado.
-result: [pending]
+result: pass
 
 ### 7. Logout administrativo e do desktop
 expected: O logout administrativo encerra a sessao correspondente sem erro, e o logout do desktop remove a credencial local e retorna ao estado de entrada de maneira previsivel.
-result: [pending]
+result: issue
+reported: "preciso apertar duas vezes em sair no app mais dps q sai e pass"
+severity: minor
 
 ### 8. Experiencia mobile do menu
 expected: Em largura de celular, o cabecalho publico apresenta um botao de menu acessivel que abre e fecha a navegacao real, em vez de exibir apenas a palavra Menu.
-result: [pending]
+result: pass
 
 ### 9. Identidade da versao instalada
 expected: A tela Sobre mostra Liiiraa Boost 0.0.1 e o canal de teste atual, sem versao 0.0.0, compilacao visual da Fase 2 ou rotulos de demonstracao/simulacao.
-result: issue
-reported: "A tela Sobre ainda mostra Versao 0.0.0, canal estavel, compilacao visual da Fase 2 e Demonstracao segura no instalador 0.0.1."
-severity: major
+result: pass
+retest: "A identidade 0.0.1 e o canal atual aparecem corretamente no instalador substituto."
 
 ### 10. Atualizacao persistente do perfil
 expected: Alterar o nome de exibicao salva no PostgreSQL, mantem a sessao autenticada e reaparece com o novo valor apos atualizar ou reabrir o aplicativo.
-result: issue
-reported: "Ao tentar mudar o nome para Mateus Winchester, a conta entrou em restauracao, perdeu a sessao, exigiu novo login e voltou para Mateus Oliveira."
-severity: blocker
+result: pass
+retest: "A atualizacao do perfil persistiu corretamente sem perder a sessao."
 
 ### 11. Vinculo deste computador
 expected: O desktop registra ou oferece uma acao clara para vincular este computador a conta, e a aba Dispositivo mostra o vinculo real persistido pela API.
-result: [pending]
+result: issue
+reported: "aqui ainda nao funciona nao nao vincula o pc"
+severity: major
 
 ### 12. Minimizar para a bandeja
 expected: Com a opcao de minimizar para a bandeja ativada, fechar ou minimizar conforme a preferencia esconde a janela principal, mantem o processo na bandeja e permite restaurar o aplicativo pelo icone.
-result: issue
-reported: "A opcao de minimizar para a bandeja esta ativa, mas o aplicativo nao minimiza para a bandeja."
-severity: major
+result: pass
+retest: "Minimizar, manter na bandeja e restaurar pelo icone funcionaram no instalador substituto."
 
 ## Summary
 
 total: 12
-passed: 3
-issues: 3
-pending: 6
+passed: 10
+issues: 2
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
+
+- truth: "O desktop deve vincular este computador a conta e persistir o dispositivo real pela API."
+  status: failed
+  reason: "User reported: aqui ainda nao funciona nao nao vincula o pc"
+  severity: major
+  test: 11
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "O logout do desktop deve remover a credencial local e retornar ao estado de entrada com um unico clique."
+  status: failed
+  reason: "User reported: preciso apertar duas vezes em sair no app mais dps q sai e pass"
+  severity: minor
+  test: 7
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
 
 - truth: "O desktop 0.0.1 deve conseguir restaurar a sessao publicada ou oferecer o login real no navegador, sem ficar preso em conexao indisponivel."
   status: resolved
@@ -99,7 +116,7 @@ blocked: 0
     - "Nenhum; o owner retestou o instalador conectado com sucesso."
   debug_session: ".planning/debug/auth-session-persistence-ui.md"
 - truth: "A tela Sobre deve projetar a identidade real 0.0.1 sem conteudo legado de simulacao."
-  status: failed
+  status: resolved
   reason: "User reported: a tela Sobre continua mostrando 0.0.0, canal estavel, Fase 2 e Demonstracao segura."
   severity: major
   test: 9
@@ -111,7 +128,7 @@ blocked: 0
     - "Reteste humano do novo instalador."
   debug_session: ".planning/debug/auth-session-persistence-ui.md"
 - truth: "Editar o nome deve persistir no PostgreSQL sem revogar ou perder a sessao desktop."
-  status: failed
+  status: resolved
   reason: "User reported: salvar Mateus Winchester entrou em restauracao, exigiu novo login e voltou ao nome anterior."
   severity: blocker
   test: 10
@@ -125,7 +142,7 @@ blocked: 0
     - "Redeploy da API após push e reteste humano do novo instalador."
   debug_session: ".planning/debug/auth-session-persistence-ui.md"
 - truth: "A preferencia ativa de minimizar para a bandeja deve controlar o ciclo real da janela nativa."
-  status: failed
+  status: resolved
   reason: "User reported: minimizar para a bandeja esta ativo, mas o aplicativo nao minimiza para a bandeja."
   severity: major
   test: 12
