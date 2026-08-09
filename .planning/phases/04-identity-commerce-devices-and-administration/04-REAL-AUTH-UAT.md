@@ -107,6 +107,11 @@ First recovery execution receipt:
 - Diagnostic run `31300480948` narrowed the rollback to `READ_ENOENT`: the expected plaintext was
   absent before encryption. A new transaction gate now rejects any compensating execution that
   does not report exactly three newly created replacement URLs before the crypto boundary runs.
+- Result-gated run `31300591705` proved that three replacements were created inside the transaction
+  but the plaintext path was still missing, and rolled back. Root cause: POSIX `/home/...` paths
+  were incorrectly classified as Windows-rooted paths and rewritten with backslashes. The path
+  classifier now recognizes only drive-letter and UNC paths as Windows paths, with a Linux-runner
+  regression test.
 
 ## Human real-authority observations
 

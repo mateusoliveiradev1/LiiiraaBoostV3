@@ -304,6 +304,45 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(dependencies.database.query).not.toHaveBeenCalled();
   });
 
+  it('preserves POSIX runner paths instead of misclassifying them as Windows paths', async () => {
+    const openProtectedOutput = vi.fn(() =>
+      Promise.resolve({
+        abort: vi.fn(() => Promise.resolve()),
+        commit: vi.fn(() => Promise.resolve()),
+      }),
+    );
+    let tokenSequence = 0;
+
+    await provisionStagingInvitations(
+      {
+        ...environment(),
+        STAGING_INVITATION_OUTPUT_PATH: '/home/runner/work/_temp/liiiraa-invitations.json',
+      },
+      {
+        clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+        database: {
+          query: vi.fn(() => Promise.resolve({ rowCount: 0, rows: [] })),
+        },
+        invitations: {
+          issueInvitation: vi.fn((input: Readonly<{ expiresAt: string }>) => {
+            tokenSequence += 1;
+            return Promise.resolve({
+              expiresAt: input.expiresAt,
+              token: `runner-token-${String(tokenSequence)}-${'x'.repeat(48)}`,
+              tokenDigest: 'a'.repeat(64),
+            });
+          }),
+        },
+        openProtectedOutput,
+        repositoryRoot: '/home/runner/work/LiiiraaBoostV3/LiiiraaBoostV3/apps/api',
+      },
+    );
+
+    expect(openProtectedOutput).toHaveBeenCalledWith(
+      '/home/runner/work/_temp/liiiraa-invitations.json',
+    );
+  });
+
   it('keeps invitation issuance outside the ordinary HTTP route authority', async () => {
     const routes = await readFile(
       new URL('../modules/identity/real-routes.ts', import.meta.url),

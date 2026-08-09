@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { chmod, open, rm, type FileHandle } from 'node:fs/promises';
-import { isAbsolute, relative, resolve, win32 } from 'node:path';
+import { isAbsolute, posix, relative, resolve, win32 } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
@@ -182,14 +182,19 @@ const outputPathOutsideRepository = (
   repositoryRoot: string,
 ): string => {
   if (!outputPath) return reject('OUTPUT_PATH');
-  const windowsPath = win32.isAbsolute(outputPath);
-  if (!windowsPath && !isAbsolute(outputPath)) return reject('OUTPUT_PATH');
+  const windowsPath = /^[A-Za-z]:[\\/]/u.test(outputPath) || outputPath.startsWith('\\\\');
+  const posixPath = outputPath.startsWith('/');
+  if (!windowsPath && !posixPath && !isAbsolute(outputPath)) return reject('OUTPUT_PATH');
   const resolvePath = (value: string): string =>
-    windowsPath ? win32.resolve(value) : resolve(value);
+    windowsPath ? win32.resolve(value) : posixPath ? posix.resolve(value) : resolve(value);
   const relativePath = (from: string, to: string): string =>
-    windowsPath ? win32.relative(from, to) : relative(from, to);
+    windowsPath
+      ? win32.relative(from, to)
+      : posixPath
+        ? posix.relative(from, to)
+        : relative(from, to);
   const absoluteCheck = (value: string): boolean =>
-    windowsPath ? win32.isAbsolute(value) : isAbsolute(value);
+    windowsPath ? win32.isAbsolute(value) : posixPath ? posix.isAbsolute(value) : isAbsolute(value);
   const absoluteOutput = resolvePath(outputPath);
   const absoluteRepository = resolvePath(repositoryRoot);
   const fromRepository = relativePath(absoluteRepository, absoluteOutput);
