@@ -2,8 +2,8 @@
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
-tested_commit: cbb9adc821422301f4a84c4a9eb5051236c63c74
-updated: 2026-08-09T07:17:01.035Z
+tested_commit: c8c54bc4b8dac5a0d82b807757997d4a8701951a
+updated: 2026-08-09T07:32:01.153Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -24,28 +24,28 @@ password, database credential, or session credential is recorded here.
 
 | Identity                         | Exact value                                                               | Result |
 | -------------------------------- | ------------------------------------------------------------------------- | ------ |
-| Source commit / API build ID     | `210f1b354da6a7a152e087a4db02f9db5f5c3ba4`                                | PASS   |
-| API OCI digest                   | `sha256:7123313c6e92c491f7ca24861e2edd303746158762e18671cf5ad584976f2c4c` | PASS   |
-| GitHub API promotion run         | `31277608537`                                                             | PASS   |
-| Render deploy                    | `dep-d9rpc4tbedkc73c883og`                                                | PASS   |
+| Source commit / API build ID     | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
+| API OCI digest                   | `sha256:8b97fe08673ada34711f6fcee73476ff62ff06adf06e85bd22ba606e50b83679` | PASS   |
+| GitHub API promotion run         | `31300897888`                                                             | PASS   |
+| Render deploy                    | `dep-d9s2lvv10e5c7393rdkg`                                                | PASS   |
 | API origin                       | `https://liiiraa-api-staging.onrender.com`                                | PASS   |
-| Public Vercel deployment         | `dpl_DR6BmRc6MJRApNgorq5cDCmaDxbF`                                        | PASS   |
-| Account Vercel deployment        | `dpl_8TQfQQk58htcZ3ZqiBFgqZcttA6H`                                        | PASS   |
-| Admin Vercel deployment          | `dpl_36eA8tMw5sJwzhSLiUdDp2BeQWUr`                                        | PASS   |
-| Surface verification run         | `31277822553`                                                             | PASS   |
+| Public Vercel revision endpoint  | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
+| Account Vercel revision endpoint | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
+| Admin Vercel revision endpoint   | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
+| Surface verification run         | `31301081145`                                                             | PASS   |
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
 | Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
 | Desktop installer                | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
 | Desktop installer SHA-256        | `3d1c31a14dff1987b296f043f5f7dc96625199a9b6a5919232f2a900341deb89`        | PASS   |
 
 The canonical Public, Account, Admin, and API endpoints each reported revision/build ID
-`210f1b354da6a7a152e087a4db02f9db5f5c3ba4` after promotion.
+`c8c54bc4b8dac5a0d82b807757997d4a8701951a` after promotion.
 
 ## Automated receipts
 
 | Receipt                  | Observation                                                                                                        | Result              |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| Provisioner preflight    | `provision-invitations.test.ts`: 1 file, 5 tests passed                                                            | PASS                |
+| Provisioner preflight    | invitation provisioning/crypto: 2 files, 11 tests passed                                                           | PASS                |
 | Dependency policy        | 72 exact dependency pins verified                                                                                  | PASS                |
 | Vulnerability gate       | `nanoid` resolved to `3.3.18`; production audit has no HIGH/CRITICAL finding                                       | PASS                |
 | API artifact             | SBOM, provenance, digest validation, Trivy scan, and anonymous digest pull passed                                  | PASS                |
