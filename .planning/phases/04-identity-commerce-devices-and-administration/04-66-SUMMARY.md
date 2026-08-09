@@ -36,7 +36,7 @@ key-decisions:
 requirements-completed: [WEB-05, IDEN-04, IDEN-05]
 duration: 42 min
 completed: 2026-08-09
-status: complete-awaiting-owner-uat
+status: complete-owner-uat-passed
 ---
 
 # Phase 04 Plan 66: Real Current-PC Binding Summary
@@ -66,6 +66,7 @@ status: complete-awaiting-owner-uat
 4. `638b0ea` — enable the Free/Premium current-PC binding UI.
 5. `4c78334` — satisfy the device API lint boundary.
 6. `db99678` — align the canonical visual-token verification witness.
+7. `61d8db9` — project the committed active device through the real account authority.
 
 ## Verification
 
@@ -92,6 +93,7 @@ status: complete-awaiting-owner-uat
 | API OCI digest    | `sha256:303e33f02d9e9c1a15eaa6fc37ab5041dee82ae0499c4bb3c9806f615c506b3c` | PASS   |
 | Render deployment | `dep-d9s577u7bikc738tmon0`                                                | PASS   |
 | API readiness     | `authorityConnected=true`, `device-authority`, exact build ID             | PASS   |
+| Projection hotfix | `61d8db9f8e4e1d090d75c67e918f53228bec03de`, promotion `31324354207`       | PASS   |
 | NSIS installer    | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
 | Installer SHA-256 | `7be3df5497dadad71399b00c46c736597707a7c9bbb3a753f185baf2bd92ecf4`        | PASS   |
 
@@ -106,17 +108,17 @@ status: complete-awaiting-owner-uat
 
 ## Owner Checkpoint
 
-The code and hosted authority are complete. Human observation remains intentionally pending for:
+Owner UAT passed on the current Windows PC:
 
-1. Install the replacement package on the current Windows PC.
-2. With a Premium account, preview the sanitized PC, check both confirmations, and bind.
-3. Restart the desktop and confirm the same device remains linked.
-4. Confirm the authenticated Account device route shows that binding.
+1. The replacement package opened the real Premium account.
+2. Native preview exposed only the sanitized `DESKTOP-FOV8OLO` label and protected evidence count.
+3. Both confirmations enabled the mutation and PostgreSQL accepted the one-PC binding.
+4. After the authoritative projection hotfix and refresh, the desktop showed the same device as `Vinculado` in both account projection locations.
 
 This plan does not approve the wider `04-40` real-authority UAT and does not create
 `04-40-SUMMARY.md`.
 
-## Self-Check: PASSED — OWNER UAT PENDING
+## Self-Check: PASSED — OWNER UAT PASSED
 
 ---
 

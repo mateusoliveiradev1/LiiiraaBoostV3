@@ -1,16 +1,16 @@
 ---
-status: retesting
+status: passed
 phase: 04-identity-commerce-devices-and-administration
 source:
   - 04-39-SUMMARY.md
   - ../../debug/auth-session-persistence-ui.md
 started: 2026-08-06T07:53:16.4689728Z
-updated: 2026-08-09T10:22:18.1347807Z
+updated: 2026-08-09T17:00:43.3227577Z
 ---
 
 ## Current Test
 
-[test 11 ready for owner retest on the replacement installer]
+[all 12 owner tests passed]
 
 ## Tests
 
@@ -71,9 +71,9 @@ retest: "A atualizacao do perfil persistiu corretamente sem perder a sessao."
 ### 11. Vinculo deste computador
 
 expected: O desktop registra ou oferece uma acao clara para vincular este computador a conta, e a aba Dispositivo mostra o vinculo real persistido pela API.
-result: pending
+result: pass
 reported: "aqui ainda nao funciona nao nao vincula o pc"
-retest: "Fix deployed on db996787627c3817ddbef72350eb75f39cb32bac and packaged as installer SHA-256 7be3df5497dadad71399b00c46c736597707a7c9bbb3a753f185baf2bd92ecf4; owner observation pending."
+retest: "Owner confirmed the real Premium flow on the current Windows PC: sanitized native preview, two confirmations, PostgreSQL-backed binding, authoritative refresh, and the same DESKTOP-FOV8OLO shown as Vinculado."
 
 ### 12. Minimizar para a bandeja
 
@@ -84,20 +84,20 @@ retest: "Minimizar, manter na bandeja e restaurar pelo icone funcionaram no inst
 ## Summary
 
 total: 12
-passed: 11
+passed: 12
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
 - truth: "O desktop deve vincular este computador a conta e persistir o dispositivo real pela API."
-  status: fixed-awaiting-retest
+  status: resolved
   reason: "User reported: aqui ainda nao funciona nao nao vincula o pc"
   severity: major
   test: 11
-  root_cause: "A producao renderizava um bloqueio hardcoded de beta e nao expunha qualquer mutacao de dispositivo. O plano 04-66 removeu o bloqueio, implementou coleta nativa, protecao server-only, comandos Tauri e a UI Free/Premium, e publicou a API exata para o instalador substituto."
+  root_cause: "A producao renderizava um bloqueio hardcoded de beta e nao expunha qualquer mutacao de dispositivo. O plano 04-66 implementou o fluxo real; no primeiro reteste, a composicao de /v1/account ainda fixava activeDevice como null mesmo depois de o PostgreSQL confirmar o vinculo."
   artifacts:
     - path: "apps/desktop/src/features/account-experience.tsx"
       issue: "Resolvido: a rota oferece plano para Free e preview, duas confirmacoes e vinculo para Premium."
@@ -108,8 +108,8 @@ blocked: 0
     - path: "apps/api/src/modules/devices/routes.ts"
       issue: "Resolvido: a API deriva a autoridade protegida no servidor e o cliente nativo alcanca o endpoint publicado."
   missing:
-    - "Reteste humano no PC atual: preview, duas confirmacoes, vinculo, reinicio e projecao no portal da conta."
-  debug_session: ".planning/debug/desktop-device-binding-beta-gate.md"
+    - "Nenhum; o owner confirmou a projecao persistida DESKTOP-FOV8OLO como Vinculado."
+  debug_session: ".planning/debug/resolved/device-bind-not-confirmed.md"
 
 - truth: "O logout do desktop deve remover a credencial local e retornar ao estado de entrada com um unico clique."
   status: resolved

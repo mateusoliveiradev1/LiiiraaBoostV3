@@ -1,8 +1,8 @@
 ---
-status: fixing
+status: resolved
 trigger: "Premium current-PC preview succeeds, but binding ends with 'O vínculo não foi confirmado'."
 created: 2026-08-09T16:32:39.1907248Z
-updated: 2026-08-09T17:00:00.0000000Z
+updated: 2026-08-09T17:00:43.3227577Z
 ---
 
 # Debug Session: Device Bind Not Confirmed
@@ -20,7 +20,7 @@ updated: 2026-08-09T17:00:00.0000000Z
 - hypothesis: Confirmed — the real `/v1/account` composition hardcodes `activeDevice: null` even after the device authority commits the PostgreSQL binding.
 - test: A RED real-auth projection test injects a valid active device resolver and requires the account response to include it.
 - expecting: Wiring the resolver into every account projection path makes the regression pass and allows the renderer's existing pessimistic confirmation to succeed.
-- next_action: Ask the owner to refresh the device projection and confirm that the previously committed binding now appears as active.
+- next_action: None; owner-visible persistence is confirmed and the session is resolved.
 - reasoning_checkpoint: Native Windows collection, sanitized preview, Premium gating, and both confirmation controls have already passed on the real PC.
 - tdd_checkpoint: RED test required before implementation because workflow.tdd_mode is true.
 
@@ -41,6 +41,9 @@ updated: 2026-08-09T17:00:00.0000000Z
 - timestamp: 2026-08-09T17:00:00.0000000Z
   observation: GitHub staging promotion 31324354207 completed successfully and hosted `/ready` reports build `61d8db9f8e4e1d090d75c67e918f53228bec03de`, `authorityConnected: true`, and `device-authority`.
   implication: The corrected account projection is active in staging; only owner-visible persistence confirmation remains.
+- timestamp: 2026-08-09T17:00:43.3227577Z
+  observation: Owner screenshot shows `DESKTOP-FOV8OLO` in the account projection and the device authority card with status `Vinculado` after refresh.
+  implication: The original mutation persisted in PostgreSQL and the corrected projection now confirms it end to end on the real Windows PC.
 
 ## Eliminated
 
@@ -53,5 +56,5 @@ updated: 2026-08-09T17:00:00.0000000Z
 
 - root_cause: The real account route hardcoded `activeDevice: null`, so post-bind synchronization could never confirm the device mutation even when PostgreSQL committed it.
 - fix: Resolve the newest non-revoked device authority projection once in staging and inject it into every real account projection path and `/v1/devices/current`.
-- verification: Local automated gates and hosted promotion pass; owner-visible persistence retest pending.
+- verification: Local automated gates, hosted promotion, and owner-visible real-PC persistence retest all pass.
 - files_changed: apps/api/src/modules/identity/real-routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-auth.test.ts
