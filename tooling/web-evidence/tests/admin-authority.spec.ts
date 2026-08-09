@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test';
 
 const OWNER_TASK_ID = '04-19-02';
@@ -8,6 +9,14 @@ const onlyCanonicalAuthorityAxis = (testInfo: TestInfo): void => {
   test.skip(
     testInfo.project.metadata['axis'] !== 'wide-1440',
     'The authority smoke journey has one canonical browser axis.',
+  );
+};
+
+const onlyAuthorityRecoveryAxis = (testInfo: TestInfo): void => {
+  const axis = testInfo.project.metadata['axis'];
+  test.skip(
+    axis !== 'wide-1440' && axis !== 'mobile-390' && axis !== 'reduced-motion',
+    'The visual recovery witness runs at the canonical desktop, mobile, and reduced-motion axes.',
   );
 };
 
@@ -38,8 +47,27 @@ const installAdminAuthority = async (page: Page, initialRole: AdminRole) => {
   let role = initialRole;
   const requests: Readonly<{ body: unknown; method: string; url: string }>[] = [];
   await page.context().addCookies([
-    { name: 'liiiraa-csrf', url: 'http://admin.localhost:3102', value: 'csrf-admin-browser' },
+    {
+      name: 'liiiraa-csrf',
+      url: 'http://admin.localhost:3102',
+      value: `csrf.${'a'.repeat(43)}`,
+    },
   ]);
+  await page.route('**/v1/identity/strong-auth/step-up', async (route) => {
+    const request = route.request();
+    requests.push({
+      body: request.postDataJSON(),
+      method: request.method(),
+      url: '/v1/identity/strong-auth/step-up',
+    });
+    await fulfill(route, {
+      expiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
+      method: 'totp',
+      ok: true,
+      receipt: 'opaque-step-up-receipt-abcdefghijklmnopqrstuvwxyz0123456789',
+      verifiedAt: new Date().toISOString(),
+    });
+  });
   await page.route('**/v1/admin/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -100,14 +128,16 @@ test(`@final @admin @authority-smoke [owner:${OWNER_TASK_ID}] admits exactly one
 }, testInfo) => {
   onlyCanonicalAuthorityAxis(testInfo);
   await installAdminAuthority(page, 'security');
-  await page.goto('/en/admin?role=audit');
+  await page.goto('/en/admin');
   await expectProductionShell(page);
 
   await expect(page.getByRole('status', { name: 'Active administrative role' })).toHaveText(
     'Security',
   );
-  await expect(page.getByRole('link', { name: 'Support case queue' })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'Diagnostic access' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Support' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Security' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Revenue' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Operation' })).toHaveCount(0);
   await expect(page.locator('[data-admin-role="audit"]')).toHaveCount(0);
 });
 
@@ -116,7 +146,7 @@ test(`@final @admin @authority-smoke [owner:${OWNER_TASK_ID}] denies route and d
 }, testInfo) => {
   onlyCanonicalAuthorityAxis(testInfo);
   const authority = await installAdminAuthority(page, 'security');
-  await page.goto('/en/admin/support/case-secret?role=support');
+  await page.goto('/en/admin/support/case-secret');
   await expectProductionShell(page);
 
   await expect(
@@ -131,7 +161,7 @@ test(`@final @admin @authority-smoke [owner:${OWNER_TASK_ID}] requires scoped st
 }, testInfo) => {
   onlyCanonicalAuthorityAxis(testInfo);
   const authority = await installAdminAuthority(page, 'operations');
-  await page.goto('/en/admin/operations/OPS-117?role=security');
+  await page.goto('/en/admin/operations/OPS-117');
   await expectProductionShell(page);
 
   await page.getByRole('button', { name: 'Review publication hold' }).click();
@@ -142,7 +172,10 @@ test(`@final @admin @authority-smoke [owner:${OWNER_TASK_ID}] requires scoped st
   await stepUp
     .getByRole('textbox', { name: 'Reason' })
     .fill('Keep publication held while integrity is reviewed');
-  await stepUp.getByRole('checkbox').check();
+  await stepUp.getByRole('textbox', { name: 'Six-digit authenticator code' }).fill('123456');
+  await stepUp.getByRole('checkbox').focus();
+  await stepUp.getByRole('checkbox').press('Space');
+  await expect(stepUp.getByRole('checkbox')).toBeChecked();
   await expect(confirm).toBeDisabled();
   await stepUp.getByRole('button', { name: 'Verify with a strong credential' }).click();
   await expect(confirm).toBeEnabled();
@@ -182,13 +215,53 @@ test(`@final @admin @authority-smoke [owner:${OWNER_TASK_ID}] handoff replaces t
     return response.json();
   });
   expect(handoff).toMatchObject({ role: 'security' });
-  await page.goto('/en/admin/security/SEC-083?role=operations');
+  await page.goto('/en/admin/security/SEC-083');
   await expect(page.getByRole('status', { name: 'Active administrative role' })).toHaveText(
     'Security',
   );
+  await page.getByRole('textbox', { name: 'Six-digit authenticator code' }).fill('123456');
   await page.getByRole('button', { name: 'Open break-glass metadata' }).click();
   const metadata = page.getByRole('region', { name: 'Redacted break-glass metadata' });
   await expect(metadata).toContainText('session-••••-083');
   await expect(metadata).not.toContainText(/raw|diagnostic bytes|email|token/iu);
   expect(authority.role()).toBe('security');
+});
+
+test(`@final @admin @authority-visual [owner:04-64-03] keeps the real authority workspace authored and responsive`, async ({
+  page,
+}, testInfo) => {
+  onlyAuthorityRecoveryAxis(testInfo);
+  await installAdminAuthority(page, 'security');
+  await page.goto('/pt-BR/admin');
+  await expectProductionShell(page);
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Visão da função' })).toBeVisible();
+  await expect(page.getByText('Central administrativa')).toBeVisible();
+  await expect(page.getByRole('status', { name: 'Função administrativa ativa' })).toHaveText(
+    'Segurança',
+  );
+  await expect(page.getByRole('link', { name: 'Abrir detalhe autorizado' })).toBeVisible();
+  await expect(page.locator('main')).not.toContainText(/\b(?:live|stale|degraded)\b/u);
+
+  const detailTarget = page.getByRole('link', { name: 'Abrir detalhe autorizado' });
+  await detailTarget.focus();
+  await expect(detailTarget).toBeFocused();
+  const targetBox = await detailTarget.boundingBox();
+  expect(targetBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  const overflow = await page
+    .locator('html')
+    .evaluate((root) => root.scrollWidth - root.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  const blocking = accessibility.violations.filter(
+    ({ impact }) => impact === 'critical' || impact === 'serious',
+  );
+  expect(blocking, `Blocking axe findings:\n${JSON.stringify(blocking, null, 2)}`).toEqual([]);
+
+  await page.screenshot({
+    animations: 'disabled',
+    fullPage: true,
+    path: testInfo.outputPath(`admin-authority-${String(testInfo.project.metadata['axis'])}.png`),
+  });
 });
