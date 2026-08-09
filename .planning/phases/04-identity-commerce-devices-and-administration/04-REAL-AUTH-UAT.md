@@ -97,6 +97,9 @@ First recovery execution receipt:
   digests, then encrypt the next output inside the same database transaction before commit.
 - The corrected workflow proves encryption with benign input before touching PostgreSQL and rolls
   back the transaction if protected-output encryption fails.
+- Preflight run `31300324810` stopped before PostgreSQL because the YAML split the benign crypto
+  command arguments onto a separate shell line. No invitation state changed in this run; the
+  command was corrected to keep the paths on the invocation line.
 
 ## Human real-authority observations
 

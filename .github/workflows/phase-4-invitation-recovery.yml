@@ -47,8 +47,7 @@ jobs:
           STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
         run: |
           node -e "require('node:fs').writeFileSync(process.env.PREFLIGHT_PLAINTEXT, '{\"preflight\":true}', { mode: 0o600 })"
-          pnpm --filter @liiiraa/api staging:invitation-crypto encrypt
-            "$PREFLIGHT_PLAINTEXT" "$PREFLIGHT_ENCRYPTED"
+          pnpm --filter @liiiraa/api staging:invitation-crypto encrypt "$PREFLIGHT_PLAINTEXT" "$PREFLIGHT_ENCRYPTED"
           test ! -e "$PREFLIGHT_PLAINTEXT"
           test -s "$PREFLIGHT_ENCRYPTED"
       - name: Compensate the three links lost by run 31300134764 and encrypt before commit
