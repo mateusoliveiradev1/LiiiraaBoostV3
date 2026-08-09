@@ -137,8 +137,6 @@ const safeJson = async (response: Response): Promise<unknown> => {
   }
 };
 
-const quotedEtag = (etag: string): string => `"${etag.replaceAll('"', '')}"`;
-
 const boundedToken = (value: string): boolean =>
   value.length >= 1 && value.length <= 128 && /^[A-Za-z0-9._:-]+$/u.test(value);
 
@@ -244,7 +242,7 @@ export const createAccountAuthority = ({
           headers: {
             ...headers(correlation),
             'content-type': 'application/json',
-            'if-match': quotedEtag(input.projection.account.etag),
+            'x-liiiraa-expected-version': input.projection.account.aggregateVersion,
           },
           method: 'PATCH',
         });

@@ -418,6 +418,48 @@ describe('real staging authentication routes', () => {
     expect(identity.updateProfile).not.toHaveBeenCalled();
     await app.close();
   });
+
+  it('allows an authenticated browser profile update through the application version header', async () => {
+    const { app, identity } = await createApp();
+    identity.updateProfile.mockResolvedValue({
+      ok: true,
+      actor: {
+        ...actor,
+        displayName: 'Mateus Winchester',
+        identityVersion: 2n,
+        updatedAt: '2030-01-02T00:00:00.000Z',
+      },
+    });
+    const csrf = await app.inject({
+      headers: { origin: accountOrigin },
+      method: 'GET',
+      url: '/v1/identity/csrf',
+    });
+
+    const browserUpdate = await app.inject({
+      headers: {
+        cookie: `__Host-liiiraa_session=${credential}`,
+        origin: accountOrigin,
+        'x-csrf-token': csrf.json<{ token: string }>().token,
+        'x-liiiraa-expected-version': actor.identityVersion.toString(),
+      },
+      method: 'PATCH',
+      payload: { patch: { displayName: 'Mateus Winchester', locale: 'pt-BR' } },
+      url: '/v1/account',
+    });
+
+    expect(browserUpdate.statusCode).toBe(200);
+    expect(browserUpdate.json()).toMatchObject({
+      account: { aggregateVersion: '2', displayName: 'Mateus Winchester' },
+    });
+    expect(identity.updateProfile).toHaveBeenCalledWith({
+      actor,
+      displayName: 'Mateus Winchester',
+      expectedVersion: 1n,
+      locale: 'pt-BR',
+    });
+    await app.close();
+  });
 });
 
 describe('staging subscription authority', () => {

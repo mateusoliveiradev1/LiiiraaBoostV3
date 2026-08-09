@@ -193,6 +193,16 @@ const ProfileAuthority = ({
   const [displayName, setDisplayName] = useState(projection.account.displayName);
   const [phase, setPhase] = useState<AccountMutationPhase>('idle');
   const [draft, setDraft] = useState<AccountProfileDraft | null>(null);
+  const [failure, setFailure] = useState<
+    'csrf' | 'invalid-authority' | 'unauthorized' | 'unavailable' | null
+  >(null);
+  const normalizedDisplayName = displayName.trim();
+  const displayNameLength = [
+    ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(normalizedDisplayName),
+  ].length;
+  const invalidDisplayName = displayNameLength < 2 || displayNameLength > 80;
+  const unchangedDisplayName = normalizedDisplayName === projection.account.displayName;
+  const editing = ['reviewing', 'issuing', 'offline', 'stale', 'error'].includes(phase);
   useEffect(() => {
     if (phase === 'idle' || phase === 'complete') {
       setDisplayName(projection.account.displayName);
@@ -200,11 +210,23 @@ const ProfileAuthority = ({
   }, [phase, projection.account.aggregateVersion, projection.account.displayName]);
 
   const edit = () => {
+    setDraft(null);
+    setFailure(null);
     setPhase(advanceAccountMutationPhase(phase, 'review'));
   };
+  const cancel = () => {
+    setDisplayName(projection.account.displayName);
+    setDraft(null);
+    setFailure(null);
+    setPhase('idle');
+  };
   const save = async () => {
+    if (invalidDisplayName || unchangedDisplayName) return;
+    setDraft(null);
+    setFailure(null);
     setPhase(advanceAccountMutationPhase('reviewing', 'issue'));
     if (!(await primeAccountCsrfToken(authorityBaseUrl))) {
+      setFailure('csrf');
       setPhase(advanceAccountMutationPhase('issuing', 'error'));
       return;
     }
@@ -215,6 +237,7 @@ const ProfileAuthority = ({
       projection,
     });
     if (result.status === 'conflict') setDraft(result.draft);
+    if (result.status === 'error') setFailure(result.code);
     const event =
       result.status === 'complete'
         ? 'complete'
@@ -230,52 +253,141 @@ const ProfileAuthority = ({
     setPhase(advanceAccountMutationPhase('issuing', event));
   };
 
+  const failureMessage =
+    phase === 'offline'
+      ? locale === 'pt-BR'
+        ? 'A conexão caiu antes da confirmação. Seu texto continua aqui para você tentar novamente.'
+        : 'The connection dropped before confirmation. Your text is still here so you can retry.'
+      : phase === 'stale'
+        ? locale === 'pt-BR'
+          ? 'A conta recebeu uma atualização. Revise o nome e tente salvar novamente.'
+          : 'The account received an update. Review the name and save again.'
+        : failure === 'unauthorized'
+          ? locale === 'pt-BR'
+            ? 'Sua sessão precisa ser renovada antes de salvar este perfil.'
+            : 'Your session must be renewed before this profile can be saved.'
+          : failure === 'csrf'
+            ? locale === 'pt-BR'
+              ? 'Não foi possível preparar a proteção da alteração. Tente novamente em instantes.'
+              : 'We could not prepare change protection. Try again in a moment.'
+            : locale === 'pt-BR'
+              ? 'Não foi possível confirmar a alteração. Nada foi perdido; revise e tente novamente.'
+              : 'We could not confirm the change. Nothing was lost; review and try again.';
+
   return (
     <div className="account-live-grid" data-layout="7-5">
-      <section className="account-live-card account-profile__editor" data-workspace-region="focal">
-        <header className="account-live-card__header">
-          <span className="account-live-kicker">
-            {locale === 'pt-BR' ? 'Identidade pública' : 'Public identity'}
-          </span>
-          <h2>{locale === 'pt-BR' ? 'Seu perfil' : 'Your profile'}</h2>
-          <p>
-            {locale === 'pt-BR'
-              ? 'Este nome aparece no aplicativo e nas áreas autenticadas.'
-              : 'This name appears in the app and across authenticated areas.'}
-          </p>
-        </header>
-        <div className="account-live-profile-preview">
-          <span className="account-live-profile-preview__avatar">{initialsFor(displayName)}</span>
+      <section
+        className="account-live-card account-live-card--focus account-profile-workspace"
+        data-workspace-region="focal"
+      >
+        <header className="account-live-card__header account-live-card__header--row">
           <span>
-            <strong>{displayName}</strong>
+            <span className="account-live-kicker">
+              {locale === 'pt-BR' ? 'Identidade pública' : 'Public identity'}
+            </span>
+            <h2>{locale === 'pt-BR' ? 'Como você aparece' : 'How you appear'}</h2>
+            <p>
+              {locale === 'pt-BR'
+                ? 'Uma identidade consistente no aplicativo, na conta e no suporte.'
+                : 'One consistent identity across the app, account, and support.'}
+            </p>
+          </span>
+          <span className="account-live-badge" data-tone="positive">
+            <ProductIcon name="check" size={14} />
+            {locale === 'pt-BR' ? 'Confirmado' : 'Confirmed'}
+          </span>
+        </header>
+
+        <div className="account-profile-identity-stage">
+          <span className="account-live-profile-preview__avatar">
+            {initialsFor(normalizedDisplayName || projection.account.displayName)}
+          </span>
+          <span>
+            <small>{locale === 'pt-BR' ? 'Nome exibido' : 'Display name'}</small>
+            <strong>{normalizedDisplayName || projection.account.displayName}</strong>
             <small>{projection.account.emailRedacted}</small>
           </span>
+          <span className="account-profile-identity-stage__scope">
+            <ProductIcon name="shield" size={16} />
+            {locale === 'pt-BR'
+              ? 'Visível só nas áreas autenticadas'
+              : 'Visible only when signed in'}
+          </span>
         </div>
-        {phase === 'reviewing' ? (
-          <div className="account-profile__control">
-            <LbTextField
-              isRequired
-              label={locale === 'pt-BR' ? 'Nome de exibição' : 'Display name'}
-              maxLength={80}
-              onChange={setDisplayName}
-              value={displayName}
-            />
-            <LbButton onPress={() => void save()}>{labels.save}</LbButton>
-          </div>
-        ) : (
-          <LbButton onPress={edit} variant="secondary">
-            {labels.edit}
-          </LbButton>
-        )}
-        {phase === 'issuing' ? (
-          <p className="account-live-feedback" role="status">
-            {locale === 'pt-BR' ? 'Salvando com segurança…' : 'Saving securely…'}
-          </p>
-        ) : null}
+
+        <div className="account-profile-editor-panel" data-editing={editing || undefined}>
+          <span className="account-profile-editor-panel__copy">
+            <strong>{locale === 'pt-BR' ? 'Nome de exibição' : 'Display name'}</strong>
+            <small>
+              {locale === 'pt-BR'
+                ? 'Use o nome pelo qual você quer ser reconhecido no Liiiraa Boost.'
+                : 'Use the name you want to be known by in Liiiraa Boost.'}
+            </small>
+          </span>
+          {editing ? (
+            <div className="account-profile-editor-panel__form">
+              <LbTextField
+                autoFocus={phase === 'reviewing'}
+                description={
+                  locale === 'pt-BR'
+                    ? `${String(displayNameLength)} de 80 caracteres · mínimo de 2`
+                    : `${String(displayNameLength)} of 80 characters · 2 minimum`
+                }
+                errorMessage={
+                  invalidDisplayName
+                    ? locale === 'pt-BR'
+                      ? 'Digite um nome entre 2 e 80 caracteres.'
+                      : 'Enter a name between 2 and 80 characters.'
+                    : undefined
+                }
+                isDisabled={phase === 'issuing'}
+                isInvalid={invalidDisplayName}
+                isRequired
+                label={locale === 'pt-BR' ? 'Nome de exibição' : 'Display name'}
+                maxLength={80}
+                onChange={(value) => {
+                  setDisplayName(value);
+                  if (phase === 'offline' || phase === 'stale' || phase === 'error') {
+                    setFailure(null);
+                    setPhase(advanceAccountMutationPhase(phase, 'review'));
+                  }
+                }}
+                value={displayName}
+              />
+              <div className="account-profile__actions">
+                <LbButton isDisabled={phase === 'issuing'} onPress={cancel} variant="quiet">
+                  {locale === 'pt-BR' ? 'Cancelar' : 'Cancel'}
+                </LbButton>
+                <LbButton
+                  isDisabled={invalidDisplayName || unchangedDisplayName}
+                  isLoading={phase === 'issuing'}
+                  loadingLabel={locale === 'pt-BR' ? 'Salvando' : 'Saving'}
+                  onPress={() => void save()}
+                  variant="primary"
+                >
+                  {locale === 'pt-BR' ? 'Salvar alterações' : 'Save changes'}
+                </LbButton>
+              </div>
+            </div>
+          ) : (
+            <LbButton onPress={edit} variant="secondary">
+              <ProductIcon name="settings" size={16} /> {labels.edit}
+            </LbButton>
+          )}
+        </div>
+
         {phase === 'complete' || phase === 'pending' ? (
-          <p className="account-live-feedback" aria-label={labels.receipt} role="status">
+          <p
+            className="account-live-feedback account-profile-feedback--success"
+            aria-label={labels.receipt}
+            role="status"
+          >
             <ProductIcon name="check" size={17} />
-            {phase === 'complete' ? labels.saved : labels.pending}
+            {phase === 'complete'
+              ? locale === 'pt-BR'
+                ? `${labels.saved}. Perfil sincronizado em todas as áreas.`
+                : `${labels.saved}. Profile synchronized across all areas.`
+              : labels.pending}
           </p>
         ) : null}
         {phase === 'conflict' && draft !== null ? (
@@ -287,23 +399,49 @@ const ProfileAuthority = ({
             role="alert"
           >
             <strong>{labels.conflict}</strong>
-            <p>{projection.account.displayName}</p>
-            <p>{draft.displayName}</p>
-            <LbButton onPress={edit}>{labels.edit}</LbButton>
+            <span>{projection.account.displayName}</span>
+            <span>{draft.displayName}</span>
+            <div className="account-profile__actions">
+              <LbButton onPress={cancel} variant="quiet">
+                {locale === 'pt-BR' ? 'Manter nome atual' : 'Keep current name'}
+              </LbButton>
+              <LbButton onPress={edit}>
+                {locale === 'pt-BR' ? 'Revisar rascunho' : 'Review draft'}
+              </LbButton>
+            </div>
           </div>
         ) : null}
         {phase === 'offline' || phase === 'stale' || phase === 'error' ? (
-          <p className="account-live-feedback" role="alert">
-            {phase === 'offline' ? labels.offline : phase === 'stale' ? labels.stale : labels.error}
+          <p className="account-live-feedback account-profile-feedback--error" role="alert">
+            <ProductIcon name="warning" size={17} /> {failureMessage}
           </p>
         ) : null}
+
+        <footer className="account-profile-assurance">
+          <span>
+            <ProductIcon name="lock" size={18} />
+          </span>
+          <span>
+            <strong>{locale === 'pt-BR' ? 'Alteração protegida' : 'Protected change'}</strong>
+            <small>
+              {locale === 'pt-BR'
+                ? 'O e-mail e as permissões da conta não mudam ao editar este nome.'
+                : 'Your email and account permissions do not change when editing this name.'}
+            </small>
+          </span>
+        </footer>
       </section>
-      <aside className="account-live-card account-live-card--quiet">
+      <aside className="account-live-card account-live-card--quiet account-profile-record">
         <header className="account-live-card__header">
           <span className="account-live-kicker">
             {locale === 'pt-BR' ? 'Registro da conta' : 'Account record'}
           </span>
-          <h2>{locale === 'pt-BR' ? 'Dados confirmados' : 'Confirmed details'}</h2>
+          <h2>{locale === 'pt-BR' ? 'Ficha confirmada' : 'Confirmed record'}</h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Dados lidos diretamente da autoridade da sua conta.'
+              : 'Data read directly from your account authority.'}
+          </p>
         </header>
         <dl className="account-live-definition">
           <div>
@@ -319,10 +457,22 @@ const ProfileAuthority = ({
             <dd>{formatDate(projection.account.createdAt, locale)}</dd>
           </div>
           <div>
-            <dt>{locale === 'pt-BR' ? 'Versão do registro' : 'Record version'}</dt>
-            <dd>{projection.account.aggregateVersion}</dd>
+            <dt>{locale === 'pt-BR' ? 'Última atualização' : 'Last update'}</dt>
+            <dd>{formatDate(projection.account.updatedAt, locale)}</dd>
           </div>
         </dl>
+        <div className="account-profile-record__version">
+          <span>
+            <ProductIcon name="history" size={17} />
+          </span>
+          <span>
+            <small>{locale === 'pt-BR' ? 'Versão auditável' : 'Auditable version'}</small>
+            <strong>v{projection.account.aggregateVersion}</strong>
+          </span>
+          <span className="account-live-badge" data-tone="positive">
+            <ProductIcon name="check" size={13} /> {locale === 'pt-BR' ? 'Atual' : 'Current'}
+          </span>
+        </div>
       </aside>
     </div>
   );

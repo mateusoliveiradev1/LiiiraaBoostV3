@@ -239,7 +239,8 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] projects account
   );
 
   expect(authority.requests).toHaveLength(1);
-  expect(authority.requests[0]?.headers['if-match']).toBe('"account-account-01-v7"');
+  expect(authority.requests[0]?.headers['x-liiiraa-expected-version']).toBe('7');
+  expect(authority.requests[0]?.headers['if-match']).toBeUndefined();
   expect(authority.requests[0]?.headers['x-csrf-token']).toBe(
     'csrf-browser-evidence-token-abcdefghijklmnopqrstuvwxyz',
   );
@@ -247,6 +248,32 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] projects account
     command: { action: 'update-profile', expectedVersion: '7' },
     patch: { displayName: 'Liiiraa Authority', locale: 'en' },
   });
+});
+
+test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] keeps profile editing usable on a compact viewport`, async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.metadata['axis'] !== 'mobile-390',
+    'The compact profile journey runs on the mobile authority axis.',
+  );
+  await installAccountAuthority(page);
+  await page.goto('/en/account/profile');
+  await expectAccountShell(page);
+
+  await expect(page.locator('.account-profile-workspace')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+    await page.evaluate(() => document.documentElement.clientWidth),
+  );
+  await page.getByRole('button', { name: 'Edit profile' }).click();
+  const name = page.getByRole('textbox', { name: 'Display name' });
+  const save = page.getByRole('button', { name: 'Save changes' });
+  await name.fill('A');
+  await expect(save).toBeDisabled();
+  await expect(page.getByText('Enter a name between 2 and 80 characters.')).toBeVisible();
+  await name.fill('Compact Player');
+  await expect(save).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible();
 });
 
 test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] presents the real overview and restricted download as authored account experiences`, async ({

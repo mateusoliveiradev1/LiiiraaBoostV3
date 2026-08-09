@@ -166,7 +166,7 @@ describe('production account authority', () => {
     });
   });
 
-  it('binds PATCH to the returned ETag and expected aggregate version', async () => {
+  it('binds PATCH to an application version header without triggering edge cache preconditions', async () => {
     const updated = projection({
       account: {
         ...projection().account,
@@ -195,9 +195,10 @@ describe('production account authority', () => {
 
     const [, request] = transport.mock.calls[0] ?? [];
     expect(request?.headers).toMatchObject({
-      'if-match': '"account-account-01-v7"',
+      'x-liiiraa-expected-version': '7',
       'x-csrf-token': 'csrf-account-01',
     });
+    expect(request?.headers).not.toHaveProperty('if-match');
     expect(typeof request?.body).toBe('string');
     const requestBody: unknown =
       typeof request?.body === 'string' ? JSON.parse(request.body) : undefined;
@@ -317,6 +318,17 @@ describe('account runtime composition', () => {
     expect(markup).toContain('account-live-download');
     expect(markup).toContain('account-inspector__quicklinks');
     expect(markup).not.toContain('@liiiraa/web-preview');
+  });
+
+  it('gives profile editing a complete authored workspace instead of a bare field', () => {
+    const markup = readFileSync(new URL('./account-authority.tsx', import.meta.url), 'utf8');
+
+    expect(markup).toContain('account-profile-workspace');
+    expect(markup).toContain('account-profile-identity-stage');
+    expect(markup).toContain('account-profile-editor-panel');
+    expect(markup).toContain('account-profile-assurance');
+    expect(markup).toContain('Salvar alterações');
+    expect(markup).toContain('Cancelar');
   });
 
   it('preserves every interruption state until an explicit authority transition occurs', () => {

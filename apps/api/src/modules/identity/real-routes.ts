@@ -183,8 +183,7 @@ const accountProjection = (
   });
 };
 
-const expectedVersion = (request: FastifyRequest): bigint | null => {
-  const header = request.headers['if-match'];
+const parseExpectedVersion = (header: unknown): bigint | null => {
   if (typeof header !== 'string' || header.length > 256) return null;
   const candidate = header.trim();
   const match =
@@ -195,6 +194,18 @@ const expectedVersion = (request: FastifyRequest): bigint | null => {
   if (digits === undefined) return null;
   const version = BigInt(digits);
   return version <= 9_223_372_036_854_775_807n ? version : null;
+};
+
+const expectedVersion = (request: FastifyRequest): bigint | null => {
+  const applicationVersion = request.headers['x-liiiraa-expected-version'];
+  const standardVersion = request.headers['if-match'];
+  if (applicationVersion === undefined) return parseExpectedVersion(standardVersion);
+  const parsedApplicationVersion = parseExpectedVersion(applicationVersion);
+  if (standardVersion === undefined) return parsedApplicationVersion;
+  const parsedStandardVersion = parseExpectedVersion(standardVersion);
+  return parsedApplicationVersion !== null && parsedApplicationVersion === parsedStandardVersion
+    ? parsedApplicationVersion
+    : null;
 };
 
 export const registerRealIdentityRoutes = (
