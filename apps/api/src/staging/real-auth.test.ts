@@ -140,6 +140,21 @@ const createApp = async ({ totpEnabled = false } = {}) => {
           ]
         : [];
     },
+    resolveActiveDevice: vi.fn(() =>
+      Promise.resolve({
+        schemaVersion: '1.0' as const,
+        aggregateVersion: '1',
+        etag: 'device-device-owner-v1',
+        correlationId: 'device-owner-test',
+        provenance: 'device-verified' as const,
+        kind: 'device-binding-projection' as const,
+        deviceBindingId: 'device-owner',
+        accountId: actor.accountId,
+        state: 'active' as const,
+        deviceLabel: 'DESKTOP-OWNER',
+        evidenceVersion: '1',
+      }),
+    ),
     resolveSubscription: vi.fn(() =>
       Promise.resolve({
         schemaVersion: '1.0' as const,
@@ -310,6 +325,11 @@ describe('real staging authentication routes', () => {
         },
       ],
       subscription: { plan: 'premium', state: 'active' },
+      activeDevice: {
+        accountId: actor.accountId,
+        deviceBindingId: 'device-owner',
+        state: 'active',
+      },
     });
     expect(strongAuth.status).toHaveBeenCalledWith(actor);
     const projection = account.json<{ account: unknown; subscription: unknown }>();

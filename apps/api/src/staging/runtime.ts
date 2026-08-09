@@ -2071,6 +2071,15 @@ export const buildRealStagingApp = async (
     const actor = await identity.resolveCredential(credential);
     return actor === null ? null : { accountId: actor.accountId };
   };
+  const resolveActiveDeviceProjection = async (accountId: string, correlationId: string) => {
+    const records = await listRuntimeAuthority<DeviceBindingRecord>(
+      database,
+      'device',
+      accountId,
+    );
+    const current = records.find((record) => record.revokedAt === null);
+    return current === undefined ? null : deviceProjection(current, correlationId);
+  };
   await registerRealIdentityRoutes(app, {
     accountOrigin: environment.accountOrigin,
     adminOrigin: environment.adminOrigin,
@@ -2089,6 +2098,8 @@ export const buildRealStagingApp = async (
           ]
         : [];
     },
+    resolveActiveDevice: (actor, correlation) =>
+      resolveActiveDeviceProjection(actor.accountId, correlation),
     resolveSubscription: (actor, correlation) =>
       resolveStagingSubscription(database, actor, correlation),
   });
@@ -2177,15 +2188,7 @@ export const buildRealStagingApp = async (
       keyVersion: 1,
     }),
     resolveSessionActor,
-    project: async (accountId, correlationId) => {
-      const records = await listRuntimeAuthority<DeviceBindingRecord>(
-        database,
-        'device',
-        accountId,
-      );
-      const current = records[0];
-      return current === undefined ? null : deviceProjection(current, correlationId);
-    },
+    project: resolveActiveDeviceProjection,
   });
   const supportRepository = createPostgresSupportLifecycleRepository(database);
   await registerSupportRoutes(app, {

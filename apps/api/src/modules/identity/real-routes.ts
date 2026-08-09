@@ -2,6 +2,7 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import type {
   AccountProjectionJson,
+  DeviceBindingProjectionJson,
   SessionProjectionJson,
   SubscriptionProjectionJson,
 } from '@liiiraa/contracts-ts';
@@ -40,6 +41,10 @@ export interface RealIdentityRouteDependencies {
   readonly resolveSecurityMethods: (
     actor: IdentityActor,
   ) => Promise<readonly RealAccountSecurityMethodProjection[]>;
+  readonly resolveActiveDevice: (
+    actor: IdentityActor,
+    correlationId: string,
+  ) => Promise<DeviceBindingProjectionJson | null>;
   readonly resolveSubscription: (
     actor: IdentityActor,
     correlationId: string,
@@ -147,6 +152,7 @@ const accountProjection = (
   correlation: string,
   securityMethods: readonly RealAccountSecurityMethodProjection[],
   subscription: SubscriptionProjectionJson,
+  activeDevice: DeviceBindingProjectionJson | null,
 ) => {
   const account: AccountProjectionJson = {
     schemaVersion: '1.0',
@@ -167,7 +173,9 @@ const accountProjection = (
   if (
     subscription.accountId !== actor.accountId ||
     !controlPlaneDocumentValidator(account) ||
-    !controlPlaneDocumentValidator(subscription)
+    !controlPlaneDocumentValidator(subscription) ||
+    (activeDevice !== null &&
+      (activeDevice.accountId !== actor.accountId || !controlPlaneDocumentValidator(activeDevice)))
   ) {
     throw new Error('REAL_ACCOUNT_PROJECTION_REJECTED');
   }
@@ -179,7 +187,7 @@ const accountProjection = (
     subscription,
     invoices: Object.freeze([]),
     supportCases: Object.freeze([]),
-    activeDevice: null,
+    activeDevice,
   });
 };
 
@@ -385,15 +393,17 @@ export const registerRealIdentityRoutes = (
     const resolved = await resolveActor(request);
     if (resolved === null) return noStore(reply).code(401).send({ code: 'UNAUTHORIZED' });
     const correlation = correlationId(request);
-    const [securityMethods, subscription] = await Promise.all([
+    const [securityMethods, subscription, activeDevice] = await Promise.all([
       dependencies.resolveSecurityMethods(resolved.actor),
       dependencies.resolveSubscription(resolved.actor, correlation),
+      dependencies.resolveActiveDevice(resolved.actor, correlation),
     ]);
     const projection = accountProjection(
       resolved.actor,
       correlation,
       securityMethods,
       subscription,
+      activeDevice,
     );
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
@@ -420,15 +430,17 @@ export const registerRealIdentityRoutes = (
     });
     if (!result.ok) {
       const correlation = correlationId(request);
-      const [securityMethods, subscription] = await Promise.all([
+      const [securityMethods, subscription, activeDevice] = await Promise.all([
         dependencies.resolveSecurityMethods(resolved.actor),
         dependencies.resolveSubscription(resolved.actor, correlation),
+        dependencies.resolveActiveDevice(resolved.actor, correlation),
       ]);
       const projection = accountProjection(
         resolved.actor,
         correlation,
         securityMethods,
         subscription,
+        activeDevice,
       );
       return noStore(reply)
         .code(result.code === 'CONFLICT' ? 409 : 400)
@@ -440,11 +452,18 @@ export const registerRealIdentityRoutes = (
         });
     }
     const correlation = correlationId(request);
-    const [securityMethods, subscription] = await Promise.all([
+    const [securityMethods, subscription, activeDevice] = await Promise.all([
       dependencies.resolveSecurityMethods(result.actor),
       dependencies.resolveSubscription(result.actor, correlation),
+      dependencies.resolveActiveDevice(result.actor, correlation),
     ]);
-    const projection = accountProjection(result.actor, correlation, securityMethods, subscription);
+    const projection = accountProjection(
+      result.actor,
+      correlation,
+      securityMethods,
+      subscription,
+      activeDevice,
+    );
     return noStore(reply).header('etag', `"${projection.account.etag}"`).code(200).send(projection);
   });
   return Promise.resolve();
