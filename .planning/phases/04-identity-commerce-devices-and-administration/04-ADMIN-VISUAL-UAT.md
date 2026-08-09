@@ -1,11 +1,11 @@
 ---
-status: passed
+status: automated-passed
 phase: 04-identity-commerce-devices-and-administration
-plan: 04-61
-tested_commit: bbc74cc
+plan: [04-61, 04-64]
+tested_commit: 46e6c4e
 storybook_iframe_sha256: b8720177e2e1df3a128f24065b0d709f66e24c0a8887d6396b3ba663c9667a6d
 started: 2026-08-07T18:40:31.4628839Z
-updated: 2026-08-07T19:45:55.0289281Z
+updated: 2026-08-09T05:45:14.2456493Z
 ---
 
 # Admin visual and accessibility UAT
@@ -19,12 +19,12 @@ technology evidence that has not been observed.
 
 ## Current Test
 
-number: 9
-name: Complete
+number: 10
+name: Owner staging review of the recovered authority workspaces
 expected: |
-  Every automated and manual visual/accessibility acceptance row passes on the exact
-  tested commit and Storybook build.
-awaiting: none
+The deployed production-authority routes retain the task-specific hierarchy, localized
+states, responsive composition, and safe denial treatment proven automatically.
+awaiting: owner visual confirmation on staging
 
 ## Evidence identity
 
@@ -37,58 +37,87 @@ awaiting: none
 - Viewports: 1600x1000, 1280x800, 1024x768, 768x1024, 390x844, 320x568
 - Additional modes: 200% text, forced colors, reduced motion
 
+## Plan 04-64 automated recovery evidence
+
+- Tested commit: `46e6c4e` (application recovery commit `5e709f4` plus browser evidence).
+- Admin verify: 14 files, 180 tests, TypeScript, and Next.js 16.3 production build passed.
+- Focused authority regressions: 30/30 passed across route presentation, overview status,
+  and safe-denial composition.
+- Production-composition Playwright: desktop 1440x900, mobile 390x844, and reduced-motion
+  axes passed; the existing English authority journey also passed.
+- Accessibility: zero serious or critical axe findings; keyboard focus and 44px action target
+  assertions passed.
+- Responsive safety: no horizontal overflow at either target width.
+- Screenshots were reviewed by Codex for automated handoff only; owner staging approval is
+  intentionally still pending.
+
 ## Tests
 
 ### 1. Briefing Focus composition across seven domains
+
 expected: Overview, Queue, invitations, access governance, Revenue/Support, and Operation/Security/System use domain-appropriate ledgers, work regions, tables, inspectors, and high-risk decision surfaces without generic dashboard repetition.
 result: pass
 evidence: Owner-delegated visual approval; dual-agent critique; refreshed desktop/mobile Storybook captures.
 
 ### 2. Responsive layout and production insets
+
 expected: Every prescribed viewport preserves navigation, readable hierarchy, stable record identity, and full recovery actions without horizontal overflow or duplicate shell/workspace padding.
 result: pass
 evidence: Production E2E viewport matrix, no-overflow assertions, and final 320px Overview capture after production-shell inset correction.
 
 ### 3. Long content, locales, and 200% text
+
 expected: PT-BR/English, long names, identifiers, dates, amounts, and time zones reflow at 320 CSS px and 200% text without clipping, overlap, or lost actions.
 result: pass
 evidence: Playwright 320px/200% matrix and refreshed compact definition-list composition.
 
 ### 4. Touch targets and mobile command access
+
 expected: Navigation, search, account, drawers, rows, pagination, filters, inspectors, and dialogs expose at least 44x44px targets with safe separation and accessible names.
 result: pass
 evidence: Shell regression tests, rendered 320px geometry, and axe WCAG 2.2 AA with zero violations.
 
 ### 5. Keyboard, focus restoration, and search shortcut
+
 expected: Keyboard traversal reaches navigation, search, tables/lists, inspectors, sheets, dialogs, filters, selection, pagination, timelines, and function controls; Escape and route transitions restore visible focus.
 result: pass-automated
 evidence: Shell interaction contracts, focus-handoff tests, drawer focus restoration, mobile search reveal, and production E2E.
 
 ### 6. Contrast, forced colors, and reduced motion
+
 expected: Text, focus, status, destructive actions, and recovery remain perceivable in normal and forced colors; reduced motion removes translation/stagger without hiding state.
 result: pass
 evidence: Forced-colors/reduced-motion Playwright matrix and axe with zero violations.
 
 ### 7. Narrator and secondary screen-reader pairing
+
 expected: Narrator/Edge and one additional pairing announce semantic structure, status changes, errors, risk, approval, tables, selections, dialogs, and focus restoration without hidden-content leakage.
 result: pass
 evidence: Owner observed Narrator/Edge and NVDA/Chromium across the shell, table, critical approval, error, and inspector/focus stories. The only reported discrepancy was a Storybook-local route escape; commits `c8553c6`, `98da17f`, `ea70636`, and `bbc74cc` added RED regressions, a preview-only navigation boundary, polite live announcements, and query-state containment. Browser verification exercised 34 internal links across all seven domains with zero escapes or HTTP failures.
 
 ### 8. Real authority, degraded states, and durable refetch
+
 expected: Login/TOTP, invitations, governance, approvals, jobs, search, incidents, configuration, privacy, emergency, consent, audit, reconnecting/degraded blocking, persistence, and HTTP refetch use API/PostgreSQL authority with preview and fixtures disabled.
 result: pass
 evidence: `admin-operations.spec.ts` production-authority test passed against Neon in 1.8 minutes.
 
 ### 9. Bounded desktop-to-Admin handoff
+
 expected: Eligible desktop administrators open the isolated HTTPS Admin in the system browser; ineligible/offline/revoked states expose no actionable handoff and no Admin payload or secret enters the WebView.
 result: pass-automated
 evidence: 18/18 focused desktop account-authority and account-experience tests.
 
+### 10. Recovered production-authority presentation
+
+expected: Real authority routes use task-specific headings and guidance, localized visible states, stable loading/denial/empty composition, and responsive record actions without weakening server-projected authority.
+result: pass-automated; owner-staging-review-pending
+evidence: Plan 04-64 focused Vitest, full Admin verify, Playwright at 1440px/390px/reduced-motion, keyboard focus, target geometry, no-overflow, axe, and deterministic screenshots.
+
 ## Summary
 
-total: 9
+total: 10
 passed: 9
-pending: 0
+pending: 1
 issues: 0
 blocked: 0
 
@@ -103,6 +132,9 @@ blocked: 0
 ## Completion evidence
 
 - Admin verify: 13 files, 165 tests, TypeScript, and Next.js production build passed.
+- Plan 04-64 Admin verify: 14 files, 180 tests, TypeScript, and Next.js production build passed.
+- Plan 04-64 browser proof: 6 authority tests passed at the desktop/mobile target widths and
+  one additional reduced-motion witness passed, with four non-applicable axis skips per run.
 - Storybook production build passed and the seven-domain link sweep checked 34 routes with
   zero escapes.
 - Desktop bounded handoff: 18/18 focused tests passed.

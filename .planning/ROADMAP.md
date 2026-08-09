@@ -660,7 +660,7 @@ Plans:
 
 **Wave 27** _(blocked on Plan 04-63)_
 
-- [ ] 04-64-PLAN.md — Recover the authored Admin visual language across real production-authority routes.
+- [x] 04-64-PLAN.md — Recover the authored Admin visual language across real production-authority routes.
 - [ ] 04-40-PLAN.md — Provision protected tester invitations, deploy real staging, and validate complete web/desktop/Admin authority.
 
 **Wave 28** _(blocked on Plans 04-40 and 04-64)_
@@ -798,7 +798,7 @@ Plans:
 | 1. Product Truth and Modular Contracts             | 22/22          | Complete    | 2026-07-27 |
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
-| 4. Identity, Commerce, Devices, and Administration | 60/63 | In Progress|  |
+| 4. Identity, Commerce, Devices, and Administration | 61/64 | In Progress|  |
 | 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
