@@ -968,7 +968,7 @@ button:focus-visible,
 .account-internal-download {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.75fr);
-  gap: 1px;
+  gap: 0;
   overflow: hidden;
   border: 1px solid var(--lb-line-subtle);
   border-radius: var(--lb-radius-default);
@@ -978,6 +978,10 @@ button:focus-visible,
 .account-internal-download__artifact,
 .account-internal-download__trust {
   background: var(--lb-surface-inset);
+}
+
+.account-internal-download__trust {
+  border-inline-start: 1px solid var(--lb-line-subtle);
 }
 
 .account-internal-download__artifact {
@@ -1056,6 +1060,11 @@ button:focus-visible,
 @media (max-width: 58rem) {
   .account-internal-download {
     grid-template-columns: 1fr;
+  }
+
+  .account-internal-download__trust {
+    border-block-start: 1px solid var(--lb-line-subtle);
+    border-inline-start: 0;
   }
 }
 
@@ -1910,7 +1919,7 @@ button:focus-visible,
 .account-profile-assurance > span:last-child,
 .account-profile-record__version > span:nth-child(2) {
   display: grid;
-  gap: 2px;
+  gap: var(--lb-space-1);
   min-inline-size: 0;
 }
 
@@ -2076,12 +2085,16 @@ button:focus-visible,
   border: 1px solid var(--lb-line-strong);
   border-radius: var(--lb-radius-stage);
   background: var(--lb-line-subtle);
-  gap: 1px;
+  gap: 0;
 }
 
 .account-live-download__main,
 .account-live-download__notice {
   background: var(--lb-surface-inset);
+}
+
+.account-live-download__notice {
+  border-inline-start: 1px solid var(--lb-line-subtle);
 }
 
 .account-live-download__main {
@@ -2194,7 +2207,7 @@ button:focus-visible,
   justify-content: center;
   inline-size: 92px;
   block-size: 92px;
-  padding-block-start: 26px;
+  padding-block-start: var(--lb-space-4);
   border: 5px solid color-mix(in oklch, var(--lb-success) 58%, var(--lb-line-subtle));
   border-radius: 50%;
   font-family: var(--lb-font-data);
