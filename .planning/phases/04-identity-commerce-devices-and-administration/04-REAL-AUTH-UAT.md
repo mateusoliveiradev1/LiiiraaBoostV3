@@ -104,6 +104,9 @@ First recovery execution receipt:
   transaction. PostgreSQL rolled back the compensation and issuance; no invitation state changed.
   The crypto boundary now reports only a safe stage/code pair so the missing file operation can be
   corrected without exposing protected values.
+- Diagnostic run `31300480948` narrowed the rollback to `READ_ENOENT`: the expected plaintext was
+  absent before encryption. A new transaction gate now rejects any compensating execution that
+  does not report exactly three newly created replacement URLs before the crypto boundary runs.
 
 ## Human real-authority observations
 

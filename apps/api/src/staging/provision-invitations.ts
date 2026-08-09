@@ -366,6 +366,9 @@ const run = async (): Promise<void> => {
         ),
         repositoryRoot: process.cwd(),
       });
+      if (environment.STAGING_INVITATION_REISSUE_ACTIVE !== undefined && result.created !== 3) {
+        return reject('REISSUE_RESULT');
+      }
       const publicKeyBase64 = environment.STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64;
       const encryptedOutputPath = environment.STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH;
       if (publicKeyBase64 !== undefined || encryptedOutputPath !== undefined) {
