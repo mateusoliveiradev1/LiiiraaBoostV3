@@ -103,20 +103,21 @@ export const createDeviceEvidenceProtector = ({
   ) {
     throw new Error('DEVICE_EVIDENCE_PROTECTOR_CONFIGURATION_REJECTED');
   }
-  const context = async (accountId: string): Promise<DeviceEvidenceContextProjectionJson> => ({
-    schemaVersion: '1.0',
-    kind: 'device-evidence-context-projection',
-    accountId,
-    contextVersion,
-    accountSalt: accountSalt(contextSecret, accountId),
-  });
+  const context = (accountId: string): Promise<DeviceEvidenceContextProjectionJson> =>
+    Promise.resolve({
+      schemaVersion: '1.0',
+      kind: 'device-evidence-context-projection',
+      accountId,
+      contextVersion,
+      accountSalt: accountSalt(contextSecret, accountId),
+    });
   return Object.freeze({
     context,
     protect: async (accountId: string, submission: unknown) => {
       if (
         !controlPlaneDocumentValidator(submission) ||
         !isRecord(submission) ||
-        submission['kind'] !== 'device-local-evidence-submission'
+        submission.kind !== 'device-local-evidence-submission'
       ) {
         throw new Error('device evidence rejected: invalid-submission');
       }
