@@ -41,6 +41,11 @@ import {
 import { AdminFocusHandoff } from '../admin-focus-handoff';
 import { AdminNavigation } from '../admin-navigation';
 import { ProductLockup } from '../admin-product-lockup';
+import {
+  adminOverviewStatusLabel,
+  resolveAdminAuthorityPresentation,
+  type AdminVisibleStatus,
+} from '../admin-production-routes';
 import { projectAdminRoleNavigation } from '../admin-shell';
 import { adminRoleCanAccessRoute, type AdminAuthorityRoute } from '../admin-runtime';
 
@@ -98,6 +103,12 @@ const copy = Object.freeze({
     enrollmentLoading: 'Preparing protected access',
     enrollmentTitle: 'Protect your administrative account',
     enrollmentVerifying: 'Verifying authenticator',
+    currentSession: 'Current session',
+    openDetail: 'Open authorized detail',
+    projectionScope: 'Projection scope',
+    recordFallback: 'Authorized administrative record',
+    recordStatus: 'Authorized',
+    retryGuidance: 'Return to the overview or retry after the administrative authority reconnects.',
   }),
   'pt-BR': Object.freeze({
     activeRole: 'Função administrativa ativa',
@@ -147,6 +158,13 @@ const copy = Object.freeze({
     enrollmentLoading: 'Preparando acesso protegido',
     enrollmentTitle: 'Proteja sua conta administrativa',
     enrollmentVerifying: 'Validando autenticador',
+    currentSession: 'Sessão atual',
+    openDetail: 'Abrir detalhe autorizado',
+    projectionScope: 'Escopo da projeção',
+    recordFallback: 'Registro administrativo autorizado',
+    recordStatus: 'Autorizado',
+    retryGuidance:
+      'Volte à visão geral ou tente novamente após a autoridade administrativa reconectar.',
   }),
 });
 
@@ -224,6 +242,34 @@ const formatRecordReference = (value: string, locale: WebLocale): string => {
   if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/iu.test(value)) return value;
   const ending = value.replaceAll('-', '').slice(-6).toLocaleUpperCase(locale);
   return `${locale === 'pt-BR' ? 'Referência' : 'Reference'} ••••${ending}`;
+};
+
+const isVisibleStatus = (value: unknown): value is AdminVisibleStatus =>
+  typeof value === 'string' &&
+  ['live', 'stale', 'reconnecting', 'offline', 'degraded', 'unavailable'].includes(value);
+
+const recordStatusLabel = (locale: WebLocale, record: AdminProjectionRecord): string => {
+  const status = record['state'] ?? record['status'];
+  return isVisibleStatus(status)
+    ? adminOverviewStatusLabel(locale, status)
+    : copy[locale].recordStatus;
+};
+
+const recordDetailHref = (
+  locale: WebLocale,
+  routeId: AdminAuthorityRoute,
+  recordId: string,
+): Route => {
+  const encodedId = encodeURIComponent(recordId);
+  const suffix =
+    routeId === 'admin-support'
+      ? `/support/cases/${encodedId}`
+      : routeId === 'admin-operations'
+        ? `/operation/jobs/${encodedId}`
+        : routeId === 'admin-security'
+          ? `/security/incidents/${encodedId}`
+          : `/system/audit/${encodedId}`;
+  return routeHref(locale, suffix) as Route;
 };
 
 const csrfToken = (): string =>
@@ -1258,26 +1304,32 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     accountOrigin,
     authority,
     enrollmentRequired,
+    freshness,
     session,
     setEnrollmentRequired,
     setSession,
   } = useAdminAuthority();
   const [records, setRecords] = useState<readonly AdminProjectionRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
+  const [recordsFailure, setRecordsFailure] = useState<'denied' | 'error' | null>(null);
+  const presentation = resolveAdminAuthorityPresentation(locale, routeId);
   useEffect(() => {
     const controller = new AbortController();
     if (session === null || session === undefined || routeId === 'admin-diagnostics') {
       setRecords([]);
       setRecordsLoading(false);
+      setRecordsFailure(null);
       return () => {
         controller.abort();
       };
     }
     setRecords([]);
     setRecordsLoading(true);
+    setRecordsFailure(null);
     void authority.list(collectionFor(routeId)).then((result) => {
       if (controller.signal.aborted) return;
       setRecords(result.records);
+      setRecordsFailure(result.status === 'online' ? null : result.status);
       setRecordsLoading(false);
     });
     return () => {
@@ -1287,9 +1339,24 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
 
   if (session === undefined) {
     return (
-      <article aria-busy="true" data-admin-runtime="production">
-        <h1>{copy[locale].activeRole}</h1>
-        <p role="status">{copy[locale].loading}</p>
+      <article
+        aria-busy="true"
+        className="admin-authority admin-authority--loading"
+        data-admin-runtime="production"
+      >
+        <header className="admin-authority__header">
+          <div>
+            <span className="admin-authority__system">{presentation.eyebrow}</span>
+            <h1>{presentation.title}</h1>
+            <p>{presentation.description}</p>
+          </div>
+        </header>
+        <div className="admin-authority__records-loading" role="status">
+          <span className="lb-visually-hidden">{copy[locale].loading}</span>
+          <span />
+          <span />
+          <span />
+        </div>
       </article>
     );
   }
@@ -1325,9 +1392,24 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
   }
   if (!adminRoleCanAccessRoute(session.role, routeId)) {
     return (
-      <article data-admin-runtime="production">
-        <h1>{copy[locale].denied}</h1>
-        <p role="alert">{copy[locale].denied}</p>
+      <article className="admin-authority admin-authority--denied" data-admin-runtime="production">
+        <header className="admin-authority__header">
+          <div>
+            <span className="admin-authority__system">{presentation.eyebrow}</span>
+            <h1>{copy[locale].denied}</h1>
+            <p>{presentation.description}</p>
+          </div>
+        </header>
+        <section className="admin-authority__denial" role="alert">
+          <ProductIcon name="lock" size={22} />
+          <div>
+            <strong>{copy[locale].denied}</strong>
+            <p>{copy[locale].retryGuidance}</p>
+            <Link href={routeHref(locale, '') as Route}>
+              {locale === 'pt-BR' ? 'Voltar à visão geral' : 'Return to overview'}
+            </Link>
+          </div>
+        </section>
       </article>
     );
   }
@@ -1339,14 +1421,29 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     >
       <header className="admin-authority__header">
         <div>
-          <h1>{copy[locale].activeRole}</h1>
-          <p>{copy[locale].authoritySummary}</p>
+          <span className="admin-authority__system">{presentation.eyebrow}</span>
+          <h1>{presentation.title}</h1>
+          <p>{presentation.description}</p>
         </div>
         <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
           <ProductIcon name="shield" size={16} />
           <span>{roleLabel(locale, session.role)}</span>
         </p>
       </header>
+      <dl className="admin-authority__context" aria-label={copy[locale].authoritySummary}>
+        <div>
+          <dt>{copy[locale].currentSession}</dt>
+          <dd>{roleLabel(locale, session.role)}</dd>
+        </div>
+        <div>
+          <dt>{copy[locale].sessionUntil}</dt>
+          <dd>{formatAdminDateTime(session.expiresAt, locale)}</dd>
+        </div>
+        <div>
+          <dt>{copy[locale].projectionScope}</dt>
+          <dd data-status={freshness}>{adminOverviewStatusLabel(locale, freshness)}</dd>
+        </div>
+      </dl>
       {routeId === 'admin-diagnostics' ? (
         <DiagnosticAuthority authority={authority} locale={locale} />
       ) : null}
@@ -1364,6 +1461,15 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
               <span />
               <span />
             </div>
+          ) : recordsFailure !== null ? (
+            <div className="admin-authority__empty admin-authority__empty--failure" role="alert">
+              <ProductIcon name="warning" size={20} />
+              <div>
+                <strong>{copy[locale].denied}</strong>
+                <p>{copy[locale].retryGuidance}</p>
+                <span>{adminOverviewStatusLabel(locale, freshness)}</span>
+              </div>
+            </div>
           ) : records.length === 0 ? (
             <div className="admin-authority__empty" role="status">
               <ProductIcon name="check" size={20} />
@@ -1377,14 +1483,27 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
             <ul className="admin-authority__records">
               {records.map((record) => (
                 <li key={record.id}>
-                  <strong className="admin-authority__record-reference">
-                    {formatRecordReference(record.id, locale)}
-                  </strong>{' '}
-                  {typeof record.redactedTarget === 'string'
-                    ? record.redactedTarget
-                    : typeof record.summary === 'string'
-                      ? record.summary
-                      : null}
+                  <article>
+                    <ProductIcon name="receipt" size={18} />
+                    <div className="admin-authority__record-copy">
+                      <strong className="admin-authority__record-reference">
+                        {formatRecordReference(record.id, locale)}
+                      </strong>
+                      <p>
+                        {typeof record.redactedTarget === 'string'
+                          ? record.redactedTarget
+                          : typeof record.summary === 'string'
+                            ? record.summary
+                            : copy[locale].recordFallback}
+                      </p>
+                    </div>
+                    <span className="admin-authority__record-status">
+                      {recordStatusLabel(locale, record)}
+                    </span>
+                    <Link href={recordDetailHref(locale, routeId, record.id)}>
+                      {copy[locale].openDetail}
+                    </Link>
+                  </article>
                 </li>
               ))}
             </ul>

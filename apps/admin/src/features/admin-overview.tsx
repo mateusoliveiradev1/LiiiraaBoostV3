@@ -4,6 +4,7 @@ import { LbOperationalNotice, LbSkeletonRegion, ProductIcon } from '@liiiraa/des
 import type { WebLocale } from '@liiiraa/web-core';
 
 import type { AdminQueryFamily, AdminQueryResult } from '../admin-authority';
+import { adminOverviewStatusLabel } from '../admin-production-routes';
 import { useAdminAuthority } from './admin-authority';
 import {
   projectAdminBriefing,
@@ -260,7 +261,7 @@ export const AdminOverviewView = (props: AdminOverviewViewProps) => {
         </div>
         <span className={styles['liveIdentity']} data-status={model.status} role="status">
           <span aria-hidden="true" />
-          {model.status}
+          {adminOverviewStatusLabel(props.locale, model.status)}
         </span>
       </header>
 
@@ -337,7 +338,7 @@ export const AdminOverviewView = (props: AdminOverviewViewProps) => {
                   <ProductIcon name={capacity.status === 'live' ? 'check' : 'warning'} size={18} />
                   <h3>{labels.capacity}</h3>
                 </div>
-                <span>{capacity.status}</span>
+                <span>{adminOverviewStatusLabel(props.locale, capacity.status)}</span>
               </header>
               {capacityAvailable ? (
                 <>

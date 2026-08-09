@@ -1,6 +1,9 @@
 'use client';
 
+import { ProductIcon } from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
+import type { Route } from 'next';
+import Link from 'next/link';
 
 import { AdminAccessGovernance } from './admin-access-governance';
 import { AdminAuthorityPage, useAdminAuthority } from './admin-authority';
@@ -17,16 +20,42 @@ import {
   type AdminWorkspaceDefinition,
 } from './admin-workspace-registry-model';
 
-const SafeWorkspaceDenial = ({ locale }: Readonly<{ locale: WebLocale }>) => (
-  <article data-admin-runtime="production">
-    <h1>{locale === 'pt-BR' ? 'Área indisponível' : 'Workspace unavailable'}</h1>
-    <p role="alert">
-      {locale === 'pt-BR'
-        ? 'Esta área não está disponível para a função administrativa ativa. Nenhuma existência foi revelada.'
-        : 'This workspace is not available to the active administrative function. No existence was disclosed.'}
-    </p>
-  </article>
-);
+const denialCopy = Object.freeze({
+  en: Object.freeze({
+    action: 'Return to overview',
+    detail: 'No protected data was loaded and no hidden workspace identity was disclosed.',
+    eyebrow: 'Protected boundary',
+    summary:
+      'This workspace is not available to the active administrative function. Choose an admitted domain from the navigation.',
+    title: 'Workspace unavailable',
+  }),
+  'pt-BR': Object.freeze({
+    action: 'Voltar à visão geral',
+    detail: 'Nenhum dado protegido foi carregado e nenhuma identidade oculta da área foi revelada.',
+    eyebrow: 'Limite protegido',
+    summary:
+      'Esta área não está disponível para a função administrativa ativa. Escolha um domínio admitido pela navegação.',
+    title: 'Área indisponível',
+  }),
+});
+
+const SafeWorkspaceDenial = ({ locale }: Readonly<{ locale: WebLocale }>) => {
+  const labels = denialCopy[locale];
+  return (
+    <article className="admin-workspace-denial" data-admin-runtime="production">
+      <span className="admin-workspace-denial__eyebrow">{labels.eyebrow}</span>
+      <div className="admin-workspace-denial__panel" role="alert">
+        <ProductIcon name="lock" size={24} />
+        <div>
+          <h1>{labels.title}</h1>
+          <p>{labels.summary}</p>
+          <small>{labels.detail}</small>
+          <Link href={`/${locale}/admin` as Route}>{labels.action}</Link>
+        </div>
+      </div>
+    </article>
+  );
+};
 
 const Workspace = ({
   definition,
