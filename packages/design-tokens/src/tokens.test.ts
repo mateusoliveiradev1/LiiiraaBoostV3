@@ -245,7 +245,7 @@ describe('Cobalt Ignition Bay token contract', () => {
     expect(css).toContain('font-weight: 600;');
     expect(css).toContain('font-stretch: 87.5%;');
     expect(css).toContain('--lb-font-display:');
-    expect(css).toContain('--lb-accent-electric: oklch(0.670 0.210 255);');
+    expect(css).toContain('--lb-accent-electric: oklch(0.67 0.21 255);');
     expect(css).toContain('--lb-radius-stage: 14px;');
     expect(css).toContain('--lb-motion-product-stage-duration: 480ms;');
     expect(css).toContain('--lb-motion-stage-delay-max: 80ms;');
