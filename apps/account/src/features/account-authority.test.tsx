@@ -301,10 +301,22 @@ describe('account runtime composition', () => {
 
     expect(markup).toContain('data-internal-download="restricted"');
     expect(markup).toContain('href="/api/internal-download"');
-    expect(markup).toContain('Build interno para testes convidados');
-    expect(markup).toContain('não possui assinatura pública');
-    expect(markup).toContain('O canal público estável continua indisponível');
+    expect(markup).toContain('Liiiraa Boost para Windows');
+    expect(markup).toContain('Versão de testes sem assinatura pública');
+    expect(markup).toContain('Entrega autenticada');
+    expect(markup).toContain('account-live-download');
     expect(markup).not.toMatch(/blob\.vercel-storage\.com|BLOB_READ_WRITE_TOKEN/iu);
+  });
+
+  it('composes every real account route with the authored visual system', () => {
+    const markup = readFileSync(new URL('./account-authority.tsx', import.meta.url), 'utf8');
+
+    expect(markup).toContain('account-live-overview-hero');
+    expect(markup).toContain('account-live-health');
+    expect(markup).toContain('account-live-methods');
+    expect(markup).toContain('account-live-download');
+    expect(markup).toContain('account-inspector__quicklinks');
+    expect(markup).not.toContain('@liiiraa/web-preview');
   });
 
   it('preserves every interruption state until an explicit authority transition occurs', () => {

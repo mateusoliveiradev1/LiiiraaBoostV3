@@ -827,6 +827,21 @@ const ADMIN_ROLES = new Set<AccountAuthActor['role']>([
   'support',
 ]);
 
+const adminRoleLabels = {
+  en: {
+    audit: 'Audit',
+    operations: 'Operations',
+    security: 'Security',
+    support: 'Support',
+  },
+  'pt-BR': {
+    audit: 'Auditoria',
+    operations: 'Operações',
+    security: 'Segurança',
+    support: 'Suporte',
+  },
+} as const;
+
 export const AccountRoleGateway = ({
   adminOrigin,
   authorityBaseUrl,
@@ -848,16 +863,20 @@ export const AccountRoleGateway = ({
   }, [auth]);
 
   if (actor === null || !ADMIN_ROLES.has(actor.role)) return null;
-  const labels = messages[locale];
+  const activeRole =
+    adminRoleLabels[locale][actor.role as keyof (typeof adminRoleLabels)[WebLocale]];
   return (
     <aside className="account-admin-gateway" data-account-role={actor.role}>
       <ProductIcon name="shield" size={18} />
       <span>
-        <strong>{labels.adminAccess}</strong>
-        <small>{labels.adminScope}</small>
+        <strong>{locale === 'pt-BR' ? 'Acesso administrativo' : 'Administrative access'}</strong>
+        <small>
+          {locale === 'pt-BR' ? `Função ativa: ${activeRole}` : `Active role: ${activeRole}`}
+        </small>
       </span>
       <a href={`${adminOrigin}/${locale}/admin`}>
-        {labels.adminAccess} <ProductIcon name="arrowRight" size={16} />
+        {locale === 'pt-BR' ? 'Abrir Admin' : 'Open Admin'}{' '}
+        <ProductIcon name="arrowRight" size={16} />
       </a>
     </aside>
   );

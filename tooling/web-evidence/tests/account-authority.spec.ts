@@ -230,13 +230,13 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] projects account
   await page.goto('/en/account/profile');
   await expectAccountShell(page);
 
-  await expect(page.getByRole('region', { name: 'Account authority status' })).toContainText(
-    'Connected',
-  );
+  await expect(page.getByLabel('Account authority status')).toContainText('Live account');
   await page.getByRole('button', { name: 'Edit profile' }).click();
   await page.getByRole('textbox', { name: 'Display name' }).fill('Liiiraa Authority');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  await expect(page.getByRole('status', { name: 'Profile update receipt' })).toContainText('Saved');
+  await expect(page.getByRole('status', { name: 'Profile update receipt' })).toContainText(
+    'Changes saved',
+  );
 
   expect(authority.requests).toHaveLength(1);
   expect(authority.requests[0]?.headers['if-match']).toBe('"account-account-01-v7"');
@@ -247,6 +247,27 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] projects account
     command: { action: 'update-profile', expectedVersion: '7' },
     patch: { displayName: 'Liiiraa Authority', locale: 'en' },
   });
+});
+
+test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] presents the real overview and restricted download as authored account experiences`, async ({
+  page,
+}, testInfo) => {
+  onlyCanonicalAuthorityAxis(testInfo);
+  await installAccountAuthority(page);
+
+  await page.goto('/en/account');
+  await expectAccountShell(page);
+  await expect(page.getByText('Welcome back')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Account health' })).toContainText('Astra-PC');
+  await expect(page.getByText('Recommended next step')).toBeVisible();
+
+  await page.goto('/en/account/downloads');
+  await expectAccountShell(page);
+  await expect(page.getByRole('heading', { name: 'Liiiraa Boost for Windows' })).toBeVisible();
+  const restrictedDownload = page.locator('[data-internal-download="restricted"] a');
+  await expect(restrictedDownload).toHaveAttribute('href', '/api/internal-download');
+  await expect(page.getByText('Authenticated delivery')).toBeVisible();
+  await expect(page.getByText('Test build without public signing')).toBeVisible();
 });
 
 test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] preserves the active PC when replacement is inside the cooldown`, async ({
@@ -274,7 +295,7 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] exposes security
       cancelAtPeriodEnd: true,
       invoiceState: 'void',
       provenance: 'pending',
-      subscriptionState: 'trialing',
+      subscriptionState: 'active',
     }),
   });
 
@@ -284,20 +305,26 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] exposes security
     const security = page.getByRole('region', {
       name: locale === 'en' ? 'Security authority' : 'Autoridade de segurança',
     });
-    await expect(security).toContainText('Passkey: active');
-    await expect(security).toContainText('MFA: active');
+    await expect(security).toContainText(locale === 'en' ? 'Passkey' : 'Chave de acesso');
     await expect(security).toContainText(
-      locale === 'en' ? 'Recovery methods' : 'Métodos de recuperação',
+      locale === 'en' ? 'Two-factor authentication' : 'Autenticação em duas etapas',
     );
+    await expect(security).toContainText(
+      locale === 'en' ? 'Recovery codes' : 'Códigos de recuperação',
+    );
+    await expect(security).toContainText(locale === 'en' ? 'Configured' : 'Configurado');
 
     await page.goto(`/${locale}/account/subscription`);
     await expect(
-      page
-        .getByRole('region', {
-          name: locale === 'en' ? 'Subscription authority' : 'Autoridade da assinatura',
-        })
-        .getByRole('status'),
-    ).toContainText(locale === 'en' ? 'Pending reconciliation' : 'Reconciliação pendente');
+      page.getByRole('region', {
+        name: locale === 'en' ? 'Subscription authority' : 'Autoridade da assinatura',
+      }),
+    ).toContainText(locale === 'en' ? 'Premium active' : 'Premium ativo');
+    await expect(
+      page.getByLabel(
+        locale === 'en' ? 'Account authority status' : 'Status da autoridade da conta',
+      ),
+    ).toContainText(locale === 'en' ? 'Synchronizing' : 'Sincronizando');
     await expect(page.getByRole('main')).toContainText(
       locale === 'en' ? 'Cancellation scheduled' : 'Cancelamento agendado',
     );
@@ -307,7 +334,7 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] exposes security
       page.getByRole('region', {
         name: locale === 'en' ? 'Authoritative invoices' : 'Faturas autoritativas',
       }),
-    ).toContainText('invoice-01: void');
+    ).toContainText(locale === 'en' ? 'invoice-01Voided' : 'invoice-01Cancelada');
 
     await page.goto(`/${locale}/account/support`);
     await expect(
@@ -346,8 +373,8 @@ test(`@final @account @authority-smoke [owner:${OWNER_TASK_ID}] preserves remote
     await installAccountAuthority(page, { projection: accountProjection({ provenance: state }) });
     await page.goto('/en/account');
     await expect(page.locator('[data-account-state]')).toHaveAttribute('data-account-state', state);
-    await expect(page.getByRole('region', { name: 'Account authority status' })).toContainText(
-      state === 'stale' ? 'Stale' : 'Offline',
+    await expect(page.getByLabel('Account authority status')).toContainText(
+      state === 'stale' ? 'Update required' : 'Offline',
     );
     await page.unroute('**/v1/account');
   }

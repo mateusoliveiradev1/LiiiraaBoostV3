@@ -80,7 +80,7 @@ describe('account shell', () => {
     const styles = readFileSync(new URL('./app/account-shell.css', import.meta.url), 'utf8');
 
     expect(styles).toMatch(
-      /\.account-app-shell\s*\{[\s\S]*grid-template-columns:\s*248px minmax\(0, 1fr\) 320px[\s\S]*grid-template-rows:\s*64px/u,
+      /\.account-app-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\) 296px[\s\S]*grid-template-rows:\s*64px/u,
     );
     expect(styles).toMatch(
       /\.account-sidebar\s*\{[\s\S]*grid-column:\s*1[\s\S]*min-block-size:\s*100dvh/u,
@@ -480,7 +480,9 @@ describe('account shell', () => {
     expect(styles).toContain('overflow-x: clip');
     expect(styles).toMatch(/@media \(width < 960px\)[\s\S]*account-nav__mobile/u);
     expect(styles).not.toContain('grid-auto-flow: column');
-    expect(styles).not.toContain('overflow-x: auto');
+    expect(styles).toMatch(/html\s*\{[^}]*overflow-x:\s*clip/u);
+    expect(styles).toMatch(/body\s*\{[^}]*overflow-x:\s*clip/u);
+    expect(styles).toMatch(/\.account-live-table\s*\{[\s\S]*overflow-x:\s*auto/u);
     expect(styles).toContain('@media (forced-colors: active)');
     expect(styles).toContain('min-block-size: 44px');
     expect(styles).toContain("a[aria-current='page']");

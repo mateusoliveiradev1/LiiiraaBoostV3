@@ -16,6 +16,26 @@ import type { LiveAccountAuthority } from '../live-account-authority';
 
 type CheckoutReturnState = 'cancelled' | 'none' | 'success';
 type CommercePhase = 'checkout' | 'error' | 'idle' | 'portal';
+type SubscriptionState = AccountAuthorityProjection['subscription']['state'];
+
+const subscriptionStateLabels = {
+  en: {
+    active: 'active',
+    canceled: 'canceled',
+    expired: 'expired',
+    none: 'no subscription',
+    'past-due': 'payment overdue',
+    trialing: 'trial period',
+  },
+  'pt-BR': {
+    active: 'ativa',
+    canceled: 'cancelada',
+    expired: 'expirada',
+    none: 'sem assinatura',
+    'past-due': 'pagamento pendente',
+    trialing: 'período de teste',
+  },
+} satisfies Record<WebLocale, Record<SubscriptionState, string>>;
 
 const copy = Object.freeze({
   en: Object.freeze({
@@ -186,7 +206,11 @@ export const AccountSubscriptionAuthority = ({
   };
 
   return (
-    <section className="account-commerce" data-account-commerce="stripe-live">
+    <section
+      aria-label={locale === 'pt-BR' ? 'Autoridade da assinatura' : 'Subscription authority'}
+      className="account-commerce"
+      data-account-commerce="stripe-live"
+    >
       {checkoutReturn !== 'none' ? (
         <section
           className="account-commerce__return"
@@ -229,7 +253,9 @@ export const AccountSubscriptionAuthority = ({
         </div>
         <span className="account-commerce__status" data-premium={premium || undefined}>
           <ProductIcon name={premium ? 'crown' : 'check'} size={18} />
-          {billingKind === 'permanent' ? labels.permanentStatus : subscription.state}
+          {billingKind === 'permanent'
+            ? labels.permanentStatus
+            : subscriptionStateLabels[locale][subscription.state]}
         </span>
       </div>
 
