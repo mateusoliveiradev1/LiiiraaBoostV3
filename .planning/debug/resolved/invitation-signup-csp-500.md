@@ -1,8 +1,8 @@
 ---
-status: investigating
+status: resolved
 trigger: 'Invited registration accepted an edited email, returned repeated 401 responses and one 500 response, while the browser reported an inline-style CSP violation. The invitation token was exposed in the report and must be replaced.'
 created: 2026-08-09T00:00:00-03:00
-updated: 2026-08-09T05:07:30-03:00
+updated: 2026-08-09T06:45:00-03:00
 ---
 
 ## Symptoms
@@ -17,7 +17,7 @@ updated: 2026-08-09T05:07:30-03:00
 - hypothesis: Confirmed. The existing owner identity caused PostgreSQL's unique identity constraint to escape as 500, while the edited plus-address correctly failed the email-bound invitation check. React Aria's visually hidden checkbox wrapper emitted the exact inline style blocked by CSP.
 - test: Focused account, API, identity-adapter, invitation-recovery, and design-system regressions plus ESLint, affected TypeScript checks, and a browser hash match for the blocked style.
 - expecting: Duplicate signup is rejected without consuming the invitation, authority exceptions are a controlled 503, the replacement link locks the exact plus-address recipient, repeated submission is guarded, and the checkbox emits no inline style.
-- next_action: Commit and publish the reviewed fix, revoke only the exposed invitation by token and recipient digests, decrypt the one-link replacement locally, and verify exact staging in the browser.
+- next_action: None. The replacement invitation created the account and the owner confirmed successful login.
 
 ## Evidence
 
@@ -51,11 +51,26 @@ updated: 2026-08-09T05:07:30-03:00
   found: The exact exposed token/recipient match succeeded, but a separate active invitation already exists for the plus-address replacement, so the created-count gate rejected and rolled the transaction back.
   implication: Supersede at most one active replacement-recipient invitation inside the same transaction before issuing the owner-visible replacement; abort if more than one exists.
 
+- timestamp: 2026-08-09T05:25:00-03:00
+  checked: Protected recovery run 31302923313 and local decrypted output.
+  found: The exact exposed invitation and at most one stale owner-test invitation were superseded; exactly one replacement passed origin, recipient-digest, fragment, and token-shape validation. The remote encrypted artifact was deleted after local validation.
+  implication: The compromised bearer is no longer usable and the only owner-test replacement remains local and protected.
+
+- timestamp: 2026-08-09T05:25:00-03:00
+  checked: API promotion run 31303054707, surface promotion run 31303291728, direct deployment endpoints, and browser DOM/console on the replacement URL.
+  found: API, Public, Account, and Admin all report exact revision 943445ecf2d635e0bc9eea3c7e4de934dc7c2e15; fail-closed probes passed; the invited email is read-only, the checkbox is a native class-styled input, and the browser console is empty.
+  implication: Automated and visual regression checks pass in exact staging; only the owner's real submission and persistence observation remain.
+
+- timestamp: 2026-08-09T06:45:00-03:00
+  checked: Owner execution of the replacement invitation and subsequent desktop authentication.
+  found: Account creation and login completed successfully without the prior CSP, 401-loop, or 500 behavior.
+  implication: The invited-signup defect is resolved in real authority.
+
 ## Resolution
 
 - root_cause: Existing owner identity was invited for signup, duplicate persistence escaped as HTTP 500, the UI allowed a different plus-address that the authority correctly rejected, and the React Aria checkbox emitted a CSP-blocked inline visually-hidden style.
 - fix: Reject duplicate signup before redemption, catch unexpected signup authority failures as 503, distinguish invitation rejection in the client, lock recipient-bearing replacement links, guard concurrent submission, replace the checkbox with a class-styled native semantic input, and add digest-bound one-invitation recovery.
-- verification: Local focused tests, TypeScript checks, ESLint, formatting, staging promotion, protected replacement recovery, and browser UAT; staging work remains pending.
+- verification: Local focused tests, TypeScript checks, ESLint, formatting, exact staging promotion, protected replacement recovery, browser UAT, and owner-confirmed account creation/login pass.
 - files_changed:
   - apps/account/src/account-auth.ts
   - apps/account/src/features/account-auth.tsx

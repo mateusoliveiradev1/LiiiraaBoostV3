@@ -1,8 +1,8 @@
 ---
-status: fixing
+status: resolved
 trigger: 'criou logou e tals mais cade dar para podeer trocar de plano e tals'
 created: 2026-08-09T06:00:00-03:00
-updated: 2026-08-09T06:38:00-03:00
+updated: 2026-08-09T06:45:00-03:00
 ---
 
 ## Symptoms
@@ -17,7 +17,7 @@ updated: 2026-08-09T06:38:00-03:00
 - hypothesis: Confirmed. The simulated desktop plan view retained illustrative plan controls, while the production authoritative branch was intentionally reduced to a read-only projection and never received a secure handoff to the real Account/Stripe subscription route.
 - test: Focused TypeScript and Rust unit tests, desktop TypeScript/ESLint/format gates, internal Vite build, Playwright authority/viewport checks, and a staging Tauri bundle.
 - expecting: Free users see a clear action to view plans and subscribe; Stripe subscribers see a manage-subscription action; the desktop opens only the configured HTTPS Account subscription route in the system browser.
-- next_action: Commit and publish the reviewed fix, install the exact rebuilt package, and confirm the Free CTA opens the live Account plan selector.
+- next_action: None. The owner confirmed the installed Free-to-plan-management flow is correct.
 
 ## Evidence
 
@@ -41,11 +41,16 @@ updated: 2026-08-09T06:38:00-03:00
   found: All checks pass and the revised Plan composition remains within the supported viewport. One staging x64 installer was produced.
   implication: The change is ready for exact-package human verification.
 
+- timestamp: 2026-08-09T06:45:00-03:00
+  checked: Owner verification on the installed package built from commit f1ae8b1.
+  found: The owner reported that the plan-management flow is now correct.
+  implication: The missing production action is resolved end to end.
+
 ## Resolution
 
 - root_cause: The production authoritative desktop Plan branch rendered subscription truth but omitted the secure browser handoff already used by the real Account Stripe surface.
 - fix: Add a locale-bound native command that constructs the canonical Account subscription URL from trusted runtime configuration, expose it through the account authority, and render a responsive Free/Premium plan-management callout with failure feedback.
-- verification: Automated TypeScript, Rust, Playwright, build, and packaging checks pass; exact installed-package confirmation remains pending.
+- verification: Automated TypeScript, Rust, Playwright, build, and packaging checks pass; the owner confirmed the exact installed flow.
 - files_changed:
   - apps/desktop/src/account-authority.ts
   - apps/desktop/src/account-authority.test.ts

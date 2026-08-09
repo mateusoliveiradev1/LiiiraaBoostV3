@@ -2,8 +2,8 @@
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
-tested_commit: c8c54bc4b8dac5a0d82b807757997d4a8701951a
-updated: 2026-08-09T07:32:01.153Z
+tested_commit: 943445ecf2d635e0bc9eea3c7e4de934dc7c2e15
+updated: 2026-08-09T09:45:00.000Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -24,22 +24,22 @@ password, database credential, or session credential is recorded here.
 
 | Identity                         | Exact value                                                               | Result |
 | -------------------------------- | ------------------------------------------------------------------------- | ------ |
-| Source commit / API build ID     | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
-| API OCI digest                   | `sha256:8b97fe08673ada34711f6fcee73476ff62ff06adf06e85bd22ba606e50b83679` | PASS   |
-| GitHub API promotion run         | `31300897888`                                                             | PASS   |
-| Render deploy                    | `dep-d9s2lvv10e5c7393rdkg`                                                | PASS   |
+| Source commit / API build ID     | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
+| API OCI digest                   | `sha256:9b38eef67ccf7e2b3fe4402653a98e6b568d854f24950ffb94cdd00974d033e5` | PASS   |
+| GitHub API promotion run         | `31303054707`                                                             | PASS   |
+| Render deploy                    | `dep-d9s3fgajnfac738o9ea0`                                                | PASS   |
 | API origin                       | `https://liiiraa-api-staging.onrender.com`                                | PASS   |
-| Public Vercel revision endpoint  | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
-| Account Vercel revision endpoint | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
-| Admin Vercel revision endpoint   | `c8c54bc4b8dac5a0d82b807757997d4a8701951a`                                | PASS   |
-| Surface verification run         | `31301081145`                                                             | PASS   |
+| Public Vercel revision endpoint  | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
+| Account Vercel revision endpoint | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
+| Admin Vercel revision endpoint   | `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`                                | PASS   |
+| Surface verification run         | `31303291728`                                                             | PASS   |
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
 | Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
 | Desktop installer                | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
 | Desktop installer SHA-256        | `3d1c31a14dff1987b296f043f5f7dc96625199a9b6a5919232f2a900341deb89`        | PASS   |
 
 The canonical Public, Account, Admin, and API endpoints each reported revision/build ID
-`c8c54bc4b8dac5a0d82b807757997d4a8701951a` after promotion.
+`943445ecf2d635e0bc9eea3c7e4de934dc7c2e15` after promotion.
 
 ## Automated receipts
 
@@ -123,6 +123,22 @@ Successful recovery receipt:
   zero retained artifacts.
 - Raw emails and tokens remain absent from Git, CI logs, this UAT record, and chat.
 
+Owner signup recovery supplement:
+
+- The invitation exposed during the failed signup report was selected by both token and owner
+  recipient digests and expired without logging either protected value.
+- GitHub run `31302923313`, exact revision
+  `943445ecf2d635e0bc9eea3c7e4de934dc7c2e15`, superseded at most one stale owner-test invitation
+  and issued exactly one replacement inside the protected transaction.
+- Local validation proved one canonical Account staging URL, the expected recipient digest, a
+  matching recipient hash fragment, and a valid token shape without printing protected values.
+- Remote encrypted artifact `9035042500` was deleted after local validation; GitHub reports zero
+  retained artifacts for the run.
+- Browser verification on the exact deployed revision proved a read-only invited email, a native
+  checkbox, and no CSP or console errors.
+- Owner verification completed account creation and desktop login without the prior CSP,
+  invitation-rejection loop, or server error.
+
 ## Human real-authority observations
 
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
@@ -130,6 +146,8 @@ revision mismatch, or result that does not survive reload is a critical failure.
 
 | Observation                                                                                            | Evidence                    | Result  |
 | ------------------------------------------------------------------------------------------------------ | --------------------------- | ------- |
+| Owner-test replacement creates an account and authenticates the packaged desktop                      | owner-confirmed             | PASS    |
+| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`   | PASS    |
 | Three invitation URLs create three persistent tester accounts                                          | _pending protected reissue_ | PENDING |
 | Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                   | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                   | PENDING |
