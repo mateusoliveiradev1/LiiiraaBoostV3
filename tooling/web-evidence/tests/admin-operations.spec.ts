@@ -438,7 +438,7 @@ test.describe('real production Admin authority', () => {
     expect(responses.some(({ status }) => status >= 500)).toBe(false);
     const unexpectedConsoleErrors = consoleErrors.filter(
       (message) =>
-        !/^Failed to load resource: the server responded with a status of 4\d\d \(.+\)$/u.test(
+        !/^Failed to load resource: the server responded with a status of 4\d\d \([^)]*\)$/u.test(
           message,
         ),
     );
