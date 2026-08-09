@@ -9,7 +9,9 @@ import {
 } from '@liiiraa/control-plane-adapters';
 
 const OWNER_TASK_ID = '04-61-01';
-const ADMIN_ORIGIN = 'https://admin.staging.localhost:3444';
+const ADMIN_ORIGIN = new URL(
+  process.env['ADMIN_STAGING_ORIGIN'] ?? 'https://admin.staging.localhost:3444',
+).origin;
 const PASSWORD = 'Liiiraa!Admin6101';
 
 const base32Decode = (value: string): Buffer => {
