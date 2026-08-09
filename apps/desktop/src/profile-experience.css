@@ -1857,6 +1857,161 @@
   background: var(--deck-warning);
 }
 
+.desktop-authority-device-workcard {
+  display: grid;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid color-mix(in srgb, var(--deck-ice) 24%, var(--deck-line));
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--deck-ice) 7%, transparent), transparent 42%),
+    var(--deck-panel);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--deck-ice) 70%, transparent);
+}
+
+.desktop-authority-device-workcard__copy,
+.desktop-authority-device-preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.desktop-authority-device-workcard__copy h2,
+.desktop-authority-device-preview h2 {
+  margin: 0;
+  color: var(--deck-ink);
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.desktop-authority-device-workcard__copy p,
+.desktop-authority-device-preview p {
+  max-inline-size: 74ch;
+  margin: 5px 0 0;
+  color: var(--deck-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.desktop-authority-device-workcard__copy > .lb-button {
+  min-block-size: 44px;
+}
+
+.desktop-authority-device-privacy,
+.desktop-authority-device-notice,
+.desktop-authority-device-live {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--deck-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.desktop-authority-device-privacy {
+  padding: 12px 14px;
+  border: 1px solid var(--deck-line);
+  border-radius: 9px;
+  background: var(--deck-inset);
+}
+
+.desktop-authority-device-privacy svg {
+  flex: 0 0 auto;
+  color: var(--deck-ice);
+}
+
+.desktop-authority-device-confirmations {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.desktop-authority-device-confirmations legend {
+  margin-block-end: 8px;
+  color: var(--deck-copy);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.desktop-authority-device-confirmations label {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-block-size: 52px;
+  padding: 12px 14px;
+  border: 1px solid var(--deck-line);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--deck-inset);
+}
+
+.desktop-authority-device-confirmations label:focus-within {
+  outline: 2px solid var(--deck-ice);
+  outline-offset: 2px;
+}
+
+.desktop-authority-device-confirmations input {
+  inline-size: 20px;
+  block-size: 20px;
+  margin: 0;
+  accent-color: var(--deck-ice);
+}
+
+.desktop-authority-device-confirmations strong,
+.desktop-authority-device-confirmations small,
+.desktop-authority-device-notice strong,
+.desktop-authority-device-notice small {
+  display: block;
+}
+
+.desktop-authority-device-confirmations strong,
+.desktop-authority-device-notice strong {
+  color: var(--deck-copy);
+  font-size: 12px;
+}
+
+.desktop-authority-device-confirmations small,
+.desktop-authority-device-notice small {
+  margin-block-start: 3px;
+  color: var(--deck-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.desktop-authority-device-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.desktop-authority-device-actions .lb-button {
+  min-block-size: 44px;
+}
+
+.desktop-authority-device-notice {
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--deck-warning) 38%, var(--deck-line));
+  border-radius: 9px;
+  color: var(--deck-warning);
+  background: color-mix(in srgb, var(--deck-warning) 7%, var(--deck-inset));
+}
+
+.desktop-authority-device-notice svg {
+  flex: 0 0 auto;
+}
+
+.desktop-authority-device-live:empty {
+  display: none;
+}
+
 .desktop-authority-device-capabilities {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2036,6 +2191,21 @@
   .desktop-authority-plan-facts,
   .desktop-authority-device-capabilities {
     grid-template-columns: 1fr;
+  }
+
+  .desktop-authority-device-workcard__copy,
+  .desktop-authority-device-preview {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .desktop-authority-device-workcard__copy > .lb-button,
+  .desktop-authority-device-preview > .desktop-authority-device-badge {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .desktop-authority-device-actions {
+    display: grid;
   }
 
   .desktop-authority-profile-actions {

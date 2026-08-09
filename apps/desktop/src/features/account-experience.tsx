@@ -7,6 +7,8 @@ import {
   type DesktopAccountAuthority,
   type DesktopAccountAuthoritySnapshot,
   type DesktopAdminHandoffProjection,
+  type DesktopDeviceBindingResult,
+  type DesktopDevicePreparationResult,
 } from '../account-authority.js';
 import { createDesktopAuth, type DesktopAuth, type DesktopAuthPhase } from '../desktop-auth.js';
 import {
@@ -2147,6 +2149,11 @@ const AuthoritativeAccountContent = ({
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [adminOpenFailed, setAdminOpenFailed] = useState(false);
   const [subscriptionOpenFailed, setSubscriptionOpenFailed] = useState(false);
+  const [devicePreparation, setDevicePreparation] = useState<DesktopDevicePreparationResult>();
+  const [deviceBindingResult, setDeviceBindingResult] = useState<DesktopDeviceBindingResult>();
+  const [deviceActionPending, setDeviceActionPending] = useState(false);
+  const [confirmedFriendlyIdentity, setConfirmedFriendlyIdentity] = useState(false);
+  const [confirmedOnePcConsequences, setConfirmedOnePcConsequences] = useState(false);
   const projection = snapshot.projection;
   const account = projection?.account;
   const subscription = projection?.subscription;
@@ -2156,6 +2163,33 @@ const AuthoritativeAccountContent = ({
   const primarySession = activeSessions[0];
   const accountIsCurrent = snapshot.state === 'online';
   const adminHandoff = resolveDesktopAdminHandoff(snapshot);
+  const deviceBindingReason =
+    deviceBindingResult !== undefined && 'reason' in deviceBindingResult
+      ? deviceBindingResult.reason
+      : undefined;
+
+  const prepareCurrentDevice = async (): Promise<void> => {
+    setDeviceActionPending(true);
+    setDeviceBindingResult(undefined);
+    const result = await authority.prepareDeviceBinding();
+    setDevicePreparation(result);
+    setDeviceActionPending(false);
+  };
+
+  const bindCurrentDevice = async (): Promise<void> => {
+    setDeviceActionPending(true);
+    setDeviceBindingResult(undefined);
+    const result = await authority.bindCurrentDevice({
+      confirmedFriendlyIdentity,
+      confirmedOnePcConsequences,
+    });
+    setDeviceBindingResult(result);
+    if (result.status === 'committed') {
+      setConfirmedFriendlyIdentity(false);
+      setConfirmedOnePcConsequences(false);
+    }
+    setDeviceActionPending(false);
+  };
 
   return (
     <div
@@ -2472,10 +2506,15 @@ const AuthoritativeAccountContent = ({
               </span>
               <h2>
                 {projection?.activeDevice?.deviceLabel ??
-                  copy(locale, {
-                    en: 'This PC is not linked yet',
-                    'pt-BR': 'Este PC ainda não está vinculado',
-                  })}
+                  (isPremium
+                    ? copy(locale, {
+                        en: 'Link this PC securely',
+                        'pt-BR': 'Vincule este PC com segurança',
+                      })
+                    : copy(locale, {
+                        en: 'Device linking is available with Premium',
+                        'pt-BR': 'Vinculação disponível no Premium',
+                      }))}
               </h2>
               <p>
                 {projection?.activeDevice
@@ -2483,19 +2522,306 @@ const AuthoritativeAccountContent = ({
                       en: 'This device was confirmed by the account API.',
                       'pt-BR': 'Este dispositivo foi confirmado pela API da conta.',
                     })
-                  : copy(locale, {
-                      en: 'Device binding has not been enabled in this beta. Your account and Premium access remain active.',
-                      'pt-BR':
-                        'A vinculação de dispositivo ainda não foi liberada nesta beta. Sua conta e o acesso Premium continuam ativos.',
-                    })}
+                  : isPremium
+                    ? copy(locale, {
+                        en: 'Verify the friendly identity of this Windows PC before assigning your single active device slot.',
+                        'pt-BR':
+                          'Verifique a identidade amigável deste PC Windows antes de ocupar sua única vaga de dispositivo ativo.',
+                      })
+                    : copy(locale, {
+                        en: 'Your Free account remains active. Upgrade when you want to assign Premium actions to one verified PC.',
+                        'pt-BR':
+                          'Sua conta Free continua ativa. Assine quando quiser atribuir ações Premium a um PC verificado.',
+                      })}
               </p>
             </div>
             <span className="desktop-authority-device-badge">
               {projection?.activeDevice
                 ? copy(locale, { en: 'Linked', 'pt-BR': 'Vinculado' })
-                : copy(locale, { en: 'Awaiting beta', 'pt-BR': 'Aguardando beta' })}
+                : isPremium
+                  ? copy(locale, { en: 'Ready to verify', 'pt-BR': 'Pronto para verificar' })
+                  : copy(locale, {
+                      en: 'Available with Premium',
+                      'pt-BR': 'Disponível com Premium',
+                    })}
             </span>
           </section>
+
+          {projection?.activeDevice === null && !isPremium ? (
+            <section className="desktop-authority-device-workcard">
+              <div className="desktop-authority-device-workcard__copy">
+                <span className="desktop-authority-section__icon">
+                  <ProductIcon name="crown" size={19} />
+                </span>
+                <div>
+                  <h2>{copy(locale, { en: 'One protected PC', 'pt-BR': 'Um PC protegido' })}</h2>
+                  <p>
+                    {copy(locale, {
+                      en: 'Premium enables device-bound optimization actions while diagnostics, history and restoration remain available on Free.',
+                      'pt-BR':
+                        'O Premium libera ações de otimização vinculadas ao PC; diagnósticos, histórico e restauração continuam no Free.',
+                    })}
+                  </p>
+                </div>
+              </div>
+              <LbButton
+                onPress={() => {
+                  setSubscriptionOpenFailed(false);
+                  void authority.openSubscription(locale).then((result) => {
+                    if (result.status !== 'opened') setSubscriptionOpenFailed(true);
+                  });
+                }}
+                variant="primary"
+              >
+                <ProductIcon name="crown" size={16} />
+                {copy(locale, { en: 'View Premium plans', 'pt-BR': 'Ver planos Premium' })}
+              </LbButton>
+            </section>
+          ) : null}
+
+          {projection?.activeDevice === null && isPremium ? (
+            <section aria-busy={deviceActionPending} className="desktop-authority-device-workcard">
+              {devicePreparation?.status === 'ready' ? (
+                <>
+                  <header className="desktop-authority-device-preview">
+                    <span className="desktop-authority-section__icon">
+                      <ProductIcon name="monitor" size={20} />
+                    </span>
+                    <div>
+                      <span className="desktop-authority-kicker">
+                        {copy(locale, {
+                          en: 'LOCAL WINDOWS CHECK',
+                          'pt-BR': 'VERIFICAÇÃO LOCAL DO WINDOWS',
+                        })}
+                      </span>
+                      <h2>{devicePreparation.preview.deviceLabel}</h2>
+                      <p>
+                        {devicePreparation.preview.deviceClass === 'virtual'
+                          ? copy(locale, {
+                              en: 'Virtual Windows PC',
+                              'pt-BR': 'PC Windows virtual',
+                            })
+                          : copy(locale, {
+                              en: 'Physical Windows PC',
+                              'pt-BR': 'PC Windows físico',
+                            })}
+                        {' · '}
+                        {devicePreparation.preview.admittedComponents.length}{' '}
+                        {copy(locale, {
+                          en: 'protected evidence classes',
+                          'pt-BR': 'classes de evidência protegidas',
+                        })}
+                      </p>
+                    </div>
+                    <span className="desktop-authority-device-badge">
+                      {copy(locale, { en: 'Ready', 'pt-BR': 'Pronto' })}
+                    </span>
+                  </header>
+                  <p className="desktop-authority-device-privacy">
+                    <ProductIcon name="lock" size={16} />
+                    {copy(locale, {
+                      en: 'Hardware identifiers stay inside the native Windows boundary. The renderer receives only this safe summary.',
+                      'pt-BR':
+                        'Os identificadores de hardware permanecem no limite nativo do Windows. A interface recebe somente este resumo seguro.',
+                    })}
+                  </p>
+                  <fieldset className="desktop-authority-device-confirmations">
+                    <legend>
+                      {copy(locale, {
+                        en: 'Confirm before linking',
+                        'pt-BR': 'Confirme antes de vincular',
+                      })}
+                    </legend>
+                    <label>
+                      <input
+                        checked={confirmedFriendlyIdentity}
+                        onChange={(event) => {
+                          setConfirmedFriendlyIdentity(event.currentTarget.checked);
+                        }}
+                        type="checkbox"
+                      />
+                      <span>
+                        <strong>
+                          {copy(locale, {
+                            en: 'I confirm this is my PC',
+                            'pt-BR': 'Confirmo que este é o meu PC',
+                          })}
+                        </strong>
+                        <small>
+                          {copy(locale, {
+                            en: `I recognize ${devicePreparation.preview.deviceLabel}.`,
+                            'pt-BR': `Reconheço ${devicePreparation.preview.deviceLabel}.`,
+                          })}
+                        </small>
+                      </span>
+                    </label>
+                    <label>
+                      <input
+                        checked={confirmedOnePcConsequences}
+                        onChange={(event) => {
+                          setConfirmedOnePcConsequences(event.currentTarget.checked);
+                        }}
+                        type="checkbox"
+                      />
+                      <span>
+                        <strong>
+                          {copy(locale, {
+                            en: 'I understand the one-active-PC limit',
+                            'pt-BR': 'Entendo o limite de um PC ativo',
+                          })}
+                        </strong>
+                        <small>
+                          {copy(locale, {
+                            en: 'A different PC requires the protected replacement flow and may have a cooldown.',
+                            'pt-BR':
+                              'Outro PC exigirá o fluxo protegido de substituição e poderá ter um prazo de espera.',
+                          })}
+                        </small>
+                      </span>
+                    </label>
+                  </fieldset>
+                  <div className="desktop-authority-device-actions">
+                    <LbButton onPress={() => void prepareCurrentDevice()} variant="secondary">
+                      <ProductIcon name="recovery" size={16} />
+                      {copy(locale, { en: 'Check again', 'pt-BR': 'Verificar novamente' })}
+                    </LbButton>
+                    <LbButton
+                      isDisabled={
+                        !confirmedFriendlyIdentity ||
+                        !confirmedOnePcConsequences ||
+                        deviceActionPending
+                      }
+                      isLoading={deviceActionPending}
+                      loadingLabel={copy(locale, { en: 'Linking PC', 'pt-BR': 'Vinculando PC' })}
+                      onPress={() => void bindCurrentDevice()}
+                      variant="primary"
+                    >
+                      <ProductIcon name="lock" size={16} />
+                      {copy(locale, { en: 'Link this PC', 'pt-BR': 'Vincular este PC' })}
+                    </LbButton>
+                  </div>
+                </>
+              ) : (
+                <div className="desktop-authority-device-workcard__copy">
+                  <span className="desktop-authority-section__icon">
+                    <ProductIcon name="device" size={20} />
+                  </span>
+                  <div>
+                    <h2>
+                      {copy(locale, {
+                        en: 'Verify this Windows PC',
+                        'pt-BR': 'Verifique este PC Windows',
+                      })}
+                    </h2>
+                    <p>
+                      {copy(locale, {
+                        en: 'The native app will read a minimum hardware inventory, derive protected evidence locally and show only a safe preview here.',
+                        'pt-BR':
+                          'O app nativo lerá um inventário mínimo, derivará evidências protegidas localmente e mostrará apenas uma prévia segura aqui.',
+                      })}
+                    </p>
+                  </div>
+                  <LbButton
+                    isDisabled={deviceActionPending}
+                    isLoading={deviceActionPending}
+                    loadingLabel={copy(locale, { en: 'Checking PC', 'pt-BR': 'Verificando PC' })}
+                    onPress={() => void prepareCurrentDevice()}
+                    variant="primary"
+                  >
+                    <ProductIcon name="shield" size={16} />
+                    {copy(locale, { en: 'Verify this PC', 'pt-BR': 'Verificar este PC' })}
+                  </LbButton>
+                </div>
+              )}
+
+              {devicePreparation !== undefined &&
+              devicePreparation.status !== 'ready' &&
+              devicePreparation.status !== 'already-linked' ? (
+                <div className="desktop-authority-device-notice" role="alert">
+                  <ProductIcon name="warning" size={18} />
+                  <span>
+                    <strong>
+                      {devicePreparation.status === 'evidence-insufficient'
+                        ? copy(locale, {
+                            en: 'Not enough stable evidence',
+                            'pt-BR': 'Evidências estáveis insuficientes',
+                          })
+                        : devicePreparation.status === 'offline'
+                          ? copy(locale, { en: 'Account offline', 'pt-BR': 'Conta offline' })
+                          : copy(locale, {
+                              en: 'PC verification unavailable',
+                              'pt-BR': 'Verificação do PC indisponível',
+                            })}
+                    </strong>
+                    <small>
+                      {copy(locale, {
+                        en: 'No device was linked. Reconnect, restart the app and try again.',
+                        'pt-BR':
+                          'Nenhum dispositivo foi vinculado. Reconecte, reinicie o app e tente novamente.',
+                      })}
+                    </small>
+                  </span>
+                </div>
+              ) : null}
+
+              {deviceBindingResult !== undefined && deviceBindingResult.status !== 'committed' ? (
+                <div className="desktop-authority-device-notice" role="alert">
+                  <ProductIcon name="warning" size={18} />
+                  <span>
+                    <strong>
+                      {deviceBindingResult.status === 'revalidation-required'
+                        ? copy(locale, {
+                            en: 'Additional verification required',
+                            'pt-BR': 'Verificação adicional necessária',
+                          })
+                        : deviceBindingResult.status === 'conflict' ||
+                            deviceBindingReason === 'one-active-pc-conflict'
+                          ? copy(locale, {
+                              en: 'Another PC is already active',
+                              'pt-BR': 'Outro PC já está ativo',
+                            })
+                          : deviceBindingReason === 'replacement-cooldown-active'
+                            ? copy(locale, {
+                                en: 'Device replacement is in cooldown',
+                                'pt-BR': 'A substituição está em prazo de espera',
+                              })
+                            : deviceBindingResult.status === 'premium-required' ||
+                                deviceBindingReason === 'premium-not-active'
+                              ? copy(locale, {
+                                  en: 'Premium is required',
+                                  'pt-BR': 'É necessário ter Premium',
+                                })
+                              : copy(locale, {
+                                  en: 'The link was not confirmed',
+                                  'pt-BR': 'O vínculo não foi confirmado',
+                                })}
+                    </strong>
+                    <small>
+                      {copy(locale, {
+                        en: 'No local success was assumed. Refresh the account or use the protected account portal before trying again.',
+                        'pt-BR':
+                          'Nenhum sucesso local foi presumido. Atualize a conta ou use o portal protegido antes de tentar novamente.',
+                      })}
+                    </small>
+                  </span>
+                </div>
+              ) : null}
+              <p className="desktop-authority-device-live" aria-live="polite" role="status">
+                {deviceActionPending
+                  ? copy(locale, {
+                      en: 'Confirming the device with the account authority…',
+                      'pt-BR': 'Confirmando o dispositivo com a autoridade da conta…',
+                    })
+                  : deviceBindingResult?.status === 'committed'
+                    ? copy(locale, {
+                        en: 'Device linked and confirmed by the account API.',
+                        'pt-BR': 'Dispositivo vinculado e confirmado pela API da conta.',
+                      })
+                    : ''}
+              </p>
+            </section>
+          ) : null}
+
           <section className="desktop-authority-section desktop-authority-section--device-explainer">
             <header>
               <span className="desktop-authority-section__icon">
@@ -2510,9 +2836,9 @@ const AuthoritativeAccountContent = ({
                 </h2>
                 <p>
                   {copy(locale, {
-                    en: 'When released, binding will associate licenses and optimization history with one verified PC.',
+                    en: 'Binding associates licenses and optimization history with one verified PC.',
                     'pt-BR':
-                      'Quando liberada, a vinculação associará licenças e histórico de otimização a um PC verificado.',
+                      'A vinculação associa licenças e histórico de otimização a um PC verificado.',
                   })}
                 </p>
               </div>
@@ -2563,15 +2889,23 @@ const AuthoritativeAccountContent = ({
             <dl className="desktop-authority-plan-facts">
               <div>
                 <dt>Status</dt>
-                <dd>{projection.activeDevice.state}</dd>
+                <dd>
+                  {projection.activeDevice.state === 'active'
+                    ? copy(locale, { en: 'Active', 'pt-BR': 'Ativo' })
+                    : copy(locale, { en: 'Revalidating', 'pt-BR': 'Revalidando' })}
+                </dd>
               </div>
               <div>
                 <dt>{copy(locale, { en: 'Evidence version', 'pt-BR': 'Versão da evidência' })}</dt>
                 <dd>v{projection.activeDevice.evidenceVersion}</dd>
               </div>
               <div>
-                <dt>{copy(locale, { en: 'Binding', 'pt-BR': 'Vínculo' })}</dt>
-                <dd>{projection.activeDevice.deviceBindingId}</dd>
+                <dt>{copy(locale, { en: 'Replacement', 'pt-BR': 'Substituição' })}</dt>
+                <dd>
+                  {projection.activeDevice.replacementEligibleAt
+                    ? formatAuthorityDate(projection.activeDevice.replacementEligibleAt, locale)
+                    : copy(locale, { en: 'Protected', 'pt-BR': 'Protegida' })}
+                </dd>
               </div>
             </dl>
           ) : null}

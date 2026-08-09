@@ -59,7 +59,9 @@ describe('desktop account session restoration', () => {
     expect(source).toContain("'pt-BR': 'Disponível com Premium'");
     expect(source).toContain("'pt-BR': 'Confirmo que este é o meu PC'");
     expect(source).toContain("'pt-BR': 'Entendo o limite de um PC ativo'");
-    expect(source).toContain('isDisabled={!confirmedFriendlyIdentity || !confirmedOnePcConsequences');
+    expect(source).toMatch(
+      /isDisabled=\{\s*!confirmedFriendlyIdentity\s*\|\|\s*!confirmedOnePcConsequences/u,
+    );
     expect(source).not.toContain('Aguardando beta');
     expect(source).not.toContain('Awaiting beta');
     expect(source).not.toContain('não foi liberada nesta beta');

@@ -4,6 +4,7 @@ import {
   type AccountCommandJson,
   type AccountProjectionJson,
   type DeviceBindingProjectionJson,
+  type DeviceCommandJson,
   type InvoiceProjectionJson,
   type SessionProjectionJson,
   type ShellLocaleJson,
@@ -15,8 +16,10 @@ export const ACCOUNT_MUTATION_COMMITTED_EVENT = 'liiiraa:account-mutation-commit
 export const ACCOUNT_AUTHORITY_REVOKED_EVENT = 'liiiraa:account-authority-revoked' as const;
 export const ACCOUNT_IDENTITY_PROJECTED_EVENT = 'liiiraa:account-identity-projected' as const;
 export const ACCOUNT_SYNC_COMMAND = 'sync_account' as const;
+export const BIND_CURRENT_DEVICE_COMMAND = 'bind_current_device' as const;
 export const OPEN_ACCOUNT_SUBSCRIPTION_COMMAND = 'open_account_subscription' as const;
 export const OPEN_ADMIN_COMMAND = 'open_admin' as const;
+export const PREPARE_DEVICE_BINDING_COMMAND = 'prepare_device_binding' as const;
 export const ACCOUNT_AUTHORITY_REFRESH_MS = 5_000;
 
 export type AccountLifecycleTrigger = 'launch' | 'resume' | 'reconnection' | 'mutation';
@@ -90,6 +93,52 @@ export type DesktopSubscriptionOpenResult = Readonly<{
   status: 'opened' | 'offline' | 'revoked' | 'unavailable';
 }>;
 
+export type DeviceComponentClass =
+  'platform-trust' | 'virtual-platform' | 'cpu' | 'storage-controller' | 'gpu' | 'memory-topology';
+
+export interface DesktopDeviceBindingPreview {
+  readonly readiness: 'ready';
+  readonly deviceLabel: string;
+  readonly deviceClass: 'physical' | 'virtual';
+  readonly admittedComponents: readonly DeviceComponentClass[];
+}
+
+export type DesktopDevicePreparationResult =
+  | Readonly<{ status: 'ready'; preview: DesktopDeviceBindingPreview }>
+  | Readonly<{
+      status:
+        | 'already-linked'
+        | 'busy'
+        | 'evidence-insufficient'
+        | 'offline'
+        | 'premium-required'
+        | 'revoked'
+        | 'unavailable';
+    }>;
+
+export interface DesktopDeviceBindingConfirmation {
+  readonly confirmedFriendlyIdentity: boolean;
+  readonly confirmedOnePcConsequences: boolean;
+}
+
+export type DesktopDeviceBindingResult =
+  | Readonly<{ status: 'committed'; projection: DeviceBindingProjectionJson }>
+  | Readonly<{
+      status: 'conflict' | 'policy-denied' | 'revalidation-required';
+      reason?: string;
+      projection?: DeviceBindingProjectionJson;
+    }>
+  | Readonly<{
+      status:
+        | 'already-linked'
+        | 'busy'
+        | 'confirmation-required'
+        | 'failed'
+        | 'offline'
+        | 'premium-required'
+        | 'revoked';
+    }>;
+
 export interface AccountAuthorityTransport {
   readonly invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
 }
@@ -128,12 +177,92 @@ const OUTER_PROJECTION_KEYS = new Set([
   'subscription',
   'supportCases',
 ]);
+const DEVICE_COMPONENT_CLASSES = new Set<DeviceComponentClass>([
+  'platform-trust',
+  'virtual-platform',
+  'cpu',
+  'storage-controller',
+  'gpu',
+  'memory-topology',
+]);
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isGeneratedDocument = (value: unknown, kind: string): boolean =>
   isRecord(value) && value['kind'] === kind && controlPlaneDocumentValidator(value);
+
+const deviceBindingProjection = (value: unknown): DeviceBindingProjectionJson | undefined =>
+  isGeneratedDocument(value, 'device-binding-projection')
+    ? (value as DeviceBindingProjectionJson)
+    : undefined;
+
+const deviceBindingPreview = (value: unknown): DesktopDeviceBindingPreview | undefined => {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).some(
+      (key) =>
+        !['readiness', 'deviceLabel', 'deviceClass', 'admittedComponents', 'error'].includes(key),
+    ) ||
+    value['readiness'] !== 'ready' ||
+    typeof value['deviceLabel'] !== 'string' ||
+    value['deviceLabel'].length < 1 ||
+    value['deviceLabel'].length > 128 ||
+    (value['deviceClass'] !== 'physical' && value['deviceClass'] !== 'virtual') ||
+    !Array.isArray(value['admittedComponents']) ||
+    value['admittedComponents'].length < 3 ||
+    value['admittedComponents'].length > DEVICE_COMPONENT_CLASSES.size ||
+    !value['admittedComponents'].every((component) =>
+      DEVICE_COMPONENT_CLASSES.has(component as DeviceComponentClass),
+    ) ||
+    new Set(value['admittedComponents']).size !== value['admittedComponents'].length ||
+    value['error'] !== undefined
+  ) {
+    return undefined;
+  }
+  return Object.freeze({
+    readiness: 'ready',
+    deviceLabel: value['deviceLabel'],
+    deviceClass: value['deviceClass'],
+    admittedComponents: Object.freeze(
+      value['admittedComponents'] as readonly DeviceComponentClass[],
+    ),
+  });
+};
+
+type NativeDeviceBindingMutation = Readonly<{
+  status: 'applied' | 'revalidation-required' | 'policy-denied' | 'conflict';
+  projection?: DeviceBindingProjectionJson;
+  reason?: string;
+}>;
+
+const nativeDeviceBindingMutation = (value: unknown): NativeDeviceBindingMutation | undefined => {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).some((key) => !['status', 'projection', 'reason'].includes(key)) ||
+    !['applied', 'revalidation-required', 'policy-denied', 'conflict'].includes(
+      String(value['status']),
+    ) ||
+    (value['reason'] !== undefined &&
+      (typeof value['reason'] !== 'string' || !/^[a-z0-9-]{1,128}$/u.test(value['reason'])))
+  ) {
+    return undefined;
+  }
+  const projection =
+    value['projection'] === undefined ? undefined : deviceBindingProjection(value['projection']);
+  if (value['projection'] !== undefined && projection === undefined) return undefined;
+  if (
+    (value['status'] === 'applied' || value['status'] === 'revalidation-required') &&
+    projection === undefined
+  ) {
+    return undefined;
+  }
+  return Object.freeze({
+    status: value['status'] as NativeDeviceBindingMutation['status'],
+    ...(projection === undefined ? {} : { projection }),
+    ...(value['reason'] === undefined ? {} : { reason: value['reason'] }),
+  });
+};
 
 const hasFixtureProvenance = (value: unknown, seen = new WeakSet<object>()): boolean => {
   if (typeof value !== 'object' || value === null) return false;
@@ -592,6 +721,116 @@ export class DesktopAccountAuthority {
       return Object.freeze({ status: 'opened' });
     } catch {
       return Object.freeze({ status: 'unavailable' });
+    }
+  }
+
+  public async prepareDeviceBinding(): Promise<DesktopDevicePreparationResult> {
+    if (this.#snapshot.state === 'revoked') return Object.freeze({ status: 'revoked' });
+    const projection = this.#snapshot.projection;
+    if (this.#snapshot.state !== 'online' || projection === undefined) {
+      return Object.freeze({ status: 'offline' });
+    }
+    if (projection.subscription.plan !== 'premium' || projection.subscription.state !== 'active') {
+      return Object.freeze({ status: 'premium-required' });
+    }
+    if (projection.activeDevice !== null) return Object.freeze({ status: 'already-linked' });
+    if (this.#mutationInFlight) return Object.freeze({ status: 'busy' });
+    try {
+      const raw = await this.#transport.invoke(PREPARE_DEVICE_BINDING_COMMAND);
+      const preview = deviceBindingPreview(raw);
+      if (preview !== undefined) return Object.freeze({ status: 'ready', preview });
+      if (
+        isRecord(raw) &&
+        raw['readiness'] === 'unavailable' &&
+        raw['error'] === 'evidence-insufficient'
+      ) {
+        return Object.freeze({ status: 'evidence-insufficient' });
+      }
+      return Object.freeze({ status: 'unavailable' });
+    } catch {
+      return Object.freeze({ status: 'unavailable' });
+    }
+  }
+
+  public async bindCurrentDevice(
+    confirmation: DesktopDeviceBindingConfirmation,
+  ): Promise<DesktopDeviceBindingResult> {
+    if (this.#snapshot.state === 'revoked') return Object.freeze({ status: 'revoked' });
+    const projection = this.#snapshot.projection;
+    if (this.#snapshot.state !== 'online' || projection === undefined) {
+      return Object.freeze({ status: 'offline' });
+    }
+    if (projection.subscription.plan !== 'premium' || projection.subscription.state !== 'active') {
+      return Object.freeze({ status: 'premium-required' });
+    }
+    if (projection.activeDevice !== null) return Object.freeze({ status: 'already-linked' });
+    if (!confirmation.confirmedFriendlyIdentity || !confirmation.confirmedOnePcConsequences) {
+      return Object.freeze({ status: 'confirmation-required' });
+    }
+    if (this.#mutationInFlight) return Object.freeze({ status: 'busy' });
+
+    const deviceBindingId = globalThis.crypto.randomUUID();
+    const command: DeviceCommandJson = {
+      schemaVersion: '1.0',
+      kind: 'device-command',
+      commandId: globalThis.crypto.randomUUID(),
+      accountId: projection.account.accountId,
+      deviceBindingId,
+      action: 'bind',
+      expectedVersion: projection.subscription.aggregateVersion,
+      correlationId: globalThis.crypto.randomUUID(),
+      requestedAt: new Date().toISOString(),
+    };
+    const sequence = ++this.#sequence;
+    this.#mutationInFlight = true;
+    this.#publish(pendingSnapshot(this.#snapshot));
+    try {
+      const raw = await this.#transport.invoke(BIND_CURRENT_DEVICE_COMMAND, {
+        request: { command, ...confirmation },
+      });
+      if (sequence !== this.#sequence) return Object.freeze({ status: 'failed' });
+      const mutation = nativeDeviceBindingMutation(raw);
+      if (mutation === undefined) {
+        this.#publish(Object.freeze({ state: 'stale', projection, error: 'invalid-response' }));
+        return Object.freeze({ status: 'failed' });
+      }
+      if (mutation.status !== 'applied') {
+        this.#publish(Object.freeze({ state: 'online', projection }));
+        return Object.freeze({
+          status: mutation.status,
+          ...(mutation.projection === undefined ? {} : { projection: mutation.projection }),
+          ...(mutation.reason === undefined ? {} : { reason: mutation.reason }),
+        });
+      }
+
+      const synchronizedRaw = await this.#transport.invoke(ACCOUNT_SYNC_COMMAND, {
+        request: { trigger: 'mutation' },
+      });
+      if (sequence !== this.#sequence) return Object.freeze({ status: 'failed' });
+      const synchronized = authoritySnapshot(synchronizedRaw);
+      const confirmedDevice = synchronized?.projection?.activeDevice;
+      if (
+        synchronized?.state !== 'online' ||
+        confirmedDevice === null ||
+        confirmedDevice === undefined ||
+        confirmedDevice.deviceBindingId !== mutation.projection?.deviceBindingId ||
+        confirmedDevice.accountId !== projection.account.accountId ||
+        confirmedDevice.state !== 'active'
+      ) {
+        this.#publish(Object.freeze({ state: 'stale', projection, error: 'invalid-response' }));
+        return Object.freeze({ status: 'failed' });
+      }
+      this.#publish(synchronized);
+      return Object.freeze({ status: 'committed', projection: confirmedDevice });
+    } catch {
+      if (sequence === this.#sequence) {
+        this.#publish(Object.freeze({ state: 'stale', projection, error: 'network-unavailable' }));
+      }
+      return Object.freeze({ status: 'failed' });
+    } finally {
+      this.#mutationInFlight = false;
+      const queuedTrigger = this.#queuedSynchronizations.shift();
+      if (queuedTrigger !== undefined) void this.synchronize(queuedTrigger);
     }
   }
 
