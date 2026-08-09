@@ -200,7 +200,7 @@ test.describe('real production Admin authority', () => {
     await database.close();
   });
 
-  test(`@production-authority [owner:${OWNER_TASK_ID}] signs up, enrolls real TOTP, persists authority, and proves the complete Admin matrix`, async ({
+  test(`@production-authority @published-authority [owner:${OWNER_TASK_ID}] signs up, enrolls real TOTP, persists authority, and proves the complete Admin matrix`, async ({
     page,
   }, testInfo) => {
     test.setTimeout(5 * 60_000);

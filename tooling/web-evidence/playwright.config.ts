@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { defineConfig, devices, type Project } from '@playwright/test';
 
 const FROZEN_CLOCK = '2026-01-15T12:00:00.000Z';
+const PUBLISHED_AUTHORITY_RUN_MARKER = 'LIIIRAA_PLAYWRIGHT_PUBLISHED_AUTHORITY_RUN';
 const PRODUCTION_AUTHORITY_RUN_MARKER = 'LIIIRAA_PLAYWRIGHT_PRODUCTION_AUTHORITY_RUN';
 const STAGING_ORIGIN_RUN_MARKER = 'LIIIRAA_PLAYWRIGHT_STAGING_ORIGIN_RUN';
 
@@ -146,6 +147,13 @@ const finalProjectGrep = (surface: (typeof surfaces)[number]['surface'], axis: s
 const isStagingOriginRun = (arguments_: readonly string[]): boolean =>
   arguments_.some((argument) => argument.includes('@staging-origin-'));
 
+const isPublishedAuthorityRun = (arguments_: readonly string[]): boolean =>
+  arguments_.some(
+    (argument) =>
+      argument.includes('@published-authority') ||
+      argument.includes('--project=published-authority'),
+  );
+
 const isProductionAuthorityRun = (arguments_: readonly string[]): boolean =>
   arguments_.some(
     (argument) =>
@@ -158,21 +166,50 @@ const resolveConditionalProjectRuns = (
   arguments_: readonly string[],
   environment: NodeJS.ProcessEnv = process.env,
 ) => {
+  const publishedAuthorityRun =
+    isPublishedAuthorityRun(arguments_) || environment[PUBLISHED_AUTHORITY_RUN_MARKER] === '1';
   const productionAuthorityRun =
-    isProductionAuthorityRun(arguments_) || environment[PRODUCTION_AUTHORITY_RUN_MARKER] === '1';
+    !publishedAuthorityRun &&
+    (isProductionAuthorityRun(arguments_) || environment[PRODUCTION_AUTHORITY_RUN_MARKER] === '1');
   const stagingOriginRun =
     isStagingOriginRun(arguments_) || environment[STAGING_ORIGIN_RUN_MARKER] === '1';
 
+  if (publishedAuthorityRun) environment[PUBLISHED_AUTHORITY_RUN_MARKER] = '1';
   if (productionAuthorityRun) environment[PRODUCTION_AUTHORITY_RUN_MARKER] = '1';
   if (stagingOriginRun) environment[STAGING_ORIGIN_RUN_MARKER] = '1';
 
-  return { productionAuthorityRun, stagingOriginRun } as const;
+  return { productionAuthorityRun, publishedAuthorityRun, stagingOriginRun } as const;
+};
+
+export const resolvePublishedAdminOrigin = (environment: NodeJS.ProcessEnv): string => {
+  const value = environment['ADMIN_STAGING_ORIGIN'];
+  try {
+    const origin = new URL(value ?? '');
+    if (
+      origin.protocol !== 'https:' ||
+      origin.username ||
+      origin.password ||
+      origin.pathname !== '/' ||
+      origin.search ||
+      origin.hash
+    ) {
+      throw new Error('invalid');
+    }
+    return origin.origin;
+  } catch {
+    throw new Error('PUBLISHED_AUTHORITY_REQUIRES_CANONICAL_HTTPS_ADMIN_STAGING_ORIGIN');
+  }
 };
 
 export const selectWebTestSurfaces = (
   arguments_: readonly string[],
 ): readonly (typeof surfaces)[number][] => {
-  if (isStagingOriginRun(arguments_) || isProductionAuthorityRun(arguments_)) return [];
+  if (
+    isStagingOriginRun(arguments_) ||
+    isPublishedAuthorityRun(arguments_) ||
+    isProductionAuthorityRun(arguments_)
+  )
+    return [];
   const selector = arguments_
     .filter(
       (argument) => /\.(?:spec|pw)\.ts(?:$|:)/u.test(argument) || argument.startsWith('--project='),
@@ -199,11 +236,12 @@ export const selectWebTestSurfaces = (
   );
 };
 
-const { productionAuthorityRun, stagingOriginRun } = resolveConditionalProjectRuns(
-  process.argv.slice(2),
-);
+const { productionAuthorityRun, publishedAuthorityRun, stagingOriginRun } =
+  resolveConditionalProjectRuns(process.argv.slice(2));
 const selectedSurfaces =
-  productionAuthorityRun || stagingOriginRun ? [] : selectWebTestSurfaces(process.argv.slice(2));
+  productionAuthorityRun || publishedAuthorityRun || stagingOriginRun
+    ? []
+    : selectWebTestSurfaces(process.argv.slice(2));
 const accountAuthorityRun = process.argv.some((argument) =>
   argument.includes('account-authority.spec.ts'),
 );
@@ -308,38 +346,62 @@ const productionAuthorityProject: Project = {
   },
 };
 
-const webServers = productionAuthorityRun
-  ? [
-      {
-        command: 'pnpm --filter @liiiraa/web-evidence real-admin:harness',
+const publishedAuthorityProject = (baseURL: string): Project => ({
+  grep: /@published-authority/u,
+  metadata: {
+    axis: 'published-authority',
+    finalOnly: false,
+    frozenClock: FROZEN_CLOCK,
+    scenarioIds: '',
+    surface: 'admin',
+  },
+  name: 'published-authority',
+  testMatch: '**/admin-operations.spec.ts',
+  use: {
+    ...chromium,
+    baseURL,
+    browserName: 'chromium',
+    colorScheme: 'dark',
+    locale: 'pt-BR',
+    reducedMotion: 'reduce',
+    viewport: { height: 1000, width: 1600 },
+  },
+});
+
+const webServers = publishedAuthorityRun
+  ? []
+  : productionAuthorityRun
+    ? [
+        {
+          command: 'pnpm --filter @liiiraa/web-evidence real-admin:harness',
+          cwd: '../..',
+          ignoreHTTPSErrors: true,
+          reuseExistingServer: false,
+          stderr: 'pipe' as const,
+          stdout: 'pipe' as const,
+          timeout: 300_000,
+          url: 'https://admin.staging.localhost:3444/pt-BR/admin',
+        },
+      ]
+    : selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
+        command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
         cwd: '../..',
-        ignoreHTTPSErrors: true,
+        env:
+          app === '@liiiraa/admin'
+            ? {
+                LIIIRAA_ACCOUNT_ORIGIN: 'https://liiiraa-boost-account-staging.vercel.app',
+                LIIIRAA_ADMIN_ORIGIN: baseURL,
+                LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
+              }
+            : app === '@liiiraa/account'
+              ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
+              : {},
         reuseExistingServer: false,
         stderr: 'pipe' as const,
         stdout: 'pipe' as const,
         timeout: 300_000,
-        url: 'https://admin.staging.localhost:3444/pt-BR/admin',
-      },
-    ]
-  : selectedSurfaces.map(({ app, baseURL, port, readinessPath }) => ({
-      command: `pnpm --filter ${app} build && pnpm --filter ${app} start --hostname ${new URL(baseURL).hostname} --port ${String(port)}`,
-      cwd: '../..',
-      env:
-        app === '@liiiraa/admin'
-          ? {
-              LIIIRAA_ACCOUNT_ORIGIN: 'https://liiiraa-boost-account-staging.vercel.app',
-              LIIIRAA_ADMIN_ORIGIN: baseURL,
-              LIIIRAA_ADMIN_PREVIEW: adminAuthorityRun ? 'false' : 'true',
-            }
-          : app === '@liiiraa/account'
-            ? { LIIIRAA_ACCOUNT_PREVIEW: accountAuthorityRun ? 'false' : 'true' }
-            : {},
-      reuseExistingServer: false,
-      stderr: 'pipe' as const,
-      stdout: 'pipe' as const,
-      timeout: 300_000,
-      url: `${baseURL}${readinessPath}`,
-    }));
+        url: `${baseURL}${readinessPath}`,
+      }));
 
 export default defineConfig({
   expect: {
@@ -357,6 +419,9 @@ export default defineConfig({
     ...finalProjects,
     ...(stagingOriginRun ? [stagingOriginProject] : []),
     ...(productionAuthorityRun ? [productionAuthorityProject] : []),
+    ...(publishedAuthorityRun
+      ? [publishedAuthorityProject(resolvePublishedAdminOrigin(process.env))]
+      : []),
   ],
   reporter: [['list']],
   retries: 0,

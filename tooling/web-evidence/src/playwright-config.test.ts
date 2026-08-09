@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { selectWebTestSurfaces } from '../playwright.config.js';
+import { resolvePublishedAdminOrigin, selectWebTestSurfaces } from '../playwright.config.js';
 
 const names = (arguments_: readonly string[]): string[] =>
   selectWebTestSurfaces(arguments_).map(({ surface }) => surface);
@@ -49,6 +49,21 @@ describe('Playwright web-server selection', () => {
     expect(names(['tests/security-artifacts.spec.ts', '--grep', '@staging-origin-live'])).toEqual(
       [],
     );
+    expect(names(['tests/admin-operations.spec.ts', '--grep', '@published-authority'])).toEqual([]);
+  });
+
+  it('requires a canonical HTTPS origin for the published Admin project', () => {
+    expect(() => resolvePublishedAdminOrigin({})).toThrow(
+      'PUBLISHED_AUTHORITY_REQUIRES_CANONICAL_HTTPS_ADMIN_STAGING_ORIGIN',
+    );
+    expect(() =>
+      resolvePublishedAdminOrigin({ ADMIN_STAGING_ORIGIN: 'http://admin.example.test' }),
+    ).toThrow('PUBLISHED_AUTHORITY_REQUIRES_CANONICAL_HTTPS_ADMIN_STAGING_ORIGIN');
+    expect(
+      resolvePublishedAdminOrigin({
+        ADMIN_STAGING_ORIGIN: 'https://liiiraa-boost-admin-staging.vercel.app',
+      }),
+    ).toBe('https://liiiraa-boost-admin-staging.vercel.app');
   });
 
   it.each([
@@ -60,9 +75,16 @@ describe('Playwright web-server selection', () => {
       arguments_: ['tests/admin-operations.spec.ts', '--grep', '@production-authority'],
       project: 'production-authority',
     },
+    {
+      arguments_: ['tests/admin-operations.spec.ts', '--grep', '@published-authority'],
+      project: 'published-authority',
+    },
   ])(
     'keeps the $project project when a worker reloads config without CLI filters',
     async ({ arguments_, project }) => {
+      if (project === 'published-authority') {
+        process.env['ADMIN_STAGING_ORIGIN'] = 'https://liiiraa-boost-admin-staging.vercel.app';
+      }
       expect(await configuredProjectNames(arguments_)).toContain(project);
       expect(await configuredProjectNames([])).toContain(project);
     },
