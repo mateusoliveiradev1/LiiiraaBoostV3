@@ -51,6 +51,21 @@ describe('desktop account session restoration', () => {
     expect(source).not.toContain('liiiraa-boost-account-staging.vercel.app');
   });
 
+  it('renders the real Free and Premium device-binding flow instead of a beta gate', () => {
+    const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('authority.prepareDeviceBinding()');
+    expect(source).toContain('authority.bindCurrentDevice({');
+    expect(source).toContain("'pt-BR': 'Disponível com Premium'");
+    expect(source).toContain("'pt-BR': 'Confirmo que este é o meu PC'");
+    expect(source).toContain("'pt-BR': 'Entendo o limite de um PC ativo'");
+    expect(source).toContain('isDisabled={!confirmedFriendlyIdentity || !confirmedOnePcConsequences');
+    expect(source).not.toContain('Aguardando beta');
+    expect(source).not.toContain('Awaiting beta');
+    expect(source).not.toContain('não foi liberada nesta beta');
+    expect(source).not.toContain('has not been enabled in this beta');
+  });
+
   it('confirms the revoked authority before routing back to sign-in', () => {
     const source = readFileSync(new URL('./account-experience.tsx', import.meta.url), 'utf8');
     const signOutBranch = source.slice(source.indexOf("result.status === 'signed-out'"));

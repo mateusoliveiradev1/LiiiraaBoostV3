@@ -3,9 +3,11 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   ACCOUNT_AUTHORITY_REFRESH_MS,
   ACCOUNT_SYNC_COMMAND,
+  BIND_CURRENT_DEVICE_COMMAND,
   DesktopAccountAuthority,
   OPEN_ACCOUNT_SUBSCRIPTION_COMMAND,
   OPEN_ADMIN_COMMAND,
+  PREPARE_DEVICE_BINDING_COMMAND,
   resolveDesktopAdminHandoff,
   type AccountAuthorityTransport,
   type SharedAccountProjection,
@@ -29,8 +31,11 @@ const projection = (
   locale: 'en' | 'pt-BR' = 'pt-BR',
   options: Readonly<{
     administrativeRole?: 'audit' | 'operations' | 'security' | 'support' | null;
+    activeDevice?: SharedAccountProjection['activeDevice'];
     expiresAt?: string;
+    plan?: 'free' | 'premium';
     sessionScopes?: SharedAccountProjection['sessions'][number]['scopes'];
+    subscriptionVersion?: string;
   }> = {},
 ): SharedAccountProjection => ({
   account: {
@@ -73,21 +78,37 @@ const projection = (
   ],
   subscription: {
     schemaVersion: '1.0',
-    aggregateVersion: '1',
-    etag: 'subscription-subscription-01-v1',
+    aggregateVersion: options.subscriptionVersion ?? '1',
+    etag: `subscription-subscription-01-v${options.subscriptionVersion ?? '1'}`,
     correlationId: 'account-authority-test',
     provenance: 'postgres-authority',
     kind: 'subscription-projection',
     subscriptionId: 'subscription-01',
     accountId: 'account-01',
-    state: 'active',
-    plan: 'premium',
-    entitlements: ['premium-actions'],
+    state: options.plan === 'free' ? 'none' : 'active',
+    plan: options.plan ?? 'premium',
+    entitlements: options.plan === 'free' ? [] : ['premium-actions'],
     cancelAtPeriodEnd: false,
   },
   invoices: [],
   supportCases: [],
-  activeDevice: null,
+  activeDevice: options.activeDevice ?? null,
+});
+
+const linkedDevice = (version = '2'): NonNullable<SharedAccountProjection['activeDevice']> => ({
+  schemaVersion: '1.0',
+  aggregateVersion: version,
+  etag: `device-binding-binding-01-v${version}`,
+  correlationId: 'device-binding-test',
+  provenance: 'postgres-authority',
+  kind: 'device-binding-projection',
+  deviceBindingId: 'binding-01',
+  accountId: 'account-01',
+  state: 'active',
+  deviceLabel: 'DESKTOP-LR07',
+  evidenceVersion: '1.0',
+  boundAt: '2030-01-15T12:00:00.000Z',
+  replacementEligibleAt: '2030-02-14T12:00:00.000Z',
 });
 
 const NOW = new Date('2030-01-15T12:00:00.000Z');
@@ -208,6 +229,112 @@ describe('bounded desktop subscription handoff', () => {
 });
 
 describe('desktop account authority mutations', () => {
+  it('keeps Free accounts out of native device collection and routes them to Premium', async () => {
+    const invoke = vi.fn<AccountAuthorityTransport['invoke']>().mockResolvedValueOnce({
+      state: 'online',
+      projection: projection('Friend Tester', '2', 'pt-BR', { plan: 'free' }),
+    });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(authority.prepareDeviceBinding()).resolves.toEqual({
+      status: 'premium-required',
+    });
+    await expect(
+      authority.bindCurrentDevice({
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: true,
+      }),
+    ).resolves.toEqual({ status: 'premium-required' });
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns only a sanitized readiness preview for a Premium account', async () => {
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({ state: 'online', projection: projection('Mateus Oliveira', '7') })
+      .mockResolvedValueOnce({
+        readiness: 'ready',
+        deviceLabel: 'DESKTOP-LR07',
+        deviceClass: 'physical',
+        admittedComponents: ['platform-trust', 'cpu', 'memory-topology'],
+      });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(authority.prepareDeviceBinding()).resolves.toEqual({
+      status: 'ready',
+      preview: {
+        readiness: 'ready',
+        deviceLabel: 'DESKTOP-LR07',
+        deviceClass: 'physical',
+        admittedComponents: ['platform-trust', 'cpu', 'memory-topology'],
+      },
+    });
+    expect(invoke).toHaveBeenLastCalledWith(PREPARE_DEVICE_BINDING_COMMAND);
+  });
+
+  it('requires both explicit confirmations before invoking the native bind', async () => {
+    const invoke = vi.fn<AccountAuthorityTransport['invoke']>().mockResolvedValueOnce({
+      state: 'online',
+      projection: projection('Mateus Oliveira', '7'),
+    });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(
+      authority.bindCurrentDevice({
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: false,
+      }),
+    ).resolves.toEqual({ status: 'confirmation-required' });
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits the linked state only after a fresh account projection confirms the native result', async () => {
+    const device = linkedDevice();
+    const invoke = vi
+      .fn<AccountAuthorityTransport['invoke']>()
+      .mockResolvedValueOnce({
+        state: 'online',
+        projection: projection('Mateus Oliveira', '7', 'pt-BR', { subscriptionVersion: '1' }),
+      })
+      .mockResolvedValueOnce({ status: 'applied', projection: device })
+      .mockResolvedValueOnce({
+        state: 'online',
+        projection: projection('Mateus Oliveira', '7', 'pt-BR', {
+          activeDevice: device,
+          subscriptionVersion: '2',
+        }),
+      });
+    const authority = new DesktopAccountAuthority({ invoke });
+    await authority.synchronize('launch');
+
+    await expect(
+      authority.bindCurrentDevice({
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: true,
+      }),
+    ).resolves.toEqual({ status: 'committed', projection: device });
+    expect(invoke.mock.calls[1]?.[0]).toBe(BIND_CURRENT_DEVICE_COMMAND);
+    expect(invoke.mock.calls[1]?.[1]).toMatchObject({
+      request: {
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: true,
+        command: {
+          accountId: 'account-01',
+          action: 'bind',
+          expectedVersion: '1',
+        },
+      },
+    });
+    expect(invoke.mock.calls[2]).toEqual([
+      ACCOUNT_SYNC_COMMAND,
+      { request: { trigger: 'mutation' } },
+    ]);
+    expect(authority.snapshot().projection?.activeDevice).toEqual(device);
+  });
+
   it('publishes a confirmed sign-out immediately and idempotently', async () => {
     const invoke = vi
       .fn<AccountAuthorityTransport['invoke']>()
