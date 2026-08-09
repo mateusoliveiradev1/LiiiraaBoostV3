@@ -10,6 +10,8 @@ use crate::credential_store::{CredentialStore, CredentialStoreError, WindowsCred
 
 pub const DESKTOP_ACCOUNT_CREDENTIAL_SLOT: &str = "desktop-account-session";
 const ACCOUNT_PATH: &str = "/v1/account";
+const DEVICE_EVIDENCE_CONTEXT_PATH: &str = "/v1/devices/evidence-context";
+const DEVICE_BIND_PATH: &str = "/v1/devices/bind";
 const MAXIMUM_RESPONSE_BYTES: usize = 1_048_576;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -474,7 +476,7 @@ impl HttpsOrigin {
 
 impl AccountAuthorityApi for WindowsAccountAuthorityApi {
     fn get_account(&self, credential: &str) -> Result<AccountApiResponse, AccountSyncError> {
-        winhttp_request(&self.origin, "GET", credential, None, None)
+        winhttp_request(&self.origin, "GET", ACCOUNT_PATH, credential, None, None)
     }
 
     fn update_account(
@@ -494,11 +496,46 @@ impl AccountAuthorityApi for WindowsAccountAuthorityApi {
         winhttp_request(
             &self.origin,
             "PATCH",
+            ACCOUNT_PATH,
             credential,
             Some(&body),
             Some(mutation.command.expected_version.as_str()),
         )
     }
+}
+
+pub fn get_device_evidence_context(
+    api_origin: &str,
+    credential: &str,
+) -> Result<AccountApiResponse, AccountSyncError> {
+    let origin = HttpsOrigin::parse(api_origin)?;
+    winhttp_request(
+        &origin,
+        "GET",
+        DEVICE_EVIDENCE_CONTEXT_PATH,
+        credential,
+        None,
+        None,
+    )
+}
+
+pub fn post_device_binding(
+    api_origin: &str,
+    credential: &str,
+    body: &[u8],
+) -> Result<AccountApiResponse, AccountSyncError> {
+    let origin = HttpsOrigin::parse(api_origin)?;
+    if body.is_empty() || body.len() > MAXIMUM_RESPONSE_BYTES {
+        return Err(AccountSyncError::InvalidRequest);
+    }
+    winhttp_request(
+        &origin,
+        "POST",
+        DEVICE_BIND_PATH,
+        credential,
+        Some(body),
+        None,
+    )
 }
 
 fn account_request_headers(
@@ -532,6 +569,7 @@ fn account_request_headers(
 fn winhttp_request(
     origin: &HttpsOrigin,
     method: &str,
+    path: &str,
     credential: &str,
     body: Option<&[u8]>,
     expected_version: Option<&str>,
@@ -560,7 +598,7 @@ fn winhttp_request(
     let user_agent = HSTRING::from("LiiiraaBoost/1.0");
     let host = HSTRING::from(origin.host.as_str());
     let method = HSTRING::from(method);
-    let path = HSTRING::from(ACCOUNT_PATH);
+    let path = HSTRING::from(path);
     // SAFETY: Inputs are owned UTF-16 strings, handles are checked, and all buffers remain alive
     // for each synchronous WinHTTP call.
     unsafe {
@@ -650,6 +688,7 @@ fn winhttp_request(
 fn winhttp_request(
     _origin: &HttpsOrigin,
     _method: &str,
+    _path: &str,
     _credential: &str,
     _body: Option<&[u8]>,
     _expected_version: Option<&str>,

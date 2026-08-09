@@ -1,12 +1,21 @@
+#[path = "../src/account_sync.rs"]
+mod account_sync;
+#[path = "../src/credential_store.rs"]
+mod credential_store;
 #[path = "../src/device_identity.rs"]
 mod device_identity;
 
 use device_identity::{
-    ComponentClass, DeviceBindingReadiness, DeviceClass, DeviceEvidenceOutcome,
-    DeviceIdentityError, DeviceInventoryCollector, RawComponentObservation, RawDeviceInventory,
-    WindowsDeviceInventoryCollector, collect_protected_device_evidence, compare_device_evidence,
-    prepare_device_binding_with_collector,
+    ComponentClass, DeviceBindingApi, DeviceBindingMutationStatus, DeviceBindingReadiness,
+    DeviceBindingRequest, DeviceClass, DeviceEvidenceOutcome, DeviceIdentityError,
+    DeviceInventoryCollector, RawComponentObservation, RawDeviceInventory,
+    WindowsDeviceInventoryCollector, bind_current_device_with, collect_protected_device_evidence,
+    compare_device_evidence, prepare_device_binding_with_collector,
 };
+use std::cell::RefCell;
+
+use account_sync::{AccountApiResponse, AccountSyncError};
+use credential_store::{CredentialStore, CredentialStoreError};
 
 const ACCOUNT_SALT_ALPHA: &[u8] = b"synthetic-account-salt-alpha";
 
@@ -196,10 +205,7 @@ impl DeviceInventoryCollector for SyntheticInventoryCollector {
                     ComponentClass::PlatformTrust,
                     "SMBIOS-BOARD-SERIAL-RAW-9001".to_owned(),
                 ),
-                (
-                    ComponentClass::Cpu,
-                    "PROCESSOR-ID-RAW-9002".to_owned(),
-                ),
+                (ComponentClass::Cpu, "PROCESSOR-ID-RAW-9002".to_owned()),
                 (
                     ComponentClass::MemoryTopology,
                     "DIMM-SERIAL-RAW-9005".to_owned(),
@@ -210,7 +216,7 @@ impl DeviceInventoryCollector for SyntheticInventoryCollector {
 }
 
 #[test]
-fn prepared_device_preview_exposes_only_friendly_readiness_metadata() {
+fn device_identity_prepared_preview_exposes_only_friendly_readiness_metadata() {
     let preview = prepare_device_binding_with_collector(&SyntheticInventoryCollector);
     assert_eq!(preview.readiness, DeviceBindingReadiness::Ready);
     assert_eq!(preview.device_label, "Astra-PC");
@@ -225,7 +231,7 @@ fn prepared_device_preview_exposes_only_friendly_readiness_metadata() {
 
 #[cfg(target_os = "windows")]
 #[test]
-fn current_windows_inventory_produces_a_privacy_safe_ready_preview() {
+fn device_identity_current_windows_inventory_produces_a_privacy_safe_ready_preview() {
     let preview = prepare_device_binding_with_collector(&WindowsDeviceInventoryCollector);
 
     assert_eq!(preview.readiness, DeviceBindingReadiness::Ready);
@@ -233,4 +239,108 @@ fn current_windows_inventory_produces_a_privacy_safe_ready_preview() {
     let serialized = serde_json::to_string(&preview).expect("preview should serialize");
     assert!(!serialized.contains("localDigest"));
     assert!(!serialized.contains("rawValue"));
+}
+
+struct MemoryCredentialStore;
+
+impl CredentialStore for MemoryCredentialStore {
+    fn write_rotated_credential(&self, _credential: &str) -> Result<(), CredentialStoreError> {
+        Ok(())
+    }
+
+    fn read_credential(&self) -> Result<Option<String>, CredentialStoreError> {
+        Ok(Some("credential-remains-in-native-custody".to_owned()))
+    }
+
+    fn delete_credential(&self) -> Result<(), CredentialStoreError> {
+        Ok(())
+    }
+}
+
+struct CapturingDeviceApi {
+    submitted_body: RefCell<Option<Vec<u8>>>,
+}
+
+impl DeviceBindingApi for CapturingDeviceApi {
+    fn evidence_context(&self, _credential: &str) -> Result<AccountApiResponse, AccountSyncError> {
+        Ok(AccountApiResponse {
+            status: 200,
+            body: serde_json::to_vec(&serde_json::json!({
+                "schemaVersion": "1.0",
+                "kind": "device-evidence-context-projection",
+                "accountId": "account-01",
+                "contextVersion": "1",
+                "accountSalt": "a".repeat(64),
+            }))
+            .expect("context fixture serializes"),
+        })
+    }
+
+    fn bind(&self, _credential: &str, body: &[u8]) -> Result<AccountApiResponse, AccountSyncError> {
+        *self.submitted_body.borrow_mut() = Some(body.to_vec());
+        Ok(AccountApiResponse {
+            status: 200,
+            body: serde_json::to_vec(&serde_json::json!({
+                "schemaVersion": "1.0",
+                "aggregateVersion": "2",
+                "etag": "device-binding-01-v2",
+                "correlationId": "device-binding-test",
+                "provenance": "device-verified",
+                "kind": "device-binding-projection",
+                "deviceBindingId": "binding-01",
+                "accountId": "account-01",
+                "state": "active",
+                "deviceLabel": "Astra-PC",
+                "evidenceVersion": "1",
+                "boundAt": "2030-02-01T12:00:00.000Z",
+            }))
+            .expect("binding fixture serializes"),
+        })
+    }
+}
+
+#[test]
+fn device_identity_native_bind_keeps_raw_and_local_evidence_out_of_renderer_results() {
+    let api = CapturingDeviceApi {
+        submitted_body: RefCell::new(None),
+    };
+    let request: DeviceBindingRequest = serde_json::from_value(serde_json::json!({
+        "command": {
+            "schemaVersion": "1.0",
+            "kind": "device-command",
+            "commandId": "bind-command-01",
+            "accountId": "account-01",
+            "deviceBindingId": "binding-01",
+            "action": "bind",
+            "expectedVersion": "1",
+            "correlationId": "device-binding-test",
+            "requestedAt": "2030-02-01T12:00:00.000Z"
+        },
+        "confirmedFriendlyIdentity": true,
+        "confirmedOnePcConsequences": true,
+    }))
+    .expect("binding request fixture decodes");
+
+    let response = bind_current_device_with(
+        &MemoryCredentialStore,
+        &api,
+        &SyntheticInventoryCollector,
+        request,
+    )
+    .expect("native binding should succeed");
+
+    assert_eq!(response.status, DeviceBindingMutationStatus::Applied);
+    let renderer_json = serde_json::to_string(&response).expect("renderer response serializes");
+    assert!(!renderer_json.contains("localDigest"));
+    assert!(!renderer_json.contains("RAW-9001"));
+    let submitted = api
+        .submitted_body
+        .borrow()
+        .clone()
+        .expect("native API body captured");
+    let submitted = String::from_utf8(submitted).expect("body is utf-8 JSON");
+    assert!(submitted.contains("localDigest"));
+    assert!(!submitted.contains("RAW-9001"));
+    assert!(!submitted.contains("protectedDigest"));
+    assert!(!submitted.contains("deviceDigest"));
 }

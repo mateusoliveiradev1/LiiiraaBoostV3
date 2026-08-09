@@ -541,6 +541,34 @@ impl From<DesktopIdentityError> for DesktopAuthCommandError {
     }
 }
 
+#[tauri::command]
+fn prepare_device_binding() -> device_identity::DeviceBindingPreview {
+    device_identity::prepare_device_binding()
+}
+
+#[tauri::command]
+async fn bind_current_device(
+    runtime: State<'_, DesktopRuntimeConfig>,
+    request: device_identity::DeviceBindingRequest,
+) -> Result<device_identity::DeviceBindingMutationResponse, DesktopAuthCommandError> {
+    let api_origin = runtime
+        .origins
+        .as_ref()
+        .map(|origins| origins.api_origin.clone())
+        .ok_or(DesktopAuthCommandError::Unavailable)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        device_identity::bind_current_device(&api_origin, request).map_err(|error| match error {
+            device_identity::DeviceIdentityError::Unauthorized
+            | device_identity::DeviceIdentityError::InvalidResponse => {
+                DesktopAuthCommandError::Rejected
+            }
+            _ => DesktopAuthCommandError::Unavailable,
+        })
+    })
+    .await
+    .map_err(|_| DesktopAuthCommandError::Unavailable)?
+}
+
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct DesktopSignInCommandResponse {
@@ -753,12 +781,14 @@ fn run() -> Result<(), String> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            bind_current_device,
             desktop_sign_in,
             desktop_sign_out,
             dispatch_shell_command,
             get_shell_bootstrap,
             open_account_subscription,
             open_admin,
+            prepare_device_binding,
             sync_account
         ])
         .on_window_event(|window, event| {
