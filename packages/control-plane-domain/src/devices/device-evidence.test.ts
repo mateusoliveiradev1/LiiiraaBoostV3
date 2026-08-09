@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   compareDeviceEvidence,
+  deriveDeviceDigest,
   deriveProtectedDeviceEvidence,
   type LocalDeviceEvidence,
   type ProtectedDeviceEvidence,
@@ -156,6 +157,16 @@ describe('protected device evidence tolerance policy', () => {
 });
 
 describe('protected device evidence privacy', () => {
+  it('derives one canonical aggregate digest without retaining local evidence', async () => {
+    const protectedEvidence = await derive();
+
+    await expect(deriveDeviceDigest(protectedEvidence)).resolves.toMatch(/^[0-9a-f]{64}$/u);
+    await expect(deriveDeviceDigest(protectedEvidence)).resolves.toBe(
+      await deriveDeviceDigest(await derive()),
+    );
+    expect(JSON.stringify(protectedEvidence)).not.toContain('localDigest');
+  });
+
   it('never returns raw hardware sentinels in transport, comparison, log, or snapshot values', async () => {
     const protectedEvidence = await derive();
     const comparison = compareDeviceEvidence(protectedEvidence, await derive());

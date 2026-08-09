@@ -9,7 +9,10 @@ import {
   type DeviceEntitlementRecord,
   type DeviceExceptionRecord,
 } from '@liiiraa/control-plane-application';
+import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
+
+import { createDeviceEvidenceProtector, registerDeviceRoutes } from './routes.ts';
 
 const ACCOUNT_ID = 'account-player';
 const ENTITLEMENT_ID = 'entitlement-premium';
@@ -57,24 +60,28 @@ interface RepositoryState {
 }
 
 class SerializableDeviceRepository implements DeviceBindingRepository {
-  private state: RepositoryState = {
-    entitlements: new Map([
-      [
-        ACCOUNT_ID,
-        {
-          entitlementId: ENTITLEMENT_ID,
-          accountId: ACCOUNT_ID,
-          status: 'active',
-          version: 1n,
-        },
-      ],
-    ]),
+  private state: RepositoryState;
+
+  public constructor(status: DeviceEntitlementRecord['status'] = 'active') {
+    this.state = {
+      entitlements: new Map([
+        [
+          ACCOUNT_ID,
+          {
+            entitlementId: ENTITLEMENT_ID,
+            accountId: ACCOUNT_ID,
+            status,
+            version: 1n,
+          },
+        ],
+      ]),
     bindings: new Map(),
     exceptions: new Map(),
     commandResults: new Map(),
     audits: [],
     outbox: [],
-  };
+    };
+  }
 
   private tail: Promise<void> = Promise.resolve();
 
@@ -242,6 +249,40 @@ const bindInput = (index: number) => ({
   correlationId: `race-${String(index).padStart(2, '0')}`,
 });
 
+const localEvidenceSubmission = (overrides: Readonly<Record<string, unknown>> = {}) => ({
+  schemaVersion: '1.0',
+  kind: 'device-local-evidence-submission',
+  accountId: ACCOUNT_ID,
+  contextVersion: '1',
+  deviceClass: 'physical',
+  components: [
+    { componentClass: 'platform-trust', localDigest: '1'.repeat(64) },
+    { componentClass: 'cpu', localDigest: '2'.repeat(64) },
+    { componentClass: 'storage-controller', localDigest: '3'.repeat(64) },
+  ],
+  ...overrides,
+});
+
+const deviceCommand = (commandId = 'route-bind-command') => ({
+  schemaVersion: '1.0',
+  kind: 'device-command',
+  commandId,
+  accountId: ACCOUNT_ID,
+  deviceBindingId: `binding-${commandId}`,
+  action: 'bind',
+  expectedVersion: '1',
+  correlationId: `correlation-${commandId}`,
+  requestedAt: FIRST_BIND_AT,
+});
+
+const protector = () =>
+  createDeviceEvidenceProtector({
+    contextSecret: 'context-secret-with-at-least-forty-three-characters-0001',
+    wrappingKey: 'wrapping-key-with-at-least-forty-three-characters-0001',
+    contextVersion: '1',
+    keyVersion: 1,
+  });
+
 describe('device concurrency transaction authority', () => {
   it('IDEN-04 serializes a 20-way bind race to exactly one active PC and remote conflicts', async () => {
     const repository = new SerializableDeviceRepository();
@@ -387,5 +428,105 @@ describe('device concurrency transaction authority', () => {
     expect(repository.activeBindings()).toHaveLength(0);
     expect(repository.auditRecords()).toHaveLength(0);
     expect(repository.outboxRecords()).toHaveLength(0);
+  });
+});
+
+describe('device evidence route boundary', () => {
+  it('returns a stable account-scoped context without exposing server key material', async () => {
+    const evidenceProtector = protector();
+    const first = await evidenceProtector.context(ACCOUNT_ID);
+    const repeated = await evidenceProtector.context(ACCOUNT_ID);
+    const otherAccount = await evidenceProtector.context('account-other');
+
+    expect(first).toEqual(repeated);
+    expect(first.accountSalt).toMatch(/^[0-9a-f]{64}$/u);
+    expect(otherAccount.accountSalt).not.toBe(first.accountSalt);
+    expect(JSON.stringify(first)).not.toContain('wrapping-key');
+    expect(JSON.stringify(first)).not.toContain('context-secret');
+  });
+
+  it.each([
+    localEvidenceSubmission({ contextVersion: '0' }),
+    localEvidenceSubmission({ accountId: 'account-attacker' }),
+    localEvidenceSubmission({ components: [{ componentClass: 'cpu', localDigest: '1'.repeat(64) }] }),
+    localEvidenceSubmission({
+      components: [
+        { componentClass: 'cpu', localDigest: '1'.repeat(64) },
+        { componentClass: 'cpu', localDigest: '2'.repeat(64) },
+        { componentClass: 'gpu', localDigest: '3'.repeat(64) },
+      ],
+    }),
+    localEvidenceSubmission({
+      components: [
+        { componentClass: 'platform-trust', localDigest: 'raw-hardware-id' },
+        { componentClass: 'cpu', localDigest: '2'.repeat(64) },
+        { componentClass: 'gpu', localDigest: '3'.repeat(64) },
+      ],
+    }),
+  ])('rejects stale, cross-account, sparse, duplicate, or malformed local evidence', async (submission) => {
+    await expect(protector().protect(ACCOUNT_ID, submission)).rejects.toThrow(
+      'device evidence rejected',
+    );
+  });
+
+  it('rejects caller-authored protected authority before persistence', async () => {
+    const repository = new SerializableDeviceRepository();
+    const app = Fastify();
+    await registerDeviceRoutes(app, {
+      authority: dependencies(repository, FIRST_BIND_AT),
+      evidenceProtector: protector(),
+      resolveSessionActor: () => Promise.resolve({ accountId: ACCOUNT_ID }),
+      project: () => Promise.resolve(null),
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/devices/bind',
+      payload: {
+        command: deviceCommand(),
+        deviceLabel: 'Player PC',
+        evidenceSubmission: localEvidenceSubmission(),
+        deviceDigest: 'f'.repeat(64),
+        protectedDigest: 'e'.repeat(64),
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: true,
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(repository.activeBindings()).toHaveLength(0);
+    expect(repository.auditRecords()).toHaveLength(0);
+    expect(repository.outboxRecords()).toHaveLength(0);
+    await app.close();
+  });
+
+  it('returns the Premium policy denial for Free without creating binding authority', async () => {
+    const repository = new SerializableDeviceRepository('expired');
+    const app = Fastify();
+    await registerDeviceRoutes(app, {
+      authority: dependencies(repository, FIRST_BIND_AT),
+      evidenceProtector: protector(),
+      resolveSessionActor: () => Promise.resolve({ accountId: ACCOUNT_ID }),
+      project: () => Promise.resolve(null),
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/devices/bind',
+      payload: {
+        command: deviceCommand('free-bind-command'),
+        deviceLabel: 'Player PC',
+        evidenceSubmission: localEvidenceSubmission(),
+        confirmedFriendlyIdentity: true,
+        confirmedOnePcConsequences: true,
+      },
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({ code: 'POLICY_DENIED', reason: 'premium-not-active' });
+    expect(repository.activeBindings()).toHaveLength(0);
+    expect(repository.auditRecords()).toHaveLength(0);
+    expect(repository.outboxRecords()).toHaveLength(0);
+    await app.close();
   });
 });
