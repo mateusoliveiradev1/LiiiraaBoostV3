@@ -660,9 +660,10 @@ Plans:
 
 **Wave 27** _(blocked on Plan 04-63)_
 
+- [ ] 04-64-PLAN.md — Recover the authored Admin visual language across real production-authority routes.
 - [ ] 04-40-PLAN.md — Provision protected tester invitations, deploy real staging, and validate complete web/desktop/Admin authority.
 
-**Wave 28** _(blocked on Plan 04-40)_
+**Wave 28** _(blocked on Plans 04-40 and 04-64)_
 
 - [ ] 04-25-PLAN.md — Perform clean-Windows, complete Admin authority, consent, and rollback UAT.
 
