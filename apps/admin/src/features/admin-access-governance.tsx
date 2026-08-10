@@ -75,6 +75,8 @@ const copy = Object.freeze({
     authorityDenied: 'Governance authority unavailable',
     authorityDeniedDetail:
       'The server did not admit People or approval records for this active function.',
+    freshnessUnavailableDetail:
+      'Current records are loaded, but live updates are unavailable. Changes stay locked until the connection is restored.',
     breakGlass: 'Request emergency access',
     breakGlassDetail:
       'Only solo-owner critical work is eligible. Mass and irreversible actions still require two people.',
@@ -100,6 +102,7 @@ const copy = Object.freeze({
     lostFunctions: 'Functions removed',
     memberDetail: 'Member authority',
     members: 'Administrative team',
+    membersDetail: 'Authorized members, active functions, and current access state.',
     noActionsSimulation: 'Simulation — no actions can run',
     noApprovals: 'No governed approval requests match this view.',
     noHistory: 'No masked governance history is available.',
@@ -140,6 +143,8 @@ const copy = Object.freeze({
     authorityDenied: 'Autoridade de governança indisponível',
     authorityDeniedDetail:
       'O servidor não admitiu registros de Pessoas ou aprovações para a função ativa.',
+    freshnessUnavailableDetail:
+      'Os registros atuais foram carregados, mas as atualizações ao vivo estão indisponíveis. As alterações ficam bloqueadas até a conexão voltar.',
     breakGlass: 'Solicitar acesso emergencial',
     breakGlassDetail:
       'Somente trabalho crítico do único proprietário é elegível. Ações em massa e irreversíveis continuam exigindo duas pessoas.',
@@ -165,6 +170,7 @@ const copy = Object.freeze({
     lostFunctions: 'Funções removidas',
     memberDetail: 'Autoridade do membro',
     members: 'Equipe administrativa',
+    membersDetail: 'Membros autorizados, funções ativas e estado atual do acesso.',
     noActionsSimulation: 'Simulação — nenhuma ação pode ser executada',
     noApprovals: 'Nenhuma solicitação de aprovação corresponde a esta visão.',
     noHistory: 'Nenhum histórico mascarado de governança está disponível.',
@@ -881,7 +887,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
               {labels.refresh}
             </LbButton>
           }
-          detail={labels.authorityDeniedDetail}
+          detail={labels.freshnessUnavailableDetail}
           state={notice.state}
           title={notice.title}
         />
@@ -959,7 +965,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
               <h2 id="team-title">{labels.members}</h2>
               <span>{model.members.length}</span>
             </div>
-            <p>{labels.adminInvitationsDetail}</p>
+            <p>{labels.membersDetail}</p>
           </header>
           {model.members.length === 0 ? (
             <div className={styles['empty']} role="status">

@@ -3,7 +3,10 @@ import { createHmac } from 'node:crypto';
 import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
-import { registerAdminOperationsRoutes } from './operations-routes.js';
+import {
+  registerAdminOperationsRoutes,
+  type AdminOperationsRouteSession,
+} from './operations-routes.js';
 
 const origin = 'https://admin.test.liiiraa.dev';
 const csrfSecret = 'synthetic-operations-csrf-secret-1234567890';
@@ -67,7 +70,7 @@ const completedOperation = (outcome: string, detail: Readonly<Record<string, unk
 const buildApp = async (
   overrides: Readonly<Record<string, unknown>> = {},
   rateLimit = true,
-  routeSession = session,
+  routeSession: AdminOperationsRouteSession = session,
 ) => {
   const operations = {
     search: vi.fn(() =>
@@ -82,9 +85,7 @@ const buildApp = async (
     ),
     resolveConflict: vi.fn(() => Promise.resolve(completedOperation('conflict-merged'))),
     recoverIncident: vi.fn(() =>
-      Promise.resolve(
-        completedOperation('recovery-started', { incident: { incidentId: 'one' } }),
-      ),
+      Promise.resolve(completedOperation('recovery-started', { incident: { incidentId: 'one' } })),
     ),
     startExport: vi.fn(() =>
       Promise.resolve({ ok: true, outcome: 'export-started', export: { exportId: 'export-one' } }),

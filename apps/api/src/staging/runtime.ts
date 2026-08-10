@@ -1182,6 +1182,7 @@ const governanceQueries = (
          FROM admin_governance_memberships AS membership
          INNER JOIN identities AS identity ON identity.id = membership.identity_id
         WHERE ($2::uuid IS NULL OR membership.identity_id < $2::uuid)
+          AND identity.email NOT LIKE 'admin-e2e-%@example.test'
         ORDER BY membership.identity_id DESC LIMIT $1`,
       [limit, cursor ?? null],
     );
@@ -1235,7 +1236,8 @@ const governanceQueries = (
                 WHERE review.membership_id = membership.id) AS next_review_at
          FROM admin_governance_memberships AS membership
          INNER JOIN identities AS identity ON identity.id = membership.identity_id
-         WHERE membership.identity_id = $1::uuid`,
+         WHERE membership.identity_id = $1::uuid
+           AND identity.email NOT LIKE 'admin-e2e-%@example.test'`,
       [identityId],
     );
     const row = result.rows[0];
@@ -1969,15 +1971,15 @@ export const createPersistentStagingAdminAuthority = ({
       },
       resolveSession: async (request: FastifyRequest) => {
         const session = await resolveSession(request);
-        return session?.activeFunction === 'operations'
-          ? {
-              sessionId: session.sessionId,
-              actorId: session.actorId,
-              activeFunction: session.activeFunction,
-              capabilities: OPERATIONS_CAPABILITIES,
-              scopes: session.dataScopes,
-            }
-          : null;
+        if (session === null) return null;
+        return {
+          sessionId: session.sessionId,
+          actorId: session.actorId,
+          activeFunction: session.activeFunction,
+          capabilities:
+            session.activeFunction === 'operations' ? OPERATIONS_CAPABILITIES : ([] as const),
+          scopes: session.dataScopes,
+        };
       },
       rateLimit,
       clock,
@@ -2072,11 +2074,7 @@ export const buildRealStagingApp = async (
     return actor === null ? null : { accountId: actor.accountId };
   };
   const resolveActiveDeviceProjection = async (accountId: string, correlationId: string) => {
-    const records = await listRuntimeAuthority<DeviceBindingRecord>(
-      database,
-      'device',
-      accountId,
-    );
+    const records = await listRuntimeAuthority<DeviceBindingRecord>(database, 'device', accountId);
     const current = records.find((record) => record.revokedAt === null);
     return current === undefined ? null : deviceProjection(current, correlationId);
   };

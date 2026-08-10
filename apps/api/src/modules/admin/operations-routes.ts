@@ -432,7 +432,8 @@ export const registerAdminOperationsRoutes = (
   });
 
   app.get('/v1/admin/operations/live', async (request, reply) => {
-    const session = await authorize(request, dependencies, 'admin-operations:search', false);
+    if (request.headers.origin !== dependencies.allowedOrigin) return hidden(reply);
+    const session = await dependencies.resolveSession(request);
     if (session === null) return hidden(reply);
     const query = queryRecord(request.query);
     const targetEnvironment = query === null ? null : queryEnvironment(query);

@@ -34,6 +34,8 @@ describe('real staging control-plane composition', () => {
     const source = readFileSync(new URL('./runtime.ts', import.meta.url), 'utf8');
 
     expect(source).toContain("identity.email NOT LIKE 'admin-e2e-%@example.test'");
-    expect(source).not.toMatch(/return session\?\.activeFunction === 'operations'/u);
+    expect(source).toContain(
+      "session.activeFunction === 'operations' ? OPERATIONS_CAPABILITIES : ([] as const)",
+    );
   });
 });
