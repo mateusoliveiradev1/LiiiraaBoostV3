@@ -58,6 +58,7 @@ const WEBHOOK_EVENTS = Object.freeze([
   'invoice.paid',
   'invoice.payment_failed',
 ] as const);
+const MANAGED_WEBHOOK_DESCRIPTION = 'Liiiraa Boost staging managed';
 
 interface ProtectedStripeRuntime {
   readonly previousWebhookEndpointIds: readonly string[];
@@ -230,13 +231,24 @@ export const prepareStripeTestRuntime = async (
   const existing = await atStage('WEBHOOK_LIST', () =>
     stripe.webhookEndpoints.list({ limit: 100 }),
   );
+  const retiredWebhookEndpointIds = existing.data
+    .filter(
+      (endpoint) =>
+        endpoint.url === webhookUrl &&
+        endpoint.status === 'disabled' &&
+        endpoint.description === MANAGED_WEBHOOK_DESCRIPTION,
+    )
+    .map(({ id }) => id);
+  for (const endpointId of retiredWebhookEndpointIds) {
+    await atStage('WEBHOOK_DELETE', () => stripe.webhookEndpoints.del(endpointId));
+  }
   const previousWebhookEndpointIds = existing.data
     .filter((endpoint) => endpoint.url === webhookUrl && endpoint.status === 'enabled')
     .map(({ id }) => id);
   const webhook = await atStage('WEBHOOK_CREATE', () =>
     stripe.webhookEndpoints.create(
       {
-        description: 'Liiiraa Boost staging managed',
+        description: MANAGED_WEBHOOK_DESCRIPTION,
         enabled_events: [...WEBHOOK_EVENTS],
         url: webhookUrl,
       },
