@@ -175,6 +175,9 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-10T13:58:42.747Z`, the owner confirmed that logout removed private authority, but
   browser Back restored the protected route inside an unauthenticated account shell. The secure
   denial passed; UX approval remains pending the staging retest of fix `e647013`.
+- At `2026-08-10T14:07:48.677Z`, the owner responded `pass` after retesting staging revision
+  `3fd725f`: logout remained revoked and browser Back returned to the clean sign-in experience
+  without restoring the authenticated account shell.
 
 ## Human real-authority observations
 
@@ -191,7 +194,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                        | PASS    |
 | Profile display-name mutation persists after reload                                                    | owner-confirmed                        | PASS    |
 | Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
-| Account logout terminates the browser session                                                          | _pending_                              | PENDING |
+| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
