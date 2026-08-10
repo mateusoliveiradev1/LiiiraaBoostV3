@@ -184,6 +184,9 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-10T14:13:10.599Z`, the owner supplied an incognito staging screenshot showing a
   Free tester identity rejected by the isolated administrative origin. The Admin sign-in surface
   reported that it could not validate administrative access and exposed no protected dashboard data.
+- At `2026-08-10T14:24:01.045Z`, the owner confirmed that one Admin logout revoked only the isolated
+  administrative session and returned to the independently authenticated Account portal. Browser
+  Back did not restore the Admin dashboard; the Account session correctly remained active.
 
 ## Human real-authority observations
 
@@ -202,7 +205,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
 | Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                        | PASS    |
-| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
+| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`          | PASS    |
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                       | PASS    |
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
 | Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
