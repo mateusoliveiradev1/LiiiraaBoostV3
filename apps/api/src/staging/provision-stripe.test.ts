@@ -175,6 +175,7 @@ describe('Stripe test catalog provisioning', () => {
 describe('Stripe staging runtime provisioning', () => {
   it('creates a managed portal and a fresh signed webhook without exposing the secret', async () => {
     const writeProtected = vi.fn(() => Promise.resolve());
+    const deleteWebhook = vi.fn(() => Promise.resolve({ deleted: true, id: 'we_retired' }));
     const stripe = {
       billingPortal: {
         configurations: {
@@ -188,12 +189,26 @@ describe('Stripe staging runtime provisioning', () => {
             data: [
               {
                 id: 'we_old',
+                description: 'Liiiraa Boost staging managed',
                 url: 'https://api.staging.example/v1/commerce/provider-webhook',
                 status: 'enabled',
+              },
+              {
+                id: 'we_retired',
+                description: 'Liiiraa Boost staging managed',
+                url: 'https://api.staging.example/v1/commerce/provider-webhook',
+                status: 'disabled',
+              },
+              {
+                id: 'we_unmanaged',
+                description: 'Another integration',
+                url: 'https://api.staging.example/v1/commerce/provider-webhook',
+                status: 'disabled',
               },
             ],
           }),
         ),
+        del: deleteWebhook,
         create: vi.fn(() =>
           Promise.resolve({
             id: 'we_new',
@@ -220,5 +235,7 @@ describe('Stripe staging runtime provisioning', () => {
       webhookEndpointId: 'we_new',
       webhookSecret: 'whsec_synthetic_secret',
     });
+    expect(deleteWebhook).toHaveBeenCalledTimes(1);
+    expect(deleteWebhook).toHaveBeenCalledWith('we_retired');
   });
 });
