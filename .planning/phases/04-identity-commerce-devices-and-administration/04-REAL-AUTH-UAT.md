@@ -178,6 +178,9 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-10T14:07:48.677Z`, the owner responded `pass` after retesting staging revision
   `3fd725f`: logout remained revoked and browser Back returned to the clean sign-in experience
   without restoring the authenticated account shell.
+- At `2026-08-10T14:09:52.482Z`, the owner responded `pass` after closing the packaged desktop
+  without signing out and reopening it: the authenticated account was restored from Windows
+  Credential Manager without reopening the browser or requesting credentials.
 
 ## Human real-authority observations
 
@@ -195,7 +198,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Profile display-name mutation persists after reload                                                    | owner-confirmed                        | PASS    |
 | Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
 | Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
-| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
+| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                        | PASS    |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
