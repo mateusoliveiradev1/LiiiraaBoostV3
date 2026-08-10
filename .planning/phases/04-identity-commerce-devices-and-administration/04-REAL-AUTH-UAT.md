@@ -170,6 +170,8 @@ Remaining tester invitation refresh supplement:
   check correctly discarded the session when the private window was closed.
 - At `2026-08-10T13:46:19.255Z`, the owner responded `pass` after changing the tester account's
   display name, saving it, and confirming that the updated profile survived a page reload.
+- At `2026-08-10T13:48:49.546Z`, the owner responded `pass` after switching the authenticated
+  Account locale to English and confirming that the selected locale survived a page reload.
 
 ## Human real-authority observations
 
@@ -185,7 +187,8 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`        | PASS    |
 | Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                        | PASS    |
 | Profile display-name mutation persists after reload                                                    | owner-confirmed                        | PASS    |
-| Locale mutation and logout persist in PostgreSQL                                                       | _pending_                              | PENDING |
+| Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
+| Account logout terminates the browser session                                                          | _pending_                              | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
