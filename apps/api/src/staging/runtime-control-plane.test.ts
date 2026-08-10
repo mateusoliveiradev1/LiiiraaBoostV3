@@ -29,4 +29,11 @@ describe('real staging control-plane composition', () => {
     expect(source).toContain('accountSubscriptionUrl');
     expect(source).not.toContain('`${environment.accountOrigin}/${locale}/plan`');
   });
+
+  it('keeps published governance free from browser-evidence identities and streams freshness to every admin function', () => {
+    const source = readFileSync(new URL('./runtime.ts', import.meta.url), 'utf8');
+
+    expect(source).toContain("identity.email NOT LIKE 'admin-e2e-%@example.test'");
+    expect(source).not.toMatch(/return session\?\.activeFunction === 'operations'/u);
+  });
 });

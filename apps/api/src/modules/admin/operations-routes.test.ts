@@ -64,7 +64,11 @@ const completedOperation = (outcome: string, detail: Readonly<Record<string, unk
   ...detail,
 });
 
-const buildApp = async (overrides: Readonly<Record<string, unknown>> = {}, rateLimit = true) => {
+const buildApp = async (
+  overrides: Readonly<Record<string, unknown>> = {},
+  rateLimit = true,
+  routeSession = session,
+) => {
   const operations = {
     search: vi.fn(() =>
       Promise.resolve({
@@ -116,7 +120,7 @@ const buildApp = async (overrides: Readonly<Record<string, unknown>> = {}, rateL
     handlers: operations,
     queries,
     freshness,
-    resolveSession: () => Promise.resolve(session),
+    resolveSession: () => Promise.resolve(routeSession),
     rateLimit: () => Promise.resolve(rateLimit),
     clock: { now: () => new Date(now) },
   });
@@ -165,6 +169,35 @@ describe('admin operations routes', () => {
     expect(freshness.current).toHaveBeenCalledWith(
       expect.objectContaining({ reconnectCursor: 'cursor-8', actorId: 'operator-one' }),
     );
+    await app.close();
+  });
+
+  it('keeps freshness available to security without widening operations authority', async () => {
+    const securitySession = {
+      ...session,
+      activeFunction: 'security',
+      capabilities: [] as const,
+      scopes: ['team', 'history'] as const,
+    };
+    const { app, freshness } = await buildApp({}, true, securitySession);
+
+    const live = await app.inject({
+      method: 'GET',
+      url: '/v1/admin/operations/live?environment=staging',
+      headers: { origin },
+    });
+    expect(live.statusCode).toBe(200);
+    expect(live.headers['content-type']).toContain('text/event-stream');
+    expect(freshness.current).toHaveBeenCalledWith(
+      expect.objectContaining({ actorId: 'operator-one', scopes: ['team', 'history'] }),
+    );
+
+    const search = await app.inject({
+      method: 'GET',
+      url: '/v1/admin/operations/search?q=protected&environment=staging',
+      headers: { origin },
+    });
+    expect(search.statusCode).toBe(404);
     await app.close();
   });
 
