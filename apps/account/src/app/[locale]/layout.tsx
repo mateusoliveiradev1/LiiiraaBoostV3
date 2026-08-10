@@ -273,6 +273,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
         <AccountNavigation
           alternateLocale={alternateLocale}
           authenticatedAction={authenticatedAction}
+          authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}
           authBrand={
             <a className="account-brand" href={publicHomeHref(locale, publicOrigin)}>
               <ProductLockup />
@@ -334,6 +335,7 @@ export default async function AccountLocaleLayout({ children, params }: AccountL
               locale={locale}
             />
           }
+          signInHref={localizedAuthHref('account-sign-in', locale)}
           supportHref={localizedHref('account-support', locale)}
           supportLabel={copy.help}
           surfaceLabel={copy.surface}

@@ -266,6 +266,10 @@ const SignInForm = ({
     () => createAccountAuth({ baseUrl: authorityBaseUrl, correlationId }),
     [authorityBaseUrl],
   );
+  const liveAuthority = useMemo(
+    () => getLiveAccountAuthority(authorityBaseUrl),
+    [authorityBaseUrl],
+  );
 
   const finishAuthentication = useCallback(async () => {
     if (desktopAuthorization === undefined) {
@@ -290,6 +294,7 @@ const SignInForm = ({
       if (!active) return;
       setLoading(false);
       if (result.status === 'signed-out') {
+        liveAuthority.markSessionUnavailable();
         setNotice(labels.signedOut);
       } else {
         setError(labels.unavailable);
@@ -298,7 +303,7 @@ const SignInForm = ({
     return () => {
       active = false;
     };
-  }, [auth, labels.signedOut, labels.unavailable, signOutRequested]);
+  }, [auth, labels.signedOut, labels.unavailable, liveAuthority, signOutRequested]);
 
   useEffect(() => {
     if (desktopAuthorization === undefined || signOutRequested) return;

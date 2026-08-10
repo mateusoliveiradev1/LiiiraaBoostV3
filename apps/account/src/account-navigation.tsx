@@ -7,14 +7,15 @@ import { resolveLocalizedCurrentRoute, type WebLocale } from '@liiiraa/web-core'
 import { ProductIcon, type ProductIconName } from '@liiiraa/design-system';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import {
   accountGoalForRoute,
   getAccountGoalNavigation,
   type AccountRoute,
 } from './account-production-model';
+import { getLiveAccountAuthority, isAccountSessionUnavailable } from './live-account-authority';
 
 export type AccountNavigationItem = Readonly<{
   href: string;
@@ -30,6 +31,7 @@ export type AccountNavigationGroup = Readonly<{
 type AccountNavigationProps = Readonly<{
   alternateLocale: WebLocale;
   authenticatedAction: AccountNavigationItem;
+  authorityBaseUrl: string;
   authBrand: ReactNode;
   authIntro: ReactNode;
   brand: ReactNode;
@@ -45,6 +47,7 @@ type AccountNavigationProps = Readonly<{
   locale: WebLocale;
   publicLink: ReactNode;
   roleGateway: ReactNode;
+  signInHref: string;
   supportHref: string;
   supportLabel: string;
   surfaceLabel: string;
@@ -117,6 +120,7 @@ function NavigationGroups({
 export function AccountNavigation({
   alternateLocale,
   authenticatedAction,
+  authorityBaseUrl,
   authBrand,
   authIntro,
   brand,
@@ -132,12 +136,16 @@ export function AccountNavigation({
   locale,
   publicLink,
   roleGateway,
+  signInHref,
   supportHref,
   supportLabel,
   surfaceLabel,
 }: AccountNavigationProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const inspectorDisclosureRef = useRef<HTMLDetailsElement>(null);
+  const authority = useMemo(() => getLiveAccountAuthority(authorityBaseUrl), [authorityBaseUrl]);
+  const [authorityResult, setAuthorityResult] = useState(() => authority.snapshot());
   useEffect(() => {
     const wideShell = window.matchMedia('(min-width: 1180px)');
     const synchronizeInspector = () => {
@@ -186,6 +194,14 @@ export function AccountNavigation({
       currentHref !== undefined && normalizePathname(href) === normalizePathname(currentHref),
   );
   const isAuthRoute = currentAuthRouteItems.length === 1;
+  const sessionUnavailable = isAccountSessionUnavailable(authorityResult);
+  useEffect(() => {
+    if (isAuthRoute) return;
+    return authority.subscribe(setAuthorityResult);
+  }, [authority, isAuthRoute]);
+  useEffect(() => {
+    if (!isAuthRoute && sessionUnavailable) router.replace(signInHref as Route);
+  }, [isAuthRoute, router, sessionUnavailable, signInHref]);
   const localizedAlternateRoute = resolveLocalizedCurrentRoute({
     pathname,
     securityBoundary: 'account-origin',
@@ -195,7 +211,7 @@ export function AccountNavigation({
     ? localizedAlternateRoute.value
     : fallbackLocaleHref;
 
-  if (isAuthRoute) {
+  if (isAuthRoute || sessionUnavailable) {
     return (
       <div className="account-auth-shell">
         <header className="account-auth-shell__header">

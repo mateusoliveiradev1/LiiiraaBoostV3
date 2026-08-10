@@ -13,6 +13,12 @@ export const ACCOUNT_LIVE_REFRESH_MS = 5_000;
 
 type LiveAccountAuthorityListener = (result: AccountAuthorityReadResult | null) => void;
 
+export const isAccountSessionUnavailable = (result: AccountAuthorityReadResult | null): boolean =>
+  result !== null &&
+  result.status === 'error' &&
+  'code' in result &&
+  result.code === 'unauthorized';
+
 export class LiveAccountAuthority {
   readonly #authority: AccountAuthority;
   readonly #listeners = new Set<LiveAccountAuthorityListener>();
@@ -31,6 +37,10 @@ export class LiveAccountAuthority {
 
   public snapshot(): AccountAuthorityReadResult | null {
     return this.#result;
+  }
+
+  public markSessionUnavailable(): void {
+    this.#publish({ code: 'unauthorized', status: 'error' });
   }
 
   #publish(result: AccountAuthorityReadResult): void {
