@@ -181,6 +181,9 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-10T14:09:52.482Z`, the owner responded `pass` after closing the packaged desktop
   without signing out and reopening it: the authenticated account was restored from Windows
   Credential Manager without reopening the browser or requesting credentials.
+- At `2026-08-10T14:13:10.599Z`, the owner supplied an incognito staging screenshot showing a
+  Free tester identity rejected by the isolated administrative origin. The Admin sign-in surface
+  reported that it could not validate administrative access and exposed no protected dashboard data.
 
 ## Human real-authority observations
 
@@ -200,7 +203,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                        | PASS    |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
-| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
+| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                       | PASS    |
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
 | Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
 | Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`     | PENDING |
