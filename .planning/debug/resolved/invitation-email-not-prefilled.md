@@ -1,8 +1,8 @@
 ---
-status: verifying
+status: resolved
 trigger: 'ja nao apareceu preenchido nao'
 created: 2026-08-10T00:00:00-03:00
-updated: 2026-08-10T10:20:00-03:00
+updated: 2026-08-10T10:30:03-03:00
 ---
 
 ## Symptoms
@@ -17,7 +17,7 @@ updated: 2026-08-10T10:20:00-03:00
 - hypothesis: Confirmed. Canonical-link repair preserved the invitation token but stripped the recipient fragment required by the account client to pre-fill and lock the e-mail.
 - test: Repair a legacy protected payload and require each canonical URL to contain the exact base64url recipient fragment; refresh only the single remaining unredeemed tester invitation.
 - expecting: The refreshed owner-only URL retains the same e-mail authority in PostgreSQL and opens registration with a pre-filled, read-only recipient.
-- next_action: Owner opens the refreshed owner-only link and confirms that the exact invited e-mail is pre-filled and read-only before completing tester signup.
+- next_action: None. The owner confirmed the corrected published invitation flow with `pass`.
 
 ## Evidence
 
@@ -41,6 +41,11 @@ updated: 2026-08-10T10:20:00-03:00
   found: Exactly one active tester invitation was refreshed. The owner-only output contains one future-dated canonical Account URL with one bounded token and a recipient fragment matching its protected e-mail. The remote encrypted artifact and temporary recovery keys were deleted after validation.
   implication: The corrected third link is available only in the protected local file and is ready for published Account UAT.
 
+- timestamp: 2026-08-10T10:30:03-03:00
+  checked: Owner execution of the refreshed invitation on published Account.
+  found: The owner responded `pass` after being instructed to verify the pre-filled, read-only invited e-mail and complete account creation.
+  implication: The corrected link and persistent invited-signup path pass human real-authority UAT.
+
 ## Eliminated
 
 - Account hydration/state loss: the existing effect correctly projects and locks a valid recipient fragment.
@@ -50,7 +55,7 @@ updated: 2026-08-10T10:20:00-03:00
 
 - root_cause: Canonical-link repair preserved the bearer token but stripped the `#recipient` fragment used by Account to project and lock the invited e-mail.
 - fix: Reconstruct the recipient fragment from the protected output e-mail and add a fail-closed encrypted refresh mode that replaces exactly one active tester invitation.
-- verification: Regression-first tests, all 237 API tests, TypeScript, ESLint, formatting, protected GitHub refresh, and secret-free local URL validation pass. Owner browser confirmation remains pending.
+- verification: Regression-first tests, all 237 API tests, TypeScript, ESLint, formatting, protected GitHub refresh, secret-free local URL validation, and owner-confirmed published signup pass.
 - files_changed:
   - .github/workflows/phase-4-invitation-recovery.yml
   - apps/api/src/staging/provision-invitations.test.ts

@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: '04-40 Task 03: corrected third tester invitation ready in owner-only local output; redemption and remaining human UAT pending'
-last_updated: '2026-08-10T13:20:00.000Z'
-last_activity: 2026-08-10 -- Recipient-bound tester invitation refreshed and validated
+stopped_at: '04-40 Task 03: protected tester signup passed; account session persistence and remaining human UAT pending'
+last_updated: '2026-08-10T13:30:03.208Z'
+last_activity: 2026-08-10 -- Corrected tester invitation passed owner UAT
 progress:
   total_phases: 10
   completed_phases: 3
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
 Plan: 63 of 66
 Status: Executing Phase 04
-Last activity: 2026-08-10 -- Recipient-bound tester invitation refreshed and validated
+Last activity: 2026-08-10 -- Corrected tester invitation passed owner UAT
 
 Progress: [██████████] 99%
 

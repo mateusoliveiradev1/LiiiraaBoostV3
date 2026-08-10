@@ -163,7 +163,8 @@ Remaining tester invitation refresh supplement:
   matching recipient fragment without printing the e-mail or token.
 - Remote encrypted artifact `9064091118` and temporary recovery keys were deleted after local
   validation. The corrected URL remains only in the owner-protected local file outside Git.
-- Human browser pre-fill, read-only state, redemption, and persistence remain pending.
+- At `2026-08-10T13:30:03.208Z`, the owner responded `pass` after verifying the corrected
+  pre-filled/read-only recipient flow and completing the published signup.
 
 ## Human real-authority observations
 
@@ -176,7 +177,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`              | PASS    |
 | Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
 | The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
-| Protected tester invitations create the intended persistent accounts                                   | one corrected link ready `31392110895` | PENDING |
+| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`        | PASS    |
 | Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                              | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
