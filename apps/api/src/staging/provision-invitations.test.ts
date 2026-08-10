@@ -101,8 +101,9 @@ describe('secret-driven staging invitation provisioning', () => {
     expect(repaired.invitations.map(({ email }) => email)).toEqual(emails);
     expect(
       repaired.invitations.every(
-        ({ invitationUrl }) =>
-          invitationUrl === `https://account.staging.example/pt-BR/register?invitation=${token}`,
+        ({ email, invitationUrl }) =>
+          invitationUrl ===
+          `https://account.staging.example/pt-BR/register?invitation=${token}#recipient=${Buffer.from(email).toString('base64url')}`,
       ),
     ).toBe(true);
     expect(() =>
@@ -133,6 +134,64 @@ describe('secret-driven staging invitation provisioning', () => {
     ).resolves.toEqual({ created: 0, skipped: 3, status: 'complete' });
     expect(invitations.issueInvitation).not.toHaveBeenCalled();
     expect(openProtectedOutput).not.toHaveBeenCalled();
+  });
+
+  it('refreshes only the single remaining active tester invitation with a recipient-bound URL', async () => {
+    const committed: string[] = [];
+    const remainingEmail = emails[2];
+    const database = {
+      query: vi.fn((statement: string, values?: readonly unknown[]) => {
+        if (statement.includes('UPDATE identity_invitations')) {
+          expect(values).toEqual([
+            emails.map((email) => digest(email)),
+            '2030-01-15T12:00:00.000Z',
+          ]);
+          return Promise.resolve({ rowCount: 1, rows: [{ email: digest(remainingEmail) }] });
+        }
+        expect(values).toEqual([digest(remainingEmail), '2030-01-15T12:00:00.000Z']);
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+    };
+
+    const result = await provisionStagingInvitations(
+      {
+        ...environment(),
+        STAGING_INVITATION_REISSUE_ACTIVE: 'refresh-single-active-tester-invitation',
+      },
+      {
+        clock: { now: () => new Date('2030-01-15T12:00:00.000Z') },
+        database,
+        invitations: {
+          issueInvitation: vi.fn((input: Readonly<{ email: string; expiresAt: string }>) =>
+            Promise.resolve({
+              expiresAt: input.expiresAt,
+              token: `replacement-${digest(input.email)}`,
+              tokenDigest: digest(`replacement-${input.email}`),
+            }),
+          ),
+        },
+        openProtectedOutput: vi.fn(() =>
+          Promise.resolve({
+            abort: vi.fn(() => Promise.resolve()),
+            commit: vi.fn((payload: string) => {
+              committed.push(payload);
+              return Promise.resolve();
+            }),
+          }),
+        ),
+        repositoryRoot: 'C:\\workspace\\liiiraa-boost',
+      },
+    );
+
+    expect(result).toEqual({ created: 1, skipped: 2, status: 'complete' });
+    const protectedPayload = JSON.parse(committed[0] ?? '{}') as {
+      invitations?: readonly { email: string; invitationUrl: string }[];
+    };
+    expect(protectedPayload.invitations).toHaveLength(1);
+    expect(protectedPayload.invitations?.[0]).toMatchObject({ email: remainingEmail });
+    expect(protectedPayload.invitations?.[0]?.invitationUrl).toContain(
+      `#recipient=${Buffer.from(remainingEmail).toString('base64url')}`,
+    );
   });
 
   it('reissues only the two owner-approved active tester invitations for the protected recipients', async () => {
@@ -431,9 +490,8 @@ describe('secret-driven staging invitation provisioning', () => {
 
     expect(workflow).toContain('secrets.STAGING_INVITATION_EMAILS_JSON');
     expect(workflow).toContain('secrets.STAGING_DATABASE_URL');
-    expect(workflow).toContain(
-      'STAGING_INVITATION_REISSUE_ACTIVE: replace-exposed-owner-invitation',
-    );
+    expect(workflow).toContain("inputs.confirmation == 'refresh-single-active-tester-invitation'");
+    expect(workflow).toContain('STAGING_INVITATION_REISSUE_ACTIVE: ${{ inputs.confirmation }}');
     expect(workflow).toContain('inputs.exposed_token_digest');
     expect(workflow).toContain('inputs.owner_email_digest');
     expect(workflow).toContain('secrets.STAGING_INVITATION_OWNER_TEST_EMAIL');

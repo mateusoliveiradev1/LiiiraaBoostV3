@@ -171,6 +171,9 @@ export const repairInvitationOutputPayload = (payload: string, accountOrigin: st
       return reject('OUTPUT_PAYLOAD');
     }
     url.pathname = '/pt-BR/register';
+    url.hash = new URLSearchParams({
+      recipient: Buffer.from(email, 'utf8').toString('base64url'),
+    }).toString();
     return {
       email,
       expiresAt,
@@ -255,6 +258,7 @@ export const provisionStagingInvitations = async (
   const reissueMode = environment.STAGING_INVITATION_REISSUE_ACTIVE;
   const compensating = reissueMode === 'compensate-run-31300134764-exactly-three';
   const replacingExposed = reissueMode === 'replace-exposed-owner-invitation';
+  const refreshingSingle = reissueMode === 'refresh-single-active-tester-invitation';
   let candidateEmails = emails;
   if (replacingExposed) {
     const tokenDigest = environment.STAGING_INVITATION_EXPOSED_TOKEN_DIGEST;
@@ -302,6 +306,24 @@ export const provisionStagingInvitations = async (
       return reject('REPLACEMENT_COUNT');
     }
     candidateEmails = [replacementEmail];
+  } else if (refreshingSingle) {
+    const invalidated = await dependencies.database.query(
+      `UPDATE identity_invitations
+       SET expires_at = $2
+       WHERE email = ANY($1::text[])
+         AND role = 'tester'
+         AND redeemed_at IS NULL
+         AND expires_at > $2
+       RETURNING email`,
+      [emails.map(digestEmail), nowIso],
+    );
+    if ((invalidated.rowCount ?? invalidated.rows.length) !== 1) {
+      return reject('REFRESH_COUNT');
+    }
+    const remainingDigest = invalidated.rows[0]?.['email'];
+    const remainingEmail = emails.find((email) => digestEmail(email) === remainingDigest);
+    if (remainingEmail === undefined) return reject('REFRESH_EMAIL');
+    candidateEmails = [remainingEmail];
   } else if (reissueMode === 'owner-approved-exactly-two' || compensating) {
     const expectedCount = compensating ? 3 : 2;
     const after = environment.STAGING_INVITATION_REISSUE_AFTER;
@@ -426,7 +448,8 @@ const run = async (): Promise<void> => {
         repositoryRoot: process.cwd(),
       });
       const expectedReissueCount =
-        environment.STAGING_INVITATION_REISSUE_ACTIVE === 'replace-exposed-owner-invitation'
+        environment.STAGING_INVITATION_REISSUE_ACTIVE === 'replace-exposed-owner-invitation' ||
+        environment.STAGING_INVITATION_REISSUE_ACTIVE === 'refresh-single-active-tester-invitation'
           ? 1
           : 3;
       if (

@@ -13,11 +13,13 @@ on:
         type: string
       exposed_token_digest:
         description: SHA-256 digest of the exposed invitation token (never the raw token)
-        required: true
+        required: false
+        default: ''
         type: string
       owner_email_digest:
         description: SHA-256 digest of the protected owner recipient email
-        required: true
+        required: false
+        default: ''
         type: string
 
 permissions:
@@ -29,7 +31,7 @@ concurrency:
 
 jobs:
   recover:
-    if: inputs.confirmation == 'replace-exposed-owner-invitation'
+    if: inputs.confirmation == 'replace-exposed-owner-invitation' || inputs.confirmation == 'refresh-single-active-tester-invitation'
     runs-on: ubuntu-24.04
     environment: staging-api
     timeout-minutes: 15
@@ -58,7 +60,7 @@ jobs:
           pnpm --filter @liiiraa/api staging:invitation-crypto encrypt "$PREFLIGHT_PLAINTEXT" "$PREFLIGHT_ENCRYPTED"
           test ! -e "$PREFLIGHT_PLAINTEXT"
           test -s "$PREFLIGHT_ENCRYPTED"
-      - name: Replace only the exposed owner invitation and encrypt before commit
+      - name: Refresh only the explicitly authorized invitation and encrypt before commit
         env:
           ACCOUNT_STAGING_ORIGIN: https://liiiraa-boost-account-staging.vercel.app
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
@@ -69,7 +71,7 @@ jobs:
           STAGING_INVITATION_REPLACEMENT_EMAIL: ${{ secrets.STAGING_INVITATION_OWNER_TEST_EMAIL }}
           STAGING_INVITATION_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.json
           STAGING_INVITATION_RECOVERY_PUBLIC_KEY_B64: ${{ inputs.recovery_public_key_b64 }}
-          STAGING_INVITATION_REISSUE_ACTIVE: replace-exposed-owner-invitation
+          STAGING_INVITATION_REISSUE_ACTIVE: ${{ inputs.confirmation }}
         run: pnpm --filter @liiiraa/api staging:provision-invitations
       - name: Assert encrypted output exists and plaintext no longer exists
         run: |
