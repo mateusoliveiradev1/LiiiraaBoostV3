@@ -150,6 +150,21 @@ Owner signup recovery supplement:
 - Owner verification completed account creation and desktop login without the prior CSP,
   invitation-rejection loop, or server error.
 
+Remaining tester invitation refresh supplement:
+
+- The owner reported that the remaining protected link reached the canonical registration route
+  but did not pre-fill the invited e-mail.
+- Root cause: canonical-link repair retained the valid token while removing the protected
+  `#recipient` fragment consumed by Account for read-only e-mail projection.
+- GitHub run `31392110895`, exact revision
+  `da5fd181a778e5ae474f86b6e7161deb60ca8f6a`, aborted unless PostgreSQL returned exactly one active,
+  unredeemed tester invitation and then issued exactly one recipient-bound replacement.
+- Local validation proved one future-dated canonical Account staging URL, one bounded token, and a
+  matching recipient fragment without printing the e-mail or token.
+- Remote encrypted artifact `9064091118` and temporary recovery keys were deleted after local
+  validation. The corrected URL remains only in the owner-protected local file outside Git.
+- Human browser pre-fill, read-only state, redemption, and persistence remain pending.
+
 ## Human real-authority observations
 
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
@@ -161,7 +176,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`              | PASS    |
 | Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
 | The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
-| Three invitation URLs create three persistent tester accounts                                          | _pending protected reissue_            | PENDING |
+| Protected tester invitations create the intended persistent accounts                                   | one corrected link ready `31392110895` | PENDING |
 | Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                              | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
