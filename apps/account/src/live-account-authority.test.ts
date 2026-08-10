@@ -5,7 +5,11 @@ import type {
   AccountAuthorityProjection,
   AccountAuthorityReadResult,
 } from './account-authority';
-import { ACCOUNT_LIVE_REFRESH_MS, LiveAccountAuthority } from './live-account-authority';
+import {
+  ACCOUNT_LIVE_REFRESH_MS,
+  isAccountSessionUnavailable,
+  LiveAccountAuthority,
+} from './live-account-authority';
 
 const projection = (displayName: string, version: string): AccountAuthorityProjection =>
   ({
@@ -38,6 +42,24 @@ afterEach(() => {
 });
 
 describe('live account authority', () => {
+  it('publishes an immediate unavailable session snapshot after browser sign-out', () => {
+    const authority = {
+      project: vi.fn<AccountAuthority['project']>(() => new Promise(() => undefined)),
+      updateProfile: vi.fn<AccountAuthority['updateProfile']>(),
+    } satisfies AccountAuthority;
+    const live = new LiveAccountAuthority(authority);
+    const listener = vi.fn<(result: AccountAuthorityReadResult | null) => void>();
+    const unsubscribe = live.subscribe(listener);
+    listener.mockClear();
+
+    live.markSessionUnavailable();
+
+    expect(live.snapshot()).toEqual({ code: 'unauthorized', status: 'error' });
+    expect(isAccountSessionUnavailable(live.snapshot())).toBe(true);
+    expect(listener).toHaveBeenCalledWith({ code: 'unauthorized', status: 'error' });
+    unsubscribe();
+  });
+
   it('shares one periodic remote projection with every open account surface', async () => {
     const authority = {
       project: vi
