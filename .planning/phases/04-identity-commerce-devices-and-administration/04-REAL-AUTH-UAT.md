@@ -3,7 +3,7 @@ phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
 tested_commit: 60d6f37984c5d3b9471f05f075acd253c75feb14
-updated: 2026-08-09T17:37:57.3289694Z
+updated: 2026-08-10T15:15:00.000Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -187,6 +187,10 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-10T14:24:01.045Z`, the owner confirmed that one Admin logout revoked only the isolated
   administrative session and returned to the independently authenticated Account portal. Browser
   Back did not restore the Admin dashboard; the Account session correctly remained active.
+- At `2026-08-10T15:15:00.000Z`, the owner exercised read-only function simulation in Pessoas. The
+  interface clearly identified `operations` as simulated and retained `security` as the real active
+  function, but exposed no explicit control to leave simulation. This checkpoint remains open until
+  the missing exit action is published and retested.
 
 ## Human real-authority observations
 
@@ -210,6 +214,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
 | Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
 | Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`     | PENDING |
+| Read-only function simulation preserves real authority and provides an explicit exit                   | owner screenshot; exit control missing | ISSUE   |
 | Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`  | PENDING |
 | Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`              | PENDING |
 | Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`  | PENDING |
