@@ -165,6 +165,9 @@ Remaining tester invitation refresh supplement:
   validation. The corrected URL remains only in the owner-protected local file outside Git.
 - At `2026-08-10T13:30:03.208Z`, the owner responded `pass` after verifying the corrected
   pre-filled/read-only recipient flow and completing the published signup.
+- At `2026-08-10T13:37:03.707Z`, the owner responded `pass` after closing and reopening a normal
+  browser and confirming that the authenticated Account session persisted. A separate incognito
+  check correctly discarded the session when the private window was closed.
 
 ## Human real-authority observations
 
@@ -178,7 +181,8 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
 | The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
 | Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`        | PASS    |
-| Account login, reload, browser restart, profile/locale mutation, and logout persist in PostgreSQL      | _pending_                              | PENDING |
+| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                        | PASS    |
+| Profile/locale mutation and logout persist in PostgreSQL                                               | _pending_                              | PENDING |
 | Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | _pending_                              | PENDING |
 | Web/admin/desktop logout and server-side revocation remove the corresponding session                   | _pending_                              | PENDING |
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | _pending_                              | PENDING |
