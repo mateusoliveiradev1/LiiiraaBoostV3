@@ -371,6 +371,7 @@
 
 .simulationBanner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--lb-space-2);
   padding: var(--lb-space-3) var(--lb-space-4);
@@ -379,9 +380,13 @@
   background: var(--lb-canvas-inset);
 }
 
-.simulationBanner span:last-child {
+.simulationBanner > span {
   margin-inline-start: auto;
   font-family: var(--lb-font-data);
+}
+
+.simulationBanner button {
+  flex: 0 0 auto;
 }
 
 .memberFacts {

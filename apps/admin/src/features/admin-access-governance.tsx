@@ -306,6 +306,7 @@ type GovernanceAction =
       member: AdminTeamMemberProjectionJson;
       targetFunction: AdminFunctionJson;
     }>
+  | Readonly<{ kind: 'exit-simulation' }>
   | Readonly<{
       kind: 'switch';
       member: AdminTeamMemberProjectionJson;
@@ -661,6 +662,9 @@ const MemberInspector = ({
           <ProductIcon name="search" size={18} />
           <strong>{labels.noActionsSimulation}</strong>
           <span>{model.simulatedFunction}</span>
+          <LbButton onPress={() => onAction?.({ kind: 'exit-simulation' })} variant="quiet">
+            {labels.simulationExit}
+          </LbButton>
         </div>
       )}
       <dl className={styles['memberFacts']}>
@@ -1183,6 +1187,10 @@ export const AdminAccessGovernance = ({
     );
   };
   const onAction = (action: GovernanceAction) => {
+    if (action.kind === 'exit-simulation') {
+      setSimulatedFunction(undefined);
+      return;
+    }
     if (action.kind === 'simulate') {
       const simulation = projectFunctionSimulation({
         assignedFunctions: action.member.functions,
