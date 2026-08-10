@@ -172,6 +172,9 @@ Remaining tester invitation refresh supplement:
   display name, saving it, and confirming that the updated profile survived a page reload.
 - At `2026-08-10T13:48:49.546Z`, the owner responded `pass` after switching the authenticated
   Account locale to English and confirming that the selected locale survived a page reload.
+- At `2026-08-10T13:58:42.747Z`, the owner confirmed that logout removed private authority, but
+  browser Back restored the protected route inside an unauthenticated account shell. The secure
+  denial passed; UX approval remains pending the staging retest of fix `e647013`.
 
 ## Human real-authority observations
 
