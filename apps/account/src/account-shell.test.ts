@@ -229,6 +229,25 @@ describe('account shell', () => {
     expect(layoutSource).not.toContain('astra.player@example.com');
   });
 
+  it('returns history-restored protected routes to the auth shell after logout', () => {
+    const layoutSource = readFileSync(
+      new URL('./app/[locale]/layout.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigationSource = readFileSync(
+      new URL('./account-navigation.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(layoutSource).toContain('authorityBaseUrl={ACCOUNT_BROWSER_AUTHORITY_BASE_URL}');
+    expect(layoutSource).toContain("signInHref={localizedAuthHref('account-sign-in', locale)}");
+    expect(navigationSource).toContain('getLiveAccountAuthority');
+    expect(navigationSource).toContain('authority.snapshot()');
+    expect(navigationSource).toContain('isAccountSessionUnavailable(authorityResult)');
+    expect(navigationSource).toContain('router.replace(signInHref as Route)');
+    expect(navigationSource).toContain('if (isAuthRoute || sessionUnavailable)');
+  });
+
   it('uses explicit Phosphor semantics for every authenticated responsibility', () => {
     const layoutSource = readFileSync(
       new URL('./app/[locale]/layout.tsx', import.meta.url),
