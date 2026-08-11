@@ -332,7 +332,14 @@ export const createPostgresStagingStrongAuthRepository = (
           : actor.role === 'support'
             ? ['support:reply', 'support:view']
             : actor.role === 'operations'
-              ? ['device:manage', 'entitlement:correct']
+              ? [
+                  'device:manage',
+                  'entitlement:correct',
+                  'beta-invitations:manage',
+                  'beta-invitations:preflight',
+                  'beta-invitations:issue',
+                  'beta-invitations:batch',
+                ]
               : ['audit:export', 'audit:reveal-sensitive'];
       const ownerScopes =
         actor.role === 'security'
@@ -347,11 +354,12 @@ export const createPostgresStagingStrongAuthRepository = (
               'history',
               'delegations',
               'reviews',
+              'invitations',
             ]
           : actor.role === 'support'
             ? ['support-cases']
             : actor.role === 'operations'
-              ? ['devices', 'entitlements']
+              ? ['devices', 'entitlements', 'invitations']
               : ['audit-events'];
       await transaction.query(
         `INSERT INTO admin_governance_memberships

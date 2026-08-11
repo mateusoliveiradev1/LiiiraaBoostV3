@@ -17,8 +17,8 @@ describe('admin governance UI', () => {
       'utf8',
     );
 
-    expect(navigation).toContain("href={`/${locale}/admin/people/team`}");
-    expect(navigation).toContain("href={`/${locale}/admin/people/invitations`}");
+    expect(navigation).toContain('href={`/${locale}/admin/people/team`}');
+    expect(navigation).toContain('href={`/${locale}/admin/people/invitations`}');
     expect(navigation).toContain('Equipe e acessos');
     expect(navigation).toContain('Convites da beta');
     expect(governance).toContain('<AdminPeopleNavigation current="team" locale={props.locale} />');
@@ -35,8 +35,8 @@ describe('admin governance UI', () => {
 
     expect(source).toContain("className={styles['errorState']}");
     expect(source).toContain("className={styles['errorActions']}");
-    expect(source).toContain("href={`/${props.locale}/admin/people/team`}");
-    expect(source).toContain('window.location.reload()');
+    expect(source).toContain('href={`/${props.locale}/admin/people/team`}');
+    expect(source).toContain('window.location.reload();');
   });
 
   it('offers an explicit way to leave a read-only function simulation', () => {

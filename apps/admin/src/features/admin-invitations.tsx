@@ -23,6 +23,7 @@ import type {
   AdminQueryResult,
 } from '../admin-authority';
 import { useAdminAuthority } from './admin-authority';
+import { AdminPeopleNavigation } from './admin-people-navigation';
 import {
   classifyInvitationActions,
   projectInvitationJob,
@@ -252,6 +253,23 @@ const copy = Object.freeze({
     timeline: 'Linha do tempo imutável',
     title: 'Convites da beta privada',
     updated: 'Atualizado',
+  }),
+});
+
+const errorRecoveryCopy = Object.freeze({
+  en: Object.freeze({
+    detail:
+      'Refresh the protected session or return to People without losing your current account session.',
+    retry: 'Try again',
+    returnToPeople: 'Return to People',
+    title: 'This workspace could not confirm its authority',
+  }),
+  'pt-BR': Object.freeze({
+    detail:
+      'Atualize a sessão protegida ou volte para Pessoas sem encerrar a sessão atual da conta.',
+    retry: 'Tentar novamente',
+    returnToPeople: 'Voltar para Pessoas',
+    title: 'Esta área não conseguiu confirmar sua autoridade',
   }),
 });
 
@@ -807,11 +825,13 @@ export const AdminInvitationsView = (props: AdminInvitationsViewProps) => {
             <p>{labels.description}</p>
           </div>
         </header>
+        <AdminPeopleNavigation current="invitations" locale={props.locale} />
         <LbSkeletonRegion label={labels.loading} rows={8} />
       </article>
     );
   }
   if (props.state === 'error') {
+    const recovery = errorRecoveryCopy[props.locale];
     return (
       <article className={styles['workspace']} data-invitation-state="error">
         <header className={styles['routeHeader']}>
@@ -820,11 +840,32 @@ export const AdminInvitationsView = (props: AdminInvitationsViewProps) => {
             <p>{labels.description}</p>
           </div>
         </header>
-        <LbOperationalNotice
-          detail={`${labels.errorDetail}${props.errorCode ? ` · ${props.errorCode}` : ''}`}
-          state="degraded"
-          title={labels.errorTitle}
-        />
+        <AdminPeopleNavigation current="invitations" locale={props.locale} />
+        <section className={styles['errorState']}>
+          <div className={styles['errorSummary']}>
+            <ProductIcon name="shield" size={24} />
+            <div>
+              <h2>{recovery.title}</h2>
+              <p>{recovery.detail}</p>
+            </div>
+          </div>
+          <LbOperationalNotice
+            detail={`${labels.errorDetail}${props.errorCode ? ` · ${props.errorCode}` : ''}`}
+            state="degraded"
+            title={labels.errorTitle}
+          />
+          <div className={styles['errorActions']}>
+            <a href={`/${props.locale}/admin/people/team`}>{recovery.returnToPeople}</a>
+            <LbButton
+              onPress={() => {
+                window.location.reload();
+              }}
+              variant="secondary"
+            >
+              {recovery.retry}
+            </LbButton>
+          </div>
+        </section>
       </article>
     );
   }
@@ -854,6 +895,7 @@ export const AdminInvitationsView = (props: AdminInvitationsViewProps) => {
           {model.authority.state}
         </span>
       </header>
+      <AdminPeopleNavigation current="invitations" locale={props.locale} />
       <Notice locale={props.locale} model={model} />
       {model.mutationFeedback?.status === 'conflict' ? (
         <LbOperationalNotice

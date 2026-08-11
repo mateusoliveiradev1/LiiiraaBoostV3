@@ -24,6 +24,8 @@ type InvitationCapability =
   | 'beta-invitations:manage'
   | 'beta-invitations:batch';
 
+const INVITATION_ADMIN_FUNCTIONS = new Set(['operations', 'security']);
+
 export interface AdminInvitationRouteSession {
   readonly actorId: string;
   readonly activeFunction: string;
@@ -106,7 +108,8 @@ const authorize = async (
     return null;
   const session = await dependencies.resolveSession(request);
   if (
-    session?.activeFunction !== 'operations' ||
+    session === null ||
+    !INVITATION_ADMIN_FUNCTIONS.has(session.activeFunction) ||
     !session.capabilities.includes(capability) ||
     !session.scopes.includes('invitations')
   ) {

@@ -1,0 +1,104 @@
+.navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--lb-admin-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--lb-admin-surface) 78%, transparent);
+}
+
+.navigation a {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 76px;
+  align-items: center;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-3) var(--lb-space-4);
+  color: var(--lb-text-secondary);
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.navigation a + a {
+  border-inline-start: 1px solid var(--lb-admin-border);
+}
+
+.navigation a::after {
+  position: absolute;
+  inset-inline: var(--lb-space-4);
+  inset-block-end: 0;
+  height: 2px;
+  background: transparent;
+  content: '';
+}
+
+.navigation a:hover {
+  background: color-mix(in srgb, var(--lb-cobalt-action) 8%, transparent);
+  color: var(--lb-text-primary);
+}
+
+.navigation a[data-current='true'] {
+  background: color-mix(in srgb, var(--lb-cobalt-action) 12%, var(--lb-admin-surface));
+  color: var(--lb-text-primary);
+}
+
+.navigation a[data-current='true']::after {
+  background: var(--lb-accent-cyan);
+}
+
+.navigation span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.navigation strong {
+  font-size: 0.94rem;
+  line-height: 1.25;
+}
+
+.navigation small {
+  overflow: hidden;
+  color: var(--lb-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation a:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--lb-focus-ring);
+  outline-offset: -3px;
+}
+
+@media (max-width: 720px) {
+  .navigation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .navigation a {
+    min-height: 64px;
+  }
+
+  .navigation a + a {
+    border-block-start: 1px solid var(--lb-admin-border);
+    border-inline-start: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation a {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .navigation,
+  .navigation a + a {
+    border-color: CanvasText;
+  }
+}

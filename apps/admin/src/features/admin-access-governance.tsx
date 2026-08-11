@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type SyntheticEve
 
 import type { AdminMutationResult, AdminQueryResult } from '../admin-authority';
 import { useAdminAuthority } from './admin-authority';
+import { AdminPeopleNavigation } from './admin-people-navigation';
 import {
   deriveAccessAuthorityState,
   maskGovernanceHistory,
@@ -822,6 +823,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
             <p>{labels.subtitle}</p>
           </div>
         </header>
+        <AdminPeopleNavigation current="team" locale={props.locale} />
         <LbSkeletonRegion label={labels.loading} rows={8} />
       </article>
     );
@@ -834,6 +836,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
             <p>{labels.subtitle}</p>
           </div>
         </header>
+        <AdminPeopleNavigation current="team" locale={props.locale} />
         <LbOperationalNotice
           detail={`${labels.authorityDeniedDetail}${props.code ? ` · ${props.code}` : ''}`}
           state="degraded"
@@ -882,6 +885,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
           <span>{formatDate(model.observedAt, props.locale)}</span>
         </div>
       </header>
+      <AdminPeopleNavigation current="team" locale={props.locale} />
       {notice === null ? null : (
         <LbOperationalNotice
           action={

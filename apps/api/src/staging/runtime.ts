@@ -1927,19 +1927,19 @@ export const createPersistentStagingAdminAuthority = ({
       queries: invitationQueries(database),
       resolveSession: async (request: FastifyRequest) => {
         const session = await resolveSession(request);
-        return session?.activeFunction === 'operations'
-          ? {
-              actorId: session.actorId,
-              activeFunction: session.activeFunction,
-              capabilities: [
-                'beta-invitations:preflight',
-                'beta-invitations:issue',
-                'beta-invitations:manage',
-                'beta-invitations:batch',
-              ] as const,
-              scopes: ['invitations'] as const,
-            }
-          : null;
+        if (session === null || !['operations', 'security'].includes(session.activeFunction))
+          return null;
+        return {
+          actorId: session.actorId,
+          activeFunction: session.activeFunction,
+          capabilities: [
+            'beta-invitations:preflight',
+            'beta-invitations:issue',
+            'beta-invitations:manage',
+            'beta-invitations:batch',
+          ] as const,
+          scopes: ['invitations'] as const,
+        };
       },
       rateLimit,
     },
