@@ -62,7 +62,7 @@ jobs:
           test -s "$PREFLIGHT_ENCRYPTED"
       - name: Refresh only the explicitly authorized invitation and encrypt before commit
         env:
-          ACCOUNT_STAGING_ORIGIN: https://liiiraa-boost-account-staging.vercel.app
+          ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           STAGING_INVITATION_ENCRYPTED_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-invitations.encrypted.json
           STAGING_INVITATION_EMAILS_JSON: ${{ secrets.STAGING_INVITATION_EMAILS_JSON }}

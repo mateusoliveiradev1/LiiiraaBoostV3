@@ -490,6 +490,7 @@ describe('secret-driven staging invitation provisioning', () => {
 
     expect(workflow).toContain('secrets.STAGING_INVITATION_EMAILS_JSON');
     expect(workflow).toContain('secrets.STAGING_DATABASE_URL');
+    expect(workflow).toContain('ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}');
     expect(workflow).toContain("inputs.confirmation == 'refresh-single-active-tester-invitation'");
     expect(workflow).toContain('STAGING_INVITATION_REISSUE_ACTIVE: ${{ inputs.confirmation }}');
     expect(workflow).toContain('inputs.exposed_token_digest');

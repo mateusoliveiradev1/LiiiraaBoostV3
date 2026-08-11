@@ -165,18 +165,18 @@ fn desktop_sign_in_uses_the_system_browser_and_forwards_only_api_exchange_eviden
 fn admin_handoff_opens_only_the_exact_configured_https_origin() {
     let browser = RecordingSystemBrowser::default();
 
-    open_admin_in_system_browser(&browser, "https://liiiraa-boost-admin-staging.vercel.app")
+    open_admin_in_system_browser(&browser, "https://admin.liiiraaboost.com.br")
         .expect("exact configured HTTPS Admin origin should open");
     assert_eq!(
         browser.opened_urls.borrow().as_slice(),
-        ["https://liiiraa-boost-admin-staging.vercel.app"]
+        ["https://admin.liiiraaboost.com.br"]
     );
 
     for rejected in [
-        "http://liiiraa-boost-admin-staging.vercel.app",
-        "https://liiiraa-boost-admin-staging.vercel.app/operations",
-        "https://liiiraa-boost-admin-staging.vercel.app?token=forbidden",
-        "https://user@liiiraa-boost-admin-staging.vercel.app",
+        "http://admin.liiiraaboost.com.br",
+        "https://admin.liiiraaboost.com.br/operations",
+        "https://admin.liiiraaboost.com.br?token=forbidden",
+        "https://user@admin.liiiraaboost.com.br",
     ] {
         assert_eq!(
             open_admin_in_system_browser(&browser, rejected),
@@ -192,19 +192,19 @@ fn subscription_handoff_opens_only_the_configured_account_route_and_locale() {
 
     open_account_subscription_in_system_browser(
         &browser,
-        "https://liiiraa-boost-account-staging.vercel.app",
+        "https://conta.liiiraaboost.com.br",
         "pt-BR",
     )
     .expect("bounded Account subscription route should open");
     assert_eq!(
         browser.opened_urls.borrow().as_slice(),
-        ["https://liiiraa-boost-account-staging.vercel.app/pt-BR/account/subscription"]
+        ["https://conta.liiiraaboost.com.br/pt-BR/account/subscription"]
     );
 
     for rejected_origin in [
-        "http://liiiraa-boost-account-staging.vercel.app",
-        "https://liiiraa-boost-account-staging.vercel.app/pt-BR/account/subscription",
-        "https://user@liiiraa-boost-account-staging.vercel.app",
+        "http://conta.liiiraaboost.com.br",
+        "https://conta.liiiraaboost.com.br/pt-BR/account/subscription",
+        "https://user@conta.liiiraaboost.com.br",
     ] {
         assert_eq!(
             open_account_subscription_in_system_browser(&browser, rejected_origin, "en"),
@@ -214,7 +214,7 @@ fn subscription_handoff_opens_only_the_configured_account_route_and_locale() {
     assert_eq!(
         open_account_subscription_in_system_browser(
             &browser,
-            "https://liiiraa-boost-account-staging.vercel.app",
+            "https://conta.liiiraaboost.com.br",
             "fr",
         ),
         Err(DesktopIdentityError::InvalidAuthorizationChallenge),

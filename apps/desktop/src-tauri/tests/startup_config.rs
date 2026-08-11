@@ -28,10 +28,10 @@ fn staging_identity_origins_are_packaged_with_the_internal_build() {
     );
     assert_eq!(
         runtime["accountOrigin"],
-        "https://liiiraa-boost-account-staging.vercel.app"
+        "https://conta.liiiraaboost.com.br"
     );
     assert_eq!(
         runtime["adminOrigin"],
-        "https://liiiraa-boost-admin-staging.vercel.app"
+        "https://admin.liiiraaboost.com.br"
     );
 }

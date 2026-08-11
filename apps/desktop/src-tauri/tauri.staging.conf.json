@@ -24,8 +24,8 @@
         "channel": "internal",
         "runtime": {
           "apiOrigin": "https://liiiraa-api-staging.onrender.com",
-          "accountOrigin": "https://liiiraa-boost-account-staging.vercel.app",
-          "adminOrigin": "https://liiiraa-boost-admin-staging.vercel.app",
+          "accountOrigin": "https://conta.liiiraaboost.com.br",
+          "adminOrigin": "https://admin.liiiraaboost.com.br",
           "apiVersion": "v1",
           "contractVersion": "1.0",
           "entitlementKeyId": "staging-entitlement-current"
