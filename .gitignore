@@ -11,6 +11,7 @@ playwright-report/
 storybook-static/
 test-results/
 /target/
+apps/desktop/src-tauri/gen/
 *.tsbuildinfo
 .planning/research/.cache/
 

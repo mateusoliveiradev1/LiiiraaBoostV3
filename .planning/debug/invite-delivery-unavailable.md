@@ -2,7 +2,7 @@
 status: fixing
 trigger: 'Falha na operação de convite: Nenhum convite foi admitido e nenhum comprovante durável foi criado. Tente novamente apenas quando a autoridade de entrega estiver disponível.'
 created: 2026-08-11T06:38:11.6257034Z
-updated: 2026-08-11T08:05:19.6361372Z
+updated: 2026-08-11T08:32:14.6368943Z
 ---
 
 ## Symptoms
@@ -30,6 +30,23 @@ estiver disponível`.
   executar o UAT real de emissão e reenvio.
 
 ## Evidence
+
+- timestamp: 2026-08-11T08:32:14.6368943Z
+  checked: Publicação dos domínios próprios, verificação Resend e candidato desktop.
+  found: Os três deploys Vercel estão `Ready` e possuem os aliases próprios; o Resend ainda mostra
+  DKIM, SPF e MX como `pending`; Cloudflare DNS, Google DNS e o próprio `a.auto.dns.br` ainda não
+  entregam os registros da zona. O instalador staging foi gerado com sucesso e possui SHA-256
+  `CA90AE336EA9392F9F652397401D096349A9DF55E5EB68615111B3AE2625CFED`.
+  implication: O bloqueio restante é exclusivamente a publicação externa da zona pelo Registro.br.
+  A chave Resend, a promoção da API e o UAT real devem continuar aguardando para evitar um corte
+  intermediário de CORS, autenticação ou entrega.
+- timestamp: 2026-08-11T08:32:14.6368943Z
+  checked: Gates de CI durante a janela de propagação.
+  found: O probe de aliases agora tolera falhas transitórias de DNS e preserva margem para encerrar
+  com diagnóstico explícito antes do timeout do job; o vínculo de hash do artefato Account também
+  foi atualizado e a verificação final da Fase 3 voltou a passar.
+  implication: A próxima execução após a publicação DNS poderá validar a revisão exata sem falso
+  negativo imediato nem cancelamento ambíguo.
 
 - timestamp: 2026-08-11T08:05:19.6361372Z
   checked: Implementação local e contratos de implantação.
