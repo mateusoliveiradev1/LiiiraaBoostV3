@@ -374,7 +374,13 @@ const isVisibleStatus = (value: unknown): value is AdminVisibleStatus =>
   ['live', 'stale', 'reconnecting', 'offline', 'degraded', 'unavailable'].includes(value);
 
 const recordStatusLabel = (locale: WebLocale, record: AdminProjectionRecord): string => {
-  const status = record['state'] ?? record['status'];
+  const summaryStatus =
+    typeof record.summary === 'string'
+      ? /^(?:admin|desktop|web)\s*·\s*(active|expired|pending|revoked)\s*·/iu.exec(
+          record.summary,
+        )?.[1]
+      : undefined;
+  const status = record['state'] ?? record['status'] ?? summaryStatus;
   if (isVisibleStatus(status)) return adminOverviewStatusLabel(locale, status);
   return authorityRecordStateLabel(locale, status) ?? copy[locale].recordStatus;
 };

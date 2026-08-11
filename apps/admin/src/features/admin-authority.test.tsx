@@ -542,6 +542,7 @@ describe('admin production composition', () => {
     expect(productionView).toContain('records.slice(0, MAX_VISIBLE_AUTHORITY_RECORDS)');
     expect(productionView).toContain('formatAuthorityRecordSummary(locale, record)');
     expect(productionView).toContain("revoked: 'Revogada'");
+    expect(productionView).toContain("record['status'] ?? summaryStatus");
     expect(productionView).not.toContain('{records.map((record) =>');
     expect(productionView).toContain('variant="destructive"');
     expect(productionView).toContain('Sair do painel');
