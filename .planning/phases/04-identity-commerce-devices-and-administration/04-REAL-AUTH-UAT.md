@@ -2,8 +2,8 @@
 phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
-tested_commit: 60d6f37984c5d3b9471f05f075acd253c75feb14
-updated: 2026-08-11T05:12:35.393Z
+tested_commit: d257850588fbe4996d7dc68de6be4c9b031fe8bc
+updated: 2026-08-11T05:21:47.527Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -28,16 +28,16 @@ password, database credential, or session credential is recorded here.
 
 | Identity                         | Exact value                                                               | Result |
 | -------------------------------- | ------------------------------------------------------------------------- | ------ |
-| Published surface/test revision  | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
+| Published surface/test revision  | `d257850588fbe4996d7dc68de6be4c9b031fe8bc`                                | PASS   |
 | API build ID                     | `61d8db9f8e4e1d090d75c67e918f53228bec03de`                                | PASS   |
 | API OCI digest                   | `sha256:332c8007d4e077ea6e8a0efac62b430cea413c106bba9b175634232c893d3933` | PASS   |
 | GitHub API promotion run         | `31324354207`                                                             | PASS   |
 | Render deploy                    | `dep-d9saslqfngtc73eva5a0`                                                | PASS   |
 | API origin                       | `https://liiiraa-api-staging.onrender.com`                                | PASS   |
-| Public Vercel revision endpoint  | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
-| Account Vercel revision endpoint | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
-| Admin Vercel revision endpoint   | `60d6f37984c5d3b9471f05f075acd253c75feb14`                                | PASS   |
-| Surface verification run         | `31326664826`                                                             | PASS   |
+| Public Vercel revision endpoint  | `d257850588fbe4996d7dc68de6be4c9b031fe8bc`                                | PASS   |
+| Account Vercel revision endpoint | `d257850588fbe4996d7dc68de6be4c9b031fe8bc`                                | PASS   |
+| Admin Vercel revision endpoint   | `d257850588fbe4996d7dc68de6be4c9b031fe8bc`                                | PASS   |
+| Surface verification run         | `31461120604`                                                             | PASS   |
 | Published Admin authority run    | `31326815831`                                                             | PASS   |
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
 | Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
@@ -47,7 +47,7 @@ password, database credential, or session credential is recorded here.
 The API readiness endpoint reported build ID
 `61d8db9f8e4e1d090d75c67e918f53228bec03de`, `authorityConnected=true`, and
 `device-authority`. Public, Account, and Admin serve the exact
-`60d6f37984c5d3b9471f05f075acd253c75feb14` revision and continue to proxy to this API.
+`d257850588fbe4996d7dc68de6be4c9b031fe8bc` revision and continue to proxy to this API.
 
 ## Automated receipts
 
@@ -198,34 +198,37 @@ Remaining tester invitation refresh supplement:
 - At `2026-08-11T05:12:35.393Z`, the owner confirmed that the published exit action is present but
   visually indistinguishable from loose text beneath the simulation banner. The action remains safe
   and local, but this checkpoint stays open until staging exposes an unmistakable button affordance.
+- At `2026-08-11T05:21:47.527Z`, the owner responded `pass` after confirming the published bordered
+  exit button is visible in the simulation banner. The read-only simulation can now be closed without
+  changing the real active administrative function.
 
 ## Human real-authority observations
 
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
 revision mismatch, or result that does not survive reload is a critical failure.
 
-| Observation                                                                                            | Evidence                                       | Result  |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ------- |
-| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                                | PASS    |
-| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`                      | PASS    |
-| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`               | PASS    |
-| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`                 | PASS    |
-| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`                | PASS    |
-| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                                | PASS    |
-| Profile display-name mutation persists after reload                                                    | owner-confirmed                                | PASS    |
-| Locale mutation persists after reload                                                                  | owner-confirmed                                | PASS    |
-| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650                  | PASS    |
-| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                                | PASS    |
-| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`                  | PASS    |
-| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                               | PASS    |
-| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                      | PENDING |
-| Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831`         | PENDING |
-| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`             | PENDING |
-| Read-only function simulation preserves real authority and provides an explicit exit                   | owner screenshot; exit lacks button affordance | ISSUE   |
-| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`          | PENDING |
-| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                      | PENDING |
-| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`          | PENDING |
-| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`                     | PASS    |
+| Observation                                                                                            | Evidence                               | Result  |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------- |
+| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                        | PASS    |
+| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`              | PASS    |
+| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
+| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
+| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`        | PASS    |
+| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                        | PASS    |
+| Profile display-name mutation persists after reload                                                    | owner-confirmed                        | PASS    |
+| Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
+| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
+| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                        | PASS    |
+| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`          | PASS    |
+| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                       | PASS    |
+| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
+| Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
+| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`     | PENDING |
+| Read-only function simulation preserves real authority and provides an explicit exit                   | owner-confirmed `d257850`              | PASS    |
+| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`  | PENDING |
+| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`              | PENDING |
+| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`  | PENDING |
+| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`             | PASS    |
 
 ## Approval
 
