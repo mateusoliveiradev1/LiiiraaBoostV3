@@ -1,9 +1,9 @@
 ---
 phase: 04-identity-commerce-devices-and-administration
 reviewed_at: 2026-08-11
-reviewed_commit: f53c8a5
-status: remediation-required
-overall_score: 14
+reviewed_commit: 44eed22
+status: remediated
+overall_score: 22
 maximum_score: 24
 needs_human_review: true
 ---
@@ -12,16 +12,15 @@ needs_human_review: true
 
 ## Veredito
 
-O Admin publicado em `admin.liiiraaboost.com.br` recuperou autorização, navegação e
-estados verdadeiros, mas ainda não alcança a direção **Calm Briefing + Mission
-Control + Operational Ledger** aprovada no contrato visual. A tela atual é segura e
-legível, porém se comporta como um relatório técnico linear: repete o contexto da
-função, usa o histórico como assunto principal e não deixa evidente qual decisão o
-administrador deve tomar agora.
+O Admin publicado em `admin.liiiraaboost.com.br` agora segue a direção **Calm
+Briefing + Mission Control + Operational Ledger**: a primeira dobra comunica a
+prioridade real, quantifica o estado observado, preserva a postura da sessão e oferece
+uma ação principal. O histórico continua disponível, mas voltou ao papel correto de
+evidência secundária.
 
-A remediação deve preservar integralmente a autoridade real e reorganizar apenas a
-apresentação: uma prioridade operacional, um resumo de postura, uma ação principal
-e um ledger recente com estados semanticamente distintos.
+A remediação preservou integralmente a autoridade real. Contadores, estados e
+navegação são derivados das projeções admitidas pelo servidor; nenhum dado de
+demonstração foi usado para sustentar a nova apresentação.
 
 ## Evidência observada
 
@@ -36,12 +35,12 @@ e um ledger recente com estados semanticamente distintos.
 
 | Pilar       | Nota | Diagnóstico                                                                                                                                                                                                                                                  |
 | ----------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Copywriting |  2/4 | O texto é seguro, mas descreve o sistema em vez de orientar a tarefa. “Central de segurança” leva diretamente a “Atividade recente”, sem prioridade, consequência ou próxima ação. Pessoas ainda expõe `live`, `active`, `owner`, `operations` e `security`. |
-| Visual      |  2/4 | A página é uma sequência de divisores sobre preto, sem uma região focal. Cabeçalho, contexto e ledger têm o mesmo peso. O controle largo e vazio de recolher a navegação parece quebrado.                                                                    |
-| Cor         |  3/4 | O cobalt permanece raro e sem efeito gamer, mas a falta de separação tonal deixa canvas, contexto e linhas com profundidade quase idêntica. Estados ativos e revogados dependem demais de texto discreto.                                                    |
-| Tipografia  |  3/4 | Manrope e JetBrains Mono estão aplicadas corretamente, porém há excesso de mono em referências e datas e pouca diferenciação entre prioridade, estado atual e histórico secundário.                                                                          |
-| Espaçamento |  2/4 | O ritmo horizontal é coerente, mas o layout desperdiça altura no contexto repetido e estica formulários/listas por toda a coluna. A densidade comunica vazio, não foco.                                                                                      |
-| Experiência |  2/4 | As rotas funcionam e preservam a sessão, mas a visão geral não responde “o que exige atenção agora?”. O histórico não possui agrupamento semântico, filtro ou ação; o acesso emergencial não explica por que a ação está bloqueada antes do código.          |
+| Copywriting |  4/4 | A primeira dobra responde o que mudou, qual é a postura e o que revisar. Pessoas traduz funções, membros e autoridade sem expor enums contratuais ao usuário. |
+| Visual      |  4/4 | Briefing, postura e ledger formam uma hierarquia inequívoca. A lateral expandida comunica sua ação e o modo compacto mantém um alvo intencional. |
+| Cor         |  4/4 | O cobalt permanece restrito à ação e foco; sucesso, atenção e crítico reforçam estados junto com ícones, rótulos e padrões de borda. |
+| Tipografia  |  4/4 | Título de prioridade, dados operacionais e evidência recente possuem papéis distintos sem abandonar Manrope e JetBrains Mono. |
+| Espaçamento |  3/4 | A primeira dobra usa o espaço com intenção e o ledger fica contido. Formulários complexos de Pessoas ainda são naturalmente densos em desktop. |
+| Experiência |  3/4 | Visão geral, Pessoas e Segurança carregam com autoridade real e oferecem próximos passos claros. O UAT humano final continua recomendado para preferências visuais subjetivas. |
 
 ## Falhas prioritárias
 
@@ -84,6 +83,7 @@ e um ledger recente com estados semanticamente distintos.
 
 ## Decisão
 
-Reabrir a recuperação visual do Admin com foco primeiro na função Segurança, que é
-a sessão real do owner. A aprovação final exige nova captura publicada e validação
-das três rotas visíveis no domínio customizado.
+Remediação aceita tecnicamente no commit `44eed22`. A nova captura publicada prova a
+hierarquia do briefing e as rotas Visão geral, Pessoas e Segurança foram verificadas
+na sessão real do owner. Manter revisão humana apenas para gosto visual e microajustes,
+não como bloqueio funcional ou de autoridade.
