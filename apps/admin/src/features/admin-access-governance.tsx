@@ -876,6 +876,8 @@ const MemberInspector = ({
 export const AdminAccessGovernanceView = (props: ViewProps) => {
   const selectionTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [breakGlassReason, setBreakGlassReason] = useState('');
+  const [breakGlassOpen, setBreakGlassOpen] = useState(false);
+  const [invitationOpen, setInvitationOpen] = useState(false);
   const labels = copy[props.locale];
   if (props.state === 'loading')
     return (
@@ -987,47 +989,66 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
           title={localeText(props.locale, 'Conflito de versão', 'Version conflict')}
         />
       ) : null}
-      <section className={styles['invitationStrip']}>
-        <div>
+      <section className={styles['invitationStrip']} data-expanded={invitationOpen || undefined}>
+        <div className={styles['invitationSummary']}>
           <ProductIcon name="userAdd" size={22} />
           <span>
             <strong>{labels.adminInvitations}</strong>
             <small>{labels.adminInvitationsDetail}</small>
           </span>
+          <button
+            aria-expanded={invitationOpen}
+            className={styles['disclosureButton']}
+            onClick={() => {
+              setInvitationOpen((current) => !current);
+            }}
+            type="button"
+          >
+            {invitationOpen
+              ? localeText(props.locale, 'Fechar convite', 'Close invitation')
+              : labels.invite}
+          </button>
         </div>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            props.onAction?.({
-              kind: 'invite',
-              email: formValue(data, 'admin-email'),
-              functions: [formValue(data, 'admin-function') || 'operations'],
-              reason: formValue(data, 'admin-invite-reason'),
-            });
-          }}
-        >
-          <LbTextField inputType="email" isRequired label={labels.inviteEmail} name="admin-email" />
-          <label className={styles['nativeField']}>
-            <span>{labels.functions}</span>
-            <select name="admin-function">
-              {FUNCTIONS.map((fn) => (
-                <option key={fn} value={fn}>
-                  {adminFunctionLabel(fn, props.locale)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <LbTextField
-            isRequired
-            label={labels.inviteReason}
-            maxLength={256}
-            name="admin-invite-reason"
-          />
-          <LbButton isDisabled={!model.authority.canMutate} type="submit" variant="primary">
-            {labels.invite}
-          </LbButton>
-        </form>
+        {invitationOpen ? (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              props.onAction?.({
+                kind: 'invite',
+                email: formValue(data, 'admin-email'),
+                functions: [formValue(data, 'admin-function') || 'operations'],
+                reason: formValue(data, 'admin-invite-reason'),
+              });
+            }}
+          >
+            <LbTextField
+              inputType="email"
+              isRequired
+              label={labels.inviteEmail}
+              name="admin-email"
+            />
+            <label className={styles['nativeField']}>
+              <span>{labels.functions}</span>
+              <select name="admin-function">
+                {FUNCTIONS.map((fn) => (
+                  <option key={fn} value={fn}>
+                    {adminFunctionLabel(fn, props.locale)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <LbTextField
+              isRequired
+              label={labels.inviteReason}
+              maxLength={256}
+              name="admin-invite-reason"
+            />
+            <LbButton isDisabled={!model.authority.canMutate} type="submit" variant="primary">
+              {localeText(props.locale, 'Enviar convite', 'Send invitation')}
+            </LbButton>
+          </form>
+        ) : null}
       </section>
       <div
         className={styles['workspace']}
@@ -1128,42 +1149,60 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
           />
         )}
       </div>
-      <section className={styles['breakGlass']} aria-labelledby="break-glass-title">
-        <div>
+      <section
+        className={styles['breakGlass']}
+        aria-labelledby="break-glass-title"
+        data-expanded={breakGlassOpen || undefined}
+      >
+        <div className={styles['breakGlassSummary']}>
           <ProductIcon name="warning" size={22} />
           <span>
             <h2 id="break-glass-title">{labels.breakGlass}</h2>
             <p>{labels.breakGlassDetail}</p>
           </span>
-        </div>
-        <strong>{labels.twoPerson}</strong>
-        <div className={styles['breakGlassAction']}>
-          <LbTextField
-            label={labels.reason}
-            maxLength={256}
-            onChange={setBreakGlassReason}
-            value={breakGlassReason}
-          />
-          <LbButton
-            isDisabled={
-              !model.authority.canMutate ||
-              model.observedAt === undefined ||
-              breakGlassReason.trim().length < 8
-            }
-            onPress={() => {
-              if (model.observedAt === undefined) return;
-              props.onAction?.({
-                kind: 'break-glass',
-                targetReference: selected?.identityReference ?? 'governance-control-plane',
-                expiresAt: addMinutes(model.observedAt, 15),
-                reason: breakGlassReason,
-              });
+          <strong>{labels.twoPerson}</strong>
+          <button
+            aria-expanded={breakGlassOpen}
+            className={styles['disclosureButton']}
+            onClick={() => {
+              setBreakGlassOpen((current) => !current);
             }}
-            variant="destructive"
+            type="button"
           >
-            {labels.breakGlass}
-          </LbButton>
+            {breakGlassOpen
+              ? localeText(props.locale, 'Fechar solicitação', 'Close request')
+              : localeText(props.locale, 'Iniciar solicitação', 'Start request')}
+          </button>
         </div>
+        {breakGlassOpen ? (
+          <div className={styles['breakGlassAction']}>
+            <LbTextField
+              label={labels.reason}
+              maxLength={256}
+              onChange={setBreakGlassReason}
+              value={breakGlassReason}
+            />
+            <LbButton
+              isDisabled={
+                !model.authority.canMutate ||
+                model.observedAt === undefined ||
+                breakGlassReason.trim().length < 8
+              }
+              onPress={() => {
+                if (model.observedAt === undefined) return;
+                props.onAction?.({
+                  kind: 'break-glass',
+                  targetReference: selected?.identityReference ?? 'governance-control-plane',
+                  expiresAt: addMinutes(model.observedAt, 15),
+                  reason: breakGlassReason,
+                });
+              }}
+              variant="destructive"
+            >
+              {labels.breakGlass}
+            </LbButton>
+          </div>
+        ) : null}
       </section>
     </article>
   );

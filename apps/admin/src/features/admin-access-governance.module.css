@@ -71,24 +71,50 @@
 }
 
 .invitationStrip {
-  display: flex;
+  display: grid;
   align-items: flex-start;
-  justify-content: space-between;
   gap: var(--lb-space-4);
   padding-block: var(--lb-space-3);
   border-block: 1px solid var(--lb-line-subtle);
 }
 
-.invitationStrip > div {
+.invitationSummary {
   display: flex;
+  align-items: center;
   gap: var(--lb-space-3);
-  min-inline-size: min(100%, 300px);
 }
 
-.invitationStrip > div > span {
+.invitationSummary > span {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: var(--lb-space-1);
+}
+
+.invitationSummary > button {
+  flex: 0 0 auto;
+}
+
+.disclosureButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-inline: var(--lb-space-3);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: 6px;
+  color: var(--lb-text-primary);
+  background: var(--lb-panel);
+  font: 600 0.875rem/1.25rem var(--lb-font-body);
+  cursor: pointer;
+}
+
+.disclosureButton:hover,
+.disclosureButton:focus-visible,
+.disclosureButton[aria-expanded='true'] {
+  border-color: var(--lb-accent-cyan);
+  color: var(--lb-accent-cyan);
+  background: var(--lb-panel-raised);
 }
 
 .invitationStrip small {
@@ -98,12 +124,14 @@
 }
 
 .invitationStrip form {
-  display: flex;
+  display: grid;
   align-items: end;
-  flex: 1;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(180px, 0.7fr) minmax(240px, 1fr) auto;
   gap: var(--lb-space-2);
+  padding: var(--lb-space-4);
+  border: 1px solid var(--lb-line-strong);
+  border-radius: 10px;
+  background: var(--lb-canvas-inset);
 }
 
 .nativeField {
@@ -127,7 +155,7 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(300px, 0.8fr) minmax(380px, 1.2fr);
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
   min-block-size: 580px;
   border-block: 1px solid var(--lb-line-subtle);
 }
@@ -541,29 +569,33 @@
 
 .breakGlass {
   display: grid;
-  align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: stretch;
   gap: var(--lb-space-4);
   padding: var(--lb-space-4);
-  border: 3px double var(--lb-critical);
+  border: 1px solid color-mix(in oklch, var(--lb-critical) 68%, var(--lb-line-strong));
   border-radius: 10px;
   background: var(--lb-canvas-inset);
 }
 
-.breakGlass > div {
-  display: flex;
-  align-items: flex-start;
+.breakGlassSummary {
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: var(--lb-space-3);
 }
 
-.breakGlass > strong {
+.breakGlassSummary > strong {
   color: var(--lb-critical);
+  font-size: 0.875rem;
 }
 
 .breakGlassAction {
-  display: flex;
+  display: grid;
   align-items: end;
+  grid-template-columns: minmax(260px, 1fr) auto;
   gap: var(--lb-space-2);
+  padding-block-start: var(--lb-space-3);
+  border-block-start: 1px solid var(--lb-line-subtle);
 }
 
 @media (width <= 1439px) {
@@ -604,6 +636,15 @@
     justify-content: stretch;
   }
 
+  .breakGlassSummary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .breakGlassSummary > strong {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
   .workspace,
   .workspace[data-inspector-open='true'] {
     grid-template-columns: 1fr;
@@ -625,6 +666,7 @@
   .memberFacts,
   .diff,
   .breakGlass,
+  .breakGlassAction,
   .approvalReview {
     grid-template-columns: 1fr;
   }
@@ -636,6 +678,24 @@
   .invitationStrip > div {
     min-inline-size: 0;
     flex-direction: column;
+  }
+
+  .invitationSummary {
+    align-items: stretch;
+  }
+
+  .breakGlassSummary {
+    align-items: flex-start;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .breakGlassSummary > strong,
+  .breakGlassSummary > button {
+    grid-column: 1 / -1;
+  }
+
+  .breakGlassSummary > strong {
+    grid-row: auto;
   }
 
   .team > header,

@@ -195,30 +195,30 @@ const roleOverviewPresentation = (locale: WebLocale, role: AdminRoleJson) => {
         description: 'Review the immutable evidence admitted to this protected audit session.',
         emptyDescription: 'There is no audit evidence waiting for review in the admitted scope.',
         emptyTitle: 'Audit scope is clear',
-        eyebrow: 'Verified administrative context',
-        title: 'Audit command center',
+        eyebrow: 'Administrative overview',
+        title: 'Audit overview',
       },
       operations: {
         description: 'Prioritize admitted work, capacity and protected operational decisions.',
         emptyDescription: 'There is no assigned operational work waiting in this session.',
         emptyTitle: 'Operations are up to date',
-        eyebrow: 'Verified administrative context',
-        title: 'Operations command center',
+        eyebrow: 'Administrative overview',
+        title: 'Operations overview',
       },
       security: {
         description:
           'Review active administrative sessions and the security scope admitted to you.',
         emptyDescription: 'There is no security evidence waiting in the admitted scope.',
         emptyTitle: 'Security scope is clear',
-        eyebrow: 'Verified administrative context',
-        title: 'Security command center',
+        eyebrow: 'Administrative overview',
+        title: 'Security overview',
       },
       support: {
         description: 'Start with the support cases admitted to this protected session.',
         emptyDescription: 'There is no support case waiting in the admitted queue.',
         emptyTitle: 'Support queue is clear',
-        eyebrow: 'Verified administrative context',
-        title: 'Support command center',
+        eyebrow: 'Administrative overview',
+        title: 'Support overview',
       },
     },
     'pt-BR': {
@@ -227,30 +227,30 @@ const roleOverviewPresentation = (locale: WebLocale, role: AdminRoleJson) => {
           'Revise as evidências imutáveis admitidas para esta sessão protegida de auditoria.',
         emptyDescription: 'Não há evidências aguardando revisão no escopo admitido.',
         emptyTitle: 'Escopo de auditoria em dia',
-        eyebrow: 'Contexto administrativo verificado',
-        title: 'Central de auditoria',
+        eyebrow: 'Visão administrativa',
+        title: 'Visão geral de auditoria',
       },
       operations: {
         description: 'Priorize trabalho admitido, capacidade e decisões operacionais protegidas.',
         emptyDescription: 'Não há trabalho operacional atribuído aguardando nesta sessão.',
         emptyTitle: 'Operação em dia',
-        eyebrow: 'Contexto administrativo verificado',
-        title: 'Central de operações',
+        eyebrow: 'Visão administrativa',
+        title: 'Visão geral de operações',
       },
       security: {
         description:
           'Revise sessões administrativas ativas e o escopo de segurança admitido para você.',
         emptyDescription: 'Não há evidências de segurança aguardando no escopo admitido.',
         emptyTitle: 'Escopo de segurança em dia',
-        eyebrow: 'Contexto administrativo verificado',
-        title: 'Central de segurança',
+        eyebrow: 'Visão administrativa',
+        title: 'Visão geral de segurança',
       },
       support: {
         description: 'Comece pelos casos de atendimento admitidos para esta sessão protegida.',
         emptyDescription: 'Não há casos aguardando na fila de atendimento admitida.',
         emptyTitle: 'Fila de atendimento em dia',
-        eyebrow: 'Contexto administrativo verificado',
-        title: 'Central de atendimento',
+        eyebrow: 'Visão administrativa',
+        title: 'Visão geral de atendimento',
       },
     },
   } as const;
@@ -354,6 +354,19 @@ const authorityRecordCounts = (records: readonly AdminProjectionRecord[]) =>
     { active: 0, expired: 0, neutral: 0, pending: 0, revoked: 0 },
   );
 
+const authorityAttentionFacts = (
+  locale: WebLocale,
+  counts: ReturnType<typeof authorityRecordCounts>,
+) => {
+  const labels =
+    locale === 'pt-BR'
+      ? { active: 'Ativas', expired: 'Expiradas', pending: 'Pendentes', revoked: 'Revogadas' }
+      : { active: 'Active', expired: 'Expired', pending: 'Pending', revoked: 'Revoked' };
+  return (['active', 'expired', 'pending', 'revoked'] as const)
+    .filter((state) => state === 'active' || counts[state] > 0)
+    .map((state) => ({ count: counts[state], label: labels[state], state }));
+};
+
 const roleBriefingDomain = Object.freeze({
   audit: 'system',
   operations: 'operation',
@@ -365,7 +378,10 @@ const roleBriefingCopy = (locale: WebLocale, role: AdminRoleJson, attentionCount
   const roleName = roleLabel(locale, role);
   if (locale === 'pt-BR') {
     return {
-      action: `Abrir revisão de ${roleName.toLocaleLowerCase(locale)}`,
+      action:
+        attentionCount > 0
+          ? `Revisar ${String(attentionCount)} ${attentionCount === 1 ? 'exceção' : 'exceções'}`
+          : `Abrir revisão de ${roleName.toLocaleLowerCase(locale)}`,
       description:
         attentionCount > 0
           ? 'Há mudanças recentes de estado para conferir antes da próxima decisão administrativa.'
@@ -377,12 +393,15 @@ const roleBriefingCopy = (locale: WebLocale, role: AdminRoleJson, attentionCount
       postureTitle: 'Sessão protegida e sincronizada',
       title:
         attentionCount > 0
-          ? `Revise ${String(attentionCount)} ${attentionCount === 1 ? 'sessão que mudou' : 'sessões que mudaram'} de estado.`
+          ? `${String(attentionCount)} ${attentionCount === 1 ? 'sessão exige' : 'sessões exigem'} revisão.`
           : 'A autoridade administrativa está sob controle.',
     } as const;
   }
   return {
-    action: `Open ${roleName.toLocaleLowerCase(locale)} review`,
+    action:
+      attentionCount > 0
+        ? `Review ${String(attentionCount)} ${attentionCount === 1 ? 'exception' : 'exceptions'}`
+        : `Open ${roleName.toLocaleLowerCase(locale)} review`,
     description:
       attentionCount > 0
         ? 'Recent state changes need review before the next administrative decision.'
@@ -394,7 +413,7 @@ const roleBriefingCopy = (locale: WebLocale, role: AdminRoleJson, attentionCount
     postureTitle: 'Protected and synchronized session',
     title:
       attentionCount > 0
-        ? `Review ${String(attentionCount)} ${attentionCount === 1 ? 'session that changed' : 'sessions that changed'} state.`
+        ? `${String(attentionCount)} ${attentionCount === 1 ? 'session needs' : 'sessions need'} review.`
         : 'Administrative authority is under control.',
   } as const;
 };
@@ -999,72 +1018,96 @@ const BreakGlassReview = ({
   const [metadata, setMetadata] = useState<Readonly<Record<string, string>> | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const targetReference = 'security-incident-083';
   return (
     <section
       aria-label="Redacted break-glass metadata"
       className="admin-break-glass"
+      data-expanded={open || undefined}
       data-redaction="allowlist-only"
     >
       <header>
-        <ProductIcon name="shield" size={20} />
-        <div>
-          <h2>{locale === 'pt-BR' ? 'Acesso emergencial' : 'Emergency access'}</h2>
-          <p>
-            {locale === 'pt-BR'
-              ? 'Exibe somente metadados autorizados, por tempo limitado e com auditoria imutável.'
-              : 'Shows only allowlisted metadata for a limited time with immutable audit.'}
-          </p>
+        <div className="admin-break-glass__heading">
+          <ProductIcon name="shield" size={20} />
+          <div>
+            <h2>{locale === 'pt-BR' ? 'Acesso emergencial' : 'Emergency access'}</h2>
+            <p>
+              {locale === 'pt-BR'
+                ? 'Exibe somente metadados autorizados, por tempo limitado e com auditoria imutável.'
+                : 'Shows only allowlisted metadata for a limited time with immutable audit.'}
+            </p>
+          </div>
         </div>
+        <button
+          aria-expanded={open}
+          className="admin-disclosure-button"
+          onClick={() => {
+            setOpen((current) => !current);
+          }}
+          type="button"
+        >
+          {open
+            ? locale === 'pt-BR'
+              ? 'Fechar verificação'
+              : 'Close verification'
+            : locale === 'pt-BR'
+              ? 'Verificar acesso'
+              : 'Verify access'}
+        </button>
       </header>
-      <LbTextField
-        label={copy[locale].enrollmentCode}
-        maxLength={6}
-        onChange={(value) => {
-          setTotpCode(value.replace(/\D/gu, '').slice(0, 6));
-          setError(false);
-        }}
-        value={totpCode}
-      />
-      {error ? (
-        <p className="admin-auth__error" role="alert">
-          {copy[locale].enrollmentError}
-        </p>
+      {open ? (
+        <div className="admin-break-glass__form">
+          <LbTextField
+            label={copy[locale].enrollmentCode}
+            maxLength={6}
+            onChange={(value) => {
+              setTotpCode(value.replace(/\D/gu, '').slice(0, 6));
+              setError(false);
+            }}
+            value={totpCode}
+          />
+          {error ? (
+            <p className="admin-auth__error" role="alert">
+              {copy[locale].enrollmentError}
+            </p>
+          ) : null}
+          <LbButton
+            isDisabled={totpCode.length !== 6 || pending}
+            isLoading={pending}
+            onPress={() => {
+              setPending(true);
+              setError(false);
+              void authority
+                .verifyStepUp({
+                  action: 'export-audit-reference',
+                  authorizationContextId: correlationId(),
+                  code: totpCode,
+                  redactedTarget: targetReference,
+                  resource: 'audit-event',
+                })
+                .then(async (stepUp) => {
+                  if (stepUp === null) return null;
+                  return authority.breakGlass({
+                    expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+                    reason: 'Contain the reviewed security incident',
+                    stepUp,
+                    targetReference,
+                  });
+                })
+                .then((result) => {
+                  if (result?.status === 'complete') setMetadata(result.metadata);
+                  else setError(true);
+                  setPending(false);
+                });
+            }}
+            variant="destructive"
+          >
+            {locale === 'pt-BR' ? 'Abrir metadados de emergência' : 'Open break-glass metadata'}
+          </LbButton>
+        </div>
       ) : null}
-      <LbButton
-        isDisabled={totpCode.length !== 6 || pending}
-        isLoading={pending}
-        onPress={() => {
-          setPending(true);
-          setError(false);
-          void authority
-            .verifyStepUp({
-              action: 'export-audit-reference',
-              authorizationContextId: correlationId(),
-              code: totpCode,
-              redactedTarget: targetReference,
-              resource: 'audit-event',
-            })
-            .then(async (stepUp) => {
-              if (stepUp === null) return null;
-              return authority.breakGlass({
-                expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
-                reason: 'Contain the reviewed security incident',
-                stepUp,
-                targetReference,
-              });
-            })
-            .then((result) => {
-              if (result?.status === 'complete') setMetadata(result.metadata);
-              else setError(true);
-              setPending(false);
-            });
-        }}
-        variant="destructive"
-      >
-        {locale === 'pt-BR' ? 'Abrir metadados de emergência' : 'Open break-glass metadata'}
-      </LbButton>
       {metadata === null ? null : (
         <dl>
           {Object.entries(metadata).map(([field, value]) => (
@@ -1137,7 +1180,7 @@ const AdminProductionShell = ({
         </>
       }
       accountLabel={shellLabels.account}
-      accountName={roleLabel(locale, session.role)}
+      accountName={locale === 'pt-BR' ? 'Sessão Admin' : 'Admin session'}
       actorId={session.actorId}
       alertsLabel={shellLabels.alerts}
       alternateLocale={alternateLocale}
@@ -1633,6 +1676,7 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     routeId === 'admin-role' ? roleOverviewPresentation(locale, session.role) : presentation;
   const recordCounts = authorityRecordCounts(records);
   const attentionCount = recordCounts.expired + recordCounts.pending + recordCounts.revoked;
+  const attentionFacts = authorityAttentionFacts(locale, recordCounts);
   const briefing = roleBriefingCopy(locale, session.role, attentionCount);
   const briefingAction = projectAdminRoleNavigation(session.role, locale).find(
     ({ domain }) => domain === roleBriefingDomain[session.role],
@@ -1647,7 +1691,9 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
       data-admin-role={session.role}
       data-admin-runtime="production"
     >
-      <header className="admin-authority__header">
+      <header
+        className={`admin-authority__header${routeId === 'admin-role' ? ' admin-authority__header--overview' : ''}`}
+      >
         <div>
           <span className="admin-authority__system">{activePresentation.eyebrow}</span>
           <h1>{activePresentation.title}</h1>
@@ -1670,18 +1716,12 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
               className="admin-authority__briefing-facts"
               aria-label={copy[locale].authoritySummary}
             >
-              <div data-state="active">
-                <dt>{locale === 'pt-BR' ? 'Sessões ativas' : 'Active sessions'}</dt>
-                <dd>{String(recordCounts.active)}</dd>
-              </div>
-              <div data-state={attentionCount > 0 ? 'attention' : 'clear'}>
-                <dt>{locale === 'pt-BR' ? 'Mudanças de estado' : 'State changes'}</dt>
-                <dd>{String(attentionCount)}</dd>
-              </div>
-              <div>
-                <dt>{copy[locale].sessionUntil}</dt>
-                <dd>{formatAdminDateTime(session.expiresAt, locale)}</dd>
-              </div>
+              {attentionFacts.map((fact) => (
+                <div data-state={fact.state} key={fact.state}>
+                  <dt>{fact.label}</dt>
+                  <dd>{String(fact.count)}</dd>
+                </div>
+              ))}
             </dl>
             {briefingAction === undefined ? null : (
               <Link
@@ -1703,6 +1743,10 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
             <span className="admin-authority__briefing-status" data-status={freshness}>
               <span aria-hidden="true" />
               {adminOverviewStatusLabel(locale, freshness)}
+            </span>
+            <span className="admin-authority__briefing-expiry">
+              {copy[locale].sessionUntil}
+              <strong>{formatAdminDateTime(session.expiresAt, locale)}</strong>
             </span>
           </aside>
         </section>
