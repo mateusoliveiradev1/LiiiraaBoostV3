@@ -3,7 +3,7 @@ phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
 tested_commit: 60d6f37984c5d3b9471f05f075acd253c75feb14
-updated: 2026-08-11T05:08:45.148Z
+updated: 2026-08-11T05:12:35.393Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -195,34 +195,37 @@ Remaining tester invitation refresh supplement:
   had remained on the pre-session skeleton across a revision/cold-start boundary. The exact published
   route had already loaded normally in a clean browser, Render health/readiness and the Admin proxy
   were responsive, and no persistent product regression was reproduced.
+- At `2026-08-11T05:12:35.393Z`, the owner confirmed that the published exit action is present but
+  visually indistinguishable from loose text beneath the simulation banner. The action remains safe
+  and local, but this checkpoint stays open until staging exposes an unmistakable button affordance.
 
 ## Human real-authority observations
 
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
 revision mismatch, or result that does not survive reload is a critical failure.
 
-| Observation                                                                                            | Evidence                               | Result  |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------- |
-| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                        | PASS    |
-| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`              | PASS    |
-| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`       | PASS    |
-| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`         | PASS    |
-| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`        | PASS    |
-| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                        | PASS    |
-| Profile display-name mutation persists after reload                                                    | owner-confirmed                        | PASS    |
-| Locale mutation persists after reload                                                                  | owner-confirmed                        | PASS    |
-| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650          | PASS    |
-| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                        | PASS    |
-| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`          | PASS    |
-| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                       | PASS    |
-| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                              | PENDING |
-| Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831` | PENDING |
-| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`     | PENDING |
-| Read-only function simulation preserves real authority and provides an explicit exit                   | owner screenshot; exit control missing | ISSUE   |
-| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`  | PENDING |
-| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`              | PENDING |
-| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`  | PENDING |
-| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`             | PASS    |
+| Observation                                                                                            | Evidence                                       | Result  |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ------- |
+| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                                | PASS    |
+| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`                      | PASS    |
+| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`               | PASS    |
+| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`                 | PASS    |
+| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`                | PASS    |
+| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                                | PASS    |
+| Profile display-name mutation persists after reload                                                    | owner-confirmed                                | PASS    |
+| Locale mutation persists after reload                                                                  | owner-confirmed                                | PASS    |
+| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650                  | PASS    |
+| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                                | PASS    |
+| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`                  | PASS    |
+| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                               | PASS    |
+| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                      | PENDING |
+| Invitation issue/resend/revoke and governance/approval changes survive reload                          | fail-closed issue subset `31326815831`         | PENDING |
+| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`             | PENDING |
+| Read-only function simulation preserves real authority and provides an explicit exit                   | owner screenshot; exit lacks button affordance | ISSUE   |
+| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`          | PENDING |
+| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                      | PENDING |
+| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`          | PENDING |
+| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`                     | PASS    |
 
 ## Approval
 
