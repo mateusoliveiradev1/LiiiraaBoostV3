@@ -553,6 +553,9 @@ export function AdminShellFrame({
             type="button"
           >
             <ProductIcon name="chevronRight" size={18} />
+            <span>
+              {sidebarMode === 'expanded' ? labels.compactSidebar : labels.expandedSidebar}
+            </span>
           </button>
           {navigation}
         </nav>

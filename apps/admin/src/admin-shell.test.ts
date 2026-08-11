@@ -312,6 +312,41 @@ describe('admin shell', () => {
     );
   });
 
+  it('keeps the Admin overview task-led and makes sidebar density intentional', () => {
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+    const accessGovernance = readFileSync(
+      new URL('./features/admin-access-governance.tsx', import.meta.url),
+      'utf8',
+    );
+    const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
+
+    expect(authority).toContain('admin-authority__briefing-focus');
+    expect(authority).toContain('admin-authority__briefing-posture');
+    expect(authority).toContain('Ledger operacional');
+    expect(authority).toContain('Evidência recente');
+    expect(navigation).toContain(
+      "sidebarMode === 'expanded' ? labels.compactSidebar : labels.expandedSidebar",
+    );
+    expect(accessGovernance).toContain('adminFunctionLabel(member.activeFunction, locale)');
+    expect(accessGovernance).toContain('memberStateLabel(member.state, locale)');
+    expect(accessGovernance).toContain("operations: 'Operações'");
+    expect(accessGovernance).toContain("active: 'Ativo'");
+    expect(styles).toMatch(
+      /\.admin-authority__briefing\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.65fr\) minmax\(260px, 0\.75fr\)/u,
+    );
+    expect(styles).toContain("li[data-record-state='revoked']");
+    expect(styles).toMatch(
+      /@media \(width < 560px\)[\s\S]*\.admin-authority__briefing-facts\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/u,
+    );
+    expect(styles).toMatch(
+      /\.admin-nav__mode\s*\{[\s\S]*justify-content:\s*flex-start[\s\S]*padding-inline:\s*var\(--lb-space-3\)/u,
+    );
+  });
+
   it('keeps one stable seven-domain order and removes domains absent from server authority', () => {
     expect(ADMIN_WEB_COMPOSITION).toEqual({
       authorityConnected: false,

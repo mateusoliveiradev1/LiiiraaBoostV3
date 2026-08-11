@@ -539,8 +539,16 @@ describe('admin production composition', () => {
     expect(productionView).toContain('formatAdminDateTime');
     expect(productionView).toContain('formatRecordReference');
     expect(productionView).toContain('const MAX_VISIBLE_AUTHORITY_RECORDS = 8');
-    expect(productionView).toContain('records.slice(0, MAX_VISIBLE_AUTHORITY_RECORDS)');
+    expect(productionView).toContain('const MAX_VISIBLE_OVERVIEW_RECORDS = 6');
+    expect(productionView).toContain('records.slice(0, visibleRecordLimit)');
     expect(productionView).toContain('formatAuthorityRecordSummary(locale, record)');
+    expect(productionView).toContain('authorityRecordSemanticState(record)');
+    expect(productionView).toContain('authorityRecordCounts(records)');
+    expect(productionView).toContain('className="admin-authority__briefing"');
+    expect(productionView).toContain('className="admin-authority__briefing-action"');
+    expect(productionView).toContain('domain === roleBriefingDomain[session.role]');
+    expect(productionView).toContain('data-record-state={authorityRecordSemanticState(record)}');
+    expect(productionView).toContain("'A autoridade administrativa está sob controle.'");
     expect(productionView).toContain("revoked: 'Revogada'");
     expect(productionView).toContain("record['status'] ?? summaryStatus");
     expect(productionView).not.toContain('{records.map((record) =>');

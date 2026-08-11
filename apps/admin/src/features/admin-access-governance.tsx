@@ -208,6 +208,41 @@ const formatDate = (value: string | undefined, locale: WebLocale): string => {
   }).format(new Date(value));
 };
 
+const adminFunctionLabel = (value: AdminFunctionJson, locale: WebLocale): string => {
+  const labels = {
+    en: {
+      audit: 'Audit',
+      finance: 'Finance',
+      operations: 'Operations',
+      owner: 'Owner',
+      'product-configuration': 'Product configuration',
+      security: 'Security',
+      support: 'Support',
+    },
+    'pt-BR': {
+      audit: 'Auditoria',
+      finance: 'Financeiro',
+      operations: 'Operações',
+      owner: 'Proprietário',
+      'product-configuration': 'Configuração do produto',
+      security: 'Segurança',
+      support: 'Suporte',
+    },
+  } as const;
+  return labels[locale][value];
+};
+
+const memberStateLabel = (
+  value: AdminTeamMemberProjectionJson['state'],
+  locale: WebLocale,
+): string => {
+  const labels = {
+    en: { active: 'Active', offboarded: 'Removed', suspended: 'Suspended' },
+    'pt-BR': { active: 'Ativo', offboarded: 'Removido', suspended: 'Suspenso' },
+  } as const;
+  return labels[locale][value];
+};
+
 const riskTone = (risk: AdminRiskLevelJson): 'information' | 'warning' | 'critical' =>
   risk === 'critical' || risk === 'irreversible'
     ? 'critical'
@@ -663,7 +698,7 @@ const MemberInspector = ({
           <div className={styles['simulationMessage']}>
             <ProductIcon name="search" size={18} />
             <strong>{labels.noActionsSimulation}</strong>
-            <span>{model.simulatedFunction}</span>
+            <span>{adminFunctionLabel(model.simulatedFunction, locale)}</span>
           </div>
           <LbButton onPress={() => onAction?.({ kind: 'exit-simulation' })} variant="secondary">
             <ProductIcon name="close" size={16} />
@@ -675,12 +710,18 @@ const MemberInspector = ({
         <div>
           <dt>{labels.state}</dt>
           <dd>
-            <Status>{member.state}</Status>
+            <Status tone={member.state === 'active' ? 'information' : 'warning'}>
+              {memberStateLabel(member.state, locale)}
+            </Status>
           </dd>
         </div>
         <div>
           <dt>{labels.activeFunction}</dt>
-          <dd>{member.activeFunction ?? '—'}</dd>
+          <dd>
+            {member.activeFunction === undefined
+              ? '—'
+              : adminFunctionLabel(member.activeFunction, locale)}
+          </dd>
         </div>
         <div>
           <dt>{labels.lastActive}</dt>
@@ -710,7 +751,7 @@ const MemberInspector = ({
           >
             {member.functions.map((fn) => (
               <option key={fn} value={fn}>
-                {fn}
+                {adminFunctionLabel(fn, locale)}
               </option>
             ))}
           </select>
@@ -1005,8 +1046,14 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
                       <code>{member.maskedEmail}</code>
                     </span>
                     <span className={styles['memberMeta']}>
-                      <Status>{member.state}</Status>
-                      <small>{member.functions.join(' · ')}</small>
+                      <Status tone={member.state === 'active' ? 'information' : 'warning'}>
+                        {memberStateLabel(member.state, props.locale)}
+                      </Status>
+                      <small>
+                        {member.functions
+                          .map((fn) => adminFunctionLabel(fn, props.locale))
+                          .join(' · ')}
+                      </small>
                     </span>
                     <ProductIcon name="arrowRight" size={18} />
                   </button>

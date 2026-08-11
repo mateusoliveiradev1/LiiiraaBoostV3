@@ -323,6 +323,81 @@ const formatRecordReference = (value: string, locale: WebLocale): string => {
 };
 
 const MAX_VISIBLE_AUTHORITY_RECORDS = 8;
+const MAX_VISIBLE_OVERVIEW_RECORDS = 6;
+
+type AuthorityRecordSemanticState = 'active' | 'expired' | 'pending' | 'revoked' | 'neutral';
+
+const authorityRecordSemanticState = (
+  record: AdminProjectionRecord,
+): AuthorityRecordSemanticState => {
+  const summaryState =
+    typeof record.summary === 'string'
+      ? /^(?:admin|desktop|web)\s*·\s*(active|expired|pending|revoked)\s*·/iu.exec(
+          record.summary,
+        )?.[1]
+      : undefined;
+  const state = record['state'] ?? record['status'] ?? summaryState;
+  if (state === 'active' || state === 'live') return 'active';
+  if (state === 'pending' || state === 'stale' || state === 'reconnecting') return 'pending';
+  if (state === 'revoked') return 'revoked';
+  if (state === 'expired' || state === 'offline' || state === 'degraded' || state === 'unavailable')
+    return 'expired';
+  return 'neutral';
+};
+
+const authorityRecordCounts = (records: readonly AdminProjectionRecord[]) =>
+  records.reduce(
+    (counts, record) => {
+      counts[authorityRecordSemanticState(record)] += 1;
+      return counts;
+    },
+    { active: 0, expired: 0, neutral: 0, pending: 0, revoked: 0 },
+  );
+
+const roleBriefingDomain = Object.freeze({
+  audit: 'system',
+  operations: 'operation',
+  security: 'security',
+  support: 'support',
+} as const);
+
+const roleBriefingCopy = (locale: WebLocale, role: AdminRoleJson, attentionCount: number) => {
+  const roleName = roleLabel(locale, role);
+  if (locale === 'pt-BR') {
+    return {
+      action: `Abrir revisão de ${roleName.toLocaleLowerCase(locale)}`,
+      description:
+        attentionCount > 0
+          ? 'Há mudanças recentes de estado para conferir antes da próxima decisão administrativa.'
+          : 'Nenhuma mudança de estado exige intervenção imediata nesta sessão protegida.',
+      eyebrow: 'Prioridade agora',
+      posture: 'Postura da sessão',
+      postureDescription:
+        'Autoridade validada pelo servidor, limitada à sua função e registrada em histórico imutável.',
+      postureTitle: 'Sessão protegida e sincronizada',
+      title:
+        attentionCount > 0
+          ? `Revise ${String(attentionCount)} ${attentionCount === 1 ? 'sessão que mudou' : 'sessões que mudaram'} de estado.`
+          : 'A autoridade administrativa está sob controle.',
+    } as const;
+  }
+  return {
+    action: `Open ${roleName.toLocaleLowerCase(locale)} review`,
+    description:
+      attentionCount > 0
+        ? 'Recent state changes need review before the next administrative decision.'
+        : 'No state change requires immediate intervention in this protected session.',
+    eyebrow: 'Priority now',
+    posture: 'Session posture',
+    postureDescription:
+      'Authority is server-verified, bounded to your role and recorded in immutable history.',
+    postureTitle: 'Protected and synchronized session',
+    title:
+      attentionCount > 0
+        ? `Review ${String(attentionCount)} ${attentionCount === 1 ? 'session that changed' : 'sessions that changed'} state.`
+        : 'Administrative authority is under control.',
+  } as const;
+};
 
 const authorityRecordStateLabel = (locale: WebLocale, value: unknown): string | null => {
   if (typeof value !== 'string') return null;
@@ -1556,7 +1631,15 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
   }
   const activePresentation =
     routeId === 'admin-role' ? roleOverviewPresentation(locale, session.role) : presentation;
-  const visibleRecords = records.slice(0, MAX_VISIBLE_AUTHORITY_RECORDS);
+  const recordCounts = authorityRecordCounts(records);
+  const attentionCount = recordCounts.expired + recordCounts.pending + recordCounts.revoked;
+  const briefing = roleBriefingCopy(locale, session.role, attentionCount);
+  const briefingAction = projectAdminRoleNavigation(session.role, locale).find(
+    ({ domain }) => domain === roleBriefingDomain[session.role],
+  );
+  const visibleRecordLimit =
+    routeId === 'admin-role' ? MAX_VISIBLE_OVERVIEW_RECORDS : MAX_VISIBLE_AUTHORITY_RECORDS;
+  const visibleRecords = records.slice(0, visibleRecordLimit);
   const hiddenRecordCount = Math.max(0, records.length - visibleRecords.length);
   return (
     <article
@@ -1570,25 +1653,75 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
           <h1>{activePresentation.title}</h1>
           <p>{activePresentation.description}</p>
         </div>
-        <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
-          <ProductIcon name="shield" size={16} />
-          <span>{roleLabel(locale, session.role)}</span>
-        </p>
+        {routeId === 'admin-role' ? null : (
+          <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
+            <ProductIcon name="shield" size={16} />
+            <span>{roleLabel(locale, session.role)}</span>
+          </p>
+        )}
       </header>
-      <dl className="admin-authority__context" aria-label={copy[locale].authoritySummary}>
-        <div>
-          <dt>{copy[locale].currentSession}</dt>
-          <dd>{roleLabel(locale, session.role)}</dd>
-        </div>
-        <div>
-          <dt>{copy[locale].sessionUntil}</dt>
-          <dd>{formatAdminDateTime(session.expiresAt, locale)}</dd>
-        </div>
-        <div>
-          <dt>{copy[locale].projectionScope}</dt>
-          <dd data-status={freshness}>{adminOverviewStatusLabel(locale, freshness)}</dd>
-        </div>
-      </dl>
+      {routeId === 'admin-role' ? (
+        <section className="admin-authority__briefing" aria-labelledby="admin-priority-title">
+          <div className="admin-authority__briefing-focus">
+            <span className="admin-authority__briefing-eyebrow">{briefing.eyebrow}</span>
+            <h2 id="admin-priority-title">{briefing.title}</h2>
+            <p>{briefing.description}</p>
+            <dl
+              className="admin-authority__briefing-facts"
+              aria-label={copy[locale].authoritySummary}
+            >
+              <div data-state="active">
+                <dt>{locale === 'pt-BR' ? 'Sessões ativas' : 'Active sessions'}</dt>
+                <dd>{String(recordCounts.active)}</dd>
+              </div>
+              <div data-state={attentionCount > 0 ? 'attention' : 'clear'}>
+                <dt>{locale === 'pt-BR' ? 'Mudanças de estado' : 'State changes'}</dt>
+                <dd>{String(attentionCount)}</dd>
+              </div>
+              <div>
+                <dt>{copy[locale].sessionUntil}</dt>
+                <dd>{formatAdminDateTime(session.expiresAt, locale)}</dd>
+              </div>
+            </dl>
+            {briefingAction === undefined ? null : (
+              <Link
+                className="admin-authority__briefing-action"
+                href={briefingAction.href as Route}
+              >
+                <span>{briefing.action}</span>
+                <ProductIcon name="arrowRight" size={17} />
+              </Link>
+            )}
+          </div>
+          <aside className="admin-authority__briefing-posture">
+            <span className="admin-authority__briefing-icon" aria-hidden="true">
+              <ProductIcon name="shield" size={22} weight="duotone" />
+            </span>
+            <span className="admin-authority__briefing-eyebrow">{briefing.posture}</span>
+            <strong>{briefing.postureTitle}</strong>
+            <p>{briefing.postureDescription}</p>
+            <span className="admin-authority__briefing-status" data-status={freshness}>
+              <span aria-hidden="true" />
+              {adminOverviewStatusLabel(locale, freshness)}
+            </span>
+          </aside>
+        </section>
+      ) : (
+        <dl className="admin-authority__context" aria-label={copy[locale].authoritySummary}>
+          <div>
+            <dt>{copy[locale].currentSession}</dt>
+            <dd>{roleLabel(locale, session.role)}</dd>
+          </div>
+          <div>
+            <dt>{copy[locale].sessionUntil}</dt>
+            <dd>{formatAdminDateTime(session.expiresAt, locale)}</dd>
+          </div>
+          <div>
+            <dt>{copy[locale].projectionScope}</dt>
+            <dd data-status={freshness}>{adminOverviewStatusLabel(locale, freshness)}</dd>
+          </div>
+        </dl>
+      )}
       {routeId === 'admin-diagnostics' ? (
         <DiagnosticAuthority authority={authority} locale={locale} />
       ) : null}
@@ -1628,11 +1761,14 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
             <>
               <header className="admin-authority__content-header">
                 <div>
-                  <h2>{locale === 'pt-BR' ? 'Atividade recente' : 'Recent activity'}</h2>
+                  <span className="admin-authority__content-eyebrow">
+                    {locale === 'pt-BR' ? 'Ledger operacional' : 'Operational ledger'}
+                  </span>
+                  <h2>{locale === 'pt-BR' ? 'Evidência recente' : 'Recent evidence'}</h2>
                   <p>
                     {locale === 'pt-BR'
-                      ? 'Últimos registros admitidos para esta função administrativa.'
-                      : 'Latest records admitted to this administrative role.'}
+                      ? 'Últimos registros admitidos para esta função, preservados pela autoridade do servidor.'
+                      : 'Latest records admitted to this role and preserved by server authority.'}
                   </p>
                 </div>
                 <span>
@@ -1645,7 +1781,7 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
                 {visibleRecords.map((record) => {
                   const detailHref = recordDetailHref(locale, routeId, record.id);
                   return (
-                    <li key={record.id}>
+                    <li data-record-state={authorityRecordSemanticState(record)} key={record.id}>
                       <article>
                         <ProductIcon name="receipt" size={18} />
                         <div className="admin-authority__record-copy">
@@ -1668,8 +1804,8 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
               {hiddenRecordCount > 0 ? (
                 <p className="admin-authority__record-limit">
                   {locale === 'pt-BR'
-                    ? `${String(hiddenRecordCount)} registros anteriores permanecem preservados no histórico do servidor.`
-                    : `${String(hiddenRecordCount)} earlier records remain preserved in the server history.`}
+                    ? `Mais ${String(hiddenRecordCount)} registros no histórico protegido.`
+                    : `${String(hiddenRecordCount)} more records in protected history.`}
                 </p>
               ) : null}
             </>
