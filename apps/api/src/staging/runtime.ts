@@ -85,6 +85,7 @@ import {
   createStagingStrongAuth,
   type StagingStrongAuth,
 } from './strong-auth.ts';
+import { createResendInvitationDelivery } from './resend-invitation-delivery.ts';
 
 export const REAL_STAGING_CAPABILITIES = Object.freeze([
   'invitation-signup',
@@ -114,7 +115,9 @@ const freeSubscriptionState = (accountId: string): SubscriptionState => ({
 });
 
 export interface RealStagingEnvironment extends ApiEnvironmentInput {
+  readonly RESEND_API_KEY?: string;
   readonly STAGING_AUTH_SECRET?: string;
+  readonly STAGING_INVITATION_FROM?: string;
 }
 
 interface StagingAdminDatabase {
@@ -146,6 +149,7 @@ interface PersistentStagingAdminAuthorityInput {
   readonly database: PersistentAdminDatabase;
   readonly environmentId: AdminEnvironment;
   readonly identity: StagingAdminIdentityAuthority;
+  readonly invitationDelivery?: AdminInvitationDependencies['delivery'];
   readonly strongAuth?: StagingStrongAuth;
 }
 
@@ -1701,6 +1705,9 @@ export const createPersistentStagingAdminAuthority = ({
   database,
   environmentId,
   identity,
+  invitationDelivery = {
+    handoff: () => Promise.reject(new Error('STAGING_INVITATION_DELIVERY_PROVIDER_UNAVAILABLE')),
+  },
   strongAuth,
 }: PersistentStagingAdminAuthorityInput): CompleteAdminRouteDependencies => {
   if (authSecret.length < 43) throw new Error('STAGING_ADMIN_AUTH_SECRET_REJECTED');
@@ -1736,7 +1743,12 @@ export const createPersistentStagingAdminAuthority = ({
   };
   const invitationAuthorization = async (actorId: string): Promise<boolean> => {
     const membership = await governanceRepository.loadMembership(actorId);
-    return membership?.status === 'active' && membership.functions.includes('operations');
+    return (
+      membership?.status === 'active' &&
+      membership.functions.some(
+        (adminFunction) => adminFunction === 'operations' || adminFunction === 'security',
+      )
+    );
   };
   const invitations: AdminInvitationDependencies = {
     authorization: { authorize: ({ actorId }) => invitationAuthorization(actorId) },
@@ -1754,9 +1766,7 @@ export const createPersistentStagingAdminAuthority = ({
       },
       digest: (plaintext) => createHmac('sha256', authSecret).update(plaintext).digest('hex'),
     },
-    delivery: {
-      handoff: () => Promise.reject(new Error('STAGING_INVITATION_DELIVERY_PROVIDER_UNAVAILABLE')),
-    },
+    delivery: invitationDelivery,
     repository: invitationsRepository,
     clock,
     ids,
@@ -2014,6 +2024,25 @@ const apiOrigin = (environment: RealStagingEnvironment): string => {
   }
 };
 
+const invitationDelivery = (
+  environment: RealStagingEnvironment,
+  accountOrigin: string,
+): AdminInvitationDependencies['delivery'] => {
+  const apiKey = environment.RESEND_API_KEY;
+  if (typeof apiKey !== 'string') {
+    throw new Error('STAGING_API_STARTUP_REJECTED:RESEND_API_KEY');
+  }
+  const from = environment.STAGING_INVITATION_FROM;
+  if (typeof from !== 'string') {
+    throw new Error('STAGING_API_STARTUP_REJECTED:STAGING_INVITATION_FROM');
+  }
+  try {
+    return createResendInvitationDelivery({ accountOrigin, apiKey, from });
+  } catch {
+    throw new Error('STAGING_API_STARTUP_REJECTED:INVITATION_DELIVERY');
+  }
+};
+
 export const buildRealStagingApp = async (
   environmentInput: RealStagingEnvironment,
 ): Promise<FastifyInstance> => {
@@ -2230,6 +2259,7 @@ export const buildRealStagingApp = async (
       database,
       environmentId: 'staging',
       identity,
+      invitationDelivery: invitationDelivery(environmentInput, environment.accountOrigin),
       strongAuth,
     }),
   );

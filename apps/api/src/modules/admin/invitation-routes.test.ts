@@ -309,11 +309,16 @@ describe('admin invitation management routes', () => {
           command: command(action, '1'),
           idempotencyKey: `${action}-idem`,
           expiryMode: 'preserve',
+          ...(action === 'resend-invitations' ? { recipient: 'private@example.com' } : {}),
         },
       });
       expect(response.statusCode).toBe(200);
     }
     expect(operations.manage).toHaveBeenCalledTimes(2);
+    expect(operations.manage).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ recipient: 'private@example.com' }),
+    );
     await app.close();
   });
 

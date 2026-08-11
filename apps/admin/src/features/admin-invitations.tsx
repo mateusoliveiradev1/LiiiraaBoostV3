@@ -113,7 +113,7 @@ interface InvitationReadyActions {
   readonly onSelect?: (invitationId: string | undefined) => void;
   readonly onResend?: (
     invitation: AdminInvitationProjectionJson,
-    input: Readonly<{ expiryMode: 'preserve' | 'restart'; reason: string }>,
+    input: Readonly<{ expiryMode: 'preserve' | 'restart'; reason: string; recipient: string }>,
   ) => void;
   readonly onRevoke?: (invitation: AdminInvitationProjectionJson, reason: string) => void;
   readonly onViewChange?: (view: InvitationView) => void;
@@ -173,6 +173,7 @@ const copy = Object.freeze({
     resend: 'Resend invitation',
     resendDescription:
       'The current secret stops working. Choose whether the existing expiry stays or restarts for 14 days.',
+    resendRecipient: 'Confirm the original recipient email',
     restartExpiry: 'Restart the 14-day window',
     retainExpiry: 'Keep the current expiry',
     revoke: 'Revoke invitation',
@@ -237,6 +238,7 @@ const copy = Object.freeze({
     resend: 'Reenviar convite',
     resendDescription:
       'O segredo atual para de funcionar. Escolha se a validade atual permanece ou reinicia por 14 dias.',
+    resendRecipient: 'Confirme o e-mail original do destinatário',
     restartExpiry: 'Reiniciar a janela de 14 dias',
     retainExpiry: 'Manter a validade atual',
     revoke: 'Revogar convite',
@@ -732,11 +734,19 @@ const Inspector = ({
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
-            onResend?.(invitation, { expiryMode, reason: formString(data, 'reason').trim() });
+            onResend?.(invitation, {
+              expiryMode,
+              reason: formString(data, 'reason').trim(),
+              recipient: formString(data, 'recipient').trim().toLowerCase(),
+            });
           }}
         >
           <h3>{labels.resend}</h3>
           <p>{labels.resendDescription}</p>
+          <label className={styles['field']}>
+            <span>{labels.resendRecipient}</span>
+            <input autoComplete="off" maxLength={254} name="recipient" required type="email" />
+          </label>
           <label>
             <input
               checked={expiryMode === 'preserve'}
@@ -1435,6 +1445,7 @@ export const AdminInvitations = ({
             ),
             expiryMode: input.expiryMode,
             idempotencyKey: key,
+            recipient: input.recipient,
           },
           reason: input.reason,
           targetId: invitation.invitationId,

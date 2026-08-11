@@ -61,7 +61,7 @@ const cloneStore = (store: Store): Store => ({
 const pendingInvitation = (overrides: Partial<BetaInvitationState> = {}): BetaInvitationState => ({
   kind: 'beta',
   invitationId: 'inv-1',
-  recipientKey: 'recipient:alice',
+  recipientKey: 'recipient:alice@example.test',
   locale: 'pt-BR',
   version: 1n,
   status: 'pending',
@@ -293,6 +293,7 @@ describe('beta invitation application authority', () => {
     expect(test.deliveries[0]).toMatchObject({
       plaintextSecret: 'plain-secret-1',
       locale: 'pt-BR',
+      recipient: 'Alice@example.test',
     });
     expect(test.store.secretDigests.get('inv-1')).toBe('digest-1');
     expect(
@@ -303,6 +304,14 @@ describe('beta invitation application authority', () => {
         ...test.store.receipts,
       ]),
     ).not.toContain('plain-secret-1');
+    expect(
+      JSON.stringify([
+        ...test.store.secretDigests,
+        ...test.store.audit,
+        ...test.store.outbox,
+        ...test.store.receipts,
+      ]),
+    ).not.toContain('Alice@example.test');
     expect(test.store.lifecycle).toHaveLength(2);
     expect(test.store.audit).toHaveLength(1);
     expect(test.store.outbox).toHaveLength(1);
@@ -353,7 +362,17 @@ describe('beta invitation application authority', () => {
       idempotencyKey: 'stale',
       invitationId: 'inv-1',
       expectedVersion: 0n,
+      recipient: 'Alice@example.test',
       action: { kind: 'resend', expiryMode: 'preserve', justification: 'requested' },
+    });
+    const mismatchedRecipient = await manageBetaInvitation(test.dependencies, {
+      actorId: 'admin-1',
+      commandId: 'resend-wrong-recipient',
+      idempotencyKey: 'resend-wrong-recipient',
+      invitationId: 'inv-1',
+      expectedVersion: 1n,
+      recipient: 'bob@example.test',
+      action: { kind: 'resend', expiryMode: 'restart', justification: 'requested' },
     });
     const rotated = await manageBetaInvitation(test.dependencies, {
       actorId: 'admin-1',
@@ -361,6 +380,7 @@ describe('beta invitation application authority', () => {
       idempotencyKey: 'resend',
       invitationId: 'inv-1',
       expectedVersion: 1n,
+      recipient: 'Alice@example.test',
       action: { kind: 'resend', expiryMode: 'restart', justification: 'requested' },
     });
     const administrative = await manageBetaInvitation(test.dependencies, {
@@ -373,7 +393,9 @@ describe('beta invitation application authority', () => {
     });
 
     expect(stale).toEqual({ ok: false, code: 'STALE' });
+    expect(mismatchedRecipient).toEqual({ ok: false, code: 'INVITATION_RECIPIENT_MISMATCH' });
     expect(rotated).toMatchObject({ ok: true, outcome: 'resent' });
+    expect(test.deliveries.at(-1)).toMatchObject({ recipient: 'alice@example.test' });
     expect(test.store.secretDigests.get('inv-1')).toBe('digest-1');
     expect(administrative).toEqual({ ok: false, code: 'INVITATION_KIND_UNSUPPORTED' });
   });

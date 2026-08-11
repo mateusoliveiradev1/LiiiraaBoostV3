@@ -183,19 +183,21 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
           DESKTOP_STAGING_ORIGIN: ${{ vars.DESKTOP_STAGING_ORIGIN }}
           PUBLIC_STAGING_ORIGIN: ${{ vars.PUBLIC_STAGING_ORIGIN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           STAGING_API_ORIGIN: ${{ secrets.STAGING_API_ORIGIN }}
           STAGING_AUTH_SECRET: ${{ secrets.STAGING_AUTH_SECRET }}
           STAGING_BUILD_ID: ${{ github.sha }}
           STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          STAGING_INVITATION_FROM: ${{ vars.STAGING_INVITATION_FROM }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_RUNTIME_OUTPUT_PATH: ${{ runner.temp }}/liiiraa-stripe-runtime.json
           SUPPORT_BUCKET: ${{ vars.SUPPORT_BUCKET }}
         run: >-
           node --input-type=module --eval
           "import { readFileSync } from 'node:fs';
-          const required = ['ACCOUNT_STAGING_ORIGIN','ADMIN_STAGING_ORIGIN','AUDIT_ANCHOR_BUCKET','AWS_REGION','DESKTOP_STAGING_ORIGIN','PUBLIC_STAGING_ORIGIN','STAGING_API_ORIGIN','STAGING_AUTH_SECRET','STAGING_BUILD_ID','STAGING_DATABASE_URL','STRIPE_SECRET_KEY','SUPPORT_BUCKET'];
+          const required = ['ACCOUNT_STAGING_ORIGIN','ADMIN_STAGING_ORIGIN','AUDIT_ANCHOR_BUCKET','AWS_REGION','DESKTOP_STAGING_ORIGIN','PUBLIC_STAGING_ORIGIN','RESEND_API_KEY','STAGING_API_ORIGIN','STAGING_AUTH_SECRET','STAGING_BUILD_ID','STAGING_DATABASE_URL','STAGING_INVITATION_FROM','STRIPE_SECRET_KEY','SUPPORT_BUCKET'];
           if (required.some((key) => !process.env[key])) throw new Error('Render staging authority environment is incomplete');
           const stripeRuntime = JSON.parse(readFileSync(process.env.STRIPE_RUNTIME_OUTPUT_PATH, 'utf8'));
           if (!/^whsec_[A-Za-z0-9_]+$/.test(stripeRuntime.webhookSecret)) throw new Error('Managed Stripe webhook secret is invalid');

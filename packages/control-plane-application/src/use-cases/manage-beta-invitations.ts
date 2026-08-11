@@ -198,6 +198,7 @@ export const issueBetaInvitation = async (
         const handoff = await dependencies.delivery.handoff({
           invitationId: decision.state.invitationId,
           recipientKey,
+          recipient: input.recipient,
           plaintextSecret: secret.plaintext,
           locale: input.locale,
           idempotencyKey: input.idempotencyKey,
@@ -240,6 +241,8 @@ export interface ManageBetaInvitationInput {
   readonly idempotencyKey: string;
   readonly invitationId: string;
   readonly expectedVersion: bigint;
+  /** Transient address required to prove resend custody; never persisted or returned. */
+  readonly recipient?: string;
   readonly action: ManageBetaInvitationAction;
 }
 
@@ -261,6 +264,8 @@ export const manageBetaInvitation = async (
   try {
     if (!(await authorize(dependencies, input.actorId, 'beta-invitations:manage')))
       return failure();
+    const resendRecipient =
+      input.action.kind === 'resend' ? input.recipient?.trim().toLowerCase() : undefined;
     return await dependencies.repository.transaction(async (transaction) => {
       const replay = await transaction.findCommandResult(commandKey(input));
       if (replay !== null) return replay;
@@ -268,6 +273,13 @@ export const manageBetaInvitation = async (
       if (current === null) return { ok: false, code: 'INVITATION_UNAVAILABLE' };
       if (current.kind !== 'beta') return { ok: false, code: 'INVITATION_KIND_UNSUPPORTED' };
       if (current.version !== input.expectedVersion) return { ok: false, code: 'STALE' };
+      if (
+        input.action.kind === 'resend' &&
+        (resendRecipient === undefined ||
+          dependencies.recipients.hash(resendRecipient) !== current.recipientKey)
+      ) {
+        return { ok: false, code: 'INVITATION_RECIPIENT_MISMATCH' };
+      }
       const now = dependencies.clock.now().toISOString();
       const command: BetaInvitationCommand = { ...input.action, now };
       const decision = decideBetaInvitationTransition(current, command);
@@ -284,6 +296,7 @@ export const manageBetaInvitation = async (
           await dependencies.delivery.handoff({
             invitationId: input.invitationId,
             recipientKey: current.recipientKey,
+            ...(resendRecipient === undefined ? {} : { recipient: resendRecipient }),
             plaintextSecret: secret.plaintext,
             locale: effect.locale as 'en' | 'pt-BR',
             idempotencyKey: input.idempotencyKey,

@@ -146,6 +146,55 @@ describe('real staging administrative authority', () => {
     await app.close();
   });
 
+  it('injects the real delivery authority and admits the security function', async () => {
+    const delivery = {
+      handoff: vi.fn(() => Promise.resolve({ deliveryReference: 'provider-message-01' })),
+    };
+    const membershipId = '00000000-0000-4000-8000-000000000091';
+    const database = {
+      query: vi.fn((statement: string) => {
+        if (statement.includes('FROM admin_governance_memberships')) {
+          return Promise.resolve({
+            rowCount: 1,
+            rows: [
+              {
+                activated_at: '2030-01-01T00:00:00.000Z',
+                id: membershipId,
+                identity_id: actor('security', 'admin').accountId,
+                offboarded_at: null,
+                offboarding_reason: null,
+                status: 'active',
+                strong_factor: true,
+                version: '1',
+              },
+            ],
+          });
+        }
+        if (statement.includes('admin_membership_functions')) {
+          return Promise.resolve({ rowCount: 1, rows: [{ value: 'security' }] });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+      transaction: vi.fn(),
+    };
+    const authority = createPersistentStagingAdminAuthority({
+      adminOrigin,
+      authSecret: 'synthetic-admin-authority-secret-abcdefghijklmnopqrstuvwxyz',
+      database: database as never,
+      environmentId: 'staging',
+      identity: { resolveCredential: vi.fn(() => Promise.resolve(null)) },
+      invitationDelivery: delivery,
+    });
+
+    expect(authority.invitations.invitations.delivery).toBe(delivery);
+    await expect(
+      authority.invitations.invitations.authorization.authorize({
+        actorId: actor('security', 'admin').accountId,
+        capability: 'beta-invitations:issue',
+      }),
+    ).resolves.toBe(true);
+  });
+
   it('runs invitation and operational claims through one bounded worker entrypoint', async () => {
     const invitations = vi.fn(() =>
       Promise.resolve({ claimed: 2, completed: 2, failed: 0, retried: 0 }),

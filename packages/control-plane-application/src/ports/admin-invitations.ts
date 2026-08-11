@@ -29,6 +29,8 @@ export interface AdminInvitationSecretPort {
 export interface InvitationDeliveryHandoff {
   readonly invitationId: string;
   readonly recipientKey: string;
+  /** Transient delivery address. It must never be persisted, logged or returned by the port. */
+  readonly recipient?: string;
   readonly plaintextSecret: string;
   readonly locale: 'en' | 'pt-BR';
   readonly campaign?: string;

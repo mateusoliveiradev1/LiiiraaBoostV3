@@ -93,6 +93,10 @@ describe('daemon-free OCI artifact contract', () => {
     expect(workflow).toContain('STAGING_AUTH_SECRET: ${{ secrets.STAGING_AUTH_SECRET }}');
     expect(workflow).toContain('ACCOUNT_STAGING_ORIGIN: ${{ vars.ACCOUNT_STAGING_ORIGIN }}');
     expect(workflow).toContain('ADMIN_STAGING_ORIGIN: ${{ vars.ADMIN_STAGING_ORIGIN }}');
+    expect(workflow).toContain('RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}');
+    expect(workflow).toContain(
+      'STAGING_INVITATION_FROM: ${{ vars.STAGING_INVITATION_FROM }}',
+    );
     expect(workflow).toContain('--data-binary @-');
     expect(workflow).toContain('env-vars" > /dev/null');
     expect(workflow).toContain('RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}');

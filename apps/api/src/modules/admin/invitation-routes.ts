@@ -691,7 +691,12 @@ export const registerAdminInvitationRoutes = (
         request.params.invitationId,
       );
       const key = idempotencyKey(request.body);
-      if (parsed === null || key === null) {
+      const recipient = stringValue(request.body, 'recipient').trim().toLowerCase();
+      if (
+        parsed === null ||
+        key === null ||
+        (action === 'resend-invitations' && !emailPattern.test(recipient))
+      ) {
         return noStore(reply).code(400).send({ code: 'REQUEST_INVALID' });
       }
       const result = await operations.manage(dependencies.invitations, {
@@ -700,6 +705,7 @@ export const registerAdminInvitationRoutes = (
         idempotencyKey: key,
         invitationId: request.params.invitationId,
         expectedVersion: parsed.expectedVersion,
+        ...(action === 'resend-invitations' ? { recipient } : {}),
         action:
           action === 'resend-invitations'
             ? {
