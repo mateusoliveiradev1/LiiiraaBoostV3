@@ -3,7 +3,7 @@ phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
 tested_commit: 60d6f37984c5d3b9471f05f075acd253c75feb14
-updated: 2026-08-10T15:15:00.000Z
+updated: 2026-08-11T05:08:45.148Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -191,6 +191,10 @@ Remaining tester invitation refresh supplement:
   interface clearly identified `operations` as simulated and retained `security` as the real active
   function, but exposed no explicit control to leave simulation. This checkpoint remains open until
   the missing exit action is published and retested.
+- At `2026-08-11T05:08:45.148Z`, the owner confirmed that a full reload recovered an Admin tab that
+  had remained on the pre-session skeleton across a revision/cold-start boundary. The exact published
+  route had already loaded normally in a clean browser, Render health/readiness and the Admin proxy
+  were responsive, and no persistent product regression was reproduced.
 
 ## Human real-authority observations
 
