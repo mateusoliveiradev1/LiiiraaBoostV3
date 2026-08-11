@@ -108,6 +108,18 @@ describe('admin shell', () => {
     expect(navigation).not.toMatch(/public navigation|account navigation/iu);
   });
 
+  it('keeps a self-service function switch in the global account menu', () => {
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(authority).toContain('session.assignedFunctions.length > 1');
+    expect(authority).toContain("family: 'switch-function'");
+    expect(authority).toContain('authorizeMutation(functionSwitchInput)');
+    expect(authority).toContain('window.location.replace(`/${locale}/admin/overview`)');
+  });
+
   it('keeps the queue and account access inside the 959px and 320px reflow boundaries', () => {
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 
@@ -335,9 +347,7 @@ describe('admin shell', () => {
     expect(accessGovernance).toContain('memberStateLabel(member.state, locale)');
     expect(accessGovernance).toContain('authorityStateLabel(model.authority.state, props.locale)');
     expect(accessGovernance).toContain('adminFunctionLabel(fn, props.locale)');
-    expect(accessGovernance).toContain(
-      'window.location.replace(`/${locale}/admin/overview`)',
-    );
+    expect(accessGovernance).toContain('window.location.replace(`/${locale}/admin/overview`)');
     expect(accessGovernance).toContain("operations: 'Operações'");
     expect(accessGovernance).toContain("active: 'Ativo'");
     expect(accessGovernance).toContain("live: 'Ao vivo'");

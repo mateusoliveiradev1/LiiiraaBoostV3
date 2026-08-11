@@ -58,7 +58,7 @@ const createApp = async () => {
               statement.includes('governed.session_id = $1')
             ? {
                 rowCount: 1,
-                rows: [{ active_function: 'security' }],
+                rows: [{ active_function: 'security', assigned_functions: ['security', 'operations'] }],
               }
             : statement.includes('FROM sessions')
           ? {
@@ -337,6 +337,7 @@ describe('real staging administrative authority', () => {
     expect(session.statusCode).toBe(200);
     expect(session.headers['cache-control']).toContain('no-store');
     expect(session.json()).toMatchObject({
+      assignedFunctions: ['security', 'operations'],
       role: 'security',
       sessionId: '00000000-0000-4000-8000-000000000012',
     });

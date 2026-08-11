@@ -526,7 +526,13 @@ export const registerAdminGovernanceRoutes = (
   });
 
   app.post('/v1/admin/governance/functions/switch', async (request, reply) => {
-    const session = await authorize(request, dependencies, 'admin-membership:manage', 'team', true);
+    const session = await authorize(
+      request,
+      dependencies,
+      'admin-function:switch-self',
+      'team',
+      true,
+    );
     if (session === null || !isRecord(request.body)) return hidden(reply);
     const parsed = governanceCommand(request.body['command'], session, session.sessionId);
     if (parsed === null) return noStore(reply).code(400).send({ code: 'REQUEST_INVALID' });

@@ -176,6 +176,7 @@ describe('production admin authority', () => {
       authority.signIn({ email: 'owner@example.com', password: 'CorrectHorse1' }),
     ).resolves.toEqual({
       actorId: 'developer-01',
+      assignedFunctions: ['security'],
       expiresAt: '2026-09-05T12:00:00.000Z',
       role: 'security',
     });
@@ -320,6 +321,7 @@ describe('production admin authority', () => {
       .mockResolvedValueOnce(
         response({
           actorId: 'developer-01',
+          assignedFunctions: ['security', 'operations'],
           expiresAt: '2026-01-15T13:00:00.000Z',
           role: 'security',
         }),
@@ -333,7 +335,10 @@ describe('production admin authority', () => {
       transport,
     });
 
-    await expect(authority.session()).resolves.toMatchObject({ role: 'security' });
+    await expect(authority.session()).resolves.toMatchObject({
+      assignedFunctions: ['security', 'operations'],
+      role: 'security',
+    });
     await expect(authority.list('diagnostic-metadata')).resolves.toMatchObject({
       records: [{ id: 'DIA-015' }],
       role: 'security',

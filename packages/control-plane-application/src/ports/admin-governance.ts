@@ -16,7 +16,8 @@ export type AdminGovernanceCapability =
   | 'admin-approval:manage'
   | 'admin-access:review'
   | 'admin-audit:reveal'
-  | 'admin-function:simulate';
+  | 'admin-function:simulate'
+  | 'admin-function:switch-self';
 
 export interface AdminGovernanceAuthorizationPort {
   authorize(

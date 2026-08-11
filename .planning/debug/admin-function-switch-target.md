@@ -2,15 +2,15 @@
 status: verifying
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-11T23:10:47.7625674Z
+updated: 2026-08-11T23:53:00.0000000Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed third root cause. The function switch now persists, but the client refetches the People governance projection under Operations even though that function does not have membership or approval capabilities.
-test: Redirect a successful switch to the canonical Overview route and remove People from the Operations navigation projection.
-expecting: Security to Operations lands on Overview, the sidebar immediately reflects Operations, and no governance team or approval request is issued under the new function.
-next_action: Run focused Admin regressions, publish the revision, verify the official domain, and ask for one focused owner retest.
+hypothesis: Confirmed and fixed fourth root cause. Self-session function switching now has a dedicated least-privilege capability and a global strongly authenticated control.
+test: Publish the API and Admin revision, verify both official-domain deployment revisions, then complete one Operations-to-Security owner UAT from the account menu.
+expecting: The operator menu exposes `Trocar função ativa`; selecting Segurança, providing a reason and completing TOTP lands on Overview with the Security navigation restored.
+next_action: Commit, push, deploy the API artifact and Admin, verify revisions, and request the focused round-trip UAT.
 
 ## Symptoms
 
@@ -42,6 +42,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   found: The active function changed to Operations, then the still-mounted People screen requested governance team and approval projections. Operations intentionally lacks `admin-membership:manage` and `admin-approval:manage`, so the API concealed those resources with HTTP 404.
   implication: Persistence is fixed; the remaining failure is a client route-transition and navigation-admission defect after the successful mutation.
 
+- timestamp: 2026-08-11T23:42:00.0000000Z
+  checked: Published Operations session, Admin account menu, governance route authorization, and application use-case authorization
+  found: Operations correctly hides People, but People owns the only switch UI. Both the route and use case also require `admin-membership:manage`, which Operations intentionally lacks.
+  implication: The successful least-privilege transition creates an authorization dead end. Self-switching must be a separate capability available to every admitted administrative function.
+
 ## Eliminated
 
 - hypothesis: The UI was stale after a successful mutation.
@@ -55,7 +60,7 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 
 ## Resolution
 
-root_cause: Three consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections.
-fix: Keep the prior opaque-session and governed-session fixes, navigate successful switches to the canonical Overview route, and project the Operations sidebar without the inaccessible People destination.
-verification: The renewed-session regression passes, the complete API suite passes 247/247, the focused PostgreSQL adapter suite passes 5/5, and the complete Admin gate passes 194/194 tests, TypeScript, and its production build. Changed files pass ESLint and `git diff --check` is clean. Publication and official owner verification remain pending. The workspace-wide TypeScript check is separately blocked by the pre-existing `recipient: undefined` fixture in `resend-invitation-delivery.test.ts`.
-files_changed: [apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/admin-shell.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-access-governance.tsx, apps/admin/src/features/admin-access-governance-feedback.ts, apps/admin/src/features/admin-access-governance-feedback.test.ts, apps/admin/src/features/admin-workspace-registry.test.tsx]
+root_cause: Four consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections. Fourth, the only return control and authorization were coupled to membership management, creating a dead end after a least-privilege switch.
+fix: Preserve the first three fixes; add `admin-function:switch-self` to every admitted function, authorize only the current protected session through the existing domain assignment checks, project assigned functions from PostgreSQL, and expose a global account-menu dialog with action-bound TOTP verification.
+verification: The focused TDD set passes 84/84, the complete Admin suite passes 196/196, the complete API suite passes 247/247, the application suite passes 28/28, Admin TypeScript and production build pass, changed-file ESLint passes, and `git diff --check` is clean. Published owner round-trip UAT remains pending.
+files_changed: [apps/api/src/modules/admin/governance-routes.ts, apps/api/src/modules/admin/governance-routes.test.ts, apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/api/src/staging/strong-auth.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-authority.tsx, apps/admin/src/features/admin-authority.test.tsx, packages/control-plane-application/src/ports/admin-governance.ts, packages/control-plane-application/src/use-cases/manage-admin-access.ts, packages/control-plane-application/src/use-cases/manage-admin-access.test.ts]

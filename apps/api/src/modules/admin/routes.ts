@@ -42,7 +42,11 @@ export interface AdminRouteDependencies {
   readonly resolveDeveloperActor: (
     request: FastifyRequest,
   ) => Promise<Readonly<{ actorId: string; nonProduction: boolean }> | null>;
-  readonly resolveAdminSession: (request: FastifyRequest) => Promise<ActiveAdminRoleSession | null>;
+  readonly resolveAdminSession: (
+    request: FastifyRequest,
+  ) => Promise<
+    (ActiveAdminRoleSession & Readonly<{ assignedFunctions?: readonly AdminRoleJson[] }>) | null
+  >;
   readonly resolveStepUp: (request: FastifyRequest) => Promise<AdminStepUpEvidence | null>;
   readonly roles: AdminRoleAuthorityDependencies;
   readonly commands: AdminCommandDependencies;
@@ -166,12 +170,15 @@ export const registerAdminRoutes = (
     const session = await dependencies.resolveAdminSession(request);
     return session === null
       ? noStore(reply).code(401).send({ code: 'AUTHORIZATION_FAILED' })
-      : noStore(reply).code(200).send({
-          actorId: session.actorId,
-          expiresAt: session.expiresAt,
-          role: session.role,
-          sessionId: session.sessionId,
-        });
+      : noStore(reply)
+          .code(200)
+          .send({
+            actorId: session.actorId,
+            assignedFunctions: session.assignedFunctions ?? [session.role],
+            expiresAt: session.expiresAt,
+            role: session.role,
+            sessionId: session.sessionId,
+          });
   });
 
   app.post('/v1/admin/roles/assume', (request, reply) =>

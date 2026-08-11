@@ -297,9 +297,16 @@ const persistedOperator = async (
 const adminSession = async (
   actor: IdentityActor,
   database: StagingAdminDatabase,
-): Promise<ActiveAdminRoleSession> => {
+): Promise<ActiveAdminRoleSession & Readonly<{ assignedFunctions: readonly AdminFunction[] }>> => {
   const active = await database.query(
-    `SELECT governed.active_function
+    `SELECT governed.active_function,
+            ARRAY(
+              SELECT assignment.function
+                FROM admin_membership_functions AS assignment
+               WHERE assignment.membership_id = membership.id
+                 AND assignment.revoked_at IS NULL
+               ORDER BY assignment.assigned_at, assignment.function
+            ) AS assigned_functions
        FROM admin_function_sessions AS governed
        INNER JOIN admin_governance_memberships AS membership
          ON membership.id = governed.membership_id
@@ -309,8 +316,20 @@ const adminSession = async (
     [actor.sessionId, actor.accountId],
   );
   const role = asAdminFunction(active.rows[0]?.['active_function']) ?? actor.role;
+  const assignedFunctions = Array.isArray(active.rows[0]?.['assigned_functions'])
+    ? active.rows[0]['assigned_functions'].flatMap((value) => {
+        const admitted = asAdminFunction(value);
+        return admitted === null ? [] : [admitted];
+      })
+    : [];
+  const admittedRole = asAdminFunction(role);
+  const admittedFunctions =
+    admittedRole === null || assignedFunctions.includes(admittedRole)
+      ? assignedFunctions
+      : [admittedRole, ...assignedFunctions];
   return Object.freeze({
     actorId: actor.accountId,
+    assignedFunctions: Object.freeze([...new Set(admittedFunctions)]),
     assumedAt: actor.authenticatedAt,
     expiresAt: actor.expiresAt,
     nonProduction: true,
@@ -902,6 +921,7 @@ const GOVERNANCE_CAPABILITIES = Object.freeze([
   'admin-access:review',
   'admin-audit:reveal',
   'admin-function:simulate',
+  'admin-function:switch-self',
 ] as const satisfies readonly AdminGovernanceCapability[]);
 
 const OPERATIONS_CAPABILITIES = Object.freeze([
@@ -927,11 +947,21 @@ const governanceCapabilitiesFor = (
     case 'security':
       return GOVERNANCE_CAPABILITIES;
     case 'audit':
-      return ['admin-access:review', 'admin-audit:reveal', 'admin-function:simulate'];
+      return [
+        'admin-access:review',
+        'admin-audit:reveal',
+        'admin-function:simulate',
+        'admin-function:switch-self',
+      ];
     case 'operations':
-      return ['admin-delegation:manage', 'admin-access:review', 'admin-function:simulate'];
+      return [
+        'admin-delegation:manage',
+        'admin-access:review',
+        'admin-function:simulate',
+        'admin-function:switch-self',
+      ];
     case 'support':
-      return ['admin-function:simulate'];
+      return ['admin-function:simulate', 'admin-function:switch-self'];
   }
 };
 
@@ -942,7 +972,7 @@ const resolveGovernanceSession = async (
 ): Promise<AdminGovernanceRouteSession | null> => {
   const actor = await persistedOperator(request, identity, database);
   if (actor === null) return null;
-  interface GovernedSessionRow {
+  interface GovernedSessionRow extends Record<string, unknown> {
     active_function: string;
     simulation: boolean;
     version: string | number | bigint;
@@ -1013,8 +1043,13 @@ const resolveGovernanceStepUp = async (
   const body = recordValue(request.body);
   const command = recordValue(body?.['command']);
   const targetReferences = command?.['targetReferences'];
-  const expectedAction = text(command?.['action']);
-  const expectedResource = request.url.includes('/approvals') ? 'approvals' : 'governance';
+  const functionSwitch = request.url.includes('/functions/switch');
+  const expectedAction = functionSwitch ? 'admin.function.switch' : text(command?.['action']);
+  const expectedResource = functionSwitch
+    ? 'admin-session'
+    : request.url.includes('/approvals')
+      ? 'approvals'
+      : 'governance';
   const expectedTarget = Array.isArray(targetReferences) ? text(targetReferences[0]) : '';
   const expectedAuthorizationContextId = text(body?.['authorizationContextId']);
   const receipt = request.headers['x-liiiraa-admin-step-up'];

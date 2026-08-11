@@ -8,7 +8,15 @@ import type {
   AuditEventJson,
   AuthorityReceiptJson,
 } from '@liiiraa/contracts-ts';
-import { LbButton, LbCheckbox, LbTextField, ProductIcon } from '@liiiraa/design-system';
+import {
+  LbButton,
+  LbCheckbox,
+  LbDialog,
+  LbDialogActions,
+  LbSelect,
+  LbTextField,
+  ProductIcon,
+} from '@liiiraa/design-system';
 import type { WebLocale } from '@liiiraa/web-core';
 import type { Route } from 'next';
 import Link from 'next/link';
@@ -88,6 +96,13 @@ const copy = Object.freeze({
     signInSecurity: 'Encrypted session · restricted administrative origin · immutable audit',
     signInScope: 'Administrative access is separate from your public account session.',
     backToAccount: 'Back to account portal',
+    functionSwitch: 'Switch active function',
+    functionSwitchAction: 'Switch function',
+    functionSwitchDescription:
+      'Choose another function assigned to your membership. The current session will be revalidated and audited.',
+    functionSwitchError: 'The function could not be changed. Review the session and try again.',
+    functionSwitchReason: 'Operational reason',
+    functionSwitchTarget: 'New active function',
     stepUp: 'Verify with a strong credential',
     stepUpDescription:
       'Use the current code from your authenticator to confirm this operation. No new key needs to be added.',
@@ -146,6 +161,13 @@ const copy = Object.freeze({
     signInSecurity: 'Sessão criptografada · domínio administrativo restrito · auditoria imutável',
     signInScope: 'O acesso administrativo é separado da sessão da sua conta pública.',
     backToAccount: 'Voltar ao portal da conta',
+    functionSwitch: 'Trocar função ativa',
+    functionSwitchAction: 'Trocar função',
+    functionSwitchDescription:
+      'Escolha outra função atribuída ao seu acesso. A sessão atual será validada novamente e auditada.',
+    functionSwitchError: 'Não foi possível trocar a função. Revise a sessão e tente novamente.',
+    functionSwitchReason: 'Motivo operacional',
+    functionSwitchTarget: 'Nova função ativa',
     stepUp: 'Verificar com credencial forte',
     stepUpDescription:
       'Use o código atual do seu autenticador para confirmar esta operação. Nenhuma nova chave precisa ser adicionada.',
@@ -1124,6 +1146,7 @@ const BreakGlassReview = ({
 
 const AdminProductionShell = ({
   accountOrigin,
+  authorizeMutation,
   authority,
   children,
   locale,
@@ -1133,6 +1156,7 @@ const AdminProductionShell = ({
   session,
 }: Readonly<{
   accountOrigin: string;
+  authorizeMutation: (input: AdminMutationInput) => Promise<AdminMutationInput | null>;
   authority: AdminAuthority;
   children: ReactNode;
   locale: WebLocale;
@@ -1145,6 +1169,13 @@ const AdminProductionShell = ({
   const shellLabels = productionShellCopy[locale];
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
+  const [functionSwitchOpen, setFunctionSwitchOpen] = useState(false);
+  const [functionSwitchReason, setFunctionSwitchReason] = useState('');
+  const [functionSwitchPending, setFunctionSwitchPending] = useState(false);
+  const [functionSwitchError, setFunctionSwitchError] = useState(false);
+  const [targetFunction, setTargetFunction] = useState<AdminRoleJson>(
+    session.assignedFunctions.find((role) => role !== session.role) ?? session.role,
+  );
   const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigation = projectAdminRoleNavigation(session.role, locale);
   const canManageFunction = navigation.some(({ domain }) => domain === 'people');
@@ -1159,6 +1190,92 @@ const AdminProductionShell = ({
       accountActions={
         <>
           <a href={`${accountOrigin}/${locale}/account`}>{labels.accountPortal}</a>
+          {session.assignedFunctions.length > 1 ? (
+            <LbDialog
+              description={labels.functionSwitchDescription}
+              isOpen={functionSwitchOpen}
+              onOpenChange={(isOpen) => {
+                setFunctionSwitchOpen(isOpen);
+                if (!isOpen) {
+                  setFunctionSwitchError(false);
+                  setFunctionSwitchReason('');
+                }
+              }}
+              title={labels.functionSwitch}
+              trigger={<LbButton variant="quiet">{labels.functionSwitch}</LbButton>}
+            >
+              <LbSelect
+                label={labels.functionSwitchTarget}
+                onSelectionChange={(key) => {
+                  const admitted = session.assignedFunctions.find((role) => role === key);
+                  if (admitted !== undefined) setTargetFunction(admitted);
+                }}
+                options={session.assignedFunctions.map((role) => ({
+                  id: role,
+                  label: roleLabel(locale, role),
+                }))}
+                selectedKey={targetFunction}
+              />
+              <LbTextField
+                label={labels.functionSwitchReason}
+                onChange={(value) => {
+                  setFunctionSwitchReason(value);
+                  setFunctionSwitchError(false);
+                }}
+                value={functionSwitchReason}
+              />
+              {functionSwitchError ? <p role="alert">{labels.functionSwitchError}</p> : null}
+              <LbDialogActions>
+                <LbButton
+                  isDisabled={functionSwitchPending}
+                  onPress={() => {
+                    setFunctionSwitchOpen(false);
+                  }}
+                  variant="secondary"
+                >
+                  {locale === 'pt-BR' ? 'Cancelar' : 'Cancel'}
+                </LbButton>
+                <LbButton
+                  isDisabled={
+                    functionSwitchPending ||
+                    functionSwitchReason.trim().length < 3 ||
+                    targetFunction === session.role ||
+                    session.sessionId === undefined
+                  }
+                  isLoading={functionSwitchPending}
+                  loadingLabel={locale === 'pt-BR' ? 'Trocando função' : 'Switching function'}
+                  onPress={() => {
+                    const id = crypto.randomUUID();
+                    const functionSwitchInput: AdminMutationInput = {
+                      family: 'switch-function',
+                      idempotencyKey: id,
+                      payload: { authorizationContextId: id, targetFunction },
+                      reason: functionSwitchReason.trim(),
+                      targetId: session.sessionId ?? session.actorId,
+                    };
+                    setFunctionSwitchPending(true);
+                    setFunctionSwitchError(false);
+                    void authorizeMutation(functionSwitchInput).then(async (admitted) => {
+                      if (admitted === null) {
+                        setFunctionSwitchPending(false);
+                        return;
+                      }
+                      const result = await authority.mutate(admitted);
+                      if (result.status === 'complete' || result.status === 'partial') {
+                        window.location.replace(`/${locale}/admin/overview`);
+                        return;
+                      }
+                      setFunctionSwitchPending(false);
+                      setFunctionSwitchError(true);
+                    });
+                  }}
+                  variant="primary"
+                >
+                  {labels.functionSwitchAction}
+                </LbButton>
+              </LbDialogActions>
+            </LbDialog>
+          ) : null}
           <LbButton
             isDisabled={signingOut}
             isLoading={signingOut}
@@ -1453,6 +1570,7 @@ export const AdminAuthorityProvider = ({
       ) : (
         <AdminProductionShell
           accountOrigin={accountOrigin}
+          authorizeMutation={authorizeMutation}
           authority={authority}
           locale={locale}
           onSignedOut={() => {

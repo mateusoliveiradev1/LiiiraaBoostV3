@@ -200,6 +200,7 @@ export const adminRoleProjectionCollection = (role: AdminRoleJson): AdminProject
 
 export type AdminSessionProjection = Readonly<{
   actorId: string;
+  assignedFunctions: readonly AdminRoleJson[];
   expiresAt: string;
   role: AdminRoleJson;
   sessionId?: string;
@@ -404,8 +405,15 @@ const admitSession = (value: unknown): AdminSessionProjection | null => {
   ) {
     return null;
   }
+  const assignedFunctions = Array.isArray(value['assignedFunctions'])
+    ? value['assignedFunctions'].filter(isRole)
+    : [];
+  const admittedFunctions = assignedFunctions.includes(value['role'])
+    ? assignedFunctions
+    : [value['role'], ...assignedFunctions];
   return Object.freeze({
     actorId: value['actorId'],
+    assignedFunctions: Object.freeze([...new Set(admittedFunctions)]),
     expiresAt: value['expiresAt'],
     role: value['role'],
     ...(typeof value['sessionId'] === 'string' ? { sessionId: value['sessionId'] } : {}),
@@ -435,6 +443,7 @@ const admitSignedInSession = (value: unknown): AdminSessionProjection | null => 
   }
   return Object.freeze({
     actorId: actor['accountId'],
+    assignedFunctions: Object.freeze([actor['role']]),
     expiresAt: actor['expiresAt'],
     role: actor['role'],
     ...(typeof actor['sessionId'] === 'string' ? { sessionId: actor['sessionId'] } : {}),
@@ -1520,14 +1529,19 @@ export const createAdminAuthority = ({
       const path = mutationPath(input);
       if (path === null || !boundedToken(action) || !boundedToken(redactedTarget)) return null;
       const requestedContext = payload?.['authorizationContextId'];
+      const functionSwitch = input.family === 'switch-function';
       return await requestStepUp({
-        action,
+        action: functionSwitch ? 'admin.function.switch' : action,
         authorizationContextId: boundedToken(requestedContext)
           ? requestedContext
           : input.idempotencyKey,
         code: input.code,
         redactedTarget,
-        resource: path.includes('/approvals') ? 'approvals' : 'governance',
+        resource: functionSwitch
+          ? 'admin-session'
+          : path.includes('/approvals')
+            ? 'approvals'
+            : 'governance',
       });
     },
 

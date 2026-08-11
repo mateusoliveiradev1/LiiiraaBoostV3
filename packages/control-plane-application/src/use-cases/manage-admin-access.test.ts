@@ -18,6 +18,7 @@ import {
   requestAdminApproval,
   revealAdminAuditValue,
   simulateAdminFunction,
+  switchAdminFunction,
 } from './manage-admin-access.js';
 
 const now = '2030-01-01T00:00:00.000Z';
@@ -150,6 +151,7 @@ const harness = () => {
     memberships,
     approvals,
     delegations,
+    sessions,
     committedEffects,
     authorize,
     verify,
@@ -163,6 +165,54 @@ const harness = () => {
 };
 
 describe('transactional admin access governance', () => {
+  it('authorizes a current-session function switch independently from team governance', async () => {
+    const test = harness();
+    test.memberships.set('owner', {
+      membershipId: 'membership-owner',
+      identityId: 'owner',
+      status: 'active',
+      functions: ['operations', 'security'],
+      strongFactor: 'passkey',
+      version: 1n,
+      activatedAt: now,
+      permissions: {
+        functions: ['operations', 'security'],
+        capabilities: ['device:manage', 'session:revoke'],
+        scopes: ['devices', 'sessions'],
+      },
+    });
+    test.sessions.set('session-one', {
+      sessionId: 'session-one',
+      actorId: 'owner',
+      activeFunction: 'operations',
+      navigation: ['operation'],
+      dataScopes: ['devices', 'entitlements'],
+      capabilities: ['device:manage', 'entitlement:correct'],
+      simulation: false,
+      version: 1n,
+    });
+
+    await expect(
+      switchAdminFunction(test.dependencies, {
+        actorId: 'owner',
+        commandId: 'switch-one',
+        sessionId: 'session-one',
+        targetFunction: 'security',
+        reason: 'Return to security governance',
+        authorizationContextId: 'context-admin.function.switch',
+        stepUp: stepUp('owner', 'admin.function.switch', 'admin-session', 'session:session-one'),
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      outcome: 'function-switched',
+      session: { activeFunction: 'security', version: 2n },
+    });
+    expect(test.authorize).toHaveBeenCalledWith({
+      actorId: 'owner',
+      capability: 'admin-function:switch-self',
+    });
+  });
+
   it('authorizes before repository access and activates only a verified separate admin invitation', async () => {
     const test = harness();
     test.authorize.mockResolvedValueOnce(false);

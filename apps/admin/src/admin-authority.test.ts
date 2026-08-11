@@ -231,6 +231,56 @@ describe('complete typed Admin mutation authority', () => {
     approvalReferences: ['approval-0001'],
   };
 
+  it('binds a sensitive function switch step-up to the current protected session', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'administrator-0001',
+          assignedFunctions: ['operations', 'security'],
+          expiresAt: '2030-08-06T20:00:00.000Z',
+          role: 'operations',
+          sessionId: 'admin-session-operations-0001',
+        }),
+      )
+      .mockResolvedValueOnce(
+        response({
+          ok: true,
+          expiresAt: '2030-08-06T20:05:00.000Z',
+          method: 'totp',
+          receipt: 'opaque-function-switch-receipt-abcdefghijklmnopqrstuvwxyz',
+          verifiedAt: '2030-08-06T20:00:00.000Z',
+        }),
+      );
+    const authority = createAuthority(transport);
+    await authority.session();
+
+    await expect(
+      authority.verifyMutationStepUp({
+        code: '123456',
+        family: 'switch-function',
+        idempotencyKey: 'switch-context-0001',
+        payload: {
+          authorizationContextId: 'switch-context-0001',
+          targetFunction: 'security',
+        },
+        reason: 'Return to the assigned Security function.',
+        targetId: 'admin-session-operations-0001',
+      }),
+    ).resolves.toMatchObject({
+      action: 'admin.function.switch',
+      redactedTarget: 'admin-session-operations-0001',
+      resource: 'admin-session',
+    });
+
+    const [, init] = transport.mock.calls[1] ?? [];
+    expect(JSON.parse(String(init?.body))).toMatchObject({
+      action: 'admin.function.switch',
+      redactedTarget: 'admin-session-operations-0001',
+      resource: 'admin-session',
+    });
+  });
+
   it('attaches CSRF, idempotency, version, step-up, and approval evidence', async () => {
     const transport = vi.fn<AdminAuthorityTransport>().mockResolvedValue(response(receipt));
     const authority = createAuthority(transport);

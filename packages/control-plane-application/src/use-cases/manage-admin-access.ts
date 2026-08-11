@@ -420,7 +420,7 @@ export const switchAdminFunction = async (
   dependencies: AdminGovernanceDependencies,
   input: SwitchAdminFunctionInput,
 ): Promise<AdminGovernanceCommandResult> => {
-  if (!(await authorize(dependencies, input.actorId, 'admin-membership:manage'))) {
+  if (!(await authorize(dependencies, input.actorId, 'admin-function:switch-self'))) {
     return failure('FORBIDDEN');
   }
   const occurredAt = dependencies.clock.now().toISOString();

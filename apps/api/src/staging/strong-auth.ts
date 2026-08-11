@@ -324,6 +324,7 @@ export const createPostgresStagingStrongAuthRepository = (
               'admin-membership:manage',
               'admin-membership:activate',
               'admin-function:simulate',
+              'admin-function:switch-self',
               'admin-access:review',
               'admin-delegation:manage',
               'admin-permissions:manage',

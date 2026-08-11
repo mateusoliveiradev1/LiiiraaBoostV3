@@ -15,12 +15,12 @@ const now = '2030-02-01T12:00:00.000Z';
 const csrf = (nonce = 'governance-nonce-abcdefghijklmnopqrstuvwxyz') =>
   `${nonce}.${createHmac('sha256', csrfSecret).update(nonce).digest('base64url')}`;
 
-const command = (target = 'identity-one') => ({
+const command = (target = 'identity-one', activeFunction = 'security') => ({
   schemaVersion: '1.0',
   kind: 'admin-operation-command',
   commandId: 'governance-command-one',
   actorId: 'operator-one',
-  activeFunction: 'security',
+  activeFunction,
   action: 'update-access',
   targetReferences: [target],
   reason: 'Reviewed access governance change',
@@ -44,13 +44,17 @@ const session: AdminGovernanceRouteSession = {
     'admin-delegation:manage',
     'admin-access:review',
     'admin-function:simulate',
+    'admin-function:switch-self',
   ],
   governanceScopes: ['team', 'delegations', 'reviews', 'history'],
   simulation: false,
   version: 4n,
 };
 
-const buildApp = async (authorized = true) => {
+const buildApp = async (
+  authorized = true,
+  admittedSession: AdminGovernanceRouteSession = session,
+) => {
   const queries = {
     listTeam: vi.fn(() =>
       Promise.resolve({
@@ -128,7 +132,7 @@ const buildApp = async (authorized = true) => {
     queries,
     operations,
     inviteTeam,
-    resolveSession: () => Promise.resolve(authorized ? session : null),
+    resolveSession: () => Promise.resolve(authorized ? admittedSession : null),
     resolveStepUp: () =>
       Promise.resolve({
         evidenceId: 'step-up-one',
@@ -201,13 +205,18 @@ describe('admin governance routes', () => {
   });
 
   it('uses generated commands and server session/version authority for switch and offboarding', async () => {
-    const { app, operations } = await buildApp();
+    const selfSwitchSession: AdminGovernanceRouteSession = {
+      ...session,
+      activeFunction: 'operations',
+      governanceCapabilities: ['admin-function:switch-self'],
+    };
+    const { app, operations } = await buildApp(true, selfSwitchSession);
     const switched = await app.inject({
       method: 'POST',
       url: '/v1/admin/governance/functions/switch',
       headers: { origin, 'x-csrf-token': csrf() },
       payload: {
-        command: command('session-one'),
+        command: command('session-one', 'operations'),
         targetFunction: 'operations',
         authorizationContextId: 'context-one',
       },
@@ -218,14 +227,18 @@ describe('admin governance routes', () => {
       expect.objectContaining({ actorId: 'operator-one', sessionId: 'session-one' }),
     );
 
-    const offboarded = await app.inject({
+    await app.close();
+
+    const offboarding = await buildApp();
+
+    const offboarded = await offboarding.app.inject({
       method: 'POST',
       url: '/v1/admin/governance/offboard',
       headers: { origin, 'x-csrf-token': csrf() },
       payload: { command: command(), compromise: true, authorizationContextId: 'context-one' },
     });
     expect(offboarded.statusCode).toBe(200);
-    expect(operations.offboard).toHaveBeenCalledWith(
+    expect(offboarding.operations.offboard).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         actorId: 'operator-one',
@@ -233,7 +246,7 @@ describe('admin governance routes', () => {
         expectedVersion: 7n,
       }),
     );
-    await app.close();
+    await offboarding.app.close();
   });
 
   it('keeps administrative team invitations separate from beta and ordinary accounts', async () => {
