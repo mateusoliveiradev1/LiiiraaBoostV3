@@ -2,21 +2,21 @@
 status: verifying
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-11T22:03:39.7952969Z
+updated: 2026-08-11T22:54:49.8522273Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed and fixed locally. The Admin command targeted the actor identity while the API correctly required the protected administrative session reference.
-test: Publish the exact Admin/API revision and repeat the owner switch from Security to Operations with TOTP.
-expecting: The switch returns success, the provider reloads the authoritative session immediately, Operations navigation appears without F5, and any rejection renders a bounded notice.
-next_action: Commit, publish Admin and API, verify deployment identity, then request the focused owner retest.
+hypothesis: Confirmed second root cause. Renewed administrative identity sessions were admitted through an actor-role fallback but never received an `admin_function_sessions` projection, so the mutation targeted the correct current session and then failed with `ADMIN_SESSION_NOT_FOUND`.
+test: Materialize a governed session for each admitted current administrative identity session, then run the focused API regression and full Admin/API gates before publishing.
+expecting: A renewed login has a persisted governed session before mutation; Security to Operations returns success and remains authoritative after refresh.
+next_action: Complete the regression, publish the API revision, verify readiness and ask for one focused owner retest.
 
 ## Symptoms
 
 expected: After selecting Operations, entering an operational reason, confirming TOTP, and activating the function, the Admin changes to Operations and refreshes its admitted navigation and projections.
 actual: TOTP completes, but no visible function change occurs and the real session remains Security.
-errors: Published runtime evidence records `POST /v1/admin/governance/functions/switch` returning HTTP 400; the UI does not explain the rejection.
+errors: The first published attempt returned HTTP 400. After correcting the actor/session command target, the official-domain retry returned HTTP 403 and no mutation record was committed.
 reproduction: Open People, inspect the owner member, exit simulation, select Operations, enter a valid reason, activate the function, and complete TOTP.
 started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 
@@ -32,6 +32,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   found: The UI supplies `session.actorId` as `targetId`, the command builder places it in `targetReferences`, and the API requires `session.sessionId` to be present.
   implication: The deterministic actor/session target mismatch produces `REQUEST_INVALID` and HTTP 400.
 
+- timestamp: 2026-08-11T22:54:49.8522273Z
+  checked: Official-domain Vercel runtime logs and the Neon staging authority for the owner account
+  found: TOTP step-up returned 200 and function switch returned 403. The current admin identity sessions created on 10-11 August have no active `admin_function_sessions` row; the only governed row belongs to the 6 August session.
+  implication: The corrected command now targets the current session, but the application repository cannot load it and returns `ADMIN_SESSION_NOT_FOUND` before persistence.
+
 ## Eliminated
 
 - hypothesis: The UI was stale after a successful mutation.
@@ -40,9 +45,12 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 - hypothesis: TOTP failed.
   evidence: The strong-auth request completed before the switch request reached the route.
 
+- hypothesis: The PostgreSQL event outbox rejected a non-UUID session reference.
+  evidence: Identity session IDs are UUID values, so the outbox aggregate constraint admits the current reference.
+
 ## Resolution
 
-root_cause: The Admin session projection omitted `sessionId`; the governed command builder therefore selected `actorId`, but `/v1/admin/governance/functions/switch` validates that `targetReferences` contains the exact protected administrative session ID.
-fix: Expose the opaque session reference from `/v1/admin/session`, admit it in the Admin authority client, force switch-function commands to target that session, refresh the React authority session after success, and render rejected mutations as explicit no-change notices.
-verification: Local TDD regressions passed; Admin 194/194 and API 246/246 tests passed; focused ESLint and Admin TypeScript passed; the optimized Admin production build completed successfully. Published owner verification remains pending.
-files_changed: [apps/api/src/modules/admin/routes.ts, apps/api/src/staging/real-admin.test.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/features/admin-access-governance.tsx, apps/admin/src/features/admin-access-governance-feedback.ts, apps/admin/src/features/admin-access-governance-feedback.test.ts]
+root_cause: Two consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row, so the now-correct target still could not be loaded by the mutation transaction.
+fix: Keep the prior opaque-session command fix and ensure every admitted current admin identity session receives a persisted governed-session projection from an assigned function before routes authorize governance work.
+verification: The renewed-session regression passes, the complete API suite passes 247/247, the focused PostgreSQL adapter suite passes 5/5, changed files pass ESLint, and `git diff --check` is clean. Publication and official owner verification remain pending. The workspace-wide TypeScript check is separately blocked by the pre-existing `recipient: undefined` fixture in `resend-invitation-delivery.test.ts`.
+files_changed: [apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/features/admin-access-governance.tsx, apps/admin/src/features/admin-access-governance-feedback.ts, apps/admin/src/features/admin-access-governance-feedback.test.ts]

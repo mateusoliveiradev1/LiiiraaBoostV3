@@ -195,6 +195,70 @@ describe('real staging administrative authority', () => {
     ).resolves.toBe(true);
   });
 
+  it('materializes governance for a renewed administrative identity session', async () => {
+    let governedSessionExists = false;
+    const statements: string[] = [];
+    const database = {
+      query: vi.fn((statement: string, values?: readonly unknown[]) => {
+        statements.push(statement);
+        if (statement.includes('INNER JOIN security_factors AS factor')) {
+          return Promise.resolve({
+            rowCount: 1,
+            rows: [{ id: '00000000-0000-4000-8000-000000000080' }],
+          });
+        }
+        if (statement.includes('INSERT INTO admin_function_sessions')) {
+          expect(values).toEqual([
+            actor('security', 'admin').sessionId,
+            actor('security', 'admin').accountId,
+            'security',
+            actor('security', 'admin').authenticatedAt,
+          ]);
+          governedSessionExists = true;
+          return Promise.resolve({ rowCount: 1, rows: [] });
+        }
+        if (
+          statement.includes('FROM admin_function_sessions AS governed') &&
+          statement.includes('governed.session_id = $1')
+        ) {
+          return Promise.resolve(
+            governedSessionExists
+              ? {
+                  rowCount: 1,
+                  rows: [{ active_function: 'security', simulation: false, version: '1' }],
+                }
+              : { rowCount: 0, rows: [] },
+          );
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      }),
+      transaction: vi.fn(),
+    };
+    const identity = {
+      resolveCredential: vi.fn(() => Promise.resolve(actor('security', 'admin'))),
+    };
+    const authority = createPersistentStagingAdminAuthority({
+      adminOrigin,
+      authSecret: 'synthetic-admin-authority-secret-abcdefghijklmnopqrstuvwxyz',
+      clock: { now: () => new Date('2030-01-15T12:05:00.000Z') },
+      database: database as never,
+      environmentId: 'staging',
+      identity,
+    });
+
+    const session = await authority.governance.resolveSession({
+      headers: { cookie: cookie(operatorCredential) },
+    } as never);
+
+    expect(session).toMatchObject({
+      activeFunction: 'security',
+      actorId: actor('security', 'admin').accountId,
+      sessionId: actor('security', 'admin').sessionId,
+      version: 1n,
+    });
+    expect(statements.join('\n')).toMatch(/INSERT INTO admin_function_sessions/iu);
+  });
+
   it('runs invitation and operational claims through one bounded worker entrypoint', async () => {
     const invitations = vi.fn(() =>
       Promise.resolve({ claimed: 2, completed: 2, failed: 0, retried: 0 }),

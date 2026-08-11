@@ -942,12 +942,14 @@ const resolveGovernanceSession = async (
 ): Promise<AdminGovernanceRouteSession | null> => {
   const actor = await persistedOperator(request, identity, database);
   if (actor === null) return null;
-  const active = await database.query<{
+  interface GovernedSessionRow {
     active_function: string;
     simulation: boolean;
     version: string | number | bigint;
-  }>(
-    `SELECT governed.active_function, governed.simulation, governed.version
+  }
+  const loadCurrent = () =>
+    database.query<GovernedSessionRow>(
+      `SELECT governed.active_function, governed.simulation, governed.version
        FROM admin_function_sessions AS governed
        INNER JOIN admin_governance_memberships AS membership
          ON membership.id = governed.membership_id
@@ -957,11 +959,35 @@ const resolveGovernanceSession = async (
         AND membership.status = 'active'
       ORDER BY governed.started_at DESC
       LIMIT 1`,
-    [actor.sessionId, actor.accountId],
-  );
+      [actor.sessionId, actor.accountId],
+    );
+  let active = await loadCurrent();
+  if (active.rows[0] === undefined) {
+    const initialFunction = asAdminFunction(actor.role);
+    if (initialFunction === null) return null;
+    await database.query(
+      `INSERT INTO admin_function_sessions
+        (id, session_id, membership_id, active_function, simulation, version, started_at)
+       SELECT gen_random_uuid(), $1, membership.id, assignment.function, FALSE, 1, $4
+         FROM admin_governance_memberships AS membership
+         INNER JOIN admin_membership_functions AS assignment
+           ON assignment.membership_id = membership.id
+          AND assignment.function = $3
+          AND assignment.revoked_at IS NULL
+        WHERE membership.identity_id = $2::uuid
+          AND membership.status = 'active'
+          AND NOT EXISTS (
+            SELECT 1 FROM admin_function_sessions AS governed
+             WHERE governed.session_id = $1 AND governed.ended_at IS NULL
+          )
+       ON CONFLICT DO NOTHING`,
+      [actor.sessionId, actor.accountId, initialFunction, actor.authenticatedAt],
+    );
+    active = await loadCurrent();
+  }
   const row = active.rows[0];
-  const activeFunction = asAdminFunction(row?.active_function) ?? asAdminFunction(actor.role);
-  if (activeFunction === null) return null;
+  const activeFunction = asAdminFunction(row?.active_function);
+  if (row === undefined || activeFunction === null) return null;
   const policy = ADMIN_FUNCTION_POLICIES[activeFunction];
   return Object.freeze({
     sessionId: actor.sessionId,
@@ -972,8 +998,8 @@ const resolveGovernanceSession = async (
     capabilities: policy.capabilities,
     governanceCapabilities: governanceCapabilitiesFor(activeFunction),
     governanceScopes: ['team', 'delegations', 'reviews', 'history'] as const,
-    simulation: row?.simulation === true,
-    version: row === undefined ? actor.sessionVersion : BigInt(row.version),
+    simulation: row.simulation,
+    version: BigInt(row.version),
   });
 };
 
