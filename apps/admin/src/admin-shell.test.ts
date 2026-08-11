@@ -61,7 +61,10 @@ describe('admin shell', () => {
 
   it('keeps operational identity, task, isolated session, role, and locale legible without preview chrome', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
-    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
     const productLockupUrl = new URL('./admin-product-lockup.tsx', import.meta.url);
 
@@ -86,7 +89,10 @@ describe('admin shell', () => {
   });
 
   it('puts localized role-scoped search, queue view, alerts, and operator identity in the shell', () => {
-    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
     const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
 
     expect(authority).toContain('searchLabel={shellLabels.searchLabel}');
@@ -138,9 +144,7 @@ describe('admin shell', () => {
     expect(styles).toMatch(
       /\.admin-header__search > \.lb-product-icon,[\s\S]*\.admin-header__search input\[type='search'\][\s\S]*display:\s*none/u,
     );
-    expect(styles).toContain(
-      ".admin-header__search button > span:not(.lb-product-icon)",
-    );
+    expect(styles).toContain('.admin-header__search button > span:not(.lb-product-icon)');
     expect(styles).not.toContain('.admin-header__search button > span {');
   });
 
@@ -352,16 +356,23 @@ describe('admin shell', () => {
       'admin-operation',
       'admin-system',
     ]);
-    expect(roleIds.security).toEqual([
-      'admin-overview',
-      'admin-people',
-      'admin-support-domain',
-      'admin-security-domain',
-      'admin-system',
-    ]);
-    expect(roleIds.audit).toEqual(['admin-overview', 'admin-security-domain', 'admin-system']);
+    expect(roleIds.security).toEqual(['admin-overview', 'admin-people', 'admin-security-domain']);
+    expect(roleIds.audit).toEqual(['admin-overview', 'admin-system']);
     expect(new Set(Object.values(roleIds).map((ids) => ids.join(','))).size).toBe(4);
     expect(adminRoleFromHeader('omnipotent')).toBe('support');
+  });
+
+  it('projects operations-only utilities instead of advertising dead destinations', () => {
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
+    const navigation = readFileSync(new URL('./admin-navigation.tsx', import.meta.url), 'utf8');
+
+    expect(authority).toContain("operationalUtilities={session.role === 'operations'}");
+    expect(navigation).toContain('operationalUtilities?: boolean');
+    expect(navigation).toContain('{operationalUtilities ? (');
+    expect(navigation).toContain('admin-header__role-context');
   });
 
   it('does not render preview role chrome before production session authority is verified', () => {
@@ -374,7 +385,10 @@ describe('admin shell', () => {
 
   it('provides skip, focus, protected operator menu, and role-guarded reflow contracts', () => {
     const layout = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
-    const authority = readFileSync(new URL('./features/admin-authority.tsx', import.meta.url), 'utf8');
+    const authority = readFileSync(
+      new URL('./features/admin-authority.tsx', import.meta.url),
+      'utf8',
+    );
     const focus = readFileSync(new URL('./admin-focus-handoff.tsx', import.meta.url), 'utf8');
     const styles = readFileSync(new URL('./app/admin-shell.css', import.meta.url), 'utf8');
 

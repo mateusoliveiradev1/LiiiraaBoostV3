@@ -530,6 +530,9 @@ describe('admin production composition', () => {
     expect(productionView).toContain('authority.openFreshness');
     expect(productionView).toContain('refetchAdminResources');
     expect(productionView).toContain('authority.query');
+    expect(productionView).toContain("session.role !== 'operations'");
+    expect(productionView).toContain("session.role === 'operations'");
+    expect(productionView).toContain("setFreshness('live')");
     expect(productionView).toContain('AbortController');
     expect(productionView).toContain("import Link from 'next/link'");
     expect(productionView).not.toContain('const RoleNavigation');

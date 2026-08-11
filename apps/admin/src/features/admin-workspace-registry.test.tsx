@@ -50,20 +50,45 @@ describe('production Admin workspace registry', () => {
     expect(adminSessionCanOpenWorkspace(revenue, 'pt-BR', 'operations')).toBe(true);
     expect(adminSessionCanOpenWorkspace(revenue, 'pt-BR', 'security')).toBe(false);
     expect(adminSessionCanOpenWorkspace(security, 'en', 'security')).toBe(true);
-    expect(adminSessionCanOpenWorkspace(security, 'en', 'audit')).toBe(true);
+    expect(adminSessionCanOpenWorkspace(security, 'en', 'audit')).toBe(false);
   });
 
-  it('routes cross-domain utilities to the permission-filtered Queue Canvas', () => {
+  it('admits cross-domain queue utilities only for the operations function', () => {
     for (const routeId of [
       'admin-search',
       'admin-inbox',
       'admin-saved-views',
       'admin-activity',
-    ] as const)
-      expect(resolveAdminWorkspaceDefinition(routeId)).toMatchObject({
+    ] as const) {
+      const definition = resolveAdminWorkspaceDefinition(routeId);
+      expect(definition).toMatchObject({
         domain: 'overview',
         kind: 'queue',
       });
+      if (definition === null) throw new Error('REGISTRY_FIXTURE_INVALID');
+      expect(adminSessionCanOpenWorkspace(definition, 'pt-BR', 'operations')).toBe(true);
+      expect(adminSessionCanOpenWorkspace(definition, 'pt-BR', 'security')).toBe(false);
+      expect(adminSessionCanOpenWorkspace(definition, 'pt-BR', 'support')).toBe(false);
+      expect(adminSessionCanOpenWorkspace(definition, 'pt-BR', 'audit')).toBe(false);
+    }
+  });
+
+  it('composes each admitted non-operations workspace from its native authority projection', () => {
+    const source = readFileSync(new URL('./admin-workspace-registry.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain("role === 'operations'");
+    expect(source).toContain('routeId="admin-role"');
+    expect(source).toContain('routeId="admin-security"');
+    expect(source).toContain('routeId="admin-audit"');
+  });
+
+  it('loads support without requesting operations-only revenue or job authority', () => {
+    const source = readFileSync(new URL('./admin-revenue-support.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain("surface === 'support'");
+    expect(source).toContain('createEmptyQueryResult');
+    expect(source).toContain("authority.list('support-cases')");
+    expect(source).toContain("authority.list('entitlements')");
   });
 
   it('preserves the canonical record identity for detail routes', () => {

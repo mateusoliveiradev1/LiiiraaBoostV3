@@ -68,5 +68,9 @@ export const adminSessionCanOpenWorkspace = (
   definition: AdminWorkspaceDefinition,
   locale: WebLocale,
   role: AdminRoleJson,
-): boolean =>
-  projectAdminRoleNavigation(role, locale).some(({ domain }) => domain === definition.domain);
+): boolean => {
+  if (definition.kind === 'queue') return role === 'operations';
+  return projectAdminRoleNavigation(role, locale).some(
+    ({ domain }) => domain === definition.domain,
+  );
+};

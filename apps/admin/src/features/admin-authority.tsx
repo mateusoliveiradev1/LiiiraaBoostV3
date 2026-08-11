@@ -188,6 +188,75 @@ const roleLabel = (locale: WebLocale, role: AdminRoleJson): string => {
   return labels[locale][role];
 };
 
+const roleOverviewPresentation = (locale: WebLocale, role: AdminRoleJson) => {
+  const labels = {
+    en: {
+      audit: {
+        description: 'Review the immutable evidence admitted to this protected audit session.',
+        emptyDescription: 'There is no audit evidence waiting for review in the admitted scope.',
+        emptyTitle: 'Audit scope is clear',
+        eyebrow: 'Verified administrative context',
+        title: 'Audit command center',
+      },
+      operations: {
+        description: 'Prioritize admitted work, capacity and protected operational decisions.',
+        emptyDescription: 'There is no assigned operational work waiting in this session.',
+        emptyTitle: 'Operations are up to date',
+        eyebrow: 'Verified administrative context',
+        title: 'Operations command center',
+      },
+      security: {
+        description:
+          'Review active administrative sessions and the security scope admitted to you.',
+        emptyDescription: 'There is no security evidence waiting in the admitted scope.',
+        emptyTitle: 'Security scope is clear',
+        eyebrow: 'Verified administrative context',
+        title: 'Security command center',
+      },
+      support: {
+        description: 'Start with the support cases admitted to this protected session.',
+        emptyDescription: 'There is no support case waiting in the admitted queue.',
+        emptyTitle: 'Support queue is clear',
+        eyebrow: 'Verified administrative context',
+        title: 'Support command center',
+      },
+    },
+    'pt-BR': {
+      audit: {
+        description:
+          'Revise as evidências imutáveis admitidas para esta sessão protegida de auditoria.',
+        emptyDescription: 'Não há evidências aguardando revisão no escopo admitido.',
+        emptyTitle: 'Escopo de auditoria em dia',
+        eyebrow: 'Contexto administrativo verificado',
+        title: 'Central de auditoria',
+      },
+      operations: {
+        description: 'Priorize trabalho admitido, capacidade e decisões operacionais protegidas.',
+        emptyDescription: 'Não há trabalho operacional atribuído aguardando nesta sessão.',
+        emptyTitle: 'Operação em dia',
+        eyebrow: 'Contexto administrativo verificado',
+        title: 'Central de operações',
+      },
+      security: {
+        description:
+          'Revise sessões administrativas ativas e o escopo de segurança admitido para você.',
+        emptyDescription: 'Não há evidências de segurança aguardando no escopo admitido.',
+        emptyTitle: 'Escopo de segurança em dia',
+        eyebrow: 'Contexto administrativo verificado',
+        title: 'Central de segurança',
+      },
+      support: {
+        description: 'Comece pelos casos de atendimento admitidos para esta sessão protegida.',
+        emptyDescription: 'Não há casos aguardando na fila de atendimento admitida.',
+        emptyTitle: 'Fila de atendimento em dia',
+        eyebrow: 'Contexto administrativo verificado',
+        title: 'Central de atendimento',
+      },
+    },
+  } as const;
+  return labels[locale][role];
+};
+
 const productionShellCopy = Object.freeze({
   en: Object.freeze({
     account: 'Operator menu',
@@ -200,6 +269,7 @@ const productionShellCopy = Object.freeze({
     jobs: 'Activity and jobs',
     navigation: 'Administrative domains',
     roleHome: 'Overview',
+    manageRole: 'Manage active function',
     savedViews: Object.freeze({
       assigned: 'Assigned work',
       'sla-risk': 'SLA at risk',
@@ -222,6 +292,7 @@ const productionShellCopy = Object.freeze({
     jobs: 'Atividade e tarefas',
     navigation: 'Domínios administrativos',
     roleHome: 'Visão geral',
+    manageRole: 'Gerenciar função ativa',
     savedViews: Object.freeze({
       assigned: 'Trabalho atribuído',
       'sla-risk': 'SLA em risco',
@@ -266,16 +337,15 @@ const recordDetailHref = (
   locale: WebLocale,
   routeId: AdminAuthorityRoute,
   recordId: string,
-): Route => {
+): Route | null => {
   const encodedId = encodeURIComponent(recordId);
   const suffix =
     routeId === 'admin-support'
       ? `/support/cases/${encodedId}`
-      : routeId === 'admin-operations'
-        ? `/operation/jobs/${encodedId}`
-        : routeId === 'admin-security'
-          ? `/security/incidents/${encodedId}`
-          : `/system/audit/${encodedId}`;
+      : routeId === 'admin-audit' || routeId === 'admin-audit-event'
+        ? `/system/audit/${encodedId}`
+        : null;
+  if (suffix === null) return null;
   return routeHref(locale, suffix) as Route;
 };
 
@@ -907,6 +977,7 @@ const AdminProductionShell = ({
   const [signOutError, setSignOutError] = useState(false);
   const alternateLocale: WebLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
   const navigation = projectAdminRoleNavigation(session.role, locale);
+  const canManageFunction = navigation.some(({ domain }) => domain === 'people');
   useEffect(() => {
     document.documentElement.dataset['adminSessionState'] = 'verified';
     return () => {
@@ -964,8 +1035,9 @@ const AdminProductionShell = ({
       jobsLabel={shellLabels.jobs}
       label={shellLabels.navigation}
       locale={locale}
-      roleHomeHref={routeHref(locale, '/overview')}
-      roleHomeLabel={shellLabels.roleHome}
+      operationalUtilities={session.role === 'operations'}
+      roleHomeHref={routeHref(locale, canManageFunction ? '/people' : '/overview')}
+      roleHomeLabel={canManageFunction ? shellLabels.manageRole : shellLabels.roleHome}
       roleLabel={roleLabel(locale, session.role)}
       savedViewLabels={shellLabels.savedViews}
       searchAction={shellLabels.searchAction}
@@ -1091,7 +1163,7 @@ export const AdminAuthorityProvider = ({
   }, [authority]);
 
   useEffect(() => {
-    if (session === null || session === undefined) return undefined;
+    if (session?.role !== 'operations') return undefined;
     const controller = new AbortController();
     void refetchAdminResources(
       [
@@ -1120,6 +1192,10 @@ export const AdminAuthorityProvider = ({
   useEffect(() => {
     if (session === null || session === undefined) {
       setFreshness('offline');
+      return undefined;
+    }
+    if (session.role !== 'operations') {
+      setFreshness('live');
       return undefined;
     }
     const controller = new AbortController();
@@ -1426,6 +1502,8 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
       </article>
     );
   }
+  const activePresentation =
+    routeId === 'admin-role' ? roleOverviewPresentation(locale, session.role) : presentation;
   return (
     <article
       className="admin-authority"
@@ -1434,9 +1512,9 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     >
       <header className="admin-authority__header">
         <div>
-          <span className="admin-authority__system">{presentation.eyebrow}</span>
-          <h1>{presentation.title}</h1>
-          <p>{presentation.description}</p>
+          <span className="admin-authority__system">{activePresentation.eyebrow}</span>
+          <h1>{activePresentation.title}</h1>
+          <p>{activePresentation.description}</p>
         </div>
         <p aria-label={copy[locale].activeRole} className="admin-authority__role" role="status">
           <ProductIcon name="shield" size={16} />
@@ -1487,38 +1565,41 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
             <div className="admin-authority__empty" role="status">
               <ProductIcon name="check" size={20} />
               <div>
-                <strong>{copy[locale].noRecordsTitle}</strong>
-                <p>{copy[locale].noRecordsDescription}</p>
+                <strong>{activePresentation.emptyTitle}</strong>
+                <p>{activePresentation.emptyDescription}</p>
                 <span>{copy[locale].noRecords}</span>
               </div>
             </div>
           ) : (
             <ul className="admin-authority__records">
-              {records.map((record) => (
-                <li key={record.id}>
-                  <article>
-                    <ProductIcon name="receipt" size={18} />
-                    <div className="admin-authority__record-copy">
-                      <strong className="admin-authority__record-reference">
-                        {formatRecordReference(record.id, locale)}
-                      </strong>
-                      <p>
-                        {typeof record.redactedTarget === 'string'
-                          ? record.redactedTarget
-                          : typeof record.summary === 'string'
-                            ? record.summary
-                            : copy[locale].recordFallback}
-                      </p>
-                    </div>
-                    <span className="admin-authority__record-status">
-                      {recordStatusLabel(locale, record)}
-                    </span>
-                    <Link href={recordDetailHref(locale, routeId, record.id)}>
-                      {copy[locale].openDetail}
-                    </Link>
-                  </article>
-                </li>
-              ))}
+              {records.map((record) => {
+                const detailHref = recordDetailHref(locale, routeId, record.id);
+                return (
+                  <li key={record.id}>
+                    <article>
+                      <ProductIcon name="receipt" size={18} />
+                      <div className="admin-authority__record-copy">
+                        <strong className="admin-authority__record-reference">
+                          {formatRecordReference(record.id, locale)}
+                        </strong>
+                        <p>
+                          {typeof record.redactedTarget === 'string'
+                            ? record.redactedTarget
+                            : typeof record.summary === 'string'
+                              ? record.summary
+                              : copy[locale].recordFallback}
+                        </p>
+                      </div>
+                      <span className="admin-authority__record-status">
+                        {recordStatusLabel(locale, record)}
+                      </span>
+                      {detailHref === null ? null : (
+                        <Link href={detailHref}>{copy[locale].openDetail}</Link>
+                      )}
+                    </article>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

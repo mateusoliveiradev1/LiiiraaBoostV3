@@ -61,13 +61,20 @@ const Workspace = ({
   definition,
   locale,
   recordId,
+  role,
 }: Readonly<{
   definition: AdminWorkspaceDefinition;
   locale: WebLocale;
   recordId: string | undefined;
+  role: 'audit' | 'operations' | 'security' | 'support';
 }>) => {
   const selection = recordId === undefined ? {} : { initialSelectedId: recordId };
-  if (definition.kind === 'overview') return <AdminOverview locale={locale} />;
+  if (definition.kind === 'overview')
+    return role === 'operations' ? (
+      <AdminOverview locale={locale} />
+    ) : (
+      <AdminAuthorityPage locale={locale} routeId="admin-role" />
+    );
   if (definition.kind === 'queue') return <AdminQueueCanvas {...selection} locale={locale} />;
   if (definition.kind === 'invitations') return <AdminInvitations {...selection} locale={locale} />;
   if (definition.kind === 'access-governance')
@@ -79,8 +86,12 @@ const Workspace = ({
   if (definition.kind === 'operation')
     return <AdminOperationsSystem {...selection} locale={locale} surface="operation" />;
   if (definition.kind === 'security')
-    return <AdminOperationsSystem {...selection} locale={locale} surface="security" />;
-  return <AdminOperationsSystem {...selection} locale={locale} surface="system" />;
+    return <AdminAuthorityPage locale={locale} routeId="admin-security" />;
+  return role === 'audit' ? (
+    <AdminAuthorityPage locale={locale} routeId="admin-audit" />
+  ) : (
+    <AdminOperationsSystem {...selection} locale={locale} surface="system" />
+  );
 };
 
 export const AdminWorkspaceRegistry = ({
@@ -100,5 +111,7 @@ export const AdminWorkspaceRegistry = ({
   if (!adminSessionCanOpenWorkspace(definition, locale, session.role))
     return <SafeWorkspaceDenial locale={locale} />;
   const recordId = resolveAdminWorkspaceRecordId(routeId, routeParameters);
-  return <Workspace definition={definition} locale={locale} recordId={recordId} />;
+  return (
+    <Workspace definition={definition} locale={locale} recordId={recordId} role={session.role} />
+  );
 };

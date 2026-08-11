@@ -1,6 +1,6 @@
 'use client';
 
-import type { AdminJobProjectionJson, AuditEventJson } from '@liiiraa/contracts-ts';
+import type { AdminJobProjectionJson, AdminRoleJson, AuditEventJson } from '@liiiraa/contracts-ts';
 import {
   LbButton,
   LbCheckbox,
@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type {
   AdminMutationResult,
+  AdminAuthorityListResult,
   AdminProjectionRecord,
   AdminQueryResult,
   AdminSensitiveExportReceipt,
@@ -31,6 +32,12 @@ import {
 import styles from './admin-revenue-support.module.css';
 
 type AuthorityState = 'live' | 'reconnecting' | 'stale' | 'offline' | 'degraded';
+
+const createEmptyQueryResult = (): AdminQueryResult =>
+  Object.freeze({ nextCursor: null, records: Object.freeze([]), status: 'online' });
+
+const createEmptyListResult = (role: AdminRoleJson): AdminAuthorityListResult =>
+  Object.freeze({ records: Object.freeze([]), role, status: 'online' });
 
 export type RevenueRow = Readonly<{
   amount: ReturnType<typeof projectRevenueAuthority>['amount'];
@@ -1051,17 +1058,28 @@ export const AdminRevenueSupport = ({
   useEffect(() => {
     if (session === null || session === undefined) return undefined;
     const controller = new AbortController();
-    void Promise.all([
-      authority.list('entitlements'),
-      authority.list('support-cases'),
-      authority.query('jobs', { environment: 'staging', limit: 25, signal: controller.signal }),
-    ]).then(([entitlements, support, jobs]) => {
-      if (!controller.signal.aborted) setCollections({ entitlements, jobs, support });
-    });
+    if (surface === 'support') {
+      void authority.list('support-cases').then((support) => {
+        if (!controller.signal.aborted)
+          setCollections({
+            entitlements: createEmptyListResult(session.role),
+            jobs: createEmptyQueryResult(),
+            support,
+          });
+      });
+    } else {
+      void Promise.all([
+        authority.list('entitlements'),
+        authority.list('support-cases'),
+        authority.query('jobs', { environment: 'staging', limit: 25, signal: controller.signal }),
+      ]).then(([entitlements, support, jobs]) => {
+        if (!controller.signal.aborted) setCollections({ entitlements, jobs, support });
+      });
+    }
     return () => {
       controller.abort();
     };
-  }, [authority, refresh, revision, session]);
+  }, [authority, refresh, revision, session, surface]);
   const model = useMemo<RevenueSupportModel | null>(() => {
     if (collections === null) return null;
     const revenue =

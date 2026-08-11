@@ -65,8 +65,8 @@ const ADMIN_DOMAIN_NAVIGATION = Object.freeze({
 const ROLE_DOMAINS = Object.freeze({
   support: Object.freeze(['overview', 'support'] as const),
   operations: Object.freeze(['overview', 'people', 'revenue', 'operation', 'system'] as const),
-  security: Object.freeze(['overview', 'people', 'support', 'security', 'system'] as const),
-  audit: Object.freeze(['overview', 'security', 'system'] as const),
+  security: Object.freeze(['overview', 'people', 'security'] as const),
+  audit: Object.freeze(['overview', 'system'] as const),
 } satisfies Readonly<Record<AdminRole, readonly AdminShellDomain[]>>);
 
 export const ADMIN_ROLE_COPY = Object.freeze({

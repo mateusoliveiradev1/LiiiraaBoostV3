@@ -48,6 +48,7 @@ type AdminNavigationProps = Readonly<{
   jobsLabel: string;
   label: string;
   locale: WebLocale;
+  operationalUtilities?: boolean;
   persistPreference?: boolean;
   roleHomeHref: string;
   roleHomeLabel: string;
@@ -123,6 +124,7 @@ const shellCopy = Object.freeze({
     expandedSidebar: 'Expand sidebar',
     navigation: 'Administrative navigation',
     openNavigation: 'Open navigation',
+    roleScope: 'Active function',
     utilities: 'Utilities',
   }),
   'pt-BR': Object.freeze({
@@ -135,6 +137,7 @@ const shellCopy = Object.freeze({
     expandedSidebar: 'Expandir barra lateral',
     navigation: 'Navegação administrativa',
     openNavigation: 'Abrir navegação',
+    roleScope: 'Função ativa',
     utilities: 'Utilitários',
   }),
 });
@@ -220,6 +223,7 @@ export function AdminShellFrame({
   jobsLabel,
   label,
   locale,
+  operationalUtilities = true,
   persistPreference = true,
   queueState,
   roleHomeHref,
@@ -282,6 +286,7 @@ export function AdminShellFrame({
   }, [density, persistPreference, preferenceKey, preferenceKeyLoaded, sidebarMode]);
 
   useEffect(() => {
+    if (!operationalUtilities) return undefined;
     const handleShortcut = (event: KeyboardEvent) => {
       const target = event.target;
       const editing =
@@ -307,7 +312,7 @@ export function AdminShellFrame({
     return () => {
       window.removeEventListener('keydown', handleShortcut);
     };
-  }, [mobileSearchOpen]);
+  }, [mobileSearchOpen, operationalUtilities]);
 
   const updateDrawer = useCallback((open: boolean) => {
     setDrawerOpen(open);
@@ -339,18 +344,20 @@ export function AdminShellFrame({
           : {})}
         queueState={queueState}
       />
-      <div className="admin-nav__utilities">
-        <span>{labels.utilities}</span>
-        <Link href={createAdminShellHref(inboxHref, queueState) as Route}>
-          <ProductIcon name="bell" size={18} />
-          <span className="admin-nav__label">{inboxLabel}</span>
-          {inboxCount > 0 ? <strong>{inboxCount}</strong> : null}
-        </Link>
-        <Link href={createAdminShellHref(jobsHref, queueState) as Route}>
-          <ProductIcon name="activity" size={18} />
-          <span className="admin-nav__label">{jobsLabel}</span>
-        </Link>
-      </div>
+      {operationalUtilities ? (
+        <div className="admin-nav__utilities">
+          <span>{labels.utilities}</span>
+          <Link href={createAdminShellHref(inboxHref, queueState) as Route}>
+            <ProductIcon name="bell" size={18} />
+            <span className="admin-nav__label">{inboxLabel}</span>
+            {inboxCount > 0 ? <strong>{inboxCount}</strong> : null}
+          </Link>
+          <Link href={createAdminShellHref(jobsHref, queueState) as Route}>
+            <ProductIcon name="activity" size={18} />
+            <span className="admin-nav__label">{jobsLabel}</span>
+          </Link>
+        </div>
+      ) : null}
     </>
   );
 
@@ -412,55 +419,73 @@ export function AdminShellFrame({
             <strong>{roleLabel}</strong>
             <span>{environmentLabel}</span>
           </div>
-          <form
-            action={searchHref}
-            className="admin-header__search"
-            data-mobile-open={mobileSearchOpen || undefined}
-            method="get"
-            role="search"
-          >
-            <ProductIcon name="search" size={17} />
-            <label className="lb-visually-hidden" htmlFor="admin-global-search">
-              {searchLabel}
-            </label>
-            <input
-              defaultValue={queueState.query}
-              id="admin-global-search"
-              maxLength={128}
-              name="q"
-              placeholder={searchPlaceholder}
-              ref={searchRef}
-              type="search"
-            />
-            <button
-              aria-expanded={mobileSearchOpen}
-              aria-label={searchAction}
-              onClick={(event) => {
-                if (window.matchMedia('(max-width: 959px)').matches && !mobileSearchOpen) {
-                  event.preventDefault();
-                  setMobileSearchOpen(true);
-                  window.queueMicrotask(() => searchRef.current?.focus());
-                }
-              }}
-              type="submit"
-            >
-              <ProductIcon name="search" size={16} />
-              <span>{searchAction}</span>
-            </button>
-          </form>
-          <div className="admin-header__task">
-            <span aria-label={currentTaskLabel}>{currentQueueLabel}</span>
-            <strong>{savedViewLabels[queueState.savedView]}</strong>
-          </div>
-          <div className="admin-header__tools">
+          {operationalUtilities ? (
+            <>
+              <form
+                action={searchHref}
+                className="admin-header__search"
+                data-mobile-open={mobileSearchOpen || undefined}
+                method="get"
+                role="search"
+              >
+                <ProductIcon name="search" size={17} />
+                <label className="lb-visually-hidden" htmlFor="admin-global-search">
+                  {searchLabel}
+                </label>
+                <input
+                  defaultValue={queueState.query}
+                  id="admin-global-search"
+                  maxLength={128}
+                  name="q"
+                  placeholder={searchPlaceholder}
+                  ref={searchRef}
+                  type="search"
+                />
+                <button
+                  aria-expanded={mobileSearchOpen}
+                  aria-label={searchAction}
+                  onClick={(event) => {
+                    if (window.matchMedia('(max-width: 959px)').matches && !mobileSearchOpen) {
+                      event.preventDefault();
+                      setMobileSearchOpen(true);
+                      window.queueMicrotask(() => searchRef.current?.focus());
+                    }
+                  }}
+                  type="submit"
+                >
+                  <ProductIcon name="search" size={16} />
+                  <span>{searchAction}</span>
+                </button>
+              </form>
+              <div className="admin-header__task">
+                <span aria-label={currentTaskLabel}>{currentQueueLabel}</span>
+                <strong>{savedViewLabels[queueState.savedView]}</strong>
+              </div>
+            </>
+          ) : (
             <Link
-              aria-label={`${alertsLabel}: ${String(inboxCount)}`}
-              className="admin-header__alerts"
-              href={createAdminShellHref(inboxHref, queueState) as Route}
+              className="admin-header__role-context"
+              href={createAdminShellHref(roleHomeHref, queueState) as Route}
             >
-              <ProductIcon name="bell" size={18} />
-              <span aria-live="polite">{inboxCount}</span>
+              <ProductIcon name="shield" size={17} />
+              <span>
+                <small>{labels.roleScope}</small>
+                <strong>{roleLabel}</strong>
+              </span>
+              <ProductIcon name="chevronRight" size={15} />
             </Link>
+          )}
+          <div className="admin-header__tools">
+            {operationalUtilities ? (
+              <Link
+                aria-label={`${alertsLabel}: ${String(inboxCount)}`}
+                className="admin-header__alerts"
+                href={createAdminShellHref(inboxHref, queueState) as Route}
+              >
+                <ProductIcon name="bell" size={18} />
+                <span aria-live="polite">{inboxCount}</span>
+              </Link>
+            ) : null}
             <button
               aria-label={
                 density === 'comfortable' ? labels.compactDensity : labels.comfortableDensity
