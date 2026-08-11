@@ -185,6 +185,19 @@ export const ADMIN_PROJECTION_RESOURCES = Object.freeze([
 
 export type AdminProjectionCollection = (typeof ADMIN_PROJECTION_RESOURCES)[number];
 
+export const adminRoleProjectionCollection = (role: AdminRoleJson): AdminProjectionCollection => {
+  switch (role) {
+    case 'support':
+      return 'support-cases';
+    case 'operations':
+      return 'entitlements';
+    case 'security':
+      return 'sessions';
+    case 'audit':
+      return 'audit-events';
+  }
+};
+
 export type AdminSessionProjection = Readonly<{
   actorId: string;
   expiresAt: string;

@@ -26,6 +26,7 @@ import {
 } from 'react';
 
 import {
+  adminRoleProjectionCollection,
   createAdminAuthority,
   type AdminAuthority,
   type AdminDiagnosticProjection,
@@ -291,7 +292,11 @@ const correlationId = (): string => {
   return `admin-browser-${String(sequence)}`;
 };
 
-const collectionFor = (routeId: AdminAuthorityRoute): AdminProjectionCollection => {
+const collectionFor = (
+  routeId: AdminAuthorityRoute,
+  role: AdminRoleJson,
+): AdminProjectionCollection => {
+  if (routeId === 'admin-role') return adminRoleProjectionCollection(role);
   if (routeId === 'admin-support') return 'support-cases';
   if (routeId === 'admin-operations') return 'entitlements';
   if (routeId === 'admin-security') return 'sessions';
@@ -332,9 +337,10 @@ const queryFamiliesForResources = (resources: readonly string[]): readonly Admin
 const loadAuthorizedRecords = async (
   authority: AdminAuthority,
   routeId: AdminAuthorityRoute,
+  role: AdminRoleJson,
 ): Promise<readonly AdminProjectionRecord[]> => {
   if (routeId === 'admin-diagnostics') return [];
-  const result = await authority.list(collectionFor(routeId));
+  const result = await authority.list(collectionFor(routeId, role));
   return result.status === 'online' ? result.records : [];
 };
 
@@ -386,7 +392,7 @@ const AdminSignIn = ({
       setLoading(false);
       return;
     }
-    const records = await loadAuthorizedRecords(authority, routeId);
+    const records = await loadAuthorizedRecords(authority, routeId, next.role);
     onAuthenticated(next, records);
   };
 
@@ -1333,7 +1339,7 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
     setRecords([]);
     setRecordsLoading(true);
     setRecordsFailure(null);
-    void authority.list(collectionFor(routeId)).then((result) => {
+    void authority.list(collectionFor(routeId, session.role)).then((result) => {
       if (controller.signal.aborted) return;
       setRecords(result.records);
       setRecordsFailure(result.status === 'online' ? null : result.status);

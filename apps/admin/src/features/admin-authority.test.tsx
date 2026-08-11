@@ -4,6 +4,7 @@ import type { AuthorityReceiptJson, DiagnosticConsentJson } from '@liiiraa/contr
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  adminRoleProjectionCollection,
   createAdminAuthority,
   type AdminAuthorityTransport,
   type AdminDiagnosticProjection,
@@ -74,6 +75,15 @@ const receipt: AuthorityReceiptJson = {
 };
 
 describe('production admin authority', () => {
+  it.each([
+    ['support', 'support-cases'],
+    ['operations', 'entitlements'],
+    ['security', 'sessions'],
+    ['audit', 'audit-events'],
+  ] as const)('selects an admitted landing projection for the %s function', (role, collection) => {
+    expect(adminRoleProjectionCollection(role)).toBe(collection);
+  });
+
   it('preserves the server-issued CSRF token so administrative logout succeeds', async () => {
     const csrfToken = 'csrf.'.concat('z'.repeat(43));
     const transport = vi
