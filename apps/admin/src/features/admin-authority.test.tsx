@@ -538,6 +538,11 @@ describe('admin production composition', () => {
     expect(productionView).not.toContain('const RoleNavigation');
     expect(productionView).toContain('formatAdminDateTime');
     expect(productionView).toContain('formatRecordReference');
+    expect(productionView).toContain('const MAX_VISIBLE_AUTHORITY_RECORDS = 8');
+    expect(productionView).toContain('records.slice(0, MAX_VISIBLE_AUTHORITY_RECORDS)');
+    expect(productionView).toContain('formatAuthorityRecordSummary(locale, record)');
+    expect(productionView).toContain("revoked: 'Revogada'");
+    expect(productionView).not.toContain('{records.map((record) =>');
     expect(productionView).toContain('variant="destructive"');
     expect(productionView).toContain('Sair do painel');
     expect(productionView).not.toContain('AdminPreviewRoute');

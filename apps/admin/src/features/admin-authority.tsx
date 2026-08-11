@@ -322,15 +322,61 @@ const formatRecordReference = (value: string, locale: WebLocale): string => {
   return `${locale === 'pt-BR' ? 'Referência' : 'Reference'} ••••${ending}`;
 };
 
+const MAX_VISIBLE_AUTHORITY_RECORDS = 8;
+
+const authorityRecordStateLabel = (locale: WebLocale, value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const labels = {
+    en: {
+      active: 'Active',
+      expired: 'Expired',
+      pending: 'Pending',
+      revoked: 'Revoked',
+    },
+    'pt-BR': {
+      active: 'Ativa',
+      expired: 'Expirada',
+      pending: 'Pendente',
+      revoked: 'Revogada',
+    },
+  } as const;
+  return value in labels[locale]
+    ? labels[locale][value as keyof (typeof labels)[typeof locale]]
+    : null;
+};
+
+const formatAuthorityRecordSummary = (locale: WebLocale, record: AdminProjectionRecord): string => {
+  if (typeof record.redactedTarget === 'string') return record.redactedTarget;
+  if (typeof record.summary !== 'string') return copy[locale].recordFallback;
+  const match =
+    /^(admin|desktop|web)\s*·\s*(active|expired|pending|revoked)\s*·\s*expires\s+(.+)$/iu.exec(
+      record.summary,
+    );
+  if (match === null) return record.summary;
+  const surfaceLabels = {
+    en: { admin: 'Admin', desktop: 'Desktop', web: 'Web' },
+    'pt-BR': { admin: 'Admin', desktop: 'Desktop', web: 'Web' },
+  } as const;
+  const surface = match[1]?.toLocaleLowerCase('en-US') as keyof (typeof surfaceLabels)['en'];
+  const state = authorityRecordStateLabel(locale, match[2]) ?? copy[locale].recordStatus;
+  const expiry = match[3] ?? '';
+  const parsedExpiry = new Date(expiry);
+  const formattedExpiry = Number.isNaN(parsedExpiry.getTime())
+    ? expiry
+    : formatAdminDateTime(parsedExpiry.toISOString(), locale);
+  return locale === 'pt-BR'
+    ? `${surfaceLabels[locale][surface]} · ${state} · expira em ${formattedExpiry}`
+    : `${surfaceLabels[locale][surface]} · ${state} · expires ${formattedExpiry}`;
+};
+
 const isVisibleStatus = (value: unknown): value is AdminVisibleStatus =>
   typeof value === 'string' &&
   ['live', 'stale', 'reconnecting', 'offline', 'degraded', 'unavailable'].includes(value);
 
 const recordStatusLabel = (locale: WebLocale, record: AdminProjectionRecord): string => {
   const status = record['state'] ?? record['status'];
-  return isVisibleStatus(status)
-    ? adminOverviewStatusLabel(locale, status)
-    : copy[locale].recordStatus;
+  if (isVisibleStatus(status)) return adminOverviewStatusLabel(locale, status);
+  return authorityRecordStateLabel(locale, status) ?? copy[locale].recordStatus;
 };
 
 const recordDetailHref = (
@@ -1504,6 +1550,8 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
   }
   const activePresentation =
     routeId === 'admin-role' ? roleOverviewPresentation(locale, session.role) : presentation;
+  const visibleRecords = records.slice(0, MAX_VISIBLE_AUTHORITY_RECORDS);
+  const hiddenRecordCount = Math.max(0, records.length - visibleRecords.length);
   return (
     <article
       className="admin-authority"
@@ -1571,36 +1619,54 @@ export const AdminAuthorityPage = ({ locale, routeId }: AdminAuthorityPageProps)
               </div>
             </div>
           ) : (
-            <ul className="admin-authority__records">
-              {records.map((record) => {
-                const detailHref = recordDetailHref(locale, routeId, record.id);
-                return (
-                  <li key={record.id}>
-                    <article>
-                      <ProductIcon name="receipt" size={18} />
-                      <div className="admin-authority__record-copy">
-                        <strong className="admin-authority__record-reference">
-                          {formatRecordReference(record.id, locale)}
-                        </strong>
-                        <p>
-                          {typeof record.redactedTarget === 'string'
-                            ? record.redactedTarget
-                            : typeof record.summary === 'string'
-                              ? record.summary
-                              : copy[locale].recordFallback}
-                        </p>
-                      </div>
-                      <span className="admin-authority__record-status">
-                        {recordStatusLabel(locale, record)}
-                      </span>
-                      {detailHref === null ? null : (
-                        <Link href={detailHref}>{copy[locale].openDetail}</Link>
-                      )}
-                    </article>
-                  </li>
-                );
-              })}
-            </ul>
+            <>
+              <header className="admin-authority__content-header">
+                <div>
+                  <h2>{locale === 'pt-BR' ? 'Atividade recente' : 'Recent activity'}</h2>
+                  <p>
+                    {locale === 'pt-BR'
+                      ? 'Últimos registros admitidos para esta função administrativa.'
+                      : 'Latest records admitted to this administrative role.'}
+                  </p>
+                </div>
+                <span>
+                  {locale === 'pt-BR'
+                    ? `${String(visibleRecords.length)} de ${String(records.length)}`
+                    : `${String(visibleRecords.length)} of ${String(records.length)}`}
+                </span>
+              </header>
+              <ul className="admin-authority__records">
+                {visibleRecords.map((record) => {
+                  const detailHref = recordDetailHref(locale, routeId, record.id);
+                  return (
+                    <li key={record.id}>
+                      <article>
+                        <ProductIcon name="receipt" size={18} />
+                        <div className="admin-authority__record-copy">
+                          <strong className="admin-authority__record-reference">
+                            {formatRecordReference(record.id, locale)}
+                          </strong>
+                          <p>{formatAuthorityRecordSummary(locale, record)}</p>
+                        </div>
+                        <span className="admin-authority__record-status">
+                          {recordStatusLabel(locale, record)}
+                        </span>
+                        {detailHref === null ? null : (
+                          <Link href={detailHref}>{copy[locale].openDetail}</Link>
+                        )}
+                      </article>
+                    </li>
+                  );
+                })}
+              </ul>
+              {hiddenRecordCount > 0 ? (
+                <p className="admin-authority__record-limit">
+                  {locale === 'pt-BR'
+                    ? `${String(hiddenRecordCount)} registros anteriores permanecem preservados no histórico do servidor.`
+                    : `${String(hiddenRecordCount)} earlier records remain preserved in the server history.`}
+                </p>
+              ) : null}
+            </>
           )}
         </section>
       ) : null}
