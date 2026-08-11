@@ -1,9 +1,9 @@
 ---
 phase: 04-identity-commerce-devices-and-administration
 reviewed_at: 2026-08-11
-reviewed_commit: 44eed22
+reviewed_commit: f194e84
 status: remediated
-overall_score: 22
+overall_score: 24
 maximum_score: 24
 needs_human_review: true
 ---
@@ -33,14 +33,14 @@ demonstração foi usado para sustentar a nova apresentação.
 
 ## Pontuação
 
-| Pilar       | Nota | Diagnóstico                                                                                                                                                                                                                                                  |
-| ----------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Copywriting |  4/4 | A primeira dobra responde o que mudou, qual é a postura e o que revisar. Pessoas traduz funções, membros e autoridade sem expor enums contratuais ao usuário. |
-| Visual      |  4/4 | Briefing, postura e ledger formam uma hierarquia inequívoca. A lateral expandida comunica sua ação e o modo compacto mantém um alvo intencional. |
-| Cor         |  4/4 | O cobalt permanece restrito à ação e foco; sucesso, atenção e crítico reforçam estados junto com ícones, rótulos e padrões de borda. |
-| Tipografia  |  4/4 | Título de prioridade, dados operacionais e evidência recente possuem papéis distintos sem abandonar Manrope e JetBrains Mono. |
-| Espaçamento |  3/4 | A primeira dobra usa o espaço com intenção e o ledger fica contido. Formulários complexos de Pessoas ainda são naturalmente densos em desktop. |
-| Experiência |  3/4 | Visão geral, Pessoas e Segurança carregam com autoridade real e oferecem próximos passos claros. O UAT humano final continua recomendado para preferências visuais subjetivas. |
+| Pilar       | Nota | Diagnóstico                                                                                                                                                                                                               |
+| ----------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Copywriting |  4/4 | A primeira dobra responde o que mudou, qual é a postura e o que revisar. Pessoas traduz funções, membros e autoridade sem expor enums contratuais ao usuário.                                                             |
+| Visual      |  4/4 | Briefing, postura e ledger formam uma hierarquia inequívoca. A lateral expandida comunica sua ação e o modo compacto mantém um alvo intencional.                                                                          |
+| Cor         |  4/4 | O cobalt permanece restrito à ação e foco; sucesso, atenção e crítico reforçam estados junto com ícones, rótulos e padrões de borda.                                                                                      |
+| Tipografia  |  4/4 | Título de prioridade, dados operacionais e evidência recente possuem papéis distintos sem abandonar Manrope e JetBrains Mono.                                                                                             |
+| Espaçamento |  4/4 | A primeira dobra usa o espaço com intenção, o ledger fica contido e os formulários densos permanecem recolhidos até a intenção explícita do operador.                                                                     |
+| Experiência |  4/4 | Visão geral, Pessoas e Segurança carregam com autoridade real, priorizam exceções acionáveis e revelam ações críticas progressivamente. O UAT humano final continua recomendado apenas para preferência visual subjetiva. |
 
 ## Falhas prioritárias
 
@@ -87,3 +87,20 @@ Remediação aceita tecnicamente no commit `44eed22`. A nova captura publicada p
 hierarquia do briefing e as rotas Visão geral, Pessoas e Segurança foram verificadas
 na sessão real do owner. Manter revisão humana apenas para gosto visual e microajustes,
 não como bloqueio funcional ou de autoridade.
+
+## Refinamento de experiência — 2026-08-11
+
+O commit `f194e84` fechou os dois pontos que ainda reduziam Espaçamento e Experiência:
+
+- a Visão geral passou a nomear a exceção real (`16 sessões exigem revisão`) e a
+  decompor a atenção por estado, com um CTA proporcional;
+- a identidade da sessão deixou de repetir a função ativa no menu do operador;
+- convite administrativo, solicitação emergencial e verificação break-glass agora
+  usam revelação progressiva, permanecendo recolhidos por padrão;
+- Equipe e Aprovações foram reequilibradas para o estado real de um membro e nenhuma
+  pendência, sem transformar o vazio em um painel dominante.
+
+A publicação `dpl_6vz36BFTuCEHD4HQ6axDmVNHR2vb` ficou `READY` no domínio oficial.
+O UAT autenticado confirmou os controles de abrir/fechar em Pessoas e Segurança, a
+navegação entre as três rotas e a ausência de erros de runtime na janela observada.
+Nenhuma ação mutável foi submetida durante a verificação.
