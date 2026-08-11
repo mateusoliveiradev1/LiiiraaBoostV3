@@ -23,7 +23,7 @@
       "surface": "account",
       "buildId": "account-preview-isolated",
       "path": "apps/account/.next/standalone",
-      "hash": "ae2305eba9b6277a550a439648b2b740da66b4234d66813612f6d19a0b1f1857"
+      "hash": "a6999b7b0486a3145dd441fe4a8ec030cd718097f59175994d4f5365ed8a65e4"
     },
     {
       "surface": "admin",
