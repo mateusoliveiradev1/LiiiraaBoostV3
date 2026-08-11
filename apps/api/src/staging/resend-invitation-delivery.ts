@@ -36,12 +36,13 @@ const admittedOrigin = (value: string): string => {
 };
 
 const admittedConfiguration = (input: ResendInvitationDeliveryInput) => {
-  if (!/^re_[A-Za-z0-9_-]{20,256}$/u.test(input.apiKey)) {
+  const accountOrigin = input.accountOrigin.trim();
+  const apiKey = input.apiKey.trim();
+  const from = input.from.trim();
+  if (!/^re_[A-Za-z0-9_-]{20,256}$/u.test(apiKey)) {
     throw new Error('INVITATION_DELIVERY_API_KEY_REJECTED');
   }
-  if (
-    !/^Liiiraa Boost <[a-z0-9._%+-]+@envios\.liiiraaboost\.com\.br>$/u.test(input.from)
-  ) {
+  if (!/^Liiiraa Boost <[a-z0-9._%+-]+@envios\.liiiraaboost\.com\.br>$/u.test(from)) {
     throw new Error('INVITATION_DELIVERY_SENDER_REJECTED');
   }
   const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -49,9 +50,9 @@ const admittedConfiguration = (input: ResendInvitationDeliveryInput) => {
     throw new Error('INVITATION_DELIVERY_TIMEOUT_REJECTED');
   }
   return Object.freeze({
-    accountOrigin: admittedOrigin(input.accountOrigin),
-    apiKey: input.apiKey,
-    from: input.from,
+    accountOrigin: admittedOrigin(accountOrigin),
+    apiKey,
+    from,
     timeoutMs,
     transport: input.transport ?? fetch,
   });

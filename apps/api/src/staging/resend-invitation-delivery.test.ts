@@ -19,6 +19,33 @@ const handoff = {
 };
 
 describe('Resend invitation delivery', () => {
+  it('normalizes deployment whitespace around admitted credentials', async () => {
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'email-provider-reference-02' }), {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      }),
+    );
+    const delivery = createResendInvitationDelivery({
+      accountOrigin: ` ${configuration.accountOrigin}\r\n`,
+      apiKey: ` ${configuration.apiKey}\r\n`,
+      from: ` ${configuration.from}\r\n`,
+      transport,
+    });
+
+    await expect(delivery.handoff(handoff)).resolves.toEqual({
+      deliveryReference: 'email-provider-reference-02',
+    });
+
+    const [, request] = transport.mock.calls[0] ?? [];
+    expect(new Headers(request?.headers).get('authorization')).toBe(
+      `Bearer ${configuration.apiKey}`,
+    );
+    expect(JSON.parse(String(request?.body))).toMatchObject({
+      from: configuration.from,
+    });
+  });
+
   it('hands one localized invitation to Resend with provider idempotency', async () => {
     const transport = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(JSON.stringify({ id: 'email-provider-reference-01' }), {
