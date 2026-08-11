@@ -117,6 +117,9 @@ describe('admin shell', () => {
     expect(authority).toContain('session.assignedFunctions.length > 1');
     expect(authority).toContain("family: 'switch-function'");
     expect(authority).toContain('authorizeMutation(functionSwitchInput)');
+    expect(authority).toMatch(
+      /setFunctionSwitchPending\(true\);\s*setFunctionSwitchError\(false\);\s*setFunctionSwitchOpen\(false\);\s*window\.setTimeout\(\(\) => \{\s*void authorizeMutation\(functionSwitchInput\)/u,
+    );
     expect(authority).toContain('window.location.replace(`/${locale}/admin/overview`)');
   });
 
