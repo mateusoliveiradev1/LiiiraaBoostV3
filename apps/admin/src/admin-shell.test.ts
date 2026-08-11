@@ -335,6 +335,9 @@ describe('admin shell', () => {
     expect(accessGovernance).toContain('memberStateLabel(member.state, locale)');
     expect(accessGovernance).toContain('authorityStateLabel(model.authority.state, props.locale)');
     expect(accessGovernance).toContain('adminFunctionLabel(fn, props.locale)');
+    expect(accessGovernance).toContain(
+      'window.location.replace(`/${locale}/admin/overview`)',
+    );
     expect(accessGovernance).toContain("operations: 'Operações'");
     expect(accessGovernance).toContain("active: 'Ativo'");
     expect(accessGovernance).toContain("live: 'Ao vivo'");
@@ -389,7 +392,6 @@ describe('admin shell', () => {
     expect(roleIds.support).toEqual(['admin-overview', 'admin-support-domain']);
     expect(roleIds.operations).toEqual([
       'admin-overview',
-      'admin-people',
       'admin-revenue',
       'admin-operation',
       'admin-system',

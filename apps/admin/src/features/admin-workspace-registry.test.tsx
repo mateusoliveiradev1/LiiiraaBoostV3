@@ -45,10 +45,14 @@ describe('production Admin workspace registry', () => {
 
   it('projects domain admission from the server session function', () => {
     const revenue = resolveAdminWorkspaceDefinition('admin-revenue');
+    const people = resolveAdminWorkspaceDefinition('admin-people');
     const security = resolveAdminWorkspaceDefinition('admin-security-domain');
-    if (revenue === null || security === null) throw new Error('REGISTRY_FIXTURE_INVALID');
+    if (people === null || revenue === null || security === null)
+      throw new Error('REGISTRY_FIXTURE_INVALID');
     expect(adminSessionCanOpenWorkspace(revenue, 'pt-BR', 'operations')).toBe(true);
     expect(adminSessionCanOpenWorkspace(revenue, 'pt-BR', 'security')).toBe(false);
+    expect(adminSessionCanOpenWorkspace(people, 'pt-BR', 'operations')).toBe(false);
+    expect(adminSessionCanOpenWorkspace(people, 'pt-BR', 'security')).toBe(true);
     expect(adminSessionCanOpenWorkspace(security, 'en', 'security')).toBe(true);
     expect(adminSessionCanOpenWorkspace(security, 'en', 'audit')).toBe(false);
   });

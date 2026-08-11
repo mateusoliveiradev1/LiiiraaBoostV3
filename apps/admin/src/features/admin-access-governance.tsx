@@ -1240,8 +1240,7 @@ export const AdminAccessGovernance = ({
   initialSelectedId,
   locale,
 }: Readonly<{ initialSelectedId?: string; locale: WebLocale }>) => {
-  const { authority, authorizeMutation, freshness, revision, session, setSession } =
-    useAdminAuthority();
+  const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
   const [results, setResults] = useState<Readonly<{
     approvals: AdminQueryResult;
     team: AdminQueryResult;
@@ -1319,10 +1318,8 @@ export const AdminAccessGovernance = ({
           admitted.family === 'switch-function' &&
           (result.status === 'complete' || result.status === 'partial')
         ) {
-          const refreshedSession = await authority.session();
-          if (refreshedSession !== null && !('kind' in refreshedSession)) {
-            setSession(refreshedSession);
-          }
+          window.location.replace(`/${locale}/admin/overview`);
+          return;
         }
         after?.(result);
         if (result.status === 'complete' || result.status === 'partial')

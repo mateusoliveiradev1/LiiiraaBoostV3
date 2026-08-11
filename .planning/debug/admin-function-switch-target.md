@@ -2,15 +2,15 @@
 status: verifying
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-11T22:54:49.8522273Z
+updated: 2026-08-11T23:10:47.7625674Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed second root cause. Renewed administrative identity sessions were admitted through an actor-role fallback but never received an `admin_function_sessions` projection, so the mutation targeted the correct current session and then failed with `ADMIN_SESSION_NOT_FOUND`.
-test: Materialize a governed session for each admitted current administrative identity session, then run the focused API regression and full Admin/API gates before publishing.
-expecting: A renewed login has a persisted governed session before mutation; Security to Operations returns success and remains authoritative after refresh.
-next_action: Complete the regression, publish the API revision, verify readiness and ask for one focused owner retest.
+hypothesis: Confirmed third root cause. The function switch now persists, but the client refetches the People governance projection under Operations even though that function does not have membership or approval capabilities.
+test: Redirect a successful switch to the canonical Overview route and remove People from the Operations navigation projection.
+expecting: Security to Operations lands on Overview, the sidebar immediately reflects Operations, and no governance team or approval request is issued under the new function.
+next_action: Run focused Admin regressions, publish the revision, verify the official domain, and ask for one focused owner retest.
 
 ## Symptoms
 
@@ -37,6 +37,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   found: TOTP step-up returned 200 and function switch returned 403. The current admin identity sessions created on 10-11 August have no active `admin_function_sessions` row; the only governed row belongs to the 6 August session.
   implication: The corrected command now targets the current session, but the application repository cannot load it and returns `ADMIN_SESSION_NOT_FOUND` before persistence.
 
+- timestamp: 2026-08-11T23:10:47.7625674Z
+  checked: Official-domain owner retest, Admin navigation projection, and API governance capabilities
+  found: The active function changed to Operations, then the still-mounted People screen requested governance team and approval projections. Operations intentionally lacks `admin-membership:manage` and `admin-approval:manage`, so the API concealed those resources with HTTP 404.
+  implication: Persistence is fixed; the remaining failure is a client route-transition and navigation-admission defect after the successful mutation.
+
 ## Eliminated
 
 - hypothesis: The UI was stale after a successful mutation.
@@ -50,7 +55,7 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 
 ## Resolution
 
-root_cause: Two consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row, so the now-correct target still could not be loaded by the mutation transaction.
-fix: Keep the prior opaque-session command fix and ensure every admitted current admin identity session receives a persisted governed-session projection from an assigned function before routes authorize governance work.
-verification: The renewed-session regression passes, the complete API suite passes 247/247, the focused PostgreSQL adapter suite passes 5/5, changed files pass ESLint, and `git diff --check` is clean. Publication and official owner verification remain pending. The workspace-wide TypeScript check is separately blocked by the pre-existing `recipient: undefined` fixture in `resend-invitation-delivery.test.ts`.
-files_changed: [apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/features/admin-access-governance.tsx, apps/admin/src/features/admin-access-governance-feedback.ts, apps/admin/src/features/admin-access-governance-feedback.test.ts]
+root_cause: Three consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections.
+fix: Keep the prior opaque-session and governed-session fixes, navigate successful switches to the canonical Overview route, and project the Operations sidebar without the inaccessible People destination.
+verification: The renewed-session regression passes, the complete API suite passes 247/247, the focused PostgreSQL adapter suite passes 5/5, and the complete Admin gate passes 194/194 tests, TypeScript, and its production build. Changed files pass ESLint and `git diff --check` is clean. Publication and official owner verification remain pending. The workspace-wide TypeScript check is separately blocked by the pre-existing `recipient: undefined` fixture in `resend-invitation-delivery.test.ts`.
+files_changed: [apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/admin-shell.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-access-governance.tsx, apps/admin/src/features/admin-access-governance-feedback.ts, apps/admin/src/features/admin-access-governance-feedback.test.ts, apps/admin/src/features/admin-workspace-registry.test.tsx]
