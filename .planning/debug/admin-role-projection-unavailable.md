@@ -1,16 +1,16 @@
 ---
-status: fixing
+status: resolved
 trigger: 'Authenticated Admin overview reports "Autoridade administrativa indisponível" while the protected session and freshness channel are live.'
 created: 2026-08-11T00:00:00-03:00
-updated: 2026-08-11T14:52:00-03:00
+updated: 2026-08-11T15:09:00-03:00
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed. The client projected domain and utility access from an overbroad local role map, then mounted Operations query clients and freshness subscriptions for non-Operations functions.
-test: A role/route regression matrix now covers the seven domains, Operations-only utilities, native non-Operations authority projections, and surface-specific Support loading.
-expecting: The Security function exposes only Overview, People, and Security; Audit exposes Overview and System/Audit; Support loads only its admitted cases; and non-Operations shells never enter the Operations reconnect loop.
-next_action: Publish the verified Admin build and sweep every visible destination on the exact custom-domain revision.
+hypothesis: Confirmed and fixed. The client projected domain and utility access from an overbroad local role map, then mounted Operations query clients and freshness subscriptions for non-Operations functions.
+test: The role/route regression matrix covers the seven domains, Operations-only utilities, native non-Operations authority projections, surface-specific Support loading, bounded activity history, and localized session states.
+expecting: The Security function exposes only Overview, People, and Security; all three destinations load inside the stable shell; and the activity view presents only the eight newest admitted records with their true state.
+next_action: Continue Phase 4 from the recovered, published Admin baseline.
 
 ## Symptoms
 
@@ -51,6 +51,6 @@ reproduction: Sign in at `https://admin.liiiraaboost.com.br/pt-BR/admin/overview
 ## Resolution
 
 root_cause: The first landing defect was an incorrect role-to-collection fallback. The remaining product failure came from a second, broader mismatch: Security and Audit were shown domains they could not load, all functions received Operations-only search/inbox/activity affordances, canonical Security mounted an Operations query client, Support requested Operations resources, and every function opened the Operations freshness channel.
-fix: Projected navigation and utilities from the admitted function, gated queue workspaces to Operations, composed Security/Audit/Support from their native authority collections, stopped non-Operations prefetch/freshness requests, added a visible active-function context and management path, authored role-specific landing copy, and removed detail links that had no authoritative destination.
-verification: The regression suite first failed in six authority/navigation cases. After the fix, the complete Admin suite passes 190/190, TypeScript and focused ESLint pass, Prettier is clean, and the optimized Next.js production build completes successfully. Published-origin verification remains pending.
+fix: Projected navigation and utilities from the admitted function, gated queue workspaces to Operations, composed Security/Audit/Support from their native authority collections, stopped non-Operations prefetch/freshness requests, added a visible active-function context and management path, authored role-specific landing copy, removed detail links that had no authoritative destination, limited the session history to eight recent records, and localized active/revoked/expired state presentation.
+verification: The complete Admin suite passes 190/190, TypeScript and focused ESLint pass, Prettier is clean, and the optimized Next.js production build completes successfully. Deployment `dpl_FZVupVek7JVwGqmJqmU2LZv5brC6` is Ready and aliased to `admin.liiiraaboost.com.br`. Authenticated custom-origin UAT confirmed `/pt-BR/admin/overview`, `/pt-BR/admin/people`, and `/pt-BR/admin/security` load successfully with a live Security session, stable role-scoped navigation, bounded recent activity, and matching localized states including revoked sessions.
 files_changed: [apps/admin/src/admin-shell.ts, apps/admin/src/admin-navigation.tsx, apps/admin/src/app/admin-shell.css, apps/admin/src/features/admin-authority.tsx, apps/admin/src/features/admin-revenue-support.tsx, apps/admin/src/features/admin-workspace-registry.tsx, apps/admin/src/features/admin-workspace-registry-model.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-authority.test.tsx, apps/admin/src/features/admin-workspace-registry.test.tsx]
