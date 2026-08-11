@@ -659,10 +659,13 @@ const MemberInspector = ({
       </header>
       {model.simulatedFunction === undefined ? null : (
         <div className={styles['simulationBanner']} role="status">
-          <ProductIcon name="search" size={18} />
-          <strong>{labels.noActionsSimulation}</strong>
-          <span>{model.simulatedFunction}</span>
-          <LbButton onPress={() => onAction?.({ kind: 'exit-simulation' })} variant="quiet">
+          <div className={styles['simulationMessage']}>
+            <ProductIcon name="search" size={18} />
+            <strong>{labels.noActionsSimulation}</strong>
+            <span>{model.simulatedFunction}</span>
+          </div>
+          <LbButton onPress={() => onAction?.({ kind: 'exit-simulation' })} variant="secondary">
+            <ProductIcon name="close" size={16} />
             {labels.simulationExit}
           </LbButton>
         </div>

@@ -370,23 +370,31 @@
 }
 
 .simulationBanner {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--lb-space-2);
+  gap: var(--lb-space-3);
   padding: var(--lb-space-3) var(--lb-space-4);
   border-block-end: 3px double var(--lb-warning);
   color: var(--lb-warning);
   background: var(--lb-canvas-inset);
 }
 
-.simulationBanner > span {
+.simulationMessage {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lb-space-2);
+}
+
+.simulationMessage > span {
   margin-inline-start: auto;
   font-family: var(--lb-font-data);
 }
 
 .simulationBanner button {
-  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .memberFacts {
@@ -666,6 +674,14 @@
     inline-size: 100vw;
     max-block-size: 100vh;
     border: 0;
+  }
+
+  .simulationBanner {
+    grid-template-columns: 1fr;
+  }
+
+  .simulationBanner button {
+    inline-size: 100%;
   }
 
   .history li {
