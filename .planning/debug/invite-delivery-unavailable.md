@@ -31,6 +31,17 @@ estiver disponível`.
 
 ## Evidence
 
+- timestamp: 2026-08-11T17:00:18Z
+  checked: Verificacao Resend, custodia da chave, promocao protegida da API e CORS dos dominios proprios.
+  found: O dominio `envios.liiiraaboost.com.br` esta verificado no Resend. Uma nova chave com permissao
+  somente de envio e restrita ao dominio foi transferida diretamente em memoria para o GitHub Actions;
+  a chave anterior foi revogada. O rerun protegido publicou a revisao
+  `9c172a7cba0b697f4888eb8e1e2adf6a4abaac43`, `/health` retornou `ok`, `/ready` confirmou todas as
+  autoridades e os preflights de Admin e Account retornaram `204` com suas origens proprias.
+  implication: O login administrativo voltou a alcancar a API pelo dominio proprio e a autoridade de
+  entrega esta configurada no processo ativo. Resta somente executar a emissao autenticada de um
+  convite descartavel e confirmar o e-mail e o comprovante duravel para encerrar este debug.
+
 - timestamp: 2026-08-11T08:32:14.6368943Z
   checked: Publicação dos domínios próprios, verificação Resend e candidato desktop.
   found: Os três deploys Vercel estão `Ready` e possuem os aliases próprios; o Resend ainda mostra
