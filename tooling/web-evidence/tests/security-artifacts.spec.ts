@@ -129,6 +129,7 @@ test('@staging-origin-smoke keeps three static Vercel surfaces isolated on one e
   expect(workflow.match(/body\.revision === process\.env\.GIT_SHA/gu) ?? []).toHaveLength(3);
   expect(workflow.match(/probe unavailable; retrying/gu) ?? []).toHaveLength(3);
   expect(workflow.match(/catch \(error\)/gu) ?? []).toHaveLength(3);
+  expect(workflow.match(/attempt < 80/gu) ?? []).toHaveLength(3);
   expect(workflow).not.toContain('api.vercel.com');
   expect(workflow).not.toContain('VERCEL_TOKEN');
   expect(workflow).not.toContain('VERCEL_TEAM_ID');
