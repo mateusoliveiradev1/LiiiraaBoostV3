@@ -497,6 +497,11 @@ describe('admin production composition', () => {
     expect(productionView).not.toContain('@liiiraa/web-preview');
     expect(productionView).toContain('Active administrative role');
     expect(productionView).toContain('Verify critical operation');
+    expect(productionView).toContain('Use the current code from your authenticator');
+    expect(productionView).toContain('Referência da operação');
+    expect(productionView).not.toContain(
+      '<p>{copy[locale].enrollmentDescription}</p>\n              </div>\n            </header>\n            <p className="admin-step-up__scope">',
+    );
     expect(productionView).toContain('Consented diagnostic view');
     expect(productionView).toContain('accountOrigin');
     expect(productionView).toContain('Entrar no painel administrativo');

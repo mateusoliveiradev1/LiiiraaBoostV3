@@ -88,7 +88,10 @@ const copy = Object.freeze({
     signInScope: 'Administrative access is separate from your public account session.',
     backToAccount: 'Back to account portal',
     stepUp: 'Verify with a strong credential',
+    stepUpDescription:
+      'Use the current code from your authenticator to confirm this operation. No new key needs to be added.',
     stepUpDialog: 'Verify critical operation',
+    stepUpReference: 'Operation reference',
     support: 'Support case queue',
     signOut: 'Sign out of Admin',
     signOutError: 'The administrative session could not be closed. Try again.',
@@ -143,7 +146,10 @@ const copy = Object.freeze({
     signInScope: 'O acesso administrativo é separado da sessão da sua conta pública.',
     backToAccount: 'Voltar ao portal da conta',
     stepUp: 'Verificar com credencial forte',
+    stepUpDescription:
+      'Use o código atual do seu autenticador para confirmar esta operação. Nenhuma nova chave precisa ser adicionada.',
     stepUpDialog: 'Verificar operação crítica',
+    stepUpReference: 'Referência da operação',
     support: 'Fila de casos de suporte',
     signOut: 'Sair do painel',
     signOutError: 'Não foi possível encerrar a sessão administrativa. Tente novamente.',
@@ -1224,12 +1230,13 @@ export const AdminAuthorityProvider = ({
               </div>
               <div>
                 <h2 id="admin-step-up-title">{copy[locale].stepUpDialog}</h2>
-                <p>{copy[locale].enrollmentDescription}</p>
+                <p>{copy[locale].stepUpDescription}</p>
               </div>
             </header>
             <p className="admin-step-up__scope">
-              <span>{mutationStepUp.input.family}</span>
+              <span>{copy[locale].stepUpReference}</span>
               <strong>
+                {mutationStepUp.input.family} ·{' '}
                 {mutationStepUp.input.targetId ?? mutationStepUp.input.idempotencyKey}
               </strong>
             </p>
