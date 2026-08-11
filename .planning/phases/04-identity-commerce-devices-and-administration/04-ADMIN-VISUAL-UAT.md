@@ -1,11 +1,11 @@
 ---
-status: automated-passed
+status: complete
 phase: 04-identity-commerce-devices-and-administration
 plan: [04-61, 04-64]
-tested_commit: 46e6c4e
+tested_commit: f194e84
 storybook_iframe_sha256: b8720177e2e1df3a128f24065b0d709f66e24c0a8887d6396b3ba663c9667a6d
 started: 2026-08-07T18:40:31.4628839Z
-updated: 2026-08-09T05:45:14.2456493Z
+updated: 2026-08-11T21:31:43.319Z
 ---
 
 # Admin visual and accessibility UAT
@@ -19,12 +19,7 @@ technology evidence that has not been observed.
 
 ## Current Test
 
-number: 10
-name: Owner staging review of the recovered authority workspaces
-expected: |
-The deployed production-authority routes retain the task-specific hierarchy, localized
-states, responsive composition, and safe denial treatment proven automatically.
-awaiting: owner visual confirmation on staging
+[testing complete]
 
 ## Evidence identity
 
@@ -110,14 +105,14 @@ evidence: 18/18 focused desktop account-authority and account-experience tests.
 ### 10. Recovered production-authority presentation
 
 expected: Real authority routes use task-specific headings and guidance, localized visible states, stable loading/denial/empty composition, and responsive record actions without weakening server-projected authority.
-result: pass-automated; owner-staging-review-pending
-evidence: Plan 04-64 focused Vitest, full Admin verify, Playwright at 1440px/390px/reduced-motion, keyboard focus, target geometry, no-overflow, axe, and deterministic screenshots.
+result: pass
+evidence: Plan 04-64 focused Vitest, full Admin verify, Playwright at 1440px/390px/reduced-motion, keyboard focus, target geometry, no-overflow, axe, deterministic screenshots, and owner PASS on the published custom domain after the `f194e84` decision-flow refinement.
 
 ## Summary
 
 total: 10
-passed: 9
-pending: 1
+passed: 10
+pending: 0
 issues: 0
 blocked: 0
 
