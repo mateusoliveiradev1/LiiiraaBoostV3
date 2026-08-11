@@ -11,6 +11,9 @@ describe('admin governance UI', () => {
 
     expect(source).toContain("Readonly<{ kind: 'exit-simulation' }>");
     expect(source).toContain("onPress={() => onAction?.({ kind: 'exit-simulation' })}");
+    expect(source).toContain('className={styles[\'simulationMessage\']}');
+    expect(source).toContain('variant="secondary"');
+    expect(source).toContain('<ProductIcon name="close" size={16} />');
     expect(source).toContain("if (action.kind === 'exit-simulation') {");
     expect(source).toContain('setSimulatedFunction(undefined);');
   });
