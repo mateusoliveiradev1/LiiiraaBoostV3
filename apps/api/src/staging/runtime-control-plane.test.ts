@@ -38,4 +38,10 @@ describe('real staging control-plane composition', () => {
       "session.activeFunction === 'operations' ? OPERATIONS_CAPABILITIES : ([] as const)",
     );
   });
+
+  it('admits private-beta invitation authority to both governed owner functions', () => {
+    const source = readFileSync(new URL('./runtime.ts', import.meta.url), 'utf8');
+
+    expect(source).toContain("['operations', 'security'].includes(session.activeFunction)");
+  });
 });

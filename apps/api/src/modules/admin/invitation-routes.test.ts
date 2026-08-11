@@ -35,7 +35,10 @@ const command = (
   requestedAt: now,
 });
 
-const buildApp = async (authorized = true) => {
+const buildApp = async (
+  authorized = true,
+  activeFunction: AdminInvitationRouteSession['activeFunction'] = 'operations',
+) => {
   const operations: AdminInvitationRouteOperations = {
     preflight: vi.fn(() =>
       Promise.resolve({
@@ -156,7 +159,7 @@ const buildApp = async (authorized = true) => {
   const session: AdminInvitationRouteSession | null = authorized
     ? {
         actorId: 'operator-1',
-        activeFunction: 'operations',
+        activeFunction,
         capabilities: [
           'beta-invitations:preflight',
           'beta-invitations:issue',
@@ -186,6 +189,30 @@ const buildApp = async (authorized = true) => {
 };
 
 describe('admin invitation management routes', () => {
+  it('admits invitation authority for security and operations but hides unsupported functions', async () => {
+    for (const activeFunction of ['security', 'operations'] as const) {
+      const allowed = await buildApp(true, activeFunction);
+      const response = await allowed.app.inject({
+        method: 'GET',
+        url: '/v1/admin/invitations?limit=25',
+        headers: { origin },
+      });
+      expect(response.statusCode).toBe(200);
+      expect(allowed.queries.list).toHaveBeenCalledOnce();
+      await allowed.app.close();
+    }
+
+    const denied = await buildApp(true, 'support');
+    const response = await denied.app.inject({
+      method: 'GET',
+      url: '/v1/admin/invitations?limit=25',
+      headers: { origin },
+    });
+    expect(response.statusCode).toBe(404);
+    expect(denied.queries.list).not.toHaveBeenCalled();
+    await denied.app.close();
+  });
+
   it('authorizes before recipient preflight and never returns recipient identity or digest', async () => {
     const denied = await buildApp(false);
     const deniedResponse = await denied.app.inject({

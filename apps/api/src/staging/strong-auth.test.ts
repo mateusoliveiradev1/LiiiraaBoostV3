@@ -151,7 +151,7 @@ describe('real staging TOTP and action-scoped step-up', () => {
     );
     expect(scopes?.sql).toMatch(/unnest\(\$1::text\[\]\)/iu);
     expect(scopes?.values[0]).toEqual(
-      expect.arrayContaining(['team', 'history', 'delegations', 'reviews']),
+      expect.arrayContaining(['team', 'history', 'delegations', 'reviews', 'invitations']),
     );
   });
 
