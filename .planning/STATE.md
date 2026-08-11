@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 04 (identity-commerce-devices-and-administration) — EXECUTING
 Plan: 63 of 66
 Status: Executing Phase 04
-Last activity: 2026-08-10 -- Isolated session revocation passed owner UAT
+Last activity: 2026-08-11 - Completed quick task 260811-4iv: Registrar PASS do proprietario para Convites da beta no UAT da Fase 4
 
 Progress: [██████████] 99%
 
@@ -784,6 +784,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260805-m3y | Preparar staging gratuito: corrigir Render e alinhar a branch main para os workflows | 2026-08-05 | a61b4a5 | Verified | [260805-m3y-preparar-staging-gratuito-corrigir-rende](./quick/260805-m3y-preparar-staging-gratuito-corrigir-rende/) |
 | 260805-maj | Adicionar executor real e seguro de migrations para o Neon staging | 2026-08-05 | 5cc6bb5 | Verified | [260805-maj-adicionar-executor-real-e-seguro-de-migr](./quick/260805-maj-adicionar-executor-real-e-seguro-de-migr/) |
 | 260808-sbv | Redesenhar todas as rotas autenticadas da conta com autoridade real | 2026-08-08 | 1dd5196 | Verified | [260808-sbv-redesenhar-todas-as-rotas-autenticadas-d](./quick/260808-sbv-redesenhar-todas-as-rotas-autenticadas-d/) |
+| 260811-4iv | Registrar PASS do proprietario para Convites da beta no UAT da Fase 4 | 2026-08-11 | cfef0c1 | Verified | [260811-4iv-registrar-pass-do-proprietario-para-conv](./quick/260811-4iv-registrar-pass-do-proprietario-para-conv/) |
 
 ## Session Continuity
 
