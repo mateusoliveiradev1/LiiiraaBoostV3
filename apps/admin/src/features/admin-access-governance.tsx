@@ -243,6 +243,28 @@ const memberStateLabel = (
   return labels[locale][value];
 };
 
+const authorityStateLabel = (value: AccessAuthorityState['state'], locale: WebLocale): string => {
+  const labels = {
+    en: {
+      degraded: 'Read-only',
+      live: 'Live',
+      offline: 'Offline',
+      reconnecting: 'Reconnecting',
+      stale: 'Update required',
+      unavailable: 'Unavailable',
+    },
+    'pt-BR': {
+      degraded: 'Somente leitura',
+      live: 'Ao vivo',
+      offline: 'Offline',
+      reconnecting: 'Reconectando',
+      stale: 'Atualização necessária',
+      unavailable: 'Indisponível',
+    },
+  } as const;
+  return labels[locale][value];
+};
+
 const riskTone = (risk: AdminRiskLevelJson): 'information' | 'warning' | 'critical' =>
   risk === 'critical' || risk === 'irreversible'
     ? 'critical'
@@ -921,7 +943,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
         </div>
         <div className={styles['headerStatus']}>
           <Status tone={model.authority.canMutate ? 'information' : 'warning'}>
-            {model.authority.state}
+            {authorityStateLabel(model.authority.state, props.locale)}
           </Status>
           <span>{formatDate(model.observedAt, props.locale)}</span>
         </div>
@@ -991,7 +1013,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
             <select name="admin-function">
               {FUNCTIONS.map((fn) => (
                 <option key={fn} value={fn}>
-                  {fn}
+                  {adminFunctionLabel(fn, props.locale)}
                 </option>
               ))}
             </select>

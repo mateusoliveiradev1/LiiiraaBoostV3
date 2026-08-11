@@ -333,8 +333,11 @@ describe('admin shell', () => {
     );
     expect(accessGovernance).toContain('adminFunctionLabel(member.activeFunction, locale)');
     expect(accessGovernance).toContain('memberStateLabel(member.state, locale)');
+    expect(accessGovernance).toContain('authorityStateLabel(model.authority.state, props.locale)');
+    expect(accessGovernance).toContain('adminFunctionLabel(fn, props.locale)');
     expect(accessGovernance).toContain("operations: 'Operações'");
     expect(accessGovernance).toContain("active: 'Ativo'");
+    expect(accessGovernance).toContain("live: 'Ao vivo'");
     expect(styles).toMatch(
       /\.admin-authority__briefing\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.65fr\) minmax\(260px, 0\.75fr\)/u,
     );
