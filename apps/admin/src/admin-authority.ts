@@ -202,6 +202,7 @@ export type AdminSessionProjection = Readonly<{
   actorId: string;
   expiresAt: string;
   role: AdminRoleJson;
+  sessionId?: string;
 }>;
 
 export type AdminEnrollmentRequired = Readonly<{
@@ -395,6 +396,8 @@ const admitSession = (value: unknown): AdminSessionProjection | null => {
     !isRecord(value) ||
     typeof value['actorId'] !== 'string' ||
     !TOKEN.test(value['actorId']) ||
+    (value['sessionId'] !== undefined &&
+      (typeof value['sessionId'] !== 'string' || !TOKEN.test(value['sessionId']))) ||
     !isRole(value['role']) ||
     typeof value['expiresAt'] !== 'string' ||
     Number.isNaN(Date.parse(value['expiresAt']))
@@ -405,6 +408,7 @@ const admitSession = (value: unknown): AdminSessionProjection | null => {
     actorId: value['actorId'],
     expiresAt: value['expiresAt'],
     role: value['role'],
+    ...(typeof value['sessionId'] === 'string' ? { sessionId: value['sessionId'] } : {}),
   });
 };
 
@@ -420,6 +424,8 @@ const admitSignedInSession = (value: unknown): AdminSessionProjection | null => 
   if (
     typeof actor['accountId'] !== 'string' ||
     !TOKEN.test(actor['accountId']) ||
+    (actor['sessionId'] !== undefined &&
+      (typeof actor['sessionId'] !== 'string' || !TOKEN.test(actor['sessionId']))) ||
     !isRole(actor['role']) ||
     actor['sessionKind'] !== 'admin' ||
     typeof actor['expiresAt'] !== 'string' ||
@@ -431,6 +437,7 @@ const admitSignedInSession = (value: unknown): AdminSessionProjection | null => 
     actorId: actor['accountId'],
     expiresAt: actor['expiresAt'],
     role: actor['role'],
+    ...(typeof actor['sessionId'] === 'string' ? { sessionId: actor['sessionId'] } : {}),
   });
 };
 
@@ -1045,15 +1052,18 @@ export const createAdminAuthority = ({
     }
     const session = activeSession ?? (await readSession());
     if (session === null) return null;
-    const candidates = [
-      input.targetId,
-      input.payload['identityId'],
-      input.payload['requestId'],
-      input.payload['invitationId'],
-      input.payload['delegationId'],
-      input.payload['targetReference'],
-      session.actorId,
-    ];
+    const candidates =
+      input.family === 'switch-function'
+        ? [session.sessionId]
+        : [
+            input.targetId,
+            input.payload['identityId'],
+            input.payload['requestId'],
+            input.payload['invitationId'],
+            input.payload['delegationId'],
+            input.payload['targetReference'],
+            session.actorId,
+          ];
     const target = candidates.find(boundedToken);
     if (target === undefined) return null;
     const expectedVersion = input.expectedVersion ?? '1';

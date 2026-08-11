@@ -312,6 +312,50 @@ describe('complete typed Admin mutation authority', () => {
     });
   });
 
+  it('targets the protected Admin session when switching the active function', async () => {
+    const transport = vi
+      .fn<AdminAuthorityTransport>()
+      .mockResolvedValueOnce(
+        response({
+          actorId: 'administrator-0001',
+          expiresAt: '2030-08-06T20:00:00.000Z',
+          role: 'security',
+          sessionId: 'admin-session-security-0001',
+        }),
+      )
+      .mockResolvedValueOnce(response({ document: governance, ok: true }));
+    const authority = createAuthority(transport);
+
+    await expect(
+      authority.mutate({
+        expectedVersion: '7',
+        family: 'switch-function',
+        idempotencyKey: 'switch-function-command-0001',
+        payload: {
+          authorizationContextId: 'context-switch-0001',
+          targetFunction: 'operations',
+        },
+        reason: 'Assume Operations for the reviewed delivery workflow.',
+        stepUp: { ...strongStepUp, authorizationContextId: 'context-switch-0001' },
+        targetId: 'administrator-0001',
+      }),
+    ).resolves.toEqual({ document: governance, status: 'complete' });
+
+    const [, init] = transport.mock.calls[1] ?? [];
+    const body = init?.body;
+    expect(typeof body).toBe('string');
+    if (typeof body !== 'string') throw new Error('EXPECTED_SERIALIZED_SWITCH_COMMAND');
+    expect(JSON.parse(body)).toMatchObject({
+      command: {
+        action: 'update-access',
+        actorId: 'administrator-0001',
+        activeFunction: 'security',
+        targetReferences: ['admin-session-security-0001'],
+      },
+      targetFunction: 'operations',
+    });
+  });
+
   it('builds and admits a consent-bounded sensitive export receipt', async () => {
     const transport = vi
       .fn<AdminAuthorityTransport>()

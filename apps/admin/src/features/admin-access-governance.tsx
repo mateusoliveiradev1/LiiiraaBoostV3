@@ -19,6 +19,7 @@ import type { WebLocale } from '@liiiraa/web-core';
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import type { AdminMutationResult, AdminQueryResult } from '../admin-authority';
+import { mutationFeedback } from './admin-access-governance-feedback';
 import { useAdminAuthority } from './admin-authority';
 import { AdminPeopleNavigation } from './admin-people-navigation';
 import {
@@ -936,6 +937,7 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
                 'Governance is read-only',
               ),
             };
+  const rejectedMutation = mutationFeedback(props.mutation, props.locale);
   return (
     <article className={styles['route']} data-state={model.authority.state}>
       <header className={styles['routeHeader']}>
@@ -989,6 +991,23 @@ export const AdminAccessGovernanceView = (props: ViewProps) => {
           title={localeText(props.locale, 'Conflito de versão', 'Version conflict')}
         />
       ) : null}
+      {rejectedMutation === null ? null : (
+        <LbOperationalNotice
+          action={
+            <LbButton
+              onPress={() => {
+                props.onRefresh?.();
+              }}
+              variant="secondary"
+            >
+              {labels.refresh}
+            </LbButton>
+          }
+          detail={rejectedMutation.detail}
+          state={rejectedMutation.state}
+          title={rejectedMutation.title}
+        />
+      )}
       <section className={styles['invitationStrip']} data-expanded={invitationOpen || undefined}>
         <div className={styles['invitationSummary']}>
           <ProductIcon name="userAdd" size={22} />
@@ -1221,7 +1240,8 @@ export const AdminAccessGovernance = ({
   initialSelectedId,
   locale,
 }: Readonly<{ initialSelectedId?: string; locale: WebLocale }>) => {
-  const { authority, authorizeMutation, freshness, revision, session } = useAdminAuthority();
+  const { authority, authorizeMutation, freshness, revision, session, setSession } =
+    useAdminAuthority();
   const [results, setResults] = useState<Readonly<{
     approvals: AdminQueryResult;
     team: AdminQueryResult;
@@ -1295,6 +1315,15 @@ export const AdminAccessGovernance = ({
         if (admitted === null) return;
         const result = await authority.mutate(admitted);
         setMutation(result);
+        if (
+          admitted.family === 'switch-function' &&
+          (result.status === 'complete' || result.status === 'partial')
+        ) {
+          const refreshedSession = await authority.session();
+          if (refreshedSession !== null && !('kind' in refreshedSession)) {
+            setSession(refreshedSession);
+          }
+        }
         after?.(result);
         if (result.status === 'complete' || result.status === 'partial')
           setRefresh((value) => value + 1);
@@ -1442,7 +1471,7 @@ export const AdminAccessGovernance = ({
         reason: action.reason,
         expectedVersion: action.member.aggregateVersion,
         payload: { authorizationContextId: id, targetFunction: action.targetFunction },
-        targetId: session?.actorId ?? action.member.identityReference,
+        targetId: session?.sessionId ?? session?.actorId ?? action.member.identityReference,
       });
     else
       run({

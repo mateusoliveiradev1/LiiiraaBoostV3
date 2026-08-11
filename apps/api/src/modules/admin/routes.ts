@@ -170,6 +170,7 @@ export const registerAdminRoutes = (
           actorId: session.actorId,
           expiresAt: session.expiresAt,
           role: session.role,
+          sessionId: session.sessionId,
         });
   });
 

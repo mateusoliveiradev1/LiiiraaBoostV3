@@ -272,7 +272,10 @@ describe('real staging administrative authority', () => {
     const session = await app.inject({ headers, method: 'GET', url: '/v1/admin/session' });
     expect(session.statusCode).toBe(200);
     expect(session.headers['cache-control']).toContain('no-store');
-    expect(session.json()).toMatchObject({ role: 'security' });
+    expect(session.json()).toMatchObject({
+      role: 'security',
+      sessionId: '00000000-0000-4000-8000-000000000012',
+    });
 
     const collection = await app.inject({ headers, method: 'GET', url: '/v1/admin/sessions' });
     expect(collection.statusCode).toBe(200);
