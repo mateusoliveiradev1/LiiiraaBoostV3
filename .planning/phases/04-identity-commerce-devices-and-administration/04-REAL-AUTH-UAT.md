@@ -24,6 +24,10 @@ password, database credential, or session credential is recorded here.
   PostgreSQL-backed binding and authoritative projection after refresh/restart.
 - Recovery action: complete; three unique replacement URLs are available only in the owner-protected
   local output.
+- Function-switch observation: **ISSUE**. The owner completed TOTP step-up, but the published Admin
+  sent the actor identity as the command target while the API requires the protected administrative
+  session reference. `POST /v1/admin/governance/functions/switch` returned HTTP 400 and preserved the
+  active `security` function without a partial mutation. The UI also failed to surface this rejection.
 - Human approval: pending until the exact build passes every real-auth observation below.
 
 ## Exact deployment identity
@@ -253,7 +257,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                                                 | PASS    |
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                                        | PENDING |
 | Invitation issue/resend/revoke and governance/approval changes survive reload                          | valid preflight PASS; issue blocked by missing delivery provider | ISSUE   |
-| Function switch and independent approval enforce permission impact and strong authentication           | switch + TOTP subset `31326815831`                               | PENDING |
+| Function switch and independent approval enforce permission impact and strong authentication           | TOTP passed; switch POST returned 400 due actor/session target mismatch | ISSUE   |
 | Read-only function simulation preserves real authority and provides an explicit exit                   | owner-confirmed `d257850`                                        | PASS    |
 | Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`                            | PENDING |
 | Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                                        | PENDING |
