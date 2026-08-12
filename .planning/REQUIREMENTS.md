@@ -85,10 +85,10 @@
 
 ### Measurement and Evidence
 
-- [ ] **MEAS-01**: User can capture a system baseline with methodology, timestamp, environment identity, and collector overhead
-- [ ] **MEAS-02**: User can capture supported game-session FPS, 1% lows, frame time, utilization, thermals, and latency-related evidence when reliable
+- [x] **MEAS-01**: User can capture a system baseline with methodology, timestamp, environment identity, and collector overhead
+- [x] **MEAS-02**: User can capture supported game-session FPS, 1% lows, frame time, utilization, thermals, and latency-related evidence when reliable
 - [ ] **MEAS-03**: The system rejects before/after comparisons when workload, environment, sample quality, or collector health are not comparable
-- [ ] **MEAS-04**: User sees uncertainty, missing coverage, degraded capture, and unsupported-game states instead of fabricated estimates
+- [x] **MEAS-04**: User sees uncertainty, missing coverage, degraded capture, and unsupported-game states instead of fabricated estimates
 - [ ] **MEAS-05**: User can compare sessions through a summary, detailed diff, timeline, and exportable technical report
 - [ ] **MEAS-06**: Marketing or in-product performance claims can reference only quality-approved reproducible evidence
 
@@ -217,10 +217,10 @@ A v1 requirement is complete only when:
 | GAME-05     | Phase 8  | Pending  |
 | GAME-06     | Phase 8  | Pending  |
 | GAME-07     | Phase 8  | Pending  |
-| MEAS-01     | Phase 5  | Pending  |
-| MEAS-02     | Phase 5  | Pending  |
+| MEAS-01     | Phase 5  | Complete |
+| MEAS-02     | Phase 5  | Complete |
 | MEAS-03     | Phase 5  | Pending  |
-| MEAS-04     | Phase 5  | Pending  |
+| MEAS-04     | Phase 5  | Complete |
 | MEAS-05     | Phase 5  | Pending  |
 | MEAS-06     | Phase 5  | Pending  |
 | OPTM-01     | Phase 7  | Pending  |

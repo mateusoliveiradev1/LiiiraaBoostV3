@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-08-12T18:03:23.419Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-08-12T18:16:23.238Z"
 last_activity: 2026-08-12
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 216
-  completed_plans: 207
+  completed_plans: 208
   percent: 30
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 05 (hardware-intelligence-and-measured-evidence) — EXECUTING
-Plan: 5 of 10
+Plan: 6 of 10
 Status: Ready to execute
 Last activity: 2026-08-12
 
@@ -239,6 +239,7 @@ _Updated after plan completion_
 | Phase 05 P04 | 7 min | 2 tasks | 3 files |
 | Phase 05 P02 | 10 min | 2 tasks | 6 files |
 | Phase 05 P03 | 18 min | 2 tasks | 5 files |
+| Phase 05 P05 | 16 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -749,6 +750,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 05]: Windows support classification uses version, build, edition, channel, and policy date rather than marketing names.
 - [Phase 05]: Protected hardware identifiers are purpose-bound SHA-256 derivations and never cross the native boundary raw.
 - [Phase 05]: Cancellation bypasses native collection and every accepted snapshot is contract-validated before optional immutable persistence.
+- [Phase 05]: Frame evidence is event-driven; non-frame metrics are admitted at no more than one sample per second.
+- [Phase 05]: Unreliable measurement sources remain nonnumeric and degrade or invalidate comparison evidence.
+- [Phase 05]: Windows capture uses QPC and documented Win32 counters without injection or broad elevation.
 
 ### Pending Todos
 
@@ -798,6 +802,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-12T18:03:23.411Z
-Stopped at: Completed 05-03-PLAN.md
+Last session: 2026-08-12T18:16:23.229Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None
