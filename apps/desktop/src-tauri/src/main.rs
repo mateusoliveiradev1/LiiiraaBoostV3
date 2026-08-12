@@ -3,11 +3,15 @@
 #[allow(dead_code)]
 mod account_sync;
 #[allow(dead_code)]
+mod comparison;
+#[allow(dead_code)]
 mod credential_store;
 #[allow(dead_code)]
 mod device_identity;
 #[allow(dead_code)]
 mod evidence_policy;
+#[allow(dead_code)]
+mod evidence_report;
 #[allow(dead_code)]
 mod evidence_store;
 #[allow(dead_code)]
