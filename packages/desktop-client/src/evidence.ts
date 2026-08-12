@@ -421,9 +421,12 @@ const validHealth = (value: unknown): value is EvidenceHealth => {
   );
 };
 
+const INVENTORY_CAPTURE_REQUIREMENTS = ['cpu', 'gpu', 'memory', 'storage', 'windows'] as const;
+
 const inventoryIsActionable = (inventory: InventorySnapshotJson): boolean =>
-  inventory.execution.health.state === 'healthy' &&
-  inventory.execution.overhead.quality === 'valid';
+  inventory.execution.health.state !== 'unavailable' &&
+  inventory.execution.overhead.quality !== 'insufficient' &&
+  INVENTORY_CAPTURE_REQUIREMENTS.every((key) => inventory[key].state === 'observed');
 
 const createEvidenceAuthority = (
   origin: EvidenceAuthorityOrigin,

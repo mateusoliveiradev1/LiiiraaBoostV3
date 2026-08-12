@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::mem::size_of;
 use std::time::Instant;
 
@@ -56,6 +57,8 @@ pub struct LiveTelemetryReading {
 pub struct LiveTelemetrySampler {
     started_at: Instant,
     previous_cpu: Option<CpuTimes>,
+    #[cfg(windows)]
+    gpu: Option<GpuSampler>,
 }
 
 impl Default for LiveTelemetrySampler {
@@ -63,6 +66,8 @@ impl Default for LiveTelemetrySampler {
         Self {
             started_at: Instant::now(),
             previous_cpu: None,
+            #[cfg(windows)]
+            gpu: GpuSampler::new(),
         }
     }
 }
@@ -112,13 +117,13 @@ impl LiveTelemetrySampler {
         }
 
         let memory = read_memory_metric();
-        let gpu = unavailable_scalar(
-            "percent",
-            "none",
-            "No trustworthy native GPU utilization counter is admitted in this build.",
-            "source-not-admitted",
-            "unavailable",
-        );
+        #[cfg(windows)]
+        let gpu = self
+            .gpu
+            .as_mut()
+            .map_or_else(unavailable_gpu, GpuSampler::sample);
+        #[cfg(not(windows))]
+        let gpu = unavailable_gpu();
 
         let mut observations = Vec::with_capacity(2);
         if let Some(value) = cpu.value {
@@ -134,6 +139,14 @@ impl LiveTelemetrySampler {
                 monotonic_ns,
                 metric: MetricKind::MemoryWorkingSetBytes,
                 value: Some(value as f64),
+                health: SourceHealth::Valid,
+            });
+        }
+        if let Some(value) = gpu.value {
+            observations.push(CounterObservation {
+                monotonic_ns,
+                metric: MetricKind::GpuUtilizationPercent,
+                value: Some(value),
                 health: SourceHealth::Valid,
             });
         }
@@ -157,6 +170,203 @@ impl LiveTelemetrySampler {
             observations,
         }
     }
+}
+
+fn unavailable_gpu() -> ScalarMetric {
+    unavailable_scalar(
+        "percent",
+        "windows-pdh-gpu-engine",
+        "Windows did not expose usable GPU engine counters.",
+        "source-unavailable",
+        "unavailable",
+    )
+}
+
+fn busiest_gpu_engine_percent<I, K>(samples: I) -> Option<f64>
+where
+    I: IntoIterator<Item = (K, f64)>,
+    K: Into<String>,
+{
+    let mut grouped = BTreeMap::<String, f64>::new();
+    for (key, value) in samples {
+        if value.is_finite() && value >= 0.0 {
+            *grouped.entry(key.into()).or_default() += value;
+        }
+    }
+    grouped
+        .into_values()
+        .reduce(f64::max)
+        .map(|value| value.clamp(0.0, 100.0))
+}
+
+#[cfg(windows)]
+struct GpuCounter {
+    handle: usize,
+    group: String,
+}
+
+#[cfg(windows)]
+struct GpuSampler {
+    query: usize,
+    counters: Vec<GpuCounter>,
+}
+
+#[cfg(windows)]
+impl GpuSampler {
+    fn new() -> Option<Self> {
+        use windows::Win32::System::Performance::{
+            PDH_HCOUNTER, PDH_HQUERY, PDH_MORE_DATA, PdhAddEnglishCounterW, PdhCollectQueryData,
+            PdhExpandWildCardPathW, PdhOpenQueryW,
+        };
+        use windows::core::{PCWSTR, PWSTR};
+
+        let wildcard: Vec<u16> = "\\GPU Engine(*)\\Utilization Percentage\0"
+            .encode_utf16()
+            .collect();
+        let mut required = 0_u32;
+        // SAFETY: this is the documented two-call buffer sizing pattern for a local PDH path.
+        let first = unsafe {
+            PdhExpandWildCardPathW(
+                PCWSTR::null(),
+                PCWSTR(wildcard.as_ptr()),
+                None,
+                &mut required,
+                0,
+            )
+        };
+        if first != PDH_MORE_DATA || required == 0 {
+            return None;
+        }
+        let mut expanded = vec![0_u16; required as usize];
+        // SAFETY: expanded is writable and sized from the immediately preceding PDH query.
+        if unsafe {
+            PdhExpandWildCardPathW(
+                PCWSTR::null(),
+                PCWSTR(wildcard.as_ptr()),
+                Some(PWSTR(expanded.as_mut_ptr())),
+                &mut required,
+                0,
+            )
+        } != 0
+        {
+            return None;
+        }
+
+        let paths = split_multi_sz(&expanded);
+        let mut query = PDH_HQUERY::default();
+        // SAFETY: query points to initialized storage and a null datasource selects the local machine.
+        if unsafe { PdhOpenQueryW(PCWSTR::null(), 0, &mut query) } != 0 || query.is_invalid() {
+            return None;
+        }
+        let mut counters = Vec::new();
+        for path in paths {
+            let wide: Vec<u16> = path.encode_utf16().chain(Some(0)).collect();
+            let mut counter = PDH_HCOUNTER::default();
+            // SAFETY: the path is a nul-terminated value returned by PDH for this query.
+            if unsafe { PdhAddEnglishCounterW(query, PCWSTR(wide.as_ptr()), 0, &mut counter) } == 0
+                && !counter.is_invalid()
+            {
+                counters.push(GpuCounter {
+                    handle: counter.0 as usize,
+                    group: gpu_engine_group(&path),
+                });
+            }
+        }
+        if counters.is_empty() {
+            // SAFETY: query is an owned valid handle and has not been closed.
+            unsafe { windows::Win32::System::Performance::PdhCloseQuery(query) };
+            return None;
+        }
+        // Prime the rate counters. A later call supplies the measured interval.
+        // SAFETY: query owns the admitted counters above.
+        unsafe { PdhCollectQueryData(query) };
+        Some(Self {
+            query: query.0 as usize,
+            counters,
+        })
+    }
+
+    fn sample(&mut self) -> ScalarMetric {
+        use windows::Win32::System::Performance::{
+            PDH_CSTATUS_NEW_DATA, PDH_CSTATUS_VALID_DATA, PDH_FMT_COUNTERVALUE, PDH_FMT_DOUBLE,
+            PDH_HCOUNTER, PDH_HQUERY, PdhCollectQueryData, PdhGetFormattedCounterValue,
+        };
+        let query = PDH_HQUERY(self.query as *mut _);
+        // SAFETY: this sampler exclusively owns the query for its lifetime.
+        if unsafe { PdhCollectQueryData(query) } != 0 {
+            return unavailable_gpu();
+        }
+        let mut samples = Vec::with_capacity(self.counters.len());
+        for counter in &self.counters {
+            let mut formatted = PDH_FMT_COUNTERVALUE::default();
+            // SAFETY: the counter belongs to query and formatted points to initialized writable storage.
+            let status = unsafe {
+                PdhGetFormattedCounterValue(
+                    PDH_HCOUNTER(counter.handle as *mut _),
+                    PDH_FMT_DOUBLE,
+                    None,
+                    &mut formatted,
+                )
+            };
+            if status == 0
+                && matches!(
+                    formatted.CStatus,
+                    PDH_CSTATUS_VALID_DATA | PDH_CSTATUS_NEW_DATA
+                )
+            {
+                // SAFETY: PDH_FMT_DOUBLE makes doubleValue the active union member.
+                let value = unsafe { formatted.Anonymous.doubleValue };
+                samples.push((counter.group.clone(), value));
+            }
+        }
+        busiest_gpu_engine_percent(samples).map_or_else(unavailable_gpu, |value| {
+            observed_scalar(
+                round(value, 1),
+                "percent",
+                "windows-pdh-gpu-engine",
+                "Busiest physical GPU engine activity measured by Windows.",
+            )
+        })
+    }
+}
+
+#[cfg(windows)]
+impl Drop for GpuSampler {
+    fn drop(&mut self) {
+        let query = windows::Win32::System::Performance::PDH_HQUERY(self.query as *mut _);
+        // SAFETY: this sampler owns the query and closes it exactly once here.
+        unsafe { windows::Win32::System::Performance::PdhCloseQuery(query) };
+    }
+}
+
+#[cfg(windows)]
+fn split_multi_sz(buffer: &[u16]) -> Vec<String> {
+    buffer
+        .split(|value| *value == 0)
+        .take_while(|part| !part.is_empty())
+        .map(String::from_utf16_lossy)
+        .collect()
+}
+
+#[cfg(windows)]
+fn gpu_engine_group(path: &str) -> String {
+    let lower = path.to_ascii_lowercase();
+    let adapter = lower
+        .find("luid_")
+        .and_then(|start| {
+            lower[start..]
+                .find("_phys_")
+                .map(|end| &lower[start..start + end])
+        })
+        .unwrap_or("adapter");
+    let engine = lower
+        .find("engtype_")
+        .map(|start| {
+            let value = &lower[start + "engtype_".len()..];
+            value.split([')', '\\']).next().unwrap_or("engine")
+        })
+        .unwrap_or("engine");
+    format!("{adapter}/{engine}")
 }
 
 fn observed_scalar(
@@ -331,16 +541,28 @@ mod tests {
     }
 
     #[test]
+    fn gpu_activity_uses_the_busiest_physical_engine_without_double_counting() {
+        let value = busiest_gpu_engine_percent([
+            ("luid-a/3d", 12.0),
+            ("luid-a/3d", 8.0),
+            ("luid-a/copy", 4.0),
+            ("luid-b/3d", 7.0),
+        ]);
+        assert_eq!(value, Some(20.0));
+    }
+
+    #[test]
     fn snapshot_is_read_only_and_never_fabricates_gpu_values() {
         let reading = LiveTelemetrySampler::default().sample();
         assert!(reading.snapshot.read_only);
         assert_eq!(reading.snapshot.schema_version, "1.0");
-        assert_eq!(reading.snapshot.gpu.state, "unavailable");
-        assert_eq!(reading.snapshot.gpu.value, None);
-        assert_eq!(
-            reading.snapshot.gpu.reason_code,
-            Some("source-not-admitted")
-        );
+        assert!(matches!(
+            reading.snapshot.gpu.state,
+            "warming-up" | "observed" | "unavailable"
+        ));
+        if let Some(value) = reading.snapshot.gpu.value {
+            assert!((0.0..=100.0).contains(&value));
+        }
     }
 
     #[cfg(windows)]
@@ -363,6 +585,14 @@ mod tests {
                 .is_some_and(|value| (0.0..=100.0).contains(&value))
         );
         assert_eq!(second.snapshot.memory.state, "observed");
+        assert_eq!(second.snapshot.gpu.state, "observed");
+        assert!(
+            second
+                .snapshot
+                .gpu
+                .value
+                .is_some_and(|value| (0.0..=100.0).contains(&value))
+        );
         assert!(
             second
                 .observations

@@ -613,6 +613,62 @@
   animation: desktop-session-restoration 1.25s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
+.desktop-session-restoration-status {
+  display: grid;
+  gap: 18px;
+}
+
+.desktop-session-restoration-status ol {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.desktop-session-restoration-status li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  color: var(--deck-muted);
+  font-size: 12px;
+}
+
+.desktop-session-restoration-status li > span {
+  inline-size: 7px;
+  block-size: 7px;
+  border: 1px solid var(--deck-line-strong);
+  border-radius: 999px;
+}
+
+.desktop-session-restoration-status li[data-state='active'] {
+  color: var(--deck-ink);
+}
+
+.desktop-session-restoration-status li[data-state='active'] > span {
+  border-color: var(--deck-ice);
+  background: var(--deck-ice);
+  box-shadow: 0 0 8px rgba(118, 213, 244, 0.44);
+}
+
+.desktop-session-restoration-status li[data-state='complete'] > span {
+  border-color: var(--lb-success);
+  background: var(--lb-success);
+}
+
+.desktop-session-restoration-status small {
+  color: var(--deck-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.desktop-session-restoration-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
 @keyframes desktop-session-restoration {
   from {
     transform: translateX(-110%);

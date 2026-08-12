@@ -278,83 +278,132 @@ const LoginSurface = ({
 const SessionRestorationSurface = ({
   locale,
   onRetry,
+  onSignIn,
   state,
 }: Readonly<{
   locale: ShellLocale;
   onRetry: () => void;
+  onSignIn: () => void;
   state: 'restoring' | 'unavailable';
-}>) => (
-  <main
-    className="desktop-auth-surface"
-    data-account-view="login"
-    data-auth-mode="native-session-restoration"
-    data-session-restoration={state}
-  >
-    <section className="desktop-auth-story" aria-labelledby="desktop-restoration-story-title">
-      <BrandLockup />
-      <div className="desktop-auth-story-copy">
-        <span className="desktop-preview-badge">
-          <ProductIcon name="shield" size={14} />
-          {copy(locale, { en: 'Protected local session', 'pt-BR': 'Sessão local protegida' })}
-        </span>
-        <h1 id="desktop-restoration-story-title">
-          {copy(locale, {
-            en: 'Your account stays with you.',
-            'pt-BR': 'Sua conta continua com você.',
-          })}
-        </h1>
-        <p>
-          {copy(locale, {
-            en: 'Liiiraa Boost is recovering the credential protected by Windows Credential Manager. Your password is never stored in the app.',
-            'pt-BR':
-              'O Liiiraa Boost está recuperando a credencial protegida pelo Gerenciador de Credenciais do Windows. Sua senha nunca é armazenada no app.',
-          })}
-        </p>
-      </div>
-      <p className="desktop-auth-footnote">WINDOWS 10/11 · BETA PRIVADO</p>
-    </section>
+}>) => {
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    if (state !== 'restoring') return undefined;
+    setStage(0);
+    const timer = globalThis.setInterval(() => {
+      setStage((current) => Math.min(current + 1, 2));
+    }, 2_500);
+    return () => globalThis.clearInterval(timer);
+  }, [state]);
+  const stages = [
+    copy(locale, { en: 'Windows credential', 'pt-BR': 'Credencial do Windows' }),
+    copy(locale, { en: 'Account validation', 'pt-BR': 'Validação da conta' }),
+    copy(locale, { en: 'Plan confirmation', 'pt-BR': 'Confirmação do plano' }),
+  ];
 
-    <section className="desktop-login-panel" aria-labelledby="desktop-restoration-title">
-      <header>
-        <span className="desktop-login-kicker">
-          {state === 'restoring'
-            ? copy(locale, { en: 'Restoring session', 'pt-BR': 'Restaurando sessão' })
-            : copy(locale, { en: 'Connection unavailable', 'pt-BR': 'Conexão indisponível' })}
-        </span>
-        <h2 id="desktop-restoration-title">
-          {state === 'restoring'
-            ? copy(locale, { en: 'Opening your command deck', 'pt-BR': 'Abrindo sua central' })
-            : copy(locale, {
-                en: 'Your saved session is still protected',
-                'pt-BR': 'Sua sessão salva continua protegida',
-              })}
-        </h2>
-        <p aria-live="polite" role="status">
-          {state === 'restoring'
-            ? copy(locale, {
-                en: 'Confirming your account and plan. This should only take a moment.',
-                'pt-BR': 'Confirmando sua conta e seu plano. Isso deve levar apenas um instante.',
-              })
-            : copy(locale, {
-                en: 'We could not contact the account service. You do not need to sign in again.',
-                'pt-BR':
-                  'Não foi possível acessar o serviço da conta. Você não precisa fazer login novamente.',
-              })}
-        </p>
-      </header>
-      {state === 'restoring' ? (
-        <div aria-hidden="true" className="desktop-session-restoration-progress">
-          <span />
+  return (
+    <main
+      className="desktop-auth-surface"
+      data-account-view="login"
+      data-auth-mode="native-session-restoration"
+      data-session-restoration={state}
+    >
+      <section className="desktop-auth-story" aria-labelledby="desktop-restoration-story-title">
+        <BrandLockup />
+        <div className="desktop-auth-story-copy">
+          <span className="desktop-preview-badge">
+            <ProductIcon name="shield" size={14} />
+            {copy(locale, { en: 'Protected local session', 'pt-BR': 'Sessão local protegida' })}
+          </span>
+          <h1 id="desktop-restoration-story-title">
+            {copy(locale, {
+              en: 'Your account stays with you.',
+              'pt-BR': 'Sua conta continua com você.',
+            })}
+          </h1>
+          <p>
+            {copy(locale, {
+              en: 'Liiiraa Boost is recovering the credential protected by Windows Credential Manager. Your password is never stored in the app.',
+              'pt-BR':
+                'O Liiiraa Boost está recuperando a credencial protegida pelo Gerenciador de Credenciais do Windows. Sua senha nunca é armazenada no app.',
+            })}
+          </p>
         </div>
-      ) : (
-        <LbButton onPress={onRetry} variant="primary">
-          <ProductIcon name="recovery" size={17} />
-          {copy(locale, { en: 'Try restoring again', 'pt-BR': 'Tentar restaurar novamente' })}
-        </LbButton>
-      )}
-    </section>
-  </main>
-);
+        <p className="desktop-auth-footnote">WINDOWS 10/11 · BETA PRIVADO</p>
+      </section>
+
+      <section className="desktop-login-panel" aria-labelledby="desktop-restoration-title">
+        <header>
+          <span className="desktop-login-kicker">
+            {state === 'restoring'
+              ? copy(locale, { en: 'Restoring session', 'pt-BR': 'Restaurando sessão' })
+              : copy(locale, { en: 'Connection unavailable', 'pt-BR': 'Conexão indisponível' })}
+          </span>
+          <h2 id="desktop-restoration-title">
+            {state === 'restoring'
+              ? copy(locale, { en: 'Opening your command deck', 'pt-BR': 'Abrindo sua central' })
+              : copy(locale, {
+                  en: 'Your saved session is still protected',
+                  'pt-BR': 'Sua sessão salva continua protegida',
+                })}
+          </h2>
+          <p aria-live="polite" role="status">
+            {state === 'restoring'
+              ? copy(locale, {
+                  en: 'Confirming your account and plan. This should only take a moment.',
+                  'pt-BR': 'Confirmando sua conta e seu plano. Isso deve levar apenas um instante.',
+                })
+              : copy(locale, {
+                  en: 'We could not contact the account service. You do not need to sign in again.',
+                  'pt-BR':
+                    'Não foi possível acessar o serviço da conta. Você não precisa fazer login novamente.',
+                })}
+          </p>
+        </header>
+        {state === 'restoring' ? (
+          <div className="desktop-session-restoration-status">
+            <div aria-hidden="true" className="desktop-session-restoration-progress">
+              <span />
+            </div>
+            <ol
+              aria-label={copy(locale, {
+                en: 'Session restoration progress',
+                'pt-BR': 'Progresso da restauração',
+              })}
+            >
+              {stages.map((label, index) => (
+                <li
+                  data-state={index < stage ? 'complete' : index === stage ? 'active' : 'waiting'}
+                  key={label}
+                >
+                  <span aria-hidden="true" />
+                  {label}
+                </li>
+              ))}
+            </ol>
+            <small>
+              {copy(locale, {
+                en: 'If the service does not answer, this attempt ends automatically in a few seconds.',
+                'pt-BR':
+                  'Se o serviço não responder, esta tentativa termina automaticamente em poucos segundos.',
+              })}
+            </small>
+          </div>
+        ) : (
+          <div className="desktop-session-restoration-actions">
+            <LbButton onPress={onRetry} variant="primary">
+              <ProductIcon name="recovery" size={17} />
+              {copy(locale, { en: 'Try restoring again', 'pt-BR': 'Tentar restaurar novamente' })}
+            </LbButton>
+            <LbButton onPress={onSignIn} variant="secondary">
+              {copy(locale, { en: 'Use another account', 'pt-BR': 'Entrar com outra conta' })}
+            </LbButton>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+};
 
 const AccountTabs = ({
   locale,
@@ -3159,6 +3208,7 @@ export const AccountExperience = ({
           onRetry={() => {
             void authority.synchronize('reconnection');
           }}
+          onSignIn={() => authority.confirmSignedOut()}
           state={loginState === 'unavailable' ? 'unavailable' : 'restoring'}
         />
       );

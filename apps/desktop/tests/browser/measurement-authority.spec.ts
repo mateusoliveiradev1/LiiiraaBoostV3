@@ -243,7 +243,12 @@ test('measurement authority renders observed and unavailable facts without inven
   const unavailableAudio = page.locator('#evidence-audio');
   await expect(unavailableAudio).toHaveAttribute('data-evidence-state', 'unavailable');
   await expect(unavailableAudio).toContainText('Audio unavailable');
-  await expect(unavailableAudio).toContainText('Windows did not report an active audio endpoint.');
+  await expect(unavailableAudio).toContainText(
+    'This complementary information was not admitted in the current reading.',
+  );
+  await expect(unavailableAudio).not.toContainText(
+    'Windows did not report an active audio endpoint.',
+  );
   await expect(unavailableAudio).not.toContainText(/\b\d+(?:[.,]\d+)?\s*(?:%|ms|Hz|GB)\b/u);
 
   const unavailableGames = page.locator('#evidence-games');

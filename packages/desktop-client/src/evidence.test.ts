@@ -286,6 +286,36 @@ describe.each([
 });
 
 describe('evidence authority state and truth', () => {
+  it('admits a degraded inventory when every core measurement fact is observed', async () => {
+    const partialInventory: InventorySnapshotJson = Object.freeze({
+      ...inventory('inventory-core-ready'),
+      execution: Object.freeze({
+        ...execution,
+        health: Object.freeze({
+          state: 'degraded' as const,
+          checkedAt: NOW,
+          detail: 'Core sources ready; complementary sources unavailable.',
+        }),
+        overhead: Object.freeze({ ...execution.overhead, quality: 'degraded' as const }),
+      }),
+      network: Object.freeze({
+        state: 'unavailable' as const,
+        reasonCode: 'collector-unavailable' as const,
+        detail: 'Complementary source unavailable.',
+      }),
+    });
+    const authority = createTauriEvidenceAuthority({
+      invoke: scriptedInvoke({ [EVIDENCE_COMMANDS.refreshInventory]: partialInventory }),
+    });
+
+    await expect(authority.refreshInventory(refreshInput())).resolves.toMatchObject({ ok: true });
+    expect(authority.snapshot()).toMatchObject({
+      inventoryActionable: true,
+      inventory: { evidenceId: 'inventory-core-ready' },
+      status: 'ready',
+    });
+  });
+
   it('retains admitted evidence and stable selections while refresh is pending', async () => {
     let release: ((value: unknown) => void) | undefined;
     const pending = new Promise<unknown>((resolve) => {

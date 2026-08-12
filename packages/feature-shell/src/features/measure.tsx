@@ -69,6 +69,24 @@ const MEASURE_VIEW_COPY: Readonly<Record<MeasureView, LocalizedCopy>> = Object.f
   'degraded-coverage': { en: 'Coverage', 'pt-BR': 'Cobertura' },
 });
 
+const MEASURE_VIEW_GROUPS = Object.freeze([
+  {
+    label: { en: 'Measure', 'pt-BR': 'Medir' },
+    views: ['overview', 'baseline', 'capture', 'session-history'],
+  },
+  {
+    label: { en: 'Analyze', 'pt-BR': 'Analisar' },
+    views: ['matched-comparison', 'rejected-comparison', 'diff', 'timeline', 'report-preview'],
+  },
+  {
+    label: { en: 'Trust', 'pt-BR': 'Confiabilidade' },
+    views: ['collector-overhead', 'degraded-coverage'],
+  },
+] as const satisfies readonly {
+  readonly label: LocalizedCopy;
+  readonly views: readonly MeasureView[];
+}[]);
+
 const CAPTURED_AT = '2030-01-15T18:30:00.000Z';
 const ENVIRONMENT = 'Northstar Arena · S01 · Windows 11 · Verified fixture profile';
 const SAMPLE_WINDOW = '120 s · 500 ms interval';
@@ -854,10 +872,39 @@ const NATIVE_FACTS = Object.freeze([
 
 const factReason = (fact: HardwareFactJson, locale: ShellLocale): string => {
   if (fact.state === 'observed') return fact.value;
-  const reason = fact.reasonCode.replaceAll('-', ' ');
-  return locale === 'pt-BR'
-    ? `${fact.detail} Motivo: ${reason}.`
-    : `${fact.detail} Reason: ${reason}.`;
+  const copy: Readonly<Record<string, LocalizedCopy>> = {
+    'collector-unavailable': {
+      en: 'This complementary Windows source is not connected in this build yet.',
+      'pt-BR': 'Esta fonte complementar do Windows ainda não está conectada nesta versão.',
+    },
+    'not-discovered': {
+      en: 'No compatible device was found during this reading.',
+      'pt-BR': 'Nenhum dispositivo compatível foi encontrado nesta leitura.',
+    },
+    'not-present': {
+      en: 'No corresponding device is present on this computer.',
+      'pt-BR': 'Nenhum dispositivo correspondente está presente neste computador.',
+    },
+    'permission-denied': {
+      en: 'Windows did not authorize this complementary reading.',
+      'pt-BR': 'O Windows não autorizou esta leitura complementar.',
+    },
+    'timed-out': {
+      en: 'The source did not respond within the protected collection window.',
+      'pt-BR': 'A fonte não respondeu dentro do tempo protegido de coleta.',
+    },
+    unsupported: {
+      en: 'This source is not supported by the current Windows environment.',
+      'pt-BR': 'Esta fonte não é compatível com o ambiente atual do Windows.',
+    },
+  };
+  return localized(
+    copy[fact.reasonCode] ?? {
+      en: 'This complementary information was not admitted in the current reading.',
+      'pt-BR': 'Esta informação complementar não foi admitida na leitura atual.',
+    },
+    locale,
+  );
 };
 
 const NativeInventory = ({
@@ -886,6 +933,53 @@ const NativeInventory = ({
     );
   }
 
+  const observedFacts = NATIVE_FACTS.filter(
+    ([key]) => (inventory[key] as HardwareFactJson).state === 'observed',
+  );
+  const unavailableFacts = NATIVE_FACTS.filter(
+    ([key]) => (inventory[key] as HardwareFactJson).state !== 'observed',
+  );
+
+  const renderFact = ([key, en, pt]: (typeof NATIVE_FACTS)[number]) => {
+    const fact = inventory[key] as HardwareFactJson;
+    const label = locale === 'pt-BR' ? pt : en;
+    return (
+      <article
+        className="lb-native-fact"
+        data-evidence-state={fact.state}
+        id={`evidence-${key}`}
+        key={key}
+        tabIndex={-1}
+      >
+        <div className="lb-native-fact-icon">
+          <ProductIcon name={fact.state === 'observed' ? 'check' : 'warning'} size={18} />
+        </div>
+        <div>
+          <span>{label}</span>
+          {fact.state === 'observed' ? (
+            <strong>{fact.value}</strong>
+          ) : (
+            <>
+              <strong>
+                {locale === 'pt-BR' ? `${label} indisponível` : `${label} unavailable`}
+              </strong>
+              <p>{factReason(fact, locale)}</p>
+            </>
+          )}
+        </div>
+        <span className="lb-native-fact-state">
+          {fact.state === 'observed'
+            ? locale === 'pt-BR'
+              ? 'Observado'
+              : 'Observed'
+            : locale === 'pt-BR'
+              ? 'Complementar'
+              : 'Complementary'}
+        </span>
+      </article>
+    );
+  };
+
   return (
     <section
       aria-labelledby="native-inventory-title"
@@ -907,63 +1001,63 @@ const NativeInventory = ({
           </p>
         </div>
         <span className="lb-native-count">
-          {
-            NATIVE_FACTS.filter(([key]) => {
-              const fact = inventory[key];
-              return (
-                typeof fact === 'object' &&
-                fact !== null &&
-                'state' in fact &&
-                fact.state === 'observed'
-              );
-            }).length
-          }{' '}
-          / {NATIVE_FACTS.length} {locale === 'pt-BR' ? 'classes observadas' : 'classes observed'}
+          {observedFacts.length} / {NATIVE_FACTS.length}{' '}
+          {locale === 'pt-BR' ? 'classes observadas' : 'classes observed'}
         </span>
       </header>
-      <div className="lb-native-fact-grid">
-        {NATIVE_FACTS.map(([key, en, pt]) => {
-          const fact = inventory[key] as HardwareFactJson;
-          const label = locale === 'pt-BR' ? pt : en;
-          return (
-            <article
-              className="lb-native-fact"
-              data-evidence-state={fact.state}
-              id={`evidence-${key}`}
-              key={key}
-              tabIndex={-1}
-            >
-              <div className="lb-native-fact-icon">
-                <ProductIcon name={fact.state === 'observed' ? 'check' : 'warning'} size={18} />
-              </div>
-              <div>
-                <span>{label}</span>
-                {fact.state === 'observed' ? (
-                  <strong>{fact.value}</strong>
-                ) : (
-                  <>
-                    <strong>
-                      {locale === 'pt-BR' ? `${label} indisponível` : `${label} unavailable`}
-                    </strong>
-                    <p>{factReason(fact, locale)}</p>
-                  </>
-                )}
-              </div>
-              <span className="lb-native-fact-state">
-                {fact.state === 'observed'
-                  ? locale === 'pt-BR'
-                    ? 'Observado'
-                    : 'Observed'
-                  : locale === 'pt-BR'
-                    ? 'Indisponível'
-                    : 'Unavailable'}
-              </span>
-            </article>
-          );
-        })}
-      </div>
+      <div className="lb-native-fact-grid">{observedFacts.map(renderFact)}</div>
+      {unavailableFacts.length > 0 ? (
+        <details className="lb-native-coverage-details">
+          <summary>
+            {locale === 'pt-BR'
+              ? `${unavailableFacts.length} fontes complementares ainda indisponíveis`
+              : `${unavailableFacts.length} complementary sources are still unavailable`}
+          </summary>
+          <p>
+            {locale === 'pt-BR'
+              ? 'A medição principal continua usando apenas dados nativos confirmados; nada é estimado.'
+              : 'The main measurement continues using confirmed native data only; nothing is estimated.'}
+          </p>
+          <div className="lb-native-fact-grid lb-native-fact-grid--secondary">
+            {unavailableFacts.map(renderFact)}
+          </div>
+        </details>
+      ) : null}
     </section>
   );
+};
+
+const evidenceStatusLabel = (status: EvidenceAuthoritySnapshot['status'], locale: ShellLocale) => {
+  const labels: Record<EvidenceAuthoritySnapshot['status'], LocalizedCopy> = {
+    cancelling: { en: 'Cancelling', 'pt-BR': 'Cancelando' },
+    capturing: { en: 'Measuring', 'pt-BR': 'Medindo' },
+    disposed: { en: 'Closed', 'pt-BR': 'Encerrada' },
+    error: { en: 'Needs attention', 'pt-BR': 'Requer atenção' },
+    idle: { en: 'Waiting', 'pt-BR': 'Aguardando' },
+    ready: { en: 'Ready', 'pt-BR': 'Pronto' },
+    refreshing: { en: 'Updating', 'pt-BR': 'Atualizando' },
+  };
+  return localized(labels[status], locale);
+};
+
+const evidenceHealthLabel = (value: string | undefined, locale: ShellLocale) => {
+  const labels: Readonly<Record<string, LocalizedCopy>> = {
+    degraded: { en: 'Partial coverage', 'pt-BR': 'Cobertura parcial' },
+    healthy: { en: 'Complete', 'pt-BR': 'Completa' },
+    unavailable: { en: 'Unavailable', 'pt-BR': 'Indisponível' },
+    valid: { en: 'Verified', 'pt-BR': 'Verificada' },
+    insufficient: { en: 'Insufficient', 'pt-BR': 'Insuficiente' },
+  };
+  return localized(labels[value ?? 'unavailable'] ?? labels['unavailable']!, locale);
+};
+
+const formatEvidenceDate = (value: string, locale: ShellLocale) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
 };
 
 const NativeEvidenceRail = ({
@@ -1006,7 +1100,7 @@ const NativeEvidenceRail = ({
       <dl>
         <div>
           <dt>{locale === 'pt-BR' ? 'Estado' : 'State'}</dt>
-          <dd>{snapshot.status}</dd>
+          <dd>{evidenceStatusLabel(snapshot.status, locale)}</dd>
         </div>
         <div>
           <dt>{locale === 'pt-BR' ? 'Coletado em' : 'Collected at'}</dt>
@@ -1014,21 +1108,25 @@ const NativeEvidenceRail = ({
             {inventory === null ? (
               '—'
             ) : (
-              <time dateTime={inventory.collectedAt}>{inventory.collectedAt}</time>
+              <time dateTime={inventory.collectedAt}>
+                {formatEvidenceDate(inventory.collectedAt, locale)}
+              </time>
             )}
           </dd>
         </div>
         <div>
           <dt>{locale === 'pt-BR' ? 'Saúde da fonte' : 'Source health'}</dt>
-          <dd>{inventory?.execution.health.state ?? 'unavailable'}</dd>
+          <dd>{evidenceHealthLabel(inventory?.execution.health.state, locale)}</dd>
         </div>
         <div>
           <dt>{locale === 'pt-BR' ? 'Qualidade' : 'Quality'}</dt>
-          <dd>{inventory?.execution.overhead.quality ?? 'unavailable'}</dd>
+          <dd>{evidenceHealthLabel(inventory?.execution.overhead.quality, locale)}</dd>
         </div>
         <div>
           <dt>{locale === 'pt-BR' ? 'Referência' : 'Reference'}</dt>
-          <dd className="lb-data-value">{inventory?.evidenceId ?? '—'}</dd>
+          <dd className="lb-data-value">
+            {inventory === null ? '—' : `••••${inventory.evidenceId.slice(-8)}`}
+          </dd>
         </div>
       </dl>
     </aside>
@@ -1140,6 +1238,10 @@ const AuthorityMeasureSurface = ({
   );
   const [environmentName, setEnvironmentName] = useState('Windows local · sessão controlada');
   const [captureNote, setCaptureNote] = useState('');
+  const [refreshFeedback, setRefreshFeedback] = useState<{
+    readonly tone: 'success' | 'error';
+    readonly message: string;
+  } | null>(null);
   const busy = snapshot.status === 'refreshing' || snapshot.status === 'cancelling';
   const captureActive = snapshot.capture?.status === 'incomplete';
 
@@ -1165,9 +1267,10 @@ const AuthorityMeasureSurface = ({
     };
   }, [authority, captureActive]);
 
-  const refreshInventory = () => {
+  const refreshInventory = async () => {
+    setRefreshFeedback(null);
     const collectedAt = new Date().toISOString();
-    void authority.refreshInventory({
+    const result = await authority.refreshInventory({
       request: {
         schemaVersion: '1.0',
         evidenceId: `inventory-${Date.now().toString(36)}`,
@@ -1177,6 +1280,26 @@ const AuthorityMeasureSurface = ({
         perSourceTimeoutMs: 750,
         policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
       },
+    });
+    if (result.ok) {
+      const observed = NATIVE_FACTS.filter(
+        ([key]) => (result.value[key] as HardwareFactJson).state === 'observed',
+      ).length;
+      setRefreshFeedback({
+        tone: 'success',
+        message:
+          locale === 'pt-BR'
+            ? `Inventário atualizado agora · ${observed} de ${NATIVE_FACTS.length} fontes confirmadas.`
+            : `Inventory updated now · ${observed} of ${NATIVE_FACTS.length} sources confirmed.`,
+      });
+      return;
+    }
+    setRefreshFeedback({
+      tone: 'error',
+      message:
+        locale === 'pt-BR'
+          ? 'Não foi possível concluir a nova leitura. A última evidência válida foi preservada.'
+          : 'The new reading could not be completed. The last valid evidence was preserved.',
     });
   };
 
@@ -1488,25 +1611,54 @@ const AuthorityMeasureSurface = ({
           </p>
         </div>
         <LbButton
+          isDisabled={busy}
           isLoading={snapshot.status === 'refreshing'}
-          onPress={refreshInventory}
+          onPress={() => void refreshInventory()}
           variant="primary"
         >
-          {locale === 'pt-BR' ? 'Atualizar inventário' : 'Refresh inventory'}
+          {snapshot.status === 'refreshing'
+            ? locale === 'pt-BR'
+              ? 'Lendo hardware…'
+              : 'Reading hardware…'
+            : locale === 'pt-BR'
+              ? 'Atualizar inventário'
+              : 'Refresh inventory'}
         </LbButton>
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          className="lb-native-refresh-feedback"
+          data-tone={refreshFeedback?.tone}
+        >
+          {refreshFeedback?.message ??
+            (snapshot.inventory === null
+              ? locale === 'pt-BR'
+                ? 'A primeira leitura será feita neste computador.'
+                : 'The first reading will run on this computer.'
+              : locale === 'pt-BR'
+                ? `Última leitura: ${formatEvidenceDate(snapshot.inventory.collectedAt, locale)}`
+                : `Last reading: ${formatEvidenceDate(snapshot.inventory.collectedAt, locale)}`)}
+        </div>
       </section>
       <nav
         aria-label={locale === 'pt-BR' ? 'Fluxo de medição' : 'Measurement workflow'}
         className="lb-native-measure-nav"
       >
-        {MEASURE_VIEWS.map((target) => (
-          <LbButton
-            key={target}
-            onPress={() => onNavigate?.(target)}
-            variant={target === view ? 'primary' : 'quiet'}
-          >
-            {localized(MEASURE_VIEW_COPY[target], locale)}
-          </LbButton>
+        {MEASURE_VIEW_GROUPS.map((group) => (
+          <div className="lb-native-measure-nav-group" key={group.label.en}>
+            <span>{localized(group.label, locale)}</span>
+            <div>
+              {group.views.map((target) => (
+                <LbButton
+                  key={target}
+                  onPress={() => onNavigate?.(target)}
+                  variant={target === view ? 'primary' : 'quiet'}
+                >
+                  {localized(MEASURE_VIEW_COPY[target], locale)}
+                </LbButton>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
       <div className="lb-native-measure-grid">

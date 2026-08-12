@@ -434,8 +434,7 @@ describe('desktop account authority mutations', () => {
       const authority = new DesktopAccountAuthority({ invoke });
 
       authority.start();
-      await Promise.resolve();
-      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(0);
       expect(authority.snapshot()).toMatchObject({
         projection: { account: { displayName: 'Mateus Winchester' } },
       });
@@ -448,6 +447,27 @@ describe('desktop account authority mutations', () => {
         request: { trigger: 'reconnection' },
       });
       authority.dispose();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stops an initial restoration that never answers instead of leaving the app frozen', async () => {
+    vi.useFakeTimers();
+    try {
+      const invoke = vi
+        .fn<AccountAuthorityTransport['invoke']>()
+        .mockReturnValue(new Promise(() => undefined));
+      const authority = new DesktopAccountAuthority({ invoke });
+      const synchronization = authority.synchronize('launch');
+
+      await vi.advanceTimersByTimeAsync(12_001);
+      await synchronization;
+
+      expect(authority.snapshot()).toEqual({
+        state: 'offline',
+        error: 'network-unavailable',
+      });
     } finally {
       vi.useRealTimers();
     }

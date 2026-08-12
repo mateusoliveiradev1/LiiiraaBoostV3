@@ -21,6 +21,24 @@ export const OPEN_ACCOUNT_SUBSCRIPTION_COMMAND = 'open_account_subscription' as 
 export const OPEN_ADMIN_COMMAND = 'open_admin' as const;
 export const PREPARE_DEVICE_BINDING_COMMAND = 'prepare_device_binding' as const;
 export const ACCOUNT_AUTHORITY_REFRESH_MS = 5_000;
+export const ACCOUNT_SYNC_TIMEOUT_MS = 12_000;
+
+const withAccountSyncDeadline = async <T>(operation: Promise<T>): Promise<T> => {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_resolve, reject) => {
+        timeout = globalThis.setTimeout(
+          () => reject(new Error('account-sync-timeout')),
+          ACCOUNT_SYNC_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } finally {
+    if (timeout !== undefined) globalThis.clearTimeout(timeout);
+  }
+};
 
 export type AccountLifecycleTrigger = 'launch' | 'resume' | 'reconnection' | 'mutation';
 export type AccountAuthorityState =
@@ -555,7 +573,9 @@ export class DesktopAccountAuthority {
       this.#publish(pendingSnapshot(this.#snapshot));
     }
     try {
-      const raw = await this.#transport.invoke(ACCOUNT_SYNC_COMMAND, { request: { trigger } });
+      const raw = await withAccountSyncDeadline(
+        this.#transport.invoke(ACCOUNT_SYNC_COMMAND, { request: { trigger } }),
+      );
       if (sequence !== this.#sequence) return;
       const next = authoritySnapshot(raw);
       if (next === undefined) {

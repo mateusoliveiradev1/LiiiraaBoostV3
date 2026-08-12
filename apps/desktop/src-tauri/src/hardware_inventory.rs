@@ -518,8 +518,9 @@ mod windows_native {
     };
     use windows::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
     use windows::Win32::System::SystemInformation::{
-        GetProductInfo, GlobalMemoryStatusEx, MEMORYSTATUSEX, OS_PRODUCT_TYPE, OSVERSIONINFOW,
-        PRODUCT_CORE, PRODUCT_CORE_COUNTRYSPECIFIC, PRODUCT_CORE_N, PRODUCT_CORE_SINGLELANGUAGE,
+        FIRMWARE_TABLE_PROVIDER, GetProductInfo, GetSystemFirmwareTable, GlobalMemoryStatusEx,
+        MEMORYSTATUSEX, OS_PRODUCT_TYPE, OSVERSIONINFOW, PRODUCT_CORE,
+        PRODUCT_CORE_COUNTRYSPECIFIC, PRODUCT_CORE_N, PRODUCT_CORE_SINGLELANGUAGE,
         PRODUCT_EDUCATION, PRODUCT_EDUCATION_N, PRODUCT_ENTERPRISE, PRODUCT_ENTERPRISE_N,
         PRODUCT_ENTERPRISE_S, PRODUCT_ENTERPRISE_S_N, PRODUCT_HOME_BASIC, PRODUCT_HOME_BASIC_N,
         PRODUCT_HOME_PREMIUM, PRODUCT_HOME_PREMIUM_N, PRODUCT_PROFESSIONAL, PRODUCT_PROFESSIONAL_E,
@@ -563,10 +564,7 @@ mod windows_native {
                 )
             } else {
                 RawHardwareFact::observed(
-                    format!(
-                        "Windows {}.{} build {}",
-                        version.major, version.minor, version.build
-                    ),
+                    windows_display_name(&version),
                     "RtlGetVersion + GetProductInfo",
                     &observed_at,
                     1,
@@ -631,9 +629,21 @@ mod windows_native {
             );
         }
         let gib = memory.ullTotalPhys as f64 / 1_073_741_824.0;
+        let smbios = read_memory_devices();
+        let value = match &smbios {
+            Some(details) => format!(
+                "{gib:.1} GiB {} · {} MT/s",
+                details.memory_type, details.configured_speed_mt_s
+            ),
+            None => format!("{gib:.1} GiB de memória física"),
+        };
         RawHardwareFact::observed(
-            format!("{gib:.1} GiB physical memory"),
-            "GlobalMemoryStatusEx",
+            value,
+            if smbios.is_some() {
+                "GlobalMemoryStatusEx + SMBIOS Type 17"
+            } else {
+                "GlobalMemoryStatusEx"
+            },
             observed_at,
             1,
         )
@@ -760,6 +770,118 @@ mod windows_native {
         }
     }
 
+    fn windows_marketing_name(major: u32, minor: u32, build: u32) -> &'static str {
+        if major == 10 && minor == 0 && build >= 22_000 {
+            "Windows 11"
+        } else if major == 10 {
+            "Windows 10"
+        } else {
+            "Windows"
+        }
+    }
+
+    fn windows_display_name(version: &WindowsVersionEvidence) -> String {
+        let edition = match version.edition {
+            WindowsEdition::Professional => " Pro",
+            WindowsEdition::Home => " Home",
+            WindowsEdition::Enterprise => " Enterprise",
+            WindowsEdition::EnterpriseLtsc => " Enterprise LTSC",
+            WindowsEdition::IoTEnterpriseLtsc => " IoT Enterprise LTSC",
+            WindowsEdition::Education => " Education",
+            WindowsEdition::Unknown => "",
+        };
+        format!(
+            "{}{} · build {}",
+            windows_marketing_name(version.major, version.minor, version.build),
+            edition,
+            version.build
+        )
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    struct MemoryDeviceDetails {
+        memory_type: String,
+        configured_speed_mt_s: u32,
+    }
+
+    fn read_memory_devices() -> Option<MemoryDeviceDetails> {
+        let provider = FIRMWARE_TABLE_PROVIDER(u32::from_le_bytes(*b"RSMB"));
+        // SAFETY: a null output slice is the documented size query for this provider.
+        let required = unsafe { GetSystemFirmwareTable(provider, 0, None) };
+        if required <= 8 || required > 16 * 1024 * 1024 {
+            return None;
+        }
+        let mut raw = vec![0_u8; required as usize];
+        // SAFETY: the buffer is writable for exactly the length passed to Windows.
+        let written = unsafe { GetSystemFirmwareTable(provider, 0, Some(&mut raw)) };
+        if written <= 8 || written as usize > raw.len() {
+            return None;
+        }
+        let table_length = u32::from_le_bytes(raw[4..8].try_into().ok()?) as usize;
+        let table_end = 8_usize.saturating_add(table_length).min(written as usize);
+        parse_memory_devices(&raw[8..table_end])
+    }
+
+    fn parse_memory_devices(table: &[u8]) -> Option<MemoryDeviceDetails> {
+        let mut cursor = 0_usize;
+        let mut memory_type: Option<&'static str> = None;
+        let mut configured_speed = 0_u32;
+        while cursor + 4 <= table.len() {
+            let structure_type = table[cursor];
+            let formatted_length = usize::from(table[cursor + 1]);
+            if formatted_length < 4 || cursor + formatted_length > table.len() {
+                break;
+            }
+            if structure_type == 17 && formatted_length > 0x16 {
+                let size = u16::from_le_bytes([table[cursor + 0x0c], table[cursor + 0x0d]]);
+                if size != 0 && size != u16::MAX {
+                    let candidate_type = match table[cursor + 0x12] {
+                        0x18 => Some("DDR3"),
+                        0x1a => Some("DDR4"),
+                        0x1b => Some("LPDDR"),
+                        0x1c => Some("LPDDR2"),
+                        0x1d => Some("LPDDR3"),
+                        0x1e => Some("LPDDR4"),
+                        0x22 => Some("DDR5"),
+                        0x23 => Some("LPDDR5"),
+                        _ => None,
+                    };
+                    memory_type = memory_type.or(candidate_type);
+                    let rated = u16::from_le_bytes([table[cursor + 0x15], table[cursor + 0x16]]);
+                    let configured = if formatted_length >= 0x22 {
+                        u16::from_le_bytes([table[cursor + 0x20], table[cursor + 0x21]])
+                    } else {
+                        0
+                    };
+                    let speed = if configured > 0 && configured != u16::MAX {
+                        configured
+                    } else {
+                        rated
+                    };
+                    if speed != u16::MAX {
+                        configured_speed = configured_speed.max(u32::from(speed));
+                    }
+                }
+            }
+
+            let mut next = cursor + formatted_length;
+            while next + 1 < table.len() && !(table[next] == 0 && table[next + 1] == 0) {
+                next += 1;
+            }
+            cursor = next.saturating_add(2);
+            if structure_type == 127 {
+                break;
+            }
+        }
+        match (memory_type, configured_speed) {
+            (Some(memory_type), speed) if speed > 0 => Some(MemoryDeviceDetails {
+                memory_type: memory_type.to_owned(),
+                configured_speed_mt_s: speed,
+            }),
+            _ => None,
+        }
+    }
+
     fn edition_from_product(product: OS_PRODUCT_TYPE) -> WindowsEdition {
         if [
             PRODUCT_PROFESSIONAL,
@@ -801,5 +923,32 @@ mod windows_native {
         String::from_utf16_lossy(&buffer[..length])
             .trim()
             .to_owned()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn names_windows_11_from_the_supported_build_boundary() {
+            assert_eq!(windows_marketing_name(10, 0, 26_200), "Windows 11");
+            assert_eq!(windows_marketing_name(10, 0, 19_045), "Windows 10");
+        }
+
+        #[test]
+        fn parses_ddr5_and_configured_speed_from_smbios_type_17() {
+            let mut structure = vec![0_u8; 0x28];
+            structure[0] = 17;
+            structure[1] = 0x28;
+            structure[0x0c..0x0e].copy_from_slice(&16_384_u16.to_le_bytes());
+            structure[0x12] = 34;
+            structure[0x15..0x17].copy_from_slice(&4_800_u16.to_le_bytes());
+            structure[0x20..0x22].copy_from_slice(&6_000_u16.to_le_bytes());
+            structure.extend_from_slice(&[0, 0]);
+
+            let details = parse_memory_devices(&structure).expect("DDR5 module");
+            assert_eq!(details.memory_type, "DDR5");
+            assert_eq!(details.configured_speed_mt_s, 6_000);
+        }
     }
 }

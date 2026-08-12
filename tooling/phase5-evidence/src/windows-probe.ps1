@@ -62,6 +62,28 @@ function Get-Sha256 {
     return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
 }
 
+function Get-ProbeFailureDetail {
+    param(
+        [int]$ExitCode,
+        [string]$ErrorPath,
+        [string]$OutputPath
+    )
+    $messages = @()
+    foreach ($path in @($ErrorPath, $OutputPath)) {
+        if (Test-Path -LiteralPath $path) {
+            $rawContents = Get-Content -Raw -LiteralPath $path -ErrorAction SilentlyContinue
+            $contents = [string]::Concat($rawContents).Trim()
+            if (-not [string]::IsNullOrWhiteSpace($contents)) {
+                $messages += $contents
+            }
+        }
+    }
+    if ($messages.Count -eq 0) {
+        return "exit code $ExitCode; the native process emitted no diagnostic output"
+    }
+    return "exit code $ExitCode; $($messages -join ' | ')"
+}
+
 function Get-RelativeRepoPath {
     param([string]$Path)
     $rootUri = [System.Uri]::new(($RepositoryRoot.TrimEnd('\') + '\'))
@@ -244,9 +266,11 @@ function Write-PhysicalEvidence {
 
     $probeSummaryPath = Join-Path $evidenceDirectory 'current-pc-native-summary.json'
     $collectedAt = [DateTimeOffset]::UtcNow
-    $deadlineAt = $collectedAt.AddSeconds($SampleSeconds + 30)
+    $deadlineAt = $collectedAt.AddSeconds($SampleSeconds + 120)
     $policyDate = [int]$collectedAt.ToString('yyyyMMdd')
-    $probeDuration = $SampleSeconds + 10
+    # The authority must remain alive beyond the complete observation window.
+    # A generous margin prevents scheduler jitter from being mistaken for a crash.
+    $probeDuration = $SampleSeconds + 60
     $probeArguments = @(
         '--phase5-probe',
         $probeSummaryPath,
@@ -255,11 +279,32 @@ function Write-PhysicalEvidence {
         $deadlineAt.ToString('o'),
         [string]$policyDate
     )
-    $process = Start-Process -FilePath $artifactAbsolute -ArgumentList $probeArguments -PassThru -WindowStyle Hidden
+    $probeNonce = [Guid]::NewGuid().ToString('N')
+    $probeErrorPath = Join-Path ([System.IO.Path]::GetTempPath()) "liiiraa-phase5-$probeNonce.stderr.log"
+    $probeOutputPath = Join-Path ([System.IO.Path]::GetTempPath()) "liiiraa-phase5-$probeNonce.stdout.log"
+    $escapedArguments = @($probeArguments | ForEach-Object { '"' + ([string]$_).Replace('"', '\"') + '"' }) -join ' '
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = $artifactAbsolute
+    $startInfo.Arguments = $escapedArguments
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+    $startInfo.RedirectStandardError = $true
+    $startInfo.RedirectStandardOutput = $true
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    if (-not $process.Start()) {
+        throw 'The packaged native authority probe could not be started.'
+    }
+    $standardErrorTask = $process.StandardError.ReadToEndAsync()
+    $standardOutputTask = $process.StandardOutput.ReadToEndAsync()
     Start-Sleep -Seconds 1
     $process.Refresh()
     if ($process.HasExited) {
-        throw "The packaged native authority probe exited before sampling with code $($process.ExitCode)."
+        Write-Utf8File -Path $probeErrorPath -Contents $standardErrorTask.Result
+        Write-Utf8File -Path $probeOutputPath -Contents $standardOutputTask.Result
+        $detail = Get-ProbeFailureDetail -ExitCode $process.ExitCode -ErrorPath $probeErrorPath -OutputPath $probeOutputPath
+        throw "The packaged native authority probe exited before sampling: $detail."
     }
     $logicalProcessors = [Math]::Max(1, [Environment]::ProcessorCount)
     $initialCpu = [double]$process.CPU
@@ -268,7 +313,12 @@ function Write-PhysicalEvidence {
     for ($second = 0; $second -lt $SampleSeconds; $second++) {
         Start-Sleep -Seconds 1
         $process.Refresh()
-        if ($process.HasExited) { throw 'The packaged desktop process exited during the physical probe.' }
+        if ($process.HasExited) {
+            Write-Utf8File -Path $probeErrorPath -Contents $standardErrorTask.Result
+            Write-Utf8File -Path $probeOutputPath -Contents $standardOutputTask.Result
+            $detail = Get-ProbeFailureDetail -ExitCode $process.ExitCode -ErrorPath $probeErrorPath -OutputPath $probeOutputPath
+            throw "The packaged desktop process exited during the physical probe: $detail."
+        }
         $peakWorkingSet = [Math]::Max($peakWorkingSet, [long]$process.WorkingSet64)
         $samples++
     }
@@ -276,16 +326,22 @@ function Write-PhysicalEvidence {
     $cpuSeconds = [Math]::Max(0, ([double]$process.CPU - $initialCpu))
     $idleCpuPercent = ($cpuSeconds / [Math]::Max(1, $SampleSeconds) / $logicalProcessors) * 100
     $memoryPeakMb = $peakWorkingSet / 1MB
-    if (-not $process.WaitForExit(20000)) {
+    if (-not $process.WaitForExit(90000)) {
         throw 'The packaged native authority probe did not finish after the admitted sample.'
     }
+    # Complete redirected stream processing and make ExitCode reliable on Windows PowerShell.
+    $process.WaitForExit()
     $process.Refresh()
+    Write-Utf8File -Path $probeErrorPath -Contents $standardErrorTask.Result
+    Write-Utf8File -Path $probeOutputPath -Contents $standardOutputTask.Result
     if ($process.ExitCode -ne 0) {
-        throw "The packaged native authority probe exited with code $($process.ExitCode)."
+        $detail = Get-ProbeFailureDetail -ExitCode $process.ExitCode -ErrorPath $probeErrorPath -OutputPath $probeOutputPath
+        throw "The packaged native authority probe failed after sampling: $detail."
     }
     if (-not (Test-Path -LiteralPath $probeSummaryPath)) {
         throw 'The packaged native authority probe did not write its privacy-safe summary.'
     }
+    Remove-Item -LiteralPath $probeErrorPath, $probeOutputPath -Force -ErrorAction SilentlyContinue
     $probeSummary = Get-Content -Raw -LiteralPath $probeSummaryPath | ConvertFrom-Json
     $facts = @($probeSummary.hardwareClasses)
     $pollingHz = [double]$probeSummary.pollingHz

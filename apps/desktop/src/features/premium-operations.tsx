@@ -248,18 +248,23 @@ const HardwareStrip = ({
     aria-label={text(locale, 'Hardware observado pelo Windows', 'Hardware observed by Windows')}
     className="premium-hardware-strip"
   >
-    {([
-      ['Sistema', inventory?.windows, 'windows'],
-      ['Processador', inventory?.cpu, 'cpu'],
-      ['Placa de vídeo', inventory?.gpu, 'graphics'],
-      ['Memória', inventory?.memory, 'memory'],
-    ] satisfies readonly (readonly [string, HardwareFactJson | undefined, ProductIconName])[]).map(([label, fact, icon]) => (
+    {(
+      [
+        [text(locale, 'Sistema', 'System'), inventory?.windows, 'windows'],
+        [text(locale, 'Processador', 'Processor'), inventory?.cpu, 'cpu'],
+        [text(locale, 'Placa de vídeo', 'Graphics card'), inventory?.gpu, 'graphics'],
+        [text(locale, 'Memória instalada', 'Installed memory'), inventory?.memory, 'memory'],
+      ] satisfies readonly (readonly [string, HardwareFactJson | undefined, ProductIconName])[]
+    ).map(([label, fact, icon]) => (
       <div key={label}>
         <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
         <span>
           <small>{label}</small>
           <strong>
-            {typeof fact === 'object' && fact !== null && 'state' in fact && fact.state === 'observed'
+            {typeof fact === 'object' &&
+            fact !== null &&
+            'state' in fact &&
+            fact.state === 'observed'
               ? fact.value
               : text(locale, 'Não disponível', 'Not available')}
           </strong>
@@ -483,8 +488,33 @@ const HomeSurface = ({
       : text(locale, 'Indisponível', 'Unavailable');
   const memoryDetail =
     live.telemetry?.memory.state === 'observed' && live.telemetry.memory.loadPercent !== null
-      ? `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(live.telemetry.memory.loadPercent)}%`
-      : live.telemetry?.memory.detail ?? text(locale, 'Aguardando leitura nativa', 'Waiting for native reading');
+      ? text(
+          locale,
+          `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(live.telemetry.memory.loadPercent)}% da memória física em uso`,
+          `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(live.telemetry.memory.loadPercent)}% of physical memory in use`,
+        )
+      : text(locale, 'Aguardando leitura nativa do Windows', 'Waiting for native Windows reading');
+  const cpuDetail =
+    live.telemetry?.cpu.state === 'observed'
+      ? text(locale, 'Uso total medido pelo Windows', 'Total usage measured by Windows')
+      : text(locale, 'Aguardando contador nativo da CPU', 'Waiting for the native CPU counter');
+  const gpuDetail =
+    live.telemetry?.gpu.state === 'observed'
+      ? text(
+          locale,
+          'Motor gráfico mais ocupado, medido pelo Windows',
+          'Busiest graphics engine measured by Windows',
+        )
+      : text(
+          locale,
+          'O Windows ainda não entregou uma amostra confiável da GPU',
+          'Windows has not provided a trustworthy GPU sample yet',
+        );
+  const collectionDetail = text(
+    locale,
+    'Tempo gasto para concluir esta leitura local',
+    'Time spent completing this local reading',
+  );
 
   const startAnalysis = (): void => {
     if (isAnalyzing) {
@@ -747,14 +777,14 @@ const HomeSurface = ({
           </header>
           <div className="premium-metric-grid">
             {[
-              ['cpu', 'CPU', liveValue(live.telemetry?.cpu), live.telemetry?.cpu.detail],
-              ['graphics', 'GPU', liveValue(live.telemetry?.gpu), live.telemetry?.gpu.detail],
+              ['cpu', 'CPU', liveValue(live.telemetry?.cpu), cpuDetail],
+              ['graphics', 'GPU', liveValue(live.telemetry?.gpu), gpuDetail],
               ['memory', text(locale, 'Memória', 'Memory'), memoryValue, memoryDetail],
               [
                 'activity',
                 text(locale, 'Tempo da coleta', 'Collection time'),
                 liveValue(live.telemetry?.collectionLatency),
-                live.telemetry?.collectionLatency.detail,
+                collectionDetail,
               ],
             ].map(([icon, label, value, detail]) => (
               <div key={label}>
@@ -773,13 +803,17 @@ const HomeSurface = ({
             <div>
               <ProductIcon name="shield" size={18} weight="duotone" />
               <span>
-                <strong>Monitoramento somente leitura</strong>
-                <small>{text(locale, 'Dados nativos deste computador', 'Native data from this computer')}</small>
+                <strong>
+                  {text(locale, 'Monitoramento somente leitura', 'Read-only monitoring')}
+                </strong>
+                <small>
+                  {text(locale, 'Dados nativos deste computador', 'Native data from this computer')}
+                </small>
               </span>
             </div>
             <span>
               <ProductIcon name="check" size={14} weight="fill" />
-              Nenhuma alteração aplicada
+              {text(locale, 'Nenhuma alteração aplicada', 'No changes applied')}
             </span>
           </footer>
         </article>
@@ -2450,11 +2484,7 @@ const UnavailableAboutSurface = ({ locale }: { readonly locale: ShellLocale }) =
             {text(locale, 'ATUALIZAÇÃO DO APLICATIVO', 'APP UPDATE')}
           </span>
           <h3>
-            {text(
-              locale,
-              'Não é possível verificar atualizações',
-              'Updates cannot be checked',
-            )}
+            {text(locale, 'Não é possível verificar atualizações', 'Updates cannot be checked')}
           </h3>
         </div>
       </header>
@@ -2913,8 +2943,12 @@ const ProductionPremiumOperationsSurface = ({
 
   useEffect(() => {
     if (toast === null) return undefined;
-    const timer = globalThis.setTimeout(() => { setToast(null); }, 4200);
-    return () => { globalThis.clearTimeout(timer); };
+    const timer = globalThis.setTimeout(() => {
+      setToast(null);
+    }, 4200);
+    return () => {
+      globalThis.clearTimeout(timer);
+    };
   }, [toast]);
 
   const notify = (message: string, tone: PremiumToastTone = 'success'): void => {

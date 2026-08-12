@@ -371,7 +371,8 @@ describe('Measure technical surfaces', () => {
     expect(markup).toContain('AMD Ryzen 7 7800X3D');
     expect(markup).toContain('Windows 11 Pro · 24H2');
     expect(markup).toContain('Áudio indisponível');
-    expect(markup).toContain('Windows did not report an active audio endpoint.');
+    expect(markup).toContain('Esta informação complementar não foi admitida na leitura atual.');
+    expect(markup).not.toContain('Windows did not report an active audio endpoint.');
     expect(markup).not.toContain('DEMO ·');
     expect(markup).not.toContain('fixture');
   });
