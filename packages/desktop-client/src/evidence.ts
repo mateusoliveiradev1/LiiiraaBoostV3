@@ -29,12 +29,10 @@ export const EVIDENCE_COMMANDS = Object.freeze({
 
 export type EvidenceInvokeCommand = (typeof EVIDENCE_COMMANDS)[keyof typeof EVIDENCE_COMMANDS];
 
-export interface EvidenceInvoke {
-  (
-    command: EvidenceInvokeCommand,
-    argumentsValue?: Readonly<Record<string, unknown>>,
-  ): Promise<unknown>;
-}
+export type EvidenceInvoke = (
+  command: EvidenceInvokeCommand,
+  argumentsValue?: Readonly<Record<string, unknown>>,
+) => Promise<unknown>;
 
 export type EvidenceAuthorityOrigin = 'native' | 'deterministic';
 export type EvidenceAuthorityStatus =
@@ -271,7 +269,7 @@ const deepFreeze = <Value>(value: Value, seen = new WeakSet<object>()): Readonly
   return Object.freeze(value);
 };
 
-const immutableClone = <Value>(value: Value): Value => deepFreeze(structuredClone(value)) as Value;
+const immutableClone = <Value>(value: Value): Value => deepFreeze(structuredClone(value));
 
 const errorResult = <Value>(error: EvidenceClientError): Result<Value, EvidenceClientError> =>
   Object.freeze({ ok: false, error: deepFreeze(error) });
@@ -361,9 +359,13 @@ const invokeAbortable = async (
     if (signal === undefined) {
       return;
     }
-    const onAbort = (): void => resolve(Object.freeze({ kind: 'cancelled' }));
+    const onAbort = (): void => {
+      resolve(Object.freeze({ kind: 'cancelled' }));
+    };
     signal.addEventListener('abort', onAbort, { once: true });
-    detach = () => signal.removeEventListener('abort', onAbort);
+    detach = () => {
+      signal.removeEventListener('abort', onAbort);
+    };
   });
   const operation: Promise<InvokeOutcome> = Promise.resolve()
     .then(async () => invoke(command, argumentsValue))
@@ -622,7 +624,7 @@ const createEvidenceAuthority = (
         publish({ status: 'error', error });
         return errorResult<CancellationReceipt>(error);
       }
-      const receipt = immutableClone(outcome.value as CancellationReceipt);
+      const receipt = immutableClone(outcome.value);
       publish({ status: 'ready', capture: null, error: null });
       return successResult(receipt);
     },
@@ -681,7 +683,7 @@ const createEvidenceAuthority = (
           command: EVIDENCE_COMMANDS.exportReport,
         });
       }
-      return successResult(immutableClone(outcome.value as ExportReceipt));
+      return successResult(immutableClone(outcome.value));
     },
     async readHealth(signal?: AbortSignal) {
       if (disposed) {
@@ -702,7 +704,7 @@ const createEvidenceAuthority = (
           command: EVIDENCE_COMMANDS.readHealth,
         });
       }
-      return successResult(immutableClone(outcome.value as EvidenceHealth));
+      return successResult(immutableClone(outcome.value));
     },
     dispose() {
       if (disposed) {

@@ -29,10 +29,9 @@ const withAccountSyncDeadline = async <T>(operation: Promise<T>): Promise<T> => 
     return await Promise.race([
       operation,
       new Promise<T>((_resolve, reject) => {
-        timeout = globalThis.setTimeout(
-          () => reject(new Error('account-sync-timeout')),
-          ACCOUNT_SYNC_TIMEOUT_MS,
-        );
+        timeout = globalThis.setTimeout(() => {
+          reject(new Error('account-sync-timeout'));
+        }, ACCOUNT_SYNC_TIMEOUT_MS);
       }),
     ]);
   } finally {

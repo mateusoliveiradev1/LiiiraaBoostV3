@@ -257,14 +257,11 @@ const HardwareStrip = ({
       ] satisfies readonly (readonly [string, HardwareFactJson | undefined, ProductIconName])[]
     ).map(([label, fact, icon]) => (
       <div key={label}>
-        <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
+        <ProductIcon name={icon} size={21} weight="duotone" />
         <span>
           <small>{label}</small>
           <strong>
-            {typeof fact === 'object' &&
-            fact !== null &&
-            'state' in fact &&
-            fact.state === 'observed'
+            {fact?.state === 'observed'
               ? fact.value
               : text(locale, 'Não disponível', 'Not available')}
           </strong>
@@ -410,13 +407,16 @@ const HomeSurface = ({
   const evidence = useSyncExternalStore(
     evidenceAuthority === undefined
       ? emptyInternalSubscribe
-      : (notify) => evidenceAuthority.subscribe(() => notify()),
-    evidenceAuthority?.snapshot ?? (() => EMPTY_INTERNAL_EVIDENCE),
+      : (notify) =>
+          evidenceAuthority.subscribe(() => {
+            notify();
+          }),
+    () => evidenceAuthority?.snapshot() ?? EMPTY_INTERNAL_EVIDENCE,
     () => EMPTY_INTERNAL_EVIDENCE,
   );
   const live = useSyncExternalStore(
-    liveTelemetryAuthority.subscribe,
-    liveTelemetryAuthority.snapshot,
+    (notify) => liveTelemetryAuthority.subscribe(notify),
+    () => liveTelemetryAuthority.snapshot(),
     () => EMPTY_INTERNAL_TELEMETRY,
   );
   const [analysisPhase, setAnalysisPhase] = useState<HomeAnalysisPhase>('idle');
@@ -459,7 +459,9 @@ const HomeSurface = ({
         policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
       },
     });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [evidenceAuthority]);
 
   useEffect(() => {

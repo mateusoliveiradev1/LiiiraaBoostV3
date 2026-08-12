@@ -169,7 +169,9 @@ describe('hardware evidence contracts', () => {
   );
 
   it('requires every inventory category and keeps absence explicit', () => {
-    const { games: _games, ...missingCategory } = inventory;
+    const missingCategory = Object.fromEntries(
+      Object.entries(inventory).filter(([key]) => key !== 'games'),
+    );
     expect(validates(missingCategory)).toBe(false);
     expect(validates({ ...inventory, games: { state: 'unavailable', value: 0 } })).toBe(false);
   });
@@ -200,7 +202,9 @@ describe('hardware evidence contracts', () => {
   });
 
   it('requires durable identity, hashes, provenance, and limitations', () => {
-    const { evidenceHashes: _hashes, ...missingHashes } = report;
+    const missingHashes = Object.fromEntries(
+      Object.entries(report).filter(([key]) => key !== 'evidenceHashes'),
+    );
     expect(validates(missingHashes)).toBe(false);
     expect(validates({ ...claim, limitations: [] })).toBe(false);
   });

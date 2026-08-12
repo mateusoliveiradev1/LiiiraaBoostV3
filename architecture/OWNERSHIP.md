@@ -26,6 +26,7 @@ future boundary without asserting an implementation exists.
 | `feature-shell`                  | desktop-ui    | feature     | production | reserved | `packages/feature-shell/src/index.ts`                           |
 | `desktop-app`                    | desktop       | composition | production | reserved | `apps/desktop/src/index.ts`                                     |
 | `acceptance-policy`              | architecture  | tooling     | tooling    | active   | `tooling/acceptance-policy/src/policy.ts`                       |
+| `phase5-evidence`                | architecture  | tooling     | tooling    | active   | `tooling/phase5-evidence/src/evaluate.ts`                       |
 | `architecture-tests`             | architecture  | tooling     | tooling    | active   | `tooling/architecture-tests/src/policy.ts`                      |
 | `contract-compat`                | contracts     | tooling     | tooling    | active   | `tooling/contract-compat/src/check-compat.ts`                   |
 | `contract-generation`            | contracts     | tooling     | tooling    | active   | `tooling/contract-generation/src/generate.ts`                   |

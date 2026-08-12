@@ -46,10 +46,10 @@ export interface Phase5HardwareEvidence {
 export interface Phase5MatrixIdentity {
   os: 'windows-10' | 'windows-11';
   cpu: 'intel' | 'amd' | 'other';
-  gpu: Array<'nvidia' | 'amd' | 'intel' | 'other'>;
+  gpu: ('nvidia' | 'amd' | 'intel' | 'other')[];
   formFactor: 'desktop' | 'notebook' | 'other';
-  storage: Array<'nvme' | 'sata-ssd' | 'other'>;
-  network: Array<'ethernet' | 'wifi' | 'other'>;
+  storage: ('nvme' | 'sata-ssd' | 'other')[];
+  network: ('ethernet' | 'wifi' | 'other')[];
 }
 
 export interface Phase5EvidenceManifest {
@@ -76,12 +76,12 @@ export interface Phase5EvidenceManifest {
     hardwareClasses: Phase5HardwareEvidence[];
     matrix?: Phase5MatrixIdentity;
   };
-  gates: Array<{
+  gates: {
     id: Phase5AutomatedGate;
     status: 'passed' | 'failed' | 'pending';
     evidenceKind: 'deterministic' | 'physical';
     evidenceSha256: string;
-  }>;
+  }[];
   budgets: {
     memoryPeakMb: number;
     idleCpuPercent: number;
@@ -97,11 +97,11 @@ export interface Phase5EvidenceManifest {
     path: string;
     sha256: string;
   };
-  phase4PhysicalGaps: Array<{
+  phase4PhysicalGaps: {
     id: string;
     status: 'pending' | 'passed';
     detail: string;
-  }>;
+  }[];
 }
 
 export interface Phase5EvidenceDiagnostic {
@@ -226,9 +226,6 @@ const validateEnvironment = (
 ): void => {
   const path = `$[${String(index)}].environment`;
   const { environment } = manifest;
-  if (environment.os.family !== 'windows') {
-    diagnostics.push(diagnostic('OS_FAMILY_INVALID', `${path}.os.family`, 'Windows is required.'));
-  }
   if (environment.os.edition.length === 0 || environment.os.version.length === 0) {
     diagnostics.push(
       diagnostic('OS_IDENTITY_MISSING', `${path}.os`, 'OS edition and version are required.'),

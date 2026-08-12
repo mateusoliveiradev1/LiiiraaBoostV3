@@ -52,7 +52,7 @@ const readDesktopTestComposition = (): DesktopAppProps => {
   const textScale = composition['textScale'];
   const viewportWidth = composition['viewportWidth'];
   const windowsLocale = composition['windowsLocale'];
-  const evidenceInvoke = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_EVIDENCE_INVOKE__');
+  const evidenceInvoke = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_EVIDENCE_INVOKE__') as unknown;
 
   if (
     typeof initialPath !== 'string' ||

@@ -40,5 +40,5 @@ updated: 2026-08-12T19:15:00-03:00
 
 - root_cause: Estados transitorios publicados em todo poll, leitura SMBIOS com assinatura incorreta, ausencia de descoberta nativa de jogos, acoes sem feedback e composicao CSS com rail lateral rigido.
 - fix: Historico visual estavel; graficos compactos; RAM via SMBIOS Type 17; descoberta local Steam/Epic/Xbox/EA/Ubisoft; Modo Competitivo com leitura automatica; copy por fonte; feedback de atualizar/relatorio; rail horizontal e responsividade; restauracao de sessao com timeout, retry e troca de conta; fonte Saira empacotada no desktop.
-- verification: 42 testes TypeScript direcionados, 140 testes Rust, 5 testes Playwright de Medicoes, 8 testes Playwright da autoridade de conta, TypeScript/lint dos arquivos alterados, build Vite e bundle NSIS aprovados.
+- verification: 42 testes TypeScript direcionados, 140 testes Rust, 5 testes Playwright de Medicoes, 8 testes Playwright da autoridade de conta, `verify:quick` global (30 pacotes), build Vite e bundle NSIS aprovados.
 - files_changed: hardware_inventory.rs, live-telemetry.ts, premium-operations-production.tsx, account-experience.tsx, measure.tsx, CSS, fontes e testes relacionados.

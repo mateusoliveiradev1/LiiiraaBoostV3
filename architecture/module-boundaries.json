@@ -288,6 +288,15 @@
       "status": "active"
     },
     {
+      "id": "phase5-evidence",
+      "owner": "architecture",
+      "layer": "tooling",
+      "roots": ["tooling/phase5-evidence"],
+      "publicRoots": ["tooling/phase5-evidence/src/evaluate.ts"],
+      "runtimeClass": "tooling",
+      "status": "active"
+    },
+    {
       "id": "architecture-tests",
       "owner": "architecture",
       "layer": "tooling",

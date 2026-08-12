@@ -71,6 +71,7 @@ const phase2Packages = [
       '@liiiraa/control-plane-domain',
       '@liiiraa/design-system',
       '@liiiraa/design-tokens',
+      '@liiiraa/desktop-client',
       '@liiiraa/desktop-production-reference',
       '@liiiraa/feature-shell',
     ],
