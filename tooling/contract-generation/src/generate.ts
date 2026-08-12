@@ -63,6 +63,7 @@ export const OUTPUT_PATHS = Object.freeze({
   messageEnvelope: join(DESKTOP_OUTPUT_ROOT, 'message-envelope.schema.json'),
   diagnosticValue: join(DESKTOP_OUTPUT_ROOT, 'diagnostic-value.schema.json'),
   inspectSystem: join(DESKTOP_OUTPUT_ROOT, 'inspect-system.schema.json'),
+  hardwareEvidence: join(DESKTOP_OUTPUT_ROOT, 'hardware-evidence.schema.json'),
   shellMessage: join(DESKTOP_OUTPUT_ROOT, 'shell-message.schema.json'),
   controlPlaneDocument: join(CONTROL_PLANE_OUTPUT_ROOT, 'control-plane-document.schema.json'),
   webDocument: join(WEB_OUTPUT_ROOT, 'web-document.schema.json'),
@@ -89,6 +90,7 @@ const REQUIRED_DEFINITIONS = Object.freeze([
   'HostToRendererShellEvent',
   'InspectSystemRequest',
   'InspectSystemResult',
+  'HardwareEvidenceDocument',
   'RendererToHostShellCommand',
   'ShellCloseContext',
   'ShellInstallerIdentity',
@@ -430,6 +432,14 @@ function desktopDefinitions(definitions: JsonObject): JsonObject {
   );
 }
 
+function hardwareEvidenceDefinitions(definitions: JsonObject): JsonObject {
+  return reachableDefinitions(
+    definitions,
+    ['HardwareEvidenceDocument'],
+    'hardware evidence',
+  );
+}
+
 function webDefinitions(definitions: JsonObject): JsonObject {
   const selectedDefinitions = reachableDefinitions(definitions, WEB_DOCUMENT_ROOTS, 'web');
 
@@ -494,7 +504,14 @@ function transportMessageRoot(): JsonObject {
       { $ref: 'InspectSystemResult.json' },
       { $ref: 'HostToRendererShellEvent.json' },
       { $ref: 'RendererToHostShellCommand.json' },
+      { $ref: 'HardwareEvidenceDocument.json' },
     ],
+  };
+}
+
+function hardwareEvidenceDocumentRoot(): JsonObject {
+  return {
+    $ref: 'HardwareEvidenceDocument.json',
   };
 }
 
@@ -666,6 +683,7 @@ const schemaStage: GenerationStage = {
     const definitions = requireDefinitions(bundle);
     const legacyDesktopDefinitions = desktopDefinitions(definitions);
     const legacyInspectionDefinitions = inspectionDefinitions(legacyDesktopDefinitions);
+    const standaloneHardwareEvidenceDefinitions = hardwareEvidenceDefinitions(definitions);
     const standaloneControlPlaneDefinitions = controlPlaneDefinitions(definitions);
     const standaloneWebDefinitions = webDefinitions(definitions);
 
@@ -692,6 +710,14 @@ const schemaStage: GenerationStage = {
           'https://schemas.liiiraa.dev/desktop/v1/inspect-system.schema.json',
           legacyInspectionDefinitions,
           inspectMessageRoot(),
+        ),
+      },
+      {
+        path: OUTPUT_PATHS.hardwareEvidence,
+        value: createRuntimeSchema(
+          'https://schemas.liiiraa.dev/desktop/v1/hardware-evidence.schema.json',
+          standaloneHardwareEvidenceDefinitions,
+          hardwareEvidenceDocumentRoot(),
         ),
       },
       {
@@ -722,6 +748,7 @@ const schemaStage: GenerationStage = {
         path: OUTPUT_PATHS.openApi,
         value: createOpenApiDocument({
           ...legacyInspectionDefinitions,
+          ...standaloneHardwareEvidenceDefinitions,
           ...standaloneWebDefinitions,
           ...standaloneControlPlaneDefinitions,
         }),
@@ -792,10 +819,16 @@ const typescriptStage: GenerationStage = {
       type: 'object',
       properties: {
         messageEnvelope: transportMessageRoot(),
+        hardwareEvidenceDocument: hardwareEvidenceDocumentRoot(),
         webDocument: webDocumentRoot(),
         controlPlaneDocument: controlPlaneDocumentRoot(),
       },
-      required: ['messageEnvelope', 'webDocument', 'controlPlaneDocument'],
+      required: [
+        'messageEnvelope',
+        'hardwareEvidenceDocument',
+        'webDocument',
+        'controlPlaneDocument',
+      ],
       $defs: definitions,
     });
 
@@ -814,6 +847,7 @@ const typescriptStage: GenerationStage = {
     });
     const transportAliases = [
       "export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];",
+      "export type HardwareEvidenceDocument = GeneratedContractRoots['hardwareEvidenceDocument'];",
       "export type WebDocument = GeneratedContractRoots['webDocument'];",
       "export type ControlPlaneDocument = GeneratedContractRoots['controlPlaneDocument'];",
     ].join('\n');
@@ -826,7 +860,7 @@ const typescriptStage: GenerationStage = {
       {
         path: OUTPUT_PATHS.typescriptIndex,
         value: normalizeGeneratedText(
-          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.js';\nexport { controlPlaneDocumentValidator } from './standalone-validators.js';`,
+          `${GENERATED_TYPESCRIPT_HEADER}\n\nexport type * from './models.js';\nexport { controlPlaneDocumentValidator, hardwareEvidenceDocumentValidator } from './standalone-validators.js';`,
         ),
       },
     ];

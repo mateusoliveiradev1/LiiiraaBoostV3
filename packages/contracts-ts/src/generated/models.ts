@@ -166,6 +166,122 @@ export type ShellNotificationTitleJson = string;
 export type ShellNotificationBodyJson = string;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "HardwareEvidenceDocument".
+ */
+export type HardwareEvidenceDocumentJson =
+  InventorySnapshotJson | MeasurementSessionJson | EvidenceComparisonJson | EvidenceReportJson | ClaimAdmissionJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceSchemaVersion".
+ */
+export type EvidenceSchemaVersionJson = '1.0';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceIdentifier".
+ */
+export type EvidenceIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceHash".
+ */
+export type EvidenceHashJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SourceCapability".
+ */
+export type SourceCapabilityJson =
+  | 'native-readonly'
+  | 'native-performance-counter'
+  | 'windows-management'
+  | 'direct-storage-query'
+  | 'derived-local-evidence';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CancellationState".
+ */
+export type CancellationStateJson = 'not-requested' | 'requested' | 'acknowledged' | 'deadline-exceeded';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CollectorHealthState".
+ */
+export type CollectorHealthStateJson = 'healthy' | 'degraded' | 'unavailable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceText".
+ */
+export type EvidenceTextJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceQuality".
+ */
+export type EvidenceQualityJson = 'valid' | 'degraded' | 'insufficient' | 'invalid';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "HardwareFact".
+ */
+export type HardwareFactJson = ObservedHardwareFactJson | UnavailableHardwareFactJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "HardwareUnavailableReason".
+ */
+export type HardwareUnavailableReasonJson =
+  | 'not-reported'
+  | 'not-present'
+  | 'permission-denied'
+  | 'unsupported'
+  | 'timed-out'
+  | 'cancelled'
+  | 'not-discovered'
+  | 'collector-unavailable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MeasurementSession".
+ */
+export type MeasurementSessionJson =
+  | IncompleteMeasurementSessionJson
+  | CompletedMeasurementSessionJson
+  | DegradedMeasurementSessionJson
+  | InvalidMeasurementSessionJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MetricKind".
+ */
+export type MetricKindJson =
+  | 'frame-time-ms'
+  | 'cpu-utilization-percent'
+  | 'gpu-utilization-percent'
+  | 'memory-working-set-bytes'
+  | 'disk-latency-ms'
+  | 'network-latency-ms';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MetricUnit".
+ */
+export type MetricUnitJson = 'milliseconds' | 'percent' | 'bytes';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceComparison".
+ */
+export type EvidenceComparisonJson = AcceptedComparisonJson | RejectedComparisonJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ComparisonBlockerCode".
+ */
+export type ComparisonBlockerCodeJson =
+  | 'hardware-drift'
+  | 'workload-drift'
+  | 'insufficient-samples'
+  | 'invalid-before'
+  | 'invalid-after'
+  | 'incompatible-metric'
+  | 'unsupported-quality';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ClaimAdmissionState".
+ */
+export type ClaimAdmissionStateJson = 'admitted' | 'rejected';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "WebIdentifier".
  */
 export type WebIdentifierJson = string;
@@ -667,7 +783,12 @@ export type AdminOperationActionJson =
 
 export interface GeneratedContractRoots {
   messageEnvelope:
-    InspectSystemRequestJson | InspectSystemResultJson | HostToRendererShellEventJson | RendererToHostShellCommandJson;
+    | InspectSystemRequestJson
+    | InspectSystemResultJson
+    | HostToRendererShellEventJson
+    | RendererToHostShellCommandJson
+    | HardwareEvidenceDocumentJson;
+  hardwareEvidenceDocument: HardwareEvidenceDocumentJson;
   webDocument:
     | WebRouteRecordJson
     | ClaimEvidenceJson
@@ -1410,6 +1531,912 @@ export interface ShellSaveWindowStateCommandJson {
  */
 export interface ShellSaveWindowStateCommandPayloadJson {
   state: ShellWindowStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InventorySnapshot".
+ */
+export interface InventorySnapshotJson {
+  kind: 'inventory-snapshot';
+  schemaVersion: EvidenceSchemaVersionJson;
+  evidenceId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  collectedAt: string;
+  evidenceHash: EvidenceHashJson;
+  execution: CollectorExecutionContextJson;
+  cpu: HardwareFactJson;
+  gpu: HardwareFactJson;
+  memory: HardwareFactJson;
+  storage: HardwareFactJson;
+  network: HardwareFactJson;
+  display: HardwareFactJson;
+  audio: HardwareFactJson;
+  usb: HardwareFactJson;
+  windows: HardwareFactJson;
+  drivers: HardwareFactJson;
+  security: HardwareFactJson;
+  games: HardwareFactJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CollectorExecutionContext".
+ */
+export interface CollectorExecutionContextJson {
+  sourceCapability: SourceCapabilityJson;
+  deadlineAt: string;
+  cancellationState: CancellationStateJson;
+  health: CollectorHealthJson;
+  overhead: CollectorOverheadJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CollectorHealth".
+ */
+export interface CollectorHealthJson {
+  state: CollectorHealthStateJson;
+  checkedAt: string;
+  detail: EvidenceTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CollectorOverhead".
+ */
+export interface CollectorOverheadJson {
+  sampleWindowMs: number;
+  cpuTimeMs: number;
+  peakWorkingSetBytes: string;
+  quality: EvidenceQualityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ObservedHardwareFact".
+ */
+export interface ObservedHardwareFactJson {
+  state: 'observed';
+  value: EvidenceTextJson;
+  source: EvidenceTextJson;
+  observedAt: string;
+  stableDerivedId?: EvidenceIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "UnavailableHardwareFact".
+ */
+export interface UnavailableHardwareFactJson {
+  state: 'unavailable';
+  reasonCode: HardwareUnavailableReasonJson;
+  detail: EvidenceTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "IncompleteMeasurementSession".
+ */
+export interface IncompleteMeasurementSessionJson {
+  kind: 'measurement-session';
+  schemaVersion: EvidenceSchemaVersionJson;
+  sessionId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  status: 'incomplete';
+  startedAt: string;
+  execution: CollectorExecutionContextJson;
+  baseline: MeasurementBaselineJson;
+  /**
+   * @minItems 0
+   * @maxItems 256
+   */
+  chunks: MetricChunkJson[];
+  reason: EvidenceTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MeasurementBaseline".
+ */
+export interface MeasurementBaselineJson {
+  baselineId: EvidenceIdentifierJson;
+  inventoryEvidenceId: EvidenceIdentifierJson;
+  inventoryEvidenceHash: EvidenceHashJson;
+  capturedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "MetricChunk".
+ */
+export interface MetricChunkJson {
+  chunkId: EvidenceIdentifierJson;
+  sequence: number;
+  startedAt: string;
+  endedAt: string;
+  metric: MetricKindJson;
+  unit: MetricUnitJson;
+  /**
+   * @minItems 1
+   * @maxItems 4096
+   */
+  values: [number, ...number[]];
+  evidenceHash: EvidenceHashJson;
+  quality: EvidenceQualityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CompletedMeasurementSession".
+ */
+export interface CompletedMeasurementSessionJson {
+  kind: 'measurement-session';
+  schemaVersion: EvidenceSchemaVersionJson;
+  sessionId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  status: 'completed';
+  startedAt: string;
+  completedAt: string;
+  execution: CollectorExecutionContextJson;
+  baseline: MeasurementBaselineJson;
+  /**
+   * @minItems 1
+   * @maxItems 256
+   */
+  chunks: [MetricChunkJson, ...MetricChunkJson[]];
+  evidenceHash: EvidenceHashJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  limitations:
+    | [EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DegradedMeasurementSession".
+ */
+export interface DegradedMeasurementSessionJson {
+  kind: 'measurement-session';
+  schemaVersion: EvidenceSchemaVersionJson;
+  sessionId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  status: 'degraded';
+  startedAt: string;
+  completedAt: string;
+  execution: CollectorExecutionContextJson;
+  baseline: MeasurementBaselineJson;
+  /**
+   * @minItems 1
+   * @maxItems 256
+   */
+  chunks: [MetricChunkJson, ...MetricChunkJson[]];
+  evidenceHash: EvidenceHashJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  limitations:
+    | [EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ];
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  qualityIssues:
+    | [EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InvalidMeasurementSession".
+ */
+export interface InvalidMeasurementSessionJson {
+  kind: 'measurement-session';
+  schemaVersion: EvidenceSchemaVersionJson;
+  sessionId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  status: 'invalid';
+  startedAt: string;
+  invalidatedAt: string;
+  execution: CollectorExecutionContextJson;
+  baseline: MeasurementBaselineJson;
+  reason: EvidenceTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AcceptedComparison".
+ */
+export interface AcceptedComparisonJson {
+  kind: 'comparison';
+  schemaVersion: EvidenceSchemaVersionJson;
+  comparisonId: EvidenceIdentifierJson;
+  state: 'accepted';
+  beforeSessionId: EvidenceIdentifierJson;
+  afterSessionId: EvidenceIdentifierJson;
+  comparedAt: string;
+  acceptedResult: ComparisonProjectionJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ComparisonProjection".
+ */
+export interface ComparisonProjectionJson {
+  metric: MetricKindJson;
+  unit: MetricUnitJson;
+  before: number;
+  after: number;
+  delta: number;
+  quality: EvidenceQualityJson;
+  evidenceHash: EvidenceHashJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RejectedComparison".
+ */
+export interface RejectedComparisonJson {
+  kind: 'comparison';
+  schemaVersion: EvidenceSchemaVersionJson;
+  comparisonId: EvidenceIdentifierJson;
+  state: 'rejected';
+  beforeSessionId: EvidenceIdentifierJson;
+  afterSessionId: EvidenceIdentifierJson;
+  comparedAt: string;
+  /**
+   * @minItems 1
+   * @maxItems 8
+   */
+  blockers:
+    | [ComparisonBlockerCodeJson]
+    | [ComparisonBlockerCodeJson, ComparisonBlockerCodeJson]
+    | [ComparisonBlockerCodeJson, ComparisonBlockerCodeJson, ComparisonBlockerCodeJson]
+    | [ComparisonBlockerCodeJson, ComparisonBlockerCodeJson, ComparisonBlockerCodeJson, ComparisonBlockerCodeJson]
+    | [
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson
+      ]
+    | [
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson
+      ]
+    | [
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson
+      ]
+    | [
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson,
+        ComparisonBlockerCodeJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceReport".
+ */
+export interface EvidenceReportJson {
+  kind: 'evidence-report';
+  schemaVersion: EvidenceSchemaVersionJson;
+  reportId: EvidenceIdentifierJson;
+  evidenceVersion: number;
+  generatedAt: string;
+  /**
+   * @minItems 1
+   * @maxItems 128
+   */
+  evidenceIds: [EvidenceIdentifierJson, ...EvidenceIdentifierJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 128
+   */
+  evidenceHashes: [EvidenceHashJson, ...EvidenceHashJson[]];
+  provenance: EvidenceProvenanceJson;
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  limitations: [EvidenceTextJson, ...EvidenceTextJson[]];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceProvenance".
+ */
+export interface EvidenceProvenanceJson {
+  source: EvidenceTextJson;
+  collectedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ClaimAdmission".
+ */
+export interface ClaimAdmissionJson {
+  kind: 'claim-admission';
+  schemaVersion: EvidenceSchemaVersionJson;
+  claimId: EvidenceIdentifierJson;
+  claim: EvidenceTextJson;
+  state: ClaimAdmissionStateJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidenceIds: [EvidenceIdentifierJson, ...EvidenceIdentifierJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidenceHashes: [EvidenceHashJson, ...EvidenceHashJson[]];
+  provenance: EvidenceProvenanceJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  limitations:
+    | [EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson, EvidenceTextJson]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ]
+    | [
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson,
+        EvidenceTextJson
+      ];
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4232,5 +5259,6 @@ export interface AdminOperationCommandJson {
 }
 
 export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];
+export type HardwareEvidenceDocument = GeneratedContractRoots['hardwareEvidenceDocument'];
 export type WebDocument = GeneratedContractRoots['webDocument'];
 export type ControlPlaneDocument = GeneratedContractRoots['controlPlaneDocument'];

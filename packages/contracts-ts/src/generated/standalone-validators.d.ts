@@ -3,6 +3,7 @@ import type { ValidateFunction } from 'ajv';
 import type {
   ControlPlaneDocument,
   DiagnosticValueJson,
+  HardwareEvidenceDocument,
   HostToRendererShellEventJson,
   RendererToHostShellCommandJson,
   WebDocument,
@@ -10,6 +11,7 @@ import type {
 
 export const controlPlaneDocumentValidator: ValidateFunction<ControlPlaneDocument>;
 export const diagnosticValueValidator: ValidateFunction<DiagnosticValueJson>;
+export const hardwareEvidenceDocumentValidator: ValidateFunction<HardwareEvidenceDocument>;
 export const hostToRendererValidator: ValidateFunction<HostToRendererShellEventJson>;
 export const rendererToHostValidator: ValidateFunction<RendererToHostShellCommandJson>;
 export const webDocumentValidator: ValidateFunction<WebDocument>;

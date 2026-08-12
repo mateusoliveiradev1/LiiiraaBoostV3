@@ -28,6 +28,213 @@ pub mod error {
         }
     }
 }
+#[doc = "`AcceptedComparison`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AcceptedComparison.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"acceptedResult\","]
+#[doc = "    \"afterSessionId\","]
+#[doc = "    \"beforeSessionId\","]
+#[doc = "    \"comparedAt\","]
+#[doc = "    \"comparisonId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"acceptedResult\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ComparisonProjection\""]
+#[doc = "    },"]
+#[doc = "    \"afterSessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"beforeSessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"comparedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"comparisonId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"comparison\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"accepted\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AcceptedComparison {
+    #[serde(rename = "acceptedResult")]
+    pub accepted_result: ComparisonProjection,
+    #[serde(rename = "afterSessionId")]
+    pub after_session_id: EvidenceIdentifier,
+    #[serde(rename = "beforeSessionId")]
+    pub before_session_id: EvidenceIdentifier,
+    #[serde(rename = "comparedAt")]
+    pub compared_at: ::std::string::String,
+    #[serde(rename = "comparisonId")]
+    pub comparison_id: EvidenceIdentifier,
+    pub kind: AcceptedComparisonKind,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    pub state: AcceptedComparisonState,
+}
+#[doc = "`AcceptedComparisonKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"comparison\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AcceptedComparisonKind {
+    #[serde(rename = "comparison")]
+    Comparison,
+}
+impl ::std::fmt::Display for AcceptedComparisonKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Comparison => f.write_str("comparison"),
+        }
+    }
+}
+impl ::std::str::FromStr for AcceptedComparisonKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "comparison" => Ok(Self::Comparison),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AcceptedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AcceptedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AcceptedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AcceptedComparisonState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"accepted\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AcceptedComparisonState {
+    #[serde(rename = "accepted")]
+    Accepted,
+}
+impl ::std::fmt::Display for AcceptedComparisonState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Accepted => f.write_str("accepted"),
+        }
+    }
+}
+impl ::std::str::FromStr for AcceptedComparisonState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "accepted" => Ok(Self::Accepted),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AcceptedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AcceptedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AcceptedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AccountCommand`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -11060,6 +11267,90 @@ impl ::std::convert::TryFrom<::std::string::String> for AuthorityReceiptSchemaVe
         value.parse()
     }
 }
+#[doc = "`CancellationState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CancellationState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"not-requested\","]
+#[doc = "    \"requested\","]
+#[doc = "    \"acknowledged\","]
+#[doc = "    \"deadline-exceeded\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CancellationState {
+    #[serde(rename = "not-requested")]
+    NotRequested,
+    #[serde(rename = "requested")]
+    Requested,
+    #[serde(rename = "acknowledged")]
+    Acknowledged,
+    #[serde(rename = "deadline-exceeded")]
+    DeadlineExceeded,
+}
+impl ::std::fmt::Display for CancellationState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NotRequested => f.write_str("not-requested"),
+            Self::Requested => f.write_str("requested"),
+            Self::Acknowledged => f.write_str("acknowledged"),
+            Self::DeadlineExceeded => f.write_str("deadline-exceeded"),
+        }
+    }
+}
+impl ::std::str::FromStr for CancellationState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "not-requested" => Ok(Self::NotRequested),
+            "requested" => Ok(Self::Requested),
+            "acknowledged" => Ok(Self::Acknowledged),
+            "deadline-exceeded" => Ok(Self::DeadlineExceeded),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CancellationState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CancellationState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CancellationState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`CapabilityAvailability`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -11154,6 +11445,235 @@ impl ::std::convert::TryFrom<::std::string::String> for CapabilityAvailability {
         value.parse()
     }
 }
+#[doc = "`ClaimAdmission`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ClaimAdmission.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"claim\","]
+#[doc = "    \"claimId\","]
+#[doc = "    \"evidenceHashes\","]
+#[doc = "    \"evidenceIds\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"limitations\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"claim\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"claimId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHashes\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"evidenceIds\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"claim-admission\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"limitations\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ClaimAdmissionState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClaimAdmission {
+    pub claim: EvidenceText,
+    #[serde(rename = "claimId")]
+    pub claim_id: EvidenceIdentifier,
+    #[serde(rename = "evidenceHashes")]
+    pub evidence_hashes: ::std::vec::Vec<EvidenceHash>,
+    #[serde(rename = "evidenceIds")]
+    pub evidence_ids: ::std::vec::Vec<EvidenceIdentifier>,
+    pub kind: ClaimAdmissionKind,
+    pub limitations: ::std::vec::Vec<EvidenceText>,
+    pub provenance: EvidenceProvenance,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    pub state: ClaimAdmissionState,
+}
+#[doc = "`ClaimAdmissionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"claim-admission\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ClaimAdmissionKind {
+    #[serde(rename = "claim-admission")]
+    ClaimAdmission,
+}
+impl ::std::fmt::Display for ClaimAdmissionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ClaimAdmission => f.write_str("claim-admission"),
+        }
+    }
+}
+impl ::std::str::FromStr for ClaimAdmissionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "claim-admission" => Ok(Self::ClaimAdmission),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ClaimAdmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ClaimAdmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ClaimAdmissionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ClaimAdmissionState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ClaimAdmissionState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"admitted\","]
+#[doc = "    \"rejected\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ClaimAdmissionState {
+    #[serde(rename = "admitted")]
+    Admitted,
+    #[serde(rename = "rejected")]
+    Rejected,
+}
+impl ::std::fmt::Display for ClaimAdmissionState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Admitted => f.write_str("admitted"),
+            Self::Rejected => f.write_str("rejected"),
+        }
+    }
+}
+impl ::std::str::FromStr for ClaimAdmissionState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "admitted" => Ok(Self::Admitted),
+            "rejected" => Ok(Self::Rejected),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ClaimAdmissionState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ClaimAdmissionState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ClaimAdmissionState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ClaimEvidence`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -11206,6 +11726,220 @@ pub struct ClaimEvidence {
     pub unproven: bool,
     #[serde(rename = "validationState")]
     pub validation_state: ValidationState,
+}
+#[doc = "`CollectorExecutionContext`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CollectorExecutionContext.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"cancellationState\","]
+#[doc = "    \"deadlineAt\","]
+#[doc = "    \"health\","]
+#[doc = "    \"overhead\","]
+#[doc = "    \"sourceCapability\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"cancellationState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CancellationState\""]
+#[doc = "    },"]
+#[doc = "    \"deadlineAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"health\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorHealth\""]
+#[doc = "    },"]
+#[doc = "    \"overhead\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorOverhead\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCapability\": {"]
+#[doc = "      \"$ref\": \"#/definitions/SourceCapability\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CollectorExecutionContext {
+    #[serde(rename = "cancellationState")]
+    pub cancellation_state: CancellationState,
+    #[serde(rename = "deadlineAt")]
+    pub deadline_at: ::std::string::String,
+    pub health: CollectorHealth,
+    pub overhead: CollectorOverhead,
+    #[serde(rename = "sourceCapability")]
+    pub source_capability: SourceCapability,
+}
+#[doc = "`CollectorHealth`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CollectorHealth.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"checkedAt\","]
+#[doc = "    \"detail\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"checkedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"detail\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorHealthState\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CollectorHealth {
+    #[serde(rename = "checkedAt")]
+    pub checked_at: ::std::string::String,
+    pub detail: EvidenceText,
+    pub state: CollectorHealthState,
+}
+#[doc = "`CollectorHealthState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CollectorHealthState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"healthy\","]
+#[doc = "    \"degraded\","]
+#[doc = "    \"unavailable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CollectorHealthState {
+    #[serde(rename = "healthy")]
+    Healthy,
+    #[serde(rename = "degraded")]
+    Degraded,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for CollectorHealthState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Healthy => f.write_str("healthy"),
+            Self::Degraded => f.write_str("degraded"),
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for CollectorHealthState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "healthy" => Ok(Self::Healthy),
+            "degraded" => Ok(Self::Degraded),
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CollectorHealthState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CollectorHealthState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CollectorHealthState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CollectorOverhead`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CollectorOverhead.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"cpuTimeMs\","]
+#[doc = "    \"peakWorkingSetBytes\","]
+#[doc = "    \"quality\","]
+#[doc = "    \"sampleWindowMs\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"cpuTimeMs\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 60000.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"peakWorkingSetBytes\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"quality\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceQuality\""]
+#[doc = "    },"]
+#[doc = "    \"sampleWindowMs\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 60000.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CollectorOverhead {
+    #[serde(rename = "cpuTimeMs")]
+    pub cpu_time_ms: i64,
+    #[serde(rename = "peakWorkingSetBytes")]
+    pub peak_working_set_bytes: ::std::string::String,
+    pub quality: EvidenceQuality,
+    #[serde(rename = "sampleWindowMs")]
+    pub sample_window_ms: ::std::num::NonZeroU64,
 }
 #[doc = "`CommerceCommand`"]
 #[doc = r""]
@@ -11486,6 +12220,401 @@ impl ::std::convert::TryFrom<&::std::string::String> for CommerceCommandSchemaVe
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for CommerceCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ComparisonBlockerCode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ComparisonBlockerCode.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"hardware-drift\","]
+#[doc = "    \"workload-drift\","]
+#[doc = "    \"insufficient-samples\","]
+#[doc = "    \"invalid-before\","]
+#[doc = "    \"invalid-after\","]
+#[doc = "    \"incompatible-metric\","]
+#[doc = "    \"unsupported-quality\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ComparisonBlockerCode {
+    #[serde(rename = "hardware-drift")]
+    HardwareDrift,
+    #[serde(rename = "workload-drift")]
+    WorkloadDrift,
+    #[serde(rename = "insufficient-samples")]
+    InsufficientSamples,
+    #[serde(rename = "invalid-before")]
+    InvalidBefore,
+    #[serde(rename = "invalid-after")]
+    InvalidAfter,
+    #[serde(rename = "incompatible-metric")]
+    IncompatibleMetric,
+    #[serde(rename = "unsupported-quality")]
+    UnsupportedQuality,
+}
+impl ::std::fmt::Display for ComparisonBlockerCode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::HardwareDrift => f.write_str("hardware-drift"),
+            Self::WorkloadDrift => f.write_str("workload-drift"),
+            Self::InsufficientSamples => f.write_str("insufficient-samples"),
+            Self::InvalidBefore => f.write_str("invalid-before"),
+            Self::InvalidAfter => f.write_str("invalid-after"),
+            Self::IncompatibleMetric => f.write_str("incompatible-metric"),
+            Self::UnsupportedQuality => f.write_str("unsupported-quality"),
+        }
+    }
+}
+impl ::std::str::FromStr for ComparisonBlockerCode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "hardware-drift" => Ok(Self::HardwareDrift),
+            "workload-drift" => Ok(Self::WorkloadDrift),
+            "insufficient-samples" => Ok(Self::InsufficientSamples),
+            "invalid-before" => Ok(Self::InvalidBefore),
+            "invalid-after" => Ok(Self::InvalidAfter),
+            "incompatible-metric" => Ok(Self::IncompatibleMetric),
+            "unsupported-quality" => Ok(Self::UnsupportedQuality),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ComparisonBlockerCode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ComparisonBlockerCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ComparisonBlockerCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ComparisonProjection`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ComparisonProjection.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"after\","]
+#[doc = "    \"before\","]
+#[doc = "    \"delta\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"metric\","]
+#[doc = "    \"quality\","]
+#[doc = "    \"unit\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"after\": {"]
+#[doc = "      \"type\": \"number\""]
+#[doc = "    },"]
+#[doc = "    \"before\": {"]
+#[doc = "      \"type\": \"number\""]
+#[doc = "    },"]
+#[doc = "    \"delta\": {"]
+#[doc = "      \"type\": \"number\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"metric\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MetricKind\""]
+#[doc = "    },"]
+#[doc = "    \"quality\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceQuality\""]
+#[doc = "    },"]
+#[doc = "    \"unit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MetricUnit\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ComparisonProjection {
+    pub after: f64,
+    pub before: f64,
+    pub delta: f64,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    pub metric: MetricKind,
+    pub quality: EvidenceQuality,
+    pub unit: MetricUnit,
+}
+#[doc = "`CompletedMeasurementSession`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CompletedMeasurementSession.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"baseline\","]
+#[doc = "    \"chunks\","]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"execution\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"limitations\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionId\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"status\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"baseline\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MeasurementBaseline\""]
+#[doc = "    },"]
+#[doc = "    \"chunks\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/MetricChunk\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 256,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"execution\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorExecutionContext\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"measurement-session\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"limitations\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"completed\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CompletedMeasurementSession {
+    pub baseline: MeasurementBaseline,
+    pub chunks: ::std::vec::Vec<MetricChunk>,
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    pub execution: CollectorExecutionContext,
+    pub kind: CompletedMeasurementSessionKind,
+    pub limitations: ::std::vec::Vec<EvidenceText>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    #[serde(rename = "sessionId")]
+    pub session_id: EvidenceIdentifier,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    pub status: CompletedMeasurementSessionStatus,
+}
+#[doc = "`CompletedMeasurementSessionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"measurement-session\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CompletedMeasurementSessionKind {
+    #[serde(rename = "measurement-session")]
+    MeasurementSession,
+}
+impl ::std::fmt::Display for CompletedMeasurementSessionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::MeasurementSession => f.write_str("measurement-session"),
+        }
+    }
+}
+impl ::std::str::FromStr for CompletedMeasurementSessionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "measurement-session" => Ok(Self::MeasurementSession),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CompletedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CompletedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CompletedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CompletedMeasurementSessionStatus`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"completed\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CompletedMeasurementSessionStatus {
+    #[serde(rename = "completed")]
+    Completed,
+}
+impl ::std::fmt::Display for CompletedMeasurementSessionStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Completed => f.write_str("completed"),
+        }
+    }
+}
+impl ::std::str::FromStr for CompletedMeasurementSessionStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "completed" => Ok(Self::Completed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CompletedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CompletedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CompletedMeasurementSessionStatus {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -12751,6 +13880,256 @@ impl<'de> ::serde::Deserialize<'de> for CurrencyCode {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`DegradedMeasurementSession`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DegradedMeasurementSession.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"baseline\","]
+#[doc = "    \"chunks\","]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"execution\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"limitations\","]
+#[doc = "    \"qualityIssues\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionId\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"status\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"baseline\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MeasurementBaseline\""]
+#[doc = "    },"]
+#[doc = "    \"chunks\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/MetricChunk\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 256,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"execution\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorExecutionContext\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"measurement-session\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"limitations\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"qualityIssues\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"degraded\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DegradedMeasurementSession {
+    pub baseline: MeasurementBaseline,
+    pub chunks: ::std::vec::Vec<MetricChunk>,
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    pub execution: CollectorExecutionContext,
+    pub kind: DegradedMeasurementSessionKind,
+    pub limitations: ::std::vec::Vec<EvidenceText>,
+    #[serde(rename = "qualityIssues")]
+    pub quality_issues: ::std::vec::Vec<EvidenceText>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    #[serde(rename = "sessionId")]
+    pub session_id: EvidenceIdentifier,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    pub status: DegradedMeasurementSessionStatus,
+}
+#[doc = "`DegradedMeasurementSessionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"measurement-session\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DegradedMeasurementSessionKind {
+    #[serde(rename = "measurement-session")]
+    MeasurementSession,
+}
+impl ::std::fmt::Display for DegradedMeasurementSessionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::MeasurementSession => f.write_str("measurement-session"),
+        }
+    }
+}
+impl ::std::str::FromStr for DegradedMeasurementSessionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "measurement-session" => Ok(Self::MeasurementSession),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DegradedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DegradedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DegradedMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DegradedMeasurementSessionStatus`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"degraded\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DegradedMeasurementSessionStatus {
+    #[serde(rename = "degraded")]
+    Degraded,
+}
+impl ::std::fmt::Display for DegradedMeasurementSessionStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Degraded => f.write_str("degraded"),
+        }
+    }
+}
+impl ::std::str::FromStr for DegradedMeasurementSessionStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "degraded" => Ok(Self::Degraded),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DegradedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DegradedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DegradedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`DetachedSignature`"]
@@ -14486,6 +15865,607 @@ impl ::std::convert::From<UnavailableDiagnosticValue> for DiagnosticValue {
         Self::UnavailableDiagnosticValue(value)
     }
 }
+#[doc = "`EvidenceComparison`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceComparison.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AcceptedComparison\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RejectedComparison\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum EvidenceComparison {
+    AcceptedComparison(AcceptedComparison),
+    RejectedComparison(RejectedComparison),
+}
+impl ::std::convert::From<AcceptedComparison> for EvidenceComparison {
+    fn from(value: AcceptedComparison) -> Self {
+        Self::AcceptedComparison(value)
+    }
+}
+impl ::std::convert::From<RejectedComparison> for EvidenceComparison {
+    fn from(value: RejectedComparison) -> Self {
+        Self::RejectedComparison(value)
+    }
+}
+#[doc = "`EvidenceHash`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceHash.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 71,"]
+#[doc = "  \"minLength\": 71,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct EvidenceHash(::std::string::String);
+impl ::std::ops::Deref for EvidenceHash {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<EvidenceHash> for ::std::string::String {
+    fn from(value: EvidenceHash) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for EvidenceHash {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 71usize {
+            return Err("longer than 71 characters".into());
+        }
+        if value.chars().count() < 71usize {
+            return Err("shorter than 71 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceHash {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceHash {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceHash {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for EvidenceHash {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`EvidenceIdentifier`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceIdentifier.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct EvidenceIdentifier(::std::string::String);
+impl ::std::ops::Deref for EvidenceIdentifier {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<EvidenceIdentifier> for ::std::string::String {
+    fn from(value: EvidenceIdentifier) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for EvidenceIdentifier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for EvidenceIdentifier {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`EvidenceProvenance`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceProvenance.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"collectedAt\","]
+#[doc = "    \"source\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"collectedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"source\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceProvenance {
+    #[serde(rename = "collectedAt")]
+    pub collected_at: ::std::string::String,
+    pub source: EvidenceText,
+}
+#[doc = "`EvidenceQuality`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceQuality.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"valid\","]
+#[doc = "    \"degraded\","]
+#[doc = "    \"insufficient\","]
+#[doc = "    \"invalid\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum EvidenceQuality {
+    #[serde(rename = "valid")]
+    Valid,
+    #[serde(rename = "degraded")]
+    Degraded,
+    #[serde(rename = "insufficient")]
+    Insufficient,
+    #[serde(rename = "invalid")]
+    Invalid,
+}
+impl ::std::fmt::Display for EvidenceQuality {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Valid => f.write_str("valid"),
+            Self::Degraded => f.write_str("degraded"),
+            Self::Insufficient => f.write_str("insufficient"),
+            Self::Invalid => f.write_str("invalid"),
+        }
+    }
+}
+impl ::std::str::FromStr for EvidenceQuality {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "valid" => Ok(Self::Valid),
+            "degraded" => Ok(Self::Degraded),
+            "insufficient" => Ok(Self::Insufficient),
+            "invalid" => Ok(Self::Invalid),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceQuality {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceQuality {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceQuality {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`EvidenceReport`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceReport.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"evidenceHashes\","]
+#[doc = "    \"evidenceIds\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"generatedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"limitations\","]
+#[doc = "    \"provenance\","]
+#[doc = "    \"reportId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"evidenceHashes\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 128,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"evidenceIds\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 128,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"generatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"evidence-report\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"limitations\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"provenance\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceProvenance\""]
+#[doc = "    },"]
+#[doc = "    \"reportId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceReport {
+    #[serde(rename = "evidenceHashes")]
+    pub evidence_hashes: ::std::vec::Vec<EvidenceHash>,
+    #[serde(rename = "evidenceIds")]
+    pub evidence_ids: ::std::vec::Vec<EvidenceIdentifier>,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    #[serde(rename = "generatedAt")]
+    pub generated_at: ::std::string::String,
+    pub kind: EvidenceReportKind,
+    pub limitations: ::std::vec::Vec<EvidenceText>,
+    pub provenance: EvidenceProvenance,
+    #[serde(rename = "reportId")]
+    pub report_id: EvidenceIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+}
+#[doc = "`EvidenceReportKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"evidence-report\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum EvidenceReportKind {
+    #[serde(rename = "evidence-report")]
+    EvidenceReport,
+}
+impl ::std::fmt::Display for EvidenceReportKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EvidenceReport => f.write_str("evidence-report"),
+        }
+    }
+}
+impl ::std::str::FromStr for EvidenceReportKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "evidence-report" => Ok(Self::EvidenceReport),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceReportKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceReportKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceReportKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`EvidenceSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceSchemaVersion.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum EvidenceSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for EvidenceSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for EvidenceSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`EvidenceText`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceText.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct EvidenceText(::std::string::String);
+impl ::std::ops::Deref for EvidenceText {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<EvidenceText> for ::std::string::String {
+    fn from(value: EvidenceText) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for EvidenceText {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for EvidenceText {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EvidenceText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EvidenceText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for EvidenceText {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "`FixtureDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -14710,6 +16690,207 @@ impl ::std::convert::TryFrom<::std::string::String> for FutureAuthorityCommandPh
         value.parse()
     }
 }
+#[doc = "`HardwareEvidenceDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"HardwareEvidenceDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/InventorySnapshot\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/MeasurementSession\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceComparison\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceReport\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ClaimAdmission\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum HardwareEvidenceDocument {
+    InventorySnapshot(InventorySnapshot),
+    MeasurementSession(MeasurementSession),
+    EvidenceComparison(EvidenceComparison),
+    EvidenceReport(EvidenceReport),
+    ClaimAdmission(ClaimAdmission),
+}
+impl ::std::convert::From<InventorySnapshot> for HardwareEvidenceDocument {
+    fn from(value: InventorySnapshot) -> Self {
+        Self::InventorySnapshot(value)
+    }
+}
+impl ::std::convert::From<MeasurementSession> for HardwareEvidenceDocument {
+    fn from(value: MeasurementSession) -> Self {
+        Self::MeasurementSession(value)
+    }
+}
+impl ::std::convert::From<EvidenceComparison> for HardwareEvidenceDocument {
+    fn from(value: EvidenceComparison) -> Self {
+        Self::EvidenceComparison(value)
+    }
+}
+impl ::std::convert::From<EvidenceReport> for HardwareEvidenceDocument {
+    fn from(value: EvidenceReport) -> Self {
+        Self::EvidenceReport(value)
+    }
+}
+impl ::std::convert::From<ClaimAdmission> for HardwareEvidenceDocument {
+    fn from(value: ClaimAdmission) -> Self {
+        Self::ClaimAdmission(value)
+    }
+}
+#[doc = "`HardwareFact`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"HardwareFact.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ObservedHardwareFact\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/UnavailableHardwareFact\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum HardwareFact {
+    ObservedHardwareFact(ObservedHardwareFact),
+    UnavailableHardwareFact(UnavailableHardwareFact),
+}
+impl ::std::convert::From<ObservedHardwareFact> for HardwareFact {
+    fn from(value: ObservedHardwareFact) -> Self {
+        Self::ObservedHardwareFact(value)
+    }
+}
+impl ::std::convert::From<UnavailableHardwareFact> for HardwareFact {
+    fn from(value: UnavailableHardwareFact) -> Self {
+        Self::UnavailableHardwareFact(value)
+    }
+}
+#[doc = "`HardwareUnavailableReason`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"HardwareUnavailableReason.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"not-reported\","]
+#[doc = "    \"not-present\","]
+#[doc = "    \"permission-denied\","]
+#[doc = "    \"unsupported\","]
+#[doc = "    \"timed-out\","]
+#[doc = "    \"cancelled\","]
+#[doc = "    \"not-discovered\","]
+#[doc = "    \"collector-unavailable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum HardwareUnavailableReason {
+    #[serde(rename = "not-reported")]
+    NotReported,
+    #[serde(rename = "not-present")]
+    NotPresent,
+    #[serde(rename = "permission-denied")]
+    PermissionDenied,
+    #[serde(rename = "unsupported")]
+    Unsupported,
+    #[serde(rename = "timed-out")]
+    TimedOut,
+    #[serde(rename = "cancelled")]
+    Cancelled,
+    #[serde(rename = "not-discovered")]
+    NotDiscovered,
+    #[serde(rename = "collector-unavailable")]
+    CollectorUnavailable,
+}
+impl ::std::fmt::Display for HardwareUnavailableReason {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NotReported => f.write_str("not-reported"),
+            Self::NotPresent => f.write_str("not-present"),
+            Self::PermissionDenied => f.write_str("permission-denied"),
+            Self::Unsupported => f.write_str("unsupported"),
+            Self::TimedOut => f.write_str("timed-out"),
+            Self::Cancelled => f.write_str("cancelled"),
+            Self::NotDiscovered => f.write_str("not-discovered"),
+            Self::CollectorUnavailable => f.write_str("collector-unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for HardwareUnavailableReason {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "not-reported" => Ok(Self::NotReported),
+            "not-present" => Ok(Self::NotPresent),
+            "permission-denied" => Ok(Self::PermissionDenied),
+            "unsupported" => Ok(Self::Unsupported),
+            "timed-out" => Ok(Self::TimedOut),
+            "cancelled" => Ok(Self::Cancelled),
+            "not-discovered" => Ok(Self::NotDiscovered),
+            "collector-unavailable" => Ok(Self::CollectorUnavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for HardwareUnavailableReason {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for HardwareUnavailableReason {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for HardwareUnavailableReason {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`HostToRendererShellEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -14797,6 +16978,228 @@ impl ::std::convert::From<ShellNotificationPreferenceChangedEvent> for HostToRen
 impl ::std::convert::From<ShellWindowStateChangedEvent> for HostToRendererShellEvent {
     fn from(value: ShellWindowStateChangedEvent) -> Self {
         Self::WindowStateChangedEvent(value)
+    }
+}
+#[doc = "`IncompleteMeasurementSession`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"IncompleteMeasurementSession.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"baseline\","]
+#[doc = "    \"chunks\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"execution\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionId\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"status\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"baseline\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MeasurementBaseline\""]
+#[doc = "    },"]
+#[doc = "    \"chunks\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/MetricChunk\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 256,"]
+#[doc = "      \"minItems\": 0"]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"execution\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorExecutionContext\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"measurement-session\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"incomplete\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct IncompleteMeasurementSession {
+    pub baseline: MeasurementBaseline,
+    pub chunks: ::std::vec::Vec<MetricChunk>,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    pub execution: CollectorExecutionContext,
+    pub kind: IncompleteMeasurementSessionKind,
+    pub reason: EvidenceText,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    #[serde(rename = "sessionId")]
+    pub session_id: EvidenceIdentifier,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    pub status: IncompleteMeasurementSessionStatus,
+}
+#[doc = "`IncompleteMeasurementSessionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"measurement-session\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum IncompleteMeasurementSessionKind {
+    #[serde(rename = "measurement-session")]
+    MeasurementSession,
+}
+impl ::std::fmt::Display for IncompleteMeasurementSessionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::MeasurementSession => f.write_str("measurement-session"),
+        }
+    }
+}
+impl ::std::str::FromStr for IncompleteMeasurementSessionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "measurement-session" => Ok(Self::MeasurementSession),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for IncompleteMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for IncompleteMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for IncompleteMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`IncompleteMeasurementSessionStatus`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"incomplete\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum IncompleteMeasurementSessionStatus {
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+impl ::std::fmt::Display for IncompleteMeasurementSessionStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Incomplete => f.write_str("incomplete"),
+        }
+    }
+}
+impl ::std::str::FromStr for IncompleteMeasurementSessionStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "incomplete" => Ok(Self::Incomplete),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for IncompleteMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for IncompleteMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for IncompleteMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`IndexingPolicy`"]
@@ -15492,6 +17895,417 @@ impl<'de> ::serde::Deserialize<'de> for InspectionId {
             })
     }
 }
+#[doc = "`InvalidMeasurementSession`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InvalidMeasurementSession.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"baseline\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"execution\","]
+#[doc = "    \"invalidatedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sessionId\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"status\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"baseline\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MeasurementBaseline\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"execution\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorExecutionContext\""]
+#[doc = "    },"]
+#[doc = "    \"invalidatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"measurement-session\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"invalid\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InvalidMeasurementSession {
+    pub baseline: MeasurementBaseline,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    pub execution: CollectorExecutionContext,
+    #[serde(rename = "invalidatedAt")]
+    pub invalidated_at: ::std::string::String,
+    pub kind: InvalidMeasurementSessionKind,
+    pub reason: EvidenceText,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    #[serde(rename = "sessionId")]
+    pub session_id: EvidenceIdentifier,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    pub status: InvalidMeasurementSessionStatus,
+}
+#[doc = "`InvalidMeasurementSessionKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"measurement-session\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InvalidMeasurementSessionKind {
+    #[serde(rename = "measurement-session")]
+    MeasurementSession,
+}
+impl ::std::fmt::Display for InvalidMeasurementSessionKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::MeasurementSession => f.write_str("measurement-session"),
+        }
+    }
+}
+impl ::std::str::FromStr for InvalidMeasurementSessionKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "measurement-session" => Ok(Self::MeasurementSession),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InvalidMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InvalidMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InvalidMeasurementSessionKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InvalidMeasurementSessionStatus`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"invalid\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InvalidMeasurementSessionStatus {
+    #[serde(rename = "invalid")]
+    Invalid,
+}
+impl ::std::fmt::Display for InvalidMeasurementSessionStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Invalid => f.write_str("invalid"),
+        }
+    }
+}
+impl ::std::str::FromStr for InvalidMeasurementSessionStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "invalid" => Ok(Self::Invalid),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InvalidMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InvalidMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InvalidMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InventorySnapshot`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InventorySnapshot.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audio\","]
+#[doc = "    \"collectedAt\","]
+#[doc = "    \"cpu\","]
+#[doc = "    \"display\","]
+#[doc = "    \"drivers\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"evidenceId\","]
+#[doc = "    \"evidenceVersion\","]
+#[doc = "    \"execution\","]
+#[doc = "    \"games\","]
+#[doc = "    \"gpu\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"memory\","]
+#[doc = "    \"network\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"security\","]
+#[doc = "    \"storage\","]
+#[doc = "    \"usb\","]
+#[doc = "    \"windows\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audio\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"collectedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"cpu\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"display\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"drivers\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceVersion\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"execution\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CollectorExecutionContext\""]
+#[doc = "    },"]
+#[doc = "    \"games\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"gpu\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"inventory-snapshot\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"memory\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"network\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"security\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"storage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"usb\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    },"]
+#[doc = "    \"windows\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareFact\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InventorySnapshot {
+    pub audio: HardwareFact,
+    #[serde(rename = "collectedAt")]
+    pub collected_at: ::std::string::String,
+    pub cpu: HardwareFact,
+    pub display: HardwareFact,
+    pub drivers: HardwareFact,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    #[serde(rename = "evidenceId")]
+    pub evidence_id: EvidenceIdentifier,
+    #[serde(rename = "evidenceVersion")]
+    pub evidence_version: ::std::num::NonZeroU64,
+    pub execution: CollectorExecutionContext,
+    pub games: HardwareFact,
+    pub gpu: HardwareFact,
+    pub kind: InventorySnapshotKind,
+    pub memory: HardwareFact,
+    pub network: HardwareFact,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    pub security: HardwareFact,
+    pub storage: HardwareFact,
+    pub usb: HardwareFact,
+    pub windows: HardwareFact,
+}
+#[doc = "`InventorySnapshotKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"inventory-snapshot\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InventorySnapshotKind {
+    #[serde(rename = "inventory-snapshot")]
+    InventorySnapshot,
+}
+impl ::std::fmt::Display for InventorySnapshotKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InventorySnapshot => f.write_str("inventory-snapshot"),
+        }
+    }
+}
+impl ::std::str::FromStr for InventorySnapshotKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "inventory-snapshot" => Ok(Self::InventorySnapshot),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InventorySnapshotKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InventorySnapshotKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InventorySnapshotKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`InvoiceProjection`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -16111,6 +18925,354 @@ impl ::std::convert::TryFrom<::std::string::String> for MeasuredDiagnosticValueQ
         value.parse()
     }
 }
+#[doc = "`MeasurementBaseline`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MeasurementBaseline.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"baselineId\","]
+#[doc = "    \"capturedAt\","]
+#[doc = "    \"inventoryEvidenceHash\","]
+#[doc = "    \"inventoryEvidenceId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"baselineId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"capturedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"inventoryEvidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"inventoryEvidenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct MeasurementBaseline {
+    #[serde(rename = "baselineId")]
+    pub baseline_id: EvidenceIdentifier,
+    #[serde(rename = "capturedAt")]
+    pub captured_at: ::std::string::String,
+    #[serde(rename = "inventoryEvidenceHash")]
+    pub inventory_evidence_hash: EvidenceHash,
+    #[serde(rename = "inventoryEvidenceId")]
+    pub inventory_evidence_id: EvidenceIdentifier,
+}
+#[doc = "`MeasurementSession`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MeasurementSession.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/IncompleteMeasurementSession\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/CompletedMeasurementSession\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DegradedMeasurementSession\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/InvalidMeasurementSession\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum MeasurementSession {
+    IncompleteMeasurementSession(IncompleteMeasurementSession),
+    CompletedMeasurementSession(CompletedMeasurementSession),
+    DegradedMeasurementSession(DegradedMeasurementSession),
+    InvalidMeasurementSession(InvalidMeasurementSession),
+}
+impl ::std::convert::From<IncompleteMeasurementSession> for MeasurementSession {
+    fn from(value: IncompleteMeasurementSession) -> Self {
+        Self::IncompleteMeasurementSession(value)
+    }
+}
+impl ::std::convert::From<CompletedMeasurementSession> for MeasurementSession {
+    fn from(value: CompletedMeasurementSession) -> Self {
+        Self::CompletedMeasurementSession(value)
+    }
+}
+impl ::std::convert::From<DegradedMeasurementSession> for MeasurementSession {
+    fn from(value: DegradedMeasurementSession) -> Self {
+        Self::DegradedMeasurementSession(value)
+    }
+}
+impl ::std::convert::From<InvalidMeasurementSession> for MeasurementSession {
+    fn from(value: InvalidMeasurementSession) -> Self {
+        Self::InvalidMeasurementSession(value)
+    }
+}
+#[doc = "`MetricChunk`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MetricChunk.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"chunkId\","]
+#[doc = "    \"endedAt\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"metric\","]
+#[doc = "    \"quality\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"unit\","]
+#[doc = "    \"values\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"chunkId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"endedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"metric\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MetricKind\""]
+#[doc = "    },"]
+#[doc = "    \"quality\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceQuality\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"unit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/MetricUnit\""]
+#[doc = "    },"]
+#[doc = "    \"values\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"type\": \"number\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 4096,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct MetricChunk {
+    #[serde(rename = "chunkId")]
+    pub chunk_id: EvidenceIdentifier,
+    #[serde(rename = "endedAt")]
+    pub ended_at: ::std::string::String,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    pub metric: MetricKind,
+    pub quality: EvidenceQuality,
+    pub sequence: u32,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    pub unit: MetricUnit,
+    pub values: ::std::vec::Vec<f64>,
+}
+#[doc = "`MetricKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MetricKind.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"frame-time-ms\","]
+#[doc = "    \"cpu-utilization-percent\","]
+#[doc = "    \"gpu-utilization-percent\","]
+#[doc = "    \"memory-working-set-bytes\","]
+#[doc = "    \"disk-latency-ms\","]
+#[doc = "    \"network-latency-ms\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum MetricKind {
+    #[serde(rename = "frame-time-ms")]
+    FrameTimeMs,
+    #[serde(rename = "cpu-utilization-percent")]
+    CpuUtilizationPercent,
+    #[serde(rename = "gpu-utilization-percent")]
+    GpuUtilizationPercent,
+    #[serde(rename = "memory-working-set-bytes")]
+    MemoryWorkingSetBytes,
+    #[serde(rename = "disk-latency-ms")]
+    DiskLatencyMs,
+    #[serde(rename = "network-latency-ms")]
+    NetworkLatencyMs,
+}
+impl ::std::fmt::Display for MetricKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FrameTimeMs => f.write_str("frame-time-ms"),
+            Self::CpuUtilizationPercent => f.write_str("cpu-utilization-percent"),
+            Self::GpuUtilizationPercent => f.write_str("gpu-utilization-percent"),
+            Self::MemoryWorkingSetBytes => f.write_str("memory-working-set-bytes"),
+            Self::DiskLatencyMs => f.write_str("disk-latency-ms"),
+            Self::NetworkLatencyMs => f.write_str("network-latency-ms"),
+        }
+    }
+}
+impl ::std::str::FromStr for MetricKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "frame-time-ms" => Ok(Self::FrameTimeMs),
+            "cpu-utilization-percent" => Ok(Self::CpuUtilizationPercent),
+            "gpu-utilization-percent" => Ok(Self::GpuUtilizationPercent),
+            "memory-working-set-bytes" => Ok(Self::MemoryWorkingSetBytes),
+            "disk-latency-ms" => Ok(Self::DiskLatencyMs),
+            "network-latency-ms" => Ok(Self::NetworkLatencyMs),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for MetricKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for MetricKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for MetricKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`MetricUnit`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"MetricUnit.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"milliseconds\","]
+#[doc = "    \"percent\","]
+#[doc = "    \"bytes\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum MetricUnit {
+    #[serde(rename = "milliseconds")]
+    Milliseconds,
+    #[serde(rename = "percent")]
+    Percent,
+    #[serde(rename = "bytes")]
+    Bytes,
+}
+impl ::std::fmt::Display for MetricUnit {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Milliseconds => f.write_str("milliseconds"),
+            Self::Percent => f.write_str("percent"),
+            Self::Bytes => f.write_str("bytes"),
+        }
+    }
+}
+impl ::std::str::FromStr for MetricUnit {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "milliseconds" => Ok(Self::Milliseconds),
+            "percent" => Ok(Self::Percent),
+            "bytes" => Ok(Self::Bytes),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for MetricUnit {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for MetricUnit {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for MetricUnit {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ModeledDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -16545,6 +19707,127 @@ impl ::std::convert::TryFrom<&::std::string::String> for ObservedDiagnosticValue
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ObservedDiagnosticValueKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ObservedHardwareFact`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ObservedHardwareFact.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"observedAt\","]
+#[doc = "    \"source\","]
+#[doc = "    \"state\","]
+#[doc = "    \"value\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"observedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"source\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"stableDerivedId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"observed\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"value\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ObservedHardwareFact {
+    #[serde(rename = "observedAt")]
+    pub observed_at: ::std::string::String,
+    pub source: EvidenceText,
+    #[serde(
+        rename = "stableDerivedId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub stable_derived_id: ::std::option::Option<EvidenceIdentifier>,
+    pub state: ObservedHardwareFactState,
+    pub value: EvidenceText,
+}
+#[doc = "`ObservedHardwareFactState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observed\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ObservedHardwareFactState {
+    #[serde(rename = "observed")]
+    Observed,
+}
+impl ::std::fmt::Display for ObservedHardwareFactState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Observed => f.write_str("observed"),
+        }
+    }
+}
+impl ::std::str::FromStr for ObservedHardwareFactState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observed" => Ok(Self::Observed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ObservedHardwareFactState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ObservedHardwareFactState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ObservedHardwareFactState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -17650,6 +20933,217 @@ impl<'de> ::serde::Deserialize<'de> for RedactedAuthorityText {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`RejectedComparison`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RejectedComparison.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"afterSessionId\","]
+#[doc = "    \"beforeSessionId\","]
+#[doc = "    \"blockers\","]
+#[doc = "    \"comparedAt\","]
+#[doc = "    \"comparisonId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"afterSessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"beforeSessionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"blockers\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/ComparisonBlockerCode\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 8,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"comparedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"comparisonId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"comparison\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"rejected\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RejectedComparison {
+    #[serde(rename = "afterSessionId")]
+    pub after_session_id: EvidenceIdentifier,
+    #[serde(rename = "beforeSessionId")]
+    pub before_session_id: EvidenceIdentifier,
+    pub blockers: ::std::vec::Vec<ComparisonBlockerCode>,
+    #[serde(rename = "comparedAt")]
+    pub compared_at: ::std::string::String,
+    #[serde(rename = "comparisonId")]
+    pub comparison_id: EvidenceIdentifier,
+    pub kind: RejectedComparisonKind,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: EvidenceSchemaVersion,
+    pub state: RejectedComparisonState,
+}
+#[doc = "`RejectedComparisonKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"comparison\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RejectedComparisonKind {
+    #[serde(rename = "comparison")]
+    Comparison,
+}
+impl ::std::fmt::Display for RejectedComparisonKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Comparison => f.write_str("comparison"),
+        }
+    }
+}
+impl ::std::str::FromStr for RejectedComparisonKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "comparison" => Ok(Self::Comparison),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RejectedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RejectedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RejectedComparisonKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RejectedComparisonState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"rejected\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RejectedComparisonState {
+    #[serde(rename = "rejected")]
+    Rejected,
+}
+impl ::std::fmt::Display for RejectedComparisonState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Rejected => f.write_str("rejected"),
+        }
+    }
+}
+impl ::std::str::FromStr for RejectedComparisonState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "rejected" => Ok(Self::Rejected),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RejectedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RejectedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RejectedComparisonState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`ReleaseArtifactEvidence`"]
@@ -26518,6 +30012,95 @@ impl ::std::convert::TryFrom<::std::string::String> for SignatureState {
         value.parse()
     }
 }
+#[doc = "`SourceCapability`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SourceCapability.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"native-readonly\","]
+#[doc = "    \"native-performance-counter\","]
+#[doc = "    \"windows-management\","]
+#[doc = "    \"direct-storage-query\","]
+#[doc = "    \"derived-local-evidence\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SourceCapability {
+    #[serde(rename = "native-readonly")]
+    NativeReadonly,
+    #[serde(rename = "native-performance-counter")]
+    NativePerformanceCounter,
+    #[serde(rename = "windows-management")]
+    WindowsManagement,
+    #[serde(rename = "direct-storage-query")]
+    DirectStorageQuery,
+    #[serde(rename = "derived-local-evidence")]
+    DerivedLocalEvidence,
+}
+impl ::std::fmt::Display for SourceCapability {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NativeReadonly => f.write_str("native-readonly"),
+            Self::NativePerformanceCounter => f.write_str("native-performance-counter"),
+            Self::WindowsManagement => f.write_str("windows-management"),
+            Self::DirectStorageQuery => f.write_str("direct-storage-query"),
+            Self::DerivedLocalEvidence => f.write_str("derived-local-evidence"),
+        }
+    }
+}
+impl ::std::str::FromStr for SourceCapability {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "native-readonly" => Ok(Self::NativeReadonly),
+            "native-performance-counter" => Ok(Self::NativePerformanceCounter),
+            "windows-management" => Ok(Self::WindowsManagement),
+            "direct-storage-query" => Ok(Self::DirectStorageQuery),
+            "derived-local-evidence" => Ok(Self::DerivedLocalEvidence),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SourceCapability {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SourceCapability {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SourceCapability {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`SubscriptionPlan`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -27646,6 +31229,113 @@ impl ::std::convert::TryFrom<&::std::string::String> for UnavailableDiagnosticVa
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for UnavailableDiagnosticValueKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`UnavailableHardwareFact`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"UnavailableHardwareFact.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"detail\","]
+#[doc = "    \"reasonCode\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"detail\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceText\""]
+#[doc = "    },"]
+#[doc = "    \"reasonCode\": {"]
+#[doc = "      \"$ref\": \"#/definitions/HardwareUnavailableReason\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unavailable\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct UnavailableHardwareFact {
+    pub detail: EvidenceText,
+    #[serde(rename = "reasonCode")]
+    pub reason_code: HardwareUnavailableReason,
+    pub state: UnavailableHardwareFactState,
+}
+#[doc = "`UnavailableHardwareFactState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unavailable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum UnavailableHardwareFactState {
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for UnavailableHardwareFactState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for UnavailableHardwareFactState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for UnavailableHardwareFactState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for UnavailableHardwareFactState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for UnavailableHardwareFactState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

@@ -9,6 +9,7 @@ const root = process.env.LIIIRAA_GENERATION_STAGING_ROOT ?? repositoryRoot;
 const read = (name) =>
   JSON.parse(fs.readFileSync(path.join(root, 'contracts/generated/desktop/v1', name), 'utf8'));
 const diagnostic = read('diagnostic-value.schema.json');
+const hardwareEvidence = read('hardware-evidence.schema.json');
 const shell = read('shell-message.schema.json');
 const controlPlane = JSON.parse(
   fs.readFileSync(
@@ -29,6 +30,7 @@ const ajv = new Ajv2020({
 ajv.addKeyword('x-liiiraa-generated');
 const definitions = [
   ...Object.values(diagnostic.$defs),
+  ...Object.values(hardwareEvidence.$defs),
   ...Object.values(shell.$defs),
   ...Object.values(controlPlane.$defs),
   ...Object.values(web.$defs),
@@ -76,6 +78,7 @@ while (pendingDefinitions.length > 0) {
 }
 ajv.addSchema(web);
 ajv.addSchema(controlPlane);
+ajv.addSchema(hardwareEvidence);
 const controlPlaneValidator = ajv.getSchema(controlPlane.$id);
 if (controlPlaneValidator === undefined) {
   throw new Error('Generated control-plane validator is unavailable.');
@@ -141,6 +144,7 @@ for (const invalid of [
 const generatedCode = standaloneCode(ajv, {
   controlPlaneDocumentValidator: controlPlane.$id,
   diagnosticValueValidator: 'DiagnosticValue.json',
+  hardwareEvidenceDocumentValidator: hardwareEvidence.$id,
   hostToRendererValidator: 'HostToRendererShellEvent.json',
   rendererToHostValidator: 'RendererToHostShellCommand.json',
   webDocumentValidator: web.$id,
@@ -173,6 +177,7 @@ import type { ValidateFunction } from 'ajv';
 import type {
   ControlPlaneDocument,
   DiagnosticValueJson,
+  HardwareEvidenceDocument,
   HostToRendererShellEventJson,
   RendererToHostShellCommandJson,
   WebDocument,
@@ -180,6 +185,7 @@ import type {
 
 export const controlPlaneDocumentValidator: ValidateFunction<ControlPlaneDocument>;
 export const diagnosticValueValidator: ValidateFunction<DiagnosticValueJson>;
+export const hardwareEvidenceDocumentValidator: ValidateFunction<HardwareEvidenceDocument>;
 export const hostToRendererValidator: ValidateFunction<HostToRendererShellEventJson>;
 export const rendererToHostValidator: ValidateFunction<RendererToHostShellCommandJson>;
 export const webDocumentValidator: ValidateFunction<WebDocument>;

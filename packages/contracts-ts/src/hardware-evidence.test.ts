@@ -30,7 +30,7 @@ const execution = {
   overhead: {
     sampleWindowMs: 1_000,
     cpuTimeMs: 12,
-    peakWorkingSetBytes: 8_388_608,
+    peakWorkingSetBytes: '8388608',
     quality: 'valid',
   },
 } as const;
@@ -97,7 +97,7 @@ const acceptedComparison = {
   beforeSessionId: 'session-before',
   afterSessionId: 'session-after',
   comparedAt: '2026-08-12T12:05:00Z',
-  projection: {
+  acceptedResult: {
     metric: 'frame-time-ms',
     unit: 'milliseconds',
     before: 8.4,
@@ -141,7 +141,7 @@ const claim = {
   claim: 'Frame-time improved in the accepted comparison.',
   state: 'admitted',
   evidenceIds: ['comparison-0001'],
-  evidenceHashes: [acceptedComparison.projection.evidenceHash],
+  evidenceHashes: [acceptedComparison.acceptedResult.evidenceHash],
   provenance: {
     source: 'comparison-engine',
     collectedAt: '2026-08-12T12:10:00Z',
@@ -160,7 +160,10 @@ describe('hardware evidence contracts', () => {
     report,
     claim,
   ])('accepts a complete evidence document', (document) => {
-    expect(validates(document)).toBe(true);
+    expect(
+      validates(document),
+      JSON.stringify(hardwareEvidenceDocumentValidator.errors),
+    ).toBe(true);
     const typed: HardwareEvidenceDocument = document;
     expect(typed.kind).toBe(document.kind);
   });
@@ -191,7 +194,7 @@ describe('hardware evidence contracts', () => {
     expect(
       validates({
         ...rejectedComparison,
-        projection: acceptedComparison.projection,
+        acceptedResult: acceptedComparison.acceptedResult,
       }),
     ).toBe(false);
   });

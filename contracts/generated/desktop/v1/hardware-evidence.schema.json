@@ -1,0 +1,1233 @@
+{
+  "$defs": {
+    "AcceptedComparison": {
+      "$id": "AcceptedComparison.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "acceptedResult": {
+          "$ref": "ComparisonProjection.json"
+        },
+        "afterSessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "beforeSessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "comparedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "comparisonId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "kind": {
+          "const": "comparison",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "state": {
+          "const": "accepted",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "comparisonId",
+        "state",
+        "beforeSessionId",
+        "afterSessionId",
+        "comparedAt",
+        "acceptedResult"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CancellationState": {
+      "$id": "CancellationState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "not-requested",
+          "type": "string"
+        },
+        {
+          "const": "requested",
+          "type": "string"
+        },
+        {
+          "const": "acknowledged",
+          "type": "string"
+        },
+        {
+          "const": "deadline-exceeded",
+          "type": "string"
+        }
+      ]
+    },
+    "ClaimAdmission": {
+      "$id": "ClaimAdmission.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "claim": {
+          "$ref": "EvidenceText.json"
+        },
+        "claimId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "evidenceHashes": {
+          "items": {
+            "$ref": "EvidenceHash.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "items": {
+            "$ref": "EvidenceIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "kind": {
+          "const": "claim-admission",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "$ref": "EvidenceText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "EvidenceProvenance.json"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "state": {
+          "$ref": "ClaimAdmissionState.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "claimId",
+        "claim",
+        "state",
+        "evidenceIds",
+        "evidenceHashes",
+        "provenance",
+        "limitations"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ClaimAdmissionState": {
+      "$id": "ClaimAdmissionState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "admitted",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "type": "string"
+        }
+      ]
+    },
+    "CollectorExecutionContext": {
+      "$id": "CollectorExecutionContext.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "cancellationState": {
+          "$ref": "CancellationState.json"
+        },
+        "deadlineAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "health": {
+          "$ref": "CollectorHealth.json"
+        },
+        "overhead": {
+          "$ref": "CollectorOverhead.json"
+        },
+        "sourceCapability": {
+          "$ref": "SourceCapability.json"
+        }
+      },
+      "required": [
+        "sourceCapability",
+        "deadlineAt",
+        "cancellationState",
+        "health",
+        "overhead"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CollectorHealth": {
+      "$id": "CollectorHealth.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "checkedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "EvidenceText.json"
+        },
+        "state": {
+          "$ref": "CollectorHealthState.json"
+        }
+      },
+      "required": [
+        "state",
+        "checkedAt",
+        "detail"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CollectorHealthState": {
+      "$id": "CollectorHealthState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "healthy",
+          "type": "string"
+        },
+        {
+          "const": "degraded",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "CollectorOverhead": {
+      "$id": "CollectorOverhead.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "cpuTimeMs": {
+          "maximum": 60000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "peakWorkingSetBytes": {
+          "minimum": 0,
+          "type": "string"
+        },
+        "quality": {
+          "$ref": "EvidenceQuality.json"
+        },
+        "sampleWindowMs": {
+          "maximum": 60000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sampleWindowMs",
+        "cpuTimeMs",
+        "peakWorkingSetBytes",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ComparisonBlockerCode": {
+      "$id": "ComparisonBlockerCode.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "hardware-drift",
+          "type": "string"
+        },
+        {
+          "const": "workload-drift",
+          "type": "string"
+        },
+        {
+          "const": "insufficient-samples",
+          "type": "string"
+        },
+        {
+          "const": "invalid-before",
+          "type": "string"
+        },
+        {
+          "const": "invalid-after",
+          "type": "string"
+        },
+        {
+          "const": "incompatible-metric",
+          "type": "string"
+        },
+        {
+          "const": "unsupported-quality",
+          "type": "string"
+        }
+      ]
+    },
+    "ComparisonProjection": {
+      "$id": "ComparisonProjection.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "after": {
+          "type": "number"
+        },
+        "before": {
+          "type": "number"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "metric": {
+          "$ref": "MetricKind.json"
+        },
+        "quality": {
+          "$ref": "EvidenceQuality.json"
+        },
+        "unit": {
+          "$ref": "MetricUnit.json"
+        }
+      },
+      "required": [
+        "metric",
+        "unit",
+        "before",
+        "after",
+        "delta",
+        "quality",
+        "evidenceHash"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CompletedMeasurementSession": {
+      "$id": "CompletedMeasurementSession.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "baseline": {
+          "$ref": "MeasurementBaseline.json"
+        },
+        "chunks": {
+          "items": {
+            "$ref": "MetricChunk.json"
+          },
+          "maxItems": 256,
+          "minItems": 1,
+          "type": "array"
+        },
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "CollectorExecutionContext.json"
+        },
+        "kind": {
+          "const": "measurement-session",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "$ref": "EvidenceText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "sessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "const": "completed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "sessionId",
+        "evidenceVersion",
+        "status",
+        "startedAt",
+        "completedAt",
+        "execution",
+        "baseline",
+        "chunks",
+        "evidenceHash",
+        "limitations"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DegradedMeasurementSession": {
+      "$id": "DegradedMeasurementSession.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "baseline": {
+          "$ref": "MeasurementBaseline.json"
+        },
+        "chunks": {
+          "items": {
+            "$ref": "MetricChunk.json"
+          },
+          "maxItems": 256,
+          "minItems": 1,
+          "type": "array"
+        },
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "CollectorExecutionContext.json"
+        },
+        "kind": {
+          "const": "measurement-session",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "$ref": "EvidenceText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "qualityIssues": {
+          "items": {
+            "$ref": "EvidenceText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "sessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "const": "degraded",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "sessionId",
+        "evidenceVersion",
+        "status",
+        "startedAt",
+        "completedAt",
+        "execution",
+        "baseline",
+        "chunks",
+        "evidenceHash",
+        "limitations",
+        "qualityIssues"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "EvidenceComparison": {
+      "$id": "EvidenceComparison.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "AcceptedComparison.json"
+        },
+        {
+          "$ref": "RejectedComparison.json"
+        }
+      ]
+    },
+    "EvidenceHash": {
+      "$id": "EvidenceHash.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 71,
+      "minLength": 71,
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EvidenceIdentifier": {
+      "$id": "EvidenceIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "EvidenceProvenance": {
+      "$id": "EvidenceProvenance.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "collectedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "EvidenceText.json"
+        }
+      },
+      "required": [
+        "source",
+        "collectedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "EvidenceQuality": {
+      "$id": "EvidenceQuality.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "valid",
+          "type": "string"
+        },
+        {
+          "const": "degraded",
+          "type": "string"
+        },
+        {
+          "const": "insufficient",
+          "type": "string"
+        },
+        {
+          "const": "invalid",
+          "type": "string"
+        }
+      ]
+    },
+    "EvidenceReport": {
+      "$id": "EvidenceReport.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "evidenceHashes": {
+          "items": {
+            "$ref": "EvidenceHash.json"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "items": {
+            "$ref": "EvidenceIdentifier.json"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "evidence-report",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "$ref": "EvidenceText.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "EvidenceProvenance.json"
+        },
+        "reportId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "reportId",
+        "evidenceVersion",
+        "generatedAt",
+        "evidenceIds",
+        "evidenceHashes",
+        "provenance",
+        "limitations"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "EvidenceSchemaVersion": {
+      "$id": "EvidenceSchemaVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "1.0",
+          "type": "string"
+        }
+      ]
+    },
+    "EvidenceText": {
+      "$id": "EvidenceText.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "HardwareEvidenceDocument": {
+      "$id": "HardwareEvidenceDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "InventorySnapshot.json"
+        },
+        {
+          "$ref": "MeasurementSession.json"
+        },
+        {
+          "$ref": "EvidenceComparison.json"
+        },
+        {
+          "$ref": "EvidenceReport.json"
+        },
+        {
+          "$ref": "ClaimAdmission.json"
+        }
+      ]
+    },
+    "HardwareFact": {
+      "$id": "HardwareFact.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ObservedHardwareFact.json"
+        },
+        {
+          "$ref": "UnavailableHardwareFact.json"
+        }
+      ]
+    },
+    "HardwareUnavailableReason": {
+      "$id": "HardwareUnavailableReason.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "not-reported",
+          "type": "string"
+        },
+        {
+          "const": "not-present",
+          "type": "string"
+        },
+        {
+          "const": "permission-denied",
+          "type": "string"
+        },
+        {
+          "const": "unsupported",
+          "type": "string"
+        },
+        {
+          "const": "timed-out",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "type": "string"
+        },
+        {
+          "const": "not-discovered",
+          "type": "string"
+        },
+        {
+          "const": "collector-unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "IncompleteMeasurementSession": {
+      "$id": "IncompleteMeasurementSession.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "baseline": {
+          "$ref": "MeasurementBaseline.json"
+        },
+        "chunks": {
+          "items": {
+            "$ref": "MetricChunk.json"
+          },
+          "maxItems": 256,
+          "minItems": 0,
+          "type": "array"
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "CollectorExecutionContext.json"
+        },
+        "kind": {
+          "const": "measurement-session",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "EvidenceText.json"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "sessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "const": "incomplete",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "sessionId",
+        "evidenceVersion",
+        "status",
+        "startedAt",
+        "execution",
+        "baseline",
+        "chunks",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InvalidMeasurementSession": {
+      "$id": "InvalidMeasurementSession.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "baseline": {
+          "$ref": "MeasurementBaseline.json"
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "CollectorExecutionContext.json"
+        },
+        "invalidatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "measurement-session",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "EvidenceText.json"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "sessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "const": "invalid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "sessionId",
+        "evidenceVersion",
+        "status",
+        "startedAt",
+        "invalidatedAt",
+        "execution",
+        "baseline",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InventorySnapshot": {
+      "$id": "InventorySnapshot.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audio": {
+          "$ref": "HardwareFact.json"
+        },
+        "collectedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cpu": {
+          "$ref": "HardwareFact.json"
+        },
+        "display": {
+          "$ref": "HardwareFact.json"
+        },
+        "drivers": {
+          "$ref": "HardwareFact.json"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "evidenceId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "evidenceVersion": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "execution": {
+          "$ref": "CollectorExecutionContext.json"
+        },
+        "games": {
+          "$ref": "HardwareFact.json"
+        },
+        "gpu": {
+          "$ref": "HardwareFact.json"
+        },
+        "kind": {
+          "const": "inventory-snapshot",
+          "type": "string"
+        },
+        "memory": {
+          "$ref": "HardwareFact.json"
+        },
+        "network": {
+          "$ref": "HardwareFact.json"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "security": {
+          "$ref": "HardwareFact.json"
+        },
+        "storage": {
+          "$ref": "HardwareFact.json"
+        },
+        "usb": {
+          "$ref": "HardwareFact.json"
+        },
+        "windows": {
+          "$ref": "HardwareFact.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "evidenceId",
+        "evidenceVersion",
+        "collectedAt",
+        "evidenceHash",
+        "execution",
+        "cpu",
+        "gpu",
+        "memory",
+        "storage",
+        "network",
+        "display",
+        "audio",
+        "usb",
+        "windows",
+        "drivers",
+        "security",
+        "games"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "MeasurementBaseline": {
+      "$id": "MeasurementBaseline.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "baselineId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "inventoryEvidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "inventoryEvidenceId": {
+          "$ref": "EvidenceIdentifier.json"
+        }
+      },
+      "required": [
+        "baselineId",
+        "inventoryEvidenceId",
+        "inventoryEvidenceHash",
+        "capturedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "MeasurementSession": {
+      "$id": "MeasurementSession.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "IncompleteMeasurementSession.json"
+        },
+        {
+          "$ref": "CompletedMeasurementSession.json"
+        },
+        {
+          "$ref": "DegradedMeasurementSession.json"
+        },
+        {
+          "$ref": "InvalidMeasurementSession.json"
+        }
+      ]
+    },
+    "MetricChunk": {
+      "$id": "MetricChunk.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "chunkId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "endedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "metric": {
+          "$ref": "MetricKind.json"
+        },
+        "quality": {
+          "$ref": "EvidenceQuality.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "unit": {
+          "$ref": "MetricUnit.json"
+        },
+        "values": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 4096,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "chunkId",
+        "sequence",
+        "startedAt",
+        "endedAt",
+        "metric",
+        "unit",
+        "values",
+        "evidenceHash",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "MetricKind": {
+      "$id": "MetricKind.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "frame-time-ms",
+          "type": "string"
+        },
+        {
+          "const": "cpu-utilization-percent",
+          "type": "string"
+        },
+        {
+          "const": "gpu-utilization-percent",
+          "type": "string"
+        },
+        {
+          "const": "memory-working-set-bytes",
+          "type": "string"
+        },
+        {
+          "const": "disk-latency-ms",
+          "type": "string"
+        },
+        {
+          "const": "network-latency-ms",
+          "type": "string"
+        }
+      ]
+    },
+    "MetricUnit": {
+      "$id": "MetricUnit.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "milliseconds",
+          "type": "string"
+        },
+        {
+          "const": "percent",
+          "type": "string"
+        },
+        {
+          "const": "bytes",
+          "type": "string"
+        }
+      ]
+    },
+    "ObservedHardwareFact": {
+      "$id": "ObservedHardwareFact.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "EvidenceText.json"
+        },
+        "stableDerivedId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "state": {
+          "const": "observed",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "EvidenceText.json"
+        }
+      },
+      "required": [
+        "state",
+        "value",
+        "source",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RejectedComparison": {
+      "$id": "RejectedComparison.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "afterSessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "beforeSessionId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "blockers": {
+          "items": {
+            "$ref": "ComparisonBlockerCode.json"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "comparedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "comparisonId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "kind": {
+          "const": "comparison",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "EvidenceSchemaVersion.json"
+        },
+        "state": {
+          "const": "rejected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "comparisonId",
+        "state",
+        "beforeSessionId",
+        "afterSessionId",
+        "comparedAt",
+        "blockers"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SourceCapability": {
+      "$id": "SourceCapability.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "native-readonly",
+          "type": "string"
+        },
+        {
+          "const": "native-performance-counter",
+          "type": "string"
+        },
+        {
+          "const": "windows-management",
+          "type": "string"
+        },
+        {
+          "const": "direct-storage-query",
+          "type": "string"
+        },
+        {
+          "const": "derived-local-evidence",
+          "type": "string"
+        }
+      ]
+    },
+    "UnavailableHardwareFact": {
+      "$id": "UnavailableHardwareFact.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "detail": {
+          "$ref": "EvidenceText.json"
+        },
+        "reasonCode": {
+          "$ref": "HardwareUnavailableReason.json"
+        },
+        "state": {
+          "const": "unavailable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reasonCode",
+        "detail"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/desktop/v1/hardware-evidence.schema.json",
+  "$ref": "HardwareEvidenceDocument.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}

@@ -1,6 +1,51 @@
 {
   "components": {
     "schemas": {
+      "AcceptedComparison": {
+        "properties": {
+          "acceptedResult": {
+            "$ref": "#/components/schemas/ComparisonProjection"
+          },
+          "afterSessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "beforeSessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "comparedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "comparisonId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "kind": {
+            "const": "comparison",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "state": {
+            "const": "accepted",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "comparisonId",
+          "state",
+          "beforeSessionId",
+          "afterSessionId",
+          "comparedAt",
+          "acceptedResult"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "AccountCommand": {
         "properties": {
           "accountId": {
@@ -3305,6 +3350,26 @@
           }
         ]
       },
+      "CancellationState": {
+        "anyOf": [
+          {
+            "const": "not-requested",
+            "type": "string"
+          },
+          {
+            "const": "requested",
+            "type": "string"
+          },
+          {
+            "const": "acknowledged",
+            "type": "string"
+          },
+          {
+            "const": "deadline-exceeded",
+            "type": "string"
+          }
+        ]
+      },
       "CapabilityAvailability": {
         "anyOf": [
           {
@@ -3329,6 +3394,82 @@
           },
           {
             "const": "unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "ClaimAdmission": {
+        "properties": {
+          "claim": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "claimId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "evidenceHashes": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceHash"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "evidenceIds": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceIdentifier"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "kind": {
+            "const": "claim-admission",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/EvidenceProvenance"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ClaimAdmissionState"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "claimId",
+          "claim",
+          "state",
+          "evidenceIds",
+          "evidenceHashes",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ClaimAdmissionState": {
+        "anyOf": [
+          {
+            "const": "admitted",
+            "type": "string"
+          },
+          {
+            "const": "rejected",
             "type": "string"
           }
         ]
@@ -3361,6 +3502,107 @@
           "applicableVersion",
           "validationState",
           "unproven"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CollectorExecutionContext": {
+        "properties": {
+          "cancellationState": {
+            "$ref": "#/components/schemas/CancellationState"
+          },
+          "deadlineAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "health": {
+            "$ref": "#/components/schemas/CollectorHealth"
+          },
+          "overhead": {
+            "$ref": "#/components/schemas/CollectorOverhead"
+          },
+          "sourceCapability": {
+            "$ref": "#/components/schemas/SourceCapability"
+          }
+        },
+        "required": [
+          "sourceCapability",
+          "deadlineAt",
+          "cancellationState",
+          "health",
+          "overhead"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CollectorHealth": {
+        "properties": {
+          "checkedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CollectorHealthState"
+          }
+        },
+        "required": [
+          "state",
+          "checkedAt",
+          "detail"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CollectorHealthState": {
+        "anyOf": [
+          {
+            "const": "healthy",
+            "type": "string"
+          },
+          {
+            "const": "degraded",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "CollectorOverhead": {
+        "properties": {
+          "cpuTimeMs": {
+            "maximum": 60000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "peakWorkingSetBytes": {
+            "minimum": 0,
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/EvidenceQuality"
+          },
+          "sampleWindowMs": {
+            "maximum": 60000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sampleWindowMs",
+          "cpuTimeMs",
+          "peakWorkingSetBytes",
+          "quality"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -3427,6 +3669,150 @@
             "type": "string"
           }
         ]
+      },
+      "ComparisonBlockerCode": {
+        "anyOf": [
+          {
+            "const": "hardware-drift",
+            "type": "string"
+          },
+          {
+            "const": "workload-drift",
+            "type": "string"
+          },
+          {
+            "const": "insufficient-samples",
+            "type": "string"
+          },
+          {
+            "const": "invalid-before",
+            "type": "string"
+          },
+          {
+            "const": "invalid-after",
+            "type": "string"
+          },
+          {
+            "const": "incompatible-metric",
+            "type": "string"
+          },
+          {
+            "const": "unsupported-quality",
+            "type": "string"
+          }
+        ]
+      },
+      "ComparisonProjection": {
+        "properties": {
+          "after": {
+            "type": "number"
+          },
+          "before": {
+            "type": "number"
+          },
+          "delta": {
+            "type": "number"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/MetricKind"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/EvidenceQuality"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/MetricUnit"
+          }
+        },
+        "required": [
+          "metric",
+          "unit",
+          "before",
+          "after",
+          "delta",
+          "quality",
+          "evidenceHash"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CompletedMeasurementSession": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/MeasurementBaseline"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/MetricChunk"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/CollectorExecutionContext"
+          },
+          "kind": {
+            "const": "measurement-session",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "const": "completed",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "sessionId",
+          "evidenceVersion",
+          "status",
+          "startedAt",
+          "completedAt",
+          "execution",
+          "baseline",
+          "chunks",
+          "evidenceHash",
+          "limitations"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "ConsentCommand": {
         "properties": {
@@ -3731,6 +4117,89 @@
         "minLength": 3,
         "pattern": "^[A-Z]{3}$",
         "type": "string"
+      },
+      "DegradedMeasurementSession": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/MeasurementBaseline"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/MetricChunk"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/CollectorExecutionContext"
+          },
+          "kind": {
+            "const": "measurement-session",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "qualityIssues": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "const": "degraded",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "sessionId",
+          "evidenceVersion",
+          "status",
+          "startedAt",
+          "completedAt",
+          "execution",
+          "baseline",
+          "chunks",
+          "evidenceHash",
+          "limitations",
+          "qualityIssues"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "DetachedSignature": {
         "maxLength": 512,
@@ -4138,6 +4607,146 @@
           }
         ]
       },
+      "EvidenceComparison": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AcceptedComparison"
+          },
+          {
+            "$ref": "#/components/schemas/RejectedComparison"
+          }
+        ]
+      },
+      "EvidenceHash": {
+        "maxLength": 71,
+        "minLength": 71,
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "EvidenceIdentifier": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "EvidenceProvenance": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvidenceText"
+          }
+        },
+        "required": [
+          "source",
+          "collectedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "EvidenceQuality": {
+        "anyOf": [
+          {
+            "const": "valid",
+            "type": "string"
+          },
+          {
+            "const": "degraded",
+            "type": "string"
+          },
+          {
+            "const": "insufficient",
+            "type": "string"
+          },
+          {
+            "const": "invalid",
+            "type": "string"
+          }
+        ]
+      },
+      "EvidenceReport": {
+        "properties": {
+          "evidenceHashes": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceHash"
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "evidenceIds": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceIdentifier"
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "evidence-report",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceText"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/EvidenceProvenance"
+          },
+          "reportId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "reportId",
+          "evidenceVersion",
+          "generatedAt",
+          "evidenceIds",
+          "evidenceHashes",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "EvidenceSchemaVersion": {
+        "anyOf": [
+          {
+            "const": "1.0",
+            "type": "string"
+          }
+        ]
+      },
+      "EvidenceText": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
       "FixtureDiagnosticValue": {
         "properties": {
           "fixtureVersion": {
@@ -4186,6 +4795,131 @@
           "surface",
           "command",
           "description"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "HardwareEvidenceDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InventorySnapshot"
+          },
+          {
+            "$ref": "#/components/schemas/MeasurementSession"
+          },
+          {
+            "$ref": "#/components/schemas/EvidenceComparison"
+          },
+          {
+            "$ref": "#/components/schemas/EvidenceReport"
+          },
+          {
+            "$ref": "#/components/schemas/ClaimAdmission"
+          }
+        ]
+      },
+      "HardwareFact": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ObservedHardwareFact"
+          },
+          {
+            "$ref": "#/components/schemas/UnavailableHardwareFact"
+          }
+        ]
+      },
+      "HardwareUnavailableReason": {
+        "anyOf": [
+          {
+            "const": "not-reported",
+            "type": "string"
+          },
+          {
+            "const": "not-present",
+            "type": "string"
+          },
+          {
+            "const": "permission-denied",
+            "type": "string"
+          },
+          {
+            "const": "unsupported",
+            "type": "string"
+          },
+          {
+            "const": "timed-out",
+            "type": "string"
+          },
+          {
+            "const": "cancelled",
+            "type": "string"
+          },
+          {
+            "const": "not-discovered",
+            "type": "string"
+          },
+          {
+            "const": "collector-unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "IncompleteMeasurementSession": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/MeasurementBaseline"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/MetricChunk"
+            },
+            "maxItems": 256,
+            "minItems": 0,
+            "type": "array"
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/CollectorExecutionContext"
+          },
+          "kind": {
+            "const": "measurement-session",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "const": "incomplete",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "sessionId",
+          "evidenceVersion",
+          "status",
+          "startedAt",
+          "execution",
+          "baseline",
+          "chunks",
+          "reason"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -4321,6 +5055,152 @@
           "deviceLabel",
           "logicalProcessorCount",
           "totalMemoryBytes"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InvalidMeasurementSession": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/MeasurementBaseline"
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/CollectorExecutionContext"
+          },
+          "invalidatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "measurement-session",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "const": "invalid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "sessionId",
+          "evidenceVersion",
+          "status",
+          "startedAt",
+          "invalidatedAt",
+          "execution",
+          "baseline",
+          "reason"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InventorySnapshot": {
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "cpu": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "display": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "drivers": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "evidenceId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "evidenceVersion": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/CollectorExecutionContext"
+          },
+          "games": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "gpu": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "kind": {
+            "const": "inventory-snapshot",
+            "type": "string"
+          },
+          "memory": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "network": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "security": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "usb": {
+            "$ref": "#/components/schemas/HardwareFact"
+          },
+          "windows": {
+            "$ref": "#/components/schemas/HardwareFact"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "evidenceId",
+          "evidenceVersion",
+          "collectedAt",
+          "evidenceHash",
+          "execution",
+          "cpu",
+          "gpu",
+          "memory",
+          "storage",
+          "network",
+          "display",
+          "audio",
+          "usb",
+          "windows",
+          "drivers",
+          "security",
+          "games"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -4484,6 +5364,148 @@
           "not": {}
         }
       },
+      "MeasurementBaseline": {
+        "properties": {
+          "baselineId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "inventoryEvidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "inventoryEvidenceId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          }
+        },
+        "required": [
+          "baselineId",
+          "inventoryEvidenceId",
+          "inventoryEvidenceHash",
+          "capturedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "MeasurementSession": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IncompleteMeasurementSession"
+          },
+          {
+            "$ref": "#/components/schemas/CompletedMeasurementSession"
+          },
+          {
+            "$ref": "#/components/schemas/DegradedMeasurementSession"
+          },
+          {
+            "$ref": "#/components/schemas/InvalidMeasurementSession"
+          }
+        ]
+      },
+      "MetricChunk": {
+        "properties": {
+          "chunkId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "endedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/MetricKind"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/EvidenceQuality"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/MetricUnit"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4096,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "chunkId",
+          "sequence",
+          "startedAt",
+          "endedAt",
+          "metric",
+          "unit",
+          "values",
+          "evidenceHash",
+          "quality"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "MetricKind": {
+        "anyOf": [
+          {
+            "const": "frame-time-ms",
+            "type": "string"
+          },
+          {
+            "const": "cpu-utilization-percent",
+            "type": "string"
+          },
+          {
+            "const": "gpu-utilization-percent",
+            "type": "string"
+          },
+          {
+            "const": "memory-working-set-bytes",
+            "type": "string"
+          },
+          {
+            "const": "disk-latency-ms",
+            "type": "string"
+          },
+          {
+            "const": "network-latency-ms",
+            "type": "string"
+          }
+        ]
+      },
+      "MetricUnit": {
+        "anyOf": [
+          {
+            "const": "milliseconds",
+            "type": "string"
+          },
+          {
+            "const": "percent",
+            "type": "string"
+          },
+          {
+            "const": "bytes",
+            "type": "string"
+          }
+        ]
+      },
       "ModeledDiagnosticValue": {
         "properties": {
           "assumptions": {
@@ -4600,6 +5622,37 @@
         },
         "required": [
           "kind",
+          "value",
+          "source",
+          "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ObservedHardwareFact": {
+        "properties": {
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "stableDerivedId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "state": {
+            "const": "observed",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/EvidenceText"
+          }
+        },
+        "required": [
+          "state",
           "value",
           "source",
           "observedAt"
@@ -4793,6 +5846,57 @@
         "maxLength": 512,
         "minLength": 1,
         "type": "string"
+      },
+      "RejectedComparison": {
+        "properties": {
+          "afterSessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "beforeSessionId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonBlockerCode"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "comparedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "comparisonId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "kind": {
+            "const": "comparison",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/EvidenceSchemaVersion"
+          },
+          "state": {
+            "const": "rejected",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "comparisonId",
+          "state",
+          "beforeSessionId",
+          "afterSessionId",
+          "comparedAt",
+          "blockers"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "ReleaseArtifactEvidence": {
         "properties": {
@@ -5181,6 +6285,30 @@
           }
         ]
       },
+      "SourceCapability": {
+        "anyOf": [
+          {
+            "const": "native-readonly",
+            "type": "string"
+          },
+          {
+            "const": "native-performance-counter",
+            "type": "string"
+          },
+          {
+            "const": "windows-management",
+            "type": "string"
+          },
+          {
+            "const": "direct-storage-query",
+            "type": "string"
+          },
+          {
+            "const": "derived-local-evidence",
+            "type": "string"
+          }
+        ]
+      },
       "SubscriptionPlan": {
         "anyOf": [
           {
@@ -5462,6 +6590,29 @@
         "required": [
           "kind",
           "reason"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "UnavailableHardwareFact": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/EvidenceText"
+          },
+          "reasonCode": {
+            "$ref": "#/components/schemas/HardwareUnavailableReason"
+          },
+          "state": {
+            "const": "unavailable",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "reasonCode",
+          "detail"
         ],
         "type": "object",
         "unevaluatedProperties": {
