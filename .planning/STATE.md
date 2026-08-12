@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-05-PLAN.md
-last_updated: "2026-08-12T18:16:23.238Z"
+stopped_at: Completed 05-06-PLAN.md
+last_updated: "2026-08-12T18:22:37.093Z"
 last_activity: 2026-08-12
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 216
-  completed_plans: 208
+  completed_plans: 209
   percent: 30
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 05 (hardware-intelligence-and-measured-evidence) — EXECUTING
-Plan: 6 of 10
+Plan: 7 of 10
 Status: Ready to execute
 Last activity: 2026-08-12
 
-Progress: [██████████] 96%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -240,6 +240,7 @@ _Updated after plan completion_
 | Phase 05 P02 | 10 min | 2 tasks | 6 files |
 | Phase 05 P03 | 18 min | 2 tasks | 5 files |
 | Phase 05 P05 | 16 min | 2 tasks | 5 files |
+| Phase 05 P06 | 14 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -753,6 +754,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 05]: Frame evidence is event-driven; non-frame metrics are admitted at no more than one sample per second.
 - [Phase 05]: Unreliable measurement sources remain nonnumeric and degrade or invalidate comparison evidence.
 - [Phase 05]: Windows capture uses QPC and documented Win32 counters without injection or broad elevation.
+- [Phase 05]: Comparisons expose no delta until every required dimension is comparable and all blockers are absent.
+- [Phase 05]: Offline HTML and JSON reports share one immutable hash-verifiable projection.
+- [Phase 05]: Claim revocation removes eligibility while preserving comparison history.
 
 ### Pending Todos
 
@@ -802,6 +806,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-12T18:16:23.229Z
-Stopped at: Completed 05-05-PLAN.md
+Last session: 2026-08-12T18:22:37.086Z
+Stopped at: Completed 05-06-PLAN.md
 Resume file: None

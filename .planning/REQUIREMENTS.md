@@ -58,7 +58,7 @@
 - [x] **DIAG-02**: The system distinguishes Windows 11, Windows 10 LTSC/ESU, and unsupported Windows 10 consumer lifecycle states
 - [ ] **DIAG-03**: User sees lifecycle and compatibility warnings before receiving recommendations for an unsupported or unverified environment
 - [ ] **DIAG-04**: The engine derives recommendations from detected capabilities and evidence freshness rather than device-name recipes
-- [ ] **DIAG-05**: Unknown, stale, contradictory, or unavailable evidence fails closed and cannot silently become a compatible recommendation
+- [x] **DIAG-05**: Unknown, stale, contradictory, or unavailable evidence fails closed and cannot silently become a compatible recommendation
 - [ ] **DIAG-06**: User can see why an operation is compatible, unsupported, hidden, or restricted to Experimental
 - [x] **DIAG-07**: Read-only collection respects explicit resource budgets and reduces sampling during active games
 
@@ -87,10 +87,10 @@
 
 - [x] **MEAS-01**: User can capture a system baseline with methodology, timestamp, environment identity, and collector overhead
 - [x] **MEAS-02**: User can capture supported game-session FPS, 1% lows, frame time, utilization, thermals, and latency-related evidence when reliable
-- [ ] **MEAS-03**: The system rejects before/after comparisons when workload, environment, sample quality, or collector health are not comparable
+- [x] **MEAS-03**: The system rejects before/after comparisons when workload, environment, sample quality, or collector health are not comparable
 - [x] **MEAS-04**: User sees uncertainty, missing coverage, degraded capture, and unsupported-game states instead of fabricated estimates
-- [ ] **MEAS-05**: User can compare sessions through a summary, detailed diff, timeline, and exportable technical report
-- [ ] **MEAS-06**: Marketing or in-product performance claims can reference only quality-approved reproducible evidence
+- [x] **MEAS-05**: User can compare sessions through a summary, detailed diff, timeline, and exportable technical report
+- [x] **MEAS-06**: Marketing or in-product performance claims can reference only quality-approved reproducible evidence
 
 ### Optimization Domains
 
@@ -199,7 +199,7 @@ A v1 requirement is complete only when:
 | DIAG-02     | Phase 5  | Complete |
 | DIAG-03     | Phase 5  | Pending  |
 | DIAG-04     | Phase 5  | Pending  |
-| DIAG-05     | Phase 5  | Pending  |
+| DIAG-05     | Phase 5  | Complete |
 | DIAG-06     | Phase 5  | Pending  |
 | DIAG-07     | Phase 5  | Complete |
 | PLAN-01     | Phase 6  | Pending  |
@@ -219,10 +219,10 @@ A v1 requirement is complete only when:
 | GAME-07     | Phase 8  | Pending  |
 | MEAS-01     | Phase 5  | Complete |
 | MEAS-02     | Phase 5  | Complete |
-| MEAS-03     | Phase 5  | Pending  |
+| MEAS-03     | Phase 5  | Complete |
 | MEAS-04     | Phase 5  | Complete |
-| MEAS-05     | Phase 5  | Pending  |
-| MEAS-06     | Phase 5  | Pending  |
+| MEAS-05     | Phase 5  | Complete |
+| MEAS-06     | Phase 5  | Complete |
 | OPTM-01     | Phase 7  | Pending  |
 | OPTM-02     | Phase 7  | Pending  |
 | OPTM-03     | Phase 7  | Pending  |
