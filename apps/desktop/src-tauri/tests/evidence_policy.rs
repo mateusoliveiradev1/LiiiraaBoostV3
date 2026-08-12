@@ -82,15 +82,29 @@ fn each_invalid_evidence_state_fails_closed_with_a_navigable_reason() {
 
         assert!(!verdict.actionable);
         assert_eq!(verdict.tier, RecommendationTier::Hidden);
-        assert!(verdict.reasons.iter().any(|reason| reason.evidence.is_some()));
-        assert!(verdict.reasons.iter().all(|reason| !reason.localization_key.is_empty()));
+        assert!(
+            verdict
+                .reasons
+                .iter()
+                .any(|reason| reason.evidence.is_some())
+        );
+        assert!(
+            verdict
+                .reasons
+                .iter()
+                .all(|reason| !reason.localization_key.is_empty())
+        );
     }
 }
 
 #[test]
 fn capability_states_are_explainable_and_deny_by_default() {
     let cases = [
-        (CapabilityState::Available, true, RecommendationTier::Compatible),
+        (
+            CapabilityState::Available,
+            true,
+            RecommendationTier::Compatible,
+        ),
         (
             CapabilityState::Experimental,
             false,
@@ -101,7 +115,11 @@ fn capability_states_are_explainable_and_deny_by_default() {
             false,
             RecommendationTier::Unsupported,
         ),
-        (CapabilityState::Forbidden, false, RecommendationTier::Hidden),
+        (
+            CapabilityState::Forbidden,
+            false,
+            RecommendationTier::Hidden,
+        ),
         (CapabilityState::Unknown, false, RecommendationTier::Hidden),
     ];
 
@@ -127,9 +145,12 @@ fn lifecycle_warnings_require_exact_acknowledgement() {
     let blocked = evaluate_policy(&input);
     assert!(!blocked.actionable);
     assert!(blocked.acknowledgement_required);
-    assert!(blocked.reasons.iter().any(|reason| {
-        reason.code == PolicyReason::LifecycleAcknowledgementRequired
-    }));
+    assert!(
+        blocked
+            .reasons
+            .iter()
+            .any(|reason| { reason.code == PolicyReason::LifecycleAcknowledgementRequired })
+    );
 
     input.lifecycle.acknowledgement = Some("wrong-warning".to_owned());
     assert!(!evaluate_policy(&input).actionable);
@@ -208,7 +229,10 @@ fn claim_admission_is_revoked_without_deleting_history() {
     });
     assert!(!revoked.admitted);
     assert_eq!(revoked.history_reference, approved.evidence);
-    assert_eq!(revoked.reasons[0].code, PolicyReason::ComparisonApprovalRevoked);
+    assert_eq!(
+        revoked.reasons[0].code,
+        PolicyReason::ComparisonApprovalRevoked
+    );
 }
 
 #[test]
