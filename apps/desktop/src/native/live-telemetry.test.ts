@@ -1,28 +1,39 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  createTauriLiveTelemetryAuthority,
-  type LiveTelemetrySnapshot,
-} from './live-telemetry.js';
+import { createTauriLiveTelemetryAuthority, type LiveTelemetrySnapshot } from './live-telemetry.js';
 
 const observedSnapshot = (): LiveTelemetrySnapshot => ({
   schemaVersion: '1.0',
   readOnly: true,
   cpu: {
-    state: 'observed', value: 12.5, unit: 'percent',
-    source: 'windows-get-system-times', detail: 'Total processor utilization.',
+    state: 'observed',
+    value: 12.5,
+    unit: 'percent',
+    source: 'windows-get-system-times',
+    detail: 'Total processor utilization.',
   },
   memory: {
-    state: 'observed', usedBytes: 10_737_418_240, totalBytes: 34_359_738_368,
-    loadPercent: 31, source: 'windows-global-memory-status-ex', detail: 'Physical memory in use.',
+    state: 'observed',
+    usedBytes: 10_737_418_240,
+    totalBytes: 34_359_738_368,
+    loadPercent: 31,
+    source: 'windows-global-memory-status-ex',
+    detail: 'Physical memory in use.',
   },
   gpu: {
-    state: 'unavailable', value: null, unit: 'percent', source: 'none',
-    detail: 'No native GPU counter was admitted.', reasonCode: 'source-not-admitted',
+    state: 'unavailable',
+    value: null,
+    unit: 'percent',
+    source: 'none',
+    detail: 'No native GPU counter was admitted.',
+    reasonCode: 'source-not-admitted',
   },
   collectionLatency: {
-    state: 'observed', value: 0.7, unit: 'milliseconds',
-    source: 'native-monotonic-clock', detail: 'Time spent on this local reading.',
+    state: 'observed',
+    value: 0.7,
+    unit: 'milliseconds',
+    source: 'native-monotonic-clock',
+    detail: 'Time spent on this local reading.',
   },
 });
 
@@ -40,7 +51,10 @@ describe('native live telemetry authority', () => {
     const invoke = vi
       .fn()
       .mockResolvedValueOnce({ ...observedSnapshot(), readOnly: false })
-      .mockResolvedValueOnce({ ...observedSnapshot(), cpu: { ...observedSnapshot().cpu, value: 140 } })
+      .mockResolvedValueOnce({
+        ...observedSnapshot(),
+        cpu: { ...observedSnapshot().cpu, value: 140 },
+      })
       .mockResolvedValueOnce({ ...observedSnapshot(), scenarioId: 'fixture-home' });
     const authority = createTauriLiveTelemetryAuthority({ invoke });
 
@@ -59,5 +73,32 @@ describe('native live telemetry authority', () => {
       error: { code: 'COMMAND_FAILED' },
     });
     expect(authority.snapshot().status).toBe('unavailable');
+  });
+
+  it('keeps the last admitted sample stable during background refreshes', async () => {
+    let resolveRefresh: ((value: LiveTelemetrySnapshot) => void) | undefined;
+    const invoke = vi
+      .fn()
+      .mockResolvedValueOnce(observedSnapshot())
+      .mockImplementationOnce(
+        () =>
+          new Promise<LiveTelemetrySnapshot>((resolve) => {
+            resolveRefresh = resolve;
+          }),
+      );
+    const authority = createTauriLiveTelemetryAuthority({ invoke });
+
+    await authority.read();
+    const refresh = authority.read();
+    expect(authority.snapshot().status).toBe('ready');
+    expect(authority.snapshot().telemetry).toEqual(observedSnapshot());
+
+    resolveRefresh?.({
+      ...observedSnapshot(),
+      cpu: { ...observedSnapshot().cpu, value: 18.5 },
+    });
+    await refresh;
+    expect(authority.snapshot().status).toBe('ready');
+    expect(authority.snapshot().telemetry?.cpu.value).toBe(18.5);
   });
 });

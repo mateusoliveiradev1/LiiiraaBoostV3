@@ -870,8 +870,97 @@ const NATIVE_FACTS = Object.freeze([
   ['games', 'Games', 'Jogos'],
 ] as const satisfies readonly (readonly [keyof InventorySnapshotJson, string, string])[]);
 
-const factReason = (fact: HardwareFactJson, locale: ShellLocale): string => {
-  if (fact.state === 'observed') return fact.value;
+type NativeFactKey = (typeof NATIVE_FACTS)[number][0];
+
+const FACT_SOURCE_COPY: Readonly<Partial<Record<NativeFactKey, LocalizedCopy>>> = Object.freeze({
+  network: {
+    en: 'Network adapters are not connected to the protected collector in this version yet.',
+    'pt-BR': 'Os adaptadores de rede ainda não estão conectados ao coletor protegido desta versão.',
+  },
+  audio: {
+    en: 'The Windows audio-device reader is still pending integration.',
+    'pt-BR': 'A leitura dos dispositivos de áudio do Windows ainda aguarda integração.',
+  },
+  usb: {
+    en: 'USB inventory through the Windows device API is still pending integration.',
+    'pt-BR': 'O inventário USB pela API de dispositivos do Windows ainda aguarda integração.',
+  },
+  drivers: {
+    en: 'The signed-driver inventory is not connected to this collector yet.',
+    'pt-BR': 'O inventário de drivers assinados ainda não está conectado a este coletor.',
+  },
+  security: {
+    en: 'Windows security posture is not connected to this collector yet.',
+    'pt-BR': 'A postura de segurança do Windows ainda não está conectada a este coletor.',
+  },
+  games: {
+    en: 'Steam, Epic, Xbox, EA and Ubisoft locations were checked, but no installed game was found.',
+    'pt-BR':
+      'Steam, Epic, Xbox, EA e Ubisoft foram verificados, mas nenhum jogo instalado foi encontrado.',
+  },
+});
+
+const formatFactValue = (key: NativeFactKey, value: string, locale: ShellLocale): string => {
+  if (key === 'storage') {
+    const storage = /^System volume (\d+) GiB total, (\d+) GiB free$/u.exec(value);
+    if (storage !== null) {
+      const total = storage[1] ?? '0';
+      const free = storage[2] ?? '0';
+      return locale === 'pt-BR'
+        ? `Disco do sistema · ${total} GB total · ${free} GB livres`
+        : `System drive · ${total} GB total · ${free} GB free`;
+    }
+  }
+  if (key === 'memory') {
+    const physical = /^(\d+(?:\.\d+)?) GiB physical memory$/u.exec(value);
+    if (physical !== null) {
+      const amount = Number(physical[1]).toLocaleString(locale, { maximumFractionDigits: 1 });
+      return locale === 'pt-BR' ? `${amount} GB de memória física` : `${amount} GB physical memory`;
+    }
+  }
+  if (key === 'games') {
+    const games = /^(\d+) installed games · (.+)$/u.exec(value);
+    if (games !== null) {
+      const count = Number(games[1] ?? '0');
+      const names = (games[2] ?? '').replace(
+        / · \+(\d+) more$/u,
+        locale === 'pt-BR' ? ' · +$1 outros' : ' · +$1 more',
+      );
+      return locale === 'pt-BR'
+        ? `${String(count)} ${count === 1 ? 'jogo encontrado' : 'jogos encontrados'} · ${names}`
+        : `${String(count)} ${count === 1 ? 'game found' : 'games found'} · ${names}`;
+    }
+  }
+  return value;
+};
+
+const unavailableStateLabel = (
+  fact: Extract<HardwareFactJson, { readonly state: 'unavailable' }>,
+  locale: ShellLocale,
+): string => {
+  const labels: Readonly<Record<string, LocalizedCopy>> = {
+    'not-discovered': { en: 'Not found', 'pt-BR': 'Não encontrado' },
+    'not-present': { en: 'Not present', 'pt-BR': 'Não presente' },
+    'permission-denied': { en: 'No permission', 'pt-BR': 'Sem permissão' },
+    'timed-out': { en: 'Timed out', 'pt-BR': 'Tempo esgotado' },
+    unsupported: { en: 'Unsupported', 'pt-BR': 'Incompatível' },
+    'collector-unavailable': { en: 'Not connected', 'pt-BR': 'Não conectado' },
+  };
+  return localized(
+    labels[fact.reasonCode] ?? {
+      en: 'Not connected',
+      'pt-BR': 'Não conectado',
+    },
+    locale,
+  );
+};
+
+const factReason = (key: NativeFactKey, fact: HardwareFactJson, locale: ShellLocale): string => {
+  if (fact.state === 'observed') return formatFactValue(key, fact.value, locale);
+  if (fact.reasonCode === 'collector-unavailable' || key === 'games') {
+    const sourceCopy = FACT_SOURCE_COPY[key];
+    if (sourceCopy !== undefined) return localized(sourceCopy, locale);
+  }
   const copy: Readonly<Record<string, LocalizedCopy>> = {
     'collector-unavailable': {
       en: 'This complementary Windows source is not connected in this build yet.',
@@ -933,15 +1022,11 @@ const NativeInventory = ({
     );
   }
 
-  const observedFacts = NATIVE_FACTS.filter(
-    ([key]) => (inventory[key] as HardwareFactJson).state === 'observed',
-  );
-  const unavailableFacts = NATIVE_FACTS.filter(
-    ([key]) => (inventory[key] as HardwareFactJson).state !== 'observed',
-  );
+  const observedFacts = NATIVE_FACTS.filter(([key]) => inventory[key].state === 'observed');
+  const unavailableFacts = NATIVE_FACTS.filter(([key]) => inventory[key].state !== 'observed');
 
   const renderFact = ([key, en, pt]: (typeof NATIVE_FACTS)[number]) => {
-    const fact = inventory[key] as HardwareFactJson;
+    const fact = inventory[key];
     const label = locale === 'pt-BR' ? pt : en;
     return (
       <article
@@ -957,13 +1042,13 @@ const NativeInventory = ({
         <div>
           <span>{label}</span>
           {fact.state === 'observed' ? (
-            <strong>{fact.value}</strong>
+            <strong>{formatFactValue(key, fact.value, locale)}</strong>
           ) : (
             <>
               <strong>
                 {locale === 'pt-BR' ? `${label} indisponível` : `${label} unavailable`}
               </strong>
-              <p>{factReason(fact, locale)}</p>
+              <p>{factReason(key, fact, locale)}</p>
             </>
           )}
         </div>
@@ -972,9 +1057,7 @@ const NativeInventory = ({
             ? locale === 'pt-BR'
               ? 'Observado'
               : 'Observed'
-            : locale === 'pt-BR'
-              ? 'Complementar'
-              : 'Complementary'}
+            : unavailableStateLabel(fact, locale)}
         </span>
       </article>
     );
@@ -992,12 +1075,12 @@ const NativeInventory = ({
             {locale === 'pt-BR' ? 'LEITURA LOCAL DO WINDOWS' : 'LOCAL WINDOWS READING'}
           </span>
           <h2 id="native-inventory-title">
-            {locale === 'pt-BR' ? 'Hardware observado' : 'Observed hardware'}
+            {locale === 'pt-BR' ? 'Inventário verificado' : 'Verified inventory'}
           </h2>
           <p>
             {locale === 'pt-BR'
-              ? 'Identificadores brutos permanecem protegidos no limite nativo.'
-              : 'Raw identifiers remain protected inside the native boundary.'}
+              ? 'Hardware e jogos detectados localmente, sem expor caminhos ou identificadores brutos.'
+              : 'Hardware and games detected locally without exposing paths or raw identifiers.'}
           </p>
         </div>
         <span className="lb-native-count">
@@ -1010,13 +1093,13 @@ const NativeInventory = ({
         <details className="lb-native-coverage-details">
           <summary>
             {locale === 'pt-BR'
-              ? `${unavailableFacts.length} fontes complementares ainda indisponíveis`
-              : `${unavailableFacts.length} complementary sources are still unavailable`}
+              ? `${String(unavailableFacts.length)} leituras avançadas ainda não conectadas`
+              : `${String(unavailableFacts.length)} advanced readings are not connected yet`}
           </summary>
           <p>
             {locale === 'pt-BR'
-              ? 'A medição principal continua usando apenas dados nativos confirmados; nada é estimado.'
-              : 'The main measurement continues using confirmed native data only; nothing is estimated.'}
+              ? 'Elas não bloqueiam CPU, GPU, memória, disco, tela, Windows ou jogos. Nenhum valor ausente é inventado.'
+              : 'They do not block CPU, GPU, memory, storage, display, Windows or games. Missing values are never invented.'}
           </p>
           <div className="lb-native-fact-grid lb-native-fact-grid--secondary">
             {unavailableFacts.map(renderFact)}
@@ -1048,7 +1131,13 @@ const evidenceHealthLabel = (value: string | undefined, locale: ShellLocale) => 
     valid: { en: 'Verified', 'pt-BR': 'Verificada' },
     insufficient: { en: 'Insufficient', 'pt-BR': 'Insuficiente' },
   };
-  return localized(labels[value ?? 'unavailable'] ?? labels['unavailable']!, locale);
+  return localized(
+    labels[value ?? 'unavailable'] ?? {
+      en: 'Unavailable',
+      'pt-BR': 'Indisponível',
+    },
+    locale,
+  );
 };
 
 const formatEvidenceDate = (value: string, locale: ShellLocale) => {
@@ -1204,13 +1293,13 @@ const NativeComparison = ({
         comparisonStatus="accepted"
         label={locale === 'pt-BR' ? 'Resultado antes e depois' : 'Before and after result'}
         series={series}
-        summary={`${result.before} → ${result.after} ${result.unit}`}
+        summary={`${String(result.before)} → ${String(result.after)} ${result.unit}`}
         unit={result.unit}
       />
       <DeltaReadout
         delta={{
           status: 'accepted',
-          absolute: `${result.delta} ${result.unit}`,
+          absolute: `${String(result.delta)} ${result.unit}`,
           relative: `${relative.toFixed(1)}%`,
           direction:
             locale === 'pt-BR'
@@ -1232,9 +1321,9 @@ const AuthorityMeasureSurface = ({
 }: Required<Pick<MeasureSurfaceProps, 'authority' | 'locale' | 'view'>> &
   Pick<MeasureSurfaceProps, 'onNavigate' | 'scenarioId'>) => {
   const snapshot = useSyncExternalStore(
-    authority.subscribe,
-    authority.snapshot,
-    authority.snapshot,
+    (notify) => authority.subscribe(notify),
+    () => authority.snapshot(),
+    () => authority.snapshot(),
   );
   const [environmentName, setEnvironmentName] = useState('Windows local · sessão controlada');
   const [captureNote, setCaptureNote] = useState('');
@@ -1242,6 +1331,11 @@ const AuthorityMeasureSurface = ({
     readonly tone: 'success' | 'error';
     readonly message: string;
   } | null>(null);
+  const [reportFeedback, setReportFeedback] = useState<{
+    readonly tone: 'success' | 'error';
+    readonly message: string;
+  } | null>(null);
+  const [reportBusy, setReportBusy] = useState(false);
   const busy = snapshot.status === 'refreshing' || snapshot.status === 'cancelling';
   const captureActive = snapshot.capture?.status === 'incomplete';
 
@@ -1277,20 +1371,25 @@ const AuthorityMeasureSurface = ({
         evidenceVersion: (snapshot.inventory?.evidenceVersion ?? 0) + 1,
         collectedAt,
         deadlineAt: new Date(Date.now() + 10_000).toISOString(),
-        perSourceTimeoutMs: 750,
+        perSourceTimeoutMs: 2_000,
         policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
       },
     });
     if (result.ok) {
       const observed = NATIVE_FACTS.filter(
-        ([key]) => (result.value[key] as HardwareFactJson).state === 'observed',
+        ([key]) => result.value[key].state === 'observed',
       ).length;
+      const games = result.value.games;
+      const gameCount =
+        games.state === 'observed'
+          ? Number.parseInt(/^(\d+)/u.exec(games.value)?.[1] ?? '0', 10)
+          : 0;
       setRefreshFeedback({
         tone: 'success',
         message:
           locale === 'pt-BR'
-            ? `Inventário atualizado agora · ${observed} de ${NATIVE_FACTS.length} fontes confirmadas.`
-            : `Inventory updated now · ${observed} of ${NATIVE_FACTS.length} sources confirmed.`,
+            ? `Leitura concluída · ${String(observed)} de ${String(NATIVE_FACTS.length)} fontes confirmadas · ${String(gameCount)} ${gameCount === 1 ? 'jogo encontrado' : 'jogos encontrados'}.`
+            : `Reading complete · ${String(observed)} of ${String(NATIVE_FACTS.length)} sources confirmed · ${String(gameCount)} ${gameCount === 1 ? 'game found' : 'games found'}.`,
       });
       return;
     }
@@ -1336,6 +1435,62 @@ const AuthorityMeasureSurface = ({
         schemaVersion: '1.0',
         monotonicNs: Math.max(0, Math.round(globalThis.performance.now() * 1_000_000)),
       },
+    });
+  };
+
+  const generateReport = async () => {
+    if (snapshot.comparison?.state !== 'accepted') return;
+    setReportBusy(true);
+    setReportFeedback(null);
+    const reportId = `report-${Date.now().toString(36)}`;
+    const result = await authority.renderReport({
+      request: {
+        schemaVersion: '1.0',
+        reportId,
+        comparisonId: snapshot.comparison.comparisonId,
+        generatedAt: new Date().toISOString(),
+        limitations: [
+          locale === 'pt-BR'
+            ? 'Válido apenas para as sessões locais admitidas nesta comparação.'
+            : 'Valid only for the local sessions admitted in this comparison.',
+        ],
+      },
+    });
+    setReportBusy(false);
+    setReportFeedback({
+      tone: result.ok ? 'success' : 'error',
+      message: result.ok
+        ? locale === 'pt-BR'
+          ? 'Relatório gerado e pronto para exportação.'
+          : 'Report generated and ready to export.'
+        : locale === 'pt-BR'
+          ? 'Não foi possível gerar o relatório. A evidência existente foi preservada.'
+          : 'The report could not be generated. Existing evidence was preserved.',
+    });
+  };
+
+  const exportReport = async () => {
+    if (snapshot.report === null) return;
+    setReportBusy(true);
+    setReportFeedback(null);
+    const result = await authority.exportReport({
+      request: {
+        schemaVersion: '1.0',
+        reportId: snapshot.report.reportId,
+        format: 'html',
+        fileName: `liiiraa-boost-${snapshot.report.reportId}.html`,
+      },
+    });
+    setReportBusy(false);
+    setReportFeedback({
+      tone: result.ok ? 'success' : 'error',
+      message: result.ok
+        ? locale === 'pt-BR'
+          ? `Relatório salvo como ${result.value.fileName}.`
+          : `Report saved as ${result.value.fileName}.`
+        : locale === 'pt-BR'
+          ? 'Não foi possível exportar o relatório.'
+          : 'The report could not be exported.',
     });
   };
 
@@ -1386,14 +1541,18 @@ const AuthorityMeasureSurface = ({
             <label>
               <span>{locale === 'pt-BR' ? 'Ambiente confirmado' : 'Confirmed environment'}</span>
               <input
-                onChange={(event) => setEnvironmentName(event.currentTarget.value)}
+                onChange={(event) => {
+                  setEnvironmentName(event.currentTarget.value);
+                }}
                 value={environmentName}
               />
             </label>
             <label>
               <span>{locale === 'pt-BR' ? 'Nota da captura' : 'Capture note'}</span>
               <input
-                onChange={(event) => setCaptureNote(event.currentTarget.value)}
+                onChange={(event) => {
+                  setCaptureNote(event.currentTarget.value);
+                }}
                 value={captureNote}
               />
             </label>
@@ -1490,6 +1649,7 @@ const AuthorityMeasureSurface = ({
       );
     }
     if (view === 'report-preview') {
+      const canGenerate = snapshot.comparison?.state === 'accepted';
       return (
         <section className="lb-native-report">
           <span className="lb-native-eyebrow">
@@ -1505,11 +1665,37 @@ const AuthorityMeasureSurface = ({
                 ? 'O relatório permanece local e não será aberto nem enviado automaticamente.'
                 : 'The report stays local and will not be opened or uploaded automatically.'}
           </p>
-          <LbButton isDisabled={snapshot.report === null} variant="primary">
-            {locale === 'pt-BR' ? 'Exportar relatório técnico' : 'Export technical report'}
+          <LbButton
+            isDisabled={snapshot.report === null ? !canGenerate || reportBusy : reportBusy}
+            isLoading={reportBusy}
+            onPress={() => void (snapshot.report === null ? generateReport() : exportReport())}
+            variant="primary"
+          >
+            {snapshot.report === null
+              ? locale === 'pt-BR'
+                ? 'Gerar relatório local'
+                : 'Generate local report'
+              : locale === 'pt-BR'
+                ? 'Exportar HTML'
+                : 'Export HTML'}
           </LbButton>
+          <div
+            aria-live="polite"
+            className="lb-native-operation-feedback"
+            data-tone={reportFeedback?.tone}
+          >
+            {reportFeedback?.message ??
+              (snapshot.report === null && !canGenerate
+                ? locale === 'pt-BR'
+                  ? 'Conclua uma comparação válida para liberar esta ação.'
+                  : 'Complete a valid comparison to enable this action.'
+                : null)}
+          </div>
         </section>
       );
+    }
+    if (view === 'degraded-coverage') {
+      return <NativeInventory locale={locale} snapshot={snapshot} />;
     }
     return (
       <section className="lb-native-overhead">
@@ -1548,7 +1734,7 @@ const AuthorityMeasureSurface = ({
           sampleWindow={
             snapshot.inventory === null
               ? '—'
-              : `${snapshot.inventory.execution.overhead.sampleWindowMs} ms`
+              : `${String(snapshot.inventory.execution.overhead.sampleWindowMs)} ms`
           }
         />
       </section>
@@ -1574,10 +1760,10 @@ const AuthorityMeasureSurface = ({
         ]}
         purpose={
           locale === 'pt-BR'
-            ? 'Evidência observada e medida neste computador, com limitações explícitas.'
-            : 'Evidence observed and measured on this computer with explicit limitations.'
+            ? 'Meça, compare e exporte evidências reais deste computador.'
+            : 'Measure, compare and export real evidence from this computer.'
         }
-        title={locale === 'pt-BR' ? 'Desempenho real' : 'Real performance'}
+        title={locale === 'pt-BR' ? 'Medições do seu PC' : 'Your PC measurements'}
       />
       <section
         className="lb-native-verdict"
@@ -1594,8 +1780,8 @@ const AuthorityMeasureSurface = ({
                 : 'Inventory is out of date'
               : snapshot.inventoryActionable
                 ? locale === 'pt-BR'
-                  ? 'Leitura local pronta para orientar decisões'
-                  : 'Local reading ready to support decisions'
+                  ? 'Inventário local pronto'
+                  : 'Local inventory is ready'
                 : locale === 'pt-BR'
                   ? 'Atualize antes de iniciar uma medição'
                   : 'Refresh before starting a measurement'}
@@ -1606,8 +1792,8 @@ const AuthorityMeasureSurface = ({
                 ? 'A última leitura continua visível, mas nenhuma nova ação será admitida até a atualização terminar.'
                 : 'The last reading remains visible, but no new action is admitted until refresh completes.'
               : locale === 'pt-BR'
-                ? 'Valores observados vêm do limite nativo; ausências permanecem explicitamente indisponíveis.'
-                : 'Observed values come from the native boundary; absences remain explicitly unavailable.'}
+                ? 'CPU, GPU, memória, disco, tela, Windows e jogos são lidos localmente. Fontes ainda não conectadas são explicadas abaixo.'
+                : 'CPU, GPU, memory, storage, display, Windows and games are read locally. Sources not connected yet are explained below.'}
           </p>
         </div>
         <LbButton
@@ -1662,8 +1848,8 @@ const AuthorityMeasureSurface = ({
         ))}
       </nav>
       <div className="lb-native-measure-grid">
-        <div className="lb-native-measure-primary">{renderBody()}</div>
         <NativeEvidenceRail locale={locale} snapshot={snapshot} />
+        <div className="lb-native-measure-primary">{renderBody()}</div>
       </div>
       <div
         aria-atomic="true"

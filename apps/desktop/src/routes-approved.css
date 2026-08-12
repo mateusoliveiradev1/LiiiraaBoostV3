@@ -1924,12 +1924,14 @@ body,
 
 .desktop-work-canvas .lb-native-measure {
   display: grid;
+  box-sizing: border-box;
   gap: var(--lb-space-4);
   inline-size: 100%;
-  max-inline-size: 1680px;
+  max-inline-size: min(100%, 1680px);
   min-inline-size: 0;
   padding: var(--lb-space-4);
   margin-inline: auto;
+  overflow-x: clip;
   color: var(--lb-text-primary);
 }
 
@@ -1940,7 +1942,7 @@ body,
   align-items: center;
   min-inline-size: 0;
   padding: var(--lb-space-4);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--lb-line-strong);
   border-inline-start: var(--lb-space-1) solid var(--lb-accent-cyan);
   border-radius: var(--lb-radius-panel);
@@ -2013,7 +2015,10 @@ body,
   grid-template-columns: 0.8fr 1.4fr 0.7fr;
   gap: 1px;
   align-items: stretch;
-  overflow: hidden;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
   border-block: 1px solid var(--lb-line-subtle);
   background: var(--lb-line-subtle);
 }
@@ -2049,7 +2054,7 @@ body,
 
 .desktop-work-canvas .lb-native-measure-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(248px, 0.29fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--lb-space-3);
   align-items: start;
   min-inline-size: 0;
@@ -2133,6 +2138,10 @@ body,
   min-block-size: 80px;
 }
 
+.desktop-work-canvas .lb-native-fact[id='evidence-games'] {
+  grid-column: 1 / -1;
+}
+
 .desktop-work-canvas .lb-native-fact {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) auto;
@@ -2195,8 +2204,10 @@ body,
 }
 
 .desktop-work-canvas .lb-native-evidence-rail {
-  position: sticky;
-  inset-block-start: var(--lb-space-3);
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(230px, 0.75fr) minmax(0, 2.25fr);
+  min-inline-size: 0;
   overflow: hidden;
 }
 
@@ -2205,7 +2216,7 @@ body,
   gap: var(--lb-space-3);
   align-items: center;
   padding: var(--lb-space-3);
-  border-block-end: 1px solid var(--lb-line-subtle);
+  border-inline-end: 1px solid var(--lb-line-subtle);
   background: var(--lb-surface-work);
 }
 
@@ -2215,19 +2226,22 @@ body,
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dl {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 0;
-  padding: 0 var(--lb-space-3);
+  padding: 0;
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dl > div {
   display: grid;
   gap: var(--lb-space-1);
-  padding-block: var(--lb-space-3);
-  border-block-end: 1px solid var(--lb-line-subtle);
+  min-inline-size: 0;
+  padding: var(--lb-space-3);
+  border-inline-end: 1px solid var(--lb-line-subtle);
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dl > div:last-child {
-  border-block-end: 0;
+  border-inline-end: 0;
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dt {
@@ -2304,6 +2318,21 @@ body,
   border-block-start: 1px solid var(--lb-line-subtle);
 }
 
+.desktop-work-canvas .lb-native-operation-feedback {
+  min-block-size: 20px;
+  margin-block-start: var(--lb-space-3);
+  color: var(--lb-text-tertiary);
+  font-size: 12px;
+}
+
+.desktop-work-canvas .lb-native-operation-feedback[data-tone='success'] {
+  color: var(--lb-success);
+}
+
+.desktop-work-canvas .lb-native-operation-feedback[data-tone='error'] {
+  color: var(--lb-critical);
+}
+
 .desktop-work-canvas .lb-native-live-status:empty {
   display: none;
 }
@@ -2326,12 +2355,17 @@ body,
   }
 
   .desktop-work-canvas .lb-native-evidence-rail {
-    position: static;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .desktop-work-canvas .lb-native-evidence-rail dl {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .desktop-work-canvas .lb-native-rail-title {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--lb-line-subtle);
   }
 
   .desktop-work-canvas .lb-native-evidence-rail dl > div {
@@ -2371,6 +2405,16 @@ body,
   .desktop-work-canvas .lb-native-fact-state {
     grid-column: 2;
     justify-self: start;
+  }
+
+  .desktop-work-canvas .lb-native-evidence-rail dl > div,
+  .desktop-work-canvas .lb-native-evidence-rail dl > div:last-child {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--lb-line-subtle);
+  }
+
+  .desktop-work-canvas .lb-native-evidence-rail dl > div:last-child {
+    border-block-end: 0;
   }
 }
 

@@ -1,6 +1,9 @@
 use std::collections::BTreeMap;
 use std::time::Instant;
 
+#[cfg(target_os = "windows")]
+use std::{collections::BTreeSet, fs, path::PathBuf};
+
 use liiiraa_contracts_rust::validate_hardware_evidence_document;
 use serde_json::{Map, Value, json};
 use sha2::{Digest, Sha256};
@@ -232,7 +235,7 @@ impl<S: HardwareInventorySource> InventoryCollector<S> {
         let mut facts = Map::new();
 
         for class in HardwareClass::ALL {
-            let mut fact = if request.cancelled {
+            let fact = if request.cancelled {
                 unavailable_fact(
                     UnavailableReason::Cancelled,
                     "collection was cancelled before admission",
@@ -240,13 +243,6 @@ impl<S: HardwareInventorySource> InventoryCollector<S> {
             } else {
                 admit_fact(class, raw.facts.get(&class), request)
             };
-            if class == HardwareClass::Windows && fact["state"] == "observed" {
-                let admitted_value = fact["value"].as_str().unwrap_or_default();
-                fact["value"] = Value::String(bounded_text(&format!(
-                    "{admitted_value}; lifecycle {}",
-                    lifecycle.contract_value()
-                )));
-            }
             if fact["state"] == "unavailable" {
                 unavailable_count += 1;
             }
@@ -538,6 +534,7 @@ mod windows_native {
         facts.insert(HardwareClass::Gpu, gpu_fact(&observed_at));
         facts.insert(HardwareClass::Display, display_fact(&observed_at));
         facts.insert(HardwareClass::Storage, storage_fact(&observed_at));
+        facts.insert(HardwareClass::Games, games_fact(&observed_at));
 
         for (class, source) in [
             (HardwareClass::Network, "GetAdaptersAddresses"),
@@ -545,7 +542,6 @@ mod windows_native {
             (HardwareClass::Usb, "SetupAPI"),
             (HardwareClass::Drivers, "SetupAPI"),
             (HardwareClass::Security, "Windows Security Center"),
-            (HardwareClass::Games, "installed-game discovery"),
         ] {
             facts.insert(
                 class,
@@ -628,15 +624,14 @@ mod windows_native {
                 1,
             );
         }
-        let gib = memory.ullTotalPhys as f64 / 1_073_741_824.0;
         let smbios = read_memory_devices();
-        let value = match &smbios {
-            Some(details) => format!(
-                "{gib:.1} GiB {} · {} MT/s",
-                details.memory_type, details.configured_speed_mt_s
-            ),
-            None => format!("{gib:.1} GiB de memória física"),
-        };
+        let value = smbios
+            .as_ref()
+            .map(memory_display_value)
+            .unwrap_or_else(|| {
+                let gib = memory.ullTotalPhys as f64 / 1_073_741_824.0;
+                format!("{gib:.1} GiB physical memory")
+            });
         RawHardwareFact::observed(
             value,
             if smbios.is_some() {
@@ -731,6 +726,167 @@ mod windows_native {
         )
     }
 
+    fn games_fact(observed_at: &str) -> RawHardwareFact {
+        let started = Instant::now();
+        let mut games = BTreeSet::new();
+        let mut protected_paths = Vec::new();
+        discover_steam_games(&mut games, &mut protected_paths);
+        discover_epic_games(&mut games, &mut protected_paths);
+        discover_directory_games(&mut games, &mut protected_paths);
+        let elapsed_ms = started.elapsed().as_millis().clamp(1, 60_000) as u64;
+
+        if games.is_empty() {
+            return RawHardwareFact::unavailable(
+                UnavailableReason::NotDiscovered,
+                "Steam, Epic, Xbox, EA and Ubisoft local manifests",
+                elapsed_ms,
+            );
+        }
+
+        let total = games.len();
+        let names = games.into_iter().take(8).collect::<Vec<_>>().join(" · ");
+        let suffix = (total > 8)
+            .then(|| format!(" · +{} more", total - 8))
+            .unwrap_or_default();
+        RawHardwareFact::observed_with_protected(
+            format!("{total} installed games · {names}{suffix}"),
+            "Steam + Epic + Xbox/EA/Ubisoft local discovery",
+            observed_at,
+            elapsed_ms,
+            protected_paths,
+        )
+    }
+
+    fn discover_steam_games(games: &mut BTreeSet<String>, protected_paths: &mut Vec<String>) {
+        let mut steam_roots = BTreeSet::new();
+        for variable in ["PROGRAMFILES(X86)", "PROGRAMFILES"] {
+            if let Some(root) = std::env::var_os(variable) {
+                steam_roots.insert(PathBuf::from(root).join("Steam"));
+            }
+        }
+        for root in steam_roots.iter().cloned().collect::<Vec<_>>() {
+            let libraries = root.join("steamapps").join("libraryfolders.vdf");
+            if let Ok(contents) = fs::read_to_string(libraries) {
+                for path in vdf_values(&contents, "path") {
+                    steam_roots.insert(PathBuf::from(path.replace("\\\\", "\\")));
+                }
+            }
+        }
+        for root in steam_roots {
+            let steamapps = root.join("steamapps");
+            let Ok(entries) = fs::read_dir(&steamapps) else {
+                continue;
+            };
+            protected_paths.push(steamapps.to_string_lossy().into_owned());
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let file_name = entry.file_name();
+                let file_name = file_name.to_string_lossy();
+                if !file_name.starts_with("appmanifest_")
+                    || path.extension().and_then(|value| value.to_str()) != Some("acf")
+                {
+                    continue;
+                }
+                if let Ok(contents) = fs::read_to_string(path) {
+                    if let Some(name) = vdf_values(&contents, "name").into_iter().next() {
+                        insert_game_name(games, &name);
+                    }
+                }
+            }
+        }
+    }
+
+    fn discover_epic_games(games: &mut BTreeSet<String>, protected_paths: &mut Vec<String>) {
+        let Some(program_data) = std::env::var_os("PROGRAMDATA") else {
+            return;
+        };
+        let manifests = PathBuf::from(program_data)
+            .join("Epic")
+            .join("EpicGamesLauncher")
+            .join("Data")
+            .join("Manifests");
+        let Ok(entries) = fs::read_dir(&manifests) else {
+            return;
+        };
+        protected_paths.push(manifests.to_string_lossy().into_owned());
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|value| value.to_str()) != Some("item") {
+                continue;
+            }
+            let Ok(bytes) = fs::read(path) else {
+                continue;
+            };
+            let Ok(manifest) = serde_json::from_slice::<Value>(&bytes) else {
+                continue;
+            };
+            if manifest["bIsIncompleteInstall"].as_bool() == Some(true) {
+                continue;
+            }
+            if let Some(name) = manifest["DisplayName"].as_str() {
+                insert_game_name(games, name);
+            }
+        }
+    }
+
+    fn discover_directory_games(games: &mut BTreeSet<String>, protected_paths: &mut Vec<String>) {
+        let mut roots = Vec::new();
+        if let Some(system_drive) = std::env::var_os("SYSTEMDRIVE") {
+            roots.push(PathBuf::from(system_drive).join("XboxGames"));
+        }
+        if let Some(program_files) = std::env::var_os("PROGRAMFILES") {
+            roots.push(PathBuf::from(&program_files).join("EA Games"));
+            roots.push(
+                PathBuf::from(program_files)
+                    .join("Ubisoft")
+                    .join("Ubisoft Game Launcher")
+                    .join("games"),
+            );
+        }
+        if let Some(program_files_x86) = std::env::var_os("PROGRAMFILES(X86)") {
+            roots.push(
+                PathBuf::from(program_files_x86)
+                    .join("Ubisoft")
+                    .join("Ubisoft Game Launcher")
+                    .join("games"),
+            );
+        }
+        for root in roots {
+            let Ok(entries) = fs::read_dir(&root) else {
+                continue;
+            };
+            protected_paths.push(root.to_string_lossy().into_owned());
+            for entry in entries.flatten() {
+                if entry.file_type().is_ok_and(|kind| kind.is_dir()) {
+                    insert_game_name(games, &entry.file_name().to_string_lossy());
+                }
+            }
+        }
+    }
+
+    fn vdf_values(contents: &str, wanted_key: &str) -> Vec<String> {
+        contents
+            .lines()
+            .filter_map(|line| {
+                let quoted = line
+                    .split('"')
+                    .enumerate()
+                    .filter_map(|(index, part)| (index % 2 == 1).then_some(part))
+                    .collect::<Vec<_>>();
+                (quoted.len() >= 2 && quoted[0].eq_ignore_ascii_case(wanted_key))
+                    .then(|| quoted[1].trim().to_owned())
+            })
+            .filter(|value| !value.is_empty())
+            .collect()
+    }
+
+    fn insert_game_name(games: &mut BTreeSet<String>, candidate: &str) {
+        let name = candidate.trim().chars().take(96).collect::<String>();
+        if name.len() >= 2 && !name.eq_ignore_ascii_case("common") {
+            games.insert(name);
+        }
+    }
+
     fn windows_version() -> WindowsVersionEvidence {
         let mut info = OSVERSIONINFOW {
             dwOSVersionInfoSize: size_of::<OSVERSIONINFOW>() as u32,
@@ -800,12 +956,36 @@ mod windows_native {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     struct MemoryDeviceDetails {
-        memory_type: String,
-        configured_speed_mt_s: u32,
+        memory_type: Option<String>,
+        configured_speed_mt_s: Option<u32>,
+        installed_mebibytes: u64,
+        module_count: u32,
+    }
+
+    fn memory_display_value(details: &MemoryDeviceDetails) -> String {
+        let capacity = if details.installed_mebibytes > 0 {
+            format!("{} GB", (details.installed_mebibytes + 512) / 1024)
+        } else {
+            "Installed memory".to_owned()
+        };
+        let mut parts = vec![capacity];
+        if let Some(memory_type) = &details.memory_type {
+            parts.push(memory_type.clone());
+        }
+        if let Some(speed) = details.configured_speed_mt_s {
+            parts.push(format!("{speed} MT/s"));
+        }
+        if details.module_count > 0 {
+            let suffix = if details.module_count == 1 { "" } else { "s" };
+            parts.push(format!("{} DIMM{suffix}", details.module_count));
+        }
+        parts.join(" · ")
     }
 
     fn read_memory_devices() -> Option<MemoryDeviceDetails> {
-        let provider = FIRMWARE_TABLE_PROVIDER(u32::from_le_bytes(*b"RSMB"));
+        // Win32 documents this as the multi-character constant 'RSMB', whose
+        // numeric DWORD representation follows the character order (big-endian).
+        let provider = FIRMWARE_TABLE_PROVIDER(u32::from_be_bytes(*b"RSMB"));
         // SAFETY: a null output slice is the documented size query for this provider.
         let required = unsafe { GetSystemFirmwareTable(provider, 0, None) };
         if required <= 8 || required > 16 * 1024 * 1024 {
@@ -826,6 +1006,8 @@ mod windows_native {
         let mut cursor = 0_usize;
         let mut memory_type: Option<&'static str> = None;
         let mut configured_speed = 0_u32;
+        let mut installed_mebibytes = 0_u64;
+        let mut module_count = 0_u32;
         while cursor + 4 <= table.len() {
             let structure_type = table[cursor];
             let formatted_length = usize::from(table[cursor + 1]);
@@ -835,6 +1017,20 @@ mod windows_native {
             if structure_type == 17 && formatted_length > 0x16 {
                 let size = u16::from_le_bytes([table[cursor + 0x0c], table[cursor + 0x0d]]);
                 if size != 0 && size != u16::MAX {
+                    module_count += 1;
+                    let module_mebibytes = if size == 0x7fff && formatted_length >= 0x20 {
+                        u64::from(u32::from_le_bytes([
+                            table[cursor + 0x1c],
+                            table[cursor + 0x1d],
+                            table[cursor + 0x1e],
+                            table[cursor + 0x1f],
+                        ]))
+                    } else if size & 0x8000 != 0 {
+                        u64::from(size & 0x7fff) / 1024
+                    } else {
+                        u64::from(size)
+                    };
+                    installed_mebibytes = installed_mebibytes.saturating_add(module_mebibytes);
                     let candidate_type = match table[cursor + 0x12] {
                         0x18 => Some("DDR3"),
                         0x1a => Some("DDR4"),
@@ -853,14 +1049,31 @@ mod windows_native {
                     } else {
                         0
                     };
-                    let speed = if configured > 0 && configured != u16::MAX {
-                        configured
+                    let legacy_speed = if configured > 0 && configured != u16::MAX {
+                        u32::from(configured)
+                    } else if rated > 0 && rated != u16::MAX {
+                        u32::from(rated)
                     } else {
-                        rated
+                        0
                     };
-                    if speed != u16::MAX {
-                        configured_speed = configured_speed.max(u32::from(speed));
-                    }
+                    let extended_speed = if formatted_length >= 0x5c {
+                        let configured = u32::from_le_bytes([
+                            table[cursor + 0x58],
+                            table[cursor + 0x59],
+                            table[cursor + 0x5a],
+                            table[cursor + 0x5b],
+                        ]);
+                        let rated = u32::from_le_bytes([
+                            table[cursor + 0x54],
+                            table[cursor + 0x55],
+                            table[cursor + 0x56],
+                            table[cursor + 0x57],
+                        ]);
+                        configured.max(rated)
+                    } else {
+                        0
+                    };
+                    configured_speed = configured_speed.max(extended_speed.max(legacy_speed));
                 }
             }
 
@@ -873,13 +1086,12 @@ mod windows_native {
                 break;
             }
         }
-        match (memory_type, configured_speed) {
-            (Some(memory_type), speed) if speed > 0 => Some(MemoryDeviceDetails {
-                memory_type: memory_type.to_owned(),
-                configured_speed_mt_s: speed,
-            }),
-            _ => None,
-        }
+        (module_count > 0).then(|| MemoryDeviceDetails {
+            memory_type: memory_type.map(str::to_owned),
+            configured_speed_mt_s: (configured_speed > 0).then_some(configured_speed),
+            installed_mebibytes,
+            module_count,
+        })
     }
 
     fn edition_from_product(product: OS_PRODUCT_TYPE) -> WindowsEdition {
@@ -947,8 +1159,26 @@ mod windows_native {
             structure.extend_from_slice(&[0, 0]);
 
             let details = parse_memory_devices(&structure).expect("DDR5 module");
-            assert_eq!(details.memory_type, "DDR5");
-            assert_eq!(details.configured_speed_mt_s, 6_000);
+            assert_eq!(details.memory_type.as_deref(), Some("DDR5"));
+            assert_eq!(details.configured_speed_mt_s, Some(6_000));
+            assert_eq!(details.installed_mebibytes, 16_384);
+            assert_eq!(details.module_count, 1);
+            assert_eq!(
+                memory_display_value(&details),
+                "16 GB · DDR5 · 6000 MT/s · 1 DIMM"
+            );
+        }
+
+        #[test]
+        fn parses_steam_vdf_fields_without_exposing_paths() {
+            let manifest = r#"
+                "AppState"
+                {
+                    "appid" "578080"
+                    "name" "PUBG: BATTLEGROUNDS"
+                }
+            "#;
+            assert_eq!(vdf_values(manifest, "name"), vec!["PUBG: BATTLEGROUNDS"]);
         }
     }
 }

@@ -42,9 +42,9 @@ export type LiveTelemetryResult =
   | Readonly<{ ok: true; value: LiveTelemetrySnapshot }>
   | Readonly<{ ok: false; error: Readonly<{ code: 'COMMAND_FAILED' | 'CONTRACT_INVALID' }> }>;
 
-export interface LiveTelemetryInvoke {
-  (command: 'read_live_telemetry' | 'sample_measurement_capture'): Promise<unknown>;
-}
+export type LiveTelemetryInvoke = (
+  command: 'read_live_telemetry' | 'sample_measurement_capture',
+) => Promise<unknown>;
 
 export interface LiveTelemetryAuthority {
   snapshot(): LiveTelemetryAuthoritySnapshot;
@@ -78,10 +78,14 @@ const finiteWithin = (value: unknown, minimum: number, maximum: number): value i
 const validText = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0 && value.length <= 256;
 
-const validScalar = (value: unknown, expectedUnit: 'percent' | 'milliseconds'): value is LiveScalarMetric => {
+const validScalar = (
+  value: unknown,
+  expectedUnit: 'percent' | 'milliseconds',
+): value is LiveScalarMetric => {
   if (!isRecord(value) || !hasOnlyKeys(value, SCALAR_KEYS)) return false;
   if (!['observed', 'warming-up', 'unavailable'].includes(String(value['state']))) return false;
-  if (value['unit'] !== expectedUnit || !validText(value['source']) || !validText(value['detail'])) return false;
+  if (value['unit'] !== expectedUnit || !validText(value['source']) || !validText(value['detail']))
+    return false;
   if (value['state'] === 'observed') {
     const maximum = expectedUnit === 'percent' ? 100 : 10_000;
     return finiteWithin(value['value'], 0, maximum) && value['reasonCode'] === undefined;
@@ -94,7 +98,12 @@ const validMemory = (value: unknown): value is LiveMemoryMetric => {
   if (!['observed', 'unavailable'].includes(String(value['state']))) return false;
   if (!validText(value['source']) || !validText(value['detail'])) return false;
   if (value['state'] === 'unavailable') {
-    return value['usedBytes'] === null && value['totalBytes'] === null && value['loadPercent'] === null && validText(value['reasonCode']);
+    return (
+      value['usedBytes'] === null &&
+      value['totalBytes'] === null &&
+      value['loadPercent'] === null &&
+      validText(value['reasonCode'])
+    );
   }
   return (
     finiteWithin(value['usedBytes'], 0, Number.MAX_SAFE_INTEGER) &&
@@ -128,7 +137,11 @@ export const createTauriLiveTelemetryAuthority = ({
   invoke = (command) => tauriInvoke(command),
 }: Readonly<{ invoke?: LiveTelemetryInvoke }> = {}): LiveTelemetryAuthority => {
   const listeners = new Set<() => void>();
-  let snapshot: LiveTelemetryAuthoritySnapshot = Object.freeze({ revision: 0, status: 'idle', telemetry: null });
+  let snapshot: LiveTelemetryAuthoritySnapshot = Object.freeze({
+    revision: 0,
+    status: 'idle',
+    telemetry: null,
+  });
 
   const publish = (status: LiveTelemetryStatus, telemetry = snapshot.telemetry): void => {
     snapshot = Object.freeze({ revision: snapshot.revision + 1, status, telemetry });
@@ -138,16 +151,25 @@ export const createTauriLiveTelemetryAuthority = ({
   const execute = async (
     command: 'read_live_telemetry' | 'sample_measurement_capture',
   ): Promise<LiveTelemetryResult> => {
-    publish('reading');
+    // Keep an admitted sample visually stable while the next background poll runs.
+    // `reading` is reserved for the first load, otherwise the 1.1 s polling cadence
+    // makes status text and assistive announcements flicker continuously.
+    if (snapshot.telemetry === null) {
+      publish('reading');
+    }
     let value: unknown;
     try {
       value = await invoke(command);
     } catch {
-      publish('unavailable');
+      if (snapshot.telemetry === null) {
+        publish('unavailable');
+      }
       return Object.freeze({ ok: false, error: Object.freeze({ code: 'COMMAND_FAILED' }) });
     }
     if (!validSnapshot(value)) {
-      publish('unavailable');
+      if (snapshot.telemetry === null) {
+        publish('unavailable');
+      }
       return Object.freeze({ ok: false, error: Object.freeze({ code: 'CONTRACT_INVALID' }) });
     }
     const telemetry = freezeSnapshot(value);

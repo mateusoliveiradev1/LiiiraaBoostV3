@@ -333,8 +333,8 @@ test('measurement authority remains readable at 150 percent app scale and narrow
   });
 
   const workspace = page.locator('.lb-native-measure');
-  await expect(workspace).toContainText('Desempenho real');
-  await expect(workspace).toContainText('Hardware observado');
+  await expect(workspace).toContainText('Medições do seu PC');
+  await expect(workspace).toContainText('Inventário verificado');
   await expect(page.locator('#evidence-audio')).toContainText('Áudio indisponível');
 
   const geometry = await page.evaluate(() => ({

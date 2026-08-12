@@ -230,6 +230,188 @@ const UnavailableSurface = ({
   </section>
 );
 
+export const resolveGameDiscovery = (
+  value: string | undefined,
+): Readonly<{ names: readonly string[]; total: number }> => {
+  if (value === undefined) return { names: [], total: 0 };
+  const match = /^\d+ installed games · (.+)$/u.exec(value);
+  if (match === null) return { names: [], total: 0 };
+  const rawNames = match[1];
+  if (rawNames === undefined) return { names: [], total: 0 };
+  const names = rawNames
+    .split(' · ')
+    .filter((name) => !/^\+\d+ more$/u.test(name))
+    .map((name) => name.trim())
+    .filter(Boolean);
+  return { names, total: Number.parseInt(value, 10) };
+};
+
+const NativeCompetitiveSurface = ({
+  evidenceAuthority,
+  locale,
+}: Readonly<{
+  evidenceAuthority?: EvidenceAuthority | undefined;
+  locale: ShellLocale;
+}>) => {
+  const evidence = useSyncExternalStore(
+    evidenceAuthority === undefined
+      ? emptySubscribe
+      : (notify) =>
+          evidenceAuthority.subscribe(() => {
+            notify();
+          }),
+    () => evidenceAuthority?.snapshot() ?? EMPTY_EVIDENCE_SNAPSHOT,
+    () => EMPTY_EVIDENCE_SNAPSHOT,
+  );
+  const gamesFact = evidence.inventory?.games;
+  const gameDiscovery = resolveGameDiscovery(
+    gamesFact?.state === 'observed' ? gamesFact.value : undefined,
+  );
+  const games = gameDiscovery.names;
+  const refreshing = evidence.status === 'refreshing';
+
+  useEffect(() => {
+    if (
+      evidenceAuthority === undefined ||
+      evidence.inventory !== null ||
+      evidence.status !== 'idle'
+    ) {
+      return;
+    }
+
+    const collectedAt = new Date().toISOString();
+    void evidenceAuthority.refreshInventory({
+      request: {
+        schemaVersion: '1.0',
+        evidenceId: `games-inventory-${Date.now().toString(36)}`,
+        evidenceVersion: 1,
+        collectedAt,
+        deadlineAt: new Date(Date.now() + 10_000).toISOString(),
+        perSourceTimeoutMs: 2_000,
+        policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
+      },
+    });
+  }, [evidence.inventory, evidence.status, evidenceAuthority]);
+
+  const refresh = (): void => {
+    if (evidenceAuthority === undefined || refreshing) return;
+    const collectedAt = new Date().toISOString();
+    void evidenceAuthority.refreshInventory({
+      request: {
+        schemaVersion: '1.0',
+        evidenceId: `games-inventory-${Date.now().toString(36)}`,
+        evidenceVersion: (evidence.inventory?.evidenceVersion ?? 0) + 1,
+        collectedAt,
+        deadlineAt: new Date(Date.now() + 10_000).toISOString(),
+        perSourceTimeoutMs: 2_000,
+        policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
+      },
+    });
+  };
+
+  return (
+    <div className="premium-competitive-layout" data-game-discovery={gamesFact?.state ?? 'pending'}>
+      <section className="premium-competitive-hero">
+        <div>
+          <span className="premium-section-label">
+            {text(locale, 'BIBLIOTECA LOCAL', 'LOCAL LIBRARY')}
+          </span>
+          <h2>
+            {gameDiscovery.total > 0
+              ? text(
+                  locale,
+                  `${String(gameDiscovery.total)} ${gameDiscovery.total === 1 ? 'jogo encontrado' : 'jogos encontrados'}`,
+                  `${String(gameDiscovery.total)} ${gameDiscovery.total === 1 ? 'game found' : 'games found'}`,
+                )
+              : text(locale, 'Procurando jogos instalados', 'Looking for installed games')}
+          </h2>
+          <p>
+            {text(
+              locale,
+              'A leitura consulta somente manifestos locais da Steam, Epic, Xbox, EA e Ubisoft. Caminhos de instalação não saem deste computador.',
+              'The scan only reads local Steam, Epic, Xbox, EA and Ubisoft manifests. Installation paths never leave this computer.',
+            )}
+          </p>
+        </div>
+        <div className="premium-game-discovery-status">
+          <span className="premium-game-discovery-icon">
+            <ProductIcon name={games.length > 0 ? 'game' : 'recovery'} size={25} weight="duotone" />
+          </span>
+          <div>
+            <small>{text(locale, 'Estado da leitura', 'Scan status')}</small>
+            <strong>
+              {refreshing
+                ? text(locale, 'Atualizando biblioteca…', 'Refreshing library…')
+                : gamesFact?.state === 'observed'
+                  ? text(locale, 'Biblioteca verificada', 'Library verified')
+                  : text(locale, 'Nenhum jogo encontrado', 'No game found')}
+            </strong>
+          </div>
+          <button
+            className="premium-button"
+            data-tone="secondary"
+            disabled={refreshing || evidenceAuthority === undefined}
+            onClick={refresh}
+            type="button"
+          >
+            <ProductIcon name="recovery" size={16} />
+            {refreshing
+              ? text(locale, 'Verificando…', 'Scanning…')
+              : text(locale, 'Verificar novamente', 'Scan again')}
+          </button>
+        </div>
+      </section>
+
+      <section
+        className="premium-discovered-games"
+        aria-labelledby="premium-discovered-games-title"
+      >
+        <header>
+          <div>
+            <span className="premium-section-label">
+              {text(locale, 'JOGOS INSTALADOS', 'INSTALLED GAMES')}
+            </span>
+            <h2 id="premium-discovered-games-title">
+              {text(locale, 'Prontos para receber um perfil', 'Ready for a profile')}
+            </h2>
+          </div>
+          <span>{text(locale, 'Somente leitura', 'Read only')}</span>
+        </header>
+        {games.length === 0 ? (
+          <div className="premium-games-empty" role="status">
+            <ProductIcon name="game" size={26} weight="duotone" />
+            <div>
+              <strong>{text(locale, 'Biblioteca ainda vazia', 'Library is still empty')}</strong>
+              <p>
+                {text(
+                  locale,
+                  'Abra um launcher ao menos uma vez e use “Verificar novamente”. Nenhuma otimização é aplicada nesta etapa.',
+                  'Open a launcher at least once and use “Scan again”. No optimization is applied at this stage.',
+                )}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="premium-games-grid">
+            {games.map((game) => (
+              <article key={game}>
+                <span>
+                  <ProductIcon name="game" size={20} weight="duotone" />
+                </span>
+                <div>
+                  <strong>{game}</strong>
+                  <small>{text(locale, 'Detectado no Windows', 'Detected on Windows')}</small>
+                </div>
+                <span className="premium-status-pill">{text(locale, 'Encontrado', 'Found')}</span>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
 const decimal = (locale: ShellLocale, value: number, digits = 1): string =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: digits, minimumFractionDigits: 0 }).format(
     value,
@@ -244,6 +426,51 @@ const scalarValue = (locale: ShellLocale, metric: LiveScalarMetric | undefined):
     : `${decimal(locale, metric.value, 3)} ms`;
 };
 
+const appendSample = (
+  values: readonly number[],
+  value: number | null | undefined,
+): readonly number[] =>
+  value === null || value === undefined ? values : [...values.slice(-23), value];
+
+const TelemetrySparkline = ({
+  label,
+  maximum,
+  values,
+}: Readonly<{ label: string; maximum: number; values: readonly number[] }>) => {
+  const usableMaximum = Math.max(maximum, ...values, 1);
+  const coordinates = values.map((value, index) => {
+    const x = values.length <= 1 ? 100 : (index / (values.length - 1)) * 100;
+    const y = 34 - (Math.min(value, usableMaximum) / usableMaximum) * 29;
+    return { x, y };
+  });
+  const points = coordinates.map(({ x, y }) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+  const areaPoints = points.length === 0 ? '' : `0,36 ${points} 100,36`;
+  const lastPoint = coordinates.at(-1);
+  return (
+    <span className="premium-metric-chart">
+      <svg
+        aria-label={label}
+        className="premium-metric-sparkline"
+        preserveAspectRatio="none"
+        role="img"
+        viewBox="0 0 100 36"
+      >
+        <title>{label}</title>
+        <path d="M0 12H100 M0 24H100 M0 35.5H100" />
+        {areaPoints === '' ? null : <polygon points={areaPoints} />}
+        {points === '' ? null : <polyline points={points} />}
+        {lastPoint === undefined ? null : (
+          <circle cx={lastPoint.x} cy={lastPoint.y} r="1.8" vectorEffect="non-scaling-stroke" />
+        )}
+      </svg>
+      <span aria-hidden="true" className="premium-metric-chart-range">
+        <span>0</span>
+        <span>{Math.round(usableMaximum)}</span>
+      </span>
+    </span>
+  );
+};
+
 const NativeLiveTelemetrySurface = ({
   evidenceAuthority,
   liveTelemetryAuthority,
@@ -256,15 +483,24 @@ const NativeLiveTelemetrySurface = ({
   const evidence = useSyncExternalStore(
     evidenceAuthority === undefined
       ? emptySubscribe
-      : (notify) => evidenceAuthority.subscribe(() => notify()),
-    evidenceAuthority?.snapshot ?? (() => EMPTY_EVIDENCE_SNAPSHOT),
+      : (notify) =>
+          evidenceAuthority.subscribe(() => {
+            notify();
+          }),
+    () => evidenceAuthority?.snapshot() ?? EMPTY_EVIDENCE_SNAPSHOT,
     () => EMPTY_EVIDENCE_SNAPSHOT,
   );
   const live = useSyncExternalStore(
-    liveTelemetryAuthority.subscribe,
-    liveTelemetryAuthority.snapshot,
+    (notify) => liveTelemetryAuthority.subscribe(notify),
+    () => liveTelemetryAuthority.snapshot(),
     () => EMPTY_TELEMETRY_SNAPSHOT,
   );
+  const [history, setHistory] = useState<{
+    readonly cpu: readonly number[];
+    readonly gpu: readonly number[];
+    readonly memory: readonly number[];
+    readonly latency: readonly number[];
+  }>(() => ({ cpu: [], gpu: [], memory: [], latency: [] }));
 
   useEffect(() => {
     if (evidenceAuthority === undefined) return undefined;
@@ -278,11 +514,13 @@ const NativeLiveTelemetrySurface = ({
         evidenceVersion: (evidenceAuthority.snapshot().inventory?.evidenceVersion ?? 0) + 1,
         collectedAt,
         deadlineAt: new Date(Date.now() + 10_000).toISOString(),
-        perSourceTimeoutMs: 750,
+        perSourceTimeoutMs: 2_000,
         policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
       },
     });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [evidenceAuthority]);
 
   useEffect(() => {
@@ -297,6 +535,29 @@ const NativeLiveTelemetrySurface = ({
       globalThis.clearInterval(timer);
     };
   }, [liveTelemetryAuthority]);
+
+  useEffect(() => {
+    const telemetry = live.telemetry;
+    if (telemetry === null) return;
+    setHistory((current) => ({
+      cpu: appendSample(
+        current.cpu,
+        telemetry.cpu.state === 'observed' ? telemetry.cpu.value : null,
+      ),
+      gpu: appendSample(
+        current.gpu,
+        telemetry.gpu.state === 'observed' ? telemetry.gpu.value : null,
+      ),
+      memory: appendSample(
+        current.memory,
+        telemetry.memory.state === 'observed' ? telemetry.memory.loadPercent : null,
+      ),
+      latency: appendSample(
+        current.latency,
+        telemetry.collectionLatency.state === 'observed' ? telemetry.collectionLatency.value : null,
+      ),
+    }));
+  }, [live.revision, live.telemetry]);
 
   const inventory = evidence.inventory;
   const telemetry = live.telemetry;
@@ -314,21 +575,23 @@ const NativeLiveTelemetrySurface = ({
     telemetry?.memory.state === 'observed' && telemetry.memory.loadPercent !== null
       ? text(
           locale,
-          `${decimal(locale, telemetry.memory.loadPercent)}% da memória física em uso`,
-          `${decimal(locale, telemetry.memory.loadPercent)}% of physical memory in use`,
+          `${decimal(locale, telemetry.memory.loadPercent)}% em uso${inventory?.memory.state === 'observed' ? ` · ${inventory.memory.value}` : ''}`,
+          `${decimal(locale, telemetry.memory.loadPercent)}% in use${inventory?.memory.state === 'observed' ? ` · ${inventory.memory.value}` : ''}`,
         )
       : text(locale, 'Aguardando leitura nativa do Windows', 'Waiting for native Windows reading');
   const liveLabel =
     live.status === 'ready'
-      ? text(locale, 'Atualizando', 'Updating')
+      ? text(locale, 'Ao vivo', 'Live')
       : live.status === 'reading'
-        ? text(locale, 'Lendo', 'Reading')
-        : text(locale, 'Indisponível', 'Unavailable');
+        ? text(locale, 'Preparando leitura', 'Preparing reading')
+        : text(locale, 'Telemetria indisponível', 'Telemetry unavailable');
   const metrics: readonly Readonly<{
     icon: ProductIconName;
     label: string;
     value: string;
     detail: string | undefined;
+    history: readonly number[];
+    maximum: number;
   }>[] = [
     {
       icon: 'cpu',
@@ -336,8 +599,10 @@ const NativeLiveTelemetrySurface = ({
       value: scalarValue(locale, telemetry?.cpu),
       detail:
         telemetry?.cpu.state === 'observed'
-          ? text(locale, 'Uso total medido pelo Windows', 'Total usage measured by Windows')
+          ? text(locale, 'Carga total do processador', 'Total processor load')
           : text(locale, 'Aguardando contador nativo da CPU', 'Waiting for the native CPU counter'),
+      history: history.cpu,
+      maximum: 100,
     },
     {
       icon: 'graphics',
@@ -345,22 +610,22 @@ const NativeLiveTelemetrySurface = ({
       value: scalarValue(locale, telemetry?.gpu),
       detail:
         telemetry?.gpu.state === 'observed'
-          ? text(
-              locale,
-              'Motor gráfico mais ocupado, medido pelo Windows',
-              'Busiest graphics engine measured by Windows',
-            )
+          ? text(locale, 'Motor gráfico mais exigido agora', 'Busiest graphics engine right now')
           : text(
               locale,
               'O Windows ainda não entregou uma amostra confiável da GPU',
               'Windows has not provided a trustworthy GPU sample yet',
             ),
+      history: history.gpu,
+      maximum: 100,
     },
     {
       icon: 'memory',
       label: text(locale, 'Memória', 'Memory'),
       value: memoryValue,
       detail: memoryDetail,
+      history: history.memory,
+      maximum: 100,
     },
     {
       icon: 'activity',
@@ -368,9 +633,11 @@ const NativeLiveTelemetrySurface = ({
       value: scalarValue(locale, telemetry?.collectionLatency),
       detail: text(
         locale,
-        'Tempo gasto para concluir esta leitura local',
-        'Time spent completing this local reading',
+        'Custo do monitoramento nesta amostra',
+        'Monitoring cost for this sample',
       ),
+      history: history.latency,
+      maximum: Math.max(4, ...history.latency),
     },
   ];
 
@@ -404,7 +671,7 @@ const NativeLiveTelemetrySurface = ({
             <span className="premium-section-label">
               {text(locale, 'TELEMETRIA NATIVA LOCAL', 'LOCAL NATIVE TELEMETRY')}
             </span>
-            <h2>{text(locale, 'Leitura atual', 'Current reading')}</h2>
+            <h2>{text(locale, 'Desempenho em tempo real', 'Live performance')}</h2>
           </div>
           <span className="premium-live" data-state={live.status}>
             <span aria-hidden="true" />
@@ -412,7 +679,7 @@ const NativeLiveTelemetrySurface = ({
           </span>
         </header>
         <div className="premium-metric-grid">
-          {metrics.map(({ icon, label, value, detail }) => (
+          {metrics.map(({ icon, label, value, detail, history: metricHistory, maximum }) => (
             <div
               data-metric-state={
                 value.includes('dispon') || value.includes('available') ? 'unavailable' : 'observed'
@@ -429,6 +696,11 @@ const NativeLiveTelemetrySurface = ({
                   {detail ??
                     text(locale, 'Aguardando leitura nativa', 'Waiting for native reading')}
                 </em>
+                <TelemetrySparkline
+                  label={text(locale, `Histórico recente de ${label}`, `Recent ${label} history`)}
+                  maximum={maximum}
+                  values={metricHistory}
+                />
               </span>
             </div>
           ))}
@@ -488,6 +760,8 @@ export const PremiumOperationsSurface = ({
         liveTelemetryAuthority={ownedLiveTelemetryAuthority}
         locale={locale}
       />
+    ) : view === 'competitive' ? (
+      <NativeCompetitiveSurface evidenceAuthority={evidenceAuthority} locale={locale} />
     ) : view === 'about' ? (
       <InstallerIdentitySurface identity={installerIdentity} locale={locale} />
     ) : view === 'settings' ? (

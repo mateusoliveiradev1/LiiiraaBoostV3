@@ -8,7 +8,10 @@ import type { ReactNode } from 'react';
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { PremiumOperationsSurface } from './features/premium-operations-production.js';
+import {
+  PremiumOperationsSurface,
+  resolveGameDiscovery,
+} from './features/premium-operations-production.js';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
 const sourceRoot = dirname(fileURLToPath(import.meta.url));
@@ -27,11 +30,9 @@ describe('published desktop composition', () => {
     expect(productionIndex).toContain("from './app.js'");
     expect(productionIndex).toContain('<DesktopApp />');
     expect(productionIndex).not.toContain("from './production-app.js'");
-    expect(productionApp).not.toMatch(
-      /from ['"][^'"]*\/premium-operations(?:\.js)?['"]/u,
-    );
+    expect(productionApp).not.toMatch(/from ['"][^'"]*\/premium-operations(?:\.js)?['"]/u);
     expect(productionApp).not.toMatch(/from ['"][^'"]*\/premium-updater(?:\.js)?['"]/u);
-    expect(productionApp).toContain("import.meta.env.PROD");
+    expect(productionApp).toContain('import.meta.env.PROD');
     expect(playwrightConfig).toContain(
       'pnpm exec vite build --mode browser-test && pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort',
     );
@@ -64,5 +65,24 @@ describe('published desktop composition', () => {
     expect(`${home}${about}`).not.toMatch(
       /SIMULATED SCENARIO|SIMULAÇÃO SEGURA|Demonstração segura/iu,
     );
+  });
+
+  it('projects only admitted game names into the competitive library', () => {
+    expect(
+      resolveGameDiscovery(
+        '10 installed games · Counter-Strike 2 · PUBG: BATTLEGROUNDS · VALORANT · +7 more',
+      ),
+    ).toEqual({
+      total: 10,
+      names: ['Counter-Strike 2', 'PUBG: BATTLEGROUNDS', 'VALORANT'],
+    });
+    expect(resolveGameDiscovery(undefined)).toEqual({ total: 0, names: [] });
+
+    const competitive = renderToStaticMarkup(
+      <PremiumOperationsSurface locale="pt-BR" navigate={() => undefined} view="competitive" />,
+    );
+    expect(competitive).toContain('data-game-discovery="pending"');
+    expect(competitive).toContain('Steam, Epic, Xbox, EA e Ubisoft');
+    expect(competitive).not.toMatch(/SIMULATED SCENARIO|Demonstração segura/iu);
   });
 });

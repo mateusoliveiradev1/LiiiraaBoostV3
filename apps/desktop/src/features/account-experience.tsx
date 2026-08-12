@@ -287,13 +287,21 @@ const SessionRestorationSurface = ({
   state: 'restoring' | 'unavailable';
 }>) => {
   const [stage, setStage] = useState(0);
+  const [takingLonger, setTakingLonger] = useState(false);
   useEffect(() => {
     if (state !== 'restoring') return undefined;
     setStage(0);
+    setTakingLonger(false);
     const timer = globalThis.setInterval(() => {
       setStage((current) => Math.min(current + 1, 2));
     }, 2_500);
-    return () => globalThis.clearInterval(timer);
+    const slowTimer = globalThis.setTimeout(() => {
+      setTakingLonger(true);
+    }, 7_500);
+    return () => {
+      globalThis.clearInterval(timer);
+      globalThis.clearTimeout(slowTimer);
+    };
   }, [state]);
   const stages = [
     copy(locale, { en: 'Windows credential', 'pt-BR': 'Credencial do Windows' }),
@@ -382,12 +390,29 @@ const SessionRestorationSurface = ({
               ))}
             </ol>
             <small>
-              {copy(locale, {
-                en: 'If the service does not answer, this attempt ends automatically in a few seconds.',
-                'pt-BR':
-                  'Se o serviço não responder, esta tentativa termina automaticamente em poucos segundos.',
-              })}
+              {takingLonger
+                ? copy(locale, {
+                    en: 'This is taking longer than expected. You can retry without losing the protected credential.',
+                    'pt-BR':
+                      'Está demorando mais que o esperado. Você pode tentar novamente sem perder a credencial protegida.',
+                  })
+                : copy(locale, {
+                    en: 'If the service does not answer, this attempt ends automatically in a few seconds.',
+                    'pt-BR':
+                      'Se o serviço não responder, esta tentativa termina automaticamente em poucos segundos.',
+                  })}
             </small>
+            {takingLonger ? (
+              <div className="desktop-session-restoration-actions" data-inline="true">
+                <LbButton onPress={onRetry} variant="secondary">
+                  <ProductIcon name="recovery" size={17} />
+                  {copy(locale, { en: 'Retry now', 'pt-BR': 'Tentar novamente' })}
+                </LbButton>
+                <LbButton onPress={onSignIn} variant="quiet">
+                  {copy(locale, { en: 'Use another account', 'pt-BR': 'Usar outra conta' })}
+                </LbButton>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="desktop-session-restoration-actions">
@@ -3208,7 +3233,9 @@ export const AccountExperience = ({
           onRetry={() => {
             void authority.synchronize('reconnection');
           }}
-          onSignIn={() => authority.confirmSignedOut()}
+          onSignIn={() => {
+            authority.confirmSignedOut();
+          }}
           state={loginState === 'unavailable' ? 'unavailable' : 'restoring'}
         />
       );
