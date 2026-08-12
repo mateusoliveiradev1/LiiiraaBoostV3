@@ -11,6 +11,8 @@ mod evidence_policy;
 #[allow(dead_code)]
 mod evidence_store;
 #[allow(dead_code)]
+mod hardware_inventory;
+#[allow(dead_code)]
 mod identity;
 mod navigation;
 mod notifications;
@@ -20,6 +22,8 @@ mod offline_entitlement;
 mod premium_authority;
 mod tray;
 mod window;
+#[allow(dead_code)]
+mod windows_lifecycle;
 
 use std::sync::Mutex;
 

@@ -61,11 +61,7 @@ fn lifecycle_table_distinguishes_supported_ltsc_esu_consumer_and_unknown() {
         ),
         WindowsLifecycle::Windows10LtscEsu,
     );
-    let mut esu = version(
-        19_045,
-        WindowsEdition::Professional,
-        ServicingChannel::Esu,
-    );
+    let mut esu = version(19_045, WindowsEdition::Professional, ServicingChannel::Esu);
     esu.esu_enrolled = true;
     assert_eq!(
         classify_windows_lifecycle(&esu, 20260812),
@@ -95,11 +91,7 @@ fn lifecycle_table_distinguishes_supported_ltsc_esu_consumer_and_unknown() {
     );
     assert_eq!(
         classify_windows_lifecycle(
-            &version(
-                0,
-                WindowsEdition::Unknown,
-                ServicingChannel::Unknown,
-            ),
+            &version(0, WindowsEdition::Unknown, ServicingChannel::Unknown,),
             20260812,
         ),
         WindowsLifecycle::Unknown,
@@ -133,20 +125,45 @@ fn all_observed_inventory() -> RawInventory {
         (HardwareClass::Cpu, "AMD Ryzen 7", "cpuid"),
         (HardwareClass::Gpu, "NVIDIA GeForce", "EnumDisplayDevicesW"),
         (HardwareClass::Memory, "32 GiB", "GlobalMemoryStatusEx"),
-        (HardwareClass::Storage, "2 fixed volumes", "GetLogicalDrives"),
-        (HardwareClass::Network, "1 active adapter", "GetAdaptersAddresses"),
-        (HardwareClass::Display, "2560 x 1440 @ 144 Hz", "EnumDisplaySettingsW"),
-        (HardwareClass::Audio, "Default audio endpoint", "MMDeviceEnumerator"),
+        (
+            HardwareClass::Storage,
+            "2 fixed volumes",
+            "GetLogicalDrives",
+        ),
+        (
+            HardwareClass::Network,
+            "1 active adapter",
+            "GetAdaptersAddresses",
+        ),
+        (
+            HardwareClass::Display,
+            "2560 x 1440 @ 144 Hz",
+            "EnumDisplaySettingsW",
+        ),
+        (
+            HardwareClass::Audio,
+            "Default audio endpoint",
+            "MMDeviceEnumerator",
+        ),
         (HardwareClass::Usb, "4 USB devices", "SetupAPI"),
         (HardwareClass::Windows, "build 26100", "GetVersionExW"),
-        (HardwareClass::Drivers, "display driver observed", "SetupAPI"),
-        (HardwareClass::Security, "security state available", "WindowsSecurity"),
-        (HardwareClass::Games, "2 supported games", "installed-game-discovery"),
+        (
+            HardwareClass::Drivers,
+            "display driver observed",
+            "SetupAPI",
+        ),
+        (
+            HardwareClass::Security,
+            "security state available",
+            "WindowsSecurity",
+        ),
+        (
+            HardwareClass::Games,
+            "2 supported games",
+            "installed-game-discovery",
+        ),
     ] {
-        facts.insert(
-            class,
-            RawHardwareFact::observed(value, source, NOW, 12),
-        );
+        facts.insert(class, RawHardwareFact::observed(value, source, NOW, 12));
     }
     RawInventory {
         facts,
@@ -187,11 +204,7 @@ fn collector_emits_every_required_class_as_observed_or_explicitly_unavailable() 
     raw.facts.remove(&HardwareClass::Audio);
     raw.facts.insert(
         HardwareClass::Security,
-        RawHardwareFact::unavailable(
-            UnavailableReason::PermissionDenied,
-            "WindowsSecurity",
-            4,
-        ),
+        RawHardwareFact::unavailable(UnavailableReason::PermissionDenied, "WindowsSecurity", 4),
     );
     raw.facts.insert(
         HardwareClass::Usb,
@@ -208,7 +221,10 @@ fn collector_emits_every_required_class_as_observed_or_explicitly_unavailable() 
     }
     assert_eq!(result.document["audio"]["state"], "unavailable");
     assert_eq!(result.document["audio"]["reasonCode"], "not-discovered");
-    assert_eq!(result.document["security"]["reasonCode"], "permission-denied");
+    assert_eq!(
+        result.document["security"]["reasonCode"],
+        "permission-denied"
+    );
     assert_eq!(result.document["usb"]["reasonCode"], "timed-out");
 }
 
@@ -223,8 +239,14 @@ fn cancellation_is_visible_and_never_reuses_partial_values() {
     .expect("cancelled inventory remains inspectable");
 
     for class in HardwareClass::ALL {
-        assert_eq!(result.document[class.contract_key()]["state"], "unavailable");
-        assert_eq!(result.document[class.contract_key()]["reasonCode"], "cancelled");
+        assert_eq!(
+            result.document[class.contract_key()]["state"],
+            "unavailable"
+        );
+        assert_eq!(
+            result.document[class.contract_key()]["reasonCode"],
+            "cancelled"
+        );
     }
     assert_eq!(
         result.document["execution"]["cancellationState"],
@@ -270,12 +292,7 @@ fn contradictory_or_malformed_source_values_fail_closed_without_leaking() {
     let mut raw = all_observed_inventory();
     raw.facts.insert(
         HardwareClass::Gpu,
-        RawHardwareFact::contradictory(
-            "GPU-SECRET-A",
-            "GPU-SECRET-B",
-            "SetupAPI",
-            8,
-        ),
+        RawHardwareFact::contradictory("GPU-SECRET-A", "GPU-SECRET-B", "SetupAPI", 8),
     );
     let result = InventoryCollector::new(SyntheticSource { inventory: raw })
         .collect(&request())
