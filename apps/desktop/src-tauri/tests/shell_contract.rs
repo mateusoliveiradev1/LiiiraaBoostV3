@@ -127,17 +127,30 @@ fn capabilities_lock_host_identity_and_non_elevation() {
 }
 
 #[test]
-fn capabilities_keep_command_registration_bounded_to_generated_shell_dispatch() {
+fn capabilities_keep_command_registration_bounded_to_exact_native_dispatch() {
     let source_path = crate_root().join("src/main.rs");
     let source = fs::read_to_string(&source_path)
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
 
-    assert_eq!(source.matches("#[tauri::command]").count(), 5);
+    assert_eq!(source.matches("#[tauri::command]").count(), 18);
     for admitted_command in [
+        "bind_current_device,",
+        "cancel_measurement_capture,",
+        "compare_measurement_sessions,",
         "desktop_sign_in,",
         "desktop_sign_out,",
         "dispatch_shell_command,",
+        "export_evidence_report,",
+        "finish_measurement_capture,",
         "get_shell_bootstrap,",
+        "open_account_subscription,",
+        "open_admin,",
+        "prepare_device_binding,",
+        "read_evidence_health,",
+        "read_hardware_inventory,",
+        "refresh_hardware_inventory,",
+        "render_evidence_report,",
+        "start_measurement_capture,",
         "sync_account",
     ] {
         assert!(

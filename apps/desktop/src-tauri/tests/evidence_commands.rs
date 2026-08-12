@@ -24,9 +24,7 @@ use evidence_commands::{
     EvidenceAuthority, ExportFormat, ExportReportRequest, InventoryRefreshRequest,
     RenderReportRequest,
 };
-use hardware_inventory::{
-    HardwareClass, HardwareInventorySource, RawHardwareFact, RawInventory,
-};
+use hardware_inventory::{HardwareClass, HardwareInventorySource, RawHardwareFact, RawInventory};
 use windows_lifecycle::{ServicingChannel, WindowsEdition, WindowsVersionEvidence};
 
 const NOW: &str = "2026-08-12T12:00:00Z";
@@ -59,7 +57,10 @@ fn observed_inventory() -> RawInventory {
         (HardwareClass::Security, "security state available"),
         (HardwareClass::Games, "2 supported games"),
     ] {
-        facts.insert(class, RawHardwareFact::observed(value, "synthetic-native", NOW, 8));
+        facts.insert(
+            class,
+            RawHardwareFact::observed(value, "synthetic-native", NOW, 8),
+        );
     }
     facts.insert(
         HardwareClass::Storage,
@@ -206,6 +207,9 @@ fn refresh_and_read_are_contract_valid_private_operations() {
     assert_eq!(health.authority, "available");
     assert_eq!(health.inventory, "ready");
     assert_eq!(health.capture, "idle");
+    assert_eq!(health.overhead.counter_poll_ceiling_hz, 1);
+    assert_eq!(health.overhead.cancellation_budget_ms, 250);
+    assert!(!health.overhead.elevated);
 }
 
 #[test]
@@ -244,7 +248,15 @@ fn capture_start_and_cancel_are_bounded_reachable_and_idempotent() {
     let started = authority.start_capture(capture_request()).expect("start");
     assert_eq!(started["status"], "incomplete");
     assert_eq!(
-        authority.start_capture(capture_request()),
+        authority
+            .start_capture(capture_request())
+            .expect("same start is idempotent"),
+        started
+    );
+    let mut competing = capture_request();
+    competing.session_id = "session-command-2".to_owned();
+    assert_eq!(
+        authority.start_capture(competing),
         Err(CommandError::AlreadyActive)
     );
 
@@ -304,6 +316,7 @@ fn comparison_report_and_export_use_only_admitted_authority() {
         .render_report(RenderReportRequest {
             schema_version: "1.0".to_owned(),
             report_id: "report-command-1".to_owned(),
+            comparison_id: "comparison-command-1".to_owned(),
             generated_at: "2026-08-12T12:02:00Z".to_owned(),
             limitations: vec!["Válido somente para esta carga reproduzível.".to_owned()],
         })
@@ -327,11 +340,17 @@ fn comparison_report_and_export_use_only_admitted_authority() {
         })
         .expect("export html");
 
-    assert!(json.path.starts_with(&directory.path));
-    assert!(html.path.starts_with(&directory.path));
-    assert!(json.path.is_file());
-    assert!(html.path.is_file());
-    assert!(fs::read_to_string(html.path).unwrap().contains("<main"));
+    assert_eq!(json.file_name, "report-command-1.json");
+    assert_eq!(html.file_name, "report-command-1.html");
+    assert!(json.stored);
+    assert!(html.stored);
+    assert!(directory.path.join(&json.file_name).is_file());
+    assert!(directory.path.join(&html.file_name).is_file());
+    assert!(
+        fs::read_to_string(directory.path.join(&html.file_name))
+            .unwrap()
+            .contains("<main")
+    );
 }
 
 #[test]
@@ -345,6 +364,7 @@ fn arbitrary_paths_and_generic_native_operations_are_rejected() {
         .render_report(RenderReportRequest {
             schema_version: "1.0".to_owned(),
             report_id: "report-command-1".to_owned(),
+            comparison_id: "comparison-command-1".to_owned(),
             generated_at: "2026-08-12T12:02:00Z".to_owned(),
             limitations: vec!["Limitação explícita.".to_owned()],
         })
@@ -392,8 +412,5 @@ fn capability_manifest_grants_no_shell_or_broad_filesystem_power() {
     assert!(!serialized.contains("fs:"));
     assert!(!serialized.contains("process:allow-exit"));
     assert!(!serialized.contains("process:allow-relaunch"));
-    assert!(value["description"]
-        .as_str()
-        .unwrap()
-        .contains("evidence"));
+    assert!(value["description"].as_str().unwrap().contains("evidence"));
 }

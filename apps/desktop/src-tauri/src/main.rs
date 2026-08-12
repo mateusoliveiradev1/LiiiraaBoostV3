@@ -9,6 +9,8 @@ mod credential_store;
 #[allow(dead_code)]
 mod device_identity;
 #[allow(dead_code)]
+mod evidence_commands;
+#[allow(dead_code)]
 mod evidence_policy;
 #[allow(dead_code)]
 mod evidence_report;
@@ -17,9 +19,9 @@ mod evidence_store;
 #[allow(dead_code)]
 mod hardware_inventory;
 #[allow(dead_code)]
-mod measurement;
-#[allow(dead_code)]
 mod identity;
+#[allow(dead_code)]
+mod measurement;
 mod navigation;
 mod notifications;
 #[allow(dead_code)]
@@ -35,6 +37,12 @@ use std::sync::Mutex;
 
 use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
 use credential_store::WindowsCredentialStore;
+use evidence_commands::{
+    CancelCaptureRequest, CaptureStartRequest, CommandError as EvidenceCommandError,
+    ComparisonCommandRequest, EvidenceAuthority, EvidenceHealth, ExportReceipt,
+    ExportReportRequest, FinishCaptureRequest, InventoryRefreshRequest, RenderReportRequest,
+};
+use hardware_inventory::WindowsInventorySource;
 use identity::{
     DesktopIdentityError, DesktopPkceProof, LoopbackCallbackListener, WindowsDesktopIdentityApi,
     WindowsSystemBrowser, open_account_subscription_in_system_browser,
@@ -531,6 +539,112 @@ fn sync_account(
     }
 }
 
+#[tauri::command]
+fn refresh_hardware_inventory(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: InventoryRefreshRequest,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("refresh-inventory")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .refresh_inventory(request, WindowsInventorySource)
+}
+
+#[tauri::command]
+fn read_hardware_inventory(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("read-inventory")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .read_inventory()
+}
+
+#[tauri::command]
+fn start_measurement_capture(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: CaptureStartRequest,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("start-capture")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .start_capture(request)
+}
+
+#[tauri::command]
+fn cancel_measurement_capture(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: CancelCaptureRequest,
+) -> Result<evidence_commands::CancellationReceipt, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("cancel-capture")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .cancel_capture(request)
+}
+
+#[tauri::command]
+fn finish_measurement_capture(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: FinishCaptureRequest,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("finish-capture")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .finish_capture(request)
+}
+
+#[tauri::command]
+fn compare_measurement_sessions(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: ComparisonCommandRequest,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("compare-measurements")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .compare_measurements(request)
+}
+
+#[tauri::command]
+fn render_evidence_report(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: RenderReportRequest,
+) -> Result<Value, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("render-report")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .render_report(request)
+}
+
+#[tauri::command]
+fn export_evidence_report(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+    request: ExportReportRequest,
+) -> Result<ExportReceipt, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("export-report")?;
+    state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .export_report(request)
+}
+
+#[tauri::command]
+fn read_evidence_health(
+    state: State<'_, Mutex<EvidenceAuthority>>,
+) -> Result<EvidenceHealth, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("read-health")?;
+    Ok(state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .read_health())
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 enum DesktopAuthCommandError {
@@ -746,6 +860,11 @@ fn run() -> Result<(), String> {
         .setup(|app| {
             let origins = desktop_runtime_origins(app.config().plugins.0.get("liiiraa-shell"));
             app.manage(DesktopRuntimeConfig { origins });
+            let evidence_root = app.path().app_data_dir()?.join("evidence-authority");
+            let evidence_authority = EvidenceAuthority::open(evidence_root).map_err(|_| {
+                std::io::Error::other("native evidence authority could not be initialized")
+            })?;
+            app.manage(Mutex::new(evidence_authority));
             let config: Value = serde_json::from_str(include_str!("../tauri.conf.json"))?;
             let startup_events = [
                 installer_identity_event(&config, HostEventMetadata::now("installer-identity")),
@@ -796,13 +915,22 @@ fn run() -> Result<(), String> {
         })
         .invoke_handler(tauri::generate_handler![
             bind_current_device,
+            cancel_measurement_capture,
+            compare_measurement_sessions,
             desktop_sign_in,
             desktop_sign_out,
             dispatch_shell_command,
+            export_evidence_report,
+            finish_measurement_capture,
             get_shell_bootstrap,
             open_account_subscription,
             open_admin,
             prepare_device_binding,
+            read_evidence_health,
+            read_hardware_inventory,
+            refresh_hardware_inventory,
+            render_evidence_report,
+            start_measurement_capture,
             sync_account
         ])
         .on_window_event(|window, event| {

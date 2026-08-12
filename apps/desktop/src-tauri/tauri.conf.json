@@ -52,7 +52,7 @@
       "capabilities": [
         {
           "identifier": "main-shell",
-          "description": "Defines a deny-by-default renderer boundary; native shell dispatch stays in Rust.",
+          "description": "Defines a deny-by-default renderer boundary; native shell and evidence dispatch stay in Rust.",
           "windows": ["main"],
           "permissions": [
             "autostart:allow-disable",
