@@ -700,7 +700,7 @@ Plans:
 4. The product rejects invalid before/after comparisons, exposes uncertainty or degraded coverage, and never substitutes estimates for unavailable evidence.
 5. User can compare accepted sessions through a summary, detailed diff, timeline, and exportable report while collection stays within budget and reduces sampling during active games.
 
-**Plans**: 8/10 plans complete
+**Plans**: 9/10 plans complete
 
 - [x] 05-01-PLAN.md
 - [x] 05-02-PLAN.md
@@ -710,7 +710,7 @@ Plans:
 - [x] 05-06-PLAN.md
 - [x] 05-07-PLAN.md
 - [x] 05-08-PLAN.md
-- [ ] 05-09-PLAN.md
+- [x] 05-09-PLAN.md
 - [ ] 05-10-PLAN.md
 
 **UI hint**: yes
