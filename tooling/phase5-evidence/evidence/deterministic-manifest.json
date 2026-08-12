@@ -2,12 +2,12 @@
     "schemaVersion":  1,
     "runId":  "phase5-deterministic-current",
     "runKind":  "deterministic-ci",
-    "generatedAt":  "2026-08-12T20:15:34.7676795+00:00",
+    "generatedAt":  "2026-08-12T21:32:33.2510459+00:00",
     "build":  {
-                  "commit":  "bd1fb91f6e9977acfe280f48ff88023d69a983de",
+                  "commit":  "dd7a1eff60b86f6ff9387e96bc85b667ce92dffd",
                   "collectorVersion":  "liiiraa-native-evidence@1",
                   "artifactPath":  "apps/desktop/dist/index.html",
-                  "artifactSha256":  "cc4314ac86854363517512c841f7b70fa69951f781bad976016c187c44c75e5e"
+                  "artifactSha256":  "7b403e6cf23c77b0c3d02fe17aae427a1cb0af4d3bda1a4197e05a5093daa667"
               },
     "environment":  {
                         "physical":  false,
@@ -173,11 +173,11 @@
                     "rawIdentifiersFound":  [
 
                                             ],
-                    "scanSha256":  "01be6483738125c81ad140f129b97bc9ddf26b831b3c64b7fb4405b8f5104c7c"
+                    "scanSha256":  "4362c78d4f371f5375009fa7cf92c0d92886b0ea90176b2ea011cf0de36aeac1"
                 },
     "report":  {
                    "path":  "tooling/phase5-evidence/evidence/deterministic-report.json",
-                   "sha256":  "01be6483738125c81ad140f129b97bc9ddf26b831b3c64b7fb4405b8f5104c7c"
+                   "sha256":  "4362c78d4f371f5375009fa7cf92c0d92886b0ea90176b2ea011cf0de36aeac1"
                },
     "phase4PhysicalGaps":  [
                                {

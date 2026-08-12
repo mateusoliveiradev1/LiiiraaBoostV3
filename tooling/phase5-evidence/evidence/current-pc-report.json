@@ -2,10 +2,10 @@
     "schemaVersion":  1,
     "runId":  "phase5-current-pc",
     "evidenceKind":  "packaged-physical",
-    "generatedAt":  "2026-08-12T20:20:47.7440023+00:00",
+    "generatedAt":  "2026-08-12T21:32:06.1665926+00:00",
     "sample":  {
                    "durationSeconds":  300,
-                   "memoryPeakMb":  12.277,
+                   "memoryPeakMb":  12.41,
                    "idleCpuPercent":  0,
                    "pollingHz":  0,
                    "cancellationMs":  100
