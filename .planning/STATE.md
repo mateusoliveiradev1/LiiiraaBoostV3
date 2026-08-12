@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready
-stopped_at: Completed 05-10-PLAN.md; Phase 06 ready
-last_updated: "2026-08-12T19:48:00.000Z"
-last_activity: 2026-08-12 -- Phase 05 implementation and current-PC evidence completed
+status: executing
+stopped_at: Executing 05-11-PLAN.md native telemetry closure
+last_updated: "2026-08-12T21:00:00.000Z"
+last_activity: 2026-08-12 -- Reopened Phase 05 after finding hard-coded production telemetry
 progress:
   total_phases: 10
   completed_phases: 4
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-26)
 
 **Core value:** Produce measurable performance gains adapted to the exact hardware without sacrificing system stability, while keeping every change explainable, auditable, and reversible.
-**Current focus:** Phase 06 — transactional-plans-and-recovery
+**Current focus:** Phase 05 — native live telemetry closure
 
 ## Current Position
 
-Phase: 06 (transactional-plans-and-recovery) — READY
-Plan: 0 of TBD
-Status: Ready to plan
+Phase: 05 (hardware-intelligence-and-measured-evidence) — EXECUTING
+Plan: 11 of 11
+Status: Replacing remaining demonstration telemetry with bounded native readings
 Last activity: 2026-08-12
 
-Progress: [██████████] Phase 05 100% implementation complete
+Progress: [█████████░] Phase 05 10/11 plans complete
 
 ## Performance Metrics
 
