@@ -1151,6 +1151,20 @@ const AuthorityMeasureSurface = ({
     };
   }, [authority]);
 
+  useEffect(() => {
+    if (!captureActive) return undefined;
+    const controller = new AbortController();
+    const poll = () => {
+      void authority.sampleCapture(controller.signal);
+    };
+    poll();
+    const timer = globalThis.setInterval(poll, 1_100);
+    return () => {
+      controller.abort();
+      globalThis.clearInterval(timer);
+    };
+  }, [authority, captureActive]);
+
   const refreshInventory = () => {
     const collectedAt = new Date().toISOString();
     void authority.refreshInventory({

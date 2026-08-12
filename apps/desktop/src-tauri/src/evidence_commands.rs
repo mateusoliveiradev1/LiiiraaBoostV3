@@ -11,7 +11,9 @@ use crate::evidence_report::{EvidenceReportBundle, ReportError, render_report, v
 use crate::hardware_inventory::{
     CollectionRequest, HardwareInventorySource, InventoryCollectionError, InventoryCollector,
 };
-use crate::measurement::{CaptureMetadata, CaptureSession, MeasurementError, SchedulerLimits};
+use crate::measurement::{
+    CaptureMetadata, CaptureSession, CounterObservation, MeasurementError, SchedulerLimits,
+};
 
 const COMMAND_SCHEMA_VERSION: &str = "1.0";
 const SALT_FILE_NAME: &str = "inventory-salt-v1";
@@ -298,6 +300,21 @@ impl EvidenceAuthority {
         Ok(result.document)
     }
 
+    pub fn ingest_live_telemetry(
+        &mut self,
+        observations: &[CounterObservation],
+    ) -> Result<Value, CommandError> {
+        let capture = self.active_capture.as_mut().ok_or(CommandError::NotFound)?;
+        for observation in observations {
+            capture.ingest_counter(*observation);
+        }
+        let document = capture
+            .incomplete_document()
+            .map_err(map_measurement_error)?;
+        self.active_capture_document = Some(document.clone());
+        Ok(document)
+    }
+
     pub fn compare_measurements(
         &mut self,
         request: ComparisonCommandRequest,
@@ -399,6 +416,7 @@ impl EvidenceAuthority {
             "refresh-inventory"
                 | "read-inventory"
                 | "start-capture"
+                | "sample-capture"
                 | "cancel-capture"
                 | "finish-capture"
                 | "compare-measurements"

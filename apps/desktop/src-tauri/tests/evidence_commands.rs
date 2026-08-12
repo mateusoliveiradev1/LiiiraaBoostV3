@@ -21,10 +21,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use comparison::{EvidenceQuality, MetricSample, SessionEvidence};
 use evidence_commands::{
     CancelCaptureRequest, CaptureStartRequest, CommandError, ComparisonCommandRequest,
-    EvidenceAuthority, ExportFormat, ExportReportRequest, InventoryRefreshRequest,
-    RenderReportRequest,
+    EvidenceAuthority, ExportFormat, ExportReportRequest, FinishCaptureRequest,
+    InventoryRefreshRequest, RenderReportRequest,
 };
 use hardware_inventory::{HardwareClass, HardwareInventorySource, RawHardwareFact, RawInventory};
+use measurement::{CounterObservation, MetricKind, SourceHealth};
 use windows_lifecycle::{ServicingChannel, WindowsEdition, WindowsVersionEvidence};
 
 const NOW: &str = "2026-08-12T12:00:00Z";
@@ -277,6 +278,45 @@ fn capture_start_and_cancel_are_bounded_reachable_and_idempotent() {
     assert_eq!(repeated.state, "acknowledged");
     assert!(first.latency_ms <= 250);
     assert_eq!(authority.read_health().capture, "cancelled");
+}
+
+#[test]
+fn live_counter_samples_are_admitted_before_capture_finishes() {
+    let directory = TempDirectory::new("live-telemetry-capture");
+    let mut authority = authority(&directory);
+    authority.start_capture(capture_request()).expect("start");
+
+    let incomplete = authority
+        .ingest_live_telemetry(&[
+            CounterObservation {
+                monotonic_ns: 1_100_000_000,
+                metric: MetricKind::CpuUtilizationPercent,
+                value: Some(37.5),
+                health: SourceHealth::Valid,
+            },
+            CounterObservation {
+                monotonic_ns: 1_100_000_000,
+                metric: MetricKind::MemoryWorkingSetBytes,
+                value: Some(10_737_418_240.0),
+                health: SourceHealth::Valid,
+            },
+        ])
+        .expect("admit live telemetry");
+    assert_eq!(incomplete["status"], "incomplete");
+
+    let completed = authority
+        .finish_capture(FinishCaptureRequest {
+            schema_version: "1.0".to_owned(),
+            completed_at: "2026-08-12T12:00:02Z".to_owned(),
+        })
+        .expect("finish capture");
+
+    assert_eq!(completed["status"], "completed");
+    let chunks = completed["chunks"].as_array().expect("metric chunks");
+    assert_eq!(chunks.len(), 2);
+    let serialized = serde_json::to_string(chunks).expect("serialize chunks");
+    assert!(serialized.contains("cpu-utilization-percent"));
+    assert!(serialized.contains("memory-working-set-bytes"));
 }
 
 #[test]

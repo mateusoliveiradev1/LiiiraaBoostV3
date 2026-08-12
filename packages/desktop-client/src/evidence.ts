@@ -18,6 +18,7 @@ export const EVIDENCE_COMMANDS = Object.freeze({
   refreshInventory: 'refresh_hardware_inventory',
   readInventory: 'read_hardware_inventory',
   startCapture: 'start_measurement_capture',
+  sampleCapture: 'sample_measurement_capture',
   cancelCapture: 'cancel_measurement_capture',
   finishCapture: 'finish_measurement_capture',
   compareSessions: 'compare_measurement_sessions',
@@ -181,6 +182,11 @@ export interface CancellationReceipt {
   readonly latencyMs: number;
 }
 
+export interface CaptureSampleReceipt {
+  readonly schemaVersion: '1.0';
+  readonly readOnly: true;
+}
+
 export interface ExportReceipt {
   readonly reportId: string;
   readonly format: EvidenceExportFormat;
@@ -213,6 +219,7 @@ export interface EvidenceAuthority {
   startCapture(
     input: StartCaptureInput,
   ): Promise<Result<MeasurementSessionJson, EvidenceClientError>>;
+  sampleCapture(signal?: AbortSignal): Promise<Result<CaptureSampleReceipt, EvidenceClientError>>;
   cancelCapture(
     input: CancelCaptureInput,
   ): Promise<Result<CancellationReceipt, EvidenceClientError>>;
@@ -377,6 +384,16 @@ const validCancellationReceipt = (value: unknown): value is CancellationReceipt 
   Number.isInteger(value['latencyMs']) &&
   value['latencyMs'] >= 0 &&
   value['latencyMs'] <= 250;
+
+const validCaptureSampleReceipt = (value: unknown): value is CaptureSampleReceipt =>
+  isRecord(value) &&
+  value['schemaVersion'] === '1.0' &&
+  value['readOnly'] === true &&
+  isRecord(value['cpu']) &&
+  isRecord(value['memory']) &&
+  isRecord(value['gpu']) &&
+  isRecord(value['collectionLatency']) &&
+  findFixturePath(value) === undefined;
 
 const validExportReceipt = (value: unknown): value is ExportReceipt =>
   isRecord(value) &&
@@ -554,6 +571,31 @@ const createEvidenceAuthority = (
         publish({ status: 'capturing', capture: result.value, error: null });
       }
       return result;
+    },
+    async sampleCapture(signal?: AbortSignal) {
+      if (disposed) {
+        return disposedResult<CaptureSampleReceipt>();
+      }
+      const outcome = await invokeAbortable(
+        invoke,
+        EVIDENCE_COMMANDS.sampleCapture,
+        undefined,
+        signal,
+      );
+      if (outcome.kind !== 'value') {
+        return commandFailure<CaptureSampleReceipt>(EVIDENCE_COMMANDS.sampleCapture, outcome);
+      }
+      if (!validCaptureSampleReceipt(outcome.value)) {
+        const error = deepFreeze({
+          code: 'RECEIPT_INVALID' as const,
+          command: EVIDENCE_COMMANDS.sampleCapture,
+        });
+        publish({ status: 'error', error });
+        return errorResult<CaptureSampleReceipt>(error);
+      }
+      return successResult<CaptureSampleReceipt>(
+        Object.freeze({ schemaVersion: '1.0', readOnly: true }),
+      );
     },
     async cancelCapture(input: CancelCaptureInput) {
       if (disposed) {

@@ -1,9 +1,14 @@
 import { ProductIcon } from '@liiiraa/design-system';
 import type { ProductIconName } from '@liiiraa/design-system';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import type { ShellLocale } from '@liiiraa/feature-shell';
-import type { ShellInstallerIdentityJson } from '@liiiraa/contracts-ts';
+import type {
+  HardwareFactJson,
+  InventorySnapshotJson,
+  ShellInstallerIdentityJson,
+} from '@liiiraa/contracts-ts';
+import type { EvidenceAuthority, EvidenceAuthoritySnapshot } from '@liiiraa/desktop-client';
 import { PreConsentLocaleControl } from '../preferences.js';
 import {
   DOWNLOADS,
@@ -34,14 +39,43 @@ import {
 import { usePremiumLocalization } from './premium-localization.js';
 import { areApplicationNotificationsEnabled, PremiumSettingsSurface } from './premium-settings.js';
 import { PremiumToast, type PremiumToastMessage, type PremiumToastTone } from './premium-toast.js';
+import {
+  createTauriLiveTelemetryAuthority,
+  type LiveTelemetryAuthority,
+  type LiveTelemetryAuthoritySnapshot,
+  type LiveScalarMetric,
+} from '../native/live-telemetry.js';
 
 interface PremiumOperationsSurfaceProps {
+  readonly evidenceAuthority?: EvidenceAuthority | undefined;
   readonly installerIdentity?: ShellInstallerIdentityJson | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly settingsSection?: string;
   readonly view: PremiumRouteId;
 }
+
+const EMPTY_INTERNAL_EVIDENCE: EvidenceAuthoritySnapshot = Object.freeze({
+  revision: 0,
+  origin: 'native',
+  status: 'idle',
+  inventory: null,
+  capture: null,
+  comparison: null,
+  report: null,
+  selection: Object.freeze({ beforeSessionId: null, afterSessionId: null }),
+  staleInventory: false,
+  inventoryActionable: false,
+  error: null,
+});
+
+const EMPTY_INTERNAL_TELEMETRY: LiveTelemetryAuthoritySnapshot = Object.freeze({
+  revision: 0,
+  status: 'idle',
+  telemetry: null,
+});
+
+const emptyInternalSubscribe = (): (() => void) => () => undefined;
 
 interface RouteMeta {
   readonly description: string;
@@ -206,23 +240,29 @@ const RouteHeader = ({
   </header>
 );
 
-const HardwareStrip = () => (
-  <section aria-label="Hardware detectado no cenário" className="premium-hardware-strip">
-    {[
-      ['windows', 'Sistema', 'Windows 11 Pro · 24H2', 'windows'],
-      ['amd', 'Processador', 'AMD Ryzen 7 7800X3D', 'cpu'],
-      ['nvidia', 'Placa de vídeo', 'NVIDIA GeForce RTX 4070', 'graphics'],
-      ['', 'Memória', '32 GB DDR5 · 6000 MT/s', 'memory'],
-    ].map(([brand, label, value, icon]) => (
+const HardwareStrip = ({
+  inventory,
+  locale,
+}: Readonly<{ inventory: InventorySnapshotJson | null; locale: ShellLocale }>) => (
+  <section
+    aria-label={text(locale, 'Hardware observado pelo Windows', 'Hardware observed by Windows')}
+    className="premium-hardware-strip"
+  >
+    {([
+      ['Sistema', inventory?.windows, 'windows'],
+      ['Processador', inventory?.cpu, 'cpu'],
+      ['Placa de vídeo', inventory?.gpu, 'graphics'],
+      ['Memória', inventory?.memory, 'memory'],
+    ] satisfies readonly (readonly [string, HardwareFactJson | undefined, ProductIconName])[]).map(([label, fact, icon]) => (
       <div key={label}>
-        {brand ? (
-          <BrandIcon brand={brand} label={value ?? brand} size={21} />
-        ) : (
-          <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
-        )}
+        <ProductIcon name={icon as ProductIconName} size={21} weight="duotone" />
         <span>
           <small>{label}</small>
-          <strong>{value}</strong>
+          <strong>
+            {typeof fact === 'object' && fact !== null && 'state' in fact && fact.state === 'observed'
+              ? fact.value
+              : text(locale, 'Não disponível', 'Not available')}
+          </strong>
         </span>
       </div>
     ))}
@@ -349,15 +389,31 @@ const HOME_ANALYSIS_PROGRESS: Readonly<Record<HomeAnalysisPhase, number>> = Obje
 
 const HomeSurface = ({
   activeGame,
+  evidenceAuthority,
+  liveTelemetryAuthority,
   locale,
   navigate,
   notify,
 }: {
   readonly activeGame: GameProfile;
+  readonly evidenceAuthority?: EvidenceAuthority | undefined;
+  readonly liveTelemetryAuthority: LiveTelemetryAuthority;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
   readonly notify: (message: string) => void;
 }) => {
+  const evidence = useSyncExternalStore(
+    evidenceAuthority === undefined
+      ? emptyInternalSubscribe
+      : (notify) => evidenceAuthority.subscribe(() => notify()),
+    evidenceAuthority?.snapshot ?? (() => EMPTY_INTERNAL_EVIDENCE),
+    () => EMPTY_INTERNAL_EVIDENCE,
+  );
+  const live = useSyncExternalStore(
+    liveTelemetryAuthority.subscribe,
+    liveTelemetryAuthority.snapshot,
+    () => EMPTY_INTERNAL_TELEMETRY,
+  );
   const [analysisPhase, setAnalysisPhase] = useState<HomeAnalysisPhase>('idle');
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const analysisTimersRef = useRef<number[]>([]);
@@ -381,6 +437,54 @@ const HomeSurface = ({
     },
     [],
   );
+
+  useEffect(() => {
+    if (evidenceAuthority === undefined) return undefined;
+    const controller = new AbortController();
+    const collectedAt = new Date().toISOString();
+    void evidenceAuthority.refreshInventory({
+      signal: controller.signal,
+      request: {
+        schemaVersion: '1.0',
+        evidenceId: `home-inventory-${Date.now().toString(36)}`,
+        evidenceVersion: (evidenceAuthority.snapshot().inventory?.evidenceVersion ?? 0) + 1,
+        collectedAt,
+        deadlineAt: new Date(Date.now() + 10_000).toISOString(),
+        perSourceTimeoutMs: 750,
+        policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
+      },
+    });
+    return () => controller.abort();
+  }, [evidenceAuthority]);
+
+  useEffect(() => {
+    let active = true;
+    const poll = () => {
+      if (active) void liveTelemetryAuthority.read();
+    };
+    poll();
+    const timer = globalThis.setInterval(poll, 1_100);
+    return () => {
+      active = false;
+      globalThis.clearInterval(timer);
+    };
+  }, [liveTelemetryAuthority]);
+
+  const liveValue = (metric: LiveScalarMetric | undefined): string => {
+    if (metric?.state !== 'observed' || metric.value === null) {
+      return text(locale, 'Indisponível', 'Unavailable');
+    }
+    const value = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(metric.value);
+    return metric.unit === 'percent' ? `${value}%` : `${value} ms`;
+  };
+  const memoryValue =
+    live.telemetry?.memory.state === 'observed' && live.telemetry.memory.usedBytes !== null
+      ? `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(live.telemetry.memory.usedBytes / 1_073_741_824)} GB`
+      : text(locale, 'Indisponível', 'Unavailable');
+  const memoryDetail =
+    live.telemetry?.memory.state === 'observed' && live.telemetry.memory.loadPercent !== null
+      ? `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(live.telemetry.memory.loadPercent)}%`
+      : live.telemetry?.memory.detail ?? text(locale, 'Aguardando leitura nativa', 'Waiting for native reading');
 
   const startAnalysis = (): void => {
     if (isAnalyzing) {
@@ -419,7 +523,7 @@ const HomeSurface = ({
 
   return (
     <>
-      <HardwareStrip />
+      <HardwareStrip inventory={evidence.inventory} locale={locale} />
       <section className="premium-home-grid">
         <article className="premium-readiness-card">
           <div className="premium-readiness-primary">
@@ -636,15 +740,22 @@ const HomeSurface = ({
             </div>
             <span className="premium-live">
               <span aria-hidden="true" />
-              Atualizando
+              {live.status === 'ready'
+                ? text(locale, 'Atualizando', 'Updating')
+                : text(locale, 'Lendo', 'Reading')}
             </span>
           </header>
           <div className="premium-metric-grid">
             {[
-              ['cpu', 'CPU', '4%', '47 °C'],
-              ['graphics', 'GPU', '2%', '42 °C'],
-              ['memory', 'Memória', '9,8 GB', '31%'],
-              ['network', 'Latência local', '1,2 ms', 'Estável'],
+              ['cpu', 'CPU', liveValue(live.telemetry?.cpu), live.telemetry?.cpu.detail],
+              ['graphics', 'GPU', liveValue(live.telemetry?.gpu), live.telemetry?.gpu.detail],
+              ['memory', text(locale, 'Memória', 'Memory'), memoryValue, memoryDetail],
+              [
+                'activity',
+                text(locale, 'Tempo da coleta', 'Collection time'),
+                liveValue(live.telemetry?.collectionLatency),
+                live.telemetry?.collectionLatency.detail,
+              ],
             ].map(([icon, label, value, detail]) => (
               <div key={label}>
                 <span className="premium-metric-icon">
@@ -663,7 +774,7 @@ const HomeSurface = ({
               <ProductIcon name="shield" size={18} weight="duotone" />
               <span>
                 <strong>Monitoramento somente leitura</strong>
-                <small>Dados locais do cenário demonstrativo</small>
+                <small>{text(locale, 'Dados nativos deste computador', 'Native data from this computer')}</small>
               </span>
             </div>
             <span>
@@ -2580,6 +2691,7 @@ const ReviewDialog = ({
 };
 
 const DevelopmentPremiumOperationsSurface = ({
+  evidenceAuthority,
   installerIdentity,
   locale,
   navigate,
@@ -2595,6 +2707,7 @@ const DevelopmentPremiumOperationsSurface = ({
   const [activeGame, setActiveGame] = useState<GameProfile>(getInitialActiveGame);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [toast, setToast] = useState<PremiumToastMessage | null>(null);
+  const [liveTelemetryAuthority] = useState(() => createTauriLiveTelemetryAuthority());
   usePremiumLocalization(rootRef, locale);
 
   useEffect(() => {
@@ -2653,7 +2766,14 @@ const DevelopmentPremiumOperationsSurface = ({
   let content: ReactNode;
   if (view === 'home') {
     content = (
-      <HomeSurface activeGame={activeGame} locale={locale} navigate={navigate} notify={notify} />
+      <HomeSurface
+        activeGame={activeGame}
+        evidenceAuthority={evidenceAuthority}
+        liveTelemetryAuthority={liveTelemetryAuthority}
+        locale={locale}
+        navigate={navigate}
+        notify={notify}
+      />
     );
   } else if (view === 'competitive') {
     content = (
@@ -2717,7 +2837,7 @@ const DevelopmentPremiumOperationsSurface = ({
           ) : undefined
         }
         meta={ROUTE_META[view]}
-        showDemoBadge={view !== 'about'}
+        showDemoBadge={view !== 'about' && view !== 'home'}
       />
       <div className="premium-route-content">{content}</div>
       <PlanBar

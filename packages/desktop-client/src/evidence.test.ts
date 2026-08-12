@@ -201,6 +201,14 @@ const conformingScript = (): Script => ({
   [EVIDENCE_COMMANDS.refreshInventory]: inventory(),
   [EVIDENCE_COMMANDS.readInventory]: inventory(),
   [EVIDENCE_COMMANDS.startCapture]: capture,
+  [EVIDENCE_COMMANDS.sampleCapture]: Object.freeze({
+    schemaVersion: '1.0',
+    readOnly: true,
+    cpu: Object.freeze({ state: 'observed' }),
+    memory: Object.freeze({ state: 'observed' }),
+    gpu: Object.freeze({ state: 'unavailable' }),
+    collectionLatency: Object.freeze({ state: 'observed' }),
+  }),
   [EVIDENCE_COMMANDS.cancelCapture]: Object.freeze({ state: 'acknowledged', latencyMs: 100 }),
   [EVIDENCE_COMMANDS.finishCapture]: capture,
   [EVIDENCE_COMMANDS.compareSessions]: comparison,
@@ -235,6 +243,7 @@ describe.each([
 
     const refreshed = await authority.refreshInventory(refreshInput());
     const started = await authority.startCapture(startInput);
+    const sampled = await authority.sampleCapture();
     const cancelled = await authority.cancelCapture({
       request: { schemaVersion: '1.0', monotonicNs: 1_000_000 },
     });
@@ -259,7 +268,7 @@ describe.each([
     });
     const health = await authority.readHealth();
 
-    expect([refreshed, started, cancelled, compared, rendered, exported, health]).toEqual(
+    expect([refreshed, started, sampled, cancelled, compared, rendered, exported, health]).toEqual(
       expect.arrayContaining([expect.objectContaining({ ok: true })]),
     );
     expect(Object.isFrozen(authority.snapshot())).toBe(true);
@@ -272,6 +281,7 @@ describe.each([
     expect(invoke).toHaveBeenCalledWith(EVIDENCE_COMMANDS.refreshInventory, {
       request: refreshInput().request,
     });
+    expect(invoke).toHaveBeenCalledWith(EVIDENCE_COMMANDS.sampleCapture, undefined);
   });
 });
 

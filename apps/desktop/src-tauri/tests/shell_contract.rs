@@ -132,7 +132,7 @@ fn capabilities_keep_command_registration_bounded_to_exact_native_dispatch() {
     let source = fs::read_to_string(&source_path)
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", source_path.display()));
 
-    assert_eq!(source.matches("#[tauri::command]").count(), 18);
+    assert_eq!(source.matches("#[tauri::command]").count(), 20);
     for admitted_command in [
         "bind_current_device,",
         "cancel_measurement_capture,",
@@ -148,8 +148,10 @@ fn capabilities_keep_command_registration_bounded_to_exact_native_dispatch() {
         "prepare_device_binding,",
         "read_evidence_health,",
         "read_hardware_inventory,",
+        "read_live_telemetry,",
         "refresh_hardware_inventory,",
         "render_evidence_report,",
+        "sample_measurement_capture,",
         "start_measurement_capture,",
         "sync_account",
     ] {

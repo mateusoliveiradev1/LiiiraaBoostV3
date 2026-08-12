@@ -20,6 +20,7 @@ mod evidence_store;
 mod hardware_inventory;
 #[allow(dead_code)]
 mod identity;
+mod live_telemetry;
 #[allow(dead_code)]
 mod measurement;
 mod navigation;
@@ -49,6 +50,7 @@ use identity::{
     WindowsSystemBrowser, open_account_subscription_in_system_browser,
     open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop, validate_https_origin,
 };
+use live_telemetry::{LiveTelemetrySampler, LiveTelemetrySnapshot};
 
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
@@ -600,6 +602,33 @@ fn finish_measurement_capture(
 }
 
 #[tauri::command]
+fn read_live_telemetry(
+    state: State<'_, Mutex<LiveTelemetrySampler>>,
+) -> Result<LiveTelemetrySnapshot, EvidenceCommandError> {
+    let mut sampler = state
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?;
+    Ok(sampler.sample().snapshot)
+}
+
+#[tauri::command]
+fn sample_measurement_capture(
+    telemetry: State<'_, Mutex<LiveTelemetrySampler>>,
+    evidence: State<'_, Mutex<EvidenceAuthority>>,
+) -> Result<LiveTelemetrySnapshot, EvidenceCommandError> {
+    EvidenceAuthority::admit_operation("sample-capture")?;
+    let reading = telemetry
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .sample();
+    evidence
+        .lock()
+        .map_err(|_| EvidenceCommandError::AuthorityUnavailable)?
+        .ingest_live_telemetry(&reading.observations)?;
+    Ok(reading.snapshot)
+}
+
+#[tauri::command]
 fn compare_measurement_sessions(
     state: State<'_, Mutex<EvidenceAuthority>>,
     request: ComparisonCommandRequest,
@@ -838,6 +867,7 @@ fn run() -> Result<(), String> {
         ))
         .manage(Mutex::new(NotificationBridge::default()))
         .manage(Mutex::new(AccountSyncState::default()))
+        .manage(Mutex::new(LiveTelemetrySampler::default()))
         .plugin(tauri_plugin_single_instance::init(
             |app, arguments, _cwd| {
                 let _ = focus_main_window(app);
@@ -927,10 +957,12 @@ fn run() -> Result<(), String> {
             open_account_subscription,
             open_admin,
             prepare_device_binding,
+            read_live_telemetry,
             read_evidence_health,
             read_hardware_inventory,
             refresh_hardware_inventory,
             render_evidence_report,
+            sample_measurement_capture,
             start_measurement_capture,
             sync_account
         ])

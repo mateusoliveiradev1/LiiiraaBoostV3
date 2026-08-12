@@ -44,7 +44,11 @@ describe('published desktop composition', () => {
     expect(viteConfig).toContain("new URL('./src/features/premium-operations.tsx'");
   });
 
-  it('renders disconnected native capabilities as unavailable without optimistic success', () => {
+  it('keeps production home behind native inventory and telemetry authorities', () => {
+    const productionOperations = readFileSync(
+      resolve(sourceRoot, 'features/premium-operations-production.tsx'),
+      'utf8',
+    );
     const home = renderToStaticMarkup(
       <PremiumOperationsSurface locale="pt-BR" navigate={() => undefined} view="home" />,
     );
@@ -52,8 +56,10 @@ describe('published desktop composition', () => {
       <PremiumOperationsSurface locale="pt-BR" navigate={() => undefined} view="about" />,
     );
 
-    expect(home).toContain('data-phase="unavailable"');
-    expect(home).toContain('Nenhuma alteração foi aplicada ao computador');
+    expect(home).toContain('data-telemetry-authority="unavailable"');
+    expect(productionOperations).toContain('NativeLiveTelemetrySurface');
+    expect(productionOperations).not.toMatch(/'4%'|'2%'|'9,8 GB'|'1,2 ms'/u);
+    expect(productionOperations).not.toContain('Dados locais do cenário demonstrativo');
     expect(about).toContain('Identidade da instalação indisponível');
     expect(`${home}${about}`).not.toMatch(
       /SIMULATED SCENARIO|SIMULAÇÃO SEGURA|Demonstração segura/iu,

@@ -1077,6 +1077,7 @@ export const DesktopRouteOutlet = ({
     if (surfaceName === 'ContextualHome') {
       return (
         <PremiumOperationsSurface
+          evidenceAuthority={evidenceAuthority}
           installerIdentity={installerIdentity}
           locale={locale}
           navigate={navigate}
@@ -1087,6 +1088,7 @@ export const DesktopRouteOutlet = ({
     if (surfaceName === 'ActivitySurface') {
       return (
         <PremiumOperationsSurface
+          evidenceAuthority={evidenceAuthority}
           installerIdentity={installerIdentity}
           locale={locale}
           navigate={navigate}
@@ -1097,6 +1099,7 @@ export const DesktopRouteOutlet = ({
     if (surfaceName === 'PremiumOperationsSurface') {
       return (
         <PremiumOperationsSurface
+          evidenceAuthority={evidenceAuthority}
           installerIdentity={installerIdentity}
           locale={locale}
           navigate={navigate}
