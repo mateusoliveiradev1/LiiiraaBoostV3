@@ -39,6 +39,7 @@ describe('staging migration execution', () => {
       '0006_admin_operations',
       '0007_identity_strong_auth',
       '0008_admin_authority_grants',
+      '0009_admin_self_service_grants',
     ]);
   });
 

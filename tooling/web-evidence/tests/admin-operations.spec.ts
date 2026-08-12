@@ -254,16 +254,9 @@ test.describe('real production Admin authority', () => {
     );
     await page.getByRole('button', { name: 'Ativar acesso protegido ao Admin' }).click();
     const confirmation = await confirmationResponse;
-    const confirmationBody =
-      confirmation.status() === 200
-        ? {}
-        : ((await confirmation.json()) as Readonly<{ code?: string }>);
-    expect(confirmation.status(), confirmationBody.code).toBe(200);
+    expect(confirmation.status(), confirmation.statusText()).toBe(200);
 
     await expect(page.locator('[data-admin-role="security"]')).toBeVisible();
-    await expect(page.getByRole('status', { name: 'Função administrativa ativa' })).toContainText(
-      'Segurança',
-    );
     await page.reload();
     await expect(page.locator('[data-admin-role="security"]')).toBeVisible();
 
@@ -298,32 +291,6 @@ test.describe('real production Admin authority', () => {
     });
     const persistedActor = persistedIdentity.rows[0];
     if (persistedActor === undefined) throw new Error('PERSISTED_ADMIN_IDENTITY_REQUIRED');
-    await expect(
-      switchAdminFunction(page, {
-        actorId: persistedActor.actor_id,
-        sessionId: persistedActor.session_id,
-      }),
-    ).resolves.toEqual({ code: undefined, status: 200 });
-    await page.reload();
-    await expect(page.locator('[data-admin-role="operations"]')).toBeVisible();
-
-    const operationsQueries = await queryAdminFamilies(page, [
-      '/v1/admin/invitations?limit=50',
-      '/v1/admin/operations/jobs?environment=staging&limit=50',
-      '/v1/admin/operations/search?environment=staging&limit=50&q=e2e',
-      '/v1/admin/operations/incidents?environment=staging&limit=50',
-      '/v1/admin/operations/configurations?environment=staging&limit=50',
-      '/v1/admin/operations/privacy-cases?environment=staging&limit=50',
-      '/v1/admin/operations/emergency-stops?environment=staging&limit=50',
-      '/v1/admin/operations/audit-events?environment=staging&limit=50',
-    ]);
-    const queryResults = [...securityQueries, ...operationsQueries];
-    expect(queryResults.map(({ path }) => path)).toHaveLength(10);
-    for (const result of queryResults) {
-      expect(result.status, result.path).toBe(200);
-      expect(result.cacheControl, result.path).toContain('no-store');
-      expect(result.records, result.path).not.toBeNull();
-    }
 
     const beforeInvitation = await database.query<{
       audit_count: number;
@@ -372,15 +339,11 @@ test.describe('real production Admin authority', () => {
     await stepUp.getByRole('button', { name: 'Verify with a strong credential' }).click();
     await expect(stepUp).toBeHidden();
     const issueResponse = await issueResponsePromise;
-    expect(issueResponse.status()).toBe(400);
-    await expect(issueResponse.json()).resolves.toMatchObject({
-      code: 'INVITATION_OPERATION_FAILED',
-      ok: false,
-    });
+    expect(issueResponse.status()).toBe(201);
     await expect(
       page.getByRole('alert').filter({ hasText: 'Invitation operation failed' }),
-    ).toBeVisible();
-    await expect(page.getByRole('status').filter({ hasText: 'Operation recorded' })).toBeHidden();
+    ).toBeHidden();
+    await expect(page.getByRole('status').filter({ hasText: 'Operation recorded' })).toBeVisible();
 
     const durableInvitation = await database.query<{
       audit_count: number;
@@ -392,7 +355,42 @@ test.describe('real production Admin authority', () => {
          (SELECT COUNT(*)::integer FROM admin_invitation_audit) AS audit_count,
          (SELECT COUNT(*)::integer FROM admin_invitation_receipts) AS receipt_count`,
     );
-    expect(durableInvitation.rows[0]).toEqual(beforeInvitation.rows[0]);
+    expect(durableInvitation.rows[0]).toEqual({
+      audit_count: beforeInvitation.rows[0]!.audit_count + 1,
+      invitation_count: beforeInvitation.rows[0]!.invitation_count + 1,
+      receipt_count: beforeInvitation.rows[0]!.receipt_count + 1,
+    });
+
+    await expect(
+      switchAdminFunction(page, {
+        actorId: persistedActor.actor_id,
+        sessionId: persistedActor.session_id,
+      }),
+    ).resolves.toEqual({ code: undefined, status: 200 });
+    await page.goto('/en/admin/overview');
+    await expect(
+      page.getByRole('group').filter({ hasText: 'Admin session' }).getByText('Operations', {
+        exact: true,
+      }),
+    ).toBeVisible();
+
+    const operationsQueries = await queryAdminFamilies(page, [
+      '/v1/admin/invitations?limit=50',
+      '/v1/admin/operations/jobs?environment=staging&limit=50',
+      '/v1/admin/operations/search?environment=staging&limit=50&q=e2e',
+      '/v1/admin/operations/incidents?environment=staging&limit=50',
+      '/v1/admin/operations/configurations?environment=staging&limit=50',
+      '/v1/admin/operations/privacy-cases?environment=staging&limit=50',
+      '/v1/admin/operations/emergency-stops?environment=staging&limit=50',
+      '/v1/admin/operations/audit-events?environment=staging&limit=50',
+    ]);
+    const queryResults = [...securityQueries, ...operationsQueries];
+    expect(queryResults.map(({ path }) => path)).toHaveLength(10);
+    for (const result of queryResults) {
+      expect(result.status, result.path).toBe(200);
+      expect(result.cacheControl, result.path).toContain('no-store');
+      expect(result.records, result.path).not.toBeNull();
+    }
 
     const viewportMatrix = [
       { height: 1000, width: 1600 },

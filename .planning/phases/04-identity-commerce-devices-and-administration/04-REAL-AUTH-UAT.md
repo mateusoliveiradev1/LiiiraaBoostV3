@@ -3,7 +3,7 @@ phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
 tested_commit: cfef0c1af6eddf60bcece00042db2dc2f7a8fba3
-updated: 2026-08-12T16:27:21.9756074Z
+updated: 2026-08-12T17:00:14.1742215Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -17,10 +17,10 @@ password, database credential, or session credential is recorded here.
 number: 16
 name: Convite administrativo e segundo operador
 expected: |
-  Em Pessoas, "Convidar administrador" abre o formulário sem trocar de rota. Um convite enviado
-  para uma segunda identidade com a função Segurança deve ser entregue pelo domínio verificado,
-  sobreviver ao reload e permanecer separado dos convites da beta. Depois do aceite, a equipe deve
-  mostrar dois membros para permitir o teste seguinte de aprovação independente.
+Em Pessoas, "Convidar administrador" abre o formulário sem trocar de rota. Um convite enviado
+para uma segunda identidade com a função Segurança deve ser entregue pelo domínio verificado,
+sobreviver ao reload e permanecer separado dos convites da beta. Depois do aceite, a equipe deve
+mostrar dois membros para permitir o teste seguinte de aprovação independente.
 awaiting: user response
 
 ## Current checkpoint
@@ -56,7 +56,7 @@ awaiting: user response
 | Surface verification run         | `31461120604`                                                             | PASS   |
 | Published Admin authority run    | `31326815831`                                                             | PASS   |
 | Neon project / branch / database | `floral-block-55553375` / `br-holy-credit-avgpp494` / `liiiraa_staging`   | PASS   |
-| Applied schema migrations        | 8; latest durable receipt `2026-08-07T12:54:20.845Z`                      | PASS   |
+| Applied schema migrations        | 9; latest durable receipt `2026-08-12T16:51:11.938Z`                      | PASS   |
 | Desktop installer                | `target/release/bundle/nsis/Liiiraa Boost_0.0.1_x64-setup.exe`            | PASS   |
 | Desktop installer SHA-256        | `7be3df5497dadad71399b00c46c736597707a7c9bbb3a753f185baf2bd92ecf4`        | PASS   |
 
@@ -67,21 +67,21 @@ The API readiness endpoint reported build ID
 
 ## Automated receipts
 
-| Receipt                   | Observation                                                                                                                                                                    | Result              |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| Provisioner preflight     | invitation provisioning/crypto: 2 files, 11 tests passed                                                                                                                       | PASS                |
-| Dependency policy         | 72 exact dependency pins verified                                                                                                                                              | PASS                |
-| Vulnerability gate        | `nanoid` resolved to `3.3.18`; production audit has no HIGH/CRITICAL finding                                                                                                   | PASS                |
-| API artifact              | SBOM, provenance, digest validation, Trivy scan, and anonymous digest pull passed                                                                                              | PASS                |
-| API promotion             | Migrations, Stripe test catalog/webhook, immutable Render digest, health, and readiness passed                                                                                 | PASS                |
-| API readiness             | `authorityConnected=true`, `invitationOnly=true`, `dataClassification=synthetic`, all Phase 4 capabilities present                                                             | PASS                |
-| Isolated surfaces         | Public, Account, and Admin exact Git deployments are READY                                                                                                                     | PASS                |
-| Fail-closed probes        | Origin, session, and consent-isolation probes passed                                                                                                                           | PASS                |
-| Desktop package           | Tauri staging overlay compiled and produced one NSIS x64 installer                                                                                                             | PASS                |
-| Device authority          | Free denial, Premium confirmations, native Windows evidence, server-only wrapping, replay, and concurrency passed                                                              | PASS                |
-| Device privacy scan       | No raw serial, machine GUID, protected digest, or local digest crosses React source; beta gate absent                                                                          | PASS                |
-| Phase evidence evaluator  | Refused stale artifact hashes and 20 missing real-PC coverage cells                                                                                                            | BLOCKED AS DESIGNED |
-| Published Admin authority | Exact Vercel revision passed signup, TOTP, function switch, authorized PostgreSQL reads, fail-closed invitation issuance, responsive layout, accessibility, and runtime guards | PASS                |
+| Receipt                   | Observation                                                                                                                                                                | Result              |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Provisioner preflight     | invitation provisioning/crypto: 2 files, 11 tests passed                                                                                                                   | PASS                |
+| Dependency policy         | 72 exact dependency pins verified                                                                                                                                          | PASS                |
+| Vulnerability gate        | `nanoid` resolved to `3.3.18`; production audit has no HIGH/CRITICAL finding                                                                                               | PASS                |
+| API artifact              | SBOM, provenance, digest validation, Trivy scan, and anonymous digest pull passed                                                                                          | PASS                |
+| API promotion             | Migrations, Stripe test catalog/webhook, immutable Render digest, health, and readiness passed                                                                             | PASS                |
+| API readiness             | `authorityConnected=true`, `invitationOnly=true`, `dataClassification=synthetic`, all Phase 4 capabilities present                                                         | PASS                |
+| Isolated surfaces         | Public, Account, and Admin exact Git deployments are READY                                                                                                                 | PASS                |
+| Fail-closed probes        | Origin, session, and consent-isolation probes passed                                                                                                                       | PASS                |
+| Desktop package           | Tauri staging overlay compiled and produced one NSIS x64 installer                                                                                                         | PASS                |
+| Device authority          | Free denial, Premium confirmations, native Windows evidence, server-only wrapping, replay, and concurrency passed                                                          | PASS                |
+| Device privacy scan       | No raw serial, machine GUID, protected digest, or local digest crosses React source; beta gate absent                                                                      | PASS                |
+| Phase evidence evaluator  | Refused stale artifact hashes and 20 missing real-PC coverage cells                                                                                                        | BLOCKED AS DESIGNED |
+| Published Admin authority | Exact Vercel revision passed signup, TOTP, durable invitation issuance, function switch, authorized PostgreSQL reads, responsive layout, accessibility, and runtime guards | PASS                |
 
 The global evidence evaluator remains closed because the checked-in evidence manifest predates
 this revision and the required Windows 10/11 hardware and lifecycle matrix has not been observed.
@@ -250,33 +250,40 @@ Invitation remediation receipts:
   identified the active `Segurança` function and a synchronized protected session; no partial
   authority mutation or stale Operations projection remained.
 
+- At `2026-08-12T17:00:14.1742215Z`, migration `0009_admin_self_service_grants` corrected the
+  reviewed PostgreSQL capability/scope catalog for self-service function switching and invitation
+  authority. The published-origin Playwright proof then passed signup, TOTP, persisted Admin
+  provisioning, a real `201` invitation issue with matching invitation/audit/receipt increments,
+  Security-to-Operations switching, all ten authorized API-family reads, the viewport matrix,
+  accessibility, and runtime guards against the live Vercel -> API -> Neon composition.
+
 ## Human real-authority observations
 
 Every row must be exercised on the exact identities above. A fixture response, optimistic success,
 revision mismatch, or result that does not survive reload is a critical failure.
 
-| Observation                                                                                            | Evidence                                                         | Result  |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ------- |
-| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                                                  | PASS    |
-| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`                                        | PASS    |
-| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`                                 | PASS    |
-| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`                                   | PASS    |
-| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`                                  | PASS    |
-| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                                                  | PASS    |
-| Profile display-name mutation persists after reload                                                    | owner-confirmed                                                  | PASS    |
-| Locale mutation persists after reload                                                                  | owner-confirmed                                                  | PASS    |
-| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650                                    | PASS    |
-| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                                                  | PASS    |
-| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`                                    | PASS    |
-| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                                                 | PASS    |
-| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                                        | PENDING |
-| Invitation issue/resend/revoke and governance/approval changes survive reload                          | valid preflight PASS; issue blocked by missing delivery provider | ISSUE   |
-| Function switch and independent approval enforce permission impact and strong authentication           | function switch PASS (`8408544`); independent approval pending | PENDING |
-| Read-only function simulation preserves real authority and provides an explicit exit                   | owner-confirmed `d257850`                                        | PASS    |
-| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`                            | PENDING |
-| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                                        | PENDING |
-| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`                            | PENDING |
-| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`                                       | PASS    |
+| Observation                                                                                            | Evidence                                                                              | Result  |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | ------- |
+| Owner-test replacement creates an account and authenticates the packaged desktop                       | owner-confirmed                                                                       | PASS    |
+| Free account opens the secure plan-management flow from the packaged desktop                           | owner-confirmed `f1ae8b1`                                                             | PASS    |
+| Premium current-PC preview requires both confirmations and creates one PostgreSQL-backed binding       | owner screenshot + API `61d8db9`                                                      | PASS    |
+| The same binding survives desktop restart and appears in the authenticated Account device route        | owner screenshot + `04-UAT.md`                                                        | PASS    |
+| Protected tester invitations create the intended persistent accounts                                   | owner-confirmed + `31392110895`                                                       | PASS    |
+| Account login, reload, and normal-browser restart preserve the authenticated session                   | owner-confirmed                                                                       | PASS    |
+| Profile display-name mutation persists after reload                                                    | owner-confirmed                                                                       | PASS    |
+| Locale mutation persists after reload                                                                  | owner-confirmed                                                                       | PASS    |
+| Account logout terminates the browser session                                                          | owner-confirmed + 31395841650                                                         | PASS    |
+| Desktop system-browser PKCE login returns to the app and Credential Manager restores after restart     | owner-confirmed                                                                       | PASS    |
+| Web/admin/desktop logout and server-side revocation remove the corresponding session                   | owner-confirmed + `04-UAT.md`                                                         | PASS    |
+| Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                                                                      | PASS    |
+| Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                                                             | PENDING |
+| Invitation issue/resend/revoke and governance/approval changes survive reload                          | real issue + PostgreSQL invitation/audit/receipt PASS; resend/revoke/approval pending | PENDING |
+| Function switch and independent approval enforce permission impact and strong authentication           | function switch PASS (`8408544`); independent approval pending                        | PENDING |
+| Read-only function simulation preserves real authority and provides an explicit exit                   | owner-confirmed `d257850`                                                             | PASS    |
+| Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`                                                 | PENDING |
+| Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                                                             | PENDING |
+| Incidents, configuration, privacy, emergency controls, and audit use PostgreSQL authority              | authorized reads subset `31326815831`                                                 | PENDING |
+| Desktop About/profile/session/tray fixes pass on the new installer                                     | owner-approved `04-UAT.md`                                                            | PASS    |
 
 ## Approval
 

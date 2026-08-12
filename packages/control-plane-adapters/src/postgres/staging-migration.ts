@@ -6,6 +6,7 @@ import { migrateAdminAuthorityGrants } from './admin-authority-grants.ts';
 import { migrateAdminGovernance } from './admin-governance.ts';
 import { migrateAdminInvitations } from './admin-invitations.ts';
 import { migrateAdminOperations } from './admin-operations.ts';
+import { migrateAdminSelfServiceGrants } from './admin-self-service-grants.ts';
 import { migrateIdentityStrongAuth } from './identity-strong-auth.ts';
 import {
   inspectControlPlaneSchema,
@@ -25,6 +26,7 @@ export const STAGING_MIGRATION_VERSIONS = Object.freeze([
   '0006_admin_operations',
   '0007_identity_strong_auth',
   '0008_admin_authority_grants',
+  '0009_admin_self_service_grants',
 ] as const);
 
 const forbiddenAuthority = /(?:^|[._/-])(?:prod|production|customer|live)(?:$|[._/?-])/iu;
@@ -94,6 +96,7 @@ const migrateStagingAuthority = async (
   const adminOperations = await migrateAdminOperations(database);
   const identityStrongAuth = await migrateIdentityStrongAuth(database);
   const adminAuthorityGrants = await migrateAdminAuthorityGrants(database);
+  const adminSelfServiceGrants = await migrateAdminSelfServiceGrants(database);
   return Object.freeze({
     applied:
       controlPlane.applied ||
@@ -103,9 +106,10 @@ const migrateStagingAuthority = async (
       adminGovernance.applied ||
       adminOperations.applied ||
       identityStrongAuth.applied ||
-      adminAuthorityGrants.applied,
-    schemaHash: adminAuthorityGrants.schemaHash,
-    version: adminAuthorityGrants.version,
+      adminAuthorityGrants.applied ||
+      adminSelfServiceGrants.applied,
+    schemaHash: adminSelfServiceGrants.schemaHash,
+    version: adminSelfServiceGrants.version,
   });
 };
 

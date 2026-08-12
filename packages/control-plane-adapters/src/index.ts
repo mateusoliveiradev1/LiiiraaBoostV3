@@ -45,6 +45,10 @@ export {
   migrateAdminAuthorityGrants,
 } from './postgres/admin-authority-grants.js';
 export {
+  adminSelfServiceGrantsSchemaHash,
+  migrateAdminSelfServiceGrants,
+} from './postgres/admin-self-service-grants.js';
+export {
   createPostgresCommerceAuthorityRepository,
   createPostgresDeviceBindingRepository,
   createPostgresSupportLifecycleRepository,
