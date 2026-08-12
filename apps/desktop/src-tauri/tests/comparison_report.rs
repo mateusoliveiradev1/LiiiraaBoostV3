@@ -57,7 +57,10 @@ fn equivalent_sessions_produce_one_schema_valid_authoritative_projection() {
     assert_eq!(projection.after, 9.0);
     assert_eq!(projection.delta, -3.0);
     assert_eq!(result.document["acceptedResult"]["delta"], -3.0);
-    assert_eq!(result.document["acceptedResult"]["evidenceHash"], projection.evidence_hash);
+    assert_eq!(
+        result.document["acceptedResult"]["evidenceHash"],
+        projection.evidence_hash
+    );
 }
 
 #[test]
@@ -177,12 +180,14 @@ fn only_approved_immutable_comparison_can_support_a_claim() {
         input.after.workload_id = "other".to_owned();
         compare(&input)
     };
-    assert!(!admit_claim(
-        "claim-2",
-        "claim",
-        &rejected_comparison,
-        ClaimAuthorityState::Approved,
-        COMPARED_AT,
-    )
-    .admitted);
+    assert!(
+        !admit_claim(
+            "claim-2",
+            "claim",
+            &rejected_comparison,
+            ClaimAuthorityState::Approved,
+            COMPARED_AT,
+        )
+        .admitted
+    );
 }
