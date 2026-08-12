@@ -12,6 +12,17 @@ This record reconstructs the immutable deployment and database receipts after th
 workstation was formatted. It is **not an approval**. No email address, raw invitation token,
 password, database credential, or session credential is recorded here.
 
+## Current Test
+
+number: 16
+name: Convite administrativo e segundo operador
+expected: |
+  Em Pessoas, "Convidar administrador" abre o formulário sem trocar de rota. Um convite enviado
+  para uma segunda identidade com a função Segurança deve ser entregue pelo domínio verificado,
+  sobreviver ao reload e permanecer separado dos convites da beta. Depois do aceite, a equipe deve
+  mostrar dois membros para permitir o teste seguinte de aprovação independente.
+awaiting: user response
+
 ## Current checkpoint
 
 - Progress: Tasks 04-40-01 and 04-40-02 complete; Task 04-40-03 human observations pending.
