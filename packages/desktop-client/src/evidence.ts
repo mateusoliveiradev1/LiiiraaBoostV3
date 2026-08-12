@@ -578,7 +578,7 @@ const createEvidenceAuthority = (
         return errorResult<CancellationReceipt>(error);
       }
       const receipt = immutableClone(outcome.value as CancellationReceipt);
-      publish({ status: 'ready', error: null });
+      publish({ status: 'ready', capture: null, error: null });
       return successResult(receipt);
     },
     async finishCapture(input: FinishCaptureInput) {

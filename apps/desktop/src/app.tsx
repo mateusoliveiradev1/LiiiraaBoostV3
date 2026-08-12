@@ -39,6 +39,7 @@ import {
   type PaidActionKind,
   type PremiumAuthorityState,
 } from '@liiiraa/control-plane-domain';
+import { createTauriEvidenceAuthority, type EvidenceAuthority } from '@liiiraa/desktop-client';
 import {
   ContextInspector,
   CriticalStateRail,
@@ -53,13 +54,10 @@ import {
   StatusSignal,
   WindowTitleBar,
 } from '@liiiraa/design-system';
-import type {
-  ActivityItem,
-  OperationalState,
-  WindowControlHandlers,
-} from '@liiiraa/design-system';
+import type { ActivityItem, OperationalState, WindowControlHandlers } from '@liiiraa/design-system';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { invoke as tauriInvoke } from '@tauri-apps/api/core';
 import { detectLocale, formatMessage, pseudoExpand } from './locales/i18n.js';
 import { PremiumInstallerHandoff } from './features/premium-installer-handoff.js';
 import { AccountExperience, type AccountExperienceView } from './features/account-experience.js';
@@ -385,7 +383,12 @@ const PremiumBoundarySurface = ({
         role="status"
       >
         <p>{getPaidActionNoticeCopy(decision.notice, locale)}</p>
-        <LbButton onPress={() => { navigate('/account/subscription'); }} variant="secondary">
+        <LbButton
+          onPress={() => {
+            navigate('/account/subscription');
+          }}
+          variant="secondary"
+        >
           {locale === 'pt-BR' ? 'Verificar Premium online' : 'Verify Premium online'}
         </LbButton>
       </section>
@@ -403,7 +406,12 @@ const PremiumBoundarySurface = ({
           A sessão Premium em andamento continua até o encerramento seguro; nenhuma mudança ativa é
           interrompida.
         </p>
-        <LbButton onPress={() => { navigate('/session/demo-session/restoring'); }} variant="secondary">
+        <LbButton
+          onPress={() => {
+            navigate('/session/demo-session/restoring');
+          }}
+          variant="secondary"
+        >
           Encerrar sessão com segurança
         </LbButton>
       </section>
@@ -428,7 +436,12 @@ const PremiumBoundarySurface = ({
           className="premium-authority-boundary"
           data-lb-region
         >
-          <LbButton onPress={() => { navigate('/session/demo-session/restoring'); }} variant="secondary">
+          <LbButton
+            onPress={() => {
+              navigate('/session/demo-session/restoring');
+            }}
+            variant="secondary"
+          >
             Iniciar restauração segura
           </LbButton>
         </section>
@@ -464,7 +477,12 @@ const PremiumBoundarySurface = ({
             Ativar modo competitivo
           </LbButton>
         ) : null}
-        <LbButton onPress={() => { navigate('/account/subscription'); }} variant="secondary">
+        <LbButton
+          onPress={() => {
+            navigate('/account/subscription');
+          }}
+          variant="secondary"
+        >
           Verificar Premium online
         </LbButton>
       </section>
@@ -1007,6 +1025,7 @@ const measurePathFor = (
 
 export interface DesktopRouteOutletProps {
   readonly activityEvents?: readonly NativeActivityEvent[];
+  readonly evidenceAuthority?: EvidenceAuthority;
   readonly installerIdentity?: ShellInstallerIdentityJson | undefined;
   readonly locale: ShellLocale;
   readonly navigate: (pathname: string) => void;
@@ -1045,6 +1064,7 @@ const ProductionUnavailableDesktopSurface = ({ locale }: { readonly locale: Shel
 
 export const DesktopRouteOutlet = ({
   activityEvents = Object.freeze([]),
+  evidenceAuthority,
   installerIdentity,
   locale,
   navigate,
@@ -1102,6 +1122,19 @@ export const DesktopRouteOutlet = ({
           navigate={navigate}
           scenarioId={scenarioId}
           view={accountViewFor(route.state)}
+        />
+      );
+    }
+    if (surfaceName === 'MeasureSurface' && evidenceAuthority !== undefined) {
+      return (
+        <MeasureSurface
+          authority={evidenceAuthority}
+          locale={locale}
+          onNavigate={(target) => {
+            navigate(measurePathFor(target));
+          }}
+          scenarioId={scenarioId}
+          view={measureViewFor(route.state)}
         />
       );
     }
@@ -1233,6 +1266,7 @@ export const DesktopRouteOutlet = ({
     case 'MeasureSurface':
       return (
         <MeasureSurface
+          {...(evidenceAuthority === undefined ? {} : { authority: evidenceAuthority })}
           locale={locale}
           onNavigate={(target) => {
             navigate(measurePathFor(target));
@@ -1414,6 +1448,7 @@ const pseudoLocalizeText = (root: HTMLElement): void => {
 export interface DesktopAppProps {
   readonly appScale?: 100 | 125 | 150;
   readonly catalogLocale?: 'pseudo';
+  readonly evidenceAuthority?: EvidenceAuthority;
   readonly forcedColors?: boolean;
   readonly initialPath?: string;
   readonly nativeBridgeTransport?: ShellBridgeTransport;
@@ -1441,6 +1476,7 @@ type DesktopAppContentProps = Omit<
 const DesktopAppContent = ({
   appScale,
   catalogLocale,
+  evidenceAuthority,
   forcedColors = false,
   initialPath = '/login',
   nativeState,
@@ -1792,6 +1828,13 @@ const DesktopAppContent = ({
         },
       },
       {
+        id: 'measure',
+        label: preferences.locale === 'pt-BR' ? 'Medições' : 'Measurements',
+        onPress: () => {
+          navigate('/measure/overview');
+        },
+      },
+      {
         id: 'competitive',
         label: preferences.locale === 'pt-BR' ? 'Modo Competitivo' : 'Competitive Mode',
         onPress: () => {
@@ -2114,6 +2157,7 @@ const DesktopAppContent = ({
           >
             <DesktopRouteOutlet
               activityEvents={routeActivityEvents}
+              {...(evidenceAuthority === undefined ? {} : { evidenceAuthority })}
               installerIdentity={nativeState?.installerIdentity}
               locale={locale}
               navigate={navigate}
@@ -2505,6 +2549,15 @@ const NativeDesktopApp = ({
   windowsLocale,
   ...appProps
 }: NativeDesktopAppProps): ReactNode => {
+  const injectedEvidenceAuthority = appProps.evidenceAuthority;
+  const [ownedEvidenceAuthority] = useState(() =>
+    injectedEvidenceAuthority === undefined
+      ? createTauriEvidenceAuthority({
+          invoke: (command, argumentsValue) => tauriInvoke(command, argumentsValue),
+        })
+      : undefined,
+  );
+  const evidenceAuthority = injectedEvidenceAuthority ?? ownedEvidenceAuthority;
   const [nativeState, setNativeState] = useState(() => createInitialNativeShellState(true));
   const commandRelayRef = useRef<NativeHostCommandRelay | null>(null);
   commandRelayRef.current ??= createNativeHostCommandRelay();
@@ -2512,6 +2565,13 @@ const NativeDesktopApp = ({
   const commandMetadata = useMemo(
     () => nativeCommandMetadata ?? createHostCommandMetadataFactory(),
     [nativeCommandMetadata],
+  );
+
+  useEffect(
+    () => () => {
+      ownedEvidenceAuthority?.dispose();
+    },
+    [ownedEvidenceAuthority],
   );
 
   const sendHostCommand = useCallback(
@@ -2645,7 +2705,10 @@ const NativeDesktopApp = ({
       {...(windowsLocale === undefined ? {} : { windowsLocale })}
     >
       <NativeShellPresentation
-        appProps={appProps}
+        appProps={{
+          ...appProps,
+          ...(evidenceAuthority === undefined ? {} : { evidenceAuthority }),
+        }}
         commandMetadata={commandMetadata}
         nativeState={nativeState}
         onAcceptInstaller={() => {

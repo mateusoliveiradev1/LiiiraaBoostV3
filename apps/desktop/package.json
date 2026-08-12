@@ -30,6 +30,7 @@
     "@liiiraa/control-plane-domain": "workspace:*",
     "@liiiraa/design-system": "workspace:*",
     "@liiiraa/design-tokens": "workspace:*",
+    "@liiiraa/desktop-client": "workspace:*",
     "@liiiraa/desktop-production-reference": "workspace:*",
     "@liiiraa/feature-shell": "workspace:*",
     "@tauri-apps/api": "2.11.1",

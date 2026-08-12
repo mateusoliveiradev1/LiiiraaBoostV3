@@ -1,5 +1,6 @@
 import { createElement, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createDeterministicEvidenceAuthority, type EvidenceInvoke } from '@liiiraa/desktop-client';
 import { DesktopApp, SHELL_OPERATIONAL_STATES } from './app.js';
 import type { DesktopAppProps, ShellOperationalState } from './app.js';
 
@@ -44,12 +45,14 @@ const readDesktopTestComposition = (): DesktopAppProps => {
   const appScale = composition['appScale'];
   const catalogLocale = composition['catalogLocale'];
   const initialPath = composition['initialPath'];
+  const evidenceMode = composition['evidenceMode'];
   const operationalState = composition['operationalState'];
   const premiumAuthorityState = composition['premiumAuthorityState'];
   const scenarioId = composition['scenarioId'];
   const textScale = composition['textScale'];
   const viewportWidth = composition['viewportWidth'];
   const windowsLocale = composition['windowsLocale'];
+  const evidenceInvoke = Reflect.get(globalThis, '__LIIIRAA_DESKTOP_EVIDENCE_INVOKE__');
 
   if (
     typeof initialPath !== 'string' ||
@@ -64,6 +67,13 @@ const readDesktopTestComposition = (): DesktopAppProps => {
 
   return Object.freeze({
     initialPath,
+    ...(evidenceMode === 'deterministic' && typeof evidenceInvoke === 'function'
+      ? {
+          evidenceAuthority: createDeterministicEvidenceAuthority({
+            invoke: evidenceInvoke as EvidenceInvoke,
+          }),
+        }
+      : {}),
     operationalState: operationalState as ShellOperationalState,
     ...(TEST_PREMIUM_AUTHORITY_STATES.has(premiumAuthorityState as string)
       ? {

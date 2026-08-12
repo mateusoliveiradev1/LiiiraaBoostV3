@@ -443,6 +443,9 @@ importers:
       '@liiiraa/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@liiiraa/desktop-client':
+        specifier: workspace:*
+        version: link:../../packages/desktop-client
       '@liiiraa/desktop-production-reference':
         specifier: workspace:*
         version: link:../../packages/desktop-production-reference

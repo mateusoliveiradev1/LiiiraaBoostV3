@@ -27,6 +27,7 @@ export interface DesktopBrowserScenario {
 export interface DesktopTestComposition {
   readonly appScale?: NonNullable<DesktopAppProps['appScale']>;
   readonly catalogLocale?: 'pseudo';
+  readonly evidenceMode?: 'deterministic';
   readonly forcedColors?: boolean;
   readonly initialPath: string;
   readonly operationalState: ShellOperationalState;

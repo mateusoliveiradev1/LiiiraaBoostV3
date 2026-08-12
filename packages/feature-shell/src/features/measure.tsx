@@ -18,6 +18,9 @@ import {
   type MetricEvidence,
   type OperationalState,
 } from '@liiiraa/design-system';
+import type { HardwareFactJson, InventorySnapshotJson } from '@liiiraa/contracts-ts';
+import type { EvidenceAuthority, EvidenceAuthoritySnapshot } from '@liiiraa/desktop-client';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import type { ShellLocale } from './calibration.js';
 
@@ -38,9 +41,10 @@ export const MEASURE_VIEWS = Object.freeze([
 export type MeasureView = (typeof MEASURE_VIEWS)[number];
 
 export interface MeasureSurfaceProps {
+  readonly authority?: EvidenceAuthority;
   readonly locale: ShellLocale;
   readonly onNavigate?: (view: MeasureView) => void;
-  readonly scenarioId: string;
+  readonly scenarioId?: string;
   readonly view: MeasureView;
 }
 
@@ -785,7 +789,12 @@ const DegradedCoverageView = ({
   </section>
 );
 
-export const MeasureSurface = ({ locale, onNavigate, scenarioId, view }: MeasureSurfaceProps) => (
+const FixtureMeasureSurface = ({
+  locale,
+  onNavigate,
+  scenarioId = 'S01',
+  view,
+}: MeasureSurfaceProps) => (
   <main
     aria-label={localized({ en: 'Measure workspace', 'pt-BR': 'Área de medição' }, locale)}
     data-locale={locale}
@@ -827,3 +836,693 @@ export const MeasureSurface = ({ locale, onNavigate, scenarioId, view }: Measure
     ) : null}
   </main>
 );
+
+const NATIVE_FACTS = Object.freeze([
+  ['cpu', 'CPU', 'CPU'],
+  ['gpu', 'GPU', 'GPU'],
+  ['memory', 'Memory', 'Memória'],
+  ['storage', 'Storage', 'Armazenamento'],
+  ['network', 'Network', 'Rede'],
+  ['display', 'Display', 'Tela'],
+  ['audio', 'Audio', 'Áudio'],
+  ['usb', 'USB', 'USB'],
+  ['windows', 'Windows', 'Windows'],
+  ['drivers', 'Drivers', 'Drivers'],
+  ['security', 'Security', 'Segurança'],
+  ['games', 'Games', 'Jogos'],
+] as const satisfies readonly (readonly [keyof InventorySnapshotJson, string, string])[]);
+
+const factReason = (fact: HardwareFactJson, locale: ShellLocale): string => {
+  if (fact.state === 'observed') return fact.value;
+  const reason = fact.reasonCode.replaceAll('-', ' ');
+  return locale === 'pt-BR'
+    ? `${fact.detail} Motivo: ${reason}.`
+    : `${fact.detail} Reason: ${reason}.`;
+};
+
+const NativeInventory = ({
+  locale,
+  snapshot,
+}: {
+  readonly locale: ShellLocale;
+  readonly snapshot: EvidenceAuthoritySnapshot;
+}) => {
+  const inventory = snapshot.inventory;
+  if (inventory === null) {
+    return (
+      <section className="lb-native-empty" data-evidence-state="not-collected" role="status">
+        <ProductIcon name="gauge" size={24} />
+        <div>
+          <h2>
+            {locale === 'pt-BR' ? 'Inventário ainda não coletado' : 'Inventory not collected yet'}
+          </h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Faça uma leitura local para descobrir exatamente o que este PC suporta.'
+              : 'Run a local read to discover exactly what this PC supports.'}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-labelledby="native-inventory-title"
+      className="lb-native-inventory"
+      data-lb-region
+    >
+      <header className="lb-native-section-heading">
+        <div>
+          <span className="lb-native-eyebrow">
+            {locale === 'pt-BR' ? 'LEITURA LOCAL DO WINDOWS' : 'LOCAL WINDOWS READING'}
+          </span>
+          <h2 id="native-inventory-title">
+            {locale === 'pt-BR' ? 'Hardware observado' : 'Observed hardware'}
+          </h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Identificadores brutos permanecem protegidos no limite nativo.'
+              : 'Raw identifiers remain protected inside the native boundary.'}
+          </p>
+        </div>
+        <span className="lb-native-count">
+          {
+            NATIVE_FACTS.filter(([key]) => {
+              const fact = inventory[key];
+              return (
+                typeof fact === 'object' &&
+                fact !== null &&
+                'state' in fact &&
+                fact.state === 'observed'
+              );
+            }).length
+          }{' '}
+          / {NATIVE_FACTS.length} {locale === 'pt-BR' ? 'classes observadas' : 'classes observed'}
+        </span>
+      </header>
+      <div className="lb-native-fact-grid">
+        {NATIVE_FACTS.map(([key, en, pt]) => {
+          const fact = inventory[key] as HardwareFactJson;
+          const label = locale === 'pt-BR' ? pt : en;
+          return (
+            <article
+              className="lb-native-fact"
+              data-evidence-state={fact.state}
+              id={`evidence-${key}`}
+              key={key}
+              tabIndex={-1}
+            >
+              <div className="lb-native-fact-icon">
+                <ProductIcon name={fact.state === 'observed' ? 'check' : 'warning'} size={18} />
+              </div>
+              <div>
+                <span>{label}</span>
+                {fact.state === 'observed' ? (
+                  <strong>{fact.value}</strong>
+                ) : (
+                  <>
+                    <strong>
+                      {locale === 'pt-BR' ? `${label} indisponível` : `${label} unavailable`}
+                    </strong>
+                    <p>{factReason(fact, locale)}</p>
+                  </>
+                )}
+              </div>
+              <span className="lb-native-fact-state">
+                {fact.state === 'observed'
+                  ? locale === 'pt-BR'
+                    ? 'Observado'
+                    : 'Observed'
+                  : locale === 'pt-BR'
+                    ? 'Indisponível'
+                    : 'Unavailable'}
+              </span>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+const NativeEvidenceRail = ({
+  locale,
+  snapshot,
+}: {
+  readonly locale: ShellLocale;
+  readonly snapshot: EvidenceAuthoritySnapshot;
+}) => {
+  const inventory = snapshot.inventory;
+  const deterministic = snapshot.origin === 'deterministic';
+  return (
+    <aside
+      aria-label={locale === 'pt-BR' ? 'Autoridade da evidência' : 'Evidence authority'}
+      className="lb-native-evidence-rail"
+    >
+      <div className="lb-native-rail-title">
+        <ProductIcon name="shield" size={18} />
+        <div>
+          <span>
+            {deterministic
+              ? locale === 'pt-BR'
+                ? 'CENÁRIO DETERMINÍSTICO'
+                : 'DETERMINISTIC SCENARIO'
+              : locale === 'pt-BR'
+                ? 'AUTORIDADE NATIVA'
+                : 'NATIVE AUTHORITY'}
+          </span>
+          <strong>
+            {deterministic
+              ? locale === 'pt-BR'
+                ? 'Dados controlados de teste'
+                : 'Controlled test data'
+              : locale === 'pt-BR'
+                ? 'Dados deste computador'
+                : 'Data from this computer'}
+          </strong>
+        </div>
+      </div>
+      <dl>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Estado' : 'State'}</dt>
+          <dd>{snapshot.status}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Coletado em' : 'Collected at'}</dt>
+          <dd>
+            {inventory === null ? (
+              '—'
+            ) : (
+              <time dateTime={inventory.collectedAt}>{inventory.collectedAt}</time>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Saúde da fonte' : 'Source health'}</dt>
+          <dd>{inventory?.execution.health.state ?? 'unavailable'}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Qualidade' : 'Quality'}</dt>
+          <dd>{inventory?.execution.overhead.quality ?? 'unavailable'}</dd>
+        </div>
+        <div>
+          <dt>{locale === 'pt-BR' ? 'Referência' : 'Reference'}</dt>
+          <dd className="lb-data-value">{inventory?.evidenceId ?? '—'}</dd>
+        </div>
+      </dl>
+    </aside>
+  );
+};
+
+const NativeComparison = ({
+  locale,
+  snapshot,
+}: {
+  readonly locale: ShellLocale;
+  readonly snapshot: EvidenceAuthoritySnapshot;
+}) => {
+  const comparison = snapshot.comparison;
+  if (comparison === null) {
+    return (
+      <section className="lb-native-empty" data-comparison-verdict="none" role="status">
+        <ProductIcon name="chart" size={24} />
+        <div>
+          <h2>{locale === 'pt-BR' ? 'Nenhuma comparação concluída' : 'No completed comparison'}</h2>
+          <p>
+            {locale === 'pt-BR'
+              ? 'Selecione duas capturas compatíveis no histórico.'
+              : 'Select two compatible captures in history.'}
+          </p>
+        </div>
+      </section>
+    );
+  }
+  if (comparison.state === 'rejected') {
+    return (
+      <section className="lb-native-comparison" data-comparison-verdict="rejected">
+        <span className="lb-native-eyebrow">{comparison.comparisonId}</span>
+        <h2>
+          {locale === 'pt-BR'
+            ? 'Estas sessões não podem ser comparadas'
+            : 'These sessions cannot be compared'}
+        </h2>
+        <p>
+          {locale === 'pt-BR'
+            ? 'Nenhum delta é exibido porque a evidência falhou na verificação de comparabilidade.'
+            : 'No delta is shown because the evidence failed comparability checks.'}
+        </p>
+        <ul>
+          {comparison.blockers.map((blocker) => (
+            <li key={blocker}>{blocker.replaceAll('-', ' ')}</li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
+  const result = comparison.acceptedResult;
+  const relative = result.before === 0 ? 0 : (result.delta / result.before) * 100;
+  const series: readonly ChartSeries[] = [
+    {
+      id: comparison.beforeSessionId,
+      label: 'Before',
+      points: [{ label: 'Result', value: result.before }],
+    },
+    {
+      id: comparison.afterSessionId,
+      label: 'After',
+      points: [{ label: 'Result', value: result.after }],
+    },
+  ];
+  return (
+    <section
+      className="lb-native-comparison"
+      data-comparison-id={comparison.comparisonId}
+      data-comparison-verdict="accepted"
+    >
+      <span className="lb-native-eyebrow">{comparison.comparisonId}</span>
+      <h2>{locale === 'pt-BR' ? 'Comparação admitida' : 'Admitted comparison'}</h2>
+      <ComparisonPlot
+        comparisonStatus="accepted"
+        label={locale === 'pt-BR' ? 'Resultado antes e depois' : 'Before and after result'}
+        series={series}
+        summary={`${result.before} → ${result.after} ${result.unit}`}
+        unit={result.unit}
+      />
+      <DeltaReadout
+        delta={{
+          status: 'accepted',
+          absolute: `${result.delta} ${result.unit}`,
+          relative: `${relative.toFixed(1)}%`,
+          direction:
+            locale === 'pt-BR'
+              ? 'Resultado calculado pela autoridade nativa.'
+              : 'Result calculated by native authority.',
+        }}
+        label={locale === 'pt-BR' ? 'Diferença medida' : 'Measured difference'}
+      />
+    </section>
+  );
+};
+
+const AuthorityMeasureSurface = ({
+  authority,
+  locale,
+  onNavigate,
+  scenarioId,
+  view,
+}: Required<Pick<MeasureSurfaceProps, 'authority' | 'locale' | 'view'>> &
+  Pick<MeasureSurfaceProps, 'onNavigate' | 'scenarioId'>) => {
+  const snapshot = useSyncExternalStore(
+    authority.subscribe,
+    authority.snapshot,
+    authority.snapshot,
+  );
+  const [environmentName, setEnvironmentName] = useState('Windows local · sessão controlada');
+  const [captureNote, setCaptureNote] = useState('');
+  const busy = snapshot.status === 'refreshing' || snapshot.status === 'cancelling';
+  const captureActive = snapshot.capture?.status === 'incomplete';
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void authority.readInventory(controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [authority]);
+
+  const refreshInventory = () => {
+    const collectedAt = new Date().toISOString();
+    void authority.refreshInventory({
+      request: {
+        schemaVersion: '1.0',
+        evidenceId: `inventory-${Date.now().toString(36)}`,
+        evidenceVersion: (snapshot.inventory?.evidenceVersion ?? 0) + 1,
+        collectedAt,
+        deadlineAt: new Date(Date.now() + 10_000).toISOString(),
+        perSourceTimeoutMs: 750,
+        policyDate: Number(collectedAt.slice(0, 10).replaceAll('-', '')),
+      },
+    });
+  };
+
+  const startCapture = () => {
+    if (snapshot.inventory === null) return;
+    const startedAt = new Date().toISOString();
+    void authority.startCapture({
+      request: {
+        schemaVersion: '1.0',
+        sessionId: `session-${Date.now().toString(36)}`,
+        evidenceVersion: 1,
+        startedAt,
+        deadlineAt: new Date(Date.now() + 5 * 60_000).toISOString(),
+        baselineId: `baseline-${snapshot.inventory.evidenceId}`,
+        inventoryEvidenceId: snapshot.inventory.evidenceId,
+        inventoryEvidenceHash: snapshot.inventory.evidenceHash,
+        collectorVersion: 'liiiraa-native-evidence@1',
+      },
+    });
+  };
+
+  const finishCapture = () => {
+    void authority.finishCapture({
+      request: {
+        schemaVersion: '1.0',
+        completedAt: new Date().toISOString(),
+      },
+    });
+  };
+
+  const cancelCapture = () => {
+    void authority.cancelCapture({
+      request: {
+        schemaVersion: '1.0',
+        monotonicNs: Math.max(0, Math.round(globalThis.performance.now() * 1_000_000)),
+      },
+    });
+  };
+
+  const renderBody = () => {
+    if (view === 'overview') return <NativeInventory locale={locale} snapshot={snapshot} />;
+    if (view === 'matched-comparison' || view === 'rejected-comparison' || view === 'diff') {
+      return <NativeComparison locale={locale} snapshot={snapshot} />;
+    }
+    if (view === 'capture' || view === 'baseline') {
+      return (
+        <section
+          aria-labelledby="native-capture-title"
+          className="lb-native-capture"
+          data-capture-active={String(captureActive)}
+        >
+          <div className="lb-native-section-heading">
+            <div>
+              <span className="lb-native-eyebrow">
+                {locale === 'pt-BR' ? 'CAPTURA CONTROLADA' : 'CONTROLLED CAPTURE'}
+              </span>
+              <h2 id="native-capture-title">
+                {view === 'baseline'
+                  ? locale === 'pt-BR'
+                    ? 'Linha de base'
+                    : 'Baseline'
+                  : locale === 'pt-BR'
+                    ? 'Nova captura'
+                    : 'New capture'}
+              </h2>
+            </div>
+            <StatusSignal
+              detail={
+                captureActive
+                  ? locale === 'pt-BR'
+                    ? 'Coleta ativa; o encerramento permanece disponível.'
+                    : 'Collection active; stop remains available.'
+                  : locale === 'pt-BR'
+                    ? 'Pronta para uma captura local.'
+                    : 'Ready for a local capture.'
+              }
+              locale={locale}
+              state={
+                captureActive ? 'loading' : snapshot.inventoryActionable ? 'success' : 'unsupported'
+              }
+            />
+          </div>
+          <div className="lb-native-capture-form">
+            <label>
+              <span>{locale === 'pt-BR' ? 'Ambiente confirmado' : 'Confirmed environment'}</span>
+              <input
+                onChange={(event) => setEnvironmentName(event.currentTarget.value)}
+                value={environmentName}
+              />
+            </label>
+            <label>
+              <span>{locale === 'pt-BR' ? 'Nota da captura' : 'Capture note'}</span>
+              <input
+                onChange={(event) => setCaptureNote(event.currentTarget.value)}
+                value={captureNote}
+              />
+            </label>
+          </div>
+          <div aria-live="polite" className="lb-native-capture-actions">
+            {captureActive ? (
+              <>
+                <LbButton isDisabled={busy} onPress={finishCapture} variant="primary">
+                  {locale === 'pt-BR' ? 'Concluir e salvar captura' : 'Finish and save capture'}
+                </LbButton>
+                <LbButton isDisabled={busy} onPress={cancelCapture} variant="secondary">
+                  {locale === 'pt-BR' ? 'Cancelar coleta' : 'Cancel collection'}
+                </LbButton>
+              </>
+            ) : (
+              <LbButton
+                isDisabled={!snapshot.inventoryActionable || busy}
+                onPress={startCapture}
+                variant="primary"
+              >
+                {view === 'baseline'
+                  ? locale === 'pt-BR'
+                    ? 'Capturar linha de base'
+                    : 'Capture baseline'
+                  : locale === 'pt-BR'
+                    ? 'Iniciar captura'
+                    : 'Start capture'}
+              </LbButton>
+            )}
+          </div>
+        </section>
+      );
+    }
+    if (view === 'session-history') {
+      return (
+        <section className="lb-native-history">
+          <h2>{locale === 'pt-BR' ? 'Histórico local' : 'Local history'}</h2>
+          {snapshot.capture === null ? (
+            <div className="lb-native-empty" role="status">
+              <ProductIcon name="history" size={24} />
+              <div>
+                <h3>
+                  {locale === 'pt-BR' ? 'Nenhuma captura concluída' : 'No completed captures'}
+                </h3>
+                <p>
+                  {locale === 'pt-BR'
+                    ? 'Faça uma linha de base ou uma captura compatível para começar.'
+                    : 'Capture a baseline or supported session to begin.'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <EvidenceTable
+              caption={locale === 'pt-BR' ? 'Capturas locais admitidas' : 'Admitted local captures'}
+              columns={[
+                { id: 'session', label: locale === 'pt-BR' ? 'Sessão' : 'Session' },
+                { id: 'status', label: 'Status' },
+                { id: 'started', label: locale === 'pt-BR' ? 'Iniciada' : 'Started' },
+              ]}
+              rows={[
+                {
+                  id: snapshot.capture.sessionId,
+                  cells: {
+                    session: snapshot.capture.sessionId,
+                    status: snapshot.capture.status,
+                    started: snapshot.capture.startedAt,
+                  },
+                },
+              ]}
+            />
+          )}
+        </section>
+      );
+    }
+    if (view === 'timeline') {
+      return (
+        <section className="lb-native-history">
+          <h2>{locale === 'pt-BR' ? 'Linha do tempo da evidência' : 'Evidence timeline'}</h2>
+          <SessionTimeline
+            entries={
+              snapshot.capture === null
+                ? []
+                : [
+                    {
+                      id: snapshot.capture.sessionId,
+                      timestamp: snapshot.capture.startedAt,
+                      title: locale === 'pt-BR' ? 'Captura iniciada' : 'Capture started',
+                      detail: snapshot.capture.status,
+                    },
+                  ]
+            }
+          />
+        </section>
+      );
+    }
+    if (view === 'report-preview') {
+      return (
+        <section className="lb-native-report">
+          <span className="lb-native-eyebrow">
+            {snapshot.report?.reportId ?? (locale === 'pt-BR' ? 'SEM RELATÓRIO' : 'NO REPORT')}
+          </span>
+          <h2>{locale === 'pt-BR' ? 'Relatório técnico local' : 'Local technical report'}</h2>
+          <p>
+            {snapshot.report === null
+              ? locale === 'pt-BR'
+                ? 'Conclua uma comparação admitida antes de gerar o relatório.'
+                : 'Complete an admitted comparison before generating the report.'
+              : locale === 'pt-BR'
+                ? 'O relatório permanece local e não será aberto nem enviado automaticamente.'
+                : 'The report stays local and will not be opened or uploaded automatically.'}
+          </p>
+          <LbButton isDisabled={snapshot.report === null} variant="primary">
+            {locale === 'pt-BR' ? 'Exportar relatório técnico' : 'Export technical report'}
+          </LbButton>
+        </section>
+      );
+    }
+    return (
+      <section className="lb-native-overhead">
+        <h2>
+          {locale === 'pt-BR' ? 'Saúde e cobertura do coletor' : 'Collector health and coverage'}
+        </h2>
+        <MetricReadout
+          evidence={
+            snapshot.inventory === null
+              ? {
+                  status: 'unavailable',
+                  reason:
+                    locale === 'pt-BR'
+                      ? 'Inventário ainda não coletado.'
+                      : 'Inventory not collected yet.',
+                  source: 'native authority',
+                  capturedAt: new Date(0).toISOString(),
+                  provenance: 'observed',
+                  quality: 'unavailable',
+                }
+              : {
+                  status: 'available',
+                  value: String(snapshot.inventory.execution.overhead.cpuTimeMs),
+                  unit: 'ms',
+                  source: snapshot.inventory.execution.sourceCapability,
+                  capturedAt: snapshot.inventory.collectedAt,
+                  provenance: 'observed',
+                  quality:
+                    snapshot.inventory.execution.overhead.quality === 'valid'
+                      ? 'verified'
+                      : 'degraded',
+                }
+          }
+          label={locale === 'pt-BR' ? 'Tempo de CPU do coletor' : 'Collector CPU time'}
+          locale={locale}
+          sampleWindow={
+            snapshot.inventory === null
+              ? '—'
+              : `${snapshot.inventory.execution.overhead.sampleWindowMs} ms`
+          }
+        />
+      </section>
+    );
+  };
+
+  return (
+    <main
+      aria-label={locale === 'pt-BR' ? 'Área de medição real' : 'Real measurement workspace'}
+      className="lb-native-measure"
+      data-evidence-origin={snapshot.origin}
+      data-evidence-stale={String(snapshot.staleInventory)}
+      data-locale={locale}
+      data-measure-view={view}
+    >
+      {snapshot.origin === 'deterministic' ? (
+        <ScenarioMarker scenarioId={scenarioId ?? 'S01'} />
+      ) : null}
+      <RouteHeader
+        breadcrumbs={[
+          { label: locale === 'pt-BR' ? 'Medir' : 'Measure' },
+          { label: localized(MEASURE_VIEW_COPY[view], locale) },
+        ]}
+        purpose={
+          locale === 'pt-BR'
+            ? 'Evidência observada e medida neste computador, com limitações explícitas.'
+            : 'Evidence observed and measured on this computer with explicit limitations.'
+        }
+        title={locale === 'pt-BR' ? 'Desempenho real' : 'Real performance'}
+      />
+      <section
+        className="lb-native-verdict"
+        data-evidence-actionable={String(snapshot.inventoryActionable)}
+      >
+        <div>
+          <span className="lb-native-eyebrow">
+            {locale === 'pt-BR' ? 'ESTADO DA EVIDÊNCIA' : 'EVIDENCE STATE'}
+          </span>
+          <h2>
+            {snapshot.staleInventory
+              ? locale === 'pt-BR'
+                ? 'Inventário desatualizado'
+                : 'Inventory is out of date'
+              : snapshot.inventoryActionable
+                ? locale === 'pt-BR'
+                  ? 'Leitura local pronta para orientar decisões'
+                  : 'Local reading ready to support decisions'
+                : locale === 'pt-BR'
+                  ? 'Atualize antes de iniciar uma medição'
+                  : 'Refresh before starting a measurement'}
+          </h2>
+          <p>
+            {snapshot.staleInventory
+              ? locale === 'pt-BR'
+                ? 'A última leitura continua visível, mas nenhuma nova ação será admitida até a atualização terminar.'
+                : 'The last reading remains visible, but no new action is admitted until refresh completes.'
+              : locale === 'pt-BR'
+                ? 'Valores observados vêm do limite nativo; ausências permanecem explicitamente indisponíveis.'
+                : 'Observed values come from the native boundary; absences remain explicitly unavailable.'}
+          </p>
+        </div>
+        <LbButton
+          isLoading={snapshot.status === 'refreshing'}
+          onPress={refreshInventory}
+          variant="primary"
+        >
+          {locale === 'pt-BR' ? 'Atualizar inventário' : 'Refresh inventory'}
+        </LbButton>
+      </section>
+      <nav
+        aria-label={locale === 'pt-BR' ? 'Fluxo de medição' : 'Measurement workflow'}
+        className="lb-native-measure-nav"
+      >
+        {MEASURE_VIEWS.map((target) => (
+          <LbButton
+            key={target}
+            onPress={() => onNavigate?.(target)}
+            variant={target === view ? 'primary' : 'quiet'}
+          >
+            {localized(MEASURE_VIEW_COPY[target], locale)}
+          </LbButton>
+        ))}
+      </nav>
+      <div className="lb-native-measure-grid">
+        <div className="lb-native-measure-primary">{renderBody()}</div>
+        <NativeEvidenceRail locale={locale} snapshot={snapshot} />
+      </div>
+      <div
+        aria-atomic="true"
+        aria-live={snapshot.status === 'error' ? 'assertive' : 'polite'}
+        className="lb-native-live-status"
+      >
+        {snapshot.error === null
+          ? null
+          : locale === 'pt-BR'
+            ? `A evidência não foi atualizada: ${snapshot.error.code}.`
+            : `Evidence was not updated: ${snapshot.error.code}.`}
+      </div>
+    </main>
+  );
+};
+
+export const MeasureSurface = (props: MeasureSurfaceProps) =>
+  props.authority === undefined ? (
+    <FixtureMeasureSurface {...props} />
+  ) : (
+    <AuthorityMeasureSurface
+      authority={props.authority}
+      locale={props.locale}
+      {...(props.onNavigate === undefined ? {} : { onNavigate: props.onNavigate })}
+      {...(props.scenarioId === undefined ? {} : { scenarioId: props.scenarioId })}
+      view={props.view}
+    />
+  );
