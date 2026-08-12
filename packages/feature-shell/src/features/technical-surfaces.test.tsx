@@ -3,7 +3,9 @@
 import type { ReactNode } from 'react';
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { EvidenceAuthority, EvidenceAuthoritySnapshot } from '@liiiraa/desktop-client';
 
 import {
   GAME_LIBRARY_STATES,
@@ -262,7 +264,135 @@ describe('Improve operation and plan review technical surface', () => {
   });
 });
 
+const createNativeMeasureAuthority = (
+  overrides: Partial<EvidenceAuthoritySnapshot> = {},
+): EvidenceAuthority => {
+  const observed = (value: string) => ({
+    state: 'observed',
+    value,
+    source: 'windows-native-api',
+    observedAt: '2026-08-12T18:00:00Z',
+  });
+  const snapshot = {
+    revision: 4,
+    origin: 'native',
+    status: 'ready',
+    inventory: {
+      kind: 'inventory-snapshot',
+      schemaVersion: '1.0',
+      evidenceId: 'inventory-native-1',
+      evidenceVersion: 1,
+      collectedAt: '2026-08-12T18:00:00Z',
+      evidenceHash: `sha256:${'a'.repeat(64)}`,
+      execution: {
+        sourceCapability: 'native-readonly',
+        deadlineAt: '2026-08-12T18:00:10Z',
+        cancellationState: 'not-requested',
+        health: { state: 'healthy', checkedAt: '2026-08-12T18:00:00Z', detail: 'Ready' },
+        overhead: {
+          sampleWindowMs: 1_000,
+          cpuTimeMs: 8,
+          peakWorkingSetBytes: '8388608',
+          quality: 'valid',
+        },
+      },
+      cpu: observed('AMD Ryzen 7 7800X3D'),
+      gpu: observed('NVIDIA GeForce RTX 4070'),
+      memory: observed('32 GB DDR5'),
+      storage: observed('NVMe SSD'),
+      network: observed('Ethernet'),
+      display: observed('2560 × 1440 · 144 Hz'),
+      audio: {
+        state: 'unavailable',
+        reasonCode: 'not-reported',
+        detail: 'Windows did not report an active audio endpoint.',
+      },
+      usb: observed('4 controllers'),
+      windows: observed('Windows 11 Pro · 24H2'),
+      drivers: observed('12 signed packages'),
+      security: observed('Secure Boot enabled'),
+      games: {
+        state: 'unavailable',
+        reasonCode: 'not-discovered',
+        detail: 'No supported game was discovered.',
+      },
+    },
+    capture: null,
+    comparison: {
+      kind: 'comparison',
+      schemaVersion: '1.0',
+      comparisonId: 'comparison-native-1',
+      state: 'accepted',
+      beforeSessionId: 'session-before',
+      afterSessionId: 'session-after',
+      comparedAt: '2026-08-12T18:10:00Z',
+      acceptedResult: {
+        metric: 'frame-time-ms',
+        unit: 'milliseconds',
+        before: 8.4,
+        after: 7.2,
+        delta: -1.2,
+        quality: 'valid',
+        evidenceHash: `sha256:${'b'.repeat(64)}`,
+      },
+    },
+    report: null,
+    selection: { beforeSessionId: 'session-before', afterSessionId: 'session-after' },
+    staleInventory: false,
+    inventoryActionable: true,
+    error: null,
+    ...overrides,
+  } as unknown as EvidenceAuthoritySnapshot;
+
+  return {
+    origin: 'native',
+    snapshot: () => snapshot,
+    subscribe: () => () => undefined,
+    setComparisonSelection: vi.fn(),
+    refreshInventory: vi.fn(),
+    readInventory: vi.fn(),
+    startCapture: vi.fn(),
+    cancelCapture: vi.fn(),
+    finishCapture: vi.fn(),
+    compareSessions: vi.fn(),
+    renderReport: vi.fn(),
+    exportReport: vi.fn(),
+    readHealth: vi.fn(),
+    dispose: vi.fn(),
+  } as unknown as EvidenceAuthority;
+};
+
 describe('Measure technical surfaces', () => {
+  it('renders native inventory truth without fixture provenance or numeric unavailable values', () => {
+    const markup = renderToStaticMarkup(
+      <MeasureSurface authority={createNativeMeasureAuthority()} locale="pt-BR" view="overview" />,
+    );
+    expect(markup).toContain('data-evidence-origin="native"');
+    expect(markup).toContain('AMD Ryzen 7 7800X3D');
+    expect(markup).toContain('Windows 11 Pro · 24H2');
+    expect(markup).toContain('Áudio indisponível');
+    expect(markup).toContain('Windows did not report an active audio endpoint.');
+    expect(markup).not.toContain('DEMO ·');
+    expect(markup).not.toContain('fixture');
+  });
+
+  it('keeps stale native evidence visible and reuses accepted comparison identity and values', () => {
+    const authority = createNativeMeasureAuthority({ staleInventory: true, status: 'refreshing' });
+    const overview = renderToStaticMarkup(
+      <MeasureSurface authority={authority} locale="en" view="overview" />,
+    );
+    const comparison = renderToStaticMarkup(
+      <MeasureSurface authority={authority} locale="en" view="matched-comparison" />,
+    );
+    expect(overview).toContain('data-evidence-stale="true"');
+    expect(overview).toContain('Inventory is out of date');
+    expect(overview).toContain('AMD Ryzen 7 7800X3D');
+    expect(comparison).toContain('comparison-native-1');
+    expect(comparison).toContain('8.4');
+    expect(comparison).toContain('7.2');
+    expect(comparison).toContain('-1.2');
+  });
+
   it('makes every evidence, capture, comparison, timeline, and report state reachable', () => {
     for (const view of MEASURE_VIEWS) {
       const markup = renderToStaticMarkup(
