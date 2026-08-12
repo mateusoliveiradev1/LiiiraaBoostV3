@@ -2205,24 +2205,98 @@ body,
 
 .desktop-work-canvas .lb-native-evidence-rail {
   position: static;
-  display: grid;
-  grid-template-columns: minmax(230px, 0.75fr) minmax(0, 2.25fr);
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
   min-inline-size: 0;
   overflow: hidden;
+}
+
+.desktop-work-canvas .lb-native-evidence-rail > summary {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto 28px;
+  gap: var(--lb-space-4);
+  align-items: center;
+  min-block-size: 68px;
+  padding: var(--lb-space-3) var(--lb-space-4);
+  cursor: pointer;
+  list-style: none;
+  background: var(--lb-surface-work);
+}
+
+.desktop-work-canvas .lb-native-evidence-rail > summary::-webkit-details-marker {
+  display: none;
+}
+
+.desktop-work-canvas .lb-native-evidence-rail > summary::after {
+  content: '+';
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 1px solid var(--lb-line-subtle);
+  border-radius: 50%;
+  color: var(--lb-accent-primary);
+  font-family: var(--lb-font-data);
+}
+
+.desktop-work-canvas .lb-native-evidence-rail[open] > summary::after {
+  content: '−';
+}
+
+.desktop-work-canvas .lb-native-evidence-rail > summary:hover {
+  background: color-mix(in srgb, var(--lb-accent-primary) 5%, var(--lb-surface-work));
+}
+
+.desktop-work-canvas .lb-native-evidence-rail > summary:focus-visible {
+  outline: 2px solid var(--lb-accent-primary);
+  outline-offset: -2px;
 }
 
 .desktop-work-canvas .lb-native-rail-title {
   display: flex;
   gap: var(--lb-space-3);
   align-items: center;
-  padding: var(--lb-space-3);
-  border-inline-end: 1px solid var(--lb-line-subtle);
-  background: var(--lb-surface-work);
+  min-inline-size: 0;
 }
 
 .desktop-work-canvas .lb-native-rail-title strong {
   display: block;
   margin-block-start: var(--lb-space-1);
+  overflow-wrap: anywhere;
+}
+
+.desktop-work-canvas .lb-native-rail-title > span {
+  min-inline-size: 0;
+}
+
+.desktop-work-canvas .lb-native-rail-title > span > span,
+.desktop-work-canvas .lb-native-rail-hint {
+  color: var(--lb-text-tertiary);
+  font-family: var(--lb-font-data);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.desktop-work-canvas .lb-native-rail-summary {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  color: var(--lb-text-secondary);
+  font-size: 12px;
+}
+
+.desktop-work-canvas .lb-native-rail-summary strong {
+  color: var(--lb-positive);
+  font-size: 12px;
+}
+
+.desktop-work-canvas .lb-native-rail-hint {
+  color: var(--lb-accent-primary);
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dl {
@@ -2230,6 +2304,7 @@ body,
   grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 0;
   padding: 0;
+  border-block-start: 1px solid var(--lb-line-subtle);
 }
 
 .desktop-work-canvas .lb-native-evidence-rail dl > div {
@@ -2355,7 +2430,7 @@ body,
   }
 
   .desktop-work-canvas .lb-native-evidence-rail {
-    grid-template-columns: minmax(0, 1fr);
+    inline-size: 100%;
   }
 
   .desktop-work-canvas .lb-native-evidence-rail dl {
@@ -2363,13 +2438,12 @@ body,
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .desktop-work-canvas .lb-native-rail-title {
-    border-inline-end: 0;
-    border-block-end: 1px solid var(--lb-line-subtle);
+  .desktop-work-canvas .lb-native-evidence-rail > summary {
+    grid-template-columns: minmax(0, 1fr) auto 28px;
   }
 
-  .desktop-work-canvas .lb-native-evidence-rail dl > div {
-    border-inline-end: 1px solid var(--lb-line-subtle);
+  .desktop-work-canvas .lb-native-rail-summary {
+    display: none;
   }
 }
 
@@ -2384,6 +2458,15 @@ body,
   .desktop-work-canvas .lb-native-fact-grid,
   .desktop-work-canvas .lb-native-evidence-rail dl {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .desktop-work-canvas .lb-native-evidence-rail > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--lb-space-2);
+  }
+
+  .desktop-work-canvas .lb-native-rail-hint {
+    display: none;
   }
 
   .desktop-work-canvas .lb-native-verdict .lb-button {

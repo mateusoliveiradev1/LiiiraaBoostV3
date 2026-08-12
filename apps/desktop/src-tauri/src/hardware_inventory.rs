@@ -784,6 +784,7 @@ mod windows_native {
                 let file_name = file_name.to_string_lossy();
                 if !file_name.starts_with("appmanifest_")
                     || path.extension().and_then(|value| value.to_str()) != Some("acf")
+                    || file_name.eq_ignore_ascii_case("appmanifest_228980.acf")
                 {
                     continue;
                 }
@@ -882,7 +883,14 @@ mod windows_native {
 
     fn insert_game_name(games: &mut BTreeSet<String>, candidate: &str) {
         let name = candidate.trim().chars().take(96).collect::<String>();
-        if name.len() >= 2 && !name.eq_ignore_ascii_case("common") {
+        let normalized = name.to_ascii_lowercase();
+        let is_support_component = normalized == "common"
+            || normalized == "steamworks common redistributables"
+            || normalized == "steamworks sdk redist"
+            || normalized.starts_with("steam linux runtime")
+            || normalized.starts_with("proton ")
+            || normalized.starts_with("source sdk base");
+        if name.len() >= 2 && !is_support_component {
             games.insert(name);
         }
     }
@@ -1179,6 +1187,19 @@ mod windows_native {
                 }
             "#;
             assert_eq!(vdf_values(manifest, "name"), vec!["PUBG: BATTLEGROUNDS"]);
+        }
+
+        #[test]
+        fn excludes_steam_support_components_from_installed_games() {
+            let mut games = BTreeSet::new();
+            insert_game_name(&mut games, "Steamworks Common Redistributables");
+            insert_game_name(&mut games, "Steam Linux Runtime 3.0 (sniper)");
+            insert_game_name(&mut games, "PUBG: BATTLEGROUNDS");
+
+            assert_eq!(
+                games.into_iter().collect::<Vec<_>>(),
+                vec!["PUBG: BATTLEGROUNDS"]
+            );
         }
     }
 }

@@ -1159,33 +1159,46 @@ const NativeEvidenceRail = ({
   const inventory = snapshot.inventory;
   const deterministic = snapshot.origin === 'deterministic';
   return (
-    <aside
+    <details
       aria-label={locale === 'pt-BR' ? 'Autoridade da evidência' : 'Evidence authority'}
       className="lb-native-evidence-rail"
     >
-      <div className="lb-native-rail-title">
-        <ProductIcon name="shield" size={18} />
-        <div>
+      <summary>
+        <span className="lb-native-rail-title">
+          <ProductIcon name="shield" size={18} />
           <span>
-            {deterministic
-              ? locale === 'pt-BR'
-                ? 'CENÁRIO DETERMINÍSTICO'
-                : 'DETERMINISTIC SCENARIO'
-              : locale === 'pt-BR'
-                ? 'AUTORIDADE NATIVA'
-                : 'NATIVE AUTHORITY'}
+            <span>
+              {deterministic
+                ? locale === 'pt-BR'
+                  ? 'CENÁRIO DETERMINÍSTICO'
+                  : 'DETERMINISTIC SCENARIO'
+                : locale === 'pt-BR'
+                  ? 'FONTE DA MEDIÇÃO'
+                  : 'MEASUREMENT SOURCE'}
+            </span>
+            <strong>
+              {deterministic
+                ? locale === 'pt-BR'
+                  ? 'Dados controlados de teste'
+                  : 'Controlled test data'
+                : locale === 'pt-BR'
+                  ? 'Leitura protegida deste computador'
+                  : 'Protected reading from this computer'}
+            </strong>
           </span>
-          <strong>
-            {deterministic
-              ? locale === 'pt-BR'
-                ? 'Dados controlados de teste'
-                : 'Controlled test data'
-              : locale === 'pt-BR'
-                ? 'Dados deste computador'
-                : 'Data from this computer'}
-          </strong>
-        </div>
-      </div>
+        </span>
+        <span className="lb-native-rail-summary">
+          <strong>{evidenceStatusLabel(snapshot.status, locale)}</strong>
+          {inventory === null ? null : (
+            <time dateTime={inventory.collectedAt}>
+              {formatEvidenceDate(inventory.collectedAt, locale)}
+            </time>
+          )}
+        </span>
+        <span className="lb-native-rail-hint">
+          {locale === 'pt-BR' ? 'Ver detalhes da fonte' : 'View source details'}
+        </span>
+      </summary>
       <dl>
         <div>
           <dt>{locale === 'pt-BR' ? 'Estado' : 'State'}</dt>
@@ -1218,7 +1231,7 @@ const NativeEvidenceRail = ({
           </dd>
         </div>
       </dl>
-    </aside>
+    </details>
   );
 };
 
@@ -1848,8 +1861,8 @@ const AuthorityMeasureSurface = ({
         ))}
       </nav>
       <div className="lb-native-measure-grid">
-        <NativeEvidenceRail locale={locale} snapshot={snapshot} />
         <div className="lb-native-measure-primary">{renderBody()}</div>
+        <NativeEvidenceRail locale={locale} snapshot={snapshot} />
       </div>
       <div
         aria-atomic="true"

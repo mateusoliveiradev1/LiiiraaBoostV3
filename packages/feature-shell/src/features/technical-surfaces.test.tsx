@@ -377,6 +377,19 @@ describe('Measure technical surfaces', () => {
     expect(markup).not.toContain('fixture');
   });
 
+  it('keeps measurement content ahead of compact expandable provenance', () => {
+    const markup = renderToStaticMarkup(
+      <MeasureSurface authority={createNativeMeasureAuthority()} locale="pt-BR" view="report-preview" />,
+    );
+    const contentIndex = markup.indexOf('lb-native-measure-primary');
+    const provenanceIndex = markup.indexOf('lb-native-evidence-rail');
+
+    expect(contentIndex).toBeGreaterThanOrEqual(0);
+    expect(provenanceIndex).toBeGreaterThan(contentIndex);
+    expect(markup).toMatch(/<details[^>]+class="lb-native-evidence-rail"/u);
+    expect(markup).toContain('Ver detalhes da fonte');
+  });
+
   it('keeps stale native evidence visible and reuses accepted comparison identity and values', () => {
     const authority = createNativeMeasureAuthority({ staleInventory: true, status: 'refreshing' });
     const overview = renderToStaticMarkup(
