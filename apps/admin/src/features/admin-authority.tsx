@@ -1257,19 +1257,26 @@ const AdminProductionShell = ({
                     setFunctionSwitchError(false);
                     setFunctionSwitchOpen(false);
                     window.setTimeout(() => {
-                      void authorizeMutation(functionSwitchInput).then(async (admitted) => {
-                        if (admitted === null) {
+                      void authorizeMutation(functionSwitchInput)
+                        .then(async (admitted) => {
+                          if (admitted === null) {
+                            setFunctionSwitchPending(false);
+                            return;
+                          }
+                          const result = await authority.mutate(admitted);
+                          if (result.status === 'complete' || result.status === 'partial') {
+                            window.location.replace(`/${locale}/admin/overview`);
+                            return;
+                          }
                           setFunctionSwitchPending(false);
-                          return;
-                        }
-                        const result = await authority.mutate(admitted);
-                        if (result.status === 'complete' || result.status === 'partial') {
-                          window.location.replace(`/${locale}/admin/overview`);
-                          return;
-                        }
-                        setFunctionSwitchPending(false);
-                        setFunctionSwitchError(true);
-                      });
+                          setFunctionSwitchError(true);
+                          setFunctionSwitchOpen(true);
+                        })
+                        .catch(() => {
+                          setFunctionSwitchPending(false);
+                          setFunctionSwitchError(true);
+                          setFunctionSwitchOpen(true);
+                        });
                     }, 0);
                   }}
                   variant="primary"

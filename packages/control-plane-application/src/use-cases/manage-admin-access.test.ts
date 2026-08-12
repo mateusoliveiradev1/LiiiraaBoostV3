@@ -200,7 +200,7 @@ describe('transactional admin access governance', () => {
         targetFunction: 'security',
         reason: 'Return to security governance',
         authorizationContextId: 'context-admin.function.switch',
-        stepUp: stepUp('owner', 'admin.function.switch', 'admin-session', 'session:session-one'),
+        stepUp: stepUp('owner', 'admin.function.switch', 'admin-session', 'session-one'),
       }),
     ).resolves.toMatchObject({
       ok: true,

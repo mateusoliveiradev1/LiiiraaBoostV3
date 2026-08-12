@@ -2,7 +2,7 @@
 status: verifying
 trigger: 'O campo do código de seis dígitos aparece ao trocar a função administrativa, mas não aceita digitação.'
 created: 2026-08-11T23:48:00.0000000Z
-updated: 2026-08-11T23:48:00.0000000Z
+updated: 2026-08-12T04:56:00.0000000Z
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-08-11T23:48:00.0000000Z
 hypothesis: Confirmed. The function-switch React Aria modal remained open when the separate strong-auth dialog mounted, so its focus scope prevented the new TOTP input from receiving keyboard input.
 test: Publish the corrected Admin revision and repeat the Operations-to-Security TOTP UAT.
 expecting: The underlying modal closes before the TOTP dialog mounts, allowing its text field to receive focus and six digits.
-next_action: Commit, push, wait for the exact Admin revision on the official domain, then request the focused retry.
+next_action: The published retry accepted all six digits and completed strong authentication. Continue the separate target-binding debug recorded in `admin-function-switch-target.md`.
 
 ## Symptoms
 
@@ -34,5 +34,5 @@ None yet.
 
 root_cause: The controlled `LbDialog` for function selection remained open while a sibling strong-auth dialog was mounted. React Aria correctly retained its modal focus scope, making the visually topmost TOTP field non-interactive.
 fix: Close the function-switch dialog and defer opening strong authentication to the next browser task, after the modal focus scope has unmounted.
-verification: The regression failed before the fix and passes after it. The complete Admin suite passes 196/196, TypeScript and changed-file ESLint pass, `git diff --check` is clean, and the production Next build succeeds. Published owner UAT remains pending.
+verification: The regression failed before the fix and passes after it. The complete Admin suite passes 196/196, TypeScript and changed-file ESLint pass, `git diff --check` is clean, and the production Next build succeeds. Published owner retry accepted the six-digit code; the later mutation denial is tracked separately.
 files_changed: [apps/admin/src/features/admin-authority.tsx, apps/admin/src/admin-shell.test.ts]

@@ -121,6 +121,7 @@ describe('admin shell', () => {
       /setFunctionSwitchPending\(true\);\s*setFunctionSwitchError\(false\);\s*setFunctionSwitchOpen\(false\);\s*window\.setTimeout\(\(\) => \{\s*void authorizeMutation\(functionSwitchInput\)/u,
     );
     expect(authority).toContain('window.location.replace(`/${locale}/admin/overview`)');
+    expect(authority).toMatch(/setFunctionSwitchError\(true\);\s*setFunctionSwitchOpen\(true\);/u);
   });
 
   it('keeps the queue and account access inside the 959px and 320px reflow boundaries', () => {

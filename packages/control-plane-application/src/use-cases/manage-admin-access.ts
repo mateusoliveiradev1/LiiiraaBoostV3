@@ -436,7 +436,7 @@ export const switchAdminFunction = async (
           authorizationContextId: input.authorizationContextId,
           action: 'admin.function.switch',
           resource: 'admin-session',
-          redactedTarget: `session:${input.sessionId}`,
+          redactedTarget: input.sessionId,
         },
         occurredAt,
       )));
