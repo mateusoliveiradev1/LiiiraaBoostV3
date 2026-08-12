@@ -13,6 +13,7 @@ function assertDeepEqual(actual: unknown, expected: unknown, message: string): v
 
 const expectedArtifacts = new Map([
   ['contracts/generated/desktop/v1/message-envelope.schema.json', 'expected\n'],
+  ['contracts/generated/desktop/v1/hardware-evidence.schema.json', 'hardware\n'],
   ['contracts/generated/desktop/v1/shell-message.schema.json', 'shell\n'],
   ['packages/contracts-ts/src/generated/models.ts', 'models\n'],
 ]);
@@ -28,6 +29,7 @@ assertDeepEqual(
   [
     'changed: contracts/generated/desktop/v1/message-envelope.schema.json',
     'extra: crates/contracts-rust/src/extra.rs',
+    'missing: contracts/generated/desktop/v1/hardware-evidence.schema.json',
     'missing: contracts/generated/desktop/v1/shell-message.schema.json',
     'missing: packages/contracts-ts/src/generated/models.ts',
   ],
@@ -71,6 +73,11 @@ assertDeepEqual(
 
 const WEB_CONTRACT_PATH = new URL(
   '../../../packages/contracts-source/src/web.tsp',
+  import.meta.url,
+);
+
+const HARDWARE_EVIDENCE_CONTRACT_PATH = new URL(
+  '../../../packages/contracts-source/src/hardware-evidence.tsp',
   import.meta.url,
 );
 
@@ -324,6 +331,92 @@ const webContractMutations = [
 for (const mutation of webContractMutations) {
   if (webContractSourceDiagnostics(mutation.source).length === 0) {
     throw new Error(`web contract source mutation survived: ${mutation.name}`);
+  }
+}
+
+function hardwareEvidenceContractDiagnostics(source: string): string[] {
+  const diagnostics: string[] = [];
+
+  for (const declarationName of [
+    'CollectorExecutionContext',
+    'InventorySnapshot',
+    'MeasurementBaseline',
+    'MetricChunk',
+    'MeasurementSession',
+    'EvidenceComparison',
+    'EvidenceReport',
+    'ClaimAdmission',
+    'HardwareEvidenceDocument',
+  ]) {
+    if (!new RegExp(`\\b(?:model|union)\\s+${declarationName}\\s*\\{`).test(source)) {
+      diagnostics.push(`missing hardware evidence declaration: ${declarationName}`);
+    }
+  }
+
+  const inventoryBody = extractDeclarationBody(source, 'model', 'InventorySnapshot') ?? '';
+  for (const category of [
+    'cpu',
+    'gpu',
+    'memory',
+    'storage',
+    'network',
+    'display',
+    'audio',
+    'usb',
+    'windows',
+    'drivers',
+    'security',
+    'games',
+  ]) {
+    if (!new RegExp(`\\b${category}\\s*:\\s*HardwareFact\\s*;`).test(inventoryBody)) {
+      diagnostics.push(`InventorySnapshot.${category} must remain explicit`);
+    }
+  }
+
+  const documentBody =
+    extractDeclarationBody(source, 'union', 'HardwareEvidenceDocument') ?? '';
+  for (const documentKind of ['inventory', 'session', 'comparison', 'report', 'claim']) {
+    if (!new RegExp(`\\b${documentKind}\\s*:`).test(documentBody)) {
+      diagnostics.push(`HardwareEvidenceDocument.${documentKind} must remain admitted`);
+    }
+  }
+
+  if (!/@jsonSchema\s*@oneOf\s*union\s+HardwareEvidenceDocument\s*\{/s.test(source)) {
+    diagnostics.push('HardwareEvidenceDocument must remain a generated closed union');
+  }
+
+  if (/\b(?:serialNumber|rawIdentifier|hardwareId)\b/i.test(source)) {
+    diagnostics.push('hardware evidence contract exposes a forbidden raw identifier');
+  }
+
+  if (/\bfixture\b/i.test(source)) {
+    diagnostics.push('hardware evidence contract admits fixture-shaped production evidence');
+  }
+
+  return diagnostics.sort();
+}
+
+const hardwareEvidenceContractSource = await readFile(
+  fileURLToPath(HARDWARE_EVIDENCE_CONTRACT_PATH),
+  'utf8',
+);
+
+assertDeepEqual(
+  hardwareEvidenceContractDiagnostics(hardwareEvidenceContractSource),
+  [],
+  'hardware evidence contract must remain complete, private, and production-safe.',
+);
+
+for (const mutation of [
+  hardwareEvidenceContractSource.replace('games: HardwareFact;', ''),
+  hardwareEvidenceContractSource.replace(
+    'cpu: HardwareFact;',
+    'cpu: HardwareFact; serialNumber: EvidenceText;',
+  ),
+  hardwareEvidenceContractSource.replace('claim: ClaimAdmission,', ''),
+]) {
+  if (hardwareEvidenceContractDiagnostics(mutation).length === 0) {
+    throw new Error('hardware evidence contract mutation survived compatibility checks');
   }
 }
 
