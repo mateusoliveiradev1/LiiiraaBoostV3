@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=resource
+kind=physical
+status=passed

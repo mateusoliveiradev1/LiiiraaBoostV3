@@ -1,0 +1,75 @@
+{
+  "cancellationMs": 100,
+  "collectorVersion": "liiiraa-native-evidence@1",
+  "hardwareClasses": [
+    {
+      "hardwareClass": "cpu",
+      "source": "CPUID",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "gpu",
+      "source": "EnumDisplayDevicesW",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "memory",
+      "source": "GlobalMemoryStatusEx",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "storage",
+      "source": "GetDiskFreeSpaceExW",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "network",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    },
+    {
+      "hardwareClass": "display",
+      "source": "EnumDisplaySettingsW",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "audio",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    },
+    {
+      "hardwareClass": "usb",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    },
+    {
+      "hardwareClass": "windows",
+      "source": "RtlGetVersion + GetProductInfo",
+      "state": "observed"
+    },
+    {
+      "hardwareClass": "drivers",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    },
+    {
+      "hardwareClass": "security",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    },
+    {
+      "hardwareClass": "games",
+      "reasonCode": "collector-unavailable",
+      "source": "native-readonly-boundary",
+      "state": "unavailable"
+    }
+  ],
+  "pollingHz": 0,
+  "rawIdentifiersFound": [],
+  "schemaVersion": 1
+}

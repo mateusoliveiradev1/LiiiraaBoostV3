@@ -1,0 +1,4 @@
+run=phase5-deterministic-current
+gate=fault
+kind=deterministic
+status=passed

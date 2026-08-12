@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=ui
+kind=physical
+status=passed

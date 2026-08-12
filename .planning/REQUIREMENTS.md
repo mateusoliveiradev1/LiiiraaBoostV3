@@ -56,10 +56,10 @@
 
 - [x] **DIAG-01**: User can inventory CPU, GPU, memory, storage, network, display, audio, USB, Windows build, drivers, security state, and installed games
 - [x] **DIAG-02**: The system distinguishes Windows 11, Windows 10 LTSC/ESU, and unsupported Windows 10 consumer lifecycle states
-- [ ] **DIAG-03**: User sees lifecycle and compatibility warnings before receiving recommendations for an unsupported or unverified environment
-- [ ] **DIAG-04**: The engine derives recommendations from detected capabilities and evidence freshness rather than device-name recipes
+- [x] **DIAG-03**: User sees lifecycle and compatibility warnings before receiving recommendations for an unsupported or unverified environment
+- [x] **DIAG-04**: The engine derives recommendations from detected capabilities and evidence freshness rather than device-name recipes
 - [x] **DIAG-05**: Unknown, stale, contradictory, or unavailable evidence fails closed and cannot silently become a compatible recommendation
-- [ ] **DIAG-06**: User can see why an operation is compatible, unsupported, hidden, or restricted to Experimental
+- [x] **DIAG-06**: User can see why an operation is compatible, unsupported, hidden, or restricted to Experimental
 - [x] **DIAG-07**: Read-only collection respects explicit resource budgets and reduces sampling during active games
 
 ### Plans, Execution, and Recovery
@@ -197,10 +197,10 @@ A v1 requirement is complete only when:
 | IDEN-09     | Phase 4  | Complete |
 | DIAG-01     | Phase 5  | Complete |
 | DIAG-02     | Phase 5  | Complete |
-| DIAG-03     | Phase 5  | Pending  |
-| DIAG-04     | Phase 5  | Pending  |
+| DIAG-03     | Phase 5  | Complete |
+| DIAG-04     | Phase 5  | Complete |
 | DIAG-05     | Phase 5  | Complete |
-| DIAG-06     | Phase 5  | Pending  |
+| DIAG-06     | Phase 5  | Complete |
 | DIAG-07     | Phase 5  | Complete |
 | PLAN-01     | Phase 6  | Pending  |
 | PLAN-02     | Phase 6  | Pending  |

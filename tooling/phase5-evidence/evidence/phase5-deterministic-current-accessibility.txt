@@ -1,0 +1,4 @@
+run=phase5-deterministic-current
+gate=accessibility
+kind=deterministic
+status=passed

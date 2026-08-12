@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=report
+kind=physical
+status=passed

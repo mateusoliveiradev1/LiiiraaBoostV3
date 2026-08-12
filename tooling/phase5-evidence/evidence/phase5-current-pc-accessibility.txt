@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=accessibility
+kind=physical
+status=passed

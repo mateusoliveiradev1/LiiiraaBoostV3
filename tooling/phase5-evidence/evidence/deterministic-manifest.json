@@ -1,0 +1,194 @@
+{
+    "schemaVersion":  1,
+    "runId":  "phase5-deterministic-current",
+    "runKind":  "deterministic-ci",
+    "generatedAt":  "2026-08-12T19:47:30.2259194+00:00",
+    "build":  {
+                  "commit":  "7227e9fe166544ed6583946506c948b24bbcea34",
+                  "collectorVersion":  "liiiraa-native-evidence@1",
+                  "artifactPath":  "apps/desktop/dist/index.html",
+                  "artifactSha256":  "094f4c899bda7a79b5702fe5faf209815a21bcdd28e58d0edf16bd2cd4fc62fd"
+              },
+    "environment":  {
+                        "physical":  false,
+                        "os":  {
+                                   "family":  "windows",
+                                   "edition":  "Deterministic Windows composition",
+                                   "lifecycle":  "windows-11",
+                                   "version":  "deterministic",
+                                   "build":  "deterministic",
+                                   "architecture":  "x64"
+                               },
+                        "hardwareClasses":  [
+                                                {
+                                                    "hardwareClass":  "cpu",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "gpu",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "memory",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "storage",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "network",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "display",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "audio",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "usb",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "windows",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "drivers",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "security",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                },
+                                                {
+                                                    "hardwareClass":  "games",
+                                                    "state":  "unavailable",
+                                                    "source":  "deterministic-test-composition",
+                                                    "reasonCode":  "not-physical"
+                                                }
+                                            ]
+                    },
+    "gates":  [
+                  {
+                      "id":  "contract",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "6c6d9f32a1172e39fd95bb16d2abdab4c4334c47f7713c738445014a826b70f9"
+                  },
+                  {
+                      "id":  "conformance",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "40494f75c2b5cd75c6475a763f936bebb27163d6ba93102ba383466dc3be9ed8"
+                  },
+                  {
+                      "id":  "migration",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "036efacf64f7aa91ae385648f68a7109da50c31115d92c4aa22eea4f326fc7e5"
+                  },
+                  {
+                      "id":  "policy",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "83d0f060221a8796e5904dd50d0a7ad9693a7813539c440192e0f973a7fcd37a"
+                  },
+                  {
+                      "id":  "trace",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "569c9704ebe04d4178c396d0943be10e761fd775e8da3b2a7526e58803e84bb9"
+                  },
+                  {
+                      "id":  "fault",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "6332a2b1f1e584207bd7e9350685ccaf8b1f623b2a88386d1915a0d00ac4ddd2"
+                  },
+                  {
+                      "id":  "ui",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "b3b8b21292ef2dc838919fd7f9de8e6d85aa8ba4ab718562ee4f06af23a4f539"
+                  },
+                  {
+                      "id":  "accessibility",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "830ecaaff909940963c6c77289cd64742a50c100de0b8ee1ae79b95a4f7b50e6"
+                  },
+                  {
+                      "id":  "report",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "297461c2f5e7846f2eb990ee398b4486c97261ee1f94f3285f068f4d6778e04b"
+                  },
+                  {
+                      "id":  "tamper",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "4f173a4d0f3e0d7f7fb60d5b07cca2e1ad23f30f451e406456c8e784e4be3d3d"
+                  },
+                  {
+                      "id":  "resource",
+                      "status":  "passed",
+                      "evidenceKind":  "deterministic",
+                      "evidenceSha256":  "adb39ae980457c3c740f101878bf0c35134fbba74ce4a226e610d637fcf8a9f2"
+                  }
+              ],
+    "budgets":  {
+                    "memoryPeakMb":  25,
+                    "idleCpuPercent":  0.5,
+                    "pollingHz":  1,
+                    "cancellationMs":  250,
+                    "sampleDurationSeconds":  30
+                },
+    "privacy":  {
+                    "rawIdentifiersFound":  [
+
+                                            ],
+                    "scanSha256":  "5afd4b664bd10b8c901f4b7578fba6638e5965d1be07a4b73d69ff6c5bd58487"
+                },
+    "report":  {
+                   "path":  "tooling/phase5-evidence/evidence/deterministic-report.json",
+                   "sha256":  "5afd4b664bd10b8c901f4b7578fba6638e5965d1be07a4b73d69ff6c5bd58487"
+               },
+    "phase4PhysicalGaps":  [
+                               {
+                                   "id":  "PHASE4-REAL-PC-MATRIX",
+                                   "status":  "pending",
+                                   "detail":  "The independent Phase 4 Windows 10/11 clean-install and recovery matrix remains uncollected."
+                               },
+                               {
+                                   "id":  "PHASE4-PUBLIC-SIGNING",
+                                   "status":  "pending",
+                                   "detail":  "Public Authenticode trust and production distribution remain Phase 10 work."
+                               }
+                           ]
+}

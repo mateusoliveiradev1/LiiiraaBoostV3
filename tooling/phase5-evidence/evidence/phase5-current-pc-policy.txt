@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=policy
+kind=physical
+status=passed

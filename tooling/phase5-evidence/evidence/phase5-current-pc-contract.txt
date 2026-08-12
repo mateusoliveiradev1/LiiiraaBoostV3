@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=contract
+kind=physical
+status=passed

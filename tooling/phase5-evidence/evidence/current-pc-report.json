@@ -1,0 +1,92 @@
+{
+    "schemaVersion":  1,
+    "runId":  "phase5-current-pc",
+    "evidenceKind":  "packaged-physical",
+    "generatedAt":  "2026-08-12T19:46:42.3109042+00:00",
+    "sample":  {
+                   "durationSeconds":  300,
+                   "memoryPeakMb":  12.363,
+                   "idleCpuPercent":  0,
+                   "pollingHz":  0,
+                   "cancellationMs":  100
+               },
+    "environment":  {
+                        "os":  "windows-11",
+                        "build":  "26200",
+                        "architecture":  "64 bits",
+                        "hardwareStates":  [
+                                               {
+                                                   "hardwareClass":  "cpu",
+                                                   "state":  "observed",
+                                                   "source":  "CPUID"
+                                               },
+                                               {
+                                                   "hardwareClass":  "gpu",
+                                                   "state":  "observed",
+                                                   "source":  "EnumDisplayDevicesW"
+                                               },
+                                               {
+                                                   "hardwareClass":  "memory",
+                                                   "state":  "observed",
+                                                   "source":  "GlobalMemoryStatusEx"
+                                               },
+                                               {
+                                                   "hardwareClass":  "storage",
+                                                   "state":  "observed",
+                                                   "source":  "GetDiskFreeSpaceExW"
+                                               },
+                                               {
+                                                   "hardwareClass":  "network",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               },
+                                               {
+                                                   "hardwareClass":  "display",
+                                                   "state":  "observed",
+                                                   "source":  "EnumDisplaySettingsW"
+                                               },
+                                               {
+                                                   "hardwareClass":  "audio",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               },
+                                               {
+                                                   "hardwareClass":  "usb",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               },
+                                               {
+                                                   "hardwareClass":  "windows",
+                                                   "state":  "observed",
+                                                   "source":  "RtlGetVersion + GetProductInfo"
+                                               },
+                                               {
+                                                   "hardwareClass":  "drivers",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               },
+                                               {
+                                                   "hardwareClass":  "security",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               },
+                                               {
+                                                   "hardwareClass":  "games",
+                                                   "state":  "unavailable",
+                                                   "source":  "native-readonly-boundary"
+                                               }
+                                           ]
+                    },
+    "privacy":  {
+                    "valuesExcluded":  [
+                                           "serial-number",
+                                           "machine-guid",
+                                           "mac-address",
+                                           "device-instance-id",
+                                           "user-name"
+                                       ],
+                    "rawIdentifiersFound":  [
+
+                                            ]
+                }
+}

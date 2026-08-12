@@ -1,0 +1,203 @@
+{
+    "schemaVersion":  1,
+    "runId":  "phase5-current-pc",
+    "runKind":  "packaged-physical",
+    "generatedAt":  "2026-08-12T19:46:42.3344288+00:00",
+    "build":  {
+                  "commit":  "7227e9fe166544ed6583946506c948b24bbcea34",
+                  "collectorVersion":  "liiiraa-native-evidence@1",
+                  "artifactPath":  "target/release/liiiraa-desktop.exe",
+                  "artifactSha256":  "7017ccabfe6ffcdfd5490916372b69de3547e33fb402dad3ac8b285b778474b6"
+              },
+    "environment":  {
+                        "physical":  true,
+                        "os":  {
+                                   "family":  "windows",
+                                   "edition":  "Microsoft Windows 11 Pro",
+                                   "lifecycle":  "windows-11",
+                                   "version":  "10.0.26200",
+                                   "build":  "26200",
+                                   "architecture":  "64 bits"
+                               },
+                        "hardwareClasses":  [
+                                                {
+                                                    "hardwareClass":  "cpu",
+                                                    "source":  "CPUID",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "gpu",
+                                                    "source":  "EnumDisplayDevicesW",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "memory",
+                                                    "source":  "GlobalMemoryStatusEx",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "storage",
+                                                    "source":  "GetDiskFreeSpaceExW",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "network",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                },
+                                                {
+                                                    "hardwareClass":  "display",
+                                                    "source":  "EnumDisplaySettingsW",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "audio",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                },
+                                                {
+                                                    "hardwareClass":  "usb",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                },
+                                                {
+                                                    "hardwareClass":  "windows",
+                                                    "source":  "RtlGetVersion + GetProductInfo",
+                                                    "state":  "observed"
+                                                },
+                                                {
+                                                    "hardwareClass":  "drivers",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                },
+                                                {
+                                                    "hardwareClass":  "security",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                },
+                                                {
+                                                    "hardwareClass":  "games",
+                                                    "reasonCode":  "collector-unavailable",
+                                                    "source":  "native-readonly-boundary",
+                                                    "state":  "unavailable"
+                                                }
+                                            ],
+                        "matrix":  {
+                                       "os":  "windows-11",
+                                       "cpu":  "amd",
+                                       "gpu":  [
+                                                   "amd",
+                                                   "nvidia"
+                                               ],
+                                       "formFactor":  "desktop",
+                                       "storage":  [
+                                                       "other"
+                                                   ],
+                                       "network":  [
+                                                       "other"
+                                                   ]
+                                   }
+                    },
+    "gates":  [
+                  {
+                      "id":  "contract",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "0050ebe400a9f762f6c5c92fe079008ca4012f87e76de1f8d79f90de62ea02e4"
+                  },
+                  {
+                      "id":  "conformance",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "3afbfa779fb7119b86efcd732c38001d51a4db395440a341bb0e626de28bd9e6"
+                  },
+                  {
+                      "id":  "migration",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "d35e9e07b02d88d3271fa610e2f882cc6fa3b0b3092d4ab1eeaf499c055d580a"
+                  },
+                  {
+                      "id":  "policy",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "e038ea2f8d4d48392f66bec934849f2103edf62e155e2257709582a3dec4ab2c"
+                  },
+                  {
+                      "id":  "trace",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "ddfcc57267702624514add124ee654cc0c77bbefead2e167a61629e90fc2c69b"
+                  },
+                  {
+                      "id":  "fault",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "69559b27525afc1289133d2075d36fc5ef93ebbb6fe124cf223f49cd0d5143f7"
+                  },
+                  {
+                      "id":  "ui",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "3edb212e8ae8f09292c97c65bd62de4c33d1577bbd2431607e0238aa97d7d196"
+                  },
+                  {
+                      "id":  "accessibility",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "7b5830ee7a59650ae669b72765ecc35106c4985629f0a4c4f93e47f6c0c4e90b"
+                  },
+                  {
+                      "id":  "report",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "72ceaa318ee5a679ed297986a644a9a5b4249776f7ceb6e699941fc8a86e3c70"
+                  },
+                  {
+                      "id":  "tamper",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "406c9c809087568df2a90490b5c06069ec34fd0ac7cd120d76d27d906ec8c5be"
+                  },
+                  {
+                      "id":  "resource",
+                      "status":  "passed",
+                      "evidenceKind":  "physical",
+                      "evidenceSha256":  "e06f5a272a14e312f177bd91fbb11552bfbe506f015f77e91ddd48f706a9f02b"
+                  }
+              ],
+    "budgets":  {
+                    "memoryPeakMb":  12.363,
+                    "idleCpuPercent":  0,
+                    "pollingHz":  0,
+                    "cancellationMs":  100,
+                    "sampleDurationSeconds":  300
+                },
+    "privacy":  {
+                    "rawIdentifiersFound":  [
+
+                                            ],
+                    "scanSha256":  "fb9cc6a59d0e6c45b67baa13b413154eb8726cf0919fb0a7cb3a80f92ed6cdc6"
+                },
+    "report":  {
+                   "path":  "tooling/phase5-evidence/evidence/current-pc-report.json",
+                   "sha256":  "fb9cc6a59d0e6c45b67baa13b413154eb8726cf0919fb0a7cb3a80f92ed6cdc6"
+               },
+    "phase4PhysicalGaps":  [
+                               {
+                                   "id":  "PHASE4-REAL-PC-MATRIX",
+                                   "status":  "pending",
+                                   "detail":  "The independent Phase 4 Windows 10/11 clean-install and recovery matrix remains uncollected."
+                               },
+                               {
+                                   "id":  "PHASE4-PUBLIC-SIGNING",
+                                   "status":  "pending",
+                                   "detail":  "Public Authenticode trust and production distribution remain Phase 10 work."
+                               }
+                           ]
+}

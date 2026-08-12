@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=fault
+kind=physical
+status=passed

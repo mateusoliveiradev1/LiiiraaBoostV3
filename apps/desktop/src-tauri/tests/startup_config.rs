@@ -30,8 +30,5 @@ fn staging_identity_origins_are_packaged_with_the_internal_build() {
         runtime["accountOrigin"],
         "https://conta.liiiraaboost.com.br"
     );
-    assert_eq!(
-        runtime["adminOrigin"],
-        "https://admin.liiiraaboost.com.br"
-    );
+    assert_eq!(runtime["adminOrigin"], "https://admin.liiiraaboost.com.br");
 }

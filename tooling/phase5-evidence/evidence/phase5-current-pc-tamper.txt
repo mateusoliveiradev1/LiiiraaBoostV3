@@ -1,0 +1,4 @@
+run=phase5-current-pc
+gate=tamper
+kind=physical
+status=passed

@@ -1,0 +1,4 @@
+run=phase5-deterministic-current
+gate=trace
+kind=deterministic
+status=passed
