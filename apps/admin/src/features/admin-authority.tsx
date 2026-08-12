@@ -102,6 +102,7 @@ const copy = Object.freeze({
       'Choose another function assigned to your membership. The current session will be revalidated and audited.',
     functionSwitchError: 'The function could not be changed. Review the session and try again.',
     functionSwitchReason: 'Operational reason',
+    functionSwitchReasonHint: 'Use at least 8 characters so the audited reason is meaningful.',
     functionSwitchTarget: 'New active function',
     stepUp: 'Verify with a strong credential',
     stepUpDescription:
@@ -167,6 +168,8 @@ const copy = Object.freeze({
       'Escolha outra função atribuída ao seu acesso. A sessão atual será validada novamente e auditada.',
     functionSwitchError: 'Não foi possível trocar a função. Revise a sessão e tente novamente.',
     functionSwitchReason: 'Motivo operacional',
+    functionSwitchReasonHint:
+      'Use pelo menos 8 caracteres para registrar um motivo de auditoria claro.',
     functionSwitchTarget: 'Nova função ativa',
     stepUp: 'Verificar com credencial forte',
     stepUpDescription:
@@ -1217,7 +1220,9 @@ const AdminProductionShell = ({
                 selectedKey={targetFunction}
               />
               <LbTextField
+                description={labels.functionSwitchReasonHint}
                 label={labels.functionSwitchReason}
+                maxLength={256}
                 onChange={(value) => {
                   setFunctionSwitchReason(value);
                   setFunctionSwitchError(false);
@@ -1238,7 +1243,7 @@ const AdminProductionShell = ({
                 <LbButton
                   isDisabled={
                     functionSwitchPending ||
-                    functionSwitchReason.trim().length < 3 ||
+                    functionSwitchReason.trim().length < 8 ||
                     targetFunction === session.role ||
                     session.sessionId === undefined
                   }

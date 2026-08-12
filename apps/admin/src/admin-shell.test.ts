@@ -117,6 +117,8 @@ describe('admin shell', () => {
     expect(authority).toContain('session.assignedFunctions.length > 1');
     expect(authority).toContain("family: 'switch-function'");
     expect(authority).toContain('authorizeMutation(functionSwitchInput)');
+    expect(authority).toContain('functionSwitchReason.trim().length < 8');
+    expect(authority).toContain('description={labels.functionSwitchReasonHint}');
     expect(authority).toMatch(
       /setFunctionSwitchPending\(true\);\s*setFunctionSwitchError\(false\);\s*setFunctionSwitchOpen\(false\);\s*window\.setTimeout\(\(\) => \{\s*void authorizeMutation\(functionSwitchInput\)/u,
     );

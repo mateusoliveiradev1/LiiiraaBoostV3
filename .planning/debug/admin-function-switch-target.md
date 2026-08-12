@@ -2,15 +2,15 @@
 status: verifying
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-12T04:56:00.0000000Z
+updated: 2026-08-12T06:36:30.0000000Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed fifth root cause. The strong-auth receipt bound the raw protected session ID, but the application compared it with an invented `session:` prefix and rejected the otherwise valid Operations-to-Security transition.
-test: Keep the raw session reference identical through client, route, receipt consumption and application admission; also reopen the function dialog with a visible error whenever the final mutation fails.
-expecting: The focused application and Admin shell regressions pass, then the published Operations-to-Security UAT redirects to Overview with Security restored.
-next_action: Commit and publish the verified API and Admin revision, then repeat the exact owner round-trip once.
+hypothesis: Confirmed sixth root cause. The function dialog enabled submission at three characters, while the shared authority rejects any mutation reason shorter than eight characters before making a request.
+test: Align the dialog with the eight-character audited-reason contract and explain the requirement beside the field.
+expecting: A five-character value such as `teste` cannot launch the strong-auth flow, while an eight-character reason can reach the already-corrected API path.
+next_action: Publish the Admin validation correction, then repeat the Operations-to-Security owner round-trip with a reason of at least eight characters.
 
 ## Symptoms
 
@@ -52,6 +52,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   found: The client, route and consumed receipt use the raw protected session ID, while `switchAdminFunction` required `session:<id>`. The six-digit challenge completed, but `reauthenticated` became false and the sensitive transition was denied. The shell then closed the only error surface.
   implication: The strong credential was valid; an internal target-format mismatch rejected it and the UI hid the result.
 
+- timestamp: 2026-08-12T06:36:30.0000000Z
+  checked: Published Operations-to-Security retry and the Admin mutation boundary
+  found: The dialog accepted `teste` at five characters, but `authority.mutate` rejects reasons below eight characters locally as `invalid-authority`, so no API request was made.
+  implication: The latest retry did not exercise the deployed backend fix; the dialog and mutation boundary exposed contradictory validation rules.
+
 ## Eliminated
 
 - hypothesis: The UI was stale after a successful mutation.
@@ -65,7 +70,7 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 
 ## Resolution
 
-root_cause: Five consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections. Fourth, the only return control and authorization were coupled to membership management, creating a dead end after a least-privilege switch. Fifth, sensitive return transitions compared the valid raw step-up target with an invented prefixed form, then hid the denial after closing the selector.
-fix: Preserve the first four fixes; compare the exact protected session reference already validated by the route and strong-auth authority, and reopen the selector with a visible error if the final mutation is denied or throws.
-verification: Focused application and Admin shell regressions failed before the fifth fix and pass after it. The complete application suite passes 28/28, Admin passes 196/196, API passes 247/247, Admin and application TypeScript pass, changed-file ESLint and Prettier pass, `git diff --check` is clean, and the Admin production build succeeds. API TypeScript retains the known unrelated exact-optional fixture error in `resend-invitation-delivery.test.ts:105`. Published owner round-trip UAT remains pending.
+root_cause: Six consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections. Fourth, the only return control and authorization were coupled to membership management, creating a dead end after a least-privilege switch. Fifth, sensitive return transitions compared the valid raw step-up target with an invented prefixed form, then hid the denial after closing the selector. Sixth, the dialog enabled a reason at three characters even though the shared mutation authority requires eight.
+fix: Preserve the first five fixes; require the same eight-character audited reason in the dialog, show the requirement beside the field, and keep the action unavailable until the reason satisfies it.
+verification: The Admin shell regression failed before the sixth fix and passes after it with all 196 Admin tests. Broader verification and published owner round-trip UAT remain pending.
 files_changed: [apps/api/src/modules/admin/governance-routes.ts, apps/api/src/modules/admin/governance-routes.test.ts, apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/api/src/staging/strong-auth.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-authority.tsx, apps/admin/src/features/admin-authority.test.tsx, packages/control-plane-application/src/ports/admin-governance.ts, packages/control-plane-application/src/use-cases/manage-admin-access.ts, packages/control-plane-application/src/use-cases/manage-admin-access.test.ts]
