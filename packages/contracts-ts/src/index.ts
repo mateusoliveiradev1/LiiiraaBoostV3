@@ -1,5 +1,8 @@
 export type * from './generated/index.js';
-export { controlPlaneDocumentValidator } from './generated/index.js';
+export {
+  controlPlaneDocumentValidator,
+  hardwareEvidenceDocumentValidator,
+} from './generated/index.js';
 export * from './offline-entitlement.js';
 export {
   DIAGNOSTIC_VALUE_SCHEMA_ID,

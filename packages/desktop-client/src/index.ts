@@ -5,6 +5,11 @@ export {
 } from './client.js';
 export { CONFORMANCE_GROUP_COUNTS, createDesktopClientConformance } from './conformance.js';
 export {
+  EVIDENCE_COMMANDS,
+  createDeterministicEvidenceAuthority,
+  createTauriEvidenceAuthority,
+} from './evidence.js';
+export {
   ACTIVITY_STATES,
   CALIBRATION_PROGRESS_STATES,
   DESKTOP_ROUTES,
@@ -31,6 +36,34 @@ export type {
   DesktopClientConformanceReport,
   DesktopClientConformanceSuite,
 } from './conformance.js';
+export type {
+  CancelCaptureInput,
+  CancellationReceipt,
+  CompareSessionsInput,
+  DeterministicEvidenceAuthorityOptions,
+  EvidenceAuthority,
+  EvidenceAuthorityOrigin,
+  EvidenceAuthoritySnapshot,
+  EvidenceAuthorityStatus,
+  EvidenceClientError,
+  EvidenceExportFormat,
+  EvidenceHealth,
+  EvidenceInvoke,
+  EvidenceInvokeCommand,
+  EvidenceListener,
+  EvidenceSelection,
+  ExportReceipt,
+  ExportReportInput,
+  FinishCaptureInput,
+  NativeMetricEvidence,
+  NativeSessionEvidence,
+  RefreshInventoryInput,
+  RefreshInventoryRequest,
+  RenderReportInput,
+  StartCaptureInput,
+  StartCaptureRequest,
+  TauriEvidenceAuthorityOptions,
+} from './evidence.js';
 export type {
   DesktopCapability,
   DesktopInspectionError,

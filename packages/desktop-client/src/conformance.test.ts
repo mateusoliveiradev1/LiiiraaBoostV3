@@ -97,10 +97,7 @@ describe('desktop client conformance factory', () => {
     });
     expect(suite.groupCounts).toEqual(CONFORMANCE_GROUP_COUNTS);
     expect(suite.cases).toHaveLength(
-      Object.values(CONFORMANCE_GROUP_COUNTS).reduce(
-        (total, count) => total + count,
-        0,
-      ),
+      Object.values(CONFORMANCE_GROUP_COUNTS).reduce((total, count) => total + count, 0),
     );
     await expect(suite.run()).resolves.toMatchObject({
       ok: true,

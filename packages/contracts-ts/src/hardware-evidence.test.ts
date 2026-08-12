@@ -3,20 +3,23 @@ import { describe, expect, it } from 'vitest';
 import {
   hardwareEvidenceDocumentValidator,
   type HardwareEvidenceDocument,
+  type HardwareUnavailableReasonJson,
 } from './generated/index.js';
 
-const observed = (value: string) => ({
-  state: 'observed',
-  value,
-  source: 'windows-native-api',
-  observedAt: '2026-08-12T12:00:00Z',
-});
+const observed = (value: string) =>
+  ({
+    state: 'observed',
+    value,
+    source: 'windows-native-api',
+    observedAt: '2026-08-12T12:00:00Z',
+  }) as const;
 
-const unavailable = (reasonCode = 'not-reported') => ({
-  state: 'unavailable',
-  reasonCode,
-  detail: 'The operating system did not expose this class.',
-});
+const unavailable = (reasonCode: HardwareUnavailableReasonJson = 'not-reported') =>
+  ({
+    state: 'unavailable',
+    reasonCode,
+    detail: 'The operating system did not expose this class.',
+  }) as const;
 
 const execution = {
   sourceCapability: 'native-readonly',
@@ -152,21 +155,18 @@ const claim = {
 const validates = (value: unknown): boolean => hardwareEvidenceDocumentValidator(value);
 
 describe('hardware evidence contracts', () => {
-  it.each([
-    inventory,
-    completedSession,
-    acceptedComparison,
-    rejectedComparison,
-    report,
-    claim,
-  ])('accepts a complete evidence document', (document) => {
-    expect(
-      validates(document),
-      JSON.stringify(hardwareEvidenceDocumentValidator.errors),
-    ).toBe(true);
-    const typed: HardwareEvidenceDocument = document;
-    expect(typed.kind).toBe(document.kind);
-  });
+  it.each([inventory, completedSession, acceptedComparison, rejectedComparison, report, claim])(
+    'accepts a complete evidence document',
+    (document) => {
+      const accepted = hardwareEvidenceDocumentValidator(document);
+      expect(accepted, JSON.stringify(hardwareEvidenceDocumentValidator.errors)).toBe(true);
+      if (!accepted) {
+        throw new Error('The generated validator rejected a valid hardware evidence document.');
+      }
+      const typed: HardwareEvidenceDocument = document;
+      expect(typed.kind).toBe(document.kind);
+    },
+  );
 
   it('requires every inventory category and keeps absence explicit', () => {
     const { games: _games, ...missingCategory } = inventory;

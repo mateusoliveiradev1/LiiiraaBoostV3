@@ -81,7 +81,7 @@ const capture: IncompleteMeasurementSessionJson = Object.freeze({
     inventoryEvidenceHash: HASH_A,
     capturedAt: NOW,
   }),
-  chunks: Object.freeze([]),
+  chunks: [],
   reason: 'Capture is active.',
 });
 
@@ -110,10 +110,10 @@ const report: EvidenceReportJson = Object.freeze({
   reportId: 'report-1',
   evidenceVersion: 1,
   generatedAt: NOW,
-  evidenceIds: ['comparison-1'],
-  evidenceHashes: [HASH_B],
+  evidenceIds: ['comparison-1'] as [string],
+  evidenceHashes: [HASH_B] as [string],
   provenance: Object.freeze({ source: 'local-evidence-store', collectedAt: NOW }),
-  limitations: ['Valid only for the admitted sessions.'],
+  limitations: ['Valid only for the admitted sessions.'] as [string],
 });
 
 const refreshInput = (signal?: AbortSignal) => ({
@@ -227,10 +227,7 @@ const conformingScript = (): Script => ({
 
 describe.each([
   ['native', (invoke: EvidenceInvoke) => createTauriEvidenceAuthority({ invoke })],
-  [
-    'deterministic',
-    (invoke: EvidenceInvoke) => createDeterministicEvidenceAuthority({ invoke }),
-  ],
+  ['deterministic', (invoke: EvidenceInvoke) => createDeterministicEvidenceAuthority({ invoke })],
 ] as const)('%s evidence adapter conformance', (_name, createAuthority) => {
   it('shares immutable refresh, capture, compare, export and health semantics', async () => {
     const invoke = scriptedInvoke(conformingScript());
