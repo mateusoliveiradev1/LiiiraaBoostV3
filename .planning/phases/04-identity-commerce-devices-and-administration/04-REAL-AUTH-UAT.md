@@ -3,7 +3,7 @@ phase: 04-identity-commerce-devices-and-administration
 plan: '40'
 status: awaiting-real-auth-human-uat
 tested_commit: cfef0c1af6eddf60bcece00042db2dc2f7a8fba3
-updated: 2026-08-11T06:38:11.6257034Z
+updated: 2026-08-12T16:27:21.9756074Z
 ---
 
 # Phase 04 Real-Authority UAT
@@ -24,10 +24,9 @@ password, database credential, or session credential is recorded here.
   PostgreSQL-backed binding and authoritative projection after refresh/restart.
 - Recovery action: complete; three unique replacement URLs are available only in the owner-protected
   local output.
-- Function-switch observation: **ISSUE**. The owner completed TOTP step-up, but the published Admin
-  sent the actor identity as the command target while the API requires the protected administrative
-  session reference. `POST /v1/admin/governance/functions/switch` returned HTTP 400 and preserved the
-  active `security` function without a partial mutation. The UI also failed to surface this rejection.
+- Function-switch remediation: complete. The published Admin now submits the protected
+  administrative session reference with sealed step-up evidence; the owner switched from
+  `operations` to `security`, observed the synchronized protected session, and approved the result.
 - Human approval: pending until the exact build passes every real-auth observation below.
 
 ## Exact deployment identity
@@ -235,6 +234,10 @@ Invitation remediation receipts:
 - At `2026-08-11T06:38:11.6257034Z`, the owner completed a real valid-recipient preflight and strong
   authentication, but reviewed issuance failed closed because staging has no invitation delivery
   provider. PostgreSQL remained at two active invitations and no durable receipt was fabricated.
+- At `2026-08-12T16:27:21.9756074Z`, the owner responded `pass` after the published Admin switched
+  the protected active function from `operations` to `security`. The resulting Security overview
+  identified the active `Segurança` function and a synchronized protected session; no partial
+  authority mutation or stale Operations projection remained.
 
 ## Human real-authority observations
 
@@ -257,7 +260,7 @@ revision mismatch, or result that does not survive reload is a critical failure.
 | Tester cannot enter Admin; administrative identities cannot leak protected payloads to tester surfaces | owner screenshot                                                 | PASS    |
 | Consent revocation terminates live access and preserves only bounded audit receipts                    | _pending_                                                        | PENDING |
 | Invitation issue/resend/revoke and governance/approval changes survive reload                          | valid preflight PASS; issue blocked by missing delivery provider | ISSUE   |
-| Function switch and independent approval enforce permission impact and strong authentication           | TOTP passed; switch POST returned 400 due actor/session target mismatch | ISSUE   |
+| Function switch and independent approval enforce permission impact and strong authentication           | function switch PASS (`8408544`); independent approval pending | PENDING |
 | Read-only function simulation preserves real authority and provides an explicit exit                   | owner-confirmed `d257850`                                        | PASS    |
 | Jobs expose durable progress and final receipt; universal search respects authorization                | authorized reads subset `31326815831`                            | PENDING |
 | Live, reconnecting, stale, and degraded states expose freshness and block unsafe mutations             | live subset `31326815831`                                        | PENDING |
