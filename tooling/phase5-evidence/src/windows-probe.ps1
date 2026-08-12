@@ -257,7 +257,10 @@ function Write-PhysicalEvidence {
     )
     $process = Start-Process -FilePath $artifactAbsolute -ArgumentList $probeArguments -PassThru -WindowStyle Hidden
     Start-Sleep -Seconds 1
-    $process = Get-Process -Id $process.Id -ErrorAction Stop
+    $process.Refresh()
+    if ($process.HasExited) {
+        throw "The packaged native authority probe exited before sampling with code $($process.ExitCode)."
+    }
     $logicalProcessors = [Math]::Max(1, [Environment]::ProcessorCount)
     $initialCpu = [double]$process.CPU
     $peakWorkingSet = [long]$process.WorkingSet64
@@ -276,6 +279,7 @@ function Write-PhysicalEvidence {
     if (-not $process.WaitForExit(20000)) {
         throw 'The packaged native authority probe did not finish after the admitted sample.'
     }
+    $process.Refresh()
     if ($process.ExitCode -ne 0) {
         throw "The packaged native authority probe exited with code $($process.ExitCode)."
     }
