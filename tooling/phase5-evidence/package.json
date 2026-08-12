@@ -1,0 +1,14 @@
+{
+  "name": "@liiiraa/phase5-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

@@ -9,8 +9,7 @@ import {
   type Phase5EvidenceManifest,
 } from '../src/evaluate.ts';
 
-const sha256 = (value: string): string =>
-  createHash('sha256').update(value, 'utf8').digest('hex');
+const sha256 = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex');
 
 const gateEvidence = 'phase-5 deterministic evidence';
 const artifactBytes = 'packaged desktop artifact';
@@ -44,6 +43,14 @@ const validManifest = (
       state: 'observed',
       source: 'windows-native-api',
     })),
+    matrix: {
+      os: 'windows-11',
+      cpu: 'amd',
+      gpu: ['nvidia'],
+      formFactor: 'desktop',
+      storage: ['nvme'],
+      network: ['ethernet'],
+    },
   },
   gates: PHASE5_AUTOMATED_GATES.map((id) => ({
     id,
@@ -80,9 +87,7 @@ const context = {
     'artifacts/liiiraa-boost.exe': artifactBytes,
     'evidence/phase5-report.json': reportBytes,
   },
-  gateEvidenceContents: Object.fromEntries(
-    PHASE5_AUTOMATED_GATES.map((id) => [id, gateEvidence]),
-  ),
+  gateEvidenceContents: Object.fromEntries(PHASE5_AUTOMATED_GATES.map((id) => [id, gateEvidence])),
 };
 
 const codes = (result: ReturnType<typeof evaluatePhase5Evidence>): string[] =>
@@ -182,10 +187,10 @@ describe('Phase 5 deterministic and physical evidence admission', () => {
   });
 
   it('admits this physical PC while keeping the unrun matrix and Phase 4 gaps explicit', () => {
-    const result = evaluatePhase5Evidence(
-      [validManifest(), validManifest('packaged-physical')],
-      { ...context, mode: 'final' },
-    );
+    const result = evaluatePhase5Evidence([validManifest(), validManifest('packaged-physical')], {
+      ...context,
+      mode: 'final',
+    });
 
     expect(result.ok).toBe(true);
     expect(result.automatedOk).toBe(true);

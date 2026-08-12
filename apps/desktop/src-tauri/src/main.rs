@@ -26,6 +26,7 @@ mod navigation;
 mod notifications;
 #[allow(dead_code)]
 mod offline_entitlement;
+mod phase5_probe;
 #[allow(dead_code)]
 mod premium_authority;
 mod tray;
@@ -986,6 +987,14 @@ fn run() -> Result<(), String> {
 }
 
 fn main() {
+    match phase5_probe::try_run() {
+        Ok(true) => return,
+        Ok(false) => {}
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    }
     if let Err(error) = run() {
         eprintln!("{error}");
         std::process::exit(1);
