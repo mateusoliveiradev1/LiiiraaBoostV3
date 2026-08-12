@@ -11,6 +11,11 @@ import {
   type NativeSystemInspection,
   type Result,
 } from './index.js';
+import {
+  EVIDENCE_COMMANDS,
+  createTauriEvidenceAuthority,
+  type EvidenceInvoke,
+} from './evidence.js';
 
 const frozenInspection: NativeSystemInspection = Object.freeze({
   inspectionId: 'inspection-conformance',
@@ -184,5 +189,40 @@ describe('desktop client conformance factory', () => {
     expect(report.ok).toBe(false);
     expect(report.results.flatMap((result) => result.failures)).toContain(expectedFailure);
     expect(JSON.stringify(report)).not.toContain('RAW_SECRET');
+  });
+});
+
+describe('production evidence truth conformance', () => {
+  it('rejects fixture provenance recursively instead of relabeling it as native', async () => {
+    const invoke: EvidenceInvoke = async () => ({
+      kind: 'inventory-snapshot',
+      schemaVersion: '1.0',
+      evidenceId: 'inventory-spoofed',
+      evidenceVersion: 1,
+      collectedAt: '2000-01-01T00:00:00.000Z',
+      nested: { history: [{ provenance: { kind: 'fixture', scenarioId: 'S01' } }] },
+    });
+    const authority = createTauriEvidenceAuthority({ invoke });
+
+    const result = await authority.refreshInventory({
+      request: {
+        schemaVersion: '1.0',
+        evidenceId: 'inventory-spoofed',
+        evidenceVersion: 1,
+        collectedAt: '2000-01-01T00:00:00.000Z',
+        deadlineAt: '2000-01-01T00:00:10.000Z',
+        perSourceTimeoutMs: 500,
+        policyDate: 20000101,
+      },
+    });
+
+    expect(EVIDENCE_COMMANDS.refreshInventory).toBe('refresh_hardware_inventory');
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        code: 'FIXTURE_PROVENANCE_REFUSED',
+        path: '$.nested.history[0].provenance',
+      },
+    });
   });
 });
