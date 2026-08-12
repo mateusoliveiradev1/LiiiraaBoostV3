@@ -100,6 +100,42 @@ const installDeterministicEvidence = async (
           reason: 'Capture is active.',
         });
       }
+      if (command === 'sample_measurement_capture') {
+        return Object.freeze({
+          schemaVersion: '1.0',
+          readOnly: true,
+          cpu: Object.freeze({
+            state: 'observed',
+            value: 21,
+            unit: 'percent',
+            source: 'deterministic-browser-authority',
+            detail: 'Deterministic browser sample.',
+          }),
+          memory: Object.freeze({
+            state: 'observed',
+            usedBytes: 10_737_418_240,
+            totalBytes: 34_359_738_368,
+            loadPercent: 31,
+            source: 'deterministic-browser-authority',
+            detail: 'Deterministic browser sample.',
+          }),
+          gpu: Object.freeze({
+            state: 'unavailable',
+            value: null,
+            unit: 'percent',
+            source: 'none',
+            detail: 'No trustworthy GPU source is admitted.',
+            reasonCode: 'source-not-admitted',
+          }),
+          collectionLatency: Object.freeze({
+            state: 'observed',
+            value: 0.4,
+            unit: 'milliseconds',
+            source: 'deterministic-browser-authority',
+            detail: 'Deterministic browser sample.',
+          }),
+        });
+      }
       if (command === 'finish_measurement_capture') {
         const request = (argumentsValue?.['request'] ?? {}) as Readonly<Record<string, unknown>>;
         const completedAt = request['completedAt'] ?? '2030-01-15T18:01:00.000Z';
