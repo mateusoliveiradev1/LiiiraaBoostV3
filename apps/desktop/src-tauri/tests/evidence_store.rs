@@ -1,11 +1,13 @@
 #[path = "../src/evidence_store.rs"]
 mod evidence_store;
 
-use std::{fs, path::PathBuf, sync::atomic::{AtomicU64, Ordering}};
-
-use evidence_store::{
-    EvidenceLifecycle, EvidenceStore, EvidenceStoreError, ReferenceKind,
+use std::{
+    fs,
+    path::PathBuf,
+    sync::atomic::{AtomicU64, Ordering},
 };
+
+use evidence_store::{EvidenceLifecycle, EvidenceStore, EvidenceStoreError, ReferenceKind};
 use rusqlite::Connection;
 use serde_json::{Value, json};
 
@@ -169,13 +171,25 @@ fn interrupted_session_remains_inspectable_but_is_not_admissible() {
     let database = TestDatabase::new("interrupted");
     let mut store = EvidenceStore::open(&database.path).expect("open evidence store");
     store
-        .append_document(&incomplete_session("session-1"), EvidenceLifecycle::Incomplete, 1)
+        .append_document(
+            &incomplete_session("session-1"),
+            EvidenceLifecycle::Incomplete,
+            1,
+        )
         .expect("append incomplete session");
     drop(store);
 
     let store = EvidenceStore::open(&database.path).expect("reopen evidence store");
-    assert_eq!(store.get("session-1").expect("inspect session").lifecycle, EvidenceLifecycle::Incomplete);
-    assert!(store.admissible_session_ids().expect("query sessions").is_empty());
+    assert_eq!(
+        store.get("session-1").expect("inspect session").lifecycle,
+        EvidenceLifecycle::Incomplete
+    );
+    assert!(
+        store
+            .admissible_session_ids()
+            .expect("query sessions")
+            .is_empty()
+    );
 }
 
 #[test]
@@ -183,15 +197,25 @@ fn completion_commits_document_chunks_and_state_atomically() {
     let database = TestDatabase::new("complete");
     let mut store = EvidenceStore::open(&database.path).expect("open evidence store");
     store
-        .append_document(&incomplete_session("session-1"), EvidenceLifecycle::Incomplete, 1)
+        .append_document(
+            &incomplete_session("session-1"),
+            EvidenceLifecycle::Incomplete,
+            1,
+        )
         .expect("append incomplete session");
     let completed = store
         .complete_session(&completed_session("session-1"), 2)
         .expect("complete session");
 
     assert_eq!(completed.lifecycle, EvidenceLifecycle::Completed);
-    assert_eq!(store.chunk_sequences("session-1").expect("read chunks"), vec![0]);
-    assert_eq!(store.admissible_session_ids().expect("query sessions"), vec!["session-1"]);
+    assert_eq!(
+        store.chunk_sequences("session-1").expect("read chunks"),
+        vec![0]
+    );
+    assert_eq!(
+        store.admissible_session_ids().expect("query sessions"),
+        vec!["session-1"]
+    );
 }
 
 #[test]
@@ -228,17 +252,31 @@ fn hash_mismatch_is_reported_as_corrupt_after_restart() {
     drop(connection);
 
     let store = EvidenceStore::open(&database.path).expect("reopen evidence store");
-    assert_eq!(store.get("inventory-1"), Err(EvidenceStoreError::HashMismatch));
-    assert!(store.admissible_session_ids().expect("query sessions").is_empty());
+    assert_eq!(
+        store.get("inventory-1"),
+        Err(EvidenceStoreError::HashMismatch)
+    );
+    assert!(
+        store
+            .admissible_session_ids()
+            .expect("query sessions")
+            .is_empty()
+    );
 }
 
 #[test]
 fn retention_preserves_referenced_evidence_and_removes_unreferenced_rows() {
     let database = TestDatabase::new("retention");
     let mut store = EvidenceStore::open(&database.path).expect("open evidence store");
-    store.append_document(&inventory("kept"), EvidenceLifecycle::Immutable, 1).unwrap();
-    store.append_document(&inventory("owner"), EvidenceLifecycle::Immutable, 2).unwrap();
-    store.append_document(&inventory("remove"), EvidenceLifecycle::Immutable, 3).unwrap();
+    store
+        .append_document(&inventory("kept"), EvidenceLifecycle::Immutable, 1)
+        .unwrap();
+    store
+        .append_document(&inventory("owner"), EvidenceLifecycle::Immutable, 2)
+        .unwrap();
+    store
+        .append_document(&inventory("remove"), EvidenceLifecycle::Immutable, 3)
+        .unwrap();
     store.link("owner", "kept", ReferenceKind::Report).unwrap();
 
     assert_eq!(store.prune_unreferenced_before(4, 10).unwrap(), 1);
@@ -253,7 +291,9 @@ fn bounded_busy_timeout_returns_a_stable_error() {
     let store = EvidenceStore::open(&database.path).expect("initialize evidence store");
     drop(store);
     let locking = Connection::open(&database.path).expect("open locking connection");
-    locking.execute_batch("BEGIN EXCLUSIVE;").expect("acquire exclusive lock");
+    locking
+        .execute_batch("BEGIN EXCLUSIVE;")
+        .expect("acquire exclusive lock");
 
     let result = EvidenceStore::open(&database.path);
     assert!(matches!(result, Err(EvidenceStoreError::Busy)));

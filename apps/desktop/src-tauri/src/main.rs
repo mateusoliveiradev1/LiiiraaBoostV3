@@ -9,6 +9,8 @@ mod device_identity;
 #[allow(dead_code)]
 mod evidence_policy;
 #[allow(dead_code)]
+mod evidence_store;
+#[allow(dead_code)]
 mod identity;
 mod navigation;
 mod notifications;

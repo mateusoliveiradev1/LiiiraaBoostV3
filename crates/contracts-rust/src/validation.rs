@@ -5,15 +5,17 @@ use serde_json::Value;
 
 use crate::{
     AdminAuditEvent, ClaimEvidence, ContentRecord, ControlPlaneDocument, DiagnosticValue,
-    FutureAuthorityCommand, HostToRendererShellEvent, NoChangeReceipt, ReleaseArtifactEvidence,
-    ReleaseRecord, RendererToHostShellCommand, ScreenshotProvenance, ShellNavigationIntent,
-    WebRouteRecord,
+    FutureAuthorityCommand, HardwareEvidenceDocument, HostToRendererShellEvent, NoChangeReceipt,
+    ReleaseArtifactEvidence, ReleaseRecord, RendererToHostShellCommand, ScreenshotProvenance,
+    ShellNavigationIntent, WebRouteRecord,
 };
 
 pub const CONTROL_PLANE_DOCUMENT_SCHEMA_ID: &str =
     "https://schemas.liiiraa.dev/control-plane/v1/control-plane-document.schema.json";
 pub const DIAGNOSTIC_VALUE_SCHEMA_ID: &str = "desktop.diagnostic-value.v1";
 pub const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID: &str = "desktop.shell.host-to-renderer.v1";
+pub const HARDWARE_EVIDENCE_DOCUMENT_SCHEMA_ID: &str =
+    "https://schemas.liiiraa.dev/desktop/v1/hardware-evidence.schema.json";
 pub const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID: &str = "desktop.shell.renderer-to-host.v1";
 pub const WEB_DOCUMENT_SCHEMA_ID: &str =
     "https://schemas.liiiraa.dev/web/v1/web-document.schema.json";
@@ -24,6 +26,8 @@ const MAX_KEYWORD_LENGTH: usize = 64;
 
 const DIAGNOSTIC_VALUE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/diagnostic-value.schema.json");
+const HARDWARE_EVIDENCE_DOCUMENT_SCHEMA: &str =
+    include_str!("../../../contracts/generated/desktop/v1/hardware-evidence.schema.json");
 const CONTROL_PLANE_DOCUMENT_SCHEMA: &str = include_str!(
     "../../../contracts/generated/control-plane/v1/control-plane-document.schema.json"
 );
@@ -37,6 +41,12 @@ static DIAGNOSTIC_VALUE_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::n
         serde_json::from_str(DIAGNOSTIC_VALUE_SCHEMA).expect("generated diagnostic JSON schema");
     jsonschema::validator_for(&schema).expect("valid generated diagnostic JSON schema")
 });
+static HARDWARE_EVIDENCE_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> =
+    LazyLock::new(|| {
+        let schema: Value = serde_json::from_str(HARDWARE_EVIDENCE_DOCUMENT_SCHEMA)
+            .expect("generated hardware evidence JSON schema");
+        jsonschema::validator_for(&schema).expect("valid generated hardware evidence JSON schema")
+    });
 static CONTROL_PLANE_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
     let schema: Value = serde_json::from_str(CONTROL_PLANE_DOCUMENT_SCHEMA)
         .expect("generated control-plane JSON schema");
@@ -294,6 +304,17 @@ pub fn validate_diagnostic_value(
         DIAGNOSTIC_VALUE_SCHEMA_ID,
         input,
         &DIAGNOSTIC_VALUE_VALIDATOR,
+    )
+}
+
+pub fn validate_hardware_evidence_document(
+    input: &Value,
+) -> Result<HardwareEvidenceDocument, ContractValidationError> {
+    validate_and_deserialize(
+        HARDWARE_EVIDENCE_DOCUMENT_SCHEMA_ID,
+        HARDWARE_EVIDENCE_DOCUMENT_SCHEMA_ID,
+        input,
+        &HARDWARE_EVIDENCE_DOCUMENT_VALIDATOR,
     )
 }
 
