@@ -810,7 +810,7 @@ Plans:
 | 2. Complete Desktop Experience                     | 36/36          | Complete    | 2026-07-30 |
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
-| 5. Hardware Intelligence and Measured Evidence     | 0/TBD          | Not started | -          |
+| 5. Hardware Intelligence and Measured Evidence     | 0/10 | Planned    |  |
 | 6. Transactional Plans and Recovery                | 0/TBD          | Not started | -          |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
