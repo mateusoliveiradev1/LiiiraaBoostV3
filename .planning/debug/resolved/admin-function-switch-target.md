@@ -1,16 +1,16 @@
 ---
-status: investigating
+status: resolved
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-12T08:00:00.0000000Z
+updated: 2026-08-12T16:24:56.9235538Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed seventh transport failure. A valid eight-character retry reaches the function-switch route, but the freshly minted one-time receipt remains unused in PostgreSQL. The protected binding and session records match, so the step-up credential is being lost or altered between the Admin origin rewrite and the API resolver.
-test: Carry the same sealed step-up envelope in the JSON body as a resilient fallback, reject any body/header disagreement, and preserve the exact command binding plus atomic one-time consumption.
-expecting: The API consumes the matching receipt and switches Operations to Security; conflicting or replayed evidence remains denied.
-next_action: Add the transport fallback and regression coverage, then publish and repeat the official-domain round trip.
+hypothesis: Confirmed and resolved. The external Admin-to-API rewrite did not preserve the one-time step-up evidence reliably enough for the API resolver to consume it.
+test: The owner repeated the official-domain Operations-to-Security switch with an eight-character reason and a fresh TOTP code after Admin and API both served revision `8408544`.
+expecting: The API consumes the matching receipt exactly once, changes the governed session to Security, and the shell re-admits Security navigation without exposing unauthorized routes.
+next_action: Closed after successful owner UAT; continue Phase 4 with the next independent test.
 
 ## Symptoms
 
@@ -62,6 +62,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   found: The switch endpoint returned HTTP 403. The new `admin.function.switch` receipt has the correct account, session, context, action, resource and target, remains unconsumed, the session is active, and both Operations and Security are assigned.
   implication: The valid strong credential is minted but never reaches atomic consumption. Account authority and function assignment are not the cause; the remaining boundary is receipt transport/admission at the API resolver.
 
+- timestamp: 2026-08-12T16:24:56.9235538Z
+  checked: Official-domain owner UAT after Admin and API deployment revision `8408544`
+  found: The active function changed from Operations to Security, the header and account menu both projected Security, the Security overview loaded, and the session reported protected and synchronized.
+  implication: The step-up transport fallback, atomic receipt consumption, governed-session mutation, and post-switch navigation admission now complete end to end.
+
 ## Eliminated
 
 - hypothesis: The UI was stale after a successful mutation.
@@ -75,7 +80,7 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
 
 ## Resolution
 
-root_cause: Six consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections. Fourth, the only return control and authorization were coupled to membership management, creating a dead end after a least-privilege switch. Fifth, sensitive return transitions compared the valid raw step-up target with an invented prefixed form, then hid the denial after closing the selector. Sixth, the dialog enabled a reason at three characters even though the shared mutation authority requires eight.
-fix: Preserve the first five fixes; require the same eight-character audited reason in the dialog, show the requirement beside the field, and keep the action unavailable until the reason satisfies it.
-verification: The Admin shell regression failed before the sixth fix and passes after it with all 196 Admin tests. Broader verification and published owner round-trip UAT remain pending.
+root_cause: Seven consecutive defects existed. First, the client targeted the actor identity rather than the protected session. Second, renewed admin identity sessions were admitted through a fallback role without materializing their governed-session row. Third, a successful switch kept the People workspace mounted and advertised to Operations even though the API correctly denies its governance projections. Fourth, the only return control and authorization were coupled to membership management, creating a dead end after a least-privilege switch. Fifth, sensitive return transitions compared the valid raw step-up target with an invented prefixed form, then hid the denial after closing the selector. Sixth, the dialog enabled a reason at three characters even though the shared mutation authority requires eight. Seventh, the external Admin-to-API rewrite could lose the one-time step-up headers before API admission, leaving a valid persisted receipt unused.
+fix: Preserve the first six fixes and transport a sealed step-up evidence envelope in the JSON body alongside the headers. The API accepts either transport, rejects any disagreement, validates the envelope against the command and session, and retains atomic one-time receipt consumption.
+verification: Admin 196/196 tests, API 248/248 tests, Admin typecheck/build, focused lint, immutable API build and protected Render promotion passed. Both official surfaces served revision `8408544`; owner UAT successfully switched Operations to Security and loaded the synchronized Security overview.
 files_changed: [apps/api/src/modules/admin/governance-routes.ts, apps/api/src/modules/admin/governance-routes.test.ts, apps/api/src/modules/admin/routes.ts, apps/api/src/staging/runtime.ts, apps/api/src/staging/real-admin.test.ts, apps/api/src/staging/strong-auth.ts, apps/admin/src/admin-authority.ts, apps/admin/src/admin-authority.test.ts, apps/admin/src/admin-shell.test.ts, apps/admin/src/features/admin-authority.tsx, apps/admin/src/features/admin-authority.test.tsx, packages/control-plane-application/src/ports/admin-governance.ts, packages/control-plane-application/src/use-cases/manage-admin-access.ts, packages/control-plane-application/src/use-cases/manage-admin-access.test.ts]
