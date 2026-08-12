@@ -1305,7 +1305,16 @@ export const createAdminAuthority = ({
             ...payload,
             ...(input.stepUp === undefined
               ? {}
-              : { authorizationContextId: input.stepUp.authorizationContextId }),
+              : {
+                  authorizationContextId: input.stepUp.authorizationContextId,
+                  stepUpEvidence: {
+                    action: input.stepUp.action,
+                    authorizationContextId: input.stepUp.authorizationContextId,
+                    receipt: input.stepUp.receipt,
+                    redactedTarget: input.stepUp.redactedTarget,
+                    resource: input.stepUp.resource,
+                  },
+                }),
             ...(input.approvalReferences === undefined
               ? {}
               : { approvalReferences: input.approvalReferences }),
@@ -1616,7 +1625,18 @@ export const createAdminAuthority = ({
       }
       try {
         const response = await transport(`${baseUrl}/v1/admin/commands`, {
-          body: JSON.stringify({ command, confirmed: true, impactReviewed: true }),
+          body: JSON.stringify({
+            command,
+            confirmed: true,
+            impactReviewed: true,
+            stepUpEvidence: {
+              action: input.stepUp.action,
+              authorizationContextId: input.stepUp.authorizationContextId,
+              receipt: input.stepUp.receipt,
+              redactedTarget: input.stepUp.redactedTarget,
+              resource: input.stepUp.resource,
+            },
+          }),
           cache: 'no-store',
           credentials: 'include',
           headers: {
@@ -1659,6 +1679,13 @@ export const createAdminAuthority = ({
           body: JSON.stringify({
             expiresAt: input.expiresAt,
             reason,
+            stepUpEvidence: {
+              action: input.stepUp.action,
+              authorizationContextId: input.stepUp.authorizationContextId,
+              receipt: input.stepUp.receipt,
+              redactedTarget: input.stepUp.redactedTarget,
+              resource: input.stepUp.resource,
+            },
             targetReference: input.targetReference,
           }),
           cache: 'no-store',

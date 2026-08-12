@@ -9,6 +9,7 @@ import {
   createPersistentStagingAdminDependencies,
   projectStagingAdminOperationRecord,
   REAL_STAGING_CAPABILITIES,
+  resolveStepUpTransportEvidence,
 } from './runtime.js';
 import { runAdminControlPlaneWorkersOnce } from '../worker.js';
 
@@ -58,22 +59,24 @@ const createApp = async () => {
               statement.includes('governed.session_id = $1')
             ? {
                 rowCount: 1,
-                rows: [{ active_function: 'security', assigned_functions: ['security', 'operations'] }],
+                rows: [
+                  { active_function: 'security', assigned_functions: ['security', 'operations'] },
+                ],
               }
             : statement.includes('FROM sessions')
-          ? {
-              rowCount: 1,
-              rows: [
-                {
-                  expires_at: '2030-02-15T12:00:00.000Z',
-                  id: '00000000-0000-4000-8000-000000000099',
-                  revoked_at: null,
-                  session_kind: 'admin',
-                  token_digest: 'must-never-leave-postgres',
-                },
-              ],
-            }
-          : { rowCount: 0, rows: [] },
+              ? {
+                  rowCount: 1,
+                  rows: [
+                    {
+                      expires_at: '2030-02-15T12:00:00.000Z',
+                      id: '00000000-0000-4000-8000-000000000099',
+                      revoked_at: null,
+                      session_kind: 'admin',
+                      token_digest: 'must-never-leave-postgres',
+                    },
+                  ],
+                }
+              : { rowCount: 0, rows: [] },
       );
     }),
   };
@@ -106,6 +109,29 @@ const cookie = (credential: string): string =>
   `__Host-liiiraa_session=${encodeURIComponent(credential)}`;
 
 describe('real staging administrative authority', () => {
+  it('admits a sealed body fallback and rejects conflicting step-up transport', () => {
+    const evidence = {
+      action: 'admin.function.switch',
+      authorizationContextId: 'switch-context-0001',
+      receipt: 'opaque-function-switch-receipt-abcdefghijklmnopqrstuvwxyz',
+      redactedTarget: '00000000-0000-4000-8000-000000000012',
+      resource: 'admin-session',
+    };
+    expect(resolveStepUpTransportEvidence({}, { stepUpEvidence: evidence })).toEqual(evidence);
+    expect(
+      resolveStepUpTransportEvidence(
+        { 'x-liiiraa-admin-step-up': evidence.receipt },
+        { stepUpEvidence: evidence },
+      ),
+    ).toEqual(evidence);
+    expect(
+      resolveStepUpTransportEvidence(
+        { 'x-liiiraa-admin-step-up': `${evidence.receipt}-conflict` },
+        { stepUpEvidence: evidence },
+      ),
+    ).toBeNull();
+  });
+
   it('composes every PostgreSQL registrar before advertising complete Admin readiness', async () => {
     const database = {
       query: vi.fn(() => Promise.resolve({ rowCount: 0, rows: [] })),
@@ -466,18 +492,158 @@ describe('real staging administrative authority', () => {
   it('projects every persisted operations family as a generated authority document', () => {
     const at = '2030-01-15T12:00:00.000Z';
     const cases = [
-      ['jobs', { record_id: 'job-one', kind: 'reconciliation', status: 'running', version: '2', progress: 40, affected_items: 10, total_items: 10, completed_items: 4, failed_items: 0, claimed_by: 'operator-one', created_at: at, updated_at: at }],
-      ['views', { record_id: 'view-one', kind: 'official', name: 'Active operations', query_text: '', version: '1', updated_at: at }],
-      ['inbox', { record_id: 'inbox-one', status: 'open', priority: 'urgent', masked_title: 'Delivery requires review', owner_id: null, occurred_at: at, updated_at: at, version: '1' }],
-      ['incidents', { record_id: 'incident-one', procedure_version: 'recovery@1', severity: 'critical', status: 'open', version: '3', owner_id: 'operator-one', substitute_id: 'security-one', started_at: at, updated_at: at }],
-      ['exports', { record_id: 'export-one', actor_id: 'operator-one', purpose: 'Restricted review', fields: ['audit-reference'], status: 'ready', masked: true, encrypted: true, created_at: at, expires_at: '2030-01-15T12:30:00.000Z' }],
-      ['configurations', { record_id: 'configuration-one', version: '3', status: 'published', cohort: 'beta', known_version: '3.1.0', previous_version: '2', created_at: at }],
-      ['capacity', { record_id: 'capacity-one', resource: 'jobs', current_use: '80', safe_limit: '100', sampled_at: at, level: 'warning', forecast_exhaustion_days: 4, early_action_required: true }],
-      ['environments', { record_id: '00000000-0000-4000-8000-000000000006', environment_identity: 'synthetic-non-production', created_at: at }],
-      ['audit-events', { record_id: 'audit-one', actor_id: 'operator-one', subject_id: 'job-one', action: 'job-transitioned', scope: 'jobs', occurred_at: at }],
-      ['alerts', { record_id: 'alert-one', subject_id: 'incident-one', severity: 'critical', channel_reference: 'security-on-call', status: 'acknowledged', created_at: at, updated_at: at, acknowledged_at: at }],
-      ['privacy-cases', { record_id: 'privacy-one', actor_id: 'operator-one', legal_basis: 'Verified request', status: 'running', version: '2', created_at: at, retention_expires_at: '2031-01-15T12:00:00.000Z' }],
-      ['emergency-stops', { record_id: 'stop-one', actor_id: 'operator-one', capability: 'invitation-delivery', reason: 'Restricted reason', status: 'active', version: '1', requested_at: at, expires_at: '2030-01-15T12:30:00.000Z', restored_at: null }],
+      [
+        'jobs',
+        {
+          record_id: 'job-one',
+          kind: 'reconciliation',
+          status: 'running',
+          version: '2',
+          progress: 40,
+          affected_items: 10,
+          total_items: 10,
+          completed_items: 4,
+          failed_items: 0,
+          claimed_by: 'operator-one',
+          created_at: at,
+          updated_at: at,
+        },
+      ],
+      [
+        'views',
+        {
+          record_id: 'view-one',
+          kind: 'official',
+          name: 'Active operations',
+          query_text: '',
+          version: '1',
+          updated_at: at,
+        },
+      ],
+      [
+        'inbox',
+        {
+          record_id: 'inbox-one',
+          status: 'open',
+          priority: 'urgent',
+          masked_title: 'Delivery requires review',
+          owner_id: null,
+          occurred_at: at,
+          updated_at: at,
+          version: '1',
+        },
+      ],
+      [
+        'incidents',
+        {
+          record_id: 'incident-one',
+          procedure_version: 'recovery@1',
+          severity: 'critical',
+          status: 'open',
+          version: '3',
+          owner_id: 'operator-one',
+          substitute_id: 'security-one',
+          started_at: at,
+          updated_at: at,
+        },
+      ],
+      [
+        'exports',
+        {
+          record_id: 'export-one',
+          actor_id: 'operator-one',
+          purpose: 'Restricted review',
+          fields: ['audit-reference'],
+          status: 'ready',
+          masked: true,
+          encrypted: true,
+          created_at: at,
+          expires_at: '2030-01-15T12:30:00.000Z',
+        },
+      ],
+      [
+        'configurations',
+        {
+          record_id: 'configuration-one',
+          version: '3',
+          status: 'published',
+          cohort: 'beta',
+          known_version: '3.1.0',
+          previous_version: '2',
+          created_at: at,
+        },
+      ],
+      [
+        'capacity',
+        {
+          record_id: 'capacity-one',
+          resource: 'jobs',
+          current_use: '80',
+          safe_limit: '100',
+          sampled_at: at,
+          level: 'warning',
+          forecast_exhaustion_days: 4,
+          early_action_required: true,
+        },
+      ],
+      [
+        'environments',
+        {
+          record_id: '00000000-0000-4000-8000-000000000006',
+          environment_identity: 'synthetic-non-production',
+          created_at: at,
+        },
+      ],
+      [
+        'audit-events',
+        {
+          record_id: 'audit-one',
+          actor_id: 'operator-one',
+          subject_id: 'job-one',
+          action: 'job-transitioned',
+          scope: 'jobs',
+          occurred_at: at,
+        },
+      ],
+      [
+        'alerts',
+        {
+          record_id: 'alert-one',
+          subject_id: 'incident-one',
+          severity: 'critical',
+          channel_reference: 'security-on-call',
+          status: 'acknowledged',
+          created_at: at,
+          updated_at: at,
+          acknowledged_at: at,
+        },
+      ],
+      [
+        'privacy-cases',
+        {
+          record_id: 'privacy-one',
+          actor_id: 'operator-one',
+          legal_basis: 'Verified request',
+          status: 'running',
+          version: '2',
+          created_at: at,
+          retention_expires_at: '2031-01-15T12:00:00.000Z',
+        },
+      ],
+      [
+        'emergency-stops',
+        {
+          record_id: 'stop-one',
+          actor_id: 'operator-one',
+          capability: 'invitation-delivery',
+          reason: 'Restricted reason',
+          status: 'active',
+          version: '1',
+          requested_at: at,
+          expires_at: '2030-01-15T12:30:00.000Z',
+          restored_at: null,
+        },
+      ],
     ] as const;
 
     for (const [resource, row] of cases) {

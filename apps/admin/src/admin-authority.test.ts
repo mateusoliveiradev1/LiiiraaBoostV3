@@ -312,6 +312,13 @@ describe('complete typed Admin mutation authority', () => {
       expectedEtag: 'admin-etag-0007',
       expectedVersion: '7',
       reason: mutation.reason,
+      stepUpEvidence: {
+        action: strongStepUp.action,
+        authorizationContextId: strongStepUp.authorizationContextId,
+        receipt: strongStepUp.receipt,
+        redactedTarget: strongStepUp.redactedTarget,
+        resource: strongStepUp.resource,
+      },
       transition: 'pause',
     });
   });

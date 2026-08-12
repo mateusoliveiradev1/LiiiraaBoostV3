@@ -1,16 +1,16 @@
 ---
-status: verifying
+status: investigating
 trigger: 'Owner activated the Operations function in the published Admin after completing TOTP, but the active function remained Security and the UI showed no useful rejection.'
 created: 2026-08-11T21:56:16.7164631Z
-updated: 2026-08-12T06:36:30.0000000Z
+updated: 2026-08-12T08:00:00.0000000Z
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed sixth root cause. The function dialog enabled submission at three characters, while the shared authority rejects any mutation reason shorter than eight characters before making a request.
-test: Align the dialog with the eight-character audited-reason contract and explain the requirement beside the field.
-expecting: A five-character value such as `teste` cannot launch the strong-auth flow, while an eight-character reason can reach the already-corrected API path.
-next_action: Publish the Admin validation correction, then repeat the Operations-to-Security owner round-trip with a reason of at least eight characters.
+hypothesis: Confirmed seventh transport failure. A valid eight-character retry reaches the function-switch route, but the freshly minted one-time receipt remains unused in PostgreSQL. The protected binding and session records match, so the step-up credential is being lost or altered between the Admin origin rewrite and the API resolver.
+test: Carry the same sealed step-up envelope in the JSON body as a resilient fallback, reject any body/header disagreement, and preserve the exact command binding plus atomic one-time consumption.
+expecting: The API consumes the matching receipt and switches Operations to Security; conflicting or replayed evidence remains denied.
+next_action: Add the transport fallback and regression coverage, then publish and repeat the official-domain round trip.
 
 ## Symptoms
 
@@ -56,6 +56,11 @@ started: Observed during Phase 4 real-authority owner UAT on 2026-08-11.
   checked: Published Operations-to-Security retry and the Admin mutation boundary
   found: The dialog accepted `teste` at five characters, but `authority.mutate` rejects reasons below eight characters locally as `invalid-authority`, so no API request was made.
   implication: The latest retry did not exercise the deployed backend fix; the dialog and mutation boundary exposed contradictory validation rules.
+
+- timestamp: 2026-08-12T08:00:00.0000000Z
+  checked: Official-domain retry with `teste UAI`, Neon `identity_step_up_receipts`, active identity session, governed function session, and administrative membership
+  found: The switch endpoint returned HTTP 403. The new `admin.function.switch` receipt has the correct account, session, context, action, resource and target, remains unconsumed, the session is active, and both Operations and Security are assigned.
+  implication: The valid strong credential is minted but never reaches atomic consumption. Account authority and function assignment are not the cause; the remaining boundary is receipt transport/admission at the API resolver.
 
 ## Eliminated
 

@@ -407,6 +407,46 @@ const recordValue = (value: unknown): Readonly<Record<string, unknown>> | null =
     ? (value as Readonly<Record<string, unknown>>)
     : null;
 
+type StepUpTransportEvidence = Readonly<{
+  action: string;
+  authorizationContextId: string;
+  receipt: string;
+  redactedTarget: string;
+  resource: string;
+}>;
+
+const matchingStepUpValue = (header: unknown, body: unknown): string | null => {
+  const headerValue = typeof header === 'string' ? header : null;
+  const bodyValue = typeof body === 'string' ? body : null;
+  if (headerValue !== null && bodyValue !== null && headerValue !== bodyValue) return null;
+  return headerValue ?? bodyValue;
+};
+
+export const resolveStepUpTransportEvidence = (
+  headers: FastifyRequest['headers'],
+  body: Readonly<Record<string, unknown>> | null,
+): StepUpTransportEvidence | null => {
+  const envelope = recordValue(body?.['stepUpEvidence']);
+  const receipt = matchingStepUpValue(headers['x-liiiraa-admin-step-up'], envelope?.['receipt']);
+  const authorizationContextId = matchingStepUpValue(
+    headers['x-admin-authorization-context'],
+    envelope?.['authorizationContextId'],
+  );
+  const action = matchingStepUpValue(headers['x-admin-step-up-action'], envelope?.['action']);
+  const resource = matchingStepUpValue(headers['x-admin-step-up-resource'], envelope?.['resource']);
+  const redactedTarget = matchingStepUpValue(
+    headers['x-admin-step-up-target'],
+    envelope?.['redactedTarget'],
+  );
+  return receipt === null ||
+    authorizationContextId === null ||
+    action === null ||
+    resource === null ||
+    redactedTarget === null
+    ? null
+    : Object.freeze({ action, authorizationContextId, receipt, redactedTarget, resource });
+};
+
 const admittedId = (value: unknown): string | null => {
   const id = text(value);
   return /^[A-Za-z0-9._:-]{1,128}$/u.test(id) ? id : null;
@@ -870,18 +910,19 @@ export const createPersistentStagingAdminDependencies = ({
                 : action === 'export-audit-reference'
                   ? 'audit-event'
                   : null;
-      const receipt = request.headers['x-liiiraa-admin-step-up'];
-      const authorizationContextId = request.headers['x-admin-authorization-context'];
+      const transportedStepUp = resolveStepUpTransportEvidence(request.headers, body);
       const evidence =
         actor === null ||
         strongAuth === undefined ||
-        typeof receipt !== 'string' ||
-        typeof authorizationContextId !== 'string'
+        transportedStepUp?.action !== action ||
+        transportedStepUp.resource !== (resource ?? '') ||
+        transportedStepUp.redactedTarget !==
+          (breakGlassMetadata ? text(body?.['targetReference']) : text(command?.['redactedTarget']))
           ? null
           : await strongAuth.consumeStepUpReceipt(actor, {
               action,
-              authorizationContextId,
-              receipt,
+              authorizationContextId: transportedStepUp.authorizationContextId,
+              receipt: transportedStepUp.receipt,
               redactedTarget: breakGlassMetadata
                 ? text(body?.['targetReference'])
                 : text(command?.['redactedTarget']),
@@ -1052,30 +1093,21 @@ const resolveGovernanceStepUp = async (
       : 'governance';
   const expectedTarget = Array.isArray(targetReferences) ? text(targetReferences[0]) : '';
   const expectedAuthorizationContextId = text(body?.['authorizationContextId']);
-  const receipt = request.headers['x-liiiraa-admin-step-up'];
-  const authorizationContextId = request.headers['x-admin-authorization-context'];
-  const action = request.headers['x-admin-step-up-action'];
-  const resource = request.headers['x-admin-step-up-resource'];
-  const redactedTarget = request.headers['x-admin-step-up-target'];
+  const transportedStepUp = resolveStepUpTransportEvidence(request.headers, body);
   if (
     actor === null ||
     strongAuth === undefined ||
-    typeof receipt !== 'string' ||
-    typeof authorizationContextId !== 'string' ||
-    typeof action !== 'string' ||
-    typeof resource !== 'string' ||
-    typeof redactedTarget !== 'string' ||
-    action !== expectedAction ||
-    resource !== expectedResource ||
-    redactedTarget !== expectedTarget ||
-    authorizationContextId !== expectedAuthorizationContextId
+    transportedStepUp?.action !== expectedAction ||
+    transportedStepUp.resource !== expectedResource ||
+    transportedStepUp.redactedTarget !== expectedTarget ||
+    transportedStepUp.authorizationContextId !== expectedAuthorizationContextId
   ) {
     return null;
   }
   const evidence = await strongAuth.consumeStepUpReceipt(actor, {
     action: expectedAction,
     authorizationContextId: expectedAuthorizationContextId,
-    receipt,
+    receipt: transportedStepUp.receipt,
     redactedTarget: expectedTarget,
     resource: expectedResource,
   });
