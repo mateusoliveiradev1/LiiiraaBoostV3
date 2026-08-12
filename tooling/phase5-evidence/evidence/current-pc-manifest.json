@@ -2,12 +2,12 @@
     "schemaVersion":  1,
     "runId":  "phase5-current-pc",
     "runKind":  "packaged-physical",
-    "generatedAt":  "2026-08-12T19:46:42.3344288+00:00",
+    "generatedAt":  "2026-08-12T20:20:47.7665333+00:00",
     "build":  {
-                  "commit":  "7227e9fe166544ed6583946506c948b24bbcea34",
+                  "commit":  "bd1fb91f6e9977acfe280f48ff88023d69a983de",
                   "collectorVersion":  "liiiraa-native-evidence@1",
                   "artifactPath":  "target/release/liiiraa-desktop.exe",
-                  "artifactSha256":  "7017ccabfe6ffcdfd5490916372b69de3547e33fb402dad3ac8b285b778474b6"
+                  "artifactSha256":  "511c76603c927d4cd26e3f9ea43f500802d7d899c21d3249713c3886359c9546"
               },
     "environment":  {
                         "physical":  true,
@@ -172,7 +172,7 @@
                   }
               ],
     "budgets":  {
-                    "memoryPeakMb":  12.363,
+                    "memoryPeakMb":  12.277,
                     "idleCpuPercent":  0,
                     "pollingHz":  0,
                     "cancellationMs":  100,
@@ -182,11 +182,11 @@
                     "rawIdentifiersFound":  [
 
                                             ],
-                    "scanSha256":  "fb9cc6a59d0e6c45b67baa13b413154eb8726cf0919fb0a7cb3a80f92ed6cdc6"
+                    "scanSha256":  "49fbec6dae7b8148e9d69b13aa2132f275367593a8b97bd7aff09c0b91ef9231"
                 },
     "report":  {
                    "path":  "tooling/phase5-evidence/evidence/current-pc-report.json",
-                   "sha256":  "fb9cc6a59d0e6c45b67baa13b413154eb8726cf0919fb0a7cb3a80f92ed6cdc6"
+                   "sha256":  "49fbec6dae7b8148e9d69b13aa2132f275367593a8b97bd7aff09c0b91ef9231"
                },
     "phase4PhysicalGaps":  [
                                {

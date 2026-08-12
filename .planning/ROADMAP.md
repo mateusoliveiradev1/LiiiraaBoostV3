@@ -10,7 +10,7 @@ Liiiraa Boost will move from a single truthful product contract to a complete de
 - [x] **Phase 2: Complete Desktop Experience** - Deliver the installable, bespoke, fully navigable desktop UX contract with every planned state represented honestly. (completed 2026-07-30)
 - [x] **Phase 3: Complete Web Experience** - Deliver the public site, documentation, download path, account shell, and isolated admin shell as one coherent web experience. (visual gap closure planned) (completed 2026-08-04)
 - [ ] **Phase 4: Identity, Commerce, Devices, and Administration** - Connect secure accounts, subscriptions, device licensing, support, and governed administration end to end.
-- [ ] **Phase 5: Hardware Intelligence and Measured Evidence** - Replace diagnostic scenarios with capability-driven Windows inventory and defensible before/after evidence. (final native telemetry closure in progress)
+- [x] **Phase 5: Hardware Intelligence and Measured Evidence** - Replace diagnostic scenarios with capability-driven Windows inventory and defensible before/after evidence. (completed 2026-08-12)
 - [ ] **Phase 6: Transactional Plans and Recovery** - Let users approve, apply, verify, and safely reverse personalized plans through a hardened privilege boundary.
 - [ ] **Phase 7: Verified Optimization Catalog** - Ship hardware-gated optimization families whose safety and benefit are proven before promotion.
 - [ ] **Phase 8: Game Profiles and Session Automation** - Discover games and apply the same safe profile lifecycle whether they start inside or outside Liiiraa Boost.
@@ -700,7 +700,7 @@ Plans:
 4. The product rejects invalid before/after comparisons, exposes uncertainty or degraded coverage, and never substitutes estimates for unavailable evidence.
 5. User can compare accepted sessions through a summary, detailed diff, timeline, and exportable report while collection stays within budget and reduces sampling during active games.
 
-**Plans**: 10/11 plans complete
+**Plans**: 11/11 plans complete
 
 - [x] 05-01-PLAN.md
 - [x] 05-02-PLAN.md
@@ -712,7 +712,7 @@ Plans:
 - [x] 05-08-PLAN.md
 - [x] 05-09-PLAN.md
 - [x] 05-10-PLAN.md
-- [ ] 05-11-PLAN.md
+- [x] 05-11-PLAN.md
 
 **UI hint**: yes
 
