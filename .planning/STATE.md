@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: '04-40 Task 03: isolated web/admin/desktop logout passed; consent and governance UAT pending'
-last_updated: '2026-08-10T14:24:01.045Z'
-last_activity: 2026-08-10 -- Isolated session revocation passed owner UAT
+stopped_at: Phase 5 context gathered
+last_updated: "2026-08-12T17:06:30.321Z"
+last_activity: "2026-08-11 - Completed quick task 260811-n4i: Refinar a experiência decisória do Admin da Fase 4"
 progress:
   total_phases: 10
   completed_phases: 3
@@ -790,6 +790,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-09T17:38:33.816Z
-Stopped at: 04-40 Task 03: published Admin authority and device binding passed; tester invitation and remaining human UAT pending
-Resume file: None
+Last session: 2026-08-12T17:06:30.315Z
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-hardware-intelligence-and-measured-evidence/05-CONTEXT.md
