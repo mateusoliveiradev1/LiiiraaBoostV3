@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-08-12T17:38:29.625Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-08-12T18:03:23.419Z"
 last_activity: 2026-08-12
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 216
-  completed_plans: 206
+  completed_plans: 207
   percent: 30
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 05 (hardware-intelligence-and-measured-evidence) — EXECUTING
-Plan: 3 of 10
+Plan: 5 of 10
 Status: Ready to execute
 Last activity: 2026-08-12
 
-Progress: [██████████] 95%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -238,6 +238,7 @@ _Updated after plan completion_
 | Phase 05 P01 | 8 min | 2 tasks | 12 files |
 | Phase 05 P04 | 7 min | 2 tasks | 3 files |
 | Phase 05 P02 | 10 min | 2 tasks | 6 files |
+| Phase 05 P03 | 18 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -744,6 +745,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 04]: Query Operation, Security, and System through surface-specific authority families. — Least-data reads prevent unrelated denial or stale state from blocking or leaking across workspaces.
 - [Phase 04]: Keep recovery, configuration, privacy, export, and emergency commands bounded and versioned. — Command identity, environment, review, validation, and receipts prohibit arbitrary execution and optimistic success.
 - [Phase 04]: Own inspector focus across responsive Admin compositions. — Focus enters details and returns to the exact trigger while desktop, tablet, and mobile preserve route identity.
+- [Phase 05]: Native inventory remains unprivileged and read-only; unavailable evidence is explicit instead of fabricated.
+- [Phase 05]: Windows support classification uses version, build, edition, channel, and policy date rather than marketing names.
+- [Phase 05]: Protected hardware identifiers are purpose-bound SHA-256 derivations and never cross the native boundary raw.
+- [Phase 05]: Cancellation bypasses native collection and every accepted snapshot is contract-validated before optional immutable persistence.
 
 ### Pending Todos
 
@@ -793,6 +798,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-12T17:38:29.619Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-08-12T18:03:23.411Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None
