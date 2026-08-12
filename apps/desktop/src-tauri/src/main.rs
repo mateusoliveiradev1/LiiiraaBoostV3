@@ -13,6 +13,8 @@ mod evidence_store;
 #[allow(dead_code)]
 mod hardware_inventory;
 #[allow(dead_code)]
+mod measurement;
+#[allow(dead_code)]
 mod identity;
 mod navigation;
 mod notifications;

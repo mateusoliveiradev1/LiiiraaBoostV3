@@ -18,10 +18,8 @@ const STARTED_AT: &str = "2026-08-12T12:00:00Z";
 const COMPLETED_AT: &str = "2026-08-12T12:00:10Z";
 
 fn reference_trace() -> measurement::ReferenceTrace {
-    serde_json::from_str(include_str!(
-        "fixtures/measurement/reference-traces.json"
-    ))
-    .expect("reference trace fixture")
+    serde_json::from_str(include_str!("fixtures/measurement/reference-traces.json"))
+        .expect("reference trace fixture")
 }
 
 fn metadata(session_id: &str) -> CaptureMetadata {
@@ -100,8 +98,9 @@ fn permission_loss_and_invalid_counter_status_stay_non_numeric_and_degrade() {
 
 #[test]
 fn monotonic_clock_discontinuity_invalidates_instead_of_reordering_samples() {
-    let mut capture = CaptureSession::new(metadata("session-clock-jump"), SchedulerLimits::default())
-        .expect("capture state");
+    let mut capture =
+        CaptureSession::new(metadata("session-clock-jump"), SchedulerLimits::default())
+            .expect("capture state");
     capture.ingest_frame(FrameEvent {
         monotonic_ns: 20_000_000,
         frame_time_ms: 10.0,
@@ -113,14 +112,18 @@ fn monotonic_clock_discontinuity_invalidates_instead_of_reordering_samples() {
         health: SourceHealth::Valid,
     });
 
-    let result = capture.finalize(COMPLETED_AT).expect("invalid evidence remains inspectable");
+    let result = capture
+        .finalize(COMPLETED_AT)
+        .expect("invalid evidence remains inspectable");
     validate_hardware_evidence_document(&result.document).expect("generated contract accepts it");
     assert_eq!(result.document["status"], "invalid");
     assert!(result.document.get("chunks").is_none());
-    assert!(result.document["reason"]
-        .as_str()
-        .unwrap()
-        .contains("clock-discontinuity"));
+    assert!(
+        result.document["reason"]
+            .as_str()
+            .unwrap()
+            .contains("clock-discontinuity")
+    );
 }
 
 #[test]
@@ -129,8 +132,8 @@ fn bounded_backpressure_records_loss_and_never_grows_the_sample_buffer() {
         max_buffered_samples: 3,
         ..SchedulerLimits::default()
     };
-    let mut capture = CaptureSession::new(metadata("session-backpressure"), limits)
-        .expect("capture state");
+    let mut capture =
+        CaptureSession::new(metadata("session-backpressure"), limits).expect("capture state");
     for index in 0..5 {
         capture.ingest_frame(FrameEvent {
             monotonic_ns: index * 10_000_000,
@@ -139,18 +142,29 @@ fn bounded_backpressure_records_loss_and_never_grows_the_sample_buffer() {
         });
     }
 
-    let result = capture.finalize(COMPLETED_AT).expect("degraded bounded evidence");
+    let result = capture
+        .finalize(COMPLETED_AT)
+        .expect("degraded bounded evidence");
     assert_eq!(result.document["status"], "degraded");
-    assert_eq!(result.document["chunks"][0]["values"].as_array().unwrap().len(), 3);
-    assert!(serde_json::to_string(&result.document)
-        .unwrap()
-        .contains("backpressure"));
+    assert_eq!(
+        result.document["chunks"][0]["values"]
+            .as_array()
+            .unwrap()
+            .len(),
+        3
+    );
+    assert!(
+        serde_json::to_string(&result.document)
+            .unwrap()
+            .contains("backpressure")
+    );
 }
 
 #[test]
 fn cancellation_is_bounded_visible_and_idempotent() {
-    let mut capture = CaptureSession::new(metadata("session-cancelled"), SchedulerLimits::default())
-        .expect("capture state");
+    let mut capture =
+        CaptureSession::new(metadata("session-cancelled"), SchedulerLimits::default())
+            .expect("capture state");
     assert!(capture.request_cancel(5_000_000));
     assert!(!capture.request_cancel(6_000_000));
     assert!(capture.acknowledge_cancel(105_000_000));
@@ -159,7 +173,10 @@ fn cancellation_is_bounded_visible_and_idempotent() {
     let result = capture.finalize(COMPLETED_AT).expect("cancelled evidence");
     validate_hardware_evidence_document(&result.document).expect("generated contract accepts it");
     assert_eq!(result.document["status"], "incomplete");
-    assert_eq!(result.document["execution"]["cancellationState"], "acknowledged");
+    assert_eq!(
+        result.document["execution"]["cancellationState"],
+        "acknowledged"
+    );
     assert!(capture.cancellation_latency_ms().unwrap() <= 250);
 }
 
@@ -168,9 +185,12 @@ fn incomplete_and_completed_sessions_remain_visible_across_restart() {
     let database = TempDatabase::new("measurement-lifecycle");
     {
         let mut store = EvidenceStore::open(&database.path).expect("open evidence store");
-        let mut capture = CaptureSession::new(metadata("session-persisted"), SchedulerLimits::default())
-            .expect("capture state");
-        capture.persist_incomplete(&mut store, 10).expect("persist incomplete session");
+        let mut capture =
+            CaptureSession::new(metadata("session-persisted"), SchedulerLimits::default())
+                .expect("capture state");
+        capture
+            .persist_incomplete(&mut store, 10)
+            .expect("persist incomplete session");
         for frame in reference_trace().frames.into_iter().take(10) {
             capture.ingest_frame(frame);
         }
@@ -182,9 +202,35 @@ fn incomplete_and_completed_sessions_remain_visible_across_restart() {
     }
 
     let store = EvidenceStore::open(&database.path).expect("reopen evidence store");
-    let stored = store.get("session-persisted").expect("restart-visible session");
+    let stored = store
+        .get("session-persisted")
+        .expect("restart-visible session");
     assert_eq!(stored.lifecycle, EvidenceLifecycle::Completed);
     assert_eq!(store.chunk_sequences("session-persisted").unwrap(), vec![0]);
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn native_windows_clock_and_memory_counter_are_real_and_bounded() {
+    use measurement::{
+        CounterSource, MonotonicClock, SourceDeadline, WindowsQpcClock, WindowsSystemCounterSource,
+    };
+
+    let clock = WindowsQpcClock::new().expect("Windows QPC clock");
+    let first = clock.now_ns();
+    let second = clock.now_ns();
+    assert!(second >= first);
+
+    let mut source = WindowsSystemCounterSource::default();
+    let memory = source.poll(
+        MetricKind::MemoryWorkingSetBytes,
+        second,
+        SourceDeadline {
+            expires_at_ns: second.saturating_add(250_000_000),
+        },
+    );
+    assert_eq!(memory.health, SourceHealth::Valid);
+    assert!(memory.value.is_some_and(|value| value > 0.0));
 }
 
 struct TempDatabase {
@@ -213,4 +259,3 @@ impl Drop for TempDatabase {
         let _ = fs::remove_file(self.path.with_extension("sqlite3-wal"));
     }
 }
-
