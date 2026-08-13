@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
   "apps/desktop/src-tauri",
+  "apps/optimizer-service",
   "crates/contracts-rust",
   "crates/plan-engine",
   "tooling/contract-generation-rust",

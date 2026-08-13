@@ -171,6 +171,15 @@
       "status": "active"
     },
     {
+      "id": "optimizer-service",
+      "owner": "optimizer",
+      "layer": "adapter",
+      "roots": ["apps/optimizer-service"],
+      "publicRoots": ["apps/optimizer-service/src/main.rs"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
       "id": "web-core",
       "owner": "web-platform",
       "layer": "application",
