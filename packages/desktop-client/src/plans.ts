@@ -1,13 +1,13 @@
-import {
-  type PlanApprovalDocumentJson,
-  type PlanTransactionDocumentJson,
-  type ProgressEventDocumentJson,
-  type ProgressSnapshotDocumentJson,
-  type RedactedDiagnosticExportDocumentJson,
-  type RiskClassJson,
-  type TransactionIntentJson,
-  type TransactionalPlanDocumentJson,
-  type TransactionalRecoveryDocumentJson,
+import type {
+  PlanApprovalDocumentJson,
+  PlanTransactionDocumentJson,
+  ProgressEventDocumentJson,
+  ProgressSnapshotDocumentJson,
+  RedactedDiagnosticExportDocumentJson,
+  RiskClassJson,
+  TransactionIntentJson,
+  TransactionalPlanDocumentJson,
+  TransactionalRecoveryDocumentJson,
 } from '@liiiraa/contracts-ts';
 import { transactionalRecoveryDocumentValidator } from '@liiiraa/contracts-ts/generated';
 
@@ -25,6 +25,9 @@ export const PLAN_COMMANDS = Object.freeze({
   subscribeExecution: 'subscribe_plan_execution',
   previewDiagnostic: 'preview_plan_diagnostic',
   exportDiagnostic: 'export_plan_diagnostic',
+  readAdvancedPreference: 'read_advanced_preference',
+  enableAdvancedPreference: 'enable_advanced_preference',
+  revokeAdvancedPreference: 'revoke_advanced_preference',
 } as const);
 
 export type PlanInvokeCommand = (typeof PLAN_COMMANDS)[keyof typeof PLAN_COMMANDS];
@@ -72,9 +75,28 @@ export interface PlanAuthoritySnapshot {
   readonly transactionId: string | null;
   readonly progress: ProgressSnapshotDocumentJson | ProgressEventDocumentJson | null;
   readonly diagnostic: RedactedDiagnosticExportDocumentJson | null;
+  readonly advancedPreference: AdvancedPreferenceProjection | null;
   readonly sequence: number | null;
   readonly stale: boolean;
   readonly error: PlanClientError | null;
+}
+
+export type AdvancedPreferenceState =
+  | 'disabled'
+  | 'enabled'
+  | 'revoked'
+  | 'invalidated'
+  | 'unavailable';
+
+export interface AdvancedPreferenceProjection {
+  readonly kind: 'advanced-preference';
+  readonly schemaVersion: '1.0';
+  readonly state: AdvancedPreferenceState;
+  readonly reason: string;
+  readonly bindingFreshness: 'current' | 'stale' | 'unavailable';
+  readonly sequence: number;
+  readonly updatedAt: string;
+  readonly provenance: 'native';
 }
 
 export type PlanListener = (snapshot: PlanAuthoritySnapshot) => void;
@@ -148,6 +170,16 @@ export interface ExportDiagnosticInput extends AbortableInput {
   readonly request: Readonly<{ planId: string; exportId: string }>;
 }
 
+export interface AdvancedPreferenceIntentInput extends AbortableInput {
+  readonly request: Readonly<{
+    intentId: string;
+    authorizationContextId: string;
+    proofReference: string;
+    expectedSequence: number;
+    requestedAt: string;
+  }>;
+}
+
 export interface PlanAuthority {
   readonly origin: PlanAuthorityOrigin;
   snapshot(): PlanAuthoritySnapshot;
@@ -175,6 +207,14 @@ export interface PlanAuthority {
   exportDiagnostic(
     input: ExportDiagnosticInput,
   ): Promise<Result<RedactedDiagnosticExportDocumentJson, PlanClientError>>;
+  readAdvancedPreference(): Promise<Result<AdvancedPreferenceProjection, PlanClientError>>;
+  enableAdvancedPreference(
+    input: AdvancedPreferenceIntentInput,
+  ): Promise<Result<AdvancedPreferenceProjection, PlanClientError>>;
+  revokeAdvancedPreference(
+    input: AdvancedPreferenceIntentInput,
+  ): Promise<Result<AdvancedPreferenceProjection, PlanClientError>>;
+  reopen(): Promise<Result<AdvancedPreferenceProjection, PlanClientError>>;
   reconnect(transactionId: string): Promise<Result<ProgressSnapshotDocumentJson, PlanClientError>>;
   dispose(): void;
 }
@@ -224,20 +264,25 @@ const FORBIDDEN_INTENT_KEYS = new Set([
   'compatible',
   'effectiveRisk',
   'entitlement',
+  'enabled',
   'file',
+  'hardwareFingerprint',
   'premium',
   'recoveryReady',
   'registry',
+  'reusableProof',
   'restored',
   'risk',
   'script',
   'service',
   'shell',
   'strongAuth',
+  'securityPostureFingerprint',
   'success',
   'successful',
   'verification',
   'verified',
+  'cloudSync',
 ]);
 
 const deepFreeze = <Value>(value: Value, seen = new WeakSet<object>()): Readonly<Value> => {
@@ -342,6 +387,57 @@ const validateDocument = <Kind extends TransactionalRecoveryDocumentJson['kind']
   return successResult(immutableClone(input as ExpectedDocument<Kind>));
 };
 
+const PREFERENCE_KEYS = new Set([
+  'kind',
+  'schemaVersion',
+  'state',
+  'reason',
+  'bindingFreshness',
+  'sequence',
+  'updatedAt',
+  'provenance',
+]);
+
+const validateAdvancedPreference = (
+  input: unknown,
+  refuseFixtures: boolean,
+): Result<AdvancedPreferenceProjection, PlanClientError> => {
+  if (refuseFixtures) {
+    const fixturePath = findFixturePath(input);
+    if (fixturePath !== undefined) {
+      return errorResult({ code: 'FIXTURE_PROVENANCE_REFUSED', path: fixturePath });
+    }
+  }
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return errorResult({ code: 'INTENT_INVALID', path: '$' });
+  }
+  const value = input as Readonly<Record<string, unknown>>;
+  const unknown = Object.keys(value).find((key) => !PREFERENCE_KEYS.has(key));
+  const states = new Set(['disabled', 'enabled', 'revoked', 'invalidated', 'unavailable']);
+  const freshness = new Set(['current', 'stale', 'unavailable']);
+  const valid =
+    unknown === undefined &&
+    value['kind'] === 'advanced-preference' &&
+    value['schemaVersion'] === '1.0' &&
+    states.has(String(value['state'])) &&
+    typeof value['reason'] === 'string' &&
+    value['reason'].length >= 1 &&
+    value['reason'].length <= 128 &&
+    freshness.has(String(value['bindingFreshness'])) &&
+    Number.isSafeInteger(value['sequence']) &&
+    Number(value['sequence']) >= 0 &&
+    typeof value['updatedAt'] === 'string' &&
+    value['updatedAt'].endsWith('Z') &&
+    value['provenance'] === 'native';
+  if (!valid) {
+    return errorResult({
+      code: 'INTENT_INVALID',
+      path: unknown === undefined ? '$' : `$.${unknown}`,
+    });
+  }
+  return successResult(immutableClone(input as AdvancedPreferenceProjection));
+};
+
 const transportInput = (input: AbortableInput & Readonly<{ request: unknown }>) =>
   Object.freeze({ request: input.request });
 
@@ -401,6 +497,8 @@ const createPlanAuthority = (
     transactionId: string;
     promise: Promise<Result<ProgressSnapshotDocumentJson, PlanClientError>>;
   }> | null = null;
+  let preferenceRead: Promise<Result<AdvancedPreferenceProjection, PlanClientError>> | null = null;
+  let reopened = false;
   let snapshot: PlanAuthoritySnapshot = deepFreeze({
     revision: 0,
     origin,
@@ -411,6 +509,7 @@ const createPlanAuthority = (
     transactionId: null,
     progress: null,
     diagnostic: null,
+    advancedPreference: null,
     sequence: null,
     stale: false,
     error: null,
@@ -552,6 +651,69 @@ const createPlanAuthority = (
       stale: false,
       error: null,
     });
+    return validated;
+  };
+
+  const readAdvancedPreference = (): Promise<
+    Result<AdvancedPreferenceProjection, PlanClientError>
+  > => {
+    if (disposed) {
+      return Promise.resolve(disposedResult());
+    }
+    if (preferenceRead !== null) {
+      return preferenceRead;
+    }
+    const pending = Promise.resolve()
+      .then(async () => invoke(PLAN_COMMANDS.readAdvancedPreference))
+      .then(
+        (value): Result<AdvancedPreferenceProjection, PlanClientError> =>
+          validateAdvancedPreference(value, origin === 'native'),
+        (): Result<AdvancedPreferenceProjection, PlanClientError> =>
+          errorResult({ code: 'COMMAND_FAILED', command: PLAN_COMMANDS.readAdvancedPreference }),
+      )
+      .then((result) => {
+        if (result.ok) {
+          publish({ advancedPreference: result.value, status: 'ready', error: null });
+        } else {
+          publish({ status: 'error', error: result.error });
+        }
+        return result;
+      })
+      .finally(() => {
+        if (preferenceRead === pending) {
+          preferenceRead = null;
+        }
+      });
+    preferenceRead = pending;
+    return pending;
+  };
+
+  const transitionAdvancedPreference = async (
+    command:
+      | typeof PLAN_COMMANDS.enableAdvancedPreference
+      | typeof PLAN_COMMANDS.revokeAdvancedPreference,
+    input: AdvancedPreferenceIntentInput,
+  ): Promise<Result<AdvancedPreferenceProjection, PlanClientError>> => {
+    if (disposed) {
+      return disposedResult();
+    }
+    const rejected = invalidIntent<AdvancedPreferenceProjection>(input);
+    if (rejected !== undefined) {
+      return rejected;
+    }
+    publish({ status: 'mutating', error: null });
+    const outcome = await invokeAbortable(invoke, command, transportInput(input), input.signal, true);
+    if (outcome.kind !== 'value') {
+      const error = deepFreeze({ code: 'COMMAND_FAILED' as const, command });
+      publish({ status: outcome.kind === 'unknown-after-dispatch' ? 'unknown' : 'error', error });
+      return errorResult(error);
+    }
+    const validated = validateAdvancedPreference(outcome.value, origin === 'native');
+    if (!validated.ok) {
+      publish({ status: 'error', error: validated.error });
+      return validated;
+    }
+    publish({ advancedPreference: validated.value, status: 'ready', error: null });
     return validated;
   };
 
@@ -749,6 +911,20 @@ const createPlanAuthority = (
         publish({ diagnostic: result.value });
       }
       return result;
+    },
+    readAdvancedPreference,
+    enableAdvancedPreference(input: AdvancedPreferenceIntentInput) {
+      return transitionAdvancedPreference(PLAN_COMMANDS.enableAdvancedPreference, input);
+    },
+    revokeAdvancedPreference(input: AdvancedPreferenceIntentInput) {
+      return transitionAdvancedPreference(PLAN_COMMANDS.revokeAdvancedPreference, input);
+    },
+    reopen() {
+      if (reopened && snapshot.advancedPreference !== null) {
+        return Promise.resolve(successResult(snapshot.advancedPreference));
+      }
+      reopened = true;
+      return readAdvancedPreference();
     },
     reconnect: authoritativeRefetch,
     dispose() {

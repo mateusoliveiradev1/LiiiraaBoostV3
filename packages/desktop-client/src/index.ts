@@ -70,6 +70,9 @@ export type {
   TauriEvidenceAuthorityOptions,
 } from './evidence.js';
 export type {
+  AdvancedPreferenceIntentInput,
+  AdvancedPreferenceProjection,
+  AdvancedPreferenceState,
   ApplyPlanInput,
   ApprovePlanInput,
   ComposePlanInput,
