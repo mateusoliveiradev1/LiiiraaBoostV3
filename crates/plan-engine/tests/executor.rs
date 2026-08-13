@@ -1,11 +1,12 @@
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
 use liiiraa_contracts_rust::{
-    ActivateManagedPowerSchemeRequest, DurableJournalEvent, ExactOperationState,
+    ActivateManagedPowerSchemeRequest, DependencyGroup, DurableJournalEvent, ExactOperationState,
     ObservePowerSchemeRequest, PlanTransactionDocument, PrivilegedBrokerResponse,
     RecoveryCheckpointDocument, TransactionHash, TransactionIdentifier, TransactionReceiptDocument,
 };
 use liiiraa_plan_engine::{
+    dependency::{DependencyPolicy, DeterministicDependencyPolicy, VerifiedAppliedOperation},
     domain::{
         BrokerMutationCommand, BrokerObservationCommand, PlanEngineErrorCode, PlanEngineResult,
         PreparedMutation, PreparedObservation, PreparedTransactionIdentity,
@@ -130,6 +131,48 @@ fn chain(event: &mut DurableJournalEvent, sequence: u32, previous: char, current
     *event_hash = hash(current);
 }
 
+fn normalize_event_identity(event: &mut DurableJournalEvent) {
+    macro_rules! normalize {
+        ($value:expr) => {{
+            $value.transaction_id = id("transaction-0001");
+            $value.operation_version_id = id("power-scheme-v1");
+        }};
+    }
+    match event {
+        DurableJournalEvent::PreparedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::DispatchReturnedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::ObservedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::VerifiedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::NotAppliedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::UnknownJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::DriftJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::ConflictJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::RestorePreparedJournalEvent(value) => normalize!(value),
+        DurableJournalEvent::RestoredJournalEvent(value) => normalize!(value),
+    }
+}
+
+fn rebind_event(event: &mut DurableJournalEvent, transaction: &str, operation: &str) {
+    macro_rules! rebind {
+        ($value:expr) => {{
+            $value.transaction_id = id(transaction);
+            $value.operation_version_id = id(operation);
+        }};
+    }
+    match event {
+        DurableJournalEvent::PreparedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::DispatchReturnedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::ObservedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::VerifiedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::NotAppliedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::UnknownJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::DriftJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::ConflictJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::RestorePreparedJournalEvent(value) => rebind!(value),
+        DurableJournalEvent::RestoredJournalEvent(value) => rebind!(value),
+    }
+}
+
 fn set_observed_state(event: &mut DurableJournalEvent, state: ExactOperationState) {
     match event {
         DurableJournalEvent::ObservedJournalEvent(value) => value.exact_observed_state = state,
@@ -153,6 +196,19 @@ fn artifacts(observed: ExactOperationState, dispatch_recorded: bool) -> Executio
     let mut drift = fixture("journal drift");
     let mut conflict = fixture("journal conflict");
     let mut restored = fixture("journal restored");
+    for event in [
+        &mut prepared,
+        &mut dispatch,
+        &mut observed_event,
+        &mut verified,
+        &mut not_applied,
+        &mut unknown,
+        &mut drift,
+        &mut conflict,
+        &mut restored,
+    ] {
+        normalize_event_identity(event);
+    }
     chain(&mut prepared, 0, '0', '1');
     let (observed_sequence, observed_previous, observed_hash, verdict_sequence, verdict_previous) =
         if dispatch_recorded {
@@ -245,6 +301,46 @@ fn request(observed: ExactOperationState, dispatch_recorded: bool) -> ExecutionR
         cancel_before_dispatch: false,
         restart_required: false,
         artifacts: artifacts(observed, dispatch_recorded),
+    }
+}
+
+fn make_restore(request: &mut ExecutionRequest) {
+    request.transaction.intent = liiiraa_contracts_rust::TransactionIntent::RestoreOperation;
+    request.operation = ExecutionOperation::Restore;
+    std::mem::swap(
+        &mut request.exact_prior_state,
+        &mut request.exact_requested_state,
+    );
+    let mut restore_prepared = fixture("journal restore prepared");
+    normalize_event_identity(&mut restore_prepared);
+    chain(&mut restore_prepared, 0, '0', '1');
+    request.artifacts.prepared = restore_prepared;
+    request.artifacts.receipt.exact_prior_state = request.exact_prior_state.clone();
+    request.artifacts.receipt.exact_requested_state = request.exact_requested_state.clone();
+}
+
+fn rebind_request(request: &mut ExecutionRequest, transaction: &str, operation: &str) {
+    request.transaction.transaction_id = id(transaction);
+    request.operation_version_id = id(operation);
+    rebind_event(&mut request.artifacts.prepared, transaction, operation);
+    if let Some(dispatch) = request.artifacts.dispatch_returned.as_mut() {
+        rebind_event(dispatch, transaction, operation);
+    }
+    for event in [
+        &mut request.artifacts.observed,
+        &mut request.artifacts.verified,
+        &mut request.artifacts.not_applied,
+        &mut request.artifacts.unknown,
+        &mut request.artifacts.drift,
+        &mut request.artifacts.conflict,
+        &mut request.artifacts.restored,
+    ] {
+        rebind_event(event, transaction, operation);
+    }
+    request.artifacts.receipt.transaction_id = id(transaction);
+    request.artifacts.receipt.operation_version_id = id(operation);
+    if let Some(checkpoint) = request.artifacts.restart_checkpoint.as_mut() {
+        checkpoint.transaction_id = id(transaction);
     }
 }
 
@@ -371,7 +467,7 @@ impl DurableJournalPort for MemoryJournal {
 
 struct FaultBroker {
     observations: RefCell<VecDeque<PlanEngineResult<PrivilegedBrokerResponse>>>,
-    mutation: Option<PlanEngineResult<PrivilegedBrokerResponse>>,
+    mutations_results: VecDeque<PlanEngineResult<PrivilegedBrokerResponse>>,
     mutations: usize,
     max_in_flight: usize,
     in_flight: usize,
@@ -389,7 +485,7 @@ impl FaultBroker {
                 Ok(observation_response(prior)),
                 Ok(observation_response(observed)),
             ])),
-            mutation: Some(Ok(accepted_response())),
+            mutations_results: VecDeque::from([Ok(accepted_response())]),
             mutations: 0,
             max_in_flight: 0,
             in_flight: 0,
@@ -419,8 +515,8 @@ impl PrivilegedBrokerPort for FaultBroker {
         self.in_flight += 1;
         self.max_in_flight = self.max_in_flight.max(self.in_flight);
         let result = self
-            .mutation
-            .take()
+            .mutations_results
+            .pop_front()
             .unwrap_or_else(|| Err(broker_unavailable_error()));
         self.in_flight -= 1;
         result
@@ -557,7 +653,7 @@ fn timeout_before_or_after_effect_and_response_loss_are_observed_without_redispa
             request.exact_prior_state.clone(),
             observed,
         );
-        broker.mutation = Some(Err(broker_unavailable_error()));
+        broker.mutations_results = VecDeque::from([Err(broker_unavailable_error())]);
         let outcome = run(&request, &mut journal, &mut broker, None).unwrap();
         assert_eq!(broker.mutations, 1);
         assert_eq!(outcome.dispatch_count(), 1);
@@ -647,6 +743,125 @@ fn startup_pending_corruption_shutdown_and_reboot_preempt_new_mutation() {
 }
 
 #[test]
+fn boot_time_reconciliation_observes_pending_effect_without_redispatch() {
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let requested = exact_state("22222222-2222-4222-8222-222222222222", '2');
+    let request = request(requested.clone(), false);
+    let mut journal = MemoryJournal::clear(Rc::clone(&trace));
+    journal.recovery = RecoveryLoad::Pending {
+        transaction: request.transaction.clone(),
+        latest_event: request.artifacts.prepared.clone(),
+    };
+    let mut broker = FaultBroker::success(
+        Rc::clone(&trace),
+        request.exact_prior_state.clone(),
+        requested.clone(),
+    );
+    broker.observations = RefCell::new(VecDeque::from([Ok(observation_response(requested))]));
+
+    let outcome = DeterministicTransactionExecutor::new()
+        .reconcile_startup(&request, &mut journal, &broker)
+        .unwrap();
+
+    assert_eq!(outcome.verdict(), ExecutionVerdict::Verified);
+    assert_eq!(outcome.dispatch_count(), 0);
+    assert_eq!(broker.mutations, 0);
+    assert_eq!(outcome.durable_sequences(), &[0, 1, 2]);
+    assert!(outcome.receipt_stored());
+}
+
+#[test]
+fn explicit_restore_is_a_new_prepared_transaction_and_never_an_implicit_retry() {
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let restore_target = exact_state("11111111-1111-4111-8111-111111111111", '1');
+    let mut request = request(restore_target.clone(), true);
+    make_restore(&mut request);
+    let mut journal = MemoryJournal::clear(Rc::clone(&trace));
+    let mut broker = FaultBroker::success(
+        Rc::clone(&trace),
+        request.exact_prior_state.clone(),
+        restore_target,
+    );
+
+    let outcome = run(&request, &mut journal, &mut broker, None).unwrap();
+
+    assert_eq!(outcome.verdict(), ExecutionVerdict::Restored);
+    assert_eq!(outcome.dispatch_count(), 1);
+    assert_eq!(journal.sequences, vec![0, 1, 2, 3]);
+    assert!(outcome.receipt_stored());
+    assert!(!outcome.allows_automatic_mutation_retry());
+}
+
+#[test]
+fn partial_failure_auto_restores_only_the_verified_dependency_closure() {
+    let groups = vec![
+        DependencyGroup {
+            dependency_group_id: id("group-base"),
+            operation_version_ids: vec![id("op-base")],
+            depends_on_group_ids: vec![],
+        },
+        DependencyGroup {
+            dependency_group_id: id("group-failed"),
+            operation_version_ids: vec![id("op-failed")],
+            depends_on_group_ids: vec![id("group-base")],
+        },
+        DependencyGroup {
+            dependency_group_id: id("group-independent"),
+            operation_version_ids: vec![id("op-independent")],
+            depends_on_group_ids: vec![],
+        },
+    ];
+    let graph = DeterministicDependencyPolicy.validate(groups).unwrap();
+    let applied = vec![
+        VerifiedAppliedOperation::new(
+            id("op-base"),
+            id("group-base"),
+            exact_state("22222222-2222-4222-8222-222222222222", '2'),
+            exact_state("11111111-1111-4111-8111-111111111111", '1'),
+        ),
+        VerifiedAppliedOperation::new(
+            id("op-independent"),
+            id("group-independent"),
+            exact_state("22222222-2222-4222-8222-222222222222", '2'),
+            exact_state("11111111-1111-4111-8111-111111111111", '1'),
+        ),
+    ];
+    let rollback = DeterministicDependencyPolicy
+        .rollback_after_failure(&graph, &id("op-failed"), &applied)
+        .unwrap();
+
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let restore_target = exact_state("11111111-1111-4111-8111-111111111111", '1');
+    let mut restore = request(restore_target.clone(), true);
+    make_restore(&mut restore);
+    rebind_request(&mut restore, "restore-transaction-0001", "op-base");
+    let mut journal = MemoryJournal::clear(Rc::clone(&trace));
+    let mut broker = FaultBroker::success(
+        Rc::clone(&trace),
+        restore.exact_prior_state.clone(),
+        restore_target,
+    );
+    let admission = Admission {
+        rejection: Some(PlanEngineErrorCode::StrongAuthenticationRejected),
+        trace: Rc::clone(&trace),
+    };
+
+    let outcome = DeterministicTransactionExecutor::new()
+        .execute_rollback(&rollback, &[restore], &mut journal, &mut broker, &admission)
+        .unwrap();
+
+    assert_eq!(outcome.steps().len(), 1);
+    assert_eq!(outcome.steps()[0].verdict(), ExecutionVerdict::Restored);
+    assert_eq!(
+        outcome.preserved_operation_version_ids(),
+        &[id("op-independent")]
+    );
+    assert!(outcome.failed_restore_operation_version_id().is_none());
+    assert_eq!(outcome.gate(), MutationGateState::Open);
+    assert_eq!(broker.mutations, 1);
+}
+
+#[test]
 fn reads_retry_only_to_the_bound_and_mutations_never_retry() {
     let trace = Rc::new(RefCell::new(Vec::new()));
     let requested = exact_state("22222222-2222-4222-8222-222222222222", '2');
@@ -729,6 +944,9 @@ fn drift_unknown_and_conflict_remain_distinct_and_block_mutation_or_followup() {
         let trace = Rc::new(RefCell::new(Vec::new()));
         let mut request = request(observed.clone(), true);
         request.operation = operation;
+        if operation == ExecutionOperation::Restore {
+            make_restore(&mut request);
+        }
         let mut journal = MemoryJournal::clear(Rc::clone(&trace));
         let mut broker = FaultBroker::success(
             Rc::clone(&trace),
