@@ -11,6 +11,7 @@ import type {
 
 import {
   PLAN_COMMANDS,
+  type AdvancedPreferenceProjection,
   createDeterministicPlanAuthority,
   createTauriPlanAuthority,
   type PlanEventSubscribe,
@@ -209,6 +210,29 @@ const applyInput = Object.freeze({
   }),
 });
 
+const advancedPreference = (
+  state: AdvancedPreferenceProjection['state'] = 'disabled',
+  sequence = 0,
+): AdvancedPreferenceProjection =>
+  Object.freeze({
+    kind: 'advanced-preference',
+    schemaVersion: '1.0',
+    state,
+    reason: state === 'disabled' ? 'never-enabled' : `${state}-with-fresh-proof`,
+    bindingFreshness: state === 'invalidated' ? 'stale' : 'current',
+    sequence,
+    updatedAt: NOW,
+    provenance: 'native',
+  });
+
+const preferenceIntent = Object.freeze({
+  intentId: 'advanced-intent-0001',
+  authorizationContextId: 'advanced-review-0001',
+  proofReference: 'opaque_native_receipt_abcdefghijklmnopqrstuvwxyz_0123456789',
+  expectedSequence: 0,
+  requestedAt: NOW,
+});
+
 type Script = Partial<Record<PlanInvokeCommand, unknown | (() => Promise<unknown>)>>;
 
 const scriptedInvoke = (script: Script): PlanInvoke =>
@@ -228,6 +252,9 @@ const conformingScript = (): Script => ({
   [PLAN_COMMANDS.readExecution]: progress(),
   [PLAN_COMMANDS.previewDiagnostic]: diagnostic,
   [PLAN_COMMANDS.exportDiagnostic]: diagnostic,
+  [PLAN_COMMANDS.readAdvancedPreference]: advancedPreference(),
+  [PLAN_COMMANDS.enableAdvancedPreference]: advancedPreference('enabled', 1),
+  [PLAN_COMMANDS.revokeAdvancedPreference]: advancedPreference('revoked', 2),
 });
 
 const inertSubscribe: PlanEventSubscribe = vi.fn(async () => () => undefined);
@@ -246,6 +273,9 @@ describe('plan command registry', () => {
       subscribeExecution: 'subscribe_plan_execution',
       previewDiagnostic: 'preview_plan_diagnostic',
       exportDiagnostic: 'export_plan_diagnostic',
+      readAdvancedPreference: 'read_advanced_preference',
+      enableAdvancedPreference: 'enable_advanced_preference',
+      revokeAdvancedPreference: 'revoke_advanced_preference',
     });
     expect(Object.values(PLAN_COMMANDS)).not.toEqual(
       expect.arrayContaining([
@@ -363,6 +393,57 @@ describe.each([
       error: { code: 'INTENT_INVALID', path: '$.request.authenticated' },
     });
     expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('reads and transitions Advanced preference only through authoritative snapshots', async () => {
+    const invoke = scriptedInvoke(conformingScript());
+    const authority = createAuthority(invoke, inertSubscribe);
+
+    await expect(authority.readAdvancedPreference()).resolves.toEqual({
+      ok: true,
+      value: advancedPreference(),
+    });
+    const enabling = authority.enableAdvancedPreference({ request: preferenceIntent });
+    expect(authority.snapshot().advancedPreference).toEqual(advancedPreference());
+    await expect(enabling).resolves.toEqual({ ok: true, value: advancedPreference('enabled', 1) });
+    await expect(
+      authority.revokeAdvancedPreference({
+        request: { ...preferenceIntent, expectedSequence: 1, intentId: 'advanced-intent-0002' },
+      }),
+    ).resolves.toEqual({ ok: true, value: advancedPreference('revoked', 2) });
+    expect(Object.isFrozen(authority.snapshot().advancedPreference)).toBe(true);
+  });
+
+  it('rejects generic, reusable, fixture, and renderer-authority preference shapes', async () => {
+    const invoke = scriptedInvoke(conformingScript());
+    const authority = createAuthority(invoke, inertSubscribe);
+    for (const forged of [
+      { ...preferenceIntent, enabled: true },
+      { ...preferenceIntent, authenticated: true },
+      { ...preferenceIntent, hardwareFingerprint: HASH_C },
+      { ...preferenceIntent, reusableProof: true },
+      { ...preferenceIntent, cloudSync: true },
+    ]) {
+      await expect(
+        authority.enableAdvancedPreference({ request: forged } as never),
+      ).resolves.toMatchObject({ ok: false, error: { code: 'INTENT_INVALID' } });
+    }
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('reopen reads once and never replays an enable or revoke command', async () => {
+    const invoke = scriptedInvoke({
+      ...conformingScript(),
+      [PLAN_COMMANDS.readAdvancedPreference]: advancedPreference('enabled', 1),
+    });
+    const authority = createAuthority(invoke, inertSubscribe);
+    await authority.reopen();
+    await authority.reopen();
+
+    expect(invoke).toHaveBeenCalledTimes(1);
+    expect(invoke).toHaveBeenCalledWith(PLAN_COMMANDS.readAdvancedPreference);
+    expect(invoke).not.toHaveBeenCalledWith(PLAN_COMMANDS.enableAdvancedPreference, expect.anything());
+    expect(invoke).not.toHaveBeenCalledWith(PLAN_COMMANDS.revokeAdvancedPreference, expect.anything());
   });
 });
 
