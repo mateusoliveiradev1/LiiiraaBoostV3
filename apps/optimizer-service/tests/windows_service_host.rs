@@ -227,3 +227,20 @@ fn windows_host_uses_reject_remote_pipe_mode_and_restores_impersonation() {
     assert!(source.contains("DisconnectNamedPipe"));
     assert!(source.contains("CancelIoEx"));
 }
+
+#[cfg(windows)]
+#[test]
+#[ignore = "requires an elevated installed build with signed canonical custody"]
+fn elevated_installed_host_can_start_stop_and_restart_without_dispatch() {
+    use std::sync::mpsc;
+
+    use service::windows_pipe::WindowsPipeHost;
+
+    for _restart in 0..2 {
+        let mut host = WindowsPipeHost::prepare(PipeHostConfig::installed_defaults())
+            .expect("verified installed host");
+        let (shutdown_tx, shutdown_rx) = mpsc::channel();
+        shutdown_tx.send(()).expect("request service stop");
+        WindowsPipeHost::run(&mut host, &shutdown_rx).expect("bounded clean stop");
+    }
+}
