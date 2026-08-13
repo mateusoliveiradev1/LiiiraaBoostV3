@@ -50,6 +50,74 @@ pub enum PlanExecutorError {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
+pub enum AdvancedPreferenceSnapshotState {
+    Disabled,
+    Enabled,
+    Revoked,
+    Invalidated,
+    Unavailable,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum BindingFreshness {
+    Current,
+    Stale,
+    Unavailable,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdvancedPreferenceSnapshot {
+    pub kind: &'static str,
+    pub schema_version: &'static str,
+    pub state: AdvancedPreferenceSnapshotState,
+    pub reason: String,
+    pub binding_freshness: BindingFreshness,
+    pub sequence: u32,
+    pub updated_at: String,
+    pub provenance: &'static str,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NativeDevicePosture {
+    pub device_id: String,
+    pub hardware_fingerprint: String,
+    pub security_posture_fingerprint: String,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AdvancedPreferenceTransitionAction {
+    Enable,
+    Revoke,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AdvancedPreferenceTransition {
+    pub action: AdvancedPreferenceTransitionAction,
+    pub authorization_context_id: String,
+    pub proof_reference: String,
+    pub expected_sequence: u32,
+    pub now_unix_ms: u64,
+    pub occurred_at: String,
+    pub posture: NativeDevicePosture,
+}
+
+pub trait AdvancedPreferenceAuthority: Send {
+    fn revalidate(
+        &mut self,
+        posture: &NativeDevicePosture,
+        occurred_at: &str,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError>;
+
+    fn transition(
+        &mut self,
+        transition: AdvancedPreferenceTransition,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError>;
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum ExecutionState {
     Idle,
     Applying,
@@ -121,6 +189,7 @@ pub struct PlanExecutor<J> {
     snapshot: ExecutionSnapshot,
     dispatch_count: u32,
     accepting_new_work: bool,
+    advanced_preference: Option<Box<dyn AdvancedPreferenceAuthority>>,
 }
 
 impl<J> PlanExecutor<J>
@@ -134,7 +203,16 @@ where
             snapshot: ExecutionSnapshot::default(),
             dispatch_count: 0,
             accepting_new_work: true,
+            advanced_preference: None,
         }
+    }
+
+    pub fn with_advanced_preference(
+        mut self,
+        authority: Box<dyn AdvancedPreferenceAuthority>,
+    ) -> Self {
+        self.advanced_preference = Some(authority);
+        self
     }
 
     /// Must run during Tauri setup before commands are registered. Pending or
@@ -203,6 +281,90 @@ where
         self.snapshot.clone()
     }
 
+    pub fn revalidate_advanced_preference(
+        &mut self,
+        current: NativeDevicePosture,
+        occurred_at: &str,
+    ) -> AdvancedPreferenceSnapshot {
+        let Some(authority) = self.advanced_preference.as_mut() else {
+            return unavailable_advanced_preference(occurred_at, "native-authority-unavailable");
+        };
+        authority
+            .revalidate(&current, occurred_at)
+            .unwrap_or_else(|_| {
+                unavailable_advanced_preference(occurred_at, "binding-revalidation-failed")
+            })
+    }
+
+    pub fn enable_advanced_preference(
+        &mut self,
+        current: NativeDevicePosture,
+        authorization_context_id: String,
+        proof_reference: String,
+        expected_sequence: u32,
+        now_unix_ms: u64,
+        occurred_at: &str,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+        self.transition_advanced_preference(
+            current,
+            authorization_context_id,
+            proof_reference,
+            expected_sequence,
+            now_unix_ms,
+            occurred_at,
+            true,
+        )
+    }
+
+    pub fn revoke_advanced_preference(
+        &mut self,
+        current: NativeDevicePosture,
+        authorization_context_id: String,
+        proof_reference: String,
+        expected_sequence: u32,
+        now_unix_ms: u64,
+        occurred_at: &str,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+        self.transition_advanced_preference(
+            current,
+            authorization_context_id,
+            proof_reference,
+            expected_sequence,
+            now_unix_ms,
+            occurred_at,
+            false,
+        )
+    }
+
+    fn transition_advanced_preference(
+        &mut self,
+        current: NativeDevicePosture,
+        authorization_context_id: String,
+        proof_reference: String,
+        expected_sequence: u32,
+        now_unix_ms: u64,
+        occurred_at: &str,
+        enable: bool,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+        let authority = self
+            .advanced_preference
+            .as_mut()
+            .ok_or(PlanExecutorError::JournalUnavailable)?;
+        authority.transition(AdvancedPreferenceTransition {
+            action: if enable {
+                AdvancedPreferenceTransitionAction::Enable
+            } else {
+                AdvancedPreferenceTransitionAction::Revoke
+            },
+            authorization_context_id,
+            proof_reference,
+            expected_sequence,
+            now_unix_ms,
+            occurred_at: occurred_at.to_owned(),
+            posture: current,
+        })
+    }
+
     pub fn accepts_new_mutation(&self) -> bool {
         self.accepting_new_work
             && self.snapshot.accepts_new_mutation
@@ -234,6 +396,19 @@ where
                 Err(PlanExecutorError::AuthoritativeSnapshotRequired)
             }
         }
+    }
+}
+
+fn unavailable_advanced_preference(updated_at: &str, reason: &str) -> AdvancedPreferenceSnapshot {
+    AdvancedPreferenceSnapshot {
+        kind: "advanced-preference",
+        schema_version: "1.0",
+        state: AdvancedPreferenceSnapshotState::Unavailable,
+        reason: reason.to_owned(),
+        binding_freshness: BindingFreshness::Unavailable,
+        sequence: 0,
+        updated_at: updated_at.to_owned(),
+        provenance: "native",
     }
 }
 

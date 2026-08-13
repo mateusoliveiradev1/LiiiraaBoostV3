@@ -20,6 +20,60 @@ pub const PLAN_COMMANDS: [&str; 11] = [
     "export_plan_diagnostic",
 ];
 
+pub const ADVANCED_PREFERENCE_COMMANDS: [&str; 3] = [
+    "read_advanced_preference",
+    "enable_advanced_preference",
+    "revoke_advanced_preference",
+];
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AdvancedPreferenceCommand {
+    Read,
+    Enable,
+    Revoke,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdvancedPreferenceCommandRequest {
+    pub intent_id: String,
+    pub authorization_context_id: String,
+    pub proof_reference: String,
+    pub expected_sequence: u32,
+    pub requested_at: String,
+}
+
+pub fn validate_advanced_preference_request(
+    command: AdvancedPreferenceCommand,
+    value: &Value,
+) -> Result<AdvancedPreferenceCommandRequest, PlanExecutorError> {
+    if command == AdvancedPreferenceCommand::Read {
+        return Err(PlanExecutorError::InvalidRequest);
+    }
+    let encoded = serde_json::to_vec(value).map_err(|_| PlanExecutorError::InvalidRequest)?;
+    if encoded.len() > 4_096 {
+        return Err(PlanExecutorError::MessageTooLarge);
+    }
+    let request: AdvancedPreferenceCommandRequest =
+        serde_json::from_value(value.clone()).map_err(|_| PlanExecutorError::InvalidRequest)?;
+    if !bounded_reference(&request.intent_id, 1, 128)
+        || !bounded_reference(&request.authorization_context_id, 1, 128)
+        || !bounded_reference(&request.proof_reference, 43, 256)
+        || !(20..=64).contains(&request.requested_at.len())
+        || !request.requested_at.ends_with('Z')
+    {
+        return Err(PlanExecutorError::InvalidRequest);
+    }
+    Ok(request)
+}
+
+fn bounded_reference(value: &str, minimum: usize, maximum: usize) -> bool {
+    (minimum..=maximum).contains(&value.len())
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b':' | b'-'))
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PlanCommand {
     Compose,

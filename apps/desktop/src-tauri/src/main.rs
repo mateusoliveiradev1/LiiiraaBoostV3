@@ -2,6 +2,9 @@
 
 #[allow(dead_code)]
 mod account_sync;
+#[cfg(test)]
+#[path = "recovery_store/advanced_preference.rs"]
+mod advanced_preference;
 #[allow(dead_code)]
 mod comparison;
 #[allow(dead_code)]
@@ -46,29 +49,47 @@ mod windows_lifecycle;
 use std::{
     fs,
     sync::{Arc, Mutex},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
+#[cfg(test)]
+use advanced_preference::{
+    AdvancedPreferenceError, AdvancedPreferenceState, AdvancedPreferenceStore, DevicePosture,
+};
 use credential_store::WindowsCredentialStore;
 use evidence_commands::{
     CancelCaptureRequest, CaptureStartRequest, CommandError as EvidenceCommandError,
     ComparisonCommandRequest, EvidenceAuthority, EvidenceHealth, ExportReceipt,
     ExportReportRequest, FinishCaptureRequest, InventoryRefreshRequest, RenderReportRequest,
 };
-use hardware_inventory::WindowsInventorySource;
+use hardware_inventory::{
+    HardwareClass, HardwareInventorySource, RawHardwareFact, WindowsInventorySource,
+};
 use identity::{
     DesktopIdentityError, DesktopPkceProof, LoopbackCallbackListener, WindowsDesktopIdentityApi,
     WindowsSystemBrowser, open_account_subscription_in_system_browser,
     open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop, validate_https_origin,
 };
 use live_telemetry::{LiveTelemetrySampler, LiveTelemetrySnapshot};
+use plan_auth::{
+    AdvancedPreferenceAction, AdvancedPreferenceApprovalRequest, OpaqueApprovalReceipt,
+    consume_advanced_preference_approval_from_native,
+};
 use plan_commands::{
-    AcceptedPlanIntent, DiagnosticExportRequest, PlanCommand, PlanDocumentRequest,
-    command_acceptance, validate_export_file_name, validate_plan_document,
+    AcceptedPlanIntent, AdvancedPreferenceCommand, DiagnosticExportRequest, PlanCommand,
+    PlanDocumentRequest, command_acceptance, validate_advanced_preference_request,
+    validate_export_file_name, validate_plan_document,
 };
 use plan_executor::{
-    DiagnosticConsent, DiagnosticExportReceipt, DiagnosticPreview, ExecutionSnapshot, PlanExecutor,
-    PlanExecutorError,
+    AdvancedPreferenceAuthority, AdvancedPreferenceSnapshot, AdvancedPreferenceSnapshotState,
+    AdvancedPreferenceTransition, AdvancedPreferenceTransitionAction, BindingFreshness,
+    DiagnosticConsent, DiagnosticExportReceipt, DiagnosticPreview, ExecutionSnapshot,
+    NativeDevicePosture, PlanExecutor, PlanExecutorError,
+};
+#[cfg(not(test))]
+use recovery_store::advanced_preference::{
+    AdvancedPreferenceError, AdvancedPreferenceState, AdvancedPreferenceStore, DevicePosture,
 };
 use recovery_store::{RecoveryStore, integrity_anchor::WindowsIntegrityAnchor};
 
@@ -87,6 +108,7 @@ use notifications::{
 };
 use serde::Serialize;
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent, TrayIconId};
 use tauri::{
@@ -118,6 +140,139 @@ struct DesktopRuntimeOrigins {
 #[derive(Clone, Debug, Default)]
 struct DesktopRuntimeConfig {
     origins: Option<DesktopRuntimeOrigins>,
+}
+
+#[derive(Clone, Debug)]
+struct AdvancedPreferenceNativeContext {
+    device_id: String,
+}
+
+struct NativeAdvancedPreferenceAuthority {
+    store: AdvancedPreferenceStore,
+    api_origin: Option<String>,
+}
+
+impl AdvancedPreferenceAuthority for NativeAdvancedPreferenceAuthority {
+    fn revalidate(
+        &mut self,
+        posture: &NativeDevicePosture,
+        occurred_at: &str,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+        self.store
+            .observe_binding(stored_device_posture(posture), occurred_at)
+            .map_err(map_advanced_preference_error)?;
+        project_advanced_preference(&self.store, occurred_at)
+    }
+
+    fn transition(
+        &mut self,
+        transition: AdvancedPreferenceTransition,
+    ) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+        let posture = stored_device_posture(&transition.posture);
+        self.store
+            .observe_binding(posture.clone(), &transition.occurred_at)
+            .map_err(map_advanced_preference_error)?;
+        if u32::try_from(self.store.projection().event_count).ok()
+            != Some(transition.expected_sequence)
+        {
+            return Err(PlanExecutorError::AuthoritativeSnapshotRequired);
+        }
+        let api_origin = self
+            .api_origin
+            .as_deref()
+            .ok_or(PlanExecutorError::AuthenticationFailed)?;
+        let action = match transition.action {
+            AdvancedPreferenceTransitionAction::Enable => AdvancedPreferenceAction::Enable,
+            AdvancedPreferenceTransitionAction::Revoke => AdvancedPreferenceAction::Revoke,
+        };
+        let receipt = OpaqueApprovalReceipt::from_native_response(transition.proof_reference)
+            .map_err(|_| PlanExecutorError::InvalidRequest)?;
+        let proof = consume_advanced_preference_approval_from_native(
+            api_origin,
+            AdvancedPreferenceApprovalRequest {
+                action,
+                authorization_context_id: transition.authorization_context_id,
+                device_id: posture.device_id.clone(),
+                hardware_fingerprint: posture.hardware_fingerprint.clone(),
+                receipt,
+                security_posture_fingerprint: posture.security_posture_fingerprint.clone(),
+            },
+            transition.now_unix_ms,
+        )
+        .map_err(|_| PlanExecutorError::AuthenticationFailed)?;
+        match transition.action {
+            AdvancedPreferenceTransitionAction::Enable => {
+                self.store
+                    .enable(&proof, transition.now_unix_ms, &transition.occurred_at)
+            }
+            AdvancedPreferenceTransitionAction::Revoke => {
+                self.store
+                    .revoke(&proof, transition.now_unix_ms, &transition.occurred_at)
+            }
+        }
+        .map_err(map_advanced_preference_error)?;
+        project_advanced_preference(&self.store, &transition.occurred_at)
+    }
+}
+
+fn stored_device_posture(posture: &NativeDevicePosture) -> DevicePosture {
+    DevicePosture {
+        device_id: posture.device_id.clone(),
+        hardware_fingerprint: posture.hardware_fingerprint.clone(),
+        security_posture_fingerprint: posture.security_posture_fingerprint.clone(),
+    }
+}
+
+fn project_advanced_preference(
+    store: &AdvancedPreferenceStore,
+    updated_at: &str,
+) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+    let history = store.history().map_err(map_advanced_preference_error)?;
+    let state = match store.projection().state {
+        AdvancedPreferenceState::Disabled => AdvancedPreferenceSnapshotState::Disabled,
+        AdvancedPreferenceState::Enabled => AdvancedPreferenceSnapshotState::Enabled,
+        AdvancedPreferenceState::Revoked => AdvancedPreferenceSnapshotState::Revoked,
+        AdvancedPreferenceState::RevalidationRequired => {
+            AdvancedPreferenceSnapshotState::Invalidated
+        }
+    };
+    Ok(AdvancedPreferenceSnapshot {
+        kind: "advanced-preference",
+        schema_version: "1.0",
+        state,
+        reason: history
+            .last()
+            .map(|event| event.reason_code.clone())
+            .unwrap_or_else(|| "never-enabled".to_owned()),
+        binding_freshness: if state == AdvancedPreferenceSnapshotState::Invalidated {
+            BindingFreshness::Stale
+        } else {
+            BindingFreshness::Current
+        },
+        sequence: u32::try_from(store.projection().event_count)
+            .map_err(|_| PlanExecutorError::InvalidResponse)?,
+        updated_at: history
+            .last()
+            .map(|event| event.occurred_at.clone())
+            .unwrap_or_else(|| updated_at.to_owned()),
+        provenance: "native",
+    })
+}
+
+fn map_advanced_preference_error(error: AdvancedPreferenceError) -> PlanExecutorError {
+    use AdvancedPreferenceError as Error;
+    match error {
+        Error::InvalidProofAction
+        | Error::ProofBindingMismatch
+        | Error::ProofExpired
+        | Error::ProofReplayed => PlanExecutorError::AuthenticationFailed,
+        Error::InvalidTransition => PlanExecutorError::InvalidRequest,
+        Error::IntegrityFailure
+        | Error::StorageFull
+        | Error::StorageIo
+        | Error::StorageBusy
+        | Error::Storage => PlanExecutorError::JournalUnavailable,
+    }
 }
 
 fn desktop_runtime_origins(plugin_config: Option<&Value>) -> Option<DesktopRuntimeOrigins> {
@@ -885,6 +1040,149 @@ fn accept_renderer_plan_intent(
     command_acceptance(command, &document).ok_or(PlanExecutorError::InvalidRequest)
 }
 
+fn native_clock() -> Result<(u64, String), PlanExecutorError> {
+    let duration = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| PlanExecutorError::InvalidResponse)?;
+    let millis =
+        u64::try_from(duration.as_millis()).map_err(|_| PlanExecutorError::InvalidResponse)?;
+    Ok((millis, format_utc_timestamp(duration.as_secs())))
+}
+
+fn format_utc_timestamp(unix_seconds: u64) -> String {
+    let days = i64::try_from(unix_seconds / 86_400).unwrap_or(i64::MAX);
+    let seconds = unix_seconds % 86_400;
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let day_of_era = z - era * 146_097;
+    let year_of_era =
+        (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
+    let mut year = year_of_era + era * 400;
+    let day_of_year = day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
+    let month_prime = (5 * day_of_year + 2) / 153;
+    let day = day_of_year - (153 * month_prime + 2) / 5 + 1;
+    let month = month_prime + if month_prime < 10 { 3 } else { -9 };
+    year += i64::from(month <= 2);
+    let hour = seconds / 3_600;
+    let minute = (seconds % 3_600) / 60;
+    let second = seconds % 60;
+    format!("{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}Z")
+}
+
+fn current_advanced_device_posture(device_id: &str) -> NativeDevicePosture {
+    let inventory = WindowsInventorySource.collect();
+    let mut hardware = Sha256::new();
+    hardware.update(b"liiiraa-phase5-advanced-hardware-v1\0");
+    let mut security = Sha256::new();
+    security.update(b"liiiraa-phase5-advanced-security-v1\0");
+    for (class, fact) in &inventory.facts {
+        let class_name = class.contract_key();
+        let fact_value = match fact {
+            RawHardwareFact::Observed { value, source, .. } => format!("observed|{source}|{value}"),
+            RawHardwareFact::Unavailable { reason, source, .. } => {
+                format!("unavailable|{source}|{reason:?}")
+            }
+            RawHardwareFact::Contradictory {
+                first,
+                second,
+                source,
+                ..
+            } => {
+                format!("contradictory|{source}|{first}|{second}")
+            }
+        };
+        let target = if *class == HardwareClass::Security {
+            &mut security
+        } else {
+            &mut hardware
+        };
+        target.update(class_name.as_bytes());
+        target.update([0]);
+        target.update(fact_value.as_bytes());
+        target.update([0]);
+    }
+    security.update(format!("{:?}", inventory.windows_version).as_bytes());
+    NativeDevicePosture {
+        device_id: device_id.to_owned(),
+        hardware_fingerprint: format!("sha256:{:x}", hardware.finalize()),
+        security_posture_fingerprint: format!("sha256:{:x}", security.finalize()),
+    }
+}
+
+#[tauri::command]
+fn read_advanced_preference(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
+) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+    let (_, occurred_at) = native_clock()?;
+    let posture = current_advanced_device_posture(&context.device_id);
+    Ok(executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?
+        .revalidate_advanced_preference(posture, &occurred_at))
+}
+
+fn transition_advanced_preference(
+    executor: &Mutex<NativePlanExecutor>,
+    context: &AdvancedPreferenceNativeContext,
+    command: AdvancedPreferenceCommand,
+    request: Value,
+) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+    let request = validate_advanced_preference_request(command, &request)?;
+    let (now_unix_ms, occurred_at) = native_clock()?;
+    let posture = current_advanced_device_posture(&context.device_id);
+    let mut executor = executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?;
+    match command {
+        AdvancedPreferenceCommand::Enable => executor.enable_advanced_preference(
+            posture,
+            request.authorization_context_id,
+            request.proof_reference,
+            request.expected_sequence,
+            now_unix_ms,
+            &occurred_at,
+        ),
+        AdvancedPreferenceCommand::Revoke => executor.revoke_advanced_preference(
+            posture,
+            request.authorization_context_id,
+            request.proof_reference,
+            request.expected_sequence,
+            now_unix_ms,
+            &occurred_at,
+        ),
+        AdvancedPreferenceCommand::Read => Err(PlanExecutorError::InvalidRequest),
+    }
+}
+
+#[tauri::command]
+fn enable_advanced_preference(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
+    request: Value,
+) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+    transition_advanced_preference(
+        &executor,
+        &context,
+        AdvancedPreferenceCommand::Enable,
+        request,
+    )
+}
+
+#[tauri::command]
+fn revoke_advanced_preference(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
+    request: Value,
+) -> Result<AdvancedPreferenceSnapshot, PlanExecutorError> {
+    transition_advanced_preference(
+        &executor,
+        &context,
+        AdvancedPreferenceCommand::Revoke,
+        request,
+    )
+}
+
 #[tauri::command]
 fn compose_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, PlanExecutorError> {
     accept_renderer_plan_intent(PlanCommand::Compose, request)
@@ -902,14 +1200,27 @@ fn approve_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, Plan
 
 fn reject_unavailable_mutation(
     executor: &Mutex<NativePlanExecutor>,
+    context: &AdvancedPreferenceNativeContext,
     command: PlanCommand,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
     let accepted = accept_renderer_plan_intent(command, request)?;
-    let executor = executor
+    let mut executor = executor
         .lock()
         .map_err(|_| PlanExecutorError::JournalUnavailable)?;
+    if command == PlanCommand::Apply {
+        let (_, occurred_at) = native_clock()?;
+        let posture = current_advanced_device_posture(&context.device_id);
+        let preference = executor.revalidate_advanced_preference(posture, &occurred_at);
+        if matches!(
+            preference.state,
+            plan_executor::AdvancedPreferenceSnapshotState::Invalidated
+                | plan_executor::AdvancedPreferenceSnapshotState::Unavailable
+        ) {
+            return Err(PlanExecutorError::RecoveryRequired);
+        }
+    }
     let snapshot = executor.read_execution();
     progress
         .send(snapshot)
@@ -927,37 +1238,59 @@ fn reject_unavailable_mutation(
 #[tauri::command]
 fn apply_plan(
     executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
-    reject_unavailable_mutation(&executor, PlanCommand::Apply, request, progress)
+    reject_unavailable_mutation(&executor, &context, PlanCommand::Apply, request, progress)
 }
 
 #[tauri::command]
 fn restore_plan_operation(
     executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
-    reject_unavailable_mutation(&executor, PlanCommand::RestoreOperation, request, progress)
+    reject_unavailable_mutation(
+        &executor,
+        &context,
+        PlanCommand::RestoreOperation,
+        request,
+        progress,
+    )
 }
 
 #[tauri::command]
 fn restore_plan(
     executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
-    reject_unavailable_mutation(&executor, PlanCommand::RestorePlan, request, progress)
+    reject_unavailable_mutation(
+        &executor,
+        &context,
+        PlanCommand::RestorePlan,
+        request,
+        progress,
+    )
 }
 
 #[tauri::command]
 fn restore_recovery_checkpoint(
     executor: State<'_, Mutex<NativePlanExecutor>>,
+    context: State<'_, AdvancedPreferenceNativeContext>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
-    reject_unavailable_mutation(&executor, PlanCommand::RestoreCheckpoint, request, progress)
+    reject_unavailable_mutation(
+        &executor,
+        &context,
+        PlanCommand::RestoreCheckpoint,
+        request,
+        progress,
+    )
 }
 
 #[tauri::command]
@@ -1055,21 +1388,43 @@ fn run() -> Result<(), String> {
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(|app| {
             let origins = desktop_runtime_origins(app.config().plugins.0.get("liiiraa-shell"));
+            let advanced_api_origin = origins.as_ref().map(|value| value.api_origin.clone());
             app.manage(DesktopRuntimeConfig { origins });
             let recovery_root = app.path().app_data_dir()?.join("transactional-recovery");
             fs::create_dir_all(&recovery_root)?;
-            let recovery_store = RecoveryStore::open(
-                &recovery_root.join("recovery.sqlite3"),
-                Arc::new(WindowsIntegrityAnchor::new()),
+            let recovery_path = recovery_root.join("recovery.sqlite3");
+            let integrity_anchor = Arc::new(WindowsIntegrityAnchor::new());
+            let recovery_store = RecoveryStore::open(&recovery_path, integrity_anchor.clone())
+                .map_err(|_| {
+                    std::io::Error::other("native recovery authority could not be initialized")
+                })?;
+            let database_id = recovery_store
+                .diagnostic_export()
+                .map_err(|_| std::io::Error::other("native device identity unavailable"))?
+                .database_id;
+            let device_id = format!("device-{:x}", Sha256::digest(database_id.as_bytes()));
+            let (_, occurred_at) =
+                native_clock().map_err(|_| std::io::Error::other("native clock unavailable"))?;
+            let posture = current_advanced_device_posture(&device_id);
+            let advanced_preference = AdvancedPreferenceStore::open(
+                &recovery_path,
+                integrity_anchor,
+                stored_device_posture(&posture),
+                &occurred_at,
             )
-            .map_err(|_| {
-                std::io::Error::other("native recovery authority could not be initialized")
-            })?;
-            let mut plan_executor = PlanExecutor::new(recovery_store);
+            .map_err(|_| std::io::Error::other("Advanced preference authority unavailable"))?;
+            let authority = NativeAdvancedPreferenceAuthority {
+                store: advanced_preference,
+                api_origin: advanced_api_origin,
+            };
+            let mut plan_executor =
+                PlanExecutor::new(recovery_store).with_advanced_preference(Box::new(authority));
             plan_executor.reconcile_startup().map_err(|_| {
                 std::io::Error::other("native recovery authority could not be reconciled")
             })?;
+            let _ = plan_executor.revalidate_advanced_preference(posture, &occurred_at);
             app.manage(Mutex::new(plan_executor));
+            app.manage(AdvancedPreferenceNativeContext { device_id });
             let evidence_root = app.path().app_data_dir()?.join("evidence-authority");
             let evidence_authority = EvidenceAuthority::open(evidence_root).map_err(|_| {
                 std::io::Error::other("native evidence authority could not be initialized")
@@ -1133,6 +1488,7 @@ fn run() -> Result<(), String> {
             desktop_sign_in,
             desktop_sign_out,
             dispatch_shell_command,
+            enable_advanced_preference,
             export_evidence_report,
             export_plan_diagnostic,
             finish_measurement_capture,
@@ -1141,6 +1497,7 @@ fn run() -> Result<(), String> {
             open_admin,
             prepare_device_binding,
             preview_plan_diagnostic,
+            read_advanced_preference,
             read_plan_execution,
             read_live_telemetry,
             read_evidence_health,
@@ -1148,6 +1505,7 @@ fn run() -> Result<(), String> {
             refresh_hardware_inventory,
             render_evidence_report,
             restore_recovery_checkpoint,
+            revoke_advanced_preference,
             restore_plan_operation,
             restore_plan,
             revise_plan,
