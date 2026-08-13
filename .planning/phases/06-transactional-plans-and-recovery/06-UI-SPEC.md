@@ -1,7 +1,8 @@
 ---
 phase: 6
 slug: transactional-plans-and-recovery
-status: draft
+status: approved
+reviewed_at: 2026-08-12T23:58:47.6539196-03:00
 shadcn_initialized: false
 preset: none
 created: 2026-08-12
