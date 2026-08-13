@@ -6,15 +6,35 @@ use crate::domain::PlanEngineResult;
 
 /// A validated acyclic dependency graph backed by generated groups.
 #[derive(Clone, Debug)]
-pub struct DependencyDag(Vec<DependencyGroup>);
+pub struct DependencyDag {
+    groups: Vec<DependencyGroup>,
+    group_apply_order: Vec<TransactionIdentifier>,
+    operation_apply_order: Vec<TransactionIdentifier>,
+}
 
 impl DependencyDag {
-    pub(crate) const fn from_groups(groups: Vec<DependencyGroup>) -> Self {
-        Self(groups)
+    pub(crate) const fn from_parts(
+        groups: Vec<DependencyGroup>,
+        group_apply_order: Vec<TransactionIdentifier>,
+        operation_apply_order: Vec<TransactionIdentifier>,
+    ) -> Self {
+        Self {
+            groups,
+            group_apply_order,
+            operation_apply_order,
+        }
     }
 
     pub fn groups(&self) -> &[DependencyGroup] {
-        &self.0
+        &self.groups
+    }
+
+    pub fn group_apply_order(&self) -> &[TransactionIdentifier] {
+        &self.group_apply_order
+    }
+
+    pub fn operation_apply_order(&self) -> &[TransactionIdentifier] {
+        &self.operation_apply_order
     }
 }
 
@@ -40,7 +60,7 @@ pub struct VerifiedAppliedOperation {
 }
 
 impl VerifiedAppliedOperation {
-    pub(crate) const fn from_parts(
+    pub const fn new(
         operation_version_id: TransactionIdentifier,
         dependency_group_id: TransactionIdentifier,
         exact_applied_state: ExactOperationState,
@@ -111,19 +131,38 @@ impl RestoreTarget {
 /// order while independent verified operations are explicitly preserved.
 #[derive(Clone, Debug)]
 pub struct RollbackDecision {
+    failed_operation_version_id: TransactionIdentifier,
+    affected_dependency_group_ids: Vec<TransactionIdentifier>,
     restore_in_order: Vec<RestoreTarget>,
     preserve_operation_version_ids: Vec<TransactionIdentifier>,
+    blocking_verdict: MutationBlockingVerdict,
+    restore_failure_operation_version_id: Option<TransactionIdentifier>,
 }
 
 impl RollbackDecision {
     pub(crate) const fn from_parts(
+        failed_operation_version_id: TransactionIdentifier,
+        affected_dependency_group_ids: Vec<TransactionIdentifier>,
         restore_in_order: Vec<RestoreTarget>,
         preserve_operation_version_ids: Vec<TransactionIdentifier>,
+        blocking_verdict: MutationBlockingVerdict,
     ) -> Self {
         Self {
+            failed_operation_version_id,
+            affected_dependency_group_ids,
             restore_in_order,
             preserve_operation_version_ids,
+            blocking_verdict,
+            restore_failure_operation_version_id: None,
         }
+    }
+
+    pub const fn failed_operation_version_id(&self) -> &TransactionIdentifier {
+        &self.failed_operation_version_id
+    }
+
+    pub fn affected_dependency_group_ids(&self) -> &[TransactionIdentifier] {
+        &self.affected_dependency_group_ids
     }
 
     pub fn restore_in_order(&self) -> &[RestoreTarget] {
@@ -132,6 +171,68 @@ impl RollbackDecision {
 
     pub fn preserve_operation_version_ids(&self) -> &[TransactionIdentifier] {
         &self.preserve_operation_version_ids
+    }
+
+    pub const fn blocking_verdict(&self) -> MutationBlockingVerdict {
+        self.blocking_verdict
+    }
+
+    pub const fn restore_failure_operation_version_id(&self) -> Option<&TransactionIdentifier> {
+        self.restore_failure_operation_version_id.as_ref()
+    }
+
+    pub fn with_restore_failure(
+        &self,
+        operation_version_id: &TransactionIdentifier,
+    ) -> PlanEngineResult<Self> {
+        let _ = operation_version_id;
+        Err(crate::domain::PlanEngineError::new(
+            crate::domain::PlanEngineErrorCode::RecoveryBlocked,
+            None,
+        ))
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MutationBlockingVerdict {
+    AffectedClosurePending,
+    GuidedRecoveryRequired,
+}
+
+#[derive(Clone, Debug)]
+pub struct SafeBoundaryCancellation {
+    finish_in_flight_operation_version_id: Option<TransactionIdentifier>,
+    preserve_operation_version_ids: Vec<TransactionIdentifier>,
+}
+
+impl SafeBoundaryCancellation {
+    pub const fn finish_in_flight_operation_version_id(&self) -> Option<&TransactionIdentifier> {
+        self.finish_in_flight_operation_version_id.as_ref()
+    }
+
+    pub fn preserve_operation_version_ids(&self) -> &[TransactionIdentifier] {
+        &self.preserve_operation_version_ids
+    }
+
+    pub const fn blocks_new_operations(&self) -> bool {
+        true
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct DeterministicDependencyPolicy;
+
+impl DeterministicDependencyPolicy {
+    pub fn safe_boundary_cancellation(
+        &self,
+        _graph: &DependencyDag,
+        _in_flight_operation_version_id: Option<&TransactionIdentifier>,
+        _applied: &[VerifiedAppliedOperation],
+    ) -> PlanEngineResult<SafeBoundaryCancellation> {
+        Err(crate::domain::PlanEngineError::new(
+            crate::domain::PlanEngineErrorCode::RecoveryBlocked,
+            None,
+        ))
     }
 }
 
@@ -145,4 +246,25 @@ pub trait DependencyPolicy {
         failed_operation_version_id: &TransactionIdentifier,
         applied: &[VerifiedAppliedOperation],
     ) -> PlanEngineResult<RollbackDecision>;
+}
+
+impl DependencyPolicy for DeterministicDependencyPolicy {
+    fn validate(
+        &self,
+        _groups: Vec<DependencyGroup>,
+    ) -> Result<DependencyDag, DependencyGraphError> {
+        Err(DependencyGraphError::Empty)
+    }
+
+    fn rollback_after_failure(
+        &self,
+        _graph: &DependencyDag,
+        failed_operation_version_id: &TransactionIdentifier,
+        _applied: &[VerifiedAppliedOperation],
+    ) -> PlanEngineResult<RollbackDecision> {
+        Err(crate::domain::PlanEngineError::new(
+            crate::domain::PlanEngineErrorCode::RecoveryBlocked,
+            Some(failed_operation_version_id.clone()),
+        ))
+    }
 }
