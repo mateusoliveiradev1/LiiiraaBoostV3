@@ -662,8 +662,8 @@ impl AdmissionBlockReason {
             Self::ExperimentalPhraseMismatch => "experimental-phrase-mismatch",
             Self::StrongAuthProofRequired => "strong-auth-proof-required",
             Self::ProofWrongAction => "proof-wrong-action",
-            Self::ProofExpired => "proof-expired",
-            Self::ProofConsumed => "proof-consumed",
+            Self::ProofExpired => "fresh-proof-required-expired",
+            Self::ProofConsumed => "fresh-proof-required-consumed",
             Self::FreshReviewRequired(diff) => fresh_review_code(diff),
             Self::ProofBindingMismatch(diff) => proof_binding_code(diff),
         }
@@ -711,6 +711,44 @@ pub enum AdmissionInputError {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct AdmissionPolicy;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ComplementaryRecoveryRequirement {
+    Visible,
+    ReadyOrExplicitlyUnavailable,
+    Ready,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct RiskRequirements {
+    advanced_preference: bool,
+    strong_auth: bool,
+    experimental_cohort: bool,
+    complementary_recovery: ComplementaryRecoveryRequirement,
+}
+
+const fn requirements_for(risk: ExecutableRisk) -> RiskRequirements {
+    match risk {
+        ExecutableRisk::Verified => RiskRequirements {
+            advanced_preference: false,
+            strong_auth: false,
+            experimental_cohort: false,
+            complementary_recovery: ComplementaryRecoveryRequirement::Visible,
+        },
+        ExecutableRisk::Advanced => RiskRequirements {
+            advanced_preference: true,
+            strong_auth: true,
+            experimental_cohort: false,
+            complementary_recovery: ComplementaryRecoveryRequirement::ReadyOrExplicitlyUnavailable,
+        },
+        ExecutableRisk::Experimental => RiskRequirements {
+            advanced_preference: true,
+            strong_auth: true,
+            experimental_cohort: true,
+            complementary_recovery: ComplementaryRecoveryRequirement::Ready,
+        },
+    }
+}
+
 impl AdmissionPolicy {
     pub fn effective_risk(
         operations: &[OperationRiskVersion],
@@ -752,6 +790,7 @@ impl AdmissionPolicy {
         };
 
         if let Some(risk) = effective_risk {
+            let requirements = requirements_for(risk);
             if !request.ceiling.allows(risk) {
                 blockers.insert(AdmissionBlockReason::RiskCeilingExceeded);
             }
@@ -778,14 +817,16 @@ impl AdmissionPolicy {
                 risk,
                 &mut blockers,
             );
-            validate_recovery(request.recovery, risk, &mut blockers);
+            validate_recovery(request.recovery, requirements, &mut blockers);
 
-            if risk >= ExecutableRisk::Advanced {
+            if requirements.advanced_preference {
                 validate_advanced_preference(
                     request.advanced_preference,
                     request.current_fingerprint,
                     &mut blockers,
                 );
+            }
+            if requirements.strong_auth {
                 validate_proof(
                     request.proof,
                     request.current_fingerprint,
@@ -793,7 +834,7 @@ impl AdmissionPolicy {
                     &mut blockers,
                 );
             }
-            if risk == ExecutableRisk::Experimental && !request.experimental_cohort {
+            if requirements.experimental_cohort && !request.experimental_cohort {
                 blockers.insert(AdmissionBlockReason::ExperimentalCohortRequired);
             }
         }
@@ -887,27 +928,30 @@ fn validate_confirmation(
 
 fn validate_recovery(
     recovery: &RecoveryReadiness,
-    risk: ExecutableRisk,
+    requirements: RiskRequirements,
     blockers: &mut BTreeSet<AdmissionBlockReason>,
 ) {
     if !recovery.manifest_rollback_proven {
         blockers.insert(AdmissionBlockReason::ManifestRollbackRequired);
     }
-    match risk {
-        ExecutableRisk::Verified => {}
-        ExecutableRisk::Advanced => match recovery.restore_point_status {
-            RestorePointStatus::Ready => {}
-            RestorePointStatus::Unavailable | RestorePointStatus::Failed => {
-                if !recovery.second_layer_unavailable_acknowledged {
-                    blockers
-                        .insert(AdmissionBlockReason::SecondRecoveryLayerAcknowledgementRequired);
+    match requirements.complementary_recovery {
+        ComplementaryRecoveryRequirement::Visible => {}
+        ComplementaryRecoveryRequirement::ReadyOrExplicitlyUnavailable => {
+            match recovery.restore_point_status {
+                RestorePointStatus::Ready => {}
+                RestorePointStatus::Unavailable | RestorePointStatus::Failed => {
+                    if !recovery.second_layer_unavailable_acknowledged {
+                        blockers.insert(
+                            AdmissionBlockReason::SecondRecoveryLayerAcknowledgementRequired,
+                        );
+                    }
+                }
+                RestorePointStatus::Unknown => {
+                    blockers.insert(AdmissionBlockReason::ComplementaryRestoreRequired);
                 }
             }
-            RestorePointStatus::Unknown => {
-                blockers.insert(AdmissionBlockReason::ComplementaryRestoreRequired);
-            }
-        },
-        ExecutableRisk::Experimental => {
+        }
+        ComplementaryRecoveryRequirement::Ready => {
             if recovery.restore_point_status != RestorePointStatus::Ready {
                 blockers.insert(AdmissionBlockReason::ComplementaryRestoreRequired);
             }
@@ -963,7 +1007,7 @@ fn validate_proof(
     if proof.disposition == ProofDisposition::Consumed {
         blockers.insert(AdmissionBlockReason::ProofConsumed);
     }
-    if proof.expires_at_epoch_seconds < now_epoch_seconds {
+    if proof.expires_at_epoch_seconds <= now_epoch_seconds {
         blockers.insert(AdmissionBlockReason::ProofExpired);
     }
     if proof.binding.validate().is_err() {

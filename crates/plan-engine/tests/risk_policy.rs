@@ -78,6 +78,7 @@ fn experimental_confirmation(
     .expect("valid confirmation")
 }
 
+#[allow(clippy::too_many_arguments)]
 fn evaluate(
     operations: &[OperationRiskVersion],
     ceiling: RiskCeiling,
@@ -485,6 +486,116 @@ fn d15_mixed_plan_inherits_maximum_risk_and_preserves_sensitive_confirmation() {
 }
 
 #[test]
+fn d10_ceiling_below_the_registered_maximum_blocks_without_lowering_risk() {
+    let operations = [operation(
+        "advanced-v1",
+        OperationRisk::Executable(ExecutableRisk::Advanced),
+    )];
+    let binding = fingerprint(ExecutableRisk::Advanced, &["advanced-v1"]);
+    assert_blocked(
+        &evaluate(
+            &operations,
+            RiskCeiling::Verified,
+            Some(&enabled_preference()),
+            false,
+            &ready_recovery(),
+            Some(&advanced_confirmation(binding.clone())),
+            Some(&proof(binding.clone())),
+            &binding,
+        ),
+        AdmissionBlockReason::RiskCeilingExceeded,
+    );
+    assert_eq!(
+        AdmissionPolicy::effective_risk(&operations),
+        Ok(ExecutableRisk::Advanced)
+    );
+}
+
+#[test]
+fn d14_experimental_rejects_each_missing_version_apply_and_detail_consent() {
+    let operations = [operation(
+        "experimental-v1",
+        OperationRisk::Executable(ExecutableRisk::Experimental),
+    )];
+    let binding = fingerprint(ExecutableRisk::Experimental, &["experimental-v1"]);
+    let preference = enabled_preference();
+    let strong_proof = proof(binding.clone());
+    let recovery = ready_recovery();
+
+    for (confirmation, expected) in [
+        (
+            ConfirmationEvidence::experimental(
+                binding.clone(),
+                false,
+                ["experimental-v1"],
+                true,
+                EXPERIMENTAL_PHRASE,
+            )
+            .expect("valid confirmation"),
+            AdmissionBlockReason::DetailedReviewRequired,
+        ),
+        (
+            ConfirmationEvidence::experimental(
+                binding.clone(),
+                true,
+                ["experimental-v2"],
+                true,
+                EXPERIMENTAL_PHRASE,
+            )
+            .expect("valid confirmation"),
+            AdmissionBlockReason::ExperimentalVersionConsentRequired,
+        ),
+        (
+            ConfirmationEvidence::experimental(
+                binding.clone(),
+                true,
+                ["experimental-v1"],
+                false,
+                EXPERIMENTAL_PHRASE,
+            )
+            .expect("valid confirmation"),
+            AdmissionBlockReason::ExperimentalApplyConsentRequired,
+        ),
+    ] {
+        assert_blocked(
+            &evaluate(
+                &operations,
+                RiskCeiling::Experimental,
+                Some(&preference),
+                true,
+                &recovery,
+                Some(&confirmation),
+                Some(&strong_proof),
+                &binding,
+            ),
+            expected,
+        );
+    }
+
+    let pt_br = ConfirmationEvidence::experimental(
+        binding.clone(),
+        true,
+        ["experimental-v1"],
+        true,
+        "APLICAR PLANO EXPERIMENTAL",
+    )
+    .expect("valid confirmation");
+    assert!(matches!(
+        evaluate(
+            &operations,
+            RiskCeiling::Experimental,
+            Some(&preference),
+            true,
+            &recovery,
+            Some(&pt_br),
+            Some(&strong_proof),
+            &binding,
+        ),
+        AdmissionDecision::Executable(_)
+    ));
+}
+
+#[test]
 fn d16_any_authority_diff_invalidates_review_and_requires_a_fresh_exact_fingerprint() {
     let operations = [operation(
         "advanced-v1",
@@ -582,6 +693,18 @@ fn apply_proof_rejects_stale_wrong_action_replay_and_exact_binding_mismatch() {
             AdmissionBlockReason::ProofExpired,
         ),
         (
+            "expires-at-admission-boundary",
+            OneUseApplyProof::new(
+                "proof-boundary-expired",
+                ApprovalAction::ApplyPlan,
+                binding.clone(),
+                1_000,
+                ProofDisposition::Available,
+            )
+            .expect("valid proof"),
+            AdmissionBlockReason::ProofExpired,
+        ),
+        (
             "wrong-action",
             OneUseApplyProof::new(
                 "proof-action",
@@ -649,6 +772,50 @@ fn recovery_remains_callable_without_subscription_or_authentication_inputs() {
     assert_eq!(local_recovery_admission(), LocalRecoveryAdmission::Callable);
 }
 
+#[test]
+fn every_closed_denial_has_a_unique_stable_aria_description_code() {
+    let mut reasons = vec![
+        AdmissionBlockReason::InvalidAuthority,
+        AdmissionBlockReason::NoOperationsSelected,
+        AdmissionBlockReason::EvidenceNotAdmitted,
+        AdmissionBlockReason::RiskCeilingExceeded,
+        AdmissionBlockReason::ExtremeLocked,
+        AdmissionBlockReason::ReviewConfirmationRequired,
+        AdmissionBlockReason::DetailedReviewRequired,
+        AdmissionBlockReason::AdvancedPreferenceMissing,
+        AdmissionBlockReason::AdvancedPreferenceDisabled,
+        AdmissionBlockReason::AdvancedPreferenceRevoked,
+        AdmissionBlockReason::AdvancedPreferenceRevalidationRequired,
+        AdmissionBlockReason::AdvancedPreferenceBindingMismatch,
+        AdmissionBlockReason::ExperimentalCohortRequired,
+        AdmissionBlockReason::ManifestRollbackRequired,
+        AdmissionBlockReason::SecondRecoveryLayerAcknowledgementRequired,
+        AdmissionBlockReason::ComplementaryRestoreRequired,
+        AdmissionBlockReason::ExperimentalVersionConsentRequired,
+        AdmissionBlockReason::ExperimentalApplyConsentRequired,
+        AdmissionBlockReason::ExperimentalPhraseMismatch,
+        AdmissionBlockReason::StrongAuthProofRequired,
+        AdmissionBlockReason::ProofWrongAction,
+        AdmissionBlockReason::ProofExpired,
+        AdmissionBlockReason::ProofConsumed,
+    ];
+    for diff in [
+        ApprovalDiff::PlanFingerprint,
+        ApprovalDiff::EvidenceFingerprint,
+        ApprovalDiff::RecoveryFingerprint,
+        ApprovalDiff::DeviceBinding,
+        ApprovalDiff::HardwareFingerprint,
+        ApprovalDiff::SecurityPostureFingerprint,
+        ApprovalDiff::OperationVersionSet,
+        ApprovalDiff::Risk,
+    ] {
+        reasons.push(AdmissionBlockReason::FreshReviewRequired(diff));
+        reasons.push(AdmissionBlockReason::ProofBindingMismatch(diff));
+    }
+    let codes: std::collections::BTreeSet<_> = reasons.iter().map(|reason| reason.code()).collect();
+    assert_eq!(codes.len(), reasons.len());
+}
+
 fn executable_risk_strategy() -> impl Strategy<Value = ExecutableRisk> {
     prop_oneof![
         Just(ExecutableRisk::Verified),
@@ -687,9 +854,9 @@ proptest! {
         )];
         let approved = fingerprint(ExecutableRisk::Advanced, &["advanced-v1"]);
         let current = match drift_index {
-            0 => approved.with_plan_fingerprint(&format!("plan-{suffix}")),
-            1 => approved.with_evidence_fingerprint(&format!("evidence-{suffix}")),
-            _ => approved.with_recovery_fingerprint(&format!("recovery-{suffix}")),
+            0 => approved.with_plan_fingerprint(format!("plan-{suffix}")),
+            1 => approved.with_evidence_fingerprint(format!("evidence-{suffix}")),
+            _ => approved.with_recovery_fingerprint(format!("recovery-{suffix}")),
         };
         let expected = match drift_index {
             0 => ApprovalDiff::PlanFingerprint,
@@ -710,6 +877,139 @@ proptest! {
             decision,
             AdmissionDecision::Blocked(ref blockers)
                 if blockers.contains(&AdmissionBlockReason::FreshReviewRequired(expected))
+        ));
+    }
+
+
+    #[test]
+    fn pairwise_risk_recovery_and_proof_matrix_fails_closed(
+        risk in executable_risk_strategy(),
+        manifest_ready in any::<bool>(),
+        restore_index in 0_u8..4,
+        second_layer_acknowledged in any::<bool>(),
+        proof_available in any::<bool>(),
+    ) {
+        let operation_id = match risk {
+            ExecutableRisk::Verified => "verified-v1",
+            ExecutableRisk::Advanced => "advanced-v1",
+            ExecutableRisk::Experimental => "experimental-v1",
+        };
+        let operations = [operation(operation_id, OperationRisk::Executable(risk))];
+        let binding = fingerprint(risk, &[operation_id]);
+        let restore_status = match restore_index {
+            0 => RestorePointStatus::Ready,
+            1 => RestorePointStatus::Unavailable,
+            2 => RestorePointStatus::Failed,
+            _ => RestorePointStatus::Unknown,
+        };
+        let recovery = RecoveryReadiness::new(
+            manifest_ready,
+            restore_status,
+            second_layer_acknowledged,
+        );
+        let confirmation = match risk {
+            ExecutableRisk::Verified => verified_confirmation(binding.clone()),
+            ExecutableRisk::Advanced => advanced_confirmation(binding.clone()),
+            ExecutableRisk::Experimental => {
+                experimental_confirmation(binding.clone(), &[operation_id])
+            }
+        };
+        let strong_proof = OneUseApplyProof::new(
+            "matrix-proof",
+            ApprovalAction::ApplyPlan,
+            binding.clone(),
+            2_000,
+            if proof_available {
+                ProofDisposition::Available
+            } else {
+                ProofDisposition::Consumed
+            },
+        )
+        .expect("valid matrix proof");
+        let decision = evaluate(
+            &operations,
+            RiskCeiling::Experimental,
+            Some(&enabled_preference()),
+            true,
+            &recovery,
+            Some(&confirmation),
+            Some(&strong_proof),
+            &binding,
+        );
+        let recovery_ready = match risk {
+            ExecutableRisk::Verified => manifest_ready,
+            ExecutableRisk::Advanced => {
+                manifest_ready
+                    && (restore_status == RestorePointStatus::Ready
+                        || (matches!(restore_status, RestorePointStatus::Unavailable | RestorePointStatus::Failed)
+                            && second_layer_acknowledged))
+            }
+            ExecutableRisk::Experimental => {
+                manifest_ready && restore_status == RestorePointStatus::Ready
+            }
+        };
+        let expected_executable = recovery_ready
+            && (risk == ExecutableRisk::Verified || proof_available);
+        prop_assert_eq!(
+            matches!(decision, AdmissionDecision::Executable(_)),
+            expected_executable,
+            "risk={:?} restore={:?} manifest={} ack={} proof={}",
+            risk,
+            restore_status,
+            manifest_ready,
+            second_layer_acknowledged,
+            proof_available,
+        );
+        prop_assert_eq!(local_recovery_admission(), LocalRecoveryAdmission::Callable);
+    }
+
+    #[test]
+    fn every_exact_proof_binding_dimension_rejects_mismatch(
+        drift_index in 0_usize..8,
+        suffix in "[a-z0-9]{1,12}",
+    ) {
+        let operations = [operation(
+            "advanced-v1",
+            OperationRisk::Executable(ExecutableRisk::Advanced),
+        )];
+        let current = fingerprint(ExecutableRisk::Advanced, &["advanced-v1"]);
+        let proof_binding = match drift_index {
+            0 => current.with_plan_fingerprint(format!("plan-{suffix}")),
+            1 => current.with_evidence_fingerprint(format!("evidence-{suffix}")),
+            2 => current.with_recovery_fingerprint(format!("recovery-{suffix}")),
+            3 => current.with_device_binding(format!("device-{suffix}")),
+            4 => current.with_hardware_fingerprint(format!("hardware-{suffix}")),
+            5 => current.with_security_posture_fingerprint(format!("security-{suffix}")),
+            6 => current
+                .with_operation_version_ids([format!("operation-{suffix}")])
+                .expect("valid operation set"),
+            _ => current.with_effective_risk(ExecutableRisk::Experimental),
+        };
+        let expected = match drift_index {
+            0 => ApprovalDiff::PlanFingerprint,
+            1 => ApprovalDiff::EvidenceFingerprint,
+            2 => ApprovalDiff::RecoveryFingerprint,
+            3 => ApprovalDiff::DeviceBinding,
+            4 => ApprovalDiff::HardwareFingerprint,
+            5 => ApprovalDiff::SecurityPostureFingerprint,
+            6 => ApprovalDiff::OperationVersionSet,
+            _ => ApprovalDiff::Risk,
+        };
+        let mismatched_proof = proof(proof_binding);
+        let decision = evaluate(
+            &operations,
+            RiskCeiling::Advanced,
+            Some(&enabled_preference()),
+            false,
+            &ready_recovery(),
+            Some(&advanced_confirmation(current.clone())),
+            Some(&mismatched_proof),
+            &current,
+        );
+        prop_assert!(matches!(
+            decision,
+            AdmissionDecision::Blocked(ref blockers)
+                if blockers.contains(&AdmissionBlockReason::ProofBindingMismatch(expected))
         ));
     }
 }
