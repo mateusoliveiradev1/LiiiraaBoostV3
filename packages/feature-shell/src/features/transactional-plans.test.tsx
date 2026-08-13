@@ -131,6 +131,7 @@ const createSnapshot = (overrides: Partial<PlanAuthoritySnapshot> = {}): PlanAut
   transactionId: null,
   progress: null,
   diagnostic: null,
+  advancedPreference: null,
   sequence: null,
   stale: false,
   error: null,
