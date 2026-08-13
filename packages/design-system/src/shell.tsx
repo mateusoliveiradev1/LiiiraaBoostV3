@@ -818,6 +818,24 @@ const EVIDENCE_SIGNAL = Object.freeze({
   stale: 'stale',
 } satisfies Record<PlanEvidenceState, 'critical' | 'stale' | 'success'>);
 
+const REVISION_RISK_PRESENTATION = Object.freeze({
+  advanced: Object.freeze({ icon: 'warning' as const, pattern: 'dashed' }),
+  experimental: Object.freeze({ icon: 'warning' as const, pattern: 'dotted' }),
+  extreme: Object.freeze({ icon: 'lock' as const, pattern: 'double' }),
+  verified: Object.freeze({ icon: 'check' as const, pattern: 'solid' }),
+});
+
+const RevisionRiskSignal = ({ level }: { readonly level: RiskLevel }) => {
+  const presentation = REVISION_RISK_PRESENTATION[level];
+
+  return (
+    <span className="lb-transaction-risk" data-pattern={presentation.pattern}>
+      <ProductIcon name={presentation.icon} size={16} weight="duotone" />
+      <RiskClass level={level} />
+    </span>
+  );
+};
+
 export const PlanRevisionSummary = ({
   action,
   approvalValid,
@@ -842,7 +860,7 @@ export const PlanRevisionSummary = ({
     <LbPanel label={copy.planRevision} tone="focal">
       <div className="lb-transaction-heading">
         <ProductIcon aria-hidden="true" name="list" size={20} weight="duotone" />
-        <h2>{copy.planRevision}</h2>
+        <h2 tabIndex={-1}>{copy.planRevision}</h2>
       </div>
       <LbRowList label={copy.planRevision}>
         <LbDetailRow
@@ -860,7 +878,7 @@ export const PlanRevisionSummary = ({
           label={copy.evidenceFingerprint}
           value={<code className="lb-transaction-exact">{evidenceFingerprint}</code>}
         />
-        <LbDetailRow label={copy.highestRisk} value={<RiskClass level={highestRisk} />} />
+        <LbDetailRow label={copy.highestRisk} value={<RevisionRiskSignal level={highestRisk} />} />
         <LbDetailRow label={copy.operationCount} value={operationCount.toLocaleString(locale)} />
         <LbDetailRow
           label={copy.recovery}
@@ -934,7 +952,11 @@ export const ExecutionTimeline = ({
   const currentStages = stages.filter(
     (stage) => stage.id === currentStageId && stage.state === 'current',
   );
-  if (currentStages.length !== 1 || stages.filter((stage) => stage.state === 'current').length !== 1) {
+  if (
+    new Set(stages.map((stage) => stage.id)).size !== stages.length ||
+    currentStages.length !== 1 ||
+    stages.filter((stage) => stage.state === 'current').length !== 1
+  ) {
     throw new Error('ExecutionTimeline requires exactly one matching current stage.');
   }
 
@@ -950,7 +972,7 @@ export const ExecutionTimeline = ({
         <ProductIcon aria-hidden="true" name="activity" size={20} weight="duotone" />
         <h2>{label ?? copy.timeline}</h2>
       </div>
-      <ol className="lb-execution-timeline">
+      <ol aria-atomic="false" aria-live="polite" className="lb-execution-timeline">
         {stages.map((stage) => {
           const presentation = TIMELINE_PRESENTATION[stage.state];
           return (
@@ -1148,13 +1170,15 @@ export const StateTripletDiff = ({
     <LbPanel label={copy.stateTriplet} tone="focal">
       <div className="lb-transaction-heading">
         <ProductIcon aria-hidden="true" name="arrowsMerge" size={20} weight="duotone" />
-        <h2>{copy.stateTriplet}</h2>
+        <h2 tabIndex={-1}>{copy.stateTriplet}</h2>
       </div>
-      <StatusSignal
-        detail={state === 'conflict' ? copy.stateConflict : copy.stateDrift}
-        state={state === 'conflict' ? 'critical' : 'warning'}
-        {...(locale === undefined ? {} : { locale })}
-      />
+      <div aria-live={state === 'conflict' ? 'assertive' : 'polite'} role="status">
+        <StatusSignal
+          detail={state === 'conflict' ? copy.stateConflict : copy.stateDrift}
+          state={state === 'conflict' ? 'critical' : 'warning'}
+          {...(locale === undefined ? {} : { locale })}
+        />
+      </div>
       <dl className="lb-state-triplet" data-pattern={state === 'conflict' ? 'double' : 'dashed'}>
         <div>
           <dt>{copy.prior}</dt>

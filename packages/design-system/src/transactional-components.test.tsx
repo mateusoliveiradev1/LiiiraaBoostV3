@@ -3,6 +3,8 @@
 import type { ReactNode } from 'react';
 // @ts-expect-error The approved runtime includes react-dom, but @types/react-dom is not an approved identity.
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from 'react-dom/server';
+// @ts-expect-error Vitest executes on Node, while this browser-facing package intentionally excludes Node types.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -14,6 +16,7 @@ import {
 } from './index.ts';
 
 const renderToStaticMarkup = reactRenderToStaticMarkup as (node: ReactNode) => string;
+const componentStyles = readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
 
 describe('transactional design-system components', () => {
   it('summarizes immutable plan identity before exact values and never offers Extreme execution', () => {
@@ -37,6 +40,9 @@ describe('transactional design-system components', () => {
       markup.indexOf('sha256:evidence-2048'),
     );
     expect(markup).toContain('Extreme operations are visible for explanation only.');
+    expect(markup).toContain('data-pattern="double"');
+    expect(markup).toContain('data-icon-library="phosphor"');
+    expect(markup).toContain('tabindex="-1"');
     expect(markup).not.toContain('<button');
     expect(markup).not.toMatch(/apply|confirm/iu);
   });
@@ -60,12 +66,11 @@ describe('transactional design-system components', () => {
 
     expect(markup).toContain('<ol');
     expect(markup.match(/aria-current="step"/gu)).toHaveLength(1);
+    expect(markup).toContain('aria-live="polite"');
     expect(markup).toContain('Completed');
     expect(markup).toContain('Current');
     expect(markup).toContain('Pending');
-    expect(markup.indexOf('Timestamp')).toBeLessThan(
-      markup.indexOf('2030-01-15T18:00:00.000Z'),
-    );
+    expect(markup.indexOf('Timestamp')).toBeLessThan(markup.indexOf('2030-01-15T18:00:00.000Z'));
     expect(markup).not.toContain('%');
   });
 
@@ -126,6 +131,8 @@ describe('transactional design-system components', () => {
       markup.indexOf('External high-performance scheme'),
     );
     expect(markup).toContain('data-pattern="double"');
+    expect(markup).toContain('aria-live="assertive"');
+    expect(markup).toContain('tabindex="-1"');
   });
 
   it('puts a verified human summary before immutable receipt disclosure and exact IDs', () => {
@@ -183,5 +190,68 @@ describe('transactional design-system components', () => {
     expect(diff).toContain('Anterior');
     expect(diff).toContain('Solicitado / Aplicado');
     expect(diff).toContain('Observado');
+  });
+
+  it('uses only the admitted Cobalt token authority and exact typography roles', () => {
+    for (const token of [
+      '--lb-canvas-inset',
+      '--lb-panel',
+      '--lb-panel-raised',
+      '--lb-accent-electric',
+      '--lb-success',
+      '--lb-warning',
+      '--lb-critical',
+      '--lb-font-body',
+      '--lb-font-data',
+      '--lb-product-label-size',
+      '--lb-product-body-size',
+      '--lb-product-task-heading-size',
+    ]) {
+      expect(componentStyles).toContain(`var(${token})`);
+    }
+
+    expect(componentStyles).not.toMatch(/#[\da-f]{3,8}/iu);
+    expect(componentStyles).not.toMatch(/Saira|shadcn|dashboard|card/iu);
+  });
+
+  it('keeps exact target, row, motion, responsive, and non-color state contracts', () => {
+    for (const token of [
+      '--lb-control-min-size',
+      '--lb-row-standard-size',
+      '--lb-row-primary-size',
+      '--lb-motion-hover-duration',
+      '--lb-motion-control-duration',
+      '--lb-motion-panel-duration',
+      '--lb-motion-route-duration',
+    ]) {
+      expect(componentStyles).toContain(`var(${token})`);
+    }
+
+    expect(componentStyles).toContain("[data-pattern='dashed']");
+    expect(componentStyles).toContain("[data-pattern='double']");
+    expect(componentStyles).toContain('@media (width < 960px)');
+    expect(componentStyles).toContain('@media (width < 640px)');
+    expect(componentStyles).not.toMatch(/overflow-x:\s*(?:auto|scroll)/u);
+    expect(componentStyles).not.toMatch(/block-size:\s*\d+px/u);
+  });
+
+  it('removes translation, glow opportunities, and delay under reduced motion', () => {
+    expect(componentStyles).toContain("[data-motion='reduced'] .lb-execution-stage");
+    expect(componentStyles).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(componentStyles).toContain('transition-duration: 0ms');
+    expect(componentStyles).toContain('transition-delay: 0ms');
+    expect(componentStyles).toContain('transform: none');
+    expect(componentStyles).not.toMatch(/animation(?:-name)?:/u);
+    expect(componentStyles).not.toMatch(/glow/iu);
+  });
+
+  it('preserves text, icons, and border patterns in forced colors', () => {
+    const forcedColors = componentStyles.slice(componentStyles.indexOf('@media (forced-colors'));
+
+    expect(forcedColors).toContain('border-color: CanvasText');
+    expect(forcedColors).toContain('color: CanvasText');
+    expect(forcedColors).toContain('background: Canvas');
+    expect(forcedColors).toContain('border-color: Highlight');
+    expect(forcedColors).toContain('forced-color-adjust: auto');
   });
 });
