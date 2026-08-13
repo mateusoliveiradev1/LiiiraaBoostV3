@@ -65,6 +65,12 @@ created: 2026-08-12
 | 06-26 | PLAN-01–08 | T-06-26A/B | Clean-VM harness run is persisted before review; exact matching reviewer verdict admits or blocks the stage | clean-VM run evaluator + post-checkpoint review validator |
 | 06-27 | PLAN-01–08 | T-06-27A/B | Owner-PC harness run is persisted before review and bound to exact clean-VM predecessor | owner-PC run evaluator + post-checkpoint review validator |
 | 06-28 | PLAN-01–08 | T-06-28A/B/C | Friends runs are persisted before consent/review; final verifier requires all four exact-version stages | friends + all-four-stage final evaluators and persisted reviews/UAT |
+| 06-29 | PLAN-05–08 | T-06-29A/B/C | Generated requests retain exact payload/context through one closed physical dispatcher; generic/Extreme authority and blind retry remain impossible | `cargo test -p liiiraa-optimizer-service --test physical_dispatcher`; existing `ipc_protocol` suite |
+| 06-30 | PLAN-05–08 | T-06-30A/B/C | The Windows service hosts only the local authenticated bounded named pipe and preserves unknown-before-dispatch across stop/restart | `windows_service_host` plus `ipc_protocol` Cargo suites and Windows target check |
+| 06-31 | PLAN-06,07 | T-06-31A/B/C | One commit/input identity produces a non-overwritable MSI containing the non-elevated desktop and exact restricted service with recovery-preserving lifecycle | Node artifact mutation suite plus Windows live build/install/update/uninstall smoke |
+| 06-32 | PLAN-01,05–08 | T-06-32A/B/C | Callback, simulation, browser, and fixture bytes cannot be relabeled physical; every physical binding is conditionally required and hash-verified | physical-writer/evaluator Vitest adversarial suites |
+| 06-33 | PLAN-01–08 | T-06-33A/B/C | The installed exact build completes the real prepare/apply/reboot/reconcile/restore cycle and emits bounded raw evidence without a mutation callback | packaged physical-runner Vitest plus Windows dry-run |
+| 06-34 | PLAN-01,05–08 | T-06-34A/B/C | Elevated Hyper-V orchestration is exact-target and fixed-runner only; unsafe paths/commands/credentials/evidence fail before mutation | Hyper-V policy mutation suite and non-mutating exact-target dry-run |
 
 ## Wave 0 Requirements
 

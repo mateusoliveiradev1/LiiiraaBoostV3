@@ -731,7 +731,7 @@ Plans:
 3. High-risk work cannot proceed until proportional explanation, authentication, recovery preparation, and confirmation are complete, and every side effect is journaled and verified.
 4. User can restore one operation, a complete plan, or a recovery checkpoint after failure or reboot; partial failure pauses safely, rolls back only the necessary dependency set, explains the cause, and preserves an auditable diagnostic.
 
-**Plans**: 28 plans
+**Plans**: 34 plans
 
 Plans:
 **Wave 1**
@@ -786,15 +786,36 @@ Plans:
 
 - [x] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
 
-**Wave 10** *(blocked on Wave 9 completion)*
+**Wave 10** *(blocked on Wave 9 completion; parallel prerequisites)*
+
+- [ ] 06-29-PLAN.md — Closed authenticated physical operation dispatcher
+- [ ] 06-32-PLAN.md — Fail-closed physical evidence provenance writer
+
+**Wave 11** *(blocked on 06-29)*
+
+- [ ] 06-30-PLAN.md — Authenticated local named-pipe Windows service host
+
+**Wave 12** *(blocked on 06-30)*
+
+- [ ] 06-31-PLAN.md — Immutable attributable Windows MSI with safe service lifecycle
+
+**Wave 13** *(blocked on 06-30, 06-31, and 06-32)*
+
+- [ ] 06-33-PLAN.md — Real packaged guest lifecycle runner
+
+**Wave 14** *(blocked on 06-31 and 06-33)*
+
+- [ ] 06-34-PLAN.md — Exact-target safe elevated Hyper-V bridge
+
+**Wave 15** *(blocked on Wave 14 completion)*
 
 - [ ] 06-26-PLAN.md — Persisted-before-review clean Windows VM promotion
 
-**Wave 11** *(blocked on Wave 10 completion)*
+**Wave 16** *(blocked on Wave 15 completion)*
 
 - [ ] 06-27-PLAN.md — Persisted-before-review owner PC promotion
 
-**Wave 12** *(blocked on Wave 11 completion)*
+**Wave 17** *(blocked on Wave 16 completion)*
 
 - [ ] 06-28-PLAN.md — Persisted-before-review friends PCs and final four-stage verification
 

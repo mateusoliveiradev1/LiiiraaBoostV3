@@ -64,3 +64,30 @@ All required source items are planned. Security and physical-promotion gates are
 - The broad Windows/CPU/GPU/network/audio optimizer catalog remains Phase 7.
 - Game discovery/session automation remains Phase 8.
 - Unfinished Phase 4 public-distribution evidence remains an explicit release gate, not Phase 6 implementation scope.
+
+# Execution-blocker remediation addendum — 2026-08-13
+
+The prior 28-plan source audit remains unchanged for completed plan coverage. Plans 06-29 through 06-34 close the newly observed physical execution reachability gap without adding product scope or weakening 06-26 through 06-28.
+
+| SOURCE | ID | Feature / Constraint | Plan | Status | Notes |
+|---|---|---|---|---|---|
+| GOAL | — | Users can execute and safely reverse the admitted physical operation | 06-29, 06-30, 06-31, 06-33, 06-34, 06-26 | COVERED | Dispatcher, service host, exact installable artifact, guest runner, Hyper-V bridge, then physical review. |
+| REQ | PLAN-01 | Exact version/build promotion evidence | 06-32, 06-33, 06-34, 06-26 | COVERED | Physical source and predecessor bindings cannot be relabeled. |
+| REQ | PLAN-02 | Approved operation selection remains exact | 06-33, 06-26 | COVERED | Runner invokes the installed approved plan, not a generic effect. |
+| REQ | PLAN-03 | Prior/requested/observed/restored operation details | 06-33, 06-26 | COVERED | GUID/state lifecycle and reviewer-visible evidence remain required. |
+| REQ | PLAN-04 | Risk policy remains enforced during execution | 06-33, 06-26 | COVERED | Exact existing native admission and physical checkpoint are prerequisites. |
+| REQ | PLAN-05 | Authentication, recovery preparation, and verification | 06-29, 06-30, 06-32, 06-33, 06-34, 06-26 | COVERED | Exact local identity and post-effect observation fail closed. |
+| REQ | PLAN-06 | Journal prior state before effect and verify outcome | 06-29 through 06-34, 06-26 | COVERED | Real service/runner path preserves prepare-before-dispatch and observed verdict. |
+| REQ | PLAN-07 | Exact restore after reboot/failure | 06-29 through 06-34, 06-26 | COVERED | Artifact lifecycle preserves recovery; runner resumes observation-first and restores exact GUID. |
+| REQ | PLAN-08 | Safe partial failure and auditable diagnostics | 06-29, 06-30, 06-32, 06-33, 06-34, 06-26 | COVERED | No blind retry; bounded physical evidence retains faults and blockers. |
+| CONTEXT | D-01, D-02, D-06 | Sequential exact-version four-stage promotion and full cycle | 06-32, 06-33, 06-34, 06-26–06-28 | COVERED | The 26→27→28 order is unchanged; correction still restarts at simulation. |
+| CONTEXT | D-03–D-05 | Dedicated reversible power scheme, persistence, and drift | 06-29, 06-33, 06-26 | COVERED | Existing PowrProf operation is connected with exact GUID/state preconditions. |
+| CONTEXT | D-07, D-35 | Redacted honest physical evidence and visible gaps | 06-32, 06-34, 06-26–06-28 | COVERED | Simulation/callback fixtures cannot claim physical provenance. |
+| CONTEXT | D-08, D-31 | No remote rollback, generic RPC, scripts, PowerShell, or generic primitives | 06-29, 06-30, 06-31, 06-33, 06-34 | COVERED | Every request, installer action, process launch, and guest action is closed and exact. |
+| CONTEXT | D-17–D-24 | Failure, reboot, cancellation, serialization, and resume safety | 06-29, 06-30, 06-33 | COVERED | Durable unknown-before-dispatch and observation-first reboot continuation remain mandatory. |
+| CONTEXT | D-26–D-30, D-32 | Immutable recovery authority, receipts, and SQLite custody | 06-31, 06-32, 06-33 | COVERED | Install/update/uninstall preserve journal/evidence; writer never overwrites runs/reviews. |
+| CONTEXT | D-34 | No Docker; Hyper-V/Windows physical path | 06-34, 06-26 | COVERED | Exact audited VM/checkpoint path only. |
+| RESEARCH | — | Privileged IPC identity/replay and PowrProf user context | 06-29, 06-30, 06-33 | COVERED | Real authenticated service path replaces the disconnected shell. |
+| RESEARCH | — | Install exact build and retain attributable evidence | 06-31, 06-32, 06-34 | COVERED | MSI plus input/file hashes and closed guest evidence chain. |
+
+Deferred Extreme execution, the Phase 7 operation catalog, and Phase 8 game automation remain excluded exactly as recorded in 06-CONTEXT.md.
