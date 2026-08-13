@@ -281,6 +281,30 @@ fn exact_known_states_match(
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ExactObservation {
+    Requested,
+    Prior,
+    ThirdState,
+    Unknown,
+}
+
+fn classify_exact_observation(
+    prior: &ExactOperationState,
+    requested: &ExactOperationState,
+    observed: &ExactOperationState,
+) -> ExactObservation {
+    let observed_is_requested = exact_known_states_match(observed, requested);
+    let observed_is_prior = exact_known_states_match(observed, prior);
+
+    match (observed_is_requested, observed_is_prior) {
+        (None, _) | (_, None) => ExactObservation::Unknown,
+        (Some(true), _) => ExactObservation::Requested,
+        (Some(false), Some(true)) => ExactObservation::Prior,
+        (Some(false), Some(false)) => ExactObservation::ThirdState,
+    }
+}
+
 fn evidence_from(input: ReconcileInput<'_>) -> ReconcileEvidence {
     ReconcileEvidence {
         transaction_id: input.transaction_id.clone(),
@@ -305,30 +329,31 @@ pub trait ReconciliationPolicy {
 
 impl ReconciliationPolicy for ObservationFirstReconciliationPolicy {
     fn reconcile(&self, input: ReconcileInput<'_>) -> PlanEngineResult<ReconcileDecision> {
-        let observed_is_requested =
-            exact_known_states_match(input.exact_observed_state, input.exact_requested_state);
-        let observed_is_prior =
-            exact_known_states_match(input.exact_observed_state, input.exact_prior_state);
+        let observation = classify_exact_observation(
+            input.exact_prior_state,
+            input.exact_requested_state,
+            input.exact_observed_state,
+        );
         let evidence = evidence_from(input);
 
-        let decision = match (observed_is_requested, observed_is_prior, evidence.operation) {
-            (None, _, _) | (_, None, _) => ReconcileDecision::UnknownBlockMutations(evidence),
-            (Some(true), _, ReconcileOperation::Apply) => {
+        let decision = match (observation, evidence.operation) {
+            (ExactObservation::Unknown, _) => ReconcileDecision::UnknownBlockMutations(evidence),
+            (ExactObservation::Requested, ReconcileOperation::Apply) => {
                 ReconcileDecision::AppliedNeedsReceipt(evidence)
             }
-            (Some(true), _, ReconcileOperation::Restore) => {
+            (ExactObservation::Requested, ReconcileOperation::Restore) => {
                 ReconcileDecision::RestoredNeedsReceipt(evidence)
             }
-            (Some(false), Some(true), ReconcileOperation::Apply) => {
+            (ExactObservation::Prior, ReconcileOperation::Apply) => {
                 ReconcileDecision::NotAppliedDoNotRetry(evidence)
             }
-            (Some(false), Some(true), ReconcileOperation::Restore) => {
+            (ExactObservation::Prior, ReconcileOperation::Restore) => {
                 ReconcileDecision::NotRestoredDoNotRetry(evidence)
             }
-            (Some(false), Some(false), ReconcileOperation::Apply) => {
+            (ExactObservation::ThirdState, ReconcileOperation::Apply) => {
                 ReconcileDecision::DriftRequiresUserChoice(evidence)
             }
-            (Some(false), Some(false), ReconcileOperation::Restore) => {
+            (ExactObservation::ThirdState, ReconcileOperation::Restore) => {
                 ReconcileDecision::ConflictRequiresUserChoice(evidence)
             }
         };
