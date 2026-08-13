@@ -5,3 +5,8 @@
 //! downstream adapters.
 
 #![forbid(unsafe_code)]
+
+pub mod dependency;
+pub mod domain;
+pub mod revision;
+pub mod risk;
