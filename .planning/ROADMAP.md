@@ -731,7 +731,7 @@ Plans:
 3. High-risk work cannot proceed until proportional explanation, authentication, recovery preparation, and confirmation are complete, and every side effect is journaled and verified.
 4. User can restore one operation, a complete plan, or a recovery checkpoint after failure or reboot; partial failure pauses safely, rolls back only the necessary dependency set, explains the cause, and preserves an auditable diagnostic.
 
-**Plans**: 34 plans
+**Plans**: 38 plans
 
 Plans:
 **Wave 1**
@@ -790,32 +790,45 @@ Plans:
 
 - [ ] 06-29-PLAN.md — Closed authenticated physical operation dispatcher
 - [ ] 06-32-PLAN.md — Fail-closed physical evidence provenance writer
+- [ ] 06-35-PLAN.md — Signed installation-manifest contract and fail-closed installed custody
 
-**Wave 11** *(blocked on 06-29)*
+**Wave 11** *(blocked on 06-29 and 06-35)*
 
 - [ ] 06-30-PLAN.md — Authenticated local named-pipe Windows service host
 
 **Wave 12** *(blocked on 06-30)*
 
-- [ ] 06-31-PLAN.md — Immutable attributable Windows MSI with safe service lifecycle
+- [ ] 06-36-PLAN.md — Bounded interactive-user PowrProf impersonation and token cleanup
 
-**Wave 13** *(blocked on 06-30, 06-31, and 06-32)*
+**Wave 13** *(blocked on 06-30 and 06-36)*
 
-- [ ] 06-33-PLAN.md — Real packaged guest lifecycle runner
+- [ ] 06-37-PLAN.md — Physical Tauri Windows named-pipe transport and command wiring
 
-**Wave 14** *(blocked on 06-31 and 06-33)*
+**Wave 14** *(blocked on 06-32, 06-35, and 06-37)*
 
-- [ ] 06-34-PLAN.md — Exact-target safe elevated Hyper-V bridge
+- [ ] 06-33-PLAN.md — Self-contained signed Rust physical lifecycle runner
 
-**Wave 15** *(blocked on Wave 14 completion)*
+**Wave 15** *(blocked on 06-33, 06-35, and 06-37)*
 
-- [ ] 06-26-PLAN.md — Persisted-before-review clean Windows VM promotion
+- [ ] 06-31-PLAN.md — Real immutable MSI, signed custody, bundled runner/drivers, and lifecycle smoke
 
-**Wave 16** *(blocked on Wave 15 completion)*
+**Wave 16** *(blocked on 06-31)*
 
-- [ ] 06-27-PLAN.md — Persisted-before-review owner PC promotion
+- [ ] 06-38-PLAN.md — Fresh artifact-bound operation-version simulation admission
 
-**Wave 17** *(blocked on Wave 16 completion)*
+**Wave 17** *(blocked on 06-31, 06-33, and 06-38)*
+
+- [ ] 06-34-PLAN.md — Exact-target self-contained safe elevated Hyper-V bridge
+
+**Wave 18** *(blocked on Wave 17 completion)*
+
+- [ ] 06-26-PLAN.md — Persisted-before-review clean Windows VM promotion via exact physical bridge
+
+**Wave 19** *(blocked on Wave 18 completion)*
+
+- [ ] 06-27-PLAN.md — Persisted-before-review owner PC promotion via signed local runner
+
+**Wave 20** *(blocked on Wave 19 completion)*
 
 - [ ] 06-28-PLAN.md — Persisted-before-review friends PCs and final four-stage verification
 
